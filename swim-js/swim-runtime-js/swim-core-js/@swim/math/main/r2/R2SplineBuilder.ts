@@ -21,19 +21,19 @@ import type {R2SplineContext} from "./R2SplineContext";
 import {R2Spline} from "./R2Spline";
 
 export class R2SplineBuilder implements R2SplineContext {
-  /** @hidden */
+  /** @internal */
   curves: R2Curve[];
-  /** @hidden */
+  /** @internal */
   closed: boolean;
-  /** @hidden */
+  /** @internal */
   aliased: boolean;
-  /** @hidden */
+  /** @internal */
   x0: number;
-  /** @hidden */
+  /** @internal */
   y0: number;
-  /** @hidden */
+  /** @internal */
   x: number;
-  /** @hidden */
+  /** @internal */
   y: number;
 
   constructor() {

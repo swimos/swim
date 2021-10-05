@@ -26,7 +26,7 @@ export interface ElementViewObserver<V extends ElementView = ElementView> extend
   viewDidSetStyle?(name: string, value: unknown, priority: string | undefined, view: V): void;
 }
 
-/** @hidden */
+/** @internal */
 export interface ElementViewObserverCache<V extends ElementView> extends ViewObserverCache<V> {
   viewWillSetAttributeObservers?: ReadonlyArray<ViewWillSetAttribute<V>>;
   viewDidSetAttributeObservers?: ReadonlyArray<ViewDidSetAttribute<V>>;
@@ -34,22 +34,22 @@ export interface ElementViewObserverCache<V extends ElementView> extends ViewObs
   viewDidSetStyleObservers?: ReadonlyArray<ViewDidSetStyle<V>>;
 }
 
-/** @hidden */
+/** @internal */
 export interface ViewWillSetAttribute<V extends ElementView = ElementView> {
   viewWillSetAttribute(name: string, value: unknown, view: V): void;
 }
 
-/** @hidden */
+/** @internal */
 export interface ViewDidSetAttribute<V extends ElementView = ElementView> {
   viewDidSetAttribute(name: string, value: unknown, view: V): void;
 }
 
-/** @hidden */
+/** @internal */
 export interface ViewWillSetStyle<V extends ElementView = ElementView> {
   viewWillSetStyle(name: string, value: unknown, priority: string | undefined, view: V): void;
 }
 
-/** @hidden */
+/** @internal */
 export interface ViewDidSetStyle<V extends ElementView = ElementView> {
   viewDidSetStyle(name: string, value: unknown, priority: string | undefined, view: V): void;
 }

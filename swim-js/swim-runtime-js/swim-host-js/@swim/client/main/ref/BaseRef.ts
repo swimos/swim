@@ -26,7 +26,7 @@ import type {RefContext} from "./RefContext";
 import type {HostRef} from "./HostRef";
 import type {NodeRef} from "./NodeRef";
 import type {LaneRef} from "./LaneRef";
-import type {WarpRef} from "../WarpRef";
+import type {WarpRef} from "./WarpRef";
 import type {
   WarpDidConnect,
   WarpDidAuthenticate,
@@ -34,7 +34,7 @@ import type {
   WarpDidDisconnect,
   WarpDidFail,
   WarpObserver,
-} from "../WarpObserver";
+} from "./WarpObserver";
 
 export abstract class BaseRef implements DownlinkOwner, WarpRef {
   constructor(context: RefContext) {
@@ -44,16 +44,16 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
     this.observers = Arrays.empty;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly context: RefContext;
 
-  /** @hidden */
+  /** @internal */
   readonly host: Host | null;
 
-  /** @hidden */
+  /** @internal */
   readonly downlinks: Downlink[];
 
-  /** @hidden */
+  /** @internal */
   readonly observers: ReadonlyArray<WarpObserver>;
 
   abstract readonly hostUri: Uri;
@@ -96,7 +96,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   abstract laneRef(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri): LaneRef;
   abstract laneRef(nodeUri: AnyUri, laneUri: AnyUri): LaneRef;
 
-  /** @hidden */
+  /** @internal */
   addDownlink(downlink: Downlink): void {
     const downlinks = this.downlinks;
     if (downlinks.length === 0) {
@@ -105,7 +105,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
     downlinks.push(downlink);
   }
 
-  /** @hidden */
+  /** @internal */
   removeDownlink(downlink: Downlink): void {
     const downlinks = this.downlinks;
     const i = downlinks.indexOf(downlink);
@@ -125,7 +125,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
     this.context.closeRef(this);
   }
 
-  /** @hidden */
+  /** @internal */
   closeUp(): void {
     const downlinks = this.downlinks;
     (this as Mutable<this>).downlinks = [];
@@ -192,7 +192,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
     return this.observe({didFail});
   }
 
-  /** @hidden */
+  /** @internal */
   hostDidConnect(host: Host): void {
     (this as Mutable<this>).host = host;
     const observers = this.observers;
@@ -204,7 +204,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   hostDidAuthenticate(body: Value, host: Host): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -215,7 +215,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   hostDidDeauthenticate(body: Value, host: Host): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -226,7 +226,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   hostDidDisconnect(host: Host): void {
     (this as Mutable<this>).host = null;
     const observers = this.observers;
@@ -238,7 +238,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   hostDidFail(error: unknown, host: Host): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {

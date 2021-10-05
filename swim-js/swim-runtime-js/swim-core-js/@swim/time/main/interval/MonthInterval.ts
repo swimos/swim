@@ -16,7 +16,7 @@ import {AnyDateTime, DateTime} from "../DateTime";
 import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
 import {FilterTimeInterval} from "./FilterTimeInterval";
 
-/** @hidden */
+/** @internal */
 export class MonthInterval extends UnitTimeInterval {
   override offset(t: AnyDateTime, k?: number): DateTime {
     const d = DateTime.fromAny(t);
@@ -54,7 +54,7 @@ export class MonthInterval extends UnitTimeInterval {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static modulo(k: number, d: DateTime): boolean {
     const month = d.month;
     return isFinite(month) && month % k === 0;

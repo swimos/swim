@@ -13,6 +13,7 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
+      "@swim/fastener": "swim",
     },
     sourcemap: true,
     interop: false,
@@ -21,6 +22,7 @@ const main = {
   external: [
     "@swim/util",
     "@swim/codec",
+    "@swim/fastener",
   ],
   plugins: [
     nodeResolve({moduleDirectories: ["../..", "node_modules"]}),

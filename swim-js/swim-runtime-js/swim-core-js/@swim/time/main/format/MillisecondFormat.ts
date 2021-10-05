@@ -17,7 +17,7 @@ import type {DateTimeInit, DateTime} from "../DateTime";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {MillisecondParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class MillisecondFormat extends DateTimeFormat {
   override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
     output = DateTimeFormat.writeDateNumber3(output, date.millisecond);

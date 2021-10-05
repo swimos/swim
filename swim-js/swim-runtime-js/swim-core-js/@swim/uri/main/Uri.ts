@@ -40,7 +40,7 @@ export interface UriInit extends UriAuthorityInit {
 }
 
 export class Uri implements HashCode, Compare, Debug, Display {
-  /** @hidden */
+  /** @internal */
   constructor(scheme: UriScheme, authority: UriAuthority, path: UriPath,
               query: UriQuery, fragment: UriFragment) {
     this.scheme = scheme;
@@ -388,7 +388,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   merge(relative: UriPath): UriPath {
     if (this.authority.isDefined() && this.path.isEmpty()) {
       return relative.prependedSlash();
@@ -447,7 +447,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly hashValue: number | undefined;
 
   hashCode(): number {
@@ -469,7 +469,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   display<T>(output: Output<T>): Output<T> {
@@ -692,7 +692,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return new UriForm(Uri.empty());
   }
 
-  /** @hidden */
+  /** @internal */
   static isUnreservedChar(c: number): boolean {
     return c >= 65/*'A'*/ && c <= 90/*'Z'*/
         || c >= 97/*'a'*/ && c <= 122/*'z'*/
@@ -701,7 +701,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
         || c === 95/*'_'*/ || c === 126/*'~'*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static isSubDelimChar(c: number): boolean {
     return c === 33/*'!'*/ || c === 36/*'$'*/
         || c === 38/*'&'*/ || c === 40/*'('*/
@@ -711,7 +711,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
         || c === 39/*'\''*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static isSchemeChar(c: number): boolean {
     return c >= 65/*'A'*/ && c <= 90/*'Z'*/
         || c >= 97/*'a'*/ && c <= 122/*'z'*/
@@ -720,33 +720,33 @@ export class Uri implements HashCode, Compare, Debug, Display {
         || c === 46/*'.'*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static isUserInfoChar(c: number): boolean {
     return Uri.isUnreservedChar(c)
         || Uri.isSubDelimChar(c)
         || c === 58/*':'*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static isUserChar(c: number): boolean {
     return Uri.isUnreservedChar(c)
         || Uri.isSubDelimChar(c);
   }
 
-  /** @hidden */
+  /** @internal */
   static isHostChar(c: number): boolean {
     return Uri.isUnreservedChar(c)
         || Uri.isSubDelimChar(c);
   }
 
-  /** @hidden */
+  /** @internal */
   static isPathChar(c: number): boolean {
     return Uri.isUnreservedChar(c)
         || Uri.isSubDelimChar(c)
         || c === 58/*':'*/ || c === 64/*'@'*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static isQueryChar(c: number): boolean {
     return Uri.isUnreservedChar(c)
         || Uri.isSubDelimChar(c)
@@ -754,7 +754,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
         || c === 63/*'?'*/ || c === 64/*'@'*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static isParamChar(c: number): boolean {
     return Uri.isUnreservedChar(c)
         || c === 33/*'!'*/ || c === 36/*'$'*/
@@ -766,7 +766,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
         || c === 39/*'\''*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static isFragmentChar(c: number): boolean {
     return Uri.isUnreservedChar(c)
         || Uri.isSubDelimChar(c)
@@ -774,13 +774,13 @@ export class Uri implements HashCode, Compare, Debug, Display {
         || c === 63/*'?'*/ || c === 64/*'@'*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAlpha(c: number): boolean {
     return c >= 65/*'A'*/ && c <= 90/*'Z'*/
         || c >= 97/*'a'*/ && c <= 122/*'z'*/;
   }
 
-  /** @hidden */
+  /** @internal */
   static toLowerCase(c: number): number {
     if (c >= 65/*'A'*/ && c <= 90/*'Z'*/) {
       return c + (97/*'a'*/ - 65/*'A'*/);
@@ -789,7 +789,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static writeScheme<T>(output: Output<T>, scheme: string): Output<T> {
     for (let i = 0, n = scheme.length; i < n; i += 1) {
       const c = scheme.charCodeAt(i);
@@ -802,7 +802,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeUserInfo<T>(output: Output<T>, userInfo: string): Output<T> {
     for (let i = 0, n = userInfo.length; i < n; i += 1) {
       const c = userInfo.charCodeAt(i);
@@ -815,7 +815,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeUser<T>(output: Output<T>, user: string): Output<T> {
     for (let i = 0, n = user.length; i < n; i += 1) {
       const c = user.charCodeAt(i);
@@ -828,7 +828,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeHost<T>(output: Output<T>, address: string): Output<T> {
     for (let i = 0, n = address.length; i < n; i += 1) {
       const c = address.charCodeAt(i);
@@ -841,7 +841,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeHostLiteral<T>(output: Output<T>, address: string): Output<T> {
     for (let i = 0, n = address.length; i < n; i += 1) {
       const c = address.charCodeAt(i);
@@ -854,7 +854,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writePathSegment<T>(output: Output<T>, segment: string): Output<T> {
     for (let i = 0, n = segment.length; i < n; i += 1) {
       const c = segment.charCodeAt(i);
@@ -867,7 +867,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeQuery<T>(output: Output<T>, query: string): Output<T> {
     for (let i = 0, n = query.length; i < n; i += 1) {
       const c = query.charCodeAt(i);
@@ -880,7 +880,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeParam<T>(output: Output<T>, param: string): Output<T> {
     for (let i = 0, n = param.length; i < n; i += 1) {
       const c = param.charCodeAt(i);
@@ -893,7 +893,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeFragment<T>(output: Output<T>, fragment: string): Output<T> {
     for (let i = 0, n = fragment.length; i < n; i += 1) {
       const c = fragment.charCodeAt(i);
@@ -906,7 +906,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeEncoded<T>(output: Output<T>, c: number): Output<T> {
     if (c === 0x00) { // modified UTF-8
       output = Uri.writePctEncoded(output, 0xC0);
@@ -933,7 +933,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writePctEncoded<T>(output: Output<T>, c: number): Output<T> {
     const base16 = Base16.lowercase;
     output = output.write(37/*'%'*/)

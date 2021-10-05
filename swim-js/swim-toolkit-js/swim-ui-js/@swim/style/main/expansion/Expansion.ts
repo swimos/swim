@@ -72,39 +72,39 @@ export class Expansion implements Interpolate<Expansion>, HashCode, Equivalent, 
     }
   }
 
-  isCollapsed(): boolean {
+  get collapsed(): boolean {
     return this.phase === 0 && this.direction === 0;
   }
 
-  isExpanded(): boolean {
+  get expanded(): boolean {
     return this.phase === 1 && this.direction === 0;
   }
 
-  isExpanding(): boolean {
+  get expanding(): boolean {
     return this.direction > 0;
   }
 
-  isCollapsing(): boolean {
+  get collapsing(): boolean {
     return this.direction < 0;
   }
 
-  expanding(): Expansion {
-    if (!this.isExpanding()) {
+  asExpanding(): Expansion {
+    if (!this.expanding) {
       return Expansion.expanding(this.phase);
     } else {
       return this;
     }
   }
 
-  collapsing(): Expansion {
-    if (!this.isCollapsing()) {
+  asCollapsing(): Expansion {
+    if (!this.collapsing) {
       return Expansion.collapsing(this.phase);
     } else {
       return this;
     }
   }
 
-  toggling(): Expansion {
+  asToggling(): Expansion {
     if (this.direction > 0 || this.phase >= 0.5) {
       return Expansion.collapsing(this.phase);
     } else if (this.direction < 0 || this.phase < 0.5) {
@@ -114,7 +114,7 @@ export class Expansion implements Interpolate<Expansion>, HashCode, Equivalent, 
     }
   }
 
-  toggled(): Expansion {
+  asToggled(): Expansion {
     if (this.direction > 0 || this.phase >= 0.5) {
       return Expansion.collapsed();
     } else if (this.direction < 0 || this.phase < 0.5) {
@@ -238,7 +238,7 @@ export class Expansion implements Interpolate<Expansion>, HashCode, Equivalent, 
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is ExpansionInit {
     if (typeof value === "object" && value !== null) {
       const init = value as ExpansionInit;
@@ -248,7 +248,7 @@ export class Expansion implements Interpolate<Expansion>, HashCode, Equivalent, 
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyExpansion {
     return value instanceof Expansion
         || Expansion.isInit(value);

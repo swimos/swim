@@ -40,16 +40,16 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
     this.version = -1;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly effects: BTree<Value, KeyEffect>;
 
-  /** @hidden */
+  /** @internal */
   readonly outlets: BTree<Value, KeyOutlet<Value, Value>>;
 
-  /** @hidden */
+  /** @internal */
   readonly outputs: ReadonlyArray<Inlet<Record>>;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   declare readonly streamletScope: StreamletScope<Value> | null; // getter defined below to work around useDefineForClassFields lunacy
@@ -318,7 +318,6 @@ Object.defineProperty(AbstractRecordOutlet.prototype, "streamletScope", {
   get(this: AbstractRecordOutlet): StreamletScope<Value> | null {
     return null;
   },
-  enumerable: true,
   configurable: true,
 });
 export interface AbstractRecordOutlet extends MapOutletCombinators<Value, Value, Record> {

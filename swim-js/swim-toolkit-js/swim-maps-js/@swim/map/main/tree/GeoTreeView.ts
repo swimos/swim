@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
 import type {GeoPoint, GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, AnyView, View} from "@swim/view";
 import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoTree} from "./GeoTree";
@@ -28,319 +29,339 @@ export class GeoTreeView extends GeoView {
   constructor(geoFrame?: GeoBox, depth?: number, maxDepth?: number, density?: number) {
     super();
     this.root = GeoTree.empty(geoFrame, depth, maxDepth, density);
-    this.childViewMap = null;
+    this.childMap = null;
   }
 
-  override initView(init: GeoTreeViewInit): void {
-    super.initView(init);
-    if (init.geoTreeColor !== void 0) {
-      this.geoTreeColor(init.geoTreeColor);
-    }
-  }
-
-  /** @hidden */
+  /** @internal */
   readonly root: GeoTree;
 
-  override get childViewCount(): number {
+  override get childCount(): number {
     return this.root.size;
   }
 
-  override get childViews(): ReadonlyArray<View> {
-    const childViews: View[] = [];
-    this.root.forEach(function (childView: GeoView): void {
-      childViews.push(childView);
+  override get children(): ReadonlyArray<View> {
+    const children: View[] = [];
+    this.root.forEach(function (child: GeoView): void {
+      children.push(child);
     }, this);
-    return childViews;
+    return children;
   }
 
-  override firstChildView(): View | null {
-    const childView = this.root.forEach(function (childView: GeoView): GeoView {
-      return childView;
+  override firstChild(): View | null {
+    const child = this.root.forEach(function (child: GeoView): GeoView {
+      return child;
     }, this);
-    return childView !== void 0 ? childView : null;
+    return child !== void 0 ? child : null;
   }
 
-  override lastChildView(): View | null {
-    const childView = this.root.forEachReverse(function (childView: GeoView): GeoView {
-      return childView;
+  override lastChild(): View | null {
+    const child = this.root.forEachReverse(function (child: GeoView): GeoView {
+      return child;
     }, this);
-    return childView !== void 0 ? childView : null;
+    return child !== void 0 ? child : null;
   }
 
-  override nextChildView(targetView: View): View | null {
-    if (targetView.parentView === this) {
-      let nextChildView: GeoView | null = null;
-      const childView = this.root.forEachReverse(function (childView: GeoView): GeoView | null | void {
-        if (childView === targetView) {
-          return nextChildView;
+  override nextChild(target: View): View | null {
+    if (target.parent === this) {
+      let nextChild: GeoView | null = null;
+      const child = this.root.forEachReverse(function (child: GeoView): GeoView | null | void {
+        if (child === target) {
+          return nextChild;
         }
-        nextChildView = childView;
+        nextChild = child;
       }, this);
-      if (childView !== void 0) {
-        return childView;
+      if (child !== void 0) {
+        return child;
       }
     }
     return null;
   }
 
-  override previousChildView(targetView: View): View | null {
-    if (targetView.parentView === this) {
-      let previousChildView: GeoView | null = null;
-      const childView = this.root.forEach(function (childView: GeoView): GeoView | null | void {
-        if (childView === targetView) {
-          return previousChildView;
+  override previousChild(target: View): View | null {
+    if (target.parent === this) {
+      let previousChild: GeoView | null = null;
+      const child = this.root.forEach(function (child: GeoView): GeoView | null | void {
+        if (child === target) {
+          return previousChild;
         }
-        previousChildView = childView;
+        previousChild = child;
       }, this);
-      if (childView !== void 0) {
-        return childView;
+      if (child !== void 0) {
+        return child;
       }
     }
     return null;
   }
 
-  override forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
-  override forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
-                                  thisArg: S): T | undefined;
-  override forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
-                                  thisArg?: S): T | undefined {
+  override forEachChild<T>(callback: (child: View) => T | void): T | undefined;
+  override forEachChild<T, S>(callback: (this: S, child: View) => T | void,
+                              thisArg: S): T | undefined;
+  override forEachChild<T, S>(callback: (this: S | undefined, child: View) => T | void,
+                              thisArg?: S): T | undefined {
     return this.root.forEach(callback, thisArg);
   }
 
-  /** @hidden */
-  readonly childViewMap: {[key: string]: GeoView | undefined} | null;
+  /** @internal */
+  readonly childMap: Dictionary<GeoView> | null;
 
-  override getChildView(key: string): GeoView | null {
-    const childViewMap = this.childViewMap;
-    if (childViewMap !== null) {
-      const childView = childViewMap[key];
-      if (childView !== void 0) {
-        return childView;
+  /** @internal */
+  protected insertChildMap(child: GeoView): void {
+    const key = child.key;
+    if (key !== void 0) {
+      let childMap = this.childMap as MutableDictionary<GeoView>;
+      if (childMap === null) {
+        childMap = {};
+        (this as Mutable<this>).childMap = childMap;
+      }
+      childMap[key] = child;
+    }
+  }
+
+  /** @internal */
+  protected removeChildMap(child: GeoView): void {
+    const key = child.key;
+    if (key !== void 0) {
+      const childMap = this.childMap as MutableDictionary<GeoView>;
+      if (childMap !== null) {
+        delete childMap[key];
+      }
+    }
+  }
+
+  override getChild<V extends GeoView>(key: string, childBound: Class<V>): V | null;
+  override getChild(key: string, childBound?: Class<GeoView>): GeoView | null;
+  override getChild(key: string, childBound?: Class<GeoView>): GeoView | null {
+    const childMap = this.childMap;
+    if (childMap !== null) {
+      const child = childMap[key];
+      if (child !== void 0 && (childBound === void 0 || child instanceof childBound)) {
+        return child;
       }
     }
     return null;
   }
 
-  override setChildView(key: string, newChildView: View | null): View | null {
-    if (newChildView !== null) {
-      if (!(newChildView instanceof GeoView)) {
-        throw new TypeError("" + newChildView);
+  override setChild<V extends View>(key: string, newChild: AnyView<V> | null): View | null;
+  override setChild(key: string, newChild: AnyView | null): View | null;
+  override setChild(key: string, newChild: AnyView | null): View | null {
+    if (newChild !== null) {
+      newChild = View.fromAny(newChild);
+      if (!(newChild instanceof GeoView)) {
+        throw new TypeError("" + newChild);
       }
-      newChildView.remove();
+      newChild.remove();
     }
-    const oldChildView = this.getChildView(key);
-    if (oldChildView !== null) {
-      const oldChildGeoBounds = oldChildView.geoBounds;
-      this.willRemoveChildView(oldChildView);
-      oldChildView.setParentView(null, this);
-      this.removeChildViewMap(oldChildView);
+
+    const oldChild = this.getChild(key);
+    if (oldChild !== null) {
+      const oldChildGeoBounds = oldChild.geoBounds;
+      this.willRemoveChild(oldChild);
+      oldChild.setParent(null, this);
+      this.removeChildMap(oldChild);
       const oldGeoBounds = this.root.geoBounds;
-      (this as Mutable<this>).root = this.root.removed(oldChildView, oldChildGeoBounds);
+      (this as Mutable<this>).root = this.root.removed(oldChild, oldChildGeoBounds);
       const newGeoBounds = this.root.geoBounds;
       if (!newGeoBounds.equals(oldGeoBounds)) {
         this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
       }
-      this.onRemoveChildView(oldChildView);
-      this.didRemoveChildView(oldChildView);
-      oldChildView.setKey(void 0);
+      this.onRemoveChild(oldChild);
+      this.didRemoveChild(oldChild);
+      oldChild.setKey(void 0);
     }
-    if (newChildView !== null) {
-      const newChildGeoBounds = newChildView.geoBounds;
-      newChildView.setKey(key);
+
+    if (newChild !== null) {
+      const newChildGeoBounds = newChild.geoBounds;
+      newChild.setKey(key);
       const oldGeoBounds = this.root.geoBounds;
-      (this as Mutable<this>).root = this.root.inserted(newChildView, newChildGeoBounds);
+      (this as Mutable<this>).root = this.root.inserted(newChild, newChildGeoBounds);
       const newGeoBounds = this.root.geoBounds;
       if (!newGeoBounds.equals(oldGeoBounds)) {
         this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
       }
-      this.insertChildViewMap(newChildView);
-      newChildView.setParentView(this, null);
-      this.onInsertChildView(newChildView, null);
-      this.didInsertChildView(newChildView, null);
-      newChildView.cascadeInsert();
+      this.insertChildMap(newChild);
+      newChild.setParent(this, null);
+      this.onInsertChild(newChild, null);
+      this.didInsertChild(newChild, null);
+      newChild.cascadeInsert();
     }
-    return oldChildView;
+
+    return oldChild;
   }
 
-  /** @hidden */
-  protected insertChildViewMap(childView: GeoView): void {
-    const key = childView.key;
-    if (key !== void 0) {
-      let childViewMap = this.childViewMap;
-      if (childViewMap === null) {
-        childViewMap = {};
-        (this as Mutable<this>).childViewMap = childViewMap;
-      }
-      childViewMap[key] = childView;
+  override appendChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override appendChild(child: AnyView, key?: string): View;
+  override appendChild(child: AnyView, key?: string): View {
+    child = View.fromAny(child);
+    if (!(child instanceof GeoView)) {
+      throw new TypeError("" + child);
     }
-  }
 
-  /** @hidden */
-  protected removeChildViewMap(childView: GeoView): void {
-    const key = childView.key;
+    child.remove();
     if (key !== void 0) {
-      const childViewMap = this.childViewMap;
-      if (childViewMap !== null) {
-        delete childViewMap[key];
-      }
+      this.removeChild(key);
+      child.setKey(key);
     }
-  }
 
-  override appendChildView(childView: View, key?: string): void {
-    if (!(childView instanceof GeoView)) {
-      throw new TypeError("" + childView);
-    }
-    childView.remove();
-    if (key !== void 0) {
-      this.removeChildView(key);
-      childView.setKey(key);
-    }
-    const childViewBounds = childView.geoBounds;
-    this.willInsertChildView(childView, null);
+    const childViewBounds = child.geoBounds;
+    this.willInsertChild(child, null);
     const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.inserted(childView, childViewBounds);
+    (this as Mutable<this>).root = this.root.inserted(child, childViewBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
     }
-    this.insertChildViewMap(childView);
-    childView.setParentView(this, null);
-    this.onInsertChildView(childView, null);
-    this.didInsertChildView(childView, null);
-    childView.cascadeInsert();
+    this.insertChildMap(child);
+    child.setParent(this, null);
+    this.onInsertChild(child, null);
+    this.didInsertChild(child, null);
+    child.cascadeInsert();
+
+    return child;
   }
 
-  override prependChildView(childView: View, key?: string): void {
-    if (!(childView instanceof GeoView)) {
-      throw new TypeError("" + childView);
+  override prependChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override prependChild(child: AnyView, key?: string): View;
+  override prependChild(child: AnyView, key?: string): View {
+    child = View.fromAny(child);
+    if (!(child instanceof GeoView)) {
+      throw new TypeError("" + child);
     }
-    childView.remove();
+
+    child.remove();
     if (key !== void 0) {
-      this.removeChildView(key);
-      childView.setKey(key);
+      this.removeChild(key);
+      child.setKey(key);
     }
-    const childViewBounds = childView.geoBounds;
-    this.willInsertChildView(childView, null);
+
+    const childViewBounds = child.geoBounds;
+    this.willInsertChild(child, null);
     const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.inserted(childView, childViewBounds);
+    (this as Mutable<this>).root = this.root.inserted(child, childViewBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
     }
-    this.insertChildViewMap(childView);
-    childView.setParentView(this, null);
-    this.onInsertChildView(childView, null);
-    this.didInsertChildView(childView, null);
-    childView.cascadeInsert();
+    this.insertChildMap(child);
+    child.setParent(this, null);
+    this.onInsertChild(child, null);
+    this.didInsertChild(child, null);
+    child.cascadeInsert();
+
+    return child;
   }
 
-  override insertChildView(childView: View, targetView: View | null, key?: string): void {
-    if (!(childView instanceof GeoView)) {
-      throw new TypeError("" + childView);
+  override insertChild<V extends View>(child: AnyView<V>, target: View | null, key?: string): V;
+  override insertChild(child: AnyView, target: View | null, key?: string): View;
+  override insertChild(child: AnyView, target: View | null, key?: string): View {
+    if (target !== null && target.parent !== this) {
+      throw new TypeError("" + target);
     }
-    if (targetView !== null && !(targetView instanceof GraphicsView)) {
-      throw new TypeError("" + targetView);
+
+    child = View.fromAny(child);
+    if (!(child instanceof GeoView)) {
+      throw new TypeError("" + child);
     }
-    if (targetView !== null && targetView.parentView !== this) {
-      throw new TypeError("" + targetView);
-    }
-    childView.remove();
+
+    child.remove();
     if (key !== void 0) {
-      this.removeChildView(key);
-      childView.setKey(key);
+      this.removeChild(key);
+      child.setKey(key);
     }
-    const childViewBounds = childView.geoBounds;
-    this.willInsertChildView(childView, targetView);
+
+    const childViewBounds = child.geoBounds;
+    this.willInsertChild(child, target);
     const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.inserted(childView, childViewBounds);
+    (this as Mutable<this>).root = this.root.inserted(child, childViewBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
     }
-    this.insertChildViewMap(childView);
-    childView.setParentView(this, null);
-    this.onInsertChildView(childView, targetView);
-    this.didInsertChildView(childView, targetView);
-    childView.cascadeInsert();
+    this.insertChildMap(child);
+    child.setParent(this, null);
+    this.onInsertChild(child, target);
+    this.didInsertChild(child, target);
+    child.cascadeInsert();
+
+    return child;
   }
 
-  override removeChildView(key: string): View | null;
-  override removeChildView(childView: View): void;
-  override removeChildView(key: string | View): View | null | void {
-    let childView: View | null;
+  override removeChild(key: string): View | null;
+  override removeChild(child: View): void;
+  override removeChild(key: string | View): View | null | void {
+    let child: View | null;
     if (typeof key === "string") {
-      childView = this.getChildView(key);
-      if (childView === null) {
+      child = this.getChild(key);
+      if (child === null) {
         return null;
       }
     } else {
-      childView = key;
+      child = key;
     }
-    if (!(childView instanceof GeoView)) {
-      throw new TypeError("" + childView);
+    if (!(child instanceof GeoView)) {
+      throw new TypeError("" + child);
     }
-    if (childView.parentView !== this) {
+    if (child.parent !== this) {
       throw new Error("not a child view");
     }
-    const childViewBounds = childView.geoBounds;
-    this.willRemoveChildView(childView);
-    childView.setParentView(null, this);
-    this.removeChildViewMap(childView);
+    const childViewBounds = child.geoBounds;
+    this.willRemoveChild(child);
+    child.setParent(null, this);
+    this.removeChildMap(child);
     const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.removed(childView, childViewBounds);
+    (this as Mutable<this>).root = this.root.removed(child, childViewBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
     }
-    this.onRemoveChildView(childView);
-    this.didRemoveChildView(childView);
-    childView.setKey(void 0);
+    this.onRemoveChild(child);
+    this.didRemoveChild(child);
+    child.setKey(void 0);
     if (typeof key === "string") {
-      return childView;
+      return child;
     }
   }
 
-  override removeAll(): void {
-    this.root.forEach(function (childView: GeoView): void {
-      this.removeChildView(childView);
+  override removeChildren(): void {
+    this.root.forEach(function (child: GeoView): void {
+      this.removeChild(child);
     }, this);
   }
 
-  protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
-    this.processTree(this.root, processFlags, viewContext, processChildView);
+  protected override processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     processChild: (this: this, child: View, processFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
+    this.processTree(this.root, processFlags, viewContext, processChild);
   }
 
-  /** @hidden */
+  /** @internal */
   protected processTree(tree: GeoTree, processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                        processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                           viewContext: ViewContextType<this>) => void): void {
+                        processChild: (this: this, child: View, processFlags: ViewFlags,
+                                       viewContext: ViewContextType<this>) => void): void {
     if (tree.southWest !== null && tree.southWest.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.processTree(tree.southWest, processFlags, viewContext, processChildView);
+      this.processTree(tree.southWest, processFlags, viewContext, processChild);
     }
     if (tree.northWest !== null && tree.northWest.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.processTree(tree.northWest, processFlags, viewContext, processChildView);
+      this.processTree(tree.northWest, processFlags, viewContext, processChild);
     }
     if (tree.southEast !== null && tree.southEast.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.processTree(tree.southEast, processFlags, viewContext, processChildView);
+      this.processTree(tree.southEast, processFlags, viewContext, processChild);
     }
     if (tree.northEast !== null && tree.northEast.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.processTree(tree.northEast, processFlags, viewContext, processChildView);
+      this.processTree(tree.northEast, processFlags, viewContext, processChild);
     }
-    const childViews = tree.views;
-    for (let i = 0; i < childViews.length; i += 1) {
-      const childView = childViews[i]!;
-      processChildView.call(this, childView, processFlags, viewContext);
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
+    const children = tree.views;
+    for (let i = 0; i < children.length; i += 1) {
+      const child = children[i]!;
+      processChild.call(this, child, processFlags, viewContext);
+      if ((child.flags & View.RemovingFlag) !== 0) {
+        child.setFlags(child.flags & ~View.RemovingFlag);
+        this.removeChild(child);
       }
     }
   }
 
-  @ViewAnimator({type: Color, state: null})
-  readonly geoTreeColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null})
+  readonly geoTreeColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
@@ -352,11 +373,8 @@ export class GeoTreeView extends GeoView {
 
   protected renderGeoTree(viewContext: ViewContextType<this>, outlineColor: Color): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
-      this.renderGeoTreeOutline(this.root, viewContext.geoViewport, context, outlineColor);
-      context.restore();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+      this.renderGeoTreeOutline(this.root, viewContext.geoViewport, renderer.context, outlineColor);
     }
   }
 
@@ -382,42 +400,42 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
-    this.displayTree(this.root, displayFlags, viewContext, displayChildView);
+  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     displayChild: (this: this, child: View, displayFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
+    this.displayTree(this.root, displayFlags, viewContext, displayChild);
   }
 
-  /** @hidden */
+  /** @internal */
   protected displayTree(tree: GeoTree, displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                        displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                           viewContext: ViewContextType<this>) => void): void {
+                        displayChild: (this: this, child: View, displayFlags: ViewFlags,
+                                       viewContext: ViewContextType<this>) => void): void {
     if (tree.southWest !== null && tree.southWest.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.displayTree(tree.southWest, displayFlags, viewContext, displayChildView);
+      this.displayTree(tree.southWest, displayFlags, viewContext, displayChild);
     }
     if (tree.northWest !== null && tree.northWest.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.displayTree(tree.northWest, displayFlags, viewContext, displayChildView);
+      this.displayTree(tree.northWest, displayFlags, viewContext, displayChild);
     }
     if (tree.southEast !== null && tree.southEast.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.displayTree(tree.southEast, displayFlags, viewContext, displayChildView);
+      this.displayTree(tree.southEast, displayFlags, viewContext, displayChild);
     }
     if (tree.northEast !== null && tree.northEast.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.displayTree(tree.northEast, displayFlags, viewContext, displayChildView);
+      this.displayTree(tree.northEast, displayFlags, viewContext, displayChild);
     }
-    const childViews = tree.views;
-    for (let i = 0; i < childViews.length; i += 1) {
-      const childView = childViews[i]!;
-      displayChildView.call(this, childView, displayFlags, viewContext);
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
+    const children = tree.views;
+    for (let i = 0; i < children.length; i += 1) {
+      const child = children[i]!;
+      displayChild.call(this, child, displayFlags, viewContext);
+      if ((child.flags & View.RemovingFlag) !== 0) {
+        child.setFlags(child.flags & ~View.RemovingFlag);
+        this.removeChild(child);
       }
     }
   }
 
-  override onSetChildViewGeoBounds(childView: GeoView, newChildViewGeoBounds: GeoBox, oldChildViewGeoBounds: GeoBox): void {
+  override onSetChildGeoBounds(child: GeoView, newChildViewGeoBounds: GeoBox, oldChildViewGeoBounds: GeoBox): void {
     const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.moved(childView, newChildViewGeoBounds, oldChildViewGeoBounds);
+    (this as Mutable<this>).root = this.root.moved(child, newChildViewGeoBounds, oldChildViewGeoBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
@@ -447,10 +465,10 @@ export class GeoTreeView extends GeoView {
       hit = this.hitTestTree(tree.northEast, x, y, geoPoint, viewContext);
     }
     if (hit === null) {
-      const childViews = tree.views;
-      for (let i = 0; i < childViews.length; i += 1) {
-        const childView = childViews[i]!;
-        hit = childView.cascadeHitTest(x, y, viewContext);
+      const children = tree.views;
+      for (let i = 0; i < children.length; i += 1) {
+        const child = children[i]!;
+        hit = child.cascadeHitTest(x, y, viewContext);
         if (hit !== null) {
           break;
         }
@@ -459,14 +477,16 @@ export class GeoTreeView extends GeoView {
     return hit;
   }
 
-  static create(): GeoTreeView {
-    return new GeoTreeView();
+  override init(init: GeoTreeViewInit): void {
+    super.init(init);
+    if (init.geoTreeColor !== void 0) {
+      this.geoTreeColor(init.geoTreeColor);
+    }
   }
 }
 Object.defineProperty(GeoTreeView.prototype, "geoBounds", {
   get(this: GeoTreeView): GeoBox {
     return this.root.geoBounds;
   },
-  enumerable: true,
   configurable: true,
 });

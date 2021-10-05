@@ -16,7 +16,7 @@ import type {Item} from "../Item";
 import {Text} from "../Text";
 import {Form} from "./Form";
 
-/** @hidden */
+/** @internal */
 export class StringForm extends Form<string> {
   constructor(unit?: string) {
     super();

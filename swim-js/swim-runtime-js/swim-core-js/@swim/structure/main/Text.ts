@@ -129,7 +129,7 @@ export class Text extends Value {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly hashValue: number | undefined;
 
   override hashCode(): number {
@@ -194,7 +194,7 @@ export class Text extends Value {
     return new TextOutput("", settings);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get cache(): HashGenCacheSet<Text> {
     const cacheSize = 128;

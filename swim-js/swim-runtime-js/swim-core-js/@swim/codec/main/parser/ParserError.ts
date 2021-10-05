@@ -15,9 +15,9 @@
 import type {Input} from "../input/Input";
 import {Parser} from "./Parser";
 
-/** @hidden */
+/** @internal */
 export class ParserError extends Parser<never> {
-  /** @hidden */
+  /** @internal */
   readonly error!: Error;
 
   constructor(error: Error) {

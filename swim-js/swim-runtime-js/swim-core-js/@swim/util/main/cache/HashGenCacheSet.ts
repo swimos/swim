@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Values} from "../runtime/Values";
+import {Values} from "../values/Values";
 
 /**
  * A hashed generational cache set discards the least recently used value
@@ -198,7 +198,7 @@ export class HashGenCacheSet<T> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   get hits(): number {
     return this.gen4Hits + this.gen3Hits + this.gen2Hits + this.gen1Hits;
   }
@@ -209,23 +209,23 @@ export class HashGenCacheSet<T> {
   }
 }
 
-/** @hidden */
+/** @internal */
 export class HashGenCacheSetBucket<T> {
-  /** @hidden */
+  /** @internal */
   gen4Val: T | undefined;
-  /** @hidden */
+  /** @internal */
   gen4Weight: number;
-  /** @hidden */
+  /** @internal */
   gen3Val: T | undefined;
-  /** @hidden */
+  /** @internal */
   gen3Weight: number;
-  /** @hidden */
+  /** @internal */
   gen2Val: T | undefined;
-  /** @hidden */
+  /** @internal */
   gen2Weight: number;
-  /** @hidden */
+  /** @internal */
   gen1Val: T | undefined;
-  /** @hidden */
+  /** @internal */
   gen1Weight: number;
 
   constructor(gen4Val?: T, gen4Weight: number = 0,

@@ -13,10 +13,12 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View} from "@swim/view";
 import type {Graphics} from "../graphics/Graphics";
 import type {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 import {LayerView} from "../layer/LayerView";
@@ -24,30 +26,25 @@ import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import {Icon} from "./Icon";
 import {FilledIcon} from "./FilledIcon";
 import {IconViewInit, IconView} from "./IconView";
-import {IconViewAnimator} from "./IconViewAnimator";
+import {IconGraphicsAnimator} from "./IconGraphicsAnimator";
 
 export interface GraphicsIconViewInit extends GraphicsViewInit, IconViewInit {
 }
 
 export class GraphicsIconView extends LayerView implements IconView {
-  override initView(init: GraphicsIconViewInit): void {
-    super.initView(init);
-    IconView.initView(this, init);
-  }
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
+  readonly xAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
-  readonly xAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
+  readonly yAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
-  readonly yAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
+  readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
-  readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
+  readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
-  readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
-
-  @ViewAnimator<GraphicsIconView, Color | null, AnyColor | null>({
+  @ThemeAnimator<GraphicsIconView, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     updateFlags: View.NeedsRender,
@@ -56,23 +53,23 @@ export class GraphicsIconView extends LayerView implements IconView {
         const oldGraphics = this.owner.graphics.value;
         if (oldGraphics instanceof FilledIcon) {
           const newGraphics = oldGraphics.withFillColor(newIconColor);
-          this.owner.graphics.setOwnState(newGraphics);
+          this.owner.graphics.setState(newGraphics, Affinity.Reflexive);
         }
       }
     },
   })
-  readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({extends: IconViewAnimator, type: Object, state: null, updateFlags: View.NeedsRender})
-  readonly graphics!: ViewAnimator<this, Graphics | null>;
+  @ThemeAnimator({extends: IconGraphicsAnimator, type: Object, state: null, updateFlags: View.NeedsRender})
+  readonly graphics!: ThemeAnimator<this, Graphics | null>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (!this.graphics.isInherited()) {
+    if (!this.graphics.inherited) {
       const oldGraphics = this.graphics.value;
       if (oldGraphics instanceof Icon) {
         const newGraphics = oldGraphics.withTheme(theme, mood);
-        this.graphics.setOwnState(newGraphics, oldGraphics.isThemed() ? timing : false);
+        this.graphics.setState(newGraphics, oldGraphics.isThemed() ? timing : false, Affinity.Reflexive);
       }
     }
   }
@@ -80,11 +77,8 @@ export class GraphicsIconView extends LayerView implements IconView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       this.renderIcon(renderer, this.viewBounds);
-      context.restore();
     }
   }
 
@@ -102,11 +96,7 @@ export class GraphicsIconView extends LayerView implements IconView {
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      context.save();
-      const hit = this.hitTestIcon(x, y, renderer, this.viewBounds);
-      context.restore();
-      return hit;
+      return this.hitTestIcon(x, y, renderer, this.viewBounds);
     }
     return null;
   }
@@ -128,8 +118,9 @@ export class GraphicsIconView extends LayerView implements IconView {
     return null;
   }
 
-  static override create(): GraphicsIconView {
-    return new GraphicsIconView();
+  override init(init: GraphicsIconViewInit): void {
+    super.init(init);
+    IconView.init(this, init);
   }
 }
 Object.defineProperty(GraphicsIconView.prototype, "viewBounds", {
@@ -146,6 +137,5 @@ Object.defineProperty(GraphicsIconView.prototype, "viewBounds", {
     const y = viewFrame.y + (viewHeight - iconHeight) * this.yAlign.getValue();
     return new R2Box(x, y, x + iconWidth, y + iconHeight);
   },
-  enumerable: true,
   configurable: true,
 });

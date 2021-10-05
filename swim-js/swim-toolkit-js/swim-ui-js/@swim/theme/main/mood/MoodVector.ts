@@ -30,10 +30,10 @@ export class MoodVector<M extends Mood = Feel> implements Equals, Debug {
     this.index = index;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly array: ReadonlyArray<[M, number]>;
 
-  /** @hidden */
+  /** @internal */
   readonly index: {readonly [name: string]: number | undefined};
 
   get size(): number {
@@ -295,7 +295,7 @@ export class MoodVector<M extends Mood = Feel> implements Equals, Debug {
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static index<M extends Mood>(array: ReadonlyArray<[M, unknown]>): {readonly [name: string]: number | undefined} {
     const index: {[name: string]: number | undefined} = {};
     for (let i = 0, n = array.length; i < n; i += 1) {

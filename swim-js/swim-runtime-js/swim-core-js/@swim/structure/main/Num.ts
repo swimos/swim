@@ -33,7 +33,7 @@ export class Num extends Value {
 
   readonly value: number;
 
-  /** @hidden */
+  /** @internal */
   readonly flags: number;
 
   isNaN(): boolean {
@@ -273,11 +273,11 @@ export class Num extends Value {
     return Format.displayNumber(output, this.value);
   }
 
-  /** @hidden */
+  /** @internal */
   static readonly Uint32Flag: number = 1;
-  /** @hidden */
+  /** @internal */
   static readonly Uint64Flag: number = 2;
-  /** @hidden */
+  /** @internal */
   static readonly TypeMask = 0x3;
 
   @Lazy
@@ -353,7 +353,7 @@ export class Num extends Value {
     throw new Error(value);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get cache(): HashGenCacheSet<Num> {
     const cacheSize = 128;

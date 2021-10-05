@@ -24,10 +24,10 @@ export class UriCache {
 
   readonly base: Uri;
 
-  /** @hidden */
+  /** @internal */
   readonly resolveCache: HashGenCacheMap<Uri, Uri>;
 
-  /** @hidden */
+  /** @internal */
   readonly unresolveCache: HashGenCacheMap<Uri, Uri>;
 
   resolve(relative: AnyUri): Uri {

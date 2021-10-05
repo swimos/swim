@@ -70,4 +70,4 @@ export {GeoBoxInterpolator} from "./GeoBoxInterpolator";
 
 export {GeoGroup} from "./GeoGroup";
 
-export * from "./GeoJson";
+export * from "./json";

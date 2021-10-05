@@ -18,6 +18,7 @@ import {FeelVectorSpec} from "./FeelVectorSpec";
 import {MoodVectorSpec} from "./MoodVectorSpec";
 import {MoodMatrixSpec} from "./MoodMatrixSpec";
 import {ThemeMatrixSpec} from "./ThemeMatrixSpec";
+import {ThemeAnimatorSpec} from "./ThemeAnimatorSpec";
 
 @Unit
 export class ThemeSuite extends Spec {
@@ -44,5 +45,10 @@ export class ThemeSuite extends Spec {
   @Unit
   themeMatrixSpec(): Spec {
     return new ThemeMatrixSpec();
+  }
+
+  @Unit
+  themeAnimatorSpec(): Spec {
+    return new ThemeAnimatorSpec();
   }
 }

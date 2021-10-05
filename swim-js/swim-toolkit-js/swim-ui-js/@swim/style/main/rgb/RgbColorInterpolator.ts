@@ -15,26 +15,30 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {RgbColor} from "./RgbColor";
 
-/** @hidden */
-export const RgbColorInterpolator = function (c0: RgbColor, c1: RgbColor): Interpolator<RgbColor> {
-  const interpolator = function (u: number): RgbColor {
-    const c0 = interpolator[0];
-    const c1 = interpolator[1];
-    const r = c0.r + u * (c1.r - c0.r);
-    const g = c0.g + u * (c1.g - c0.g);
-    const b = c0.b + u * (c1.b - c0.b);
-    const a = c0.a + u * (c1.a - c0.a);
-    return new RgbColor(r, g, b, a);
-  } as Interpolator<RgbColor>;
-  Object.setPrototypeOf(interpolator, RgbColorInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = c0;
-  (interpolator as Mutable<typeof interpolator>)[1] = c1;
-  return interpolator;
-} as {
-  (c0: RgbColor, c1: RgbColor): Interpolator<RgbColor>;
+/** @internal */
+export const RgbColorInterpolator = (function (_super: typeof Interpolator) {
+  const RgbColorInterpolator = function (c0: RgbColor, c1: RgbColor): Interpolator<RgbColor> {
+    const interpolator = function (u: number): RgbColor {
+      const c0 = interpolator[0];
+      const c1 = interpolator[1];
+      const r = c0.r + u * (c1.r - c0.r);
+      const g = c0.g + u * (c1.g - c0.g);
+      const b = c0.b + u * (c1.b - c0.b);
+      const a = c0.a + u * (c1.a - c0.a);
+      return new RgbColor(r, g, b, a);
+    } as Interpolator<RgbColor>;
+    Object.setPrototypeOf(interpolator, RgbColorInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = c0;
+    (interpolator as Mutable<typeof interpolator>)[1] = c1;
+    return interpolator;
+  } as {
+    (c0: RgbColor, c1: RgbColor): Interpolator<RgbColor>;
 
-  /** @hidden */
-  prototype: Interpolator<RgbColor>;
-};
+    /** @internal */
+    prototype: Interpolator<RgbColor>;
+  };
 
-RgbColorInterpolator.prototype = Object.create(Interpolator.prototype);
+  RgbColorInterpolator.prototype = Object.create(_super.prototype);
+
+  return RgbColorInterpolator;
+})(Interpolator);

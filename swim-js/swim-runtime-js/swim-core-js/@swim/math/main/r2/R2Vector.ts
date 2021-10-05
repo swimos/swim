@@ -135,7 +135,7 @@ export class R2Vector implements Interpolate<R2Vector>, HashCode, Equivalent, De
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is R2VectorInit {
     if (typeof value === "object" && value !== null) {
       const init = value as R2VectorInit;
@@ -145,7 +145,7 @@ export class R2Vector implements Interpolate<R2Vector>, HashCode, Equivalent, De
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyR2Vector {
     return value instanceof R2Vector
         || R2Vector.isInit(value);

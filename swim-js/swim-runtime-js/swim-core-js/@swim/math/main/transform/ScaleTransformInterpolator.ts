@@ -15,24 +15,28 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {ScaleTransform} from "./ScaleTransform";
 
-/** @hidden */
-export const ScaleTransformInterpolator = function (f0: ScaleTransform, f1: ScaleTransform): Interpolator<ScaleTransform> {
-  const interpolator = function (u: number): ScaleTransform {
-    const f0 = interpolator[0];
-    const f1 = interpolator[1];
-    const x = f0.x + u * (f1.x - f0.x);
-    const y = f0.y + u * (f1.y - f0.y);
-    return new ScaleTransform(x, y);
-  } as Interpolator<ScaleTransform>;
-  Object.setPrototypeOf(interpolator, ScaleTransformInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = f0;
-  (interpolator as Mutable<typeof interpolator>)[1] = f1;
-  return interpolator;
-} as {
-  (f0: ScaleTransform, f1: ScaleTransform): Interpolator<ScaleTransform>;
+/** @internal */
+export const ScaleTransformInterpolator = (function (_super: typeof Interpolator) {
+  const ScaleTransformInterpolator = function (f0: ScaleTransform, f1: ScaleTransform): Interpolator<ScaleTransform> {
+    const interpolator = function (u: number): ScaleTransform {
+      const f0 = interpolator[0];
+      const f1 = interpolator[1];
+      const x = f0.x + u * (f1.x - f0.x);
+      const y = f0.y + u * (f1.y - f0.y);
+      return new ScaleTransform(x, y);
+    } as Interpolator<ScaleTransform>;
+    Object.setPrototypeOf(interpolator, ScaleTransformInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = f0;
+    (interpolator as Mutable<typeof interpolator>)[1] = f1;
+    return interpolator;
+  } as {
+    (f0: ScaleTransform, f1: ScaleTransform): Interpolator<ScaleTransform>;
 
-  /** @hidden */
-  prototype: Interpolator<ScaleTransform>;
-};
+    /** @internal */
+    prototype: Interpolator<ScaleTransform>;
+  };
 
-ScaleTransformInterpolator.prototype = Object.create(Interpolator.prototype);
+  ScaleTransformInterpolator.prototype = Object.create(_super.prototype);
+
+  return ScaleTransformInterpolator;
+})(Interpolator);

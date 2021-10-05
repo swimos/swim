@@ -17,13 +17,13 @@ import type {Item} from "../Item";
 import {Operator} from "./Operator";
 import type {BinaryOperator} from "./BinaryOperator";
 
-/** @hidden */
+/** @internal */
 export interface BinaryOperatorInterpolator extends Interpolator<BinaryOperator> {
-  /** @hidden */
+  /** @internal */
   readonly operand1Interpolator: Interpolator<Item>;
-  /** @hidden */
+  /** @internal */
   readonly operator: string;
-  /** @hidden */
+  /** @internal */
   readonly operand2Interpolator: Interpolator<Item>;
 
   readonly 0: BinaryOperator;
@@ -33,58 +33,60 @@ export interface BinaryOperatorInterpolator extends Interpolator<BinaryOperator>
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const BinaryOperatorInterpolator = function (y0: BinaryOperator, y1: BinaryOperator): BinaryOperatorInterpolator {
-  const operator = y0.operator;
-  if (operator !== y1.operator) {
-    throw new Error();
-  }
-  const interpolator = function (u: number): BinaryOperator {
-    const operand1 = interpolator.operand1Interpolator(u);
-    const operand2 = interpolator.operand2Interpolator(u);
-    return Operator.binary(operand1, interpolator.operator, operand2);
-  } as BinaryOperatorInterpolator;
-  Object.setPrototypeOf(interpolator, BinaryOperatorInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).operand1Interpolator = y0.operand1.interpolateTo(y1.operand1);
-  (interpolator as Mutable<typeof interpolator>).operator = operator;
-  (interpolator as Mutable<typeof interpolator>).operand2Interpolator = y0.operand2.interpolateTo(y1.operand2);
-  return interpolator;
-} as {
-  (y0: BinaryOperator, y1: BinaryOperator): BinaryOperatorInterpolator;
+/** @internal */
+export const BinaryOperatorInterpolator = (function (_super: typeof Interpolator) {
+  const BinaryOperatorInterpolator = function (y0: BinaryOperator, y1: BinaryOperator): BinaryOperatorInterpolator {
+    const operator = y0.operator;
+    if (operator !== y1.operator) {
+      throw new Error();
+    }
+    const interpolator = function (u: number): BinaryOperator {
+      const operand1 = interpolator.operand1Interpolator(u);
+      const operand2 = interpolator.operand2Interpolator(u);
+      return Operator.binary(operand1, interpolator.operator, operand2);
+    } as BinaryOperatorInterpolator;
+    Object.setPrototypeOf(interpolator, BinaryOperatorInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).operand1Interpolator = y0.operand1.interpolateTo(y1.operand1);
+    (interpolator as Mutable<typeof interpolator>).operator = operator;
+    (interpolator as Mutable<typeof interpolator>).operand2Interpolator = y0.operand2.interpolateTo(y1.operand2);
+    return interpolator;
+  } as {
+    (y0: BinaryOperator, y1: BinaryOperator): BinaryOperatorInterpolator;
 
-  /** @hidden */
-  prototype: BinaryOperatorInterpolator;
-};
+    /** @internal */
+    prototype: BinaryOperatorInterpolator;
+  };
 
-BinaryOperatorInterpolator.prototype = Object.create(Interpolator.prototype);
+  BinaryOperatorInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(BinaryOperatorInterpolator.prototype, 0, {
-  get(this: BinaryOperatorInterpolator): BinaryOperator {
-    const operand1 = this.operand1Interpolator[0];
-    const operand2 = this.operand2Interpolator[0];
-    return Operator.binary(operand1, this.operator, operand2);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(BinaryOperatorInterpolator.prototype, 0, {
+    get(this: BinaryOperatorInterpolator): BinaryOperator {
+      const operand1 = this.operand1Interpolator[0];
+      const operand2 = this.operand2Interpolator[0];
+      return Operator.binary(operand1, this.operator, operand2);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(BinaryOperatorInterpolator.prototype, 1, {
-  get(this: BinaryOperatorInterpolator): BinaryOperator {
-    const operand1 = this.operand1Interpolator[1];
-    const operand2 = this.operand2Interpolator[1];
-    return Operator.binary(operand1, this.operator, operand2);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(BinaryOperatorInterpolator.prototype, 1, {
+    get(this: BinaryOperatorInterpolator): BinaryOperator {
+      const operand1 = this.operand1Interpolator[1];
+      const operand2 = this.operand2Interpolator[1];
+      return Operator.binary(operand1, this.operator, operand2);
+    },
+    configurable: true,
+  });
 
-BinaryOperatorInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof BinaryOperatorInterpolator) {
-    return this.operator === that.operator
-        && this.operand1Interpolator.equals(that.operand1Interpolator)
-        && this.operand2Interpolator.equals(that.operand2Interpolator);
-  }
-  return false;
-};
+  BinaryOperatorInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof BinaryOperatorInterpolator) {
+      return this.operator === that.operator
+          && this.operand1Interpolator.equals(that.operand1Interpolator)
+          && this.operand2Interpolator.equals(that.operand2Interpolator);
+    }
+    return false;
+  };
+
+  return BinaryOperatorInterpolator;
+})(Interpolator);

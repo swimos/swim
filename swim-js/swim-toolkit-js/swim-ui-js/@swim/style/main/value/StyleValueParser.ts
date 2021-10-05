@@ -33,7 +33,7 @@ import {HslColorParser} from "../hsl/HslColorParser";
 import {LinearGradientParser} from "../gradient/LinearGradientParser";
 import type {StyleValue} from "./StyleValue";
 
-/** @hidden */
+/** @internal */
 export class StyleValueParser extends Parser<StyleValue> {
   private readonly identOutput: Output<string> | undefined;
   private readonly valueParser: Parser<number> | undefined;

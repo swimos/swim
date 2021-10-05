@@ -18,7 +18,7 @@ import type {DateTimeSpecifiers} from "./DateTimeSpecifiers";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {PatternParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class PatternFormat extends DateTimeFormat {
   private readonly pattern: string;
   private readonly specifiers: DateTimeSpecifiers;

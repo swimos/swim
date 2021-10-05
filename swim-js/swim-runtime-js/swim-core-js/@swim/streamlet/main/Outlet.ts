@@ -102,16 +102,21 @@ export interface Outlet<O = unknown> extends OutletCombinators<O> {
   watch(func: WatchValueFunction<O>): this;
 }
 
-export const Outlet = {} as {
-  is<O>(object: unknown): object is Outlet<O>;
-};
+/** @internal */
+export const Outlet = (function () {
+  const Outlet = {} as {
+    is<O>(object: unknown): object is Outlet<O>;
+  };
 
-Outlet.is = function <O>(object: unknown): object is Outlet<O> {
-  if (typeof object === "object" && object !== null) {
-    const outlet = object as Outlet<O>;
-    return typeof outlet.outputIterator === "function"
-        && typeof outlet.bindOutput === "function"
-        && typeof outlet.unbindOutput === "function";
-  }
-  return false;
-};
+  Outlet.is = function <O>(object: unknown): object is Outlet<O> {
+    if (typeof object === "object" && object !== null) {
+      const outlet = object as Outlet<O>;
+      return typeof outlet.outputIterator === "function"
+          && typeof outlet.bindOutput === "function"
+          && typeof outlet.unbindOutput === "function";
+    }
+    return false;
+  };
+
+  return Outlet;
+})();

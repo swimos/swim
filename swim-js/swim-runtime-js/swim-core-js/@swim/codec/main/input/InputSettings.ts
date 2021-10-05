@@ -39,7 +39,7 @@ export class InputSettings implements HashCode, Debug {
     });
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stripped!: boolean;
 
   /**

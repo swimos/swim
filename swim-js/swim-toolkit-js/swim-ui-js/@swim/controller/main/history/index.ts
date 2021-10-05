@@ -18,5 +18,7 @@ export {
   HistoryState,
 } from "./HistoryState";
 
-export {HistoryManager} from "./HistoryManager";
-export {HistoryManagerObserver} from "./HistoryManagerObserver";
+export {HistoryService} from "./HistoryService";
+export {HistoryServiceObserver} from "./HistoryServiceObserver";
+
+export {HistoryProvider} from "./HistoryProvider";

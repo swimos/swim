@@ -17,7 +17,7 @@ import {Uri} from "../Uri";
 import type {UriUser} from "../UriUser";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriUserParser extends Parser<UriUser> {
   private readonly uri: UriParser;
   private readonly usernameOutput: Output<string> | undefined;

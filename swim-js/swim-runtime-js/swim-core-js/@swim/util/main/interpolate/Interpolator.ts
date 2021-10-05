@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Values} from "../runtime/Values";
+import {Values} from "../values/Values";
 import {Range} from "../mapping/Range";
 import {Interpolate} from "./Interpolate";
 import {InterpolatorMap} from "../"; // forward import
@@ -39,57 +39,61 @@ export interface Interpolator<Y = unknown> extends Range<Y>, Interpolate<Interpo
   toString(): string;
 }
 
-export const Interpolator = function (y0: unknown, y1: unknown): Interpolator {
-  let interpolator: Interpolator | null;
-  if (y0 === y1) {
-    interpolator = IdentityInterpolator(y0);
-  } else if (typeof y0 === "number" && typeof y1 === "number") {
-    interpolator = NumberInterpolator(y0, y1);
-  } else if (Array.isArray(y0) && Array.isArray(y1)) {
-    interpolator = ArrayInterpolator(y0, y1);
-  } else {
-    interpolator = Interpolate(y0, y1);
-    if (interpolator === null) {
-      interpolator = StepInterpolator(y0, y1);
+export const Interpolator = (function (_super: typeof Range) {
+  const Interpolator = function (y0: unknown, y1: unknown): Interpolator {
+    let interpolator: Interpolator | null;
+    if (y0 === y1) {
+      interpolator = IdentityInterpolator(y0);
+    } else if (typeof y0 === "number" && typeof y1 === "number") {
+      interpolator = NumberInterpolator(y0, y1);
+    } else if (Array.isArray(y0) && Array.isArray(y1)) {
+      interpolator = ArrayInterpolator(y0, y1);
+    } else {
+      interpolator = Interpolate(y0, y1);
+      if (interpolator === null) {
+        interpolator = StepInterpolator(y0, y1);
+      }
     }
-  }
-  return interpolator;
-} as {
-  <Y>(y0: Y, y1: Y): Interpolator<Y>;
-  (y0: unknown, y1: unknown): Interpolator;
+    return interpolator;
+  } as {
+    <Y>(y0: Y, y1: Y): Interpolator<Y>;
+    (y0: unknown, y1: unknown): Interpolator;
 
-  /** @hidden */
-  prototype: Interpolator<any>;
-};
+    /** @internal */
+    prototype: Interpolator<any>;
+  };
 
-Interpolator.prototype = Object.create(Range.prototype);
+  Interpolator.prototype = Object.create(_super.prototype);
 
-Interpolator.prototype.map = function <Y, FY>(this: Interpolator<Y>, transform: (y: Y) => FY): Interpolator<FY> {
-  return InterpolatorMap(this, transform);
-};
+  Interpolator.prototype.map = function <Y, FY>(this: Interpolator<Y>, transform: (y: Y) => FY): Interpolator<FY> {
+    return InterpolatorMap(this, transform);
+  };
 
-Interpolator.prototype.interpolateTo = function <Y>(this: Interpolator<Y>, that: unknown): Interpolator<Interpolator<Y>> | null {
-  if (that instanceof Interpolator) {
-    return InterpolatorInterpolator(this, that);
-  }
-  return null;
-} as typeof Interpolator.prototype.interpolateTo;
+  Interpolator.prototype.interpolateTo = function <Y>(this: Interpolator<Y>, that: unknown): Interpolator<Interpolator<Y>> | null {
+    if (that instanceof Interpolator) {
+      return InterpolatorInterpolator(this, that);
+    }
+    return null;
+  } as typeof Interpolator.prototype.interpolateTo;
 
-Interpolator.prototype.canEqual = function (that: unknown): boolean {
-  return that instanceof this.constructor;
-};
+  Interpolator.prototype.canEqual = function (that: unknown): boolean {
+    return that instanceof this.constructor;
+  };
 
-Interpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof Interpolator) {
-    return that.canEqual(this)
-        && Values.equal(this[0], that[0])
-        && Values.equal(this[1], that[1]);
-  }
-  return false;
-};
+  Interpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof Interpolator) {
+      return that.canEqual(this)
+          && Values.equal(this[0], that[0])
+          && Values.equal(this[1], that[1]);
+    }
+    return false;
+  };
 
-Interpolator.prototype.toString = function (): string {
-  return "Interpolator(" + this[0] + ", " + this[1] + ")";
-};
+  Interpolator.prototype.toString = function (): string {
+    return "Interpolator(" + this[0] + ", " + this[1] + ")";
+  };
+
+  return Interpolator;
+})(Range);

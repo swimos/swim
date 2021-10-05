@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ControllerViewTrait, CompositeController} from "@swim/controller";
-import type {AxisView} from "./AxisView";
+import type {Class} from "@swim/util";
+import {TraitViewFastener, GenericController} from "@swim/controller";
+import {AxisView} from "./AxisView";
 import {AxisTrait} from "./AxisTrait";
 import {TopAxisTrait} from "./TopAxisTrait";
 import {RightAxisTrait} from "./RightAxisTrait";
@@ -25,8 +26,8 @@ import {RightAxisController} from "../"; // forward import
 import {BottomAxisController} from "../"; // forward import
 import {LeftAxisController} from "../"; // forward import
 
-export abstract class AxisController<D> extends CompositeController {
-  override readonly controllerObservers!: ReadonlyArray<AxisControllerObserver<D>>;
+export abstract class AxisController<D> extends GenericController {
+  override readonly observerType?: Class<AxisControllerObserver<D>>;
 
   protected initAxisTrait(axisTrait: AxisTrait<D>): void {
     // hook
@@ -41,11 +42,11 @@ export abstract class AxisController<D> extends CompositeController {
   }
 
   protected willSetAxisTrait(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetAxisTrait !== void 0) {
-        controllerObserver.controllerWillSetAxisTrait(newAxisTrait, oldAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetAxisTrait !== void 0) {
+        observer.controllerWillSetAxisTrait(newAxisTrait, oldAxisTrait, this);
       }
     }
   }
@@ -61,11 +62,11 @@ export abstract class AxisController<D> extends CompositeController {
   }
 
   protected didSetAxisTrait(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetAxisTrait !== void 0) {
-        controllerObserver.controllerDidSetAxisTrait(newAxisTrait, oldAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetAxisTrait !== void 0) {
+        observer.controllerDidSetAxisTrait(newAxisTrait, oldAxisTrait, this);
       }
     }
   }
@@ -85,11 +86,11 @@ export abstract class AxisController<D> extends CompositeController {
   }
 
   protected willSetAxisView(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetAxisView !== void 0) {
-        controllerObserver.controllerWillSetAxisView(newAxisView, oldAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetAxisView !== void 0) {
+        observer.controllerWillSetAxisView(newAxisView, oldAxisView, this);
       }
     }
   }
@@ -105,17 +106,29 @@ export abstract class AxisController<D> extends CompositeController {
   }
 
   protected didSetAxisView(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetAxisView !== void 0) {
-        controllerObserver.controllerDidSetAxisView(newAxisView, oldAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetAxisView !== void 0) {
+        observer.controllerDidSetAxisView(newAxisView, oldAxisView, this);
       }
     }
   }
 
-  /** @hidden */
-  static AxisFastener = ControllerViewTrait.define<AxisController<unknown>, AxisView<unknown>, AxisTrait<unknown>>({
+  /** @internal */
+  static AxisFastener = TraitViewFastener.define<AxisController<unknown>, AxisTrait<unknown>, AxisView<unknown>>({
+    traitType: AxisTrait,
+    observesTrait: true,
+    willSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
+      this.owner.willSetAxisTrait(newAxisTrait, oldAxisTrait);
+    },
+    onSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
+      this.owner.onSetAxisTrait(newAxisTrait, oldAxisTrait);
+    },
+    didSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
+      this.owner.didSetAxisTrait(newAxisTrait, oldAxisTrait);
+    },
+    viewType: AxisView,
     willSetView(newAxisView: AxisView<unknown> | null, oldAxisView: AxisView<unknown> | null): void {
       this.owner.willSetAxisView(newAxisView, oldAxisView);
     },
@@ -128,23 +141,12 @@ export abstract class AxisController<D> extends CompositeController {
     createView(): AxisView<unknown> | null {
       return this.owner.createAxisView();
     },
-    traitType: AxisTrait,
-    observeTrait: true,
-    willSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.willSetAxisTrait(newAxisTrait, oldAxisTrait);
-    },
-    onSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.onSetAxisTrait(newAxisTrait, oldAxisTrait);
-    },
-    didSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.didSetAxisTrait(newAxisTrait, oldAxisTrait);
-    },
   });
 
-  @ControllerViewTrait<AxisController<D>, AxisView<D>, AxisTrait<D>>({
+  @TraitViewFastener<AxisController<D>, AxisTrait<D>, AxisView<D>>({
     extends: AxisController.AxisFastener,
   })
-  readonly axis!: ControllerViewTrait<this, AxisView<D>, AxisTrait<D>>;
+  readonly axis!: TraitViewFastener<this, AxisTrait<D>, AxisView<D>>;
 
   protected createAxis<D>(axisTrait: AxisTrait<D>): AxisController<D> | null {
     if (axisTrait instanceof TopAxisTrait) {

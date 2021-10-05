@@ -15,25 +15,29 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {R2Circle} from "./R2Circle";
 
-/** @hidden */
-export const R2CircleInterpolator = function (s0: R2Circle, s1: R2Circle): Interpolator<R2Circle> {
-  const interpolator = function (u: number): R2Circle {
-    const s0 = interpolator[0];
-    const s1 = interpolator[1];
-    const cx = s0.cx + u * (s1.cx - s0.cx);
-    const cy = s0.cy + u * (s1.cy - s0.cy);
-    const r = s0.r + u * (s1.r - s0.r);
-    return new R2Circle(cx, cy, r);
-  } as Interpolator<R2Circle>;
-  Object.setPrototypeOf(interpolator, R2CircleInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = s0;
-  (interpolator as Mutable<typeof interpolator>)[1] = s1;
-  return interpolator;
-} as {
-  (s0: R2Circle, s1: R2Circle): Interpolator<R2Circle>;
+/** @internal */
+export const R2CircleInterpolator = (function (_super: typeof Interpolator) {
+  const R2CircleInterpolator = function (s0: R2Circle, s1: R2Circle): Interpolator<R2Circle> {
+    const interpolator = function (u: number): R2Circle {
+      const s0 = interpolator[0];
+      const s1 = interpolator[1];
+      const cx = s0.cx + u * (s1.cx - s0.cx);
+      const cy = s0.cy + u * (s1.cy - s0.cy);
+      const r = s0.r + u * (s1.r - s0.r);
+      return new R2Circle(cx, cy, r);
+    } as Interpolator<R2Circle>;
+    Object.setPrototypeOf(interpolator, R2CircleInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = s0;
+    (interpolator as Mutable<typeof interpolator>)[1] = s1;
+    return interpolator;
+  } as {
+    (s0: R2Circle, s1: R2Circle): Interpolator<R2Circle>;
 
-  /** @hidden */
-  prototype: Interpolator<R2Circle>;
-};
+    /** @internal */
+    prototype: Interpolator<R2Circle>;
+  };
 
-R2CircleInterpolator.prototype = Object.create(Interpolator.prototype);
+  R2CircleInterpolator.prototype = Object.create(_super.prototype);
+
+  return R2CircleInterpolator;
+})(Interpolator);

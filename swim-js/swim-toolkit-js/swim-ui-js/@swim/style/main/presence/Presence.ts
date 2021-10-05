@@ -72,39 +72,39 @@ export class Presence implements Interpolate<Presence>, HashCode, Equivalent, De
     }
   }
 
-  isDismissed(): boolean {
+  get dismissed(): boolean {
     return this.phase === 0 && this.direction === 0;
   }
 
-  isPresented(): boolean {
+  get presented(): boolean {
     return this.phase === 1 && this.direction === 0;
   }
 
-  isPresenting(): boolean {
+  get presenting(): boolean {
     return this.direction > 0;
   }
 
-  isDismissing(): boolean {
+  get dismissing(): boolean {
     return this.direction < 0;
   }
 
-  presenting(): Presence {
-    if (!this.isPresenting()) {
+  asPresenting(): Presence {
+    if (!this.presenting) {
       return Presence.presenting(this.phase);
     } else {
       return this;
     }
   }
 
-  dismissing(): Presence {
-    if (!this.isDismissing()) {
+  asDismissing(): Presence {
+    if (!this.dismissing) {
       return Presence.dismissing(this.phase);
     } else {
       return this;
     }
   }
 
-  toggling(): Presence {
+  asToggling(): Presence {
     if (this.direction > 0 || this.phase >= 0.5) {
       return Presence.dismissing(this.phase);
     } else if (this.direction < 0 || this.phase < 0.5) {
@@ -114,7 +114,7 @@ export class Presence implements Interpolate<Presence>, HashCode, Equivalent, De
     }
   }
 
-  toggled(): Presence {
+  asToggled(): Presence {
     if (this.direction > 0 || this.phase >= 0.5) {
       return Presence.dismissed();
     } else if (this.direction < 0 || this.phase < 0.5) {
@@ -238,7 +238,7 @@ export class Presence implements Interpolate<Presence>, HashCode, Equivalent, De
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is PresenceInit {
     if (typeof value === "object" && value !== null) {
       const init = value as PresenceInit;
@@ -248,7 +248,7 @@ export class Presence implements Interpolate<Presence>, HashCode, Equivalent, De
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyPresence {
     return value instanceof Presence
         || Presence.isInit(value);

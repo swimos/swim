@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
+import {Affinity, FastenerOwner, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import type {Color} from "@swim/style";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, ViewContext, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
+import {Look, Mood, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewContext, View, ViewFastenerClass, ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {SvgIconView} from "@swim/graphics";
 import {DeckSlot} from "./DeckSlot";
@@ -32,21 +33,21 @@ export class DeckButton extends DeckSlot {
 
   protected initButton(): void {
     this.addClass("deck-button");
-    this.position.setState("relative", View.Intrinsic);
-    this.userSelect.setState("none", View.Intrinsic);
-    this.cursor.setState("pointer", View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
+    this.userSelect.setState("none", Affinity.Intrinsic);
+    this.cursor.setState("pointer", Affinity.Intrinsic);
   }
 
-  override readonly viewObservers!: ReadonlyArray<DeckButtonObserver>;
+  override readonly observerType?: Class<DeckButtonObserver>;
 
-  @ViewProperty({type: Length, state: Length.px(12)})
-  readonly iconPadding!: ViewProperty<this, Length, AnyLength>;
+  @Property({type: Length, state: Length.px(12)})
+  readonly iconPadding!: Property<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Number, inherit: true, updateFlags: View.NeedsLayout})
-  readonly deckPhase!: ViewAnimator<this, number | undefined>;
+  @ThemeAnimator({type: Number, inherits: true, updateFlags: View.NeedsLayout})
+  readonly deckPhase!: ThemeAnimator<this, number | undefined>;
 
-  @ViewAnimator({type: Number, state: 0})
-  readonly slotAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0})
+  readonly slotAlign!: ThemeAnimator<this, number>;
 
   override get colorLook(): Look<Color> {
     return Look.accentColor;
@@ -56,16 +57,16 @@ export class DeckButton extends DeckSlot {
 
   readonly backIcon!: DeckButtonBackIcon<this, SvgIconView>; // defined by DeckButtonBackIcon
 
-  /** @hidden */
+  /** @internal */
   labelCount: number;
 
   label: DeckButtonLabel<this, HtmlView> | null;
 
   protected createLabel(value: string): HtmlView {
-    const labelView = HtmlView.span.create();
-    labelView.display.setState("flex", View.Intrinsic);
-    labelView.alignItems.setState("center", View.Intrinsic);
-    labelView.whiteSpace.setState("nowrap", View.Intrinsic);
+    const labelView = HtmlView.fromTag("span");
+    labelView.display.setState("flex", Affinity.Intrinsic);
+    labelView.alignItems.setState("center", Affinity.Intrinsic);
+    labelView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
     labelView.text(value);
     return labelView;
   }
@@ -80,16 +81,16 @@ export class DeckButton extends DeckSlot {
     this.labelCount = newLabelCount;
 
     const oldLabelKey = "label" + oldLabelCount;
-    const oldLabelFastener = this.getViewFastener(oldLabelKey) as DeckButtonLabel<this, HtmlView> | null;
+    const oldLabelFastener = this.getFastener(oldLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
     const oldLabelView = oldLabelFastener !== null ? oldLabelFastener.view : null;
 
     const newLabelKey = "label" + newLabelCount;
-    const newLabelFastener = new DeckButtonLabelFastener(this, newLabelKey, newLabelKey) as unknown as DeckButtonLabel<this, HtmlView>;
+    const newLabelFastener = DeckButtonLabelFastener.create(this, newLabelKey) as DeckButtonLabel<this, HtmlView>;
     newLabelFastener.labelIndex = newLabelCount;
     this.willPushLabel(newLabelView, oldLabelView);
     this.label = newLabelFastener;
 
-    this.setViewFastener(newLabelKey, newLabelFastener);
+    this.setFastener(newLabelKey, newLabelFastener);
     newLabelFastener.setView(newLabelView);
     newLabelFastener.injectView();
 
@@ -101,7 +102,7 @@ export class DeckButton extends DeckSlot {
       timing = Timing.fromAny(timing);
     }
 
-    //if (this.deckPhase.superAnimator === null) {
+    //if (this.deckPhase.superFastener === null) {
     //  this.deckPhase.setState(newLabelCount, timing);
     //}
     if (timing === false) {
@@ -110,20 +111,20 @@ export class DeckButton extends DeckSlot {
   }
 
   protected willPushLabel(newLabelView: HtmlView, oldLabelView: HtmlView | null): void {
-    this.willObserve(function (viewObserver: DeckButtonObserver): void {
-      if (viewObserver.deckButtonWillPushLabel !== void 0) {
-        viewObserver.deckButtonWillPushLabel(newLabelView, oldLabelView, this);
+    this.forEachObserver(function (observer: DeckButtonObserver): void {
+      if (observer.deckButtonWillPushLabel !== void 0) {
+        observer.deckButtonWillPushLabel(newLabelView, oldLabelView, this);
       }
     });
   }
 
   protected didPushLabel(newLabelView: HtmlView, oldLabelView: HtmlView | null): void {
-    if (oldLabelView !== null && oldLabelView.parentView === this) {
+    if (oldLabelView !== null && oldLabelView.parent === this) {
       oldLabelView.remove();
     }
-    this.didObserve(function (viewObserver: DeckButtonObserver): void {
-      if (viewObserver.deckButtonDidPushLabel !== void 0) {
-        viewObserver.deckButtonDidPushLabel(newLabelView, oldLabelView, this);
+    this.forEachObserver(function (observer: DeckButtonObserver): void {
+      if (observer.deckButtonDidPushLabel !== void 0) {
+        observer.deckButtonDidPushLabel(newLabelView, oldLabelView, this);
       }
     });
   }
@@ -134,12 +135,12 @@ export class DeckButton extends DeckSlot {
     this.labelCount = newLabelCount;
 
     const oldLabelKey = "label" + oldLabelCount;
-    const oldLabelFastener = this.getViewFastener(oldLabelKey) as DeckButtonLabel<this, HtmlView> | null;
+    const oldLabelFastener = this.getFastener(oldLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
     const oldLabelView = oldLabelFastener !== null ? oldLabelFastener.view : null;
 
     if (oldLabelView !== null) {
       const newLabelKey = "label" + newLabelCount;
-      const newLabelFastener = this.getViewFastener(newLabelKey) as DeckButtonLabel<this, HtmlView> | null;
+      const newLabelFastener = this.getFastener(newLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
       const newLabelView = newLabelFastener !== null ? newLabelFastener.view : null;
       this.willPopLabel(newLabelView, oldLabelView);
       this.label = newLabelFastener;
@@ -153,7 +154,7 @@ export class DeckButton extends DeckSlot {
         timing = Timing.fromAny(timing);
       }
 
-      //if (this.deckPhase.superAnimator === null) {
+      //if (this.deckPhase.superFastener === null) {
       //  this.deckPhase.setState(newLabelCount, timing);
       //}
       if (timing === false) {
@@ -165,9 +166,9 @@ export class DeckButton extends DeckSlot {
   }
 
   protected willPopLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView): void {
-    this.willObserve(function (viewObserver: DeckButtonObserver): void {
-      if (viewObserver.deckButtonWillPopLabel !== void 0) {
-        viewObserver.deckButtonWillPopLabel(newLabelView, oldLabelView, this);
+    this.forEachObserver(function (observer: DeckButtonObserver): void {
+      if (observer.deckButtonWillPopLabel !== void 0) {
+        observer.deckButtonWillPopLabel(newLabelView, oldLabelView, this);
       }
     });
   }
@@ -176,32 +177,32 @@ export class DeckButton extends DeckSlot {
     const oldLabelKey = oldLabelView.key;
     oldLabelView.remove();
     if (oldLabelKey !== void 0) {
-      const oldLabelFastener = this.getViewFastener(oldLabelKey) as DeckButtonLabel<this, HtmlView> | null;
+      const oldLabelFastener = this.getFastener(oldLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
       if (oldLabelFastener !== null && oldLabelFastener.labelIndex > this.labelCount) {
-        this.setViewFastener(oldLabelKey, null);
+        this.setFastener(oldLabelKey, null);
       }
     }
-    this.didObserve(function (viewObserver: DeckButtonObserver): void {
-      if (viewObserver.deckButtonDidPopLabel !== void 0) {
-        viewObserver.deckButtonDidPopLabel(newLabelView, oldLabelView, this);
+    this.forEachObserver(function (observer: DeckButtonObserver): void {
+      if (observer.deckButtonDidPopLabel !== void 0) {
+        observer.deckButtonDidPopLabel(newLabelView, oldLabelView, this);
       }
     });
   }
 
   protected override didLayout(viewContext: ViewContextType<this>): void {
-    if (!this.deckPhase.isAnimating()) {
-      const deckPhase = this.deckPhase.takeUpdatedValue();
+    if (!this.deckPhase.tweening) {
+      const deckPhase = this.deckPhase.value;
       if (deckPhase !== void 0) {
         const nextLabelIndex = Math.round(deckPhase + 1);
         const nextLabelKey = "label" + nextLabelIndex;
-        const nextLabelFastener = this.getViewFastener(nextLabelKey) as DeckButtonLabel<this, HtmlView> | null;
+        const nextLabelFastener = this.getFastener(nextLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
         const nextLabelView = nextLabelFastener !== null ? nextLabelFastener.view : null;
         if (nextLabelView !== null) {
           this.didPopLabel(this.label !== null ? this.label.view : null, nextLabelView);
         } else if (this.label !== null && this.label.view !== null && Math.round(deckPhase) > 0) {
           const prevLabelIndex = Math.round(deckPhase - 1);
           const prevLabelKey = "label" + prevLabelIndex;
-          const prevLabelFastener = this.getViewFastener(prevLabelKey) as DeckButtonLabel<this, HtmlView> | null;
+          const prevLabelFastener = this.getFastener(prevLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
           const prevLabelView = prevLabelFastener !== null ? prevLabelFastener.view : null;
           this.didPushLabel(this.label.view, prevLabelView);
         }
@@ -211,29 +212,47 @@ export class DeckButton extends DeckSlot {
   }
 }
 
-/** @hidden */
-export abstract class DeckButtonCloseIcon<V extends DeckButton, S extends SvgIconView> extends ViewFastener<V, S> {
-  override onSetView(iconView: S | null): void {
+/** @internal */
+export interface DeckButtonCloseIcon<V extends DeckButton = DeckButton, T extends SvgIconView = SvgIconView> extends ViewFastener<V, T> {
+  /** @override */
+  onSetView(iconView: T | null): void;
+
+  /** @override */
+  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+
+  viewDidLayout(viewContext: ViewContext, iconView: T): void;
+
+  /** @protected */
+  initIcon(iconView: T): void;
+
+  /** @protected */
+  layoutIcon(iconView: T): void;
+}
+/** @internal */
+export const DeckButtonCloseIcon = (function (_super: typeof ViewFastener) {
+  const DeckButtonCloseIcon = _super.extend() as ViewFastenerClass<DeckButtonCloseIcon<any, any>>;
+
+  DeckButtonCloseIcon.prototype.onSetView = function (this: DeckButtonCloseIcon, iconView: SvgIconView | null): void {
     if (iconView !== null) {
       this.initIcon(iconView);
     }
-  }
+  };
 
-  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
-    parentView.prependChildView(childView, key);
-  }
+  DeckButtonCloseIcon.prototype.insertView = function (this: DeckButtonCloseIcon, parent: View, childView: SvgIconView, targetView: View | null, key: string | undefined): void {
+    parent.prependChild(childView, key);
+  };
 
-  viewDidLayout(viewContext: ViewContext, iconView: S): void {
+  DeckButtonCloseIcon.prototype.viewDidLayout = function (this: DeckButtonCloseIcon, viewContext: ViewContext, iconView: SvgIconView): void {
     this.layoutIcon(iconView);
-  }
+  };
 
-  protected initIcon(iconView: S): void {
+  DeckButtonCloseIcon.prototype.initIcon = function (this: DeckButtonCloseIcon, iconView: SvgIconView): void {
     iconView.addClass("close-icon");
     iconView.setStyle("position", "absolute");
-    iconView.pointerEvents.setState("none", View.Intrinsic);
-  }
+    iconView.pointerEvents.setState("none", Affinity.Intrinsic);
+  };
 
-  protected layoutIcon(iconView: S): void {
+  DeckButtonCloseIcon.prototype.layoutIcon = function (this: DeckButtonCloseIcon, iconView: SvgIconView): void {
     const slotAlign = this.owner.slotAlign.getValue();
     let slotWidth: Length | number | null = this.owner.width.state;
     slotWidth = slotWidth instanceof Length ? slotWidth.pxValue() : this.owner.node.offsetWidth;
@@ -253,40 +272,60 @@ export abstract class DeckButtonCloseIcon<V extends DeckButton, S extends SvgIco
     const iconTop = (slotHeight - iconHeight) / 2;
     iconView.setStyle("left", iconLeft + "px");
     iconView.setStyle("top", iconTop + "px");
-    iconView.viewBox.setState("0 0 " + iconWidth + " " + iconHeight, View.Intrinsic);
-    iconView.opacity.setState(1 - iconPhase, View.Intrinsic);
-  }
-}
+    iconView.viewBox.setState("0 0 " + iconWidth + " " + iconHeight, Affinity.Intrinsic);
+    iconView.opacity.setState(1 - iconPhase, Affinity.Intrinsic);
+  };
+
+  return DeckButtonCloseIcon;
+})(ViewFastener);
 ViewFastener({
   extends: DeckButtonCloseIcon,
   key: true,
   type: SvgIconView,
-  observe: true,
+  observes: true,
 })(DeckButton.prototype, "closeIcon");
 
-/** @hidden */
-export abstract class DeckButtonBackIcon<V extends DeckButton, S extends SvgIconView> extends ViewFastener<V, S> {
-  override onSetView(iconView: S | null): void {
+/** @internal */
+export interface DeckButtonBackIcon<V extends DeckButton = DeckButton, T extends SvgIconView = SvgIconView> extends ViewFastener<V, T> {
+  /** @override */
+  onSetView(iconView: T | null): void;
+
+  /** @override */
+  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+
+  viewDidLayout(viewContext: ViewContext, iconView: T): void;
+
+  /** @protected */
+  initIcon(iconView: T): void;
+
+  /** @protected */
+  layoutIcon(iconView: T): void;
+}
+/** @internal */
+export const DeckButtonBackIcon = (function (_super: typeof ViewFastener) {
+  const DeckButtonBackIcon = _super.extend() as ViewFastenerClass<DeckButtonBackIcon<any, any>>;
+
+  DeckButtonBackIcon.prototype.onSetView = function (this: DeckButtonBackIcon, iconView: SvgIconView | null): void {
     if (iconView !== null) {
       this.initIcon(iconView);
     }
-  }
+  };
 
-  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
-    parentView.prependChildView(childView, key);
-  }
+  DeckButtonBackIcon.prototype.insertView = function (this: DeckButtonBackIcon, parent: View, childView: SvgIconView, targetView: View | null, key: string | undefined): void {
+    parent.prependChild(childView, key);
+  };
 
-  viewDidLayout(viewContext: ViewContext, iconView: S): void {
+  DeckButtonBackIcon.prototype.viewDidLayout = function (this: DeckButtonBackIcon, viewContext: ViewContext, iconView: SvgIconView): void {
     this.layoutIcon(iconView);
-  }
+  };
 
-  protected initIcon(iconView: S): void {
+  DeckButtonBackIcon.prototype.initIcon = function (this: DeckButtonBackIcon, iconView: SvgIconView): void {
     iconView.addClass("back-icon");
     iconView.setStyle("position", "absolute");
-    iconView.pointerEvents.setState("none", View.Intrinsic);
-  }
+    iconView.pointerEvents.setState("none", Affinity.Intrinsic);
+  };
 
-  protected layoutIcon(iconView: S): void {
+  DeckButtonBackIcon.prototype.layoutIcon = function (this: DeckButtonBackIcon, iconView: SvgIconView): void {
     const slotAlign = this.owner.slotAlign.getValue();
     let slotWidth: Length | number | null = this.owner.width.state;
     slotWidth = slotWidth instanceof Length ? slotWidth.pxValue() : this.owner.node.offsetWidth;
@@ -302,18 +341,18 @@ export abstract class DeckButtonBackIcon<V extends DeckButton, S extends SvgIcon
     const deckPhase = this.owner.deckPhase.getValueOr(0);
     const nextIndex = Math.max(this.owner.labelCount, Math.ceil(deckPhase));
     const labelKey = "label" + nextIndex;
-    const labelView = this.owner.getChildView(labelKey) as HtmlView | null;
+    const labelView = this.owner.getChild(labelKey) as HtmlView | null;
     const slotSpace = slotWidth - iconWidth - iconPadding;
     let iconLeft = iconPadding + slotSpace * slotAlign;
     const iconTop = (slotHeight - iconHeight) / 2;
     let iconOpacity: number | undefined;
     if (deckPhase <= 1) {
       iconOpacity = 0;
-      iconView.iconColor.setState(null, View.Intrinsic);
+      iconView.iconColor.setState(null, Affinity.Intrinsic);
     } else if (labelView !== null && deckPhase < 2) {
-      const parentView = this.owner.parentView;
+      const parent = this.owner.parent;
       const nextPost = this.owner.nextPost.state;
-      const nextSlot = parentView !== null && nextPost !== null ? parentView.getChildView(nextPost.key) : null;
+      const nextSlot = parent !== null && nextPost !== null ? parent.getChild(nextPost.key) : null;
       let nextSlotAlign: number;
       let nextSlotWidth: Length | number | null;
       if (nextSlot instanceof DeckSlot) {
@@ -344,69 +383,85 @@ export abstract class DeckButtonBackIcon<V extends DeckButton, S extends SvgIcon
       const nextColor = nextSlot instanceof DeckSlot ? nextSlot.getLookOr(nextSlot.colorLook, null) : null;
       const thisColor = this.owner.getLookOr(this.owner.colorLook, null);
       if (nextColor !== null && thisColor !== null) {
-        iconView.iconColor.setState(nextColor.interpolateTo(thisColor)(labelPhase), View.Intrinsic);
+        iconView.iconColor.setState(nextColor.interpolateTo(thisColor)(labelPhase), Affinity.Intrinsic);
       } else {
-        iconView.iconColor.setState(thisColor, View.Intrinsic);
+        iconView.iconColor.setState(thisColor, Affinity.Intrinsic);
       }
     }
     iconView.setStyle("left", iconLeft + "px");
     iconView.setStyle("top", iconTop + "px");
-    iconView.viewBox.setState("0 0 " + iconWidth + " " + iconHeight, View.Intrinsic);
-    iconView.opacity.setState(iconOpacity, View.Intrinsic);
-  }
-}
+    iconView.viewBox.setState("0 0 " + iconWidth + " " + iconHeight, Affinity.Intrinsic);
+    iconView.opacity.setState(iconOpacity, Affinity.Intrinsic);
+  };
+
+  return DeckButtonBackIcon;
+})(ViewFastener);
 ViewFastener({
   extends: DeckButtonBackIcon,
   key: true,
   type: SvgIconView,
-  observe: true,
+  observes: true,
 })(DeckButton.prototype, "backIcon");
 
-/** @hidden */
-export abstract class DeckButtonLabel<V extends DeckButton, S extends HtmlView> extends ViewFastener<V, S> {
-  constructor(owner: V, key: string | undefined, fastenerName: string | undefined) {
-    super(owner, key, fastenerName);
-    this.labelIndex = 0;
-    this.labelWidth = null;
-    this.layoutWidth = 0;
-  }
-
+/** @internal */
+export interface DeckButtonLabel<V extends DeckButton = DeckButton, T extends HtmlView = HtmlView> extends ViewFastener<V, T> {
   labelIndex: number;
 
-  /** @hidden */
+  /** @internal */
   labelWidth: Length | string | null;
 
-  /** @hidden */
+  /** @internal */
   layoutWidth: number;
 
-  override onSetView(labelView: S | null): void {
+  /** @override */
+  onSetView(labelView: T | null): void;
+
+  /** @override */
+  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+
+  /** @protected */
+  viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, labelView: T): void;
+
+  viewDidLayout(viewContext: ViewContext, labelView: T): void;
+
+  /** @protected */
+  initLabel(labelView: T): void;
+
+  /** @protected */
+  layoutLabel(labelView: T): void;
+}
+/** @internal */
+export const DeckButtonLabel = (function (_super: typeof ViewFastener) {
+  const DeckButtonLabel = _super.extend() as ViewFastenerClass<DeckButtonLabel<any, any>>;
+
+  DeckButtonLabel.prototype.onSetView = function (this: DeckButtonLabel, labelView: HtmlView | null): void {
     if (labelView !== null) {
       this.initLabel(labelView);
     }
-  }
+  };
 
-  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
+  DeckButtonLabel.prototype.insertView = function (this: DeckButtonLabel, parent: View, childView: HtmlView, targetView: View | null, key: string | undefined): void {
     const targetKey = "label" + (this.labelIndex + 1);
-    targetView = parentView.getChildView(targetKey);
-    parentView.insertChildView(childView, targetView, key);
-  }
+    targetView = parent.getChild(targetKey);
+    parent.insertChild(childView, targetView, key);
+  };
 
-  protected viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, labelView: S): void {
-    if (labelView.color.takesPrecedence(View.Intrinsic)) {
-      labelView.color.setState(theme.getOr(this.owner.colorLook, mood, null), timing, View.Intrinsic);
+  DeckButtonLabel.prototype.viewDidApplyTheme = function (this: DeckButtonLabel, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, labelView: HtmlView): void {
+    if (labelView.color.hasAffinity(Affinity.Intrinsic)) {
+      labelView.color.setState(theme.getOr(this.owner.colorLook, mood, null), timing, Affinity.Intrinsic);
     }
-  }
+  };
 
-  viewDidLayout(viewContext: ViewContext, labelView: S): void {
+  DeckButtonLabel.prototype.viewDidLayout = function (this: DeckButtonLabel, viewContext: ViewContext, labelView: HtmlView): void {
     this.layoutLabel(labelView);
-  }
+  };
 
-  protected initLabel(labelView: S): void {
-    labelView.position.setState("absolute", View.Intrinsic);
-    labelView.pointerEvents.setState("none", View.Intrinsic);
-  }
+  DeckButtonLabel.prototype.initLabel = function (this: DeckButtonLabel, labelView: HtmlView): void {
+    labelView.position.setState("absolute", Affinity.Intrinsic);
+    labelView.pointerEvents.setState("none", Affinity.Intrinsic);
+  };
 
-  protected layoutLabel(labelView: S): void {
+  DeckButtonLabel.prototype.layoutLabel = function (this: DeckButtonLabel, labelView: HtmlView): void {
     const labelIndex = this.labelIndex;
     const slotAlign = this.owner.slotAlign.getValue();
     let slotWidth: Length | number | null = this.owner.width.state;
@@ -414,9 +469,9 @@ export abstract class DeckButtonLabel<V extends DeckButton, S extends HtmlView> 
     let slotHeight: Length | number | null = this.owner.height.state;
     slotHeight = slotHeight instanceof Length ? slotHeight.pxValue() : this.owner.node.offsetHeight;
 
-    const parentView = this.owner.parentView;
+    const parent = this.owner.parent;
     const nextPost = this.owner.nextPost.state;
-    const nextSlot = parentView !== null && nextPost !== null ? parentView.getChildView(nextPost.key) : null;
+    const nextSlot = parent !== null && nextPost !== null ? parent.getChild(nextPost.key) : null;
     let nextSlotAlign: number;
     let nextSlotWidth: Length | number | null;
     if (nextSlot instanceof DeckSlot) {
@@ -460,10 +515,10 @@ export abstract class DeckButtonLabel<V extends DeckButton, S extends HtmlView> 
       labelWidth = labelView.node.offsetWidth;
       // Memoize computed label width while animating
       // to avoid style recalculation in animation frames.
-      if (this.owner.deckPhase.isAnimating()) {
-        labelView.width.setState(labelWidth, View.Intrinsic);
+      if (this.owner.deckPhase.tweening) {
+        labelView.width.setState(labelWidth, Affinity.Intrinsic);
       } else {
-        labelView.width.setState(this.labelWidth, View.Intrinsic);
+        labelView.width.setState(this.labelWidth, Affinity.Intrinsic);
       }
     }
 
@@ -472,45 +527,55 @@ export abstract class DeckButtonLabel<V extends DeckButton, S extends HtmlView> 
     const iconTop = (slotHeight - iconHeight) / 2;
     const labelSlotSpace = slotWidth - iconLeft - iconWidth + (nextSlotWidth - labelWidth) * nextSlotAlign;
     if (labelIndex < prevIndex || labelIndex === prevIndex && labelPhase === 1) { // under
-      labelView.left.setState(iconLeft + iconWidth, View.Intrinsic);
-      labelView.top.setState(iconTop, View.Intrinsic);
-      labelView.height.setState(iconHeight, View.Intrinsic);
-      labelView.opacity.setState(0, View.Intrinsic);
+      labelView.left.setState(iconLeft + iconWidth, Affinity.Intrinsic);
+      labelView.top.setState(iconTop, Affinity.Intrinsic);
+      labelView.height.setState(iconHeight, Affinity.Intrinsic);
+      labelView.opacity.setState(0, Affinity.Intrinsic);
       labelView.setCulled(true);
     } else if (labelIndex === prevIndex) { // out
-      labelView.left.setState(iconLeft + iconWidth + (labelSlotSpace * slotAlign * (1 - labelPhase)), View.Intrinsic);
-      labelView.top.setState(iconTop, View.Intrinsic);
-      labelView.height.setState(iconHeight, View.Intrinsic);
-      labelView.opacity.setState(1 - labelPhase, View.Intrinsic);
+      labelView.left.setState(iconLeft + iconWidth + (labelSlotSpace * slotAlign * (1 - labelPhase)), Affinity.Intrinsic);
+      labelView.top.setState(iconTop, Affinity.Intrinsic);
+      labelView.height.setState(iconHeight, Affinity.Intrinsic);
+      labelView.opacity.setState(1 - labelPhase, Affinity.Intrinsic);
       labelView.setCulled(false);
     } else if (labelIndex === nextIndex) { // in
-      labelView.left.setState(iconLeft + iconWidth + (labelSlotSpace * (1 - labelPhase) + labelSlotSpace * slotAlign * labelPhase), View.Intrinsic);
-      labelView.top.setState(iconTop, View.Intrinsic);
-      labelView.height.setState(iconHeight, View.Intrinsic);
+      labelView.left.setState(iconLeft + iconWidth + (labelSlotSpace * (1 - labelPhase) + labelSlotSpace * slotAlign * labelPhase), Affinity.Intrinsic);
+      labelView.top.setState(iconTop, Affinity.Intrinsic);
+      labelView.height.setState(iconHeight, Affinity.Intrinsic);
       const nextColor = nextSlot instanceof DeckSlot ? nextSlot.getLookOr(nextSlot.colorLook, null) : null;
       const thisColor = this.owner.getLookOr(this.owner.colorLook, null);
       if (nextColor !== null && thisColor !== null) {
-        labelView.color.setState(nextColor.interpolateTo(thisColor)(labelPhase), View.Intrinsic);
+        labelView.color.setState(nextColor.interpolateTo(thisColor)(labelPhase), Affinity.Intrinsic);
       } else {
-        labelView.color.setState(thisColor, View.Intrinsic);
+        labelView.color.setState(thisColor, Affinity.Intrinsic);
       }
-      labelView.opacity.setState(1, View.Intrinsic);
+      labelView.opacity.setState(1, Affinity.Intrinsic);
       labelView.setCulled(false);
     } else { // over
-      labelView.left.setState(iconLeft + iconWidth + labelSlotSpace, View.Intrinsic);
-      labelView.top.setState(iconTop, View.Intrinsic);
-      labelView.height.setState(iconHeight, View.Intrinsic);
-      labelView.opacity.setState(0, View.Intrinsic);
+      labelView.left.setState(iconLeft + iconWidth + labelSlotSpace, Affinity.Intrinsic);
+      labelView.top.setState(iconTop, Affinity.Intrinsic);
+      labelView.height.setState(iconHeight, Affinity.Intrinsic);
+      labelView.opacity.setState(0, Affinity.Intrinsic);
       labelView.setCulled(true);
     }
     this.layoutWidth = iconLeft + iconWidth + labelWidth + iconPadding;
-  }
-}
+  };
 
-/** @hidden */
+  DeckButtonLabel.construct = function <F extends DeckButtonLabel<any, any>>(fastenerClass: ViewFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+    (fastener as Mutable<typeof fastener>).labelIndex = 0;
+    (fastener as Mutable<typeof fastener>).labelWidth = null;
+    (fastener as Mutable<typeof fastener>).layoutWidth = 0;
+    return fastener;
+  };
+
+  return DeckButtonLabel;
+})(ViewFastener);
+/** @internal */
 export const DeckButtonLabelFastener = ViewFastener.define<DeckButton, HtmlView>({
   extends: DeckButtonLabel,
+  key: true,
   type: HtmlView,
   child: false,
-  observe: true,
+  observes: true,
 });

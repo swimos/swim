@@ -16,13 +16,13 @@ import {Mutable, Interpolator} from "@swim/util";
 import type {Item} from "../Item";
 import {ConditionalOperator} from "./ConditionalOperator";
 
-/** @hidden */
+/** @internal */
 export interface ConditionalOperatorInterpolator extends Interpolator<ConditionalOperator> {
-  /** @hidden */
+  /** @internal */
   readonly ifTermInterpolator: Interpolator<Item>;
-  /** @hidden */
+  /** @internal */
   readonly thenTermInterpolator: Interpolator<Item>;
-  /** @hidden */
+  /** @internal */
   readonly elseTermInterpolator: Interpolator<Item>;
 
   readonly 0: ConditionalOperator;
@@ -32,57 +32,59 @@ export interface ConditionalOperatorInterpolator extends Interpolator<Conditiona
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const ConditionalOperatorInterpolator = function (y0: ConditionalOperator, y1: ConditionalOperator): ConditionalOperatorInterpolator {
-  const interpolator = function (u: number): ConditionalOperator {
-    const ifTerm = interpolator.ifTermInterpolator(u);
-    const thenTerm = interpolator.thenTermInterpolator(u);
-    const elseTerm = interpolator.elseTermInterpolator(u);
-    return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
-  } as ConditionalOperatorInterpolator;
-  Object.setPrototypeOf(interpolator, ConditionalOperatorInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).ifTermInterpolator = y0.ifTerm.interpolateTo(y1.ifTerm);
-  (interpolator as Mutable<typeof interpolator>).thenTermInterpolator = y0.thenTerm.interpolateTo(y1.thenTerm);
-  (interpolator as Mutable<typeof interpolator>).elseTermInterpolator = y0.elseTerm.interpolateTo(y1.elseTerm);
-  return interpolator;
-} as {
-  (y0: ConditionalOperator, y1: ConditionalOperator): ConditionalOperatorInterpolator;
+/** @internal */
+export const ConditionalOperatorInterpolator = (function (_super: typeof Interpolator) {
+  const ConditionalOperatorInterpolator = function (y0: ConditionalOperator, y1: ConditionalOperator): ConditionalOperatorInterpolator {
+    const interpolator = function (u: number): ConditionalOperator {
+      const ifTerm = interpolator.ifTermInterpolator(u);
+      const thenTerm = interpolator.thenTermInterpolator(u);
+      const elseTerm = interpolator.elseTermInterpolator(u);
+      return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
+    } as ConditionalOperatorInterpolator;
+    Object.setPrototypeOf(interpolator, ConditionalOperatorInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).ifTermInterpolator = y0.ifTerm.interpolateTo(y1.ifTerm);
+    (interpolator as Mutable<typeof interpolator>).thenTermInterpolator = y0.thenTerm.interpolateTo(y1.thenTerm);
+    (interpolator as Mutable<typeof interpolator>).elseTermInterpolator = y0.elseTerm.interpolateTo(y1.elseTerm);
+    return interpolator;
+  } as {
+    (y0: ConditionalOperator, y1: ConditionalOperator): ConditionalOperatorInterpolator;
 
-  /** @hidden */
-  prototype: ConditionalOperatorInterpolator;
-};
+    /** @internal */
+    prototype: ConditionalOperatorInterpolator;
+  };
 
-ConditionalOperatorInterpolator.prototype = Object.create(Interpolator.prototype);
+  ConditionalOperatorInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(ConditionalOperatorInterpolator.prototype, 0, {
-  get(this: ConditionalOperatorInterpolator): ConditionalOperator {
-    const ifTerm = this.ifTermInterpolator[0];
-    const thenTerm = this.thenTermInterpolator[0];
-    const elseTerm = this.elseTermInterpolator[0];
-    return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(ConditionalOperatorInterpolator.prototype, 0, {
+    get(this: ConditionalOperatorInterpolator): ConditionalOperator {
+      const ifTerm = this.ifTermInterpolator[0];
+      const thenTerm = this.thenTermInterpolator[0];
+      const elseTerm = this.elseTermInterpolator[0];
+      return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(ConditionalOperatorInterpolator.prototype, 1, {
-  get(this: ConditionalOperatorInterpolator): ConditionalOperator {
-    const ifTerm = this.ifTermInterpolator[1];
-    const thenTerm = this.thenTermInterpolator[1];
-    const elseTerm = this.elseTermInterpolator[1];
-    return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(ConditionalOperatorInterpolator.prototype, 1, {
+    get(this: ConditionalOperatorInterpolator): ConditionalOperator {
+      const ifTerm = this.ifTermInterpolator[1];
+      const thenTerm = this.thenTermInterpolator[1];
+      const elseTerm = this.elseTermInterpolator[1];
+      return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
+    },
+    configurable: true,
+  });
 
-ConditionalOperatorInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof ConditionalOperatorInterpolator) {
-    return this.ifTermInterpolator.equals(that.ifTermInterpolator)
-        && this.thenTermInterpolator.equals(that.thenTermInterpolator)
-        && this.elseTermInterpolator.equals(that.elseTermInterpolator);
-  }
-  return false;
-};
+  ConditionalOperatorInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof ConditionalOperatorInterpolator) {
+      return this.ifTermInterpolator.equals(that.ifTermInterpolator)
+          && this.thenTermInterpolator.equals(that.thenTermInterpolator)
+          && this.elseTermInterpolator.equals(that.elseTermInterpolator);
+    }
+    return false;
+  };
+
+  return ConditionalOperatorInterpolator;
+})(Interpolator);

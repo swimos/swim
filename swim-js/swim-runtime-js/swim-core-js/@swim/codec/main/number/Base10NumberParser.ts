@@ -18,15 +18,15 @@ import type {Output} from "../output/Output";
 import {Parser} from "../parser/Parser";
 import {Unicode} from "../unicode/Unicode";
 
-/** @hidden */
+/** @internal */
 export class Base10NumberParser extends Parser<number> {
-  /** @hidden */
+  /** @internal */
   readonly sign: number;
-  /** @hidden */
+  /** @internal */
   readonly value: number;
-  /** @hidden */
+  /** @internal */
   readonly mode: number;
-  /** @hidden */
+  /** @internal */
   readonly step: number;
 
   constructor(sign: number = 1, value: number = 0, mode: number = 2, step: number = 1) {
@@ -125,13 +125,13 @@ export class Base10NumberParser extends Parser<number> {
   }
 }
 
-/** @hidden */
+/** @internal */
 class Base10DecimalParser extends Parser<number> {
-  /** @hidden */
+  /** @internal */
   readonly output: Output<string>;
-  /** @hidden */
+  /** @internal */
   readonly mode: number;
-  /** @hidden */
+  /** @internal */
   readonly step: number;
 
   constructor(output: Output<string>, mode: number = 2, step: number = 1) {

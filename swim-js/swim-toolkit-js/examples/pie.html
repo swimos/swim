@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .mouseEventsEnabled(true)
@@ -25,10 +25,10 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const pieView = canvasView.append(swim.PieView)
+const pieView = canvasView.appendChild(swim.PieView)
     .font("14px sans-serif");
 
-const slice0View = pieView.append(swim.SliceView, "slice0")
+const slice0View = pieView.appendChild(swim.SliceView, "slice0")
     .value(1)
     .label("Label 0")
     .legend("Legend 0")
@@ -40,7 +40,7 @@ const slice0View = pieView.append(swim.SliceView, "slice0")
     });
 slice0View.label.view.textColor.setLook(swim.Look.backgroundColor);
 
-const slice1View = pieView.append(swim.SliceView, "slice1")
+const slice1View = pieView.appendChild(swim.SliceView, "slice1")
     .value(2)
     .label("Label 1")
     .legend("Legend 1")
@@ -60,7 +60,7 @@ setInterval(function () {
             .outerRadius(swim.Length.pct(20 + 10 * Math.random()), timing);
 }, 1000);
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
     </script>
   </body>

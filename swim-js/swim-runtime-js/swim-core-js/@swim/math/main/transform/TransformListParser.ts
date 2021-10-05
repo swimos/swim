@@ -16,7 +16,7 @@ import {Input, Parser, Unicode} from "@swim/codec";
 import {Transform} from "./Transform";
 import {TransformParser} from "./TransformParser";
 
-/** @hidden */
+/** @internal */
 export class TransformListParser extends Parser<Transform> {
   private readonly transform: Transform | undefined;
   private readonly transformParser: Parser<Transform> | undefined;

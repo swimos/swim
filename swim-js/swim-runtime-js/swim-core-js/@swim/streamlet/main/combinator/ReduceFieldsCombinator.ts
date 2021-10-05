@@ -29,7 +29,7 @@ export class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, 
 
   override readonly identity: O;
 
-  /** @hidden */
+  /** @internal */
   readonly accumulator: (result: O, element: V) => O;
 
   override accumulate(result: O, value: V): O {
@@ -37,7 +37,7 @@ export class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, 
     return accumulator(result, value);
   }
 
-  /** @hidden */
+  /** @internal */
   readonly combiner: (result: O, result2: O) => O;
 
   override combine(result: O, value: O): O {

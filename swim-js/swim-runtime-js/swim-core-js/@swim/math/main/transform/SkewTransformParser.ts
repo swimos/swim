@@ -18,7 +18,7 @@ import {DegAngle} from "../angle/DegAngle";
 import {AngleParser} from "../angle/AngleParser";
 import {SkewTransform} from "./SkewTransform";
 
-/** @hidden */
+/** @internal */
 export class SkewTransformParser extends Parser<SkewTransform> {
   private readonly identOutput: Output<string> | undefined;
   private readonly xParser: Parser<Angle> | undefined;
@@ -148,7 +148,7 @@ export class SkewTransformParser extends Parser<SkewTransform> {
     return new SkewTransformParser(identOutput, xParser, yParser, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseRest(input: Input, identOutput?: Output<string>): Parser<SkewTransform> {
     return SkewTransformParser.parse(input, identOutput, void 0, void 0, 2);
   }

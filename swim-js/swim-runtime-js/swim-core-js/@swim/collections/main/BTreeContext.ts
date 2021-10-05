@@ -15,7 +15,7 @@
 import {Values} from "@swim/util";
 import type {BTreePage} from "./BTreePage";
 
-/** @hidden */
+/** @internal */
 export abstract class BTreeContext<K, V> {
   pageSplitSize: number = 32;
 

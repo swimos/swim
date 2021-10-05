@@ -13,16 +13,18 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {HtmlViewInit, HtmlView} from "@swim/dom";
 import type {Graphics} from "../graphics/Graphics";
 import {Icon} from "./Icon";
 import {FilledIcon} from "./FilledIcon";
 import {IconViewInit, IconView} from "./IconView";
-import {IconViewAnimator} from "./IconViewAnimator";
+import {IconGraphicsAnimator} from "./IconGraphicsAnimator";
 import {SvgIconView} from "./SvgIconView";
 
 export interface HtmlIconViewInit extends HtmlViewInit, IconViewInit {
@@ -35,16 +37,11 @@ export class HtmlIconView extends HtmlView implements IconView {
   }
 
   protected initIcon(): void {
-    this.position.setState("relative", View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
     const svgView = this.createSvgView();
     if (svgView !== null) {
-      this.setChildView("svg", svgView);
+      this.setChild("svg", svgView);
     }
-  }
-
-  override initView(init: HtmlIconViewInit): void {
-    super.initView(init);
-    IconView.initView(this, init);
   }
 
   protected createSvgView(): SvgIconView | null {
@@ -52,23 +49,23 @@ export class HtmlIconView extends HtmlView implements IconView {
   }
 
   get svgView(): SvgIconView | null {
-    const svgView = this.getChildView("svg");
+    const svgView = this.getChild("svg");
     return svgView instanceof SvgIconView ? svgView : null;
   }
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly xAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly xAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly yAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly yAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
+  readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
+  readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator<HtmlIconView, Color | null, AnyColor | null>({
+  @ThemeAnimator<HtmlIconView, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     updateFlags: View.NeedsLayout,
@@ -77,40 +74,40 @@ export class HtmlIconView extends HtmlView implements IconView {
         const oldGraphics = this.owner.graphics.value;
         if (oldGraphics instanceof FilledIcon) {
           const newGraphics = oldGraphics.withFillColor(newIconColor);
-          this.owner.graphics.setOwnState(newGraphics);
+          this.owner.graphics.setState(newGraphics, Affinity.Reflexive);
         }
       }
     },
   })
-  readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({extends: IconViewAnimator, type: Object, state: null, updateFlags: View.NeedsLayout})
-  readonly graphics!: ViewAnimator<this, Graphics | null>;
+  @ThemeAnimator({extends: IconGraphicsAnimator, type: Object, state: null, updateFlags: View.NeedsLayout})
+  readonly graphics!: ThemeAnimator<this, Graphics | null>;
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
-    if (childView.key === "svg" && childView instanceof SvgIconView) {
-      this.onInsertSvg(childView);
+  protected override onInsertChild(child: View, target: View | null): void {
+    super.onInsertChild(child, target);
+    if (child.key === "svg" && child instanceof SvgIconView) {
+      this.onInsertSvg(child);
     }
   }
 
   protected onInsertSvg(svgView: SvgIconView): void {
-    svgView.xAlign.setInherit(true);
-    svgView.yAlign.setInherit(true);
-    svgView.iconWidth.setInherit(true);
-    svgView.iconHeight.setInherit(true);
-    svgView.iconColor.setInherit(true);
-    svgView.graphics.setInherit(true);
+    svgView.xAlign.setInherits(true);
+    svgView.yAlign.setInherits(true);
+    svgView.iconWidth.setInherits(true);
+    svgView.iconHeight.setInherits(true);
+    svgView.iconColor.setInherits(true);
+    svgView.graphics.setInherits(true);
     svgView.setStyle("position", "absolute");
   }
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (!this.graphics.isInherited()) {
+    if (!this.graphics.inherited) {
       const oldGraphics = this.graphics.value;
       if (oldGraphics instanceof Icon) {
         const newGraphics = oldGraphics.withTheme(theme, mood);
-        this.graphics.setOwnState(newGraphics, oldGraphics.isThemed() ? timing : false);
+        this.graphics.setState(newGraphics, oldGraphics.isThemed() ? timing : false, Affinity.Reflexive);
       }
     }
   }
@@ -121,7 +118,7 @@ export class HtmlIconView extends HtmlView implements IconView {
   }
 
   protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
-    if ((this.viewFlags & View.NeedsLayout) === 0) {
+    if ((this.flags & View.NeedsLayout) === 0) {
       displayFlags &= ~View.NeedsLayout;
     }
     return displayFlags;
@@ -134,16 +131,21 @@ export class HtmlIconView extends HtmlView implements IconView {
 
   protected layoutIcon(): void {
     const svgView = this.svgView;
-    if (svgView !== null && (svgView.width.takesPrecedence(View.Intrinsic)
-                          || svgView.height.takesPrecedence(View.Intrinsic)
-                          || svgView.viewBox.takesPrecedence(View.Intrinsic))) {
+    if (svgView !== null && (svgView.width.hasAffinity(Affinity.Intrinsic)
+                          || svgView.height.hasAffinity(Affinity.Intrinsic)
+                          || svgView.viewBox.hasAffinity(Affinity.Intrinsic))) {
       let viewWidth: Length | number | null = this.width.value;
       viewWidth = viewWidth instanceof Length ? viewWidth.pxValue() : this.node.offsetWidth;
       let viewHeight: Length | number | null = this.height.value;
       viewHeight = viewHeight instanceof Length ? viewHeight.pxValue() : this.node.offsetHeight;
-      svgView.width.setState(viewWidth, View.Intrinsic);
-      svgView.height.setState(viewHeight, View.Intrinsic);
-      svgView.viewBox.setState("0 0 " + viewWidth + " " + viewHeight, View.Intrinsic);
+      svgView.width.setState(viewWidth, Affinity.Intrinsic);
+      svgView.height.setState(viewHeight, Affinity.Intrinsic);
+      svgView.viewBox.setState("0 0 " + viewWidth + " " + viewHeight, Affinity.Intrinsic);
     }
+  }
+
+  override init(init: HtmlIconViewInit): void {
+    super.init(init);
+    IconView.init(this, init);
   }
 }

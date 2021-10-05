@@ -18,7 +18,7 @@ import type {DateTimeLocale} from "./DateTimeLocale";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {MonthParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class MonthFormat extends DateTimeFormat {
   private readonly locale: DateTimeLocale;
 

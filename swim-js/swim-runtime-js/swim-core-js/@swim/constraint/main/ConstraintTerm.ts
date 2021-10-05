@@ -15,7 +15,7 @@
 import type {ConstraintExpression} from "./ConstraintExpression";
 import type {ConstraintVariable} from "./ConstraintVariable";
 
-/** @hidden */
+/** @internal */
 export interface ConstraintTerm extends ConstraintExpression {
   readonly coefficient: number;
 
@@ -24,15 +24,19 @@ export interface ConstraintTerm extends ConstraintExpression {
   negative(): ConstraintTerm;
 }
 
-/** @hidden */
-export const ConstraintTerm = {} as {
-  is(value: unknown): value is ConstraintTerm;
-};
+/** @internal */
+export const ConstraintTerm = (function () {
+  const ConstraintTerm = {} as {
+    is(value: unknown): value is ConstraintTerm;
+  };
 
-ConstraintTerm.is = function (value: unknown): value is ConstraintTerm {
-  if (typeof value !== void 0 && value !== null) {
-    const term = value as ConstraintTerm;
-    return "coefficient" in term && "variable" in term;
-  }
-  return false;
-};
+  ConstraintTerm.is = function (value: unknown): value is ConstraintTerm {
+    if (typeof value === "object" && value !== null || typeof value === "function") {
+      const term = value as ConstraintTerm;
+      return "coefficient" in term && "variable" in term;
+    }
+    return false;
+  };
+
+  return ConstraintTerm;
+})();

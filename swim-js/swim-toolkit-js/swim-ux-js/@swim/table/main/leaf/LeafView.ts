@@ -12,24 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {AnyFocus, Focus, AnyExpansion, Expansion} from "@swim/style";
-import {Look, Feel} from "@swim/theme";
+import {
+  Look,
+  Feel,
+  ThemeAnimator,
+  FocusThemeAnimator,
+  ExpansionThemeAnimator,
+  ThemeConstraintAnimator,
+} from "@swim/theme";
 import {
   ViewContextType,
   ViewFlags,
-  ViewClass,
   View,
-  ViewProperty,
-  ViewAnimator,
-  ViewAnimatorConstraint,
-  FocusViewAnimator,
-  ExpansionViewAnimator,
   ViewFastener,
   PositionGestureInput,
   PositionGesture,
 } from "@swim/view";
-import {ViewNode, NodeViewConstructor, HtmlView} from "@swim/dom";
+import {ViewNode, HtmlViewClass, HtmlView} from "@swim/dom";
 import {ButtonGlow} from "@swim/button";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {CellView} from "../cell/CellView";
@@ -44,9 +47,9 @@ export class LeafView extends HtmlView {
 
   protected initLeaf(): void {
     this.addClass("leaf");
-    this.position.setState("relative", View.Intrinsic);
-    this.overflowX.setState("hidden", View.Intrinsic);
-    this.overflowY.setState("hidden", View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
+    this.overflowX.setState("hidden", Affinity.Intrinsic);
+    this.overflowY.setState("hidden", Affinity.Intrinsic);
 
     const highlightPhase = this.highlight.getPhase();
     const hoverPhase = this.hover.getPhase();
@@ -56,34 +59,34 @@ export class LeafView extends HtmlView {
                                    [Feel.selected, highlightPhase]], false);
   }
 
-  override readonly viewObservers!: ReadonlyArray<LeafViewObserver>;
+  override readonly observerType?: Class<LeafViewObserver>;
 
-  @ViewProperty({type: TableLayout, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly layout!: ViewProperty<this, TableLayout | null, AnyTableLayout | null>;
+  @Property({type: TableLayout, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
   protected didSetDepth(newDepth: number, oldDepth: number): void {
     // hook
   }
 
-  @ViewProperty<LeafView, number>({
+  @Property<LeafView, number>({
     type: Number,
-    inherit: true,
+    inherits: true,
     state: 0,
     updateFlags: View.NeedsLayout,
     didSetState(newDepth: number, oldDepth: number): void {
       this.owner.didSetDepth(newDepth, oldDepth);
     },
   })
-  readonly depth!: ViewProperty<this, number>;
+  readonly depth!: Property<this, number>;
 
-  @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly rowSpacing!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
+  @ThemeConstraintAnimator({type: Length, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly rowSpacing!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly rowHeight!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
+  @ThemeConstraintAnimator({type: Length, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly rowHeight!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Expansion, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly stretch!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ThemeAnimator({type: Expansion, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly stretch!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
 
   protected didSetHover(newHover: Focus, oldHover: Focus): void {
     const highlightPhase = this.highlight.getPhase();
@@ -93,31 +96,31 @@ export class LeafView extends HtmlView {
                                    [Feel.hovering, hoverPhase * (1 - highlightPhase)],
                                    [Feel.selected, highlightPhase]], false);
     if (backgroundPhase !== 0) {
-      this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
+      this.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
     } else {
-      this.backgroundColor.setLook(null, View.Intrinsic);
-      this.backgroundColor.setState(null, View.Intrinsic);
+      this.backgroundColor.setLook(null, Affinity.Intrinsic);
+      this.backgroundColor.setState(null, Affinity.Intrinsic);
     }
   }
 
-  @ViewProperty({type: Boolean, inherit: true, state: false})
-  readonly hovers!: ViewProperty<this, boolean>;
+  @Property({type: Boolean, inherits: true, state: false})
+  readonly hovers!: Property<this, boolean>;
 
-  @ViewAnimator<LeafView, Focus, AnyFocus>({
+  @ThemeAnimator<LeafView, Focus, AnyFocus>({
     type: Focus,
     state: Focus.unfocused(),
     didSetValue(newHover: Focus, oldHover: Focus): void {
       this.owner.didSetHover(newHover, oldHover);
     },
   })
-  readonly hover!: FocusViewAnimator<this>;
+  readonly hover!: FocusThemeAnimator<this>;
 
   protected willHighlight(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillHighlight !== void 0) {
-        viewObserver.viewWillHighlight(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillHighlight !== void 0) {
+        observer.viewWillHighlight(this);
       }
     }
   }
@@ -127,21 +130,21 @@ export class LeafView extends HtmlView {
   }
 
   protected didHighlight(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidHighlight !== void 0) {
-        viewObserver.viewDidHighlight(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidHighlight !== void 0) {
+        observer.viewDidHighlight(this);
       }
     }
   }
 
   protected willUnhighlight(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillUnhighlight !== void 0) {
-        viewObserver.viewWillUnhighlight(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillUnhighlight !== void 0) {
+        observer.viewWillUnhighlight(this);
       }
     }
   }
@@ -151,11 +154,11 @@ export class LeafView extends HtmlView {
   }
 
   protected didUnhighlight(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidUnhighlight !== void 0) {
-        viewObserver.viewDidUnhighlight(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidUnhighlight !== void 0) {
+        observer.viewDidUnhighlight(this);
       }
     }
   }
@@ -168,14 +171,14 @@ export class LeafView extends HtmlView {
                                    [Feel.hovering, hoverPhase * (1 - highlightPhase)],
                                    [Feel.selected, highlightPhase]], false);
     if (backgroundPhase !== 0) {
-      this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
+      this.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
     } else {
-      this.backgroundColor.setLook(null, View.Intrinsic);
-      this.backgroundColor.setState(null, View.Intrinsic);
+      this.backgroundColor.setLook(null, Affinity.Intrinsic);
+      this.backgroundColor.setState(null, Affinity.Intrinsic);
     }
   }
 
-  @ViewAnimator<LeafView, Focus, AnyFocus>({
+  @ThemeAnimator<LeafView, Focus, AnyFocus>({
     type: Focus,
     state: Focus.unfocused(),
     willFocus(): void {
@@ -196,29 +199,29 @@ export class LeafView extends HtmlView {
       this.owner.didSetHighlight(newHighlight, oldHighlight);
     },
   })
-  readonly highlight!: FocusViewAnimator<this>;
+  readonly highlight!: FocusThemeAnimator<this>;
 
   getCell(key: string): CellView | null;
-  getCell<V extends CellView>(key: string, cellViewClass: ViewClass<V>): V | null;
-  getCell(key: string, cellViewClass?: ViewClass<CellView>): CellView | null {
+  getCell<V extends CellView>(key: string, cellViewClass: Class<V>): V | null;
+  getCell(key: string, cellViewClass?: Class<CellView>): CellView | null {
     if (cellViewClass === void 0) {
       cellViewClass = CellView;
     }
-    const cellView = this.getChildView(key);
+    const cellView = this.getChild(key);
     return cellView instanceof cellViewClass ? cellView : null;
   }
 
-  getOrCreateCell<V extends CellView>(key: string, cellViewConstructor: NodeViewConstructor<V>): V {
-    let cellView = this.getChildView(key) as V | null;
-    if (!(cellView instanceof cellViewConstructor)) {
-      cellView = HtmlView.fromConstructor(cellViewConstructor);
-      this.setChildView(key, cellView);
+  getOrCreateCell<V extends CellView>(key: string, cellViewClass: HtmlViewClass<V>): V {
+    let cellView = this.getChild(key) as V | null;
+    if (!(cellView instanceof cellViewClass)) {
+      cellView = cellViewClass.create();
+      this.setChild(key, cellView);
     }
     return cellView;
   }
 
   setCell(key: string, cellView: CellView): void {
-    this.setChildView(key, cellView);
+    this.setChild(key, cellView);
   }
 
   insertCell(cellView: CellView, targetView: View | null = null): void {
@@ -235,7 +238,7 @@ export class LeafView extends HtmlView {
     const cellFastener = this.createCellFastener(cellView);
     cellFasteners.splice(targetIndex, 0, cellFastener);
     cellFastener.setView(cellView, targetView);
-    if (this.isMounted()) {
+    if (this.mounted) {
       cellFastener.mount();
     }
   }
@@ -246,7 +249,7 @@ export class LeafView extends HtmlView {
       const cellFastener = cellFasteners[i]!;
       if (cellFastener.view === cellView) {
         cellFastener.setView(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           cellFastener.unmount();
         }
         cellFasteners.splice(i, 1);
@@ -256,12 +259,12 @@ export class LeafView extends HtmlView {
   }
 
   protected initCell(cellView: CellView, cellFastener: ViewFastener<this, CellView>): void {
-    cellView.display.setState("none", View.Intrinsic);
-    cellView.position.setState("absolute", View.Intrinsic);
-    cellView.left.setState(0, View.Intrinsic);
-    cellView.top.setState(0, View.Intrinsic);
-    cellView.width.setState(0, View.Intrinsic);
-    cellView.height.setState(this.height.state, View.Intrinsic);
+    cellView.display.setState("none", Affinity.Intrinsic);
+    cellView.position.setState("absolute", Affinity.Intrinsic);
+    cellView.left.setState(0, Affinity.Intrinsic);
+    cellView.top.setState(0, Affinity.Intrinsic);
+    cellView.width.setState(0, Affinity.Intrinsic);
+    cellView.height.setState(this.height.state, Affinity.Intrinsic);
   }
 
   protected attachCell(cellView: CellView, cellFastener: ViewFastener<this, CellView>): void {
@@ -274,11 +277,11 @@ export class LeafView extends HtmlView {
 
   protected willSetCell(newCellView: CellView | null, oldCellView: CellView | null,
                         targetView: View | null, cellFastener: ViewFastener<this, CellView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetCell !== void 0) {
-        viewObserver.viewWillSetCell(newCellView, oldCellView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetCell !== void 0) {
+        observer.viewWillSetCell(newCellView, oldCellView, targetView, this);
       }
     }
   }
@@ -296,16 +299,16 @@ export class LeafView extends HtmlView {
 
   protected didSetCell(newCellView: CellView | null, oldCellView: CellView | null,
                        targetView: View | null, cellFastener: ViewFastener<this, CellView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetCell !== void 0) {
-        viewObserver.viewDidSetCell(newCellView, oldCellView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetCell !== void 0) {
+        observer.viewDidSetCell(newCellView, oldCellView, targetView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static CellFastener = ViewFastener.define<LeafView, CellView>({
     type: CellView,
     child: false,
@@ -321,13 +324,13 @@ export class LeafView extends HtmlView {
   });
 
   protected createCellFastener(cellView: CellView): ViewFastener<this, CellView> {
-    return new LeafView.CellFastener(this, cellView.key, "cell");
+    return LeafView.CellFastener.create(this, cellView.key ?? "cell");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly cellFasteners: ReadonlyArray<ViewFastener<this, CellView>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountCellFasteners(): void {
     const cellFasteners = this.cellFasteners;
     for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
@@ -336,7 +339,7 @@ export class LeafView extends HtmlView {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountCellFasteners(): void {
     const cellFasteners = this.cellFasteners;
     for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
@@ -349,16 +352,16 @@ export class LeafView extends HtmlView {
     return view instanceof CellView ? view : null;
   }
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     const cellView = this.detectCell(childView);
     if (cellView !== null) {
       this.insertCell(cellView, targetView);
     }
   }
 
-  protected override onRemoveChildView(childView: View): void {
-    super.onRemoveChildView(childView);
+  protected override onRemoveChild(childView: View): void {
+    super.onRemoveChild(childView);
     const cellView = this.detectCell(childView);
     if (cellView !== null) {
       this.removeCell(cellView);
@@ -373,23 +376,23 @@ export class LeafView extends HtmlView {
   protected layoutLeaf(): void {
     const rowHeight = this.rowHeight.value;
     if (rowHeight !== null) {
-      this.height.setState(rowHeight, View.Intrinsic);
+      this.height.setState(rowHeight, Affinity.Intrinsic);
     }
   }
 
-  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
-      this.layoutChildViews(displayFlags, viewContext, displayChildView);
+      this.layoutChildViews(displayFlags, viewContext, displayChild);
     } else {
-      super.displayChildViews(displayFlags, viewContext, displayChildView);
+      super.displayChildren(displayFlags, viewContext, displayChild);
     }
   }
 
   protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                viewContext: ViewContextType<this>) => void): void {
+                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                            viewContext: ViewContextType<this>) => void): void {
     const layout = this.layout.state;
     const height = this.height.state;
     const stretch = this.stretch.getPhaseOr(1);
@@ -400,45 +403,45 @@ export class LeafView extends HtmlView {
         const key = childView.key;
         const col = layout !== null && key !== void 0 ? layout.getCol(key) : null;
         if (col !== null) {
-          childView.display.setState(!col.hidden ? "flex" : "none", View.Intrinsic);
-          childView.left.setState(col.left, View.Intrinsic);
-          childView.width.setState(col.width, View.Intrinsic);
-          childView.height.setState(height, View.Intrinsic);
+          childView.display.setState(!col.hidden ? "flex" : "none", Affinity.Intrinsic);
+          childView.left.setState(col.left, Affinity.Intrinsic);
+          childView.width.setState(col.width, Affinity.Intrinsic);
+          childView.height.setState(height, Affinity.Intrinsic);
           const textColor = col.textColor;
           if (textColor instanceof Look) {
-            childView.color.setLook(textColor, View.Intrinsic);
+            childView.color.setLook(textColor, Affinity.Intrinsic);
           } else {
-            childView.color.setState(textColor, View.Intrinsic);
+            childView.color.setState(textColor, Affinity.Intrinsic);
           }
           if (!col.persistent) {
-            childView.opacity.setState(stretch, View.Intrinsic);
+            childView.opacity.setState(stretch, Affinity.Intrinsic);
           }
         } else {
-          childView.display.setState("none", View.Intrinsic);
-          childView.left.setState(null, View.Intrinsic);
-          childView.width.setState(null, View.Intrinsic);
-          childView.height.setState(null, View.Intrinsic);
+          childView.display.setState("none", Affinity.Intrinsic);
+          childView.left.setState(null, Affinity.Intrinsic);
+          childView.width.setState(null, Affinity.Intrinsic);
+          childView.height.setState(null, Affinity.Intrinsic);
         }
       }
-      displayChildView.call(this, childView, displayFlags, viewContext);
+      displayChild.call(this, childView, displayFlags, viewContext);
     }
-    super.displayChildViews(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, viewContext, layoutChildView);
   }
 
-  /** @hidden */
-  protected override mountViewFasteners(): void {
-    super.mountViewFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountCellFasteners();
   }
 
-  /** @hidden */
-  protected override unmountViewFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountCellFasteners();
-    super.unmountViewFasteners();
+    super.unmountFasteners();
   }
 
-  @ViewProperty({type: Boolean, inherit: true, state: true})
-  readonly glows!: ViewProperty<this, boolean>;
+  @Property({type: Boolean, inherits: true, state: true})
+  readonly glows!: Property<this, boolean>;
 
   protected glow(input: PositionGestureInput): void {
     if (input.detail instanceof ButtonGlow) {
@@ -447,7 +450,7 @@ export class LeafView extends HtmlView {
     }
     if (input.detail === void 0) {
       const delay = input.inputType === "mouse" ? 0 : 100;
-      input.detail = this.prepend(ButtonGlow);
+      input.detail = this.prependChild(ButtonGlow);
       (input.detail as ButtonGlow).glow(input.x, input.y, void 0, delay);
     }
   }
@@ -459,11 +462,11 @@ export class LeafView extends HtmlView {
   }
 
   protected didEnter(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidEnter !== void 0) {
-        viewObserver.viewDidEnter(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidEnter !== void 0) {
+        observer.viewDidEnter(this);
       }
     }
   }
@@ -475,11 +478,11 @@ export class LeafView extends HtmlView {
   }
 
   protected didLeave(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidLeave !== void 0) {
-        viewObserver.viewDidLeave(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidLeave !== void 0) {
+        observer.viewDidLeave(this);
       }
     }
   }
@@ -489,11 +492,11 @@ export class LeafView extends HtmlView {
   }
 
   protected didPress(input: PositionGestureInput, event: Event | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidPress !== void 0) {
-        viewObserver.viewDidPress(input, event, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidPress !== void 0) {
+        observer.viewDidPress(input, event, this);
       }
     }
   }
@@ -503,16 +506,16 @@ export class LeafView extends HtmlView {
   }
 
   protected didLongPress(input: PositionGestureInput): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidLongPress !== void 0) {
-        viewObserver.viewDidLongPress(input, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidLongPress !== void 0) {
+        observer.viewDidLongPress(input, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static Gesture = PositionGesture.define<LeafView, LeafView>({
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
       if (this.owner.glows.state) {
@@ -601,6 +604,7 @@ export class LeafView extends HtmlView {
 
   @PositionGesture<LeafView, LeafView>({
     extends: LeafView.Gesture,
+    eager: true,
     self: true,
   })
   readonly gesture!: PositionGesture<this, LeafView>;

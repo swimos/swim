@@ -20,19 +20,19 @@ import {Unicode} from "./Unicode";
 import {UtfErrorMode} from "./UtfErrorMode";
 import {Base16} from "../number/Base16";
 
-/** @hidden */
+/** @internal */
 export class Utf8DecodedOutput<T> extends Output<T> {
-  /** @hidden */
+  /** @internal */
   readonly output: Output<T>;
-  /** @hidden */
+  /** @internal */
   readonly errorMode: UtfErrorMode;
-  /** @hidden */
+  /** @internal */
   c1: number;
-  /** @hidden */
+  /** @internal */
   c2: number;
-  /** @hidden */
+  /** @internal */
   c3: number;
-  /** @hidden */
+  /** @internal */
   have: number;
 
   constructor(output: Output<T>, errorMode: UtfErrorMode,

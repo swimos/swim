@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
@@ -54,7 +54,7 @@ class ExampleChartController extends swim.ChartController {
   }
 }
 
-const plot1Model = new swim.CompoundModel();
+const plot1Model = new swim.GenericModel();
 const plot1Trait = new swim.LinePlotTrait()
   .stroke(swim.Look.accentColor)
   .strokeWidth(4);
@@ -68,15 +68,15 @@ let n = cycles * samplesPerCycle
 while (i <= n) {
   const x = i * 2 * Math.PI / samplesPerCycle;
   const y = Math.sin(x) * x;
-  const dataPointModel = new swim.CompoundModel();
+  const dataPointModel = new swim.GenericModel();
   const dataPointTrait = new swim.DataPointTrait(x, y);
   dataPointModel.setTrait("dataPoint", dataPointTrait);
-  plot1Model.appendChildModel(dataPointModel);
+  plot1Model.appendChild(dataPointModel);
   i += 1;
 }
 plot1Model.setTrait("dataSet", dataSet1Trait);
 
-const chartModel = new swim.CompoundModel();
+const chartModel = new swim.GenericModel();
 chartModel.mount();
 const chartTrait = new swim.ChartTrait();
 chartModel.setTrait("chart", chartTrait);
@@ -90,14 +90,14 @@ const bottomAxisTrait = new swim.BottomAxisTrait();
 chartModel.setTrait("bottomAxis", bottomAxisTrait);
 const leftAxisTrait = new swim.LeftAxisTrait();
 chartModel.setTrait("leftAxis", leftAxisTrait);
-chartModel.appendChildModel(plot1Model);
+chartModel.appendChild(plot1Model);
 
 const chartController = new ExampleChartController();
 chartController.mount();
 chartController.chart.injectView(canvasView);
 chartController.chart.setTrait(chartTrait);
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
     </script>
   </body>

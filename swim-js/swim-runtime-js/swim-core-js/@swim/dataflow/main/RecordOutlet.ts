@@ -33,14 +33,18 @@ export interface RecordOutlet extends Outlet<Record>, MapOutlet<Value, Value, Re
   watch(func: WatchFieldsFunction<Value, Value>): this;
 }
 
-export const RecordOutlet = {} as {
-  is(object: unknown): object is RecordOutlet;
-};
+export const RecordOutlet = (function () {
+  const RecordOutlet = {} as {
+    is(object: unknown): object is RecordOutlet;
+  };
 
-RecordOutlet.is = function (object: unknown): object is RecordOutlet {
-  if (typeof object === "object" && object !== null) {
-    const outlet = object as RecordOutlet;
-    return MapOutlet.is(outlet) && StreamletScope.is(outlet);
-  }
-  return false;
-};
+  RecordOutlet.is = function (object: unknown): object is RecordOutlet {
+    if (typeof object === "object" && object !== null) {
+      const outlet = object as RecordOutlet;
+      return MapOutlet.is(outlet) && StreamletScope.is(outlet);
+    }
+    return false;
+  };
+
+  return RecordOutlet;
+})();

@@ -15,7 +15,7 @@
 import {AnyDateTime, DateTime} from "./DateTime";
 import {Item, Value, Text, Form} from "@swim/structure";
 
-/** @hidden */
+/** @internal */
 export class DateTimeForm extends Form<DateTime, AnyDateTime> {
   constructor(unit: DateTime | undefined) {
     super();

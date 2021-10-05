@@ -12,20 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
-import {Look, Feel} from "@swim/theme";
+import {
+  Look,
+  Feel,
+  ThemeAnimator,
+  ExpansionThemeAnimator,
+  ThemeConstraintAnimator,
+} from "@swim/theme";
 import {
   ViewContextType,
   ViewContext,
   ViewFlags,
   View,
   ViewEdgeInsets,
-  ViewProperty,
-  ViewAnimator,
-  ViewAnimatorConstraint,
-  ExpansionViewAnimator,
   ViewFastener,
   PositionGestureInput,
 } from "@swim/view";
@@ -48,67 +51,67 @@ export class TableView extends HtmlView {
 
   protected initTable(): void {
     this.addClass("table");
-    this.position.setState("relative", View.Intrinsic);
-    this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
+    this.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
   }
 
-  override readonly viewObservers!: ReadonlyArray<TableViewObserver>;
+  override readonly observerType?: Class<TableViewObserver>;
 
-  override readonly viewContext!: TableViewContext;
+  override readonly contextType?: Class<TableViewContext>;
 
-  @ViewProperty({type: TableLayout, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly layout!: ViewProperty<this, TableLayout | null, AnyTableLayout | null>;
+  @Property({type: TableLayout, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
-  @ViewProperty({type: Object, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
+  @Property({type: Object, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
 
   protected didSetDepth(newDepth: number, oldDepth: number): void {
     this.modifyTheme(Feel.default, [[Feel.nested, newDepth !== 0 ? 1 : void 0]], false);
   }
 
-  @ViewProperty<TableView, number>({
+  @Property<TableView, number>({
     type: Number,
-    inherit: true,
+    inherits: true,
     state: 0,
     updateFlags: View.NeedsLayout,
     didSetState(newDepth: number, oldDepth: number): void {
       this.owner.didSetDepth(newDepth, oldDepth);
     },
   })
-  readonly depth!: ViewProperty<this, number>;
+  readonly depth!: Property<this, number>;
 
-  @ViewAnimatorConstraint({type: Length, inherit: true, state: Length.zero(), updateFlags: View.NeedsLayout})
-  readonly rowSpacing!: ViewAnimatorConstraint<this, Length, AnyLength>;
+  @ThemeConstraintAnimator({type: Length, inherits: true, state: Length.zero(), updateFlags: View.NeedsLayout})
+  readonly rowSpacing!: ThemeConstraintAnimator<this, Length, AnyLength>;
 
-  @ViewAnimatorConstraint({type: Length, inherit: true, state: Length.px(24), updateFlags: View.NeedsLayout})
-  readonly rowHeight!: ViewAnimatorConstraint<this, Length, AnyLength>;
+  @ThemeConstraintAnimator({type: Length, inherits: true, state: Length.px(24), updateFlags: View.NeedsLayout})
+  readonly rowHeight!: ThemeConstraintAnimator<this, Length, AnyLength>;
 
-  @ViewProperty({type: Boolean, inherit: true, state: false})
-  readonly hovers!: ViewProperty<this, boolean>;
+  @Property({type: Boolean, inherits: true, state: false})
+  readonly hovers!: Property<this, boolean>;
 
-  @ViewProperty({type: Boolean, inherit: true, state: true})
-  readonly glows!: ViewProperty<this, boolean>;
+  @Property({type: Boolean, inherits: true, state: true})
+  readonly glows!: Property<this, boolean>;
 
-  @ViewAnimator({type: Expansion, inherit: true, state: null})
-  readonly disclosure!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ThemeAnimator({type: Expansion, inherits: true, state: null})
+  readonly disclosure!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  @ViewAnimator({type: Expansion, inherit: true, state: null})
-  readonly disclosing!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ThemeAnimator({type: Expansion, inherits: true, state: null})
+  readonly disclosing!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  @ViewAnimator({type: Expansion, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly stretch!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ThemeAnimator({type: Expansion, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly stretch!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
 
   protected createHeader(): HeaderView | null {
     return HeaderView.create();
   }
 
   protected initHeader(headerView: HeaderView): void {
-    headerView.display.setState("none", View.Intrinsic);
-    headerView.position.setState("absolute", View.Intrinsic);
-    headerView.left.setState(0, View.Intrinsic);
-    headerView.top.setState(null, View.Intrinsic);
+    headerView.display.setState("none", Affinity.Intrinsic);
+    headerView.position.setState("absolute", Affinity.Intrinsic);
+    headerView.left.setState(0, Affinity.Intrinsic);
+    headerView.top.setState(null, Affinity.Intrinsic);
     const layout = this.layout.state;
-    headerView.width.setState(layout !== null ? layout.width : null, View.Intrinsic);
+    headerView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
     headerView.setCulled(true);
   }
 
@@ -121,11 +124,11 @@ export class TableView extends HtmlView {
   }
 
   protected willSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetHeader !== void 0) {
-        viewObserver.viewWillSetHeader(newHeaderView, oldHeaderView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetHeader !== void 0) {
+        observer.viewWillSetHeader(newHeaderView, oldHeaderView, this);
       }
     }
   }
@@ -141,11 +144,11 @@ export class TableView extends HtmlView {
   }
 
   protected didSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetHeader !== void 0) {
-        viewObserver.viewDidSetHeader(newHeaderView, oldHeaderView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetHeader !== void 0) {
+        observer.viewDidSetHeader(newHeaderView, oldHeaderView, this);
       }
     }
   }
@@ -166,8 +169,8 @@ export class TableView extends HtmlView {
     createView(): HeaderView | null {
       return this.owner.createHeader();
     },
-    insertView(parentView: View, childView: HeaderView, targetView: View | null, key: string | undefined): void {
-      parentView.prependChildView(childView, key);
+    insertView(parent: View, childView: HeaderView, targetView: View | null, key: string | undefined): void {
+      parent.prependChild(childView, key);
     }
   })
   readonly header!: ViewFastener<this, HeaderView>;
@@ -186,7 +189,7 @@ export class TableView extends HtmlView {
     const rowFastener = this.createRowFastener(rowView);
     rowFasteners.splice(targetIndex, 0, rowFastener);
     rowFastener.setView(rowView, targetView);
-    if (this.isMounted()) {
+    if (this.mounted) {
       rowFastener.mount();
     }
   }
@@ -197,7 +200,7 @@ export class TableView extends HtmlView {
       const rowFastener = rowFasteners[i]!;
       if (rowFastener.view === rowView) {
         rowFastener.setView(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           rowFastener.unmount();
         }
         rowFasteners.splice(i, 1);
@@ -207,12 +210,12 @@ export class TableView extends HtmlView {
   }
 
   protected initRow(rowView: RowView, rowFastener: ViewFastener<this, RowView>): void {
-    rowView.display.setState("none", View.Intrinsic);
-    rowView.position.setState("absolute", View.Intrinsic);
-    rowView.left.setState(0, View.Intrinsic);
-    rowView.top.setState(null, View.Intrinsic);
+    rowView.display.setState("none", Affinity.Intrinsic);
+    rowView.position.setState("absolute", Affinity.Intrinsic);
+    rowView.left.setState(0, Affinity.Intrinsic);
+    rowView.top.setState(null, Affinity.Intrinsic);
     const layout = this.layout.state;
-    rowView.width.setState(layout !== null ? layout.width : null, View.Intrinsic);
+    rowView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
     rowView.setCulled(true);
   }
 
@@ -226,11 +229,11 @@ export class TableView extends HtmlView {
 
   protected willSetRow(newRowView: RowView | null, oldRowView: RowView | null,
                        targetView: View | null, rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetRow !== void 0) {
-        viewObserver.viewWillSetRow(newRowView, oldRowView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetRow !== void 0) {
+        observer.viewWillSetRow(newRowView, oldRowView, targetView, this);
       }
     }
   }
@@ -248,22 +251,22 @@ export class TableView extends HtmlView {
 
   protected didSetRow(newRowView: RowView | null, oldRowView: RowView | null,
                       targetView: View | null, rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetRow !== void 0) {
-        viewObserver.viewDidSetRow(newRowView, oldRowView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetRow !== void 0) {
+        observer.viewDidSetRow(newRowView, oldRowView, targetView, this);
       }
     }
   }
 
   protected willSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null,
                         rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetLeaf !== void 0) {
-        viewObserver.viewWillSetLeaf(newLeafView, oldLeafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetLeaf !== void 0) {
+        observer.viewWillSetLeaf(newLeafView, oldLeafView, rowFastener);
       }
     }
   }
@@ -275,51 +278,51 @@ export class TableView extends HtmlView {
 
   protected didSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null,
                        rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetLeaf !== void 0) {
-        viewObserver.viewDidSetLeaf(newLeafView, oldLeafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetLeaf !== void 0) {
+        observer.viewDidSetLeaf(newLeafView, oldLeafView, rowFastener);
       }
     }
   }
 
   protected willHighlightLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillHighlightLeaf !== void 0) {
-        viewObserver.viewWillHighlightLeaf(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillHighlightLeaf !== void 0) {
+        observer.viewWillHighlightLeaf(leafView, rowFastener);
       }
     }
   }
 
   protected didHighlightLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidHighlightLeaf !== void 0) {
-        viewObserver.viewDidHighlightLeaf(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidHighlightLeaf !== void 0) {
+        observer.viewDidHighlightLeaf(leafView, rowFastener);
       }
     }
   }
 
   protected willUnhighlightLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillUnhighlightLeaf !== void 0) {
-        viewObserver.viewWillUnhighlightLeaf(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillUnhighlightLeaf !== void 0) {
+        observer.viewWillUnhighlightLeaf(leafView, rowFastener);
       }
     }
   }
 
   protected didUnhighlightLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidUnhighlightLeaf !== void 0) {
-        viewObserver.viewDidUnhighlightLeaf(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidUnhighlightLeaf !== void 0) {
+        observer.viewDidUnhighlightLeaf(leafView, rowFastener);
       }
     }
   }
@@ -329,11 +332,11 @@ export class TableView extends HtmlView {
   }
 
   protected didEnterLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidEnterLeaf !== void 0) {
-        viewObserver.viewDidEnterLeaf(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidEnterLeaf !== void 0) {
+        observer.viewDidEnterLeaf(leafView, rowFastener);
       }
     }
   }
@@ -343,11 +346,11 @@ export class TableView extends HtmlView {
   }
 
   protected didLeaveLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidLeaveLeaf !== void 0) {
-        viewObserver.viewDidLeaveLeaf(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidLeaveLeaf !== void 0) {
+        observer.viewDidLeaveLeaf(leafView, rowFastener);
       }
     }
   }
@@ -359,11 +362,11 @@ export class TableView extends HtmlView {
 
   protected didPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView,
                          rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidPressLeaf !== void 0) {
-        viewObserver.viewDidPressLeaf(input, event, leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidPressLeaf !== void 0) {
+        observer.viewDidPressLeaf(input, event, leafView, rowFastener);
       }
     }
   }
@@ -375,22 +378,22 @@ export class TableView extends HtmlView {
 
   protected didLongPressLeaf(input: PositionGestureInput, leafView: LeafView,
                              rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidLongPressLeaf !== void 0) {
-        viewObserver.viewDidLongPressLeaf(input, leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidLongPressLeaf !== void 0) {
+        observer.viewDidLongPressLeaf(input, leafView, rowFastener);
       }
     }
   }
 
   protected willSetTree(newTreeView: TableView | null, oldTreeView: TableView | null,
                         rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetTree !== void 0) {
-        viewObserver.viewWillSetTree(newTreeView, oldTreeView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetTree !== void 0) {
+        observer.viewWillSetTree(newTreeView, oldTreeView, rowFastener);
       }
     }
   }
@@ -402,21 +405,21 @@ export class TableView extends HtmlView {
 
   protected didSetTree(newTreeView: TableView | null, oldTreeView: TableView | null,
                        rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetTree !== void 0) {
-        viewObserver.viewDidSetTree(newTreeView, oldTreeView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetTree !== void 0) {
+        observer.viewDidSetTree(newTreeView, oldTreeView, rowFastener);
       }
     }
   }
 
   protected willExpandRow(rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillExpandRow !== void 0) {
-        viewObserver.viewWillExpandRow(rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillExpandRow !== void 0) {
+        observer.viewWillExpandRow(rowFastener);
       }
     }
   }
@@ -426,21 +429,21 @@ export class TableView extends HtmlView {
   }
 
   protected didExpandRow(rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidExpandRow !== void 0) {
-        viewObserver.viewDidExpandRow(rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidExpandRow !== void 0) {
+        observer.viewDidExpandRow(rowFastener);
       }
     }
   }
 
   protected willCollapseRow(rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillCollapseRow !== void 0) {
-        viewObserver.viewWillCollapseRow(rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillCollapseRow !== void 0) {
+        observer.viewWillCollapseRow(rowFastener);
       }
     }
   }
@@ -450,20 +453,20 @@ export class TableView extends HtmlView {
   }
 
   protected didCollapseRow(rowFastener: ViewFastener<this, RowView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidCollapseRow !== void 0) {
-        viewObserver.viewDidCollapseRow(rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidCollapseRow !== void 0) {
+        observer.viewDidCollapseRow(rowFastener);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static RowFastener = ViewFastener.define<TableView, RowView>({
     type: RowView,
     child: false,
-    observe: true,
+    observes: true,
     willSetView(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null): void {
       this.owner.willSetRow(newRowView, oldRowView, targetView, this);
     },
@@ -519,13 +522,13 @@ export class TableView extends HtmlView {
   });
 
   protected createRowFastener(rowView: RowView): ViewFastener<this, RowView> {
-    return new TableView.RowFastener(this, rowView.key, "row");
+    return TableView.RowFastener.create(this, rowView.key ?? "row");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly rowFasteners: ReadonlyArray<ViewFastener<this, RowView>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountRowFasteners(): void {
     const rowFasteners = this.rowFasteners;
     for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
@@ -534,7 +537,7 @@ export class TableView extends HtmlView {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountRowFasteners(): void {
     const rowFasteners = this.rowFasteners;
     for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
@@ -547,26 +550,26 @@ export class TableView extends HtmlView {
     return view instanceof RowView ? view : null;
   }
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     const rowView = this.detectRow(childView);
     if (rowView !== null) {
       this.insertRow(rowView, targetView);
     }
   }
 
-  protected override onRemoveChildView(childView: View): void {
-    super.onRemoveChildView(childView);
+  protected override onRemoveChild(childView: View): void {
+    super.onRemoveChild(childView);
     const rowView = this.detectRow(childView);
     if (rowView !== null) {
       this.removeRow(rowView);
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly visibleViews: ReadonlyArray<View>;
 
-  /** @hidden */
+  /** @internal */
   readonly visibleFrame: R2Box;
 
   protected detectVisibleFrame(viewContext: ViewContext): R2Box {
@@ -609,7 +612,7 @@ export class TableView extends HtmlView {
   }
 
   protected resizeTable(): void {
-    const oldLayout = !this.layout.isInherited() ? this.layout.state : null;
+    const oldLayout = !this.layout.inherited ? this.layout.state : null;
     if (oldLayout !== null) {
       const superLayout = this.layout.superState;
       let width: Length | number | null = null;
@@ -635,37 +638,37 @@ export class TableView extends HtmlView {
   }
 
   protected processVisibleViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                   viewContext: ViewContextType<this>) => void): void {
+                                processChild: (this: this, childView: View, processFlags: ViewFlags,
+                                               viewContext: ViewContextType<this>) => void): void {
     const visibleViews = this.visibleViews;
     let i = 0;
     while (i < visibleViews.length) {
       const childView = visibleViews[i]!;
-      processChildView.call(this, childView, processFlags, viewContext);
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
+      processChild.call(this, childView, processFlags, viewContext);
+      if ((childView.flags & View.RemovingFlag) !== 0) {
+        childView.setFlags(childView.flags & ~View.RemovingFlag);
+        this.removeChild(childView);
         continue;
       }
       i += 1;
     }
   }
 
-  protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
-    if (!this.isCulled()) {
+  protected override processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     processChild: (this: this, childView: View, processFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
+    if (!this.culled) {
       if ((processFlags & View.NeedsScroll) !== 0) {
-        this.scrollChildViews(processFlags, viewContext, processChildView);
+        this.scrollChildViews(processFlags, viewContext, processChild);
       } else {
-        this.processVisibleViews(processFlags, viewContext, processChildView);
+        this.processVisibleViews(processFlags, viewContext, processChild);
       }
     }
   }
 
   protected scrollChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                viewContext: ViewContextType<this>) => void): void {
+                             processChild: (this: this, childView: View, processFlags: ViewFlags,
+                                            viewContext: ViewContextType<this>) => void): void {
     const visibleViews = this.visibleViews as View[];
     visibleViews.length = 0;
 
@@ -686,7 +689,7 @@ export class TableView extends HtmlView {
           const yMin1 = top.pxValue();
           const yMax1 = yMin1 + height.pxValue();
           isVisible = yMin0 <= yMax1 && yMin1 <= yMax0;
-          childView.display.setState(isVisible ? "flex" : "none", View.Intrinsic);
+          childView.display.setState(isVisible ? "flex" : "none", Affinity.Intrinsic);
           childView.setCulled(!isVisible);
         } else {
           isVisible = true;
@@ -696,42 +699,42 @@ export class TableView extends HtmlView {
       }
       if (isVisible) {
         visibleViews.push(childView);
-        processChildView.call(this, childView, processFlags, viewContext);
+        processChild.call(this, childView, processFlags, viewContext);
       }
     }
-    super.processChildViews(processFlags, viewContext, scrollChildView);
+    super.processChildren(processFlags, viewContext, scrollChildView);
   }
 
   protected displayVisibleViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                   viewContext: ViewContextType<this>) => void): void {
+                                displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                               viewContext: ViewContextType<this>) => void): void {
     const visibleViews = this.visibleViews;
     let i = 0;
     while (i < visibleViews.length) {
       const childView = visibleViews[i]!;
-      displayChildView.call(this, childView, displayFlags, viewContext);
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
+      displayChild.call(this, childView, displayFlags, viewContext);
+      if ((childView.flags & View.RemovingFlag) !== 0) {
+        childView.setFlags(childView.flags & ~View.RemovingFlag);
+        this.removeChild(childView);
         continue;
       }
       i += 1;
     }
   }
 
-  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
-      this.layoutChildViews(displayFlags, viewContext, displayChildView);
+      this.layoutChildViews(displayFlags, viewContext, displayChild);
     } else {
-      this.displayVisibleViews(displayFlags, viewContext, displayChildView);
+      this.displayVisibleViews(displayFlags, viewContext, displayChild);
     }
   }
 
   protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                viewContext: ViewContextType<this>) => void): void {
+                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                            viewContext: ViewContextType<this>) => void): void {
     this.resizeTable();
     const layout = this.layout.state;
     const width = layout !== null ? layout.width : null;
@@ -758,10 +761,10 @@ export class TableView extends HtmlView {
           yValue += rowSpacing * disclosingPhase;
           yState += rowSpacing;
         }
-        if (childView.top.takesPrecedence(View.Intrinsic)) {
-          childView.top.setIntermediateValue(Length.px(yValue), Length.px(yState));
+        if (childView.top.hasAffinity(Affinity.Intrinsic)) {
+          childView.top.setInterpolatedValue(Length.px(yValue), Length.px(yState));
         }
-        childView.width.setState(width, View.Intrinsic);
+        childView.width.setState(width, Affinity.Intrinsic);
       }
       let isVisible: boolean;
       if (childView instanceof HtmlView) {
@@ -776,7 +779,7 @@ export class TableView extends HtmlView {
         } else {
           isVisible = true;
         }
-        childView.display.setState(isVisible ? "flex" : "none", View.Intrinsic);
+        childView.display.setState(isVisible ? "flex" : "none", Affinity.Intrinsic);
         childView.setCulled(!isVisible);
       } else {
         isVisible = true;
@@ -784,7 +787,7 @@ export class TableView extends HtmlView {
       if (isVisible) {
         visibleViews.push(childView);
       }
-      displayChildView.call(this, childView, displayFlags, viewContext);
+      displayChild.call(this, childView, displayFlags, viewContext);
       if (childView instanceof RowView || childView instanceof HeaderView) {
         let heightValue: Length | number | null = childView.height.value;
         heightValue = heightValue instanceof Length ? heightValue.pxValue() : childView.node.offsetHeight;
@@ -795,25 +798,25 @@ export class TableView extends HtmlView {
         rowIndex += 1;
       }
     }
-    super.displayChildViews(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, viewContext, layoutChildView);
 
-    if (this.height.takesPrecedence(View.Intrinsic)) {
-      this.height.setIntermediateValue(Length.px(yValue), Length.px(yState));
+    if (this.height.hasAffinity(Affinity.Intrinsic)) {
+      this.height.setInterpolatedValue(Length.px(yValue), Length.px(yState));
     }
 
     const disclosurePhase = this.disclosure.getPhaseOr(1);
-    this.opacity.setState(disclosurePhase, View.Intrinsic);
+    this.opacity.setState(disclosurePhase, Affinity.Intrinsic);
   }
 
-  /** @hidden */
-  protected override mountViewFasteners(): void {
-    super.mountViewFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountRowFasteners();
   }
 
-  /** @hidden */
-  protected override unmountViewFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountRowFasteners();
-    super.unmountViewFasteners();
+    super.unmountFasteners();
   }
 }

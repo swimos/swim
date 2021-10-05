@@ -18,12 +18,8 @@ export * from "./downlink";
 
 export * from "./ref";
 
-export {WarpRef} from "./WarpRef";
-export {WarpObserver} from "./WarpObserver";
-
-export {
-  WarpClientOptions,
-  WarpClient,
-} from "./WarpClient";
-
 export * from "./client";
+
+export * from "./service";
+
+export * from "./fastener";

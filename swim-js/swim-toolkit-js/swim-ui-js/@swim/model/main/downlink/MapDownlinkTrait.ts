@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyValue, Value} from "@swim/structure";
-import {ModelMapDownlink} from "./ModelMapDownlink";
+import {MapDownlinkFastener} from "@swim/client";
 import {DownlinkTrait} from "./DownlinkTrait";
 
 export abstract class MapDownlinkTrait extends DownlinkTrait {
@@ -25,18 +25,19 @@ export abstract class MapDownlinkTrait extends DownlinkTrait {
     // hook
   }
 
-  @ModelMapDownlink<MapDownlinkTrait, Value, Value, AnyValue, AnyValue>({
-    consume: true,
+  @MapDownlinkFastener<MapDownlinkTrait, Value, Value, AnyValue, AnyValue>({
+    eager: true,
+    consumed: true,
     didUpdate(key: Value, newValue: Value, oldValue: Value): void {
-      if (this.owner.isConsuming()) {
+      if (this.owner.consuming) {
         this.owner.downlinkDidUpdate(key, newValue, oldValue);
       }
     },
     didRemove(key: Value, oldValue: Value): void {
-      if (this.owner.isConsuming()) {
+      if (this.owner.consuming) {
         this.owner.downlinkDidRemove(key, oldValue);
       }
     },
   })
-  readonly downlink!: ModelMapDownlink<this, Value, Value, AnyValue, AnyValue>;
+  readonly downlink!: MapDownlinkFastener<this, Value, Value, AnyValue, AnyValue>;
 }

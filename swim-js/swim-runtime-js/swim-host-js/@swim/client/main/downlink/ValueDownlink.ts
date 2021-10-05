@@ -34,7 +34,7 @@ export interface ValueDownlinkInit<V, VU = never> extends ValueDownlinkObserver<
 }
 
 export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, Outlet<V> {
-  /** @hidden */
+  /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: ValueDownlinkInit<V, VU>,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number, rate?: number,
               body?: Value, flags: number = DownlinkFlags.KeepLinkedSynced,
@@ -54,16 +54,16 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     this.version = -1;
   }
 
-  /** @hidden */
+  /** @internal */
   override readonly model!: ValueDownlinkModel | null;
 
-  /** @hidden */
+  /** @internal */
   override observers!: ReadonlyArray<ValueDownlinkObserver<V, VU>>;
 
-  /** @hidden */
+  /** @internal */
   readonly ownValueForm: Form<V, VU>;
 
-  /** @hidden */
+  /** @internal */
   readonly state0: Value;
 
   override get type(): DownlinkType {
@@ -121,7 +121,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     return this.observe({didSet});
   }
 
-  /** @hidden */
+  /** @internal */
   valueWillSet(newValue: Value): Value {
     let newObject: V | undefined;
     const observers = this.observers;
@@ -141,7 +141,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     return newValue;
   }
 
-  /** @hidden */
+  /** @internal */
   valueDidSet(newValue: Value, oldValue: Value): void {
     let newObject: V | undefined;
     let oldObject: V | undefined;
@@ -174,7 +174,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected didAliasModel(): void {
     this.onLinkedResponse();
     this.valueDidSet(this.model!.get(), Value.absent());
@@ -218,10 +218,10 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
 
   readonly input: Outlet<V> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly outputs: ReadonlyArray<Inlet<V>>;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   bindInput(newInput: Outlet<V> | null): void {

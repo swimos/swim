@@ -17,7 +17,7 @@ import type {STreeContext} from "./STreeContext";
 import {STreePage} from "./STreePage";
 import {STreeNodeCursor} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export class STreeNode<V, I> extends STreePage<V, I> {
   constructor(pages: ReadonlyArray<STreePage<V, I>>, knots: ReadonlyArray<number>, size: number) {
     super();
@@ -26,10 +26,10 @@ export class STreeNode<V, I> extends STreePage<V, I> {
     this.size = size;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pages: ReadonlyArray<STreePage<V, I>>;
 
-  /** @hidden */
+  /** @internal */
   readonly knots: ReadonlyArray<number>;
 
   override get arity(): number {
@@ -85,7 +85,7 @@ export class STreeNode<V, I> extends STreePage<V, I> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   updatedPage(x: number, newPage: STreePage<V, I>, oldPage: STreePage<V, I>): STreeNode<V, I> {
     const oldPages = this.pages;
     const newPages = oldPages.slice(0);
@@ -114,7 +114,7 @@ export class STreeNode<V, I> extends STreePage<V, I> {
     return new STreeNode(newPages, newKnots, newSize);
   }
 
-  /** @hidden */
+  /** @internal */
   updatedPageSplit(x: number, newPage: STreePage<V, I>, oldPage: STreePage<V, I>): STreeNode<V, I> {
     const oldPages = this.pages;
     const newPages = new Array<STreePage<V, I>>(oldPages.length + 1);
@@ -133,7 +133,7 @@ export class STreeNode<V, I> extends STreePage<V, I> {
     return STreeNode.create(newPages);
   }
 
-  /** @hidden */
+  /** @internal */
   updatedPageMerge(x: number, newPage: STreeNode<V, I>, oldPage: STreePage<V, I>): STreeNode<V, I> {
     const oldPages = this.pages;
     const midPages = newPage.pages;
@@ -189,7 +189,7 @@ export class STreeNode<V, I> extends STreePage<V, I> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   replacedPage(x: number, newPage: STreePage<V, I>, oldPage: STreePage<V, I>,
                tree: STreeContext<V, I>): STreePage<V, I> {
     if (!newPage.isEmpty()) {
@@ -211,7 +211,7 @@ export class STreeNode<V, I> extends STreePage<V, I> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   removedPage(x: number, newPage: STreePage<V, I>, oldPage: STreePage<V, I>): STreeNode<V, I> {
     const oldPages = this.pages;
     const newPages = new Array<STreePage<V, I>>(oldPages.length - 1);
@@ -418,7 +418,7 @@ export class STreeNode<V, I> extends STreePage<V, I> {
     return new STreeNodeCursor(this.pages, this.size, this.pages.length);
   }
 
-  /** @hidden */
+  /** @internal */
   lookup(index: number): number {
     let lo = 0;
     let hi = this.knots.length - 1;

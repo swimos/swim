@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {AnyLength, Length, R2Box} from "@swim/math";
+import {Affinity, Property} from "@swim/fastener";
 import type {GeoBox, GeoPath} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
-import {ViewContextType, View, ViewProperty, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View} from "@swim/view";
 import {
   GraphicsView,
   FillViewInit,
@@ -33,30 +36,14 @@ export interface GeoAreaViewInit extends GeoPathViewInit, FillViewInit, StrokeVi
 }
 
 export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
-  override initView(init: GeoAreaViewInit): void {
-    super.initView(init);
-    if (init.fill !== void 0) {
-      this.fill(init.fill);
-    }
-    if (init.stroke !== void 0) {
-      this.stroke(init.stroke);
-    }
-    if (init.strokeWidth !== void 0) {
-      this.strokeWidth(init.strokeWidth);
-    }
-    if (init.clipViewport !== void 0) {
-      this.clipViewport(init.clipViewport);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<GeoAreaViewObserver>;
+  override readonly observerType?: Class<GeoAreaViewObserver>;
 
   protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetFill !== void 0) {
-        viewObserver.viewWillSetFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetFill !== void 0) {
+        observer.viewWillSetFill(newFill, oldFill, this);
       }
     }
   }
@@ -66,19 +53,20 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   }
 
   protected didSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetFill !== void 0) {
-        viewObserver.viewDidSetFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetFill !== void 0) {
+        observer.viewDidSetFill(newFill, oldFill, this);
       }
     }
   }
 
-  @ViewAnimator<GeoAreaView, Color | null, AnyColor | null>({
+  @ThemeAnimator<GeoAreaView, Color | null, AnyColor | null>({
     type: Color,
     state: null,
-    inherit: true,
+    inherits: true,
+    updateFlags: View.NeedsRender,
     willSetValue(newFill: Color | null, oldFill: Color | null): void {
       this.owner.willSetFill(newFill, oldFill);
     },
@@ -87,14 +75,14 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
       this.owner.didSetFill(newFill, oldFill);
     },
   })
-  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetStroke !== void 0) {
-        viewObserver.viewWillSetStroke(newStroke, oldStroke, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetStroke !== void 0) {
+        observer.viewWillSetStroke(newStroke, oldStroke, this);
       }
     }
   }
@@ -104,19 +92,20 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   }
 
   protected didSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetStroke !== void 0) {
-        viewObserver.viewDidSetStroke(newStroke, oldStroke, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetStroke !== void 0) {
+        observer.viewDidSetStroke(newStroke, oldStroke, this);
       }
     }
   }
 
-  @ViewAnimator<GeoAreaView, Color | null, AnyColor | null>({
+  @ThemeAnimator<GeoAreaView, Color | null, AnyColor | null>({
     type: Color,
     state: null,
-    inherit: true,
+    inherits: true,
+    updateFlags: View.NeedsRender,
     willSetValue(newStroke: Color | null, oldStroke: Color | null): void {
       this.owner.willSetStroke(newStroke, oldStroke);
     },
@@ -125,14 +114,14 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
       this.owner.didSetStroke(newStroke, oldStroke);
     },
   })
-  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetStrokeWidth !== void 0) {
-        viewObserver.viewWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetStrokeWidth !== void 0) {
+        observer.viewWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
     }
   }
@@ -142,19 +131,20 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   }
 
   protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetStrokeWidth !== void 0) {
-        viewObserver.viewDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetStrokeWidth !== void 0) {
+        observer.viewDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
     }
   }
 
-  @ViewAnimator<GeoAreaView, Length | null, AnyLength | null>({
+  @ThemeAnimator<GeoAreaView, Length | null, AnyLength | null>({
     type: Length,
     state: null,
-    inherit: true,
+    inherits: true,
+    updateFlags: View.NeedsRender,
     willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
       this.owner.willSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
@@ -163,15 +153,15 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
       this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
   })
-  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewProperty({type: Boolean, state: true})
-  readonly clipViewport!: ViewProperty<this, boolean>;
+  @Property({type: Boolean, state: true})
+  readonly clipViewport!: Property<this, boolean>;
 
   protected override onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
     super.onSetGeoPath(newGeoPath, oldGeoPath);
-    if (this.geoCentroid.takesPrecedence(View.Intrinsic)) {
-      this.geoCentroid.setState(newGeoPath.centroid(), View.Intrinsic);
+    if (this.geoCentroid.hasAffinity(Affinity.Intrinsic)) {
+      this.geoCentroid.setState(newGeoPath.centroid(), Affinity.Intrinsic);
     }
   }
 
@@ -196,17 +186,19 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
-      this.renderArea(context, this.viewFrame);
-      context.restore();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+      this.renderArea(renderer.context, this.viewFrame);
     }
   }
 
   protected renderArea(context: CanvasContext, frame: R2Box): void {
     const viewPath = this.viewPath.value;
     if (viewPath !== null && viewPath.isDefined()) {
+      // save
+      const contextFillStyle = context.fillStyle;
+      const contextLineWidth = context.lineWidth;
+      const contextStrokeStyle = context.strokeStyle;
+
       context.beginPath();
       viewPath.draw(context);
       const fill = this.fill.value;
@@ -222,18 +214,19 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
         context.strokeStyle = stroke.toString();
         context.stroke();
       }
+
+      // restore
+      context.fillStyle = contextFillStyle;
+      context.lineWidth = contextLineWidth;
+      context.strokeStyle = contextStrokeStyle;
     }
   }
 
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      context.save();
       const p = renderer.transform.transform(x, y);
-      const hit = this.hitTestArea(p.x, p.y, context, this.viewFrame);
-      context.restore();
-      return hit;
+      return this.hitTestArea(p.x, p.y, renderer.context, this.viewFrame);
     }
     return null;
   }
@@ -249,9 +242,17 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
       if (this.stroke.value !== null) {
         const strokeWidth = this.strokeWidth.value;
         if (strokeWidth !== null) {
+          // save
+          const contextLineWidth = context.lineWidth;
+
           const size = Math.min(frame.width, frame.height);
           context.lineWidth = strokeWidth.pxValue(size);
-          if (context.isPointInStroke(x, y)) {
+          const pointInStroke = context.isPointInStroke(x, y);
+
+          // restore
+          context.lineWidth = contextLineWidth;
+
+          if (pointInStroke) {
             return this;
           }
         }
@@ -260,13 +261,19 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     return null;
   }
 
-  static override create(): GeoAreaView {
-    return new GeoAreaView();
-  }
-
-  static fromInit(init: GeoAreaViewInit): GeoAreaView {
-    const view = new GeoAreaView();
-    view.initView(init);
-    return view;
+  override init(init: GeoAreaViewInit): void {
+    super.init(init);
+    if (init.fill !== void 0) {
+      this.fill(init.fill);
+    }
+    if (init.stroke !== void 0) {
+      this.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      this.strokeWidth(init.strokeWidth);
+    }
+    if (init.clipViewport !== void 0) {
+      this.clipViewport(init.clipViewport);
+    }
   }
 }

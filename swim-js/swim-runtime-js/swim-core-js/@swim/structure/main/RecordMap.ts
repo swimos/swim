@@ -24,7 +24,7 @@ import {AnyText, Text} from "./"; // forward import
 import {AnyNum, Num} from "./"; // forward import
 import {AnyInterpreter, Interpreter} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export class RecordMap extends Record {
   constructor(array: Array<Item> | null, table: Array<Field> | null,
               length: number, fieldCount: number, flags: number) {
@@ -46,10 +46,10 @@ export class RecordMap extends Record {
     this.flags = flags;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly array: Array<Item> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly table: Array<Field> | null;
 
   override isEmpty(): boolean {
@@ -64,7 +64,7 @@ export class RecordMap extends Record {
     return this.length - this.fieldCount;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly flags: number;
 
   override isConstant(): boolean {
@@ -341,7 +341,7 @@ export class RecordMap extends Record {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   setAliased(key: Value, newValue: Value): void {
     const n = this.length;
     const oldArray = this.array!;
@@ -370,7 +370,7 @@ export class RecordMap extends Record {
     (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
-  /** @hidden */
+  /** @internal */
   setMutable(key: Value, newValue: Value): void {
     const table = this.table!;
     const n = table.length;
@@ -399,7 +399,7 @@ export class RecordMap extends Record {
     RecordMap.put(table, field);
   }
 
-  /** @hidden */
+  /** @internal */
   updateMutable(key: Value, newValue: Value): void {
     const array = this.array!;
     for (let i = 0, n = this.length; i < n; i += 1) {
@@ -441,7 +441,7 @@ export class RecordMap extends Record {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   setAttrAliased(key: Text, newValue: Value): void {
     const n = this.length;
     const oldArray = this.array!;
@@ -470,7 +470,7 @@ export class RecordMap extends Record {
     (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
-  /** @hidden */
+  /** @internal */
   setAttrMutable(key: Text, newValue: Value): void {
     const table = this.table!;
     const n = table.length;
@@ -498,7 +498,7 @@ export class RecordMap extends Record {
     RecordMap.put(table, field);
   }
 
-  /** @hidden */
+  /** @internal */
   updateAttrMutable(key: Text, newValue: Value): void {
     const array = this.array!;
     for (let i = 0, n = this.length; i < n; i += 1) {
@@ -540,7 +540,7 @@ export class RecordMap extends Record {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   setSlotAliased(key: Value, newValue: Value): void {
     const n = this.length;
     const oldArray = this.array!;
@@ -569,7 +569,7 @@ export class RecordMap extends Record {
     (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
-  /** @hidden */
+  /** @internal */
   setSlotMutable(key: Value, newValue: Value): void {
     const table = this.table!;
     const n = table.length;
@@ -597,7 +597,7 @@ export class RecordMap extends Record {
     RecordMap.put(table, field);
   }
 
-  /** @hidden */
+  /** @internal */
   updateSlotMutable(key: Value, newValue: Value): void {
     const array = this.array!;
     for (let i = 0, n = this.length; i < n; i += 1) {
@@ -633,7 +633,7 @@ export class RecordMap extends Record {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   setItemAliased(index: number, newItem: Item): void {
     const n = this.length;
     const oldArray = this.array!;
@@ -655,7 +655,7 @@ export class RecordMap extends Record {
     (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
-  /** @hidden */
+  /** @internal */
   setItemMutable(index: number, newItem: Item): void {
     const array = this.array!;
     const oldItem = array[index];
@@ -755,7 +755,7 @@ export class RecordMap extends Record {
     return this.length;
   }
 
-  /** @hidden */
+  /** @internal */
   pushAliased(...newItems: AnyItem[]): void {
     const k = newItems.length;
     let m = this.length;
@@ -782,7 +782,7 @@ export class RecordMap extends Record {
     (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
-  /** @hidden */
+  /** @internal */
   pushMutable(...newItems: AnyItem[]): void {
     const k = newItems.length;
     let m = this.length;
@@ -830,7 +830,7 @@ export class RecordMap extends Record {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   spliceAliased(start: number, deleteCount: number, ...newItems: AnyItem[]): Item[] {
     const k = newItems.length;
     let m = this.length;
@@ -868,7 +868,7 @@ export class RecordMap extends Record {
     return oldItems;
   }
 
-  /** @hidden */
+  /** @internal */
   spliceMutable(start: number, deleteCount: number, ...newItems: AnyItem[]): Item[] {
     const k = newItems.length;
     let m = this.length;
@@ -929,7 +929,7 @@ export class RecordMap extends Record {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   deleteAliased(key: Value): Item {
     const n = this.length;
     const oldArray = this.array!;
@@ -952,7 +952,7 @@ export class RecordMap extends Record {
     return Item.absent();
   }
 
-  /** @hidden */
+  /** @internal */
   deleteMutable(key: Value): Item {
     const n = this.length;
     const array = this.array!;
@@ -1044,7 +1044,7 @@ export class RecordMap extends Record {
     return table;
   }
 
-  /** @hidden */
+  /** @internal */
   static put(table: Field[] | null, field: Field): void {
     if (table !== null) {
       const n = table.length;

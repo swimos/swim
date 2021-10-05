@@ -139,11 +139,11 @@ export abstract class TimeInterval {
     return TimeInterval.millisecond.range(d0, d1, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static readonly MillisPerSecond: number = 1000;
-  /** @hidden */
+  /** @internal */
   static readonly MillisPerMinute: number = 60 * TimeInterval.MillisPerSecond;
-  /** @hidden */
+  /** @internal */
   static readonly MillisPerHour: number = 60 * TimeInterval.MillisPerMinute;
 }
 

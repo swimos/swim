@@ -20,7 +20,7 @@ import {Color} from "../color/Color";
 import {BoxShadow} from "../shadow/BoxShadow";
 import {AnyStyleValue, StyleValue} from "./StyleValue";
 
-/** @hidden */
+/** @internal */
 export class StyleValueForm extends Form<StyleValue, AnyStyleValue> {
   constructor(unit: StyleValue | undefined) {
     super();

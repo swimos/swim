@@ -19,7 +19,7 @@ import {Input} from "./Input";
 import {InputEmpty} from "../"; // forward import
 import {InputError} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class InputDone extends Input {
   constructor(id: string | undefined, mark: Mark, settings: InputSettings) {
     super();

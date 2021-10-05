@@ -19,7 +19,7 @@ import {InputBuffer} from "./InputBuffer";
 import {InputBufferDone} from "../"; // forward import
 import {InputBufferError} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class InputBufferEmpty extends InputBuffer {
   constructor(id: string | undefined, mark: Mark, settings: InputSettings) {
     super();

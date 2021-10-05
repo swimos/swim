@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./style";
+export * from "./animator";
 
 export * from "./css";
 
@@ -20,15 +20,13 @@ export * from "./node";
 
 export * from "./text";
 
-export * from "./attribute";
-
 export * from "./element";
 
 export * from "./html";
 
 export * from "./svg";
 
-export * from "./manager";
+export * from "./service";
 
 declare global { // CSS Typed OM shim
   /* eslint-disable no-var */

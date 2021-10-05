@@ -19,10 +19,8 @@ export {
 export {CanvasRenderer} from "./CanvasRenderer";
 
 export {
-  CanvasViewMouse,
-  CanvasViewPointer,
-  CanvasViewInit,
   CanvasFlags,
+  CanvasViewInit,
   CanvasView,
 } from "./CanvasView";
 export {CanvasViewObserver} from "./CanvasViewObserver";

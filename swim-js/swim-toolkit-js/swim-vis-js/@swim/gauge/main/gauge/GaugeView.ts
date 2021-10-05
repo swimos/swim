@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
-import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
+import {Look, ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -59,8 +61,395 @@ export class GaugeView extends LayerView {
     this.dialFasteners = [];
   }
 
-  override initView(init: GaugeViewInit): void {
-    super.initView(init);
+  override readonly observerType?: Class<GaugeViewObserver>;
+
+  @ThemeAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
+  readonly limit!: ThemeAnimator<this, number>;
+
+  @ThemeAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsLayout})
+  readonly center!: ThemeAnimator<this, R2Point, AnyR2Point>;
+
+  @ThemeAnimator({type: Length, state: Length.pct(30), updateFlags: View.NeedsLayout})
+  readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Length, state: Length.pct(40), updateFlags: View.NeedsLayout})
+  readonly outerRadius!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Angle, state: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
+  readonly startAngle!: ThemeAnimator<this, Angle, AnyAngle>;
+
+  @ThemeAnimator({type: Angle, state: Angle.rad(2 * Math.PI), updateFlags: View.NeedsLayout})
+  readonly sweepAngle!: ThemeAnimator<this, Angle, AnyAngle>;
+
+  @ThemeAnimator({type: Length, state: Length.pct(50)})
+  readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Length, state: Length.px(1), updateFlags: View.NeedsLayout})
+  readonly dialSpacing!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Color, state: null, look: Look.subduedColor})
+  readonly dialColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
+
+  @ThemeAnimator({type: Color, state: null, look: Look.accentColor})
+  readonly meterColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
+
+  @ThemeAnimator({type: Length, state: Length.pct(25)})
+  readonly labelPadding!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Number, state: 1.0})
+  readonly tickAlign!: ThemeAnimator<this, number>;
+
+  @ThemeAnimator({type: Length, state: Length.pct(45)})
+  readonly tickRadius!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Length, state: Length.pct(50)})
+  readonly tickLength!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Length, state: Length.px(1)})
+  readonly tickWidth!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Length, state: Length.px(2)})
+  readonly tickPadding!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Color, state: null, look: Look.neutralColor})
+  readonly tickColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
+
+  @ThemeAnimator({type: Font, state: null, inherits: true})
+  readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
+
+  @ThemeAnimator({type: Color, state: null, look: Look.mutedColor})
+  readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
+
+  protected initTitle(titleView: GraphicsView): void {
+    if (TypesetView.is(titleView)) {
+      titleView.textAlign.setState("center", Affinity.Intrinsic);
+      titleView.textBaseline.setState("middle", Affinity.Intrinsic);
+      titleView.textOrigin.setState(this.center.state, Affinity.Intrinsic);
+    }
+  }
+
+  protected attachTitle(titleView: GraphicsView): void {
+    // hook
+  }
+
+  protected detachTitle(titleView: GraphicsView): void {
+    // hook
+  }
+
+  protected willSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGaugeTitle !== void 0) {
+        observer.viewWillSetGaugeTitle(newTitleView, oldTitleView, this);
+      }
+    }
+  }
+
+  protected onSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+    if (oldTitleView !== null) {
+      this.detachTitle(oldTitleView);
+    }
+    if (newTitleView !== null) {
+      this.attachTitle(newTitleView);
+      this.initTitle(newTitleView);
+    }
+  }
+
+  protected didSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGaugeTitle !== void 0) {
+        observer.viewDidSetGaugeTitle(newTitleView, oldTitleView, this);
+      }
+    }
+  }
+
+  @ViewFastener<GaugeView, GraphicsView, AnyTextRunView>({
+    key: true,
+    type: TextRunView,
+    child: true,
+    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
+      if (value instanceof GraphicsView) {
+        return value;
+      } else if (typeof value === "string" && this.view instanceof TextRunView) {
+        this.view.text(value);
+        return this.view;
+      } else {
+        return TextRunView.fromAny(value);
+      }
+    },
+    willSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+      this.owner.willSetTitle(newTitleView, oldTitleView);
+    },
+    onSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+      this.owner.onSetTitle(newTitleView, oldTitleView);
+    },
+    didSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+      this.owner.didSetTitle(newTitleView, oldTitleView);
+    },
+  })
+  readonly title!: ViewFastener<this, GraphicsView, AnyTextRunView>;
+
+  insertDial(dialView: AnyDialView, targetView: View | null = null): void {
+    dialView = DialView.fromAny(dialView);
+    const dialFasteners = this.dialFasteners as ViewFastener<this, DialView>[];
+    let targetIndex = dialFasteners.length;
+    for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
+      const dialFastener = dialFasteners[i]!;
+      if (dialFastener.view === dialView) {
+        return;
+      } else if (dialFastener.view === targetView) {
+        targetIndex = i;
+      }
+    }
+    const dialFastener = this.createDialFastener(dialView);
+    dialFasteners.splice(targetIndex, 0, dialFastener);
+    dialFastener.setView(dialView, targetView);
+    if (this.mounted) {
+      dialFastener.mount();
+    }
+  }
+
+  removeDial(dialView: DialView): void {
+    const dialFasteners = this.dialFasteners as ViewFastener<this, DialView>[];
+    for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
+      const dialFastener = dialFasteners[i]!;
+      if (dialFastener.view === dialView) {
+        dialFastener.setView(null);
+        if (this.mounted) {
+          dialFastener.unmount();
+        }
+        dialFasteners.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  protected initDial(dialView: DialView, dialFastener: ViewFastener<this, DialView>): void {
+    const labelView = dialView.label.view;
+    if (labelView !== null) {
+      this.initDialLabel(labelView, dialFastener);
+    }
+    const legendView = dialView.legend.view;
+    if (legendView !== null) {
+      this.initDialLegend(legendView, dialFastener);
+    }
+  }
+
+  protected attachDial(dialView: DialView, dialFastener: ViewFastener<this, DialView>): void {
+    // hook
+  }
+
+  protected detachDial(dialView: DialView, dialFastener: ViewFastener<this, DialView>): void {
+    // hook
+  }
+
+  protected willSetDial(newDialView: DialView | null, oldDialView: DialView | null,
+                        targetView: View | null, dialFastener: ViewFastener<this, DialView>): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDial !== void 0) {
+        observer.viewWillSetDial(newDialView, oldDialView, targetView, this);
+      }
+    }
+  }
+
+  protected onSetDial(newDialView: DialView | null, oldDialView: DialView | null,
+                      targetView: View | null, dialFastener: ViewFastener<this, DialView>): void {
+    if (oldDialView !== null) {
+      this.detachDial(oldDialView, dialFastener);
+    }
+    if (newDialView !== null) {
+      this.attachDial(newDialView, dialFastener);
+      this.initDial(newDialView, dialFastener);
+    }
+  }
+
+  protected didSetDial(newDialView: DialView | null, oldDialView: DialView | null,
+                       targetView: View | null, dialFastener: ViewFastener<this, DialView>): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDial !== void 0) {
+        observer.viewDidSetDial(newDialView, oldDialView, targetView, this);
+      }
+    }
+  }
+
+  protected onSetDialValue(newValue: number, oldValue: number, dialFastener: ViewFastener<this, DialView>): void {
+    this.requireUpdate(View.NeedsLayout);
+  }
+
+  protected initDialLabel(labelView: GraphicsView, dialFastener: ViewFastener<this, DialView>): void {
+    // hook
+  }
+
+  protected onSetDialLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
+                           dialFastener: ViewFastener<this, DialView>): void {
+    if (newLabelView !== null) {
+      this.initDialLabel(newLabelView, dialFastener);
+    }
+  }
+
+  protected initDialLegend(legendView: GraphicsView, dialFastener: ViewFastener<this, DialView>): void {
+    // hook
+  }
+
+  protected onSetDialLegend(newLegendView: GraphicsView | null, oldLabelView: GraphicsView | null,
+                            dialFastener: ViewFastener<this, DialView>): void {
+    if (newLegendView !== null) {
+      this.initDialLegend(newLegendView, dialFastener);
+    }
+  }
+
+  /** @internal */
+  static DialFastener = ViewFastener.define<GaugeView, DialView>({
+    type: DialView,
+    child: false,
+    observes: true,
+    willSetView(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null): void {
+      this.owner.willSetDial(newDialView, oldDialView, targetView, this);
+    },
+    onSetView(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null): void {
+      this.owner.onSetDial(newDialView, oldDialView, targetView, this);
+    },
+    didSetView(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null): void {
+      this.owner.didSetDial(newDialView, oldDialView, targetView, this);
+    },
+    viewDidSetDialValue(newValue: number, oldValue: number): void {
+      this.owner.onSetDialValue(newValue, oldValue, this);
+    },
+    viewDidSetDialLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+      this.owner.onSetDialLabel(newLabelView, oldLabelView, this);
+    },
+    viewDidSetDialLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+      this.owner.onSetDialLegend(newLegendView, oldLegendView, this);
+    },
+  });
+
+  protected createDialFastener(dialView: DialView): ViewFastener<this, DialView> {
+    return GaugeView.DialFastener.create(this, dialView.key ?? "dial");
+  }
+
+  /** @internal */
+  readonly dialFasteners: ReadonlyArray<ViewFastener<this, DialView>>;
+
+  /** @internal */
+  protected mountDialFasteners(): void {
+    const dialFasteners = this.dialFasteners;
+    for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
+      const dialFastener = dialFasteners[i]!;
+      dialFastener.mount();
+    }
+  }
+
+  /** @internal */
+  protected unmountDialFasteners(): void {
+    const dialFasteners = this.dialFasteners;
+    for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
+      const dialFastener = dialFasteners[i]!;
+      dialFastener.unmount();
+    }
+  }
+
+  protected detectDial(view: View): DialView | null {
+    return view instanceof DialView ? view : null;
+  }
+
+  protected onInsertDial(dialView: DialView, targetView: View | null): void {
+    this.insertDial(dialView, targetView);
+  }
+
+  protected onRemoveDial(dialView: DialView): void {
+    this.removeDial(dialView);
+  }
+
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
+    const dialView = this.detectDial(childView);
+    if (dialView !== null) {
+      this.onInsertDial(dialView, targetView);
+    }
+  }
+
+  protected override onRemoveChild(childView: View): void {
+    super.onRemoveChild(childView);
+    const dialView = this.detectDial(childView);
+    if (dialView !== null) {
+      this.onRemoveDial(dialView);
+    }
+  }
+
+  protected override onLayout(viewContext: ViewContextType<this>): void {
+    super.onLayout(viewContext);
+    this.layoutGauge(this.viewFrame);
+  }
+
+  protected layoutGauge(frame: R2Box): void {
+    if (this.center.hasAffinity(Affinity.Intrinsic)) {
+      const cx = (frame.xMin + frame.xMax) / 2;
+      const cy = (frame.yMin + frame.yMax) / 2;
+      this.center.setState(new R2Point(cx, cy), Affinity.Intrinsic);
+    }
+
+    const dialFasteners = this.dialFasteners;
+    const dialCount = dialFasteners.length;
+
+    let autoCount = 0;
+    for (let i = 0; i < dialCount; i += 1) {
+      const dialView = dialFasteners[i]!.view;
+      if (dialView !== null && dialView.arrangement.state === "auto") {
+        autoCount += 1;
+      }
+    }
+
+    const size = Math.min(frame.width, frame.height);
+    const gaugeLimit = this.limit.getValue();
+    const startAngle = this.startAngle.getValue();
+    const sweepAngle = this.sweepAngle.getValue();
+    let r0 = this.innerRadius.getValue().pxValue(size);
+    const r1 = this.outerRadius.getValue().pxValue(size);
+    const rs = this.dialSpacing.getValue().pxValue(size);
+    const dr = autoCount > 1 ? (r1 - r0 - rs * (autoCount - 1)) / autoCount : r1 - r0;
+
+    for (let i = 0; i < dialCount; i += 1) {
+      const dialView = dialFasteners[i]!.view;
+      if (dialView !== null && dialView.arrangement.state === "auto") {
+        if (isFinite(gaugeLimit)) {
+          const dialLimit = dialView.limit.getValue();
+          dialView.limit.setState(Math.max(dialLimit, gaugeLimit), Affinity.Intrinsic);
+        }
+        dialView.startAngle.setState(startAngle, Affinity.Intrinsic);
+        dialView.sweepAngle.setState(sweepAngle, Affinity.Intrinsic);
+        dialView.innerRadius.setState(Length.px(r0), Affinity.Intrinsic);
+        dialView.outerRadius.setState(Length.px(r0 + dr), Affinity.Intrinsic);
+        r0 = r0 + dr + rs;
+      }
+    }
+
+    const titleView = this.title.view;
+    if (TypesetView.is(titleView)) {
+      titleView.textOrigin.setState(this.center.state, Affinity.Intrinsic);
+    }
+  }
+
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
+    this.mountDialFasteners();
+  }
+
+  /** @internal */
+  protected override unmountFasteners(): void {
+    this.unmountDialFasteners();
+    super.unmountFasteners();
+  }
+
+  override init(init: GaugeViewInit): void {
+    super.init(init);
     if (init.limit !== void 0) {
       this.limit(init.limit);
     }
@@ -122,413 +511,8 @@ export class GaugeView extends LayerView {
     if (dials !== void 0) {
       for (let i = 0, n = dials.length; i < n; i += 1) {
         const dial = dials[i]!;
-        this.appendChildView(DialView.fromAny(dial), dial.key);
+        this.appendChild(DialView.fromAny(dial), dial.key);
       }
     }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<GaugeViewObserver>;
-
-  @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
-  readonly limit!: ViewAnimator<this, number>;
-
-  @ViewAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsLayout})
-  readonly center!: ViewAnimator<this, R2Point, AnyR2Point>;
-
-  @ViewAnimator({type: Length, state: Length.pct(30), updateFlags: View.NeedsLayout})
-  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Length, state: Length.pct(40), updateFlags: View.NeedsLayout})
-  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Angle, state: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
-  readonly startAngle!: ViewAnimator<this, Angle, AnyAngle>;
-
-  @ViewAnimator({type: Angle, state: Angle.rad(2 * Math.PI), updateFlags: View.NeedsLayout})
-  readonly sweepAngle!: ViewAnimator<this, Angle, AnyAngle>;
-
-  @ViewAnimator({type: Length, state: Length.pct(50)})
-  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Length, state: Length.px(1), updateFlags: View.NeedsLayout})
-  readonly dialSpacing!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Color, state: null, look: Look.subduedColor})
-  readonly dialColor!: ViewAnimator<this, Color | null, AnyColor | null>;
-
-  @ViewAnimator({type: Color, state: null, look: Look.accentColor})
-  readonly meterColor!: ViewAnimator<this, Color | null, AnyColor | null>;
-
-  @ViewAnimator({type: Length, state: Length.pct(25)})
-  readonly labelPadding!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Number, state: 1.0})
-  readonly tickAlign!: ViewAnimator<this, number>;
-
-  @ViewAnimator({type: Length, state: Length.pct(45)})
-  readonly tickRadius!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Length, state: Length.pct(50)})
-  readonly tickLength!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Length, state: Length.px(1)})
-  readonly tickWidth!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Length, state: Length.px(2)})
-  readonly tickPadding!: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Color, state: null, look: Look.neutralColor})
-  readonly tickColor!: ViewAnimator<this, Color | null, AnyColor | null>;
-
-  @ViewAnimator({type: Font, state: null, inherit: true})
-  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
-
-  @ViewAnimator({type: Color, state: null, look: Look.mutedColor})
-  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
-
-  protected initTitle(titleView: GraphicsView): void {
-    if (TypesetView.is(titleView)) {
-      titleView.textAlign.setState("center", View.Intrinsic);
-      titleView.textBaseline.setState("middle", View.Intrinsic);
-      titleView.textOrigin.setState(this.center.state, View.Intrinsic);
-    }
-  }
-
-  protected attachTitle(titleView: GraphicsView): void {
-    // hook
-  }
-
-  protected detachTitle(titleView: GraphicsView): void {
-    // hook
-  }
-
-  protected willSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGaugeTitle !== void 0) {
-        viewObserver.viewWillSetGaugeTitle(newTitleView, oldTitleView, this);
-      }
-    }
-  }
-
-  protected onSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    if (oldTitleView !== null) {
-      this.detachTitle(oldTitleView);
-    }
-    if (newTitleView !== null) {
-      this.attachTitle(newTitleView);
-      this.initTitle(newTitleView);
-    }
-  }
-
-  protected didSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGaugeTitle !== void 0) {
-        viewObserver.viewDidSetGaugeTitle(newTitleView, oldTitleView, this);
-      }
-    }
-  }
-
-  @ViewFastener<GaugeView, GraphicsView, AnyTextRunView>({
-    key: true,
-    type: TextRunView,
-    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
-      if (value instanceof GraphicsView) {
-        return value;
-      } else if (typeof value === "string" && this.view instanceof TextRunView) {
-        this.view.text(value);
-        return this.view;
-      } else {
-        return TextRunView.fromAny(value);
-      }
-    },
-    willSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.willSetTitle(newTitleView, oldTitleView);
-    },
-    onSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.onSetTitle(newTitleView, oldTitleView);
-    },
-    didSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.didSetTitle(newTitleView, oldTitleView);
-    },
-  })
-  readonly title!: ViewFastener<this, GraphicsView, AnyTextRunView>;
-
-  insertDial(dialView: AnyDialView, targetView: View | null = null): void {
-    dialView = DialView.fromAny(dialView);
-    const dialFasteners = this.dialFasteners as ViewFastener<this, DialView>[];
-    let targetIndex = dialFasteners.length;
-    for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
-      const dialFastener = dialFasteners[i]!;
-      if (dialFastener.view === dialView) {
-        return;
-      } else if (dialFastener.view === targetView) {
-        targetIndex = i;
-      }
-    }
-    const dialFastener = this.createDialFastener(dialView);
-    dialFasteners.splice(targetIndex, 0, dialFastener);
-    dialFastener.setView(dialView, targetView);
-    if (this.isMounted()) {
-      dialFastener.mount();
-    }
-  }
-
-  removeDial(dialView: DialView): void {
-    const dialFasteners = this.dialFasteners as ViewFastener<this, DialView>[];
-    for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
-      const dialFastener = dialFasteners[i]!;
-      if (dialFastener.view === dialView) {
-        dialFastener.setView(null);
-        if (this.isMounted()) {
-          dialFastener.unmount();
-        }
-        dialFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected initDial(dialView: DialView, dialFastener: ViewFastener<this, DialView>): void {
-    const labelView = dialView.label.view;
-    if (labelView !== null) {
-      this.initDialLabel(labelView, dialFastener);
-    }
-    const legendView = dialView.legend.view;
-    if (legendView !== null) {
-      this.initDialLegend(legendView, dialFastener);
-    }
-  }
-
-  protected attachDial(dialView: DialView, dialFastener: ViewFastener<this, DialView>): void {
-    // hook
-  }
-
-  protected detachDial(dialView: DialView, dialFastener: ViewFastener<this, DialView>): void {
-    // hook
-  }
-
-  protected willSetDial(newDialView: DialView | null, oldDialView: DialView | null,
-                        targetView: View | null, dialFastener: ViewFastener<this, DialView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDial !== void 0) {
-        viewObserver.viewWillSetDial(newDialView, oldDialView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetDial(newDialView: DialView | null, oldDialView: DialView | null,
-                      targetView: View | null, dialFastener: ViewFastener<this, DialView>): void {
-    if (oldDialView !== null) {
-      this.detachDial(oldDialView, dialFastener);
-    }
-    if (newDialView !== null) {
-      this.attachDial(newDialView, dialFastener);
-      this.initDial(newDialView, dialFastener);
-    }
-  }
-
-  protected didSetDial(newDialView: DialView | null, oldDialView: DialView | null,
-                       targetView: View | null, dialFastener: ViewFastener<this, DialView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDial !== void 0) {
-        viewObserver.viewDidSetDial(newDialView, oldDialView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetDialValue(newValue: number, oldValue: number, dialFastener: ViewFastener<this, DialView>): void {
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected initDialLabel(labelView: GraphicsView, dialFastener: ViewFastener<this, DialView>): void {
-    // hook
-  }
-
-  protected onSetDialLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
-                           dialFastener: ViewFastener<this, DialView>): void {
-    if (newLabelView !== null) {
-      this.initDialLabel(newLabelView, dialFastener);
-    }
-  }
-
-  protected initDialLegend(legendView: GraphicsView, dialFastener: ViewFastener<this, DialView>): void {
-    // hook
-  }
-
-  protected onSetDialLegend(newLegendView: GraphicsView | null, oldLabelView: GraphicsView | null,
-                            dialFastener: ViewFastener<this, DialView>): void {
-    if (newLegendView !== null) {
-      this.initDialLegend(newLegendView, dialFastener);
-    }
-  }
-
-  /** @hidden */
-  static DialFastener = ViewFastener.define<GaugeView, DialView>({
-    type: DialView,
-    child: false,
-    observe: true,
-    willSetView(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null): void {
-      this.owner.willSetDial(newDialView, oldDialView, targetView, this);
-    },
-    onSetView(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null): void {
-      this.owner.onSetDial(newDialView, oldDialView, targetView, this);
-    },
-    didSetView(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null): void {
-      this.owner.didSetDial(newDialView, oldDialView, targetView, this);
-    },
-    viewDidSetDialValue(newValue: number, oldValue: number): void {
-      this.owner.onSetDialValue(newValue, oldValue, this);
-    },
-    viewDidSetDialLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetDialLabel(newLabelView, oldLabelView, this);
-    },
-    viewDidSetDialLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.onSetDialLegend(newLegendView, oldLegendView, this);
-    },
-  });
-
-  protected createDialFastener(dialView: DialView): ViewFastener<this, DialView> {
-    return new GaugeView.DialFastener(this, dialView.key, "dial");
-  }
-
-  /** @hidden */
-  readonly dialFasteners: ReadonlyArray<ViewFastener<this, DialView>>;
-
-  /** @hidden */
-  protected mountDialFasteners(): void {
-    const dialFasteners = this.dialFasteners;
-    for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
-      const dialFastener = dialFasteners[i]!;
-      dialFastener.mount();
-    }
-  }
-
-  /** @hidden */
-  protected unmountDialFasteners(): void {
-    const dialFasteners = this.dialFasteners;
-    for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
-      const dialFastener = dialFasteners[i]!;
-      dialFastener.unmount();
-    }
-  }
-
-  protected detectDial(view: View): DialView | null {
-    return view instanceof DialView ? view : null;
-  }
-
-  protected onInsertDial(dialView: DialView, targetView: View | null): void {
-    this.insertDial(dialView, targetView);
-  }
-
-  protected onRemoveDial(dialView: DialView): void {
-    this.removeDial(dialView);
-  }
-
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
-    const dialView = this.detectDial(childView);
-    if (dialView !== null) {
-      this.onInsertDial(dialView, targetView);
-    }
-  }
-
-  protected override onRemoveChildView(childView: View): void {
-    super.onRemoveChildView(childView);
-    const dialView = this.detectDial(childView);
-    if (dialView !== null) {
-      this.onRemoveDial(dialView);
-    }
-  }
-
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-    this.layoutGauge(this.viewFrame);
-  }
-
-  protected layoutGauge(frame: R2Box): void {
-    if (this.center.takesPrecedence(View.Intrinsic)) {
-      const cx = (frame.xMin + frame.xMax) / 2;
-      const cy = (frame.yMin + frame.yMax) / 2;
-      this.center.setState(new R2Point(cx, cy), View.Intrinsic);
-    }
-
-    const dialFasteners = this.dialFasteners;
-    const dialCount = dialFasteners.length;
-
-    let autoCount = 0;
-    for (let i = 0; i < dialCount; i += 1) {
-      const dialView = dialFasteners[i]!.view;
-      if (dialView !== null && dialView.arrangement.state === "auto") {
-        autoCount += 1;
-      }
-    }
-
-    const size = Math.min(frame.width, frame.height);
-    const gaugeLimit = this.limit.getValue();
-    const startAngle = this.startAngle.getValue();
-    const sweepAngle = this.sweepAngle.getValue();
-    let r0 = this.innerRadius.getValue().pxValue(size);
-    const r1 = this.outerRadius.getValue().pxValue(size);
-    const rs = this.dialSpacing.getValue().pxValue(size);
-    const dr = autoCount > 1 ? (r1 - r0 - rs * (autoCount - 1)) / autoCount : r1 - r0;
-
-    for (let i = 0; i < dialCount; i += 1) {
-      const dialView = dialFasteners[i]!.view;
-      if (dialView !== null && dialView.arrangement.state === "auto") {
-        if (isFinite(gaugeLimit)) {
-          const dialLimit = dialView.limit.getValue();
-          dialView.limit.setState(Math.max(dialLimit, gaugeLimit), View.Intrinsic);
-        }
-        dialView.startAngle.setState(startAngle, View.Intrinsic);
-        dialView.sweepAngle.setState(sweepAngle, View.Intrinsic);
-        dialView.innerRadius.setState(Length.px(r0), View.Intrinsic);
-        dialView.outerRadius.setState(Length.px(r0 + dr), View.Intrinsic);
-        r0 = r0 + dr + rs;
-      }
-    }
-
-    const titleView = this.title.view;
-    if (TypesetView.is(titleView)) {
-      titleView.textOrigin.setState(this.center.state, View.Intrinsic);
-    }
-  }
-
-  /** @hidden */
-  protected override mountViewFasteners(): void {
-    super.mountViewFasteners();
-    this.mountDialFasteners();
-  }
-
-  /** @hidden */
-  protected override unmountViewFasteners(): void {
-    this.unmountDialFasteners();
-    super.unmountViewFasteners();
-  }
-
-  static override create(): GaugeView {
-    return new GaugeView();
-  }
-
-  static fromInit(init: GaugeViewInit): GaugeView {
-    const view = new GaugeView();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny(value: AnyGaugeView): GaugeView {
-    if (value instanceof GaugeView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
-    }
-    throw new TypeError("" + value);
   }
 }

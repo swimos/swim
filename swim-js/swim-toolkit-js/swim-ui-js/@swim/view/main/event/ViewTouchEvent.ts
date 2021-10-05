@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {View} from "../View";
 import type {ViewEventInit, ViewEvent} from "./ViewEvent";
+import type {View} from "../view/View";
 
 export interface ViewTouchInit extends TouchInit {
   targetView?: View;

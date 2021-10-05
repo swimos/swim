@@ -16,7 +16,7 @@ import type {Cursor} from "@swim/util";
 import {NodeCursor} from "./NodeCursor";
 import type {STreePage} from "./STreePage";
 
-/** @hidden */
+/** @internal */
 export class STreeNodeCursor<V, I> extends NodeCursor<[I, V], STreePage<V, I>> {
   constructor(pages: ReadonlyArray<STreePage<V, I>>, index: number = 0,
               childIndex: number = 0, childCursor: Cursor<[I, V]> | null = null) {

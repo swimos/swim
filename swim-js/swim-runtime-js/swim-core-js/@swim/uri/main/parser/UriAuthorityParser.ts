@@ -19,7 +19,7 @@ import type {UriHost} from "../UriHost";
 import type {UriPort} from "../UriPort";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriAuthorityParser extends Parser<UriAuthority> {
   private readonly uri: UriParser;
   private readonly userParser: Parser<UriUser> | undefined;

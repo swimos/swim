@@ -48,7 +48,7 @@ export class GetAttrSelector extends Selector {
     return selected;
   }
 
-  /** @hidden */
+  /** @internal */
   static forSelected<T, S>(key: Text, then: Selector, interpreter: Interpreter,
                            callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
                            thisArg?: S): T | undefined {
@@ -143,7 +143,7 @@ export class GetAttrSelector extends Selector {
     return new GetAttrSelector(this.item, then as Selector);
   }
 
-  /** @hidden */
+  /** @internal */
   static substitute(key: Text, then: Selector, interpreter: Interpreter): Item | undefined {
     let selected: Item | undefined;
     if (interpreter.scopeDepth !== 0) {

@@ -93,7 +93,7 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly outerMoodModifier: MoodMatrix | null;
 
   withOuterMoodModifier(outerMoodModifier: MoodMatrix | null): EnclosedIcon {
@@ -118,7 +118,7 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly innerMoodModifier: MoodMatrix | null;
 
   withInnerMoodModifier(innerMoodModifier: MoodMatrix | null): EnclosedIcon {

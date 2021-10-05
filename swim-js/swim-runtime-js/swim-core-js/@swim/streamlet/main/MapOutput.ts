@@ -23,7 +23,7 @@ export class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
     this.state = new BTree();
   }
 
-  /** @hidden */
+  /** @internal */
   readonly state: BTree<K, V>;
 
   get(): Map<K, V> {

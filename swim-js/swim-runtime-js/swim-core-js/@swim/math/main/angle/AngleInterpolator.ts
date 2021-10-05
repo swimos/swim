@@ -15,22 +15,26 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {Angle} from "./Angle";
 
-/** @hidden */
-export const AngleInterpolator = function (a0: Angle, a1: Angle): Interpolator<Angle> {
-  const interpolator = function (u: number): Angle {
-    const a0 = interpolator[0];
-    const a1 = interpolator[1];
-    return Angle.create(a0.value + u * (a1.value - a0.value), a1.units);
-  } as Interpolator<Angle>;
-  Object.setPrototypeOf(interpolator, AngleInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = a0.to(a1.units);
-  (interpolator as Mutable<typeof interpolator>)[1] = a1;
-  return interpolator;
-} as {
-  (a0: Angle, a1: Angle): Interpolator<Angle>;
+/** @internal */
+export const AngleInterpolator = (function (_super: typeof Interpolator) {
+  const AngleInterpolator = function (a0: Angle, a1: Angle): Interpolator<Angle> {
+    const interpolator = function (u: number): Angle {
+      const a0 = interpolator[0];
+      const a1 = interpolator[1];
+      return Angle.create(a0.value + u * (a1.value - a0.value), a1.units);
+    } as Interpolator<Angle>;
+    Object.setPrototypeOf(interpolator, AngleInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = a0.to(a1.units);
+    (interpolator as Mutable<typeof interpolator>)[1] = a1;
+    return interpolator;
+  } as {
+    (a0: Angle, a1: Angle): Interpolator<Angle>;
 
-  /** @hidden */
-  prototype: Interpolator<Angle>;
-};
+    /** @internal */
+    prototype: Interpolator<Angle>;
+  };
 
-AngleInterpolator.prototype = Object.create(Interpolator.prototype);
+  AngleInterpolator.prototype = Object.create(_super.prototype);
+
+  return AngleInterpolator;
+})(Interpolator);

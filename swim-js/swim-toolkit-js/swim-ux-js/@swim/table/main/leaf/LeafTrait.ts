@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {
   Model,
   TraitModelType,
@@ -19,18 +20,17 @@ import {
   TraitClass,
   Trait,
   TraitFastener,
-  GenericTrait,
 } from "@swim/model";
 import {CellTrait} from "../cell/CellTrait";
 import type {LeafTraitObserver} from "./LeafTraitObserver";
 
-export class LeafTrait extends GenericTrait {
+export class LeafTrait extends Trait {
   constructor() {
     super();
     this.cellFasteners = [];
   }
 
-  override readonly traitObservers!: ReadonlyArray<LeafTraitObserver>;
+  override readonly observerType?: Class<LeafTraitObserver>;
 
   getCell(key: string): CellTrait | null;
   getCell<R extends CellTrait>(key: string, cellTraitClass: TraitClass<R>): R | null;
@@ -69,7 +69,7 @@ export class LeafTrait extends GenericTrait {
     const cellFastener = this.createCellFastener(cellTrait);
     cellFasteners.splice(targetIndex, 0, cellFastener);
     cellFastener.setTrait(cellTrait, targetTrait);
-    if (this.isMounted()) {
+    if (this.mounted) {
       cellFastener.mount();
     }
   }
@@ -80,7 +80,7 @@ export class LeafTrait extends GenericTrait {
       const cellFastener = cellFasteners[i]!;
       if (cellFastener.trait === cellTrait) {
         cellFastener.setTrait(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           cellFastener.unmount();
         }
         cellFasteners.splice(i, 1);
@@ -94,22 +94,22 @@ export class LeafTrait extends GenericTrait {
   }
 
   protected attachCell(cellTrait: CellTrait, cellFastener: TraitFastener<this, CellTrait>): void {
-    if (this.isConsuming()) {
-      cellTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      cellTrait.consume(this);
     }
   }
 
   protected detachCell(cellTrait: CellTrait, cellFastener: TraitFastener<this, CellTrait>): void {
-    if (this.isConsuming()) {
-      cellTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      cellTrait.unconsume(this);
     }
   }
 
   protected willSetCell(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null,
                         targetTrait: Trait | null, cellFastener: TraitFastener<this, CellTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetCell !== void 0) {
         traitObserver.traitWillSetCell(newCellTrait, oldCellTrait, targetTrait, this);
       }
@@ -129,16 +129,16 @@ export class LeafTrait extends GenericTrait {
 
   protected didSetCell(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null,
                        targetTrait: Trait | null, cellFastener: TraitFastener<this, CellTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetCell !== void 0) {
         traitObserver.traitDidSetCell(newCellTrait, oldCellTrait, targetTrait, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static CellFastener = TraitFastener.define<LeafTrait, CellTrait>({
     type: CellTrait,
     sibling: false,
@@ -154,13 +154,13 @@ export class LeafTrait extends GenericTrait {
   });
 
   protected createCellFastener(cellTrait: CellTrait): TraitFastener<this, CellTrait> {
-    return new LeafTrait.CellFastener(this, cellTrait.key, "cell");
+    return LeafTrait.CellFastener.create(this, cellTrait.key ?? "cell");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly cellFasteners: ReadonlyArray<TraitFastener<this, CellTrait>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountCellFasteners(): void {
     const cellFasteners = this.cellFasteners;
     for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
@@ -169,7 +169,7 @@ export class LeafTrait extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountCellFasteners(): void {
     const cellFasteners = this.cellFasteners;
     for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
@@ -178,24 +178,24 @@ export class LeafTrait extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected startConsumingCells(): void {
     const cellFasteners = this.cellFasteners;
     for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
       const cellTrait = cellFasteners[i]!.trait;
       if (cellTrait !== null) {
-        cellTrait.addTraitConsumer(this);
+        cellTrait.consume(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected stopConsumingCells(): void {
     const cellFasteners = this.cellFasteners;
     for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
       const cellTrait = cellFasteners[i]!.trait;
       if (cellTrait !== null) {
-        cellTrait.removeTraitConsumer(this);
+        cellTrait.unconsume(this);
       }
     }
   }
@@ -205,10 +205,10 @@ export class LeafTrait extends GenericTrait {
   }
 
   protected detectModels(model: TraitModelType<this>): void {
-    const childModels = model.childModels;
-    for (let i = 0, n = childModels.length; i < n; i += 1) {
-      const childModel = childModels[i]!;
-      const cellTrait = this.detectCellModel(childModel);
+    const children = model.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      const cellTrait = this.detectCellModel(child);
       if (cellTrait !== null) {
         this.insertCell(cellTrait);
       }
@@ -238,24 +238,27 @@ export class LeafTrait extends GenericTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    super.onInsertChildModel(childModel, targetModel);
-    const cellTrait = this.detectCellModel(childModel);
+  /** @protected */
+  override onInsertChild(child: Model, target: Model | null): void {
+    super.onInsertChild(child, target);
+    const cellTrait = this.detectCellModel(child);
     if (cellTrait !== null) {
-      const targetTrait = targetModel !== null ? this.detectCellModel(targetModel) : null;
+      const targetTrait = target !== null ? this.detectCellModel(target) : null;
       this.insertCell(cellTrait, targetTrait);
     }
   }
 
-  protected override onRemoveChildModel(childModel: Model): void {
-    super.onRemoveChildModel(childModel);
-    const cellTrait = this.detectCellModel(childModel);
+  /** @protected */
+  override onRemoveChild(child: Model): void {
+    super.onRemoveChild(child);
+    const cellTrait = this.detectCellModel(child);
     if (cellTrait !== null) {
       this.removeCell(cellTrait);
     }
   }
 
-  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  /** @protected */
+  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     const cellTrait = this.detectCellTrait(trait);
     if (cellTrait !== null) {
@@ -263,7 +266,8 @@ export class LeafTrait extends GenericTrait {
     }
   }
 
-  protected override onRemoveTrait(trait: Trait): void {
+  /** @protected */
+  override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const cellTrait = this.detectCellTrait(trait);
     if (cellTrait !== null) {
@@ -271,16 +275,16 @@ export class LeafTrait extends GenericTrait {
     }
   }
 
-  /** @hidden */
-  protected override mountTraitFasteners(): void {
-    super.mountTraitFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountCellFasteners();
   }
 
-  /** @hidden */
-  protected override unmountTraitFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountCellFasteners();
-    super.unmountTraitFasteners();
+    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

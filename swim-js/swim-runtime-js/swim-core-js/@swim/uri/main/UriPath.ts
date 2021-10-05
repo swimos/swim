@@ -25,7 +25,7 @@ import {UriPathForm} from "./"; // forward import
 export type AnyUriPath = UriPath | string[] | string;
 
 export abstract class UriPath implements HashCode, Compare, Debug, Display {
-  /** @hidden */
+  /** @internal */
   protected constructor() {
     // sealed
   }
@@ -66,10 +66,10 @@ export abstract class UriPath implements HashCode, Compare, Debug, Display {
 
   abstract tail(): UriPath;
 
-  /** @hidden */
+  /** @internal */
   abstract setTail(tail: UriPath): void;
 
-  /** @hidden */
+  /** @internal */
   abstract dealias(): UriPath;
 
   abstract parent(): UriPath;
@@ -388,14 +388,14 @@ export abstract class UriPath implements HashCode, Compare, Debug, Display {
     return new UriPathForm(UriPath.empty());
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get segmentCache(): HashGenCacheSet<string> {
     const segmentCacheSize = 64;
     return new HashGenCacheSet<string>(segmentCacheSize);
   }
 
-  /** @hidden */
+  /** @internal */
   static cacheSegment(segment: string): string {
     if (segment.length <= 32) {
       return this.segmentCache.put(segment);

@@ -16,25 +16,29 @@ import {Mutable, Interpolator} from "@swim/util";
 import {Length} from "../length/Length";
 import {TranslateTransform} from "./TranslateTransform";
 
-/** @hidden */
-export const TranslateTransformInterpolator = function (f0: TranslateTransform, f1: TranslateTransform): Interpolator<TranslateTransform> {
-  const interpolator = function (u: number): TranslateTransform {
-    const f0 = interpolator[0];
-    const f1 = interpolator[1];
-    const x = Length.create(f0.x.value + u * (f1.x.value - f0.x.value), f1.x.units);
-    const y = Length.create(f0.y.value + u * (f1.y.value - f0.y.value), f1.y.units);
-    return new TranslateTransform(x, y);
-  } as Interpolator<TranslateTransform>;
-  Object.setPrototypeOf(interpolator, TranslateTransformInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = f0.x.units === f1.x.units && f0.y.units === f1.y.units
-                                                    ? f0 : new TranslateTransform(f0.x.to(f1.x.units), f0.y.to(f1.y.units));
-  (interpolator as Mutable<typeof interpolator>)[1] = f1;
-  return interpolator;
-} as {
-  (f0: TranslateTransform, f1: TranslateTransform): Interpolator<TranslateTransform>;
+/** @internal */
+export const TranslateTransformInterpolator = (function (_super: typeof Interpolator) {
+  const TranslateTransformInterpolator = function (f0: TranslateTransform, f1: TranslateTransform): Interpolator<TranslateTransform> {
+    const interpolator = function (u: number): TranslateTransform {
+      const f0 = interpolator[0];
+      const f1 = interpolator[1];
+      const x = Length.create(f0.x.value + u * (f1.x.value - f0.x.value), f1.x.units);
+      const y = Length.create(f0.y.value + u * (f1.y.value - f0.y.value), f1.y.units);
+      return new TranslateTransform(x, y);
+    } as Interpolator<TranslateTransform>;
+    Object.setPrototypeOf(interpolator, TranslateTransformInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = f0.x.units === f1.x.units && f0.y.units === f1.y.units
+                                                      ? f0 : new TranslateTransform(f0.x.to(f1.x.units), f0.y.to(f1.y.units));
+    (interpolator as Mutable<typeof interpolator>)[1] = f1;
+    return interpolator;
+  } as {
+    (f0: TranslateTransform, f1: TranslateTransform): Interpolator<TranslateTransform>;
 
-  /** @hidden */
-  prototype: Interpolator<TranslateTransform>;
-};
+    /** @internal */
+    prototype: Interpolator<TranslateTransform>;
+  };
 
-TranslateTransformInterpolator.prototype = Object.create(Interpolator.prototype);
+  TranslateTransformInterpolator.prototype = Object.create(_super.prototype);
+
+  return TranslateTransformInterpolator;
+})(Interpolator);

@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/util";
+import type {Class, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {Color} from "@swim/style";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {View, ViewFastener} from "@swim/view";
+import {ViewFastener} from "@swim/view";
 import {StyleRule, StyleSheet, HtmlView, StyleView} from "@swim/dom";
 import {TokenViewInit, TokenView} from "./TokenView";
 import type {InputTokenViewObserver} from "./InputTokenViewObserver";
@@ -31,6 +32,8 @@ export class InputTokenView extends TokenView {
     this.onInputKey = this.onInputKey.bind(this);
   }
 
+  override readonly observerType?: Class<InputTokenViewObserver>;
+
   protected override initToken(): void {
     this.stylesheet.injectView();
     super.initToken();
@@ -38,47 +41,41 @@ export class InputTokenView extends TokenView {
     this.label.setView(this.label.createView());
   }
 
-  override readonly viewObservers!: ReadonlyArray<InputTokenViewObserver>;
-
-  override initView(init: InputTokenViewInit): void {
-    super.initView(init);
-  }
-
   protected initStylesheet(styleView: StyleView): void {
     const sheet = styleView.sheet;
     if (sheet !== null) {
-      const placeholder = new InputTokenView.PlaceholderRule(sheet, "placeholder");
-      sheet.setCssRule("placeholder", placeholder);
+      const placeholder = InputTokenView.PlaceholderRule.create(sheet, "placeholder");
+      sheet.setFastener("placeholder", placeholder);
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static PlaceholderRule = StyleRule.define<StyleSheet>({
     css: "::placeholder {}",
   });
 
   protected override initLabel(labelView: HtmlView): void {
     super.initLabel(labelView);
-    labelView.paddingTop.setState(0, View.Intrinsic);
-    labelView.paddingRight.setState(0, View.Intrinsic);
-    labelView.paddingBottom.setState(0, View.Intrinsic);
-    labelView.paddingLeft.setState(0, View.Intrinsic);
-    labelView.borderTopStyle.setState("none", View.Intrinsic);
-    labelView.borderRightStyle.setState("none", View.Intrinsic);
-    labelView.borderBottomStyle.setState("none", View.Intrinsic);
-    labelView.borderLeftStyle.setState("none", View.Intrinsic);
-    labelView.boxSizing.setState("border-box", View.Intrinsic);
-    labelView.backgroundColor.setState(Color.transparent(), View.Intrinsic);
-    labelView.appearance.setState("none", View.Intrinsic);
-    labelView.outlineStyle.setState("none", View.Intrinsic);
-    labelView.pointerEvents.setState("auto", View.Intrinsic);
+    labelView.paddingTop.setState(0, Affinity.Intrinsic);
+    labelView.paddingRight.setState(0, Affinity.Intrinsic);
+    labelView.paddingBottom.setState(0, Affinity.Intrinsic);
+    labelView.paddingLeft.setState(0, Affinity.Intrinsic);
+    labelView.borderTopStyle.setState("none", Affinity.Intrinsic);
+    labelView.borderRightStyle.setState("none", Affinity.Intrinsic);
+    labelView.borderBottomStyle.setState("none", Affinity.Intrinsic);
+    labelView.borderLeftStyle.setState("none", Affinity.Intrinsic);
+    labelView.boxSizing.setState("border-box", Affinity.Intrinsic);
+    labelView.backgroundColor.setState(Color.transparent(), Affinity.Intrinsic);
+    labelView.appearance.setState("none", Affinity.Intrinsic);
+    labelView.outlineStyle.setState("none", Affinity.Intrinsic);
+    labelView.pointerEvents.setState("auto", Affinity.Intrinsic);
   }
 
   @ViewFastener<InputTokenView, StyleView>({
     key: true,
-    type: HtmlView.style,
+    type: StyleView,
     child: true,
-    observe: true,
+    observes: true,
     viewDidMount(styleView: StyleView): void {
       this.owner.initStylesheet(styleView);
     },
@@ -86,16 +83,16 @@ export class InputTokenView extends TokenView {
   readonly stylesheet!: ViewFastener<this, StyleView>;
 
   @ViewFastener<InputTokenView, HtmlView>({
+    type: HtmlView.forTag("input"),
     child: false,
-    type: HtmlView.input,
-    observe: true,
+    observes: true,
     onSetView(labelView: HtmlView | null): void {
       if (labelView !== null) {
-        if (labelView.parentView === null) {
+        if (labelView.parent === null) {
           this.owner.labelContainer.injectView();
           const labelContainer = this.owner.labelContainer.view;
           if (labelContainer !== null) {
-            labelContainer.appendChildView(labelView);
+            labelContainer.appendChild(labelView);
           }
         }
         this.owner.initLabel(labelView);
@@ -114,7 +111,7 @@ export class InputTokenView extends TokenView {
   })
   override readonly label!: ViewFastener<this, HtmlView>;
 
-  /** @hidden */
+  /** @internal */
   get placeholderLook(): Look<Color> {
     return Look.neutralColor;
   }
@@ -123,15 +120,15 @@ export class InputTokenView extends TokenView {
     super.onApplyTheme(theme, mood, timing);
     const styleView = this.stylesheet.view;
     if (styleView !== null) {
-      const placeholder = styleView.getCssRule("placeholder") as StyleRule<StyleSheet> | null;
+      const placeholder = styleView.getFastener("placeholder", StyleRule);
       if (placeholder !== null) {
-        placeholder.color.setState(theme.getOr(this.placeholderLook, mood, null), timing, View.Intrinsic);
+        placeholder.color.setState(theme.getOr(this.placeholderLook, mood, null), timing, Affinity.Intrinsic);
       }
     }
 
     const labelView = this.label.view;
     if (labelView !== null) {
-      labelView.font(theme.getOr(Look.font, mood, null), false, View.Intrinsic);
+      labelView.font(theme.getOr(Look.font, mood, null), false, Affinity.Intrinsic);
     }
   }
 
@@ -143,11 +140,11 @@ export class InputTokenView extends TokenView {
   }
 
   protected didUpdateInput(inputView: HtmlView): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.tokenDidUpdateInput !== void 0) {
-        viewObserver.tokenDidUpdateInput(inputView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.tokenDidUpdateInput !== void 0) {
+        observer.tokenDidUpdateInput(inputView, this);
       }
     }
   }
@@ -160,11 +157,11 @@ export class InputTokenView extends TokenView {
   }
 
   protected didChangeInput(inputView: HtmlView): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.tokenDidChangeInput !== void 0) {
-        viewObserver.tokenDidChangeInput(inputView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.tokenDidChangeInput !== void 0) {
+        observer.tokenDidChangeInput(inputView, this);
       }
     }
   }
@@ -177,12 +174,16 @@ export class InputTokenView extends TokenView {
   }
 
   protected didAcceptInput(inputView: HtmlView): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.tokenDidAcceptInput !== void 0) {
-        viewObserver.tokenDidAcceptInput(inputView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.tokenDidAcceptInput !== void 0) {
+        observer.tokenDidAcceptInput(inputView, this);
       }
     }
+  }
+
+  override init(init: InputTokenViewInit): void {
+    super.init(init);
   }
 }

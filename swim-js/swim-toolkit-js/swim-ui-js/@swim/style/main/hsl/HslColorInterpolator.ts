@@ -15,26 +15,30 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {HslColor} from "./HslColor";
 
-/** @hidden */
-export const HslColorInterpolator = function (c0: HslColor, c1: HslColor): Interpolator<HslColor> {
-  const interpolator = function (u: number): HslColor {
-    const c0 = interpolator[0];
-    const c1 = interpolator[1];
-    const h = c0.h + u * (c1.h - c0.h);
-    const s = c0.s + u * (c1.s - c0.s);
-    const l = c0.l + u * (c1.l - c0.l);
-    const a = c0.a + u * (c1.a - c0.a);
-    return new HslColor(h, s, l, a);
-  } as Interpolator<HslColor>;
-  Object.setPrototypeOf(interpolator, HslColorInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = c0;
-  (interpolator as Mutable<typeof interpolator>)[1] = c1;
-  return interpolator;
-} as {
-  (c0: HslColor, c1: HslColor): Interpolator<HslColor>;
+/** @internal */
+export const HslColorInterpolator = (function (_super: typeof Interpolator) {
+  const HslColorInterpolator = function (c0: HslColor, c1: HslColor): Interpolator<HslColor> {
+    const interpolator = function (u: number): HslColor {
+      const c0 = interpolator[0];
+      const c1 = interpolator[1];
+      const h = c0.h + u * (c1.h - c0.h);
+      const s = c0.s + u * (c1.s - c0.s);
+      const l = c0.l + u * (c1.l - c0.l);
+      const a = c0.a + u * (c1.a - c0.a);
+      return new HslColor(h, s, l, a);
+    } as Interpolator<HslColor>;
+    Object.setPrototypeOf(interpolator, HslColorInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = c0;
+    (interpolator as Mutable<typeof interpolator>)[1] = c1;
+    return interpolator;
+  } as {
+    (c0: HslColor, c1: HslColor): Interpolator<HslColor>;
 
-  /** @hidden */
-  prototype: Interpolator<HslColor>;
-};
+    /** @internal */
+    prototype: Interpolator<HslColor>;
+  };
 
-HslColorInterpolator.prototype = Object.create(Interpolator.prototype);
+  HslColorInterpolator.prototype = Object.create(_super.prototype);
+
+  return HslColorInterpolator;
+})(Interpolator);

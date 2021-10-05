@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Mutable, AnyTiming, Timing} from "@swim/util";
+import {Mutable, Class, Lazy, AnyTiming, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {Length} from "@swim/math";
 import {Expansion} from "@swim/style";
-import {Look} from "@swim/theme";
+import {Look, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
 import {
   ViewContextType,
   View,
   ModalOptions,
   ModalState,
   Modal,
-  ViewAnimator,
-  ExpansionViewAnimator,
   PositionGestureInput,
   PositionGesture,
 } from "@swim/view";
@@ -45,42 +44,42 @@ export class ButtonStack extends HtmlView implements Modal {
 
   protected initButtonStack(): void {
     this.addClass("button-stack");
-    this.display.setState("block", View.Intrinsic);
-    this.position.setState("relative", View.Intrinsic);
-    this.width.setState(56, View.Intrinsic);
-    this.height.setState(56, View.Intrinsic);
-    this.opacity.setState(1, View.Intrinsic);
-    this.userSelect.setState("none", View.Intrinsic);
-    this.cursor.setState("pointer", View.Intrinsic);
+    this.display.setState("block", Affinity.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
+    this.width.setState(56, Affinity.Intrinsic);
+    this.height.setState(56, Affinity.Intrinsic);
+    this.opacity.setState(1, Affinity.Intrinsic);
+    this.userSelect.setState("none", Affinity.Intrinsic);
+    this.cursor.setState("pointer", Affinity.Intrinsic);
   }
 
   protected initButton(): void {
     const button = this.createButton();
     if (button !== null) {
-      this.append(button, "button");
+      this.appendChild(button, "button");
     }
   }
 
-  override readonly viewObservers!: ReadonlyArray<ButtonStackObserver>;
+  override readonly observerType?: Class<ButtonStackObserver>;
 
-  /** @hidden */
+  /** @internal */
   readonly stackHeight: number;
 
   protected createButton(): HtmlView | null {
     return FloatingButton.create();
   }
 
-  /** @hidden */
+  /** @internal */
   static Gesture = PositionGesture.define<ButtonStack, HtmlView>({
     didMovePress(input: PositionGestureInput, event: Event | null): void {
-      if (!input.defaultPrevented && !this.owner.disclosure.isExpanded()) {
+      if (!input.defaultPrevented && !this.owner.disclosure.expanded) {
         const stackHeight = this.owner.stackHeight;
         const phase = Math.min(Math.max(0, -(input.y - input.y0) / (0.5 * stackHeight)), 1);
         this.owner.disclosure.setPhase(phase);
         if (phase > 0.1) {
           input.clearHoldTimer();
-          if (!this.owner.disclosure.isExpanding()) {
-            this.owner.disclosure.setState(this.owner.disclosure.value.expanding());
+          if (!this.owner.disclosure.expanding) {
+            this.owner.disclosure.setState(this.owner.disclosure.value.asExpanding());
           }
         }
       }
@@ -89,7 +88,7 @@ export class ButtonStack extends HtmlView implements Modal {
       if (!input.defaultPrevented) {
         const phase = this.owner.disclosure.getPhase();
         if (input.t - input.t0 < input.holdDelay) {
-          if (phase < 0.1 || this.owner.disclosure.isExpanded()) {
+          if (phase < 0.1 || this.owner.disclosure.expanded) {
             this.owner.disclosure.collapse();
           } else {
             this.owner.disclosure.expand();
@@ -108,7 +107,7 @@ export class ButtonStack extends HtmlView implements Modal {
         this.owner.disclosure.toggle();
       } else {
         const phase = this.owner.disclosure.getPhase();
-        if (phase < 0.1 || this.owner.disclosure.isExpanded()) {
+        if (phase < 0.1 || this.owner.disclosure.expanded) {
           this.owner.disclosure.collapse();
         } else {
           this.owner.disclosure.expand();
@@ -126,7 +125,7 @@ export class ButtonStack extends HtmlView implements Modal {
   })
   readonly gesture!: PositionGesture<this, HtmlView>;
 
-  @ViewAnimator<ButtonStack, Expansion>({
+  @ThemeAnimator<ButtonStack, Expansion>({
     type: Expansion,
     state: Expansion.collapsed(),
     updateFlags: View.NeedsLayout,
@@ -145,18 +144,18 @@ export class ButtonStack extends HtmlView implements Modal {
       this.owner.didCollapse();
     },
   })
-  readonly disclosure!: ExpansionViewAnimator<this>;
+  readonly disclosure!: ExpansionThemeAnimator<this>;
 
-  @ViewAnimator({type: Number, state: 28, updateFlags: View.NeedsLayout})
-  readonly buttonSpacing!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 28, updateFlags: View.NeedsLayout})
+  readonly buttonSpacing!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 20, updateFlags: View.NeedsLayout})
-  readonly itemSpacing!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 20, updateFlags: View.NeedsLayout})
+  readonly itemSpacing!: ThemeAnimator<this, number>;
 
   @StyleAnimator<ButtonStack, number | undefined>({
     propertyNames: "opacity",
     type: Number,
-    onEnd(opacity: number | undefined): void {
+    didTransition(opacity: number | undefined): void {
       if (opacity === 1) {
         this.owner.didShow();
       } else if (opacity === 0) {
@@ -171,7 +170,7 @@ export class ButtonStack extends HtmlView implements Modal {
   }
 
   get modalState(): ModalState {
-    return this.disclosure.modalState!;
+    return this.disclosure.modalState! as ModalState;
   }
 
   get modality(): boolean | number {
@@ -187,7 +186,7 @@ export class ButtonStack extends HtmlView implements Modal {
   }
 
   get button(): HtmlView | null {
-    const childView = this.getChildView("button");
+    const childView = this.getChild("button");
     return childView instanceof HtmlView ? childView : null;
   }
 
@@ -197,21 +196,21 @@ export class ButtonStack extends HtmlView implements Modal {
 
   get items(): ReadonlyArray<ButtonItem> {
     const childNodes = this.node.childNodes;
-    const childViews = [];
+    const children = [];
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView instanceof ButtonItem) {
-        childViews.push(childView);
+        children.push(childView);
       }
     }
-    return childViews;
+    return children;
   }
 
   insertItem(item: ButtonItem, index?: number, key?: string): void {
     if (index === void 0) {
       index = this.node.childNodes.length - 1;
     }
-    this.insertChildNode(item.node, this.node.childNodes[1 + index] || null, key);
+    this.insertChild(item.node, this.node.childNodes[1 + index] || null, key);
   }
 
   removeItems(): void {
@@ -239,9 +238,9 @@ export class ButtonStack extends HtmlView implements Modal {
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.layoutStack();
-    const modalManager = this.modalService.manager;
-    if (modalManager !== void 0 && modalManager !== null) {
-      modalManager.updateModality();
+    const modalService = this.modalProvider.service;
+    if (modalService !== void 0 && modalService !== null) {
+      modalService.updateModality();
     }
   }
 
@@ -255,7 +254,7 @@ export class ButtonStack extends HtmlView implements Modal {
     let stackHeight = 0;
     let y: number;
     if (button !== null) {
-      button.zIndex.setState(childCount, View.Intrinsic);
+      button.zIndex.setState(childCount, Affinity.Intrinsic);
       const buttonHeight = button !== null ? button.height.value : void 0;
       y = buttonHeight instanceof Length
         ? buttonHeight.pxValue()
@@ -279,9 +278,9 @@ export class ButtonStack extends HtmlView implements Modal {
         const dy = itemHeight instanceof Length
                  ? itemHeight.pxValue()
                  : childView.node.offsetHeight;
-        childView.display.setState(phase === 0 ? "none" : "flex", View.Intrinsic);
-        childView.bottom.setState(phase * y, View.Intrinsic);
-        childView.zIndex.setState(zIndex, View.Intrinsic);
+        childView.display.setState(phase === 0 ? "none" : "flex", Affinity.Intrinsic);
+        childView.bottom.setState(phase * y, Affinity.Intrinsic);
+        childView.zIndex.setState(zIndex, Affinity.Intrinsic);
         y += dy;
         stackHeight += dy;
         itemIndex += 1;
@@ -291,8 +290,8 @@ export class ButtonStack extends HtmlView implements Modal {
     (this as Mutable<this>).stackHeight = stackHeight;
   }
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof HtmlView) {
       this.onInsertButton(childView);
@@ -301,25 +300,25 @@ export class ButtonStack extends HtmlView implements Modal {
     }
   }
 
-  protected override onRemoveChildView(childView: View): void {
+  protected override onRemoveChild(childView: View): void {
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof HtmlView) {
       this.onRemoveButton(childView);
     } else if (childView instanceof ButtonItem) {
       this.onRemoveItem(childView);
     }
-    super.onRemoveChildView(childView);
+    super.onRemoveChild(childView);
   }
 
   protected onInsertButton(button: HtmlView): void {
     this.gesture.setView(button);
     if (button instanceof FloatingButton) {
-      button.disclosure.setState(Expansion.expanded(), View.Intrinsic);
-      if (this.disclosure.isExpanded() || this.disclosure.isExpanding()) {
+      button.disclosure.setState(Expansion.expanded(), Affinity.Intrinsic);
+      if (this.disclosure.expanded || this.disclosure.expanding) {
         button.pushIcon(this.closeIcon);
       }
     }
-    button.zIndex.setState(0, View.Intrinsic);
+    button.zIndex.setState(0, Affinity.Intrinsic);
   }
 
   protected onRemoveButton(button: HtmlView): void {
@@ -327,11 +326,11 @@ export class ButtonStack extends HtmlView implements Modal {
   }
 
   protected onInsertItem(item: ButtonItem): void {
-    item.position.setState("absolute", View.Intrinsic);
-    item.right.setState(8, View.Intrinsic);
-    item.bottom.setState(8, View.Intrinsic);
-    item.left.setState(8, View.Intrinsic);
-    item.zIndex.setState(0, View.Intrinsic);
+    item.position.setState("absolute", Affinity.Intrinsic);
+    item.right.setState(8, Affinity.Intrinsic);
+    item.bottom.setState(8, Affinity.Intrinsic);
+    item.left.setState(8, Affinity.Intrinsic);
+    item.zIndex.setState(0, Affinity.Intrinsic);
   }
 
   protected onRemoveItem(item: ButtonItem): void {
@@ -339,11 +338,11 @@ export class ButtonStack extends HtmlView implements Modal {
   }
 
   protected willExpand(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.buttonStackWillExpand !== void 0) {
-        viewObserver.buttonStackWillExpand(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.buttonStackWillExpand !== void 0) {
+        observer.buttonStackWillExpand(this);
       }
     }
   }
@@ -355,31 +354,31 @@ export class ButtonStack extends HtmlView implements Modal {
       button.pushIcon(this.closeIcon, timing !== null ? timing : void 0);
     }
 
-    this.modalService.presentModal(this);
+    this.modalProvider.presentModal(this);
   }
 
   protected didExpand(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.buttonStackDidExpand !== void 0) {
-        viewObserver.buttonStackDidExpand(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.buttonStackDidExpand !== void 0) {
+        observer.buttonStackDidExpand(this);
       }
     }
   }
 
   protected willCollapse(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.buttonStackWillCollapse !== void 0) {
-        viewObserver.buttonStackWillCollapse(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.buttonStackWillCollapse !== void 0) {
+        observer.buttonStackWillCollapse(this);
       }
     }
   }
 
   protected onCollapse(): void {
-    this.modalService.dismissModal(this);
+    this.modalProvider.dismissModal(this);
 
     const button = this.button;
     if (button instanceof FloatingButton && button.iconCount > 1) {
@@ -389,11 +388,11 @@ export class ButtonStack extends HtmlView implements Modal {
   }
 
   protected didCollapse(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.buttonStackDidCollapse !== void 0) {
-        viewObserver.buttonStackDidCollapse(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.buttonStackDidCollapse !== void 0) {
+        observer.buttonStackDidCollapse(this);
       }
     }
   }
@@ -407,20 +406,20 @@ export class ButtonStack extends HtmlView implements Modal {
       }
       this.willShow();
       if (timing !== false) {
-        this.opacity.setState(1, timing, View.Intrinsic);
+        this.opacity.setState(1, timing, Affinity.Intrinsic);
       } else {
-        this.opacity.setState(1, View.Intrinsic);
+        this.opacity.setState(1, Affinity.Intrinsic);
         this.didShow();
       }
     }
   }
 
   protected willShow(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.buttonStackWillShow !== void 0) {
-        viewObserver.buttonStackWillShow(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.buttonStackWillShow !== void 0) {
+        observer.buttonStackWillShow(this);
       }
     }
 
@@ -430,11 +429,11 @@ export class ButtonStack extends HtmlView implements Modal {
   protected didShow(): void {
     this.requireUpdate(View.NeedsLayout);
 
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.buttonStackDidShow !== void 0) {
-        viewObserver.buttonStackDidShow(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.buttonStackDidShow !== void 0) {
+        observer.buttonStackDidShow(this);
       }
     }
   }
@@ -448,20 +447,20 @@ export class ButtonStack extends HtmlView implements Modal {
       }
       this.willHide();
       if (timing !== false) {
-        this.opacity.setState(0, timing, View.Intrinsic);
+        this.opacity.setState(0, timing, Affinity.Intrinsic);
       } else {
-        this.opacity.setState(0, View.Intrinsic);
+        this.opacity.setState(0, Affinity.Intrinsic);
         this.didHide();
       }
     }
   }
 
   protected willHide(): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.buttonStackWillHide !== void 0) {
-        viewObserver.buttonStackWillHide(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.buttonStackWillHide !== void 0) {
+        observer.buttonStackWillHide(this);
       }
     }
   }
@@ -470,11 +469,11 @@ export class ButtonStack extends HtmlView implements Modal {
     this.display("none");
     this.requireUpdate(View.NeedsLayout);
 
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.buttonStackDidHide !== void 0) {
-        viewObserver.buttonStackDidHide(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.buttonStackDidHide !== void 0) {
+        observer.buttonStackDidHide(this);
       }
     }
   }

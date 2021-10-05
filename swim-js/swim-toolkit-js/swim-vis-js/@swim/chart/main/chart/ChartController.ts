@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import type {Trait} from "@swim/model";
-import {Controller, ControllerViewTrait, ControllerFastener} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener, Controller} from "@swim/controller";
 import type {GraphView} from "../graph/GraphView";
 import type {GraphTrait} from "../graph/GraphTrait";
 import {GraphController} from "../graph/GraphController";
@@ -29,7 +30,7 @@ import {ChartTrait} from "./ChartTrait";
 import type {ChartControllerObserver} from "./ChartControllerObserver";
 
 export class ChartController<X, Y> extends GraphController<X, Y> {
-  override readonly controllerObservers!: ReadonlyArray<ChartControllerObserver<X, Y>>;
+  override readonly observerType?: Class<ChartControllerObserver<X, Y>>;
 
   protected initChartTrait(chartTrait: ChartTrait<X, Y>): void {
     // hook
@@ -76,11 +77,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetChartTrait(newGraphTrait: ChartTrait<X, Y> | null, oldGraphTrait: ChartTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetChartTrait !== void 0) {
-        controllerObserver.controllerWillSetChartTrait(newGraphTrait, oldGraphTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetChartTrait !== void 0) {
+        observer.controllerWillSetChartTrait(newGraphTrait, oldGraphTrait, this);
       }
     }
   }
@@ -96,17 +97,17 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetChartTrait(newGraphTrait: ChartTrait<X, Y> | null, oldGraphTrait: ChartTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetChartTrait !== void 0) {
-        controllerObserver.controllerDidSetChartTrait(newGraphTrait, oldGraphTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetChartTrait !== void 0) {
+        observer.controllerDidSetChartTrait(newGraphTrait, oldGraphTrait, this);
       }
     }
   }
 
   protected createChartView(): ChartView<X, Y> | null {
-    return ChartView.create<X, Y>();
+    return new ChartView<X, Y>();
   }
 
   protected initChartView(chartView: ChartView<X, Y>): void {
@@ -140,11 +141,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetChartView(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetChartView !== void 0) {
-        controllerObserver.controllerWillSetChartView(newChartView, oldChartView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetChartView !== void 0) {
+        observer.controllerWillSetChartView(newChartView, oldChartView, this);
       }
     }
   }
@@ -160,32 +161,19 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetChartView(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetChartView !== void 0) {
-        controllerObserver.controllerDidSetChartView(newChartView, oldChartView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetChartView !== void 0) {
+        observer.controllerDidSetChartView(newChartView, oldChartView, this);
       }
     }
   }
 
-  /** @hidden */
-  static ChartFastener = ControllerViewTrait.define<ChartController<unknown, unknown>, ChartView<unknown, unknown>, ChartTrait<unknown, unknown>>({
-    viewType: ChartView,
-    willSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
-      this.owner.willSetChartView(newChartView, oldChartView);
-    },
-    onSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
-      this.owner.onSetChartView(newChartView, oldChartView);
-    },
-    didSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
-      this.owner.didSetChartView(newChartView, oldChartView);
-    },
-    createView(): ChartView<unknown, unknown> | null {
-      return this.owner.createChartView();
-    },
+  /** @internal */
+  static ChartFastener = TraitViewFastener.define<ChartController<unknown, unknown>, ChartTrait<unknown, unknown>, ChartView<unknown, unknown>>({
     traitType: ChartTrait,
-    observeTrait: true,
+    observesTrait: true,
     willSetTrait(newChartTrait: ChartTrait<unknown, unknown> | null, oldChartTrait: ChartTrait<unknown, unknown> | null): void {
       this.owner.willSetChartTrait(newChartTrait, oldChartTrait);
     },
@@ -235,12 +223,25 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
         this.owner.insertLeftAxisTrait(newLeftAxisTrait);
       }
     },
+    viewType: ChartView,
+    willSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
+      this.owner.willSetChartView(newChartView, oldChartView);
+    },
+    onSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
+      this.owner.onSetChartView(newChartView, oldChartView);
+    },
+    didSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
+      this.owner.didSetChartView(newChartView, oldChartView);
+    },
+    createView(): ChartView<unknown, unknown> | null {
+      return this.owner.createChartView();
+    },
   });
 
-  @ControllerViewTrait<ChartController<X, Y>, ChartView<X, Y>, ChartTrait<X, Y>>({
+  @TraitViewFastener<ChartController<X, Y>, ChartTrait<X, Y>, ChartView<X, Y>>({
     extends: ChartController.ChartFastener,
   })
-  readonly chart!: ControllerViewTrait<this, ChartView<X, Y>, ChartTrait<X, Y>>;
+  readonly chart!: TraitViewFastener<this, ChartTrait<X, Y>, ChartView<X, Y>>;
 
   protected override attachGraphTrait(graphTrait: GraphTrait<X, Y>): void {
     super.attachGraphTrait(graphTrait);
@@ -300,11 +301,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetTopAxis(newTopAxisController: AxisController<X> | null, oldTopAxisController: AxisController<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTopAxis !== void 0) {
-        controllerObserver.controllerWillSetTopAxis(newTopAxisController, oldTopAxisController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTopAxis !== void 0) {
+        observer.controllerWillSetTopAxis(newTopAxisController, oldTopAxisController, this);
       }
     }
   }
@@ -320,20 +321,20 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetTopAxis(newTopAxisController: AxisController<X> | null, oldTopAxisController: AxisController<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTopAxis !== void 0) {
-        controllerObserver.controllerDidSetTopAxis(newTopAxisController, oldTopAxisController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTopAxis !== void 0) {
+        observer.controllerDidSetTopAxis(newTopAxisController, oldTopAxisController, this);
       }
     }
   }
 
   protected insertTopAxisTrait(topAxisTrait: AxisTrait<X>, targetTrait: Trait | null = null): void {
-    const childControllers = this.childControllers;
+    const children = this.children;
     let targetController: AxisController<unknown> | null = null;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof AxisController) {
         if (childController.axis.trait === topAxisTrait) {
           return;
@@ -346,7 +347,7 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
     if (topAxisController !== null) {
       topAxisController.axis.setTrait(topAxisTrait);
       this.topAxis.setController(topAxisController, targetController);
-      this.insertChildController(topAxisController, targetController);
+      this.insertChild(topAxisController, targetController);
       if (topAxisController.axis.view === null) {
         const topAxisView = this.createTopAxisView(topAxisController);
         let targetView: AxisView<unknown> | null = null;
@@ -364,9 +365,9 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected removeTopAxisTrait(topAxisTrait: AxisTrait<X>): void {
-    const childControllers = this.childControllers;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof AxisController && childController.axis.trait === topAxisTrait) {
         this.topAxis.setController(null);
         childController.remove();
@@ -388,11 +389,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetTopAxisTrait(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTopAxisTrait !== void 0) {
-        controllerObserver.controllerWillSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTopAxisTrait !== void 0) {
+        observer.controllerWillSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
       }
     }
   }
@@ -408,11 +409,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetTopAxisTrait(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTopAxisTrait !== void 0) {
-        controllerObserver.controllerDidSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTopAxisTrait !== void 0) {
+        observer.controllerDidSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
       }
     }
   }
@@ -434,11 +435,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetTopAxisView(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTopAxisView !== void 0) {
-        controllerObserver.controllerWillSetTopAxisView(newTopAxisView, oldTopAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTopAxisView !== void 0) {
+        observer.controllerWillSetTopAxisView(newTopAxisView, oldTopAxisView, this);
       }
     }
   }
@@ -454,19 +455,20 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetTopAxisView(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTopAxisView !== void 0) {
-        controllerObserver.controllerDidSetTopAxisView(newTopAxisView, oldTopAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTopAxisView !== void 0) {
+        observer.controllerDidSetTopAxisView(newTopAxisView, oldTopAxisView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static TopAxisFastener = ControllerFastener.define<ChartController<unknown, unknown>, AxisController<unknown>>({
     type: TopAxisController,
-    observe: true,
+    child: true,
+    observes: true,
     willSetController(newTopAxisController: AxisController<unknown> | null, oldTopAxisController: AxisController<unknown> | null): void {
       this.owner.willSetTopAxis(newTopAxisController, oldTopAxisController);
     },
@@ -535,11 +537,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetRightAxis(newRightAxisController: AxisController<Y> | null, oldRightAxisController: AxisController<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetRightAxis !== void 0) {
-        controllerObserver.controllerWillSetRightAxis(newRightAxisController, oldRightAxisController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetRightAxis !== void 0) {
+        observer.controllerWillSetRightAxis(newRightAxisController, oldRightAxisController, this);
       }
     }
   }
@@ -555,20 +557,20 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetRightAxis(newRightAxisController: AxisController<Y> | null, oldRightAxisController: AxisController<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetRightAxis !== void 0) {
-        controllerObserver.controllerDidSetRightAxis(newRightAxisController, oldRightAxisController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetRightAxis !== void 0) {
+        observer.controllerDidSetRightAxis(newRightAxisController, oldRightAxisController, this);
       }
     }
   }
 
   protected insertRightAxisTrait(rightAxisTrait: AxisTrait<Y>, targetTrait: Trait | null = null): void {
-    const childControllers = this.childControllers;
+    const children = this.children;
     let targetController: AxisController<unknown> | null = null;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof AxisController) {
         if (childController.axis.trait === rightAxisTrait) {
           return;
@@ -581,7 +583,7 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
     if (rightAxisController !== null) {
       rightAxisController.axis.setTrait(rightAxisTrait);
       this.rightAxis.setController(rightAxisController, targetController);
-      this.insertChildController(rightAxisController, targetController);
+      this.insertChild(rightAxisController, targetController);
       if (rightAxisController.axis.view === null) {
         const rightAxisView = this.createRightAxisView(rightAxisController);
         let targetView: AxisView<unknown> | null = null;
@@ -599,9 +601,9 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected removeRightAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
-    const childControllers = this.childControllers;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof AxisController && childController.axis.trait === rightAxisTrait) {
         this.rightAxis.setController(null);
         childController.remove();
@@ -623,11 +625,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetRightAxisTrait(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllertWillSetRightAxisTrait !== void 0) {
-        controllerObserver.controllertWillSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllertWillSetRightAxisTrait !== void 0) {
+        observer.controllertWillSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
       }
     }
   }
@@ -643,11 +645,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetRightAxisTrait(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetRightAxisTrait !== void 0) {
-        controllerObserver.controllerDidSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetRightAxisTrait !== void 0) {
+        observer.controllerDidSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
       }
     }
   }
@@ -669,11 +671,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetRightAxisView(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetRightAxisView !== void 0) {
-        controllerObserver.controllerWillSetRightAxisView(newRightAxisView, oldRightAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetRightAxisView !== void 0) {
+        observer.controllerWillSetRightAxisView(newRightAxisView, oldRightAxisView, this);
       }
     }
   }
@@ -689,19 +691,20 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetRightAxisView(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetRightAxisView !== void 0) {
-        controllerObserver.controllerDidSetRightAxisView(newRightAxisView, oldRightAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetRightAxisView !== void 0) {
+        observer.controllerDidSetRightAxisView(newRightAxisView, oldRightAxisView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static RightAxisFastener = ControllerFastener.define<ChartController<unknown, unknown>, AxisController<unknown>>({
     type: RightAxisController,
-    observe: true,
+    child: true,
+    observes: true,
     willSetController(newRightAxisController: AxisController<unknown> | null, oldRightAxisController: AxisController<unknown> | null): void {
       this.owner.willSetRightAxis(newRightAxisController, oldRightAxisController);
     },
@@ -770,11 +773,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetBottomAxis(newBottomAxisController: AxisController<X> | null, oldBottomAxisController: AxisController<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetBottomAxis !== void 0) {
-        controllerObserver.controllerWillSetBottomAxis(newBottomAxisController, oldBottomAxisController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetBottomAxis !== void 0) {
+        observer.controllerWillSetBottomAxis(newBottomAxisController, oldBottomAxisController, this);
       }
     }
   }
@@ -790,20 +793,20 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetBottomAxis(newBottomAxisController: AxisController<X> | null, oldBottomAxisController: AxisController<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetBottomAxis !== void 0) {
-        controllerObserver.controllerDidSetBottomAxis(newBottomAxisController, oldBottomAxisController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetBottomAxis !== void 0) {
+        observer.controllerDidSetBottomAxis(newBottomAxisController, oldBottomAxisController, this);
       }
     }
   }
 
   protected insertBottomAxisTrait(bottomAxisTrait: AxisTrait<X>, targetTrait: Trait | null = null): void {
-    const childControllers = this.childControllers;
+    const children = this.children;
     let targetController: AxisController<unknown> | null = null;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof AxisController) {
         if (childController.axis.trait === bottomAxisTrait) {
           return;
@@ -816,7 +819,7 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
     if (bottomAxisController !== null) {
       bottomAxisController.axis.setTrait(bottomAxisTrait);
       this.bottomAxis.setController(bottomAxisController, targetController);
-      this.insertChildController(bottomAxisController, targetController);
+      this.insertChild(bottomAxisController, targetController);
       if (bottomAxisController.axis.view === null) {
         const bottomAxisView = this.createBottomAxisView(bottomAxisController);
         let targetView: AxisView<unknown> | null = null;
@@ -834,9 +837,9 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected removeBottomAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
-    const childControllers = this.childControllers;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof AxisController && childController.axis.trait === bottomAxisTrait) {
         this.bottomAxis.setController(null);
         childController.remove();
@@ -858,11 +861,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetBottomAxisTrait(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetBottomAxisTrait !== void 0) {
-        controllerObserver.controllerWillSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetBottomAxisTrait !== void 0) {
+        observer.controllerWillSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
       }
     }
   }
@@ -878,11 +881,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetBottomAxisTrait(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetBottomAxisTrait !== void 0) {
-        controllerObserver.controllerDidSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetBottomAxisTrait !== void 0) {
+        observer.controllerDidSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
       }
     }
   }
@@ -904,11 +907,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetBottomAxisView(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetBottomAxisView !== void 0) {
-        controllerObserver.controllerWillSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetBottomAxisView !== void 0) {
+        observer.controllerWillSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
       }
     }
   }
@@ -924,19 +927,20 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetBottomAxisView(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetBottomAxisView !== void 0) {
-        controllerObserver.controllerDidSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetBottomAxisView !== void 0) {
+        observer.controllerDidSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static BottomAxisFastener = ControllerFastener.define<ChartController<unknown, unknown>, AxisController<unknown>>({
     type: BottomAxisController,
-    observe: true,
+    child: true,
+    observes: true,
     willSetController(newBottomAxisController: AxisController<unknown> | null, oldBottomAxisController: AxisController<unknown> | null): void {
       this.owner.willSetBottomAxis(newBottomAxisController, oldBottomAxisController);
     },
@@ -1005,11 +1009,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetLeftAxis(newLeftAxisController: AxisController<Y> | null, oldLeftAxisController: AxisController<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLeftAxis !== void 0) {
-        controllerObserver.controllerWillSetLeftAxis(newLeftAxisController, oldLeftAxisController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLeftAxis !== void 0) {
+        observer.controllerWillSetLeftAxis(newLeftAxisController, oldLeftAxisController, this);
       }
     }
   }
@@ -1025,20 +1029,20 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetLeftAxis(newLeftAxisController: AxisController<Y> | null, oldLeftAxisController: AxisController<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLeftAxis !== void 0) {
-        controllerObserver.controllerDidSetLeftAxis(newLeftAxisController, oldLeftAxisController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLeftAxis !== void 0) {
+        observer.controllerDidSetLeftAxis(newLeftAxisController, oldLeftAxisController, this);
       }
     }
   }
 
   protected insertLeftAxisTrait(leftAxisTrait: AxisTrait<Y>, targetTrait: Trait | null = null): void {
-    const childControllers = this.childControllers;
+    const children = this.children;
     let targetController: AxisController<unknown> | null = null;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof AxisController) {
         if (childController.axis.trait === leftAxisTrait) {
           return;
@@ -1051,7 +1055,7 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
     if (leftAxisController !== null) {
       leftAxisController.axis.setTrait(leftAxisTrait);
       this.leftAxis.setController(leftAxisController, targetController);
-      this.insertChildController(leftAxisController, targetController);
+      this.insertChild(leftAxisController, targetController);
       if (leftAxisController.axis.view === null) {
         const leftAxisView = this.createLeftAxisView(leftAxisController);
         let targetView: AxisView<unknown> | null = null;
@@ -1069,9 +1073,9 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected removeLeftAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
-    const childControllers = this.childControllers;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof AxisController && childController.axis.trait === leftAxisTrait) {
         this.leftAxis.setController(null);
         childController.remove();
@@ -1093,11 +1097,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetLeftAxisTrait(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLeftAxisTrait !== void 0) {
-        controllerObserver.controllerWillSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLeftAxisTrait !== void 0) {
+        observer.controllerWillSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
       }
     }
   }
@@ -1113,11 +1117,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetLeftAxisTrait(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLeftAxisTrait !== void 0) {
-        controllerObserver.controllerDidSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLeftAxisTrait !== void 0) {
+        observer.controllerDidSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
       }
     }
   }
@@ -1139,11 +1143,11 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected willSetLeftAxisView(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLeftAxisView !== void 0) {
-        controllerObserver.controllerWillSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLeftAxisView !== void 0) {
+        observer.controllerWillSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
       }
     }
   }
@@ -1159,19 +1163,20 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
   }
 
   protected didSetLeftAxisView(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLeftAxisView !== void 0) {
-        controllerObserver.controllerDidSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLeftAxisView !== void 0) {
+        observer.controllerDidSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static LeftAxisFastener = ControllerFastener.define<ChartController<unknown, unknown>, AxisController<unknown>>({
     type: LeftAxisController,
-    observe: true,
+    child: true,
+    observes: true,
     willSetController(newLeftAxisController: AxisController<unknown> | null, oldLeftAxisController: AxisController<unknown> | null): void {
       this.owner.willSetLeftAxis(newLeftAxisController, oldLeftAxisController);
     },
@@ -1218,8 +1223,8 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
     return controller instanceof LeftAxisController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const topAxisController = this.detectTopAxisController(childController);
     if (topAxisController !== null) {
       this.topAxis.setController(topAxisController, targetController);
@@ -1238,8 +1243,8 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const topAxisController = this.detectTopAxisController(childController);
     if (topAxisController !== null) {
       this.topAxis.setController(null);

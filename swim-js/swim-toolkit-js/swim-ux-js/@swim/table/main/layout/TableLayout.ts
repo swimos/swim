@@ -226,7 +226,7 @@ export class TableLayout implements Equals, Equivalent, Debug {
   }
 
   debug<T>(output: Output<T>): Output<T> {
-    output = output.write("TableLayout").write(46/*'.'*/).write("of").write(40/*'('*/)
+    output = output.write("TableLayout").write(46/*'.'*/).write("of").write(40/*'('*/);
     for (let i = 0, n = this.cols.length; i < n; i += 1) {
       if (i !== 0) {
         output = output.write(", ");

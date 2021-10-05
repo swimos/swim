@@ -15,7 +15,7 @@
 import {Input, Output, Parser, Diagnostic, Unicode, Base10} from "@swim/codec";
 import {LengthUnits, Length} from "./Length";
 
-/** @hidden */
+/** @internal */
 export class LengthParser extends Parser<Length> {
   private readonly defaultUnits: LengthUnits | undefined;
   private readonly valueParser: Parser<number> | undefined;

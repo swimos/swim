@@ -137,13 +137,13 @@ export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   containsPoint(that: GeoPoint): boolean {
     return this.lngMin <= that.lng && that.lng <= this.lngMax
         && this.latMin <= that.lat && that.lat <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsSegment(that: GeoSegment): boolean {
     return this.lngMin <= that.lng0 && that.lng0 <= this.lngMax
         && this.latMin <= that.lat0 && that.lat0 <= this.latMax
@@ -151,13 +151,13 @@ export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
         && this.latMin <= that.lat1 && that.lat1 <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsTile(that: GeoTile): boolean {
     return this.lngMin <= that.lngMin && that.lngMax <= this.lngMax
         && this.latMin <= that.latMin && that.latMax <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsBox(that: GeoBox): boolean {
     return this.lngMin <= that.lngMin && that.lngMax <= this.lngMax
         && this.latMin <= that.latMin && that.latMax <= this.latMax;
@@ -177,13 +177,13 @@ export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsPoint(that: GeoPoint): boolean {
     return this.lngMin <= that.lng && that.lng <= this.lngMax
         && this.latMin <= that.lat && that.lat <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsSegment(that: GeoSegment): boolean {
     const lngMin = this.lngMin;
     const latMin = this.latMin;
@@ -208,13 +208,13 @@ export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsTile(that: GeoTile): boolean {
     return this.lngMin <= that.lngMax && that.lngMin <= this.lngMax
         && this.latMin <= that.latMax && that.latMin <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsBox(that: GeoBox): boolean {
     return this.lngMin <= that.lngMax && that.lngMin <= this.lngMax
         && this.latMin <= that.latMax && that.latMin <= this.latMax;
@@ -324,7 +324,7 @@ export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is GeoTileInit {
     if (typeof value === "object" && value !== null) {
       const init = value as GeoTileInit;
@@ -335,7 +335,7 @@ export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isTuple(value: unknown): value is GeoTileTuple {
     return Array.isArray(value)
         && value.length === 3
@@ -344,19 +344,19 @@ export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
         && typeof value[2] === "number";
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyGeoTile {
     return value instanceof GeoTile
         || GeoTile.isInit(value)
         || GeoTile.isTuple(value);
   }
 
-  /** @hidden */
+  /** @internal */
   static unprojectX(x: number): number {
     return (x * Math.PI * 2 - Math.PI) * (180 / Math.PI);
   }
 
-  /** @hidden */
+  /** @internal */
   static unprojectY(y: number): number {
     return (Math.atan(Math.exp(y * Math.PI * 2 - Math.PI)) * 2 - Math.PI / 2) * (180 / Math.PI);
   }

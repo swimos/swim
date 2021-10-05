@@ -23,7 +23,7 @@ import {Format} from "../"; // forward import
  * and end [[Mark marks]].
  */
 export class Span extends Tag {
-  /** @hidden */
+  /** @internal */
   constructor(start: Mark, end: Mark) {
     super();
     this.start = start;

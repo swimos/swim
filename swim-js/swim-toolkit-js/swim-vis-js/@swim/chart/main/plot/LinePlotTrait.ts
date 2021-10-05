@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
-import {TraitProperty} from "@swim/model";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {LinePlotTraitObserver} from "./LinePlotTraitObserver";
 
 export class LinePlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
-  override readonly traitObservers!: ReadonlyArray<LinePlotTraitObserver<X, Y>>;
+  override readonly observerType?: Class<LinePlotTraitObserver<X, Y>>;
 
   protected willSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetPlotStroke !== void 0) {
         traitObserver.traitWillSetPlotStroke(newStroke, oldStroke, this);
       }
@@ -37,16 +38,16 @@ export class LinePlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
   }
 
   protected didSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetPlotStroke !== void 0) {
         traitObserver.traitDidSetPlotStroke(newStroke, oldStroke, this);
       }
     }
   }
 
-  @TraitProperty<LinePlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<LinePlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
     state: null,
     willSetState(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
       this.owner.willSetStroke(newStroke, oldStroke);
@@ -62,12 +63,12 @@ export class LinePlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
       return stroke;
     },
   })
-  readonly stroke!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly stroke!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetPlotStrokeWidth !== void 0) {
         traitObserver.traitWillSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
@@ -79,16 +80,16 @@ export class LinePlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
   }
 
   protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetPlotStrokeWidth !== void 0) {
         traitObserver.traitDidSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
     }
   }
 
-  @TraitProperty<LinePlotTrait<X, Y>, Length | null, AnyLength | null>({
+  @Property<LinePlotTrait<X, Y>, Length | null, AnyLength | null>({
     type: Length,
     state: null,
     willSetState(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
@@ -99,5 +100,5 @@ export class LinePlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
       this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
   })
-  readonly strokeWidth!: TraitProperty<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: Property<this, Length | null, AnyLength | null>;
 }

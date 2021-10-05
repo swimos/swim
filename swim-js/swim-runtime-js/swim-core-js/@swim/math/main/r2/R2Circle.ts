@@ -93,14 +93,14 @@ export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode
     }
   }
 
-  /** @hidden */
+  /** @internal */
   containsPoint(that: R2Point): boolean {
     const dx = that.x - this.cx;
     const dy = that.y - this.cy;
     return dx * dx + dy * dy <= this.r * this.r;
   }
 
-  /** @hidden */
+  /** @internal */
   containsSegment(that: R2Segment): boolean {
     const dx0 = that.x0 - this.cx;
     const dy0 = that.y0 - this.cy;
@@ -111,7 +111,7 @@ export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode
         && dx1 * dx1 + dy1 * dy1 <= r2;
   }
 
-  /** @hidden */
+  /** @internal */
   containsBox(that: R2Box): boolean {
     const dxMin = that.xMin - this.cx;
     const dyMin = that.yMin - this.cy;
@@ -124,7 +124,7 @@ export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode
         && dxMax * dxMax + dyMax * dyMax <= r2;
   }
 
-  /** @hidden */
+  /** @internal */
   containsCircle(that: R2Circle): boolean {
     const dx = that.cx - this.cx;
     const dy = that.cy - this.cy;
@@ -147,14 +147,14 @@ export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsPoint(that: R2Point): boolean {
     const dx = that.x - this.cx;
     const dy = that.y - this.cy;
     return dx * dx + dy * dy <= this.r * this.r;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsSegment(that: R2Segment): boolean {
     const cx = this.cx;
     const cy = this.cy;
@@ -188,14 +188,14 @@ export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode
     }
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsBox(that: R2Box): boolean {
     const dx = (this.cx < that.xMin ? that.xMin : that.xMax < this.cx ? that.xMax : this.cx) - this.cx;
     const dy = (this.cy < that.yMin ? that.yMin : that.yMax < this.cy ? that.yMax : this.cy) - this.cy;
     return dx * dx + dy * dy <= this.r * this.r;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsCircle(that: R2Circle): boolean {
     const dx = that.cx - this.cx;
     const dy = that.cy - this.cy;
@@ -285,7 +285,7 @@ export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is R2CircleInit {
     if (typeof value === "object" && value !== null) {
       const init = value as R2CircleInit;
@@ -296,7 +296,7 @@ export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyR2Circle {
     return value instanceof R2Circle
         || R2Circle.isInit(value);

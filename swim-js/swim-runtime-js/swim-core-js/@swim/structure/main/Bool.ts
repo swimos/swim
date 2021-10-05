@@ -28,7 +28,6 @@ export class Bool extends Value {
     });
     Object.defineProperty(this, "hashValue", {
       value: Strings.hash(value ? "true" : "false"),
-      enumerable: true,
     });
   }
 
@@ -116,7 +115,7 @@ export class Bool extends Value {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly hashValue!: number;
 
   override hashCode(): number {

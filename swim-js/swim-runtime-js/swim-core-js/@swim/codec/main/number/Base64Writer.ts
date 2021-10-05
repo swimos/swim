@@ -17,17 +17,17 @@ import {WriterException} from "../writer/WriterException";
 import {Writer} from "../writer/Writer";
 import type {Base64} from "./Base64";
 
-/** @hidden */
+/** @internal */
 export class Base64Writer extends Writer {
-  /** @hidden */
+  /** @internal */
   readonly base64: Base64;
-  /** @hidden */
+  /** @internal */
   readonly value: unknown;
-  /** @hidden */
+  /** @internal */
   readonly input: Uint8Array | null;
-  /** @hidden */
+  /** @internal */
   readonly index: number;
-  /** @hidden */
+  /** @internal */
   readonly step: number;
 
   constructor(base64: Base64, value: unknown, input: Uint8Array | null,

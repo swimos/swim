@@ -38,7 +38,7 @@ export {
   IconViewInit,
   IconView,
 } from "./IconView";
-export {IconViewAnimator} from "./IconViewAnimator";
+export {IconGraphicsAnimator} from "./IconGraphicsAnimator";
 
 export {
   GraphicsIconViewInit,

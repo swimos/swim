@@ -101,13 +101,11 @@ Object.defineProperty(Envelope.prototype, "prio", {
   get(this: Envelope): number {
     return 0;
   },
-  enumerable: true,
   configurable: true,
 });
 Object.defineProperty(Envelope.prototype, "rate", {
   get(this: Envelope): number {
     return 0;
   },
-  enumerable: true,
   configurable: true,
 });

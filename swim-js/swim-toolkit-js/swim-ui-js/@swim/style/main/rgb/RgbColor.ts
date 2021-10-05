@@ -190,7 +190,7 @@ export class RgbColor extends Color {
     return s;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   override toString(): string {
@@ -294,7 +294,7 @@ export class RgbColor extends Color {
     return Color.parse(str).rgb();
   }
 
-  /** @hidden */
+  /** @internal */
   static override isInit(value: unknown): value is RgbColorInit {
     if (typeof value === "object" && value !== null) {
       const init = value as RgbColorInit;
@@ -306,7 +306,7 @@ export class RgbColor extends Color {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyRgbColor {
     return value instanceof RgbColor
         || RgbColor.isInit(value)

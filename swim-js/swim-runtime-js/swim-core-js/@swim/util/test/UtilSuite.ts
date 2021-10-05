@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import {Spec, Unit} from "@swim/unit";
-import {LangSuite} from "./lang/LangSuite";
 import {RuntimeSuite} from "./runtime/RuntimeSuite";
 import {InterpolateSuite} from "./interpolate/InterpolateSuite";
 import {TransitionSuite} from "./transition/TransitionSuite";
@@ -21,11 +20,6 @@ import {ScaleSuite} from "./scale/ScaleSuite";
 
 @Unit
 export class UtilSuite extends Spec {
-  @Unit
-  langSuite(): Spec {
-    return new LangSuite();
-  }
-
   @Unit
   runtimeSuite(): Spec {
     return new RuntimeSuite();

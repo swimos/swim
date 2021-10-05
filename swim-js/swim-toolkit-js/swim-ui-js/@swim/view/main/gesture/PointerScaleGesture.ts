@@ -12,58 +12,87 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {View} from "../View";
+import type {FastenerOwner} from "@swim/fastener";
 import {GestureInput} from "./GestureInput";
-import type {GestureContext} from "./GestureContext";
 import type {ScaleGestureInput} from "./ScaleGestureInput";
-import {ScaleGesture} from "./ScaleGesture";
+import {ScaleGestureClass, ScaleGesture} from "./ScaleGesture";
+import type {View} from "../view/View";
 
-export class PointerScaleGesture<G extends GestureContext, V extends View, X, Y> extends ScaleGesture<G, V, X, Y> {
-  constructor(owner: G, gestureName: string | undefined) {
-    super(owner, gestureName);
-    this.onPointerEnter = this.onPointerEnter.bind(this);
-    this.onPointerLeave = this.onPointerLeave.bind(this);
-    this.onPointerDown = this.onPointerDown.bind(this);
-    this.onPointerMove = this.onPointerMove.bind(this);
-    this.onPointerUp = this.onPointerUp.bind(this);
-    this.onPointerCancel = this.onPointerCancel.bind(this);
-    this.onPointerLeaveDocument = this.onPointerLeaveDocument.bind(this);
-    this.onWheel = this.onWheel.bind(this);
-  }
+/** @internal */
+export interface PointerScaleGesture<O = unknown, V extends View = View, X = unknown, Y = unknown> extends ScaleGesture<O, V, X, Y> {
+  /** @internal @protected @override */
+  attachHoverEvents(view: V): void;
 
-  /** @hidden */
-  override attachHoverEvents(view: V): void {
+  /** @internal @protected @override */
+  detachHoverEvents(view: V): void;
+
+  /** @internal @protected @override */
+  attachPressEvents(view: V): void;
+
+  /** @internal @protected @override */
+  detachPressEvents(view: V): void;
+
+  /** @internal @protected */
+  updateInput(input: ScaleGestureInput<X, Y>, event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerEnter(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerLeave(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerDown(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerMove(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerUp(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerCancel(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerLeaveDocument(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onWheel(event: WheelEvent): void;
+}
+
+/** @internal */
+export const PointerScaleGesture = (function (_super: typeof ScaleGesture) {
+  const PointerScaleGesture = _super.extend() as ScaleGestureClass<PointerScaleGesture<any, any, any, any>>;
+
+  PointerScaleGesture.prototype.attachHoverEvents = function (this: PointerScaleGesture, view: View): void {
     view.on("pointerenter", this.onPointerEnter as EventListener);
     view.on("pointerleave", this.onPointerLeave as EventListener);
     view.on("pointerdown", this.onPointerDown as EventListener);
     view.on("wheel", this.onWheel as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override detachHoverEvents(view: V): void {
+  PointerScaleGesture.prototype.detachHoverEvents = function (this: PointerScaleGesture, view: View): void {
     view.off("pointerenter", this.onPointerEnter as EventListener);
     view.off("pointerleave", this.onPointerLeave as EventListener);
     view.off("pointerdown", this.onPointerDown as EventListener);
     view.off("wheel", this.onWheel as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override attachPressEvents(view: V): void {
+  PointerScaleGesture.prototype.attachPressEvents = function (this: PointerScaleGesture, view: View): void {
     document.body.addEventListener("pointermove", this.onPointerMove);
     document.body.addEventListener("pointerup", this.onPointerUp);
     document.body.addEventListener("pointercancel", this.onPointerCancel);
     document.body.addEventListener("pointerleave", this.onPointerLeaveDocument);
-  }
+  };
 
-  /** @hidden */
-  override detachPressEvents(view: V): void {
+  PointerScaleGesture.prototype.detachPressEvents = function (this: PointerScaleGesture, view: View): void {
     document.body.removeEventListener("pointermove", this.onPointerMove);
     document.body.removeEventListener("pointerup", this.onPointerUp);
     document.body.removeEventListener("pointercancel", this.onPointerCancel);
     document.body.removeEventListener("pointerleave", this.onPointerLeaveDocument);
-  }
+  };
 
-  protected updateInput(input: ScaleGestureInput<X, Y>, event: PointerEvent): void {
+  PointerScaleGesture.prototype.updateInput = function <X, Y>(this: PointerScaleGesture<unknown, View, X, Y>, input: ScaleGestureInput<X, Y>, event: PointerEvent): void {
     input.target = event.target;
     input.button = event.button;
     input.buttons = event.buttons;
@@ -86,9 +115,9 @@ export class PointerScaleGesture<G extends GestureContext, V extends View, X, Y>
     input.twist = event.twist;
     input.pressure = event.pressure;
     input.tangentialPressure = event.tangentialPressure;
-  }
+  };
 
-  protected onPointerEnter(event: PointerEvent): void {
+  PointerScaleGesture.prototype.onPointerEnter = function (this: PointerScaleGesture, event: PointerEvent): void {
     if (event.pointerType === "mouse" && event.buttons === 0) {
       const input = this.getOrCreateInput(event.pointerId, GestureInput.pointerInputType(event.pointerType),
                                           event.isPrimary, event.clientX, event.clientY, event.timeStamp);
@@ -99,9 +128,9 @@ export class PointerScaleGesture<G extends GestureContext, V extends View, X, Y>
         this.beginHover(input, event);
       }
     }
-  }
+  };
 
-  protected onPointerLeave(event: PointerEvent): void {
+  PointerScaleGesture.prototype.onPointerLeave = function (this: PointerScaleGesture, event: PointerEvent): void {
     if (event.pointerType === "mouse") {
       const input = this.getInput(event.pointerId);
       if (input !== null) {
@@ -111,9 +140,9 @@ export class PointerScaleGesture<G extends GestureContext, V extends View, X, Y>
         this.endHover(input, event);
       }
     }
-  }
+  };
 
-  protected onPointerDown(event: PointerEvent): void {
+  PointerScaleGesture.prototype.onPointerDown = function (this: PointerScaleGesture, event: PointerEvent): void {
     const input = this.getOrCreateInput(event.pointerId, GestureInput.pointerInputType(event.pointerType),
                                         event.isPrimary, event.clientX, event.clientY, event.timeStamp);
     this.updateInput(input, event);
@@ -123,17 +152,17 @@ export class PointerScaleGesture<G extends GestureContext, V extends View, X, Y>
     if (event.pointerType === "mouse" && event.button !== 0) {
       this.cancelPress(input, event);
     }
-  }
+  };
 
-  protected onPointerMove(event: PointerEvent): void {
+  PointerScaleGesture.prototype.onPointerMove = function (this: PointerScaleGesture, event: PointerEvent): void {
     const input = this.getInput(event.pointerId);
     if (input !== null) {
       this.updateInput(input, event);
       this.movePress(input, event);
     }
-  }
+  };
 
-  protected onPointerUp(event: PointerEvent): void {
+  PointerScaleGesture.prototype.onPointerUp = function (this: PointerScaleGesture, event: PointerEvent): void {
     const input = this.getInput(event.pointerId);
     if (input !== null) {
       this.updateInput(input, event);
@@ -142,29 +171,44 @@ export class PointerScaleGesture<G extends GestureContext, V extends View, X, Y>
         this.press(input, event);
       }
     }
-  }
+  };
 
-  protected onPointerCancel(event: PointerEvent): void {
+  PointerScaleGesture.prototype.onPointerCancel = function (this: PointerScaleGesture, event: PointerEvent): void {
     const input = this.getInput(event.pointerId);
     if (input !== null) {
       this.updateInput(input, event);
       this.cancelPress(input, event);
     }
-  }
+  };
 
-  protected onPointerLeaveDocument(event: PointerEvent): void {
+  PointerScaleGesture.prototype.onPointerLeaveDocument = function (this: PointerScaleGesture, event: PointerEvent): void {
     const input = this.getInput(event.pointerId);
     if (input !== null) {
       this.updateInput(input, event);
       this.cancelPress(input, event);
       this.endHover(input, event);
     }
-  }
+  };
 
-  protected onWheel(event: WheelEvent): void {
+  PointerScaleGesture.prototype.onWheel = function (this: PointerScaleGesture, event: WheelEvent): void {
     if (this.wheel) {
       event.preventDefault();
       this.zoom(event.clientX, event.clientY, event.deltaY, event);
     }
-  }
-}
+  };
+
+  PointerScaleGesture.construct = function <G extends PointerScaleGesture<any, any, any, any>>(gestureClass: ScaleGestureClass<PointerScaleGesture<any, any, any, any>>, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+    gesture.onPointerEnter = gesture.onPointerEnter.bind(gesture);
+    gesture.onPointerLeave = gesture.onPointerLeave.bind(gesture);
+    gesture.onPointerDown = gesture.onPointerDown.bind(gesture);
+    gesture.onPointerMove = gesture.onPointerMove.bind(gesture);
+    gesture.onPointerUp = gesture.onPointerUp.bind(gesture);
+    gesture.onPointerCancel = gesture.onPointerCancel.bind(gesture);
+    gesture.onPointerLeaveDocument = gesture.onPointerLeaveDocument.bind(gesture);
+    gesture.onWheel = gesture.onWheel.bind(gesture);
+    return gesture;
+  };
+
+  return PointerScaleGesture;
+})(ScaleGesture);

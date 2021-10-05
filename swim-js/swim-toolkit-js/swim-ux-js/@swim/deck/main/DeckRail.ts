@@ -193,7 +193,7 @@ export class DeckRail implements Equals, Equivalent, Debug {
   }
 
   debug<T>(output: Output<T>): Output<T> {
-    output = output.write("DeckRail").write(46/*'.'*/).write("of").write(40/*'('*/)
+    output = output.write("DeckRail").write(46/*'.'*/).write("of").write(40/*'('*/);
     for (let i = 0, n = this.posts.length; i < n; i += 1) {
       if (i !== 0) {
         output = output.write(", ");

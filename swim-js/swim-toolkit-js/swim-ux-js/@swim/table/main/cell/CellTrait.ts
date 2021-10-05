@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Trait} from "@swim/model";
 import type {CellTraitObserver} from "./CellTraitObserver";
 
-export class CellTrait extends GenericTrait {
-  override readonly traitObservers!: ReadonlyArray<CellTraitObserver>;
+export class CellTrait extends Trait {
+  override readonly observerType?: Class<CellTraitObserver>;
 }

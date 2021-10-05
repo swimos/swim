@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
-import {Look} from "@swim/theme";
 import {
-  ViewContextType,
-  ViewFlags,
-  ViewClass,
-  View,
-  ViewProperty,
-  ViewAnimator,
-  ViewAnimatorConstraint,
-  ExpansionViewAnimator,
-  ViewFastener,
-} from "@swim/view";
-import {NodeViewConstructor, HtmlView} from "@swim/dom";
+  Look,
+  ThemeAnimator,
+  ExpansionThemeAnimator,
+  ThemeConstraintAnimator,
+} from "@swim/theme";
+import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
+import {HtmlViewClass, HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {ColView} from "../col/ColView";
 import type {HeaderViewObserver} from "./HeaderViewObserver";
@@ -40,66 +37,66 @@ export class HeaderView extends HtmlView {
 
   protected initHeader(): void {
     this.addClass("header");
-    this.position.setState("relative", View.Intrinsic);
-    this.overflowX.setState("hidden", View.Intrinsic);
-    this.overflowY.setState("hidden", View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
+    this.overflowX.setState("hidden", Affinity.Intrinsic);
+    this.overflowY.setState("hidden", Affinity.Intrinsic);
   }
 
-  override readonly viewObservers!: ReadonlyArray<HeaderViewObserver>;
+  override readonly observerType?: Class<HeaderViewObserver>;
 
-  @ViewProperty({type: TableLayout, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly layout!: ViewProperty<this, TableLayout | null, AnyTableLayout | null>;
+  @Property({type: TableLayout, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
   protected didSetDepth(newDepth: number, oldDepth: number): void {
     // hook
   }
 
-  @ViewProperty<HeaderView, number>({
+  @Property<HeaderView, number>({
     type: Number,
-    inherit: true,
+    inherits: true,
     state: 0,
     updateFlags: View.NeedsLayout,
     didSetState(newDepth: number, oldDepth: number): void {
       this.owner.didSetDepth(newDepth, oldDepth);
     },
   })
-  readonly depth!: ViewProperty<this, number>;
+  readonly depth!: Property<this, number>;
 
-  @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly rowSpacing!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
+  @ThemeConstraintAnimator({type: Length, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly rowSpacing!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly rowHeight!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
+  @ThemeConstraintAnimator({type: Length, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly rowHeight!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Expansion, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly stretch!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ThemeAnimator({type: Expansion, inherits: true, state: null, updateFlags: View.NeedsLayout})
+  readonly stretch!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
 
   getCol(key: string): ColView | null;
-  getCol<V extends ColView>(key: string, colViewClass: ViewClass<V>): V | null;
-  getCol(key: string, colViewClass?: ViewClass<ColView>): ColView | null {
+  getCol<V extends ColView>(key: string, colViewClass: Class<V>): V | null;
+  getCol(key: string, colViewClass?: Class<ColView>): ColView | null {
     if (colViewClass === void 0) {
       colViewClass = ColView;
     }
-    const colView = this.getChildView(key);
+    const colView = this.getChild(key);
     return colView instanceof colViewClass ? colView : null;
   }
 
   getOrCreateCol(key: string): ColView;
-  getOrCreateCol<V extends ColView>(key: string, colViewConstructor: NodeViewConstructor<V>): V;
-  getOrCreateCol(key: string, colViewConstructor?: NodeViewConstructor<ColView>): ColView {
-    if (colViewConstructor === void 0) {
-      colViewConstructor = ColView;
+  getOrCreateCol<V extends ColView>(key: string, colViewClass: HtmlViewClass<V>): V;
+  getOrCreateCol(key: string, colViewClass?: HtmlViewClass<ColView>): ColView {
+    if (colViewClass === void 0) {
+      colViewClass = ColView;
     }
-    let colView = this.getChildView(key) as ColView | null;
-    if (!(colView instanceof colViewConstructor)) {
-      colView = HtmlView.fromConstructor(colViewConstructor);
-      this.setChildView(key, colView);
+    let colView = this.getChild(key) as ColView | null;
+    if (!(colView instanceof colViewClass)) {
+      colView = colViewClass.create();
+      this.setChild(key, colView);
     }
     return colView;
   }
 
   setCol(key: string, colView: ColView): void {
-    this.setChildView(key, colView);
+    this.setChild(key, colView);
   }
 
   insertCol(colView: ColView, targetView: View | null = null): void {
@@ -116,7 +113,7 @@ export class HeaderView extends HtmlView {
     const colFastener = this.createColFastener(colView);
     colFasteners.splice(targetIndex, 0, colFastener);
     colFastener.setView(colView, targetView);
-    if (this.isMounted()) {
+    if (this.mounted) {
       colFastener.mount();
     }
   }
@@ -127,7 +124,7 @@ export class HeaderView extends HtmlView {
       const colFastener = colFasteners[i]!;
       if (colFastener.view === colView) {
         colFastener.setView(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           colFastener.unmount();
         }
         colFasteners.splice(i, 1);
@@ -137,12 +134,12 @@ export class HeaderView extends HtmlView {
   }
 
   protected initCol(colView: ColView, colFastener: ViewFastener<this, ColView>): void {
-    colView.display.setState("none", View.Intrinsic);
-    colView.position.setState("absolute", View.Intrinsic);
-    colView.left.setState(0, View.Intrinsic);
-    colView.top.setState(0, View.Intrinsic);
-    colView.width.setState(0, View.Intrinsic);
-    colView.height.setState(this.height.state, View.Intrinsic);
+    colView.display.setState("none", Affinity.Intrinsic);
+    colView.position.setState("absolute", Affinity.Intrinsic);
+    colView.left.setState(0, Affinity.Intrinsic);
+    colView.top.setState(0, Affinity.Intrinsic);
+    colView.width.setState(0, Affinity.Intrinsic);
+    colView.height.setState(this.height.state, Affinity.Intrinsic);
   }
 
   protected attachCol(colView: ColView, colFastener: ViewFastener<this, ColView>): void {
@@ -155,11 +152,11 @@ export class HeaderView extends HtmlView {
 
   protected willSetCol(newColView: ColView | null, oldColView: ColView | null,
                        targetView: View | null, colFastener: ViewFastener<this, ColView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetCol !== void 0) {
-        viewObserver.viewWillSetCol(newColView, oldColView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetCol !== void 0) {
+        observer.viewWillSetCol(newColView, oldColView, targetView, this);
       }
     }
   }
@@ -177,16 +174,16 @@ export class HeaderView extends HtmlView {
 
   protected didSetCol(newColView: ColView | null, oldColView: ColView | null,
                       targetView: View | null, colFastener: ViewFastener<this, ColView>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetCol !== void 0) {
-        viewObserver.viewDidSetCol(newColView, oldColView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetCol !== void 0) {
+        observer.viewDidSetCol(newColView, oldColView, targetView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static ColFastener = ViewFastener.define<HeaderView, ColView>({
     type: ColView,
     child: false,
@@ -202,13 +199,13 @@ export class HeaderView extends HtmlView {
   });
 
   protected createColFastener(colView: ColView): ViewFastener<this, ColView> {
-    return new HeaderView.ColFastener(this, colView.key, "col");
+    return HeaderView.ColFastener.create(this, colView.key ?? "col");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly colFasteners: ReadonlyArray<ViewFastener<this, ColView>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountColFasteners(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
@@ -217,7 +214,7 @@ export class HeaderView extends HtmlView {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountColFasteners(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
@@ -230,16 +227,16 @@ export class HeaderView extends HtmlView {
     return view instanceof ColView ? view : null;
   }
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     const colView = this.detectCol(childView);
     if (colView !== null) {
       this.insertCol(colView, targetView);
     }
   }
 
-  protected override onRemoveChildView(childView: View): void {
-    super.onRemoveChildView(childView);
+  protected override onRemoveChild(childView: View): void {
+    super.onRemoveChild(childView);
     const colView = this.detectCol(childView);
     if (colView !== null) {
       this.removeCol(colView);
@@ -254,23 +251,23 @@ export class HeaderView extends HtmlView {
   protected layoutHeader(): void {
     const rowHeight = this.rowHeight.value;
     if (rowHeight !== null) {
-      this.height.setState(rowHeight, View.Intrinsic);
+      this.height.setState(rowHeight, Affinity.Intrinsic);
     }
   }
 
-  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
-      this.layoutChildViews(displayFlags, viewContext, displayChildView);
+      this.layoutChildViews(displayFlags, viewContext, displayChild);
     } else {
-      super.displayChildViews(displayFlags, viewContext, displayChildView);
+      super.displayChildren(displayFlags, viewContext, displayChild);
     }
   }
 
   protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                viewContext: ViewContextType<this>) => void): void {
+                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                            viewContext: ViewContextType<this>) => void): void {
     const layout = this.layout.state;
     const height = this.height.state;
     const stretch = this.stretch.getPhaseOr(1);
@@ -281,40 +278,40 @@ export class HeaderView extends HtmlView {
         const key = childView.key;
         const col = layout !== null && key !== void 0 ? layout.getCol(key) : null;
         if (col !== null) {
-          childView.display.setState(!col.hidden ? "flex" : "none", View.Intrinsic);
-          childView.left.setState(col.left, View.Intrinsic);
-          childView.width.setState(col.width, View.Intrinsic);
-          childView.height.setState(height, View.Intrinsic);
+          childView.display.setState(!col.hidden ? "flex" : "none", Affinity.Intrinsic);
+          childView.left.setState(col.left, Affinity.Intrinsic);
+          childView.width.setState(col.width, Affinity.Intrinsic);
+          childView.height.setState(height, Affinity.Intrinsic);
           const textColor = col.textColor;
           if (textColor instanceof Look) {
-            childView.color.setLook(textColor, View.Intrinsic);
+            childView.color.setLook(textColor, Affinity.Intrinsic);
           } else {
-            childView.color.setState(textColor, View.Intrinsic);
+            childView.color.setState(textColor, Affinity.Intrinsic);
           }
           if (!col.persistent) {
-            childView.opacity.setState(stretch, View.Intrinsic);
+            childView.opacity.setState(stretch, Affinity.Intrinsic);
           }
         } else {
-          childView.display.setState("none", View.Intrinsic);
-          childView.left.setState(null, View.Intrinsic);
-          childView.width.setState(null, View.Intrinsic);
-          childView.height.setState(null, View.Intrinsic);
+          childView.display.setState("none", Affinity.Intrinsic);
+          childView.left.setState(null, Affinity.Intrinsic);
+          childView.width.setState(null, Affinity.Intrinsic);
+          childView.height.setState(null, Affinity.Intrinsic);
         }
       }
-      displayChildView.call(this, childView, displayFlags, viewContext);
+      displayChild.call(this, childView, displayFlags, viewContext);
     }
-    super.displayChildViews(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, viewContext, layoutChildView);
   }
 
-  /** @hidden */
-  protected override mountViewFasteners(): void {
-    super.mountViewFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountColFasteners();
   }
 
-  /** @hidden */
-  protected override unmountViewFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountColFasteners();
-    super.unmountViewFasteners();
+    super.unmountFasteners();
   }
 }

@@ -15,7 +15,7 @@
 import {Input, Parser, Diagnostic, Unicode, Base10} from "@swim/codec";
 import {R2QuadraticCurve} from "./R2QuadraticCurve";
 
-/** @hidden */
+/** @internal */
 export class R2QuadraticCurveParser extends Parser<R2QuadraticCurve> {
   private readonly x0Parser: Parser<number> | undefined;
   private readonly y0Parser: Parser<number> | undefined;

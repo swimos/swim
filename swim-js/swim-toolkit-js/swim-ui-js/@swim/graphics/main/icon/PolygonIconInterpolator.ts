@@ -18,21 +18,21 @@ import type {Color} from "@swim/style";
 import type {Look, MoodMatrix} from "@swim/theme";
 import {PolygonIcon} from "./PolygonIcon";
 
-/** @hidden */
+/** @internal */
 export interface PolygonIconInterpolator extends Interpolator<PolygonIcon> {
-  /** @hidden */
+  /** @internal */
   readonly sides: number;
 
-  /** @hidden */
+  /** @internal */
   readonly rotationInterpolator: Interpolator<Angle>;
 
-  /** @hidden */
+  /** @internal */
   readonly fillColorInterpolator: Interpolator<Color | null>;
 
-  /** @hidden */
+  /** @internal */
   readonly fillLook: Look<Color> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly moodModifier: MoodMatrix | null;
 
   readonly 0: PolygonIcon;
@@ -42,67 +42,69 @@ export interface PolygonIconInterpolator extends Interpolator<PolygonIcon> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const PolygonIconInterpolator = function (i0: PolygonIcon, i1: PolygonIcon): PolygonIconInterpolator {
-  const interpolator = function (u: number): PolygonIcon {
-    const sides = interpolator.sides;
-    const rotation = interpolator.rotationInterpolator(u);
-    const fillColor = interpolator.fillColorInterpolator(u);
-    const fillLook = interpolator.fillLook;
-    const moodModifier = interpolator.moodModifier;
-    return new PolygonIcon(sides, rotation, fillColor, fillLook, moodModifier);
-  } as PolygonIconInterpolator;
-  Object.setPrototypeOf(interpolator, PolygonIconInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).sides = i1.sides;
-  (interpolator as Mutable<typeof interpolator>).rotationInterpolator = i0.rotation.interpolateTo(i1.rotation);
-  (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
-  (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
-  (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
-  return interpolator;
-} as {
-  (i0: PolygonIcon, i1: PolygonIcon): PolygonIconInterpolator;
+/** @internal */
+export const PolygonIconInterpolator = (function (_super: typeof Interpolator) {
+  const PolygonIconInterpolator = function (i0: PolygonIcon, i1: PolygonIcon): PolygonIconInterpolator {
+    const interpolator = function (u: number): PolygonIcon {
+      const sides = interpolator.sides;
+      const rotation = interpolator.rotationInterpolator(u);
+      const fillColor = interpolator.fillColorInterpolator(u);
+      const fillLook = interpolator.fillLook;
+      const moodModifier = interpolator.moodModifier;
+      return new PolygonIcon(sides, rotation, fillColor, fillLook, moodModifier);
+    } as PolygonIconInterpolator;
+    Object.setPrototypeOf(interpolator, PolygonIconInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).sides = i1.sides;
+    (interpolator as Mutable<typeof interpolator>).rotationInterpolator = i0.rotation.interpolateTo(i1.rotation);
+    (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
+    (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
+    (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
+    return interpolator;
+  } as {
+    (i0: PolygonIcon, i1: PolygonIcon): PolygonIconInterpolator;
 
-  /** @hidden */
-  prototype: PolygonIconInterpolator;
-};
+    /** @internal */
+    prototype: PolygonIconInterpolator;
+  };
 
-PolygonIconInterpolator.prototype = Object.create(Interpolator.prototype);
+  PolygonIconInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(PolygonIconInterpolator.prototype, 0, {
-  get(this: PolygonIconInterpolator): PolygonIcon {
-    const sides = this.sides;
-    const rotation = this.rotationInterpolator[0];
-    const fillColor = this.fillColorInterpolator[0];
-    const fillLook = this.fillLook;
-    const moodModifier = this.moodModifier;
-    return new PolygonIcon(sides, rotation, fillColor, fillLook, moodModifier);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(PolygonIconInterpolator.prototype, 0, {
+    get(this: PolygonIconInterpolator): PolygonIcon {
+      const sides = this.sides;
+      const rotation = this.rotationInterpolator[0];
+      const fillColor = this.fillColorInterpolator[0];
+      const fillLook = this.fillLook;
+      const moodModifier = this.moodModifier;
+      return new PolygonIcon(sides, rotation, fillColor, fillLook, moodModifier);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(PolygonIconInterpolator.prototype, 1, {
-  get(this: PolygonIconInterpolator): PolygonIcon {
-    const sides = this.sides;
-    const rotation = this.rotationInterpolator[1];
-    const fillColor = this.fillColorInterpolator[1];
-    const fillLook = this.fillLook;
-    const moodModifier = this.moodModifier;
-    return new PolygonIcon(sides, rotation, fillColor, fillLook, moodModifier);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(PolygonIconInterpolator.prototype, 1, {
+    get(this: PolygonIconInterpolator): PolygonIcon {
+      const sides = this.sides;
+      const rotation = this.rotationInterpolator[1];
+      const fillColor = this.fillColorInterpolator[1];
+      const fillLook = this.fillLook;
+      const moodModifier = this.moodModifier;
+      return new PolygonIcon(sides, rotation, fillColor, fillLook, moodModifier);
+    },
+    configurable: true,
+  });
 
-PolygonIconInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof PolygonIconInterpolator) {
-    return this.sides === that.sides
-        && this.rotationInterpolator.equals(that.rotationInterpolator)
-        && this.fillColorInterpolator.equals(that.fillColorInterpolator)
-        && this.fillLook === that.fillLook
-        && Equals(this.moodModifier, that.moodModifier);
-  }
-  return false;
-};
+  PolygonIconInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof PolygonIconInterpolator) {
+      return this.sides === that.sides
+          && this.rotationInterpolator.equals(that.rotationInterpolator)
+          && this.fillColorInterpolator.equals(that.fillColorInterpolator)
+          && this.fillLook === that.fillLook
+          && Equals(this.moodModifier, that.moodModifier);
+    }
+    return false;
+  };
+
+  return PolygonIconInterpolator;
+})(Interpolator);

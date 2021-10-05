@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AnyTiming} from "@swim/util";
+import type {Class, AnyTiming} from "@swim/util";
 import type {GeoBox} from "@swim/geo";
 import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
@@ -23,7 +23,7 @@ import {GeoLayerView} from "../layer/GeoLayerView";
 import type {MapViewObserver} from "./MapViewObserver";
 
 export abstract class MapView extends GeoLayerView {
-  override readonly viewObservers!: ReadonlyArray<MapViewObserver>;
+  override readonly observerType?: Class<MapViewObserver>;
 
   protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsResize) !== 0) {
@@ -59,11 +59,11 @@ export abstract class MapView extends GeoLayerView {
   }
 
   protected willSetCanvas(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetMapCanvas !== void 0) {
-        viewObserver.viewWillSetMapCanvas(newCanvasView, oldCanvasView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetMapCanvas !== void 0) {
+        observer.viewWillSetMapCanvas(newCanvasView, oldCanvasView, this);
       }
     }
   }
@@ -79,11 +79,11 @@ export abstract class MapView extends GeoLayerView {
   }
 
   protected didSetCanvas(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetMapCanvas !== void 0) {
-        viewObserver.viewDidSetMapCanvas(newCanvasView, oldCanvasView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetMapCanvas !== void 0) {
+        observer.viewDidSetMapCanvas(newCanvasView, oldCanvasView, this);
       }
     }
   }
@@ -116,11 +116,11 @@ export abstract class MapView extends GeoLayerView {
   }
 
   protected willSetContainer(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetMapContainer !== void 0) {
-        viewObserver.viewWillSetMapContainer(newContainerView, oldContainerView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetMapContainer !== void 0) {
+        observer.viewWillSetMapContainer(newContainerView, oldContainerView, this);
       }
     }
   }
@@ -136,11 +136,11 @@ export abstract class MapView extends GeoLayerView {
   }
 
   protected didSetContainer(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetMapContainer !== void 0) {
-        viewObserver.viewDidSetMapContainer(newContainerView, oldContainerView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetMapContainer !== void 0) {
+        observer.viewDidSetMapContainer(newContainerView, oldContainerView, this);
       }
     }
   }
@@ -159,6 +159,4 @@ export abstract class MapView extends GeoLayerView {
     },
   })
   readonly container!: ViewFastener<this, HtmlView>;
-
-  static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsProject;
 }

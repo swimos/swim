@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  CssContextPrototype,
-  CssContext,
-} from "./CssContext";
+export * from "./types";
+
+export {StyleContext} from "./StyleContext";
 
 export {
-  CssRuleType,
+  StyleMapInit,
+  StyleMap,
+} from "./StyleMap";
+
+export {CssContext} from "./CssContext";
+
+export {
   CssRuleInit,
   CssRuleDescriptor,
-  CssRuleDescriptorExtends,
-  CssRuleConstructor,
   CssRuleClass,
   CssRule,
 } from "./CssRule";
@@ -30,8 +33,6 @@ export {
 export {
   StyleRuleInit,
   StyleRuleDescriptor,
-  StyleRuleDescriptorExtends,
-  StyleRuleConstructor,
   StyleRuleClass,
   StyleRule,
 } from "./StyleRule";
@@ -39,13 +40,13 @@ export {
 export {
   MediaRuleInit,
   MediaRuleDescriptor,
-  MediaRuleDescriptorExtends,
-  MediaRuleConstructor,
   MediaRuleClass,
   MediaRule,
 } from "./MediaRule";
 
 export {
-  StyleSheetContext,
+  StyleSheetInit,
+  StyleSheetDescriptor,
+  StyleSheetClass,
   StyleSheet,
 } from "./StyleSheet";

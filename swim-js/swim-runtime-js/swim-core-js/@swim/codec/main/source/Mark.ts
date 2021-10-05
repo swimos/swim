@@ -23,7 +23,7 @@ import {Format} from "../"; // forward import
  * column number, with an optional note.
  */
 export class Mark extends Tag {
-  /** @hidden */
+  /** @internal */
   constructor(offset: number, line: number, column: number, note: string | undefined) {
     super();
     this.offset = offset;

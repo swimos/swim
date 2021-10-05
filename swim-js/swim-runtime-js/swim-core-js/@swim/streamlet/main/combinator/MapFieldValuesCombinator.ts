@@ -21,7 +21,7 @@ export class MapFieldValuesCombinator<K, VI, VO, I> extends MapFieldValuesOperat
     this.func = func;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly func: MapFieldValuesFunction<K, VI, VO>;
 
   override evaluate(key: K, value: VI | undefined): VO | undefined {

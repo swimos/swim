@@ -27,6 +27,20 @@ const core = [
     ],
   },
   {
+    id: "fastener",
+    name: "@swim/fastener",
+    targets: [
+      {
+        id: "main",
+        deps: ["util"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "fastener", "unit"],
+      },
+    ],
+  },
+  {
     id: "args",
     name: "@swim/args",
     targets: [
@@ -36,7 +50,7 @@ const core = [
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "args"],
+        deps: ["util", "codec", "args", "unit"],
       },
     ],
   },
@@ -80,11 +94,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec"],
+        deps: ["util", "codec", "fastener"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "constraint"],
+        deps: ["util", "codec", "fastener", "unit", "constraint"],
       },
     ],
   },
@@ -226,7 +240,7 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
       },
     ],
   },

@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .mouseEventsEnabled(true)
@@ -25,7 +25,7 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const gaugeView = canvasView.append(swim.GaugeView)
+const gaugeView = canvasView.appendChild(swim.GaugeView)
     .innerRadius(swim.Length.pct(25))
     .startAngle(swim.Angle.rad(3 * Math.PI / 4))
     .sweepAngle(swim.Angle.rad(3 * Math.PI / 2))
@@ -42,15 +42,15 @@ const gaugeView = canvasView.append(swim.GaugeView)
       }
     });
 
-const dial0View = gaugeView.append(swim.DialView, "dial0")
+const dial0View = gaugeView.appendChild(swim.DialView, "dial0")
     .value(0.33)
     .label("label 0");
 
-const dial1View = gaugeView.append(swim.DialView, "dial1")
+const dial1View = gaugeView.appendChild(swim.DialView, "dial1")
     .value(0.5)
     .label("label 1");
 
-const dial2View = gaugeView.append(swim.DialView, "dial2")
+const dial2View = gaugeView.appendChild(swim.DialView, "dial2")
     .value(0.67)
     .label("label 2");
 
@@ -61,7 +61,7 @@ setInterval(function () {
   dial2View.value(Math.random(), timing);
 }, 1000);
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
     </script>
   </body>

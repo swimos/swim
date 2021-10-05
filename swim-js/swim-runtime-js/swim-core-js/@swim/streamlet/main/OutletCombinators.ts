@@ -26,45 +26,49 @@ export interface OutletCombinators<O> {
   watch(func: WatchValueFunction<O>): this;
 }
 
-export const OutletCombinators = {} as {
-  define<O>(prototype: OutletCombinators<O>): void;
+export const OutletCombinators = (function () {
+  const OutletCombinators = {} as {
+    define<O>(prototype: OutletCombinators<O>): void;
 
-  /** @hidden */
-  memoize<O>(this: Outlet<O>): Outlet<O>;
+    /** @internal */
+    memoize<O>(this: Outlet<O>): Outlet<O>;
 
-  /** @hidden */
-  map<O, O2>(this: Outlet<O>, func: MapValueFunction<O, O2>): Outlet<O2>;
+    /** @internal */
+    map<O, O2>(this: Outlet<O>, func: MapValueFunction<O, O2>): Outlet<O2>;
 
-  /** @hidden */
-  watch<O>(this: Outlet<O>, func: WatchValueFunction<O>): Outlet<O>;
-};
+    /** @internal */
+    watch<O>(this: Outlet<O>, func: WatchValueFunction<O>): Outlet<O>;
+  };
 
-OutletCombinators.define = function <O>(prototype: Outlet<O>): void {
-  if (!Object.prototype.hasOwnProperty.call(prototype, "memoize")) {
-    prototype.memoize = OutletCombinators.memoize;
-  }
-  if (!Object.prototype.hasOwnProperty.call(prototype, "map")) {
-    prototype.map = OutletCombinators.map;
-  }
-  if (!Object.prototype.hasOwnProperty.call(prototype, "watch")) {
-    prototype.watch = OutletCombinators.watch;
-  }
-};
+  OutletCombinators.define = function <O>(prototype: Outlet<O>): void {
+    if (!Object.prototype.hasOwnProperty.call(prototype, "memoize")) {
+      prototype.memoize = OutletCombinators.memoize;
+    }
+    if (!Object.prototype.hasOwnProperty.call(prototype, "map")) {
+      prototype.map = OutletCombinators.map;
+    }
+    if (!Object.prototype.hasOwnProperty.call(prototype, "watch")) {
+      prototype.watch = OutletCombinators.watch;
+    }
+  };
 
-OutletCombinators.memoize = function <O>(this: Outlet<O>): Outlet<O> {
-  const combinator = new MemoizeValueCombinator<O>();
-  combinator.bindInput(this);
-  return combinator;
-};
+  OutletCombinators.memoize = function <O>(this: Outlet<O>): Outlet<O> {
+    const combinator = new MemoizeValueCombinator<O>();
+    combinator.bindInput(this);
+    return combinator;
+  };
 
-OutletCombinators.map = function <O, O2>(this: Outlet<O>, func: MapValueFunction<O, O2>): Outlet<O2> {
-  const combinator = new MapValueCombinator<O, O2>(func);
-  combinator.bindInput(this);
-  return combinator;
-};
+  OutletCombinators.map = function <O, O2>(this: Outlet<O>, func: MapValueFunction<O, O2>): Outlet<O2> {
+    const combinator = new MapValueCombinator<O, O2>(func);
+    combinator.bindInput(this);
+    return combinator;
+  };
 
-OutletCombinators.watch = function <O>(this: Outlet<O>, func: WatchValueFunction<O>): Outlet<O> {
-  const combinator = new WatchValueCombinator<O>(func);
-  combinator.bindInput(this);
-  return this;
-};
+  OutletCombinators.watch = function <O>(this: Outlet<O>, func: WatchValueFunction<O>): Outlet<O> {
+    const combinator = new WatchValueCombinator<O>(func);
+    combinator.bindInput(this);
+    return this;
+  };
+
+  return OutletCombinators;
+})();

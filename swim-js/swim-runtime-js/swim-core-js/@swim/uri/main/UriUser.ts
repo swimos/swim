@@ -24,7 +24,7 @@ export interface UriUserInit {
 }
 
 export class UriUser implements HashCode, Debug, Display {
-  /** @hidden */
+  /** @internal */
   constructor(username: string | undefined, password: string | undefined) {
     this.username = username;
     this.password = password;

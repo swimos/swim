@@ -15,7 +15,7 @@
 import type {Value} from "@swim/structure";
 import type {Host} from "./Host";
 
-/** @hidden */
+/** @internal */
 export interface HostContext {
   isOnline(): boolean;
  

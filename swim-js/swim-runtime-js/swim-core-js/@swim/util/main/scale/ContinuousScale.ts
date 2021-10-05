@@ -40,31 +40,35 @@ export interface ContinuousScale<X, Y> extends Scale<X, Y> {
   toString(): string;
 }
 
-export const ContinuousScale = function (): never {
-  throw new Error();
-} as {
-  /** @hidden */
-  (): never;
+export const ContinuousScale = (function (_super: typeof Scale) {
+  const ContinuousScale = function (): never {
+    throw new Error();
+  } as {
+    /** @internal */
+    (): never;
 
-  /** @hidden */
-  prototype: ContinuousScale<any, any>;
-};
+    /** @internal */
+    prototype: ContinuousScale<any, any>;
+  };
 
-ContinuousScale.prototype = Object.create(Scale.prototype);
+  ContinuousScale.prototype = Object.create(_super.prototype);
 
-ContinuousScale.prototype.canEqual = function (that: unknown): boolean {
-  return that instanceof ContinuousScale;
-};
+  ContinuousScale.prototype.canEqual = function (that: unknown): boolean {
+    return that instanceof ContinuousScale;
+  };
 
-ContinuousScale.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof ContinuousScale) {
-    return this.domain.equals(that.domain) && this.range.equals(that.range);
-  }
-  return false;
-};
+  ContinuousScale.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof ContinuousScale) {
+      return this.domain.equals(that.domain) && this.range.equals(that.range);
+    }
+    return false;
+  };
 
-ContinuousScale.prototype.toString = function (): string {
-  return "ContinuousScale(" + this.domain + ", " + this.range + ")";
-};
+  ContinuousScale.prototype.toString = function (): string {
+    return "ContinuousScale(" + this.domain + ", " + this.range + ")";
+  };
+
+  return ContinuousScale;
+})(Scale);

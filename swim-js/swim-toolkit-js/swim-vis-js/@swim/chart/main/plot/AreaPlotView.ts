@@ -12,39 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
-import {ViewAnimator} from "@swim/view";
+import {Look, ThemeAnimator} from "@swim/theme";
+import {View} from "@swim/view";
 import type {GraphicsView, CanvasContext, CanvasRenderer, FillViewInit, FillView} from "@swim/graphics";
 import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
 import type {AreaPlotViewObserver} from "./AreaPlotViewObserver";
 
-export type AnyAreaPlotView<X, Y> = AreaPlotView<X, Y> | AreaPlotViewInit<X, Y>;
+export type AnyAreaPlotView<X = unknown, Y = unknown> = AreaPlotView<X, Y> | AreaPlotViewInit<X, Y>;
 
-export interface AreaPlotViewInit<X, Y> extends SeriesPlotViewInit<X, Y>, FillViewInit {
+export interface AreaPlotViewInit<X = unknown, Y = unknown> extends SeriesPlotViewInit<X, Y>, FillViewInit {
 }
 
-export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView {
-  override initView(init: AreaPlotViewInit<X, Y>): void {
-    super.initView(init);
-    if (init.fill !== void 0) {
-      this.fill(init.fill);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<AreaPlotViewObserver<X, Y>>;
+export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y> implements FillView {
+  override readonly observerType?: Class<AreaPlotViewObserver<X, Y>>;
 
   override get plotType(): SeriesPlotType {
     return "area";
   }
 
   protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetPlotFill !== void 0) {
-        viewObserver.viewWillSetPlotFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetPlotFill !== void 0) {
+        observer.viewWillSetPlotFill(newFill, oldFill, this);
       }
     }
   }
@@ -54,19 +48,20 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
   }
 
   protected didSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetPlotFill !== void 0) {
-        viewObserver.viewDidSetPlotFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetPlotFill !== void 0) {
+        observer.viewDidSetPlotFill(newFill, oldFill, this);
       }
     }
   }
 
-  @ViewAnimator<AreaPlotView<X, Y>, Color | null, AnyColor | null>({
+  @ThemeAnimator<AreaPlotView<X, Y>, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     look: Look.accentColor,
+    updateFlags: View.NeedsRender,
     willSetValue(newFill: Color | null, oldFill: Color | null): void {
       this.owner.willSetFill(newFill, oldFill);
     },
@@ -75,7 +70,7 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
       this.owner.didSetFill(newFill, oldFill);
     },
   })
-  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected renderPlot(context: CanvasContext, frame: R2Box): void {
     const fill = this.fill.getValueOr(Color.transparent());
@@ -135,8 +130,14 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
       context.closePath();
     }
 
+    // save
+    const contextFillStyle = context.fillStyle;
+
     context.fillStyle = gradient !== null ? gradient : fill.toString();
     context.fill();
+
+    // restore
+    context.fillStyle = contextFillStyle;
   }
 
   protected hitTestPlot(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null {
@@ -173,22 +174,10 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
     return null;
   }
 
-  static create<X, Y>(): AreaPlotView<X, Y> {
-    return new AreaPlotView<X, Y>();
-  }
-
-  static override fromInit<X, Y>(init: AreaPlotViewInit<X, Y>): AreaPlotView<X, Y> {
-    const view = new AreaPlotView<X, Y>();
-    view.initView(init);
-    return view;
-  }
-
-  static override fromAny<X, Y>(value: AnyAreaPlotView<X, Y>): AreaPlotView<X, Y> {
-    if (value instanceof AreaPlotView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+  override init(init: AreaPlotViewInit<X, Y>): void {
+    super.init(init);
+    if (init.fill !== void 0) {
+      this.fill(init.fill);
     }
-    throw new TypeError("" + value);
   }
 }

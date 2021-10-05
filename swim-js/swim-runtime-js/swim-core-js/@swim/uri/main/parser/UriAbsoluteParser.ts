@@ -21,7 +21,7 @@ import type {UriQuery} from "../UriQuery";
 import type {UriFragment} from "../UriFragment";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriAbsoluteParser extends Parser<Uri> {
   private readonly uri: UriParser;
   private readonly schemeParser: Parser<UriScheme> | undefined;

@@ -21,7 +21,7 @@ export class ValueInput<O> extends AbstractOutlet<O> {
     this.state = state;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly state: O | undefined;
 
   override get(): O | undefined {

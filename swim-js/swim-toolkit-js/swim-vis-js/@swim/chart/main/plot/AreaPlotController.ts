@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import type {Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
-import {View} from "@swim/view";
-import {ControllerViewTrait, ControllerFastener} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener} from "@swim/controller";
 import type {DataPointController} from "../data/DataPointController";
 import {DataSetTrait} from "../data/DataSetTrait";
 import {AreaPlotView} from "./AreaPlotView";
@@ -25,7 +25,7 @@ import {SeriesPlotController} from "./SeriesPlotController";
 import type {AreaPlotControllerObserver} from "./AreaPlotControllerObserver";
 
 export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
-  override readonly controllerObservers!: ReadonlyArray<AreaPlotControllerObserver<X, Y>>;
+  override readonly observerType?: Class<AreaPlotControllerObserver<X, Y>>;
 
   protected detectDataSet(plotTrait: AreaPlotTrait<X, Y>): DataSetTrait<X, Y> | null {
     return plotTrait.getTrait(DataSetTrait);
@@ -34,7 +34,7 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
   protected override attachDataPoint(dataPointController: DataPointController<X, Y>, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
     super.attachDataPoint(dataPointController, dataPointFastener);
     const dataPointView = dataPointController.dataPoint.view;
-    if (dataPointView !== null && dataPointView.parentView === null) {
+    if (dataPointView !== null && dataPointView.parent === null) {
       const plotView = this.plot.view;
       if (plotView !== null) {
         dataPointController.dataPoint.injectView(plotView);
@@ -66,11 +66,11 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected willSetPlotTrait(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotTrait !== void 0) {
-        controllerObserver.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotTrait !== void 0) {
+        observer.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       }
     }
   }
@@ -86,17 +86,17 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected didSetPlotTrait(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotTrait !== void 0) {
-        controllerObserver.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotTrait !== void 0) {
+        observer.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       }
     }
   }
 
   protected createPlotView(): AreaPlotView<X, Y> {
-    return AreaPlotView.create<X, Y>();
+    return new AreaPlotView<X, Y>();
   }
 
   protected initPlotView(plotView: AreaPlotView<X, Y>): void {
@@ -126,11 +126,11 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected willSetPlotView(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotView !== void 0) {
-        controllerObserver.controllerWillSetPlotView(newPlotView, oldPlotView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotView !== void 0) {
+        observer.controllerWillSetPlotView(newPlotView, oldPlotView, this);
       }
     }
   }
@@ -146,11 +146,11 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected didSetPlotView(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotView !== void 0) {
-        controllerObserver.controllerDidSetPlotView(newPlotView, oldPlotView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotView !== void 0) {
+        observer.controllerDidSetPlotView(newPlotView, oldPlotView, this);
       }
     }
   }
@@ -167,19 +167,19 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
         timing = Timing.fromAny(timing);
       }
       if (fill instanceof Look) {
-        plotView.fill.setLook(fill, timing, View.Intrinsic);
+        plotView.fill.setLook(fill, timing, Affinity.Intrinsic);
       } else {
-        plotView.fill.setState(fill, timing, View.Intrinsic);
+        plotView.fill.setState(fill, timing, Affinity.Intrinsic);
       }
     }
   }
 
   protected willSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotFill !== void 0) {
-        controllerObserver.controllerWillSetPlotFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotFill !== void 0) {
+        observer.controllerWillSetPlotFill(newFill, oldFill, this);
       }
     }
   }
@@ -189,19 +189,33 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected didSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotFill !== void 0) {
-        controllerObserver.controllerDidSetPlotFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotFill !== void 0) {
+        observer.controllerDidSetPlotFill(newFill, oldFill, this);
       }
     }
   }
 
-  /** @hidden */
-  static PlotFastener = ControllerViewTrait.define<AreaPlotController<unknown, unknown>, AreaPlotView<unknown, unknown>, AreaPlotTrait<unknown, unknown>>({
+  /** @internal */
+  static PlotFastener = TraitViewFastener.define<AreaPlotController<unknown, unknown>, AreaPlotTrait<unknown, unknown>, AreaPlotView<unknown, unknown>>({
+    traitType: AreaPlotTrait,
+    observesTrait: true,
+    willSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
+      this.owner.willSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    onSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
+      this.owner.onSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    didSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
+      this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.setPlotFill(newFill);
+    },
     viewType: AreaPlotView,
-    observeView: true,
+    observesView: true,
     willSetView(newPlotView: AreaPlotView<unknown, unknown> | null, oldPlotView: AreaPlotView<unknown, unknown> | null): void {
       this.owner.willSetPlotView(newPlotView, oldPlotView);
     },
@@ -221,24 +235,10 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
     createView(): AreaPlotView<unknown, unknown> | null {
       return this.owner.createPlotView();
     },
-    traitType: AreaPlotTrait,
-    observeTrait: true,
-    willSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
-      this.owner.willSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    onSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
-      this.owner.onSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    didSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
-      this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.setPlotFill(newFill);
-    },
   });
 
-  @ControllerViewTrait<AreaPlotController<X, Y>, AreaPlotView<X, Y>, AreaPlotTrait<X, Y>>({
+  @TraitViewFastener<AreaPlotController<X, Y>, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>({
     extends: AreaPlotController.PlotFastener,
   })
-  readonly plot!: ControllerViewTrait<this, AreaPlotView<X, Y>, AreaPlotTrait<X, Y>>;
+  readonly plot!: TraitViewFastener<this, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>;
 }

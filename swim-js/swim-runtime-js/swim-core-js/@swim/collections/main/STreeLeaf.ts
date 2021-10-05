@@ -17,14 +17,14 @@ import type {STreeContext} from "./STreeContext";
 import {STreePage} from "./STreePage";
 import {STreeNode} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export class STreeLeaf<V, I> extends STreePage<V, I> {
   constructor(slots: ReadonlyArray<[I, V]>) {
     super();
     this.slots = slots;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly slots: ReadonlyArray<[I, V]>;
 
   override get arity(): number {
@@ -59,7 +59,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return this.updatedItem(index, newValue);
   }
 
-  /** @hidden */
+  /** @internal */
   updatedItem(index: number, newValue: V): STreeLeaf<V, I> {
     const oldItems = this.slots;
     const oldSlot = oldItems[index];
@@ -79,7 +79,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return this.insertedItem(index, newValue, id, tree);
   }
 
-  /** @hidden */
+  /** @internal */
   insertedItem(index: number, newValue: V, id: I | undefined, tree: STreeContext<V, I>): STreeLeaf<V, I> {
     if (id === void 0) {
       id = tree.identify(newValue);
@@ -107,7 +107,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   removedSlot(index: number): STreeLeaf<V, I> {
     const oldSlots = this.slots;
     const newSlots = new Array<[I, V]>(oldSlots.length - 1);

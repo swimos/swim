@@ -15,7 +15,7 @@
 import {Input, Parser, Diagnostic, Unicode, Base10} from "@swim/codec";
 import {R2Segment} from "./R2Segment";
 
-/** @hidden */
+/** @internal */
 export class R2SegmentParser extends Parser<R2Segment> {
   private readonly x0Parser: Parser<number> | undefined;
   private readonly y0Parser: Parser<number> | undefined;

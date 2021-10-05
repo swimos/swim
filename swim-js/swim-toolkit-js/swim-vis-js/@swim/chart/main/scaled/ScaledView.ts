@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import {
+  Mutable,
+  Class,
   Equals,
   Equivalent,
-  Mutable,
   Arrays,
   Values,
   Domain,
@@ -28,13 +29,12 @@ import {
   ContinuousScale,
   LinearScale,
 } from "@swim/util";
+import {Affinity, Property, Animator} from "@swim/fastener";
 import {DateTime, TimeDomain, TimeScale} from "@swim/time";
 import {
   ViewContextType,
   ViewFlags,
   View,
-  ViewProperty,
-  ViewAnimator,
   ViewFastener,
   ScaleGestureInput,
   ScaleGesture,
@@ -46,7 +46,7 @@ import type {ScaledXYView} from "./ScaledXYView";
 import {ContinuousScaleAnimator} from "./ContinuousScaleAnimator";
 import type {ScaledViewObserver} from "./ScaledViewObserver";
 
-/** @hidden */
+/** @internal */
 export type ScaledFlags = number;
 
 export interface ScaledViewInit<X, Y> extends GraphicsViewInit {
@@ -94,101 +94,22 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.yDataDomainPadded = null;
   }
 
-  override initView(init: ScaledViewInit<X, Y>): void {
-    super.initView(init);
-    if (init.xScale !== void 0) {
-      this.xScale(init.xScale);
-    }
-    if (init.yScale !== void 0) {
-      this.yScale(init.yScale);
-    }
+  override readonly observerType?: Class<ScaledViewObserver<X, Y>>;
 
-    if (init.xDomainBounds !== void 0) {
-      this.xDomainBounds(init.xDomainBounds);
-    }
-    if (init.yDomainBounds !== void 0) {
-      this.yDomainBounds(init.yDomainBounds);
-    }
-    if (init.xZoomBounds !== void 0) {
-      this.xZoomBounds(init.xZoomBounds);
-    }
-    if (init.yZoomBounds !== void 0) {
-      this.yZoomBounds(init.yZoomBounds);
-    }
-
-    if (init.xDomainPadding !== void 0) {
-      this.xDomainPadding(init.xDomainPadding);
-    }
-    if (init.yDomainPadding !== void 0) {
-      this.yDomainPadding(init.yDomainPadding);
-    }
-    if (init.xRangePadding !== void 0) {
-      this.xRangePadding(init.xRangePadding);
-    }
-    if (init.yRangePadding !== void 0) {
-      this.yRangePadding(init.yRangePadding);
-    }
-
-    if (init.fitAlign !== void 0) {
-      this.fitAlign(init.fitAlign);
-    }
-    if (init.xFitAlign !== void 0) {
-      this.xFitAlign(init.xFitAlign);
-    }
-    if (init.yFitAlign !== void 0) {
-      this.yFitAlign(init.yFitAlign);
-    }
-    if (init.fitAspectRatio !== void 0) {
-      this.fitAspectRatio(init.fitAspectRatio);
-    }
-    if (init.preserveAspectRatio !== void 0) {
-      this.preserveAspectRatio(init.preserveAspectRatio);
-    }
-
-    if (init.domainTracking !== void 0) {
-      this.domainTracking(init.domainTracking);
-    }
-    if (init.xDomainTracking !== void 0) {
-      this.xDomainTracking(init.xDomainTracking);
-    }
-    if (init.yDomainTracking !== void 0) {
-      this.yDomainTracking(init.yDomainTracking);
-    }
-
-    if (init.scaleGestures !== void 0) {
-      this.scaleGestures(init.scaleGestures);
-    }
-    if (init.xScaleGestures !== void 0) {
-      this.xScaleGestures(init.xScaleGestures);
-    }
-    if (init.yScaleGestures !== void 0) {
-      this.yScaleGestures(init.yScaleGestures);
-    }
-
-    if (init.rescaleTransition !== void 0) {
-      this.rescaleTransition.setState(init.rescaleTransition);
-    }
-    if (init.reboundTransition !== void 0) {
-      this.reboundTransition.setState(init.reboundTransition);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<ScaledViewObserver<X, Y>>;
-
-  /** @hidden */
+  /** @internal */
   readonly scaledFlags: ScaledFlags;
 
-  /** @hidden */
+  /** @internal */
   setScaledFlags(scaledFlags: ScaledFlags): void {
     (this as Mutable<this>).scaledFlags = scaledFlags;
   }
 
   protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetXScale !== void 0) {
-        viewObserver.viewWillSetXScale(newXScale, oldXScale, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetXScale !== void 0) {
+        observer.viewWillSetXScale(newXScale, oldXScale, this);
       }
     }
   }
@@ -199,19 +120,19 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected didSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetXScale !== void 0) {
-        viewObserver.viewDidSetXScale(newXScale, oldXScale, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetXScale !== void 0) {
+        observer.viewDidSetXScale(newXScale, oldXScale, this);
       }
     }
   }
 
-  @ViewAnimator<ScaledView<X, Y>, ContinuousScale<X, number> | null>({
+  @Animator<ScaledView<X, Y>, ContinuousScale<X, number> | null>({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
-    inherit: true,
+    inherits: true,
     state: null,
     willSetValue(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
       this.owner.willSetXScale(newXScale, oldXScale);
@@ -220,17 +141,17 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       this.owner.onSetXScale(newXScale, oldXScale);
       this.owner.didSetXScale(newXScale, oldXScale);
     },
-    onBegin(xScale: ContinuousScale<X, number>): void {
+    willTransition(xScale: ContinuousScale<X, number>): void {
       if ((this.owner.scaledFlags & ScaledView.XBoundingFlag) !== 0) {
         this.owner.onBeginBoundingXScale(xScale);
       }
     },
-    onEnd(xScale: ContinuousScale<X, number>): void {
+    didTransition(xScale: ContinuousScale<X, number>): void {
       if ((this.owner.scaledFlags & ScaledView.XBoundingFlag) !== 0) {
         this.owner.onEndBoundingXScale(xScale);
       }
     },
-    onInterrupt(xScale: ContinuousScale<X, number>): void {
+    didInterrupt(xScale: ContinuousScale<X, number>): void {
       if ((this.owner.scaledFlags & ScaledView.XBoundingFlag) !== 0) {
         this.owner.onInterruptBoundingXScale(xScale);
       }
@@ -239,11 +160,11 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
   protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetYScale !== void 0) {
-        viewObserver.viewWillSetYScale(newYScale, oldYScale, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetYScale !== void 0) {
+        observer.viewWillSetYScale(newYScale, oldYScale, this);
       }
     }
   }
@@ -254,19 +175,19 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected didSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetYScale !== void 0) {
-        viewObserver.viewDidSetYScale(newYScale, oldYScale, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetYScale !== void 0) {
+        observer.viewDidSetYScale(newYScale, oldYScale, this);
       }
     }
   }
 
-  @ViewAnimator<ScaledView<X, Y>, ContinuousScale<Y, number> | null>({
+  @Animator<ScaledView<X, Y>, ContinuousScale<Y, number> | null>({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
-    inherit: true,
+    inherits: true,
     state: null,
     willSetValue(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
       this.owner.willSetYScale(newYScale, oldYScale);
@@ -275,17 +196,17 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       this.owner.onSetYScale(newYScale, oldYScale);
       this.owner.didSetYScale(newYScale, oldYScale);
     },
-    onBegin(yScale: ContinuousScale<Y, number>): void {
+    willTransition(yScale: ContinuousScale<Y, number>): void {
       if ((this.owner.scaledFlags & ScaledView.YBoundingFlag) !== 0) {
         this.owner.onBeginBoundingYScale(yScale);
       }
     },
-    onEnd(yScale: ContinuousScale<Y, number>): void {
+    didTransition(yScale: ContinuousScale<Y, number>): void {
       if ((this.owner.scaledFlags & ScaledView.YBoundingFlag) !== 0) {
         this.owner.onEndBoundingYScale(yScale);
       }
     },
-    onInterrupt(yScale: ContinuousScale<Y, number>): void {
+    didInterrupt(yScale: ContinuousScale<Y, number>): void {
       if ((this.owner.scaledFlags & ScaledView.YBoundingFlag) !== 0) {
         this.owner.onInterruptBoundingYScale(yScale);
       }
@@ -396,11 +317,11 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected willSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetXDataDomain !== void 0) {
-        viewObserver.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetXDataDomain !== void 0) {
+        observer.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
     }
   }
@@ -412,11 +333,11 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected didSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetXDataDomain !== void 0) {
-        viewObserver.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetXDataDomain !== void 0) {
+        observer.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
     }
   }
@@ -449,11 +370,11 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected willSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetYDataDomain !== void 0) {
-        viewObserver.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetYDataDomain !== void 0) {
+        observer.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
     }
   }
@@ -465,11 +386,11 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected didSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetYDataDomain !== void 0) {
-        viewObserver.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetYDataDomain !== void 0) {
+        observer.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
     }
   }
@@ -577,7 +498,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setYDataDomainPadded(yDataDomainPadded);
   }
 
-  @ViewProperty<ScaledView<X, Y>, readonly [X | boolean, X | boolean]>({
+  @Property<ScaledView<X, Y>, readonly [X | boolean, X | boolean]>({
     updateFlags: View.NeedsLayout,
     initState(): readonly [X | boolean, X | boolean] {
       return [true, true];
@@ -586,9 +507,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Arrays.equal(newXDomainBounds, oldXDomainBounds);
     },
   })
-  readonly xDomainBounds!: ViewProperty<this, readonly [X | boolean, X | boolean]>
+  readonly xDomainBounds!: Property<this, readonly [X | boolean, X | boolean]>
 
-  @ViewProperty<ScaledView<X, Y>, readonly [Y | boolean, Y | boolean]>({
+  @Property<ScaledView<X, Y>, readonly [Y | boolean, Y | boolean]>({
     updateFlags: View.NeedsLayout,
     initState(): readonly [Y | boolean, Y | boolean] {
       return [true, true];
@@ -597,9 +518,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Arrays.equal(newYDomainBounds, oldYDomainBounds);
     },
   })
-  readonly yDomainBounds!: ViewProperty<this, readonly [Y | boolean, Y | boolean]>
+  readonly yDomainBounds!: Property<this, readonly [Y | boolean, Y | boolean]>
 
-  @ViewProperty<ScaledView<X, Y>, readonly [number | boolean, number | boolean]>({
+  @Property<ScaledView<X, Y>, readonly [number | boolean, number | boolean]>({
     updateFlags: View.NeedsLayout,
     initState(): readonly [number | boolean, number | boolean] {
       return [true, true];
@@ -608,9 +529,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Arrays.equal(newXZoomBounds, oldXZoomBounds);
     },
   })
-  readonly xZoomBounds!: ViewProperty<this, readonly [number | boolean, number | boolean]>
+  readonly xZoomBounds!: Property<this, readonly [number | boolean, number | boolean]>
 
-  @ViewProperty<ScaledView<X, Y>, readonly [number | boolean, number | boolean]>({
+  @Property<ScaledView<X, Y>, readonly [number | boolean, number | boolean]>({
     updateFlags: View.NeedsLayout,
     initState(): readonly [number | boolean, number | boolean] {
       return [true, true];
@@ -619,9 +540,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Arrays.equal(newYDomainBounds, oldYDomainBounds);
     },
   })
-  readonly yZoomBounds!: ViewProperty<this, readonly [number | boolean, number | boolean]>
+  readonly yZoomBounds!: Property<this, readonly [number | boolean, number | boolean]>
 
-  @ViewProperty<ScaledView<X, Y>, readonly [X | boolean, X | boolean]>({
+  @Property<ScaledView<X, Y>, readonly [X | boolean, X | boolean]>({
     updateFlags: View.NeedsLayout,
     initState(): readonly [X | boolean, X | boolean] {
       return [false, false];
@@ -630,9 +551,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Arrays.equal(newXDomainPadding, oldXDomainPadding);
     },
   })
-  readonly xDomainPadding!: ViewProperty<this, readonly [X | boolean, X | boolean]>
+  readonly xDomainPadding!: Property<this, readonly [X | boolean, X | boolean]>
 
-  @ViewProperty<ScaledView<X, Y>, readonly [Y | boolean, Y | boolean]>({
+  @Property<ScaledView<X, Y>, readonly [Y | boolean, Y | boolean]>({
     updateFlags: View.NeedsLayout,
     initState(): readonly [Y | boolean, Y | boolean] {
       return [false, false];
@@ -641,14 +562,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Arrays.equal(newYDomainPadding, oldYDomainPadding);
     },
   })
-  readonly yDomainPadding!: ViewProperty<this, readonly [Y | boolean, Y | boolean]>
+  readonly yDomainPadding!: Property<this, readonly [Y | boolean, Y | boolean]>
 
   protected willSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetXRangePadding !== void 0) {
-        viewObserver.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetXRangePadding !== void 0) {
+        observer.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
   }
@@ -658,28 +579,28 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected didSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetXRangePadding !== void 0) {
-        viewObserver.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetXRangePadding !== void 0) {
+        observer.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
   }
 
   protected updateXRangePadding(xScaledRangePadding: readonly [number, number], scaledFastener: ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>): void {
-    if (this.xRangePadding.takesPrecedence(View.Intrinsic)) {
+    if (this.xRangePadding.hasAffinity(Affinity.Intrinsic)) {
       let xRangePadding = this.xRangePadding.state;
       if (xRangePadding === null || this.scaledFasteners.length === 1) {
         xRangePadding = xScaledRangePadding;
       } else if (xScaledRangePadding !== null) {
         xRangePadding = [Math.max(xRangePadding[0], xScaledRangePadding[0]), Math.max(xRangePadding[1], xScaledRangePadding[1])];
       }
-      this.xRangePadding.setState(xRangePadding, View.Intrinsic);
+      this.xRangePadding.setState(xRangePadding, Affinity.Intrinsic);
     }
   }
 
-  @ViewProperty<ScaledView<X, Y>, readonly [number, number]>({
+  @Property<ScaledView<X, Y>, readonly [number, number]>({
     initState(): readonly [number, number] {
       return [0, 0];
     },
@@ -694,14 +615,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Arrays.equal(newXRangePadding, oldXRangePadding);
     },
   })
-  readonly xRangePadding!: ViewProperty<this, readonly [number, number]>
+  readonly xRangePadding!: Property<this, readonly [number, number]>
 
   protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetYRangePadding !== void 0) {
-        viewObserver.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetYRangePadding !== void 0) {
+        observer.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
     }
   }
@@ -711,28 +632,28 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected didSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetYRangePadding !== void 0) {
-        viewObserver.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetYRangePadding !== void 0) {
+        observer.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
     }
   }
 
   protected updateYRangePadding(yScaledRangePadding: readonly [number, number], scaledFastener: ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>): void {
-    if (this.yRangePadding.takesPrecedence(View.Intrinsic)) {
+    if (this.yRangePadding.hasAffinity(Affinity.Intrinsic)) {
       let yRangePadding = this.yRangePadding.state;
       if (yRangePadding === null || this.scaledFasteners.length === 1) {
         yRangePadding = yScaledRangePadding;
       } else if (yScaledRangePadding !== null) {
         yRangePadding = [Math.max(yRangePadding[0], yScaledRangePadding[0]), Math.max(yRangePadding[1], yScaledRangePadding[1])];
       }
-      this.yRangePadding.setState(yRangePadding, View.Intrinsic);
+      this.yRangePadding.setState(yRangePadding, Affinity.Intrinsic);
     }
   }
 
-  @ViewProperty<ScaledView<X, Y>, readonly [number, number]>({
+  @Property<ScaledView<X, Y>, readonly [number, number]>({
     initState(): readonly [number, number] {
       return [0, 0];
     },
@@ -747,9 +668,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Arrays.equal(newYRangePadding, oldYRangePadding);
     },
   })
-  readonly yRangePadding!: ViewProperty<this, readonly [number, number]>
+  readonly yRangePadding!: Property<this, readonly [number, number]>
 
-  @ViewProperty<ScaledView<X, Y>, readonly [number, number], number>({
+  @Property<ScaledView<X, Y>, readonly [number, number], number>({
     type: Object,
     initState(): readonly [number, number] {
       return [1.0, 0.5];
@@ -765,7 +686,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       }
     },
   })
-  readonly fitAlign!: ViewProperty<this, readonly [number, number], number>;
+  readonly fitAlign!: Property<this, readonly [number, number], number>;
 
   xFitAlign(): number;
   xFitAlign(xFitAlign: number): this;
@@ -791,8 +712,8 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  @ViewProperty({type: Number})
-  readonly fitAspectRatio!: ViewProperty<this, number | undefined>;
+  @Property({type: Number})
+  readonly fitAspectRatio!: Property<this, number | undefined>;
 
   preserveAspectRatio(): boolean;
   preserveAspectRatio(preserveAspectRatio: boolean): this;
@@ -923,23 +844,23 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  @ViewProperty<ScaledView<X, Y>, Timing | boolean | undefined, AnyTiming>({
+  @Property<ScaledView<X, Y>, Timing | boolean | undefined, AnyTiming>({
     type: Timing,
-    inherit: true,
+    inherits: true,
     initState(): Timing | boolean | undefined {
       return Easing.linear.withDuration(250);
     },
   })
-  readonly rescaleTransition!: ViewProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly rescaleTransition!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  @ViewProperty<ScaledView<X, Y>, Timing | boolean | undefined, AnyTiming>({
+  @Property<ScaledView<X, Y>, Timing | boolean | undefined, AnyTiming>({
     type: Timing,
-    inherit: true,
+    inherits: true,
     initState(): Timing | boolean | undefined {
       return Easing.cubicOut.withDuration(250);
     },
   })
-  readonly reboundTransition!: ViewProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly reboundTransition!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
   fitX(tween: boolean = false): void {
     this.setScaledFlags(this.scaledFlags | ScaledView.XFitFlag);
@@ -979,7 +900,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const scaledFastener = this.createScaledFastener(scaledView);
     scaledFasteners.splice(targetIndex, 0, scaledFastener);
     scaledFastener.setView(scaledView, targetView);
-    if (this.isMounted()) {
+    if (this.mounted) {
       scaledFastener.mount();
     }
   }
@@ -990,7 +911,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       const scaledFastener = scaledFasteners[i]!;
       if (scaledFastener.view === scaledView) {
         scaledFastener.setView(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           scaledFastener.unmount();
         }
         scaledFasteners.splice(i, 1);
@@ -1005,11 +926,11 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected willSetScaled(newScaledView: ScaledXView<X> | ScaledYView<Y> | null, oldScaledView: ScaledXView<X> | ScaledYView<Y> | null,
                           targetView: View | null, scaledFastener: ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetScaled !== void 0) {
-        viewObserver.viewWillSetScaled(newScaledView, oldScaledView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetScaled !== void 0) {
+        observer.viewWillSetScaled(newScaledView, oldScaledView, targetView, this);
       }
     }
   }
@@ -1029,11 +950,11 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected didSetScaled(newScaledView: ScaledXView<X> | ScaledYView<Y> | null, oldScaledView: ScaledXView<X> | ScaledYView<Y> | null,
                          targetView: View | null, scaledFastener: ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetScaled !== void 0) {
-        viewObserver.viewDidSetScaled(newScaledView, oldScaledView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetScaled !== void 0) {
+        observer.viewDidSetScaled(newScaledView, oldScaledView, targetView, this);
       }
     }
   }
@@ -1070,10 +991,10 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.requireUpdate(View.NeedsLayout);
   }
 
-  /** @hidden */
+  /** @internal */
   static ScaledFastener = ViewFastener.define<ScaledView<unknown, unknown>, ScaledXView<unknown> | ScaledYView<unknown>>({
     child: false,
-    observe: true,
+    observes: true,
     willSetView(newScaledView: ScaledView<unknown, unknown> | null, oldScaledView: ScaledXView<unknown> | ScaledYView<unknown> | null, targetView: View | null): void {
       this.owner.willSetScaled(newScaledView, oldScaledView, targetView, this);
     },
@@ -1104,13 +1025,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   });
 
   protected createScaledFastener(scaledView: ScaledXView<X> | ScaledYView<Y>): ViewFastener<this, ScaledXView<X> | ScaledYView<Y>> {
-    return new ScaledView.ScaledFastener(this as ScaledView<unknown, unknown>, scaledView.key, "scaled") as ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>;
+    return ScaledView.ScaledFastener.create(this, scaledView.key ?? "scaled") as ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly scaledFasteners: ReadonlyArray<ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountScaledFasteners(): void {
     const scaledFasteners = this.scaledFasteners;
     for (let i = 0, n = scaledFasteners.length; i < n; i += 1) {
@@ -1119,7 +1040,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountScaledFasteners(): void {
     const scaledFasteners = this.scaledFasteners;
     for (let i = 0, n = scaledFasteners.length; i < n; i += 1) {
@@ -1140,16 +1061,16 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.removeScaled(scaledView);
   }
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     const scaledView = this.detectScaled(childView);
     if (scaledView !== null) {
       this.onInsertScaled(scaledView, targetView);
     }
   }
 
-  protected override onRemoveChildView(childView: View): void {
-    super.onRemoveChildView(childView);
+  protected override onRemoveChild(childView: View): void {
+    super.onRemoveChild(childView);
     const scaledView = this.detectScaled(childView);
     if (scaledView !== null) {
       this.onRemoveScaled(scaledView);
@@ -1158,8 +1079,8 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
-    this.xScale.onAnimate(viewContext.updateTime);
-    this.yScale.onAnimate(viewContext.updateTime);
+    this.xScale.recohere(viewContext.updateTime);
+    this.yScale.recohere(viewContext.updateTime);
     this.resizeScales();
     this.updateScales();
   }
@@ -1172,13 +1093,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     let xScale: ContinuousScale<X, number> | null;
     const xRange = this.xRange();
     if (xRange !== null) {
-      xScale = !this.xScale.isInherited() ? this.xScale.ownState : null;
+      xScale = !this.xScale.inherited ? this.xScale.state : null;
       if (xScale !== null) {
         if (!xScale.range.equals(xRange)) {
           this.xScale.setRange(xRange);
           this.setScaledFlags(this.scaledFlags | ScaledView.RescaleFlag);
         }
-      } else if (this.xScale.superAnimator === null || this.xScale.superValue === null) {
+      } else if (this.xScale.superFastener === null || this.xScale.superValue === null) {
         const xDataDomainPadded = this.xDataDomainPadded;
         if (xDataDomainPadded !== null) {
           xScale = ScaledView.createScale(xDataDomainPadded[0], xDataDomainPadded[1], xRange[0], xRange[1]);
@@ -1191,13 +1112,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     let yScale: ContinuousScale<Y, number> | null;
     const yRange = this.yRange();
     if (yRange !== null) {
-      yScale = !this.yScale.isInherited() ? this.yScale.ownState : null;
+      yScale = !this.yScale.inherited ? this.yScale.state : null;
       if (yScale !== null) {
         if (!yScale.range.equals(yRange)) {
           this.yScale.setRange(yRange);
           this.setScaledFlags(this.scaledFlags | ScaledView.RescaleFlag);
         }
-      } else if (this.yScale.superAnimator === null || this.yScale.superValue === null) {
+      } else if (this.yScale.superFastener === null || this.yScale.superValue === null) {
         const yDataDomainPadded = this.yDataDomainPadded;
         if (yDataDomainPadded !== null) {
           yScale = ScaledView.createScale(yDataDomainPadded[0], yDataDomainPadded[1], yRange[0], yRange[1]);
@@ -1209,12 +1130,12 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected updateScales(): void {
-    const xScale = !this.xScale.isInherited() ? this.xScale.ownState : null;
-    const yScale = !this.yScale.isInherited() ? this.yScale.ownState : null;
+    const xScale = !this.xScale.inherited ? this.xScale.state : null;
+    const yScale = !this.yScale.inherited ? this.yScale.state : null;
     if (xScale !== null && yScale !== null) {
-      const isPressing = this.gesture.isPressing();
+      const isPressing = this.gesture.pressing;
       if (!isPressing) {
-        const isCoasting = this.gesture.isCoasting();
+        const isCoasting = this.gesture.coasting;
         this.boundScales(xScale, yScale, isCoasting);
       }
     }
@@ -1425,25 +1346,25 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setScaledFlags(this.scaledFlags & ~(ScaledView.InteractedFlag | ScaledView.RescaleFlag));
   }
 
-  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
     let xScale: ContinuousScale<X, number> | null;
     let yScale: ContinuousScale<Y, number> | null;
     if ((displayFlags & View.NeedsLayout) !== 0 &&
         (xScale = this.xScale.value, xScale !== null) &&
         (yScale = this.yScale.value, yScale !== null)) {
-      this.layoutChildViews(xScale, yScale, displayFlags, viewContext, displayChildView);
+      this.layoutChildViews(xScale, yScale, displayFlags, viewContext, displayChild);
     } else {
-      super.displayChildViews(displayFlags, viewContext, displayChildView);
+      super.displayChildren(displayFlags, viewContext, displayChild);
     }
   }
 
   protected layoutChildViews(xScale: ContinuousScale<X, number>,
                              yScale: ContinuousScale<Y, number>,
                              displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                viewContext: ViewContextType<this>) => void): void {
+                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                            viewContext: ViewContextType<this>) => void): void {
     // Recompute extrema when laying out child views.
     let xDataDomainMin: X | undefined;
     let xDataDomainMax: X | undefined;
@@ -1459,8 +1380,8 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     type self = this;
     function layoutChildView(this: self, childView: View, displayFlags: ViewFlags,
                              viewContext: ViewContextType<self>): void {
-      displayChildView.call(this, childView, displayFlags, viewContext);
-      if (ScaledXView.is<X>(childView) && childView.xScale.isInherited()) {
+      displayChild.call(this, childView, displayFlags, viewContext);
+      if (ScaledXView.is<X>(childView) && childView.xScale.inherited) {
         const childXDataDomain = childView.xDataDomain;
         if (childXDataDomain !== null) {
           if (xCount !== 0) {
@@ -1480,7 +1401,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
           xCount += 1;
         }
       }
-      if (ScaledYView.is<Y>(childView) && childView.yScale.isInherited()) {
+      if (ScaledYView.is<Y>(childView) && childView.yScale.inherited) {
         const childYDataDomain = childView.yDataDomain;
         if (childYDataDomain !== null) {
           if (yCount !== 0) {
@@ -1501,12 +1422,12 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
         }
       }
     }
-    super.displayChildViews(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, viewContext, layoutChildView);
 
     this.setXDataDomain(xCount !== 0 ? Domain<X>(xDataDomainMin!, xDataDomainMax!) : null);
     this.setYDataDomain(yCount !== 0 ? Domain<Y>(yDataDomainMin!, yDataDomainMax!) : null);
-    this.xRangePadding.setState([xRangePaddingMin, xRangePaddingMax], View.Intrinsic);
-    this.yRangePadding.setState([yRangePaddingMin, yRangePaddingMax], View.Intrinsic);
+    this.xRangePadding.setState([xRangePaddingMin, xRangePaddingMax], Affinity.Intrinsic);
+    this.yRangePadding.setState([yRangePaddingMin, yRangePaddingMax], Affinity.Intrinsic);
   }
 
   protected onBeginBoundingXScale(xScale: ContinuousScale<X, number>): void {
@@ -1553,7 +1474,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     // hook
   }
 
-  /** @hidden */
+  /** @internal */
   static Gesture = ScaleGesture.define<ScaledView<unknown, unknown>, ScaledView<unknown, unknown>, unknown, unknown>({
     getXScale(): ContinuousScale<unknown, number> | null {
       if ((this.owner.scaledFlags & ScaledView.XScaleGesturesFlag) !== 0) {
@@ -1634,23 +1555,103 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   @ScaleGesture<ScaledView<unknown, unknown>, ScaledView<unknown, unknown>, unknown, unknown>({
     extends: ScaledView.Gesture,
+    eager: true,
     self: true,
   })
   readonly gesture!: ScaleGesture<this, ScaledView<X, Y>, X, Y>;
 
-  /** @hidden */
-  protected override mountViewFasteners(): void {
-    super.mountViewFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountScaledFasteners();
   }
 
-  /** @hidden */
-  protected override unmountViewFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountScaledFasteners();
-    super.unmountViewFasteners();
+    super.unmountFasteners();
   }
 
-  /** @hidden */
+  override init(init: ScaledViewInit<X, Y>): void {
+    super.init(init);
+    if (init.xScale !== void 0) {
+      this.xScale(init.xScale);
+    }
+    if (init.yScale !== void 0) {
+      this.yScale(init.yScale);
+    }
+
+    if (init.xDomainBounds !== void 0) {
+      this.xDomainBounds(init.xDomainBounds);
+    }
+    if (init.yDomainBounds !== void 0) {
+      this.yDomainBounds(init.yDomainBounds);
+    }
+    if (init.xZoomBounds !== void 0) {
+      this.xZoomBounds(init.xZoomBounds);
+    }
+    if (init.yZoomBounds !== void 0) {
+      this.yZoomBounds(init.yZoomBounds);
+    }
+
+    if (init.xDomainPadding !== void 0) {
+      this.xDomainPadding(init.xDomainPadding);
+    }
+    if (init.yDomainPadding !== void 0) {
+      this.yDomainPadding(init.yDomainPadding);
+    }
+    if (init.xRangePadding !== void 0) {
+      this.xRangePadding(init.xRangePadding);
+    }
+    if (init.yRangePadding !== void 0) {
+      this.yRangePadding(init.yRangePadding);
+    }
+
+    if (init.fitAlign !== void 0) {
+      this.fitAlign(init.fitAlign);
+    }
+    if (init.xFitAlign !== void 0) {
+      this.xFitAlign(init.xFitAlign);
+    }
+    if (init.yFitAlign !== void 0) {
+      this.yFitAlign(init.yFitAlign);
+    }
+    if (init.fitAspectRatio !== void 0) {
+      this.fitAspectRatio(init.fitAspectRatio);
+    }
+    if (init.preserveAspectRatio !== void 0) {
+      this.preserveAspectRatio(init.preserveAspectRatio);
+    }
+
+    if (init.domainTracking !== void 0) {
+      this.domainTracking(init.domainTracking);
+    }
+    if (init.xDomainTracking !== void 0) {
+      this.xDomainTracking(init.xDomainTracking);
+    }
+    if (init.yDomainTracking !== void 0) {
+      this.yDomainTracking(init.yDomainTracking);
+    }
+
+    if (init.scaleGestures !== void 0) {
+      this.scaleGestures(init.scaleGestures);
+    }
+    if (init.xScaleGestures !== void 0) {
+      this.xScaleGestures(init.xScaleGestures);
+    }
+    if (init.yScaleGestures !== void 0) {
+      this.yScaleGestures(init.yScaleGestures);
+    }
+
+    if (init.rescaleTransition !== void 0) {
+      this.rescaleTransition.setState(init.rescaleTransition);
+    }
+    if (init.reboundTransition !== void 0) {
+      this.reboundTransition.setState(init.reboundTransition);
+    }
+  }
+
+  /** @internal */
   static createScale<X, Y>(x0: X, x1: X, y0: Y | undefined, y1: Y | undefined): ContinuousScale<X, Y> {
     let range: LinearRange;
     if (typeof y0 === "number" && typeof y1 === "number") {
@@ -1667,7 +1668,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static parseScale<X, Y>(string: string): ContinuousScale<X, Y> {
     if (string === "linear") {
       return LinearScale(LinearDomain(0, 1), LinearRange(0, 1)) as unknown as ContinuousScale<X, Y>;
@@ -1690,74 +1691,74 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     throw new TypeError("" + string);
   }
 
-  /** @hidden */
+  /** @internal */
   static readonly XDomainTrackingFlag: ScaledFlags = 1 << 0;
-  /** @hidden */
+  /** @internal */
   static readonly YDomainTrackingFlag: ScaledFlags = 1 << 1;
-  /** @hidden */
+  /** @internal */
   static readonly XScaleGesturesFlag: ScaledFlags = 1 << 2;
-  /** @hidden */
+  /** @internal */
   static readonly YScaleGesturesFlag: ScaledFlags = 1 << 3;
-  /** @hidden */
+  /** @internal */
   static readonly XMinInRangeFlag: ScaledFlags = 1 << 4;
-  /** @hidden */
+  /** @internal */
   static readonly XMaxInRangeFlag: ScaledFlags = 1 << 5;
-  /** @hidden */
+  /** @internal */
   static readonly YMinInRangeFlag: ScaledFlags = 1 << 6;
-  /** @hidden */
+  /** @internal */
   static readonly YMaxInRangeFlag: ScaledFlags = 1 << 7;
-  /** @hidden */
+  /** @internal */
   static readonly InteractingFlag: ScaledFlags = 1 << 8;
-  /** @hidden */
+  /** @internal */
   static readonly InteractedFlag: ScaledFlags = 1 << 9;
-  /** @hidden */
+  /** @internal */
   static readonly XBoundingFlag: ScaledFlags = 1 << 10;
-  /** @hidden */
+  /** @internal */
   static readonly YBoundingFlag: ScaledFlags = 1 << 11;
-  /** @hidden */
+  /** @internal */
   static readonly XFitFlag: ScaledFlags = 1 << 12;
-  /** @hidden */
+  /** @internal */
   static readonly YFitFlag: ScaledFlags = 1 << 13;
-  /** @hidden */
+  /** @internal */
   static readonly XFitTweenFlag: ScaledFlags = 1 << 14;
-  /** @hidden */
+  /** @internal */
   static readonly YFitTweenFlag: ScaledFlags = 1 << 15;
-  /** @hidden */
+  /** @internal */
   static readonly RescaleFlag: ScaledFlags = 1 << 16;
 
-  /** @hidden */
+  /** @internal */
   static readonly DomainTrackingMask: ScaledFlags = ScaledView.XDomainTrackingFlag
                                                   | ScaledView.YDomainTrackingFlag;
-  /** @hidden */
+  /** @internal */
   static readonly ScaleGesturesMask: ScaledFlags = ScaledView.XScaleGesturesFlag
                                                  | ScaledView.YScaleGesturesFlag;
-  /** @hidden */
+  /** @internal */
   static readonly XInRangeMask: ScaledFlags = ScaledView.XMinInRangeFlag
                                             | ScaledView.XMaxInRangeFlag;
-  /** @hidden */
+  /** @internal */
   static readonly YInRangeMask: ScaledFlags = ScaledView.YMinInRangeFlag
                                             | ScaledView.YMaxInRangeFlag;
-  /** @hidden */
+  /** @internal */
   static readonly InteractingMask: ScaledFlags = ScaledView.InteractingFlag
                                                | ScaledView.InteractedFlag;
-  /** @hidden */
+  /** @internal */
   static readonly BoundingMask: ScaledFlags = ScaledView.XBoundingFlag
                                             | ScaledView.YBoundingFlag;
-  /** @hidden */
+  /** @internal */
   static readonly FitMask: ScaledFlags = ScaledView.XFitFlag
                                        | ScaledView.YFitFlag;
-  /** @hidden */
+  /** @internal */
   static readonly FitTweenMask: ScaledFlags = ScaledView.XFitTweenFlag
                                             | ScaledView.YFitTweenFlag;
 
-  /** @hidden */
+  /** @internal */
   static LinearZoomMin: number = 1000000;
-  /** @hidden */
+  /** @internal */
   static LinearZoomMax: number = 0.001;
-  /** @hidden */
+  /** @internal */
   static TimeZoomMin: number = 86400000;
-  /** @hidden */
+  /** @internal */
   static TimeZoomMax: number = 1;
 
-  static override readonly insertChildFlags: ViewFlags = LayerView.insertChildFlags | View.NeedsResize;
+  static override readonly InsertChildFlags: ViewFlags = LayerView.InsertChildFlags | View.NeedsResize;
 }

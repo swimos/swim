@@ -15,7 +15,7 @@
 import {Input, Output, Parser, Diagnostic, Unicode, Base10} from "@swim/codec";
 import {ScaleTransform} from "./ScaleTransform";
 
-/** @hidden */
+/** @internal */
 export class ScaleTransformParser extends Parser<ScaleTransform> {
   private readonly identOutput: Output<string> | undefined;
   private readonly xParser: Parser<number> | undefined;
@@ -145,7 +145,7 @@ export class ScaleTransformParser extends Parser<ScaleTransform> {
     return new ScaleTransformParser(identOutput, xParser, yParser, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseRest(input: Input, identOutput?: Output<string>): Parser<ScaleTransform> {
     return ScaleTransformParser.parse(input, identOutput, void 0, void 0, 2);
   }

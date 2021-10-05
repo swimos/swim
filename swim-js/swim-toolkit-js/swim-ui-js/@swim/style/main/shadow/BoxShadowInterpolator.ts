@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {Mutable, Interpolator} from "@swim/util";
 import type {Length} from "@swim/math";
 import type {Color} from "../color/Color";
 import {BoxShadow} from "./BoxShadow";
 
-/** @hidden */
-export declare abstract class BoxShadowInterpolator {
-  /** @hidden */
+/** @internal */
+export interface BoxShadowInterpolator extends Interpolator<BoxShadow> {
+  /** @internal */
   readonly insetInterpolator: Interpolator<boolean>;
-  /** @hidden */
+  /** @internal */
   readonly offsetXInterpolator: Interpolator<Length>;
-  /** @hidden */
+  /** @internal */
   readonly offsetYInterpolator: Interpolator<Length>;
-  /** @hidden */
+  /** @internal */
   readonly blurRadiusInterpolator: Interpolator<Length>;
-  /** @hidden */
+  /** @internal */
   readonly spreadRadiusInterpolator: Interpolator<Length>;
-  /** @hidden */
+  /** @internal */
   readonly colorInterpolator: Interpolator<Color>;
-  /** @hidden */
+  /** @internal */
   readonly nextInterpolator: Interpolator<BoxShadow | null>;
 
   get 0(): BoxShadow;
@@ -42,74 +41,79 @@ export declare abstract class BoxShadowInterpolator {
   equals(that: unknown): boolean;
 }
 
-export interface BoxShadowInterpolator extends Interpolator<BoxShadow> {
-}
+/** @internal */
+export const BoxShadowInterpolator = (function (_super: typeof Interpolator) {
+  const BoxShadowInterpolator = function (b0: BoxShadow, b1: BoxShadow): BoxShadowInterpolator {
+    const interpolator = function (u: number): BoxShadow {
+      const inset = interpolator.insetInterpolator(u);
+      const offsetX = interpolator.offsetXInterpolator(u);
+      const offsetY = interpolator.offsetYInterpolator(u);
+      const blurRadius = interpolator.blurRadiusInterpolator(u);
+      const spreadRadius = interpolator.spreadRadiusInterpolator(u);
+      const color = interpolator.colorInterpolator(u);
+      const next = interpolator.nextInterpolator(u);
+      return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, next);
+    } as BoxShadowInterpolator;
+    Object.setPrototypeOf(interpolator, BoxShadowInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).insetInterpolator = Interpolator(b0.inset, b1.inset);
+    (interpolator as Mutable<typeof interpolator>).offsetXInterpolator = b0.offsetX.interpolateTo(b1.offsetX);
+    (interpolator as Mutable<typeof interpolator>).offsetYInterpolator = b0.offsetY.interpolateTo(b1.offsetY);
+    (interpolator as Mutable<typeof interpolator>).blurRadiusInterpolator = b0.blurRadius.interpolateTo(b1.blurRadius);
+    (interpolator as Mutable<typeof interpolator>).spreadRadiusInterpolator = b0.spreadRadius.interpolateTo(b1.spreadRadius);
+    (interpolator as Mutable<typeof interpolator>).colorInterpolator = b0.color.interpolateTo(b1.color);
+    (interpolator as Mutable<typeof interpolator>).nextInterpolator = Interpolator(b0.next, b1.next);
+    return interpolator;
+  } as {
+    (b0: BoxShadow, b1: BoxShadow): BoxShadowInterpolator;
 
-/** @hidden */
-export function BoxShadowInterpolator(y0: BoxShadow, y1: BoxShadow): BoxShadowInterpolator {
-  const interpolator = function (u: number): BoxShadow {
-    const inset = interpolator.insetInterpolator(u);
-    const offsetX = interpolator.offsetXInterpolator(u);
-    const offsetY = interpolator.offsetYInterpolator(u);
-    const blurRadius = interpolator.blurRadiusInterpolator(u);
-    const spreadRadius = interpolator.spreadRadiusInterpolator(u);
-    const color = interpolator.colorInterpolator(u);
-    const next = interpolator.nextInterpolator(u);
-    return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, next);
-  } as BoxShadowInterpolator;
-  Object.setPrototypeOf(interpolator, BoxShadowInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).insetInterpolator = Interpolator(y0.inset, y1.inset);
-  (interpolator as Mutable<typeof interpolator>).offsetXInterpolator = y0.offsetX.interpolateTo(y1.offsetX);
-  (interpolator as Mutable<typeof interpolator>).offsetYInterpolator = y0.offsetY.interpolateTo(y1.offsetY);
-  (interpolator as Mutable<typeof interpolator>).blurRadiusInterpolator = y0.blurRadius.interpolateTo(y1.blurRadius);
-  (interpolator as Mutable<typeof interpolator>).spreadRadiusInterpolator = y0.spreadRadius.interpolateTo(y1.spreadRadius);
-  (interpolator as Mutable<typeof interpolator>).colorInterpolator = y0.color.interpolateTo(y1.color);
-  (interpolator as Mutable<typeof interpolator>).nextInterpolator = Interpolator(y0.next, y1.next);
-  return interpolator;
-}
-__extends(BoxShadowInterpolator, Interpolator);
+    /** @internal */
+    prototype: BoxShadowInterpolator;
+  };
 
-Object.defineProperty(BoxShadowInterpolator.prototype, 0, {
-  get(this: BoxShadowInterpolator): BoxShadow {
-    const inset = this.insetInterpolator[0];
-    const offsetX = this.offsetXInterpolator[0];
-    const offsetY = this.offsetYInterpolator[0];
-    const blurRadius = this.blurRadiusInterpolator[0];
-    const spreadRadius = this.spreadRadiusInterpolator[0];
-    const color = this.colorInterpolator[0];
-    const next = this.nextInterpolator[0];
-    return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, next);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  BoxShadowInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(BoxShadowInterpolator.prototype, 1, {
-  get(this: BoxShadowInterpolator): BoxShadow {
-    const inset = this.insetInterpolator[1];
-    const offsetX = this.offsetXInterpolator[1];
-    const offsetY = this.offsetYInterpolator[1];
-    const blurRadius = this.blurRadiusInterpolator[1];
-    const spreadRadius = this.spreadRadiusInterpolator[1];
-    const color = this.colorInterpolator[1];
-    const next = this.nextInterpolator[1];
-    return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, next);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(BoxShadowInterpolator.prototype, 0, {
+    get(this: BoxShadowInterpolator): BoxShadow {
+      const inset = this.insetInterpolator[0];
+      const offsetX = this.offsetXInterpolator[0];
+      const offsetY = this.offsetYInterpolator[0];
+      const blurRadius = this.blurRadiusInterpolator[0];
+      const spreadRadius = this.spreadRadiusInterpolator[0];
+      const color = this.colorInterpolator[0];
+      const next = this.nextInterpolator[0];
+      return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, next);
+    },
+    configurable: true,
+  });
 
-BoxShadowInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof BoxShadowInterpolator) {
-    return this.insetInterpolator.equals(that.insetInterpolator)
-        && this.offsetXInterpolator.equals(that.offsetXInterpolator)
-        && this.offsetYInterpolator.equals(that.offsetYInterpolator)
-        && this.blurRadiusInterpolator.equals(that.blurRadiusInterpolator)
-        && this.spreadRadiusInterpolator.equals(that.spreadRadiusInterpolator)
-        && this.colorInterpolator.equals(that.colorInterpolator)
-        && this.nextInterpolator.equals(that.nextInterpolator);
-  }
-  return false;
-};
+  Object.defineProperty(BoxShadowInterpolator.prototype, 1, {
+    get(this: BoxShadowInterpolator): BoxShadow {
+      const inset = this.insetInterpolator[1];
+      const offsetX = this.offsetXInterpolator[1];
+      const offsetY = this.offsetYInterpolator[1];
+      const blurRadius = this.blurRadiusInterpolator[1];
+      const spreadRadius = this.spreadRadiusInterpolator[1];
+      const color = this.colorInterpolator[1];
+      const next = this.nextInterpolator[1];
+      return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, next);
+    },
+    configurable: true,
+  });
+
+  BoxShadowInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof BoxShadowInterpolator) {
+      return this.insetInterpolator.equals(that.insetInterpolator)
+          && this.offsetXInterpolator.equals(that.offsetXInterpolator)
+          && this.offsetYInterpolator.equals(that.offsetYInterpolator)
+          && this.blurRadiusInterpolator.equals(that.blurRadiusInterpolator)
+          && this.spreadRadiusInterpolator.equals(that.spreadRadiusInterpolator)
+          && this.colorInterpolator.equals(that.colorInterpolator)
+          && this.nextInterpolator.equals(that.nextInterpolator);
+    }
+    return false;
+  };
+
+  return BoxShadowInterpolator;
+})(Interpolator);

@@ -19,7 +19,7 @@ import {AnyInputSettings, InputSettings} from "../input/InputSettings";
 import {Input} from "../input/Input";
 import {InputError} from "../input/InputError";
 
-/** @hidden */
+/** @internal */
 export class StringInput extends Input {
   constructor(string: string, id: string | undefined, offset: number,
               line: number, column: number, settings: InputSettings,
@@ -35,13 +35,13 @@ export class StringInput extends Input {
     this.settings = settings;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly string: string;
 
-  /** @hidden */
+  /** @internal */
   readonly index: number;
 
-  /** @hidden */
+  /** @internal */
   readonly part: boolean;
 
   override isCont(): boolean {

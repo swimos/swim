@@ -238,7 +238,7 @@ export abstract class Angle implements Interpolate<Angle>, HashCode, Equivalent,
     return new AngleForm(void 0, Angle.zero());
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyAngle {
     return value instanceof Angle
         || typeof value === "number"

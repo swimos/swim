@@ -16,24 +16,28 @@ import {Mutable, Interpolator} from "@swim/util";
 import {Angle} from "../angle/Angle";
 import {RotateTransform} from "./RotateTransform";
 
-/** @hidden */
-export const RotateTransformInterpolator = function (f0: RotateTransform, f1: RotateTransform): Interpolator<RotateTransform> {
-  const interpolator = function (u: number): RotateTransform {
-    const f0 = interpolator[0];
-    const f1 = interpolator[1];
-    const a = Angle.create(f0.angle.value + u * (f1.angle.value - f0.angle.value), f1.angle.units);
-    return new RotateTransform(a);
-  } as Interpolator<RotateTransform>;
-  Object.setPrototypeOf(interpolator, RotateTransformInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = f0.angle.units === f1.angle.units
-                                                    ? f0 : new RotateTransform(f0.angle.to(f1.angle.units));
-  (interpolator as Mutable<typeof interpolator>)[1] = f1;
-  return interpolator;
-} as {
-  (f0: RotateTransform, f1: RotateTransform): Interpolator<RotateTransform>;
+/** @internal */
+export const RotateTransformInterpolator = (function (_super: typeof Interpolator) {
+  const RotateTransformInterpolator = function (f0: RotateTransform, f1: RotateTransform): Interpolator<RotateTransform> {
+    const interpolator = function (u: number): RotateTransform {
+      const f0 = interpolator[0];
+      const f1 = interpolator[1];
+      const a = Angle.create(f0.angle.value + u * (f1.angle.value - f0.angle.value), f1.angle.units);
+      return new RotateTransform(a);
+    } as Interpolator<RotateTransform>;
+    Object.setPrototypeOf(interpolator, RotateTransformInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = f0.angle.units === f1.angle.units
+                                                      ? f0 : new RotateTransform(f0.angle.to(f1.angle.units));
+    (interpolator as Mutable<typeof interpolator>)[1] = f1;
+    return interpolator;
+  } as {
+    (f0: RotateTransform, f1: RotateTransform): Interpolator<RotateTransform>;
 
-  /** @hidden */
-  prototype: Interpolator<RotateTransform>;
-};
+    /** @internal */
+    prototype: Interpolator<RotateTransform>;
+  };
 
-RotateTransformInterpolator.prototype = Object.create(Interpolator.prototype);
+  RotateTransformInterpolator.prototype = Object.create(_super.prototype);
+
+  return RotateTransformInterpolator;
+})(Interpolator);

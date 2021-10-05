@@ -15,7 +15,7 @@
 import {Input, Parser, Diagnostic, Base16} from "@swim/codec";
 import {RgbColor} from "./RgbColor";
 
-/** @hidden */
+/** @internal */
 export class HexColorParser extends Parser<RgbColor> {
   private readonly value: number | undefined;
   private readonly step: number | undefined;

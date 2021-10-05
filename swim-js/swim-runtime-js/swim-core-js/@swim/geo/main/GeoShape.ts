@@ -72,7 +72,7 @@ export abstract class GeoShape implements Equals {
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyGeoShape {
     return value instanceof GeoShape
         || GeoPoint.isInit(value)

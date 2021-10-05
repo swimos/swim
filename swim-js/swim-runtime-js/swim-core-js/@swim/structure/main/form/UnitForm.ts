@@ -15,7 +15,7 @@
 import type {Item} from "../Item";
 import {Form} from "./Form";
 
-/** @hidden */
+/** @internal */
 export class UnitForm<T, U = never> extends Form<T, U> {
   constructor(form: Form<T, U>, unit: T | undefined) {
     super();
@@ -26,7 +26,7 @@ export class UnitForm<T, U = never> extends Form<T, U> {
     });
   }
 
-  /** @hidden */
+  /** @internal */
   readonly form: Form<T, U>;
 
   override readonly tag: string | undefined; // // getter defined below to work around useDefineForClassFields lunacy
@@ -71,6 +71,5 @@ Object.defineProperty(UnitForm.prototype, "tag", {
   get<T, U>(this: UnitForm<T, U>): string | undefined {
     return this.form.tag;
   },
-  enumerable: true,
   configurable: true,
 });

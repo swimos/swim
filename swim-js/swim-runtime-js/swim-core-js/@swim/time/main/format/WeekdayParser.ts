@@ -17,7 +17,7 @@ import type {DateTimeInit} from "../DateTime";
 import type {DateTimeLocale} from "./DateTimeLocale";
 import {DateTimeFormat} from "./DateTimeFormat";
 
-/** @hidden */
+/** @internal */
 export class WeekdayParser extends Parser<DateTimeInit> {
   private readonly locale: DateTimeLocale;
   private readonly date: DateTimeInit | undefined;

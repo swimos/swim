@@ -199,7 +199,7 @@ export class DateTime implements Interpolate<DateTime>, HashCode, Equivalent, Co
 
   /**
    * Returns this date time shifted by the time zone offset.
-   * @hidden
+   * @internal
    */
   toUTCLocalDate(): Date {
     return new Date(this.time + 60000 * this.zone.offset);
@@ -271,7 +271,7 @@ export class DateTime implements Interpolate<DateTime>, HashCode, Equivalent, Co
 
   /**
    * Returns this date time shifted back by the time zone offset.
-   * @hidden
+   * @internal
    */
   static fromUTCLocalDate(date: Date, zone: TimeZone): DateTime {
     return new DateTime(date.getTime() - 60000 * zone.offset, zone);
@@ -397,7 +397,7 @@ export class DateTime implements Interpolate<DateTime>, HashCode, Equivalent, Co
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is DateTimeInit {
     if (typeof value === "object" && value !== null) {
       const init = value as DateTimeInit;
@@ -420,7 +420,7 @@ export class DateTime implements Interpolate<DateTime>, HashCode, Equivalent, Co
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyDateTime {
     return value instanceof DateTime
         || value instanceof Date

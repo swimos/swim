@@ -18,7 +18,7 @@ import type {ColorChannel} from "../color/ColorChannel";
 import {ColorChannelParser} from "../color/ColorChannelParser";
 import {HslColor} from "./HslColor";
 
-/** @hidden */
+/** @internal */
 export class HslColorParser extends Parser<HslColor> {
   private readonly hParser: Parser<Angle> | undefined;
   private readonly sParser: Parser<ColorChannel> | undefined;
@@ -234,7 +234,7 @@ export class HslColorParser extends Parser<HslColor> {
     return new HslColorParser(hParser, sParser, lParser, aParser, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseRest(input: Input): Parser<HslColor> {
     return HslColorParser.parse(input, void 0, void 0, void 0, void 0, 5);
   }

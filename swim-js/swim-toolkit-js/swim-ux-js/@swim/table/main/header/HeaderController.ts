@@ -12,15 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import type {TraitConstructor, TraitClass, Trait} from "@swim/model";
-import type {ViewClass, View} from "@swim/view";
-import type {NodeViewConstructor, HtmlView} from "@swim/dom";
-import {
-  Controller,
-  ControllerViewTrait,
-  ControllerFastener,
-  CompositeController,
-} from "@swim/controller";
+import type {View} from "@swim/view";
+import type {HtmlViewClass, HtmlView} from "@swim/dom";
+import {TraitViewFastener, ControllerFastener, Controller, GenericController} from "@swim/controller";
 import type {ColLayout} from "../layout/ColLayout";
 import type {ColView} from "../col/ColView";
 import type {ColTrait} from "../col/ColTrait";
@@ -29,13 +25,13 @@ import {HeaderView} from "./HeaderView";
 import {HeaderTrait} from "./HeaderTrait";
 import type {HeaderControllerObserver} from "./HeaderControllerObserver";
 
-export class HeaderController extends CompositeController {
+export class HeaderController extends GenericController {
   constructor() {
     super();
     this.colFasteners = [];
   }
 
-  override readonly controllerObservers!: ReadonlyArray<HeaderControllerObserver>;
+  override readonly observerType?: Class<HeaderControllerObserver>;
 
   protected initHeaderTrait(headerTrait: HeaderTrait): void {
     // hook
@@ -62,11 +58,11 @@ export class HeaderController extends CompositeController {
   }
 
   protected willSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetHeaderTrait !== void 0) {
-        controllerObserver.controllerWillSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetHeaderTrait !== void 0) {
+        observer.controllerWillSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
       }
     }
   }
@@ -82,11 +78,11 @@ export class HeaderController extends CompositeController {
   }
 
   protected didSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetHeaderTrait !== void 0) {
-        controllerObserver.controllerDidSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetHeaderTrait !== void 0) {
+        observer.controllerDidSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
       }
     }
   }
@@ -105,7 +101,7 @@ export class HeaderController extends CompositeController {
       const colController = colFasteners[i]!.controller;
       if (colController !== null) {
         const colView = colController.col.view;
-        if (colView !== null && colView.parentView === null) {
+        if (colView !== null && colView.parent === null) {
           const colTrait = colController.col.trait;
           if (colTrait !== null) {
             colController.col.injectView(headerView, void 0, void 0, colTrait.key);
@@ -120,11 +116,11 @@ export class HeaderController extends CompositeController {
   }
 
   protected willSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetHeaderView !== void 0) {
-        controllerObserver.controllerWillSetHeaderView(newHeaderView, oldHeaderView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetHeaderView !== void 0) {
+        observer.controllerWillSetHeaderView(newHeaderView, oldHeaderView, this);
       }
     }
   }
@@ -140,36 +136,19 @@ export class HeaderController extends CompositeController {
   }
 
   protected didSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetHeaderView !== void 0) {
-        controllerObserver.controllerDidSetHeaderView(newHeaderView, oldHeaderView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetHeaderView !== void 0) {
+        observer.controllerDidSetHeaderView(newHeaderView, oldHeaderView, this);
       }
     }
   }
 
-  /** @hidden */
-  static HeaderFastener = ControllerViewTrait.define<HeaderController, HeaderView, HeaderTrait>({
-    viewType: HeaderView,
-    observeView: true,
-    willSetView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-      this.owner.willSetHeaderView(newHeaderView, oldHeaderView);
-    },
-    onSetView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-      this.owner.onSetHeaderView(newHeaderView, oldHeaderView);
-    },
-    didSetView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-      this.owner.didSetHeaderView(newHeaderView, oldHeaderView);
-    },
-    createView(): HeaderView | null {
-      return this.owner.createHeaderView();
-    },
-    insertView(parentView: View, childView: HeaderView, targetView: View | null, key: string | undefined): void {
-      parentView.prependChildView(childView, key);
-    },
+  /** @internal */
+  static HeaderFastener = TraitViewFastener.define<HeaderController, HeaderTrait, HeaderView>({
     traitType: HeaderTrait,
-    observeTrait: true,
+    observesTrait: true,
     willSetTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
       this.owner.willSetHeaderTrait(newHeaderTrait, oldHeaderTrait);
     },
@@ -189,12 +168,29 @@ export class HeaderController extends CompositeController {
         this.owner.insertColTrait(newColTrait, targetTrait);
       }
     },
+    viewType: HeaderView,
+    observesView: true,
+    willSetView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+      this.owner.willSetHeaderView(newHeaderView, oldHeaderView);
+    },
+    onSetView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+      this.owner.onSetHeaderView(newHeaderView, oldHeaderView);
+    },
+    didSetView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+      this.owner.didSetHeaderView(newHeaderView, oldHeaderView);
+    },
+    createView(): HeaderView | null {
+      return this.owner.createHeaderView();
+    },
+    insertView(parent: View, childView: HeaderView, targetView: View | null, key: string | undefined): void {
+      parent.prependChild(childView, key);
+    },
   });
 
-  @ControllerViewTrait<HeaderController, HeaderView, HeaderTrait>({
+  @TraitViewFastener<HeaderController, HeaderTrait, HeaderView>({
     extends: HeaderController.HeaderFastener,
   })
-  readonly header!: ControllerViewTrait<this, HeaderView, HeaderTrait>;
+  readonly header!: TraitViewFastener<this, HeaderTrait, HeaderView>;
 
   insertCol(colController: ColController, targetController: Controller | null = null): void {
     const colFasteners = this.colFasteners as ControllerFastener<this, ColController>[];
@@ -210,7 +206,7 @@ export class HeaderController extends CompositeController {
     const colFastener = this.createColFastener(colController);
     colFasteners.splice(targetIndex, 0, colFastener);
     colFastener.setController(colController, targetController);
-    if (this.isMounted()) {
+    if (this.mounted) {
       colFastener.mount();
     }
   }
@@ -221,7 +217,7 @@ export class HeaderController extends CompositeController {
       const colFastener = colFasteners[i]!;
       if (colFastener.controller === colController) {
         colFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           colFastener.unmount();
         }
         colFasteners.splice(i, 1);
@@ -269,11 +265,11 @@ export class HeaderController extends CompositeController {
 
   protected willSetCol(newColController: ColController | null, oldColController: ColController | null,
                        colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCol !== void 0) {
-        controllerObserver.controllerWillSetCol(newColController, oldColController, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCol !== void 0) {
+        observer.controllerWillSetCol(newColController, oldColController, colFastener);
       }
     }
   }
@@ -291,11 +287,11 @@ export class HeaderController extends CompositeController {
 
   protected didSetCol(newColController: ColController | null, oldColController: ColController | null,
                       colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCol !== void 0) {
-        controllerObserver.controllerDidSetCol(newColController, oldColController, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCol !== void 0) {
+        observer.controllerDidSetCol(newColController, oldColController, colFastener);
       }
     }
   }
@@ -341,7 +337,7 @@ export class HeaderController extends CompositeController {
     const colController = this.createCol(colTrait);
     if (colController !== null) {
       colController.col.setTrait(colTrait);
-      this.insertChildController(colController, targetController, colTrait.key);
+      this.insertChild(colController, targetController, colTrait.key);
       if (colController.col.view === null) {
         const colView = this.createColView(colController);
         let targetView: ColView | null = null;
@@ -365,7 +361,7 @@ export class HeaderController extends CompositeController {
       const colController = colFastener.controller;
       if (colController !== null && colController.col.trait === colTrait) {
         colFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           colFastener.unmount();
         }
         colFasteners.splice(i, 1);
@@ -389,11 +385,11 @@ export class HeaderController extends CompositeController {
 
   protected willSetColTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
                             colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColTrait !== void 0) {
-        controllerObserver.controllerWillSetColTrait(newColTrait, oldColTrait, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColTrait !== void 0) {
+        observer.controllerWillSetColTrait(newColTrait, oldColTrait, colFastener);
       }
     }
   }
@@ -411,25 +407,25 @@ export class HeaderController extends CompositeController {
 
   protected didSetColTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
                            colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColTrait !== void 0) {
-        controllerObserver.controllerDidSetColTrait(newColTrait, oldColTrait, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColTrait !== void 0) {
+        observer.controllerDidSetColTrait(newColTrait, oldColTrait, colFastener);
       }
     }
   }
 
   getColView(key: string): ColView | null;
-  getColView<V extends ColView>(key: string, colViewClass: ViewClass<V>): V | null;
-  getColView(key: string, colViewClass?: ViewClass<ColView>): ColView | null {
+  getColView<V extends ColView>(key: string, colViewClass: Class<V>): V | null;
+  getColView(key: string, colViewClass?: Class<ColView>): ColView | null {
     const headerView = this.header.view;
     return headerView !== null ? headerView.getCol(key, colViewClass!) : null;
   }
 
   getOrCreateColView(key: string): ColView;
-  getOrCreateColView<V extends ColView>(key: string, colViewConstructor: NodeViewConstructor<V>): V;
-  getOrCreateColView(key: string, colViewConstructor?: NodeViewConstructor<ColView>): ColView {
+  getOrCreateColView<V extends ColView>(key: string, colViewClass: HtmlViewClass<V>): V;
+  getOrCreateColView(key: string, colViewClass?: HtmlViewClass<ColView>): ColView {
     let headerView = this.header.view;
     if (headerView === null) {
       headerView = this.header.createView();
@@ -438,7 +434,7 @@ export class HeaderController extends CompositeController {
       }
       this.header.setView(headerView);
     }
-    return headerView.getOrCreateCol(key, colViewConstructor!);
+    return headerView.getOrCreateCol(key, colViewClass!);
   }
 
   setColView(key: string, colView: ColView): void {
@@ -481,11 +477,11 @@ export class HeaderController extends CompositeController {
 
   protected willSetColView(newColView: ColView | null, oldColView: ColView | null,
                            colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColView !== void 0) {
-        controllerObserver.controllerWillSetColView(newColView, oldColView, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColView !== void 0) {
+        observer.controllerWillSetColView(newColView, oldColView, colFastener);
       }
     }
   }
@@ -503,22 +499,22 @@ export class HeaderController extends CompositeController {
 
   protected didSetColView(newColView: ColView | null, oldColView: ColView | null,
                           colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColView !== void 0) {
-        controllerObserver.controllerDidSetColView(newColView, oldColView, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColView !== void 0) {
+        observer.controllerDidSetColView(newColView, oldColView, colFastener);
       }
     }
   }
 
   protected willSetColLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null,
                              colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColLayout !== void 0) {
-        controllerObserver.controllerWillSetColLayout(newColLayout, oldColLayout, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColLayout !== void 0) {
+        observer.controllerWillSetColLayout(newColLayout, oldColLayout, colFastener);
       }
     }
   }
@@ -530,11 +526,11 @@ export class HeaderController extends CompositeController {
 
   protected didSetColLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null,
                             colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColLayout !== void 0) {
-        controllerObserver.controllerDidSetColLayout(newColLayout, oldColLayout, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColLayout !== void 0) {
+        observer.controllerDidSetColLayout(newColLayout, oldColLayout, colFastener);
       }
     }
   }
@@ -553,11 +549,11 @@ export class HeaderController extends CompositeController {
 
   protected willSetColLabelView(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null,
                                 colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColLabelView !== void 0) {
-        controllerObserver.controllerWillSetColLabelView(newColLabelView, oldColLabelView, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColLabelView !== void 0) {
+        observer.controllerWillSetColLabelView(newColLabelView, oldColLabelView, colFastener);
       }
     }
   }
@@ -575,20 +571,20 @@ export class HeaderController extends CompositeController {
 
   protected didSetColLabelView(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null,
                                colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColLabelView !== void 0) {
-        controllerObserver.controllerDidSetColLabelView(newColLabelView, oldColLabelView, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColLabelView !== void 0) {
+        observer.controllerDidSetColLabelView(newColLabelView, oldColLabelView, colFastener);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static ColFastener = ControllerFastener.define<HeaderController, ColController>({
     type: ColController,
     child: false,
-    observe: true,
+    observes: true,
     willSetController(newColController: ColController | null, oldColController: ColController | null): void {
       this.owner.willSetCol(newColController, oldColController, this);
     },
@@ -629,10 +625,10 @@ export class HeaderController extends CompositeController {
   });
 
   protected createColFastener(colController: ColController): ControllerFastener<this, ColController> {
-    return new HeaderController.ColFastener(this, colController.key, "col");
+    return HeaderController.ColFastener.create(this, colController.key ?? "col");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly colFasteners: ReadonlyArray<ControllerFastener<this, ColController>>;
 
   protected getColFastener(colTrait: ColTrait): ControllerFastener<this, ColController> | null {
@@ -647,7 +643,7 @@ export class HeaderController extends CompositeController {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   protected mountColFasteners(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
@@ -656,7 +652,7 @@ export class HeaderController extends CompositeController {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountColFasteners(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
@@ -669,31 +665,31 @@ export class HeaderController extends CompositeController {
     return controller instanceof ColController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const colController = this.detectColController(childController);
     if (colController !== null) {
       this.insertCol(colController, targetController);
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const colController = this.detectColController(childController);
     if (colController !== null) {
       this.removeCol(colController);
     }
   }
 
-  /** @hidden */
-  protected override mountControllerFasteners(): void {
-    super.mountControllerFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountColFasteners();
   }
 
-  /** @hidden */
-  protected override unmountControllerFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountColFasteners();
-    super.unmountControllerFasteners();
+    super.unmountFasteners();
   }
 }

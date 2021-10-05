@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {TraitProperty} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import type {HtmlView} from "@swim/dom";
 import {CellTrait} from "./CellTrait";
 import type {TextCellTraitObserver} from "./TextCellTraitObserver";
@@ -21,12 +22,12 @@ export type TextCellContent = TextCellContentFunction | string;
 export type TextCellContentFunction = (cellTrait: TextCellTrait) => HtmlView | string | null;
 
 export class TextCellTrait extends CellTrait {
-  override readonly traitObservers!: ReadonlyArray<TextCellTraitObserver>;
+  override readonly observerType?: Class<TextCellTraitObserver>;
 
   protected willSetContent(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetContent !== void 0) {
         traitObserver.traitWillSetContent(newContent, oldContent, this);
       }
@@ -38,16 +39,16 @@ export class TextCellTrait extends CellTrait {
   }
 
   protected didSetContent(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetContent !== void 0) {
         traitObserver.traitDidSetContent(newContent, oldContent, this);
       }
     }
   }
 
-  @TraitProperty<TextCellTrait, TextCellContent | null>({
+  @Property<TextCellTrait, TextCellContent | null>({
     state: null,
     willSetState(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
       this.owner.willSetContent(newContent, oldContent);
@@ -57,5 +58,5 @@ export class TextCellTrait extends CellTrait {
       this.owner.didSetContent(newContent, oldContent);
     },
   })
-  readonly content!: TraitProperty<this, TextCellContent | null>;
+  readonly content!: Property<this, TextCellContent | null>;
 }

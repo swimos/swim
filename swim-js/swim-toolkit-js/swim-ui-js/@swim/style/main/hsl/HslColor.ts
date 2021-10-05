@@ -169,7 +169,7 @@ export class HslColor extends Color {
     return this.rgb().toHexString();
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   override toString(): string {
@@ -270,7 +270,7 @@ export class HslColor extends Color {
     return Color.parse(str).hsl();
   }
 
-  /** @hidden */
+  /** @internal */
   static override isInit(value: unknown): value is HslColorInit {
     if (typeof value === "object" && value !== null) {
       const init = value as HslColorInit;
@@ -282,7 +282,7 @@ export class HslColor extends Color {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyHslColor {
     return value instanceof HslColor
         || HslColor.isInit(value)

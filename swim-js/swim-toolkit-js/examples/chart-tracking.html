@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
@@ -26,7 +26,7 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const chartView = canvasView.append(swim.ChartView)
+const chartView = canvasView.appendChild(swim.ChartView)
     .bottomAxis(true)
     .leftAxis(true)
     .xRangePadding([0, 0])
@@ -47,7 +47,7 @@ const zeroTick = chartView.leftAxis.view.insertTick({
 });
 zeroTick.gridLineColor.setLook(swim.Look.accentColor);
 
-const plotView = graphView.append(swim.LinePlotView)
+const plotView = graphView.appendChild(swim.LinePlotView)
     .hitMode("plot")
     .strokeWidth(4)
     .on("pointerenter", function (event) {
@@ -69,7 +69,7 @@ while (i <= n) {
   i += 1;
 }
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
 const samplesPerInterval = 10;
 let j = 0;

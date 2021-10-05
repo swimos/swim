@@ -19,7 +19,7 @@ import {Uri} from "./Uri";
 export type AnyUriScheme = UriScheme | string;
 
 export class UriScheme implements HashCode, Compare, Debug, Display {
-  /** @hidden */
+  /** @internal */
   constructor(name: string) {
     this.name = name;
   }
@@ -105,7 +105,7 @@ export class UriScheme implements HashCode, Compare, Debug, Display {
     return Uri.standardParser.parseSchemeString(schemePart);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get cache(): HashGenCacheMap<string, UriScheme> {
     const cacheSize = 4;

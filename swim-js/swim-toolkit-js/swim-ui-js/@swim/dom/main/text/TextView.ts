@@ -12,18 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {ViewConstructor, View} from "@swim/view";
-import {NodeViewInit, NodeViewConstructor, NodeView} from "../node/NodeView";
+import {Class, Creatable} from "@swim/util";
+import {View} from "@swim/view";
+import {AnyNodeView, NodeViewInit, NodeViewConstructor, NodeView} from "../node/NodeView";
 import type {TextViewObserver} from "./TextViewObserver";
 
 export interface ViewText extends Text {
   view?: TextView;
 }
 
+export type AnyTextView<V extends TextView = TextView> = AnyNodeView<V> | string;
+
 export interface TextViewInit extends NodeViewInit {
 }
 
 export interface TextViewConstructor<V extends TextView = TextView> extends NodeViewConstructor<V> {
+  new(node: Text): V;
 }
 
 export class TextView extends NodeView {
@@ -31,28 +35,55 @@ export class TextView extends NodeView {
     super(node);
   }
 
+  override readonly observerType?: Class<TextViewObserver>;
+
   override readonly node!: Text;
 
-  override readonly viewObservers!: ReadonlyArray<TextViewObserver>;
-
-  override initView(init: TextViewInit): void {
-    super.initView(init);
+  override init(init: TextViewInit): void {
+    super.init(init);
   }
 
-  static create(value: string = ""): TextView {
-    const node = document.createTextNode(value);
-    return new TextView(node);
+  static override create<S extends new (node: Text) => InstanceType<S>>(this: S, text?: string): InstanceType<S>;
+  static override create(text?: string): TextView;
+  static override create(text?: string): TextView {
+    if (text === void 0) {
+      text = "";
+    }
+    const node = document.createTextNode(text);
+    return new this(node);
   }
 
-  static override fromConstructor<V extends NodeView>(viewConstructor: NodeViewConstructor<V>): V;
-  static override fromConstructor<V extends View>(viewConstructor: ViewConstructor<V>): V;
-  static override fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View;
-  static override fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View {
-    if (viewConstructor.prototype instanceof TextView) {
-      const node = document.createTextNode("");
-      return new viewConstructor(node);
+  static override fromNode<S extends new (node: Text) => InstanceType<S>>(this: S, node: Text): InstanceType<S>;
+  static override fromNode(node: Text): TextView;
+  static override fromNode(node: Text): TextView {
+    let view = (node as ViewText).view;
+    if (view === void 0) {
+      view = new this(node);
+    } else if (!(view instanceof this)) {
+      throw new TypeError(view + " not an instance of " + this);
+    }
+    return view;
+  }
+
+  static override fromAny<S extends abstract new (...args: any[]) => InstanceType<S>>(this: S, value: AnyTextView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny(value: AnyTextView | string): TextView;
+  static override fromAny(value: AnyTextView | string): TextView {
+    if (value === void 0 || value === null) {
+      return value;
+    } else if (value instanceof View) {
+      if (value instanceof this) {
+        return value;
+      } else {
+        throw new TypeError(value + " not an instance of " + this);
+      }
+    } else if (value instanceof Node) {
+      return this.fromNode(value);
+    } else if (typeof value === "string") {
+      return this.create(value);
+    } else if (Creatable.is(value)) {
+      return value.create();
     } else {
-      return super.fromConstructor(viewConstructor);
+      return this.fromInit(value);
     }
   }
 }

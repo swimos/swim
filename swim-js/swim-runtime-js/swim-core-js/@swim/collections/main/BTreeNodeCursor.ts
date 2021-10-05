@@ -16,7 +16,7 @@ import type {Cursor} from "@swim/util";
 import {NodeCursor} from "./NodeCursor";
 import type {BTreePage} from "./BTreePage";
 
-/** @hidden */
+/** @internal */
 export class BTreeNodeCursor<K, V, U> extends NodeCursor<[K, V], BTreePage<K, V, U>> {
   constructor(pages: ReadonlyArray<BTreePage<K, V, U>>, index: number = 0,
               childIndex: number = 0, childCursor: Cursor<[K, V]> | null = null) {

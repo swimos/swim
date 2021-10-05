@@ -16,7 +16,7 @@ import type {Mutable} from "@swim/util";
 import {AnyOutputSettings, OutputSettings, Output} from "@swim/codec";
 import type {Data} from "./Data";
 
-/** @hidden */
+/** @internal */
 export class DataOutput extends Output<Data> {
   constructor(data: Data, settings: OutputSettings) {
     super();
@@ -24,7 +24,7 @@ export class DataOutput extends Output<Data> {
     this.settings = settings;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly data: Data;
 
   override isCont(): boolean {

@@ -17,13 +17,13 @@ import type {Length} from "@swim/math";
 import type {Color} from "../color/Color";
 import {ColorStop} from "./ColorStop";
 
-/** @hidden */
+/** @internal */
 export interface ColorStopInterpolator extends Interpolator<ColorStop> {
-  /** @hidden */
+  /** @internal */
   readonly colorInterpolator: Interpolator<Color>;
-  /** @hidden */
+  /** @internal */
   readonly stopInterpolator: Interpolator<Length | null>;
-  /** @hidden */
+  /** @internal */
   readonly hintInterpolator: Interpolator<Length | null>;
 
   readonly 0: ColorStop;
@@ -33,57 +33,59 @@ export interface ColorStopInterpolator extends Interpolator<ColorStop> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const ColorStopInterpolator = function (y0: ColorStop, y1: ColorStop): ColorStopInterpolator {
-  const interpolator = function (u: number): ColorStop {
-    const color = interpolator.colorInterpolator(u);
-    const stop = interpolator.stopInterpolator(u);
-    const hint = interpolator.hintInterpolator(u);
-    return new ColorStop(color, stop, hint);
-  } as ColorStopInterpolator;
-  Object.setPrototypeOf(interpolator, ColorStopInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).colorInterpolator = y0.color.interpolateTo(y1.color);
-  (interpolator as Mutable<typeof interpolator>).stopInterpolator = Interpolator(y0.stop, y1.stop);
-  (interpolator as Mutable<typeof interpolator>).hintInterpolator = Interpolator(y0.hint, y1.hint);
-  return interpolator;
-} as {
-  (y0: ColorStop, y1: ColorStop): ColorStopInterpolator;
+/** @internal */
+export const ColorStopInterpolator = (function (_super: typeof Interpolator) {
+  const ColorStopInterpolator = function (y0: ColorStop, y1: ColorStop): ColorStopInterpolator {
+    const interpolator = function (u: number): ColorStop {
+      const color = interpolator.colorInterpolator(u);
+      const stop = interpolator.stopInterpolator(u);
+      const hint = interpolator.hintInterpolator(u);
+      return new ColorStop(color, stop, hint);
+    } as ColorStopInterpolator;
+    Object.setPrototypeOf(interpolator, ColorStopInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).colorInterpolator = y0.color.interpolateTo(y1.color);
+    (interpolator as Mutable<typeof interpolator>).stopInterpolator = Interpolator(y0.stop, y1.stop);
+    (interpolator as Mutable<typeof interpolator>).hintInterpolator = Interpolator(y0.hint, y1.hint);
+    return interpolator;
+  } as {
+    (y0: ColorStop, y1: ColorStop): ColorStopInterpolator;
 
-  /** @hidden */
-  prototype: ColorStopInterpolator;
-};
+    /** @internal */
+    prototype: ColorStopInterpolator;
+  };
 
-ColorStopInterpolator.prototype = Object.create(Interpolator.prototype);
+  ColorStopInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(ColorStopInterpolator.prototype, 0, {
-  get(this: ColorStopInterpolator): ColorStop {
-    const color = this.colorInterpolator[0];
-    const stop = this.stopInterpolator[0];
-    const hint = this.hintInterpolator[0];
-    return new ColorStop(color, stop, hint);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(ColorStopInterpolator.prototype, 0, {
+    get(this: ColorStopInterpolator): ColorStop {
+      const color = this.colorInterpolator[0];
+      const stop = this.stopInterpolator[0];
+      const hint = this.hintInterpolator[0];
+      return new ColorStop(color, stop, hint);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(ColorStopInterpolator.prototype, 1, {
-  get(this: ColorStopInterpolator): ColorStop {
-    const color = this.colorInterpolator[1];
-    const stop = this.stopInterpolator[1];
-    const hint = this.hintInterpolator[1];
-    return new ColorStop(color, stop, hint);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(ColorStopInterpolator.prototype, 1, {
+    get(this: ColorStopInterpolator): ColorStop {
+      const color = this.colorInterpolator[1];
+      const stop = this.stopInterpolator[1];
+      const hint = this.hintInterpolator[1];
+      return new ColorStop(color, stop, hint);
+    },
+    configurable: true,
+  });
 
-ColorStopInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof ColorStopInterpolator) {
-    return this.colorInterpolator.equals(that.colorInterpolator)
-        && this.stopInterpolator.equals(that.stopInterpolator)
-        && this.hintInterpolator.equals(that.hintInterpolator);
-  }
-  return false;
-};
+  ColorStopInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof ColorStopInterpolator) {
+      return this.colorInterpolator.equals(that.colorInterpolator)
+          && this.stopInterpolator.equals(that.stopInterpolator)
+          && this.hintInterpolator.equals(that.hintInterpolator);
+    }
+    return false;
+  };
+
+  return ColorStopInterpolator;
+})(Interpolator);

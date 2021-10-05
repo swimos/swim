@@ -15,7 +15,7 @@
 import {Input, Parser, Base10} from "@swim/codec";
 import {ColorChannel} from "./ColorChannel";
 
-/** @hidden */
+/** @internal */
 export class ColorChannelParser extends Parser<ColorChannel> {
   private readonly valueParser: Parser<number> | undefined;
   private readonly step: number | undefined;

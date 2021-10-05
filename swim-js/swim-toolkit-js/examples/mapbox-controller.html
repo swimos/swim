@@ -61,17 +61,17 @@ class ExampleLayerController extends swim.GeoLayerController {
   }
 }
 
-const layerModel = new swim.CompoundModel();
+const layerModel = new swim.GenericModel();
 const layerTrait = new swim.GeoLayerTrait();
 layerModel.setTrait("layer", layerTrait);
 
 function addFeature(featureId, layerModel) {
-  const featureModel = new swim.CompoundModel();
+  const featureModel = new swim.GenericModel();
   const featureTrait = new swim.GeoIconTrait()
     .iconLayout({iconWidth: 16, iconHeight: 16})
     .graphics(swim.CircleIcon.create());
   featureModel.setTrait("feature", featureTrait);
-  layerModel.appendChildModel(featureModel, "feature" + featureId);
+  layerModel.appendChild(featureModel, "feature" + featureId);
   setInterval(function () {
     const lng = Math.random() * 360 - 180;
     const lat = Math.random() * 120 - 60;
@@ -85,11 +85,11 @@ for (let featureId = 0; featureId < featureCount; featureId += 1) {
   addFeature(featureId, layerModel);
 }
 
-const mapModel = new swim.CompoundModel();
+const mapModel = new swim.GenericModel();
 mapModel.mount();
 const mapTrait = new swim.MapTrait();
 mapModel.setTrait("map", mapTrait);
-mapModel.appendChildModel(layerModel, "layer");
+mapModel.appendChild(layerModel, "layer");
 
 const mapController = new ExampleMapboxController();
 mapController.mount();

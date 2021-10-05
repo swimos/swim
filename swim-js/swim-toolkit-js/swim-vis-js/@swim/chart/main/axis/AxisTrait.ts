@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Trait} from "@swim/model";
 import type {AxisTraitObserver} from "./AxisTraitObserver";
 
-export abstract class AxisTrait<D> extends GenericTrait {
-  override readonly traitObservers!: ReadonlyArray<AxisTraitObserver<D>>;
+export abstract class AxisTrait<D> extends Trait {
+  override readonly observerType?: Class<AxisTraitObserver<D>>;
 }

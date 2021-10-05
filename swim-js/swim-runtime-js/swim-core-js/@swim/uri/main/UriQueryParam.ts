@@ -16,7 +16,7 @@ import type {Mutable} from "@swim/util";
 import {Output, Format} from "@swim/codec";
 import {UriQuery} from "./UriQuery";
 
-/** @hidden */
+/** @internal */
 export class UriQueryParam extends UriQuery {
   constructor(key: string | undefined, value: string, tail: UriQuery) {
     super();
@@ -30,7 +30,7 @@ export class UriQueryParam extends UriQuery {
 
   override readonly value: string;
 
-  /** @hidden */
+  /** @internal */
   readonly rest: UriQuery;
 
   override isDefined(): boolean {
@@ -49,12 +49,12 @@ export class UriQueryParam extends UriQuery {
     return this.rest;
   }
 
-  /** @hidden */
+  /** @internal */
   override setTail(tail: UriQuery): void {
     (this as Mutable<this>).rest = tail;
   }
 
-  /** @hidden */
+  /** @internal */
   override dealias(): UriQuery {
     return new UriQueryParam(this.key, this.value, this.rest);
   }
@@ -75,7 +75,7 @@ export class UriQueryParam extends UriQuery {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   override toString(): string {

@@ -34,16 +34,16 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
 
   readonly input: MapOutlet<K, VI, I> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly effects: BTree<K, KeyEffect>;
 
-  /** @hidden */
+  /** @internal */
   readonly outlets: BTree<K, KeyOutlet<K, VO>>;
 
-  /** @hidden */
+  /** @internal */
   readonly outputs: ReadonlyArray<Inlet<O>>;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   bindInput(newInput: MapOutlet<K, VI, I>): void {

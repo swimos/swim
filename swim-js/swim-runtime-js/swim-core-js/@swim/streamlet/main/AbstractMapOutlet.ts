@@ -30,16 +30,16 @@ export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
     this.version = -1;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly effects: BTree<K, KeyEffect>;
 
-  /** @hidden */
+  /** @internal */
   readonly outlets: BTree<K, KeyOutlet<K, V>>;
 
-  /** @hidden */
+  /** @internal */
   readonly outputs: ReadonlyArray<Inlet<O>>;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   abstract has(key: K): boolean;

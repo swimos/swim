@@ -55,7 +55,7 @@ require([
   //const mapView = new swim.EsriSceneView(esriSceneView);
   //mapView.canvas.injectView();
 
-  const layerView = mapView.append(swim.GeoTreeView);
+  const layerView = mapView.appendChild(swim.GeoTreeView);
   //layerView.geoBoundsColor("#008f11");
   //layerView.geoTreeColor("#008f11");
 
@@ -71,7 +71,7 @@ require([
         const lat = value.get("latitude").numberValue(0);
         const timing = swim.Easing.linear.withDuration(10000);
 
-        let vehicleView = layerView.getChildView(key);
+        let vehicleView = layerView.getChild(key);
         if (vehicleView !== null) {
           vehicleView.geoCenter([lng, lat], timing);
           vehicleView.ripple({
@@ -87,7 +87,7 @@ require([
               .iconHeight(10)
               .iconColor(VEHICLE_COLOR)
               .graphics(vehicleIcon);
-          layerView.setChildView(key, vehicleView);
+          layerView.setChild(key, vehicleView);
         }
       })
       .open();

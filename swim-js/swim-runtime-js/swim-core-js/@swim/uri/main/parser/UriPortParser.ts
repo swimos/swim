@@ -16,7 +16,7 @@ import {Input, Parser, Base10} from "@swim/codec";
 import type {UriPort} from "../UriPort";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriPortParser extends Parser<UriPort> {
   private readonly uri: UriParser;
   private readonly number: number | undefined;

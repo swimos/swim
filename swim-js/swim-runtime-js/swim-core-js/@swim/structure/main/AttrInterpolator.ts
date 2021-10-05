@@ -17,11 +17,11 @@ import {Attr} from "./Attr";
 import type {Value} from "./Value";
 import type {Text} from "./Text";
 
-/** @hidden */
+/** @internal */
 export interface AttrInterpolator extends Interpolator<Attr> {
-  /** @hidden */
+  /** @internal */
   readonly keyInterpolator: Interpolator<Text>;
-  /** @hidden */
+  /** @internal */
   readonly valueInterpolator: Interpolator<Value>;
 
   readonly 0: Attr;
@@ -31,48 +31,50 @@ export interface AttrInterpolator extends Interpolator<Attr> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const AttrInterpolator = function (y0: Attr, y1: Attr): AttrInterpolator {
-  const interpolator = function (u: number): Attr {
-    const key = interpolator.keyInterpolator(u);
-    const value = interpolator.valueInterpolator(u);
-    return Attr.of(key, value);
-  } as AttrInterpolator;
-  Object.setPrototypeOf(interpolator, AttrInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).keyInterpolator = y0.key.interpolateTo(y1.key);
-  (interpolator as Mutable<typeof interpolator>).valueInterpolator = y0.value.interpolateTo(y1.value);
-  return interpolator;
-} as {
-  (y0: Attr, y1: Attr): AttrInterpolator;
+/** @internal */
+export const AttrInterpolator = (function (_super: typeof Interpolator) {
+  const AttrInterpolator = function (y0: Attr, y1: Attr): AttrInterpolator {
+    const interpolator = function (u: number): Attr {
+      const key = interpolator.keyInterpolator(u);
+      const value = interpolator.valueInterpolator(u);
+      return Attr.of(key, value);
+    } as AttrInterpolator;
+    Object.setPrototypeOf(interpolator, AttrInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).keyInterpolator = y0.key.interpolateTo(y1.key);
+    (interpolator as Mutable<typeof interpolator>).valueInterpolator = y0.value.interpolateTo(y1.value);
+    return interpolator;
+  } as {
+    (y0: Attr, y1: Attr): AttrInterpolator;
 
-  /** @hidden */
-  prototype: AttrInterpolator;
-};
+    /** @internal */
+    prototype: AttrInterpolator;
+  };
 
-AttrInterpolator.prototype = Object.create(Interpolator.prototype);
+  AttrInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(AttrInterpolator.prototype, 0, {
-  get(this: AttrInterpolator): Attr {
-    return Attr.of(this.keyInterpolator[0], this.valueInterpolator[0]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(AttrInterpolator.prototype, 0, {
+    get(this: AttrInterpolator): Attr {
+      return Attr.of(this.keyInterpolator[0], this.valueInterpolator[0]);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(AttrInterpolator.prototype, 1, {
-  get(this: AttrInterpolator): Attr {
-    return Attr.of(this.keyInterpolator[1], this.valueInterpolator[1]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(AttrInterpolator.prototype, 1, {
+    get(this: AttrInterpolator): Attr {
+      return Attr.of(this.keyInterpolator[1], this.valueInterpolator[1]);
+    },
+    configurable: true,
+  });
 
-AttrInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof AttrInterpolator) {
-    return this.keyInterpolator.equals(that.keyInterpolator)
-        && this.valueInterpolator.equals(that.valueInterpolator);
-  }
-  return false;
-};
+  AttrInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof AttrInterpolator) {
+      return this.keyInterpolator.equals(that.keyInterpolator)
+          && this.valueInterpolator.equals(that.valueInterpolator);
+    }
+    return false;
+  };
+
+  return AttrInterpolator;
+})(Interpolator);

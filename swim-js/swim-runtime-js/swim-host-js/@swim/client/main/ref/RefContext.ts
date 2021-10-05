@@ -17,7 +17,7 @@ import type {AnyUri} from "@swim/uri";
 import type {DownlinkContext} from "../downlink/DownlinkContext";
 import type {BaseRef} from "./BaseRef";
 
-/** @hidden */
+/** @internal */
 export interface RefContext extends DownlinkContext {
   openRef(ref: BaseRef): void;
 

@@ -15,7 +15,7 @@
 import {Input, Parser} from "@swim/codec";
 import {DateTimeInit, DateTime} from "./DateTime";
 
-/** @hidden */
+/** @internal */
 export class DateTimeParser extends Parser<DateTime> {
   private readonly dateParser: Parser<DateTimeInit>;
 

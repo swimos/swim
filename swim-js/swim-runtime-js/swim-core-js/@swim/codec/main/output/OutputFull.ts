@@ -18,7 +18,7 @@ import {Output} from "./Output";
 import {OutputDone} from "../"; // forward import
 import {OutputError} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class OutputFull extends Output<never> {
   constructor(settings: OutputSettings) {
     super();

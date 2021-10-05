@@ -12,49 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
-import {ViewAnimator} from "@swim/view";
+import {Look, ThemeAnimator} from "@swim/theme";
+import {View} from "@swim/view";
 import type {CanvasContext, FillViewInit, FillView, StrokeViewInit, StrokeView} from "@swim/graphics";
 import {ScatterPlotType, ScatterPlotViewInit, ScatterPlotView} from "./ScatterPlotView";
 import type {BubblePlotViewObserver} from "./BubblePlotViewObserver";
 
-export type AnyBubblePlotView<X, Y> = BubblePlotView<X, Y> | BubblePlotViewInit<X, Y>;
+export type AnyBubblePlotView<X = unknown, Y = unknown> = BubblePlotView<X, Y> | BubblePlotViewInit<X, Y>;
 
-export interface BubblePlotViewInit<X, Y> extends ScatterPlotViewInit<X, Y>, FillViewInit, StrokeViewInit {
+export interface BubblePlotViewInit<X = unknown, Y = unknown> extends ScatterPlotViewInit<X, Y>, FillViewInit, StrokeViewInit {
   radius?: AnyLength;
 }
 
-export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillView, StrokeView {
-  override initView(init: BubblePlotViewInit<X, Y>): void {
-    super.initView(init);
-    if (init.radius !== void 0) {
-      this.radius(init.radius);
-    }
-    if (init.fill !== void 0) {
-      this.fill(init.fill);
-    }
-    if (init.stroke !== void 0) {
-      this.stroke(init.stroke);
-    }
-    if (init.strokeWidth !== void 0) {
-      this.strokeWidth(init.strokeWidth);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<BubblePlotViewObserver<X, Y>>;
+export class BubblePlotView<X = unknown, Y = unknown> extends ScatterPlotView<X, Y> implements FillView, StrokeView {
+  override readonly observerType?: Class<BubblePlotViewObserver<X, Y>>;
 
   override get plotType(): ScatterPlotType {
     return "bubble";
   }
 
   protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetPlotRadius !== void 0) {
-        viewObserver.viewWillSetPlotRadius(newRadius, oldRadius, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetPlotRadius !== void 0) {
+        observer.viewWillSetPlotRadius(newRadius, oldRadius, this);
       }
     }
   }
@@ -64,18 +49,19 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
   }
 
   protected didSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetPlotRadius !== void 0) {
-        viewObserver.viewDidSetPlotRadius(newRadius, oldRadius, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetPlotRadius !== void 0) {
+        observer.viewDidSetPlotRadius(newRadius, oldRadius, this);
       }
     }
   }
 
-  @ViewAnimator<BubblePlotView<X, Y>, Length | null, AnyLength | null>({
+  @ThemeAnimator<BubblePlotView<X, Y>, Length | null, AnyLength | null>({
     type: Length,
     state: Length.px(5),
+    updateFlags: View.NeedsRender,
     willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
       this.owner.willSetRadius(newRadius, oldRadius);
     },
@@ -84,14 +70,14 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
       this.owner.didSetRadius(newRadius, oldRadius);
     },
   })
-  readonly radius!: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly radius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetPlotFill !== void 0) {
-        viewObserver.viewWillSetPlotFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetPlotFill !== void 0) {
+        observer.viewWillSetPlotFill(newFill, oldFill, this);
       }
     }
   }
@@ -101,19 +87,20 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
   }
 
   protected didSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetPlotFill !== void 0) {
-        viewObserver.viewDidSetPlotFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetPlotFill !== void 0) {
+        observer.viewDidSetPlotFill(newFill, oldFill, this);
       }
     }
   }
 
-  @ViewAnimator<BubblePlotView<X, Y>, Color | null, AnyColor | null>({
+  @ThemeAnimator<BubblePlotView<X, Y>, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     look: Look.accentColor,
+    updateFlags: View.NeedsRender,
     willSetValue(newFill: Color | null, oldFill: Color | null): void {
       this.owner.willSetFill(newFill, oldFill);
     },
@@ -122,13 +109,13 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
       this.owner.didSetFill(newFill, oldFill);
     },
   })
-  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, state: null})
-  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, updateFlags: View.NeedsRender})
+  readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, state: null})
-  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
+  readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   protected renderPlot(context: CanvasContext, frame: R2Box): void {
     const size = Math.min(frame.width, frame.height);
@@ -136,6 +123,11 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
     const fill = this.fill.value;
     const stroke = this.stroke.value;
     const strokeWidth = this.strokeWidth.value;
+
+    // save
+    const contextFillStyle = context.fillStyle;
+    const contextLineWidth = context.lineWidth;
+    const contextStrokeStyle = context.strokeStyle;
 
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
@@ -160,24 +152,26 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
         context.stroke();
       }
     }
+
+    // restore
+    context.fillStyle = contextFillStyle;
+    context.lineWidth = contextLineWidth;
+    context.strokeStyle = contextStrokeStyle;
   }
 
-  static override create<X, Y>(): BubblePlotView<X, Y> {
-    return new BubblePlotView<X, Y>();
-  }
-
-  static override fromInit<X, Y>(init: BubblePlotViewInit<X, Y>): BubblePlotView<X, Y> {
-    const view = new BubblePlotView<X, Y>();
-    view.initView(init);
-    return view;
-  }
-
-  static override fromAny<X, Y>(value: AnyBubblePlotView<X, Y>): BubblePlotView<X, Y> {
-    if (value instanceof BubblePlotView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+  override init(init: BubblePlotViewInit<X, Y>): void {
+    super.init(init);
+    if (init.radius !== void 0) {
+      this.radius(init.radius);
     }
-    throw new TypeError("" + value);
+    if (init.fill !== void 0) {
+      this.fill(init.fill);
+    }
+    if (init.stroke !== void 0) {
+      this.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      this.strokeWidth(init.strokeWidth);
+    }
   }
 }

@@ -78,24 +78,25 @@ class ExampleGridTrait extends swim.GeoGridTrait {
     console.log("onStopConsuming " + this.geoTile);
   }
 }
-swim.ModelMapDownlink({
-  consume: true,
+swim.MapDownlinkFastener({
+  eager: true,
+  consumed: true,
   laneUri: "vehicles",
   didUpdate(key, value) {
     console.log(this.nodeUri() + " updateVehicle " + key.toAny() + ":", value.toAny());
   },
 })(ExampleGridTrait.prototype, "vehiclesDownlink")
 
-const layerModel = new swim.CompoundModel();
+const layerModel = new swim.GenericModel();
 const layerTrait = new ExampleGridTrait(swim.GeoTile.root());
 layerModel.setTrait("layer", layerTrait);
 
-const mapModel = new swim.CompoundModel();
+const mapModel = new swim.GenericModel();
 mapModel.warpRef.setState(swim.client.hostRef("warps://transit.swim.services"));
 mapModel.mount();
 const mapTrait = new swim.MapTrait();
 mapModel.setTrait("map", mapTrait);
-mapModel.appendChildModel(layerModel, "layer");
+mapModel.appendChild(layerModel, "layer");
 
 const mapController = new ExampleMapboxController();
 mapController.mount();

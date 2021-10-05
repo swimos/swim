@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {TraitProperty, GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
+import {Trait} from "@swim/model";
 import type {HtmlView} from "@swim/dom";
 import {AnyColLayout, ColLayout} from "../layout/ColLayout";
 import type {ColTraitObserver} from "./ColTraitObserver";
@@ -20,13 +22,13 @@ import type {ColTraitObserver} from "./ColTraitObserver";
 export type ColLabel = ColLabelFunction | string;
 export type ColLabelFunction = (colTrait: ColTrait) => HtmlView | string | null;
 
-export class ColTrait extends GenericTrait {
-  override readonly traitObservers!: ReadonlyArray<ColTraitObserver>;
+export class ColTrait extends Trait {
+  override readonly observerType?: Class<ColTraitObserver>;
 
   protected willSetLayout(newLayout: ColLayout | null, oldLabel: ColLayout | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetLayout !== void 0) {
         traitObserver.traitWillSetLayout(newLayout, oldLabel, this);
       }
@@ -38,16 +40,16 @@ export class ColTrait extends GenericTrait {
   }
 
   protected didSetLayout(newLayout: ColLayout | null, oldLabel: ColLayout | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetLayout !== void 0) {
         traitObserver.traitDidSetLayout(newLayout, oldLabel, this);
       }
     }
   }
 
-  @TraitProperty<ColTrait, ColLayout | null, AnyColLayout | null>({
+  @Property<ColTrait, ColLayout | null, AnyColLayout | null>({
     type: ColLayout,
     state: null,
     willSetState(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
@@ -58,12 +60,12 @@ export class ColTrait extends GenericTrait {
       this.owner.didSetLayout(newLayout, oldLayout);
     },
   })
-  readonly layout!: TraitProperty<this, ColLayout | null, AnyColLayout | null>;
+  readonly layout!: Property<this, ColLayout | null, AnyColLayout | null>;
 
   protected willSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetLabel !== void 0) {
         traitObserver.traitWillSetLabel(newLabel, oldLabel, this);
       }
@@ -75,16 +77,16 @@ export class ColTrait extends GenericTrait {
   }
 
   protected didSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetLabel !== void 0) {
         traitObserver.traitDidSetLabel(newLabel, oldLabel, this);
       }
     }
   }
 
-  @TraitProperty<ColTrait, ColLabel | null>({
+  @Property<ColTrait, ColLabel | null>({
     state: null,
     willSetState(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
       this.owner.willSetLabel(newLabel, oldLabel);
@@ -94,5 +96,5 @@ export class ColTrait extends GenericTrait {
       this.owner.didSetLabel(newLabel, oldLabel);
     },
   })
-  readonly label!: TraitProperty<this, ColLabel | null>;
+  readonly label!: Property<this, ColLabel | null>;
 }

@@ -20,7 +20,7 @@ import {TimeZoneForm} from "./"; // forward import
 export type AnyTimeZone = TimeZone | string | number;
 
 export class TimeZone implements HashCode, Debug {
-  /** @hidden */
+  /** @internal */
   private constructor(name: string | undefined, offset: number) {
     this.name = name;
     this.offset = offset;
@@ -127,7 +127,7 @@ export class TimeZone implements HashCode, Debug {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyTimeZone {
     return value instanceof TimeZone
         || typeof value === "string"

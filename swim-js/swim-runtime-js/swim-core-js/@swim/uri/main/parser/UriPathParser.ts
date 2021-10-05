@@ -18,7 +18,7 @@ import type {UriPath} from "../UriPath";
 import type {UriPathBuilder} from "../UriPathBuilder";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriPathParser extends Parser<UriPath> {
   private readonly uri: UriParser;
   private readonly builder: UriPathBuilder | undefined;

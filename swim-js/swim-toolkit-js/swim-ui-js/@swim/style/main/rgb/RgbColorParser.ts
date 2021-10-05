@@ -17,7 +17,7 @@ import type {ColorChannel} from "../color/ColorChannel";
 import {ColorChannelParser} from "../color/ColorChannelParser";
 import {RgbColor} from "./RgbColor";
 
-/** @hidden */
+/** @internal */
 export class RgbColorParser extends Parser<RgbColor> {
   private readonly rParser: Parser<ColorChannel> | undefined;
   private readonly gParser: Parser<ColorChannel> | undefined;
@@ -225,7 +225,7 @@ export class RgbColorParser extends Parser<RgbColor> {
     return new RgbColorParser(rParser, gParser, bParser, aParser, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseRest(input: Input): Parser<RgbColor> {
     return RgbColorParser.parse(input, void 0, void 0, void 0, void 0, 5);
   }

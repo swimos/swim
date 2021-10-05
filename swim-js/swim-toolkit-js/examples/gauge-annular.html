@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .mouseEventsEnabled(true)
@@ -25,23 +25,23 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const gaugeView = canvasView.append(swim.GaugeView)
+const gaugeView = canvasView.appendChild(swim.GaugeView)
     .font("14px sans-serif")
     .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"));
 
-const dial0View = gaugeView.append(swim.DialView, "dial0")
+const dial0View = gaugeView.appendChild(swim.DialView, "dial0")
     .arrangement("manual")
     .innerRadius(swim.Length.pct(30))
     .outerRadius(swim.Length.pct(35));
 dial0View.dialColor.setLook(swim.Look.subduedColor);
 
-const dial1View = gaugeView.append(swim.DialView, "dial1")
+const dial1View = gaugeView.appendChild(swim.DialView, "dial1")
     .arrangement("manual")
     .innerRadius(swim.Length.pct(35))
     .outerRadius(swim.Length.pct(40));
 dial1View.dialColor.setLook(swim.Look.faintColor);
 
-const ringView = gaugeView.append(swim.DialView, "ring")
+const ringView = gaugeView.appendChild(swim.DialView, "ring")
     .value(0.33)
     .arrangement("manual")
     .innerRadius(swim.Length.pct(30))
@@ -60,7 +60,7 @@ setInterval(function () {
   ringView.value(Math.random(), timing);
 }, 1000);
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
     </script>
   </body>

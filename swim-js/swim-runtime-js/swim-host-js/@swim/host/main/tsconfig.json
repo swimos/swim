@@ -5,6 +5,7 @@
     "paths": {
       "@swim/util": ["../../../../swim-core-js/@swim/util/main"],
       "@swim/codec": ["../../../../swim-core-js/@swim/codec/main"],
+      "@swim/fastener": ["../../../../swim-core-js/@swim/fastener/main"],
       "@swim/collections": ["../../../../swim-core-js/@swim/collections/main"],
       "@swim/structure": ["../../../../swim-core-js/@swim/structure/main"],
       "@swim/streamlet": ["../../../../swim-core-js/@swim/streamlet/main"],

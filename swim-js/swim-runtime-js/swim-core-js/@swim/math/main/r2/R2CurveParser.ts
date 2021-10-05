@@ -19,7 +19,7 @@ import {R2QuadraticCurveParser} from "../"; // forward import
 import {R2CubicCurveParser} from "../"; // forward import
 import {R2EllipticCurveParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class R2CurveParser extends Parser<R2Curve> {
   private readonly x0Parser: Parser<number> | undefined;
   private readonly y0Parser: Parser<number> | undefined;

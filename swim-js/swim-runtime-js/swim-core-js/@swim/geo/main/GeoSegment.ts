@@ -99,12 +99,12 @@ export class GeoSegment extends GeoCurve implements Interpolate<GeoSegment>, Has
     }
   }
 
-  /** @hidden */
+  /** @internal */
   containsPoint(that: GeoPoint): boolean {
     return R2Segment.contains(this.lng0, this.lat0, this.lng1, this.lat1, that.lng, that.lat);
   }
 
-  /** @hidden */
+  /** @internal */
   containsSegment(that: GeoSegment): boolean {
     return R2Segment.contains(this.lng0, this.lat0, this.lng1, this.lat1, that.lng0, that.lat0)
         && R2Segment.contains(this.lng0, this.lat0, this.lng1, this.lat1, that.lng1, that.lat1);
@@ -122,12 +122,12 @@ export class GeoSegment extends GeoCurve implements Interpolate<GeoSegment>, Has
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsPoint(that: GeoPoint): boolean {
     return R2Segment.contains(this.lng0, this.lat0, this.lng1, this.lat1, that.lng, that.lat);
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsSegment(that: GeoSegment): boolean {
     return R2Segment.intersects(this.lng0, this.lat0, this.lng1 - this.lat0, this.lng1 - this.lat0,
                                 that.lng0, that.lat0, that.lng1 - that.lat0, that.lng1 - that.lat0);
@@ -252,7 +252,7 @@ export class GeoSegment extends GeoCurve implements Interpolate<GeoSegment>, Has
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is GeoSegmentInit {
     if (typeof value === "object" && value !== null) {
       const init = value as GeoSegmentInit;
@@ -264,7 +264,7 @@ export class GeoSegment extends GeoCurve implements Interpolate<GeoSegment>, Has
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyGeoSegment {
     return value instanceof GeoSegment
         || GeoSegment.isInit(value);

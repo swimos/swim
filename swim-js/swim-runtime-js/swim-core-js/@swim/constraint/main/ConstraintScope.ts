@@ -14,7 +14,7 @@
 
 import type {AnyConstraintExpression} from "./ConstraintExpression";
 import type {ConstraintVariable} from "./ConstraintVariable";
-import type {ConstraintBinding} from "./ConstraintBinding";
+import type {ConstraintProperty} from "./ConstraintProperty";
 import type {ConstraintRelation} from "./ConstraintRelation";
 import type {AnyConstraintStrength} from "./ConstraintStrength";
 import type {Constraint} from "./Constraint";
@@ -29,7 +29,7 @@ export interface ConstraintScope {
 
   removeConstraint(constraint: Constraint): void;
 
-  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstraintBinding;
+  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstraintProperty<unknown, number>;
 
   hasConstraintVariable(variable: ConstraintVariable): boolean;
 
@@ -39,3 +39,21 @@ export interface ConstraintScope {
 
   setConstraintVariable(variable: ConstraintVariable, state: number): void;
 }
+
+/** @internal */
+export const ConstraintScope = (function () {
+  const ConstraintScope = {} as {
+    /** @internal */
+    is(object: unknown): object is ConstraintScope;
+  };
+
+  ConstraintScope.is = function (object: unknown): object is ConstraintScope {
+    if (typeof object === "object" && object !== null || typeof object === "function") {
+      const constraintScope = object as ConstraintScope;
+      return "constraint" in constraintScope;
+    }
+    return false;
+  };
+
+  return ConstraintScope;
+})();

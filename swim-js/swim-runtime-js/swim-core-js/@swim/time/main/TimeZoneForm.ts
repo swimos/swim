@@ -15,7 +15,7 @@
 import {Item, Text, Num, Form} from "@swim/structure";
 import {AnyTimeZone, TimeZone} from "./TimeZone";
 
-/** @hidden */
+/** @internal */
 export class TimeZoneForm extends Form<TimeZone, AnyTimeZone> {
   constructor(unit: TimeZone | undefined) {
     super();

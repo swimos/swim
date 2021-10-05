@@ -18,7 +18,7 @@ import {ValuesCursor} from "./ValuesCursor";
 import type {BTreeContext} from "./BTreeContext";
 import {BTreeLeaf} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export abstract class BTreePage<K, V, U> {
   abstract readonly arity: number;
 

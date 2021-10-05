@@ -35,7 +35,7 @@ import {LiteralSelector} from "../"; // forward import
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export abstract class Selector extends Expression {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }

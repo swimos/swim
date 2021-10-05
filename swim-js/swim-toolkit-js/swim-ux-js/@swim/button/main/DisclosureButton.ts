@@ -13,15 +13,10 @@
 // limitations under the License.
 
 import {Angle, Transform} from "@swim/math";
+import {Affinity} from "@swim/fastener";
 import {AnyColor, Color, AnyExpansion, Expansion} from "@swim/style";
-import {Look} from "@swim/theme";
-import {
-  ViewContextType,
-  ViewFlags,
-  View,
-  ViewAnimator,
-  ExpansionViewAnimator,
-} from "@swim/view";
+import {Look, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {HtmlView, SvgView} from "@swim/dom";
 
 export class DisclosureButton extends HtmlView {
@@ -32,55 +27,57 @@ export class DisclosureButton extends HtmlView {
 
   protected initDisclosureButton(): void {
     this.addClass("disclosure-button");
-    this.display.setState("flex", View.Intrinsic);
-    this.justifyContent.setState("center", View.Intrinsic);
-    this.alignItems.setState("center", View.Intrinsic);
-    this.flexGrow.setState(1, View.Intrinsic);
-    this.flexShrink.setState(0, View.Intrinsic);
-    this.cursor.setState("pointer", View.Intrinsic);
+    this.display.setState("flex", Affinity.Intrinsic);
+    this.justifyContent.setState("center", Affinity.Intrinsic);
+    this.alignItems.setState("center", Affinity.Intrinsic);
+    this.flexGrow.setState(1, Affinity.Intrinsic);
+    this.flexShrink.setState(0, Affinity.Intrinsic);
+    this.cursor.setState("pointer", Affinity.Intrinsic);
 
-    const icon = this.append(SvgView, "icon");
-    icon.width.setState(24, View.Intrinsic);
-    icon.height.setState(24, View.Intrinsic);
-    icon.viewBox.setState("0 0 24 24", View.Intrinsic);
-    const arrow = icon.append("polygon", "arrow");
-    arrow.points.setState("0 4 -6 -2 -4.59 -3.41 0 1.17 4.59 -3.41 6 -2", View.Intrinsic);
-    arrow.transform.setState(Transform.translate(12, 12).rotate(Angle.deg(0)), View.Intrinsic);
+    const icon = this.appendChild(SvgView, "icon");
+    icon.width.setState(24, Affinity.Intrinsic);
+    icon.height.setState(24, Affinity.Intrinsic);
+    icon.viewBox.setState("0 0 24 24", Affinity.Intrinsic);
+    const arrow = icon.appendChild("polygon", "arrow");
+    arrow.points.setState("0 4 -6 -2 -4.59 -3.41 0 1.17 4.59 -3.41 6 -2", Affinity.Intrinsic);
+    arrow.transform.setState(Transform.translate(12, 12).rotate(Angle.deg(0)), Affinity.Intrinsic);
   }
 
   get icon(): SvgView {
-    return this.getChildView("icon") as SvgView;
+    return this.getChild("icon") as SvgView;
   }
 
   get arrow(): SvgView {
     const icon = this.icon;
-    return icon.getChildView("arrow") as SvgView;
+    return icon.getChild("arrow") as SvgView;
   }
 
-  @ViewAnimator({type: Expansion, inherit: true, updateFlags: View.NeedsAnimate})
-  readonly disclosure!: ExpansionViewAnimator<this, Expansion, AnyExpansion>;
+  @ThemeAnimator({type: Expansion, inherits: true, updateFlags: View.NeedsLayout})
+  readonly disclosure!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;
 
-  @ViewAnimator({type: Color, inherit: true, look: Look.color, updateFlags: View.NeedsAnimate})
-  readonly collapsedColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, look: Look.color, updateFlags: View.NeedsLayout})
+  readonly collapsedColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, inherit: true, look: Look.accentColor, updateFlags: View.NeedsAnimate})
-  readonly expandedColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, look: Look.accentColor, updateFlags: View.NeedsLayout})
+  readonly expandedColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected override onAnimate(viewContext: ViewContextType<this>): void {
-    super.onAnimate(viewContext);
-    if (this.disclosure.isUpdated() || this.collapsedColor.isUpdated() || this.expandedColor.isUpdated()) {
-      const disclosure = this.disclosure.takeValue()!;
-      const phase = disclosure.phase;
-      const collapsedColor = this.collapsedColor.takeValue();
-      const expandedColor = this.expandedColor.takeValue();
-      if (collapsedColor !== null && expandedColor !== null && this.arrow.fill.takesPrecedence(View.Intrinsic)) {
-        const colorInterpolator = collapsedColor.interpolateTo(expandedColor);
-        this.arrow.fill.setState(colorInterpolator(phase), View.Intrinsic);
-      }
-      const transform = Transform.translate(12, 12).rotate(Angle.deg(-180 * phase));
-      this.arrow.transform.setState(transform, View.Intrinsic);
+  protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+    if ((this.flags & View.NeedsLayout) === 0) {
+      displayFlags &= ~View.NeedsLayout;
     }
+    return displayFlags;
   }
 
-  static override readonly mountFlags: ViewFlags = HtmlView.mountFlags | View.NeedsAnimate;
+  protected override onLayout(viewContext: ViewContextType<this>): void {
+    super.onLayout(viewContext);
+    const phase = this.disclosure.getPhase();
+    const collapsedColor = this.collapsedColor.value;
+    const expandedColor = this.expandedColor.value;
+    if (collapsedColor !== null && expandedColor !== null && this.arrow.fill.hasAffinity(Affinity.Intrinsic)) {
+      const colorInterpolator = collapsedColor.interpolateTo(expandedColor);
+      this.arrow.fill.setState(colorInterpolator(phase), Affinity.Intrinsic);
+    }
+    const transform = Transform.translate(12, 12).rotate(Angle.deg(-180 * phase));
+    this.arrow.transform.setState(transform, Affinity.Intrinsic);
+  }
 }

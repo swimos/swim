@@ -12,23 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Interpolator} from "./Interpolator";
 
-/** @hidden */
-export const StepInterpolator = function <Y>(y0: Y, y1: Y): Interpolator<Y> {
-  const interpolator = function (u: number): Y {
-    return u < 1 ? interpolator[0] : interpolator[1];
-  } as Interpolator<Y>;
-  Object.setPrototypeOf(interpolator, StepInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = y0;
-  (interpolator as Mutable<typeof interpolator>)[1] = y1;
-  return interpolator;
-} as {
-  <Y>(y0: Y, y1: Y): Interpolator<Y>;
+/** @internal */
+export const StepInterpolator = (function (_super: typeof Interpolator) {
+  const StepInterpolator = function <Y>(y0: Y, y1: Y): Interpolator<Y> {
+    const interpolator = function (u: number): Y {
+      return u < 1 ? interpolator[0] : interpolator[1];
+    } as Interpolator<Y>;
+    Object.setPrototypeOf(interpolator, StepInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = y0;
+    (interpolator as Mutable<typeof interpolator>)[1] = y1;
+    return interpolator;
+  } as {
+    <Y>(y0: Y, y1: Y): Interpolator<Y>;
 
-  /** @hidden */
-  prototype: Interpolator<any>;
-};
+    /** @internal */
+    prototype: Interpolator<any>;
+  };
 
-StepInterpolator.prototype = Object.create(Interpolator.prototype);
+  StepInterpolator.prototype = Object.create(_super.prototype);
+
+  return StepInterpolator;
+})(Interpolator);

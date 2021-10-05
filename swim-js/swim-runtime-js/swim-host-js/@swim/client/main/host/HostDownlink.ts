@@ -22,7 +22,7 @@ import type {
 } from "@swim/warp";
 import type {Host} from "./Host";
 
-/** @hidden */
+/** @internal */
 export interface HostDownlink {
   readonly nodeUri: Uri;
  

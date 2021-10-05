@@ -12,45 +12,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {View} from "../View";
-import type {GestureContext} from "./GestureContext";
+import type {FastenerOwner} from "@swim/fastener";
 import type {MomentumGestureInput} from "./MomentumGestureInput";
-import {MomentumGesture} from "./MomentumGesture";
+import {MomentumGestureClass, MomentumGesture} from "./MomentumGesture";
+import type {View} from "../view/View";
 
-export class TouchMomentumGesture<G extends GestureContext, V extends View> extends MomentumGesture<G, V> {
-  constructor(owner: G, gestureName: string | undefined) {
-    super(owner, gestureName);
-    this.onTouchStart = this.onTouchStart.bind(this);
-    this.onTouchMove = this.onTouchMove.bind(this);
-    this.onTouchEnd = this.onTouchEnd.bind(this);
-    this.onTouchCancel = this.onTouchCancel.bind(this);
-  }
+/** @internal */
+export interface TouchMomentumGesture<O = unknown, V extends View = View> extends MomentumGesture<O, V> {
+  /** @internal @protected @override */
+  attachHoverEvents(view: V): void;
 
-  /** @hidden */
-  override attachHoverEvents(view: V): void {
+  /** @internal @protected @override */
+  detachHoverEvents(view: V): void;
+
+  /** @internal @protected @override */
+  attachPressEvents(view: V): void;
+
+  /** @internal @protected @override */
+  detachPressEvents(view: V): void;
+
+  /** @internal @protected */
+  updateInput(input: MomentumGestureInput, event: TouchEvent, touch: Touch): void;
+
+  /** @internal @protected */
+  onTouchStart(event: TouchEvent): void;
+
+  /** @internal @protected */
+  onTouchMove(event: TouchEvent): void;
+
+  /** @internal @protected */
+  onTouchEnd(event: TouchEvent): void;
+
+  /** @internal @protected */
+  onTouchCancel(event: TouchEvent): void;
+}
+
+/** @internal */
+export const TouchMomentumGesture = (function (_super: typeof MomentumGesture) {
+  const TouchMomentumGesture = _super.extend() as MomentumGestureClass<TouchMomentumGesture<any, any>>;
+
+  TouchMomentumGesture.prototype.attachHoverEvents = function (this: TouchMomentumGesture, view: View): void {
     view.on("touchstart", this.onTouchStart as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override detachHoverEvents(view: V): void {
+  TouchMomentumGesture.prototype.detachHoverEvents = function (this: TouchMomentumGesture, view: View): void {
     view.off("touchstart", this.onTouchStart as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override attachPressEvents(view: V): void {
+  TouchMomentumGesture.prototype.attachPressEvents = function (this: TouchMomentumGesture, view: View): void {
     view.on("touchmove", this.onTouchMove as EventListener);
     view.on("touchend", this.onTouchEnd as EventListener);
     view.on("touchcancel", this.onTouchCancel as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override detachPressEvents(view: V): void {
+  TouchMomentumGesture.prototype.detachPressEvents = function (this: TouchMomentumGesture, view: View): void {
     view.off("touchmove", this.onTouchMove as EventListener);
     view.off("touchend", this.onTouchEnd as EventListener);
     view.off("touchcancel", this.onTouchCancel as EventListener);
-  }
+  };
 
-  protected updateInput(input: MomentumGestureInput, event: TouchEvent, touch: Touch): void {
+  TouchMomentumGesture.prototype.updateInput = function (this: TouchMomentumGesture, input: MomentumGestureInput, event: TouchEvent, touch: Touch): void {
     input.target = touch.target;
     input.altKey = event.altKey;
     input.ctrlKey = event.ctrlKey;
@@ -63,22 +84,21 @@ export class TouchMomentumGesture<G extends GestureContext, V extends View> exte
     input.x = touch.clientX;
     input.y = touch.clientY;
     input.t = event.timeStamp;
-  }
+  };
 
-  protected onTouchStart(event: TouchEvent): void {
+  TouchMomentumGesture.prototype.onTouchStart = function (this: TouchMomentumGesture, event: TouchEvent): void {
     const touches = event.targetTouches;
     for (let i = 0; i < touches.length; i += 1) {
       const touch = touches[i]!;
-      const input = this.getOrCreateInput(touch.identifier, "touch", false,
-                                          touch.clientX, touch.clientY, event.timeStamp);
+      const input = this.getOrCreateInput(touch.identifier, "touch", false, touch.clientX, touch.clientY, event.timeStamp);
       this.updateInput(input, event, touch);
       if (!input.pressing) {
         this.beginPress(input, event);
       }
     }
-  }
+  };
 
-  protected onTouchMove(event: TouchEvent): void {
+  TouchMomentumGesture.prototype.onTouchMove = function (this: TouchMomentumGesture, event: TouchEvent): void {
     const touches = event.changedTouches;
     for (let i = 0; i < touches.length; i += 1) {
       const touch = touches[i]!;
@@ -88,9 +108,9 @@ export class TouchMomentumGesture<G extends GestureContext, V extends View> exte
         this.movePress(input, event);
       }
     }
-  }
+  };
 
-  protected onTouchEnd(event: TouchEvent): void {
+  TouchMomentumGesture.prototype.onTouchEnd = function (this: TouchMomentumGesture, event: TouchEvent): void {
     const touches = event.changedTouches;
     for (let i = 0; i < touches.length; i += 1) {
       const touch = touches[i]!;
@@ -104,9 +124,9 @@ export class TouchMomentumGesture<G extends GestureContext, V extends View> exte
         this.endHover(input, event);
       }
     }
-  }
+  };
 
-  protected onTouchCancel(event: TouchEvent): void {
+  TouchMomentumGesture.prototype.onTouchCancel = function (this: TouchMomentumGesture, event: TouchEvent): void {
     const touches = event.changedTouches;
     for (let i = 0; i < touches.length; i += 1) {
       const touch = touches[i]!;
@@ -117,5 +137,16 @@ export class TouchMomentumGesture<G extends GestureContext, V extends View> exte
         this.endHover(input, event);
       }
     }
-  }
-}
+  };
+
+  TouchMomentumGesture.construct = function <G extends TouchMomentumGesture<any, any>>(gestureClass: MomentumGestureClass<TouchMomentumGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+    gesture.onTouchStart = gesture.onTouchStart.bind(gesture);
+    gesture.onTouchMove = gesture.onTouchMove.bind(gesture);
+    gesture.onTouchEnd = gesture.onTouchEnd.bind(gesture);
+    gesture.onTouchCancel = gesture.onTouchCancel.bind(gesture);
+    return gesture;
+  };
+
+  return TouchMomentumGesture;
+})(MomentumGesture);

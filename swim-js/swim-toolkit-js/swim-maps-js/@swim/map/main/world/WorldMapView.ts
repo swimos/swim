@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, AnyTiming} from "@swim/util";
+import type {Mutable, Class, AnyTiming} from "@swim/util";
 import {R2Box} from "@swim/math";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
@@ -34,16 +34,16 @@ export class WorldMapView extends MapView {
     });
   }
 
-  override readonly viewObservers!: ReadonlyArray<WorldMapViewObserver>;
+  override readonly observerType?: Class<WorldMapViewObserver>;
 
   override readonly geoViewport!: WorldMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoViewport !== void 0) {
-        viewObserver.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoViewport !== void 0) {
+        observer.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
     }
   }
@@ -53,11 +53,11 @@ export class WorldMapView extends MapView {
   }
 
   protected didSetGeoViewport(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!
-      if (viewObserver.viewDidSetGeoViewport !== void 0) {
-        viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoViewport !== void 0) {
+        observer.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
     }
   }
@@ -89,14 +89,14 @@ export class WorldMapView extends MapView {
 
   protected override attachCanvas(canvasView: CanvasView): void {
     super.attachCanvas(canvasView);
-    if (this.parentView === null) {
-      canvasView.appendChildView(this);
+    if (this.parent === null) {
+      canvasView.appendChild(this);
     }
   }
 
   protected override detachCanvas(canvasView: CanvasView): void {
-    if (this.parentView === canvasView) {
-      canvasView.removeChildView(this);
+    if (this.parent === canvasView) {
+      canvasView.removeChild(this);
     }
     super.detachCanvas(canvasView);
   }
@@ -108,12 +108,14 @@ export class WorldMapView extends MapView {
 
   protected override detachContainer(containerView: HtmlView): void {
     const canvasView = this.canvas.view;
-    if (canvasView !== null && canvasView.parentView === containerView) {
-      containerView.removeChildView(containerView);
+    if (canvasView !== null && canvasView.parent === containerView) {
+      containerView.removeChild(containerView);
     }
     super.detachContainer(containerView);
   }
 
+  static override create(geoViewport?: WorldMapViewport): WorldMapView;
+  static override create(): WorldMapView;
   static override create(geoViewport?: WorldMapViewport): WorldMapView {
     if (geoViewport === void 0) {
       geoViewport = new EquirectangularMapViewport(R2Box.undefined());

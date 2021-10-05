@@ -12,21 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
-import type {Mutable} from "@swim/util";
-import {View} from "../View";
-import type {ViewObserverType} from "../ViewObserver";
+import type {Mutable, ObserverType} from "@swim/util";
+import type {FastenerOwner} from "@swim/fastener";
 import type {GestureInputType} from "./GestureInput";
-import {GestureContext} from "./GestureContext";
-import {GestureMethod, GestureInit, Gesture} from "./Gesture";
+import {GestureMethod, GestureInit, GestureClass, Gesture} from "./Gesture";
 import {PositionGestureInput} from "./PositionGestureInput";
-import {MousePositionGesture} from "../"; // forward import
-import {TouchPositionGesture} from "../"; // forward import
-import {PointerPositionGesture} from "../"; // forward import
+import {MousePositionGesture} from "./"; // forward import
+import {TouchPositionGesture} from "./"; // forward import
+import {PointerPositionGesture} from "./"; // forward import
+import type {View} from "../view/View";
 
-export interface PositionGestureInit<V extends View> extends GestureInit<V> {
-  extends?: PositionGestureClass;
-
+export interface PositionGestureInit<V extends View = View> extends GestureInit<V> {
   willStartHovering?(): void;
   didStartHovering?(): void;
   willStopHovering?(): void;
@@ -61,614 +57,611 @@ export interface PositionGestureInit<V extends View> extends GestureInit<V> {
   didLongPress?(input: PositionGestureInput): void;
 }
 
-export type PositionGestureDescriptor<G extends GestureContext, V extends View, I = {}> = PositionGestureInit<V> & ThisType<PositionGesture<G, V> & I> & Partial<I>;
+export type PositionGestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<PositionGesture<O, V> & I> & PositionGestureInit<V> & Partial<I>;
 
-export interface PositionGestureConstructor<G extends GestureContext, V extends View, I = {}> {
-  new<O extends G>(owner: O, gestureName: string | undefined): PositionGesture<O, V> & I;
-  prototype: PositionGesture<any, any> & I;
+export interface PositionGestureClass<G extends PositionGesture<any, any> = PositionGesture<any, any>> extends GestureClass<G> {
+  create(this: PositionGestureClass<G>, owner: FastenerOwner<G>, gestureName: string): G;
+
+  construct(gestureClass: PositionGestureClass, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
+
+  specialize(method: GestureMethod): PositionGestureClass | null;
+
+  extend(this: PositionGestureClass<G>, classMembers?: {} | null): PositionGestureClass<G>;
+
+  define<O, V extends View = View, I = {}>(descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PositionGestureClass<PositionGesture<any, V> & I>;
+  define<O, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<O, V, I>): PositionGestureClass<PositionGesture<any, V> & I>;
+
+  <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
+  <O, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<O, V, I>): PropertyDecorator;
 }
 
-export interface PositionGestureClass extends Function {
-  readonly prototype: PositionGesture<any, any>;
-}
-
-export interface PositionGesture<G extends GestureContext, V extends View> extends Gesture<G, V> {
-  /** @hidden */
+export interface PositionGesture<O = unknown, V extends View = View> extends Gesture<O, V> {
+  /** @internal @protected @override */
   attachEvents(view: V): void;
 
-  /** @hidden */
+  /** @internal @protected @override */
   detachEvents(view: V): void;
 
-  /** @hidden */
+  /** @internal @protected */
   attachHoverEvents(view: V): void;
 
-  /** @hidden */
+  /** @internal @protected */
   detachHoverEvents(view: V): void;
 
-  /** @hidden */
+  /** @internal @protected */
   attachPressEvents(view: V): void;
 
-  /** @hidden */
+  /** @internal @protected */
   detachPressEvents(view: V): void;
 
+  /** @internal @override */
   readonly inputs: {readonly [inputId: string]: PositionGestureInput | undefined};
 
+  /** @override */
   getInput(inputId: string | number): PositionGestureInput | null;
 
-  /** @hidden */
+  /** @internal @override */
   createInput(inputId: string, inputType: GestureInputType, isPrimary: boolean,
               x: number, y: number, t: number): PositionGestureInput;
 
-  /** @hidden */
+  /** @internal */
   getOrCreateInput(inputId: string | number, inputType: GestureInputType, isPrimary: boolean,
                    x: number, y: number, t: number): PositionGestureInput;
 
-  /** @hidden */
+  /** @internal @override */
   clearInput(input: PositionGestureInput): void;
 
-  /** @hidden */
+  /** @internal @override */
   clearInputs(): void;
 
   readonly hoverCount: number;
 
-  isHovering(): boolean;
+  get hovering(): boolean;
 
-  /** @hidden */
+  /** @internal */
   startHovering(): void;
 
-  /** @hidden */
+  /** @protected */
   willStartHovering(): void;
 
-  /** @hidden */
+  /** @protected */
   onStartHovering(): void;
 
-  /** @hidden */
+  /** @protected */
   didStartHovering(): void;
 
-  /** @hidden */
+  /** @internal */
   stopHovering(): void;
 
-  /** @hidden */
+  /** @protected */
   willStopHovering(): void;
 
-  /** @hidden */
+  /** @protected */
   onStopHovering(): void;
 
-  /** @hidden */
+  /** @protected */
   didStopHovering(): void;
 
+  /** @internal */
   beginHover(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   willBeginHover(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   onBeginHover(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   didBeginHover(input: PositionGestureInput, event: Event | null): void;
 
+  /** @internal */
   endHover(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   willEndHover(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   onEndHover(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   didEndHover(input: PositionGestureInput, event: Event | null): void;
 
   readonly pressCount: number;
 
-  isPressing(): boolean
+  get pressing(): boolean
 
-  /** @hidden */
+  /** @internal */
   startPressing(): void;
 
-  /** @hidden */
+  /** @protected */
   willStartPressing(): void;
 
-  /** @hidden */
+  /** @protected */
   onStartPressing(): void;
 
-  /** @hidden */
+  /** @protected */
   didStartPressing(): void;
 
-  /** @hidden */
+  /** @internal */
   stopPressing(): void;
 
-  /** @hidden */
+  /** @protected */
   willStopPressing(): void;
 
-  /** @hidden */
+  /** @protected */
   onStopPressing(): void;
 
-  /** @hidden */
+  /** @protected */
   didStopPressing(): void;
 
+  /** @internal */
   beginPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   willBeginPress(input: PositionGestureInput, event: Event | null): boolean | void;
 
-  /** @hidden */
+  /** @protected */
   onBeginPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   didBeginPress(input: PositionGestureInput, event: Event | null): void;
 
+  /** @internal */
   movePress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   willMovePress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   onMovePress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   didMovePress(input: PositionGestureInput, event: Event | null): void;
 
+  /** @internal */
   endPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   willEndPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   onEndPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   didEndPress(input: PositionGestureInput, event: Event | null): void;
 
+  /** @internal */
   cancelPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   willCancelPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   onCancelPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   didCancelPress(input: PositionGestureInput, event: Event | null): void;
 
+  /** @internal */
   press(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   willPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   onPress(input: PositionGestureInput, event: Event | null): void;
 
-  /** @hidden */
+  /** @protected */
   didPress(input: PositionGestureInput, event: Event | null): void;
 
+  /** @internal */
   longPress(input: PositionGestureInput): void;
 
-  /** @hidden */
+  /** @protected */
   willLongPress(input: PositionGestureInput): void;
 
-  /** @hidden */
+  /** @protected */
   onLongPress(input: PositionGestureInput): void;
 
-  /** @hidden */
+  /** @protected */
   didLongPress(input: PositionGestureInput): void;
 }
 
-export const PositionGesture = function <G extends GestureContext, V extends View>(
-    this: PositionGesture<G, V> | typeof PositionGesture,
-    owner: G | PositionGestureDescriptor<G, V>,
-    gestureName?: string,
-  ): PositionGesture<G, V> | PropertyDecorator {
-  if (this instanceof PositionGesture) { // constructor
-    return PositionGestureConstructor.call(this as unknown as PositionGesture<GestureContext, View>, owner as G, gestureName);
-  } else { // decorator factory
-    return PositionGestureDecoratorFactory(owner as PositionGestureDescriptor<G, V>);
-  }
-} as {
-  /** @hidden */
-  new<G extends GestureContext, V extends View>(owner: G, gestureName: string | undefined): PositionGesture<G, V>;
+export const PositionGesture = (function (_super: typeof Gesture) {
+  const PositionGesture = _super.extend() as PositionGestureClass;
 
-  <G extends GestureContext, V extends View = View, I = {}>(descriptor: {observe: boolean} & PositionGestureDescriptor<G, V, I & ViewObserverType<V>>): PropertyDecorator;
-  <G extends GestureContext, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<G, V, I>): PropertyDecorator;
+  PositionGesture.prototype.attachEvents = function (this: PositionGesture, view: View): void {
+    Gesture.prototype.attachEvents.call(this, view);
+    this.attachHoverEvents(view);
+  };
 
-  /** @hidden */
-  prototype: PositionGesture<any, any>;
+  PositionGesture.prototype.detachEvents = function (this: PositionGesture, view: View): void {
+    this.detachPressEvents(view);
+    this.detachHoverEvents(view);
+    Gesture.prototype.detachEvents.call(this, view);
+  };
 
-  /** @hidden */
-  getClass(method: GestureMethod): PositionGestureClass;
+  PositionGesture.prototype.attachHoverEvents = function (this: PositionGesture, view: View): void {
+    // hook
+  };
 
-  define<G extends GestureContext, V extends View = View, I = {}>(descriptor: {observe: boolean} & PositionGestureDescriptor<G, V, I & ViewObserverType<V>>): PositionGestureConstructor<G, V, I>;
-  define<G extends GestureContext, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<G, V, I>): PositionGestureConstructor<G, V, I>;
-};
-__extends(PositionGesture, Gesture);
+  PositionGesture.prototype.detachHoverEvents = function (this: PositionGesture, view: View): void {
+    // hook
+  };
 
-function PositionGestureConstructor<G extends GestureContext, V extends View>(this: PositionGesture<G, V>, owner: G, gestureName: string | undefined): PositionGesture<G, V> {
-  const _this: PositionGesture<G, V> = (Gesture as Function).call(this, owner, gestureName) || this;
-  (_this as Mutable<typeof _this>).hoverCount = 0;
-  (_this as Mutable<typeof _this>).pressCount = 0;
-  return _this;
-}
+  PositionGesture.prototype.attachPressEvents = function (this: PositionGesture, view: View): void {
+    // hook
+  };
 
-function PositionGestureDecoratorFactory<G extends GestureContext, V extends View>(descriptor: PositionGestureDescriptor<G, V>): PropertyDecorator {
-  return GestureContext.decorateGesture.bind(View, PositionGesture.define(descriptor as PositionGestureDescriptor<GestureContext, View>));
-}
+  PositionGesture.prototype.detachPressEvents = function (this: PositionGesture, view: View): void {
+    // hook
+  };
 
-PositionGesture.prototype.attachEvents = function (this: PositionGesture<GestureContext, View>, view: View): void {
-  Gesture.prototype.attachEvents.call(this, view);
-  this.attachHoverEvents(view);
-};
+  PositionGesture.prototype.createInput = function (this: PositionGesture, inputId: string, inputType: GestureInputType, isPrimary: boolean,
+                                                    x: number, y: number, t: number): PositionGestureInput {
+    return new PositionGestureInput(inputId, inputType, isPrimary, x, y, t);
+  };
 
-PositionGesture.prototype.detachEvents = function (this: PositionGesture<GestureContext, View>, view: View): void {
-  this.detachPressEvents(view);
-  this.detachHoverEvents(view);
-  Gesture.prototype.detachEvents.call(this, view);
-};
-
-PositionGesture.prototype.attachHoverEvents = function (this: PositionGesture<GestureContext, View>, view: View): void {
-  // hook
-};
-
-PositionGesture.prototype.detachHoverEvents = function (this: PositionGesture<GestureContext, View>, view: View): void {
-  // hook
-};
-
-PositionGesture.prototype.attachPressEvents = function (this: PositionGesture<GestureContext, View>, view: View): void {
-  // hook
-};
-
-PositionGesture.prototype.detachPressEvents = function (this: PositionGesture<GestureContext, View>, view: View): void {
-  // hook
-};
-
-PositionGesture.prototype.createInput = function (this: PositionGesture<GestureContext, View>, inputId: string, inputType: GestureInputType, isPrimary: boolean,
-                                                  x: number, y: number, t: number): PositionGestureInput {
-  return new PositionGestureInput(inputId, inputType, isPrimary, x, y, t);
-};
-
-PositionGesture.prototype.clearInput = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput): void {
-  if (!input.hovering && !input.pressing) {
-    Gesture.prototype.clearInput.call(this, input);
-  }
-};
-
-PositionGesture.prototype.clearInputs = function (this: PositionGesture<GestureContext, View>): void {
-  Gesture.prototype.clearInputs.call(this);
-  (this as Mutable<typeof this>).hoverCount = 0;
-  (this as Mutable<typeof this>).pressCount = 0;
-};
-
-PositionGesture.prototype.isHovering = function (this: PositionGesture<GestureContext, View>): boolean {
-  return this.hoverCount !== 0;
-};
-
-PositionGesture.prototype.startHovering = function (this: PositionGesture<GestureContext, View>): void {
-  this.willStartHovering();
-  this.onStartHovering();
-  this.didStartHovering();
-};
-
-PositionGesture.prototype.willStartHovering = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.onStartHovering = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.didStartHovering = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.stopHovering = function (this: PositionGesture<GestureContext, View>): void {
-  this.willStopHovering();
-  this.onStopHovering();
-  this.didStopHovering();
-};
-
-PositionGesture.prototype.willStopHovering = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.onStopHovering = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.didStopHovering = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.beginHover = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  if (!input.hovering) {
-    this.willBeginHover(input, event);
-    input.hovering = true;
-    (this as Mutable<typeof this>).hoverCount += 1;
-    this.onBeginHover(input, event);
-    this.didBeginHover(input, event);
-    if (this.hoverCount === 1) {
-      this.startHovering();
+  PositionGesture.prototype.clearInput = function (this: PositionGesture, input: PositionGestureInput): void {
+    if (!input.hovering && !input.pressing) {
+      Gesture.prototype.clearInput.call(this, input);
     }
-  }
-};
+  };
 
-PositionGesture.prototype.willBeginHover = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
+  PositionGesture.prototype.clearInputs = function (this: PositionGesture): void {
+    Gesture.prototype.clearInputs.call(this);
+    (this as Mutable<typeof this>).hoverCount = 0;
+    (this as Mutable<typeof this>).pressCount = 0;
+  };
 
-PositionGesture.prototype.onBeginHover = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
+  Object.defineProperty(PositionGesture.prototype, "hovering", {
+    get(this: PositionGesture): boolean {
+      return this.hoverCount !== 0;
+    },
+    configurable: true,
+  })
 
-PositionGesture.prototype.didBeginHover = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
+  PositionGesture.prototype.startHovering = function (this: PositionGesture): void {
+    this.willStartHovering();
+    this.onStartHovering();
+    this.didStartHovering();
+  };
 
-PositionGesture.prototype.endHover = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  if (input.hovering) {
-    this.willEndHover(input, event);
-    input.hovering = false;
-    (this as Mutable<typeof this>).hoverCount -= 1;
-    this.onEndHover(input, event);
-    this.didEndHover(input, event);
-    if (this.hoverCount === 0) {
-      this.stopHovering();
-    }
-    this.clearInput(input);
-  }
-};
+  PositionGesture.prototype.willStartHovering = function (this: PositionGesture): void {
+    // hook
+  };
 
-PositionGesture.prototype.willEndHover = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
+  PositionGesture.prototype.onStartHovering = function (this: PositionGesture): void {
+    // hook
+  };
 
-PositionGesture.prototype.onEndHover = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
+  PositionGesture.prototype.didStartHovering = function (this: PositionGesture): void {
+    // hook
+  };
 
-PositionGesture.prototype.didEndHover = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
+  PositionGesture.prototype.stopHovering = function (this: PositionGesture): void {
+    this.willStopHovering();
+    this.onStopHovering();
+    this.didStopHovering();
+  };
 
-PositionGesture.prototype.isPressing = function (this: PositionGesture<GestureContext, View>): boolean {
-  return this.pressCount !== 0;
-};
+  PositionGesture.prototype.willStopHovering = function (this: PositionGesture): void {
+    // hook
+  };
 
-PositionGesture.prototype.startPressing = function (this: PositionGesture<GestureContext, View>): void {
-  this.willStartPressing();
-  this.onStartPressing();
-  this.didStartPressing();
-};
+  PositionGesture.prototype.onStopHovering = function (this: PositionGesture): void {
+    // hook
+  };
 
-PositionGesture.prototype.willStartPressing = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
+  PositionGesture.prototype.didStopHovering = function (this: PositionGesture): void {
+    // hook
+  };
 
-PositionGesture.prototype.onStartPressing = function (this: PositionGesture<GestureContext, View>): void {
-  this.attachPressEvents(this.view!);
-};
-
-PositionGesture.prototype.didStartPressing = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.stopPressing = function (this: PositionGesture<GestureContext, View>): void {
-  this.willStopPressing();
-  this.onStopPressing();
-  this.didStopPressing();
-};
-
-PositionGesture.prototype.willStopPressing = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.onStopPressing = function (this: PositionGesture<GestureContext, View>): void {
-  this.detachPressEvents(this.view!);
-};
-
-PositionGesture.prototype.didStopPressing = function (this: PositionGesture<GestureContext, View>): void {
-  // hook
-};
-
-PositionGesture.prototype.beginPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  if (!input.pressing) {
-    let allowPress = this.willBeginPress(input, event);
-    if (allowPress === void 0) {
-      allowPress = true;
-    }
-    if (allowPress) {
-      input.pressing = true;
-      input.defaultPrevented = false;
-      (this as Mutable<typeof this>).pressCount += 1;
-      this.onBeginPress(input, event);
-      input.setHoldTimer(this.longPress.bind(this, input));
-      this.didBeginPress(input, event);
-      if (this.pressCount === 1) {
-        this.startPressing();
+  PositionGesture.prototype.beginHover = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    if (!input.hovering) {
+      this.willBeginHover(input, event);
+      input.hovering = true;
+      (this as Mutable<typeof this>).hoverCount += 1;
+      this.onBeginHover(input, event);
+      this.didBeginHover(input, event);
+      if (this.hoverCount === 1) {
+        this.startHovering();
       }
     }
-  }
-};
+  };
 
-PositionGesture.prototype.willBeginPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): boolean | void {
-  // hook
-};
+  PositionGesture.prototype.willBeginHover = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
 
-PositionGesture.prototype.onBeginPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  input.x0 = input.x;
-  input.y0 = input.y;
-  input.t0 = input.t;
-  input.dx = 0;
-  input.dy = 0;
-  input.dt = 0;
-};
+  PositionGesture.prototype.onBeginHover = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
 
-PositionGesture.prototype.didBeginPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
+  PositionGesture.prototype.didBeginHover = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
 
-PositionGesture.prototype.movePress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  if (input.pressing) {
-    this.willMovePress(input, event);
-    this.onMovePress(input, event);
-    this.didMovePress(input, event);
-  }
-};
-
-PositionGesture.prototype.willMovePress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.onMovePress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.didMovePress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.endPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  input.clearHoldTimer();
-  if (input.pressing) {
-    this.willEndPress(input, event);
-    input.pressing = false;
-    (this as Mutable<typeof this>).pressCount -= 1;
-    this.onEndPress(input, event);
-    this.didEndPress(input, event);
-    if (this.pressCount === 0) {
-      this.stopPressing();
-    }
-    this.clearInput(input);
-  }
-};
-
-PositionGesture.prototype.willEndPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.onEndPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.didEndPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.cancelPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  input.clearHoldTimer();
-  if (input.pressing) {
-    this.willCancelPress(input, event);
-    input.pressing = false;
-    (this as Mutable<typeof this>).pressCount -= 1;
-    this.onCancelPress(input, event);
-    this.didCancelPress(input, event);
-    if (this.pressCount === 0) {
-      this.stopPressing();
-    }
-    this.clearInput(input);
-  }
-};
-
-PositionGesture.prototype.willCancelPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.onCancelPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.didCancelPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.press = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  this.willPress(input, event);
-  this.onPress(input, event);
-  this.didPress(input, event);
-};
-
-PositionGesture.prototype.willPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.onPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.didPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput, event: Event | null): void {
-  // hook
-};
-
-PositionGesture.prototype.longPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput): void {
-  input.clearHoldTimer();
-  const dt = performance.now() - input.t0;
-  if (dt < 1.5 * input.holdDelay && input.pressing) {
-    this.willLongPress(input);
-    this.onLongPress(input);
-    this.didLongPress(input);
-  }
-};
-
-PositionGesture.prototype.willLongPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput): void {
-  // hook
-};
-
-PositionGesture.prototype.onLongPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput): void {
-  const t = performance.now();
-  input.dt = t - input.t;
-  input.t = t;
-};
-
-PositionGesture.prototype.didLongPress = function (this: PositionGesture<GestureContext, View>, input: PositionGestureInput): void {
-  // hook
-};
-
-PositionGesture.getClass = function (method: GestureMethod): PositionGestureClass {
-  if (method === "pointer") {
-    return PointerPositionGesture;
-  } else if (method === "touch") {
-    return TouchPositionGesture;
-  } else if (method === "mouse") {
-    return MousePositionGesture;
-  } else if (typeof PointerEvent !== "undefined") {
-    return PointerPositionGesture;
-  } else if (typeof TouchEvent !== "undefined") {
-    return TouchPositionGesture;
-  } else {
-    return MousePositionGesture;
-  }
-};
-
-PositionGesture.define = function <G extends GestureContext, V extends View, I>(descriptor: PositionGestureDescriptor<G, V, I>): PositionGestureConstructor<G, V, I> {
-  let _super: PositionGestureClass | null | undefined = descriptor.extends;
-  let method = descriptor.method;
-  delete descriptor.extends;
-  delete descriptor.method;
-
-  if (method === void 0) {
-    method = "auto";
-  }
-  if (_super === void 0) {
-    _super = PositionGesture.getClass(method);
-  }
-
-  const _constructor = function DecoratedPositionGesture(this: PositionGesture<G, V>, owner: G, gestureName: string | undefined): PositionGesture<G, V> {
-    let _this: PositionGesture<G, V> = function PositionGestureAccessor(view?: V | null, targetView?: View | null): V | null | G {
-      if (view === void 0) {
-        return _this.view;
-      } else {
-        _this.setView(view, targetView);
-        return _this.owner;
+  PositionGesture.prototype.endHover = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    if (input.hovering) {
+      this.willEndHover(input, event);
+      input.hovering = false;
+      (this as Mutable<typeof this>).hoverCount -= 1;
+      this.onEndHover(input, event);
+      this.didEndHover(input, event);
+      if (this.hoverCount === 0) {
+        this.stopHovering();
       }
-    } as PositionGesture<G, V>;
-    Object.setPrototypeOf(_this, this);
-    _this = _super!.call(_this, owner, gestureName) || _this;
-    return _this;
-  } as unknown as PositionGestureConstructor<G, V, I>;
+      this.clearInput(input);
+    }
+  };
 
-  const _prototype = descriptor as unknown as PositionGesture<any, any> & I;
-  Object.setPrototypeOf(_constructor, _super);
-  _constructor.prototype = _prototype;
-  _constructor.prototype.constructor = _constructor;
-  Object.setPrototypeOf(_constructor.prototype, _super.prototype);
+  PositionGesture.prototype.willEndHover = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
 
-  return _constructor;
-};
+  PositionGesture.prototype.onEndHover = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.didEndHover = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  Object.defineProperty(PositionGesture.prototype, "pressing", {
+    get(this: PositionGesture): boolean {
+      return this.pressCount !== 0;
+    },
+    configurable: true,
+  })
+
+  PositionGesture.prototype.startPressing = function (this: PositionGesture): void {
+    this.willStartPressing();
+    this.onStartPressing();
+    this.didStartPressing();
+  };
+
+  PositionGesture.prototype.willStartPressing = function (this: PositionGesture): void {
+    // hook
+  };
+
+  PositionGesture.prototype.onStartPressing = function (this: PositionGesture): void {
+    this.attachPressEvents(this.view!);
+  };
+
+  PositionGesture.prototype.didStartPressing = function (this: PositionGesture): void {
+    // hook
+  };
+
+  PositionGesture.prototype.stopPressing = function (this: PositionGesture): void {
+    this.willStopPressing();
+    this.onStopPressing();
+    this.didStopPressing();
+  };
+
+  PositionGesture.prototype.willStopPressing = function (this: PositionGesture): void {
+    // hook
+  };
+
+  PositionGesture.prototype.onStopPressing = function (this: PositionGesture): void {
+    this.detachPressEvents(this.view!);
+  };
+
+  PositionGesture.prototype.didStopPressing = function (this: PositionGesture): void {
+    // hook
+  };
+
+  PositionGesture.prototype.beginPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    if (!input.pressing) {
+      let allowPress = this.willBeginPress(input, event);
+      if (allowPress === void 0) {
+        allowPress = true;
+      }
+      if (allowPress) {
+        input.pressing = true;
+        input.defaultPrevented = false;
+        (this as Mutable<typeof this>).pressCount += 1;
+        this.onBeginPress(input, event);
+        input.setHoldTimer(this.longPress.bind(this, input));
+        this.didBeginPress(input, event);
+        if (this.pressCount === 1) {
+          this.startPressing();
+        }
+      }
+    }
+  };
+
+  PositionGesture.prototype.willBeginPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): boolean | void {
+    // hook
+  };
+
+  PositionGesture.prototype.onBeginPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    input.x0 = input.x;
+    input.y0 = input.y;
+    input.t0 = input.t;
+    input.dx = 0;
+    input.dy = 0;
+    input.dt = 0;
+  };
+
+  PositionGesture.prototype.didBeginPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.movePress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    if (input.pressing) {
+      this.willMovePress(input, event);
+      this.onMovePress(input, event);
+      this.didMovePress(input, event);
+    }
+  };
+
+  PositionGesture.prototype.willMovePress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.onMovePress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.didMovePress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.endPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    input.clearHoldTimer();
+    if (input.pressing) {
+      this.willEndPress(input, event);
+      input.pressing = false;
+      (this as Mutable<typeof this>).pressCount -= 1;
+      this.onEndPress(input, event);
+      this.didEndPress(input, event);
+      if (this.pressCount === 0) {
+        this.stopPressing();
+      }
+      this.clearInput(input);
+    }
+  };
+
+  PositionGesture.prototype.willEndPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.onEndPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.didEndPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.cancelPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    input.clearHoldTimer();
+    if (input.pressing) {
+      this.willCancelPress(input, event);
+      input.pressing = false;
+      (this as Mutable<typeof this>).pressCount -= 1;
+      this.onCancelPress(input, event);
+      this.didCancelPress(input, event);
+      if (this.pressCount === 0) {
+        this.stopPressing();
+      }
+      this.clearInput(input);
+    }
+  };
+
+  PositionGesture.prototype.willCancelPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.onCancelPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.didCancelPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.press = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    this.willPress(input, event);
+    this.onPress(input, event);
+    this.didPress(input, event);
+  };
+
+  PositionGesture.prototype.willPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.onPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.didPress = function (this: PositionGesture, input: PositionGestureInput, event: Event | null): void {
+    // hook
+  };
+
+  PositionGesture.prototype.longPress = function (this: PositionGesture, input: PositionGestureInput): void {
+    input.clearHoldTimer();
+    const dt = performance.now() - input.t0;
+    if (dt < 1.5 * input.holdDelay && input.pressing) {
+      this.willLongPress(input);
+      this.onLongPress(input);
+      this.didLongPress(input);
+    }
+  };
+
+  PositionGesture.prototype.willLongPress = function (this: PositionGesture, input: PositionGestureInput): void {
+    // hook
+  };
+
+  PositionGesture.prototype.onLongPress = function (this: PositionGesture, input: PositionGestureInput): void {
+    const t = performance.now();
+    input.dt = t - input.t;
+    input.t = t;
+  };
+
+  PositionGesture.prototype.didLongPress = function (this: PositionGesture, input: PositionGestureInput): void {
+    // hook
+  };
+
+  PositionGesture.construct = function <G extends PositionGesture<any, any>>(gestureClass: PositionGestureClass, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+    (gesture as Mutable<typeof gesture>).hoverCount = 0;
+    (gesture as Mutable<typeof gesture>).pressCount = 0;
+    return gesture;
+  };
+
+  PositionGesture.specialize = function (method: GestureMethod): PositionGestureClass | null {
+    if (method === "pointer") {
+      return PointerPositionGesture;
+    } else if (method === "touch") {
+      return TouchPositionGesture;
+    } else if (method === "mouse") {
+      return MousePositionGesture;
+    } else if (typeof PointerEvent !== "undefined") {
+      return PointerPositionGesture;
+    } else if (typeof TouchEvent !== "undefined") {
+      return TouchPositionGesture;
+    } else {
+      return MousePositionGesture;
+    }
+  };
+
+  PositionGesture.define = function <O, V extends View>(descriptor: PositionGestureDescriptor<O, V>): PositionGestureClass<PositionGesture<any, V>> {
+    let superClass = descriptor.extends as PositionGestureClass | null | undefined;
+    const affinity = descriptor.affinity;
+    const inherits = descriptor.inherits;
+    let method = descriptor.method;
+    delete descriptor.extends;
+    delete descriptor.affinity;
+    delete descriptor.inherits;
+    delete descriptor.method;
+
+    if (method === void 0) {
+      method = "auto";
+    }
+    if (superClass === void 0 || superClass === null) {
+      superClass = PositionGesture.specialize(method);
+    }
+    if (superClass === null) {
+      superClass = this;
+    }
+
+    const gestureClass = superClass.extend(descriptor);
+
+    gestureClass.construct = function (gestureClass: PositionGestureClass, gesture: PositionGesture<O, V> | null, owner: O, gestureName: string): PositionGesture<O, V> {
+      gesture = superClass!.construct(gestureClass, gesture, owner, gestureName);
+      if (affinity !== void 0) {
+        gesture.initAffinity(affinity);
+      }
+      if (inherits !== void 0) {
+        gesture.initInherits(inherits);
+      }
+      return gesture;
+    };
+
+    return gestureClass;
+  };
+
+  return PositionGesture;
+})(Gesture);

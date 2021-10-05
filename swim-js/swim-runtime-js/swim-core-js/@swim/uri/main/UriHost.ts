@@ -126,7 +126,7 @@ export abstract class UriHost implements HashCode, Compare, Debug, Display {
     return Uri.standardParser.parseHostString(hostPart);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get cache(): HashGenCacheMap<string, UriHost> {
     const cacheSize = 16;

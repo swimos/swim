@@ -17,6 +17,7 @@ export {FeelVectorSpec} from "./FeelVectorSpec";
 export {MoodVectorSpec} from "./MoodVectorSpec";
 export {MoodMatrixSpec} from "./MoodMatrixSpec";
 export {ThemeMatrixSpec} from "./ThemeMatrixSpec";
+export {ThemeAnimatorSpec} from "./ThemeAnimatorSpec";
 export {ThemeSuite} from "./ThemeSuite";
 
 import {ThemeSuite} from "./ThemeSuite";

@@ -175,7 +175,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   toString(): string {
@@ -385,7 +385,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     return parser.bind();
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is BoxShadowInit {
     if (typeof value === "object" && value !== null) {
       const init = value as BoxShadowInit;
@@ -394,7 +394,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isArray(value: unknown): value is ReadonlyArray<BoxShadow> {
     if (Array.isArray(value)) {
       const n = value.length;
@@ -410,7 +410,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyBoxShadow {
     return value instanceof BoxShadow
         || BoxShadow.isArray(value)

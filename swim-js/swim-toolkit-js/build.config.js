@@ -29,6 +29,21 @@ const core = [
     ],
   },
   {
+    id: "fastener",
+    name: "@swim/fastener",
+    path: "../swim-runtime-js/swim-core-js/@swim/fastener",
+    targets: [
+      {
+        id: "main",
+        deps: ["util"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "fastener", "unit"],
+      },
+    ],
+  },
+  {
     id: "args",
     name: "@swim/args",
     path: "../swim-runtime-js/swim-core-js/@swim/args",
@@ -39,7 +54,7 @@ const core = [
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "args"],
+        deps: ["util", "codec", "args", "unit"],
       },
     ],
   },
@@ -87,11 +102,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec"],
+        deps: ["util", "codec", "fastener"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "constraint"],
+        deps: ["util", "codec", "fastener", "unit", "constraint"],
       },
     ],
   },
@@ -243,7 +258,7 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time"],
       },
     ],
   },
@@ -272,11 +287,11 @@ const host = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
+        deps: ["util", "codec", "fastener", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "collections", "unit", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "fastener", "unit", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },
@@ -287,7 +302,7 @@ const host = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "args", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "fastener", "args", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },
@@ -330,7 +345,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "fastener", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },
@@ -356,11 +371,11 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "structure", "math", "time", "style"],
+        deps: ["util", "codec", "fastener", "constraint", "structure", "math", "time", "style"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "structure", "math", "time", "style", "theme"],
+        deps: ["util", "codec", "fastener", "unit", "constraint", "structure", "math", "time", "style", "theme"],
       },
     ],
   },
@@ -371,7 +386,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "constraint", "structure", "math", "time", "style", "theme"],
+        deps: ["util", "codec", "fastener", "constraint", "structure", "math", "time", "style", "theme"],
       },
     ],
   },
@@ -382,7 +397,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "constraint", "structure", "math", "time", "style", "theme", "view"],
+        deps: ["util", "codec", "fastener", "constraint", "structure", "math", "time", "style", "theme", "view"],
       },
     ],
   },
@@ -393,7 +408,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "constraint", "structure", "math", "time", "style", "theme", "view", "dom"],
+        deps: ["util", "codec", "fastener", "constraint", "structure", "math", "time", "style", "theme", "view", "dom"],
       },
     ],
   },
@@ -404,7 +419,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom"],
       },
     ],
   },
@@ -431,7 +446,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "constraint", "structure", "math", "time", "style", "theme", "view", "dom", "graphics"],
+        deps: ["util", "codec", "fastener", "constraint", "structure", "math", "time", "style", "theme", "view", "dom", "graphics"],
       },
     ],
   },
@@ -442,7 +457,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "constraint", "structure", "math", "time", "style", "theme", "view", "dom", "graphics"],
+        deps: ["util", "codec", "fastener", "constraint", "structure", "math", "time", "style", "theme", "view", "dom", "graphics"],
       },
     ],
   },
@@ -453,7 +468,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "button"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "button"],
       },
     ],
   },
@@ -464,7 +479,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "constraint", "structure", "math", "time", "style", "theme", "view", "dom", "graphics", "button"],
+        deps: ["util", "codec", "fastener", "constraint", "structure", "math", "time", "style", "theme", "view", "dom", "graphics", "button"],
       },
     ],
   },
@@ -475,7 +490,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "constraint", "structure", "math", "time", "style", "theme", "view", "dom", "graphics", "button"],
+        deps: ["util", "codec", "fastener", "constraint", "structure", "math", "time", "style", "theme", "view", "dom", "graphics", "button"],
       },
     ],
   },
@@ -502,7 +517,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -513,7 +528,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -524,7 +539,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -551,7 +566,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -562,7 +577,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
       },
     ],
   },
@@ -573,7 +588,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
       },
     ],
   },
@@ -584,7 +599,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
       },
     ],
   },
@@ -595,7 +610,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
       },
     ],
   },

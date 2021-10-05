@@ -173,7 +173,7 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly boundingBox: R2Box | null;
 
   override get bounds(): R2Box {
@@ -226,7 +226,7 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pathString: string | undefined;
 
   toPathString(outputSettings?: AnyOutputSettings): string {

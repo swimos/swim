@@ -16,7 +16,7 @@ import {Input, Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import {Angle, AngleParser} from "@swim/math";
 import type {LinearGradientAngle, LinearGradientSide} from "./LinearGradient";
 
-/** @hidden */
+/** @internal */
 export class LinearGradientAngleParser extends Parser<LinearGradientAngle> {
   private readonly identOutput: Output<string> | undefined;
   private readonly angleParser: Parser<Angle> | undefined;

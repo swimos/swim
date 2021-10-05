@@ -19,9 +19,15 @@ declare global {
   }
 }
 
-export * from "./lang";
-
 export * from "./runtime";
+
+export * from "./types";
+
+export * from "./values";
+
+export * from "./compare";
+
+export * from "./convert";
 
 export * from "./mapping";
 
@@ -30,6 +36,16 @@ export * from "./interpolate";
 export * from "./transition";
 
 export * from "./scale";
+
+export * from "./creatable";
+
+export * from "./initable";
+
+export * from "./observable";
+
+export * from "./consumable";
+
+export * from "./service";
 
 export * from "./collections";
 

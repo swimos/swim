@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {View, ViewEdgeInsets, ViewProperty, ViewFastener} from "@swim/view";
+import {ViewEdgeInsets, ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 
 export class DeckCard extends HtmlView {
@@ -25,24 +26,24 @@ export class DeckCard extends HtmlView {
 
   protected initCard(): void {
     this.addClass("deck-card");
-    this.position.setState("relative", View.Intrinsic);
-    this.overflowX.setState("auto", View.Intrinsic);
-    this.overflowY.setState("auto", View.Intrinsic);
-    this.overflowScrolling.setState("touch", View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
+    this.overflowX.setState("auto", Affinity.Intrinsic);
+    this.overflowY.setState("auto", Affinity.Intrinsic);
+    this.overflowScrolling.setState("touch", Affinity.Intrinsic);
   }
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
-      this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
+    if (this.backgroundColor.hasAffinity(Affinity.Intrinsic)) {
+      this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, Affinity.Intrinsic);
     }
   }
 
-  @ViewProperty({type: Object, inherit: true, state: null})
-  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
+  @Property({type: Object, inherits: true, state: null})
+  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
 
-  @ViewProperty({type: String})
-  readonly cardTitle!: ViewProperty<this, string | undefined>;
+  @Property({type: String})
+  readonly cardTitle!: Property<this, string | undefined>;
 
   @ViewFastener({type: HtmlView, child: false})
   readonly backItem!: ViewFastener<this, HtmlView>;

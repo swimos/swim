@@ -71,7 +71,7 @@ export class ConstraintGroup {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   enableConstraints(): void {
     const constraints = this.constraints;
     for (let i = 0, n = constraints.length ; i < n; i += 1) {
@@ -79,7 +79,7 @@ export class ConstraintGroup {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   disableConstraints(): void {
     const constraints = this.constraints;
     for (let i = 0, n = constraints.length ; i < n; i += 1) {
@@ -87,7 +87,7 @@ export class ConstraintGroup {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly constrained: boolean;
 
   isConstrained(): boolean {

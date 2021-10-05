@@ -17,19 +17,19 @@ import {WriterException} from "../writer/WriterException";
 import {Writer} from "../writer/Writer";
 import type {Base16} from "./Base16";
 
-/** @hidden */
+/** @internal */
 export class Base16IntegerWriter extends Writer {
-  /** @hidden */
+  /** @internal */
   readonly base16: Base16;
-  /** @hidden */
+  /** @internal */
   readonly value: unknown;
-  /** @hidden */
+  /** @internal */
   readonly input: number;
-  /** @hidden */
+  /** @internal */
   readonly width: number;
-  /** @hidden */
+  /** @internal */
   readonly index: number;
-  /** @hidden */
+  /** @internal */
   readonly step: number;
 
   constructor(base16: Base16, value: unknown, input: number,

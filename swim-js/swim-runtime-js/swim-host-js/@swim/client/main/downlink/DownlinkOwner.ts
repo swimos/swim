@@ -14,7 +14,7 @@
 
 import type {Downlink} from "./Downlink";
 
-/** @hidden */
+/** @internal */
 export interface DownlinkOwner {
   addDownlink(downlink: Downlink): void;
 

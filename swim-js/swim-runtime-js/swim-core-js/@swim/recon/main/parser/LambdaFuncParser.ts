@@ -16,7 +16,7 @@ import type {Builder} from "@swim/util";
 import {Input, Parser} from "@swim/codec";
 import type {ReconParser} from "./ReconParser";
 
-/** @hidden */
+/** @internal */
 export class LambdaFuncParser<I, V> extends Parser<V> {
   private readonly recon: ReconParser<I, V>;
   private readonly builder: Builder<I, V> | undefined;

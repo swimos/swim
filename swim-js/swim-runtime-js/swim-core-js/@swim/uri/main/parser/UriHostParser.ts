@@ -16,7 +16,7 @@ import {Input, Parser} from "@swim/codec";
 import type {UriHost} from "../UriHost";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriHostParser extends Parser<UriHost> {
   private readonly uri: UriParser;
 

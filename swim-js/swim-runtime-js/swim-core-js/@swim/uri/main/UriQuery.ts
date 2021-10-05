@@ -44,10 +44,10 @@ export abstract class UriQuery implements HashCode, Compare, Debug, Display {
 
   abstract tail(): UriQuery;
 
-  /** @hidden */
+  /** @internal */
   abstract setTail(tail: UriQuery): void;
 
-  /** @hidden */
+  /** @internal */
   abstract dealias(): UriQuery;
 
   has(key: string): boolean {
@@ -236,14 +236,14 @@ export abstract class UriQuery implements HashCode, Compare, Debug, Display {
     return new UriQueryBuilder();
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get keyCache(): HashGenCacheSet<string> {
     const keyCacheSize = 64;
     return new HashGenCacheSet<string>(keyCacheSize);
   }
 
-  /** @hidden */
+  /** @internal */
   static cacheKey(key: string): string {
     if (key.length <= 32) {
       return UriQuery.keyCache.put(key);

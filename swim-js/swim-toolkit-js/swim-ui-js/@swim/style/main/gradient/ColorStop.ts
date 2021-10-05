@@ -53,7 +53,7 @@ export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
     return new ColorStop(this.color, stop, this.hint);
   }
 
-  readonly hint: Length | null
+  readonly hint: Length | null;
 
   withHint(hint: AnyLength | null): ColorStop {
     if (hint !== null) {
@@ -197,7 +197,7 @@ export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
     return parser.bind();
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is ColorStopInit {
     if (typeof value === "object" && value !== null) {
       const init = value as ColorStopInit;
@@ -206,7 +206,7 @@ export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isTuple(value: unknown): value is ColorStopTuple {
     return Array.isArray(value)
         && value.length === 2
@@ -214,7 +214,7 @@ export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
         && (value[1] === null || Length.isAny(value[1]));
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyColorStop {
     return value instanceof ColorStop
         || ColorStop.isInit(value)

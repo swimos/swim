@@ -12,25 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Arrays, AnyTiming, Timing} from "@swim/util";
+import {Class, Arrays, Creatable, ObserverType} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {R2Box} from "@swim/math";
-import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix, Theme} from "@swim/theme";
+import {ThemeMatrix, Theme} from "@swim/theme";
 import {ToAttributeString, ToStyleString, ToCssValue} from "@swim/style";
+import {View, Viewport} from "@swim/view";
+import type {StyleContext} from "../css/StyleContext";
 import {
-  ViewContextType,
-  ViewPrecedence,
-  ViewPrototype,
-  ViewConstructor,
-  View,
-  ViewObserverType,
-  Viewport,
-  ViewProperty,
-  ViewAnimator,
-} from "@swim/view";
-import {StyleContextPrototype, StyleContext} from "../style/StyleContext";
-import type {StyleAnimator} from "../style/StyleAnimator";
-import {NodeViewInit, NodeViewConstructor, NodeView} from "../node/NodeView";
-import type {AttributeAnimatorConstructor, AttributeAnimator} from "../attribute/AttributeAnimator";
+  ViewNodeType,
+  AnyNodeView,
+  NodeViewInit,
+  NodeViewFactory,
+  NodeViewClass,
+  NodeViewConstructor,
+  NodeView,
+} from "../node/NodeView";
 import type {
   ElementViewObserver,
   ElementViewObserverCache,
@@ -39,67 +36,42 @@ import type {
   ViewWillSetStyle,
   ViewDidSetStyle,
 } from "./ElementViewObserver";
-import {DomManager} from "../"; // forward import
+import {DomService} from "../"; // forward import
+import {HtmlView} from "../"; // forward import
+import {SvgView} from "../"; // forward import
 
 export interface ViewElement extends Element, ElementCSSInlineStyle {
   view?: ElementView;
 }
 
-export type ElementViewMemberType<V, K extends keyof V> =
-  V[K] extends ViewProperty<any, infer T, any> ? T :
-  V[K] extends ViewAnimator<any, infer T, any> ? T :
-  V[K] extends StyleAnimator<any, infer T, any> ? T :
-  V[K] extends AttributeAnimator<any, infer T, any> ? T :
-  never;
-
-export type ElementViewMemberInit<V, K extends keyof V> =
-  V[K] extends ViewProperty<any, infer T, infer U> ? T | U :
-  V[K] extends ViewAnimator<any, infer T, infer U> ? T | U :
-  V[K] extends StyleAnimator<any, infer T, infer U> ? T | U :
-  V[K] extends AttributeAnimator<any, infer T, infer U> ? T | U :
-  never;
-
-export type ElementViewMemberKey<V, K extends keyof V> =
-  V[K] extends ViewProperty<any, any> ? K :
-  V[K] extends ViewAnimator<any, any> ? K :
-  V[K] extends StyleAnimator<any, any> ? K :
-  V[K] extends AttributeAnimator<any, any> ? K :
-  never;
-
-export type ElementViewMemberMap<V> = {
-  -readonly [K in keyof V as ElementViewMemberKey<V, K>]?: ElementViewMemberInit<V, K>;
-};
+export type AnyElementView<V extends ElementView = ElementView> = AnyNodeView<V>;
 
 export interface ElementViewInit extends NodeViewInit {
   id?: string;
   classList?: string[];
-  mood?: MoodVector;
-  moodModifier?: MoodMatrix;
-  theme?: ThemeMatrix;
-  themeModifier?: MoodMatrix;
 }
 
-export interface ElementViewPrototype extends ViewPrototype, StyleContextPrototype {
-  /** @hidden */
-  attributeAnimatorConstructors?: {[animatorName: string]: AttributeAnimatorConstructor<ElementView, unknown> | undefined};
+export interface ElementViewFactory<V extends ElementView = ElementView, U = AnyElementView> extends NodeViewFactory<V, U> {
+  fromTag(tag: string): V;
 }
 
-export interface ElementViewConstructor<V extends ElementView = ElementView> extends NodeViewConstructor<V> {
-  readonly tag: string;
+export interface ElementViewClass<V extends ElementView = ElementView, U = AnyElementView> extends NodeViewClass<V, U>, ElementViewFactory<V, U> {
+  readonly tag?: string;
   readonly namespace?: string;
+}
+
+export interface ElementViewConstructor<V extends ElementView = ElementView, U = AnyElementView> extends NodeViewConstructor<V, U>, ElementViewClass<V, U> {
 }
 
 export class ElementView extends NodeView implements StyleContext {
   constructor(node: Element) {
     super(node);
-    this.attributeAnimators = null;
-    this.styleAnimators = null;
     this.initElement(node);
   }
 
-  override readonly node!: Element & ElementCSSInlineStyle;
+  override readonly observerType?: Class<ElementViewObserver>;
 
-  override readonly viewObservers!: ReadonlyArray<ElementViewObserver>;
+  override readonly node!: Element & ElementCSSInlineStyle;
 
   protected initElement(node: Element): void {
     const themeName = node.getAttribute("swim-theme");
@@ -116,257 +88,27 @@ export class ElementView extends NodeView implements StyleContext {
       } else if (themeName.indexOf('.') < 0) {
         theme = (Theme as any)[themeName];
       } else {
-        theme = DomManager.eval(themeName) as ThemeMatrix | undefined;
+        theme = DomService.eval(themeName) as ThemeMatrix | undefined;
       }
       if (theme instanceof ThemeMatrix) {
-        this.theme.setState(theme, View.Extrinsic);
+        this.theme.setState(theme, Affinity.Extrinsic);
       } else {
         throw new TypeError("unknown swim-theme: " + themeName);
       }
     }
   }
 
-  override initView(init: ElementViewInit): void {
-    super.initView(init);
-    if (init.id !== void 0) {
-      this.id(init.id);
-    }
-    if (init.classList !== void 0) {
-      this.addClass(...init.classList);
-    }
-    if (init.mood !== void 0) {
-      this.mood(init.mood);
-    }
-    if (init.moodModifier !== void 0) {
-      this.moodModifier(init.moodModifier);
-    }
-    if (init.theme !== void 0) {
-      this.theme(init.theme);
-    }
-    if (init.themeModifier !== void 0) {
-      this.themeModifier(init.themeModifier);
-    }
-  }
-
-  /** @hidden */
-  override readonly viewObserverCache!: ElementViewObserverCache<this>;
-
-  protected override onAddViewObserver(viewObserver: ViewObserverType<this>): void {
-    super.onAddViewObserver(viewObserver);
-    if (viewObserver.viewWillSetAttribute !== void 0) {
-      this.viewObserverCache.viewWillSetAttributeObservers = Arrays.inserted(viewObserver as ViewWillSetAttribute, this.viewObserverCache.viewWillSetAttributeObservers);
-    }
-    if (viewObserver.viewDidSetAttribute !== void 0) {
-      this.viewObserverCache.viewDidSetAttributeObservers = Arrays.inserted(viewObserver as ViewDidSetAttribute, this.viewObserverCache.viewDidSetAttributeObservers);
-    }
-    if (viewObserver.viewWillSetStyle !== void 0) {
-      this.viewObserverCache.viewWillSetStyleObservers = Arrays.inserted(viewObserver as ViewWillSetStyle, this.viewObserverCache.viewWillSetStyleObservers);
-    }
-    if (viewObserver.viewDidSetStyle !== void 0) {
-      this.viewObserverCache.viewDidSetStyleObservers = Arrays.inserted(viewObserver as ViewDidSetStyle, this.viewObserverCache.viewDidSetStyleObservers);
-    }
-  }
-
-  protected override onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
-    super.onRemoveViewObserver(viewObserver);
-    if (viewObserver.viewWillSetAttribute !== void 0) {
-      this.viewObserverCache.viewWillSetAttributeObservers = Arrays.removed(viewObserver as ViewWillSetAttribute, this.viewObserverCache.viewWillSetAttributeObservers);
-    }
-    if (viewObserver.viewDidSetAttribute !== void 0) {
-      this.viewObserverCache.viewDidSetAttributeObservers = Arrays.removed(viewObserver as ViewDidSetAttribute, this.viewObserverCache.viewDidSetAttributeObservers);
-    }
-    if (viewObserver.viewWillSetStyle !== void 0) {
-      this.viewObserverCache.viewWillSetStyleObservers = Arrays.removed(viewObserver as ViewWillSetStyle, this.viewObserverCache.viewWillSetStyleObservers);
-    }
-    if (viewObserver.viewDidSetStyle !== void 0) {
-      this.viewObserverCache.viewDidSetStyleObservers = Arrays.removed(viewObserver as ViewDidSetStyle, this.viewObserverCache.viewDidSetStyleObservers);
-    }
-  }
-
-  protected override onMount(): void {
-    super.onMount();
-    this.mountTheme();
-    this.updateTheme(false);
-  }
-
-  protected override onChange(viewContext: ViewContextType<this>): void {
-    super.onChange(viewContext);
-    this.updateTheme();
-  }
-
-  protected override onUncull(): void {
-    super.onUncull();
-    if (this.mood.isInherited()) {
-      this.mood.change();
-    }
-    if (this.theme.isInherited()) {
-      this.theme.change();
-    }
-  }
-
-  @ViewProperty({type: MoodMatrix, state: null})
-  readonly moodModifier!: ViewProperty<this, MoodMatrix | null>;
-
-  @ViewProperty({type: MoodMatrix, state: null})
-  readonly themeModifier!: ViewProperty<this, MoodMatrix | null>;
-
-  override getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
-    const theme = this.theme.state;
-    let value: T | undefined;
-    if (theme !== null) {
-      if (mood === void 0 || mood === null) {
-        mood = this.mood.state;
-      }
-      if (mood !== null) {
-        value = theme.get(look, mood);
-      }
-    }
-    return value;
-  }
-
-  override getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
-  override getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
-  override getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
-    if (arguments.length === 2) {
-      elseValue = mood as E;
-      mood = null;
-    }
-    const theme = this.theme.state;
-    let value: T | E;
-    if (theme !== null) {
-      if (mood === void 0 || mood === null) {
-        mood = this.mood.state;
-      }
-      if (mood !== null) {
-        value = theme.getOr(look, mood as MoodVector<Feel>, elseValue as E);
-      } else {
-        value = elseValue as E;
-      }
-    } else {
-      value = elseValue as E;
-    }
-    return value;
-  }
-
-  override modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
-    if (this.moodModifier.takesPrecedence(View.Intrinsic)) {
-      const oldMoodModifier = this.moodModifier.getStateOr(MoodMatrix.empty());
-      const newMoodModifier = oldMoodModifier.updatedCol(feel, updates, true);
-      if (!newMoodModifier.equals(oldMoodModifier)) {
-        this.moodModifier.setState(newMoodModifier, View.Intrinsic);
-        this.changeMood();
-        if (timing !== void 0) {
-          const theme = this.theme.state;
-          const mood = this.mood.state;
-          if (theme !== null && mood !== null) {
-            if (timing === true) {
-              timing = theme.getOr(Look.timing, mood, false);
-            } else {
-              timing = Timing.fromAny(timing);
-            }
-            this.applyTheme(theme, mood, timing);
-          }
-        } else {
-          this.requireUpdate(View.NeedsChange);
-        }
-      }
-    }
-  }
-
-  override modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
-    if (this.themeModifier.takesPrecedence(View.Intrinsic)) {
-      const oldThemeModifier = this.themeModifier.getStateOr(MoodMatrix.empty());
-      const newThemeModifier = oldThemeModifier.updatedCol(feel, updates, true);
-      if (!newThemeModifier.equals(oldThemeModifier)) {
-        this.themeModifier.setState(newThemeModifier, View.Intrinsic);
-        this.changeTheme();
-        if (timing !== void 0) {
-          const theme = this.theme.state;
-          const mood = this.mood.state;
-          if (theme !== null && mood !== null) {
-            if (timing === true) {
-              timing = theme.getOr(Look.timing, mood, false);
-            } else {
-              timing = Timing.fromAny(timing);
-            }
-            this.applyTheme(theme, mood, timing);
-          }
-        } else {
-          this.requireUpdate(View.NeedsChange);
-        }
-      }
-    }
-  }
-
-  protected changeMood(): void {
-    const moodModifierProperty = this.getViewProperty("moodModifier") as ViewProperty<this, MoodMatrix | null> | null;
-    if (moodModifierProperty !== null && this.mood.takesPrecedence(View.Intrinsic)) {
-      const moodModifier = moodModifierProperty.state;
-      if (moodModifier !== null) {
-        let superMood = this.mood.superState;
-        if (superMood === void 0 || superMood === null) {
-          const themeManager = this.themeService.manager;
-          if (themeManager !== void 0 && themeManager !== null) {
-            superMood = themeManager.mood;
-          }
-        }
-        if (superMood !== void 0 && superMood !== null) {
-          const mood = moodModifier.timesCol(superMood, true);
-          this.mood.setState(mood, View.Intrinsic);
-        }
-      } else {
-        this.mood.setInherited(true);
-      }
-    }
-  }
-
-  protected changeTheme(): void {
-    const themeModifierProperty = this.getViewProperty("themeModifier") as ViewProperty<this, MoodMatrix | null> | null;
-    if (themeModifierProperty !== null && this.theme.takesPrecedence(View.Intrinsic)) {
-      const themeModifier = themeModifierProperty.state;
-      if (themeModifier !== null) {
-        let superTheme = this.theme.superState;
-        if (superTheme === void 0 || superTheme === null) {
-          const themeManager = this.themeService.manager;
-          if (themeManager !== void 0 && themeManager !== null) {
-            superTheme = themeManager.theme;
-          }
-        }
-        if (superTheme !== void 0 && superTheme !== null) {
-          const theme = superTheme.transform(themeModifier, true);
-          this.theme.setState(theme, View.Intrinsic);
-        }
-      } else {
-        this.theme.setInherited(true);
-      }
-    }
-  }
-
-  protected updateTheme(timing?: AnyTiming | boolean): void {
-    this.changeMood();
-    this.changeTheme();
-    const theme = this.theme.state;
-    const mood = this.mood.state;
-    if (theme !== null && mood !== null) {
-      this.applyTheme(theme, mood, timing);
-    }
-  }
-
-  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    super.onApplyTheme(theme, mood, timing);
-    this.themeViewAnimators(theme, mood, timing);
-  }
-
-  /** @hidden */
-  protected mountTheme(): void {
+  /** @internal */
+  protected override mountTheme(): void {
+    super.mountTheme();
     if (NodeView.isRootView(this.node)) {
-      const themeManager = this.themeService.manager;
-      if (themeManager !== void 0 && themeManager !== null) {
-        if (this.mood.takesPrecedence(View.Intrinsic) && this.mood.state === null) {
-          this.mood.setState(themeManager.mood, View.Intrinsic);
+      const themeService = this.themeProvider.service;
+      if (themeService !== void 0 && themeService !== null) {
+        if (this.mood.hasAffinity(Affinity.Intrinsic) && this.mood.state === null) {
+          this.mood.setState(themeService.mood, Affinity.Intrinsic);
         }
-        if (this.theme.takesPrecedence(View.Intrinsic) && this.theme.state === null) {
-          this.theme.setState(themeManager.theme, View.Intrinsic);
+        if (this.theme.hasAffinity(Affinity.Intrinsic) && this.theme.state === null) {
+          this.theme.setState(themeService.theme, Affinity.Intrinsic);
         }
       }
     }
@@ -389,11 +131,11 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   protected willSetAttribute(attributeName: string, value: unknown): void {
-    const viewObservers = this.viewObserverCache.viewWillSetAttributeObservers;
-    if (viewObservers !== void 0) {
-      for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-        const viewObserver = viewObservers[i]!;
-        viewObserver.viewWillSetAttribute(attributeName, value, this);
+    const observers = this.observerCache.viewWillSetAttributeObservers;
+    if (observers !== void 0) {
+      for (let i = 0, n = observers.length; i < n; i += 1) {
+        const observer = observers[i]!;
+        observer.viewWillSetAttribute(attributeName, value, this);
       }
     }
   }
@@ -403,65 +145,13 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   protected didSetAttribute(attributeName: string, value: unknown): void {
-    const viewObservers = this.viewObserverCache.viewDidSetAttributeObservers;
-    if (viewObservers !== void 0) {
-      for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-        const viewObserver = viewObservers[i]!;
-        viewObserver.viewDidSetAttribute(attributeName, value, this);
+    const observers = this.observerCache.viewDidSetAttributeObservers;
+    if (observers !== void 0) {
+      for (let i = 0, n = observers.length; i < n; i += 1) {
+        const observer = observers[i]!;
+        observer.viewDidSetAttribute(attributeName, value, this);
       }
     }
-  }
-
-  /** @hidden */
-  readonly attributeAnimators: {[animatorName: string]: AttributeAnimator<ElementView, unknown> | undefined} | null;
-
-  hasAttributeAnimator(animatorName: string): boolean {
-    const attributeAnimators = this.attributeAnimators;
-    return attributeAnimators !== null && attributeAnimators[animatorName] !== void 0;
-  }
-
-  getAttributeAnimator(animatorName: string): AttributeAnimator<this, unknown> | null {
-    const attributeAnimators = this.attributeAnimators;
-    if (attributeAnimators !== null) {
-      const attributeAnimator = attributeAnimators[animatorName];
-      if (attributeAnimator !== void 0) {
-        return attributeAnimator as AttributeAnimator<this, unknown>;
-      }
-    }
-    return null;
-  }
-
-  setAttributeAnimator(animatorName: string, newAttributeAnimator: AttributeAnimator<this, unknown> | null): void {
-    let attributeAnimators = this.attributeAnimators;
-    if (attributeAnimators === null) {
-      attributeAnimators = {};
-      (this as Mutable<this>).attributeAnimators = attributeAnimators;
-    }
-    const oldAttributedAnimator = attributeAnimators[animatorName];
-    if (oldAttributedAnimator !== void 0 && this.isMounted()) {
-      oldAttributedAnimator.unmount();
-    }
-    if (newAttributeAnimator !== null) {
-      attributeAnimators[animatorName] = newAttributeAnimator;
-      if (this.isMounted()) {
-        newAttributeAnimator.mount();
-      }
-    } else {
-      delete attributeAnimators[animatorName];
-    }
-  }
-
-  /** @hidden */
-  getLazyAttributeAnimator(animatorName: string): AttributeAnimator<this, unknown> | null {
-    let attributeAnimator = this.getAttributeAnimator(animatorName);
-    if (attributeAnimator === null) {
-      const constructor = ElementView.getAttributeAnimatorConstructor(animatorName, Object.getPrototypeOf(this));
-      if (constructor !== null) {
-        attributeAnimator = new constructor(this, animatorName);
-        this.setAttributeAnimator(animatorName, attributeAnimator);
-      }
-    }
-    return attributeAnimator;
   }
 
   getStyle(propertyNames: string | ReadonlyArray<string>): CSSStyleValue | string | undefined {
@@ -528,11 +218,11 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   protected willSetStyle(propertyName: string, value: unknown, priority: string | undefined): void {
-    const viewObservers = this.viewObserverCache.viewWillSetStyleObservers;
-    if (viewObservers !== void 0) {
-      for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-        const viewObserver = viewObservers[i]!;
-        viewObserver.viewWillSetStyle(propertyName, value, priority, this);
+    const observers = this.observerCache.viewWillSetStyleObservers;
+    if (observers !== void 0) {
+      for (let i = 0, n = observers.length; i < n; i += 1) {
+        const observer = observers[i]!;
+        observer.viewWillSetStyle(propertyName, value, priority, this);
       }
     }
   }
@@ -542,114 +232,13 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   protected didSetStyle(propertyName: string, value: unknown, priority: string | undefined): void {
-    const viewObservers = this.viewObserverCache.viewDidSetStyleObservers;
-    if (viewObservers !== void 0) {
-      for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-        const viewObserver = viewObservers[i]!;
-        viewObserver.viewDidSetStyle(propertyName, value, priority, this);
+    const observers = this.observerCache.viewDidSetStyleObservers;
+    if (observers !== void 0) {
+      for (let i = 0, n = observers.length; i < n; i += 1) {
+        const observer = observers[i]!;
+        observer.viewDidSetStyle(propertyName, value, priority, this);
       }
     }
-  }
-
-  /** @hidden */
-  readonly styleAnimators: {[animatorName: string]: StyleAnimator<ElementView, unknown> | undefined} | null;
-
-  hasStyleAnimator(animatorName: string): boolean {
-    const styleAnimators = this.styleAnimators;
-    return styleAnimators !== null && styleAnimators[animatorName] !== void 0;
-  }
-
-  getStyleAnimator(animatorName: string): StyleAnimator<this, unknown> | null {
-    const styleAnimators = this.styleAnimators;
-    if (styleAnimators !== null) {
-      const styleAnimator = styleAnimators[animatorName];
-      if (styleAnimator !== void 0) {
-        return styleAnimator as StyleAnimator<this, unknown>;
-      }
-    }
-    return null;
-  }
-
-  setStyleAnimator(animatorName: string, newStyleAnimator: StyleAnimator<this, unknown> | null): void {
-    let styleAnimators = this.styleAnimators;
-    if (styleAnimators === null) {
-      styleAnimators = {};
-      (this as Mutable<this>).styleAnimators = styleAnimators;
-    }
-    const oldStyleAnimator = styleAnimators[animatorName];
-    if (oldStyleAnimator !== void 0 && this.isMounted()) {
-      oldStyleAnimator.unmount();
-    }
-    if (newStyleAnimator !== null) {
-      styleAnimators[animatorName] = newStyleAnimator;
-      if (this.isMounted()) {
-        newStyleAnimator.mount();
-      }
-    } else {
-      delete styleAnimators[animatorName];
-    }
-  }
-
-  /** @hidden */
-  getLazyStyleAnimator(animatorName: string): StyleAnimator<this, unknown> | null {
-    let styleAnimator = this.getStyleAnimator(animatorName);
-    if (styleAnimator === null) {
-      const constructor = StyleContext.getStyleAnimatorConstructor(animatorName, Object.getPrototypeOf(this));
-      if (constructor !== null) {
-        styleAnimator = new constructor(this, animatorName);
-        this.setStyleAnimator(animatorName, styleAnimator);
-      }
-    }
-    return styleAnimator;
-  }
-
-  /** @hidden */
-  protected themeViewAnimators(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    const viewAnimators = this.viewAnimators;
-    for (const animatorName in viewAnimators) {
-      const viewAnimator = viewAnimators[animatorName]!;
-      viewAnimator.applyTheme(theme, mood, timing);
-    }
-    const attributeAnimators = this.attributeAnimators;
-    for (const animatorName in attributeAnimators) {
-      const attributeAnimator = attributeAnimators[animatorName]!;
-      attributeAnimator.applyTheme(theme, mood, timing);
-    }
-    const styleAnimators = this.styleAnimators;
-    for (const animatorName in styleAnimators) {
-      const styleAnimator = styleAnimators[animatorName]!;
-      styleAnimator.applyTheme(theme, mood, timing);
-    }
-  }
-
-  /** @hidden */
-  protected override mountViewAnimators(): void {
-    super.mountViewAnimators();
-    const attributeAnimators = this.attributeAnimators;
-    for (const animatorName in attributeAnimators) {
-      const attributeAnimator = attributeAnimators[animatorName]!;
-      attributeAnimator.mount();
-    }
-    const styleAnimators = this.styleAnimators;
-    for (const animatorName in styleAnimators) {
-      const styleAnimator = styleAnimators[animatorName]!;
-      styleAnimator.mount();
-    }
-  }
-
-  /** @hidden */
-  protected override unmountViewAnimators(): void {
-    const styleAnimators = this.styleAnimators;
-    for (const animatorName in styleAnimators) {
-      const styleAnimator = styleAnimators[animatorName]!;
-      styleAnimator.unmount();
-    }
-    const attributeAnimators = this.attributeAnimators;
-    for (const animatorName in attributeAnimators) {
-      const attributeAnimator = attributeAnimators[animatorName]!;
-      attributeAnimator.unmount();
-    }
-    super.unmountViewAnimators();
   }
 
   id(): string | undefined;
@@ -712,45 +301,6 @@ export class ElementView extends NodeView implements StyleContext {
     return this;
   }
 
-  /** @hidden */
-  override setViewMember(key: string, value: unknown, timing?: AnyTiming | boolean, precedence?: ViewPrecedence): void {
-    const viewProperty = this.getLazyViewProperty(key);
-    if (viewProperty !== null) {
-      viewProperty.setState(value, precedence);
-      return;
-    }
-    const viewAnimator = this.getLazyViewAnimator(key);
-    if (viewAnimator !== null) {
-      viewAnimator.setState(value, timing, precedence);
-      return;
-    }
-    const styleAnimator = this.getLazyStyleAnimator(key);
-    if (styleAnimator !== null) {
-      styleAnimator.setState(value, timing, precedence);
-      return;
-    }
-    const attributeAnimator = this.getLazyAttributeAnimator(key);
-    if (attributeAnimator !== null) {
-      attributeAnimator.setState(value, timing, precedence);
-      return;
-    }
-  }
-
-  override setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, precedenceOrTiming: ViewPrecedence | AnyTiming | boolean | undefined): void;
-  override setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, timing?: AnyTiming | boolean, precedence?: ViewPrecedence): void;
-  override setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, timing?: ViewPrecedence | AnyTiming | boolean, precedence?: ViewPrecedence): void {
-    if (typeof timing === "number") {
-      precedence = timing;
-      timing = void 0;
-    } else if (precedence === void 0) {
-      precedence = View.Extrinsic;
-    }
-    for (const key in state) {
-      const value = state[key];
-      this.setViewMember(key, value, timing, precedence);
-    }
-  }
-
   override get clientBounds(): R2Box {
     const bounds = this.node.getBoundingClientRect();
     return new R2Box(bounds.left, bounds.top, bounds.right, bounds.bottom);
@@ -764,7 +314,7 @@ export class ElementView extends NodeView implements StyleContext {
                      bounds.right + scrollX, bounds.bottom + scrollY);
   }
 
-  override on<T extends keyof ElementEventMap>(type: T, listener: (this: Element, event: ElementEventMap[T]) => unknown,
+  override on<K extends keyof ElementEventMap>(type: K, listener: (this: Element, event: ElementEventMap[K]) => unknown,
                                                options?: AddEventListenerOptions | boolean): this;
   override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
   override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
@@ -772,7 +322,7 @@ export class ElementView extends NodeView implements StyleContext {
     return this;
   }
 
-  override off<T extends keyof ElementEventMap>(type: T, listener: (this: Element, event: ElementEventMap[T]) => unknown,
+  override off<K extends keyof ElementEventMap>(type: K, listener: (this: Element, event: ElementEventMap[K]) => unknown,
                                                 options?: EventListenerOptions | boolean): this;
   override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
   override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
@@ -780,118 +330,122 @@ export class ElementView extends NodeView implements StyleContext {
     return this;
   }
 
-  /** @hidden */
-  static readonly tags: {[tag: string]: ElementViewConstructor<any> | undefined} = {};
+  /** @internal */
+  override readonly observerCache!: ElementViewObserverCache<this>;
 
-  /** @hidden */
+  protected override onObserve(observer: ObserverType<this>): void {
+    super.onObserve(observer);
+    if (observer.viewWillSetAttribute !== void 0) {
+      this.observerCache.viewWillSetAttributeObservers = Arrays.inserted(observer as ViewWillSetAttribute, this.observerCache.viewWillSetAttributeObservers);
+    }
+    if (observer.viewDidSetAttribute !== void 0) {
+      this.observerCache.viewDidSetAttributeObservers = Arrays.inserted(observer as ViewDidSetAttribute, this.observerCache.viewDidSetAttributeObservers);
+    }
+    if (observer.viewWillSetStyle !== void 0) {
+      this.observerCache.viewWillSetStyleObservers = Arrays.inserted(observer as ViewWillSetStyle, this.observerCache.viewWillSetStyleObservers);
+    }
+    if (observer.viewDidSetStyle !== void 0) {
+      this.observerCache.viewDidSetStyleObservers = Arrays.inserted(observer as ViewDidSetStyle, this.observerCache.viewDidSetStyleObservers);
+    }
+  }
+
+  protected override onUnobserve(observer: ObserverType<this>): void {
+    super.onUnobserve(observer);
+    if (observer.viewWillSetAttribute !== void 0) {
+      this.observerCache.viewWillSetAttributeObservers = Arrays.removed(observer as ViewWillSetAttribute, this.observerCache.viewWillSetAttributeObservers);
+    }
+    if (observer.viewDidSetAttribute !== void 0) {
+      this.observerCache.viewDidSetAttributeObservers = Arrays.removed(observer as ViewDidSetAttribute, this.observerCache.viewDidSetAttributeObservers);
+    }
+    if (observer.viewWillSetStyle !== void 0) {
+      this.observerCache.viewWillSetStyleObservers = Arrays.removed(observer as ViewWillSetStyle, this.observerCache.viewWillSetStyleObservers);
+    }
+    if (observer.viewDidSetStyle !== void 0) {
+      this.observerCache.viewDidSetStyleObservers = Arrays.removed(observer as ViewDidSetStyle, this.observerCache.viewDidSetStyleObservers);
+    }
+  }
+
+  override init(init: ElementViewInit): void {
+    super.init(init);
+    if (init.id !== void 0) {
+      this.id(init.id);
+    }
+    if (init.classList !== void 0) {
+      this.addClass(...init.classList);
+    }
+  }
+
+  /** @internal */
   static readonly tag?: string;
 
-  /** @hidden */
+  /** @internal */
   static readonly namespace?: string;
 
-  static fromTag(tag: string): ElementView {
-    let viewConstructor: ElementViewConstructor | undefined;
-    if (Object.prototype.hasOwnProperty.call(this, "tags")) {
-      viewConstructor = this.tags[tag];
+  static override create<S extends abstract new (...args: any[]) => InstanceType<S>>(this: S): InstanceType<S>;
+  static override create(): ElementView;
+  static override create(): ElementView {
+    let tag = this.tag;
+    if (tag === void 0) {
+      tag = "div";
     }
-    if (viewConstructor === void 0) {
-      viewConstructor = this as ElementViewConstructor;
+    return this.fromTag(tag);
+  }
+
+  static fromTag<S extends abstract new (...args: any[]) => InstanceType<S>>(this: S, tag: string, namespace?: string): InstanceType<S>;
+  static fromTag(tag: string, namespace?: string): ElementView;
+  static fromTag(tag: string, namespace?: string): ElementView {
+    if (namespace === void 0) {
+      if (tag === "svg") {
+        namespace = SvgView.namespace;
+      }
     }
     let node: Element;
-    const namespace = viewConstructor.namespace;
     if (namespace !== void 0) {
       node = document.createElementNS(namespace, tag);
     } else {
       node = document.createElement(tag);
     }
-    return new viewConstructor(node as Element & ElementCSSInlineStyle);
+    return this.fromNode(node);
   }
 
-  static override fromNode(node: ViewElement): ElementView {
-    if (node.view instanceof this) {
-      return node.view;
-    } else {
-      let viewConstructor: ElementViewConstructor | undefined;
-      if (Object.prototype.hasOwnProperty.call(this, "tags")) {
-        viewConstructor = this.tags[node.tagName];
-      }
-      if (viewConstructor === void 0) {
-        viewConstructor = this as ElementViewConstructor;
-      }
-      const view = new viewConstructor(node);
-      this.mount(view);
-      return view;
-    }
-  }
-
-  static override fromConstructor<V extends NodeView>(viewConstructor: NodeViewConstructor<V>): V;
-  static override fromConstructor<V extends View>(viewConstructor: ViewConstructor<V>): V;
-  static override fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View;
-  static override fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View {
-    if (viewConstructor.prototype instanceof ElementView) {
-      let node: Element;
-      const tag = (viewConstructor as unknown as ElementViewConstructor).tag;
-      if (typeof tag === "string") {
-        const namespace = (viewConstructor as unknown as ElementViewConstructor).namespace;
-        if (namespace !== void 0) {
-          node = document.createElementNS(namespace, tag);
-        } else {
-          node = document.createElement(tag);
-        }
-        return new viewConstructor(node);
+  static override fromNode<S extends new (node: Element) => InstanceType<S>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
+  static override fromNode(node: Element): ElementView;
+  static override fromNode(node: Element): ElementView {
+    let view = (node as ViewElement).view;
+    if (view === void 0) {
+      if (node instanceof HTMLElement) {
+        view = HtmlView.fromNode(node);
+      } else if (node instanceof SVGElement) {
+        view = SvgView.fromNode(node);
       } else {
-        throw new TypeError("" + viewConstructor);
+        view = new this(node);
+        this.mount(view);
       }
-    } else {
-      return super.fromConstructor(viewConstructor);
+    } else if (!(view instanceof this)) {
+      throw new TypeError(view + " not an instance of " + this);
     }
+    return view;
   }
 
-  static override fromAny(value: ElementView | Element): ElementView {
-    if (value instanceof ElementView) {
+  static override fromAny<S extends abstract new (...args: any[]) => InstanceType<S>>(this: S, value: AnyElementView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny(value: AnyElementView | string): ElementView;
+  static override fromAny(value: AnyElementView | string): ElementView {
+    if (value === void 0 || value === null) {
       return value;
-    } else if (value instanceof Element) {
-      return this.fromNode(value as ViewElement);
-    }
-    throw new TypeError("" + value);
-  }
-
-  /** @hidden */
-  static getAttributeAnimatorConstructor(animatorName: string, viewPrototype: ElementViewPrototype | null): AttributeAnimatorConstructor<any, unknown> | null {
-    if (viewPrototype === null) {
-      viewPrototype = this.prototype as ElementViewPrototype;
-    }
-    while (viewPrototype !== null) {
-      if (Object.prototype.hasOwnProperty.call(viewPrototype, "attributeAnimatorConstructors")) {
-        const constructor = viewPrototype.attributeAnimatorConstructors![animatorName];
-        if (constructor !== void 0) {
-          return constructor;
-        }
+    } else if (value instanceof View) {
+      if (value instanceof this) {
+        return value;
+      } else {
+        throw new TypeError(value + " not an instance of " + this);
       }
-      viewPrototype = Object.getPrototypeOf(viewPrototype);
+    } else if (value instanceof Node) {
+      return this.fromNode(value);
+    } else if (typeof value === "string") {
+      return this.fromTag(value);
+    } else if (Creatable.is(value)) {
+      return value.create();
+    } else {
+      return this.fromInit(value);
     }
-    return null;
-  }
-
-  /** @hidden */
-  static decorateAttributeAnimator(constructor: AttributeAnimatorConstructor<ElementView, unknown>,
-                                   target: Object, propertyKey: string | symbol): void {
-    const viewPrototype = target as ElementViewPrototype;
-    if (!Object.prototype.hasOwnProperty.call(viewPrototype, "attributeAnimatorConstructors")) {
-      viewPrototype.attributeAnimatorConstructors = {};
-    }
-    viewPrototype.attributeAnimatorConstructors![propertyKey.toString()] = constructor;
-    Object.defineProperty(target, propertyKey, {
-      get: function (this: ElementView): AttributeAnimator<ElementView, unknown> {
-        let attributeAnimator = this.getAttributeAnimator(propertyKey.toString());
-        if (attributeAnimator === null) {
-          attributeAnimator = new constructor(this, propertyKey.toString());
-          this.setAttributeAnimator(propertyKey.toString(), attributeAnimator);
-        }
-        return attributeAnimator;
-      },
-      configurable: true,
-      enumerable: true,
-    });
   }
 }

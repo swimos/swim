@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {
   AnyGraphicsRenderer,
   GraphicsRendererType,
@@ -56,64 +58,38 @@ export class GeoRasterView extends GeoLayerView {
     this.ownRasterFrame = null;
   }
 
-  override initView(init: GeoRasterViewInit): void {
-    super.initView(init);
-    if (init.geoAnchor !== void 0) {
-      this.geoAnchor(init.geoAnchor);
-    }
-    if (init.viewAnchor !== void 0) {
-      this.viewAnchor(init.viewAnchor);
-    }
-    if (init.xAlign !== void 0) {
-      this.xAlign(init.xAlign);
-    }
-    if (init.yAlign !== void 0) {
-      this.yAlign(init.yAlign);
-    }
-    if (init.width !== void 0) {
-      this.width(init.width);
-    }
-    if (init.height !== void 0) {
-      this.height(init.height);
-    }
-    if (init.opacity !== void 0) {
-      this.opacity(init.opacity);
-    }
-    if (init.compositeOperation !== void 0) {
-      this.compositeOperation(init.compositeOperation);
-    }
-  }
+  override readonly observerType?: Class<GeoRasterViewObserver>;
 
-  override readonly viewObservers!: ReadonlyArray<GeoRasterViewObserver>;
+  override readonly contextType?: Class<GeoRasterViewContext>;
 
   protected willSetGeoAnchor(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoAnchor !== void 0) {
-        viewObserver.viewWillSetGeoAnchor(newGeoAnchor, oldGeoAnchor, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoAnchor !== void 0) {
+        observer.viewWillSetGeoAnchor(newGeoAnchor, oldGeoAnchor, this);
       }
     }
   }
 
   protected onSetGeoAnchor(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
     this.setGeoBounds(newGeoAnchor !== null ? newGeoAnchor.bounds : GeoBox.undefined());
-    if (this.isMounted()) {
+    if (this.mounted) {
       this.projectRaster(this.viewContext as ViewContextType<this>);
     }
   }
 
   protected didSetGeoAnchor(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGeoAnchor !== void 0) {
-        viewObserver.viewDidSetGeoAnchor(newGeoAnchor, oldGeoAnchor, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoAnchor !== void 0) {
+        observer.viewDidSetGeoAnchor(newGeoAnchor, oldGeoAnchor, this);
       }
     }
   }
 
-  @ViewAnimator<GeoRasterView, GeoPoint | null, AnyGeoPoint | null>({
+  @ThemeAnimator<GeoRasterView, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
     didSetState(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
@@ -127,40 +103,40 @@ export class GeoRasterView extends GeoLayerView {
       this.owner.didSetGeoAnchor(newGeoAnchor, oldGeoAnchor);
     },
   })
-  readonly geoAnchor!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoAnchor!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator({type: R2Point, state: R2Point.undefined()})
-  readonly viewAnchor!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
+  @ThemeAnimator({type: R2Point, state: R2Point.undefined()})
+  readonly viewAnchor!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsComposite})
-  readonly xAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsComposite})
+  readonly xAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsComposite})
-  readonly yAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsComposite})
+  readonly yAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
-  readonly width!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
+  readonly width!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
-  readonly height!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
+  readonly height!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Number, state: 1, updateFlags: View.NeedsComposite})
-  readonly opacity!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 1, updateFlags: View.NeedsComposite})
+  readonly opacity!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: String, state: "source-over", updateFlags: View.NeedsComposite})
-  readonly compositeOperation!: ViewAnimator<this, CanvasCompositeOperation>;
+  @ThemeAnimator({type: String, state: "source-over", updateFlags: View.NeedsComposite})
+  readonly compositeOperation!: ThemeAnimator<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
     return window.devicePixelRatio || 1;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly canvas: HTMLCanvasElement;
 
   get compositor(): GraphicsRenderer | null {
-    const parentView = this.parentView;
-    if (parentView instanceof GraphicsView) {
-      return parentView.renderer;
+    const parent = this.parent;
+    if (parent instanceof GraphicsView) {
+      return parent.renderer;
     } else {
       return null;
     }
@@ -202,13 +178,13 @@ export class GeoRasterView extends GeoLayerView {
     const rasterFlags = updateFlags & (View.NeedsRender | View.NeedsComposite);
     if (rasterFlags !== 0) {
       updateFlags |= View.NeedsComposite;
-      this.setViewFlags(this.viewFlags | View.NeedsDisplay | View.NeedsComposite | rasterFlags);
+      this.setFlags(this.flags | View.NeedsDisplay | View.NeedsComposite | rasterFlags);
     }
     return updateFlags;
   }
 
   protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
-    if ((this.viewFlags & View.ProcessMask) === 0 && (processFlags & (View.NeedsResize | View.NeedsProject)) === 0) {
+    if ((this.flags & View.ProcessMask) === 0 && (processFlags & (View.NeedsResize | View.NeedsProject)) === 0) {
       processFlags = 0;
     }
     return processFlags;
@@ -225,19 +201,19 @@ export class GeoRasterView extends GeoLayerView {
   }
 
   protected projectGeoAnchor(geoAnchor: GeoPoint | null): void {
-    if (this.isMounted()) {
+    if (this.mounted) {
       const viewContext = this.viewContext as ViewContextType<this>;
       const viewAnchor = geoAnchor !== null && geoAnchor.isDefined()
                        ? viewContext.geoViewport.project(geoAnchor)
                        : null;
-      this.viewAnchor.setIntermediateValue(this.viewAnchor.value, viewAnchor);
+      this.viewAnchor.setInterpolatedValue(this.viewAnchor.value, viewAnchor);
       this.projectRaster(viewContext);
     }
   }
 
   protected projectRaster(viewContext: ViewContextType<this>): void {
     let viewAnchor: R2Point | null;
-    if (this.viewAnchor.takesPrecedence(View.Intrinsic)) {
+    if (this.viewAnchor.hasAffinity(Affinity.Intrinsic)) {
       const geoAnchor = this.geoAnchor.value;
       viewAnchor = geoAnchor !== null && geoAnchor.isDefined()
                  ? viewContext.geoViewport.project(geoAnchor)
@@ -267,7 +243,7 @@ export class GeoRasterView extends GeoLayerView {
   }
 
   protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
-    if ((this.viewFlags & View.DisplayMask) !== 0) {
+    if ((this.flags & View.DisplayMask) !== 0) {
       displayFlags |= View.NeedsComposite;
     } else if ((displayFlags & View.NeedsComposite) !== 0) {
       displayFlags = View.NeedsDisplay | View.NeedsComposite;
@@ -303,9 +279,7 @@ export class GeoRasterView extends GeoLayerView {
     return rasterViewContext;
   }
 
-  override readonly viewContext!: GeoRasterViewContext;
-
-  /** @hidden */
+  /** @internal */
   readonly ownRasterFrame: R2Box | null;
 
   get rasterFrame(): R2Box {
@@ -316,7 +290,7 @@ export class GeoRasterView extends GeoLayerView {
     return rasterFrame;
   }
 
-  /** @hidden */
+  /** @internal */
   setRasterFrame(rasterFrame: R2Box | null): void {
     (this as Mutable<this>).ownRasterFrame = rasterFrame;
   }
@@ -391,11 +365,34 @@ export class GeoRasterView extends GeoLayerView {
     return GeoRippleView.ripple(this, options);
   }
 
-  static override create(): GeoRasterView {
-    return new GeoRasterView();
+  override init(init: GeoRasterViewInit): void {
+    super.init(init);
+    if (init.geoAnchor !== void 0) {
+      this.geoAnchor(init.geoAnchor);
+    }
+    if (init.viewAnchor !== void 0) {
+      this.viewAnchor(init.viewAnchor);
+    }
+    if (init.xAlign !== void 0) {
+      this.xAlign(init.xAlign);
+    }
+    if (init.yAlign !== void 0) {
+      this.yAlign(init.yAlign);
+    }
+    if (init.width !== void 0) {
+      this.width(init.width);
+    }
+    if (init.height !== void 0) {
+      this.height(init.height);
+    }
+    if (init.opacity !== void 0) {
+      this.opacity(init.opacity);
+    }
+    if (init.compositeOperation !== void 0) {
+      this.compositeOperation(init.compositeOperation);
+    }
   }
 
-  static override readonly mountFlags: ViewFlags = GeoLayerView.mountFlags | View.NeedsRender | View.NeedsComposite;
-  static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsRender | View.NeedsComposite;
-  static override readonly uncullFlags: ViewFlags = GeoLayerView.uncullFlags | View.NeedsRender | View.NeedsComposite;
+  static override readonly MountFlags: ViewFlags = GeoLayerView.MountFlags | View.NeedsRender | View.NeedsComposite;
+  static override readonly UncullFlags: ViewFlags = GeoLayerView.UncullFlags | View.NeedsRender | View.NeedsComposite;
 }

@@ -25,47 +25,51 @@ import {ByteOutputUint8Array} from "./ByteOutputUint8Array";
  * bytes to a growable array, and [[Output.bind binds]] a `Uint8Array`
  * containing all written bytes.
  */
-export const Binary = {} as {
-  /**
-   * Returns a new `Output` that appends bytes to a growable array,
-   * pre-allocated with space for `initialCapacity` bytes, if `initialCapacity`
-   * is defined, using the given `settings`, if `settings` is defined.  The
-   * returned `Output` accepts an unbounded number of bytes, remaining
-   * permanently in the _cont_ state, and can [[Output.bind bind]] a
-   * `Uint8Array` with the current output state at any time.
-   */
-  output(initialCapacity?: number, settings?: AnyOutputSettings): Output<Uint8Array>;
+export const Binary = (function () {
+  const Binary = {} as {
+    /**
+     * Returns a new `Output` that appends bytes to a growable array,
+     * pre-allocated with space for `initialCapacity` bytes, if `initialCapacity`
+     * is defined, using the given `settings`, if `settings` is defined.  The
+     * returned `Output` accepts an unbounded number of bytes, remaining
+     * permanently in the _cont_ state, and can [[Output.bind bind]] a
+     * `Uint8Array` with the current output state at any time.
+     */
+    output(initialCapacity?: number, settings?: AnyOutputSettings): Output<Uint8Array>;
 
-  /**
-   * Returns a new `Output` that appends bytes to a growable array, using the
-   * given `settings`.  The returned `Output` accepts an unbounded number of
-   * bytes, remaining permanently in the _cont_ state, and can [[Output.bind
-   * bind]] a `Uint8Array` array with the current output state at any time.
-   */
-  output(settings: AnyOutputSettings): Output<Uint8Array>;
+    /**
+     * Returns a new `Output` that appends bytes to a growable array, using the
+     * given `settings`.  The returned `Output` accepts an unbounded number of
+     * bytes, remaining permanently in the _cont_ state, and can [[Output.bind
+     * bind]] a `Uint8Array` array with the current output state at any time.
+     */
+    output(settings: AnyOutputSettings): Output<Uint8Array>;
 
-  outputBuffer(array: Uint8Array, offset?: number, length?: number): OutputBuffer<Uint8Array>;
-};
+    outputBuffer(array: Uint8Array, offset?: number, length?: number): OutputBuffer<Uint8Array>;
+  };
 
-Binary.output = function (initialCapacity?: number | AnyOutputSettings,
-                          settings?: AnyOutputSettings): Output<Uint8Array> {
-  if (settings === void 0 && typeof initialCapacity !== "number") {
-    settings = initialCapacity;
-    initialCapacity = void 0;
-  } else if (typeof initialCapacity !== "number") {
-    initialCapacity = void 0;
-  }
-  let array: Uint8Array | null;
-  if (typeof initialCapacity === "number") {
-    array = new Uint8Array(initialCapacity);
-  } else {
-    array = null;
-  }
-  settings = OutputSettings.fromAny(settings);
-  return new ByteOutputUint8Array(array, 0, settings);
-};
+  Binary.output = function (initialCapacity?: number | AnyOutputSettings,
+                            settings?: AnyOutputSettings): Output<Uint8Array> {
+    if (settings === void 0 && typeof initialCapacity !== "number") {
+      settings = initialCapacity;
+      initialCapacity = void 0;
+    } else if (typeof initialCapacity !== "number") {
+      initialCapacity = void 0;
+    }
+    let array: Uint8Array | null;
+    if (typeof initialCapacity === "number") {
+      array = new Uint8Array(initialCapacity);
+    } else {
+      array = null;
+    }
+    settings = OutputSettings.fromAny(settings);
+    return new ByteOutputUint8Array(array, 0, settings);
+  };
 
-Binary.outputBuffer = function (array: Uint8Array, offset?: number,
-                                length?: number): OutputBuffer<Uint8Array> {
-  return ByteOutputBuffer.create(array, offset, length);
-};
+  Binary.outputBuffer = function (array: Uint8Array, offset?: number,
+                                  length?: number): OutputBuffer<Uint8Array> {
+    return ByteOutputBuffer.create(array, offset, length);
+  };
+
+  return Binary;
+})();

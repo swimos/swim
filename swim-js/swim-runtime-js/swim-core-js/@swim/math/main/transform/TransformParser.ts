@@ -20,7 +20,7 @@ import {RotateTransformParser} from "../"; // forward import
 import {SkewTransformParser} from "../"; // forward import
 import {AffineTransformParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class TransformParser extends Parser<Transform> {
   private readonly identOutput: Output<string> | undefined;
 

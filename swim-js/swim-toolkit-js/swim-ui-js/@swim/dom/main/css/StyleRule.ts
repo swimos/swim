@@ -12,329 +12,267 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {Mutable, AnyTiming, Timing} from "@swim/util";
+import type {FastenerOwner} from "@swim/fastener";
 import {ToStyleString, ToCssValue} from "@swim/style";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
-import type {StyleAnimator} from "../style/StyleAnimator";
-import {StyleMapInit, StyleMap} from "../style/StyleMap";
+import {Look, Mood, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
+import {StyleMapInit, StyleMap} from "./StyleMap";
 import {CssContext} from "./CssContext";
-import {CssRuleInit, CssRule} from "./CssRule";
+import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";
 
 export interface StyleRuleInit extends CssRuleInit {
-  extends?: StyleRuleClass;
-
-  css?: string | (() => string);
   style?: StyleMapInit;
 
   willSetStyle?(propertyName: string, value: unknown, priority: string | undefined): void;
-  onSetStyle?(propertyName: string, value: unknown, priority: string | undefined): void;
   didSetStyle?(propertyName: string, value: unknown, priority: string | undefined): void;
 
-  initRule?(rule: CSSStyleRule): CSSStyleRule;
+  initRule?(rule: CSSStyleRule): void;
 }
 
-export type StyleRuleDescriptor<V extends CssContext, I = {}> = StyleRuleInit & ThisType<StyleRule<V> & I> & Partial<I>;
+export type StyleRuleDescriptor<O = unknown, I = {}> = ThisType<StyleRule<O> & I> & StyleRuleInit & Partial<I>;
 
-export type StyleRuleDescriptorExtends<V extends CssContext, I = {}> = {extends: StyleRuleClass | undefined} & StyleRuleDescriptor<V, I>;
+export interface StyleRuleClass<F extends StyleRule<any> = StyleRule<any>> extends CssRuleClass<F> {
+  create(this: StyleRuleClass<F>, owner: FastenerOwner<F>, ruleName: string): F;
 
-export interface StyleRuleConstructor<V extends CssContext, I = {}> {
-  new(owner: V, ruleName: string | undefined): StyleRule<V> & I;
-  prototype: StyleRule<any> & I;
+  construct(ruleClass: StyleRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
+
+  extend(this: StyleRuleClass<F>, classMembers?: {} | null): StyleRuleClass<F>;
+
+  define<O, I = {}>(descriptor: {extends: StyleRuleClass | null} & StyleRuleDescriptor<O, I>): StyleRuleClass<StyleRule<any> & I>;
+  define<O>(descriptor: StyleRuleDescriptor<O>): StyleRuleClass<StyleRule<any>>;
+
+  <O, I = {}>(descriptor: {extends: StyleRuleClass | null} & StyleRuleDescriptor<O, I>): PropertyDecorator;
+  <O>(descriptor: StyleRuleDescriptor<O>): PropertyDecorator;
 }
 
-export interface StyleRuleClass extends Function {
-  readonly prototype: StyleRule<any>;
-}
-
-export interface StyleRule<V extends CssContext> extends CssRule<V>, StyleMap {
+export interface StyleRule<O = unknown> extends CssRule<O>, StyleMap {
   (property: string): unknown;
-  (property: string, value: unknown): V;
+  (property: string, value: unknown): O;
 
-  readonly node: Node | null;
-
+  /** @override */
   readonly rule: CSSStyleRule;
 
-  readonly selector: string;
+  get selector(): string;
 
   setSelector(selector: string): void;
 
+  /** @override */
   getStyle(propertyNames: string | ReadonlyArray<string>): CSSStyleValue | string | undefined;
 
+  /** @override */
   setStyle(propertyName: string, value: unknown, priority?: string): this;
 
+  /** @protected */
   willSetStyle(propertyName: string, value: unknown, priority: string | undefined): void;
 
+  /** @protected */
   onSetStyle(propertyName: string, value: unknown, priority: string | undefined): void;
 
+  /** @protected */
   didSetStyle(propertyName: string, value: unknown, priority: string | undefined): void;
 
-  /** @hidden */
-  styleAnimators: {[animatorName: string]: StyleAnimator<StyleRule<CssContext>, unknown> | undefined};
+  /** @override */
+  applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean | null): void;
 
-  hasStyleAnimator(animatorName: string): boolean;
-
-  getStyleAnimator(animatorName: string): StyleAnimator<this, unknown> | null;
-
-  setStyleAnimator(animatorName: string, animator: StyleAnimator<this, unknown> | null): void;
-
-  applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void;
-
-  /** @hidden */
-  mount(): void;
-
-  /** @hidden */
-  unmount(): void;
-
-  /** @hidden */
-  initCss?(): string;
-
-  /** @hidden */
+  /** @internal */
   createRule(cssText: string): CSSStyleRule;
 
-  /** @hidden */
-  initRule?(rule: CSSStyleRule): CSSStyleRule;
+  /** @internal */
+  initRule?(rule: CSSStyleRule): void;
+
+  /** @internal */
+  initCss?(): string;
 }
 
-export const StyleRule = function <V extends CssContext>(
-    this: StyleRule<V> | typeof StyleRule,
-    owner: V | StyleRuleDescriptor<V>,
-    ruleName?: string,
-  ): StyleRule<V> | PropertyDecorator {
-  if (this instanceof StyleRule) { // constructor
-    return StyleRuleConstructor.call(this, owner as V, ruleName) as StyleRule<V>;
-  } else { // decorator factory
-    return StyleRuleDecoratorFactory(owner as StyleRuleDescriptor<V>);
-  }
-} as {
-  /** @hidden */
-  new<V extends CssContext>(owner: V, ruleName: string | undefined): StyleRule<V>;
+export const StyleRule = (function (_super: typeof CssRule) {
+  const StyleRule = _super.extend() as StyleRuleClass;
 
-  <V extends CssContext, I = {}>(descriptor: StyleRuleDescriptorExtends<V, I>): PropertyDecorator;
-  <V extends CssContext>(descriptor: StyleRuleDescriptor<V>): PropertyDecorator;
+  Object.defineProperty(StyleRule.prototype, "selector", {
+    get: function (this: StyleRule): string {
+      return this.rule.selectorText;
+    },
+    configurable: true,
+  });
 
-  /** @hidden */
-  prototype: StyleRule<any>;
+  StyleRule.prototype.setSelector = function (this: StyleRule, selector: string): void {
+    this.rule.selectorText = selector;
+  };
 
-  define<V extends CssContext, I = {}>(descriptor: StyleRuleDescriptorExtends<V, I>): StyleRuleConstructor<V, I>;
-  define<V extends CssContext>(descriptor: StyleRuleDescriptor<V>): StyleRuleConstructor<V>;
-};
-__extends(StyleRule, CssRule);
-StyleMap.define(StyleRule.prototype);
-
-function StyleRuleConstructor<V extends CssContext>(this: StyleRule<V>, owner: V, ruleName: string | undefined): StyleRule<V> {
-  const _this: StyleRule<V> = (CssRule as Function).call(this, owner, ruleName) || this;
-  (_this as Mutable<typeof _this>).styleAnimators = {};
-  return _this;
-}
-
-function StyleRuleDecoratorFactory<V extends CssContext>(descriptor: StyleRuleDescriptor<V>): PropertyDecorator {
-  return CssContext.decorateCssRule.bind(CssContext, StyleRule.define(descriptor as StyleRuleDescriptor<CssContext>));
-}
-
-Object.defineProperty(StyleRule.prototype, "node", {
-  get: function (this: StyleRule<CssContext>): Node | null {
-    return null;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
-Object.defineProperty(StyleRule.prototype, "selector", {
-  get: function (this: StyleRule<CssContext>): string {
-    return this.rule.selectorText;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
-StyleRule.prototype.setSelector = function (this: StyleRule<CssContext>, selector: string): void {
-  this.rule.selectorText = selector;
-};
-
-StyleRule.prototype.getStyle = function (this: StyleRule<CssContext>, propertyNames: string | ReadonlyArray<string>): CSSStyleValue | string | undefined {
-  if (typeof CSSStyleValue !== "undefined") { // CSS Typed OM support
-    const style = this.rule.styleMap;
-    if (typeof propertyNames === "string") {
-      return style.get(propertyNames);
-    } else {
-      for (let i = 0, n = propertyNames.length; i < n; i += 1) {
-        const value = style.get(propertyNames[i]!);
-        if (value !== "") {
-          return value;
+  StyleRule.prototype.getStyle = function (this: StyleRule, propertyNames: string | ReadonlyArray<string>): CSSStyleValue | string | undefined {
+    if (typeof CSSStyleValue !== "undefined") { // CSS Typed OM support
+      const style = this.rule.styleMap;
+      if (typeof propertyNames === "string") {
+        return style.get(propertyNames);
+      } else {
+        for (let i = 0, n = propertyNames.length; i < n; i += 1) {
+          const value = style.get(propertyNames[i]!);
+          if (value !== "") {
+            return value;
+          }
         }
+        return "";
       }
-      return "";
-    }
-  } else {
-    const style = this.rule.style;
-    if (typeof propertyNames === "string") {
-      return style.getPropertyValue(propertyNames);
     } else {
-      for (let i = 0, n = propertyNames.length; i < n; i += 1) {
-        const value = style.getPropertyValue(propertyNames[i]!);
-        if (value !== "") {
-          return value;
+      const style = this.rule.style;
+      if (typeof propertyNames === "string") {
+        return style.getPropertyValue(propertyNames);
+      } else {
+        for (let i = 0, n = propertyNames.length; i < n; i += 1) {
+          const value = style.getPropertyValue(propertyNames[i]!);
+          if (value !== "") {
+            return value;
+          }
         }
+        return "";
       }
-      return "";
     }
-  }
-};
+  };
 
-StyleRule.prototype.setStyle = function (this: StyleRule<CssContext>, propertyName: string,
-                                         value: unknown, priority?: string): StyleRule<CssContext> {
-  this.willSetStyle(propertyName, value, priority);
-  if (typeof CSSStyleValue !== "undefined") { // CSS Typed OM support
-    if (value !== void 0 && value !== null) {
-      const cssValue = ToCssValue(value);
-      if (cssValue !== null) {
-        try {
-          this.rule.styleMap.set(propertyName, cssValue);
-        } catch (e) {
-          // swallow
+  StyleRule.prototype.setStyle = function (this: StyleRule, propertyName: string, value: unknown, priority?: string): StyleRule {
+    this.willSetStyle(propertyName, value, priority);
+    if (typeof CSSStyleValue !== "undefined") { // CSS Typed OM support
+      if (value !== void 0 && value !== null) {
+        const cssValue = ToCssValue(value);
+        if (cssValue !== null) {
+          try {
+            this.rule.styleMap.set(propertyName, cssValue);
+          } catch (e) {
+            // swallow
+          }
+        } else {
+          this.rule.style.setProperty(propertyName, ToStyleString(value), priority);
         }
       } else {
+        this.rule.styleMap.delete(propertyName);
+      }
+    } else {
+      if (value !== void 0 && value !== null) {
         this.rule.style.setProperty(propertyName, ToStyleString(value), priority);
-      }
-    } else {
-      this.rule.styleMap.delete(propertyName);
-    }
-  } else {
-    if (value !== void 0 && value !== null) {
-      this.rule.style.setProperty(propertyName, ToStyleString(value), priority);
-    } else {
-      this.rule.style.removeProperty(propertyName);
-    }
-  }
-  this.onSetStyle(propertyName, value, priority);
-  this.didSetStyle(propertyName, value, priority);
-  return this;
-};
-
-StyleRule.prototype.willSetStyle = function (this: StyleRule<CssContext>, propertyName: string, value: unknown, priority: string | undefined): void {
-  // hook
-};
-
-StyleRule.prototype.onSetStyle = function (this: StyleRule<CssContext>, propertyName: string, value: unknown, priority: string | undefined): void {
-  // hook
-};
-
-StyleRule.prototype.didSetStyle = function (this: StyleRule<CssContext>, propertyName: string, value: unknown, priority: string | undefined): void {
-  // hook
-};
-
-StyleRule.prototype.hasStyleAnimator = function (this: StyleRule<CssContext>, animatorName: string): boolean {
-  return this.styleAnimators[animatorName] !== void 0;
-};
-
-StyleRule.prototype.getStyleAnimator = function (this: StyleRule<CssContext>, animatorName: string): StyleAnimator<StyleRule<CssContext>, unknown> | null {
-  const styleAnimator = this.styleAnimators[animatorName] as StyleAnimator<StyleRule<CssContext>, unknown> | undefined;
-  return styleAnimator !== void 0 ? styleAnimator : null;
-};
-
-StyleRule.prototype.setStyleAnimator = function (this: StyleRule<CssContext>, animatorName: string, animator: StyleAnimator<StyleRule<CssContext>, unknown> | null): void {
-  const styleAnimators = this.styleAnimators;
-  if (animator !== null) {
-    styleAnimators[animatorName] = animator;
-  } else {
-    delete styleAnimators[animatorName];
-  }
-};
-
-StyleRule.prototype.applyTheme = function (theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void {
-  if (timing === void 0 || timing === true) {
-    timing = theme.getOr(Look.timing, Mood.ambient, false);
-  } else {
-    timing = Timing.fromAny(timing);
-  }
-  const styleAnimators = this.styleAnimators;
-  for (const animatorName in styleAnimators) {
-    const styleAnimator = styleAnimators[animatorName]!;
-    styleAnimator.applyTheme(theme, mood, timing as Timing | boolean);
-  }
-};
-
-StyleRule.prototype.mount = function (): void {
-  CssRule.prototype.mount.call(this);
-  const styleAnimators = this.styleAnimators;
-  for (const animatorName in styleAnimators) {
-    const styleAnimator = styleAnimators[animatorName]!;
-    styleAnimator.mount();
-  }
-};
-
-StyleRule.prototype.unmount = function (): void {
-  const styleAnimators = this.styleAnimators;
-  for (const animatorName in styleAnimators) {
-    const styleAnimator = styleAnimators[animatorName]!;
-    styleAnimator.unmount();
-  }
-  CssRule.prototype.unmount.call(this);
-};
-
-StyleRule.prototype.createRule = function (this: StyleRule<CssContext>, cssText: string): CSSStyleRule {
-  const index = this.owner.insertRule(cssText);
-  const rule = this.owner.getRule(index);
-  if (rule instanceof CSSStyleRule) {
-    return rule;
-  } else {
-    throw new TypeError("" + rule);
-  }
-};
-
-StyleRule.define = function <V extends CssContext, I>(descriptor: StyleRuleDescriptor<V, I>): StyleRuleConstructor<V, I> {
-  let _super = descriptor.extends;
-  let css = descriptor.css;
-  const style = descriptor.style;
-  delete descriptor.extends;
-  delete descriptor.css;
-  delete descriptor.style;
-
-  if (_super === void 0) {
-    _super = StyleRule;
-  }
-
-  const _constructor = function DecoratedStyleRule(this: StyleRule<V>, owner: V, ruleName: string | undefined): StyleRule<V> {
-    let _this: StyleRule<V> = function StyleRuleAccessor(property: string, value: unknown): unknown | V {
-      if (value === void 0) {
-        return _this.getStyle(property);
       } else {
-        _this.setStyle(property, value);
-        return _this.owner;
+        this.rule.style.removeProperty(propertyName);
       }
-    } as StyleRule<V>;
-    Object.setPrototypeOf(_this, this);
-    _this = _super!.call(_this, owner, ruleName) || _this;
-    let cssText: string;
-    if (css !== void 0) {
-      cssText = css as string;
-    } else if (_this.initCss !== void 0) {
-      cssText = _this.initCss();
+    }
+    this.onSetStyle(propertyName, value, priority);
+    this.didSetStyle(propertyName, value, priority);
+    return this;
+  };
+
+  StyleRule.prototype.willSetStyle = function (this: StyleRule, propertyName: string, value: unknown, priority: string | undefined): void {
+    // hook
+  };
+
+  StyleRule.prototype.onSetStyle = function (this: StyleRule, propertyName: string, value: unknown, priority: string | undefined): void {
+    // hook
+  };
+
+  StyleRule.prototype.didSetStyle = function (this: StyleRule, propertyName: string, value: unknown, priority: string | undefined): void {
+    // hook
+  };
+
+  StyleRule.prototype.applyTheme = function (theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean | null): void {
+    if (timing === void 0 || timing === true) {
+      timing = theme.getOr(Look.timing, Mood.ambient, false);
     } else {
-      throw new Error("undefined css");
+      timing = Timing.fromAny(timing);
     }
-    let rule = _this.createRule(cssText);
-    if (_this.initRule !== void 0) {
-      rule = _this.initRule(rule);
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      if (fastener instanceof ThemeAnimator) {
+        fastener.applyTheme(theme, mood, timing as Timing | boolean);
+      }
     }
-    (_this as Mutable<typeof _this>).rule = rule;
-    if (style !== void 0) {
-      StyleMap.init(_this, style);
+  };
+
+  StyleRule.prototype.createRule = function (this: StyleRule, cssText: string): CSSStyleRule {
+    const cssContext = this.owner;
+    if (CssContext.is(cssContext)) {
+      const index = cssContext.insertRule(cssText);
+      const rule = cssContext.getRule(index);
+      if (rule instanceof CSSStyleRule) {
+        return rule;
+      } else {
+        throw new TypeError("" + rule);
+      }
+    } else {
+      throw new Error("no css context");
     }
-    return _this;
-  } as unknown as StyleRuleConstructor<V, I>;
+  };
 
-  const _prototype = descriptor as unknown as StyleRule<V> & I;
-  Object.setPrototypeOf(_constructor, _super);
-  _constructor.prototype = _prototype;
-  _constructor.prototype.constructor = _constructor;
-  Object.setPrototypeOf(_constructor.prototype, _super.prototype);
+  StyleMap.define(StyleRule.prototype);
 
-  if (typeof css === "function") {
-    _prototype.initCss = css;
-    css = void 0;
-  }
+  StyleRule.construct = function <F extends StyleRule<any>>(ruleClass: StyleRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
+    if (rule === null) {
+      rule = function StyleRule(property: string, value: unknown): unknown | FastenerOwner<F> {
+        if (value === void 0) {
+          return rule!.getStyle(property);
+         } else {
+          rule!.setStyle(property, value);
+          return rule!.owner;
+        }
+      } as F;
+      Object.setPrototypeOf(rule, ruleClass.prototype);
+    }
+    rule = _super.construct(ruleClass, rule, owner, ruleName) as F;
+    return rule;
+  };
 
-  return _constructor;
-}
+  StyleRule.define = function <O>(descriptor: StyleRuleDescriptor<O>): StyleRuleClass<StyleRule<any>> {
+    let superClass = descriptor.extends as StyleRuleClass | undefined;
+    const affinity = descriptor.affinity;
+    const inherits = descriptor.inherits;
+    let css = descriptor.css;
+    const style = descriptor.style;
+    delete descriptor.extends;
+    delete descriptor.affinity;
+    delete descriptor.inherits;
+    delete descriptor.css;
+    delete descriptor.style;
+
+    if (superClass === void 0 || superClass === null) {
+      superClass = this;
+    }
+
+    const ruleClass = superClass.extend(descriptor);
+
+    if (typeof css === "function") {
+      ruleClass.prototype.initCss = css;
+      css = void 0;
+    }
+
+    ruleClass.construct = function (ruleClass: StyleRuleClass, rule: StyleRule<O> | null, owner: O, ruleName: string): StyleRule<O> {
+      rule = superClass!.construct(ruleClass, rule, owner, ruleName);
+
+      if (affinity !== void 0) {
+        rule.initAffinity(affinity);
+      }
+      if (inherits !== void 0) {
+        rule.initInherits(inherits);
+      }
+
+      let cssText: string | undefined;
+      if (css !== void 0) {
+        cssText = css as string;
+      } else if (rule.initCss !== void 0) {
+        cssText = rule.initCss();
+      } else {
+        throw new Error("undefined css");
+      }
+
+      (rule as Mutable<typeof rule>).rule = rule.createRule(cssText);
+      if (rule.initRule !== void 0) {
+        rule.initRule(rule.rule);
+      }
+
+      if (style !== void 0) {
+        StyleMap.init(rule, style);
+      }
+
+      return rule;
+    };
+
+    return ruleClass;
+  };
+
+  return StyleRule;
+})(CssRule);

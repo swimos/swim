@@ -91,7 +91,7 @@ export class SpecUnit {
 
   /**
    * Asynchronously executes the next spec in an array of child specs.
-   * @hidden
+   * @internal
    */
   runUnit(report: Report, spec: Spec, units: Spec[], index: number): Promise<Spec[]> {
     if (index < units.length) {
@@ -109,7 +109,7 @@ export class SpecUnit {
 
   /**
    * Asynchronously completes the execution of a successfuly child unit.
-   * @hidden
+   * @internal
    */
   runUnitSuccess(report: Report, spec: Spec, unit: Spec): Spec {
     this.didRunUnit(report, spec, unit);
@@ -118,7 +118,7 @@ export class SpecUnit {
 
   /**
    * Asynchronous completes the execution of a failed child unit.
-   * @hidden
+   * @internal
    */
   runUnitFailure(report: Report, spec: Spec, unit: Spec, error: unknown): never {
     // A child spec can only fail if it encounters a bug in the test framework.
@@ -127,7 +127,7 @@ export class SpecUnit {
 
   /**
    * Curried [[Unit]] method decorator, with captured `options`.
-   * @hidden
+   * @internal
    */
   static decorate(options: UnitOptions, target: SpecClass, propertyKey: string | symbol,
                   descriptor: PropertyDescriptor): void {

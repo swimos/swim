@@ -15,7 +15,7 @@
 import {Random, Values} from "@swim/util";
 import type {STreePage} from "./STreePage";
 
-/** @hidden */
+/** @internal */
 export abstract class STreeContext<V, I> {
   pageSplitSize: number = 32;
 

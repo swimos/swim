@@ -14,7 +14,7 @@
 
 import {Output, WriterException, Writer, Base64} from "@swim/codec";
 
-/** @hidden */
+/** @internal */
 export class DataWriter extends Writer {
   private readonly array: Uint8Array;
   private readonly part: Writer | undefined;

@@ -18,19 +18,19 @@ import type {AnyOutputSettings, OutputSettings} from "../output/OutputSettings";
 import {Output} from "../output/Output";
 import {UtfErrorMode} from "./UtfErrorMode";
 
-/** @hidden */
+/** @internal */
 export class Utf8EncodedOutput<T> extends Output<T> {
-  /** @hidden */
+  /** @internal */
   readonly output: Output<T>;
-  /** @hidden */
+  /** @internal */
   readonly errorMode: UtfErrorMode;
-  /** @hidden */
+  /** @internal */
   c2: number;
-  /** @hidden */
+  /** @internal */
   c3: number;
-  /** @hidden */
+  /** @internal */
   c4: number;
-  /** @hidden */
+  /** @internal */
   index: number;
 
   constructor(output: Output<T>, errorMode: UtfErrorMode, c2: number,

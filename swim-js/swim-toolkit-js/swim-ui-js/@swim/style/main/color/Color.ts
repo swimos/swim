@@ -154,12 +154,12 @@ export abstract class Color implements Interpolate<Color>, HashCode, Equivalent,
     return parser.bind();
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is ColorInit {
     return RgbColor.isInit(value) || HslColor.isInit(value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyColor {
     return value instanceof Color
         || Color.isInit(value)
@@ -171,8 +171,8 @@ export abstract class Color implements Interpolate<Color>, HashCode, Equivalent,
     return new ColorForm(Color.transparent());
   }
 
-  /** @hidden */
+  /** @internal */
   static Darker: number = 0.7;
-  /** @hidden */
+  /** @internal */
   static Brighter: number = 1 / Color.Darker;
 }

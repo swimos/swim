@@ -16,7 +16,7 @@ import type {Mutable} from "@swim/util";
 import {AnyOutputSettings, OutputSettings} from "../output/OutputSettings";
 import {Output} from "../output/Output";
 
-/** @hidden */
+/** @internal */
 export abstract class ByteOutput<T> extends Output<T> {
   constructor(array: Uint8Array | null, size: number, settings: OutputSettings) {
     super();
@@ -25,10 +25,10 @@ export abstract class ByteOutput<T> extends Output<T> {
     this.settings = settings;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly array: Uint8Array | null;
 
-  /** @hidden */
+  /** @internal */
   readonly size: number;
 
   override isCont(): boolean {
@@ -113,7 +113,7 @@ export abstract class ByteOutput<T> extends Output<T> {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   static expand(n: number): number {
     n = Math.max(32, n) - 1;
     n |= n >> 1; n |= n >> 2; n |= n >> 4; n |= n >> 8; n |= n >> 16;

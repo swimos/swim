@@ -15,7 +15,7 @@
 import {Item, Record, Form} from "@swim/structure";
 import {AnyTransform, Transform} from "./Transform";
 
-/** @hidden */
+/** @internal */
 export class TransformForm extends Form<Transform, AnyTransform> {
   constructor(unit: Transform | undefined) {
     super();

@@ -12,60 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  ModelDownlinkContextPrototype,
-  ModelDownlinkContext,
-} from "./ModelDownlinkContext";
-export {
-  ModelDownlinkInit,
-  ModelDownlinkFlags,
-  ModelDownlinkDescriptor,
-  ModelDownlinkDescriptorExtends,
-  ModelDownlinkConstructor,
-  ModelDownlinkClass,
-  ModelDownlink,
-} from "./ModelDownlink";
-export {
-  ModelDownlinkConsumerType,
-  ModelDownlinkConsumer,
-} from "./ModelDownlinkConsumer";
-
-export {
-  ModelEventDownlinkInit,
-  ModelEventDownlinkDescriptor,
-  ModelEventDownlinkDescriptorExtends,
-  ModelEventDownlinkConstructor,
-  ModelEventDownlinkClass,
-  ModelEventDownlink,
-} from "./ModelEventDownlink";
-
-export {
-  ModelListDownlinkInit,
-  ModelListDownlinkDescriptor,
-  ModelListDownlinkDescriptorExtends,
-  ModelListDownlinkConstructor,
-  ModelListDownlinkClass,
-  ModelListDownlink,
-} from "./ModelListDownlink";
-
-export {
-  ModelMapDownlinkInit,
-  ModelMapDownlinkDescriptor,
-  ModelMapDownlinkDescriptorExtends,
-  ModelMapDownlinkConstructor,
-  ModelMapDownlinkClass,
-  ModelMapDownlink,
-} from "./ModelMapDownlink";
-
-export {
-  ModelValueDownlinkInit,
-  ModelValueDownlinkDescriptor,
-  ModelValueDownlinkDescriptorExtends,
-  ModelValueDownlinkConstructor,
-  ModelValueDownlinkClass,
-  ModelValueDownlink,
-} from "./ModelValueDownlink";
-
 export {DownlinkTrait} from "./DownlinkTrait";
 
 export {ValueDownlinkTrait} from "./ValueDownlinkTrait";

@@ -18,19 +18,19 @@ import type {GeoSplineContext} from "./GeoSplineContext";
 import {GeoSpline} from "./GeoSpline";
 
 export class GeoSplineBuilder implements GeoSplineContext {
-  /** @hidden */
+  /** @internal */
   curves: GeoCurve[];
-  /** @hidden */
+  /** @internal */
   closed: boolean;
-  /** @hidden */
+  /** @internal */
   aliased: boolean;
-  /** @hidden */
+  /** @internal */
   lng0: number;
-  /** @hidden */
+  /** @internal */
   lat0: number;
-  /** @hidden */
+  /** @internal */
   lng: number;
-  /** @hidden */
+  /** @internal */
   lat: number;
 
   constructor() {

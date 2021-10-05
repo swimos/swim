@@ -17,15 +17,15 @@ import {WriterException} from "../writer/WriterException";
 import {Writer} from "../writer/Writer";
 import {Base10} from "./Base10";
 
-/** @hidden */
+/** @internal */
 export class Base10IntegerWriter extends Writer {
-  /** @hidden */
+  /** @internal */
   readonly value: unknown;
-  /** @hidden */
+  /** @internal */
   readonly input: number;
-  /** @hidden */
+  /** @internal */
   readonly index: number;
-  /** @hidden */
+  /** @internal */
   readonly step: number;
 
   constructor(value: unknown, input: number, index: number = 0, step: number = 1) {

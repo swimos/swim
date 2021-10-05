@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import type {Length} from "@swim/math";
 import type {Trait} from "@swim/model";
 import type {Color} from "@swim/style";
 import type {GraphicsView} from "@swim/graphics";
-import {Controller, ControllerViewTrait, ControllerFastener, CompositeController} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener, Controller, GenericController} from "@swim/controller";
 import type {DataPointView} from "../data/DataPointView";
 import type {DataPointTrait} from "../data/DataPointTrait";
 import type {DataPointController} from "../data/DataPointController";
@@ -28,13 +29,13 @@ import {GraphView} from "./GraphView";
 import {GraphTrait} from "./GraphTrait";
 import type {GraphControllerObserver} from "./GraphControllerObserver";
 
-export class GraphController<X, Y> extends CompositeController {
+export class GraphController<X, Y> extends GenericController {
   constructor() {
     super();
     this.plotFasteners = [];
   }
 
-  override readonly controllerObservers!: ReadonlyArray<GraphControllerObserver<X, Y>>;
+  override readonly observerType?: Class<GraphControllerObserver<X, Y>>;
 
   protected initGraphTrait(graphTrait: GraphTrait<X, Y>): void {
     // hook
@@ -61,11 +62,11 @@ export class GraphController<X, Y> extends CompositeController {
   }
 
   protected willSetGraphTrait(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGraphTrait !== void 0) {
-        controllerObserver.controllerWillSetGraphTrait(newGraphTrait, oldGraphTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGraphTrait !== void 0) {
+        observer.controllerWillSetGraphTrait(newGraphTrait, oldGraphTrait, this);
       }
     }
   }
@@ -81,17 +82,17 @@ export class GraphController<X, Y> extends CompositeController {
   }
 
   protected didSetGraphTrait(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGraphTrait !== void 0) {
-        controllerObserver.controllerDidSetGraphTrait(newGraphTrait, oldGraphTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGraphTrait !== void 0) {
+        observer.controllerDidSetGraphTrait(newGraphTrait, oldGraphTrait, this);
       }
     }
   }
 
   protected createGraphView(): GraphView<X, Y> | null {
-    return GraphView.create<X, Y>();
+    return new GraphView<X, Y>();
   }
 
   protected initGraphView(graphView: GraphView<X, Y>): void {
@@ -104,7 +105,7 @@ export class GraphController<X, Y> extends CompositeController {
       const plotController = plotFasteners[i]!.controller;
       if (plotController !== null) {
         const plotView = plotController.plot.view;
-        if (plotView !== null && plotView.parentView === null) {
+        if (plotView !== null && plotView.parent === null) {
           plotController.plot.injectView(graphView);
         }
       }
@@ -116,11 +117,11 @@ export class GraphController<X, Y> extends CompositeController {
   }
 
   protected willSetGraphView(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGraphView !== void 0) {
-        controllerObserver.controllerWillSetGraphView(newGraphView, oldGraphView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGraphView !== void 0) {
+        observer.controllerWillSetGraphView(newGraphView, oldGraphView, this);
       }
     }
   }
@@ -136,32 +137,19 @@ export class GraphController<X, Y> extends CompositeController {
   }
 
   protected didSetGraphView(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGraphView !== void 0) {
-        controllerObserver.controllerDidSetGraphView(newGraphView, oldGraphView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGraphView !== void 0) {
+        observer.controllerDidSetGraphView(newGraphView, oldGraphView, this);
       }
     }
   }
 
-  /** @hidden */
-  static GraphFastener = ControllerViewTrait.define<GraphController<unknown, unknown>, GraphView<unknown, unknown>, GraphTrait<unknown, unknown>>({
-    viewType: GraphView,
-    willSetView(newGraphView: GraphView<unknown, unknown> | null, oldGraphView: GraphView<unknown, unknown> | null): void {
-      this.owner.willSetGraphView(newGraphView, oldGraphView);
-    },
-    onSetView(newGraphView: GraphView<unknown, unknown> | null, oldGraphView: GraphView<unknown, unknown> | null): void {
-      this.owner.onSetGraphView(newGraphView, oldGraphView);
-    },
-    didSetView(newGraphView: GraphView<unknown, unknown> | null, oldGraphView: GraphView<unknown, unknown> | null): void {
-      this.owner.didSetGraphView(newGraphView, oldGraphView);
-    },
-    createView(): GraphView<unknown, unknown> | null {
-      return this.owner.createGraphView();
-    },
+  /** @internal */
+  static GraphFastener = TraitViewFastener.define<GraphController<unknown, unknown>, GraphTrait<unknown, unknown>, GraphView<unknown, unknown>>({
     traitType: GraphTrait,
-    observeTrait: true,
+    observesTrait: true,
     willSetTrait(newGraphTrait: GraphTrait<unknown, unknown> | null, oldGraphTrait: GraphTrait<unknown, unknown> | null): void {
       this.owner.willSetGraphTrait(newGraphTrait, oldGraphTrait);
     },
@@ -181,12 +169,25 @@ export class GraphController<X, Y> extends CompositeController {
         this.owner.insertPlotTrait(newPlotTrait, targetTrait);
       }
     },
+    viewType: GraphView,
+    willSetView(newGraphView: GraphView<unknown, unknown> | null, oldGraphView: GraphView<unknown, unknown> | null): void {
+      this.owner.willSetGraphView(newGraphView, oldGraphView);
+    },
+    onSetView(newGraphView: GraphView<unknown, unknown> | null, oldGraphView: GraphView<unknown, unknown> | null): void {
+      this.owner.onSetGraphView(newGraphView, oldGraphView);
+    },
+    didSetView(newGraphView: GraphView<unknown, unknown> | null, oldGraphView: GraphView<unknown, unknown> | null): void {
+      this.owner.didSetGraphView(newGraphView, oldGraphView);
+    },
+    createView(): GraphView<unknown, unknown> | null {
+      return this.owner.createGraphView();
+    },
   });
 
-  @ControllerViewTrait<GraphController<X, Y>, GraphView<X, Y>, GraphTrait<X, Y>>({
+  @TraitViewFastener<GraphController<X, Y>, GraphTrait<X, Y>, GraphView<X, Y>>({
     extends: GraphController.GraphFastener,
   })
-  readonly graph!: ControllerViewTrait<this, GraphView<X, Y>, GraphTrait<X, Y>>;
+  readonly graph!: TraitViewFastener<this, GraphTrait<X, Y>, GraphView<X, Y>>;
 
   insertPlot(plotController: PlotController<X, Y>, targetController: Controller | null = null): void {
     const plotFasteners = this.plotFasteners as ControllerFastener<this, PlotController<X, Y>>[];
@@ -202,7 +203,7 @@ export class GraphController<X, Y> extends CompositeController {
     const plotFastener = this.createPlotFastener(plotController);
     plotFasteners.splice(targetIndex, 0, plotFastener);
     plotFastener.setController(plotController, targetController);
-    if (this.isMounted()) {
+    if (this.mounted) {
       plotFastener.mount();
     }
   }
@@ -213,7 +214,7 @@ export class GraphController<X, Y> extends CompositeController {
       const plotFastener = plotFasteners[i]!;
       if (plotFastener.controller === plotController) {
         plotFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           plotFastener.unmount();
         }
         plotFasteners.splice(i, 1);
@@ -276,11 +277,11 @@ export class GraphController<X, Y> extends CompositeController {
 
   protected willSetPlot(newPlotController: PlotController<X, Y> | null, oldPlotController: PlotController<X, Y> | null,
                         plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlot !== void 0) {
-        controllerObserver.controllerWillSetPlot(newPlotController, oldPlotController, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlot !== void 0) {
+        observer.controllerWillSetPlot(newPlotController, oldPlotController, plotFastener);
       }
     }
   }
@@ -298,11 +299,11 @@ export class GraphController<X, Y> extends CompositeController {
 
   protected didSetPlot(newPlotController: PlotController<X, Y> | null, oldPlotController: PlotController<X, Y> | null,
                        plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlot !== void 0) {
-        controllerObserver.controllerDidSetPlot(newPlotController, oldPlotController, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlot !== void 0) {
+        observer.controllerDidSetPlot(newPlotController, oldPlotController, plotFastener);
       }
     }
   }
@@ -323,7 +324,7 @@ export class GraphController<X, Y> extends CompositeController {
     const plotController = this.createPlot(plotTrait);
     if (plotController !== null) {
       plotController.plot.setTrait(plotTrait);
-      this.insertChildController(plotController, targetController);
+      this.insertChild(plotController, targetController);
       if (plotController.plot.view === null) {
         const plotView = this.createPlotView(plotController);
         let targetView: PlotView<X, Y> | null = null;
@@ -347,7 +348,7 @@ export class GraphController<X, Y> extends CompositeController {
       const plotController = plotFastener.controller;
       if (plotController !== null && plotController.plot.trait === plotTrait) {
         plotFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           plotFastener.unmount();
         }
         plotFasteners.splice(i, 1);
@@ -371,11 +372,11 @@ export class GraphController<X, Y> extends CompositeController {
 
   protected willSetPlotTrait(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null,
                              plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotTrait !== void 0) {
-        controllerObserver.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotTrait !== void 0) {
+        observer.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, plotFastener);
       }
     }
   }
@@ -393,11 +394,11 @@ export class GraphController<X, Y> extends CompositeController {
 
   protected didSetPlotTrait(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null,
                             plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotTrait !== void 0) {
-        controllerObserver.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotTrait !== void 0) {
+        observer.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, plotFastener);
       }
     }
   }
@@ -420,11 +421,11 @@ export class GraphController<X, Y> extends CompositeController {
 
   protected willSetPlotView(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null,
                             plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotView !== void 0) {
-        controllerObserver.controllerWillSetPlotView(newPlotView, oldPlotView, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotView !== void 0) {
+        observer.controllerWillSetPlotView(newPlotView, oldPlotView, plotFastener);
       }
     }
   }
@@ -442,11 +443,11 @@ export class GraphController<X, Y> extends CompositeController {
 
   protected didSetPlotView(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null,
                            plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotView !== void 0) {
-        controllerObserver.controllerDidSetPlotView(newPlotView, oldPlotView, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotView !== void 0) {
+        observer.controllerDidSetPlotView(newPlotView, oldPlotView, plotFastener);
       }
     }
   }
@@ -465,11 +466,11 @@ export class GraphController<X, Y> extends CompositeController {
 
   protected willSetDataSetTrait(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null,
                                 plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataSetTrait !== void 0) {
-        controllerObserver.controllerWillSetDataSetTrait(newDataSetTrait, oldDataSetTrait, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataSetTrait !== void 0) {
+        observer.controllerWillSetDataSetTrait(newDataSetTrait, oldDataSetTrait, plotFastener);
       }
     }
   }
@@ -487,11 +488,11 @@ export class GraphController<X, Y> extends CompositeController {
 
   protected didSetDataSetTrait(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null,
                                plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataSetTrait !== void 0) {
-        controllerObserver.controllerDidSetDataSetTrait(newDataSetTrait, oldDataSetTrait, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataSetTrait !== void 0) {
+        observer.controllerDidSetDataSetTrait(newDataSetTrait, oldDataSetTrait, plotFastener);
       }
     }
   }
@@ -538,11 +539,11 @@ export class GraphController<X, Y> extends CompositeController {
   protected willSetDataPoint(newDataPointController: DataPointController<X, Y> | null, oldDataPointController: DataPointController<X, Y> | null,
                              dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>,
                              plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPoint !== void 0) {
-        controllerObserver.controllerWillSetDataPoint(newDataPointController, oldDataPointController, dataPointFastener, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPoint !== void 0) {
+        observer.controllerWillSetDataPoint(newDataPointController, oldDataPointController, dataPointFastener, plotFastener);
       }
     }
   }
@@ -562,11 +563,11 @@ export class GraphController<X, Y> extends CompositeController {
   protected didSetDataPoint(newDataPointController: DataPointController<X, Y> | null, oldDataPointController: DataPointController<X, Y> | null,
                             dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>,
                             plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPoint !== void 0) {
-        controllerObserver.controllerDidSetDataPoint(newDataPointController, oldDataPointController, dataPointFastener, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPoint !== void 0) {
+        observer.controllerDidSetDataPoint(newDataPointController, oldDataPointController, dataPointFastener, plotFastener);
       }
     }
   }
@@ -592,11 +593,11 @@ export class GraphController<X, Y> extends CompositeController {
   protected willSetDataPointTrait(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null,
                                   dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>,
                                   plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointTrait !== void 0) {
-        controllerObserver.controllerWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointTrait !== void 0) {
+        observer.controllerWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, plotFastener);
       }
     }
   }
@@ -616,11 +617,11 @@ export class GraphController<X, Y> extends CompositeController {
   protected didSetDataPointTrait(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null,
                                  dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>,
                                  plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointTrait !== void 0) {
-        controllerObserver.controllerDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointTrait !== void 0) {
+        observer.controllerDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, plotFastener);
       }
     }
   }
@@ -655,11 +656,11 @@ export class GraphController<X, Y> extends CompositeController {
   protected willSetDataPointView(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
                                  dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>,
                                  plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointView !== void 0) {
-        controllerObserver.controllerWillSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointView !== void 0) {
+        observer.controllerWillSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, plotFastener);
       }
     }
   }
@@ -679,11 +680,11 @@ export class GraphController<X, Y> extends CompositeController {
   protected didSetDataPointView(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
                                 dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>,
                                 plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointView !== void 0) {
-        controllerObserver.controllerDidSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointView !== void 0) {
+        observer.controllerDidSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, plotFastener);
       }
     }
   }
@@ -745,11 +746,11 @@ export class GraphController<X, Y> extends CompositeController {
   protected willSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
                                       dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>,
                                       plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllertWillSetDataPointLabelView !== void 0) {
-        controllerObserver.controllertWillSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllertWillSetDataPointLabelView !== void 0) {
+        observer.controllertWillSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, plotFastener);
       }
     }
   }
@@ -769,20 +770,20 @@ export class GraphController<X, Y> extends CompositeController {
   protected didSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
                                      dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>,
                                      plotFastener: ControllerFastener<this, PlotController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointLabelView !== void 0) {
-        controllerObserver.controllerDidSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, plotFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointLabelView !== void 0) {
+        observer.controllerDidSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, plotFastener);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static PlotFastener = ControllerFastener.define<GraphController<unknown, unknown>, PlotController<unknown, unknown>>({
     type: PlotController,
     child: false,
-    observe: true,
+    observes: true,
     willSetController(newPlotController: PlotController<unknown, unknown> | null, oldPlotController: PlotController<unknown, unknown> | null): void {
       this.owner.willSetPlot(newPlotController, oldPlotController, this);
     },
@@ -872,10 +873,10 @@ export class GraphController<X, Y> extends CompositeController {
   });
 
   protected createPlotFastener(plotController: PlotController<X, Y>): ControllerFastener<this, PlotController<X, Y>> {
-    return new GraphController.PlotFastener(this as GraphController<unknown, unknown>, plotController.key, "plot") as ControllerFastener<this, PlotController<X, Y>>;
+    return GraphController.PlotFastener.create(this, plotController.key ?? "plot") as ControllerFastener<this, PlotController<X, Y>>;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly plotFasteners: ReadonlyArray<ControllerFastener<this, PlotController<X, Y>>>;
 
   protected getPlotFastener(plotTrait: PlotTrait<X, Y>): ControllerFastener<this, PlotController<X, Y>> | null {
@@ -890,7 +891,7 @@ export class GraphController<X, Y> extends CompositeController {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   protected mountPlotFasteners(): void {
     const plotFasteners = this.plotFasteners;
     for (let i = 0, n = plotFasteners.length; i < n; i += 1) {
@@ -899,7 +900,7 @@ export class GraphController<X, Y> extends CompositeController {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountPlotFasteners(): void {
     const plotFasteners = this.plotFasteners;
     for (let i = 0, n = plotFasteners.length; i < n; i += 1) {
@@ -912,31 +913,31 @@ export class GraphController<X, Y> extends CompositeController {
     return controller instanceof PlotController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const plotController = this.detectPlotController(childController);
     if (plotController !== null) {
       this.insertPlot(plotController, targetController);
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const plotController = this.detectPlotController(childController);
     if (plotController !== null) {
       this.removePlot(plotController);
     }
   }
 
-  /** @hidden */
-  protected override mountControllerFasteners(): void {
-    super.mountControllerFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountPlotFasteners();
   }
 
-  /** @hidden */
-  protected override unmountControllerFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountPlotFasteners();
-    super.unmountControllerFasteners();
+    super.unmountFasteners();
   }
 }

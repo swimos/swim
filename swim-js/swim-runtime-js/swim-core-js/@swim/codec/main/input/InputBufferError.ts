@@ -17,9 +17,9 @@ import {InputException} from "./InputException";
 import {AnyInputSettings, InputSettings} from "./InputSettings";
 import {InputBuffer} from "./InputBuffer";
 
-/** @hidden */
+/** @internal */
 export class InputBufferError extends InputBuffer {
-  /** @hidden */
+  /** @internal */
   readonly error!: Error;
 
   constructor(error: Error, id: string | undefined, mark: Mark, settings: InputSettings) {

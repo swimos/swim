@@ -12,341 +12,429 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
-import {Mutable, Arrays, AnyTiming} from "@swim/util";
+import type {Mutable, Class, AnyTiming} from "@swim/util";
+import {
+  FastenerContext,
+  FastenerOwner,
+  FastenerInit,
+  FastenerClass,
+  Fastener,
+} from "@swim/fastener";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,
-  ConstraintBinding,
+  ConstraintProperty,
   ConstraintRelation,
   AnyConstraintStrength,
   Constraint,
   ConstraintScope,
 } from "@swim/constraint";
-import type {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
-import type {AnimationTrack, AnimationTimeline} from "@swim/view";
+import {Look, Feel, MoodVector, ThemeMatrix, ThemeContext} from "@swim/theme";
 import {CssContext} from "./CssContext";
-import {
-  StyleRuleDescriptorExtends,
-  StyleRuleDescriptor,
-  StyleRuleConstructor,
-  StyleRule,
-} from "../"; // forward import
-import {
-  MediaRuleDescriptorExtends,
-  MediaRuleDescriptor,
-  MediaRuleConstructor,
-  MediaRule,
-} from "../"; // forward import
 
-export type CssRuleType = "style" | "media";
+export interface CssRuleInit extends FastenerInit {
+  css?: string | (() => string);
 
-export interface CssRuleInit {
-  extends?: CssRuleClass;
-  type?: CssRuleType;
-
-  css?: string | (() => string | undefined);
-
-  initRule?(rule: CSSRule): CSSRule;
+  initRule?(rule: CSSRule): void;
 }
 
-export type CssRuleDescriptor<V extends CssContext, I = {}> = CssRuleInit & ThisType<CssRule<V> & I> & Partial<I>;
+export type CssRuleDescriptor<O = unknown, I = {}> = ThisType<CssRule<O> & I> & CssRuleInit & Partial<I>;
 
-export type CssRuleDescriptorExtends<V extends CssContext, I = {}> = {extends: CssRuleClass | undefined} & CssRuleDescriptor<V, I>;
+export interface CssRuleClass<F extends CssRule<any> = CssRule<any>> extends FastenerClass<F> {
+  create(this: CssRuleClass<F>, owner: FastenerOwner<F>, ruleName: string): F;
 
-export interface CssRuleConstructor<V extends CssContext, I = {}> {
-  new(owner: V, ruleName: string | undefined): CssRule<V> & I;
-  prototype: CssRule<any> & I;
+  construct(ruleClass: CssRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
+
+  extend(this: CssRuleClass<F>, classMembers?: {} | null): CssRuleClass<F>;
+
+  define<O, I = {}>(descriptor: {extends: CssRuleClass | null} & CssRuleDescriptor<O, I>): CssRuleClass<CssRule<any> & I>;
+  define<O>(descriptor: CssRuleDescriptor<O>): CssRuleClass<CssRule<any>>;
+
+  <O, I = {}>(descriptor: {extends: CssRuleClass | null} & CssRuleDescriptor<O, I>): PropertyDecorator;
+  <O>(descriptor: CssRuleDescriptor<O>): PropertyDecorator;
 }
 
-export interface CssRuleClass extends Function {
-  readonly prototype: CssRule<any>;
-}
-
-export interface CssRule<V extends CssContext> extends AnimationTrack, AnimationTimeline, ConstraintScope {
-  readonly name: string | undefined;
-
-  readonly owner: V;
+export interface CssRule<O = unknown> extends Fastener<O>, FastenerContext, ConstraintScope, ThemeContext {
+  /** @override */
+  get familyType(): Class<CssRule<any>> | null;
 
   readonly rule: CSSRule;
 
-  onAnimate(t: number): void;
+  /** @internal */
+  readonly fasteners: {[fastenerName: string]: Fastener | undefined} | null;
 
-  /** @hidden */
-  updateAnimations(t: number): void;
+  /** @override */
+  hasFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): boolean;
 
-  /** @hidden */
-  readonly animationTracks: ReadonlyArray<AnimationTrack>;
+  /** @override */
+  getFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Class<F>): F | null;
+  /** @override */
+  getFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null;
 
-  trackWillStartAnimating(track: AnimationTrack): void;
+  /** @override */
+  setFastener(fastenerName: string, fastener: Fastener | null): void;
 
-  trackDidStartAnimating(track: AnimationTrack): void;
+  /** @override */
+  getLazyFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Class<F>): F | null;
+  /** @override */
+  getLazyFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null;
 
-  trackWillStopAnimating(track: AnimationTrack): void;
+  /** @override */
+  getSuperFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Class<F>): F | null;
+  /** @override */
+  getSuperFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null;
+  /** @internal @override */
+  getSuperFastener(): Fastener | null;
 
-  trackDidStopAnimating(track: AnimationTrack): void;
+  /** @internal @protected */
+  mountFasteners(): void;
 
+  /** @internal @protected */
+  unmountFasteners(): void;
+
+  /** @override */
+  requireUpdate(updateFlags: number): void;
+
+  /** @internal */
+  readonly decoherent: ReadonlyArray<Fastener> | null;
+
+  /** @override */
+  decohereFastener(fastener: Fastener): void;
+
+  /** @override */
+  recohere(t: number): void
+
+  /** @internal @protected */
+  recohereFasteners(t: number): void
+
+  /** @override */
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
              rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint;
 
+  /** @override */
   hasConstraint(constraint: Constraint): boolean;
 
+  /** @override */
   addConstraint(constraint: Constraint): void;
 
+  /** @override */
   removeConstraint(constraint: Constraint): void;
 
-  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstraintBinding;
+  /** @override */
+  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstraintProperty<unknown, number>;
 
+  /** @override */
   hasConstraintVariable(variable: ConstraintVariable): boolean;
 
+  /** @override */
   addConstraintVariable(variable: ConstraintVariable): void;
 
+  /** @override */
   removeConstraintVariable(variable: ConstraintVariable): void;
 
-  /** @hidden */
+  /** @internal @override */
   setConstraintVariable(constraintVariable: ConstraintVariable, state: number): void;
 
+  /** @override */
   getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined;
 
+  /** @override */
   getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
+  /** @override */
   getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
 
   applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void;
 
-  /** @hidden */
-  mount(): void;
+  /** @protected @override */
+  onMount(): void;
 
-  /** @hidden */
-  unmount(): void;
+  /** @protected @override */
+  onUnmount(): void;
 
-  /** @hidden */
-  initCss?(): string | undefined;
+  /** @internal */
+  createRule(cssText: string): CSSRule;
 
-  /** @hidden */
-  createRule(cssText?: string): CSSRule;
+  /** @internal */
+  initRule?(rule: CSSRule): void;
 
-  /** @hidden */
-  initRule?(rule: CSSRule): CSSRule;
+  /** @internal */
+  initCss?(): string;
 }
 
-export const CssRule = function <V extends CssContext>(
-    this: CssRule<V> | typeof CssRule,
-    owner: V | CssRuleDescriptor<V>,
-    ruleName?: string,
-  ): CssRule<V> | PropertyDecorator {
-  if (this instanceof CssRule) { // constructor
-    return CssRuleConstructor.call(this, owner as V, ruleName) as CssRule<V>;
-  } else { // decorator factory
-    return CssRuleDecoratorFactory(owner as CssRuleDescriptor<V>);
-  }
-} as {
-  /** @hidden */
-  new<V extends CssContext>(owner: V, ruleName: string | undefined): CssRule<V>;
+export const CssRule = (function (_super: typeof Fastener) {
+  const CssRule = _super.extend() as CssRuleClass;
 
-  <V extends CssContext, I = {}>(descriptor: {type: "style"} & StyleRuleDescriptorExtends<V, I>): PropertyDecorator;
-  <V extends CssContext>(descriptor: {type: "style"} & StyleRuleDescriptor<V>): PropertyDecorator;
+  Object.defineProperty(CssRule.prototype, "familyType", {
+    get: function (this: CssRule): Class<CssRule<any>> | null {
+      return CssRule;
+    },
+    configurable: true,
+  });
 
-  <V extends CssContext, I = {}>(descriptor: {type: "media"} & MediaRuleDescriptorExtends<V, I>): PropertyDecorator;
-  <V extends CssContext>(descriptor: {type: "media"} & MediaRuleDescriptor<V>): PropertyDecorator;
-
-  <V extends CssContext, I = {}>(descriptor: CssRuleDescriptorExtends<V, I>): PropertyDecorator;
-  <V extends CssContext>(descriptor: CssRuleDescriptor<V>): PropertyDecorator;
-
-  /** @hidden */
-  prototype: CssRule<any>;
-
-  define<V extends CssContext, I = {}>(descriptor: {type: "style"} & StyleRuleDescriptorExtends<V, I>): StyleRuleConstructor<V, I>;
-  define<V extends CssContext>(descriptor: {type: "style"} & StyleRuleDescriptor<V>): StyleRuleConstructor<V>;
-
-  define<V extends CssContext, I = {}>(descriptor: {type: "media"} & MediaRuleDescriptorExtends<V, I>): MediaRuleConstructor<V, I>;
-  define<V extends CssContext>(descriptor: {type: "media"} & MediaRuleDescriptor<V>): MediaRuleConstructor<V>;
-
-  define<V extends CssContext, I = {}>(descriptor: CssRuleDescriptorExtends<V, I>): CssRuleConstructor<V, I>;
-  define<V extends CssContext>(descriptor: CssRuleDescriptor<V>): CssRuleConstructor<V>;
-};
-__extends(CssRule, Object);
-
-function CssRuleConstructor<V extends CssContext>(this: CssRule<V>, owner: V, ruleName: string | undefined): CssRule<V> {
-  if (ruleName !== void 0) {
-    Object.defineProperty(this, "name", {
-      value: ruleName,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-  (this as Mutable<typeof this>).owner = owner;
-  (this as Mutable<typeof this>).animationTracks = Arrays.empty;
-  return this;
-}
-
-function CssRuleDecoratorFactory<V extends CssContext>(descriptor: CssRuleDescriptor<V>): PropertyDecorator {
-  return CssContext.decorateCssRule.bind(CssContext, CssRule.define(descriptor as CssRuleDescriptor<CssContext>));
-}
-
-CssRule.prototype.onAnimate = function (this: CssRule<CssContext>, t: number): void {
-  this.updateAnimations(t);
-};
-
-CssRule.prototype.updateAnimations = function (t: number): void {
-  const animationTracks = this.animationTracks;
-  for (let i = 0, n = animationTracks.length; i < n; i += 1) {
-    const track = animationTracks[i]!;
-    track.onAnimate(t);
-  }
-};
-
-CssRule.prototype.trackWillStartAnimating = function (track: AnimationTrack): void {
-  const oldTracks = this.animationTracks;
-  const newTracks = Arrays.inserted(track, oldTracks);
-  if (oldTracks !== newTracks) {
-    (this as Mutable<typeof this>).animationTracks = newTracks;
-    if (oldTracks.length === 0) {
-      this.owner.trackWillStartAnimating(this);
-      this.owner.trackDidStartAnimating(this);
+  CssRule.prototype.hasFastener = function (this: CssRule, fastenerName: string, fastenerBound?: Class<Fastener> | null): boolean {
+    const fasteners = this.fasteners;
+    if (fasteners !== null) {
+      const fastener = fasteners[fastenerName];
+      if (fastener !== void 0 && (fastenerBound === void 0 || fastenerBound === null || fastener instanceof fastenerBound)) {
+        return true;
+      }
     }
-  }
-};
+    return false;
+  };
 
-CssRule.prototype.trackDidStartAnimating = function (track: AnimationTrack): void {
-  // hook
-};
-
-CssRule.prototype.trackWillStopAnimating = function (track: AnimationTrack): void {
-  // hook
-};
-
-CssRule.prototype.trackDidStopAnimating = function (track: AnimationTrack): void {
-  const oldTracks = this.animationTracks;
-  const newTracks = Arrays.removed(track, oldTracks);
-  if (oldTracks !== newTracks) {
-    (this as Mutable<typeof this>).animationTracks = newTracks;
-    if (newTracks.length === 0) {
-      this.owner.trackWillStopAnimating(this);
-      this.owner.trackDidStopAnimating(this);
+  CssRule.prototype.getFastener = function (this: CssRule, fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null {
+    const fasteners = this.fasteners;
+    if (fasteners !== null) {
+      const fastener = fasteners[fastenerName];
+      if (fastener !== void 0 && (fastenerBound === void 0 || fastenerBound === null || fastener instanceof fastenerBound)) {
+        return fastener;
+      }
     }
-  }
-};
+    return null;
+  };
 
-CssRule.prototype.constraint = function (this: CssRule<CssContext>, lhs: AnyConstraintExpression, relation: ConstraintRelation,
-                                         rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {
-  return this.owner.constraint(lhs, relation, rhs, strength);
-};
-
-CssRule.prototype.hasConstraint = function (this: CssRule<CssContext>, constraint: Constraint): boolean {
-  return this.owner.hasConstraint(constraint);
-};
-
-CssRule.prototype.addConstraint = function (this: CssRule<CssContext>, constraint: Constraint): void {
-  this.owner.addConstraint(constraint);
-};
-
-CssRule.prototype.removeConstraint = function (this: CssRule<CssContext>, constraint: Constraint): void {
-  this.owner.removeConstraint(constraint);
-};
-
-CssRule.prototype.constraintVariable = function (this: CssRule<CssContext>, name: string, value?: number, strength?: AnyConstraintStrength): ConstraintBinding {
-  return this.owner.constraintVariable(name, value, strength);
-};
-
-CssRule.prototype.hasConstraintVariable = function (this: CssRule<CssContext>, constraintVariable: ConstraintVariable): boolean {
-  return this.owner.hasConstraintVariable(constraintVariable);
-};
-
-CssRule.prototype.addConstraintVariable = function (this: CssRule<CssContext>, constraintVariable: ConstraintVariable): void {
-  this.owner.addConstraintVariable(constraintVariable);
-};
-
-CssRule.prototype.removeConstraintVariable = function (this: CssRule<CssContext>, constraintVariable: ConstraintVariable): void {
-  this.owner.removeConstraintVariable(constraintVariable);
-};
-
-CssRule.prototype.setConstraintVariable = function (this: CssRule<CssContext>, constraintVariable: ConstraintVariable, state: number): void {
-  this.owner.setConstraintVariable(constraintVariable, state);
-};
-
-CssRule.prototype.getLook = function <T>(this: CssRule<CssContext>, look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
-  return this.owner.getLook(look, mood);
-};
-
-CssRule.prototype.getLookOr = function <T, E>(this: CssRule<CssContext>, look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
-  if (arguments.length === 2) {
-    return this.owner.getLookOr(look, mood as E);
-  } else {
-    return this.owner.getLookOr(look, mood as MoodVector<Feel> | null, elseValue!);
-  }
-};
-
-CssRule.prototype.applyTheme = function (theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void {
-  // hook
-};
-
-CssRule.prototype.mount = function (): void {
-  // hook
-};
-
-CssRule.prototype.unmount = function (): void {
-  // hook
-};
-
-CssRule.prototype.createRule = function (this: CssRule<CssContext>, cssText?: string): CSSRule {
-  if (cssText !== void 0) {
-    const index = this.owner.insertRule(cssText);
-    const rule = this.owner.getRule(index);
-    if (rule instanceof CSSRule) {
-      return rule;
+  CssRule.prototype.setFastener = function (this: CssRule, fastenerName: string, newFastener: Fastener | null): void {
+    let fasteners = this.fasteners;
+    if (fasteners === null) {
+      fasteners = {};
+      (this as Mutable<typeof this>).fasteners = fasteners;
+    }
+    const oldFastener = fasteners[fastenerName];
+    if (oldFastener !== void 0 && this.mounted) {
+      oldFastener.unmount();
+    }
+    if (newFastener !== null) {
+      fasteners[fastenerName] = newFastener;
+      if (this.mounted) {
+        newFastener.mount();
+      }
     } else {
-      throw new TypeError("" + rule);
+      delete fasteners[fastenerName];
     }
-  } else {
-    throw new Error("undefined css rule");
-  }
-};
+  };
 
-CssRule.define = function <V extends CssContext, I>(descriptor: CssRuleDescriptor<V, I>): CssRuleConstructor<V, I> {
-  const type = descriptor.type;
-  delete descriptor.type;
+  CssRule.prototype.getLazyFastener = function (this: CssRule, fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null {
+    return FastenerContext.getLazyFastener(this, fastenerName, fastenerBound);
+  };
 
-  if (type === void 0 || type === "style") {
-    return StyleRule.define(descriptor as unknown as StyleRuleDescriptor<V>) as unknown as CssRuleConstructor<V, I>;
-  } else if (type === "media") {
-    return MediaRule.define(descriptor as unknown as MediaRuleDescriptor<V>) as unknown as CssRuleConstructor<V, I>;
-  } else {
-    let _super = descriptor.extends;
+  CssRule.prototype.getSuperFastener = function (this: CssRule, fastenerName?: string, fastenerBound?: Class<Fastener> | null): Fastener | null {
+    if (arguments.length === 0) {
+      return _super.prototype.getSuperFastener.call(this);
+    } else {
+      return null;
+    }
+  };
+
+  CssRule.prototype.mountFasteners = function (this: CssRule): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      fastener.mount();
+    }
+    FastenerContext.init(this);
+  };
+
+  CssRule.prototype.unmountFasteners = function (this: CssRule): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      fastener.unmount();
+    }
+  };
+
+  CssRule.prototype.requireUpdate = function (this: CssRule, updateFlags: number): void {
+    const propertyContext = this.owner;
+    if (FastenerContext.has(propertyContext, "requireUpdate")) {
+      propertyContext.requireUpdate(updateFlags);
+    }
+  };
+
+  CssRule.prototype.decohereFastener = function (this: CssRule, fastener: Fastener): void {
+    let decoherent = this.decoherent as Fastener[];
+    if (decoherent === null) {
+      decoherent = [];
+      (this as Mutable<typeof this>).decoherent = decoherent;
+    }
+    decoherent.push(fastener);
+
+    if (this.coherent) {
+      this.setCoherent(false);
+      this.decohere();
+    }
+  };
+
+  CssRule.prototype.recohereFasteners = function (this: CssRule, t: number): void {
+    const decoherent = this.decoherent;
+    if (decoherent !== null) {
+      const decoherentCount = decoherent.length;
+      if (decoherentCount !== 0) {
+        (this as Mutable<typeof this>).decoherent = null;
+        for (let i = 0; i < decoherentCount; i += 1) {
+          const fastener = decoherent[i]!;
+          fastener.recohere(t);
+        }
+      }
+    }
+  };
+
+  CssRule.prototype.recohere = function (this: CssRule, t: number): void {
+    this.recohereFasteners(t);
+    if (this.decoherent === null || this.decoherent.length === 0) {
+      this.setCoherent(true);
+    } else {
+      this.setCoherent(false);
+      this.decohere();
+    }
+  };
+
+  CssRule.prototype.constraint = function (this: CssRule<ConstraintScope>, lhs: AnyConstraintExpression, relation: ConstraintRelation,
+                                           rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {
+    return this.owner.constraint(lhs, relation, rhs, strength);
+  };
+
+  CssRule.prototype.hasConstraint = function (this: CssRule<ConstraintScope>, constraint: Constraint): boolean {
+    return this.owner.hasConstraint(constraint);
+  };
+
+  CssRule.prototype.addConstraint = function (this: CssRule<ConstraintScope>, constraint: Constraint): void {
+    this.owner.addConstraint(constraint);
+  };
+
+  CssRule.prototype.removeConstraint = function (this: CssRule<ConstraintScope>, constraint: Constraint): void {
+    this.owner.removeConstraint(constraint);
+  };
+
+  CssRule.prototype.constraintVariable = function (this: CssRule<ConstraintScope>, name: string, value?: number, strength?: AnyConstraintStrength): ConstraintProperty<unknown, number> {
+    return this.owner.constraintVariable(name, value, strength);
+  };
+
+  CssRule.prototype.hasConstraintVariable = function (this: CssRule<ConstraintScope>, constraintVariable: ConstraintVariable): boolean {
+    return this.owner.hasConstraintVariable(constraintVariable);
+  };
+
+  CssRule.prototype.addConstraintVariable = function (this: CssRule<ConstraintScope>, constraintVariable: ConstraintVariable): void {
+    this.owner.addConstraintVariable(constraintVariable);
+  };
+
+  CssRule.prototype.removeConstraintVariable = function (this: CssRule<ConstraintScope>, constraintVariable: ConstraintVariable): void {
+    this.owner.removeConstraintVariable(constraintVariable);
+  };
+
+  CssRule.prototype.setConstraintVariable = function (this: CssRule<ConstraintScope>, constraintVariable: ConstraintVariable, state: number): void {
+    this.owner.setConstraintVariable(constraintVariable, state);
+  };
+
+  CssRule.prototype.getLook = function <T>(this: CssRule, look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
+    const themeContext = this.owner;
+    if (ThemeContext.is(themeContext)) {
+      return themeContext.getLook(look, mood);
+    } else {
+      return void 0;
+    }
+  };
+
+  CssRule.prototype.getLookOr = function <T, E>(this: CssRule, look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
+    const themeContext = this.owner;
+    if (ThemeContext.is(themeContext)) {
+      if (arguments.length === 2) {
+        return themeContext.getLookOr(look, mood as E);
+      } else {
+        return themeContext.getLookOr(look, mood as MoodVector<Feel> | null, elseValue!);
+      }
+    } else if (arguments.length === 2) {
+      return mood as E;
+    } else {
+      return elseValue!;
+    }
+  };
+
+  CssRule.prototype.applyTheme = function (this: CssRule, theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean | null): void {
+    // hook
+  };
+
+  CssRule.prototype.onMount = function (this: CssRule): void {
+    _super.prototype.onMount.call(this);
+    this.mountFasteners();
+  };
+
+  CssRule.prototype.onUnmount = function (this: CssRule): void {
+    this.unmountFasteners();
+    _super.prototype.onUnmount.call(this);
+  };
+
+  CssRule.prototype.createRule = function (this: CssRule, cssText: string): CSSRule {
+    const cssContext = this.owner;
+    if (CssContext.is(cssContext)) {
+      const index = cssContext.insertRule(cssText);
+      const rule = cssContext.getRule(index);
+      if (rule instanceof CSSRule) {
+        return rule;
+      } else {
+        throw new TypeError("" + rule);
+      }
+    } else {
+      throw new Error("no css context");
+    }
+  };
+
+  CssRule.construct = function <F extends CssRule<any>>(ruleClass: CssRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
+    rule = _super.construct(ruleClass, rule, owner, ruleName) as F;
+    (rule as Mutable<typeof rule>).fasteners = null;
+    (rule as Mutable<typeof rule>).decoherent = null;
+    (rule as Mutable<typeof rule>).rule = null as unknown as CSSRule;
+    return rule;
+  };
+
+  CssRule.define = function <O>(descriptor: CssRuleDescriptor<O>): CssRuleClass<CssRule<any>> {
+    let superClass = descriptor.extends as CssRuleClass | undefined;
+    const affinity = descriptor.affinity;
+    const inherits = descriptor.inherits;
     let css = descriptor.css;
     delete descriptor.extends;
+    delete descriptor.affinity;
+    delete descriptor.inherits;
     delete descriptor.css;
 
-    if (_super === void 0) {
-      _super = CssRule;
+    if (superClass === void 0 || superClass === null) {
+      superClass = this;
     }
 
-    const _constructor = function DecoratedCssRule(this: CssRule<V>, owner: V, ruleName: string | undefined): CssRule<V> {
-      const _this: CssRule<V> = _super!.call(this, owner, ruleName) || this;
-      let cssText: string | undefined;
-      if (css !== void 0) {
-        cssText = css as string;
-      } else if (_this.initCss !== void 0) {
-        cssText = _this.initCss();
-      }
-      let rule = _this.createRule(cssText);
-      if (_this.initRule !== void 0) {
-        rule = _this.initRule(rule);
-      }
-      (_this as Mutable<typeof _this>).rule = rule;
-      return _this;
-    } as unknown as CssRuleConstructor<V, I>;
-
-    const _prototype = descriptor as unknown as CssRule<V> & I;
-    Object.setPrototypeOf(_constructor, _super);
-    _constructor.prototype = _prototype;
-    _constructor.prototype.constructor = _constructor;
-    Object.setPrototypeOf(_constructor.prototype, _super.prototype);
+    const ruleClass = superClass.extend(descriptor);
 
     if (typeof css === "function") {
-      _prototype.initCss = css;
+      ruleClass.prototype.initCss = css;
       css = void 0;
     }
 
-    return _constructor;
-  }
-};
+    ruleClass.construct = function (ruleClass: CssRuleClass, rule: CssRule<O> | null, owner: O, ruleName: string): CssRule<O> {
+      rule = superClass!.construct(ruleClass, rule, owner, ruleName);
+
+      if (affinity !== void 0) {
+        rule.initAffinity(affinity);
+      }
+      if (inherits !== void 0) {
+        rule.initInherits(inherits);
+      }
+
+      let cssText: string | undefined;
+      if (css !== void 0) {
+        cssText = css as string;
+      } else if (rule.initCss !== void 0) {
+        cssText = rule.initCss();
+      } else {
+        throw new Error("undefined css");
+      }
+
+      (rule as Mutable<typeof rule>).rule = rule.createRule(cssText);
+      if (rule.initRule !== void 0) {
+        rule.initRule(rule.rule);
+      }
+
+      return rule;
+    };
+
+    return ruleClass;
+  };
+
+  return CssRule;
+})(Fastener);

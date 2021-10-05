@@ -18,7 +18,7 @@ import type {DateTimeLocale} from "./DateTimeLocale";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {PeriodParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class PeriodFormat extends DateTimeFormat {
   private readonly locale: DateTimeLocale;
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Mapping} from "../mapping/Mapping";
 import type {Interpolator} from "../interpolate/Interpolator";
 import type {Timing} from "./Timing";
@@ -31,40 +31,44 @@ export interface Tweening<Y> extends Mapping<number, Y> {
   toString(): string;
 }
 
-export const Tweening = function <Y>(domain: Timing, range: Interpolator<Y>): Tweening<Y> {
-  const tweening = function (u: number): Y {
-    return tweening.range(tweening.domain(u));
-  } as Tweening<Y>;
-  Object.setPrototypeOf(tweening, Tweening.prototype);
-  (tweening as Mutable<typeof tweening>).domain = domain;
-  (tweening as Mutable<typeof tweening>).range = range;
-  return tweening;
-} as {
-  <Y>(domain: Timing, range: Interpolator<Y>): Tweening<Y>
+export const Tweening = (function (_super: typeof Mapping) {
+  const Tweening = function <Y>(domain: Timing, range: Interpolator<Y>): Tweening<Y> {
+    const tweening = function (u: number): Y {
+      return tweening.range(tweening.domain(u));
+    } as Tweening<Y>;
+    Object.setPrototypeOf(tweening, Tweening.prototype);
+    (tweening as Mutable<typeof tweening>).domain = domain;
+    (tweening as Mutable<typeof tweening>).range = range;
+    return tweening;
+  } as {
+    <Y>(domain: Timing, range: Interpolator<Y>): Tweening<Y>
 
-  /** @hidden */
-  prototype: Tweening<any>;
-};
+    /** @internal */
+    prototype: Tweening<any>;
+  };
 
-Tweening.prototype = Object.create(Mapping.prototype);
+  Tweening.prototype = Object.create(_super.prototype);
 
-Tweening.prototype.withDomain = function <Y>(this: Tweening<Y>, t0: number, t1: number): Tweening<Y> {
-  return this.domain.withDomain(t0, t1).overRange(this.range);
-};
+  Tweening.prototype.withDomain = function <Y>(this: Tweening<Y>, t0: number, t1: number): Tweening<Y> {
+    return this.domain.withDomain(t0, t1).overRange(this.range);
+  };
 
-Tweening.prototype.canEqual = function (that: unknown): boolean {
-  return that instanceof Tweening;
-};
+  Tweening.prototype.canEqual = function (that: unknown): boolean {
+    return that instanceof Tweening;
+  };
 
-Tweening.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof Tweening) {
-    return this.domain.equals(that.domain) && this.range.equals(that.range);
-  }
-  return false;
-};
+  Tweening.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof Tweening) {
+      return this.domain.equals(that.domain) && this.range.equals(that.range);
+    }
+    return false;
+  };
 
-Tweening.prototype.toString = function (): string {
-  return "Tweening(" + this.domain + ", " + this.range + ")";
-};
+  Tweening.prototype.toString = function (): string {
+    return "Tweening(" + this.domain + ", " + this.range + ")";
+  };
+
+  return Tweening;
+})(Mapping);

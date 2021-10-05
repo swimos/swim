@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {
   AnyLength,
   Length,
@@ -26,7 +27,8 @@ import {
 } from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View} from "@swim/view";
 import {
   GraphicsView,
   FillViewInit,
@@ -67,76 +69,36 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     });
   }
 
-  override initView(init: GeoArcViewInit): void {
-    super.initView(init);
-    if (init.geoCenter !== void 0) {
-      this.geoCenter(init.geoCenter);
-    }
-    if (init.viewCenter !== void 0) {
-      this.viewCenter(init.viewCenter);
-    }
-    if (init.innerRadius !== void 0) {
-      this.innerRadius(init.innerRadius);
-    }
-    if (init.outerRadius !== void 0) {
-      this.outerRadius(init.outerRadius);
-    }
-    if (init.startAngle !== void 0) {
-      this.startAngle(init.startAngle);
-    }
-    if (init.sweepAngle !== void 0) {
-      this.sweepAngle(init.sweepAngle);
-    }
-    if (init.padAngle !== void 0) {
-      this.padAngle(init.padAngle);
-    }
-    if (init.padRadius !== void 0) {
-      this.padRadius(init.padRadius);
-    }
-    if (init.cornerRadius !== void 0) {
-      this.cornerRadius(init.cornerRadius);
-    }
-    if (init.fill !== void 0) {
-      this.fill(init.fill);
-    }
-    if (init.stroke !== void 0) {
-      this.stroke(init.stroke);
-    }
-    if (init.strokeWidth !== void 0) {
-      this.strokeWidth(init.strokeWidth);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<GeoArcViewObserver>;
+  override readonly observerType?: Class<GeoArcViewObserver>;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoCenter !== void 0) {
-        viewObserver.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoCenter !== void 0) {
+        observer.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
   protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     this.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
-    if (this.isMounted()) {
+    if (this.mounted) {
       this.projectArc(this.viewContext as ViewContextType<this>);
     }
   }
 
   protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGeoCenter !== void 0) {
-        viewObserver.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoCenter !== void 0) {
+        observer.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
-  @ViewAnimator<GeoArcView, GeoPoint | null, AnyGeoPoint | null>({
+  @ThemeAnimator<GeoArcView, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
     didSetState(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
@@ -150,9 +112,9 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
     },
   })
-  readonly geoCenter!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator<GeoArcView, R2Point | null, AnyR2Point | null>({
+  @ThemeAnimator<GeoArcView, R2Point | null, AnyR2Point | null>({
     type: R2Point,
     state: R2Point.undefined(),
     updateFlags: View.NeedsRender,
@@ -160,37 +122,37 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
       this.owner.updateViewBounds();
     },
   })
-  readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
+  readonly viewCenter!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator({type: Length, state: Length.zero()})
-  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
+  readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, state: Length.zero()})
-  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
+  readonly outerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Angle, state: Angle.zero()})
-  readonly startAngle!: ViewAnimator<this, Angle, AnyAngle>;
+  @ThemeAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
+  readonly startAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator({type: Angle, state: Angle.zero()})
-  readonly sweepAngle!: ViewAnimator<this, Angle, AnyAngle>;
+  @ThemeAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
+  readonly sweepAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator({type: Angle, state: Angle.zero()})
-  readonly padAngle!: ViewAnimator<this, Angle, AnyAngle>;
+  @ThemeAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
+  readonly padAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator({type: Length, state: null})
-  readonly padRadius!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
+  readonly padRadius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: Length.zero()})
-  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
+  readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
-  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
-  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, state: null, inherit: true})
-  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Arc | null {
     const viewCenter = this.viewCenter.value;
@@ -220,18 +182,18 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   }
 
   protected projectGeoCenter(geoCenter: GeoPoint | null): void {
-    if (this.isMounted()) {
+    if (this.mounted) {
       const viewContext = this.viewContext as ViewContextType<this>;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
                        : null;
-      this.viewCenter.setIntermediateValue(this.viewCenter.value, viewCenter);
+      this.viewCenter.setInterpolatedValue(this.viewCenter.value, viewCenter);
       this.projectArc(viewContext);
     }
   }
 
   protected projectArc(viewContext: ViewContextType<this>): void {
-    if (this.viewCenter.takesPrecedence(View.Intrinsic)) {
+    if (this.viewCenter.hasAffinity(Affinity.Intrinsic)) {
       const geoCenter = this.geoCenter.value;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
@@ -255,24 +217,28 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       this.renderArc(renderer.context, this.viewFrame);
-      context.restore();
     }
   }
 
   protected renderArc(context: CanvasContext, frame: R2Box): void {
     const arc = this.value;
     if (arc !== null && frame.isDefined()) {
+      // save
+      const contextFillStyle = context.fillStyle;
+      const contextLineWidth = context.lineWidth;
+      const contextStrokeStyle = context.strokeStyle;
+
       context.beginPath();
       arc.draw(context, frame);
+
       const fill = this.fill.value;
       if (fill !== null) {
         context.fillStyle = fill.toString();
         context.fill();
       }
+
       const stroke = this.stroke.value;
       if (stroke !== null) {
         const strokeWidth = this.strokeWidth.value;
@@ -283,6 +249,11 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
         context.strokeStyle = stroke.toString();
         context.stroke();
       }
+
+      // restore
+      context.fillStyle = contextFillStyle;
+      context.lineWidth = contextLineWidth;
+      context.strokeStyle = contextStrokeStyle;
     }
   }
 
@@ -334,12 +305,8 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      context.save();
       const p = renderer.transform.transform(x, y);
-      const hit = this.hitTestArc(p.x, p.y, context, this.viewFrame);
-      context.restore();
-      return hit;
+      return this.hitTestArc(p.x, p.y, renderer.context, this.viewFrame);
     }
     return null;
   }
@@ -354,9 +321,17 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
       } else if (this.stroke.value !== void 0) {
         const strokeWidth = this.strokeWidth.value;
         if (strokeWidth !== null) {
+          // save
+          const contextLineWidth = context.lineWidth;
+
           const size = Math.min(frame.width, frame.height);
           context.lineWidth = strokeWidth.pxValue(size);
-          if (context.isPointInStroke(x, y)) {
+          const pointInStroke = context.isPointInStroke(x, y);
+
+          // restore
+          context.lineWidth = contextLineWidth;
+
+          if (pointInStroke) {
             return this;
           }
         }
@@ -369,22 +344,43 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     return GeoRippleView.ripple(this, options);
   }
 
-  static override create(): GeoArcView {
-    return new GeoArcView();
-  }
-
-  static fromInit(init: GeoArcViewInit): GeoArcView {
-    const view = new GeoArcView();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny(value: AnyGeoArcView): GeoArcView {
-    if (value instanceof GeoArcView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+  override init(init: GeoArcViewInit): void {
+    super.init(init);
+    if (init.geoCenter !== void 0) {
+      this.geoCenter(init.geoCenter);
     }
-    throw new TypeError("" + value);
+    if (init.viewCenter !== void 0) {
+      this.viewCenter(init.viewCenter);
+    }
+    if (init.innerRadius !== void 0) {
+      this.innerRadius(init.innerRadius);
+    }
+    if (init.outerRadius !== void 0) {
+      this.outerRadius(init.outerRadius);
+    }
+    if (init.startAngle !== void 0) {
+      this.startAngle(init.startAngle);
+    }
+    if (init.sweepAngle !== void 0) {
+      this.sweepAngle(init.sweepAngle);
+    }
+    if (init.padAngle !== void 0) {
+      this.padAngle(init.padAngle);
+    }
+    if (init.padRadius !== void 0) {
+      this.padRadius(init.padRadius);
+    }
+    if (init.cornerRadius !== void 0) {
+      this.cornerRadius(init.cornerRadius);
+    }
+    if (init.fill !== void 0) {
+      this.fill(init.fill);
+    }
+    if (init.stroke !== void 0) {
+      this.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      this.strokeWidth(init.strokeWidth);
+    }
   }
 }

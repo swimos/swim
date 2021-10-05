@@ -16,13 +16,13 @@ import type {Builder} from "@swim/util";
 import {AnyUriPath, UriPath} from "./UriPath";
 
 export class UriPathBuilder implements Builder<string, UriPath> {
-  /** @hidden */
+  /** @internal */
   first: UriPath;
-  /** @hidden */
+  /** @internal */
   last: UriPath | null;
-  /** @hidden */
+  /** @internal */
   size: number;
-  /** @hidden */
+  /** @internal */
   aliased: number;
 
   constructor() {
@@ -145,7 +145,7 @@ export class UriPathBuilder implements Builder<string, UriPath> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   dealias(n: number): UriPath {
     let i = 0;
     let xi: UriPath | null = null;

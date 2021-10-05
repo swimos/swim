@@ -15,9 +15,9 @@
 import {Item, Field, Value, Record} from "@swim/structure";
 import {RecordModel, Reifier} from "@swim/dataflow";
 import {DownlinkStreamlet} from "./DownlinkStreamlet";
-import type {WarpRef} from "../WarpRef";
+import type {WarpRef} from "../ref/WarpRef";
 
-/** @hidden */
+/** @internal */
 export class DownlinkReifier extends Reifier {
   constructor(warp: WarpRef | null = null) {
     super();
@@ -34,7 +34,7 @@ export class DownlinkReifier extends Reifier {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   reifyField(field: Field): Field {
     const oldValue = field.value;
     const newValue = this.reifyValue(oldValue);
@@ -45,7 +45,7 @@ export class DownlinkReifier extends Reifier {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   reifyValue(value: Value): Value {
     if (value instanceof RecordModel) {
       return this.reifyModel(value);
@@ -54,7 +54,7 @@ export class DownlinkReifier extends Reifier {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   reifyModel(model: RecordModel): Record {
     if (model.tag === "link") {
       const streamlet = new DownlinkStreamlet(this.warp, model);

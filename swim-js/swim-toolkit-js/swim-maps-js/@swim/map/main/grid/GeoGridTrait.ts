@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import type {GeoTile, GeoBox} from "@swim/geo";
-import {Model, CompoundModel, Trait, TraitFastener} from "@swim/model";
+import {Model, GenericModel, Trait, TraitFastener} from "@swim/model";
 import {GeoLayerTrait} from "../layer/GeoLayerTrait";
 import type {GeoGridTraitObserver} from "./GeoGridTraitObserver";
 
@@ -25,7 +26,7 @@ export class GeoGridTrait extends GeoLayerTrait {
     this.tileFasteners = [];
   }
 
-  override readonly traitObservers!: ReadonlyArray<GeoGridTraitObserver>;
+  override readonly observerType?: Class<GeoGridTraitObserver>;
 
   readonly geoTile: GeoTile;
 
@@ -49,7 +50,7 @@ export class GeoGridTrait extends GeoLayerTrait {
     const tileFastener = this.createTileFastener(tileTrait);
     tileFasteners.splice(targetIndex, 0, tileFastener);
     tileFastener.setTrait(tileTrait, targetTrait);
-    if (this.isMounted()) {
+    if (this.mounted) {
       tileFastener.mount();
     }
   }
@@ -60,7 +61,7 @@ export class GeoGridTrait extends GeoLayerTrait {
       const tileFastener = tileFasteners[i]!;
       if (tileFastener.trait === tileTrait) {
         tileFastener.setTrait(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           tileFastener.unmount();
         }
         tileFasteners.splice(i, 1);
@@ -83,9 +84,9 @@ export class GeoGridTrait extends GeoLayerTrait {
 
   protected willSetTile(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null,
                         targetTrait: Trait | null, tileFastener: TraitFastener<this, GeoGridTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetTile !== void 0) {
         traitObserver.traitWillSetTile(newTileTrait, oldTileTrait, targetTrait, this);
       }
@@ -105,16 +106,16 @@ export class GeoGridTrait extends GeoLayerTrait {
 
   protected didSetTile(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null,
                        targetTrait: Trait | null, tileFastener: TraitFastener<this, GeoGridTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetTile !== void 0) {
         traitObserver.traitDidSetTile(newTileTrait, oldTileTrait, targetTrait, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static TileFastener = TraitFastener.define<GeoGridTrait, GeoGridTrait>({
     type: GeoGridTrait,
     sibling: false,
@@ -130,13 +131,13 @@ export class GeoGridTrait extends GeoLayerTrait {
   });
 
   protected createTileFastener(tileTrait: GeoGridTrait): TraitFastener<this, GeoGridTrait> {
-    return new GeoGridTrait.TileFastener(this, tileTrait.key, "tile");
+    return GeoGridTrait.TileFastener.create(this, tileTrait.key ?? "tile");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly tileFasteners: ReadonlyArray<TraitFastener<this, GeoGridTrait>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountTileFasteners(): void {
     const tileFasteners = this.tileFasteners;
     for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
@@ -145,7 +146,7 @@ export class GeoGridTrait extends GeoLayerTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountTileFasteners(): void {
     const tileFasteners = this.tileFasteners;
     for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
@@ -161,7 +162,7 @@ export class GeoGridTrait extends GeoLayerTrait {
   protected createTileModel(geoTile: GeoTile): Model | null {
     const tileTrait = this.createTileTrait(geoTile);
     if (tileTrait !== null) {
-      const tileModel = new CompoundModel();
+      const tileModel = new GenericModel();
       tileModel.setTrait("tile", tileTrait);
       return tileModel;
     } else {
@@ -170,35 +171,35 @@ export class GeoGridTrait extends GeoLayerTrait {
   }
 
   protected initTiles(): void {
-    let southWestModel = this.getChildModel("southWest");
+    let southWestModel = this.getChild("southWest");
     if (southWestModel === null) {
       southWestModel = this.createTileModel(this.geoTile.southWestTile);
       if (southWestModel !== null) {
-        this.setChildModel("southWest", southWestModel);
+        this.setChild("southWest", southWestModel);
       }
     }
 
-    let northWestModel = this.getChildModel("northWest");
+    let northWestModel = this.getChild("northWest");
     if (northWestModel === null) {
       northWestModel = this.createTileModel(this.geoTile.northWestTile);
       if (northWestModel !== null) {
-        this.setChildModel("northWest", northWestModel);
+        this.setChild("northWest", northWestModel);
       }
     }
 
-    let southEastModel = this.getChildModel("southEast");
+    let southEastModel = this.getChild("southEast");
     if (southEastModel === null) {
       southEastModel = this.createTileModel(this.geoTile.southEastTile);
       if (southEastModel !== null) {
-        this.setChildModel("southEast", southEastModel);
+        this.setChild("southEast", southEastModel);
       }
     }
 
-    let northEastTile = this.getChildModel("northEast");
+    let northEastTile = this.getChild("northEast");
     if (northEastTile === null) {
       northEastTile = this.createTileModel(this.geoTile.northEastTile);
       if (northEastTile !== null) {
-        this.setChildModel("northEast", northEastTile);
+        this.setChild("northEast", northEastTile);
       }
     }
   }
@@ -207,44 +208,44 @@ export class GeoGridTrait extends GeoLayerTrait {
     return model.getTrait(GeoGridTrait);
   }
 
-  protected override detectChildModel(childModel: Model): void {
-    const tileTrait = this.detectTileModel(childModel);
+  protected override detectChildModel(child: Model): void {
+    const tileTrait = this.detectTileModel(child);
     if (tileTrait !== null) {
       this.insertTile(tileTrait);
     } else {
-      super.detectChildModel(childModel);
+      super.detectChildModel(child);
     }
   }
 
-  protected override detectInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    const tileTrait = this.detectTileModel(childModel);
+  protected override detectInsertChildModel(child: Model, target: Model | null): void {
+    const tileTrait = this.detectTileModel(child);
     if (tileTrait !== null) {
-      const targetTrait = targetModel !== null ? this.detectTileModel(targetModel) : null;
+      const targetTrait = target !== null ? this.detectTileModel(target) : null;
       this.insertTile(tileTrait, targetTrait);
     } else {
-      super.detectInsertChildModel(childModel, targetModel);
+      super.detectInsertChildModel(child, target);
     }
   }
 
-  protected override detectRemoveChildModel(childModel: Model): void {
-    const tileTrait = this.detectTileModel(childModel);
+  protected override detectRemoveChildModel(child: Model): void {
+    const tileTrait = this.detectTileModel(child);
     if (tileTrait !== null) {
       this.removeTile(tileTrait);
     } else {
-      super.detectRemoveChildModel(childModel);
+      super.detectRemoveChildModel(child);
     }
   }
 
-  /** @hidden */
-  protected override mountTraitFasteners(): void {
-    super.mountTraitFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountTileFasteners();
   }
 
-  /** @hidden */
-  protected override unmountTraitFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountTileFasteners();
-    super.unmountTraitFasteners();
+    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

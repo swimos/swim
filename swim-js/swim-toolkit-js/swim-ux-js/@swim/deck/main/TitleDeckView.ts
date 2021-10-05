@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View} from "@swim/view";
+import {Affinity} from "@swim/fastener";
 import type {DeckCard} from "./DeckCard";
 import {DeckView} from "./DeckView";
 import {TitleDeckBar} from "./TitleDeckBar";
@@ -38,7 +38,7 @@ export class TitleDeckView extends DeckView {
       deckBar.pushTitle(newCardView.cardTitle.getStateOr(""));
       const backMembrane = deckBar.backMembrane.view;
       if (backMembrane !== null) {
-        backMembrane.pointerEvents.setState("none", View.Intrinsic);
+        backMembrane.pointerEvents.setState("none", Affinity.Intrinsic);
       }
     }
   }
@@ -48,7 +48,7 @@ export class TitleDeckView extends DeckView {
     if (deckBar instanceof TitleDeckBar) {
       const backMembrane = deckBar.backMembrane.view;
       if (backMembrane !== null) {
-        backMembrane.pointerEvents.setState("auto", View.Intrinsic);
+        backMembrane.pointerEvents.setState("auto", Affinity.Intrinsic);
       }
     }
     super.didPushCard(newCardView, oldCardView);
@@ -63,7 +63,7 @@ export class TitleDeckView extends DeckView {
   }
 
   override didPressBackButton(event: Event | null): void {
-    if (!this.deckPhase.isAnimating()) {
+    if (!this.deckPhase.tweening) {
       this.popCard();
     }
     super.didPressBackButton(event);

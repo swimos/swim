@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {HtmlViewInit, HtmlView} from "@swim/dom";
-import {ViewProperty, PositionGestureInput, PositionGesture} from "@swim/view";
+import {Property} from "@swim/fastener";
+import {PositionGestureInput, PositionGesture} from "@swim/view";
 import {ButtonGlow} from "./ButtonGlow";
 
 export interface ButtonMembraneInit extends HtmlViewInit {
@@ -29,12 +30,8 @@ export class ButtonMembrane extends HtmlView {
     this.addClass("membrane");
   }
 
-  override initView(init: ButtonMembraneInit): void {
-    super.initView(init);
-  }
-
-  @ViewProperty({type: Boolean, inherit: true, state: true})
-  readonly glows!: ViewProperty<this, boolean>;
+  @Property({type: Boolean, inherits: true, state: true})
+  readonly glows!: Property<this, boolean>;
 
   protected glow(input: PositionGestureInput): void {
     if (input.detail instanceof ButtonGlow) {
@@ -43,12 +40,12 @@ export class ButtonMembrane extends HtmlView {
     }
     if (input.detail === void 0) {
       const delay = input.inputType === "mouse" ? 0 : 100;
-      input.detail = this.prepend(ButtonGlow);
+      input.detail = this.prependChild(ButtonGlow);
       (input.detail as ButtonGlow).glow(input.x, input.y, void 0, delay);
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static Gesture = PositionGesture.define<ButtonMembrane, HtmlView>({
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
       if (this.owner.glows.state) {
@@ -91,7 +88,12 @@ export class ButtonMembrane extends HtmlView {
 
   @PositionGesture<ButtonMembrane, HtmlView>({
     extends: ButtonMembrane.Gesture,
+    eager: true,
     self: true,
   })
   readonly gesture!: PositionGesture<this, HtmlView>;
+
+  override init(init: ButtonMembraneInit): void {
+    super.init(init);
+  }
 }

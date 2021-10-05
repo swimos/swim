@@ -17,7 +17,7 @@ import type {DateTimeInit, DateTime} from "../DateTime";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {DayOfMonthParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class DayOfMonthFormat extends DateTimeFormat {
   override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
     output = DateTimeFormat.writeDateNumber2(output, date.day);

@@ -12,35 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Property} from "@swim/fastener";
 import type {GeoBox} from "@swim/geo";
 import type {Trait} from "@swim/model";
+import {ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {CanvasView} from "@swim/graphics";
-import {
-  Controller,
-  ControllerProperty,
-  ControllerView,
-  ControllerViewTrait,
-  ControllerFastener,
-  CompositeController,
-} from "@swim/controller";
+import {Controller, TraitViewFastener, ControllerFastener, GenericController} from "@swim/controller";
 import type {GeoPerspective} from "../geo/GeoPerspective";
 import type {GeoViewport} from "../geo/GeoViewport";
 import type {GeoView} from "../geo/GeoView";
 import type {GeoTrait} from "../geo/GeoTrait";
 import {GeoController} from "../geo/GeoController";
-import type {MapView} from "./MapView";
+import {MapView} from "./MapView";
 import {MapTrait} from "./MapTrait";
 import type {MapControllerObserver} from "./MapControllerObserver";
 
-export abstract class MapController extends CompositeController {
+export abstract class MapController extends GenericController {
   constructor() {
     super();
     this.layerFasteners = [];
   }
 
-  override readonly controllerObservers!: ReadonlyArray<MapControllerObserver>;
+  override readonly observerType?: Class<MapControllerObserver>;
 
   protected initMapTrait(mapTrait: MapTrait): void {
     // hook
@@ -72,11 +67,11 @@ export abstract class MapController extends CompositeController {
   }
 
   protected willSetMapTrait(newMapTrait: MapTrait | null, oldMapTrait: MapTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetMapTrait !== void 0) {
-        controllerObserver.controllerWillSetMapTrait(newMapTrait, oldMapTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetMapTrait !== void 0) {
+        observer.controllerWillSetMapTrait(newMapTrait, oldMapTrait, this);
       }
     }
   }
@@ -92,11 +87,11 @@ export abstract class MapController extends CompositeController {
   }
 
   protected didSetMapTrait(newMapTrait: MapTrait | null, oldMapTrait: MapTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetMapTrait !== void 0) {
-        controllerObserver.controllerDidSetMapTrait(newMapTrait, oldMapTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetMapTrait !== void 0) {
+        observer.controllerDidSetMapTrait(newMapTrait, oldMapTrait, this);
       }
     }
   }
@@ -121,7 +116,7 @@ export abstract class MapController extends CompositeController {
       const layerController = layerFasteners[i]!.controller;
       if (layerController !== null) {
         const layerView = layerController.geo.view;
-        if (layerView !== null && layerView.parentView === null) {
+        if (layerView !== null && layerView.parent === null) {
           layerController.geo.injectView(mapView);
         }
       }
@@ -134,11 +129,11 @@ export abstract class MapController extends CompositeController {
   }
 
   protected willSetMapView(newMapView: MapView | null, oldMapView: MapView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetMapView !== void 0) {
-        controllerObserver.controllerWillSetMapView(newMapView, oldMapView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetMapView !== void 0) {
+        observer.controllerWillSetMapView(newMapView, oldMapView, this);
       }
     }
   }
@@ -154,11 +149,11 @@ export abstract class MapController extends CompositeController {
   }
 
   protected didSetMapView(newMapView: MapView | null, oldMapView: MapView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetMapView !== void 0) {
-        controllerObserver.controllerDidSetMapView(newMapView, oldMapView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetMapView !== void 0) {
+        observer.controllerDidSetMapView(newMapView, oldMapView, this);
       }
     }
   }
@@ -173,11 +168,11 @@ export abstract class MapController extends CompositeController {
   }
 
   protected willSetGeoViewport(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, mapView: MapView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGeoViewport !== void 0) {
-        controllerObserver.controllerWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGeoViewport !== void 0) {
+        observer.controllerWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
     }
   }
@@ -187,42 +182,19 @@ export abstract class MapController extends CompositeController {
   }
 
   protected didSetGeoViewport(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, mapView: MapView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGeoViewport !== void 0) {
-        controllerObserver.controllerDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGeoViewport !== void 0) {
+        observer.controllerDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
     }
   }
 
-  /** @hidden */
-  static MapFastener = ControllerViewTrait.define<MapController, MapView, MapTrait>({
-    observeView: true,
-    willSetView(newMapView: MapView | null, oldMapView: MapView | null): void {
-      this.owner.willSetMapView(newMapView, oldMapView);
-    },
-    onSetView(newMapView: MapView | null, oldMapView: MapView | null): void {
-      this.owner.onSetMapView(newMapView, oldMapView);
-    },
-    didSetView(newMapView: MapView | null, oldMapView: MapView | null): void {
-      this.owner.didSetMapView(newMapView, oldMapView);
-    },
-    viewWillSetGeoViewport(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, mapView: MapView): void {
-      this.owner.willSetGeoViewport(newGeoViewport, oldGeoViewport, mapView);
-    },
-    viewDidSetGeoViewport(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, mapView: MapView): void {
-      this.owner.onSetGeoViewport(newGeoViewport, oldGeoViewport, mapView);
-      this.owner.didSetGeoViewport(newGeoViewport, oldGeoViewport, mapView);
-    },
-    viewDidSetMapCanvas(newMapCanvasView: CanvasView | null, oldMapCanvasView: CanvasView | null, mapView: MapView): void {
-      this.owner.canvas.setView(newMapCanvasView);
-    },
-    viewDidSetMapContainer(newMapContainerView: HtmlView | null, oldMapContainerView: HtmlView | null, mapView: MapView): void {
-      this.owner.container.setView(newMapContainerView);
-    },
+  /** @internal */
+  static MapFastener = TraitViewFastener.define<MapController, MapTrait, MapView>({
     traitType: MapTrait,
-    observeTrait: true,
+    observesTrait: true,
     willSetTrait(newMapTrait: MapTrait | null, oldMapTrait: MapTrait | null): void {
       this.owner.willSetMapTrait(newMapTrait, oldMapTrait);
     },
@@ -245,12 +217,36 @@ export abstract class MapController extends CompositeController {
         this.owner.insertLayerTrait(newLayerTrait, targetTrait);
       }
     },
+    viewType: MapView,
+    observesView: true,
+    willSetView(newMapView: MapView | null, oldMapView: MapView | null): void {
+      this.owner.willSetMapView(newMapView, oldMapView);
+    },
+    onSetView(newMapView: MapView | null, oldMapView: MapView | null): void {
+      this.owner.onSetMapView(newMapView, oldMapView);
+    },
+    didSetView(newMapView: MapView | null, oldMapView: MapView | null): void {
+      this.owner.didSetMapView(newMapView, oldMapView);
+    },
+    viewWillSetGeoViewport(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, mapView: MapView): void {
+      this.owner.willSetGeoViewport(newGeoViewport, oldGeoViewport, mapView);
+    },
+    viewDidSetGeoViewport(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, mapView: MapView): void {
+      this.owner.onSetGeoViewport(newGeoViewport, oldGeoViewport, mapView);
+      this.owner.didSetGeoViewport(newGeoViewport, oldGeoViewport, mapView);
+    },
+    viewDidSetMapCanvas(newMapCanvasView: CanvasView | null, oldMapCanvasView: CanvasView | null, mapView: MapView): void {
+      this.owner.canvas.setView(newMapCanvasView);
+    },
+    viewDidSetMapContainer(newMapContainerView: HtmlView | null, oldMapContainerView: HtmlView | null, mapView: MapView): void {
+      this.owner.container.setView(newMapContainerView);
+    },
   });
 
-  @ControllerViewTrait<MapController, MapView, MapTrait>({
+  @TraitViewFastener<MapController, MapTrait, MapView>({
     extends: MapController.MapFastener,
   })
-  readonly map!: ControllerViewTrait<this, MapView, MapTrait>;
+  readonly map!: TraitViewFastener<this, MapTrait, MapView>;
 
   protected initCanvasView(canvasView: CanvasView): void {
     // hook
@@ -265,11 +261,11 @@ export abstract class MapController extends CompositeController {
   }
 
   protected willSetCanvasView(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCanvasView !== void 0) {
-        controllerObserver.controllerWillSetCanvasView(newCanvasView, oldCanvasView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCanvasView !== void 0) {
+        observer.controllerWillSetCanvasView(newCanvasView, oldCanvasView, this);
       }
     }
   }
@@ -285,17 +281,17 @@ export abstract class MapController extends CompositeController {
   }
 
   protected didSetCanvasView(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCanvasView !== void 0) {
-        controllerObserver.controllerDidSetCanvasView(newCanvasView, oldCanvasView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCanvasView !== void 0) {
+        observer.controllerDidSetCanvasView(newCanvasView, oldCanvasView, this);
       }
     }
   }
 
-  /** @hidden */
-  static CanvasFastener = ControllerView.define<MapController, CanvasView>({
+  /** @internal */
+  static CanvasFastener = ViewFastener.define<MapController, CanvasView>({
     type: CanvasView,
     willSetView(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
       this.owner.willSetCanvasView(newCanvasView, oldCanvasView);
@@ -308,10 +304,10 @@ export abstract class MapController extends CompositeController {
     },
   });
 
-  @ControllerView<MapController, CanvasView>({
+  @ViewFastener<MapController, CanvasView>({
     extends: MapController.CanvasFastener,
   })
-  readonly canvas!: ControllerView<this, CanvasView>;
+  readonly canvas!: ViewFastener<this, CanvasView>;
 
   protected initContainerView(containerView: HtmlView): void {
     const mapView = this.createMapView(containerView);
@@ -328,11 +324,11 @@ export abstract class MapController extends CompositeController {
   }
 
   protected willSetContainerView(newContainerView: HtmlView | null, oldCanvasView: HtmlView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetContainerView !== void 0) {
-        controllerObserver.controllerWillSetContainerView(newContainerView, oldCanvasView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetContainerView !== void 0) {
+        observer.controllerWillSetContainerView(newContainerView, oldCanvasView, this);
       }
     }
   }
@@ -348,17 +344,17 @@ export abstract class MapController extends CompositeController {
   }
 
   protected didSetContainerView(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetContainerView !== void 0) {
-        controllerObserver.controllerDidSetContainerView(newContainerView, oldContainerView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetContainerView !== void 0) {
+        observer.controllerDidSetContainerView(newContainerView, oldContainerView, this);
       }
     }
   }
 
-  /** @hidden */
-  static ContainerFastener = ControllerView.define<MapController, HtmlView>({
+  /** @internal */
+  static ContainerFastener = ViewFastener.define<MapController, HtmlView>({
     type: HtmlView,
     willSetView(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
       this.owner.willSetContainerView(newContainerView, oldContainerView);
@@ -371,10 +367,10 @@ export abstract class MapController extends CompositeController {
     },
   });
 
-  @ControllerView<MapController, HtmlView>({
+  @ViewFastener<MapController, HtmlView>({
     extends: MapController.ContainerFastener,
   })
-  readonly container!: ControllerView<this, HtmlView>;
+  readonly container!: ViewFastener<this, HtmlView>;
 
   insertLayer(layerController: GeoController, targetController: Controller | null = null): void {
     const layerFasteners = this.layerFasteners as ControllerFastener<this, GeoController>[];
@@ -390,7 +386,7 @@ export abstract class MapController extends CompositeController {
     const layerFastener = this.createLayerFastener(layerController);
     layerFasteners.splice(targetIndex, 0, layerFastener);
     layerFastener.setController(layerController, targetController);
-    if (this.isMounted()) {
+    if (this.mounted) {
       layerFastener.mount();
     }
   }
@@ -401,7 +397,7 @@ export abstract class MapController extends CompositeController {
       const layerFastener = layerFasteners[i]!;
       if (layerFastener.controller === layerController) {
         layerFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           layerFastener.unmount();
         }
         layerFasteners.splice(i, 1);
@@ -449,11 +445,11 @@ export abstract class MapController extends CompositeController {
 
   protected willSetLayer(newLayerController: GeoController | null, oldLayerController: GeoController | null,
                          layerFastener: ControllerFastener<this, GeoController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLayer !== void 0) {
-        controllerObserver.controllerWillSetLayer(newLayerController, oldLayerController, layerFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLayer !== void 0) {
+        observer.controllerWillSetLayer(newLayerController, oldLayerController, layerFastener);
       }
     }
   }
@@ -471,11 +467,11 @@ export abstract class MapController extends CompositeController {
 
   protected didSetLayer(newLayerController: GeoController | null, oldLayerController: GeoController | null,
                         layerFastener: ControllerFastener<this, GeoController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLayer !== void 0) {
-        controllerObserver.controllerDidSetLayer(newLayerController, oldLayerController, layerFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLayer !== void 0) {
+        observer.controllerDidSetLayer(newLayerController, oldLayerController, layerFastener);
       }
     }
   }
@@ -496,7 +492,7 @@ export abstract class MapController extends CompositeController {
     const layerController = this.createLayer(layerTrait);
     if (layerController !== null) {
       layerController.geo.setTrait(layerTrait);
-      this.insertChildController(layerController, targetController);
+      this.insertChild(layerController, targetController);
       if (layerController.geo.view === null) {
         const layerView = this.createLayerView(layerController);
         let targetView: GeoView | null = null;
@@ -520,7 +516,7 @@ export abstract class MapController extends CompositeController {
       const layerController = layerFastener.controller;
       if (layerController !== null && layerController.geo.trait === layerTrait) {
         layerFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           layerFastener.unmount();
         }
         layerFasteners.splice(i, 1);
@@ -544,11 +540,11 @@ export abstract class MapController extends CompositeController {
 
   protected willSetLayerTrait(newLayerTrait: GeoTrait | null, oldLayerTrait: GeoTrait | null,
                               layerFastener: ControllerFastener<this, GeoController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLayerTrait !== void 0) {
-        controllerObserver.controllerWillSetLayerTrait(newLayerTrait, oldLayerTrait, layerFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLayerTrait !== void 0) {
+        observer.controllerWillSetLayerTrait(newLayerTrait, oldLayerTrait, layerFastener);
       }
     }
   }
@@ -566,11 +562,11 @@ export abstract class MapController extends CompositeController {
 
   protected didSetLayerTrait(newLayerTrait: GeoTrait | null, oldLayerTrait: GeoTrait | null,
                              layerFastener: ControllerFastener<this, GeoController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLayerTrait !== void 0) {
-        controllerObserver.controllerDidSetLayerTrait(newLayerTrait, oldLayerTrait, layerFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLayerTrait !== void 0) {
+        observer.controllerDidSetLayerTrait(newLayerTrait, oldLayerTrait, layerFastener);
       }
     }
   }
@@ -593,11 +589,11 @@ export abstract class MapController extends CompositeController {
 
   protected willSetLayerView(newLayerView: GeoView | null, oldLayerView: GeoView | null,
                              layerFastener: ControllerFastener<this, GeoController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLayerView !== void 0) {
-        controllerObserver.controllerWillSetLayerView(newLayerView, oldLayerView, layerFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLayerView !== void 0) {
+        observer.controllerWillSetLayerView(newLayerView, oldLayerView, layerFastener);
       }
     }
   }
@@ -615,22 +611,22 @@ export abstract class MapController extends CompositeController {
 
   protected didSetLayerView(newLayerView: GeoView | null, oldLayerView: GeoView | null,
                             layerFastener: ControllerFastener<this, GeoController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLayerView !== void 0) {
-        controllerObserver.controllerDidSetLayerView(newLayerView, oldLayerView, layerFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLayerView !== void 0) {
+        observer.controllerDidSetLayerView(newLayerView, oldLayerView, layerFastener);
       }
     }
   }
 
   protected willSetLayerGeoBounds(newLayerGeoBounds: GeoBox, oldLayerGeoBounds: GeoBox,
                                   layerFastener: ControllerFastener<this, GeoController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLayerGeoBounds !== void 0) {
-        controllerObserver.controllerWillSetLayerGeoBounds(newLayerGeoBounds, oldLayerGeoBounds, layerFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLayerGeoBounds !== void 0) {
+        observer.controllerWillSetLayerGeoBounds(newLayerGeoBounds, oldLayerGeoBounds, layerFastener);
       }
     }
   }
@@ -642,23 +638,23 @@ export abstract class MapController extends CompositeController {
 
   protected didSetLayerGeoBounds(newLayerGeoBounds: GeoBox, oldLayerGeoBounds: GeoBox,
                                  layerFastener: ControllerFastener<this, GeoController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLayerGeoBounds !== void 0) {
-        controllerObserver.controllerDidSetLayerGeoBounds(newLayerGeoBounds, oldLayerGeoBounds, layerFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLayerGeoBounds !== void 0) {
+        observer.controllerDidSetLayerGeoBounds(newLayerGeoBounds, oldLayerGeoBounds, layerFastener);
       }
     }
   }
 
-  @ControllerProperty({type: Timing, state: true})
-  readonly geoTiming!: ControllerProperty<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({type: Timing, state: true})
+  readonly geoTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  /** @hidden */
+  /** @internal */
   static LayerFastener = ControllerFastener.define<MapController, GeoController>({
     type: GeoController,
     child: false,
-    observe: true,
+    observes: true,
     willSetController(newLayerController: GeoController | null, oldLayerController: GeoController | null): void {
       this.owner.willSetLayer(newLayerController, oldLayerController, this);
     },
@@ -692,10 +688,10 @@ export abstract class MapController extends CompositeController {
   });
 
   protected createLayerFastener(layerController: GeoController): ControllerFastener<this, GeoController> {
-    return new MapController.LayerFastener(this, layerController.key, "layer");
+    return MapController.LayerFastener.create(this, layerController.key ?? "layer");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly layerFasteners: ReadonlyArray<ControllerFastener<this, GeoController>>;
 
   protected getLayerFastener(layerTrait: GeoTrait): ControllerFastener<this, GeoController> | null {
@@ -710,7 +706,7 @@ export abstract class MapController extends CompositeController {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   protected mountLayerFasteners(): void {
     const layerFasteners = this.layerFasteners;
     for (let i = 0, n = layerFasteners.length; i < n; i += 1) {
@@ -719,7 +715,7 @@ export abstract class MapController extends CompositeController {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountLayerFasteners(): void {
     const layerFasteners = this.layerFasteners;
     for (let i = 0, n = layerFasteners.length; i < n; i += 1) {
@@ -732,31 +728,31 @@ export abstract class MapController extends CompositeController {
     return controller instanceof GeoController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const layerController = this.detectLayerController(childController);
     if (layerController !== null) {
       this.insertLayer(layerController, targetController);
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const layerController = this.detectLayerController(childController);
     if (layerController !== null) {
       this.removeLayer(layerController);
     }
   }
 
-  /** @hidden */
-  protected override mountControllerFasteners(): void {
-    super.mountControllerFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountLayerFasteners();
   }
 
-  /** @hidden */
-  protected override unmountControllerFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountLayerFasteners();
-    super.unmountControllerFasteners();
+    super.unmountFasteners();
   }
 }

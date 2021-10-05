@@ -33,16 +33,21 @@ export interface StreamletScope<O> {
   outlet(key: string): Outlet<O> | null;
 }
 
-export const StreamletScope = {} as {
-  is<O>(object: unknown): object is StreamletScope<O>;
-};
+/** @internal */
+export const StreamletScope = (function () {
+  const StreamletScope = {} as {
+    is<O>(object: unknown): object is StreamletScope<O>;
+  };
 
-StreamletScope.is = function <O>(object: unknown): object is StreamletScope<O> {
-  if (typeof object === "object" && object !== null) {
-    const scope = object as StreamletScope<O>;
-    return "streamletScope" in scope
-        && "streamletContext" in scope
-        && typeof scope.outlet === "function";
-  }
-  return false;
-};
+  StreamletScope.is = function <O>(object: unknown): object is StreamletScope<O> {
+    if (typeof object === "object" && object !== null || typeof object === "function") {
+      const scope = object as StreamletScope<O>;
+      return "streamletScope" in scope
+          && "streamletContext" in scope
+          && typeof scope.outlet === "function";
+    }
+    return false;
+  };
+
+  return StreamletScope;
+})();

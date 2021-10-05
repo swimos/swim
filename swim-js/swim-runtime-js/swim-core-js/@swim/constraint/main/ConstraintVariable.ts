@@ -21,5 +21,6 @@ export interface ConstraintVariable extends ConstraintSymbol, ConstraintTerm {
 
   readonly strength: ConstraintStrength;
 
+  /** @internal */
   evaluateConstraintVariable(): void;
 }

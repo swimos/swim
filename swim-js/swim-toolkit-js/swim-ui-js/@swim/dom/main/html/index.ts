@@ -14,13 +14,16 @@
 
 export {
   ViewHtml,
+  AnyHtmlView,
+  HtmlViewInit,
   HtmlViewAttributesInit,
   HtmlViewStyleInit,
-  HtmlViewInit,
   HtmlViewTagMap,
   HtmlViewFactory,
+  HtmlViewClass,
   HtmlViewConstructor,
   HtmlView,
+  HtmlViewTagFactory,
 } from "./HtmlView";
 export {HtmlViewObserver} from "./HtmlViewObserver";
 

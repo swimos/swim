@@ -69,7 +69,7 @@ export interface DownlinkInit extends DownlinkObserver {
   type?: DownlinkType;
 }
 
-/** @hidden */
+/** @internal */
 export const enum DownlinkFlags {
   KeepLinked = 1,
   KeepSynced = 2,
@@ -123,37 +123,37 @@ export abstract class Downlink {
     this.observers = observers;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly context: DownlinkContext;
 
-  /** @hidden */
+  /** @internal */
   readonly owner: DownlinkOwner | null;
   
-  /** @hidden */
+  /** @internal */
   readonly ownHostUri: Uri;
   
-  /** @hidden */
+  /** @internal */
   readonly ownNodeUri: Uri;
   
-  /** @hidden */
+  /** @internal */
   readonly ownLaneUri: Uri;
   
-  /** @hidden */
+  /** @internal */
   readonly ownPrio: number;
   
-  /** @hidden */
+  /** @internal */
   readonly ownRate: number;
   
-  /** @hidden */
+  /** @internal */
   readonly ownBody: Value;
 
-  /** @hidden */
+  /** @internal */
   readonly flags: number;
 
-  /** @hidden */
+  /** @internal */
   readonly model: DownlinkModel | null;
 
-  /** @hidden */
+  /** @internal */
   readonly observers: ReadonlyArray<DownlinkObserver>;
 
   abstract readonly type: DownlinkType;
@@ -367,7 +367,7 @@ export abstract class Downlink {
     return model !== null ? model.session : Value.absent();
   }
 
-  /** @hidden */
+  /** @internal */
   onEventMessage(message: EventMessage): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -378,7 +378,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   onCommandMessage(body: Value): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -389,7 +389,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   onLinkRequest(request?: LinkRequest): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -400,7 +400,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   onLinkedResponse(response?: LinkedResponse): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -411,7 +411,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   onSyncRequest(request?: SyncRequest): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -422,7 +422,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   onSyncedResponse(response?: SyncedResponse): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -433,7 +433,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   onUnlinkRequest(request?: UnlinkRequest): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -444,7 +444,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   onUnlinkedResponse(response?: UnlinkedResponse): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -455,7 +455,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   hostDidConnect(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -466,7 +466,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   hostDidDisconnect(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -477,7 +477,7 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   hostDidFail(error: unknown): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -505,12 +505,12 @@ export abstract class Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   openUp(host: Host): void {
     // nop
   }
 
-  /** @hidden */
+  /** @internal */
   closeUp(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -527,7 +527,7 @@ export abstract class Downlink {
   }
 }
 
-/** @hidden */
+/** @internal */
 class DownlinkInitForm extends Form<DownlinkInit | undefined> {
   declare readonly tag: string | undefined; // getter defined below to work around useDefineForClassFields lunacy
 
@@ -603,6 +603,5 @@ Object.defineProperty(DownlinkInitForm.prototype, "tag", {
   get(this: DownlinkInitForm): string | undefined {
     return "link";
   },
-  enumerable: true,
   configurable: true,
 });

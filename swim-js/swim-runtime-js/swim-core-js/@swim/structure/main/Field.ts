@@ -27,7 +27,7 @@ export type AnyField = Field
                      | {[key: string]: AnyValue};
 
 export abstract class Field extends Item {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }
@@ -311,7 +311,7 @@ export abstract class Field extends Item {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static readonly ImmutableFlag: number = 1 << 0;
 
   static of(key: AnyValue, value?: AnyValue): Field {

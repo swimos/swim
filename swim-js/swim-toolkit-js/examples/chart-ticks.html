@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
@@ -26,7 +26,7 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const chartView = canvasView.append(swim.ChartView)
+const chartView = canvasView.appendChild(swim.ChartView)
     .topAxis(true)
     .rightAxis(true)
     .bottomAxis(true)
@@ -53,7 +53,7 @@ chartView.rightAxis.view
     .borderWidth(0);
 chartView.rightAxis.view.gridLineColor.setLook(swim.Look.mutedColor);
 
-const plotView = graphView.append(swim.LinePlotView)
+const plotView = graphView.appendChild(swim.LinePlotView)
     .hitMode("domain")
     .strokeWidth(2)
     .on("pointerover", function (event) {
@@ -89,7 +89,7 @@ for (let i = 0, n = cycles * samples; i <= n; i += 1) {
   plotView.insertDataPoint({x: x, y: y, opacity: opacity});
 }
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
     </script>
   </body>

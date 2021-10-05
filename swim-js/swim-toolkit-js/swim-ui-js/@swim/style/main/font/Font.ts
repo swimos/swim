@@ -219,7 +219,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     return output;
   }
 
-  /* @hidden */
+  /* @internal */
   readonly stringValue: string | undefined;
 
   toString(): string {
@@ -383,7 +383,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     return parser.bind();
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is FontInit {
     if (typeof value === "object" && value !== null) {
       const init = value as FontInit;
@@ -392,7 +392,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyFont {
     return value instanceof Font || Font.isInit(value);
   }

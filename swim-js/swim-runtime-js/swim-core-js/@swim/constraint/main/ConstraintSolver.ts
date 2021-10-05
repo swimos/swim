@@ -17,20 +17,20 @@ import {ConstraintMap} from "./ConstraintMap";
 import {ConstraintSymbol, ConstraintSlack, ConstraintError, ConstraintDummy} from "./ConstraintSymbol";
 import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpression";
 import type {ConstraintVariable} from "./ConstraintVariable";
-import {ConstraintBinding} from "./ConstraintBinding";
+import {ConstraintProperty} from "./ConstraintProperty";
 import type {ConstraintRelation} from "./ConstraintRelation";
 import {AnyConstraintStrength, ConstraintStrength} from "./ConstraintStrength";
 import {Constraint} from "./Constraint";
 import type {ConstraintScope} from "./ConstraintScope";
 import {ConstraintRow} from "./ConstraintRow";
 
-/** @hidden */
+/** @internal */
 export interface ConstraintTag {
   readonly marker: ConstraintSymbol;
   readonly other: ConstraintSymbol;
 }
 
-/** @hidden */
+/** @internal */
 export interface ConstraintVariableBinding {
   readonly constraint: Constraint;
   readonly tag: ConstraintTag;
@@ -48,25 +48,25 @@ export class ConstraintSolver implements ConstraintScope {
     this.invalidated = new ConstraintMap();
   }
 
-  /** @hidden */
+  /** @internal */
   readonly constraints: ConstraintMap<Constraint, ConstraintTag>;
 
-  /** @hidden */
+  /** @internal */
   readonly constraintVariables: ConstraintMap<ConstraintVariable, ConstraintVariableBinding>;
 
-  /** @hidden */
+  /** @internal */
   readonly rows: ConstraintMap<ConstraintSymbol, ConstraintRow>;
 
-  /** @hidden */
+  /** @internal */
   readonly infeasible: ConstraintSymbol[];
 
-  /** @hidden */
+  /** @internal */
   readonly objective: ConstraintRow;
 
-  /** @hidden */
+  /** @internal */
   readonly artificial: ConstraintRow | null;
 
-  /** @hidden */
+  /** @internal */
   readonly invalidated: ConstraintMap<ConstraintSymbol, ConstraintRow | null>;
 
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
@@ -107,7 +107,7 @@ export class ConstraintSolver implements ConstraintScope {
     this.addConstraintRow(constraint, row, tag);
   }
 
-  /** @hidden */
+  /** @internal */
   protected addConstraintRow(constraint: Constraint, row: ConstraintRow, tag: ConstraintTag): void {
     this.willAddConstraint(constraint);
 
@@ -175,7 +175,7 @@ export class ConstraintSolver implements ConstraintScope {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected removeConstraintRow(constraint: Constraint): void {
     const tag = this.constraints.get(constraint);
     if (tag === void 0) {
@@ -221,16 +221,22 @@ export class ConstraintSolver implements ConstraintScope {
     // hook
   }
 
-  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstraintBinding {
+  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstraintProperty<unknown, number> {
     if (value === void 0) {
       value = 0;
     }
-    if (strength === void 0) {
-      strength = ConstraintStrength.Strong;
-    } else {
+    if (strength !== void 0) {
       strength = ConstraintStrength.fromAny(strength);
+    } else {
+      strength = ConstraintStrength.Strong;
     }
-    return new ConstraintBinding(this, name, value, strength);
+    const property = ConstraintProperty.create(this, name) as ConstraintProperty<unknown, number>;
+    if (value !== void 0) {
+      property.setState(value);
+    }
+    property.setStrength(strength);
+    property.mount();
+    return property;
   }
 
   hasConstraintVariable(variable: ConstraintVariable): boolean {
@@ -347,14 +353,14 @@ export class ConstraintSolver implements ConstraintScope {
     // hook
   }
 
-  /** @hidden */
+  /** @internal */
   invalidate(symbol: ConstraintSymbol, row: ConstraintRow | null = null): void {
     if (symbol.isExternal()) {
       this.invalidated.set(symbol, row);
     }
   }
 
-  /** @hidden */
+  /** @internal */
   updateSolution(): void {
     const invalidated = this.invalidated;
     if (!invalidated.isEmpty()) {

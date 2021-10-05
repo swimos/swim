@@ -22,13 +22,13 @@ import type {Exam} from "./Exam";
  * Unit test `Report` that prints its results to the console.
  */
 export class ConsoleReport extends Report {
-  /** @hidden */
+  /** @internal */
   outputSettings: OutputSettings;
-  /** @hidden */
+  /** @internal */
   testDepth: number;
-  /** @hidden */
+  /** @internal */
   passCount: number;
-  /** @hidden */
+  /** @internal */
   failCount: number;
 
   constructor(outputSettings?: OutputSettings) {

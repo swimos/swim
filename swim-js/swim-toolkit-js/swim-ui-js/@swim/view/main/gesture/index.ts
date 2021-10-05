@@ -17,16 +17,11 @@ export {
   GestureInput,
 } from "./GestureInput";
 export {
-  GestureContextPrototype,
-  GestureContext,
-} from "./GestureContext";
-export {
-  GestureMemberType,
+  GestureMemberView,
+  GestureView,
   GestureMethod,
-  GestureFlags,
   GestureInit,
   GestureDescriptor,
-  GestureConstructor,
   GestureClass,
   Gesture,
 } from "./Gesture";
@@ -35,7 +30,6 @@ export {PositionGestureInput} from "./PositionGestureInput";
 export {
   PositionGestureInit,
   PositionGestureDescriptor,
-  PositionGestureConstructor,
   PositionGestureClass,
   PositionGesture,
 } from "./PositionGesture";
@@ -47,7 +41,6 @@ export {MomentumGestureInput} from "./MomentumGestureInput";
 export {
   MomentumGestureInit,
   MomentumGestureDescriptor,
-  MomentumGestureConstructor,
   MomentumGestureClass,
   MomentumGesture,
 } from "./MomentumGesture";
@@ -59,7 +52,6 @@ export {ScaleGestureInput} from "./ScaleGestureInput";
 export {
   ScaleGestureInit,
   ScaleGestureDescriptor,
-  ScaleGestureConstructor,
   ScaleGestureClass,
   ScaleGesture,
 } from "./ScaleGesture";

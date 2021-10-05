@@ -17,15 +17,15 @@ import type {Color} from "@swim/style";
 import type {Look, MoodMatrix} from "@swim/theme";
 import {CircleIcon} from "./CircleIcon";
 
-/** @hidden */
+/** @internal */
 export interface CircleIconInterpolator extends Interpolator<CircleIcon> {
-  /** @hidden */
+  /** @internal */
   readonly fillColorInterpolator: Interpolator<Color | null>;
 
-  /** @hidden */
+  /** @internal */
   readonly fillLook: Look<Color> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly moodModifier: MoodMatrix | null;
 
   readonly 0: CircleIcon;
@@ -35,57 +35,59 @@ export interface CircleIconInterpolator extends Interpolator<CircleIcon> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const CircleIconInterpolator = function (i0: CircleIcon, i1: CircleIcon): CircleIconInterpolator {
-  const interpolator = function (u: number): CircleIcon {
-    const fillColor = interpolator.fillColorInterpolator(u);
-    const fillLook = interpolator.fillLook;
-    const moodModifier = interpolator.moodModifier;
-    return new CircleIcon(fillColor, fillLook, moodModifier);
-  } as CircleIconInterpolator;
-  Object.setPrototypeOf(interpolator, CircleIconInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
-  (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
-  (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
-  return interpolator;
-} as {
-  (i0: CircleIcon, i1: CircleIcon): CircleIconInterpolator;
+/** @internal */
+export const CircleIconInterpolator = (function (_super: typeof Interpolator) {
+  const CircleIconInterpolator = function (i0: CircleIcon, i1: CircleIcon): CircleIconInterpolator {
+    const interpolator = function (u: number): CircleIcon {
+      const fillColor = interpolator.fillColorInterpolator(u);
+      const fillLook = interpolator.fillLook;
+      const moodModifier = interpolator.moodModifier;
+      return new CircleIcon(fillColor, fillLook, moodModifier);
+    } as CircleIconInterpolator;
+    Object.setPrototypeOf(interpolator, CircleIconInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
+    (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
+    (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
+    return interpolator;
+  } as {
+    (i0: CircleIcon, i1: CircleIcon): CircleIconInterpolator;
 
-  /** @hidden */
-  prototype: CircleIconInterpolator;
-};
+    /** @internal */
+    prototype: CircleIconInterpolator;
+  };
 
-CircleIconInterpolator.prototype = Object.create(Interpolator.prototype);
+  CircleIconInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(CircleIconInterpolator.prototype, 0, {
-  get(this: CircleIconInterpolator): CircleIcon {
-    const fillColor = this.fillColorInterpolator[0];
-    const fillLook = this.fillLook;
-    const moodModifier = this.moodModifier;
-    return new CircleIcon(fillColor, fillLook, moodModifier);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(CircleIconInterpolator.prototype, 0, {
+    get(this: CircleIconInterpolator): CircleIcon {
+      const fillColor = this.fillColorInterpolator[0];
+      const fillLook = this.fillLook;
+      const moodModifier = this.moodModifier;
+      return new CircleIcon(fillColor, fillLook, moodModifier);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(CircleIconInterpolator.prototype, 1, {
-  get(this: CircleIconInterpolator): CircleIcon {
-    const fillColor = this.fillColorInterpolator[1];
-    const fillLook = this.fillLook;
-    const moodModifier = this.moodModifier;
-    return new CircleIcon(fillColor, fillLook, moodModifier);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(CircleIconInterpolator.prototype, 1, {
+    get(this: CircleIconInterpolator): CircleIcon {
+      const fillColor = this.fillColorInterpolator[1];
+      const fillLook = this.fillLook;
+      const moodModifier = this.moodModifier;
+      return new CircleIcon(fillColor, fillLook, moodModifier);
+    },
+    configurable: true,
+  });
 
-CircleIconInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof CircleIconInterpolator) {
-    return this.fillColorInterpolator.equals(that.fillColorInterpolator)
-        && this.fillLook === that.fillLook
-        && Equals(this.moodModifier, that.moodModifier);
-  }
-  return false;
-};
+  CircleIconInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof CircleIconInterpolator) {
+      return this.fillColorInterpolator.equals(that.fillColorInterpolator)
+          && this.fillLook === that.fillLook
+          && Equals(this.moodModifier, that.moodModifier);
+    }
+    return false;
+  };
+
+  return CircleIconInterpolator;
+})(Interpolator);

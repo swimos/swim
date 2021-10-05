@@ -12,5 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {LayoutManager} from "./LayoutManager";
-export {LayoutManagerObserver} from "./LayoutManagerObserver";
+export {LayoutService} from "./LayoutService";
+export {LayoutServiceObserver} from "./LayoutServiceObserver";
+
+export {LayoutProvider} from "./LayoutProvider";

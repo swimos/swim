@@ -15,26 +15,30 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {R2Box} from "./R2Box";
 
-/** @hidden */
-export const R2BoxInterpolator = function (s0: R2Box, s1: R2Box): Interpolator<R2Box> {
-  const interpolator = function (u: number): R2Box {
-    const s0 = interpolator[0];
-    const s1 = interpolator[1];
-    const xMin = s0.xMin + u * (s1.xMin - s0.xMin);
-    const yMin = s0.yMin + u * (s1.yMin - s0.yMin);
-    const xMax = s0.xMax + u * (s1.xMax - s0.xMax);
-    const yMax = s0.yMax + u * (s1.yMax - s0.yMax);
-    return new R2Box(xMin, yMin, xMax, yMax);
-  } as Interpolator<R2Box>;
-  Object.setPrototypeOf(interpolator, R2BoxInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = s0;
-  (interpolator as Mutable<typeof interpolator>)[1] = s1;
-  return interpolator;
-} as {
-  (s0: R2Box, s1: R2Box): Interpolator<R2Box>;
+/** @internal */
+export const R2BoxInterpolator = (function (_super: typeof Interpolator) {
+  const R2BoxInterpolator = function (s0: R2Box, s1: R2Box): Interpolator<R2Box> {
+    const interpolator = function (u: number): R2Box {
+      const s0 = interpolator[0];
+      const s1 = interpolator[1];
+      const xMin = s0.xMin + u * (s1.xMin - s0.xMin);
+      const yMin = s0.yMin + u * (s1.yMin - s0.yMin);
+      const xMax = s0.xMax + u * (s1.xMax - s0.xMax);
+      const yMax = s0.yMax + u * (s1.yMax - s0.yMax);
+      return new R2Box(xMin, yMin, xMax, yMax);
+    } as Interpolator<R2Box>;
+    Object.setPrototypeOf(interpolator, R2BoxInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = s0;
+    (interpolator as Mutable<typeof interpolator>)[1] = s1;
+    return interpolator;
+  } as {
+    (s0: R2Box, s1: R2Box): Interpolator<R2Box>;
 
-  /** @hidden */
-  prototype: Interpolator<R2Box>;
-};
+    /** @internal */
+    prototype: Interpolator<R2Box>;
+  };
 
-R2BoxInterpolator.prototype = Object.create(Interpolator.prototype);
+  R2BoxInterpolator.prototype = Object.create(_super.prototype);
+
+  return R2BoxInterpolator;
+})(Interpolator);

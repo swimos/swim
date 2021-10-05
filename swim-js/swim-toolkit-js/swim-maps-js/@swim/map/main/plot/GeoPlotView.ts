@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, AnyTiming} from "@swim/util";
+import type {Mutable, Class, AnyTiming} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {ViewContextType, View, ViewProperty, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View} from "@swim/view";
 import {GraphicsView, StrokeViewInit, StrokeView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import type {GeoViewInit} from "../geo/GeoView";
 import {GeoLayerView} from "../layer/GeoLayerView";
@@ -47,39 +49,16 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     });
   }
 
-  override initView(init: GeoPlotViewInit): void {
-    super.initView(init);
-    if (init.stroke !== void 0) {
-      this.stroke(init.stroke);
-    }
-    if (init.strokeWidth !== void 0) {
-      this.strokeWidth(init.strokeWidth);
-    }
-    if (init.hitWidth !== void 0) {
-      this.hitWidth(init.hitWidth);
-    }
-    if (init.font !== void 0) {
-      this.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      this.textColor(init.textColor);
-    }
-    const points = init.points;
-    if (points !== void 0) {
-      this.points(points);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<GeoPlotViewObserver>;
+  override readonly observerType?: Class<GeoPlotViewObserver>;
 
   points(): ReadonlyArray<GeoPointView>;
   points(points: ReadonlyArray<AnyGeoPointView>, timing?: AnyTiming | boolean): this;
   points(points?: ReadonlyArray<AnyGeoPointView>, timing?: AnyTiming | boolean): ReadonlyArray<GeoPointView> | this {
-    const childViews = this.childViews;
+    const children = this.children;
     if (points === void 0) {
       const points: GeoPointView[] = [];
-      for (let i = 0; i < childViews.length; i += 1) {
-        const childView = childViews[i];
+      for (let i = 0; i < children.length; i += 1) {
+        const childView = children[i];
         if (childView instanceof GeoPointView) {
           points.push(childView);
         }
@@ -96,8 +75,8 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
       let invalid = false;
       let i = 0;
       let j = 0;
-      while (i < childViews.length && j < points.length) {
-        const childView = childViews[i];
+      while (i < children.length && j < points.length) {
+        const childView = children[i];
         if (childView instanceof GeoPointView) {
           const point = points[j]!;
           childView.setState(point);
@@ -115,7 +94,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
       }
       while (j < points.length) {
         const point = GeoPointView.fromAny(points[j]!);
-        this.appendChildView(point);
+        this.appendChild(point);
         const {lng, lat} = point.geoPoint.getValue();
         lngMid += lng;
         latMid += lat;
@@ -127,10 +106,10 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
         i += 1;
         j += 1;
       }
-      while (i < childViews.length) {
-        const childView = childViews[i];
+      while (i < children.length) {
+        const childView = children[i];
         if (childView instanceof GeoPointView) {
-          this.removeChildView(childView);
+          this.removeChild(childView);
         } else {
           i += 1;
         }
@@ -138,10 +117,10 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
       if (!invalid && j !== 0) {
         lngMid /= j;
         latMid /= j;
-        this.geoCentroid.setState(new GeoPoint(lngMid, latMid), View.Intrinsic);
+        this.geoCentroid.setState(new GeoPoint(lngMid, latMid), Affinity.Intrinsic);
         (this as Mutable<this>).geoBounds = new GeoBox(lngMin, latMin, lngMax, latMax);
       } else {
-        this.geoCentroid.setState(GeoPoint.origin(), View.Intrinsic);
+        this.geoCentroid.setState(GeoPoint.origin(), Affinity.Intrinsic);
         (this as Mutable<this>).geoBounds = GeoBox.undefined();
       }
       const newGeoBounds = this.geoBounds;
@@ -156,42 +135,42 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
 
   appendPoint(point: AnyGeoPointView, key?: string): GeoPointView {
     point = GeoPointView.fromAny(point);
-    this.appendChildView(point, key);
+    this.appendChild(point, key);
     return point;
   }
 
   setPoint(key: string, point: AnyGeoPointView): GeoPointView {
     point = GeoPointView.fromAny(point);
-    this.setChildView(key, point);
+    this.setChild(key, point);
     return point;
   }
 
-  @ViewProperty({type: GeoPoint, state: GeoPoint.origin()})
-  readonly geoCentroid!: ViewProperty<this, GeoPoint, AnyGeoPoint>;
+  @Property({type: GeoPoint, state: GeoPoint.origin()})
+  readonly geoCentroid!: Property<this, GeoPoint, AnyGeoPoint>;
 
-  @ViewProperty({type: R2Point, state: R2Point.origin()})
-  readonly viewCentroid!: ViewProperty<this, R2Point, AnyR2Point>;
+  @Property({type: R2Point, state: R2Point.origin()})
+  readonly viewCentroid!: Property<this, R2Point, AnyR2Point>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
-  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, state: null, inherit: true})
-  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Font, state: null, inherit: true})
-  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
+  @ThemeAnimator({type: Font, state: null, inherits: true})
+  readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
-  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true})
+  readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewProperty({type: Number})
-  readonly hitWidth!: ViewProperty<this, number | undefined>;
+  @Property({type: Number})
+  readonly hitWidth!: Property<this, number | undefined>;
 
-  /** @hidden */
+  /** @internal */
   readonly gradientStops: number;
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     if (childView instanceof GeoPointView) {
       this.onInsertPoint(childView);
     }
@@ -218,9 +197,9 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     let invalid = false;
     let gradientStops = 0;
     let pointCount = 0;
-    const childViews = this.childViews;
-    for (let i = 0; i < childViews.length; i += 1) {
-      const childView = childViews[i];
+    const children = this.children;
+    for (let i = 0; i < children.length; i += 1) {
+      const childView = children[i];
       if (childView instanceof GeoPointView) {
         const {lng, lat} = childView.geoPoint.getValue();
         lngMid += lng;
@@ -247,17 +226,17 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     if (!invalid && pointCount !== 0) {
       lngMid /= pointCount;
       latMid /= pointCount;
-      this.geoCentroid.setState(new GeoPoint(lngMid, latMid), View.Intrinsic);
+      this.geoCentroid.setState(new GeoPoint(lngMid, latMid), Affinity.Intrinsic);
       (this as Mutable<this>).geoBounds = new GeoBox(lngMin, latMin, lngMax, latMax);
       xMid /= pointCount;
       yMid /= pointCount;
-      this.viewCentroid.setState(new R2Point(xMid, yMid), View.Intrinsic);
+      this.viewCentroid.setState(new R2Point(xMid, yMid), Affinity.Intrinsic);
       (this as Mutable<this>).viewBounds = new R2Box(xMin, yMin, xMax, yMax);
       this.cullGeoFrame(viewContext.geoViewport.geoFrame);
     } else {
-      this.geoCentroid.setState(GeoPoint.origin(), View.Intrinsic);
+      this.geoCentroid.setState(GeoPoint.origin(), Affinity.Intrinsic);
       (this as Mutable<this>).geoBounds = GeoBox.undefined();
-      this.viewCentroid.setState(R2Point.origin(), View.Intrinsic);
+      this.viewCentroid.setState(R2Point.origin(), Affinity.Intrinsic);
       (this as Mutable<this>).viewBounds = R2Box.undefined();
       this.setCulled(true);
     }
@@ -274,43 +253,50 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       if (this.gradientStops !== 0) {
-        this.renderPlotGradient(context, this.viewFrame);
+        this.renderPlotGradient(renderer.context, this.viewFrame);
       } else {
-        this.renderPlotStroke(context, this.viewFrame);
+        this.renderPlotStroke(renderer.context, this.viewFrame);
       }
-      context.restore();
     }
   }
 
   protected renderPlotStroke(context: CanvasContext, frame: R2Box): void {
-    const childViews = this.childViews;
-    const childCount = childViews.length;
-    let pointCount = 0;
-    context.beginPath();
-    for (let i = 0; i < childCount; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof GeoPointView) {
-        const {x, y} = childView.viewPoint.getValue();
-        if (pointCount === 0) {
-          context.moveTo(x, y);
-        } else {
-          context.lineTo(x, y);
+    const stroke = this.stroke.value;
+    if (stroke !== null) {
+      const children = this.children;
+      const childCount = children.length;
+      let pointCount = 0;
+
+      context.beginPath();
+      for (let i = 0; i < childCount; i += 1) {
+        const childView = children[i];
+        if (childView instanceof GeoPointView) {
+          const {x, y} = childView.viewPoint.getValue();
+          if (pointCount === 0) {
+            context.moveTo(x, y);
+          } else {
+            context.lineTo(x, y);
+          }
+          pointCount += 1;
         }
-        pointCount += 1;
       }
-    }
-    if (pointCount !== 0) {
-      const stroke = this.stroke.value;
-      if (stroke !== null) {
+
+      if (pointCount !== 0) {
+        // save
+        const contextLineWidth = context.lineWidth;
+        const contextStrokeStyle = context.strokeStyle;
+
         const size = Math.min(frame.width, frame.height);
         const strokeWidth = this.strokeWidth.getValue().pxValue(size);
-        context.strokeStyle = stroke.toString();
         context.lineWidth = strokeWidth;
+        context.strokeStyle = stroke.toString();
         context.stroke();
+
+        // restore
+        context.lineWidth = contextLineWidth;
+        context.strokeStyle = contextStrokeStyle;
       }
     }
   }
@@ -319,11 +305,16 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     const stroke = this.stroke.getValue();
     const size = Math.min(frame.width, frame.height);
     const strokeWidth = this.strokeWidth.getValue().pxValue(size);
-    const childViews = this.childViews;
-    const childCount = childViews.length;
+    const children = this.children;
+    const childCount = children.length;
+
+    // save
+    const contextLineWidth = context.lineWidth;
+    const contextStrokeStyle = context.strokeStyle;
+
     let p0: GeoPointView | undefined;
     for (let i = 0; i < childCount; i += 1) {
-      const p1 = childViews[i];
+      const p1 = children[i];
       if (p1 instanceof GeoPointView) {
         if (p0 !== void 0) {
           const x0 = p0.viewPoint.getValue().x;
@@ -349,13 +340,17 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
           context.beginPath();
           context.moveTo(x0, y0);
           context.lineTo(x1, y1);
-          context.strokeStyle = gradient;
           context.lineWidth = strokeWidth;
+          context.strokeStyle = gradient;
           context.stroke();
         }
         p0 = p1;
       }
     }
+
+    // restore
+    context.lineWidth = contextLineWidth;
+    context.strokeStyle = contextStrokeStyle;
   }
 
   protected override updateGeoBounds(): void {
@@ -375,23 +370,20 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      context.save();
       const p = renderer.transform.transform(x, y);
-      const hit = this.hitTestPlot(p.x, p.y, context, this.viewFrame);
-      context.restore();
-      return hit;
+      return this.hitTestPlot(p.x, p.y, renderer.context, this.viewFrame);
     }
     return null;
   }
 
   protected hitTestPlot(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
-    const childViews = this.childViews;
-    const childCount = childViews.length;
+    const children = this.children;
+    const childCount = children.length;
     let pointCount = 0;
+
     context.beginPath();
     for (let i = 0; i < childCount; i += 1) {
-      const childView = this.childViews[i];
+      const childView = this.children[i];
       if (childView instanceof GeoPointView) {
         const {x, y} = childView.viewPoint.getValue();
         if (i === 0) {
@@ -402,7 +394,11 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
         pointCount += 1;
       }
     }
+
     if (pointCount !== 0) {
+      // save
+      const contextLineWidth = context.lineWidth;
+
       let hitWidth = this.hitWidth.getStateOr(0);
       const strokeWidth = this.strokeWidth.value;
       if (strokeWidth !== null) {
@@ -410,10 +406,16 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
         hitWidth = Math.max(hitWidth, strokeWidth.pxValue(size));
       }
       context.lineWidth = hitWidth;
-      if (context.isPointInStroke(x, y)) {
+      const pointInStroke = context.isPointInStroke(x, y);
+
+      // restore
+      context.lineWidth = contextLineWidth;
+
+      if (pointInStroke) {
         return this;
       }
     }
+
     return null;
   }
 
@@ -421,22 +423,26 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     return GeoRippleView.ripple(this, options);
   }
 
-  static override create(): GeoPlotView {
-    return new GeoPlotView();
-  }
-
-  static fromInit(init: GeoPlotViewInit): GeoPlotView {
-    const view = new GeoPlotView();
-    view.initView(init);
-    return view;
-  }
-
-  static value(value: AnyGeoPlotView): GeoPlotView {
-    if (value instanceof GeoPlotView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+  override init(init: GeoPlotViewInit): void {
+    super.init(init);
+    if (init.stroke !== void 0) {
+      this.stroke(init.stroke);
     }
-    throw new TypeError("" + value);
+    if (init.strokeWidth !== void 0) {
+      this.strokeWidth(init.strokeWidth);
+    }
+    if (init.hitWidth !== void 0) {
+      this.hitWidth(init.hitWidth);
+    }
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
+    const points = init.points;
+    if (points !== void 0) {
+      this.points(points);
+    }
   }
 }

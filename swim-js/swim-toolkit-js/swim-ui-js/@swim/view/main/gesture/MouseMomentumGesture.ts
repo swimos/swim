@@ -12,51 +12,76 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {View} from "../View";
-import type {GestureContext} from "./GestureContext";
+import type {FastenerOwner} from "@swim/fastener";
 import type {MomentumGestureInput} from "./MomentumGestureInput";
-import {MomentumGesture} from "./MomentumGesture";
+import {MomentumGestureClass, MomentumGesture} from "./MomentumGesture";
+import type {View} from "../view/View";
 
-export class MouseMomentumGesture<G extends GestureContext, V extends View> extends MomentumGesture<G, V> {
-  constructor(owner: G, gestureName: string | undefined) {
-    super(owner, gestureName);
-    this.onMouseEnter = this.onMouseEnter.bind(this);
-    this.onMouseLeave = this.onMouseLeave.bind(this);
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
-    this.onMouseLeaveDocument = this.onMouseLeaveDocument.bind(this);
-  }
+/** @internal */
+export interface MouseMomentumGesture<O = unknown, V extends View = View> extends MomentumGesture<O, V> {
+  /** @internal @protected @override */
+  attachHoverEvents(view: V): void;
 
-  /** @hidden */
-  override attachHoverEvents(view: V): void {
+  /** @internal @protected @override */
+  detachHoverEvents(view: V): void;
+
+  /** @internal @protected @override */
+  attachPressEvents(view: V): void;
+
+  /** @internal @protected @override */
+  detachPressEvents(view: V): void;
+
+  /** @internal @protected */
+  updateInput(input: MomentumGestureInput, event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseEnter(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseLeave(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseDown(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseMove(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseUp(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseLeaveDocument(event: MouseEvent): void;
+}
+
+/** @internal */
+export const MouseMomentumGesture = (function (_super: typeof MomentumGesture) {
+  const MouseMomentumGesture = _super.extend() as MomentumGestureClass<MouseMomentumGesture<any, any>>;
+
+  MouseMomentumGesture.prototype.attachHoverEvents = function (this: MouseMomentumGesture, view: View): void {
     view.on("mouseenter", this.onMouseEnter as EventListener);
     view.on("mouseleave", this.onMouseLeave as EventListener);
     view.on("mousedown", this.onMouseDown as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override detachHoverEvents(view: V): void {
+  MouseMomentumGesture.prototype.detachHoverEvents = function (this: MouseMomentumGesture, view: View): void {
     view.off("mouseenter", this.onMouseEnter as EventListener);
     view.off("mouseleave", this.onMouseLeave as EventListener);
     view.off("mousedown", this.onMouseDown as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override attachPressEvents(view: V): void {
+  MouseMomentumGesture.prototype.attachPressEvents = function (this: MouseMomentumGesture, view: View): void {
     document.body.addEventListener("mousemove", this.onMouseMove);
     document.body.addEventListener("mouseup", this.onMouseUp);
     document.body.addEventListener("mouseleave", this.onMouseLeaveDocument);
-  }
+  };
 
-  /** @hidden */
-  override detachPressEvents(view: V): void {
+  MouseMomentumGesture.prototype.detachPressEvents = function (this: MouseMomentumGesture, view: View): void {
     document.body.removeEventListener("mousemove", this.onMouseMove);
     document.body.removeEventListener("mouseup", this.onMouseUp);
     document.body.removeEventListener("mouseleave", this.onMouseLeaveDocument);
-  }
+  };
 
-  protected updateInput(input: MomentumGestureInput, event: MouseEvent): void {
+  MouseMomentumGesture.prototype.updateInput = function (this: MouseMomentumGesture, input: MomentumGestureInput, event: MouseEvent): void {
     input.target = event.target;
     input.button = event.button;
     input.buttons = event.buttons;
@@ -71,30 +96,28 @@ export class MouseMomentumGesture<G extends GestureContext, V extends View> exte
     input.x = event.clientX;
     input.y = event.clientY;
     input.t = event.timeStamp;
-  }
+  };
 
-  protected onMouseEnter(event: MouseEvent): void {
+  MouseMomentumGesture.prototype.onMouseEnter = function (this: MouseMomentumGesture, event: MouseEvent): void {
     if (event.buttons === 0) {
-      const input = this.getOrCreateInput("mouse", "mouse", true,
-                                          event.clientX, event.clientY, event.timeStamp);
+      const input = this.getOrCreateInput("mouse", "mouse", true, event.clientX, event.clientY, event.timeStamp);
       this.updateInput(input, event);
       if (!input.hovering) {
         this.beginHover(input, event);
       }
     }
-  }
+  };
 
-  protected onMouseLeave(event: MouseEvent): void {
+  MouseMomentumGesture.prototype.onMouseLeave = function (this: MouseMomentumGesture, event: MouseEvent): void {
     const input = this.getInput("mouse");
     if (input !== null) {
       this.updateInput(input, event);
       this.endHover(input, event);
     }
-  }
+  };
 
-  protected onMouseDown(event: MouseEvent): void {
-    const input = this.getOrCreateInput("mouse", "mouse", true,
-                                        event.clientX, event.clientY, event.timeStamp);
+  MouseMomentumGesture.prototype.onMouseDown = function (this: MouseMomentumGesture, event: MouseEvent): void {
+    const input = this.getOrCreateInput("mouse", "mouse", true, event.clientX, event.clientY, event.timeStamp);
     this.updateInput(input, event);
     if (!input.pressing) {
       this.beginPress(input, event);
@@ -102,17 +125,17 @@ export class MouseMomentumGesture<G extends GestureContext, V extends View> exte
     if (event.button !== 0) {
       this.cancelPress(input, event);
     }
-  }
+  };
 
-  protected onMouseMove(event: MouseEvent): void {
+  MouseMomentumGesture.prototype.onMouseMove = function (this: MouseMomentumGesture, event: MouseEvent): void {
     const input = this.getInput("mouse");
     if (input !== null) {
       this.updateInput(input, event);
       this.movePress(input, event);
     }
-  }
+  };
 
-  protected onMouseUp(event: MouseEvent): void {
+  MouseMomentumGesture.prototype.onMouseUp = function (this: MouseMomentumGesture, event: MouseEvent): void {
     const input = this.getInput("mouse");
     if (input !== null) {
       this.updateInput(input, event);
@@ -121,14 +144,27 @@ export class MouseMomentumGesture<G extends GestureContext, V extends View> exte
         this.press(input, event);
       }
     }
-  }
+  };
 
-  protected onMouseLeaveDocument(event: MouseEvent): void {
+  MouseMomentumGesture.prototype.onMouseLeaveDocument = function (this: MouseMomentumGesture, event: MouseEvent): void {
     const input = this.getInput("mouse");
     if (input !== null) {
       this.updateInput(input, event);
       this.cancelPress(input, event);
       this.endHover(input, event);
     }
-  }
-}
+  };
+
+  MouseMomentumGesture.construct = function <G extends MouseMomentumGesture<any, any>>(gestureClass: MomentumGestureClass<MouseMomentumGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+    gesture.onMouseEnter = gesture.onMouseEnter.bind(gesture);
+    gesture.onMouseLeave = gesture.onMouseLeave.bind(gesture);
+    gesture.onMouseDown = gesture.onMouseDown.bind(gesture);
+    gesture.onMouseMove = gesture.onMouseMove.bind(gesture);
+    gesture.onMouseUp = gesture.onMouseUp.bind(gesture);
+    gesture.onMouseLeaveDocument = gesture.onMouseLeaveDocument.bind(gesture);
+    return gesture;
+  };
+
+  return MouseMomentumGesture;
+})(MomentumGesture);

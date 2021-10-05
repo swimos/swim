@@ -19,7 +19,7 @@ import type {InvokeOperator} from "../operator/InvokeOperator";
 import type {Interpreter} from "../interpreter/Interpreter";
 
 export abstract class Func extends Expression {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }

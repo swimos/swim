@@ -17,9 +17,9 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
 
-const canvasView = containerView.append(swim.CanvasView)
+const canvasView = containerView.appendChild(swim.CanvasView)
     .mouseEventsEnabled(true)
     .pointerEventsEnabled(true)
     .touchEventsEnabled(true)
@@ -50,31 +50,31 @@ class ExamplePieController extends swim.PieController {
   }
 }
 
-const slice1Model = new swim.CompoundModel();
+const slice1Model = new swim.GenericModel();
 const slice1Trait = new swim.SliceTrait()
   .value(1)
   .legend("Slice 1");
 slice1Model.setTrait("slice", slice1Trait);
 
-const slice2Model = new swim.CompoundModel();
+const slice2Model = new swim.GenericModel();
 const slice2Trait = new swim.SliceTrait()
   .value(1)
   .legend("Slice 2");
 slice2Model.setTrait("slice", slice2Trait);
 
-const slice3Model = new swim.CompoundModel();
+const slice3Model = new swim.GenericModel();
 const slice3Trait = new swim.SliceTrait()
   .value(1)
   .legend("Slice 3");
 slice3Model.setTrait("slice", slice3Trait);
 
-const pieModel = new swim.CompoundModel();
+const pieModel = new swim.GenericModel();
 pieModel.mount();
 const pieTrait = new swim.PieTrait();
 pieModel.setTrait("pie", pieTrait);
-pieModel.appendChildModel(slice1Model, "slice1");
-pieModel.appendChildModel(slice2Model, "slice2");
-pieModel.appendChildModel(slice3Model, "slice3");
+pieModel.appendChild(slice1Model, "slice1");
+pieModel.appendChild(slice2Model, "slice2");
+pieModel.appendChild(slice3Model, "slice3");
 
 const pieController = new ExamplePieController();
 pieController.mount();
@@ -88,10 +88,10 @@ setInterval(function () {
 }, 1000);
 
 setInterval(function () {
-  if (slice3Model.isMounted()) {
+  if (slice3Model.mounted) {
     slice3Model.remove();
   } else {
-    pieModel.appendChildModel(slice3Model, "slice3");
+    pieModel.appendChild(slice3Model, "slice3");
   }
 }, 2500);
 

@@ -18,7 +18,7 @@ import type {UriQuery} from "../UriQuery";
 import type {UriQueryBuilder} from "../UriQueryBuilder";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriQueryParser extends Parser<UriQuery> {
   private readonly uri: UriParser;
   private readonly builder: UriQueryBuilder | undefined;

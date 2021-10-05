@@ -4,6 +4,7 @@
   "references": [
     {"path": "./@swim/util"},
     {"path": "./@swim/codec"},
+    {"path": "./@swim/fastener"},
     {"path": "./@swim/args"},
     {"path": "./@swim/unit"},
     {"path": "./@swim/collections"},

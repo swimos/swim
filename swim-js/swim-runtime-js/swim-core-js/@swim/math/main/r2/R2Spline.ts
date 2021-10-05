@@ -42,7 +42,7 @@ export class R2Spline extends R2Curve implements Debug {
 
   readonly curves: ReadonlyArray<R2Curve>;
 
-  /** @hidden */
+  /** @internal */
   readonly closed: boolean;
 
   isDefined(): boolean {
@@ -179,7 +179,7 @@ export class R2Spline extends R2Curve implements Debug {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly boundingBox: R2Box | null;
 
   override get bounds(): R2Box {
@@ -262,7 +262,7 @@ export class R2Spline extends R2Curve implements Debug {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pathString: string | undefined;
 
   override toPathString(outputSettings?: AnyOutputSettings): string {

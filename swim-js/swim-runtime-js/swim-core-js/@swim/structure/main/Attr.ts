@@ -52,7 +52,7 @@ export class Attr extends Field {
 
   override readonly value: Value;
 
-  /** @hidden */
+  /** @internal */
   readonly flags: number;
 
   override setValue(newValue: Value): Value {

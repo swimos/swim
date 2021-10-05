@@ -15,7 +15,7 @@
 import {Output, WriterException, Writer} from "@swim/codec";
 import type {ReconWriter} from "./ReconWriter";
 
-/** @hidden */
+/** @internal */
 export class DescendantsSelectorWriter<I, V> extends Writer {
   private readonly recon: ReconWriter<I, V>;
   private readonly then: V;

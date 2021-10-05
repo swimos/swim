@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {ExecuteContext} from "./ExecuteContext";
-export {ExecuteManager} from "./ExecuteManager";
-export {ExecuteManagerObserver} from "./ExecuteManagerObserver";
+export {ExecuteService} from "./ExecuteService";
+export {ExecuteServiceObserver} from "./ExecuteServiceObserver";
+
+export {ExecuteProvider} from "./ExecuteProvider";

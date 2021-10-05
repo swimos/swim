@@ -16,7 +16,7 @@ import type {OutputSettings} from "../output/OutputSettings";
 import type {Output} from "../output/Output";
 import {ByteOutput} from "./ByteOutput";
 
-/** @hidden */
+/** @internal */
 export class ByteOutputUint8Array extends ByteOutput<Uint8Array> {
   constructor(array: Uint8Array | null, size: number, settings: OutputSettings) {
     super(array, size, settings);

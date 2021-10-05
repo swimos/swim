@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Interpolator} from "./Interpolator";
 
-/** @hidden */
+/** @internal */
 export interface IdentityInterpolator<Y> extends Interpolator<Y> {
-  /** @hidden */
+  /** @internal */
   readonly value: Y;
 
   readonly 0: Y;
@@ -27,44 +27,46 @@ export interface IdentityInterpolator<Y> extends Interpolator<Y> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const IdentityInterpolator = function <Y>(value: Y): IdentityInterpolator<Y> {
-  const interpolator = function (u: number): Y {
-    return interpolator.value;
-  } as IdentityInterpolator<Y>;
-  Object.setPrototypeOf(interpolator, IdentityInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).value = value;
-  return interpolator;
-} as {
-  <Y>(value: Y): IdentityInterpolator<Y>;
+/** @internal */
+export const IdentityInterpolator = (function (_super: typeof Interpolator) {
+  const IdentityInterpolator = function <Y>(value: Y): IdentityInterpolator<Y> {
+    const interpolator = function (u: number): Y {
+      return interpolator.value;
+    } as IdentityInterpolator<Y>;
+    Object.setPrototypeOf(interpolator, IdentityInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).value = value;
+    return interpolator;
+  } as {
+    <Y>(value: Y): IdentityInterpolator<Y>;
 
-  /** @hidden */
-  prototype: IdentityInterpolator<any>;
-};
+    /** @internal */
+    prototype: IdentityInterpolator<any>;
+  };
 
-IdentityInterpolator.prototype = Object.create(Interpolator.prototype);
+  IdentityInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(IdentityInterpolator.prototype, 0, {
-  get<Y>(this: IdentityInterpolator<Y>): Y {
-    return this.value;
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(IdentityInterpolator.prototype, 0, {
+    get<Y>(this: IdentityInterpolator<Y>): Y {
+      return this.value;
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(IdentityInterpolator.prototype, 1, {
-  get<Y>(this: IdentityInterpolator<Y>): Y {
-    return this.value;
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(IdentityInterpolator.prototype, 1, {
+    get<Y>(this: IdentityInterpolator<Y>): Y {
+      return this.value;
+    },
+    configurable: true,
+  });
 
-IdentityInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof IdentityInterpolator) {
-    return this.value === that.value;
-  }
-  return false;
-};
+  IdentityInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof IdentityInterpolator) {
+      return this.value === that.value;
+    }
+    return false;
+  };
+
+  return IdentityInterpolator;
+})(Interpolator);

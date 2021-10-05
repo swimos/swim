@@ -16,7 +16,7 @@ import type {Item} from "../Item";
 import {Bool} from "../Bool";
 import {Form} from "./Form";
 
-/** @hidden */
+/** @internal */
 export class BooleanForm extends Form<boolean> {
   constructor(unit?: boolean) {
     super();

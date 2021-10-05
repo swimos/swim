@@ -30,29 +30,33 @@ export interface IconLayout {
   readonly yAlign: number | undefined;
 }
 
-export const IconLayout = {} as {
-  fromAny(value: AnyIconLayout): IconLayout;
+export const IconLayout = (function () {
+  const IconLayout = {} as {
+    fromAny(value: AnyIconLayout): IconLayout;
 
-  is(object: unknown): object is IconLayout;
-};
+    is(object: unknown): object is IconLayout;
+  };
 
-IconLayout.fromAny = function (value: AnyIconLayout): IconLayout {
-  if (value === void 0 || value === null) {
-    return value;
-  } else {
-    const iconWidth = Length.fromAny(value.iconWidth);
-    const iconHeight = Length.fromAny(value.iconHeight);
-    const xAlign = value.xAlign;
-    const yAlign = value.yAlign;
-    return {iconWidth, iconHeight, xAlign, yAlign};
-  }
-};
+  IconLayout.fromAny = function (value: AnyIconLayout): IconLayout {
+    if (value === void 0 || value === null) {
+      return value;
+    } else {
+      const iconWidth = Length.fromAny(value.iconWidth);
+      const iconHeight = Length.fromAny(value.iconHeight);
+      const xAlign = value.xAlign;
+      const yAlign = value.yAlign;
+      return {iconWidth, iconHeight, xAlign, yAlign};
+    }
+  };
 
-IconLayout.is = function (object: unknown): object is IconLayout {
-  if (object !== void 0 && object !== null) {
-    const viewport = object as IconLayout;
-    return "iconWidth" in viewport
-        && "iconHeight" in viewport;
-  }
-  return false;
-};
+  IconLayout.is = function (object: unknown): object is IconLayout {
+    if (typeof object === "object" && object !== null || typeof object === "function") {
+      const viewport = object as IconLayout;
+      return "iconWidth" in viewport
+          && "iconHeight" in viewport;
+    }
+    return false;
+  };
+
+  return IconLayout;
+})();

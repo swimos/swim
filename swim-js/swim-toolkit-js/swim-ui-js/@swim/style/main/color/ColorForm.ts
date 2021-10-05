@@ -15,7 +15,7 @@
 import {Item, Text, Form} from "@swim/structure";
 import {AnyColor, Color} from "./Color";
 
-/** @hidden */
+/** @internal */
 export class ColorForm extends Form<Color, AnyColor> {
   constructor(unit: Color | undefined) {
     super();

@@ -14,7 +14,7 @@
 
 import type {AnyLength, Length} from "@swim/math";
 import type {AnyColor, Color} from "@swim/style";
-import type {ViewAnimator} from "@swim/view";
+import type {ThemeAnimator} from "@swim/theme";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 
 export interface StrokeViewInit extends GraphicsViewInit {
@@ -23,32 +23,36 @@ export interface StrokeViewInit extends GraphicsViewInit {
 }
 
 export interface StrokeView extends GraphicsView {
-  readonly stroke: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  readonly strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly strokeWidth: ThemeAnimator<this, Length | null, AnyLength | null>;
 }
 
-export const StrokeView = {} as {
-  is(object: unknown): object is StrokeView;
+export const StrokeView = (function () {
+  const StrokeView = {} as {
+    init(view: StrokeView, init: StrokeViewInit): void;
 
-  initView(view: StrokeView, init: StrokeViewInit): void;
-};
+    is(object: unknown): object is StrokeView;
+  };
 
-StrokeView.is = function (object: unknown): object is StrokeView {
-  if (typeof object === "object" && object !== null) {
-    const view = object as StrokeView;
-    return view instanceof GraphicsView
-        && "stroke" in view
-        && "strokeWidth" in view;
-  }
-  return false;
-};
+  StrokeView.init = function (view: StrokeView, init: StrokeViewInit): void {
+    if (init.stroke !== void 0) {
+      view.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      view.strokeWidth(init.strokeWidth);
+    }
+  };
 
-StrokeView.initView = function (view: StrokeView, init: StrokeViewInit): void {
-  if (init.stroke !== void 0) {
-    view.stroke(init.stroke);
-  }
-  if (init.strokeWidth !== void 0) {
-    view.strokeWidth(init.strokeWidth);
-  }
-};
+  StrokeView.is = function (object: unknown): object is StrokeView {
+    if (typeof object === "object" && object !== null) {
+      const view = object as StrokeView;
+      return view instanceof GraphicsView
+          && "stroke" in view
+          && "strokeWidth" in view;
+    }
+    return false;
+  };
+
+  return StrokeView;
+})();

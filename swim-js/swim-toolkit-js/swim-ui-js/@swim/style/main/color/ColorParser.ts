@@ -18,7 +18,7 @@ import {HexColorParser} from "../"; // forward import
 import {RgbColorParser} from "../"; // forward import
 import {HslColorParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class ColorParser extends Parser<Color> {
   private readonly identOutput: Output<string> | undefined;
   private readonly step: number | undefined;

@@ -12,17 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Property} from "@swim/fastener";
 import type {Trait} from "@swim/model";
+import {ViewFastener} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
-import {
-  Controller,
-  ControllerProperty,
-  ControllerView,
-  ControllerViewTrait,
-  ControllerFastener,
-  CompositeController,
-} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener, Controller, GenericController} from "@swim/controller";
 import type {DialView} from "../dial/DialView";
 import type {DialTrait} from "../dial/DialTrait";
 import {DialController} from "../dial/DialController";
@@ -30,13 +25,13 @@ import {GaugeView} from "./GaugeView";
 import {GaugeTitle, GaugeTrait} from "./GaugeTrait";
 import type {GaugeControllerObserver} from "./GaugeControllerObserver";
 
-export class GaugeController extends CompositeController {
+export class GaugeController extends GenericController {
   constructor() {
     super();
     this.dialFasteners = [];
   }
 
-  override readonly controllerObservers!: ReadonlyArray<GaugeControllerObserver>;
+  override readonly observerType?: Class<GaugeControllerObserver>;
 
   protected initGaugeTrait(gaugeTrait: GaugeTrait): void {
     // hook
@@ -73,11 +68,11 @@ export class GaugeController extends CompositeController {
  }
 
   protected willSetGaugeTrait(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGaugeTrait !== void 0) {
-        controllerObserver.controllerWillSetGaugeTrait(newGaugeTrait, oldGaugeTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGaugeTrait !== void 0) {
+        observer.controllerWillSetGaugeTrait(newGaugeTrait, oldGaugeTrait, this);
       }
     }
   }
@@ -93,11 +88,11 @@ export class GaugeController extends CompositeController {
   }
 
   protected didSetGaugeTrait(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGaugeTrait !== void 0) {
-        controllerObserver.controllerDidSetGaugeTrait(newGaugeTrait, oldGaugeTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGaugeTrait !== void 0) {
+        observer.controllerDidSetGaugeTrait(newGaugeTrait, oldGaugeTrait, this);
       }
     }
   }
@@ -123,7 +118,7 @@ export class GaugeController extends CompositeController {
       const dialController = dialFasteners[i]!.controller;
       if (dialController !== null) {
         const dialView = dialController.dial.view;
-        if (dialView !== null && dialView.parentView === null) {
+        if (dialView !== null && dialView.parent === null) {
           dialController.dial.injectView(gaugeView);
         }
       }
@@ -135,11 +130,11 @@ export class GaugeController extends CompositeController {
   }
 
   protected willSetGaugeView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGaugeView !== void 0) {
-        controllerObserver.controllerWillSetGaugeView(newGaugeView, oldGaugeView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGaugeView !== void 0) {
+        observer.controllerWillSetGaugeView(newGaugeView, oldGaugeView, this);
       }
     }
   }
@@ -155,11 +150,11 @@ export class GaugeController extends CompositeController {
   }
 
   protected didSetGaugeView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGaugeView !== void 0) {
-        controllerObserver.controllerDidSetGaugeView(newGaugeView, oldGaugeView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGaugeView !== void 0) {
+        observer.controllerDidSetGaugeView(newGaugeView, oldGaugeView, this);
       }
     }
   }
@@ -193,11 +188,11 @@ export class GaugeController extends CompositeController {
   }
 
   protected willSetTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGaugeTitleView !== void 0) {
-        controllerObserver.controllerWillSetGaugeTitleView(newTitleView, oldTitleView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGaugeTitleView !== void 0) {
+        observer.controllerWillSetGaugeTitleView(newTitleView, oldTitleView, this);
       }
     }
   }
@@ -213,36 +208,19 @@ export class GaugeController extends CompositeController {
   }
 
   protected didSetTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGaugeTitleView !== void 0) {
-        controllerObserver.controllerDidSetGaugeTitleView(newTitleView, oldTitleView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGaugeTitleView !== void 0) {
+        observer.controllerDidSetGaugeTitleView(newTitleView, oldTitleView, this);
       }
     }
   }
 
-  /** @hidden */
-  static GaugeFastener = ControllerViewTrait.define<GaugeController, GaugeView, GaugeTrait>({
-    viewType: GaugeView,
-    observeView: true,
-    willSetView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
-      this.owner.willSetGaugeView(newGaugeView, oldGaugeView);
-    },
-    onSetView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
-      this.owner.onSetGaugeView(newGaugeView, oldGaugeView);
-    },
-    didSetView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
-      this.owner.didSetGaugeView(newGaugeView, oldGaugeView);
-    },
-    viewDidSetGaugeTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.title.setView(newTitleView);
-    },
-    createView(): GaugeView | null {
-      return this.owner.createGaugeView();
-    },
+  /** @internal */
+  static GaugeFastener = TraitViewFastener.define<GaugeController, GaugeTrait, GaugeView>({
     traitType: GaugeTrait,
-    observeTrait: true,
+    observesTrait: true,
     willSetTrait(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null): void {
       this.owner.willSetGaugeTrait(newGaugeTrait, oldGaugeTrait);
     },
@@ -265,14 +243,31 @@ export class GaugeController extends CompositeController {
         this.owner.insertDialTrait(newDialTrait, targetTrait);
       }
     },
+    viewType: GaugeView,
+    observesView: true,
+    willSetView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
+      this.owner.willSetGaugeView(newGaugeView, oldGaugeView);
+    },
+    onSetView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
+      this.owner.onSetGaugeView(newGaugeView, oldGaugeView);
+    },
+    didSetView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
+      this.owner.didSetGaugeView(newGaugeView, oldGaugeView);
+    },
+    viewDidSetGaugeTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+      this.owner.title.setView(newTitleView);
+    },
+    createView(): GaugeView | null {
+      return this.owner.createGaugeView();
+    },
   });
 
-  @ControllerViewTrait<GaugeController, GaugeView, GaugeTrait>({
+  @TraitViewFastener<GaugeController, GaugeTrait, GaugeView>({
     extends: GaugeController.GaugeFastener,
   })
-  readonly gauge!: ControllerViewTrait<this, GaugeView, GaugeTrait>;
+  readonly gauge!: TraitViewFastener<this, GaugeTrait, GaugeView>;
 
-  @ControllerView<GaugeController, GraphicsView>({
+  @ViewFastener<GaugeController, GraphicsView>({
     key: true,
     willSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
       this.owner.willSetTitleView(newTitleView, oldTitleView);
@@ -284,7 +279,7 @@ export class GaugeController extends CompositeController {
       this.owner.didSetTitleView(newTitleView, oldTitleView);
     },
   })
-  readonly title!: ControllerView<this, GraphicsView>;
+  readonly title!: ViewFastener<this, GraphicsView>;
 
   insertDial(dialController: DialController, targetController: Controller | null = null): void {
     const dialFasteners = this.dialFasteners as ControllerFastener<this, DialController>[];
@@ -300,7 +295,7 @@ export class GaugeController extends CompositeController {
     const dialFastener = this.createDialFastener(dialController);
     dialFasteners.splice(targetIndex, 0, dialFastener);
     dialFastener.setController(dialController, targetController);
-    if (this.isMounted()) {
+    if (this.mounted) {
       dialFastener.mount();
     }
   }
@@ -311,7 +306,7 @@ export class GaugeController extends CompositeController {
       const dialFastener = dialFasteners[i]!;
       if (dialFastener.controller === dialController) {
         dialFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           dialFastener.unmount();
         }
         dialFasteners.splice(i, 1);
@@ -359,11 +354,11 @@ export class GaugeController extends CompositeController {
 
   protected willSetDial(newDialController: DialController | null, oldDialController: DialController | null,
                         dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDial !== void 0) {
-        controllerObserver.controllerWillSetDial(newDialController, oldDialController, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDial !== void 0) {
+        observer.controllerWillSetDial(newDialController, oldDialController, dialFastener);
       }
     }
   }
@@ -381,11 +376,11 @@ export class GaugeController extends CompositeController {
 
   protected didSetDial(newDialController: DialController | null, oldDialController: DialController | null,
                         dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDial !== void 0) {
-        controllerObserver.controllerDidSetDial(newDialController, oldDialController, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDial !== void 0) {
+        observer.controllerDidSetDial(newDialController, oldDialController, dialFastener);
       }
     }
   }
@@ -406,7 +401,7 @@ export class GaugeController extends CompositeController {
     const dialController = this.createDial(dialTrait);
     if (dialController !== null) {
       dialController.dial.setTrait(dialTrait);
-      this.insertChildController(dialController, targetController);
+      this.insertChild(dialController, targetController);
       if (dialController.dial.view === null) {
         const dialView = this.createDialView(dialController);
         let targetView: DialView | null = null;
@@ -430,7 +425,7 @@ export class GaugeController extends CompositeController {
       const dialController = dialFastener.controller;
       if (dialController !== null && dialController.dial.trait === dialTrait) {
         dialFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           dialFastener.unmount();
         }
         dialFasteners.splice(i, 1);
@@ -454,11 +449,11 @@ export class GaugeController extends CompositeController {
 
   protected willSetDialTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null,
                              dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDialTrait !== void 0) {
-        controllerObserver.controllerWillSetDialTrait(newDialTrait, oldDialTrait, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDialTrait !== void 0) {
+        observer.controllerWillSetDialTrait(newDialTrait, oldDialTrait, dialFastener);
       }
     }
   }
@@ -476,11 +471,11 @@ export class GaugeController extends CompositeController {
 
   protected didSetDialTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null,
                             dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDialTrait !== void 0) {
-        controllerObserver.controllerDidSetDialTrait(newDialTrait, oldDialTrait, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDialTrait !== void 0) {
+        observer.controllerDidSetDialTrait(newDialTrait, oldDialTrait, dialFastener);
       }
     }
   }
@@ -525,11 +520,11 @@ export class GaugeController extends CompositeController {
 
   protected willSetDialView(newDialView: DialView | null, oldDialView: DialView | null,
                             dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDialView !== void 0) {
-        controllerObserver.controllerWillSetDialView(newDialView, oldDialView, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDialView !== void 0) {
+        observer.controllerWillSetDialView(newDialView, oldDialView, dialFastener);
       }
     }
   }
@@ -547,22 +542,22 @@ export class GaugeController extends CompositeController {
 
   protected didSetDialView(newDialView: DialView | null, oldDialView: DialView | null,
                            dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDialView !== void 0) {
-        controllerObserver.controllerDidSetDialView(newDialView, oldDialView, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDialView !== void 0) {
+        observer.controllerDidSetDialView(newDialView, oldDialView, dialFastener);
       }
     }
   }
 
   protected willSetDialValue(newValue: number, oldValue: number,
                              dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDialValue !== void 0) {
-        controllerObserver.controllerWillSetDialValue(newValue, oldValue, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDialValue !== void 0) {
+        observer.controllerWillSetDialValue(newValue, oldValue, dialFastener);
       }
     }
   }
@@ -574,22 +569,22 @@ export class GaugeController extends CompositeController {
 
   protected didSetDialValue(newValue: number, oldValue: number,
                             dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDialValue !== void 0) {
-        controllerObserver.controllerDidSetDialValue(newValue, oldValue, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDialValue !== void 0) {
+        observer.controllerDidSetDialValue(newValue, oldValue, dialFastener);
       }
     }
   }
 
   protected willSetDialLimit(newLimit: number, oldLimit: number,
                              dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDialLimit !== void 0) {
-        controllerObserver.controllerWillSetDialLimit(newLimit, oldLimit, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDialLimit !== void 0) {
+        observer.controllerWillSetDialLimit(newLimit, oldLimit, dialFastener);
       }
     }
   }
@@ -601,11 +596,11 @@ export class GaugeController extends CompositeController {
 
   protected didSetDialLimit(newLimit: number, oldLimit: number,
                             dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDialLimit !== void 0) {
-        controllerObserver.controllerDidSetDialLimit(newLimit, oldLimit, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDialLimit !== void 0) {
+        observer.controllerDidSetDialLimit(newLimit, oldLimit, dialFastener);
       }
     }
   }
@@ -624,11 +619,11 @@ export class GaugeController extends CompositeController {
 
   protected willSetDialLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
                                  dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDialLabelView !== void 0) {
-        controllerObserver.controllerWillSetDialLabelView(newLabelView, oldLabelView, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDialLabelView !== void 0) {
+        observer.controllerWillSetDialLabelView(newLabelView, oldLabelView, dialFastener);
       }
     }
   }
@@ -646,11 +641,11 @@ export class GaugeController extends CompositeController {
 
   protected didSetDialLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
                                 dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDialLabelView !== void 0) {
-        controllerObserver.controllerDidSetDialLabelView(newLabelView, oldLabelView, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDialLabelView !== void 0) {
+        observer.controllerDidSetDialLabelView(newLabelView, oldLabelView, dialFastener);
       }
     }
   }
@@ -669,11 +664,11 @@ export class GaugeController extends CompositeController {
 
   protected willSetDialLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null,
                                   dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDialLegendView !== void 0) {
-        controllerObserver.controllerWillSetDialLegendView(newLegendView, oldLegendView, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDialLegendView !== void 0) {
+        observer.controllerWillSetDialLegendView(newLegendView, oldLegendView, dialFastener);
       }
     }
   }
@@ -691,23 +686,23 @@ export class GaugeController extends CompositeController {
 
   protected didSetDialLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null,
                                  dialFastener: ControllerFastener<this, DialController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDialLegendView !== void 0) {
-        controllerObserver.controllerDidSetDialLegendView(newLegendView, oldLegendView, dialFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDialLegendView !== void 0) {
+        observer.controllerDidSetDialLegendView(newLegendView, oldLegendView, dialFastener);
       }
     }
   }
 
-  @ControllerProperty({type: Timing, state: true})
-  readonly dialTiming!: ControllerProperty<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({type: Timing, state: true})
+  readonly dialTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  /** @hidden */
+  /** @internal */
   static DialFastener = ControllerFastener.define<GaugeController, DialController>({
     type: DialController,
     child: false,
-    observe: true,
+    observes: true,
     willSetController(newDialController: DialController | null, oldDialController: DialController | null): void {
       this.owner.willSetDial(newDialController, oldDialController, this);
     },
@@ -762,10 +757,10 @@ export class GaugeController extends CompositeController {
   });
 
   protected createDialFastener(dialController: DialController): ControllerFastener<this, DialController> {
-    return new GaugeController.DialFastener(this, dialController.key, "dial");
+    return GaugeController.DialFastener.create(this, dialController.key ?? "dial");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly dialFasteners: ReadonlyArray<ControllerFastener<this, DialController>>;
 
   protected getDialastener(dialTrait: DialTrait): ControllerFastener<this, DialController> | null {
@@ -780,7 +775,7 @@ export class GaugeController extends CompositeController {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   protected mountDialFasteners(): void {
     const dialFasteners = this.dialFasteners;
     for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
@@ -789,7 +784,7 @@ export class GaugeController extends CompositeController {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountDialFasteners(): void {
     const dialFasteners = this.dialFasteners;
     for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
@@ -802,31 +797,31 @@ export class GaugeController extends CompositeController {
     return controller instanceof DialController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const dialController = this.detectDialController(childController);
     if (dialController !== null) {
       this.insertDial(dialController, targetController);
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const dialController = this.detectDialController(childController);
     if (dialController !== null) {
       this.removeDial(dialController);
     }
   }
 
-  /** @hidden */
-  protected override mountControllerFasteners(): void {
-    super.mountControllerFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountDialFasteners();
   }
 
-  /** @hidden */
-  protected override unmountControllerFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountDialFasteners();
-    super.unmountControllerFasteners();
+    super.unmountFasteners();
   }
 }

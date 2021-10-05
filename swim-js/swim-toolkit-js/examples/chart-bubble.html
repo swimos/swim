@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
@@ -26,7 +26,7 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const chartView = canvasView.append(swim.ChartView)
+const chartView = canvasView.appendChild(swim.ChartView)
     .bottomAxis(true)
     .leftAxis(true)
     .xScaleGestures(true)
@@ -47,7 +47,7 @@ chartView.leftAxis.view.createTickLabel = function (tickValue) {
   return tickValue + "%";
 };
 
-const plotView = graphView.append(swim.BubblePlotView)
+const plotView = graphView.appendChild(swim.BubblePlotView)
     .on("pointerover", function (event) {
       if (event.targetView instanceof swim.DataPointView) {
         event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
@@ -69,10 +69,10 @@ for (let i = 0; i < n; i += 1) {
   const opacity = 0.5 + 0.5 * Math.random();
   const bubble = swim.DataPointView.fromAny({x: x, y: y, radius: radius, opacity: opacity});
   bubble.color.setLook(swim.Look.accentColor);
-  plotView.appendChildView(bubble, key);
+  plotView.appendChild(bubble, key);
 }
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
 setInterval(function () {
   const timing = swim.Easing.linear.withDuration(2000);
@@ -82,7 +82,7 @@ setInterval(function () {
     const y = Math.round(100 * Math.random());
     const radius = 10 + Math.round(Math.random() * 10);
     const opacity = 0.5 + 0.5 * Math.random();
-    plotView.getChildView(key)
+    plotView.getChild(key)
         .x(x, timing)
         .y(y, timing)
         .radius(radius, timing)

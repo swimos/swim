@@ -12,214 +12,158 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {Mutable, AnyTiming, Timing} from "@swim/util";
+import type {FastenerOwner} from "@swim/fastener";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {CssContext} from "./CssContext";
-import {CssRuleInit, CssRule} from "./CssRule";
+import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";
 
 export interface MediaRuleInit extends CssRuleInit {
-  extends?: MediaRuleClass;
-
-  css?: string | (() => string);
-
-  initRule?(rule: CSSMediaRule): CSSMediaRule;
+  initRule?(rule: CSSMediaRule): void;
 }
 
-export type MediaRuleDescriptor<V extends CssContext, I = {}> = MediaRuleInit & ThisType<MediaRule<V> & I> & Partial<I>;
+export type MediaRuleDescriptor<O = unknown, I = {}> = ThisType<MediaRule<O> & I> & MediaRuleInit & Partial<I>;
 
-export type MediaRuleDescriptorExtends<V extends CssContext, I = {}> = {extends: MediaRuleClass | undefined} & MediaRuleDescriptor<V, I>;
+export interface MediaRuleClass<F extends MediaRule<any> = MediaRule<any>> extends CssRuleClass<F> {
+  create(this: MediaRuleClass<F>, owner: FastenerOwner<F>, ruleName: string): F;
 
-export interface MediaRuleConstructor<V extends CssContext, I = {}> {
-  new(owner: V, ruleName: string | undefined): MediaRule<V> & I;
-  prototype: MediaRule<any> & I;
+  construct(ruleClass: MediaRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
+
+  extend(this: MediaRuleClass<F>, classMembers?: {} | null): MediaRuleClass<F>;
+
+  define<O, I = {}>(descriptor: {extends: MediaRuleClass | null} & MediaRuleDescriptor<O, I>): MediaRuleClass<MediaRule<any> & I>;
+  define<O>(descriptor: MediaRuleDescriptor<O>): MediaRuleClass<MediaRule<any>>;
+
+  <O, I = {}>(descriptor: {extends: MediaRuleClass | null} & MediaRuleDescriptor<O, I>): PropertyDecorator;
+  <O>(descriptor: MediaRuleDescriptor<O>): PropertyDecorator;
 }
 
-export interface MediaRuleClass extends Function {
-  readonly prototype: MediaRule<any>;
-}
-
-export interface MediaRule<V extends CssContext> extends CssRule<V>, CssContext {
+export interface MediaRule<O = unknown> extends CssRule<O>, CssContext {
+  /** @override */
   readonly rule: CSSMediaRule;
 
-  readonly node: Node | undefined;
-
+  /** @override */
   getRule(index: number): CSSRule | null;
 
+  /** @override */
   insertRule(cssText: string, index?: number): number;
 
+  /** @override */
   removeRule(index: number): void;
 
-  /** @hidden */
-  cssRules: {[ruleName: string]: CssRule<MediaRule<CssContext>> | undefined};
+  /** @override */
+  applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean | null): void;
 
-  hasCssRule(ruleName: string): boolean;
-
-  getCssRule(ruleName: string): CssRule<this> | null;
-
-  setCssRule(ruleName: string, cssRule: CssRule<this> | null): void;
-
-  applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void;
-
-  /** @hidden */
-  mount(): void;
-
-  /** @hidden */
-  unmount(): void;
-
-  /** @hidden */
-  initCss?(): string;
-
-  /** @hidden */
+  /** @internal */
   createRule(cssText: string): CSSMediaRule;
 
-  /** @hidden */
-  initRule?(rule: CSSMediaRule): CSSMediaRule;
+  /** @internal */
+  initRule?(rule: CSSMediaRule): void;
+
+  /** @internal */
+  initCss?(): string;
 }
 
-export const MediaRule = function <V extends CssContext>(
-    this: MediaRule<V> | typeof MediaRule,
-    owner: V | MediaRuleDescriptor<V>,
-    ruleName?: string,
-  ): MediaRule<V> | PropertyDecorator {
-  if (this instanceof MediaRule) { // constructor
-    return MediaRuleConstructor.call(this, owner as V, ruleName) as MediaRule<V>;
-  } else { // decorator factory
-    return MediaRuleDecoratorFactory(owner as MediaRuleDescriptor<V>);
-  }
-} as {
-  /** @hidden */
-  new<V extends CssContext>(owner: V, ruleName: string | undefined): MediaRule<V>;
+export const MediaRule = (function (_super: typeof CssRule) {
+  const MediaRule = _super.extend() as MediaRuleClass;
 
-  <V extends CssContext, I = {}>(descriptor: MediaRuleDescriptorExtends<V, I>): PropertyDecorator;
-  <V extends CssContext>(descriptor: MediaRuleDescriptor<V>): PropertyDecorator;
+  MediaRule.prototype.getRule = function (this: MediaRule, index: number): CSSRule | null {
+    return this.rule.cssRules.item(index);
+  };
 
-  /** @hidden */
-  prototype: MediaRule<any>;
+  MediaRule.prototype.insertRule = function (this: MediaRule, cssText: string, index?: number): number {
+    return this.rule.insertRule(cssText, index);
+  };
 
-  define<V extends CssContext, I = {}>(descriptor: MediaRuleDescriptorExtends<V, I>): MediaRuleConstructor<V, I>;
-  define<V extends CssContext>(descriptor: MediaRuleDescriptor<V>): MediaRuleConstructor<V>;
-};
-__extends(MediaRule, CssRule);
+  MediaRule.prototype.removeRule = function (this: MediaRule, index: number): void {
+    this.rule.deleteRule(index);
+  };
 
-function MediaRuleConstructor<V extends CssContext>(this: MediaRule<V>, owner: V, ruleName: string | undefined): MediaRule<V> {
-  const _this: MediaRule<V> = (CssRule as Function).call(this, owner, ruleName) || this;
-  (_this as Mutable<typeof _this>).cssRules = {};
-  return _this;
-}
-
-function MediaRuleDecoratorFactory<V extends CssContext>(descriptor: MediaRuleDescriptor<V>): PropertyDecorator {
-  return CssContext.decorateCssRule.bind(CssContext, MediaRule.define(descriptor as MediaRuleDescriptor<CssContext>));
-}
-
-MediaRule.prototype.getRule = function (this: MediaRule<CssContext>, index: number): CSSRule | null {
-  return this.rule.cssRules.item(index);
-};
-
-MediaRule.prototype.insertRule = function (this: MediaRule<CssContext>, cssText: string, index?: number): number {
-  return this.rule.insertRule(cssText, index);
-};
-
-MediaRule.prototype.removeRule = function (this: MediaRule<CssContext>, index: number): void {
-  this.rule.deleteRule(index);
-};
-
-MediaRule.prototype.hasCssRule = function (this: MediaRule<CssContext>, ruleName: string): boolean {
-  return this.cssRules[ruleName] !== void 0;
-};
-
-MediaRule.prototype.getCssRule = function (this: MediaRule<CssContext>, ruleName: string): CssRule<MediaRule<CssContext>> | null {
-  const cssRule = this.cssRules[ruleName] as CssRule<MediaRule<CssContext>> | undefined;
-  return cssRule !== void 0 ? cssRule : null;
-};
-
-MediaRule.prototype.setCssRule = function (this: MediaRule<CssContext>, ruleName: string, cssRule: CssRule<MediaRule<CssContext>> | null): void {
-  if (cssRule !== null) {
-    this.cssRules[ruleName] = cssRule;
-  } else {
-    delete this.cssRules[ruleName];
-  }
-};
-
-MediaRule.prototype.applyTheme = function (theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void {
-  if (timing === void 0 || timing === true) {
-    timing = theme.getOr(Look.timing, Mood.ambient, false);
-  } else {
-    timing = Timing.fromAny(timing);
-  }
-  const cssRules = this.cssRules;
-  for (const ruleName in cssRules) {
-    const cssRule = cssRules[ruleName]!;
-    cssRule.applyTheme(theme, mood, timing);
-  }
-};
-
-MediaRule.prototype.mount = function (): void {
-  CssRule.prototype.mount.call(this);
-  const cssRules = this.cssRules;
-  for (const ruleName in cssRules) {
-    const cssRule = cssRules[ruleName]!;
-    cssRule.mount();
-  }
-};
-
-MediaRule.prototype.unmount = function (): void {
-  const cssRules = this.cssRules;
-  for (const ruleName in cssRules) {
-    const cssRule = cssRules[ruleName]!;
-    cssRule.unmount();
-  }
-  CssRule.prototype.unmount.call(this);
-};
-
-MediaRule.prototype.createRule = function (this: MediaRule<CssContext>, cssText: string): CSSMediaRule {
-  const index = this.owner.insertRule(cssText);
-  const rule = this.owner.getRule(index);
-  if (rule instanceof CSSMediaRule) {
-    return rule;
-  } else {
-    throw new TypeError("" + rule);
-  }
-};
-
-MediaRule.define = function <V extends CssContext, I>(descriptor: MediaRuleDescriptor<V, I>): MediaRuleConstructor<V, I> {
-  let _super = descriptor.extends;
-  let css = descriptor.css;
-  delete descriptor.extends;
-  delete descriptor.css;
-
-  if (_super === void 0) {
-    _super = MediaRule;
-  }
-
-  const _constructor = function DecoratedMediaRule(this: MediaRule<V>, owner: V, ruleName: string | undefined): MediaRule<V> {
-    const _this = _super!.call(this, owner, ruleName) || this;
-    let cssText: string;
-    if (css !== void 0) {
-      cssText = css as string;
-    } else if (_this.initCss !== void 0) {
-      cssText = _this.initCss();
+  MediaRule.prototype.applyTheme = function (theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean | null): void {
+    if (timing === void 0 || timing === true) {
+      timing = theme.getOr(Look.timing, Mood.ambient, false);
     } else {
-      throw new Error("undefined css");
+      timing = Timing.fromAny(timing);
     }
-    let rule = _this.createRule(cssText);
-    if (_this.initRule !== void 0) {
-      rule = _this.initRule(rule);
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      if (fastener instanceof CssRule) {
+        fastener.applyTheme(theme, mood, timing);
+      }
     }
-    (_this as Mutable<typeof _this>).rule = rule;
-    return _this;
-  } as unknown as MediaRuleConstructor<V, I>;
+  };
 
-  const _prototype = descriptor as unknown as MediaRule<V> & I;
-  Object.setPrototypeOf(_constructor, _super);
-  _constructor.prototype = _prototype;
-  _constructor.prototype.constructor = _constructor;
-  Object.setPrototypeOf(_constructor.prototype, _super.prototype);
+  MediaRule.prototype.createRule = function (this: MediaRule, cssText: string): CSSMediaRule {
+    const cssContext = this.owner;
+    if (CssContext.is(cssContext)) {
+      const index = cssContext.insertRule(cssText);
+      const rule = cssContext.getRule(index);
+      if (rule instanceof CSSMediaRule) {
+        return rule;
+      } else {
+        throw new TypeError("" + rule);
+      }
+    } else {
+      throw new Error("no css context");
+    }
+  };
 
-  if (typeof css === "function") {
-    _prototype.initCss = css;
-    css = void 0;
-  }
+  MediaRule.construct = function <F extends MediaRule<any>>(ruleClass: MediaRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
+    rule = _super.construct(ruleClass, rule, owner, ruleName) as F;
+    return rule;
+  };
 
-  return _constructor;
-}
+  MediaRule.define = function <O>(descriptor: MediaRuleDescriptor<O>): MediaRuleClass<MediaRule<any>> {
+    let superClass = descriptor.extends as MediaRuleClass | undefined;
+    const affinity = descriptor.affinity;
+    const inherits = descriptor.inherits;
+    let css = descriptor.css;
+    delete descriptor.extends;
+    delete descriptor.affinity;
+    delete descriptor.inherits;
+    delete descriptor.css;
+
+    if (superClass === void 0 || superClass === null) {
+      superClass = this;
+    }
+
+    const ruleClass = superClass.extend(descriptor);
+
+    if (typeof css === "function") {
+      ruleClass.prototype.initCss = css;
+      css = void 0;
+    }
+
+    ruleClass.construct = function (ruleClass: MediaRuleClass, rule: MediaRule<O> | null, owner: O, ruleName: string): MediaRule<O> {
+      rule = superClass!.construct(ruleClass, rule, owner, ruleName);
+
+      if (affinity !== void 0) {
+        rule.initAffinity(affinity);
+      }
+      if (inherits !== void 0) {
+        rule.initInherits(inherits);
+      }
+
+      let cssText: string | undefined;
+      if (css !== void 0) {
+        cssText = css as string;
+      } else if (rule.initCss !== void 0) {
+        cssText = rule.initCss();
+      } else {
+        throw new Error("undefined css");
+      }
+
+      (rule as Mutable<typeof rule>).rule = rule.createRule(cssText);
+      if (rule.initRule !== void 0) {
+        rule.initRule(rule.rule);
+      }
+
+      return rule;
+    };
+
+    return ruleClass;
+  };
+
+  return MediaRule;
+})(CssRule);

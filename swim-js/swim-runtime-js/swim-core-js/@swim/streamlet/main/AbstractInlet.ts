@@ -24,7 +24,7 @@ export abstract class AbstractInlet<I> implements Inlet<I> {
 
   readonly input: Outlet<I> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   bindInput(newInput: Outlet<I> | null): void {

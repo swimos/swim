@@ -23,7 +23,7 @@ export class InvokeOutlet extends AbstractOutlet<Value> {
     this.argsInlet = new OutletInlet<Value>(this);
   }
 
-  /** @hidden */
+  /** @internal */
   readonly scope: Record;
 
   readonly funcInlet: Inlet<Value>;

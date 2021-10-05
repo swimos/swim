@@ -25,10 +25,10 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
     this.cache = new BTree();
   }
 
-  /** @hidden */
+  /** @internal */
   readonly state: IO | undefined;
 
-  /** @hidden */
+  /** @internal */
   readonly cache: BTree<K, V>;
 
   override has(key: K): boolean {

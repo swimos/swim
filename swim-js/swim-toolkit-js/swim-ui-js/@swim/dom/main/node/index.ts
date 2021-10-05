@@ -15,7 +15,10 @@
 export {
   ViewNodeType,
   ViewNode,
+  AnyNodeView,
   NodeViewInit,
+  NodeViewFactory,
+  NodeViewClass,
   NodeViewConstructor,
   NodeView,
 } from "./NodeView";

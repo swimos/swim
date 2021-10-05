@@ -21,7 +21,7 @@ export class FilterFieldsCombinator<K, V, I> extends FilterFieldsOperator<K, V, 
     this.func = func;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly func: FilterFieldsFunction<K, V>;
 
   override evaluate(key: K, value: V): boolean {

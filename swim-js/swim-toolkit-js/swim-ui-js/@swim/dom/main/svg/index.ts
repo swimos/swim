@@ -14,12 +14,15 @@
 
 export {
   ViewSvg,
+  AnySvgView,
+  SvgViewInit,
   SvgViewAttributesInit,
   SvgViewStyleInit,
-  SvgViewInit,
   SvgViewTagMap,
   SvgViewFactory,
+  SvgViewClass,
   SvgViewConstructor,
   SvgView,
+  SvgViewTagFactory,
 } from "./SvgView";
 export {SvgViewObserver} from "./SvgViewObserver";

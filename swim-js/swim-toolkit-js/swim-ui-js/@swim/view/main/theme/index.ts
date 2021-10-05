@@ -12,5 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {ThemeManager} from "./ThemeManager";
-export {ThemeManagerObserver} from "./ThemeManagerObserver";
+export {ThemeService} from "./ThemeService";
+export {ThemeServiceObserver} from "./ThemeServiceObserver";
+
+export {ThemeProvider} from "./ThemeProvider";

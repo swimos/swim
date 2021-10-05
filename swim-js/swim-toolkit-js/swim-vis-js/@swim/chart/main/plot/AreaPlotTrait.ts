@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {TraitProperty} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {AreaPlotTraitObserver} from "./AreaPlotTraitObserver";
 
 export class AreaPlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
-  override readonly traitObservers!: ReadonlyArray<AreaPlotTraitObserver<X, Y>>;
+  override readonly observerType?: Class<AreaPlotTraitObserver<X, Y>>;
 
   protected willSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetPlotFill !== void 0) {
         traitObserver.traitWillSetPlotFill(newFill, oldFill, this);
       }
@@ -36,16 +37,16 @@ export class AreaPlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
   }
 
   protected didSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetPlotFill !== void 0) {
         traitObserver.traitDidSetPlotFill(newFill, oldFill, this);
       }
     }
   }
 
-  @TraitProperty<AreaPlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<AreaPlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
     state: null,
     willSetState(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
       this.owner.willSetFill(newFill, oldFill);
@@ -61,5 +62,5 @@ export class AreaPlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
       return fill;
     },
   })
-  readonly fill!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly fill!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 }

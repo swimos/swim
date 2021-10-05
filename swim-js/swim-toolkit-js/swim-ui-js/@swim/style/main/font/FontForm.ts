@@ -16,7 +16,7 @@ import {Item, Attr, Record, Form} from "@swim/structure";
 import {Length} from "@swim/math";
 import {AnyFont, Font} from "./Font";
 
-/** @hidden */
+/** @internal */
 export class FontForm extends Form<Font, AnyFont> {
   constructor(unit: Font | undefined) {
     super();

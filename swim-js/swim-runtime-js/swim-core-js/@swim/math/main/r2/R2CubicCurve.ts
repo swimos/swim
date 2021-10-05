@@ -166,23 +166,23 @@ export class R2CubicCurve extends R2BezierCurve implements Debug {
 
   override writeMove<T>(output: Output<T>): Output<T> {
     output = output.write(77/*'M'*/);
-    output = Format.displayNumber(output, this.x0)
-    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.x0);
+    output = output.write(44/*','*/);
     output = Format.displayNumber(output, this.y0);
     return output;
   }
 
   override writeRest<T>(output: Output<T>): Output<T> {
     output = output.write(67/*'C'*/);
-    output = Format.displayNumber(output, this.x1)
+    output = Format.displayNumber(output, this.x1);
     output = output.write(44/*','*/)
     output = Format.displayNumber(output, this.y1);
     output = output.write(44/*','*/)
-    output = Format.displayNumber(output, this.x2)
+    output = Format.displayNumber(output, this.x2);
     output = output.write(44/*','*/)
     output = Format.displayNumber(output, this.y2);
     output = output.write(44/*','*/)
-    output = Format.displayNumber(output, this.x3)
+    output = Format.displayNumber(output, this.x3);
     output = output.write(44/*','*/)
     output = Format.displayNumber(output, this.y3);
     return output;

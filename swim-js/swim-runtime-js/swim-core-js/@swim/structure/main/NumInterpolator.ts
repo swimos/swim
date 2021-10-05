@@ -15,22 +15,26 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {Num} from "./Num";
 
-/** @hidden */
-export const NumInterpolator = function (y0: Num, y1: Num): Interpolator<Num> {
-  const interpolator = function (u: number): Num {
-    const y0 = interpolator[0].value;
-    const y1 = interpolator[1].value;
-    return Num.from(y0 + u * (y1 - y0));
-  } as Interpolator<Num>;
-  Object.setPrototypeOf(interpolator, NumInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = y0;
-  (interpolator as Mutable<typeof interpolator>)[1] = y1;
-  return interpolator;
-} as {
-  (y0: Num, y1: Num): Interpolator<Num>;
+/** @internal */
+export const NumInterpolator = (function (_super: typeof Interpolator) {
+  const NumInterpolator = function (y0: Num, y1: Num): Interpolator<Num> {
+    const interpolator = function (u: number): Num {
+      const y0 = interpolator[0].value;
+      const y1 = interpolator[1].value;
+      return Num.from(y0 + u * (y1 - y0));
+    } as Interpolator<Num>;
+    Object.setPrototypeOf(interpolator, NumInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = y0;
+    (interpolator as Mutable<typeof interpolator>)[1] = y1;
+    return interpolator;
+  } as {
+    (y0: Num, y1: Num): Interpolator<Num>;
 
-  /** @hidden */
-  prototype: Interpolator<Num>;
-};
+    /** @internal */
+    prototype: Interpolator<Num>;
+  };
 
-NumInterpolator.prototype = Object.create(Interpolator.prototype);
+  NumInterpolator.prototype = Object.create(_super.prototype);
+
+  return NumInterpolator;
+})(Interpolator);

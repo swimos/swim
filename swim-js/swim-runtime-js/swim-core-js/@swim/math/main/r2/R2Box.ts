@@ -123,13 +123,13 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
     }
   }
 
-  /** @hidden */
+  /** @internal */
   containsPoint(that: R2Point): boolean {
     return this.xMin <= that.x && that.x <= this.xMax
         && this.yMin <= that.y && that.y <= this.yMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsSegment(that: R2Segment): boolean {
     return this.xMin <= that.x0 && that.x0 <= this.xMax
         && this.yMin <= that.y0 && that.y0 <= this.yMax
@@ -137,13 +137,13 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
         && this.yMin <= that.y1 && that.y1 <= this.yMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsBox(that: R2Box): boolean {
     return this.xMin <= that.xMin && that.xMax <= this.xMax
         && this.yMin <= that.yMin && that.yMax <= this.yMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsCircle(that: R2Circle): boolean {
     return this.xMin <= that.cx - that.r && that.cx + that.r <= this.xMax
         && this.yMin <= that.cy - that.r && that.cy + that.r <= this.yMax;
@@ -165,13 +165,13 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsPoint(that: R2Point): boolean {
     return this.xMin <= that.x && that.x <= this.xMax
         && this.yMin <= that.y && that.y <= this.yMax;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsSegment(that: R2Segment): boolean {
     const xMin = this.xMin;
     const yMin = this.yMin;
@@ -196,9 +196,9 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static hitX: number = 0; // stack local hit register
-  /** @hidden */
+  /** @internal */
   static hitY: number = 0; // stack local hit register
   static intersectsSegment(d0: number, d1: number, x0: number, y0: number, x1: number, y1: number): boolean {
     if (d0 !== d1 || d0 * d1 < 0) {
@@ -210,13 +210,13 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsBox(that: R2Box): boolean {
     return this.xMin <= that.xMax && that.xMin <= this.xMax
         && this.yMin <= that.yMax && that.yMin <= this.yMax;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsCircle(that: R2Circle): boolean {
     const dx = (that.cx < this.xMin ? this.xMin : this.xMax < that.cx ? this.xMax : that.cx) - that.cx;
     const dy = (that.cy < this.yMin ? this.yMin : this.yMax < that.cy ? this.yMax : that.cy) - that.cy;
@@ -322,7 +322,7 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is R2BoxInit {
     if (typeof value === "object" && value !== null) {
       const init = value as R2BoxInit;
@@ -334,7 +334,7 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyR2Box {
     return value instanceof R2Box
         || R2Box.isInit(value);

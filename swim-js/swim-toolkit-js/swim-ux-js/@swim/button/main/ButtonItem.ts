@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyExpansion, Expansion} from "@swim/style";
-import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, View, ViewAnimator, ExpansionViewAnimator} from "@swim/view";
+import {Look, MoodVector, ThemeMatrix, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
+import type {ViewContextType, View} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {HtmlIconView} from "@swim/graphics";
 import {FloatingButton} from "./FloatingButton";
@@ -28,10 +29,10 @@ export class ButtonItem extends HtmlView {
 
   protected initButtonItem(): void {
     this.addClass("button-item");
-    this.position.setState("relative", View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
     const button = this.createButton();
     if (button !== null) {
-      this.setChildView("button", button);
+      this.setChild("button", button);
     }
   }
 
@@ -42,7 +43,7 @@ export class ButtonItem extends HtmlView {
   }
 
   get button(): FloatingButton | null {
-    const childView = this.getChildView("button");
+    const childView = this.getChild("button");
     return childView instanceof FloatingButton ? childView : null;
   }
 
@@ -53,18 +54,18 @@ export class ButtonItem extends HtmlView {
   }
 
   get label(): HtmlView | null {
-    const childView = this.getChildView("label");
+    const childView = this.getChild("label");
     return childView instanceof HtmlView ? childView : null;
   }
 
-  @ViewAnimator({type: Expansion, inherit: true})
-  readonly disclosure!: ExpansionViewAnimator<this, Expansion | undefined, AnyExpansion | undefined>;
+  @ThemeAnimator({type: Expansion, inherits: true})
+  readonly disclosure!: ExpansionThemeAnimator<this, Expansion | undefined, AnyExpansion | undefined>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     const label = this.label;
-    if (label !== null && label.color.takesPrecedence(View.Intrinsic)) {
-      label.color.setState(theme.getOr(Look.mutedColor, mood, null), timing, View.Intrinsic);
+    if (label !== null && label.color.hasAffinity(Affinity.Intrinsic)) {
+      label.color.setState(theme.getOr(Look.mutedColor, mood, null), timing, Affinity.Intrinsic);
     }
   }
 
@@ -73,17 +74,17 @@ export class ButtonItem extends HtmlView {
     const phase = this.disclosure.getPhaseOr(1);
     const button = this.button;
     if (button !== null) {
-      this.width.setState(button.width.state, View.Intrinsic);
-      this.height.setState(button.height.state, View.Intrinsic);
+      this.width.setState(button.width.state, Affinity.Intrinsic);
+      this.height.setState(button.height.state, Affinity.Intrinsic);
     }
     const label = this.label;
     if (label !== null) {
-      label.opacity.setState(phase, View.Intrinsic);
+      label.opacity.setState(phase, Affinity.Intrinsic);
     }
   }
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof FloatingButton) {
       this.onInsertButton(childView);
@@ -92,14 +93,14 @@ export class ButtonItem extends HtmlView {
     }
   }
 
-  protected override onRemoveChildView(childView: View): void {
+  protected override onRemoveChild(childView: View): void {
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof FloatingButton) {
       this.onRemoveButton(childView);
     } else if (childKey === "label" && childView instanceof HtmlView) {
       this.onRemoveLabel(childView);
     }
-    super.onRemoveChildView(childView);
+    super.onRemoveChild(childView);
   }
 
   protected onInsertButton(button: FloatingButton): void {
@@ -111,16 +112,16 @@ export class ButtonItem extends HtmlView {
   }
 
   protected onInsertLabel(label: HtmlView): void {
-    label.display.setState("block", View.Intrinsic);
-    label.position.setState("absolute", View.Intrinsic);
-    label.top.setState(0, View.Intrinsic);
-    label.right.setState(40 + 16, View.Intrinsic);
-    label.bottom.setState(0, View.Intrinsic);
-    label.fontSize.setState(17, View.Intrinsic);
-    label.fontWeight.setState("500", View.Intrinsic);
-    label.lineHeight.setState(40, View.Intrinsic);
-    label.whiteSpace.setState("nowrap", View.Intrinsic);
-    label.opacity.setState(this.disclosure.getPhaseOr(0), View.Intrinsic);
+    label.display.setState("block", Affinity.Intrinsic);
+    label.position.setState("absolute", Affinity.Intrinsic);
+    label.top.setState(0, Affinity.Intrinsic);
+    label.right.setState(40 + 16, Affinity.Intrinsic);
+    label.bottom.setState(0, Affinity.Intrinsic);
+    label.fontSize.setState(17, Affinity.Intrinsic);
+    label.fontWeight.setState("500", Affinity.Intrinsic);
+    label.lineHeight.setState(40, Affinity.Intrinsic);
+    label.whiteSpace.setState("nowrap", Affinity.Intrinsic);
+    label.opacity.setState(this.disclosure.getPhaseOr(0), Affinity.Intrinsic);
   }
 
   protected onRemoveLabel(label: HtmlView): void {

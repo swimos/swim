@@ -14,7 +14,7 @@
 
 import {Output, WriterException, Writer, Utf8, Base16} from "@swim/codec";
 
-/** @hidden */
+/** @internal */
 export class MarkupTextWriter extends Writer {
   private readonly text: string;
   private readonly index: number | undefined;

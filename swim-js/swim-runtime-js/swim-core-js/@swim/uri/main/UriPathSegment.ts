@@ -16,9 +16,9 @@ import type {Mutable} from "@swim/util";
 import {Output, Format} from "@swim/codec";
 import {UriPath} from "./UriPath";
 
-/** @hidden */
+/** @internal */
 export class UriPathSegment extends UriPath {
-  /** @hidden */
+  /** @internal */
   constructor(head: string, tail: UriPath) {
     super();
     this.segment = head;
@@ -26,10 +26,10 @@ export class UriPathSegment extends UriPath {
     this.stringValue = void 0;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly segment: string;
 
-  /** @hidden */
+  /** @internal */
   readonly rest: UriPath;
 
   override isDefined(): boolean {
@@ -56,7 +56,7 @@ export class UriPathSegment extends UriPath {
     return this.rest;
   }
 
-  /** @hidden */
+  /** @internal */
   override setTail(tail: UriPath): void {
     if (tail instanceof UriPathSegment) {
       throw new Error("adjacent path segments");
@@ -64,7 +64,7 @@ export class UriPathSegment extends UriPath {
     (this as Mutable<this>).rest = tail;
   }
 
-  /** @hidden */
+  /** @internal */
   override dealias(): UriPath {
     return new UriPathSegment(this.segment, this.rest);
   }
@@ -112,7 +112,7 @@ export class UriPathSegment extends UriPath {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   override toString(): string {

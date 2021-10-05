@@ -22,7 +22,7 @@ import {DownlinkModel} from "./DownlinkModel";
 import type {DownlinkType} from "./Downlink";
 import type {ValueDownlink} from "./ValueDownlink";
 
-/** @hidden */
+/** @internal */
 export class ValueDownlinkModel extends DownlinkModel {
   constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
               prio?: number, rate?: number, body?: Value, state: Value = Value.absent()) {
@@ -32,7 +32,7 @@ export class ValueDownlinkModel extends DownlinkModel {
 
   override readonly views!: ReadonlyArray<ValueDownlink<unknown>>;
 
-  /** @hidden */
+  /** @internal */
   readonly state: Value;
 
   override get type(): DownlinkType {

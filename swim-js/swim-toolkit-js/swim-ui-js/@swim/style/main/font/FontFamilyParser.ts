@@ -15,7 +15,7 @@
 import {Input, Output, Parser, Diagnostic, Unicode, Base16} from "@swim/codec";
 import type {FontFamily} from "./FontFamily";
 
-/** @hidden */
+/** @internal */
 export class FontFamilyParser extends Parser<FontFamily> {
   private readonly output: Output<string> | undefined;
   private readonly quote: number | undefined;

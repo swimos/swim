@@ -17,7 +17,7 @@ import type {BTreeContext} from "./BTreeContext";
 import {BTreePage} from "./BTreePage";
 import {BTreeNodeCursor} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   constructor(pages: ReadonlyArray<BTreePage<K, V, U>>, knots: ReadonlyArray<K>,
               fold: U | undefined, size: number) {
@@ -28,10 +28,10 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     this.size = size;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pages: ReadonlyArray<BTreePage<K, V, U>>;
 
-  /** @hidden */
+  /** @internal */
   readonly knots: ReadonlyArray<K>;
 
   override get arity(): number {
@@ -157,7 +157,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   updatedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const newPages = oldPages.slice(0);
@@ -178,7 +178,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
-  /** @hidden */
+  /** @internal */
   updatedPageSplit(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const newPages = new Array<BTreePage<K, V, U>>(oldPages.length + 1);
@@ -216,7 +216,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
-  /** @hidden */
+  /** @internal */
   updatedPageMerge(x: number, newPage: BTreeNode<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const midPages = newPage.pages;
@@ -275,7 +275,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   replacedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>,
                tree: BTreeContext<K, V>): BTreePage<K, V, U> {
     if (!newPage.isEmpty()) {
@@ -297,7 +297,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   removedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const newPages = new Array<BTreePage<K, V, U>>(oldPages.length - 1);
@@ -558,7 +558,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNodeCursor(this.pages, this.size, this.pages.length);
   }
 
-  /** @hidden */
+  /** @internal */
   lookup(key: K, tree: BTreeContext<K, V>): number {
     let lo = 0;
     let hi = this.knots.length - 1;

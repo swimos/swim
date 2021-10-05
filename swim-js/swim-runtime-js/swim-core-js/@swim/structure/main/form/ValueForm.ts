@@ -16,7 +16,7 @@ import type {Item} from "../Item";
 import {AnyValue, Value} from "../Value";
 import {Form} from "./Form";
 
-/** @hidden */
+/** @internal */
 export class ValueForm extends Form<Value, AnyValue> {
   constructor(unit?: Value) {
     super();

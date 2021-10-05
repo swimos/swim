@@ -29,16 +29,16 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
     this.colIndex = colIndex;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly rowArray: ReadonlyArray<[M, MoodVector<N>]>;
 
-  /** @hidden */
+  /** @internal */
   readonly rowIndex: {readonly [name: string]: number | undefined};
 
-  /** @hidden */
+  /** @internal */
   readonly colArray: ReadonlyArray<[N, MoodVector<M>]>;
 
-  /** @hidden */
+  /** @internal */
   readonly colIndex: {readonly [name: string]: number | undefined};
 
   get rowCount(): number {
@@ -276,7 +276,7 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
     return new MoodMatrix(newRowArray, newRowIndex, newColArray, newColIndex);
   }
 
-  /** @hidden */
+  /** @internal */
   identityFor(that: MoodMatrix<N, M & N>): MoodMatrix<M, N> {
     const thisRowArray = this.rowArray;
     const thatColArray = that.colArray;

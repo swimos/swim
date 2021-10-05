@@ -18,7 +18,7 @@ import {OutputBuffer} from "./OutputBuffer";
 import {OutputBufferFull} from "../"; // forward import
 import {OutputBufferError} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class OutputBufferDone extends OutputBuffer<never> {
   constructor(settings: OutputSettings) {
     super();

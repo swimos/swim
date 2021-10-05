@@ -17,7 +17,7 @@ import type {Angle} from "../angle/Angle";
 import {AngleParser} from "../angle/AngleParser";
 import {RotateTransform} from "./RotateTransform";
 
-/** @hidden */
+/** @internal */
 export class RotateTransformParser extends Parser<RotateTransform> {
   private readonly identOutput: Output<string> | undefined;
   private readonly angleParser: Parser<Angle> | undefined;
@@ -99,7 +99,7 @@ export class RotateTransformParser extends Parser<RotateTransform> {
     return new RotateTransformParser(identOutput, angleParser, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseRest(input: Input, identOutput?: Output<string>): Parser<RotateTransform> {
     return RotateTransformParser.parse(input, identOutput, void 0, 2);
   }

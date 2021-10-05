@@ -16,13 +16,13 @@ import type {PairBuilder} from "@swim/util";
 import {AnyUriQuery, UriQuery} from "./UriQuery";
 
 export class UriQueryBuilder implements PairBuilder<string | undefined, string, UriQuery> {
-  /** @hidden */
+  /** @internal */
   first: UriQuery;
-  /** @hidden */
+  /** @internal */
   last: UriQuery | null;
-  /** @hidden */
+  /** @internal */
   size: number;
-  /** @hidden */
+  /** @internal */
   aliased: number;
 
   constructor() {
@@ -105,7 +105,7 @@ export class UriQueryBuilder implements PairBuilder<string | undefined, string, 
     }
   }
 
-  /** @hidden */
+  /** @internal */
   dealias(n: number): UriQuery {
     let i = 0;
     let xi: UriQuery | null = null;

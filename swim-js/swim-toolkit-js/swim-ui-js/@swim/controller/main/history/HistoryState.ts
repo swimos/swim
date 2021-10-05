@@ -14,7 +14,7 @@
 
 import {AnyUri, Uri, UriQuery, AnyUriFragment, UriFragment} from "@swim/uri";
 
-/** @hidden */
+/** @internal */
 export interface MutableHistoryState {
   fragment: string | undefined;
 
@@ -39,126 +39,129 @@ export interface HistoryState {
   readonly ephemeral: {readonly [key: string]: string | undefined};
 }
 
-export const HistoryState = {} as {
-  empty(): HistoryState;
+export const HistoryState = (function () {
+  const HistoryState = {} as {
+    empty(): HistoryState;
 
-  current(): MutableHistoryState;
+    current(): MutableHistoryState;
 
-  updated(delta: HistoryStateInit, state?: MutableHistoryState): MutableHistoryState;
+    updated(delta: HistoryStateInit, state?: MutableHistoryState): MutableHistoryState;
 
-  cloned(state: HistoryState): MutableHistoryState;
+    cloned(state: HistoryState): MutableHistoryState;
 
-  fromUri(uri: AnyUri): HistoryState;
+    fromUri(uri: AnyUri): HistoryState;
 
-  fromUriFragment(fragment: AnyUriFragment): HistoryState;
+    fromUriFragment(fragment: AnyUriFragment): HistoryState;
 
-  toUri(state: HistoryState): Uri;
-};
-
-HistoryState.empty = function (): HistoryState {
-  return {
-    fragment: void 0,
-    permanent: {},
-    ephemeral: {},
+    toUri(state: HistoryState): Uri;
   };
-};
 
-HistoryState.current = function (): MutableHistoryState {
-  try {
-    return HistoryState.fromUri(window.location.href);
-  } catch (e) {
-    console.error(e);
+  HistoryState.empty = function (): HistoryState {
     return {
       fragment: void 0,
       permanent: {},
       ephemeral: {},
     };
-  }
-};
-
-HistoryState.updated = function (delta: HistoryStateInit,
-                                 state?: MutableHistoryState): MutableHistoryState {
-  if (state === void 0) {
-    state = HistoryState.current();
-  }
-  if ("fragment" in delta) {
-    state.fragment = delta.fragment;
-  }
-  for (const key in delta.permanent) {
-    const value = delta.permanent[key];
-    if (value !== void 0) {
-      state.permanent[key] = value;
-    } else {
-      delete state.permanent[key];
-    }
-  }
-  for (const key in delta.ephemeral) {
-    const value = delta.ephemeral[key];
-    if (value !== void 0) {
-      state.ephemeral[key] = value;
-    } else {
-      delete state.ephemeral[key];
-    }
-  }
-  return state;
-};
-
-HistoryState.cloned = function (oldState: HistoryState): MutableHistoryState {
-  const newState: MutableHistoryState = {
-    fragment: oldState.fragment,
-    permanent: {},
-    ephemeral: {},
   };
-  for (const key in oldState.permanent) {
-    newState.permanent[key] = oldState.permanent[key];
-  }
-  for (const key in oldState.ephemeral) {
-    newState.ephemeral[key] = oldState.ephemeral[key];
-  }
-  return newState;
-};
 
-HistoryState.fromUri = function (uri: AnyUri): HistoryState {
-  uri = Uri.fromAny(uri);
-  const fragment = (uri as Uri).fragment;
-  if (fragment.isDefined()) {
-    return HistoryState.fromUriFragment(fragment);
-  } else {
-    return HistoryState.empty();
-  }
-};
-
-HistoryState.fromUriFragment = function (fragment: AnyUriFragment): HistoryState {
-  fragment = UriFragment.fromAny(fragment);
-  let query = fragment.identifier !== void 0
-            ? UriQuery.parse(fragment.identifier)
-            : UriQuery.undefined();
-  const state: MutableHistoryState = {
-    fragment: void 0,
-    permanent: {},
-    ephemeral: {},
-  };
-  while (!query.isEmpty()) {
-    const key = query.key;
-    const value = query.value;
-    if (key !== void 0) {
-      state.permanent[key] = value;
-    } else {
-      state.fragment = value;
+  HistoryState.current = function (): MutableHistoryState {
+    try {
+      return HistoryState.fromUri(window.location.href);
+    } catch (e) {
+      console.error(e);
+      return {
+        fragment: void 0,
+        permanent: {},
+        ephemeral: {},
+      };
     }
-    query = query.tail();
-  }
-  return state;
-};
+  };
 
-HistoryState.toUri = function (state: HistoryState): Uri {
-  const queryBuilder = UriQuery.builder();
-  if (state.fragment !== void 0) {
-    queryBuilder.add(void 0, state.fragment);
-  }
-  for (const key in state.permanent) {
-    const value = state.permanent[key]!;
-    queryBuilder.add(key, value);
-  }
-  return Uri.fragment(UriFragment.create(queryBuilder.bind().toString()));
-};
+  HistoryState.updated = function (delta: HistoryStateInit, state?: MutableHistoryState): MutableHistoryState {
+    if (state === void 0) {
+      state = HistoryState.current();
+    }
+    if ("fragment" in delta) {
+      state.fragment = delta.fragment;
+    }
+    for (const key in delta.permanent) {
+      const value = delta.permanent[key];
+      if (value !== void 0) {
+        state.permanent[key] = value;
+      } else {
+        delete state.permanent[key];
+      }
+    }
+    for (const key in delta.ephemeral) {
+      const value = delta.ephemeral[key];
+      if (value !== void 0) {
+        state.ephemeral[key] = value;
+      } else {
+        delete state.ephemeral[key];
+      }
+    }
+    return state;
+  };
+
+  HistoryState.cloned = function (oldState: HistoryState): MutableHistoryState {
+    const newState: MutableHistoryState = {
+      fragment: oldState.fragment,
+      permanent: {},
+      ephemeral: {},
+    };
+    for (const key in oldState.permanent) {
+      newState.permanent[key] = oldState.permanent[key];
+    }
+    for (const key in oldState.ephemeral) {
+      newState.ephemeral[key] = oldState.ephemeral[key];
+    }
+    return newState;
+  };
+
+  HistoryState.fromUri = function (uri: AnyUri): HistoryState {
+    uri = Uri.fromAny(uri);
+    const fragment = (uri as Uri).fragment;
+    if (fragment.isDefined()) {
+      return HistoryState.fromUriFragment(fragment);
+    } else {
+      return HistoryState.empty();
+    }
+  };
+
+  HistoryState.fromUriFragment = function (fragment: AnyUriFragment): HistoryState {
+    fragment = UriFragment.fromAny(fragment);
+    let query = fragment.identifier !== void 0
+              ? UriQuery.parse(fragment.identifier)
+              : UriQuery.undefined();
+    const state: MutableHistoryState = {
+      fragment: void 0,
+      permanent: {},
+      ephemeral: {},
+    };
+    while (!query.isEmpty()) {
+      const key = query.key;
+      const value = query.value;
+      if (key !== void 0) {
+        state.permanent[key] = value;
+      } else {
+        state.fragment = value;
+      }
+      query = query.tail();
+    }
+    return state;
+  };
+
+  HistoryState.toUri = function (state: HistoryState): Uri {
+    const queryBuilder = UriQuery.builder();
+    if (state.fragment !== void 0) {
+      queryBuilder.add(void 0, state.fragment);
+    }
+    for (const key in state.permanent) {
+      const value = state.permanent[key]!;
+      queryBuilder.add(key, value);
+    }
+    return Uri.fragment(UriFragment.create(queryBuilder.bind().toString()));
+  };
+
+  return HistoryState;
+})();

@@ -12,55 +12,82 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {View} from "../View";
+import type {FastenerOwner} from "@swim/fastener";
 import {GestureInput} from "./GestureInput";
-import type {GestureContext} from "./GestureContext";
 import type {MomentumGestureInput} from "./MomentumGestureInput";
-import {MomentumGesture} from "./MomentumGesture";
+import {MomentumGestureClass, MomentumGesture} from "./MomentumGesture";
+import type {View} from "../view/View";
 
-export class PointerMomentumGesture<G extends GestureContext, V extends View> extends MomentumGesture<G, V> {
-  constructor(owner: G, gestureName: string | undefined) {
-    super(owner, gestureName);
-    this.onPointerEnter = this.onPointerEnter.bind(this);
-    this.onPointerLeave = this.onPointerLeave.bind(this);
-    this.onPointerDown = this.onPointerDown.bind(this);
-    this.onPointerMove = this.onPointerMove.bind(this);
-    this.onPointerUp = this.onPointerUp.bind(this);
-    this.onPointerCancel = this.onPointerCancel.bind(this);
-    this.onPointerLeaveDocument = this.onPointerLeaveDocument.bind(this);
-  }
+/** @internal */
+export interface PointerMomentumGesture<O = unknown, V extends View = View> extends MomentumGesture<O, V> {
+  /** @internal @protected @override */
+  attachHoverEvents(view: V): void;
 
-  /** @hidden */
-  override attachHoverEvents(view: V): void {
+  /** @internal @protected @override */
+  detachHoverEvents(view: V): void;
+
+  /** @internal @protected @override */
+  attachPressEvents(view: V): void;
+
+  /** @internal @protected @override */
+  detachPressEvents(view: V): void;
+
+  /** @internal @protected */
+  updateInput(input: MomentumGestureInput, event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerEnter(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerLeave(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerDown(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerMove(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerUp(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerCancel(event: PointerEvent): void;
+
+  /** @internal @protected */
+  onPointerLeaveDocument(event: PointerEvent): void;
+}
+
+/** @internal */
+export const PointerMomentumGesture = (function (_super: typeof MomentumGesture) {
+  const PointerMomentumGesture = _super.extend() as MomentumGestureClass<PointerMomentumGesture<any, any>>;
+
+  PointerMomentumGesture.prototype.attachHoverEvents = function (this: PointerMomentumGesture, view: View): void {
     view.on("pointerenter", this.onPointerEnter as EventListener);
     view.on("pointerleave", this.onPointerLeave as EventListener);
     view.on("pointerdown", this.onPointerDown as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override detachHoverEvents(view: V): void {
+  PointerMomentumGesture.prototype.detachHoverEvents = function (this: PointerMomentumGesture, view: View): void {
     view.off("pointerenter", this.onPointerEnter as EventListener);
     view.off("pointerleave", this.onPointerLeave as EventListener);
     view.off("pointerdown", this.onPointerDown as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override attachPressEvents(view: V): void {
+  PointerMomentumGesture.prototype.attachPressEvents = function (this: PointerMomentumGesture, view: View): void {
     document.body.addEventListener("pointermove", this.onPointerMove);
     document.body.addEventListener("pointerup", this.onPointerUp);
     document.body.addEventListener("pointercancel", this.onPointerCancel);
     document.body.addEventListener("pointerleave", this.onPointerLeaveDocument);
-  }
+  };
 
-  /** @hidden */
-  override detachPressEvents(view: V): void {
+  PointerMomentumGesture.prototype.detachPressEvents = function (this: PointerMomentumGesture, view: View): void {
     document.body.removeEventListener("pointermove", this.onPointerMove);
     document.body.removeEventListener("pointerup", this.onPointerUp);
     document.body.removeEventListener("pointercancel", this.onPointerCancel);
     document.body.removeEventListener("pointerleave", this.onPointerLeaveDocument);
-  }
+  };
 
-  protected updateInput(input: MomentumGestureInput, event: PointerEvent): void {
+  PointerMomentumGesture.prototype.updateInput = function (this: PointerMomentumGesture, input: MomentumGestureInput, event: PointerEvent): void {
     input.target = event.target;
     input.button = event.button;
     input.buttons = event.buttons;
@@ -83,9 +110,9 @@ export class PointerMomentumGesture<G extends GestureContext, V extends View> ex
     input.twist = event.twist;
     input.pressure = event.pressure;
     input.tangentialPressure = event.tangentialPressure;
-  }
+  };
 
-  protected onPointerEnter(event: PointerEvent): void {
+  PointerMomentumGesture.prototype.onPointerEnter = function (this: PointerMomentumGesture, event: PointerEvent): void {
     if (event.pointerType === "mouse" && event.buttons === 0) {
       const input = this.getOrCreateInput(event.pointerId, GestureInput.pointerInputType(event.pointerType),
                                           event.isPrimary, event.clientX, event.clientY, event.timeStamp);
@@ -94,9 +121,9 @@ export class PointerMomentumGesture<G extends GestureContext, V extends View> ex
         this.beginHover(input, event);
       }
     }
-  }
+  };
 
-  protected onPointerLeave(event: PointerEvent): void {
+  PointerMomentumGesture.prototype.onPointerLeave = function (this: PointerMomentumGesture, event: PointerEvent): void {
     if (event.pointerType === "mouse") {
       const input = this.getInput(event.pointerId);
       if (input !== null) {
@@ -104,9 +131,9 @@ export class PointerMomentumGesture<G extends GestureContext, V extends View> ex
         this.endHover(input, event);
       }
     }
-  }
+  };
 
-  protected onPointerDown(event: PointerEvent): void {
+  PointerMomentumGesture.prototype.onPointerDown = function (this: PointerMomentumGesture, event: PointerEvent): void {
     const input = this.getOrCreateInput(event.pointerId, GestureInput.pointerInputType(event.pointerType),
                                         event.isPrimary, event.clientX, event.clientY, event.timeStamp);
     this.updateInput(input, event);
@@ -116,17 +143,17 @@ export class PointerMomentumGesture<G extends GestureContext, V extends View> ex
     if (event.pointerType === "mouse" && event.button !== 0) {
       this.cancelPress(input, event);
     }
-  }
+  };
 
-  protected onPointerMove(event: PointerEvent): void {
+  PointerMomentumGesture.prototype.onPointerMove = function (this: PointerMomentumGesture, event: PointerEvent): void {
     const input = this.getInput(event.pointerId);
     if (input !== null) {
       this.updateInput(input, event);
       this.movePress(input, event);
     }
-  }
+  };
 
-  protected onPointerUp(event: PointerEvent): void {
+  PointerMomentumGesture.prototype.onPointerUp = function (this: PointerMomentumGesture, event: PointerEvent): void {
     const input = this.getInput(event.pointerId);
     if (input !== null) {
       this.updateInput(input, event);
@@ -135,22 +162,36 @@ export class PointerMomentumGesture<G extends GestureContext, V extends View> ex
         this.press(input, event);
       }
     }
-  }
+  };
 
-  protected onPointerCancel(event: PointerEvent): void {
+  PointerMomentumGesture.prototype.onPointerCancel = function (this: PointerMomentumGesture, event: PointerEvent): void {
     const input = this.getInput(event.pointerId);
     if (input !== null) {
       this.updateInput(input, event);
       this.cancelPress(input, event);
     }
-  }
+  };
 
-  protected onPointerLeaveDocument(event: PointerEvent): void {
+  PointerMomentumGesture.prototype.onPointerLeaveDocument = function (this: PointerMomentumGesture, event: PointerEvent): void {
     const input = this.getInput(event.pointerId);
     if (input !== null) {
       this.updateInput(input, event);
       this.cancelPress(input, event);
       this.endHover(input, event);
     }
-  }
-}
+  };
+
+  PointerMomentumGesture.construct = function <G extends PointerMomentumGesture<any, any>>(gestureClass: MomentumGestureClass<PointerMomentumGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+    gesture.onPointerEnter = gesture.onPointerEnter.bind(gesture);
+    gesture.onPointerLeave = gesture.onPointerLeave.bind(gesture);
+    gesture.onPointerDown = gesture.onPointerDown.bind(gesture);
+    gesture.onPointerMove = gesture.onPointerMove.bind(gesture);
+    gesture.onPointerUp = gesture.onPointerUp.bind(gesture);
+    gesture.onPointerCancel = gesture.onPointerCancel.bind(gesture);
+    gesture.onPointerLeaveDocument = gesture.onPointerLeaveDocument.bind(gesture);
+    return gesture;
+  };
+
+  return PointerMomentumGesture;
+})(MomentumGesture);

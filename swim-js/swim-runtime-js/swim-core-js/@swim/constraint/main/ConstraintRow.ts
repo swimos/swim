@@ -17,7 +17,7 @@ import type {ConstraintMap} from "./ConstraintMap";
 import {ConstraintSymbol, ConstraintDummy} from "./ConstraintSymbol";
 import type {ConstraintSolver} from "./ConstraintSolver";
 
-/** @hidden */
+/** @internal */
 export class ConstraintRow {
   constructor(solver: ConstraintSolver, symbol: ConstraintSymbol | null,
               cells: ConstraintMap<ConstraintSymbol, number>, constant: number) {
@@ -31,7 +31,7 @@ export class ConstraintRow {
 
   readonly symbol: ConstraintSymbol | null;
 
-  /** @hidden */
+  /** @internal */
   setSymbol(symbol: ConstraintSymbol | null): void {
     (this as Mutable<this>).symbol = symbol;
     this.invalidate();
@@ -41,7 +41,7 @@ export class ConstraintRow {
 
   readonly constant: number;
 
-  /** @hidden */
+  /** @internal */
   setConstant(constant: number): void {
     if (this.constant !== constant) {
       (this as Mutable<this>).constant = constant;

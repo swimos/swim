@@ -53,7 +53,7 @@ export type AnyValue = Value
                      | undefined;
 
 export abstract class Value extends Item {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }

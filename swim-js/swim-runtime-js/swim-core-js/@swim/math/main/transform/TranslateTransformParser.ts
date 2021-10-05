@@ -18,7 +18,7 @@ import {PxLength} from "../length/PxLength";
 import {LengthParser} from "../length/LengthParser";
 import {TranslateTransform} from "./TranslateTransform";
 
-/** @hidden */
+/** @internal */
 export class TranslateTransformParser extends Parser<TranslateTransform> {
   private readonly identOutput: Output<string> | undefined;
   private readonly xParser: Parser<Length> | undefined;
@@ -198,7 +198,7 @@ export class TranslateTransformParser extends Parser<TranslateTransform> {
     return new TranslateTransformParser(identOutput, xParser, yParser, zParser, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseRest(input: Input, identOutput?: Output<string>): Parser<TranslateTransform> {
     return TranslateTransformParser.parse(input, identOutput, void 0, void 0, void 0, 2);
   }

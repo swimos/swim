@@ -31,7 +31,7 @@ export type AnyRecord = Record
                       | ReadonlyArray<AnyItem>;
 
 export abstract class Record extends Value implements Builder<Item, Record> {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }
@@ -832,9 +832,9 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static readonly AliasedFlag: number = 1;
-  /** @hidden */
+  /** @internal */
   static readonly ImmutableFlag: number = 2;
 
   static override empty(): Record {
@@ -887,7 +887,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return record;
   }
 
-  /** @hidden */
+  /** @internal */
   static expand(n: number): number {
     n = Math.max(8, n) - 1;
     n |= n >> 1; n |= n >> 2; n |= n >> 4; n |= n >> 8; n |= n >> 16;
@@ -904,6 +904,5 @@ Object.defineProperty(Record.prototype, "fieldCount", {
     }, this);
     return count;
   },
-  enumerable: true,
   configurable: true,
 });

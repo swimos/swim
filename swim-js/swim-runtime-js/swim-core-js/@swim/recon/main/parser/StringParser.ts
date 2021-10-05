@@ -16,7 +16,7 @@ import {Input, Output, Parser, Diagnostic, Base16} from "@swim/codec";
 import {Recon} from "../Recon";
 import type {ReconParser} from "./ReconParser";
 
-/** @hidden */
+/** @internal */
 export class StringParser<I, V> extends Parser<V> {
   private readonly recon: ReconParser<I, V>;
   private readonly output: Output<V> | undefined;

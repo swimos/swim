@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, AnyTiming, Timing, Easing} from "@swim/util";
+import {Mutable, Class, AnyTiming, Timing, Easing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
-import {Look, Mood} from "@swim/theme";
-import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
+import {Look, Mood, ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View, ViewFastener} from "@swim/view";
 import {StrokeView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {GeoView} from "../geo/GeoView";
 import {GeoLayerView} from "../layer/GeoLayerView";
@@ -42,39 +43,39 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
       enumerable: true,
       configurable: true,
     });
-    this.setViewFlags(this.viewFlags | View.UnboundedFlag);
+    this.setFlags(this.flags | View.UnboundedFlag);
   }
 
-  override readonly viewObservers!: ReadonlyArray<GeoRippleViewObserver>;
+  override readonly observerType?: Class<GeoRippleViewObserver>;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoCenter !== void 0) {
-        viewObserver.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoCenter !== void 0) {
+        observer.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
   protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     this.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
-    if (this.isMounted()) {
+    if (this.mounted) {
       this.projectRipple(this.viewContext as ViewContextType<this>);
     }
   }
 
   protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGeoCenter !== void 0) {
-        viewObserver.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoCenter !== void 0) {
+        observer.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
-  @ViewAnimator<GeoRippleView, GeoPoint | null, AnyGeoPoint | null>({
+  @ThemeAnimator<GeoRippleView, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
     didSetState(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
@@ -88,9 +89,9 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
     },
   })
-  readonly geoCenter!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator<GeoRippleView, R2Point | null, AnyR2Point | null>({
+  @ThemeAnimator<GeoRippleView, R2Point | null, AnyR2Point | null>({
     type: R2Point,
     state: R2Point.undefined(),
     updateFlags: View.NeedsRender,
@@ -98,37 +99,38 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
       this.owner.updateViewBounds();
     },
   })
-  readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
+  readonly viewCenter!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator<GeoRippleView, Length, AnyLength>({
+  @ThemeAnimator<GeoRippleView, Length, AnyLength>({
     type: Length,
     state: Length.zero(),
-    onEnd() {
+    updateFlags: View.NeedsRender,
+    didTransition() {
       this.owner.source.setView(null);
       this.owner.remove();
     },
   })
-  readonly radius!: ViewAnimator<this, Length, AnyLength>;
+  readonly radius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Color, state: null, look: Look.accentColor, inherit: true})
-  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, look: Look.accentColor, inherits: true, updateFlags: View.NeedsRender})
+  readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, state: Length.px(1), inherit: true})
-  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: Length.px(1), inherits: true, updateFlags: View.NeedsRender})
+  readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   @ViewFastener<GeoRippleView, GeoView>({
     child: false,
-    observe: true,
+    observes: true,
     onSetView(newSourceView: GeoView | null, oldSourceView: GeoView | null): void {
       if (newSourceView !== null) {
-        this.owner.geoCenter.setState(newSourceView.geoBounds.center, View.Intrinsic);
+        this.owner.geoCenter.setState(newSourceView.geoBounds.center, Affinity.Intrinsic);
       }
     },
     viewDidUnmount(sourceView: GeoView): void {
       this.owner.remove();
     },
     viewDidSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, sourceView: GeoView): void {
-      this.owner.geoCenter.setState(newGeoBounds.center, View.Intrinsic);
+      this.owner.geoCenter.setState(newGeoBounds.center, Affinity.Intrinsic);
     },
   })
   readonly source!: ViewFastener<this, GeoView>;
@@ -139,18 +141,18 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
   }
 
   protected projectGeoCenter(geoCenter: GeoPoint | null): void {
-    if (this.isMounted()) {
+    if (this.mounted) {
       const viewContext = this.viewContext as ViewContextType<this>;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
                        : null;
-      this.viewCenter.setIntermediateValue(this.viewCenter.value, viewCenter);
+      this.viewCenter.setInterpolatedValue(this.viewCenter.value, viewCenter);
       this.projectRipple(viewContext);
     }
   }
 
   protected projectRipple(viewContext: ViewContextType<this>): void {
-    if (this.viewCenter.takesPrecedence(View.Intrinsic)) {
+    if (this.viewCenter.hasAffinity(Affinity.Intrinsic)) {
       const geoCenter = this.geoCenter.value;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
@@ -162,11 +164,8 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       this.renderRipple(renderer.context, this.viewFrame);
-      context.restore();
     }
   }
 
@@ -175,18 +174,25 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
     if (viewCenter !== null && viewCenter.isDefined()) {
       const size = Math.min(frame.width, frame.height);
       const radius = this.radius.getValue().pxValue(size);
-
-      context.beginPath();
-      context.arc(viewCenter.x, viewCenter.y, radius, 0, 2 * Math.PI);
-
       const stroke = this.stroke.value;
       if (stroke !== null) {
+        // save
+        const contextLineWidth = context.lineWidth;
+        const contextStrokeStyle = context.strokeStyle;
+
+        context.beginPath();
+        context.arc(viewCenter.x, viewCenter.y, radius, 0, 2 * Math.PI);
+
         const strokeWidth = this.strokeWidth.value;
         if (strokeWidth !== null) {
           context.lineWidth = strokeWidth.pxValue(size);
         }
         context.strokeStyle = stroke.toString();
         context.stroke();
+
+        // restore
+        context.lineWidth = contextLineWidth;
+        context.strokeStyle = contextStrokeStyle;
       }
     }
   }
@@ -261,10 +267,10 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
       this.source.setView(source);
     }
     if (center !== null) {
-      this.geoCenter.setState(center, View.Intrinsic);
+      this.geoCenter.setState(center, Affinity.Intrinsic);
     }
     if (width !== null) {
-      this.strokeWidth.setState(width, View.Intrinsic);
+      this.strokeWidth.setState(width, Affinity.Intrinsic);
     }
     this.radius.setState(radius, timing);
     if (color !== null) {
@@ -276,23 +282,19 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
   }
 
   static ripple(sourceView: GeoView, options?: GeoRippleOptions): GeoRippleView | null {
-    if (!document.hidden && !sourceView.isHidden() && !sourceView.isCulled() &&
+    if (!document.hidden && !sourceView.isHidden() && !sourceView.culled &&
         sourceView.geoBounds.intersects(sourceView.geoViewport.geoFrame)) {
       const rippleView = GeoRippleView.create();
       rippleView.source.setView(sourceView);
-      let containerView = sourceView.getBaseView(GeoView);
+      let containerView = sourceView.getBase(GeoView);
       if (containerView === null) {
         containerView = sourceView;
       }
-      containerView.appendChildView(rippleView);
+      containerView.appendChild(rippleView);
       rippleView.ripple(options);
       return rippleView;
     } else {
       return null;
     }
-  }
-
-  static override create(): GeoRippleView {
-    return new GeoRippleView();
   }
 }

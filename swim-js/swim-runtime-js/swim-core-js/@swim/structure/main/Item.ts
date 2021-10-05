@@ -40,7 +40,7 @@ export type AnyItem = Item
                     | undefined;
 
 export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, Compare, Debug, Display {
-  /** @hidden */
+  /** @internal */
   constructor() {
     // stub
   }
@@ -445,7 +445,7 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
 
   abstract commit(): this;
 
-  /** @hidden */
+  /** @internal */
   get precedence(): number {
     return 11;
   }

@@ -24,7 +24,7 @@ import type {FontFamily} from "./FontFamily";
 import {FontFamilyParser} from "./FontFamilyParser";
 import {Font} from "./Font";
 
-/** @hidden */
+/** @internal */
 export class FontParser extends Parser<Font> {
   private readonly style: FontStyle | undefined;
   private readonly variant: FontVariant | undefined;

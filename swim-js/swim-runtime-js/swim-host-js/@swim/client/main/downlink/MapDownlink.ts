@@ -52,7 +52,7 @@ export interface MapDownlinkInit<K, V, KU = never, VU = never> extends MapDownli
 }
 
 export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implements OrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V, KU, VU>> {
-  /** @hidden */
+  /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: MapDownlinkInit<K, V, KU, VU>,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number, rate?: number,
               body?: Value, flags: number = DownlinkFlags.KeepLinkedSynced,
@@ -84,19 +84,19 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     this.version = -1;
   }
 
-  /** @hidden */
+  /** @internal */
   override readonly model!: MapDownlinkModel | null;
 
-  /** @hidden */
+  /** @internal */
   override readonly observers!: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>>;
 
-  /** @hidden */
+  /** @internal */
   readonly ownKeyForm: Form<K, KU>;
 
-  /** @hidden */
+  /** @internal */
   readonly ownValueForm: Form<V, VU>;
 
-  /** @hidden */
+  /** @internal */
   readonly state0: BTree<Value, Value> | null;
 
   override get type(): DownlinkType {
@@ -428,7 +428,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     return this.observe({didClear});
   }
 
-  /** @hidden */
+  /** @internal */
   mapWillUpdate(key: Value, newValue: Value): Value {
     let keyObject: K | undefined;
     let newObject: V | undefined;
@@ -452,7 +452,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     return newValue;
   }
 
-  /** @hidden */
+  /** @internal */
   mapDidUpdate(key: Value, newValue: Value, oldValue: Value): void {
     const keyObject = key.coerce(this.ownKeyForm);
     let newObject: V | undefined;
@@ -474,7 +474,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     this.recohereInput(0); // TODO: debounce and track version
   }
 
-  /** @hidden */
+  /** @internal */
   mapWillRemove(key: Value): void {
     let keyObject: K | undefined;
     const observers = this.observers;
@@ -489,7 +489,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     }
   }
 
-  /** @hidden */
+  /** @internal */
   mapDidRemove(key: Value, oldValue: Value): void {
     const keyObject = key.coerce(this.ownKeyForm);
     let oldObject: V | undefined;
@@ -507,7 +507,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     this.recohereInput(0); // TODO: debounce and track version
   }
 
-  /** @hidden */
+  /** @internal */
   mapWillDrop(lower: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -518,7 +518,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     }
   }
 
-  /** @hidden */
+  /** @internal */
   mapDidDrop(lower: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -529,7 +529,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     }
   }
 
-  /** @hidden */
+  /** @internal */
   mapWillTake(upper: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -540,7 +540,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     }
   }
 
-  /** @hidden */
+  /** @internal */
   mapDidTake(upper: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -551,7 +551,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     }
   }
 
-  /** @hidden */
+  /** @internal */
   mapWillClear(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -562,7 +562,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     }
   }
 
-  /** @hidden */
+  /** @internal */
   mapDidClear(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -585,7 +585,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected didAliasModel(): void {
     this.onLinkedResponse();
     this.model!.state.forEach(function (key: Value, value: Value): void {
@@ -635,16 +635,16 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
 
   readonly input: MapOutlet<K, V, Map<K, V>> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly effects: BTree<K, KeyEffect>;
 
-  /** @hidden */
+  /** @internal */
   readonly outlets: BTree<K, KeyOutlet<K, V>>;
 
-  /** @hidden */
+  /** @internal */
   readonly outputs: ReadonlyArray<Inlet<MapDownlink<K, V, KU, VU>>>;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   bindInput(newInput: MapOutlet<K, V, Map<K, V>>): void {

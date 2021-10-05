@@ -15,24 +15,28 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {Presence} from "./Presence";
 
-/** @hidden */
-export const PresenceInterpolator = function (p0: Presence, p1: Presence): Interpolator<Presence> {
-  const interpolator = function (u: number): Presence {
-    const p0 = interpolator[0];
-    const p1 = interpolator[1];
-    const phase = p0.phase + u * (p1.phase - p0.phase);
-    const direction = u !== 1 ? p0.direction : 0;
-    return Presence.create(phase, direction);
-  } as Interpolator<Presence>;
-  Object.setPrototypeOf(interpolator, PresenceInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = p0;
-  (interpolator as Mutable<typeof interpolator>)[1] = p1;
-  return interpolator;
-} as {
-  (p0: Presence, p1: Presence): Interpolator<Presence>;
+/** @internal */
+export const PresenceInterpolator = (function (_super: typeof Interpolator) {
+  const PresenceInterpolator = function (p0: Presence, p1: Presence): Interpolator<Presence> {
+    const interpolator = function (u: number): Presence {
+      const p0 = interpolator[0];
+      const p1 = interpolator[1];
+      const phase = p0.phase + u * (p1.phase - p0.phase);
+      const direction = u !== 1 ? p0.direction : 0;
+      return Presence.create(phase, direction);
+    } as Interpolator<Presence>;
+    Object.setPrototypeOf(interpolator, PresenceInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = p0;
+    (interpolator as Mutable<typeof interpolator>)[1] = p1;
+    return interpolator;
+  } as {
+    (p0: Presence, p1: Presence): Interpolator<Presence>;
 
-  /** @hidden */
-  prototype: Interpolator<Presence>;
-};
+    /** @internal */
+    prototype: Interpolator<Presence>;
+  };
 
-PresenceInterpolator.prototype = Object.create(Interpolator.prototype);
+  PresenceInterpolator.prototype = Object.create(_super.prototype);
+
+  return PresenceInterpolator;
+})(Interpolator);

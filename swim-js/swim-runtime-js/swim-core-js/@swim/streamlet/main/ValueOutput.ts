@@ -21,7 +21,7 @@ export class ValueOutput<I> extends AbstractInlet<I> {
     this.state = state;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly state: I | undefined;
 
   get(): I | undefined {

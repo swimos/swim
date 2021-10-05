@@ -16,7 +16,7 @@ import {AnyDateTime, DateTime} from "../DateTime";
 import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
 import {MillisecondsInterval} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class MillisecondInterval extends UnitTimeInterval {
   override offset(d: AnyDateTime, k?: number): DateTime {
     const z = DateTime.zone(d);

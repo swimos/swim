@@ -12,31 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Property} from "@swim/fastener";
 import type {Length} from "@swim/math";
-import type {Trait} from "@swim/model";
+import {TraitFastener, Trait} from "@swim/model";
 import type {Color} from "@swim/style";
 import type {GraphicsView} from "@swim/graphics";
-import {
-  Controller,
-  ControllerProperty,
-  ControllerTrait,
-  ControllerFastener,
-  CompositeController,
-} from "@swim/controller";
+import {Controller, ControllerFastener, GenericController} from "@swim/controller";
 import type {DataPointView} from "./DataPointView";
 import type {DataPointTrait} from "./DataPointTrait";
 import {DataPointController} from "./DataPointController";
 import {DataSetTrait} from "./DataSetTrait";
 import type {DataSetControllerObserver} from "./DataSetControllerObserver";
 
-export class DataSetController<X, Y> extends CompositeController {
+export class DataSetController<X, Y> extends GenericController {
   constructor() {
     super();
     this.dataPointFasteners = [];
   }
 
-  override readonly controllerObservers!: ReadonlyArray<DataSetControllerObserver<X, Y>>;
+  override readonly observerType?: Class<DataSetControllerObserver<X, Y>>;
 
   protected initDataSetTrait(dataSetTrait: DataSetTrait<X, Y>): void {
     // hook
@@ -63,11 +58,11 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   protected willSetDataSetTrait(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataSetTrait !== void 0) {
-        controllerObserver.controllerWillSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataSetTrait !== void 0) {
+        observer.controllerWillSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
       }
     }
   }
@@ -83,19 +78,19 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   protected didSetDataSetTrait(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataSetTrait !== void 0) {
-        controllerObserver.controllerDidSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataSetTrait !== void 0) {
+        observer.controllerDidSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
       }
     }
   }
 
-  /** @hidden */
-  static DataSetFastener = ControllerTrait.define<DataSetController<unknown, unknown>, DataSetTrait<unknown, unknown>>({
+  /** @internal */
+  static DataSetFastener = TraitFastener.define<DataSetController<unknown, unknown>, DataSetTrait<unknown, unknown>>({
     type: DataSetTrait,
-    observe: true,
+    observes: true,
     willSetTrait(newDataSetTrait: DataSetTrait<unknown, unknown> | null, oldDataSetTrait: DataSetTrait<unknown, unknown> | null): void {
       this.owner.willSetDataSetTrait(newDataSetTrait, oldDataSetTrait);
     },
@@ -117,10 +112,10 @@ export class DataSetController<X, Y> extends CompositeController {
     },
   });
 
-  @ControllerTrait<DataSetController<X, Y>, DataSetTrait<X, Y>>({
+  @TraitFastener<DataSetController<X, Y>, DataSetTrait<X, Y>>({
     extends: DataSetController.DataSetFastener,
   })
-  readonly dataSet!: ControllerTrait<this, DataSetTrait<X, Y>>;
+  readonly dataSet!: TraitFastener<this, DataSetTrait<X, Y>>;
 
   insertDataPoint(dataPointController: DataPointController<X, Y>, targetController: Controller | null = null): void {
     const dataPointFasteners = this.dataPointFasteners as ControllerFastener<this, DataPointController<X, Y>>[];
@@ -136,7 +131,7 @@ export class DataSetController<X, Y> extends CompositeController {
     const dataPointFastener = this.createDataPointFastener(dataPointController);
     dataPointFasteners.splice(targetIndex, 0, dataPointFastener);
     dataPointFastener.setController(dataPointController, targetController);
-    if (this.isMounted()) {
+    if (this.mounted) {
       dataPointFastener.mount();
     }
   }
@@ -147,7 +142,7 @@ export class DataSetController<X, Y> extends CompositeController {
       const dataPointFastener = dataPointFasteners[i]!;
       if (dataPointFastener.controller === dataPointController) {
         dataPointFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           dataPointFastener.unmount();
         }
         dataPointFasteners.splice(i, 1);
@@ -195,11 +190,11 @@ export class DataSetController<X, Y> extends CompositeController {
 
   protected willSetDataPoint(newDataPointController: DataPointController<X, Y> | null, oldDataPointController: DataPointController<X, Y> | null,
                              dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPoint !== void 0) {
-        controllerObserver.controllerWillSetDataPoint(newDataPointController, oldDataPointController, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPoint !== void 0) {
+        observer.controllerWillSetDataPoint(newDataPointController, oldDataPointController, dataPointFastener);
       }
     }
   }
@@ -217,11 +212,11 @@ export class DataSetController<X, Y> extends CompositeController {
 
   protected didSetDataPoint(newDataPointController: DataPointController<X, Y> | null, oldDataPointController: DataPointController<X, Y> | null,
                             dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPoint !== void 0) {
-        controllerObserver.controllerDidSetDataPoint(newDataPointController, oldDataPointController, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPoint !== void 0) {
+        observer.controllerDidSetDataPoint(newDataPointController, oldDataPointController, dataPointFastener);
       }
     }
   }
@@ -242,7 +237,7 @@ export class DataSetController<X, Y> extends CompositeController {
     const dataPointController = this.createDataPoint(dataPointTrait);
     if (dataPointController !== null) {
       dataPointController.dataPoint.setTrait(dataPointTrait);
-      this.insertChildController(dataPointController, targetController);
+      this.insertChild(dataPointController, targetController);
       if (dataPointController.dataPoint.view === null) {
         const dataPointView = this.createDataPointView(dataPointController);
         let targetView: DataPointView<X, Y> | null = null;
@@ -261,7 +256,7 @@ export class DataSetController<X, Y> extends CompositeController {
       const dataPointController = dataPointFastener.controller;
       if (dataPointController !== null && dataPointController.dataPoint.trait === dataPointTrait) {
         dataPointFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           dataPointFastener.unmount();
         }
         dataPointFasteners.splice(i, 1);
@@ -285,11 +280,11 @@ export class DataSetController<X, Y> extends CompositeController {
 
   protected willSetDataPointTrait(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null,
                                   dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointTrait !== void 0) {
-        controllerObserver.controllerWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointTrait !== void 0) {
+        observer.controllerWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener);
       }
     }
   }
@@ -307,11 +302,11 @@ export class DataSetController<X, Y> extends CompositeController {
 
   protected didSetDataPointTrait(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null,
                                  dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointTrait !== void 0) {
-        controllerObserver.controllerDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointTrait !== void 0) {
+        observer.controllerDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener);
       }
     }
   }
@@ -344,11 +339,11 @@ export class DataSetController<X, Y> extends CompositeController {
 
   protected willSetDataPointView(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
                                  dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointView !== void 0) {
-        controllerObserver.controllerWillSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointView !== void 0) {
+        observer.controllerWillSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener);
       }
     }
   }
@@ -366,21 +361,21 @@ export class DataSetController<X, Y> extends CompositeController {
 
   protected didSetDataPointView(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
                                 dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointView !== void 0) {
-        controllerObserver.controllerDidSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointView !== void 0) {
+        observer.controllerDidSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener);
       }
     }
   }
 
   protected willSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointX !== void 0) {
-        controllerObserver.controllerWillSetDataPointX(newX, oldX, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointX !== void 0) {
+        observer.controllerWillSetDataPointX(newX, oldX, dataPointFastener);
       }
     }
   }
@@ -390,21 +385,21 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   protected didSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointX !== void 0) {
-        controllerObserver.controllerDidSetDataPointX(newX, oldX, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointX !== void 0) {
+        observer.controllerDidSetDataPointX(newX, oldX, dataPointFastener);
       }
     }
   }
 
   protected willSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointY !== void 0) {
-        controllerObserver.controllerWillSetDataPointY(newY, oldY, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointY !== void 0) {
+        observer.controllerWillSetDataPointY(newY, oldY, dataPointFastener);
       }
     }
   }
@@ -414,21 +409,21 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   protected didSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointY !== void 0) {
-        controllerObserver.controllerDidSetDataPointY(newY, oldY, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointY !== void 0) {
+        observer.controllerDidSetDataPointY(newY, oldY, dataPointFastener);
       }
     }
   }
 
   protected willSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointY2 !== void 0) {
-        controllerObserver.controllerWillSetDataPointY2(newY2, oldY2, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointY2 !== void 0) {
+        observer.controllerWillSetDataPointY2(newY2, oldY2, dataPointFastener);
       }
     }
   }
@@ -438,21 +433,21 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   protected didSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointY2 !== void 0) {
-        controllerObserver.controllerDidSetDataPointY2(newY2, oldY2, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointY2 !== void 0) {
+        observer.controllerDidSetDataPointY2(newY2, oldY2, dataPointFastener);
       }
     }
   }
 
   protected willSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointRadius !== void 0) {
-        controllerObserver.controllerWillSetDataPointRadius(newRadius, oldRadius, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointRadius !== void 0) {
+        observer.controllerWillSetDataPointRadius(newRadius, oldRadius, dataPointFastener);
       }
     }
   }
@@ -462,21 +457,21 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   protected didSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointRadius !== void 0) {
-        controllerObserver.controllerDidSetDataPointRadius(newRadius, oldRadius, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointRadius !== void 0) {
+        observer.controllerDidSetDataPointRadius(newRadius, oldRadius, dataPointFastener);
       }
     }
   }
 
   protected willSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointColor !== void 0) {
-        controllerObserver.controllerWillSetDataPointColor(newColor, oldColor, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointColor !== void 0) {
+        observer.controllerWillSetDataPointColor(newColor, oldColor, dataPointFastener);
       }
     }
   }
@@ -486,21 +481,21 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   protected didSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointColor !== void 0) {
-        controllerObserver.controllerDidSetDataPointColor(newColor, oldColor, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointColor !== void 0) {
+        observer.controllerDidSetDataPointColor(newColor, oldColor, dataPointFastener);
       }
     }
   }
 
   protected willSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetDataPointOpacity !== void 0) {
-        controllerObserver.controllerWillSetDataPointOpacity(newOpacity, oldOpacity, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetDataPointOpacity !== void 0) {
+        observer.controllerWillSetDataPointOpacity(newOpacity, oldOpacity, dataPointFastener);
       }
     }
   }
@@ -510,11 +505,11 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   protected didSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointOpacity !== void 0) {
-        controllerObserver.controllerDidSetDataPointOpacity(newOpacity, oldOpacity, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointOpacity !== void 0) {
+        observer.controllerDidSetDataPointOpacity(newOpacity, oldOpacity, dataPointFastener);
       }
     }
   }
@@ -533,11 +528,11 @@ export class DataSetController<X, Y> extends CompositeController {
 
   protected willSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
                                       dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllertWillSetDataPointLabelView !== void 0) {
-        controllerObserver.controllertWillSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllertWillSetDataPointLabelView !== void 0) {
+        observer.controllertWillSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener);
       }
     }
   }
@@ -555,23 +550,23 @@ export class DataSetController<X, Y> extends CompositeController {
 
   protected didSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
                                      dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetDataPointLabelView !== void 0) {
-        controllerObserver.controllerDidSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetDataPointLabelView !== void 0) {
+        observer.controllerDidSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener);
       }
     }
   }
 
-  @ControllerProperty({type: Timing, state: true})
-  readonly dataPointTiming!: ControllerProperty<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({type: Timing, state: true})
+  readonly dataPointTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  /** @hidden */
+  /** @internal */
   static DataPointFastener = ControllerFastener.define<DataSetController<unknown, unknown>, DataPointController<unknown, unknown>>({
     type: DataPointController,
     child: false,
-    observe: true,
+    observes: true,
     willSetController(newDataPointController: DataPointController<unknown, unknown> | null, oldDataPointController: DataPointController<unknown, unknown> | null): void {
       this.owner.willSetDataPoint(newDataPointController, oldDataPointController, this);
     },
@@ -647,10 +642,10 @@ export class DataSetController<X, Y> extends CompositeController {
   });
 
   protected createDataPointFastener(dataPointController: DataPointController<X, Y>): ControllerFastener<this, DataPointController<X, Y>> {
-    return new DataSetController.DataPointFastener(this as DataSetController<unknown, unknown>, dataPointController.key, "dataPoint") as ControllerFastener<this, DataPointController<X, Y>>;
+    return DataSetController.DataPointFastener.create(this, dataPointController.key ?? "dataPoint") as ControllerFastener<this, DataPointController<X, Y>>;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly dataPointFasteners: ReadonlyArray<ControllerFastener<this, DataPointController<X, Y>>>;
 
   protected getDataPointFastener(dataPointTrait: DataPointTrait<X, Y>): ControllerFastener<this, DataPointController<X, Y>> | null {
@@ -665,7 +660,7 @@ export class DataSetController<X, Y> extends CompositeController {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   protected mountDataPointFasteners(): void {
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
@@ -674,7 +669,7 @@ export class DataSetController<X, Y> extends CompositeController {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountDataPointFasteners(): void {
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
@@ -687,31 +682,31 @@ export class DataSetController<X, Y> extends CompositeController {
     return controller instanceof DataPointController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const dataPointController = this.detectDataPointController(childController);
     if (dataPointController !== null) {
       this.insertDataPoint(dataPointController, targetController);
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const dataPointController = this.detectDataPointController(childController);
     if (dataPointController !== null) {
       this.removeDataPoint(dataPointController);
     }
   }
 
-  /** @hidden */
-  protected override mountControllerFasteners(): void {
-    super.mountControllerFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountDataPointFasteners();
   }
 
-  /** @hidden */
-  protected override unmountControllerFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountDataPointFasteners();
-    super.unmountControllerFasteners();
+    super.unmountFasteners();
   }
 }

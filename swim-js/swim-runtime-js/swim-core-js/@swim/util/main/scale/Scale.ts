@@ -32,31 +32,35 @@ export interface Scale<X, Y> extends Mapping<X, Y> {
   toString(): string;
 }
 
-export const Scale = function (): never {
-  throw new Error();
-} as {
-  /** @hidden */
-  (): never;
+export const Scale = (function (_super: typeof Mapping) {
+  const Scale = function (): never {
+    throw new Error();
+  } as {
+    /** @internal */
+    (): never;
 
-  /** @hidden */
-  prototype: Scale<any, any>;
-};
+    /** @internal */
+    prototype: Scale<any, any>;
+  };
 
-Scale.prototype = Object.create(Mapping.prototype);
+  Scale.prototype = Object.create(_super.prototype);
 
-Scale.prototype.canEqual = function (that: unknown): boolean {
-  return that instanceof Scale;
-};
+  Scale.prototype.canEqual = function (that: unknown): boolean {
+    return that instanceof Scale;
+  };
 
-Scale.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof Scale) {
-    return this.domain.equals(that.domain) && this.range.equals(that.range);
-  }
-  return false;
-};
+  Scale.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof Scale) {
+      return this.domain.equals(that.domain) && this.range.equals(that.range);
+    }
+    return false;
+  };
 
-Scale.prototype.toString = function (): string {
-  return "Scale(" + this.domain + ", " + this.range + ")";
-};
+  Scale.prototype.toString = function (): string {
+    return "Scale(" + this.domain + ", " + this.range + ")";
+  };
+
+  return Scale;
+})(Mapping);

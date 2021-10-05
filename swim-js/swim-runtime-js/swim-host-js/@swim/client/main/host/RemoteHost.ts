@@ -35,7 +35,7 @@ import type {HostDownlink} from "./HostDownlink";
 import type {HostContext} from "./HostContext";
 import {HostOptions, Host} from "./Host";
 
-/** @hidden */
+/** @internal */
 export abstract class RemoteHost extends Host {
   constructor(context: HostContext, hostUri: Uri, options: HostOptions = {}) {
     super();
@@ -53,7 +53,7 @@ export abstract class RemoteHost extends Host {
     this.idleTimer = 0;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly context: HostContext;
 
   override readonly hostUri: Uri;
@@ -82,7 +82,7 @@ export abstract class RemoteHost extends Host {
 
   abstract override isConnected(): boolean;
 
-  /** @hidden */
+  /** @internal */
   readonly authenticated: boolean;
 
   override isAuthenticated(): boolean {
@@ -91,20 +91,20 @@ export abstract class RemoteHost extends Host {
 
   override readonly session: Value;
 
-  /** @hidden */
+  /** @internal */
   readonly sendBuffer: Envelope[];
 
-  /** @hidden */
+  /** @internal */
   readonly downlinks: BTree<Uri, BTree<Uri, HostDownlink>>;
 
-  /** @hidden */
+  /** @internal */
   readonly downlinkCount: number;
 
   isIdle(): boolean {
     return this.sendBuffer.length === 0 && this.downlinkCount === 0;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly uriCache: UriCache;
 
   override resolve(relative: AnyUri): Uri {
@@ -312,13 +312,13 @@ export abstract class RemoteHost extends Host {
     // nop
   }
 
-  /** @hidden */
+  /** @internal */
   reconnectTimer: number;
 
-  /** @hidden */
+  /** @internal */
   reconnectTimeout: number;
 
-  /** @hidden */
+  /** @internal */
   idleTimer: number;
 
   protected onConnect(): void {

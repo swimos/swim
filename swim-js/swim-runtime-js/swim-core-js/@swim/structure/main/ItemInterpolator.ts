@@ -15,20 +15,24 @@
 import {Mutable, Interpolator} from "@swim/util";
 import type {Item} from "./Item";
 
-/** @hidden */
-export const ItemInterpolator = function <Y extends Item>(y0: Y, y1: Y): Interpolator<Y> {
-  const interpolator = function (u: number): Y {
-    return u < 1 ? interpolator[0] : interpolator[1];
-  } as Interpolator<Y>;
-  Object.setPrototypeOf(interpolator, ItemInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = y0.commit();
-  (interpolator as Mutable<typeof interpolator>)[1] = y1.commit();
-  return interpolator;
-} as {
-  <Y extends Item>(y0: Y, y1: Y): Interpolator<Y>;
+/** @internal */
+export const ItemInterpolator = (function (_super: typeof Interpolator) {
+  const ItemInterpolator = function <Y extends Item>(y0: Y, y1: Y): Interpolator<Y> {
+    const interpolator = function (u: number): Y {
+      return u < 1 ? interpolator[0] : interpolator[1];
+    } as Interpolator<Y>;
+    Object.setPrototypeOf(interpolator, ItemInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = y0.commit();
+    (interpolator as Mutable<typeof interpolator>)[1] = y1.commit();
+    return interpolator;
+  } as {
+    <Y extends Item>(y0: Y, y1: Y): Interpolator<Y>;
 
-  /** @hidden */
-  prototype: Interpolator<any>;
-};
+    /** @internal */
+    prototype: Interpolator<any>;
+  };
 
-ItemInterpolator.prototype = Object.create(Interpolator.prototype);
+  ItemInterpolator.prototype = Object.create(_super.prototype);
+
+  return ItemInterpolator;
+})(Interpolator);

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {
   Model,
   TraitModelType,
@@ -19,18 +20,17 @@ import {
   TraitClass,
   Trait,
   TraitFastener,
-  GenericTrait,
 } from "@swim/model";
 import {ColTrait} from "../col/ColTrait";
 import type {HeaderTraitObserver} from "./HeaderTraitObserver";
 
-export class HeaderTrait extends GenericTrait {
+export class HeaderTrait extends Trait {
   constructor() {
     super();
     this.colFasteners = [];
   }
 
-  override readonly traitObservers!: ReadonlyArray<HeaderTraitObserver>;
+  override readonly observerType?: Class<HeaderTraitObserver>;
 
   getCol(key: string): ColTrait | null;
   getCol<R extends ColTrait>(key: string, colTraitClass: TraitClass<R>): R | null;
@@ -74,7 +74,7 @@ export class HeaderTrait extends GenericTrait {
     const colFastener = this.createColFastener(colTrait);
     colFasteners.splice(targetIndex, 0, colFastener);
     colFastener.setTrait(colTrait, targetTrait);
-    if (this.isMounted()) {
+    if (this.mounted) {
       colFastener.mount();
     }
   }
@@ -85,7 +85,7 @@ export class HeaderTrait extends GenericTrait {
       const colFastener = colFasteners[i]!;
       if (colFastener.trait === colTrait) {
         colFastener.setTrait(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           colFastener.unmount();
         }
         colFasteners.splice(i, 1);
@@ -99,22 +99,22 @@ export class HeaderTrait extends GenericTrait {
   }
 
   protected attachCol(colTrait: ColTrait, colFastener: TraitFastener<this, ColTrait>): void {
-    if (this.isConsuming()) {
-      colTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      colTrait.consume(this);
     }
   }
 
   protected detachCol(colTrait: ColTrait, colFastener: TraitFastener<this, ColTrait>): void {
-    if (this.isConsuming()) {
-      colTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      colTrait.unconsume(this);
     }
   }
 
   protected willSetCol(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
                        targetTrait: Trait | null, colFastener: TraitFastener<this, ColTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetCol !== void 0) {
         traitObserver.traitWillSetCol(newColTrait, oldColTrait, targetTrait, this);
       }
@@ -134,16 +134,16 @@ export class HeaderTrait extends GenericTrait {
 
   protected didSetCol(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
                       targetTrait: Trait | null, colFastener: TraitFastener<this, ColTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetCol !== void 0) {
         traitObserver.traitDidSetCol(newColTrait, oldColTrait, targetTrait, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static ColFastener = TraitFastener.define<HeaderTrait, ColTrait>({
     type: ColTrait,
     sibling: false,
@@ -159,13 +159,13 @@ export class HeaderTrait extends GenericTrait {
   });
 
   protected createColFastener(colTrait: ColTrait): TraitFastener<this, ColTrait> {
-    return new HeaderTrait.ColFastener(this, colTrait.key, "col");
+    return HeaderTrait.ColFastener.create(this, colTrait.key ?? "col");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly colFasteners: ReadonlyArray<TraitFastener<this, ColTrait>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountColFasteners(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
@@ -174,7 +174,7 @@ export class HeaderTrait extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountColFasteners(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
@@ -183,24 +183,24 @@ export class HeaderTrait extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected startConsumingCols(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
       const colTrait = colFasteners[i]!.trait;
       if (colTrait !== null) {
-        colTrait.addTraitConsumer(this);
+        colTrait.consume(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected stopConsumingCols(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
       const colTrait = colFasteners[i]!.trait;
       if (colTrait !== null) {
-        colTrait.removeTraitConsumer(this);
+        colTrait.unconsume(this);
       }
     }
   }
@@ -210,10 +210,10 @@ export class HeaderTrait extends GenericTrait {
   }
 
   protected detectModels(model: TraitModelType<this>): void {
-    const childModels = model.childModels;
-    for (let i = 0, n = childModels.length; i < n; i += 1) {
-      const childModel = childModels[i]!;
-      const colTrait = this.detectCellModel(childModel);
+    const children = model.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      const colTrait = this.detectCellModel(child);
       if (colTrait !== null) {
         this.insertCol(colTrait);
       }
@@ -243,24 +243,27 @@ export class HeaderTrait extends GenericTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    super.onInsertChildModel(childModel, targetModel);
-    const colTrait = this.detectCellModel(childModel);
+  /** @protected */
+  override onInsertChild(child: Model, target: Model | null): void {
+    super.onInsertChild(child, target);
+    const colTrait = this.detectCellModel(child);
     if (colTrait !== null) {
-      const targetTrait = targetModel !== null ? this.detectCellModel(targetModel) : null;
+      const targetTrait = target !== null ? this.detectCellModel(target) : null;
       this.insertCol(colTrait, targetTrait);
     }
   }
 
-  protected override onRemoveChildModel(childModel: Model): void {
-    super.onRemoveChildModel(childModel);
-    const colTrait = this.detectCellModel(childModel);
+  /** @protected */
+  override onRemoveChild(child: Model): void {
+    super.onRemoveChild(child);
+    const colTrait = this.detectCellModel(child);
     if (colTrait !== null) {
       this.removeCol(colTrait);
     }
   }
 
-  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  /** @protected */
+  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     const colTrait = this.detectColTrait(trait);
     if (colTrait !== null) {
@@ -268,7 +271,8 @@ export class HeaderTrait extends GenericTrait {
     }
   }
 
-  protected override onRemoveTrait(trait: Trait): void {
+  /** @protected */
+  override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const colTrait = this.detectColTrait(trait);
     if (colTrait !== null) {
@@ -276,16 +280,16 @@ export class HeaderTrait extends GenericTrait {
     }
   }
 
-  /** @hidden */
-  protected override mountTraitFasteners(): void {
-    super.mountTraitFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountColFasteners();
   }
 
-  /** @hidden */
-  protected override unmountTraitFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountColFasteners();
-    super.unmountTraitFasteners();
+    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

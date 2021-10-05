@@ -16,7 +16,7 @@ import {Mutable, Cursor} from "@swim/util";
 import type {Item} from "./Item";
 import type {Record} from "./Record";
 
-/** @hidden */
+/** @internal */
 export class RecordCursor extends Cursor<Item> {
   constructor(record: Record, lower?: number, upper?: number, index?: number) {
     super();
@@ -36,19 +36,19 @@ export class RecordCursor extends Cursor<Item> {
     this.direction = 0;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly record: Record;
 
-  /** @hidden */
+  /** @internal */
   readonly lower: number;
 
-  /** @hidden */
+  /** @internal */
   readonly upper: number;
 
-  /** @hidden */
+  /** @internal */
   readonly index: number;
 
-  /** @hidden */
+  /** @internal */
   readonly direction: number;
 
   override isEmpty(): boolean {

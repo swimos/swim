@@ -19,21 +19,21 @@ import type {Look, MoodMatrix} from "@swim/theme";
 import type {PaintingFillRule} from "../painting/PaintingContext";
 import {VectorIcon} from "./VectorIcon";
 
-/** @hidden */
+/** @internal */
 export interface VectorIconInterpolator extends Interpolator<VectorIcon> {
-  /** @hidden */
+  /** @internal */
   readonly path: R2Path;
 
-  /** @hidden */
+  /** @internal */
   readonly fillRule: PaintingFillRule;
 
-  /** @hidden */
+  /** @internal */
   readonly fillColorInterpolator: Interpolator<Color | null>;
 
-  /** @hidden */
+  /** @internal */
   readonly fillLook: Look<Color> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly moodModifier: MoodMatrix | null;
 
   readonly 0: VectorIcon;
@@ -43,67 +43,69 @@ export interface VectorIconInterpolator extends Interpolator<VectorIcon> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const VectorIconInterpolator = function (i0: VectorIcon, i1: VectorIcon): VectorIconInterpolator {
-  const interpolator = function (u: number): VectorIcon {
-    const path = interpolator.path;
-    const fillRule = interpolator.fillRule;
-    const fillColor = interpolator.fillColorInterpolator(u);
-    const fillLook = interpolator.fillLook;
-    const moodModifier = interpolator.moodModifier;
-    return new VectorIcon(path, fillRule, fillColor, fillLook, moodModifier);
-  } as VectorIconInterpolator;
-  Object.setPrototypeOf(interpolator, VectorIconInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).path = i1.path;
-  (interpolator as Mutable<typeof interpolator>).fillRule = i1.fillRule;
-  (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
-  (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
-  (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
-  return interpolator;
-} as {
-  (i0: VectorIcon, i1: VectorIcon): VectorIconInterpolator;
+/** @internal */
+export const VectorIconInterpolator = (function (_super: typeof Interpolator) {
+  const VectorIconInterpolator = function (i0: VectorIcon, i1: VectorIcon): VectorIconInterpolator {
+    const interpolator = function (u: number): VectorIcon {
+      const path = interpolator.path;
+      const fillRule = interpolator.fillRule;
+      const fillColor = interpolator.fillColorInterpolator(u);
+      const fillLook = interpolator.fillLook;
+      const moodModifier = interpolator.moodModifier;
+      return new VectorIcon(path, fillRule, fillColor, fillLook, moodModifier);
+    } as VectorIconInterpolator;
+    Object.setPrototypeOf(interpolator, VectorIconInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).path = i1.path;
+    (interpolator as Mutable<typeof interpolator>).fillRule = i1.fillRule;
+    (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
+    (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
+    (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
+    return interpolator;
+  } as {
+    (i0: VectorIcon, i1: VectorIcon): VectorIconInterpolator;
 
-  /** @hidden */
-  prototype: VectorIconInterpolator;
-};
+    /** @internal */
+    prototype: VectorIconInterpolator;
+  };
 
-VectorIconInterpolator.prototype = Object.create(Interpolator.prototype);
+  VectorIconInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(VectorIconInterpolator.prototype, 0, {
-  get(this: VectorIconInterpolator): VectorIcon {
-    const path = this.path;
-    const fillRule = this.fillRule;
-    const fillColor = this.fillColorInterpolator[0];
-    const fillLook = this.fillLook;
-    const moodModifier = this.moodModifier;
-    return new VectorIcon(path, fillRule, fillColor, fillLook, moodModifier);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(VectorIconInterpolator.prototype, 0, {
+    get(this: VectorIconInterpolator): VectorIcon {
+      const path = this.path;
+      const fillRule = this.fillRule;
+      const fillColor = this.fillColorInterpolator[0];
+      const fillLook = this.fillLook;
+      const moodModifier = this.moodModifier;
+      return new VectorIcon(path, fillRule, fillColor, fillLook, moodModifier);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(VectorIconInterpolator.prototype, 1, {
-  get(this: VectorIconInterpolator): VectorIcon {
-    const path = this.path;
-    const fillRule = this.fillRule;
-    const fillColor = this.fillColorInterpolator[1];
-    const fillLook = this.fillLook;
-    const moodModifier = this.moodModifier;
-    return new VectorIcon(path, fillRule, fillColor, fillLook, moodModifier);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(VectorIconInterpolator.prototype, 1, {
+    get(this: VectorIconInterpolator): VectorIcon {
+      const path = this.path;
+      const fillRule = this.fillRule;
+      const fillColor = this.fillColorInterpolator[1];
+      const fillLook = this.fillLook;
+      const moodModifier = this.moodModifier;
+      return new VectorIcon(path, fillRule, fillColor, fillLook, moodModifier);
+    },
+    configurable: true,
+  });
 
-VectorIconInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof VectorIconInterpolator) {
-    return this.path.equals(that.path)
-        && this.fillRule === that.fillRule
-        && this.fillColorInterpolator.equals(that.fillColorInterpolator)
-        && this.fillLook === that.fillLook
-        && Equals(this.moodModifier, that.moodModifier);
-  }
-  return false;
-};
+  VectorIconInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof VectorIconInterpolator) {
+      return this.path.equals(that.path)
+          && this.fillRule === that.fillRule
+          && this.fillColorInterpolator.equals(that.fillColorInterpolator)
+          && this.fillLook === that.fillLook
+          && Equals(this.moodModifier, that.moodModifier);
+    }
+    return false;
+  };
+
+  return VectorIconInterpolator;
+})(Interpolator);

@@ -12,27 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Mutable, Values} from "@swim/util";
-import {Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
+import {Mutable, Class, Equals, Values, Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
 import {GraphicsView, LayerView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import type {PlotViewInit, PlotView} from "./PlotView";
 import type {ScatterPlotViewObserver} from "./ScatterPlotViewObserver";
-import {BubblePlotView} from "../"; // forward import
 
 export type ScatterPlotType = "bubble";
 
-export type AnyScatterPlotView<X, Y> = ScatterPlotView<X, Y> | ScatterPlotViewInit<X, Y> | ScatterPlotType;
+export type AnyScatterPlotView<X = unknown, Y = unknown> = ScatterPlotView<X, Y> | ScatterPlotViewInit<X, Y> | ScatterPlotType;
 
-export interface ScatterPlotViewInit<X, Y> extends PlotViewInit<X, Y> {
+export interface ScatterPlotViewInit<X = unknown, Y = unknown> extends PlotViewInit<X, Y> {
   plotType?: ScatterPlotType;
 }
 
-export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotView<X, Y> {
+export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerView implements PlotView<X, Y> {
   constructor() {
     super();
     this.dataPointFasteners = [];
@@ -42,46 +42,22 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     this.yDataRange = null;
   }
 
-  override initView(init: ScatterPlotViewInit<X, Y>): void {
-    super.initView(init);
-    if (init.xScale !== void 0) {
-      this.xScale(init.xScale);
-    }
-    if (init.yScale !== void 0) {
-      this.yScale(init.yScale);
-    }
-
-    const data = init.data;
-    if (data !== void 0) {
-      for (let i = 0, n = data.length; i < n; i += 1) {
-        this.insertDataPoint(data[i]!);
-      }
-    }
-
-    if (init.font !== void 0) {
-      this.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      this.textColor(init.textColor);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<ScatterPlotViewObserver<X, Y>>;
+  override readonly observerType?: Class<ScatterPlotViewObserver<X, Y>>;
 
   abstract readonly plotType: ScatterPlotType;
 
-  @ViewAnimator({type: Font, state: null, inherit: true})
-  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
+  @ThemeAnimator({type: Font, state: null, inherits: true})
+  readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
-  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true})
+  readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetXScale !== void 0) {
-        viewObserver.viewWillSetXScale(newXScale, oldXScale, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetXScale !== void 0) {
+        observer.viewWillSetXScale(newXScale, oldXScale, this);
       }
     }
   }
@@ -92,19 +68,19 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected didSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetXScale !== void 0) {
-        viewObserver.viewDidSetXScale(newXScale, oldXScale, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetXScale !== void 0) {
+        observer.viewDidSetXScale(newXScale, oldXScale, this);
       }
     }
   }
 
-  @ViewAnimator<ScatterPlotView<X, Y>, ContinuousScale<X, number> | null>({
+  @ThemeAnimator<ScatterPlotView<X, Y>, ContinuousScale<X, number> | null>({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
-    inherit: true,
+    inherits: true,
     state: null,
     willSetValue(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
       this.owner.willSetXScale(newXScale, oldXScale);
@@ -117,11 +93,11 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
   protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetYScale !== void 0) {
-        viewObserver.viewWillSetYScale(newYScale, oldYScale, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetYScale !== void 0) {
+        observer.viewWillSetYScale(newYScale, oldYScale, this);
       }
     }
   }
@@ -132,19 +108,19 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected didSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetYScale !== void 0) {
-        viewObserver.viewDidSetYScale(newYScale, oldYScale, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetYScale !== void 0) {
+        observer.viewDidSetYScale(newYScale, oldYScale, this);
       }
     }
   }
 
-  @ViewAnimator<ScatterPlotView<X, Y>, ContinuousScale<Y, number> | null>({
+  @ThemeAnimator<ScatterPlotView<X, Y>, ContinuousScale<Y, number> | null>({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
-    inherit: true,
+    inherits: true,
     state: null,
     willSetValue(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
       this.owner.willSetYScale(newYScale, oldYScale);
@@ -195,11 +171,11 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected willSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetXRangePadding !== void 0) {
-        viewObserver.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetXRangePadding !== void 0) {
+        observer.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
   }
@@ -209,16 +185,16 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected didSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetXRangePadding !== void 0) {
-        viewObserver.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetXRangePadding !== void 0) {
+        observer.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
   }
 
-  @ViewProperty<ScatterPlotView<X, Y>, readonly [number, number]>({
+  @Property<ScatterPlotView<X, Y>, readonly [number, number]>({
     initState(): readonly [number, number] {
       return [0, 0];
     },
@@ -230,14 +206,14 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
       this.owner.didSetXRangePadding(newXRangePadding, oldXRangePadding);
     },
   })
-  readonly xRangePadding!: ViewProperty<this, readonly [number, number]>
+  readonly xRangePadding!: Property<this, readonly [number, number]>
 
   protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetYRangePadding !== void 0) {
-        viewObserver.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetYRangePadding !== void 0) {
+        observer.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
     }
   }
@@ -247,16 +223,16 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected didSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetYRangePadding !== void 0) {
-        viewObserver.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetYRangePadding !== void 0) {
+        observer.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
     }
   }
 
-  @ViewProperty<ScatterPlotView<X, Y>, readonly [number, number]>({
+  @Property<ScatterPlotView<X, Y>, readonly [number, number]>({
     initState(): readonly [number, number] {
       return [0, 0];
     },
@@ -268,7 +244,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
       this.owner.didSetYRangePadding(newYRangePadding, oldYRangePadding);
     },
   })
-  readonly yRangePadding!: ViewProperty<this, readonly [number, number]>
+  readonly yRangePadding!: Property<this, readonly [number, number]>
 
   readonly xDataDomain: Domain<X> | null;
 
@@ -283,11 +259,11 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected willSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetXDataDomain !== void 0) {
-        viewObserver.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetXDataDomain !== void 0) {
+        observer.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
     }
   }
@@ -298,11 +274,11 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected didSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetXDataDomain !== void 0) {
-        viewObserver.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetXDataDomain !== void 0) {
+        observer.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
     }
   }
@@ -335,11 +311,11 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected willSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetYDataDomain !== void 0) {
-        viewObserver.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetYDataDomain !== void 0) {
+        observer.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
     }
   }
@@ -350,11 +326,11 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   protected didSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetYDataDomain !== void 0) {
-        viewObserver.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetYDataDomain !== void 0) {
+        observer.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
     }
   }
@@ -419,7 +395,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   insertDataPoint(dataPointView: AnyDataPointView<X, Y>, targetView: View | null = null): void {
-    dataPointView = DataPointView.fromAny(dataPointView);
+    dataPointView = DataPointView.fromAny(dataPointView as AnyDataPointView) as DataPointView<X, Y>;
     const dataPointFasteners = this.dataPointFasteners as ViewFastener<this, DataPointView<X, Y>>[];
     let targetIndex = dataPointFasteners.length;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
@@ -433,7 +409,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     const dataPointFastener = this.createDataPointFastener(dataPointView);
     dataPointFasteners.splice(targetIndex, 0, dataPointFastener);
     dataPointFastener.setView(dataPointView, targetView);
-    if (this.isMounted()) {
+    if (this.mounted) {
       dataPointFastener.mount();
     }
   }
@@ -450,7 +426,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
       const dataPointFastener = dataPointFasteners[i]!;
       if (dataPointFastener.view === dataPointView) {
         dataPointFastener.setView(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           dataPointFastener.unmount();
         }
         dataPointFasteners.splice(i, 1);
@@ -477,11 +453,11 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected willSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
                              targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDataPoint !== void 0) {
-        viewObserver.viewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDataPoint !== void 0) {
+        observer.viewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
       }
     }
   }
@@ -499,11 +475,11 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected didSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
                             targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDataPoint !== void 0) {
-        viewObserver.viewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDataPoint !== void 0) {
+        observer.viewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
       }
     }
   }
@@ -538,10 +514,10 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static DataPointFastener = ViewFastener.define<ScatterPlotView<unknown, unknown>, DataPointView<unknown, unknown>>({
     child: false,
-    observe: true,
+    observes: true,
     willSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null, targetView: View | null): void {
       this.owner.willSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
     },
@@ -566,13 +542,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   });
 
   protected createDataPointFastener(dataPointView: DataPointView<X, Y>): ViewFastener<this, DataPointView<X, Y>> {
-    return new ScatterPlotView.DataPointFastener(this as ScatterPlotView<unknown, unknown>, dataPointView.key, "dataPoint") as ViewFastener<this, DataPointView<X, Y>>;
+    return ScatterPlotView.DataPointFastener.create(this, dataPointView.key ?? "dataPoint") as ViewFastener<this, DataPointView<X, Y>>;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly dataPointFasteners: ReadonlyArray<ViewFastener<this, DataPointView<X, Y>>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountDataPointFasteners(): void {
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
@@ -581,7 +557,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountDataPointFasteners(): void {
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
@@ -594,16 +570,16 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     return view instanceof DataPointView ? view : null;
   }
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     const dataPointView = this.detectDataPoint(childView);
     if (dataPointView !== null) {
       this.insertDataPoint(dataPointView, targetView);
     }
   }
 
-  protected override onRemoveChildView(childView: View): void {
-    super.onRemoveChildView(childView);
+  protected override onRemoveChild(childView: View): void {
+    super.onRemoveChild(childView);
     const dataPointView = this.detectDataPoint(childView);
     if (dataPointView !== null) {
       this.removeDataPoint(dataPointView);
@@ -612,8 +588,8 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
-    this.xScale.onAnimate(viewContext.updateTime);
-    this.yScale.onAnimate(viewContext.updateTime);
+    this.xScale.recohere(viewContext.updateTime);
+    this.yScale.recohere(viewContext.updateTime);
     this.resizeScales(this.viewFrame);
   }
 
@@ -621,35 +597,35 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
    * Updates own scale ranges to project onto view frame.
    */
   protected resizeScales(frame: R2Box): void {
-    const xScale = !this.xScale.isInherited() ? this.xScale.ownValue : null;
+    const xScale = !this.xScale.inherited ? this.xScale.value : null;
     if (xScale !== null && xScale.range[1] !== frame.width) {
       this.xScale.setRange(0, frame.width);
     }
-    const yScale = !this.yScale.isInherited() ? this.yScale.ownValue : null;
+    const yScale = !this.yScale.inherited ? this.yScale.value : null;
     if (yScale !== null && yScale.range[1] !== frame.height) {
       this.yScale.setRange(0, frame.height);
     }
   }
 
-  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
     let xScale: ContinuousScale<X, number> | null;
     let yScale: ContinuousScale<Y, number> | null;
     if ((displayFlags & View.NeedsLayout) !== 0 &&
         (xScale = this.xScale.value, xScale !== null) &&
         (yScale = this.yScale.value, yScale !== null)) {
-      this.layoutChildViews(xScale, yScale, displayFlags, viewContext, displayChildView);
+      this.layoutChildViews(xScale, yScale, displayFlags, viewContext, displayChild);
     } else {
-      super.displayChildViews(displayFlags, viewContext, displayChildView);
+      super.displayChildren(displayFlags, viewContext, displayChild);
     }
   }
 
   protected layoutChildViews(xScale: ContinuousScale<X, number>,
                              yScale: ContinuousScale<Y, number>,
                              displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                viewContext: ViewContextType<this>) => void): void {
+                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                            viewContext: ViewContextType<this>) => void): void {
     // Recompute extrema when laying out child views.
     const frame = this.viewFrame;
     const size = Math.min(frame.width, frame.height);
@@ -679,12 +655,12 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
         if (point0 !== null) {
           // update extrema
           if (Values.compare(x1, xDataDomainMin) < 0) {
-            xDataDomainMin = x1
+            xDataDomainMin = x1;
           } else if (Values.compare(xDataDomainMax, x1) < 0) {
             xDataDomainMax = x1;
           }
           if (Values.compare(y1, yDataDomainMin) < 0) {
-            yDataDomainMin = y1
+            yDataDomainMin = y1;
           } else if (Values.compare(yDataDomainMax, y1) < 0) {
             yDataDomainMax = y1;
           }
@@ -712,62 +688,59 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
         point0 = point1;
       }
 
-      displayChildView.call(this, point1, displayFlags, viewContext);
+      displayChild.call(this, point1, displayFlags, viewContext);
     }
-    super.displayChildViews(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, viewContext, layoutChildView);
 
     this.setXDataDomain(point0 !== null ? Domain<X>(xDataDomainMin!, xDataDomainMax!) : null);
     this.setYDataDomain(point0 !== null ? Domain<Y>(yDataDomainMin!, yDataDomainMax!) : null);
-    this.xRangePadding.setState([xRangePaddingMin, xRangePaddingMax], View.Intrinsic);
-    this.yRangePadding.setState([yRangePaddingMin, yRangePaddingMax], View.Intrinsic);
+    this.xRangePadding.setState([xRangePaddingMin, xRangePaddingMax], Affinity.Intrinsic);
+    this.yRangePadding.setState([yRangePaddingMin, yRangePaddingMax], Affinity.Intrinsic);
   }
 
   protected override didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      this.renderPlot(context, this.viewFrame);
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+      this.renderPlot(renderer.context, this.viewFrame);
     }
     super.didRender(viewContext);
   }
 
   protected abstract renderPlot(context: CanvasContext, frame: R2Box): void;
 
-  /** @hidden */
-  protected override mountViewFasteners(): void {
-    super.mountViewFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountDataPointFasteners();
   }
 
-  /** @hidden */
-  protected override unmountViewFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountDataPointFasteners();
-    super.unmountViewFasteners();
+    super.unmountFasteners();
   }
 
-  static fromType<X, Y>(type: ScatterPlotType): ScatterPlotView<X, Y> {
-    if (type === "bubble") {
-      return new BubblePlotView();
+  override init(init: ScatterPlotViewInit<X, Y>): void {
+    super.init(init);
+    if (init.xScale !== void 0) {
+      this.xScale(init.xScale);
     }
-    throw new TypeError("" + type);
-  }
+    if (init.yScale !== void 0) {
+      this.yScale(init.yScale);
+    }
 
-  static fromInit<X, Y>(init: ScatterPlotViewInit<X, Y>): ScatterPlotView<X, Y> {
-    const type = init.plotType;
-    if (type === "bubble") {
-      return BubblePlotView.fromInit(init);
+    const data = init.data;
+    if (data !== void 0) {
+      for (let i = 0, n = data.length; i < n; i += 1) {
+        this.insertDataPoint(data[i]!);
+      }
     }
-    throw new TypeError("" + init);
-  }
 
-  static fromAny<X, Y>(value: AnyScatterPlotView<X, Y>): ScatterPlotView<X, Y> {
-    if (value instanceof ScatterPlotView) {
-      return value;
-    } else if (typeof value === "string") {
-      return this.fromType(value);
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+    if (init.font !== void 0) {
+      this.font(init.font);
     }
-    throw new TypeError("" + value);
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
   }
 }

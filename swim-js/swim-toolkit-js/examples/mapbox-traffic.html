@@ -37,7 +37,7 @@ const mapView = new swim.MapboxView(map);
 mapView.container.setView(bodyView);
 mapView.canvas.view.pointerEventsEnabled(true);
 
-const layerView = mapView.append(swim.GeoTreeView);
+const layerView = mapView.appendChild(swim.GeoTreeView);
 //layerView.geoBoundsColor("#008f11");
 //layerView.geoTreeColor("#008f11");
 
@@ -51,7 +51,7 @@ const intersectionsLink = host.downlinkMap()
       const lng = value.get("lng").numberValue();
       const lat = value.get("lat").numberValue();
 
-      let intersectionLayerView = layerView.getChildView(key);
+      let intersectionLayerView = layerView.getChild(key);
       if (intersectionLayerView === null && lng !== 0 && lat !== 0 && isFinite(lng) && isFinite(lat)) {
         const intersectionId = value.get("id").stringValue();
         intersectionLayerView = new swim.GeoLayerView();
@@ -59,8 +59,8 @@ const intersectionsLink = host.downlinkMap()
             .geoCenter([lng, lat])
             .radius(5)
             .fill(INTERSECTION_COLOR);
-        intersectionLayerView.setChildView("marker", intersectionMarkerView);
-        layerView.setChildView(key, intersectionLayerView);
+        intersectionLayerView.setChild("marker", intersectionMarkerView);
+        layerView.setChild(key, intersectionLayerView);
         linkIntersection(intersectionId, host.nodeRef(key), intersectionLayerView, intersectionMarkerView);
       }
     })
@@ -82,7 +82,7 @@ function linkIntersection(intersectionId, node, intersectionLayerView, intersect
       intersectionPopover.setSource(intersectionMarkerView);
       intersectionPopover.hideModal();
     }
-    bodyView.modalService.toggleModal(intersectionPopover, {multi: event.shiftKey});
+    bodyView.modalProvider.toggleModal(intersectionPopover, {multi: event.shiftKey});
   });
   intersectionMarkerView.on("click", function (event) {
     event.stopPropagation();
@@ -123,7 +123,7 @@ function linkIntersection(intersectionId, node, intersectionLayerView, intersect
                 detectorApproaches.push(approachView);
                 detectors[detectorId] = detectorApproaches;
               }
-              intersectionLayerView.setChildView(approachKey, approachView);
+              intersectionLayerView.setChild(approachKey, approachView);
             }
           }
         })

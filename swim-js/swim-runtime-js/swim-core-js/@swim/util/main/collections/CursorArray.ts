@@ -14,7 +14,7 @@
 
 import {Cursor} from "./Cursor";
 
-/** @hidden */
+/** @internal */
 export class CursorArray<T> extends Cursor<T> {
   constructor(array: ReadonlyArray<T>, index: number, limit: number) {
     super();
@@ -23,13 +23,13 @@ export class CursorArray<T> extends Cursor<T> {
     this.limit = limit;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly array: ReadonlyArray<T>;
 
-  /** @hidden */
+  /** @internal */
   index: number;
 
-  /** @hidden */
+  /** @internal */
   readonly limit: number;
 
   override isEmpty(): boolean {

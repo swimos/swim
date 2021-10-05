@@ -18,7 +18,7 @@ import type {DateTimeLocale} from "./DateTimeLocale";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {ShortWeekdayParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class ShortWeekdayFormat extends DateTimeFormat {
   private readonly locale: DateTimeLocale;
 

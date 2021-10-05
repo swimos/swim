@@ -26,7 +26,6 @@ export {GraphicsViewContext} from "./GraphicsViewContext";
 export {
   GraphicsViewEventMap,
   GraphicsViewInit,
-  GraphicsViewConstructor,
   GraphicsView,
 } from "./GraphicsView";
 export {GraphicsViewObserver} from "./GraphicsViewObserver";

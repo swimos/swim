@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Model, TraitModelType, Trait, TraitProperty, TraitFastener, GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
+import {Model, TraitModelType, Trait, TraitFastener} from "@swim/model";
 import type {GraphicsView} from "@swim/graphics";
 import {DialTrait} from "../dial/DialTrait";
 import type {GaugeTraitObserver} from "./GaugeTraitObserver";
@@ -20,18 +22,18 @@ import type {GaugeTraitObserver} from "./GaugeTraitObserver";
 export type GaugeTitle = GaugeTitleFunction | string;
 export type GaugeTitleFunction = (gaugeTrait: GaugeTrait) => GraphicsView | string | null;
 
-export class GaugeTrait extends GenericTrait {
+export class GaugeTrait extends Trait {
   constructor() {
     super();
     this.dialFasteners = [];
   }
 
-  override readonly traitObservers!: ReadonlyArray<GaugeTraitObserver>;
+  override readonly observerType?: Class<GaugeTraitObserver>;
 
   protected willSetTitle(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetGaugeTitle !== void 0) {
         traitObserver.traitWillSetGaugeTitle(newTitle, oldTitle, this);
       }
@@ -43,16 +45,16 @@ export class GaugeTrait extends GenericTrait {
   }
 
   protected didSetTitle(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetGaugeTitle !== void 0) {
         traitObserver.traitDidSetGaugeTitle(newTitle, oldTitle, this);
       }
     }
   }
 
-  @TraitProperty<GaugeTrait, GaugeTitle | null>({
+  @Property<GaugeTrait, GaugeTitle | null>({
     state: null,
     willSetState(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null): void {
       this.owner.willSetTitle(newTitle, oldTitle);
@@ -62,7 +64,7 @@ export class GaugeTrait extends GenericTrait {
       this.owner.didSetTitle(newTitle, oldTitle);
     },
   })
-  readonly title!: TraitProperty<this, GaugeTitle | null>;
+  readonly title!: Property<this, GaugeTitle | null>;
 
   insertDial(dialTrait: DialTrait, targetTrait: Trait | null = null): void {
     const dialFasteners = this.dialFasteners as TraitFastener<this, DialTrait>[];
@@ -78,7 +80,7 @@ export class GaugeTrait extends GenericTrait {
     const dialFastener = this.createDialFastener(dialTrait);
     dialFasteners.splice(targetIndex, 0, dialFastener);
     dialFastener.setTrait(dialTrait, targetTrait);
-    if (this.isMounted()) {
+    if (this.mounted) {
       dialFastener.mount();
     }
   }
@@ -89,7 +91,7 @@ export class GaugeTrait extends GenericTrait {
       const dialFastener = dialFasteners[i]!;
       if (dialFastener.trait === dialTrait) {
         dialFastener.setTrait(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           dialFastener.unmount();
         }
         dialFasteners.splice(i, 1);
@@ -103,22 +105,22 @@ export class GaugeTrait extends GenericTrait {
   }
 
   protected attachDial(dialTrait: DialTrait, dialFastener: TraitFastener<this, DialTrait>): void {
-    if (this.isConsuming()) {
-      dialTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      dialTrait.consume(this);
     }
   }
 
   protected detachDial(dialTrait: DialTrait, dialFastener: TraitFastener<this, DialTrait>): void {
-    if (this.isConsuming()) {
-      dialTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      dialTrait.unconsume(this);
     }
   }
 
   protected willSetDial(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null,
                         targetTrait: Trait | null, dialFastener: TraitFastener<this, DialTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetDial !== void 0) {
         traitObserver.traitWillSetDial(newDialTrait, oldDialTrait, targetTrait, this);
       }
@@ -138,16 +140,16 @@ export class GaugeTrait extends GenericTrait {
 
   protected didSetDial(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null,
                        targetTrait: Trait | null, dialFastener: TraitFastener<this, DialTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetDial !== void 0) {
         traitObserver.traitDidSetDial(newDialTrait, oldDialTrait, targetTrait, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static DialFastener = TraitFastener.define<GaugeTrait, DialTrait>({
     type: DialTrait,
     sibling: false,
@@ -163,13 +165,13 @@ export class GaugeTrait extends GenericTrait {
   });
 
   protected createDialFastener(dialTrait: DialTrait): TraitFastener<this, DialTrait> {
-    return new GaugeTrait.DialFastener(this, dialTrait.key, "dial");
+    return GaugeTrait.DialFastener.create(this, dialTrait.key ?? "dial");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly dialFasteners: ReadonlyArray<TraitFastener<this, DialTrait>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountDialFasteners(): void {
     const dialFasteners = this.dialFasteners;
     for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
@@ -178,7 +180,7 @@ export class GaugeTrait extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountDialFasteners(): void {
     const dialFasteners = this.dialFasteners;
     for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
@@ -187,24 +189,24 @@ export class GaugeTrait extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected startConsumingDials(): void {
     const dialFasteners = this.dialFasteners;
     for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
       const dialTrait = dialFasteners[i]!.trait;
       if (dialTrait !== null) {
-        dialTrait.addTraitConsumer(this);
+        dialTrait.consume(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected stopConsumingDials(): void {
     const dialFasteners = this.dialFasteners;
     for (let i = 0, n = dialFasteners.length; i < n; i += 1) {
       const dialTrait = dialFasteners[i]!.trait;
       if (dialTrait !== null) {
-        dialTrait.removeTraitConsumer(this);
+        dialTrait.unconsume(this);
       }
     }
   }
@@ -214,10 +216,10 @@ export class GaugeTrait extends GenericTrait {
   }
 
   protected detectModels(model: TraitModelType<this>): void {
-    const childModels = model.childModels;
-    for (let i = 0, n = childModels.length; i < n; i += 1) {
-      const childModel = childModels[i]!;
-      const dialTrait = this.detectDialModel(childModel);
+    const children = model.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      const dialTrait = this.detectDialModel(child);
       if (dialTrait !== null) {
         this.insertDial(dialTrait);
       }
@@ -231,33 +233,35 @@ export class GaugeTrait extends GenericTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    super.onInsertChildModel(childModel, targetModel);
-    const dialTrait = this.detectDialModel(childModel);
+  /** @protected */
+  override onInsertChild(child: Model, target: Model | null): void {
+    super.onInsertChild(child, target);
+    const dialTrait = this.detectDialModel(child);
     if (dialTrait !== null) {
-      const targetTrait = targetModel !== null ? this.detectDialModel(targetModel) : null;
+      const targetTrait = target !== null ? this.detectDialModel(target) : null;
       this.insertDial(dialTrait, targetTrait);
     }
   }
 
-  protected override onRemoveChildModel(childModel: Model): void {
-    super.onRemoveChildModel(childModel);
-    const dialTrait = this.detectDialModel(childModel);
+  /** @protected */
+  override onRemoveChild(child: Model): void {
+    super.onRemoveChild(child);
+    const dialTrait = this.detectDialModel(child);
     if (dialTrait !== null) {
       this.removeDial(dialTrait);
     }
   }
 
-  /** @hidden */
-  protected override mountTraitFasteners(): void {
-    super.mountTraitFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountDialFasteners();
   }
 
-  /** @hidden */
-  protected override unmountTraitFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountDialFasteners();
-    super.unmountTraitFasteners();
+    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

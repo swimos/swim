@@ -19,7 +19,7 @@ import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpress
 import type {ConstraintTerm} from "./ConstraintTerm";
 import type {ConstraintVariable} from "./ConstraintVariable";
 
-/** @hidden */
+/** @internal */
 export class ConstraintConstant implements ConstraintTerm, Debug {
   constructor(constant: number) {
     this.constant = constant;
@@ -74,7 +74,7 @@ export class ConstraintConstant implements ConstraintTerm, Debug {
   }
 
   debug<T>(output: Output<T>): Output<T> {
-    output = output.write("ConstraintExpression").write(46/*'.'*/)
+    output = output.write("ConstraintExpression").write(46/*'.'*/);
     if (this.constant === 0) {
       output = output.write("zero");
     } else {

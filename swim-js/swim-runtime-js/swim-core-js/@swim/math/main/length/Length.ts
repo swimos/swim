@@ -253,14 +253,14 @@ export abstract class Length implements Interpolate<Length>, HashCode, Equivalen
     return new LengthForm(void 0, Length.zero());
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyLength {
     return value instanceof Length
         || typeof value === "number"
         || typeof value === "string";
   }
 
-  /** @hidden */
+  /** @internal */
   static emUnit(basis?: LengthBasis | number): number {
     if (typeof basis === "object" && typeof basis.emUnit === "number") {
       return basis.emUnit;
@@ -279,7 +279,7 @@ export abstract class Length implements Interpolate<Length>, HashCode, Equivalen
     throw new LengthException("unknown em unit");
   }
 
-  /** @hidden */
+  /** @internal */
   static remUnit(basis?: LengthBasis | number): number {
     if (typeof basis === "object" && typeof basis.remUnit === "number") {
       return basis.remUnit;
@@ -292,7 +292,7 @@ export abstract class Length implements Interpolate<Length>, HashCode, Equivalen
     throw new LengthException("unknown rem unit");
   }
 
-  /** @hidden */
+  /** @internal */
   static pctUnit(basis?: LengthBasis | number): number {
     if (typeof basis === "number") {
       return basis;

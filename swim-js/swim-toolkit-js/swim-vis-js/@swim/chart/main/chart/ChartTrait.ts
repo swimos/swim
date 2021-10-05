@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {TraitModelType, Trait, TraitFastener, GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {TraitModelType, Trait, TraitFastener} from "@swim/model";
 import {GraphTrait} from "../graph/GraphTrait";
 import type {AxisTrait} from "../axis/AxisTrait";
 import {TopAxisTrait} from "../axis/TopAxisTrait";
@@ -21,29 +22,29 @@ import {BottomAxisTrait} from "../axis/BottomAxisTrait";
 import {LeftAxisTrait} from "../axis/LeftAxisTrait";
 import type {ChartTraitObserver} from "./ChartTraitObserver";
 
-export class ChartTrait<X, Y> extends GenericTrait {
-  override readonly traitObservers!: ReadonlyArray<ChartTraitObserver<X, Y>>;
+export class ChartTrait<X, Y> extends Trait {
+  override readonly observerType?: Class<ChartTraitObserver<X, Y>>;
 
   protected initGraph(graphTrait: GraphTrait<X, Y>): void {
     // hook
   }
 
   protected attachGraph(graphTrait: GraphTrait<X, Y>): void {
-    if (this.isConsuming()) {
-      graphTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      graphTrait.consume(this);
     }
   }
 
   protected detachGraph(graphTrait: GraphTrait<X, Y>): void {
-    if (this.isConsuming()) {
-      graphTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      graphTrait.unconsume(this);
     }
   }
 
   protected willSetGraph(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetGraph !== void 0) {
         traitObserver.traitWillSetGraph(newGraphTrait, oldGraphTrait, targetTrait, this);
       }
@@ -61,9 +62,9 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected didSetGraph(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetGraph !== void 0) {
         traitObserver.traitDidSetGraph(newGraphTrait, oldGraphTrait, targetTrait, this);
       }
@@ -90,21 +91,21 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected attachTopAxis(topAxisTrait: AxisTrait<X>): void {
-    if (this.isConsuming()) {
-      topAxisTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      topAxisTrait.consume(this);
     }
   }
 
   protected detachTopAxis(topAxisTrait: AxisTrait<X>): void {
-    if (this.isConsuming()) {
-      topAxisTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      topAxisTrait.unconsume(this);
     }
   }
 
   protected willSetTopAxis(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetTopAxis !== void 0) {
         traitObserver.traitWillSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait, this);
       }
@@ -122,9 +123,9 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected didSetTopAxis(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetTopAxis !== void 0) {
         traitObserver.traitDidSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait, this);
       }
@@ -150,21 +151,21 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected attachRightAxis(rightAxisTrait: AxisTrait<Y>): void {
-    if (this.isConsuming()) {
-      rightAxisTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      rightAxisTrait.consume(this);
     }
   }
 
   protected detachRightAxis(rightAxisTrait: AxisTrait<Y>): void {
-    if (this.isConsuming()) {
-      rightAxisTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      rightAxisTrait.unconsume(this);
     }
   }
 
   protected willSetRightAxis(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetRightAxis !== void 0) {
         traitObserver.traitWillSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait, this);
       }
@@ -182,9 +183,9 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected didSetRightAxis(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetRightAxis !== void 0) {
         traitObserver.traitDidSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait, this);
       }
@@ -210,21 +211,21 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected attachBottomAxis(bottomAxisTrait: AxisTrait<X>): void {
-    if (this.isConsuming()) {
-      bottomAxisTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      bottomAxisTrait.consume(this);
     }
   }
 
   protected detachBottomAxis(bottomAxisTrait: AxisTrait<X>): void {
-    if (this.isConsuming()) {
-      bottomAxisTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      bottomAxisTrait.unconsume(this);
     }
   }
 
   protected willSetBottomAxis(newBottomAxisTrrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetBottomAxis !== void 0) {
         traitObserver.traitWillSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait, this);
       }
@@ -242,9 +243,9 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected didSetBottomAxis(newBottomAxisTrrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetBottomAxis !== void 0) {
         traitObserver.traitDidSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait, this);
       }
@@ -270,21 +271,21 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected attachLeftAxis(leftAxisTrait: AxisTrait<Y>): void {
-    if (this.isConsuming()) {
-      leftAxisTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      leftAxisTrait.consume(this);
     }
   }
 
   protected detachLeftAxis(leftAxisTrait: AxisTrait<Y>): void {
-    if (this.isConsuming()) {
-      leftAxisTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      leftAxisTrait.unconsume(this);
     }
   }
 
   protected willSetLeftAxis(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetLeftAxis !== void 0) {
         traitObserver.traitWillSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait, this);
       }
@@ -302,9 +303,9 @@ export class ChartTrait<X, Y> extends GenericTrait {
   }
 
   protected didSetLeftAxis(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetLeftAxis !== void 0) {
         traitObserver.traitDidSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait, this);
       }
@@ -389,7 +390,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  /** @protected */
+  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     if (this.graph.trait === null) {
       const graphTrait = this.detectGraphTrait(trait);
@@ -423,7 +425,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected override onRemoveTrait(trait: Trait): void {
+  /** @protected */
+  override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const graphTrait = this.detectGraphTrait(trait);
     if (graphTrait !== null && this.graph.trait === graphTrait) {
@@ -451,23 +454,23 @@ export class ChartTrait<X, Y> extends GenericTrait {
     super.onStartConsuming();
     const graphTrait = this.graph.trait;
     if (graphTrait !== null) {
-      graphTrait.addTraitConsumer(this);
+      graphTrait.consume(this);
     }
     const topAxisTrair = this.topAxis.trait;
     if (topAxisTrair !== null) {
-      topAxisTrair.addTraitConsumer(this);
+      topAxisTrair.consume(this);
     }
     const rightAxisTrait = this.rightAxis.trait;
     if (rightAxisTrait !== null) {
-      rightAxisTrait.addTraitConsumer(this);
+      rightAxisTrait.consume(this);
     }
     const bottomAxisTrait = this.bottomAxis.trait;
     if (bottomAxisTrait !== null) {
-      bottomAxisTrait.addTraitConsumer(this);
+      bottomAxisTrait.consume(this);
     }
     const leftAxisTrait = this.leftAxis.trait;
     if (leftAxisTrait !== null) {
-      leftAxisTrait.addTraitConsumer(this);
+      leftAxisTrait.consume(this);
     }
   }
 
@@ -475,23 +478,23 @@ export class ChartTrait<X, Y> extends GenericTrait {
     super.onStopConsuming();
     const graphTrait = this.graph.trait;
     if (graphTrait !== null) {
-      graphTrait.removeTraitConsumer(this);
+      graphTrait.unconsume(this);
     }
     const topAxisTrair = this.topAxis.trait;
     if (topAxisTrair !== null) {
-      topAxisTrair.removeTraitConsumer(this);
+      topAxisTrair.unconsume(this);
     }
     const rightAxisTrait = this.rightAxis.trait;
     if (rightAxisTrait !== null) {
-      rightAxisTrait.removeTraitConsumer(this);
+      rightAxisTrait.unconsume(this);
     }
     const bottomAxisTrait = this.bottomAxis.trait;
     if (bottomAxisTrait !== null) {
-      bottomAxisTrait.removeTraitConsumer(this);
+      bottomAxisTrait.unconsume(this);
     }
     const leftAxisTrait = this.leftAxis.trait;
     if (leftAxisTrait !== null) {
-      leftAxisTrait.removeTraitConsumer(this);
+      leftAxisTrait.unconsume(this);
     }
   }
 }

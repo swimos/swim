@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {PlotTrait} from "./PlotTrait";
 import type {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
 
 export class SeriesPlotTrait<X, Y> extends PlotTrait<X, Y> {
-  override readonly traitObservers!: ReadonlyArray<SeriesPlotTraitObserver<X, Y>>;
+  override readonly observerType?: Class<SeriesPlotTraitObserver<X, Y>>;
 }

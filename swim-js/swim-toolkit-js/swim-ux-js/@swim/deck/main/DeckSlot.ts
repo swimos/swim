@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
-import {ViewProperty, ViewAnimator} from "@swim/view";
+import {Property} from "@swim/fastener";
+import type {Look, ThemeAnimator} from "@swim/theme";
 import {HtmlView} from "@swim/dom";
 import {AnyDeckPost, DeckPost} from "./DeckPost";
 
@@ -28,18 +28,18 @@ export abstract class DeckSlot extends HtmlView {
     this.addClass("deck-slot");
   }
 
-  @ViewProperty({type: DeckPost, state: null, inherit: true})
-  readonly post!: ViewProperty<this, DeckPost | null, AnyDeckPost | null>;
+  @Property({type: DeckPost, state: null, inherits: true})
+  readonly post!: Property<this, DeckPost | null, AnyDeckPost | null>;
 
-  @ViewProperty({type: DeckPost, state: null})
-  readonly nextPost!: ViewProperty<this, DeckPost | null, AnyDeckPost | null>;
+  @Property({type: DeckPost, state: null})
+  readonly nextPost!: Property<this, DeckPost | null, AnyDeckPost | null>;
 
-  @ViewProperty({type: DeckPost, state: null})
-  readonly prevPost!: ViewProperty<this, DeckPost | null, AnyDeckPost | null>;
+  @Property({type: DeckPost, state: null})
+  readonly prevPost!: Property<this, DeckPost | null, AnyDeckPost | null>;
 
-  abstract readonly deckPhase: ViewAnimator<this, number | undefined>;
+  abstract readonly deckPhase: ThemeAnimator<this, number | undefined>;
 
-  abstract readonly slotAlign: ViewAnimator<this, number>;
+  abstract readonly slotAlign: ThemeAnimator<this, number>;
 
   abstract readonly colorLook: Look<Color>;
 }

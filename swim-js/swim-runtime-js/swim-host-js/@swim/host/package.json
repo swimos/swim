@@ -11,11 +11,12 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "devDependencies": {
-    "@types/ws": "7"
+    "@types/ws": "8"
   },
   "dependencies": {
     "@swim/util": "4.0.0-dev.20210927.1",
     "@swim/codec": "4.0.0-dev.20210927.1",
+    "@swim/fastener": "4.0.0-dev.20210927.1",
     "@swim/collections": "4.0.0-dev.20210927.1",
     "@swim/structure": "4.0.0-dev.20210927.1",
     "@swim/streamlet": "4.0.0-dev.20210927.1",
@@ -24,6 +25,6 @@
     "@swim/uri": "4.0.0-dev.20210927.1",
     "@swim/warp": "4.0.0-dev.20210927.1",
     "@swim/client": "4.0.0-dev.20210927.1",
-    "ws": ">= 7.4.6"
+    "ws": "8"
   }
 }

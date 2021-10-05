@@ -18,7 +18,7 @@ import type {Color} from "../color/Color";
 import {ColorParser} from "../color/ColorParser";
 import {ColorStop} from "./ColorStop";
 
-/** @hidden */
+/** @internal */
 export class ColorStopParser extends Parser<ColorStop> {
   private readonly colorParser: Parser<Color> | undefined;
   private readonly stopParser: Parser<Length> | undefined;

@@ -29,7 +29,7 @@ import type {Host} from "../host/Host";
 import type {DownlinkContext} from "./DownlinkContext";
 import type {DownlinkType, Downlink} from "./Downlink";
 
-/** @hidden */
+/** @internal */
 export abstract class DownlinkModel implements HostDownlink {
   constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
               prio: number = 0, rate: number = 0, body: Value = Value.absent()) {
@@ -63,7 +63,7 @@ export abstract class DownlinkModel implements HostDownlink {
 
   readonly host: Host | null;
 
-  /** @hidden */
+  /** @internal */
   readonly status: number;
 
   abstract readonly type: DownlinkType;

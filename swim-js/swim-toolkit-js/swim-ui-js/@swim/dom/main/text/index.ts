@@ -14,6 +14,7 @@
 
 export {
   ViewText,
+  AnyTextView,
   TextViewInit,
   TextViewConstructor,
   TextView,

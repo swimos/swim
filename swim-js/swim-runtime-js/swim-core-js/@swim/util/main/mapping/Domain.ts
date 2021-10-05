@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
-import {Values} from "../runtime/Values";
+import type {Mutable} from "../types/Mutable";
+import {Values} from "../values/Values";
 import {Mapping} from "./Mapping";
 import {Range} from "../"; // forward import
 import {LinearDomain} from "../"; // forward import
@@ -41,84 +41,86 @@ export interface Domain<X> extends Mapping<X, number> {
   toString(): string;
 }
 
-export const Domain = function <X>(x0: X, x1: X): Domain<X> {
-  const domain = function (x: X): number {
-    return Values.equal(x, domain[1]) ? 1 : 0;
-  } as Domain<X>;
-  Object.setPrototypeOf(domain, Domain.prototype);
-  (domain as Mutable<typeof domain>)[0] = x0;
-  (domain as Mutable<typeof domain>)[1] = x1;
-  return domain;
-} as {
-  <X>(x0: X, x1: X): Domain<X>;
+export const Domain = (function (_super: typeof Mapping) {
+  const Domain = function <X>(x0: X, x1: X): Domain<X> {
+    const domain = function (x: X): number {
+      return Values.equal(x, domain[1]) ? 1 : 0;
+    } as Domain<X>;
+    Object.setPrototypeOf(domain, Domain.prototype);
+    (domain as Mutable<typeof domain>)[0] = x0;
+    (domain as Mutable<typeof domain>)[1] = x1;
+    return domain;
+  } as {
+    <X>(x0: X, x1: X): Domain<X>;
 
-  /** @hidden */
-  prototype: Domain<any>;
+    /** @internal */
+    prototype: Domain<any>;
 
-  readonly unit: LinearDomain;
-};
+    readonly unit: LinearDomain;
+  };
 
-Domain.prototype = Object.create(Mapping.prototype);
+  Domain.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(Domain.prototype, "domain", {
-  get<X>(this: Domain<X>): Domain<X> {
-    return this;
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(Domain.prototype, "domain", {
+    get<X>(this: Domain<X>): Domain<X> {
+      return this;
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(Domain.prototype, "range", {
-  get(): LinearRange {
-    return Range.unit;
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(Domain.prototype, "range", {
+    get(): LinearRange {
+      return Range.unit;
+    },
+    configurable: true,
+  });
 
-Domain.prototype.contains = function (x: unknown): boolean {
-  return Values.compare(this[0], x) <= 0 && Values.compare(x, this[1]) <= 0;
-};
+  Domain.prototype.contains = function (x: unknown): boolean {
+    return Values.compare(this[0], x) <= 0 && Values.compare(x, this[1]) <= 0;
+  };
 
-Domain.prototype.equivalentTo = function (that: unknown, epsilon?: number): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof Domain) {
-    return Values.equivalent(this[0], that[0], epsilon)
-        && Values.equivalent(this[1], that[1], epsilon);
-  }
-  return false;
-};
+  Domain.prototype.equivalentTo = function (that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof Domain) {
+      return Values.equivalent(this[0], that[0], epsilon)
+          && Values.equivalent(this[1], that[1], epsilon);
+    }
+    return false;
+  };
 
-Domain.prototype.canEqual = function (that: unknown): boolean {
-  return that instanceof Domain;
-};
+  Domain.prototype.canEqual = function (that: unknown): boolean {
+    return that instanceof Domain;
+  };
 
-Domain.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof Domain) {
-    return that.canEqual(this)
-        && Values.equal(this[0], that[0])
-        && Values.equal(this[1], that[1]);
-  }
-  return false;
-};
+  Domain.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof Domain) {
+      return that.canEqual(this)
+          && Values.equal(this[0], that[0])
+          && Values.equal(this[1], that[1]);
+    }
+    return false;
+  };
 
-Domain.prototype.toString = function (): string {
-  return "Domain(" + this[0] + ", " + this[1] + ")";
-};
+  Domain.prototype.toString = function (): string {
+    return "Domain(" + this[0] + ", " + this[1] + ")";
+  };
 
-Object.defineProperty(Domain, "unit", {
-  get(): Domain<number> {
-    const value = LinearDomain(0, 1);
-    Object.defineProperty(Domain, "unit", {
-      value: value,
-      enumerable: true,
-      configurable: true,
-    });
-    return value;
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(Domain, "unit", {
+    get(): Domain<number> {
+      const value = LinearDomain(0, 1);
+      Object.defineProperty(Domain, "unit", {
+        value: value,
+        enumerable: true,
+        configurable: true,
+      });
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return Domain;
+})(Mapping);

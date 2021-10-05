@@ -12,29 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Interpolator} from "./Interpolator";
 
-/** @hidden */
-export const InterpolatorInterpolator = function <Y>(y0: Interpolator<Y>, y1: Interpolator<Y>): Interpolator<Interpolator<Y>> {
-  const interpolator = function (u: number): Interpolator<Y> {
-    if (u === 0) {
-      return interpolator[0];
-    } else if (u === 1) {
-      return interpolator[1];
-    } else {
-      return Interpolator(interpolator[0](u), interpolator[1](u));
-    }
-  } as Interpolator<Interpolator<Y>>;
-  Object.setPrototypeOf(interpolator, InterpolatorInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = y0;
-  (interpolator as Mutable<typeof interpolator>)[1] = y1;
-  return interpolator;
-} as {
-  <Y>(y0: Interpolator<Y>, y1: Interpolator<Y>): Interpolator<Interpolator<Y>>;
+/** @internal */
+export const InterpolatorInterpolator = (function (_super: typeof Interpolator) {
+  const InterpolatorInterpolator = function <Y>(y0: Interpolator<Y>, y1: Interpolator<Y>): Interpolator<Interpolator<Y>> {
+    const interpolator = function (u: number): Interpolator<Y> {
+      if (u === 0) {
+        return interpolator[0];
+      } else if (u === 1) {
+        return interpolator[1];
+      } else {
+        return Interpolator(interpolator[0](u), interpolator[1](u));
+      }
+    } as Interpolator<Interpolator<Y>>;
+    Object.setPrototypeOf(interpolator, InterpolatorInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = y0;
+    (interpolator as Mutable<typeof interpolator>)[1] = y1;
+    return interpolator;
+  } as {
+    <Y>(y0: Interpolator<Y>, y1: Interpolator<Y>): Interpolator<Interpolator<Y>>;
 
-  /** @hidden */
-  prototype: Interpolator<any>;
-};
+    /** @internal */
+    prototype: Interpolator<any>;
+  };
 
-InterpolatorInterpolator.prototype = Object.create(Interpolator.prototype);
+  InterpolatorInterpolator.prototype = Object.create(_super.prototype);
+
+  return InterpolatorInterpolator;
+})(Interpolator);

@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Arrays, AnyTiming, Timing} from "@swim/util";
+import {Mutable, Class, Arrays, AnyTiming, Timing} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Box, R2Box} from "@swim/math";
-import {Color} from "@swim/style";
-import {Look} from "@swim/theme";
+import {AnyColor, Color} from "@swim/style";
+import {Look, ThemeAnimator} from "@swim/theme";
 import {
   ViewContextType,
   ViewContext,
   ViewFlags,
   View,
-  ViewProperty,
-  ViewAnimator,
   ModalOptions,
   ModalState,
   Modal,
   ViewFastener,
 } from "@swim/view";
-import {HtmlViewInit, HtmlView, HtmlViewObserver} from "@swim/dom";
+import {StyleAnimator, HtmlViewInit, HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {PopoverViewObserver} from "./PopoverViewObserver";
 
 export type PopoverPlacement = "none" | "above" | "below" | "over" | "top" | "bottom" | "right" | "left";
@@ -53,64 +52,55 @@ export class PopoverView extends HtmlView implements Modal {
     this.initArrow();
   }
 
+  override readonly observerType?: Class<PopoverViewObserver>;
+
   protected initArrow(): void {
     const arrow = this.createArrow();
     if (arrow !== null) {
-      this.prependChildView(arrow, "arrow");
+      this.prependChild(arrow, "arrow");
     }
   }
 
   protected createArrow(): HtmlView | null {
-    const arrow = HtmlView.create("div");
+    const arrow = HtmlView.fromTag("div");
     arrow.addClass("popover-arrow");
-    arrow.display.setState("none", View.Intrinsic);
-    arrow.position.setState("absolute", View.Intrinsic);
-    arrow.width.setState(0, View.Intrinsic);
-    arrow.height.setState(0, View.Intrinsic);
+    arrow.display.setState("none", Affinity.Intrinsic);
+    arrow.position.setState("absolute", Affinity.Intrinsic);
+    arrow.width.setState(0, Affinity.Intrinsic);
+    arrow.height.setState(0, Affinity.Intrinsic);
     return arrow;
   }
 
-  override readonly viewObservers!: ReadonlyArray<PopoverViewObserver>;
-
-  override initView(init: PopoverViewInit): void {
-    super.initView(init);
-    if (init.source !== void 0) {
-      this.source.setView(init.source);
-    }
-    if (init.placement !== void 0) {
-      this.placement(init.placement);
-    }
-    if (init.placementFrame !== void 0) {
-      this.placementFrame(init.placementFrame);
-    }
-    if (init.arrowWidth !== void 0) {
-      this.arrowWidth(init.arrowWidth);
-    }
-    if (init.arrowHeight !== void 0) {
-      this.arrowHeight(init.arrowHeight);
-    }
-  }
-
-  /** @hidden */
+  /** @internal */
   readonly displayState: number;
 
-  /** @hidden */
+  /** @internal */
   setDisplayState(displayState: number): void {
     (this as Mutable<this>).displayState = displayState;
   }
 
-  /** @hidden */
-  @ViewAnimator({type: Number, state: 0})
-  readonly displayPhase!: ViewAnimator<this, number>; // 0 = hidden; 1 = shown
+  @StyleAnimator<PopoverView, Color | null, AnyColor | null>({
+    propertyNames: "background-color",
+    type: Color,
+    state: null,
+    didSetValue(newBackgroundColor: Color, oldBackgroundColor: Color): void {
+      this.owner.place();
+    },
+  })
+  override readonly backgroundColor!: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, state: Length.zero()})
-  readonly placementGap!: ViewAnimator<this, Length, AnyLength>;
+  /** @internal */
+  @ThemeAnimator({type: Number, state: 0})
+  readonly displayPhase!: ThemeAnimator<this, number>; // 0 = hidden; 1 = shown
 
-  @ViewAnimator({type: Length, state: Length.px(10)})
-  readonly arrowWidth!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, state: Length.zero()})
+  readonly placementGap!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, state: Length.px(8)})
-  readonly arrowHeight!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, state: Length.px(10)})
+  readonly arrowWidth!: ThemeAnimator<this, Length, AnyLength>;
+
+  @ThemeAnimator({type: Length, state: Length.px(8)})
+  readonly arrowHeight!: ThemeAnimator<this, Length, AnyLength>;
 
   protected initSourceView(sourceView: View): void {
     // hook
@@ -125,11 +115,11 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   protected willSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.popoverWillSetSource !== void 0) {
-        viewObserver.popoverWillSetSource(newSourceView, oldSourceView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.popoverWillSetSource !== void 0) {
+        observer.popoverWillSetSource(newSourceView, oldSourceView, this);
       }
     }
   }
@@ -139,19 +129,20 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   protected didSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.popoverDidSetSource !== void 0) {
-        viewObserver.popoverDidSetSource(newSourceView, oldSourceView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.popoverDidSetSource !== void 0) {
+        observer.popoverDidSetSource(newSourceView, oldSourceView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static SourceFastener = ViewFastener.define<PopoverView, View, never, HtmlViewObserver>({
+    extends: null,
     child: false,
-    observe: true,
+    observes: true,
     willSetView(newSourceView: View | null, oldSourceView: View | null, popoverView: PopoverView): void {
       this.owner.willSetSourceView(newSourceView, oldSourceView);
     },
@@ -169,9 +160,6 @@ export class PopoverView extends HtmlView implements Modal {
       this.owner.didSetSourceView(newSourceView, oldSourceView);
     },
     viewDidMount(view: View): void {
-      this.owner.place();
-    },
-    viewDidPower(view: View): void {
       this.owner.place();
     },
     viewDidResize(viewContext: ViewContext, view: View): void {
@@ -265,30 +253,30 @@ export class PopoverView extends HtmlView implements Modal {
   protected willShow(): void {
     this.setDisplayState(PopoverView.ShowingState);
 
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.popoverWillShow !== void 0) {
-        viewObserver.popoverWillShow(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.popoverWillShow !== void 0) {
+        observer.popoverWillShow(this);
       }
     }
 
     this.place();
-    this.visibility.setState("visible", View.Intrinsic);
+    this.visibility.setState("visible", Affinity.Intrinsic);
   }
 
   protected didShow(): void {
     this.setDisplayState(PopoverView.ShownState);
 
-    this.pointerEvents.setState("auto", View.Intrinsic);
-    this.marginTop.setState(null, View.Intrinsic);
-    this.opacity.setState(void 0, View.Intrinsic);
+    this.pointerEvents.setState("auto", Affinity.Intrinsic);
+    this.marginTop.setState(null, Affinity.Intrinsic);
+    this.opacity.setState(void 0, Affinity.Intrinsic);
 
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.popoverDidShow !== void 0) {
-        viewObserver.popoverDidShow(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.popoverDidShow !== void 0) {
+        observer.popoverDidShow(this);
       }
     }
   }
@@ -313,34 +301,34 @@ export class PopoverView extends HtmlView implements Modal {
   protected willHide(): void {
     this.setDisplayState(PopoverView.HidingState);
 
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.popoverWillHide !== void 0) {
-        viewObserver.popoverWillHide(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.popoverWillHide !== void 0) {
+        observer.popoverWillHide(this);
       }
     }
 
-    this.pointerEvents.setState("none", View.Intrinsic);
+    this.pointerEvents.setState("none", Affinity.Intrinsic);
   }
 
   protected didHide(): void {
     this.setDisplayState(PopoverView.HiddenState);
 
-    this.visibility.setState("hidden", View.Intrinsic);
-    this.marginTop.setState(null, View.Intrinsic);
-    this.opacity.setState(void 0, View.Intrinsic);
+    this.visibility.setState("hidden", Affinity.Intrinsic);
+    this.marginTop.setState(null, Affinity.Intrinsic);
+    this.opacity.setState(void 0, Affinity.Intrinsic);
 
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.popoverDidHide !== void 0) {
-        viewObserver.popoverDidHide(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.popoverDidHide !== void 0) {
+        observer.popoverDidHide(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly allowedPlacement: PopoverPlacement[];
 
   placement(): ReadonlyArray<PopoverPlacement>;
@@ -358,10 +346,10 @@ export class PopoverView extends HtmlView implements Modal {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly currentPlacement: PopoverPlacement;
 
-  @ViewProperty<PopoverView, R2Box | null, AnyR2Box | null>({
+  @Property<PopoverView, R2Box | null, AnyR2Box | null>({
     type: R2Box,
     state: null,
     didSetState(placementFrame: R2Box | null): void {
@@ -371,16 +359,16 @@ export class PopoverView extends HtmlView implements Modal {
       return value !== null ? R2Box.fromAny(value) : null;
     },
   })
-  readonly placementFrame!: ViewProperty<this, R2Box | null, AnyR2Box | null>;
+  readonly placementFrame!: Property<this, R2Box | null, AnyR2Box | null>;
 
-  @ViewProperty<PopoverView, boolean>({
+  @Property<PopoverView, boolean>({
     type: Boolean,
     state: false,
     didSetState(dropdown: boolean): void {
       this.owner.place();
     }
   })
-  readonly dropdown!: ViewProperty<this, boolean>;
+  readonly dropdown!: Property<this, boolean>;
 
   protected override onMount(): void {
     super.onMount();
@@ -409,35 +397,32 @@ export class PopoverView extends HtmlView implements Modal {
 
   protected override onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
-    if (this.backgroundColor.takeUpdatedValue() !== void 0) {
-      this.place(true);
-    }
     const displayState = this.displayState;
     if (displayState === PopoverView.ShowState) {
       this.willShow();
     } else if (displayState === PopoverView.HideState) {
       this.willHide();
-    } else if (displayState === PopoverView.ShowingState && !this.displayPhase.isAnimating()) {
+    } else if (displayState === PopoverView.ShowingState && !this.displayPhase.tweening) {
       this.didShow();
-    } else if (displayState === PopoverView.HidingState && !this.displayPhase.isAnimating()) {
+    } else if (displayState === PopoverView.HidingState && !this.displayPhase.tweening) {
       this.didHide();
     }
-    if (this.displayPhase.isAnimating() || this.displayPhase.isUpdated()) {
-      this.applyDisplayPhase(this.displayPhase.takeValue());
+    if (this.displayPhase.tweening) {
+      this.applyDisplayPhase(this.displayPhase.value);
     }
   }
 
   protected applyDisplayPhase(displayPhase: number): void {
     const placement = this.currentPlacement;
     if (placement === "above") {
-      this.opacity.setState(void 0, View.Intrinsic);
-      this.marginTop.setState((1 - displayPhase) * -this.node.clientHeight, View.Intrinsic);
+      this.opacity.setState(void 0, Affinity.Intrinsic);
+      this.marginTop.setState((1 - displayPhase) * -this.node.clientHeight, Affinity.Intrinsic);
     } else if (placement === "below") {
-      this.opacity.setState(void 0, View.Intrinsic);
-      this.marginTop.setState((1 - displayPhase) * this.node.clientHeight, View.Intrinsic);
+      this.opacity.setState(void 0, Affinity.Intrinsic);
+      this.marginTop.setState((1 - displayPhase) * this.node.clientHeight, Affinity.Intrinsic);
     } else {
-      this.marginTop.setState(null, View.Intrinsic);
-      this.opacity.setState(displayPhase, View.Intrinsic);
+      this.marginTop.setState(null, Affinity.Intrinsic);
+      this.opacity.setState(displayPhase, Affinity.Intrinsic);
     }
   }
 
@@ -446,7 +431,7 @@ export class PopoverView extends HtmlView implements Modal {
     this.place();
   }
 
-  /** @hidden */
+  /** @internal */
   readonly sourceFrame: R2Box | null;
 
   place(force: boolean = false): PopoverPlacement {
@@ -457,7 +442,7 @@ export class PopoverView extends HtmlView implements Modal {
         (force || !newSourceFrame.equals(oldSourceFrame))) {
       (this as Mutable<this>).sourceFrame = null;
       const placement = this.placePopover(sourceView!, newSourceFrame);
-      const arrow = this.getChildView("arrow");
+      const arrow = this.getChild("arrow");
       if (arrow instanceof HtmlView) {
         this.placeArrow(sourceView!, newSourceFrame, arrow, placement);
       }
@@ -467,7 +452,7 @@ export class PopoverView extends HtmlView implements Modal {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected placePopover(sourceView: View, sourceFrame: R2Box): PopoverPlacement {
     const node = this.node;
     const parent = node.offsetParent;
@@ -668,22 +653,22 @@ export class PopoverView extends HtmlView implements Modal {
       maxHeight = Math.round(Math.max(0, placementBottom - placementTop));
     }
 
-    if (placement !== "none" && (left !== node.offsetLeft && this.left.takesPrecedence(View.Intrinsic)
-                              || top !== node.offsetTop && this.top.takesPrecedence(View.Intrinsic)
-                              || width !== oldWidth && this.width.takesPrecedence(View.Intrinsic)
-                              || height !== oldHeight && this.height.takesPrecedence(View.Intrinsic)
-                              || maxWidth !== oldMaxWidth && this.maxWidth.takesPrecedence(View.Intrinsic)
-                              || maxHeight !== oldMaxHeight && this.maxHeight.takesPrecedence(View.Intrinsic))) {
+    if (placement !== "none" && (left !== node.offsetLeft && this.left.hasAffinity(Affinity.Intrinsic)
+                              || top !== node.offsetTop && this.top.hasAffinity(Affinity.Intrinsic)
+                              || width !== oldWidth && this.width.hasAffinity(Affinity.Intrinsic)
+                              || height !== oldHeight && this.height.hasAffinity(Affinity.Intrinsic)
+                              || maxWidth !== oldMaxWidth && this.maxWidth.hasAffinity(Affinity.Intrinsic)
+                              || maxHeight !== oldMaxHeight && this.maxHeight.hasAffinity(Affinity.Intrinsic))) {
       this.willPlacePopover(placement!);
-      this.position.setState("absolute", View.Intrinsic);
-      this.left.setState(left, View.Intrinsic);
-      this.right.setState(right, View.Intrinsic);
-      this.top.setState(top, View.Intrinsic);
-      this.bottom.setState(bottom, View.Intrinsic);
-      this.width.setState(width, View.Intrinsic);
-      this.height.setState(height, View.Intrinsic);
-      this.maxWidth.setState(maxWidth, View.Intrinsic);
-      this.maxHeight.setState(maxHeight, View.Intrinsic);
+      this.position.setState("absolute", Affinity.Intrinsic);
+      this.left.setState(left, Affinity.Intrinsic);
+      this.right.setState(right, Affinity.Intrinsic);
+      this.top.setState(top, Affinity.Intrinsic);
+      this.bottom.setState(bottom, Affinity.Intrinsic);
+      this.width.setState(width, Affinity.Intrinsic);
+      this.height.setState(height, Affinity.Intrinsic);
+      this.maxWidth.setState(maxWidth, Affinity.Intrinsic);
+      this.maxHeight.setState(maxHeight, Affinity.Intrinsic);
       this.onPlacePopover(placement!);
       this.didPlacePopover(placement!);
     }
@@ -693,11 +678,11 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   protected willPlacePopover(placement: PopoverPlacement): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.popoverWillPlace !== void 0) {
-        viewObserver.popoverWillPlace(placement, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.popoverWillPlace !== void 0) {
+        observer.popoverWillPlace(placement, this);
       }
     }
   }
@@ -707,16 +692,16 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   protected didPlacePopover(placement: PopoverPlacement): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.popoverDidPlace !== void 0) {
-        viewObserver.popoverDidPlace(placement, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.popoverDidPlace !== void 0) {
+        observer.popoverDidPlace(placement, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected placeArrow(sourceView: View, sourceFrame: R2Box, arrow: HtmlView,
                        placement: PopoverPlacement): void {
     const node = this.node;
@@ -758,90 +743,90 @@ export class PopoverView extends HtmlView implements Modal {
     const arrowYMin = offsetTop + radius + arrowWidth / 2;
     const arrowYMax = offsetBottom - radius - arrowWidth / 2;
 
-    arrow.top.setState(null, View.Intrinsic);
-    arrow.right.setState(null, View.Intrinsic);
-    arrow.bottom.setState(null, View.Intrinsic);
-    arrow.left.setState(null, View.Intrinsic);
-    arrow.borderLeftWidth.setState(null, View.Intrinsic);
-    arrow.borderLeftStyle.setState(void 0, View.Intrinsic);
-    arrow.borderLeftColor.setState(null, View.Intrinsic);
-    arrow.borderRightWidth.setState(null, View.Intrinsic);
-    arrow.borderRightStyle.setState(void 0, View.Intrinsic);
-    arrow.borderRightColor.setState(null, View.Intrinsic);
-    arrow.borderTopWidth.setState(null, View.Intrinsic);
-    arrow.borderTopStyle.setState(void 0, View.Intrinsic);
-    arrow.borderTopColor.setState(null, View.Intrinsic);
-    arrow.borderBottomWidth.setState(null, View.Intrinsic);
-    arrow.borderBottomStyle.setState(void 0, View.Intrinsic);
-    arrow.borderBottomColor.setState(null, View.Intrinsic);
-    arrow.zIndex.setState(100, View.Intrinsic);
+    arrow.top.setState(null, Affinity.Intrinsic);
+    arrow.right.setState(null, Affinity.Intrinsic);
+    arrow.bottom.setState(null, Affinity.Intrinsic);
+    arrow.left.setState(null, Affinity.Intrinsic);
+    arrow.borderLeftWidth.setState(null, Affinity.Intrinsic);
+    arrow.borderLeftStyle.setState(void 0, Affinity.Intrinsic);
+    arrow.borderLeftColor.setState(null, Affinity.Intrinsic);
+    arrow.borderRightWidth.setState(null, Affinity.Intrinsic);
+    arrow.borderRightStyle.setState(void 0, Affinity.Intrinsic);
+    arrow.borderRightColor.setState(null, Affinity.Intrinsic);
+    arrow.borderTopWidth.setState(null, Affinity.Intrinsic);
+    arrow.borderTopStyle.setState(void 0, Affinity.Intrinsic);
+    arrow.borderTopColor.setState(null, Affinity.Intrinsic);
+    arrow.borderBottomWidth.setState(null, Affinity.Intrinsic);
+    arrow.borderBottomStyle.setState(void 0, Affinity.Intrinsic);
+    arrow.borderBottomColor.setState(null, Affinity.Intrinsic);
+    arrow.zIndex.setState(100, Affinity.Intrinsic);
 
     if (placement === "none" || placement === "above" || placement === "below" || placement === "over") {
       // hide arrow
-      arrow.display.setState("none", View.Intrinsic);
+      arrow.display.setState("none", Affinity.Intrinsic);
     } else if (Math.round(sourceY) <= Math.round(offsetTop - arrowHeight) // arrow tip below source center
         && arrowXMin <= sourceX && sourceX <= arrowXMax) { // arrow base on top popover edge
       // top arrow
-      arrow.display.setState("block", View.Intrinsic);
-      arrow.top.setState(Math.round(-arrowHeight), View.Intrinsic);
-      arrow.left.setState(Math.round(sourceX - offsetLeft - arrowWidth / 2), View.Intrinsic);
-      arrow.borderLeftWidth.setState(Math.round(arrowWidth / 2), View.Intrinsic);
-      arrow.borderLeftStyle.setState("solid", View.Intrinsic);
-      arrow.borderLeftColor.setState(Color.transparent(), View.Intrinsic);
-      arrow.borderRightWidth.setState(Math.round(arrowWidth / 2), View.Intrinsic);
-      arrow.borderRightStyle.setState("solid", View.Intrinsic);
-      arrow.borderRightColor.setState(Color.transparent(), View.Intrinsic);
-      arrow.borderBottomWidth.setState(Math.round(arrowHeight), View.Intrinsic);
-      arrow.borderBottomStyle.setState("solid", View.Intrinsic);
-      arrow.borderBottomColor.setState(backgroundColor, View.Intrinsic);
+      arrow.display.setState("block", Affinity.Intrinsic);
+      arrow.top.setState(Math.round(-arrowHeight), Affinity.Intrinsic);
+      arrow.left.setState(Math.round(sourceX - offsetLeft - arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderLeftWidth.setState(Math.round(arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderLeftStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderLeftColor.setState(Color.transparent(), Affinity.Intrinsic);
+      arrow.borderRightWidth.setState(Math.round(arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderRightStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderRightColor.setState(Color.transparent(), Affinity.Intrinsic);
+      arrow.borderBottomWidth.setState(Math.round(arrowHeight), Affinity.Intrinsic);
+      arrow.borderBottomStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderBottomColor.setState(backgroundColor, Affinity.Intrinsic);
     } else if (Math.round(offsetBottom + arrowHeight) <= Math.round(sourceY) // arrow tip above source center
         && arrowXMin <= sourceX && sourceX <= arrowXMax) { // arrow base on bottom popover edge
       // bottom arrow
-      arrow.display.setState("block", View.Intrinsic);
-      arrow.bottom.setState(Math.round(-arrowHeight), View.Intrinsic);
-      arrow.left.setState(Math.round(sourceX - offsetLeft - arrowWidth / 2), View.Intrinsic);
-      arrow.borderLeftWidth.setState(Math.round(arrowWidth / 2), View.Intrinsic);
-      arrow.borderLeftStyle.setState("solid", View.Intrinsic);
-      arrow.borderLeftColor.setState(Color.transparent(), View.Intrinsic);
-      arrow.borderRightWidth.setState(Math.round(arrowWidth / 2), View.Intrinsic);
-      arrow.borderRightStyle.setState("solid", View.Intrinsic);
-      arrow.borderRightColor.setState(Color.transparent(), View.Intrinsic);
-      arrow.borderTopWidth.setState(Math.round(arrowHeight), View.Intrinsic);
-      arrow.borderTopStyle.setState("solid", View.Intrinsic);
-      arrow.borderTopColor.setState(backgroundColor, View.Intrinsic);
+      arrow.display.setState("block", Affinity.Intrinsic);
+      arrow.bottom.setState(Math.round(-arrowHeight), Affinity.Intrinsic);
+      arrow.left.setState(Math.round(sourceX - offsetLeft - arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderLeftWidth.setState(Math.round(arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderLeftStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderLeftColor.setState(Color.transparent(), Affinity.Intrinsic);
+      arrow.borderRightWidth.setState(Math.round(arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderRightStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderRightColor.setState(Color.transparent(), Affinity.Intrinsic);
+      arrow.borderTopWidth.setState(Math.round(arrowHeight), Affinity.Intrinsic);
+      arrow.borderTopStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderTopColor.setState(backgroundColor, Affinity.Intrinsic);
     } else if (Math.round(sourceX) <= Math.round(offsetLeft - arrowHeight) // arrow tip right of source center
         && arrowYMin <= sourceY && sourceY <= arrowYMax) { // arrow base on left popover edge
       // left arrow
       arrow.display.setState("block");
-      arrow.left.setState(Math.round(-arrowHeight), View.Intrinsic);
-      arrow.top.setState(Math.round(sourceY - offsetTop - arrowWidth / 2), View.Intrinsic);
-      arrow.borderTopWidth.setState(Math.round(arrowWidth / 2), View.Intrinsic);
-      arrow.borderTopStyle.setState("solid", View.Intrinsic);
-      arrow.borderTopColor.setState(Color.transparent(), View.Intrinsic);
-      arrow.borderBottomWidth.setState(Math.round(arrowWidth / 2), View.Intrinsic);
-      arrow.borderBottomStyle.setState("solid", View.Intrinsic);
-      arrow.borderBottomColor.setState(Color.transparent(), View.Intrinsic);
-      arrow.borderRightWidth.setState(Math.round(arrowHeight), View.Intrinsic);
-      arrow.borderRightStyle.setState("solid", View.Intrinsic);
-      arrow.borderRightColor.setState(backgroundColor, View.Intrinsic);
+      arrow.left.setState(Math.round(-arrowHeight), Affinity.Intrinsic);
+      arrow.top.setState(Math.round(sourceY - offsetTop - arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderTopWidth.setState(Math.round(arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderTopStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderTopColor.setState(Color.transparent(), Affinity.Intrinsic);
+      arrow.borderBottomWidth.setState(Math.round(arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderBottomStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderBottomColor.setState(Color.transparent(), Affinity.Intrinsic);
+      arrow.borderRightWidth.setState(Math.round(arrowHeight), Affinity.Intrinsic);
+      arrow.borderRightStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderRightColor.setState(backgroundColor, Affinity.Intrinsic);
     } else if (Math.round(offsetRight + arrowHeight) <= Math.round(sourceX) // arrow tip left of source center
         && arrowYMin <= sourceY && sourceY <= arrowYMax) { // arrow base on right popover edge
       // right arrow
-      arrow.display.setState("block", View.Intrinsic);
-      arrow.right.setState(Math.round(-arrowHeight), View.Intrinsic);
-      arrow.top.setState(Math.round(sourceY - offsetTop - arrowWidth / 2), View.Intrinsic);
-      arrow.borderTopWidth.setState(Math.round(arrowWidth / 2), View.Intrinsic);
-      arrow.borderTopStyle.setState("solid", View.Intrinsic);
-      arrow.borderTopColor.setState(Color.transparent(), View.Intrinsic);
-      arrow.borderBottomWidth.setState(Math.round(arrowWidth / 2), View.Intrinsic);
-      arrow.borderBottomStyle.setState("solid", View.Intrinsic);
-      arrow.borderBottomColor.setState(Color.transparent(), View.Intrinsic);
-      arrow.borderLeftWidth.setState(Math.round(arrowHeight), View.Intrinsic);
-      arrow.borderLeftStyle.setState("solid", View.Intrinsic);
-      arrow.borderLeftColor.setState(backgroundColor, View.Intrinsic);
+      arrow.display.setState("block", Affinity.Intrinsic);
+      arrow.right.setState(Math.round(-arrowHeight), Affinity.Intrinsic);
+      arrow.top.setState(Math.round(sourceY - offsetTop - arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderTopWidth.setState(Math.round(arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderTopStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderTopColor.setState(Color.transparent(), Affinity.Intrinsic);
+      arrow.borderBottomWidth.setState(Math.round(arrowWidth / 2), Affinity.Intrinsic);
+      arrow.borderBottomStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderBottomColor.setState(Color.transparent(), Affinity.Intrinsic);
+      arrow.borderLeftWidth.setState(Math.round(arrowHeight), Affinity.Intrinsic);
+      arrow.borderLeftStyle.setState("solid", Affinity.Intrinsic);
+      arrow.borderLeftColor.setState(backgroundColor, Affinity.Intrinsic);
     } else {
       // no arrow
-      arrow.display.setState("none", View.Intrinsic);
+      arrow.display.setState("none", Affinity.Intrinsic);
     }
   }
 
@@ -849,16 +834,35 @@ export class PopoverView extends HtmlView implements Modal {
     event.stopPropagation();
   }
 
-  /** @hidden */
+  override init(init: PopoverViewInit): void {
+    super.init(init);
+    if (init.source !== void 0) {
+      this.source.setView(init.source);
+    }
+    if (init.placement !== void 0) {
+      this.placement(init.placement);
+    }
+    if (init.placementFrame !== void 0) {
+      this.placementFrame(init.placementFrame);
+    }
+    if (init.arrowWidth !== void 0) {
+      this.arrowWidth(init.arrowWidth);
+    }
+    if (init.arrowHeight !== void 0) {
+      this.arrowHeight(init.arrowHeight);
+    }
+  }
+
+  /** @internal */
   static readonly HiddenState: number = 0;
-  /** @hidden */
+  /** @internal */
   static readonly HidingState: number = 1;
-  /** @hidden */
+  /** @internal */
   static readonly HideState: number = 2;
-  /** @hidden */
+  /** @internal */
   static readonly ShownState: number = 3;
-  /** @hidden */
+  /** @internal */
   static readonly ShowingState: number = 4;
-  /** @hidden */
+  /** @internal */
   static readonly ShowState: number = 5;
 }

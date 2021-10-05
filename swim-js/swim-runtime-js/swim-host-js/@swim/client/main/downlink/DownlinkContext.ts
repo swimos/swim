@@ -15,7 +15,7 @@
 import type {Uri} from "@swim/uri";
 import type {DownlinkModel} from "./DownlinkModel";
 
-/** @hidden */
+/** @internal */
 export interface DownlinkContext {
   getDownlink(hostUri: Uri, nodeUri: Uri, laneUri: Uri): DownlinkModel | undefined;
  

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
-import {View} from "@swim/view";
-import {ControllerViewTrait, ControllerFastener} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener} from "@swim/controller";
 import type {DataPointController} from "../data/DataPointController";
 import {DataSetTrait} from "../data/DataSetTrait";
 import {BubblePlotView} from "./BubblePlotView";
@@ -26,7 +26,7 @@ import {ScatterPlotController} from "./ScatterPlotController";
 import type {BubblePlotControllerObserver} from "./BubblePlotControllerObserver";
 
 export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
-  override readonly controllerObservers!: ReadonlyArray<BubblePlotControllerObserver<X, Y>>;
+  override readonly observerType?: Class<BubblePlotControllerObserver<X, Y>>;
 
   protected detectDataSet(plotTrait: BubblePlotTrait<X, Y>): DataSetTrait<X, Y> | null {
     return plotTrait.getTrait(DataSetTrait);
@@ -35,7 +35,7 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   protected override attachDataPoint(dataPointController: DataPointController<X, Y>, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
     super.attachDataPoint(dataPointController, dataPointFastener);
     const dataPointView = dataPointController.dataPoint.view;
-    if (dataPointView !== null && dataPointView.parentView === null) {
+    if (dataPointView !== null && dataPointView.parent === null) {
       const plotView = this.plot.view;
       if (plotView !== null) {
         dataPointController.dataPoint.injectView(plotView);
@@ -65,11 +65,11 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   }
 
   protected willSetPlotTrait(newPlotTrait: BubblePlotTrait<X, Y> | null, oldPlotTrait: BubblePlotTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotTrait !== void 0) {
-        controllerObserver.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotTrait !== void 0) {
+        observer.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       }
     }
   }
@@ -85,17 +85,17 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   }
 
   protected didSetPlotTrait(newPlotTrait: BubblePlotTrait<X, Y> | null, oldPlotTrait: BubblePlotTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotTrait !== void 0) {
-        controllerObserver.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotTrait !== void 0) {
+        observer.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       }
     }
   }
 
   protected createPlotView(): BubblePlotView<X, Y> {
-    return BubblePlotView.create<X, Y>();
+    return new BubblePlotView<X, Y>();
   }
 
   protected initPlotView(plotView: BubblePlotView<X, Y>): void {
@@ -123,11 +123,11 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   }
 
   protected willSetPlotView(newPlotView: BubblePlotView<X, Y> | null, oldPlotView: BubblePlotView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotView !== void 0) {
-        controllerObserver.controllerWillSetPlotView(newPlotView, oldPlotView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotView !== void 0) {
+        observer.controllerWillSetPlotView(newPlotView, oldPlotView, this);
       }
     }
   }
@@ -143,11 +143,11 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   }
 
   protected didSetPlotView(newPlotView: BubblePlotView<X, Y> | null, oldPlotView: BubblePlotView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotView !== void 0) {
-        controllerObserver.controllerDidSetPlotView(newPlotView, oldPlotView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotView !== void 0) {
+        observer.controllerDidSetPlotView(newPlotView, oldPlotView, this);
       }
     }
   }
@@ -163,16 +163,16 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
       } else {
         timing = Timing.fromAny(timing);
       }
-      plotView.radius.setState(radius, timing, View.Intrinsic);
+      plotView.radius.setState(radius, timing, Affinity.Intrinsic);
     }
   }
 
   protected willSetPlotRadius(newRadius: Length | null, oldRadius: Length | null, plotView: BubblePlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotRadius !== void 0) {
-        controllerObserver.controllerWillSetPlotRadius(newRadius, oldRadius, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotRadius !== void 0) {
+        observer.controllerWillSetPlotRadius(newRadius, oldRadius, this);
       }
     }
   }
@@ -182,11 +182,11 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   }
 
   protected didSetPlotRadius(newRadius: Length | null, oldRadius: Length | null, plotView: BubblePlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotRadius !== void 0) {
-        controllerObserver.controllerDidSetPlotRadius(newRadius, oldRadius, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotRadius !== void 0) {
+        observer.controllerDidSetPlotRadius(newRadius, oldRadius, this);
       }
     }
   }
@@ -203,19 +203,19 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
         timing = Timing.fromAny(timing);
       }
       if (fill instanceof Look) {
-        plotView.fill.setLook(fill, timing, View.Intrinsic);
+        plotView.fill.setLook(fill, timing, Affinity.Intrinsic);
       } else {
-        plotView.fill.setState(fill, timing, View.Intrinsic);
+        plotView.fill.setState(fill, timing, Affinity.Intrinsic);
       }
     }
   }
 
   protected willSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: BubblePlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotFill !== void 0) {
-        controllerObserver.controllerWillSetPlotFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotFill !== void 0) {
+        observer.controllerWillSetPlotFill(newFill, oldFill, this);
       }
     }
   }
@@ -225,19 +225,36 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   }
 
   protected didSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: BubblePlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotFill !== void 0) {
-        controllerObserver.controllerDidSetPlotFill(newFill, oldFill, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotFill !== void 0) {
+        observer.controllerDidSetPlotFill(newFill, oldFill, this);
       }
     }
   }
 
-  /** @hidden */
-  static PlotFastener = ControllerViewTrait.define<BubblePlotController<unknown, unknown>, BubblePlotView<unknown, unknown>, BubblePlotTrait<unknown, unknown>>({
+  /** @internal */
+  static PlotFastener = TraitViewFastener.define<BubblePlotController<unknown, unknown>, BubblePlotTrait<unknown, unknown>, BubblePlotView<unknown, unknown>>({
+    traitType: BubblePlotTrait,
+    observesTrait: true,
+    willSetTrait(newPlotTrait: BubblePlotTrait<unknown, unknown> | null, oldPlotTrait: BubblePlotTrait<unknown, unknown> | null): void {
+      this.owner.willSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    onSetTrait(newPlotTrait: BubblePlotTrait<unknown, unknown> | null, oldPlotTrait: BubblePlotTrait<unknown, unknown> | null): void {
+      this.owner.onSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    didSetTrait(newPlotTrait: BubblePlotTrait<unknown, unknown> | null, oldPlotTrait: BubblePlotTrait<unknown, unknown> | null): void {
+      this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    traitDidSetPlotRadius(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.setPlotRadius(newRadius);
+    },
+    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.setPlotFill(newFill);
+    },
     viewType: BubblePlotView,
-    observeView: true,
+    observesView: true,
     willSetView(newPlotView: BubblePlotView<unknown, unknown> | null, oldPlotView: BubblePlotView<unknown, unknown> | null): void {
       this.owner.willSetPlotView(newPlotView, oldPlotView);
     },
@@ -264,27 +281,10 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
     createView(): BubblePlotView<unknown, unknown> | null {
       return this.owner.createPlotView();
     },
-    traitType: BubblePlotTrait,
-    observeTrait: true,
-    willSetTrait(newPlotTrait: BubblePlotTrait<unknown, unknown> | null, oldPlotTrait: BubblePlotTrait<unknown, unknown> | null): void {
-      this.owner.willSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    onSetTrait(newPlotTrait: BubblePlotTrait<unknown, unknown> | null, oldPlotTrait: BubblePlotTrait<unknown, unknown> | null): void {
-      this.owner.onSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    didSetTrait(newPlotTrait: BubblePlotTrait<unknown, unknown> | null, oldPlotTrait: BubblePlotTrait<unknown, unknown> | null): void {
-      this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    traitDidSetPlotRadius(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.setPlotRadius(newRadius);
-    },
-    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.setPlotFill(newFill);
-    },
   });
 
-  @ControllerViewTrait<BubblePlotController<X, Y>, BubblePlotView<X, Y>, BubblePlotTrait<X, Y>>({
+  @TraitViewFastener<BubblePlotController<X, Y>, BubblePlotTrait<X, Y>, BubblePlotView<X, Y>>({
     extends: BubblePlotController.PlotFastener,
   })
-  readonly plot!: ControllerViewTrait<this, BubblePlotView<X, Y>, BubblePlotTrait<X, Y>>;
+  readonly plot!: TraitViewFastener<this, BubblePlotTrait<X, Y>, BubblePlotView<X, Y>>;
 }

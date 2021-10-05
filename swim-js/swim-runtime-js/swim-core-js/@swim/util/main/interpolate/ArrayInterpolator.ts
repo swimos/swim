@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Interpolator} from "./Interpolator";
 
-/** @hidden */
+/** @internal */
 export interface ArrayInterpolator<Y> extends Interpolator<ReadonlyArray<Y>> {
-  /** @hidden */
+  /** @internal */
   readonly interpolators: ReadonlyArray<Interpolator<Y>>;
 
   readonly 0: ReadonlyArray<Y>;
@@ -27,75 +27,77 @@ export interface ArrayInterpolator<Y> extends Interpolator<ReadonlyArray<Y>> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const ArrayInterpolator = function <Y>(y0: ReadonlyArray<Y>, y1: ReadonlyArray<Y>): ArrayInterpolator<Y> {
-  const interpolator = function (u: number): ReadonlyArray<Y> {
-    const interpolators = interpolator.interpolators;
-    const interpolatorCount = interpolators.length;
-    const array = new Array<Y>(interpolatorCount);
-    for (let i = 0; i < interpolatorCount; i += 1) {
-      array[i] = interpolators[i]!(u);
-    }
-    return array;
-  } as ArrayInterpolator<Y>;
-  Object.setPrototypeOf(interpolator, ArrayInterpolator.prototype);
-  const interpolatorCount = Math.min(y0.length, y1.length);
-  const interpolators = new Array<Interpolator<Y>>(interpolatorCount);
-  for (let i = 0; i < interpolatorCount; i += 1) {
-    interpolators[i] = Interpolator(y0[i]!, y1[i]!);
-  }
-  (interpolator as Mutable<typeof interpolator>).interpolators = interpolators;
-  return interpolator;
-} as {
-  <Y>(y0: ReadonlyArray<Y>, y1: ReadonlyArray<Y>): ArrayInterpolator<Y>;
-
-  /** @hidden */
-  prototype: ArrayInterpolator<any>;
-};
-
-ArrayInterpolator.prototype = Object.create(Interpolator.prototype);
-
-Object.defineProperty(ArrayInterpolator.prototype, 0, {
-  get<Y>(this: ArrayInterpolator<Y>): ReadonlyArray<Y> {
-    const interpolators = this.interpolators;
-    const interpolatorCount = interpolators.length;
-    const array = new Array<Y>(interpolatorCount);
-    for (let i = 0; i < interpolatorCount; i += 1) {
-      array[i] = interpolators[i]![0];
-    }
-    return array;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
-Object.defineProperty(ArrayInterpolator.prototype, 1, {
-  get<Y>(this: ArrayInterpolator<Y>): ReadonlyArray<Y> {
-    const interpolators = this.interpolators;
-    const interpolatorCount = interpolators.length;
-    const array = new Array<Y>(interpolatorCount);
-    for (let i = 0; i < interpolatorCount; i += 1) {
-      array[i] = interpolators[i]![1];
-    }
-    return array;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
-ArrayInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof ArrayInterpolator) {
-    const n = this.interpolators.length;
-    if (n === that.interpolators.length) {
-      for (let i = 0; i < n; i += 1) {
-        if (!this.interpolators[i]!.equals(that.interpolators[i]!)) {
-          return false;
-        }
+/** @internal */
+export const ArrayInterpolator = (function (_super: typeof Interpolator) {
+  const ArrayInterpolator = function <Y>(y0: ReadonlyArray<Y>, y1: ReadonlyArray<Y>): ArrayInterpolator<Y> {
+    const interpolator = function (u: number): ReadonlyArray<Y> {
+      const interpolators = interpolator.interpolators;
+      const interpolatorCount = interpolators.length;
+      const array = new Array<Y>(interpolatorCount);
+      for (let i = 0; i < interpolatorCount; i += 1) {
+        array[i] = interpolators[i]!(u);
       }
-      return true;
+      return array;
+    } as ArrayInterpolator<Y>;
+    Object.setPrototypeOf(interpolator, ArrayInterpolator.prototype);
+    const interpolatorCount = Math.min(y0.length, y1.length);
+    const interpolators = new Array<Interpolator<Y>>(interpolatorCount);
+    for (let i = 0; i < interpolatorCount; i += 1) {
+      interpolators[i] = Interpolator(y0[i]!, y1[i]!);
     }
-  }
-  return false;
-};
+    (interpolator as Mutable<typeof interpolator>).interpolators = interpolators;
+    return interpolator;
+  } as {
+    <Y>(y0: ReadonlyArray<Y>, y1: ReadonlyArray<Y>): ArrayInterpolator<Y>;
+
+    /** @internal */
+    prototype: ArrayInterpolator<any>;
+  };
+
+  ArrayInterpolator.prototype = Object.create(_super.prototype);
+
+  Object.defineProperty(ArrayInterpolator.prototype, 0, {
+    get<Y>(this: ArrayInterpolator<Y>): ReadonlyArray<Y> {
+      const interpolators = this.interpolators;
+      const interpolatorCount = interpolators.length;
+      const array = new Array<Y>(interpolatorCount);
+      for (let i = 0; i < interpolatorCount; i += 1) {
+        array[i] = interpolators[i]![0];
+      }
+      return array;
+    },
+    configurable: true,
+  });
+
+  Object.defineProperty(ArrayInterpolator.prototype, 1, {
+    get<Y>(this: ArrayInterpolator<Y>): ReadonlyArray<Y> {
+      const interpolators = this.interpolators;
+      const interpolatorCount = interpolators.length;
+      const array = new Array<Y>(interpolatorCount);
+      for (let i = 0; i < interpolatorCount; i += 1) {
+        array[i] = interpolators[i]![1];
+      }
+      return array;
+    },
+    configurable: true,
+  });
+
+  ArrayInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof ArrayInterpolator) {
+      const n = this.interpolators.length;
+      if (n === that.interpolators.length) {
+        for (let i = 0; i < n; i += 1) {
+          if (!this.interpolators[i]!.equals(that.interpolators[i]!)) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return ArrayInterpolator;
+})(Interpolator);

@@ -16,7 +16,7 @@ import {Input, Parser} from "@swim/codec";
 import type {DateTimeInit} from "../DateTime";
 import {DateTimeFormat} from "./DateTimeFormat";
 
-/** @hidden */
+/** @internal */
 export class Hour24Parser extends Parser<DateTimeInit> {
   private readonly date: DateTimeInit | undefined;
   private readonly hour: number | undefined;

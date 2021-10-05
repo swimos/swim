@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {GraphicsView} from "@swim/graphics";
 import type {ScaledXView} from "./ScaledXView";
 import type {ScaledYView} from "./ScaledYView";
@@ -19,18 +20,23 @@ import type {ScaledXYViewObserver} from "./ScaledXYViewObserver";
 import {ScaledView} from "../"; // forward import
 
 export interface ScaledXYView<X, Y> extends GraphicsView, ScaledXView<X>, ScaledYView<Y> {
-  readonly viewObservers: ReadonlyArray<ScaledXYViewObserver<X, Y>>;
+  /** @override */
+  readonly observerType?: Class<ScaledXYViewObserver<X, Y>>;
 }
 
-export const ScaledXYView = {} as {
-  is<X, Y>(object: unknown): object is ScaledXYView<X, Y>;
-};
+export const ScaledXYView = (function () {
+  const ScaledXYView = {} as {
+    is<X, Y>(object: unknown): object is ScaledXYView<X, Y>;
+  };
 
-ScaledXYView.is = function <X, Y>(object: unknown): object is ScaledXYView<X, Y> {
-  if (typeof object === "object" && object !== null) {
-    const view = object as ScaledXYView<X, Y>;
-    return view instanceof ScaledView
-        || view instanceof GraphicsView && "xScale" in view && "yScale" in view;
-  }
-  return false;
-};
+  ScaledXYView.is = function <X, Y>(object: unknown): object is ScaledXYView<X, Y> {
+    if (typeof object === "object" && object !== null) {
+      const view = object as ScaledXYView<X, Y>;
+      return view instanceof ScaledView
+          || view instanceof GraphicsView && "xScale" in view && "yScale" in view;
+    }
+    return false;
+  };
+
+  return ScaledXYView;
+})();

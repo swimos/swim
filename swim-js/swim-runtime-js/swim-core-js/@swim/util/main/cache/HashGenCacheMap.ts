@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Values} from "../runtime/Values";
+import {Values} from "../values/Values";
 
 /**
  * A hashed generational cache map discards the least recently used value
@@ -26,17 +26,17 @@ import {Values} from "../runtime/Values";
  * biasing the cache against least recently used values with poor hit rates.
  */
 export class HashGenCacheMap<K, V> {
-  /** @hidden */
+  /** @internal */
   readonly buckets: Array<HashGenCacheMapBucket<K, V> | undefined>;
-  /** @hidden */
+  /** @internal */
   gen4Hits: number;
-  /** @hidden */
+  /** @internal */
   gen3Hits: number;
-  /** @hidden */
+  /** @internal */
   gen2Hits: number;
-  /** @hidden */
+  /** @internal */
   gen1Hits: number;
-  /** @hidden */
+  /** @internal */
   misses: number;
 
   constructor(size: number) {
@@ -307,7 +307,7 @@ export class HashGenCacheMap<K, V> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   hits(): number {
     return this.gen4Hits + this.gen3Hits + this.gen2Hits + this.gen1Hits;
   }
@@ -318,31 +318,31 @@ export class HashGenCacheMap<K, V> {
   }
 }
 
-/** @hidden */
+/** @internal */
 export class HashGenCacheMapBucket<K, V> {
-  /** @hidden */
+  /** @internal */
   gen4Key: K | undefined;
-  /** @hidden */
+  /** @internal */
   gen4Val: V | undefined;
-  /** @hidden */
+  /** @internal */
   gen4Weight: number;
-  /** @hidden */
+  /** @internal */
   gen3Key: K | undefined;
-  /** @hidden */
+  /** @internal */
   gen3Val: V | undefined;
-  /** @hidden */
+  /** @internal */
   gen3Weight: number;
-  /** @hidden */
+  /** @internal */
   gen2Key: K | undefined;
-  /** @hidden */
+  /** @internal */
   gen2Val: V | undefined;
-  /** @hidden */
+  /** @internal */
   gen2Weight: number;
-  /** @hidden */
+  /** @internal */
   gen1Key: K | undefined;
-  /** @hidden */
+  /** @internal */
   gen1Val: V | undefined;
-  /** @hidden */
+  /** @internal */
   gen1Weight: number;
 
   constructor(gen4Key?: K, gen4Val?: V, gen4Weight: number = 0,

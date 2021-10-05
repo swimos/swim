@@ -13,22 +13,23 @@
 // limitations under the License.
 
 import {ContinuousScale} from "@swim/util";
+import {Affinity, Animator} from "@swim/fastener";
 import {R2Point, R2Box} from "@swim/math";
-import {View, ViewAnimator} from "@swim/view";
+import {View} from "@swim/view";
 import type {CanvasContext} from "@swim/graphics";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import type {TickView} from "../tick/TickView";
-import {AxisOrientation, AnyAxisView, AxisViewInit, AxisView} from "./AxisView";
+import {AxisOrientation, AxisView} from "./AxisView";
 
-export class RightAxisView<Y> extends AxisView<Y> {
+export class RightAxisView<Y = unknown> extends AxisView<Y> {
   override get orientation(): AxisOrientation {
     return "right";
   }
 
-  @ViewAnimator({
+  @Animator({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
-    inherit: "yScale",
+    inherits: "yScale",
     state: null,
     updateFlags: View.NeedsLayout,
   })
@@ -36,10 +37,10 @@ export class RightAxisView<Y> extends AxisView<Y> {
 
   protected override layoutTick(tick: TickView<Y>, origin: R2Point, frame: R2Box,
                                 scale: ContinuousScale<Y, number>): void {
-    if (tick.anchor.takesPrecedence(View.Intrinsic)) {
+    if (tick.anchor.hasAffinity(Affinity.Intrinsic)) {
       const offset = scale(tick.value);
       tick.setOffset(offset);
-      tick.anchor.setState(new R2Point(origin.x, frame.yMin + offset), View.Intrinsic);
+      tick.anchor.setState(new R2Point(origin.x, frame.yMin + offset), Affinity.Intrinsic);
     }
   }
 
@@ -52,9 +53,13 @@ export class RightAxisView<Y> extends AxisView<Y> {
       const y0 = frame.yMin;
       const y1 = frame.yMax;
 
+      // save
+      const contextLineWidth = context.lineWidth;
+      const contextStrokeStyle = context.strokeStyle;
+
       context.beginPath();
-      context.strokeStyle = borderColor.toString();
       context.lineWidth = borderWidth;
+      context.strokeStyle = borderColor.toString();
       if (dx !== 0) {
         context.moveTo(x + dx, y0);
         context.lineTo(x,      y0);
@@ -65,27 +70,10 @@ export class RightAxisView<Y> extends AxisView<Y> {
         context.lineTo(x, y1);
       }
       context.stroke();
+
+      // restore
+      context.lineWidth = contextLineWidth;
+      context.strokeStyle = contextStrokeStyle;
     }
-  }
-
-  static create<Y>(): RightAxisView<Y> {
-    return new RightAxisView<Y>();
-  }
-
-  static override fromInit<Y>(init: AxisViewInit<Y>): RightAxisView<Y> {
-    const view = new RightAxisView<Y>();
-    view.initView(init)
-    return view;
-  }
-
-  static override fromAny<Y>(value: AnyAxisView<Y> | true): RightAxisView<Y> {
-    if (value instanceof RightAxisView) {
-      return value;
-    } else if (value === true) {
-      return new RightAxisView<Y>();
-    } else if (typeof value === "object" && value !== null && !(value instanceof AxisView)) {
-      return this.fromInit(value);
-    }
-    throw new TypeError("" + value);
   }
 }

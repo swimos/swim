@@ -54,7 +54,7 @@ export interface ListDownlinkInit<V, VU = never> extends ListDownlinkObserver<V,
 }
 
 export class ListDownlink<V, VU = never> extends Downlink {
-  /** @hidden */
+  /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: ListDownlinkInit<V, VU>,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number, rate?: number,
               body?: Value, flags: number = DownlinkFlags.KeepLinkedSynced,
@@ -81,16 +81,16 @@ export class ListDownlink<V, VU = never> extends Downlink {
     this.state0 = state0;
   }
 
-  /** @hidden */
+  /** @internal */
   override readonly model!: ListDownlinkModel | null;
 
-  /** @hidden */
+  /** @internal */
   override readonly observers!: ReadonlyArray<ListDownlinkObserver<V, VU>>;
 
-  /** @hidden */
+  /** @internal */
   readonly ownValueForm: Form<V, VU>;
 
-  /** @hidden */
+  /** @internal */
   readonly state0: STree<Value, Value> | null;
 
   override get type(): DownlinkType {
@@ -304,7 +304,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     return this.observe({didClear});
   }
 
-  /** @hidden */
+  /** @internal */
   listWillUpdate(index: number, newValue: Value): Value {
     let newObject: V | undefined;
     const observers = this.observers;
@@ -324,7 +324,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     return newValue;
   }
 
-  /** @hidden */
+  /** @internal */
   listDidUpdate(index: number, newValue: Value, oldValue: Value): void {
     let newObject: V | undefined;
     let oldObject: V | undefined;
@@ -343,7 +343,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listWillMove(fromIndex: number, toIndex: number, value: Value): void {
     let object: V | undefined;
     const observers = this.observers;
@@ -358,7 +358,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listDidMove(fromIndex: number, toIndex: number, value: Value): void {
     let object: V | undefined;
     const observers = this.observers;
@@ -373,7 +373,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listWillRemove(index: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -384,7 +384,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listDidRemove(index: number, oldValue: Value): void {
     let oldObject: V | undefined;
     const observers = this.observers;
@@ -399,7 +399,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listWillDrop(lower: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -410,7 +410,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listDidDrop(lower: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -421,7 +421,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listWillTake(upper: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -432,7 +432,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listDidTake(upper: number): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -443,7 +443,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listWillClear(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -454,7 +454,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   listDidClear(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -477,7 +477,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected didAliasModel(): void {
     this.onLinkedResponse();
     this.model!.state.forEach(function (value: Value, index: number) {

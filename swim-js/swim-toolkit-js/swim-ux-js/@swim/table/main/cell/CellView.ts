@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View, PositionGestureInput} from "@swim/view";
+import type {Class} from "@swim/util";
+import {Affinity} from "@swim/fastener";
+import type {PositionGestureInput} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {CellViewObserver} from "./CellViewObserver";
 
@@ -24,22 +26,22 @@ export class CellView extends HtmlView {
 
   protected initCell(): void {
     this.addClass("cell");
-    this.overflowX.setState("hidden", View.Intrinsic);
-    this.overflowY.setState("hidden", View.Intrinsic);
+    this.overflowX.setState("hidden", Affinity.Intrinsic);
+    this.overflowY.setState("hidden", Affinity.Intrinsic);
   }
 
-  override readonly viewObservers!: ReadonlyArray<CellViewObserver>;
+  override readonly observerType?: Class<CellViewObserver>;
 
   onPress(input: PositionGestureInput, event: Event | null): void {
     // hook
   }
 
   didPress(input: PositionGestureInput, event: Event | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidPress !== void 0) {
-        viewObserver.viewDidPress(input, event, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidPress !== void 0) {
+        observer.viewDidPress(input, event, this);
       }
     }
   }
@@ -49,11 +51,11 @@ export class CellView extends HtmlView {
   }
 
   didLongPress(input: PositionGestureInput): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidLongPress !== void 0) {
-        viewObserver.viewDidLongPress(input, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidLongPress !== void 0) {
+        observer.viewDidLongPress(input, this);
       }
     }
   }

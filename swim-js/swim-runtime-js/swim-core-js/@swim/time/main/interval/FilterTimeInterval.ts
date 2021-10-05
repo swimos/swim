@@ -15,7 +15,7 @@
 import {AnyDateTime, DateTime} from "../DateTime";
 import {TimeInterval} from "./TimeInterval";
 
-/** @hidden */
+/** @internal */
 export class FilterTimeInterval extends TimeInterval {
   private readonly unit: TimeInterval;
   private readonly predicate: (d: DateTime) => boolean;

@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
+import {Affinity, FastenerOwner, Property} from "@swim/fastener";
 import {Length} from "@swim/math";
-import {Look, Mood} from "@swim/theme";
+import {Look, Mood, ThemeAnimator} from "@swim/theme";
 import {
   ViewContextType,
   ViewContext,
   View,
   ViewEdgeInsets,
-  ViewProperty,
-  ViewAnimator,
+  ViewFastenerClass,
   ViewFastener,
 } from "@swim/view";
 import {HtmlView} from "@swim/dom";
@@ -39,34 +39,34 @@ export class DeckView extends HtmlView {
 
   protected initDeck(): void {
     this.addClass("deck");
-    this.position.setState("relative", View.Intrinsic);
-    this.overflowX.setState("hidden", View.Intrinsic);
-    this.overflowY.setState("hidden", View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
+    this.overflowX.setState("hidden", Affinity.Intrinsic);
+    this.overflowY.setState("hidden", Affinity.Intrinsic);
   }
 
-  override readonly viewObservers!: ReadonlyArray<DeckViewObserver>;
+  override readonly observerType?: Class<DeckViewObserver>;
 
-  @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
-  readonly deckPhase!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
+  readonly deckPhase!: ThemeAnimator<this, number>;
 
-  @ViewProperty({type: Number, state: 1})
-  readonly inAlign!: ViewProperty<this, number>;
+  @Property({type: Number, state: 1})
+  readonly inAlign!: Property<this, number>;
 
-  @ViewProperty({type: Number, state: 1 / 3})
-  readonly outAlign!: ViewProperty<this, number>;
+  @Property({type: Number, state: 1 / 3})
+  readonly outAlign!: Property<this, number>;
 
-  @ViewProperty({type: Object, inherit: true, state: null, updateFlags: View.NeedsResize})
-  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
+  @Property({type: Object, inherits: true, state: null, updateFlags: View.NeedsResize})
+  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
 
   readonly bar!: DeckViewBar<this, DeckBar>; // defined by DeckViewBar
 
-  /** @hidden */
+  /** @internal */
   cardCount: number;
 
   card: ViewFastener<this, DeckCard> | null;
 
   pushCard(newCardView: DeckCard, timing?: AnyTiming | boolean): void {
-    if (this.deckPhase.isAnimating()) {
+    if (this.deckPhase.tweening) {
       return;
     }
 
@@ -75,16 +75,16 @@ export class DeckView extends HtmlView {
     this.cardCount = newCardCount;
 
     const oldCardKey = "card" + oldCardCount;
-    const oldCardFastener = this.getViewFastener(oldCardKey) as DeckViewCard<this, DeckCard> | null;
+    const oldCardFastener = this.getFastener(oldCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
     const oldCardView = oldCardFastener !== null ? oldCardFastener.view : null;
 
     const newCardKey = "card" + newCardCount;
-    const newCardFastener = new DeckViewCardFastener(this, newCardKey, newCardKey) as unknown as DeckViewCard<this, DeckCard>;
+    const newCardFastener = DeckViewCardFastener.create(this, newCardKey) as DeckViewCard<this, DeckCard>;
     newCardFastener.cardIndex = newCardCount;
     this.willPushCard(newCardView, oldCardView);
     this.card = newCardFastener;
 
-    this.setViewFastener(newCardKey, newCardFastener);
+    this.setFastener(newCardKey, newCardFastener);
     newCardFastener.setView(newCardView);
     newCardFastener.injectView();
 
@@ -104,9 +104,9 @@ export class DeckView extends HtmlView {
   }
 
   protected willPushCard(newCardView: DeckCard, oldCardView: DeckCard | null): void {
-    this.willObserve(function (viewObserver: DeckViewObserver): void {
-      if (viewObserver.deckWillPushCard !== void 0) {
-        viewObserver.deckWillPushCard(newCardView, oldCardView, this);
+    this.forEachObserver(function (observer: DeckViewObserver): void {
+      if (observer.deckWillPushCard !== void 0) {
+        observer.deckWillPushCard(newCardView, oldCardView, this);
       }
     });
   }
@@ -116,18 +116,18 @@ export class DeckView extends HtmlView {
   }
 
   protected didPushCard(newCardView: DeckCard, oldCardView: DeckCard | null): void {
-    if (oldCardView !== null && oldCardView.parentView === this) {
+    if (oldCardView !== null && oldCardView.parent === this) {
       oldCardView.remove();
     }
-    this.didObserve(function (viewObserver: DeckViewObserver): void {
-      if (viewObserver.deckDidPushCard !== void 0) {
-        viewObserver.deckDidPushCard(newCardView, oldCardView, this);
+    this.forEachObserver(function (observer: DeckViewObserver): void {
+      if (observer.deckDidPushCard !== void 0) {
+        observer.deckDidPushCard(newCardView, oldCardView, this);
       }
     });
   }
 
   popCard(timing?: AnyTiming | boolean): DeckCard | null {
-    if (this.deckPhase.isAnimating()) {
+    if (this.deckPhase.tweening) {
       return null;
     }
 
@@ -136,12 +136,12 @@ export class DeckView extends HtmlView {
     this.cardCount = newCardCount;
 
     const oldCardKey = "card" + oldCardCount;
-    const oldCardFastener = this.getViewFastener(oldCardKey) as DeckViewCard<this, DeckCard> | null;
+    const oldCardFastener = this.getFastener(oldCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
     const oldCardView = oldCardFastener !== null ? oldCardFastener.view : null;
 
     if (oldCardView !== null) {
       const newCardKey = "card" + newCardCount;
-      const newCardFastener = this.getViewFastener(newCardKey) as DeckViewCard<this, DeckCard> | null;
+      const newCardFastener = this.getFastener(newCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
       const newCardView = newCardFastener !== null ? newCardFastener.view : null;
       this.willPopCard(newCardView, oldCardView);
       this.card = newCardFastener;
@@ -166,9 +166,9 @@ export class DeckView extends HtmlView {
   }
 
   protected willPopCard(newCardView: DeckCard | null, oldCardView: DeckCard): void {
-    this.willObserve(function (viewObserver: DeckViewObserver): void {
-      if (viewObserver.deckWillPopCard !== void 0) {
-        viewObserver.deckWillPopCard(newCardView, oldCardView, this);
+    this.forEachObserver(function (observer: DeckViewObserver): void {
+      if (observer.deckWillPopCard !== void 0) {
+        observer.deckWillPopCard(newCardView, oldCardView, this);
       }
     });
   }
@@ -181,32 +181,32 @@ export class DeckView extends HtmlView {
     const oldCardKey = oldCardView.key;
     oldCardView.remove();
     if (oldCardKey !== void 0) {
-      const oldCardFastener = this.getViewFastener(oldCardKey) as DeckViewCard<this, DeckCard> | null;
+      const oldCardFastener = this.getFastener(oldCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
       if (oldCardFastener !== null && oldCardFastener.cardIndex > this.cardCount) {
-        this.setViewFastener(oldCardKey, null);
+        this.setFastener(oldCardKey, null);
       }
     }
-    this.didObserve(function (viewObserver: DeckViewObserver): void {
-      if (viewObserver.deckDidPopCard !== void 0) {
-        viewObserver.deckDidPopCard(newCardView, oldCardView, this);
+    this.forEachObserver(function (observer: DeckViewObserver): void {
+      if (observer.deckDidPopCard !== void 0) {
+        observer.deckDidPopCard(newCardView, oldCardView, this);
       }
     });
   }
 
   protected override didLayout(viewContext: ViewContextType<this>): void {
-    if (!this.deckPhase.isAnimating()) {
-      const deckPhase = this.deckPhase.takeUpdatedValue();
+    if (!this.deckPhase.tweening) {
+      const deckPhase = this.deckPhase.value;
       if (deckPhase !== void 0) {
         const nextCardIndex = Math.round(deckPhase + 1);
         const nextCardKey = "card" + nextCardIndex;
-        const nextCardFastener = this.getViewFastener(nextCardKey) as DeckViewCard<this, DeckCard> | null;
+        const nextCardFastener = this.getFastener(nextCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
         const nextCardView = nextCardFastener !== null ? nextCardFastener.view : null;
         if (nextCardView !== null) {
           this.didPopCard(this.card !== null ? this.card.view : null, nextCardView);
         } else if (this.card !== null && this.card.view !== null && Math.round(deckPhase) > 0) {
           const prevCardIndex = Math.round(deckPhase - 1);
           const prevCardKey = "card" + prevCardIndex;
-          const prevCardFastener = this.getViewFastener(prevCardKey) as DeckViewCard<this, DeckCard> | null;
+          const prevCardFastener = this.getFastener(prevCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
           const catdCardView = prevCardFastener !== null ? prevCardFastener.view : null;
           this.didPushCard(this.card.view, catdCardView);
         }
@@ -215,104 +215,147 @@ export class DeckView extends HtmlView {
     super.didLayout(viewContext);
   }
 
-  /** @hidden */
+  /** @internal */
   didPressBackButton(event: Event | null): void {
-    this.didObserve(function (viewObserver: DeckViewObserver): void {
-      if (viewObserver.deckDidPressBackButton !== void 0) {
-        viewObserver.deckDidPressBackButton(event, this);
+    this.forEachObserver(function (observer: DeckViewObserver): void {
+      if (observer.deckDidPressBackButton !== void 0) {
+        observer.deckDidPressBackButton(event, this);
       }
     });
   }
 
-  /** @hidden */
+  /** @internal */
   didPressCloseButton(event: Event | null): void {
-    this.didObserve(function (viewObserver: DeckViewObserver): void {
-      if (viewObserver.deckDidPressCloseButton !== void 0) {
-        viewObserver.deckDidPressCloseButton(event, this);
+    this.forEachObserver(function (observer: DeckViewObserver): void {
+      if (observer.deckDidPressCloseButton !== void 0) {
+        observer.deckDidPressCloseButton(event, this);
       }
     });
   }
 }
 
-/** @hidden */
-export abstract class DeckViewBar<V extends DeckView, S extends DeckBar> extends ViewFastener<V, S> {
-  override onSetView(barView: S | null): void {
+/** @internal */
+export interface DeckViewBar<V extends DeckView = DeckView, T extends DeckBar = DeckBar> extends ViewFastener<V, T> {
+  /** @override */
+  onSetView(barView: T | null): void;
+
+  /** @override */
+  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+
+  viewDidResize(viewContext: ViewContext, barView: T): void;
+
+  /** @protected */
+  initBar(barView: T): void;
+
+  /** @protected */
+  resizeBar(barView: T): void;
+
+  deckBarDidPressBackButton(event: Event | null, view: V): void;
+
+  deckBarDidPressCloseButton(event: Event | null, view: V): void;
+}
+/** @internal */
+export const DeckViewBar = (function (_super: typeof ViewFastener) {
+  const DeckViewBar = _super.extend() as ViewFastenerClass<DeckViewBar<any, any>>;
+
+  DeckViewBar.prototype.onSetView = function (this: DeckViewBar, barView: DeckBar | null): void {
     if (barView !== null) {
       this.initBar(barView);
     }
-  }
+  };
 
-  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
-    parentView.prependChildView(childView, key);
-  }
+  DeckViewBar.prototype.insertView = function (this: DeckViewBar, parent: View, childView: DeckBar, targetView: View | null, key: string | undefined): void {
+    parent.prependChild(childView, key);
+  };
 
-  viewDidResize(viewContext: ViewContext, barView: S): void {
+  DeckViewBar.prototype.viewDidResize = function (this: DeckViewBar, viewContext: ViewContext, barView: DeckBar): void {
     this.resizeBar(barView);
-  }
+  };
 
-  protected initBar(barView: S): void {
+  DeckViewBar.prototype.initBar = function (this: DeckViewBar, barView: DeckBar): void {
     let deckWidth = this.owner.width.state;
     deckWidth = deckWidth instanceof Length ? deckWidth : Length.px(this.owner.node.offsetWidth);
-    barView.position.setState("absolute", View.Intrinsic);
-    barView.left.setState(0, View.Intrinsic);
-    barView.top.setState(0, View.Intrinsic);
-    barView.width.setState(deckWidth, View.Intrinsic);
-    barView.zIndex.setState(1, View.Intrinsic);
-  }
+    barView.position.setState("absolute", Affinity.Intrinsic);
+    barView.left.setState(0, Affinity.Intrinsic);
+    barView.top.setState(0, Affinity.Intrinsic);
+    barView.width.setState(deckWidth, Affinity.Intrinsic);
+    barView.zIndex.setState(1, Affinity.Intrinsic);
+  };
 
-  protected resizeBar(barView: S): void {
+  DeckViewBar.prototype.resizeBar = function (this: DeckViewBar, barView: DeckBar): void {
     let deckWidth = this.owner.width.state;
     deckWidth = deckWidth instanceof Length ? deckWidth : Length.px(this.owner.node.offsetWidth);
-    barView.width.setState(deckWidth, View.Intrinsic);
-  }
+    barView.width.setState(deckWidth, Affinity.Intrinsic);
+  };
 
-  deckBarDidPressBackButton(event: Event | null, view: V): void {
+  DeckViewBar.prototype.deckBarDidPressBackButton = function (this: DeckViewBar, event: Event | null): void {
     this.owner.didPressBackButton(event);
-  }
+  };
 
-  deckBarDidPressCloseButton(event: Event | null, view: V): void {
+  DeckViewBar.prototype.deckBarDidPressCloseButton = function (this: DeckViewBar, event: Event | null): void {
     this.owner.didPressCloseButton(event);
-  }
-}
+  };
+
+  return DeckViewBar;
+})(ViewFastener);
 ViewFastener({
   extends: DeckViewBar,
   key: true,
   type: DeckBar,
-  observe: true,
+  child: true,
+  observes: true,
 })(DeckView.prototype, "bar");
 
-/** @hidden */
-export abstract class DeckViewCard<V extends DeckView, S extends DeckCard> extends ViewFastener<V, S> {
-  constructor(owner: V, key: string | undefined, fastenerName: string | undefined) {
-    super(owner, key, fastenerName);
-    this.cardIndex = 0;
-  }
-
+/** @internal */
+export interface DeckViewCard<V extends DeckView = DeckView, T extends DeckCard = DeckCard> extends ViewFastener<V, T> {
   cardIndex: number;
 
-  override onSetView(cardView: S | null): void {
+  /** @override */
+  onSetView(cardView: T | null): void;
+
+  /** @override */
+  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+
+  viewDidResize(viewContext: ViewContext, cardView: T): void;
+
+  viewDidLayout(viewContext: ViewContext, cardView: T): void;
+
+  /** @protected */
+  initCard(cardView: T): void;
+
+  /** @protected */
+  resizeCard(cardView: T, viewContext: ViewContext): void;
+
+  /** @protected */
+  layoutCard(cardView: T, viewContext: ViewContext): void;
+}
+/** @internal */
+export const DeckViewCard = (function (_super: typeof ViewFastener) {
+  const DeckViewCard = _super.extend() as ViewFastenerClass<DeckViewCard<any, any>>;
+
+  DeckViewCard.prototype.onSetView = function (this: DeckViewCard, cardView: DeckCard | null): void {
     if (cardView !== null) {
       this.initCard(cardView);
     }
-  }
+  };
 
-  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
+  DeckViewCard.prototype.insertView = function (this: DeckViewCard, parent: View, childView: DeckCard, targetView: View | null, key: string | undefined): void {
     const targetKey = "card" + (this.cardIndex + 1);
-    targetView = parentView.getChildView(targetKey);
-    parentView.insertChildView(childView, targetView, key);
-  }
+    targetView = parent.getChild(targetKey);
+    parent.insertChild(childView, targetView, key);
+  };
 
-  viewDidResize(viewContext: ViewContext, cardView: S): void {
+  DeckViewCard.prototype.viewDidResize = function (this: DeckViewCard, viewContext: ViewContext, cardView: DeckCard): void {
     this.resizeCard(cardView, viewContext);
-  }
+  };
 
-  viewDidLayout(viewContext: ViewContext, cardView: S): void {
+  DeckViewCard.prototype.viewDidLayout = function (this: DeckViewCard, viewContext: ViewContext, cardView: DeckCard): void {
     this.layoutCard(cardView, viewContext);
-  }
+  };
 
-  protected initCard(cardView: S): void {
+  DeckViewCard.prototype.initCard = function (this: DeckViewCard, cardView: DeckCard): void {
     let edgeInsets = this.owner.edgeInsets.state;
-    if (edgeInsets === void 0 && this.owner.edgeInsets.takesPrecedence(View.Intrinsic)) {
+    if (edgeInsets === void 0 && this.owner.edgeInsets.hasAffinity(Affinity.Intrinsic)) {
       edgeInsets = this.owner.viewport.safeArea;
     }
 
@@ -336,21 +379,21 @@ export abstract class DeckViewCard<V extends DeckView, S extends DeckCard> exten
       }
     }
 
-    cardView.edgeInsets.setState(edgeInsets, View.Intrinsic);
-    cardView.position.setState("absolute", View.Intrinsic);
-    cardView.left.setState(deckWidth, View.Intrinsic);
-    cardView.top.setState(0, View.Intrinsic);
-    cardView.width.setState(deckWidth, View.Intrinsic);
-    cardView.height.setState(deckHeight, View.Intrinsic);
-    cardView.paddingTop.setState(barHeight, View.Intrinsic);
-    cardView.boxSizing.setState("border-box", View.Intrinsic);
-    cardView.zIndex.setState(0, View.Intrinsic);
-    cardView.visibility.setState("hidden", View.Intrinsic);
-  }
+    cardView.edgeInsets.setState(edgeInsets, Affinity.Intrinsic);
+    cardView.position.setState("absolute", Affinity.Intrinsic);
+    cardView.left.setState(deckWidth, Affinity.Intrinsic);
+    cardView.top.setState(0, Affinity.Intrinsic);
+    cardView.width.setState(deckWidth, Affinity.Intrinsic);
+    cardView.height.setState(deckHeight, Affinity.Intrinsic);
+    cardView.paddingTop.setState(barHeight, Affinity.Intrinsic);
+    cardView.boxSizing.setState("border-box", Affinity.Intrinsic);
+    cardView.zIndex.setState(0, Affinity.Intrinsic);
+    cardView.visibility.setState("hidden", Affinity.Intrinsic);
+  };
 
-  protected resizeCard(cardView: S, viewContext: ViewContext): void {
+  DeckViewCard.prototype.resizeCard = function (this: DeckViewCard, cardView: DeckCard, viewContext: ViewContext): void {
     let edgeInsets = this.owner.edgeInsets.state;
-    if (edgeInsets === void 0 && this.owner.edgeInsets.takesPrecedence(View.Intrinsic)) {
+    if (edgeInsets === void 0 && this.owner.edgeInsets.hasAffinity(Affinity.Intrinsic)) {
       edgeInsets = viewContext.viewport.safeArea;
     }
 
@@ -374,13 +417,13 @@ export abstract class DeckViewCard<V extends DeckView, S extends DeckCard> exten
       }
     }
 
-    cardView.edgeInsets.setState(edgeInsets, View.Intrinsic);
-    cardView.width.setState(deckWidth, View.Intrinsic);
-    cardView.height.setState(deckHeight, View.Intrinsic);
-    cardView.paddingTop.setState(barHeight, View.Intrinsic);
-  }
+    cardView.edgeInsets.setState(edgeInsets, Affinity.Intrinsic);
+    cardView.width.setState(deckWidth, Affinity.Intrinsic);
+    cardView.height.setState(deckHeight, Affinity.Intrinsic);
+    cardView.paddingTop.setState(barHeight, Affinity.Intrinsic);
+  };
 
-  protected layoutCard(cardView: S, viewContext: ViewContext): void {
+  DeckViewCard.prototype.layoutCard = function (this: DeckViewCard, cardView: DeckCard, viewContext: ViewContext): void {
     let cardWidth = cardView.width.state;
     cardWidth = cardWidth instanceof Length ? cardWidth : Length.px(cardView.node.offsetWidth);
 
@@ -393,29 +436,37 @@ export abstract class DeckViewCard<V extends DeckView, S extends DeckCard> exten
 
     const cardIndex = this.cardIndex;
     if (cardIndex < prevIndex || cardIndex === prevIndex && cardPhase === 1) { // under
-      cardView.left.setState(-cardWidth.pxValue() * outAlign, View.Intrinsic);
-      cardView.visibility.setState("hidden", View.Intrinsic);
+      cardView.left.setState(-cardWidth.pxValue() * outAlign, Affinity.Intrinsic);
+      cardView.visibility.setState("hidden", Affinity.Intrinsic);
       cardView.setCulled(true);
     } else if (cardIndex === prevIndex) { // out
-      cardView.left.setState(-cardWidth.pxValue() * outAlign * cardPhase, View.Intrinsic);
-      cardView.visibility.setState(void 0, View.Intrinsic);
+      cardView.left.setState(-cardWidth.pxValue() * outAlign * cardPhase, Affinity.Intrinsic);
+      cardView.visibility.setState(void 0, Affinity.Intrinsic);
       cardView.setCulled(false);
     } else if (cardIndex === nextIndex) { // in
-      cardView.left.setState(cardWidth.pxValue() * inAlign * (1 - cardPhase), View.Intrinsic);
-      cardView.visibility.setState(void 0, View.Intrinsic);
+      cardView.left.setState(cardWidth.pxValue() * inAlign * (1 - cardPhase), Affinity.Intrinsic);
+      cardView.visibility.setState(void 0, Affinity.Intrinsic);
       cardView.setCulled(false);
     } else { // over
-      cardView.left.setState(cardWidth.pxValue() * inAlign, View.Intrinsic);
-      cardView.visibility.setState("hidden", View.Intrinsic);
+      cardView.left.setState(cardWidth.pxValue() * inAlign, Affinity.Intrinsic);
+      cardView.visibility.setState("hidden", Affinity.Intrinsic);
       cardView.setCulled(true);
     }
-  }
-}
+  };
 
-/** @hidden */
+  DeckViewCard.construct = function <F extends DeckViewCard<any, any>>(fastenerClass: ViewFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+    (fastener as Mutable<typeof fastener>).cardIndex = 0;
+    return fastener;
+  };
+
+  return DeckViewCard;
+})(ViewFastener);
+/** @internal */
 export const DeckViewCardFastener = ViewFastener.define<DeckView, DeckCard>({
   extends: DeckViewCard,
+  key: true,
   type: DeckCard,
   child: false,
-  observe: true,
+  observes: true,
 });

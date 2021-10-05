@@ -66,7 +66,7 @@ export abstract class R2Shape {
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyR2Shape {
     return value instanceof R2Shape
         || R2Point.isInit(value)

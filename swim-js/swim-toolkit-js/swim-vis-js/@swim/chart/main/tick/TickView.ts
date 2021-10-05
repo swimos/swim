@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Timing} from "@swim/util";
+import type {Mutable, Class, Timing} from "@swim/util";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {ViewContextType, ViewAnimator, ViewFastener} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -31,7 +32,7 @@ import {RightTickView} from "../"; // forward import
 import {BottomTickView} from "../"; // forward import
 import {LeftTickView} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export const enum TickState {
   Excluded,
   Entering,
@@ -41,9 +42,9 @@ export const enum TickState {
 
 export type TickOrientation = "top" | "right" | "bottom" | "left";
 
-export type AnyTickView<D> = TickView<D> | TickViewInit<D>;
+export type AnyTickView<D = unknown> = TickView<D> | TickViewInit<D>;
 
-export interface TickViewInit<D> extends GraphicsViewInit {
+export interface TickViewInit<D = unknown> extends GraphicsViewInit {
   value: D;
   orientation?: TickOrientation;
 
@@ -61,7 +62,7 @@ export interface TickViewInit<D> extends GraphicsViewInit {
   label?: GraphicsView | string | null;
 }
 
-export abstract class TickView<D> extends LayerView {
+export abstract class TickView<D = unknown> extends LayerView {
   constructor(value: D) {
     super();
     this.value = value;
@@ -70,86 +71,52 @@ export abstract class TickView<D> extends LayerView {
     this.preserved = true;
   }
 
-  override initView(init: TickViewInit<D>): void {
-    super.initView(init);
-    if (init.tickMarkColor !== void 0) {
-      this.tickMarkColor(init.tickMarkColor);
-    }
-    if (init.tickMarkWidth !== void 0) {
-      this.tickMarkWidth(init.tickMarkWidth);
-    }
-    if (init.tickMarkLength !== void 0) {
-      this.tickMarkLength(init.tickMarkLength);
-    }
-    if (init.tickLabelPadding !== void 0) {
-      this.tickLabelPadding(init.tickLabelPadding);
-    }
-
-    if (init.gridLineColor !== void 0) {
-      this.gridLineColor(init.gridLineColor);
-    }
-    if (init.gridLineWidth !== void 0) {
-      this.gridLineWidth(init.gridLineWidth);
-    }
-
-    if (init.font !== void 0) {
-      this.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      this.textColor(init.textColor);
-    }
-
-    if (init.label !== void 0) {
-      this.label(init.label);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<TickViewObserver<D>>;
+  override readonly observerType?: Class<TickViewObserver<D>>;
 
   abstract readonly orientation: TickOrientation;
 
   readonly value: D;
 
-  /** @hidden */
+  /** @internal */
   readonly offset: number;
 
-  /** @hidden */
+  /** @internal */
   setOffset(offset: number): void {
     (this as Mutable<this>).offset = offset;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly tickState: TickState;
 
-  @ViewAnimator({type: R2Point, state: R2Point.origin()})
-  readonly anchor!: ViewAnimator<this, R2Point, AnyR2Point>;
+  @ThemeAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsRender})
+  readonly anchor!: ThemeAnimator<this, R2Point, AnyR2Point>;
 
-  @ViewAnimator({type: Number, state: 1})
-  readonly opacity!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 1, updateFlags: View.NeedsRender})
+  readonly opacity!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Color, inherit: true, state: null})
-  readonly tickMarkColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, state: null, updateFlags: View.NeedsRender})
+  readonly tickMarkColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Number, inherit: true, state: 1})
-  readonly tickMarkWidth!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, inherits: true, state: 1, updateFlags: View.NeedsRender})
+  readonly tickMarkWidth!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, inherit: true, state: 6})
-  readonly tickMarkLength!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, inherits: true, state: 6, updateFlags: View.NeedsRender})
+  readonly tickMarkLength!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, inherit: true, state: 2})
-  readonly tickLabelPadding!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, inherits: true, state: 2, updateFlags: View.NeedsRender})
+  readonly tickLabelPadding!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Color, inherit: true, state: null})
-  readonly gridLineColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, state: null, updateFlags: View.NeedsRender})
+  readonly gridLineColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Number, inherit: true, state: 0})
-  readonly gridLineWidth!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, inherits: true, state: 0, updateFlags: View.NeedsRender})
+  readonly gridLineWidth!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Font, inherit: true, state: null})
-  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
+  @ThemeAnimator({type: Font, inherits: true, state: null})
+  readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ViewAnimator({type: Color, inherit: true, state: null})
-  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, state: null})
+  readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected initLabel(labelView: GraphicsView): void {
     // hook
@@ -164,11 +131,11 @@ export abstract class TickView<D> extends LayerView {
   }
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetTickLabel !== void 0) {
-        viewObserver.viewWillSetTickLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetTickLabel !== void 0) {
+        observer.viewWillSetTickLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -184,11 +151,11 @@ export abstract class TickView<D> extends LayerView {
   }
 
   protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetTickLabel !== void 0) {
-        viewObserver.viewDidSetTickLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetTickLabel !== void 0) {
+        observer.viewDidSetTickLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -196,6 +163,7 @@ export abstract class TickView<D> extends LayerView {
   @ViewFastener<TickView<D>, GraphicsView, AnyTextRunView>({
     key: true,
     type: TextRunView,
+    child: true,
     fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
       if (value instanceof GraphicsView) {
         return value;
@@ -218,7 +186,7 @@ export abstract class TickView<D> extends LayerView {
   })
   readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
-  /** @hidden */
+  /** @internal */
   readonly preserved: boolean;
 
   preserve(): boolean;
@@ -254,21 +222,24 @@ export abstract class TickView<D> extends LayerView {
     }
   }
 
+  /** @internal */
+  private static globalAlpha: number = NaN;
+
   protected override willRender(viewContext: ViewContextType<this>): void {
     super.willRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
-      context.save();
+      // save
+      TickView.globalAlpha = context.globalAlpha;
+      context.globalAlpha = this.opacity.getValue();
     }
   }
 
   protected override onRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.globalAlpha = this.opacity.getValue();
-      this.renderTick(context, this.viewFrame);
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+      this.renderTick(renderer.context, this.viewFrame);
     }
   }
 
@@ -276,7 +247,9 @@ export abstract class TickView<D> extends LayerView {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
-      context.restore();
+      // restore
+      context.globalAlpha = TickView.globalAlpha;
+      TickView.globalAlpha = NaN;
     }
     super.didRender(viewContext);
   }
@@ -284,6 +257,40 @@ export abstract class TickView<D> extends LayerView {
   protected abstract layoutLabel(labelView: GraphicsView): void;
 
   protected abstract renderTick(context: CanvasContext, frame: R2Box): void;
+
+  override init(init: TickViewInit<D>): void {
+    super.init(init);
+    if (init.tickMarkColor !== void 0) {
+      this.tickMarkColor(init.tickMarkColor);
+    }
+    if (init.tickMarkWidth !== void 0) {
+      this.tickMarkWidth(init.tickMarkWidth);
+    }
+    if (init.tickMarkLength !== void 0) {
+      this.tickMarkLength(init.tickMarkLength);
+    }
+    if (init.tickLabelPadding !== void 0) {
+      this.tickLabelPadding(init.tickLabelPadding);
+    }
+
+    if (init.gridLineColor !== void 0) {
+      this.gridLineColor(init.gridLineColor);
+    }
+    if (init.gridLineWidth !== void 0) {
+      this.gridLineWidth(init.gridLineWidth);
+    }
+
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
+
+    if (init.label !== void 0) {
+      this.label(init.label);
+    }
+  }
 
   static top<D>(value: D): TopTickView<D> {
     return new TopTickView(value);
@@ -315,7 +322,9 @@ export abstract class TickView<D> extends LayerView {
     }
   }
 
-  static fromInit<D>(init: TickViewInit<D>, orientation?: TickOrientation): TickView<D> {
+  static override fromInit<D>(init: TickViewInit<D>, orientation?: TickOrientation): TickView<D>;
+  static override fromInit(init: TickViewInit, orientation?: TickOrientation): TickView;
+  static override fromInit(init: TickViewInit, orientation?: TickOrientation): TickView {
     if (init.orientation !== void 0) {
       orientation = init.orientation;
     }
@@ -323,16 +332,23 @@ export abstract class TickView<D> extends LayerView {
       throw new TypeError();
     }
     const view = this.from(init.value, orientation);
-    view.initView(init);
+    view.init(init);
     return view;
   }
 
-  static fromAny<D>(value: AnyTickView<D>, orientation?: TickOrientation): TickView<D> {
-    if (value instanceof TickView) {
+  static override fromAny<D>(value: AnyTickView<D>, orientation?: TickOrientation): TickView<D>;
+  static override fromAny(value: AnyTickView, orientation?: TickOrientation): TickView;
+  static override fromAny(value: AnyTickView, orientation?: TickOrientation): TickView {
+    if (value === void 0 || value === null) {
       return value;
-    } else if (typeof value === "object" && value !== null) {
+    } else if (value instanceof View) {
+      if (value instanceof this) {
+        return value;
+      } else {
+        throw new TypeError(value + " not an instance of " + this);
+      }
+    } else {
       return this.fromInit(value, orientation);
     }
-    throw new TypeError("" + value);
   }
 }

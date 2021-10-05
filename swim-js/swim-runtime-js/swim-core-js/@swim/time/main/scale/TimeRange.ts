@@ -34,53 +34,56 @@ export interface TimeRange extends Range<DateTime>, Interpolate<TimeRange> {
   toString(): string;
 }
 
-export const TimeRange = function (y0: DateTime, y1: DateTime): TimeRange {
-  const range = function (u: number): DateTime {
-    const t0 = range[0].time;
-    const t1 = range[1].time;
-    return new DateTime(t0 + u * (t1 - t0), u === 0 ? range[0].zone : range[1].zone);
-  } as TimeRange;
-  Object.setPrototypeOf(range, TimeRange.prototype);
-  (range as Mutable<typeof range>)[0] = y0;
-  (range as Mutable<typeof range>)[1] = y1;
-  return range;
-} as {
-  (y0: DateTime, y1: DateTime): TimeRange;
+export const TimeRange = (function (_super: typeof Range) {
+  const TimeRange = function (y0: DateTime, y1: DateTime): TimeRange {
+    const range = function (u: number): DateTime {
+      const t0 = range[0].time;
+      const t1 = range[1].time;
+      return new DateTime(t0 + u * (t1 - t0), u === 0 ? range[0].zone : range[1].zone);
+    } as TimeRange;
+    Object.setPrototypeOf(range, TimeRange.prototype);
+    (range as Mutable<typeof range>)[0] = y0;
+    (range as Mutable<typeof range>)[1] = y1;
+    return range;
+  } as {
+    (y0: DateTime, y1: DateTime): TimeRange;
 
-  /** @hidden */
-  prototype: TimeRange;
-};
+    /** @internal */
+    prototype: TimeRange;
+  };
 
-TimeRange.prototype = Object.create(Range.prototype);
+  TimeRange.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(TimeRange.prototype, "inverse", {
-  get(this: TimeRange): TimeDomain {
-    return TimeDomain(this[0], this[1]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(TimeRange.prototype, "inverse", {
+    get(this: TimeRange): TimeDomain {
+      return TimeDomain(this[0], this[1]);
+    },
+    configurable: true,
+  });
 
-TimeRange.prototype.interpolateTo = function (this: TimeRange, that: unknown): Interpolator<TimeRange> | null {
-  if (that instanceof TimeRange) {
-    return TimeRangeInterpolator(this, that);
-  }
-  return null;
-} as typeof TimeRange.prototype.interpolateTo;
+  TimeRange.prototype.interpolateTo = function (this: TimeRange, that: unknown): Interpolator<TimeRange> | null {
+    if (that instanceof TimeRange) {
+      return TimeRangeInterpolator(this, that);
+    }
+    return null;
+  } as typeof TimeRange.prototype.interpolateTo;
 
-TimeRange.prototype.canEqual = function (that: unknown): boolean {
-  return that instanceof TimeRange;
-};
+  TimeRange.prototype.canEqual = function (that: unknown): boolean {
+    return that instanceof TimeRange;
+  };
 
-TimeRange.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof TimeRange) {
-    return that.canEqual(this) && this[0].equals(that[0]) && this[1].equals(that[1]);
-  }
-  return false;
-};
+  TimeRange.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof TimeRange) {
+      return that.canEqual(this) && this[0].equals(that[0]) && this[1].equals(that[1]);
+    }
+    return false;
+  };
 
-TimeRange.prototype.toString = function (): string {
-  return "TimeRange(" + this[0] + ", " + this[1] + ")";
-};
+  TimeRange.prototype.toString = function (): string {
+    return "TimeRange(" + this[0] + ", " + this[1] + ")";
+  };
+
+  return TimeRange;
+})(Range);

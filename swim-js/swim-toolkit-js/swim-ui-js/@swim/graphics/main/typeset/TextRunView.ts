@@ -15,7 +15,8 @@
 import type {AnyTiming} from "@swim/util";
 import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View} from "@swim/view";
 import {LayerView} from "../layer/LayerView";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
@@ -29,28 +30,23 @@ export interface TextRunViewInit extends TypesetViewInit {
 }
 
 export class TextRunView extends LayerView implements TypesetView {
-  override initView(init: TextRunViewInit): void {
-    super.initView(init);
-    this.setState(init);
-  }
+  @ThemeAnimator({type: String, state: "", updateFlags: View.NeedsRender})
+  readonly text!: ThemeAnimator<this, string>;
 
-  @ViewAnimator({type: String, state: "", updateFlags: View.NeedsRender})
-  readonly text!: ViewAnimator<this, string>;
+  @ThemeAnimator({type: Font, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ViewAnimator({type: Font, state: null, inherit: true, updateFlags: View.NeedsRender})
-  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
+  @ThemeAnimator({type: String, inherits: true, updateFlags: View.NeedsRender})
+  readonly textAlign!: ThemeAnimator<this, CanvasTextAlign | undefined>;
 
-  @ViewAnimator({type: String, inherit: true, updateFlags: View.NeedsRender})
-  readonly textAlign!: ViewAnimator<this, CanvasTextAlign | undefined>;
+  @ThemeAnimator({type: String, inherits: true, updateFlags: View.NeedsRender})
+  readonly textBaseline!: ThemeAnimator<this, CanvasTextBaseline | undefined>;
 
-  @ViewAnimator({type: String, inherit: true, updateFlags: View.NeedsRender})
-  readonly textBaseline!: ViewAnimator<this, CanvasTextBaseline | undefined>;
+  @ThemeAnimator({type: R2Point, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly textOrigin!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator({type: R2Point, state: null, inherit: true, updateFlags: View.NeedsRender})
-  readonly textOrigin!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
-
-  @ViewAnimator({type: Color, state: null, inherit: true, updateFlags: View.NeedsRender})
-  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   get value(): TextRun {
     return new TextRun(this.text.getValue(), this.font.getValue(), this.textAlign.getValue(),
@@ -93,15 +89,18 @@ export class TextRunView extends LayerView implements TypesetView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
-      this.renderText(context);
-      context.restore();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+      this.renderText(renderer.context);
     }
   }
 
   protected renderText(context: CanvasContext): void {
+    // save
+    const contextFont = context.font;
+    const contextTextAlign = context.textAlign;
+    const contextTextBaseline = context.textBaseline;
+    const contextFillStyle = context.fillStyle;
+
     const font = this.font.value;
     if (font !== null) {
       context.font = font.toString();
@@ -114,50 +113,31 @@ export class TextRunView extends LayerView implements TypesetView {
     if (textBaseline !== void 0) {
       context.textBaseline = textBaseline;
     }
-    let textOrigin = this.textOrigin.value;
-    if (textOrigin === null) {
-      textOrigin = R2Point.origin();
-    }
     const textColor = this.textColor.value;
     if (textColor !== null) {
       context.fillStyle = textColor.toString();
     }
+    let textOrigin = this.textOrigin.value;
+    if (textOrigin === null) {
+      textOrigin = R2Point.origin();
+    }
     context.fillText(this.text.getValue(), textOrigin.x, textOrigin.y);
+
+    // restore
+    context.font = contextFont;
+    context.textAlign = contextTextAlign;
+    context.textBaseline = contextTextBaseline;
+    context.fillStyle = contextFillStyle;
   }
 
-  static override create(): TextRunView {
-    return new TextRunView();
-  }
-
-  static fromText(text: string): TextRunView {
-    const view = new TextRunView();
-    view.text(text);
-    return view;
-  }
-
-  static fromTextRun(run: TextRun): TextRunView {
-    const view = new TextRunView();
-    view.setState(run);
-    return view;
-  }
-
-  static fromInit(init: TextRunViewInit): TextRunView {
-    const view = new TextRunView();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny(value: AnyTextRunView): TextRunView {
-    if (value instanceof TextRunView) {
-      return value;
-    } else if (value instanceof TextRun) {
-      return this.fromTextRun(value);
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
-    } else if (typeof value === "string") {
-      return this.fromText(value);
+  override init(init: TextRun | TextRunViewInit | string): void {
+    if (typeof init !== "string") {
+      if (!(init instanceof TextRun)) {
+        super.init(init);
+      }
+      this.setState(init);
     } else {
-      throw new TypeError("" + value);
+      this.text(init);
     }
   }
 }

@@ -15,9 +15,9 @@
 import type {Input} from "../input/Input";
 import {Parser} from "./Parser";
 
-/** @hidden */
+/** @internal */
 export class ParserDone<O> extends Parser<O> {
-  /** @hidden */
+  /** @internal */
   readonly value!: O;
 
   constructor(value: O) {

@@ -17,11 +17,11 @@ import type {Field} from "./Field";
 import {Slot} from "./Slot";
 import type {Value} from "./Value";
 
-/** @hidden */
+/** @internal */
 export interface FieldInterpolator extends Interpolator<Field> {
-  /** @hidden */
+  /** @internal */
   readonly keyInterpolator: Interpolator<Value>;
-  /** @hidden */
+  /** @internal */
   readonly valueInterpolator: Interpolator<Value>;
 
   readonly 0: Field;
@@ -31,48 +31,50 @@ export interface FieldInterpolator extends Interpolator<Field> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const FieldInterpolator = function (y0: Field, y1: Field): FieldInterpolator {
-  const interpolator = function (u: number): Field {
-    const key = interpolator.keyInterpolator(u);
-    const value = interpolator.valueInterpolator(u);
-    return Slot.of(key, value);
-  } as FieldInterpolator;
-  Object.setPrototypeOf(interpolator, FieldInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).keyInterpolator = y0.key.interpolateTo(y1.key);
-  (interpolator as Mutable<typeof interpolator>).valueInterpolator = y0.value.interpolateTo(y1.value);
-  return interpolator;
-} as {
-  (y0: Field, y1: Field): FieldInterpolator;
+/** @internal */
+export const FieldInterpolator = (function (_super: typeof Interpolator) {
+  const FieldInterpolator = function (y0: Field, y1: Field): FieldInterpolator {
+    const interpolator = function (u: number): Field {
+      const key = interpolator.keyInterpolator(u);
+      const value = interpolator.valueInterpolator(u);
+      return Slot.of(key, value);
+    } as FieldInterpolator;
+    Object.setPrototypeOf(interpolator, FieldInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).keyInterpolator = y0.key.interpolateTo(y1.key);
+    (interpolator as Mutable<typeof interpolator>).valueInterpolator = y0.value.interpolateTo(y1.value);
+    return interpolator;
+  } as {
+    (y0: Field, y1: Field): FieldInterpolator;
 
-  /** @hidden */
-  prototype: FieldInterpolator;
-};
+    /** @internal */
+    prototype: FieldInterpolator;
+  };
 
-FieldInterpolator.prototype = Object.create(Interpolator.prototype);
+  FieldInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(FieldInterpolator.prototype, 0, {
-  get(this: FieldInterpolator): Field {
-    return Slot.of(this.keyInterpolator[0], this.valueInterpolator[0]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(FieldInterpolator.prototype, 0, {
+    get(this: FieldInterpolator): Field {
+      return Slot.of(this.keyInterpolator[0], this.valueInterpolator[0]);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(FieldInterpolator.prototype, 1, {
-  get(this: FieldInterpolator): Field {
-    return Slot.of(this.keyInterpolator[1], this.valueInterpolator[1]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(FieldInterpolator.prototype, 1, {
+    get(this: FieldInterpolator): Field {
+      return Slot.of(this.keyInterpolator[1], this.valueInterpolator[1]);
+    },
+    configurable: true,
+  });
 
-FieldInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof FieldInterpolator) {
-    return this.keyInterpolator.equals(that.keyInterpolator)
-        && this.valueInterpolator.equals(that.valueInterpolator);
-  }
-  return false;
-};
+  FieldInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof FieldInterpolator) {
+      return this.keyInterpolator.equals(that.keyInterpolator)
+          && this.valueInterpolator.equals(that.valueInterpolator);
+    }
+    return false;
+  };
+
+  return FieldInterpolator;
+})(Interpolator);

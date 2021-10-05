@@ -14,6 +14,8 @@
 
 export {
   SelectionOptions,
-  SelectionManager,
-} from "./SelectionManager";
-export {SelectionManagerObserver} from "./SelectionManagerObserver";
+  SelectionService,
+} from "./SelectionService";
+export {SelectionServiceObserver} from "./SelectionServiceObserver";
+
+export {SelectionProvider} from "./SelectionProvider";

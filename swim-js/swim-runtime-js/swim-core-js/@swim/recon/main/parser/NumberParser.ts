@@ -16,7 +16,7 @@ import {Input, Output, Parser, Diagnostic, Unicode, Base16} from "@swim/codec";
 import {Recon} from "../Recon";
 import type {ReconParser} from "./ReconParser";
 
-/** @hidden */
+/** @internal */
 export class NumberParser<I, V> extends Parser<V> {
   private readonly recon: ReconParser<I, V>;
   private readonly sign: number | undefined;
@@ -125,7 +125,7 @@ export class NumberParser<I, V> extends Parser<V> {
   }
 }
 
-/** @hidden */
+/** @internal */
 export class DecimalParser<I, V> extends Parser<V> {
   private readonly recon: ReconParser<I, V>;
   private readonly output: Output<string>;
@@ -253,7 +253,7 @@ export class DecimalParser<I, V> extends Parser<V> {
   }
 }
 
-/** @hidden */
+/** @internal */
 class HexadecimalParser<I, V> extends Parser<V> {
   private readonly recon: ReconParser<I, V>;
   private readonly value: number | undefined;

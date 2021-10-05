@@ -37,7 +37,7 @@ export class GeoSpline extends GeoCurve implements Debug {
 
   readonly curves: ReadonlyArray<GeoCurve>;
 
-  /** @hidden */
+  /** @internal */
   readonly closed: boolean;
 
   isDefined(): boolean {
@@ -199,7 +199,7 @@ export class GeoSpline extends GeoCurve implements Debug {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly boundingBox: GeoBox | null;
 
   override get bounds(): GeoBox {
@@ -350,14 +350,14 @@ export class GeoSpline extends GeoCurve implements Debug {
     return new GeoSplineBuilder();
   }
 
-  /** @hidden */
+  /** @internal */
   static isPoints(value: unknown): value is GeoSplinePoints {
     return Array.isArray(value)
         && value.length >= 2
         && GeoPoint.isAny(value[0]!);
   }
 
-  /** @hidden */
+  /** @internal */
   static isAnySpline(value: unknown): value is AnyGeoSpline {
     return value instanceof GeoSpline
         || GeoSpline.isPoints(value);

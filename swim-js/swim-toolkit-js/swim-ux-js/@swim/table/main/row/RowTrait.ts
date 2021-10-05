@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {TraitModelType, Trait, TraitFastener} from "@swim/model";
 import {LeafTrait} from "../leaf/LeafTrait";
 import type {RowTraitObserver} from "./RowTraitObserver";
 import {TableTrait} from "../"; // forward import
 
 export class RowTrait extends LeafTrait {
-  override readonly traitObservers!: ReadonlyArray<RowTraitObserver>;
+  override readonly observerType?: Class<RowTraitObserver>;
 
   protected initTree(treeTrait: TableTrait): void {
     // hook
@@ -33,9 +34,9 @@ export class RowTrait extends LeafTrait {
   }
 
   protected willSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetTree !== void 0) {
         traitObserver.traitWillSetTree(newTreeTrait, oldTreeTrait, targetTrait, this);
       }
@@ -53,9 +54,9 @@ export class RowTrait extends LeafTrait {
   }
 
   protected didSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetTree !== void 0) {
         traitObserver.traitDidSetTree(newTreeTrait, oldTreeTrait, targetTrait, this);
       }
@@ -98,7 +99,8 @@ export class RowTrait extends LeafTrait {
     }
   }
 
-  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  /** @protected */
+  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     if (this.tree.trait === null) {
       const treeTrait = this.detectTreeTrait(trait);
@@ -108,7 +110,8 @@ export class RowTrait extends LeafTrait {
     }
   }
 
-  protected override onRemoveTrait(trait: Trait): void {
+  /** @protected */
+  override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const treeTrait = this.detectTreeTrait(trait);
     if (treeTrait !== null && this.tree.trait === treeTrait) {

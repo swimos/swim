@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {ViewFastener} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
-import {ControllerView, ControllerViewTrait, CompositeController} from "@swim/controller";
+import {TraitViewFastener, GenericController} from "@swim/controller";
 import type {ColLayout} from "../layout/ColLayout";
 import {ColView} from "./ColView";
 import {ColLabel, ColTrait} from "./ColTrait";
 import type {ColControllerObserver} from "./ColControllerObserver";
 
-export class ColController extends CompositeController {
-  override readonly controllerObservers!: ReadonlyArray<ColControllerObserver>;
+export class ColController extends GenericController {
+  override readonly observerType?: Class<ColControllerObserver>;
 
   protected initColTrait(colTrait: ColTrait): void {
     // hook
@@ -41,11 +43,11 @@ export class ColController extends CompositeController {
   }
 
   protected willSetColTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColTrait !== void 0) {
-        controllerObserver.controllerWillSetColTrait(newColTrait, oldColTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColTrait !== void 0) {
+        observer.controllerWillSetColTrait(newColTrait, oldColTrait, this);
       }
     }
   }
@@ -61,21 +63,21 @@ export class ColController extends CompositeController {
   }
 
   protected didSetColTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColTrait !== void 0) {
-        controllerObserver.controllerDidSetColTrait(newColTrait, oldColTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColTrait !== void 0) {
+        observer.controllerDidSetColTrait(newColTrait, oldColTrait, this);
       }
     }
   }
 
   protected willSetLayout(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColLayout !== void 0) {
-        controllerObserver.controllerWillSetColLayout(newLayout, oldLayout, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColLayout !== void 0) {
+        observer.controllerWillSetColLayout(newLayout, oldLayout, this);
       }
     }
   }
@@ -85,11 +87,11 @@ export class ColController extends CompositeController {
   }
 
   protected didSetLayout(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColLayout !== void 0) {
-        controllerObserver.controllerDidSetColLayout(newLayout, oldLayout, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColLayout !== void 0) {
+        observer.controllerDidSetColLayout(newLayout, oldLayout, this);
       }
     }
   }
@@ -116,11 +118,11 @@ export class ColController extends CompositeController {
   }
 
   protected willSetColView(newColView: ColView | null, oldColView: ColView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColView !== void 0) {
-        controllerObserver.controllerWillSetColView(newColView, oldColView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColView !== void 0) {
+        observer.controllerWillSetColView(newColView, oldColView, this);
       }
     }
   }
@@ -136,36 +138,19 @@ export class ColController extends CompositeController {
   }
 
   protected didSetColView(newColView: ColView | null, oldColView: ColView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColView !== void 0) {
-        controllerObserver.controllerDidSetColView(newColView, oldColView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColView !== void 0) {
+        observer.controllerDidSetColView(newColView, oldColView, this);
       }
     }
   }
 
-  /** @hidden */
-  static ColFastener = ControllerViewTrait.define<ColController, ColView, ColTrait>({
-    viewType: ColView,
-    observeView: true,
-    willSetView(newColView: ColView | null, oldColView: ColView | null): void {
-      this.owner.willSetColView(newColView, oldColView);
-    },
-    onSetView(newColView: ColView | null, oldColView: ColView | null): void {
-      this.owner.onSetColView(newColView, oldColView);
-    },
-    didSetView(newColView: ColView | null, oldColView: ColView | null): void {
-      this.owner.didSetColView(newColView, oldColView);
-    },
-    viewDidSetLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
-      this.owner.label.setView(newLabelView);
-    },
-    createView(): ColView | null {
-      return this.owner.createColView();
-    },
+  /** @internal */
+  static ColFastener = TraitViewFastener.define<ColController, ColTrait, ColView>({
     traitType: ColTrait,
-    observeTrait: true,
+    observesTrait: true,
     willSetTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null): void {
       this.owner.willSetColTrait(newColTrait, oldColTrait);
     },
@@ -185,12 +170,29 @@ export class ColController extends CompositeController {
     traitDidSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null, colTrait: ColTrait): void {
       this.owner.setLabelView(newLabel, colTrait);
     },
+    viewType: ColView,
+    observesView: true,
+    willSetView(newColView: ColView | null, oldColView: ColView | null): void {
+      this.owner.willSetColView(newColView, oldColView);
+    },
+    onSetView(newColView: ColView | null, oldColView: ColView | null): void {
+      this.owner.onSetColView(newColView, oldColView);
+    },
+    didSetView(newColView: ColView | null, oldColView: ColView | null): void {
+      this.owner.didSetColView(newColView, oldColView);
+    },
+    viewDidSetLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+      this.owner.label.setView(newLabelView);
+    },
+    createView(): ColView | null {
+      return this.owner.createColView();
+    },
   });
 
-  @ControllerViewTrait<ColController, ColView, ColTrait>({
+  @TraitViewFastener<ColController, ColTrait, ColView>({
     extends: ColController.ColFastener,
   })
-  readonly col!: ControllerViewTrait<this, ColView, ColTrait>;
+  readonly col!: TraitViewFastener<this, ColTrait, ColView>;
 
   protected createLabelView(label: ColLabel, colTrait: ColTrait): HtmlView | string | null {
     if (typeof label === "function") {
@@ -221,11 +223,11 @@ export class ColController extends CompositeController {
   }
 
   protected willSetLabelView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColLabelView !== void 0) {
-        controllerObserver.controllerWillSetColLabelView(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColLabelView !== void 0) {
+        observer.controllerWillSetColLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -241,16 +243,16 @@ export class ColController extends CompositeController {
   }
 
   protected didSetLabelView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColLabelView !== void 0) {
-        controllerObserver.controllerDidSetColLabelView(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColLabelView !== void 0) {
+        observer.controllerDidSetColLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
 
-  @ControllerView<ColController, HtmlView>({
+  @ViewFastener<ColController, HtmlView>({
     willSetView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
       this.owner.willSetLabelView(newLabelView, oldLabelView);
     },
@@ -261,5 +263,5 @@ export class ColController extends CompositeController {
       this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
-  readonly label!: ControllerView<this, HtmlView>;
+  readonly label!: ViewFastener<this, HtmlView>;
 }

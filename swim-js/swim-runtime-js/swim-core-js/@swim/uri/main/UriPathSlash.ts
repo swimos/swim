@@ -16,16 +16,16 @@ import type {Mutable} from "@swim/util";
 import {Output, Format} from "@swim/codec";
 import {UriPath} from "./UriPath";
 
-/** @hidden */
+/** @internal */
 export class UriPathSlash extends UriPath {
-  /** @hidden */
+  /** @internal */
   constructor(tail: UriPath) {
     super();
     this.rest = tail;
     this.stringValue = void 0;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly rest: UriPath;
 
   override isDefined(): boolean {
@@ -52,12 +52,12 @@ export class UriPathSlash extends UriPath {
     return this.rest;
   }
 
-  /** @hidden */
+  /** @internal */
   override setTail(tail: UriPath): void {
     (this as Mutable<this>).rest = tail;
   }
 
-  /** @hidden */
+  /** @internal */
   override dealias(): UriPath {
     return new UriPathSlash(this.rest);
   }
@@ -105,7 +105,7 @@ export class UriPathSlash extends UriPath {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   override toString(): string {

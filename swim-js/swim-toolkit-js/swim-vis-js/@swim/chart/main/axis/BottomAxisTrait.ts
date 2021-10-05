@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {AxisTrait} from "./AxisTrait";
 import type {AxisTraitObserver} from "./AxisTraitObserver";
 
 export abstract class BottomAxisTrait<X> extends AxisTrait<X> {
-  override readonly traitObservers!: ReadonlyArray<AxisTraitObserver<X, BottomAxisTrait<X>>>;
+  override readonly observerType?: Class<AxisTraitObserver<X, BottomAxisTrait<X>>>;
 }

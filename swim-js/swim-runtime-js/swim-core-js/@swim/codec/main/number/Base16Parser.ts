@@ -18,13 +18,13 @@ import type {Output} from "../output/Output";
 import {Parser} from "../parser/Parser";
 import {Base16} from "./Base16";
 
-/** @hidden */
+/** @internal */
 export class Base16Parser<O> extends Parser<O> {
-  /** @hidden */
+  /** @internal */
   readonly output: Output<O>;
-  /** @hidden */
+  /** @internal */
   readonly p: number;
-  /** @hidden */
+  /** @internal */
   readonly step: number;
 
   constructor(output: Output<O>, p: number = 0, step: number = 1) {

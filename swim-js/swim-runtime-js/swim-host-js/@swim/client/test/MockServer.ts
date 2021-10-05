@@ -45,13 +45,13 @@ export class MockServer {
 
   readonly client: WarpClient;
 
-  /** @hidden */
+  /** @internal */
   readonly httpServer: http.Server | null;
 
-  /** @hidden */
+  /** @internal */
   readonly wsServer: ws.Server | null;
 
-  /** @hidden */
+  /** @internal */
   readonly socket: ws | null;
 
   resolve(relative: AnyUri): Uri {

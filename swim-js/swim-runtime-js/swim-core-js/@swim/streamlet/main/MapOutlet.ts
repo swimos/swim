@@ -84,16 +84,21 @@ export interface MapOutlet<K, V, O> extends Outlet<O>, MapOutletCombinators<K, V
   watch(func: WatchFieldsFunction<K, V>): this;
 }
 
-export const MapOutlet = {} as {
-  is<K, V, I>(object: unknown): object is MapOutlet<K, V, I>;
-};
+/** @internal */
+export const MapOutlet = (function () {
+  const MapOutlet = {} as {
+    is<K, V, I>(object: unknown): object is MapOutlet<K, V, I>;
+  };
 
-MapOutlet.is = function <K, V, I>(object: unknown): object is MapOutlet<K, V, I> {
-  if (typeof object === "object" && object !== null) {
-    const outlet = object as MapOutlet<K, V, I>;
-    return Outlet.is(outlet)
-        && typeof outlet.keyIterator === "function"
-        && typeof outlet.outlet === "function";
-  }
-  return false;
-};
+  MapOutlet.is = function <K, V, I>(object: unknown): object is MapOutlet<K, V, I> {
+    if (typeof object === "object" && object !== null) {
+      const outlet = object as MapOutlet<K, V, I>;
+      return Outlet.is(outlet)
+          && typeof outlet.keyIterator === "function"
+          && typeof outlet.outlet === "function";
+    }
+    return false;
+  };
+
+  return MapOutlet;
+})();

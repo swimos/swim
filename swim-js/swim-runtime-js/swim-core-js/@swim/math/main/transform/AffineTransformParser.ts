@@ -16,7 +16,7 @@ import {Input, Output, Parser, Diagnostic, Unicode, Base10} from "@swim/codec";
 import {Transform} from "./Transform";
 import type {AffineTransform} from "./AffineTransform";
 
-/** @hidden */
+/** @internal */
 export class AffineTransformParser extends Parser<AffineTransform> {
   private readonly identOutput: Output<string> | undefined;
   private readonly entries: number[] | undefined;
@@ -117,7 +117,7 @@ export class AffineTransformParser extends Parser<AffineTransform> {
     return new AffineTransformParser(identOutput, entries, entryParser, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseRest(input: Input, identOutput?: Output<string>): Parser<AffineTransform> {
     return AffineTransformParser.parse(input, identOutput, void 0, void 0, 2);
   }

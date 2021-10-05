@@ -18,19 +18,19 @@ import type {Output} from "../output/Output";
 import {Parser} from "../parser/Parser";
 import type {Base64} from "./Base64";
 
-/** @hidden */
+/** @internal */
 export class Base64Parser<O> extends Parser<O> {
-  /** @hidden */
+  /** @internal */
   readonly base64: Base64;
-  /** @hidden */
+  /** @internal */
   readonly output: Output<O>;
-  /** @hidden */
+  /** @internal */
   readonly p: number;
-  /** @hidden */
+  /** @internal */
   readonly q: number;
-  /** @hidden */
+  /** @internal */
   readonly r: number;
-  /** @hidden */
+  /** @internal */
   readonly step: number;
 
   constructor(base64: Base64, output: Output<O>, p: number = 0, q: number = 0,

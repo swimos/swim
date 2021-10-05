@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable} from "@swim/util";
-import {View} from "@swim/view";
+import {Affinity, Property} from "@swim/fastener";
 import {ViewNode, SvgView} from "@swim/dom";
 import {PathContext} from "../path/PathContext";
 import type {PaintingFillRule, PaintingContext} from "../painting/PaintingContext";
@@ -37,7 +37,7 @@ export class SvgContext implements PaintingContext {
     (this as Mutable<this>).precision = precision;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pathContext: PathContext | null;
 
   protected getPathContext(): PathContext {
@@ -69,15 +69,15 @@ export class SvgContext implements PaintingContext {
     return pathContext;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pathView: SvgView | null;
 
-  /** @hidden */
+  /** @internal */
   setPathView(pathView: SvgView | null): void {
     (this as Mutable<this>).pathView = pathView;
   }
 
-  /** @hidden */
+  /** @internal */
   nextPathView(): SvgView | null {
     let pathView = this.pathView;
     if (pathView !== null) {
@@ -94,42 +94,42 @@ export class SvgContext implements PaintingContext {
     return pathView;
   }
 
-  /** @hidden */
+  /** @internal */
   finalizePath(): void {
     const pathView = this.pathView;
     if (pathView !== null) {
       const pathFlags = this.pathFlags;
       if ((pathFlags & SvgContext.FillFlag) === 0) {
-        const fill = pathView.getAttributeAnimator("fill");
+        const fill = pathView.getFastener("fill", Property);
         if (fill !== null) {
-          fill.setState(null, View.Intrinsic);
+          fill.setState(null, Affinity.Intrinsic);
         }
       }
       if ((pathFlags & SvgContext.FillRuleFlag) === 0) {
-        const fillRule = pathView.getAttributeAnimator("fillRule");
+        const fillRule = pathView.getFastener("fillRule", Property);
         if (fillRule !== null) {
-          fillRule.setState(void 0, View.Intrinsic);
+          fillRule.setState(void 0, Affinity.Intrinsic);
         }
       }
       if ((pathFlags & SvgContext.StrokeFlag) === 0) {
-        const stroke = pathView.getAttributeAnimator("stroke");
+        const stroke = pathView.getFastener("stroke", Property);
         if (stroke !== null) {
-          stroke.setState(null, View.Intrinsic);
+          stroke.setState(null, Affinity.Intrinsic);
         }
       }
       if ((pathFlags & SvgContext.PathFlag) === 0) {
-        const d = pathView.getAttributeAnimator("d");
+        const d = pathView.getFastener("d", Property);
         if (d !== null) {
-          d.setState(void 0, View.Intrinsic);
+          d.setState(void 0, Affinity.Intrinsic);
         }
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pathFlags: number;
 
-  /** @hidden */
+  /** @internal */
   setPathFlags(pathFlags: number): void {
     (this as Mutable<this>).pathFlags = pathFlags;
   }
@@ -192,23 +192,23 @@ export class SvgContext implements PaintingContext {
       }
       let created = false;
       if (pathView === null) {
-        pathView = SvgView.path.create();
+        pathView = SvgView.fromTag("path");
         this.setPathView(pathView);
         created = true;
       }
-      pathView.fill.setState(fillStyle, View.Intrinsic);
+      pathView.fill.setState(fillStyle, Affinity.Intrinsic);
       this.setPathFlags(this.pathFlags | SvgContext.FillFlag);
       if (fillRule !== void 0) {
-        pathView.fillRule.setState(fillRule, View.Intrinsic);
+        pathView.fillRule.setState(fillRule, Affinity.Intrinsic);
         this.setPathFlags(this.pathFlags | SvgContext.FillRuleFlag);
       }
       if ((this.pathFlags & SvgContext.PathFlag) === 0) {
         const pathString = this.getPathContext().toString();
-        pathView.d.setState(pathString, View.Intrinsic);
+        pathView.d.setState(pathString, Affinity.Intrinsic);
         this.setPathFlags(this.pathFlags | SvgContext.PathFlag);
       }
       if (created) {
-        this.view.appendChildView(pathView);
+        this.view.appendChild(pathView);
       }
     } else {
       throw new Error("unsupported fill style: " + fillStyle);
@@ -226,19 +226,19 @@ export class SvgContext implements PaintingContext {
       }
       let created = false;
       if (pathView === null) {
-        pathView = SvgView.path.create();
+        pathView = SvgView.fromTag("path");
         this.setPathView(pathView);
         created = true;
       }
-      pathView.stroke.setState(strokeStyle, View.Intrinsic);
+      pathView.stroke.setState(strokeStyle, Affinity.Intrinsic);
       this.setPathFlags(this.pathFlags | SvgContext.StrokeFlag);
       if ((this.pathFlags & SvgContext.PathFlag) === 0) {
         const pathString = this.getPathContext().toString();
-        pathView.d.setState(pathString, View.Intrinsic);
+        pathView.d.setState(pathString, Affinity.Intrinsic);
         this.setPathFlags(this.pathFlags | SvgContext.PathFlag);
       }
       if (created) {
-        this.view.appendChildView(pathView);
+        this.view.appendChild(pathView);
       }
     } else {
       throw new Error("unsupported stroke style: " + strokeStyle);
@@ -278,12 +278,12 @@ export class SvgContext implements PaintingContext {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static readonly FillFlag: number = 1 << 0;
-  /** @hidden */
+  /** @internal */
   static readonly FillRuleFlag: number = 1 << 1;
-  /** @hidden */
+  /** @internal */
   static readonly StrokeFlag: number = 1 << 2;
-  /** @hidden */
+  /** @internal */
   static readonly PathFlag: number = 1 << 3;
 }

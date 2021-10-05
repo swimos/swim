@@ -16,7 +16,7 @@ import {Input, Parser} from "@swim/codec";
 import type {DateTimeInit} from "../DateTime";
 import {DateTimeFormat} from "./DateTimeFormat";
 
-/** @hidden */
+/** @internal */
 export class SecondParser extends Parser<DateTimeInit> {
   private readonly date: DateTimeInit | undefined;
   private readonly second: number | undefined;

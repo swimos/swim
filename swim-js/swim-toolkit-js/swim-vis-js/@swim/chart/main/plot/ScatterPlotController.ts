@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {ControllerViewTrait} from "@swim/controller";
+import type {Class} from "@swim/util";
+import type {TraitViewFastener} from "@swim/controller";
 import {PlotController} from "./PlotController";
 import type {ScatterPlotView} from "./ScatterPlotView";
 import type {ScatterPlotTrait} from "./ScatterPlotTrait";
 import type {ScatterPlotControllerObserver} from "./ScatterPlotControllerObserver";
 
 export abstract class ScatterPlotController<X, Y> extends PlotController<X, Y> {
-  override readonly controllerObservers!: ReadonlyArray<ScatterPlotControllerObserver<X, Y>>;
+  override readonly observerType?: Class<ScatterPlotControllerObserver<X, Y>>;
 
-  abstract override readonly plot: ControllerViewTrait<this, ScatterPlotView<X, Y>, ScatterPlotTrait<X, Y>>;
+  abstract override readonly plot: TraitViewFastener<this, ScatterPlotTrait<X, Y>, ScatterPlotView<X, Y>>;
 }

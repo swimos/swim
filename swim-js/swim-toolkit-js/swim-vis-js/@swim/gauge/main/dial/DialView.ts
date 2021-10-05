@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent} from "@swim/util";
+import {Class, Equivalent} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
-import {ViewContextType, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
+import {Look, ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -61,84 +62,14 @@ export interface DialViewInit extends GraphicsViewInit {
 }
 
 export class DialView extends LayerView {
-  override initView(init: DialViewInit): void {
-    super.initView(init);
-    if (init.value !== void 0) {
-      this.value(init.value);
-    }
-    if (init.limit !== void 0) {
-      this.limit(init.limit);
-    }
-    if (init.center !== void 0) {
-      this.center(init.center);
-    }
-    if (init.innerRadius !== void 0) {
-      this.innerRadius(init.innerRadius);
-    }
-    if (init.outerRadius !== void 0) {
-      this.outerRadius(init.outerRadius);
-    }
-    if (init.startAngle !== void 0) {
-      this.startAngle(init.startAngle);
-    }
-    if (init.sweepAngle !== void 0) {
-      this.sweepAngle(init.sweepAngle);
-    }
-    if (init.cornerRadius !== void 0) {
-      this.cornerRadius(init.cornerRadius);
-    }
-    if (init.dialColor !== void 0) {
-      this.dialColor(init.dialColor);
-    }
-    if (init.meterColor !== void 0) {
-      this.meterColor(init.meterColor);
-    }
-    if (init.labelPadding !== void 0) {
-      this.labelPadding(init.labelPadding);
-    }
-    if (init.tickAlign !== void 0) {
-      this.tickAlign(init.tickAlign);
-    }
-    if (init.tickRadius !== void 0) {
-      this.tickRadius(init.tickRadius);
-    }
-    if (init.tickLength !== void 0) {
-      this.tickLength(init.tickLength);
-    }
-    if (init.tickWidth !== void 0) {
-      this.tickWidth(init.tickWidth);
-    }
-    if (init.tickPadding !== void 0) {
-      this.tickPadding(init.tickPadding);
-    }
-    if (init.tickColor !== void 0) {
-      this.tickColor(init.tickColor);
-    }
-    if (init.font !== void 0) {
-      this.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      this.textColor(init.textColor);
-    }
-    if (init.arrangement !== void 0) {
-      this.arrangement(init.arrangement);
-    }
-    if (init.label !== void 0) {
-      this.label(init.label);
-    }
-    if (init.legend !== void 0) {
-      this.legend(init.legend);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<DialViewObserver>;
+  override readonly observerType?: Class<DialViewObserver>;
 
   protected willSetValue(newValue: number, oldValue: number): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDialValue !== void 0) {
-        viewObserver.viewWillSetDialValue(newValue, oldValue, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDialValue !== void 0) {
+        observer.viewWillSetDialValue(newValue, oldValue, this);
       }
     }
   }
@@ -148,18 +79,19 @@ export class DialView extends LayerView {
   }
 
   protected didSetValue(newValue: number, oldValue: number): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDialValue !== void 0) {
-        viewObserver.viewDidSetDialValue(newValue, oldValue, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDialValue !== void 0) {
+        observer.viewDidSetDialValue(newValue, oldValue, this);
       }
     }
   }
 
-  @ViewAnimator<DialView, number>({
+  @ThemeAnimator<DialView, number>({
     type: Number,
     state: 0,
+    updateFlags: View.NeedsRender,
     willSetValue(newValue: number, oldValue: number): void {
       this.owner.willSetValue(newValue, oldValue);
     },
@@ -168,14 +100,14 @@ export class DialView extends LayerView {
       this.owner.didSetValue(newValue, oldValue);
     },
   })
-  readonly value!: ViewAnimator<this, number>;
+  readonly value!: ThemeAnimator<this, number>;
 
   protected willSetLimit(newLimit: number, oldLimit: number): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDialLimit !== void 0) {
-        viewObserver.viewWillSetDialLimit(newLimit, oldLimit, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDialLimit !== void 0) {
+        observer.viewWillSetDialLimit(newLimit, oldLimit, this);
       }
     }
   }
@@ -185,18 +117,19 @@ export class DialView extends LayerView {
   }
 
   protected didSetLimit(newLimit: number, oldLimit: number): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDialLimit !== void 0) {
-        viewObserver.viewDidSetDialLimit(newLimit, oldLimit, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDialLimit !== void 0) {
+        observer.viewDidSetDialLimit(newLimit, oldLimit, this);
       }
     }
   }
 
-  @ViewAnimator<DialView, number>({
+  @ThemeAnimator<DialView, number>({
     type: Number,
     state: 1,
+    updateFlags: View.NeedsRender,
     willSetValue(newLimit: number, oldLimit: number): void {
       this.owner.willSetLimit(newLimit, oldLimit);
     },
@@ -205,58 +138,58 @@ export class DialView extends LayerView {
       this.owner.didSetLimit(newLimit, oldLimit);
     },
   })
-  readonly limit!: ViewAnimator<this, number>;
+  readonly limit!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: R2Point, inherit: true, state: R2Point.origin()})
-  readonly center!: ViewAnimator<this, R2Point, AnyR2Point>;
+  @ThemeAnimator({type: R2Point, inherits: true, state: R2Point.origin(), updateFlags: View.NeedsRender})
+  readonly center!: ThemeAnimator<this, R2Point, AnyR2Point>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.pct(30)})
-  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, inherits: true, state: Length.pct(30), updateFlags: View.NeedsRender})
+  readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.pct(40)})
-  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, inherits: true, state: Length.pct(40), updateFlags: View.NeedsRender})
+  readonly outerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Angle, inherit: true, state: Angle.rad(-Math.PI / 2)})
-  readonly startAngle!: ViewAnimator<this, Angle, AnyAngle>;
+  @ThemeAnimator({type: Angle, inherits: true, state: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsRender})
+  readonly startAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator({type: Angle, inherit: true, state: Angle.rad(2 * Math.PI)})
-  readonly sweepAngle!: ViewAnimator<this, Angle, AnyAngle>;
+  @ThemeAnimator({type: Angle, inherits: true, state: Angle.rad(2 * Math.PI), updateFlags: View.NeedsRender})
+  readonly sweepAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.pct(50)})
-  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, inherits: true, state: Length.pct(50), updateFlags: View.NeedsRender})
+  readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Color, inherit: true, state: null, look: Look.subduedColor})
-  readonly dialColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, state: null, look: Look.subduedColor, updateFlags: View.NeedsRender})
+  readonly dialColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, inherit: true, state: null, look: Look.accentColor})
-  readonly meterColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, state: null, look: Look.accentColor, updateFlags: View.NeedsRender})
+  readonly meterColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.pct(25)})
-  readonly labelPadding!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, inherits: true, state: Length.pct(25), updateFlags: View.NeedsRender})
+  readonly labelPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Number, inherit: true, state: 1.0})
-  readonly tickAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, inherits: true, state: 1.0, updateFlags: View.NeedsRender})
+  readonly tickAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.pct(45)})
-  readonly tickRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, inherits: true, state: Length.pct(45), updateFlags: View.NeedsRender})
+  readonly tickRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.pct(50)})
-  readonly tickLength!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, inherits: true, state: Length.pct(50), updateFlags: View.NeedsRender})
+  readonly tickLength!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.px(1)})
-  readonly tickWidth!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, inherits: true, state: Length.px(1), updateFlags: View.NeedsRender})
+  readonly tickWidth!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.px(2)})
-  readonly tickPadding!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, inherits: true, state: Length.px(2), updateFlags: View.NeedsRender})
+  readonly tickPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Color, inherit: true, state: null, look: Look.neutralColor})
-  readonly tickColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, state: null, look: Look.neutralColor, updateFlags: View.NeedsRender})
+  readonly tickColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Font, inherit: true})
-  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
+  @ThemeAnimator({type: Font, inherits: true, updateFlags: View.NeedsRender})
+  readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ViewAnimator({type: Color, inherit: true, look: Look.mutedColor})
-  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, look: Look.mutedColor, updateFlags: View.NeedsRender})
+  readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected initLabel(labelView: GraphicsView): void {
     // hook
@@ -271,11 +204,11 @@ export class DialView extends LayerView {
   }
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDialLabel !== void 0) {
-        viewObserver.viewWillSetDialLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDialLabel !== void 0) {
+        observer.viewWillSetDialLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -291,11 +224,11 @@ export class DialView extends LayerView {
   }
 
   protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDialLabel !== void 0) {
-        viewObserver.viewDidSetDialLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDialLabel !== void 0) {
+        observer.viewDidSetDialLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -303,6 +236,7 @@ export class DialView extends LayerView {
   @ViewFastener<DialView, GraphicsView, AnyTextRunView>({
     key: true,
     type: TextRunView,
+    child: true,
     fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
       if (value instanceof GraphicsView) {
         return value;
@@ -338,11 +272,11 @@ export class DialView extends LayerView {
   }
 
   protected willSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDialLegend !== void 0) {
-        viewObserver.viewWillSetDialLegend(newLegendView, oldLegendView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDialLegend !== void 0) {
+        observer.viewWillSetDialLegend(newLegendView, oldLegendView, this);
       }
     }
   }
@@ -358,11 +292,11 @@ export class DialView extends LayerView {
   }
 
   protected didSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDialLegend !== void 0) {
-        viewObserver.viewDidSetDialLegend(newLegendView, oldLegendView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDialLegend !== void 0) {
+        observer.viewDidSetDialLegend(newLegendView, oldLegendView, this);
       }
     }
   }
@@ -370,6 +304,7 @@ export class DialView extends LayerView {
   @ViewFastener<DialView, GraphicsView, AnyTextRunView>({
     key: true,
     type: TextRunView,
+    child: true,
     fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
       if (value instanceof GraphicsView) {
         return value;
@@ -392,18 +327,18 @@ export class DialView extends LayerView {
   })
   readonly legend!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
-  @ViewProperty({type: String, state: "auto"})
-  readonly arrangement!: ViewProperty<this, DialViewArrangement>;
+  @Property({type: String, state: "auto"})
+  readonly arrangement!: Property<this, DialViewArrangement>;
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
-    this.center.onAnimate(viewContext.updateTime);
+    this.center.recohere(viewContext.updateTime);
   }
 
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       const context = renderer.context;
       context.save();
       this.renderDial(context, this.viewFrame);
@@ -479,9 +414,9 @@ export class DialView extends LayerView {
       const dy = labelPadding * Math.sin(padAngle);
 
       if (TypesetView.is(labelView)) {
-        labelView.textAlign.setState(textAlign, View.Intrinsic);
-        labelView.textBaseline.setState("middle", View.Intrinsic);
-        labelView.textOrigin.setState(new R2Point(center.x + rx + dx, center.y + ry + dy), View.Intrinsic);
+        labelView.textAlign.setState(textAlign, Affinity.Intrinsic);
+        labelView.textBaseline.setState("middle", Affinity.Intrinsic);
+        labelView.textOrigin.setState(new R2Point(center.x + rx + dx, center.y + ry + dy), Affinity.Intrinsic);
       }
     }
 
@@ -504,8 +439,8 @@ export class DialView extends LayerView {
 
       if (tickColor !== null) {
         context.beginPath();
-        context.strokeStyle = tickColor.toString();
         context.lineWidth = tickWidth;
+        context.strokeStyle = tickColor.toString();
         context.moveTo(cx + r1x, cy + r1y);
         context.lineTo(cx + r2x, cy + r2y);
         if (tickLength !== 0) {
@@ -539,11 +474,11 @@ export class DialView extends LayerView {
       if (TypesetView.is(legendView)) {
         const tickPadding = this.tickPadding.getValue().pxValue(size);
         if (FillView.is(legendView)) {
-          legendView.fill.setState(tickColor, View.Intrinsic);
+          legendView.fill.setState(tickColor, Affinity.Intrinsic);
         }
-        legendView.textAlign.setState(textAlign, View.Intrinsic);
-        legendView.textBaseline.setState("alphabetic", View.Intrinsic);
-        legendView.textOrigin.setState(new R2Point(cx + r2x + dx, cy + r2y - tickPadding), View.Intrinsic);
+        legendView.textAlign.setState(textAlign, Affinity.Intrinsic);
+        legendView.textBaseline.setState("alphabetic", Affinity.Intrinsic);
+        legendView.textOrigin.setState(new R2Point(cx + r2x + dx, cy + r2y - tickPadding), Affinity.Intrinsic);
       }
     }
   }
@@ -551,12 +486,8 @@ export class DialView extends LayerView {
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      context.save();
       const p = renderer.transform.transform(x, y);
-      const hit = this.hitTestDial(p.x, p.y, context, this.viewFrame);
-      context.restore();
-      return hit;
+      return this.hitTestDial(p.x, p.y, renderer.context, this.viewFrame);
     }
     return null;
   }
@@ -581,22 +512,73 @@ export class DialView extends LayerView {
     return null;
   }
 
-  static override create(): DialView {
-    return new DialView();
-  }
-
-  static fromInit(init: DialViewInit): DialView {
-    const view = new DialView();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny(value: AnyDialView): DialView {
-    if (value instanceof DialView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return DialView.fromInit(value);
+  override init(init: DialViewInit): void {
+    super.init(init);
+    if (init.value !== void 0) {
+      this.value(init.value);
     }
-    throw new TypeError("" + value);
+    if (init.limit !== void 0) {
+      this.limit(init.limit);
+    }
+    if (init.center !== void 0) {
+      this.center(init.center);
+    }
+    if (init.innerRadius !== void 0) {
+      this.innerRadius(init.innerRadius);
+    }
+    if (init.outerRadius !== void 0) {
+      this.outerRadius(init.outerRadius);
+    }
+    if (init.startAngle !== void 0) {
+      this.startAngle(init.startAngle);
+    }
+    if (init.sweepAngle !== void 0) {
+      this.sweepAngle(init.sweepAngle);
+    }
+    if (init.cornerRadius !== void 0) {
+      this.cornerRadius(init.cornerRadius);
+    }
+    if (init.dialColor !== void 0) {
+      this.dialColor(init.dialColor);
+    }
+    if (init.meterColor !== void 0) {
+      this.meterColor(init.meterColor);
+    }
+    if (init.labelPadding !== void 0) {
+      this.labelPadding(init.labelPadding);
+    }
+    if (init.tickAlign !== void 0) {
+      this.tickAlign(init.tickAlign);
+    }
+    if (init.tickRadius !== void 0) {
+      this.tickRadius(init.tickRadius);
+    }
+    if (init.tickLength !== void 0) {
+      this.tickLength(init.tickLength);
+    }
+    if (init.tickWidth !== void 0) {
+      this.tickWidth(init.tickWidth);
+    }
+    if (init.tickPadding !== void 0) {
+      this.tickPadding(init.tickPadding);
+    }
+    if (init.tickColor !== void 0) {
+      this.tickColor(init.tickColor);
+    }
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
+    if (init.arrangement !== void 0) {
+      this.arrangement(init.arrangement);
+    }
+    if (init.label !== void 0) {
+      this.label(init.label);
+    }
+    if (init.legend !== void 0) {
+      this.legend(init.legend);
+    }
   }
 }

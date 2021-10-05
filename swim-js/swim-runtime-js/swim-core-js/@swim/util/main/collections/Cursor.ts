@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "../lang/Lazy";
+import {Lazy} from "../runtime/Lazy";
 import type {Iterator} from "./Iterator";
 import {CursorEmpty} from "../"; // forward import
 import {CursorUnary} from "../"; // forward import

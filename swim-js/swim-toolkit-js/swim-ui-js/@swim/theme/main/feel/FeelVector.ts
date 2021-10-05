@@ -30,10 +30,10 @@ export class FeelVector implements Interpolate<FeelVector>, Equals, Debug {
     this.index = index;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly array: ReadonlyArray<[Look<unknown>, unknown]>;
 
-  /** @hidden */
+  /** @internal */
   readonly index: {readonly [name: string]: number | undefined};
 
   get size(): number {
@@ -296,7 +296,7 @@ export class FeelVector implements Interpolate<FeelVector>, Equals, Debug {
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static index<T>(array: ReadonlyArray<[Look<T>, T]>): {readonly [name: string]: number | undefined} {
     const index: {[name: string]: number | undefined} = {};
     for (let i = 0, n = array.length; i < n; i += 1) {

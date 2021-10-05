@@ -12,30 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Interpolator} from "../interpolate/Interpolator";
 import {LinearDomain} from "./LinearDomain";
 
-/** @hidden */
-export const LinearDomainInterpolator = function (x0: LinearDomain, x1: LinearDomain): Interpolator<LinearDomain> {
-  const interpolator = function (u: number): LinearDomain {
-    const x0 = interpolator[0];
-    const x00 = x0[0];
-    const x01 = x0[1];
-    const x1 = interpolator[1];
-    const x10 = x1[0];
-    const x11 = x1[1];
-    return LinearDomain(x00 + u * (x10 - x00), x01 + u * (x11 - x01));
-  } as Interpolator<LinearDomain>;
-  Object.setPrototypeOf(interpolator, LinearDomainInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = x0;
-  (interpolator as Mutable<typeof interpolator>)[1] = x1;
-  return interpolator;
-} as {
-  (x0: LinearDomain, x1: LinearDomain): Interpolator<LinearDomain>;
+/** @internal */
+export const LinearDomainInterpolator = (function (_super: typeof Interpolator) {
+  const LinearDomainInterpolator = function (x0: LinearDomain, x1: LinearDomain): Interpolator<LinearDomain> {
+    const interpolator = function (u: number): LinearDomain {
+      const x0 = interpolator[0];
+      const x00 = x0[0];
+      const x01 = x0[1];
+      const x1 = interpolator[1];
+      const x10 = x1[0];
+      const x11 = x1[1];
+      return LinearDomain(x00 + u * (x10 - x00), x01 + u * (x11 - x01));
+    } as Interpolator<LinearDomain>;
+    Object.setPrototypeOf(interpolator, LinearDomainInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = x0;
+    (interpolator as Mutable<typeof interpolator>)[1] = x1;
+    return interpolator;
+  } as {
+    (x0: LinearDomain, x1: LinearDomain): Interpolator<LinearDomain>;
 
-  /** @hidden */
-  prototype: Interpolator<LinearDomain>;
-};
+    /** @internal */
+    prototype: Interpolator<LinearDomain>;
+  };
 
-LinearDomainInterpolator.prototype = Object.create(Interpolator.prototype);
+  LinearDomainInterpolator.prototype = Object.create(_super.prototype);
+
+  return LinearDomainInterpolator;
+})(Interpolator);

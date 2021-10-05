@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import type {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
-import {View} from "@swim/view";
 import type {Graphics, IconLayout} from "@swim/graphics";
-import {ControllerViewTrait} from "@swim/controller";
+import {TraitViewFastener} from "@swim/controller";
 import {GeoController} from "../geo/GeoController";
 import {GeoIconView} from "./GeoIconView";
 import {GeoIconTrait} from "./GeoIconTrait";
 import type {GeoIconControllerObserver} from "./GeoIconControllerObserver";
 
 export class GeoIconController extends GeoController {
-  override readonly controllerObservers!: ReadonlyArray<GeoIconControllerObserver>;
+  override readonly observerType?: Class<GeoIconControllerObserver>;
 
   protected initGeoTrait(geoTrait: GeoIconTrait): void {
     // hook
@@ -44,11 +44,11 @@ export class GeoIconController extends GeoController {
   }
 
   protected willSetGeoTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGeoTrait !== void 0) {
-        controllerObserver.controllerWillSetGeoTrait(newGeoTrait, oldGeoTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGeoTrait !== void 0) {
+        observer.controllerWillSetGeoTrait(newGeoTrait, oldGeoTrait, this);
       }
     }
   }
@@ -64,11 +64,11 @@ export class GeoIconController extends GeoController {
   }
 
   protected didSetGeoTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGeoTrait !== void 0) {
-        controllerObserver.controllerDidSetGeoTrait(newGeoTrait, oldGeoTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGeoTrait !== void 0) {
+        observer.controllerDidSetGeoTrait(newGeoTrait, oldGeoTrait, this);
       }
     }
   }
@@ -95,11 +95,11 @@ export class GeoIconController extends GeoController {
   }
 
   protected willSetGeoView(newGeoView: GeoIconView | null, oldGeoView: GeoIconView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGeoView !== void 0) {
-        controllerObserver.controllerWillSetGeoView(newGeoView, oldGeoView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGeoView !== void 0) {
+        observer.controllerWillSetGeoView(newGeoView, oldGeoView, this);
       }
     }
   }
@@ -115,11 +115,11 @@ export class GeoIconController extends GeoController {
   }
 
   protected didSetGeoView(newGeoView: GeoIconView | null, oldGeoView: GeoIconView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGeoView !== void 0) {
-        controllerObserver.controllerDidSetGeoView(newGeoView, oldGeoView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGeoView !== void 0) {
+        observer.controllerDidSetGeoView(newGeoView, oldGeoView, this);
       }
     }
   }
@@ -135,16 +135,16 @@ export class GeoIconController extends GeoController {
       } else {
         timing = Timing.fromAny(timing);
       }
-      geoView.geoCenter.setState(geoCenter, timing, View.Intrinsic);
+      geoView.geoCenter.setState(geoCenter, timing, Affinity.Intrinsic);
     }
   }
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoView: GeoIconView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGeoCenter !== void 0) {
-        controllerObserver.controllerWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGeoCenter !== void 0) {
+        observer.controllerWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
@@ -154,11 +154,11 @@ export class GeoIconController extends GeoController {
   }
 
   protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoView: GeoIconView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGeoCenter !== void 0) {
-        controllerObserver.controllerDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGeoCenter !== void 0) {
+        observer.controllerDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
@@ -174,23 +174,23 @@ export class GeoIconController extends GeoController {
       } else {
         timing = Timing.fromAny(timing);
       }
-      geoView.iconWidth.setState(iconLayout.iconWidth, timing, View.Intrinsic);
-      geoView.iconHeight.setState(iconLayout.iconHeight, timing, View.Intrinsic);
+      geoView.iconWidth.setState(iconLayout.iconWidth, timing, Affinity.Intrinsic);
+      geoView.iconHeight.setState(iconLayout.iconHeight, timing, Affinity.Intrinsic);
       if (iconLayout.xAlign !== void 0) {
-        geoView.xAlign.setState(iconLayout.xAlign, timing, View.Intrinsic);
+        geoView.xAlign.setState(iconLayout.xAlign, timing, Affinity.Intrinsic);
       }
       if (iconLayout.yAlign !== void 0) {
-        geoView.yAlign.setState(iconLayout.yAlign, timing, View.Intrinsic);
+        geoView.yAlign.setState(iconLayout.yAlign, timing, Affinity.Intrinsic);
       }
     }
   }
 
   protected willSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null, geoView: GeoIconView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetIconLayout !== void 0) {
-        controllerObserver.controllerWillSetIconLayout(newIconLayout, oldIconLayout, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetIconLayout !== void 0) {
+        observer.controllerWillSetIconLayout(newIconLayout, oldIconLayout, this);
       }
     }
   }
@@ -200,11 +200,11 @@ export class GeoIconController extends GeoController {
   }
 
   protected didSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null, geoView: GeoIconView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetIconLayout !== void 0) {
-        controllerObserver.controllerDidSetIconLayout(newIconLayout, oldIconLayout, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetIconLayout !== void 0) {
+        observer.controllerDidSetIconLayout(newIconLayout, oldIconLayout, this);
       }
     }
   }
@@ -220,16 +220,16 @@ export class GeoIconController extends GeoController {
       } else {
         timing = Timing.fromAny(timing);
       }
-      geoView.graphics.setState(graphics, timing, View.Intrinsic);
+      geoView.graphics.setState(graphics, timing, Affinity.Intrinsic);
     }
   }
 
   protected willSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null, geoView: GeoIconView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetGraphics !== void 0) {
-        controllerObserver.controllerWillSetGraphics(newGraphics, oldGraphics, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetGraphics !== void 0) {
+        observer.controllerWillSetGraphics(newGraphics, oldGraphics, this);
       }
     }
   }
@@ -239,19 +239,39 @@ export class GeoIconController extends GeoController {
   }
 
   protected didSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null, geoView: GeoIconView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetGraphics !== void 0) {
-        controllerObserver.controllerDidSetGraphics(newGraphics, oldGraphics, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetGraphics !== void 0) {
+        observer.controllerDidSetGraphics(newGraphics, oldGraphics, this);
       }
     }
   }
 
-  /** @hidden */
-  static GetFastener = ControllerViewTrait.define<GeoIconController, GeoIconView, GeoIconTrait>({
+  /** @internal */
+  static GetFastener = TraitViewFastener.define<GeoIconController, GeoIconTrait, GeoIconView>({
+    traitType: GeoIconTrait,
+    observesTrait: true,
+    willSetTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
+      this.owner.willSetGeoTrait(newGeoTrait, oldGeoTrait);
+    },
+    onSetTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
+      this.owner.onSetGeoTrait(newGeoTrait, oldGeoTrait);
+    },
+    didSetTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
+      this.owner.didSetGeoTrait(newGeoTrait, oldGeoTrait);
+    },
+    traitDidSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoTrait: GeoIconTrait): void {
+      this.owner.setGeoCenter(newGeoCenter, geoTrait);
+    },
+    traitDidSetIconLayout(newIconLayout: IconLayout, oldIconLayout: IconLayout, geoTrait: GeoIconTrait): void {
+      this.owner.setIconLayout(newIconLayout, geoTrait);
+    },
+    traitDidSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null, geoTrait: GeoIconTrait): void {
+      this.owner.setGraphics(newGraphics, geoTrait);
+    },
     viewType: GeoIconView,
-    observeView: true,
+    observesView: true,
     willSetView(newGeoView: GeoIconView | null, oldGeoView: GeoIconView | null): void {
       this.owner.willSetGeoView(newGeoView, oldGeoView);
     },
@@ -278,30 +298,10 @@ export class GeoIconController extends GeoController {
     createView(): GeoIconView | null {
       return this.owner.createGeoView();
     },
-    traitType: GeoIconTrait,
-    observeTrait: true,
-    willSetTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
-      this.owner.willSetGeoTrait(newGeoTrait, oldGeoTrait);
-    },
-    onSetTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
-      this.owner.onSetGeoTrait(newGeoTrait, oldGeoTrait);
-    },
-    didSetTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
-      this.owner.didSetGeoTrait(newGeoTrait, oldGeoTrait);
-    },
-    traitDidSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoTrait: GeoIconTrait): void {
-      this.owner.setGeoCenter(newGeoCenter, geoTrait);
-    },
-    traitDidSetIconLayout(newIconLayout: IconLayout, oldIconLayout: IconLayout, geoTrait: GeoIconTrait): void {
-      this.owner.setIconLayout(newIconLayout, geoTrait);
-    },
-    traitDidSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null, geoTrait: GeoIconTrait): void {
-      this.owner.setGraphics(newGraphics, geoTrait);
-    },
   });
 
-  @ControllerViewTrait<GeoIconController, GeoIconView, GeoIconTrait>({
+  @TraitViewFastener<GeoIconController, GeoIconTrait, GeoIconView>({
     extends: GeoIconController.GetFastener,
   })
-  readonly geo!: ControllerViewTrait<this, GeoIconView, GeoIconTrait>;
+  readonly geo!: TraitViewFastener<this, GeoIconTrait, GeoIconView>;
 }

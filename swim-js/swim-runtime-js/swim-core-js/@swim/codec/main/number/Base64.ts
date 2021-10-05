@@ -164,13 +164,13 @@ export abstract class Base64 {
     return Base64Writer.write(output, this, void 0, input);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get standardPadded(): Base64 {
     return new Base64Standard(true);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get standardUnpadded(): Base64 {
     return new Base64Standard(false);
@@ -188,13 +188,13 @@ export abstract class Base64 {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get urlPadded(): Base64 {
     return new Base64Url(true);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get urlUnpadded(): Base64 {
     return new Base64Url(false);
@@ -213,7 +213,7 @@ export abstract class Base64 {
   }
 }
 
-/** @hidden */
+/** @internal */
 class Base64Standard extends Base64 {
   constructor(padded: boolean) {
     super();
@@ -227,7 +227,7 @@ class Base64Standard extends Base64 {
     return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   }
 
-  /** @hidden */
+  /** @internal */
   readonly padded!: boolean;
 
   isPadded(): boolean {
@@ -250,7 +250,7 @@ class Base64Standard extends Base64 {
   }
 }
 
-/** @hidden */
+/** @internal */
 class Base64Url extends Base64 {
   constructor(padded: boolean) {
     super();
@@ -264,7 +264,7 @@ class Base64Url extends Base64 {
     return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
   }
 
-  /** @hidden */
+  /** @internal */
   readonly padded!: boolean;
 
   isPadded(): boolean {

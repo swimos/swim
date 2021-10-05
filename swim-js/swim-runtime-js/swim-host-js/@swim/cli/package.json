@@ -23,6 +23,7 @@
   "devDependencies": {
     "@swim/util": "4.0.0-dev.20210927.1",
     "@swim/codec": "4.0.0-dev.20210927.1",
+    "@swim/fastener": "4.0.0-dev.20210927.1",
     "@swim/args": "4.0.0-dev.20210927.1",
     "@swim/collections": "4.0.0-dev.20210927.1",
     "@swim/structure": "4.0.0-dev.20210927.1",
@@ -34,7 +35,7 @@
     "@swim/client": "4.0.0-dev.20210927.1"
   },
   "dependencies": {
-    "ws": ">= 7.4.6"
+    "ws": "8"
   },
   "bin": {
     "swim-cli": "./dist/main/swim-cli.js"

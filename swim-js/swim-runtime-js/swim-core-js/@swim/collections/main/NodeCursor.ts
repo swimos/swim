@@ -14,7 +14,7 @@
 
 import {Cursor} from "@swim/util";
 
-/** @hidden */
+/** @internal */
 export abstract class NodeCursor<T, P> extends Cursor<T> {
   constructor(pages: ReadonlyArray<P>, index: number,
               childIndex: number, childCursor: Cursor<T> | null) {
@@ -25,16 +25,16 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     this.childCursor = childCursor;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pages: ReadonlyArray<P>;
 
-  /** @hidden */
+  /** @internal */
   index: number;
 
-  /** @hidden */
+  /** @internal */
   childIndex: number;
 
-  /** @hidden */
+  /** @internal */
   childCursor: Cursor<T> | null;
 
   protected abstract pageSize(page: P): number;

@@ -18,6 +18,7 @@ export {ViewColorScheme} from "./ViewColorScheme";
 export {VisualViewport} from "./VisualViewport";
 export {Viewport} from "./Viewport";
 
-export {ViewportContext} from "./ViewportContext";
-export {ViewportManager} from "./ViewportManager";
-export {ViewportManagerObserver} from "./ViewportManagerObserver";
+export {ViewportService} from "./ViewportService";
+export {ViewportServiceObserver} from "./ViewportServiceObserver";
+
+export {ViewportProvider} from "./ViewportProvider";

@@ -16,7 +16,7 @@ import {Input, Parser, Diagnostic} from "@swim/codec";
 import type {DateTimeInit} from "../DateTime";
 import type {DateTimeSpecifiers} from "./DateTimeSpecifiers";
 
-/** @hidden */
+/** @internal */
 export class PatternParser extends Parser<DateTimeInit> {
   private readonly pattern: string;
   private readonly specifiers: DateTimeSpecifiers;

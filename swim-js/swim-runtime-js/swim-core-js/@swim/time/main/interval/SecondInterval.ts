@@ -16,7 +16,7 @@ import {AnyDateTime, DateTime} from "../DateTime";
 import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
 import {FilterTimeInterval} from "./FilterTimeInterval";
 
-/** @hidden */
+/** @internal */
 export class SecondInterval extends UnitTimeInterval {
   override offset(d: AnyDateTime, k?: number): DateTime {
     const z = DateTime.zone(d);
@@ -59,7 +59,7 @@ export class SecondInterval extends UnitTimeInterval {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static modulo(k: number, d: DateTime): boolean {
     const second = d.second;
     return isFinite(second) && second % k === 0;

@@ -71,7 +71,7 @@ export class R2Group<S extends R2Shape = R2Shape> extends R2Shape implements Equ
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly boundingBox: R2Box | null;
 
   override get bounds(): R2Box {

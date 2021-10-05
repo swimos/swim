@@ -74,7 +74,7 @@ export class OutputSettings implements Debug, HashCode {
     return this.copy(lineSeparator, this.pretty, this.styled, this.precision);
   }
 
-  /** @hidden */
+  /** @internal */
   readonly pretty!: boolean;
 
   /**
@@ -92,7 +92,7 @@ export class OutputSettings implements Debug, HashCode {
     return this.copy(this.lineSeparator, pretty, this.styled, this.precision);
   }
 
-  /** @hidden */
+  /** @internal */
   readonly styled!: boolean;
 
   /**

@@ -15,3 +15,5 @@
 export {Theme} from "./Theme";
 
 export {ThemeMatrix} from "./ThemeMatrix";
+
+export {ThemeContext} from "./ThemeContext";

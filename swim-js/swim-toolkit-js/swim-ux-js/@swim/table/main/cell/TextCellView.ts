@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View, ViewFastener} from "@swim/view";
+import type {Class} from "@swim/util";
+import {Affinity} from "@swim/fastener";
+import {ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {CellView} from "./CellView";
 import type {TextCellViewObserver} from "./TextCellViewObserver";
@@ -23,15 +25,15 @@ export class TextCellView extends CellView {
     this.addClass("cell-text");
   }
 
-  override readonly viewObservers!: ReadonlyArray<TextCellViewObserver>;
+  override readonly observerType?: Class<TextCellViewObserver>;
 
   protected createContent(value?: string): HtmlView | null {
-    const contentView = HtmlView.span.create();
-    contentView.alignSelf.setState("center", View.Intrinsic);
-    contentView.whiteSpace.setState("nowrap", View.Intrinsic);
-    contentView.textOverflow.setState("ellipsis", View.Intrinsic);
-    contentView.overflowX.setState("hidden", View.Intrinsic);
-    contentView.overflowY.setState("hidden", View.Intrinsic);
+    const contentView = HtmlView.fromTag("span");
+    contentView.alignSelf.setState("center", Affinity.Intrinsic);
+    contentView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
+    contentView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
+    contentView.overflowX.setState("hidden", Affinity.Intrinsic);
+    contentView.overflowY.setState("hidden", Affinity.Intrinsic);
     if (value !== void 0) {
       contentView.text(value);
     }
@@ -51,11 +53,11 @@ export class TextCellView extends CellView {
   }
 
   protected willSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetContent !== void 0) {
-        viewObserver.viewWillSetContent(newContentView, oldContentView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetContent !== void 0) {
+        observer.viewWillSetContent(newContentView, oldContentView, this);
       }
     }
   }
@@ -71,11 +73,11 @@ export class TextCellView extends CellView {
   }
 
   protected didSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetContent !== void 0) {
-        viewObserver.viewDidSetContent(newContentView, oldContentView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetContent !== void 0) {
+        observer.viewDidSetContent(newContentView, oldContentView, this);
       }
     }
   }
@@ -83,6 +85,7 @@ export class TextCellView extends CellView {
   @ViewFastener<TextCellView, HtmlView, string>({
     key: true,
     type: HtmlView,
+    child: true,
     willSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
       this.owner.willSetContent(newContentView, oldContentView);
     },

@@ -18,11 +18,11 @@ import {Field} from "./Field";
 import {Value} from "./Value";
 import {Record} from "./Record";
 
-/** @hidden */
+/** @internal */
 export class ValueBuilder implements Builder<Item, Value> {
-  /** @hidden */
+  /** @internal */
   record: Record | null;
-  /** @hidden */
+  /** @internal */
   value: Value | null;
 
   constructor() {
@@ -43,7 +43,7 @@ export class ValueBuilder implements Builder<Item, Value> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   pushField(item: Field): void {
     if (this.record === null) {
       this.record = Record.create();
@@ -55,7 +55,7 @@ export class ValueBuilder implements Builder<Item, Value> {
     this.record.push(item);
   }
 
-  /** @hidden */
+  /** @internal */
   pushValue(item: Value): void {
     if (this.record !== null) {
       this.record.push(item);

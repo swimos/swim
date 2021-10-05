@@ -170,7 +170,7 @@ export class AffineTransform extends Transform {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   override toString(): string {

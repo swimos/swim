@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Model, TraitModelType, Trait, TraitFastener, GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Model, TraitModelType, Trait, TraitFastener} from "@swim/model";
 import {DataPointTrait} from "./DataPointTrait";
 import type {DataSetTraitObserver} from "./DataSetTraitObserver";
 
-export class DataSetTrait<X, Y> extends GenericTrait {
+export class DataSetTrait<X, Y> extends Trait {
   constructor() {
     super();
     this.dataPointFasteners = [];
   }
 
-  override readonly traitObservers!: ReadonlyArray<DataSetTraitObserver<X, Y>>;
+  override readonly observerType?: Class<DataSetTraitObserver<X, Y>>;
 
   insertDataPoint(dataPointTrait: DataPointTrait<X, Y>, targetTrait: Trait | null = null): void {
     const dataPointFasteners = this.dataPointFasteners as TraitFastener<this, DataPointTrait<X, Y>>[];
@@ -38,7 +39,7 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     const dataPointFastener = this.createDataPointFastener(dataPointTrait);
     dataPointFasteners.splice(targetIndex, 0, dataPointFastener);
     dataPointFastener.setTrait(dataPointTrait, targetTrait);
-    if (this.isMounted()) {
+    if (this.mounted) {
       dataPointFastener.mount();
     }
   }
@@ -49,7 +50,7 @@ export class DataSetTrait<X, Y> extends GenericTrait {
       const dataPointFastener = dataPointFasteners[i]!;
       if (dataPointFastener.trait === dataPointTrait) {
         dataPointFastener.setTrait(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           dataPointFastener.unmount();
         }
         dataPointFasteners.splice(i, 1);
@@ -63,22 +64,22 @@ export class DataSetTrait<X, Y> extends GenericTrait {
   }
 
   protected attachDataPoint(dataPointTrait: DataPointTrait<X, Y>, dataPointFastener: TraitFastener<this, DataPointTrait<X, Y>>): void {
-    if (this.isConsuming()) {
-      dataPointTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      dataPointTrait.consume(this);
     }
   }
 
   protected detachDataPoint(dataPointTrait: DataPointTrait<X, Y>, dataPointFastener: TraitFastener<this, DataPointTrait<X, Y>>): void {
-    if (this.isConsuming()) {
-      dataPointTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      dataPointTrait.unconsume(this);
     }
   }
 
   protected willSetDataPoint(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null,
                              targetTrait: Trait | null, dataPointFastener: TraitFastener<this, DataPointTrait<X, Y>>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetDataPoint !== void 0) {
         traitObserver.traitWillSetDataPoint(newDataPointTrait, oldDataPointTrait, targetTrait, this);
       }
@@ -98,16 +99,16 @@ export class DataSetTrait<X, Y> extends GenericTrait {
 
   protected didSetDataPoint(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null,
                             targetTrait: Trait | null, dataPointFastener: TraitFastener<this, DataPointTrait<X, Y>>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetDataPoint !== void 0) {
         traitObserver.traitDidSetDataPoint(newDataPointTrait, oldDataPointTrait, targetTrait, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static DataPointFastener = TraitFastener.define<DataSetTrait<unknown, unknown>, DataPointTrait<unknown, unknown>>({
     type: DataPointTrait,
     sibling: false,
@@ -123,13 +124,13 @@ export class DataSetTrait<X, Y> extends GenericTrait {
   });
 
   protected createDataPointFastener(dataPointTrait: DataPointTrait<X, Y>): TraitFastener<this, DataPointTrait<X, Y>> {
-    return new DataSetTrait.DataPointFastener(this as DataSetTrait<unknown, unknown>, dataPointTrait.key, "dataPoint") as TraitFastener<this, DataPointTrait<X, Y>>;
+    return DataSetTrait.DataPointFastener.create(this, dataPointTrait.key ?? "dataPoint") as TraitFastener<this, DataPointTrait<X, Y>>;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly dataPointFasteners: ReadonlyArray<TraitFastener<this, DataPointTrait<X, Y>>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountDataPointFasteners(): void {
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
@@ -138,7 +139,7 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountDataPointFasteners(): void {
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
@@ -147,24 +148,24 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected startConsumingDataPoints(): void {
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
       const dataPointTrait = dataPointFasteners[i]!.trait;
       if (dataPointTrait !== null) {
-        dataPointTrait.addTraitConsumer(this);
+        dataPointTrait.consume(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected stopConsumingDataPoints(): void {
     const dataPointFasteners = this.dataPointFasteners;
     for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
       const dataPointTrait = dataPointFasteners[i]!.trait;
       if (dataPointTrait !== null) {
-        dataPointTrait.removeTraitConsumer(this);
+        dataPointTrait.unconsume(this);
       }
     }
   }
@@ -182,10 +183,10 @@ export class DataSetTrait<X, Y> extends GenericTrait {
   }
 
   protected detectModels(model: TraitModelType<this>): void {
-    const childModels = model.childModels;
-    for (let i = 0, n = childModels.length; i < n; i += 1) {
-      const childModel = childModels[i]!;
-      const dataPointTrait = this.detectDataPointModel(childModel);
+    const children = model.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      const dataPointTrait = this.detectDataPointModel(child);
       if (dataPointTrait !== null) {
         this.insertDataPoint(dataPointTrait);
       }
@@ -199,33 +200,35 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    super.onInsertChildModel(childModel, targetModel);
-    const dataPointTrait = this.detectDataPointModel(childModel);
+  /** @protected */
+  override onInsertChild(child: Model, target: Model | null): void {
+    super.onInsertChild(child, target);
+    const dataPointTrait = this.detectDataPointModel(child);
     if (dataPointTrait !== null) {
-      const targetTrait = targetModel !== null ? this.detectDataPointModel(targetModel) : null;
+      const targetTrait = target !== null ? this.detectDataPointModel(target) : null;
       this.onInsertDataPoint(dataPointTrait, targetTrait);
     }
   }
 
-  protected override onRemoveChildModel(childModel: Model): void {
-    super.onRemoveChildModel(childModel);
-    const dataPointTrait = this.detectDataPointModel(childModel);
+  /** @protected */
+  override onRemoveChild(child: Model): void {
+    super.onRemoveChild(child);
+    const dataPointTrait = this.detectDataPointModel(child);
     if (dataPointTrait !== null) {
       this.onRemoveDataPoint(dataPointTrait);
     }
   }
 
-  /** @hidden */
-  protected override mountTraitFasteners(): void {
-    super.mountTraitFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountDataPointFasteners();
   }
 
-  /** @hidden */
-  protected override unmountTraitFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountDataPointFasteners();
-    super.unmountTraitFasteners();
+    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

@@ -33,13 +33,13 @@ import {SecondFormat} from "../"; // forward import
 import {MillisecondFormat} from "../"; // forward import
 import {PatternFormat} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export interface DateNumberFactory {
   term(value: number, date: DateTimeInit, input: Input): Parser<DateTimeInit>;
   cont(date: DateTimeInit, value: number, step: number, input: Input): Parser<DateTimeInit>;
 }
 
-/** @hidden */
+/** @internal */
 export interface DateStringFactory {
   term(locale: DateTimeLocale, value: string, date: DateTimeInit, input: Input): Parser<DateTimeInit>;
   cont(locale: DateTimeLocale, date: DateTimeInit, output: Output, input: Input): Parser<DateTimeInit>;
@@ -78,7 +78,7 @@ export abstract class DateTimeFormat {
     return parser.bind();
   }
 
-  /** @hidden */
+  /** @internal */
   parseDate(input: Input, date: DateTimeInit): Parser<DateTime> {
     const dateParser = this.parseDateTime(input, date);
     if (dateParser.isDone()) {
@@ -89,7 +89,7 @@ export abstract class DateTimeFormat {
     return new DateTimeParser(dateParser);
   }
 
-  /** @hidden */
+  /** @internal */
   abstract parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit>;
 
   @Lazy
@@ -169,7 +169,7 @@ export abstract class DateTimeFormat {
     return new PatternFormat("%Y-%m-%dT%H:%M:%S.%LZ", DateTimeSpecifiers.standard());
   }
 
-  /** @hidden */
+  /** @internal */
   static parseDateNumber(input: Input, factory: DateNumberFactory, desc: string,
                          minDigits: number, maxDigits: number, date: DateTimeInit | undefined,
                          value: number = 0, step: number = 0): Parser<DateTimeInit> {
@@ -193,7 +193,7 @@ export abstract class DateTimeFormat {
     return factory.cont(date !== void 0 ? date : {}, value, step, input);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseDateString(input: Input, factory: DateStringFactory, locale: DateTimeLocale,
                          date?: DateTimeInit, output?: Output<string>): Parser<DateTimeInit> {
     let c = 0;
@@ -211,7 +211,7 @@ export abstract class DateTimeFormat {
     return factory.cont(locale, date !== void 0 ? date : {}, output, input);
   }
 
-  /** @hidden */
+  /** @internal */
   static writeDateNumber2<T>(output: Output<T>, value: number): Output<T> {
     const c1 = 48/*'0'*/ + value % 10;
     value /= 10;
@@ -220,7 +220,7 @@ export abstract class DateTimeFormat {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeDateNumber3<T>(output: Output<T>, value: number): Output<T> {
     const c2 = 48/*'0'*/ + value % 10;
     value /= 10;
@@ -231,7 +231,7 @@ export abstract class DateTimeFormat {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static writeDateNumber4<T>(output: Output<T>, value: number): Output<T> {
     const c3 = 48/*'0'*/ + value % 10;
     value /= 10;

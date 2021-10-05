@@ -23,7 +23,7 @@ import {R2CubicCurveParser} from "./R2CubicCurveParser";
 import {R2EllipticCurveParser} from "./R2EllipticCurveParser";
 import {R2Spline} from "./R2Spline";
 
-/** @hidden */
+/** @internal */
 export class R2SplineParser extends Parser<R2Spline> {
   private readonly x0Parser: Parser<number> | undefined;
   private readonly y0Parser: Parser<number> | undefined;

@@ -15,26 +15,30 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {GeoSegment} from "./GeoSegment";
 
-/** @hidden */
-export const GeoSegmentInterpolator = function (s0: GeoSegment, s1: GeoSegment): Interpolator<GeoSegment> {
-  const interpolator = function (u: number): GeoSegment {
-    const s0 = interpolator[0];
-    const s1 = interpolator[1];
-    const lng0 = s0.lng0 + u * (s1.lng0 - s0.lng0);
-    const lat0 = s0.lat0 + u * (s1.lat0 - s0.lat0);
-    const lng1 = s0.lng1 + u * (s1.lng1 - s0.lng1);
-    const lat1 = s0.lat1 + u * (s1.lat1 - s0.lat1);
-    return new GeoSegment(lng0, lat0, lng1, lat1);
-  } as Interpolator<GeoSegment>;
-  Object.setPrototypeOf(interpolator, GeoSegmentInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = s0;
-  (interpolator as Mutable<typeof interpolator>)[1] = s1;
-  return interpolator;
-} as {
-  (s0: GeoSegment, s1: GeoSegment): Interpolator<GeoSegment>;
+/** @internal */
+export const GeoSegmentInterpolator = (function (_super: typeof Interpolator) {
+  const GeoSegmentInterpolator = function (s0: GeoSegment, s1: GeoSegment): Interpolator<GeoSegment> {
+    const interpolator = function (u: number): GeoSegment {
+      const s0 = interpolator[0];
+      const s1 = interpolator[1];
+      const lng0 = s0.lng0 + u * (s1.lng0 - s0.lng0);
+      const lat0 = s0.lat0 + u * (s1.lat0 - s0.lat0);
+      const lng1 = s0.lng1 + u * (s1.lng1 - s0.lng1);
+      const lat1 = s0.lat1 + u * (s1.lat1 - s0.lat1);
+      return new GeoSegment(lng0, lat0, lng1, lat1);
+    } as Interpolator<GeoSegment>;
+    Object.setPrototypeOf(interpolator, GeoSegmentInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = s0;
+    (interpolator as Mutable<typeof interpolator>)[1] = s1;
+    return interpolator;
+  } as {
+    (s0: GeoSegment, s1: GeoSegment): Interpolator<GeoSegment>;
 
-  /** @hidden */
-  prototype: Interpolator<GeoSegment>;
-};
+    /** @internal */
+    prototype: Interpolator<GeoSegment>;
+  };
 
-GeoSegmentInterpolator.prototype = Object.create(Interpolator.prototype);
+  GeoSegmentInterpolator.prototype = Object.create(_super.prototype);
+
+  return GeoSegmentInterpolator;
+})(Interpolator);

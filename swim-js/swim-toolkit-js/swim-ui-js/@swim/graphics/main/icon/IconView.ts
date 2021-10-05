@@ -14,7 +14,8 @@
 
 import type {AnyLength, Length} from "@swim/math";
 import type {AnyColor, Color} from "@swim/style";
-import {ViewInit, View, ViewAnimator} from "@swim/view";
+import type {ThemeAnimator} from "@swim/theme";
+import {ViewInit, View} from "@swim/view";
 import type {Graphics} from "../graphics/Graphics";
 import {GraphicsIconView} from "../"; // forward import
 import {SvgIconView} from "../"; // forward import
@@ -30,59 +31,63 @@ export interface IconViewInit extends ViewInit {
 }
 
 export interface IconView extends View {
-  readonly xAlign: ViewAnimator<this, number>;
+  readonly xAlign: ThemeAnimator<this, number>;
 
-  readonly yAlign: ViewAnimator<this, number>;
+  readonly yAlign: ThemeAnimator<this, number>;
 
-  readonly iconWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconWidth: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  readonly iconHeight: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconHeight: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  readonly iconColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly iconColor: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  readonly graphics: ViewAnimator<this, Graphics | null>;
+  readonly graphics: ThemeAnimator<this, Graphics | null>;
 }
 
-export const IconView = {} as {
-  is(object: unknown): object is IconView;
+export const IconView = (function () {
+  const IconView = {} as {
+    is(object: unknown): object is IconView;
 
-  initView(view: IconView, init: IconViewInit): void;
-};
+    init(view: IconView, init: IconViewInit): void;
+  };
 
-IconView.is = function (object: unknown): object is IconView {
-  if (typeof object === "object" && object !== null) {
-    const view = object as IconView;
-    return view instanceof GraphicsIconView
-        || view instanceof SvgIconView
-        || view instanceof HtmlIconView
-        || view instanceof View
-        && "xAlign" in view
-        && "yAlign" in view
-        && "iconWidth" in view
-        && "iconHeight" in view
-        && "iconColor" in view
-        && "graphics" in view;
-  }
-  return false;
-};
+  IconView.is = function (object: unknown): object is IconView {
+    if (typeof object === "object" && object !== null) {
+      const view = object as IconView;
+      return view instanceof GraphicsIconView
+          || view instanceof SvgIconView
+          || view instanceof HtmlIconView
+          || view instanceof View
+          && "xAlign" in view
+          && "yAlign" in view
+          && "iconWidth" in view
+          && "iconHeight" in view
+          && "iconColor" in view
+          && "graphics" in view;
+    }
+    return false;
+  };
 
-IconView.initView = function (view: IconView, init: IconViewInit): void {
-  if (init.xAlign !== void 0) {
-    view.xAlign(init.xAlign);
-  }
-  if (init.yAlign !== void 0) {
-    view.yAlign(init.yAlign);
-  }
-  if (init.iconWidth !== void 0) {
-    view.iconWidth(init.iconWidth);
-  }
-  if (init.iconHeight !== void 0) {
-    view.iconHeight(init.iconHeight);
-  }
-  if (init.iconColor !== void 0) {
-    view.iconColor(init.iconColor);
-  }
-  if (init.graphics !== void 0) {
-    view.graphics(init.graphics);
-  }
-};
+  IconView.init = function (view: IconView, init: IconViewInit): void {
+    if (init.xAlign !== void 0) {
+      view.xAlign(init.xAlign);
+    }
+    if (init.yAlign !== void 0) {
+      view.yAlign(init.yAlign);
+    }
+    if (init.iconWidth !== void 0) {
+      view.iconWidth(init.iconWidth);
+    }
+    if (init.iconHeight !== void 0) {
+      view.iconHeight(init.iconHeight);
+    }
+    if (init.iconColor !== void 0) {
+      view.iconColor(init.iconColor);
+    }
+    if (init.graphics !== void 0) {
+      view.graphics(init.graphics);
+    }
+  };
+
+  return IconView;
+})();

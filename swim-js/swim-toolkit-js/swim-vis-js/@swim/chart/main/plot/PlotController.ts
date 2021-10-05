@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
-import {ControllerProperty, ControllerViewTrait} from "@swim/controller";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Property} from "@swim/fastener";
+import type {TraitViewFastener} from "@swim/controller";
 import {DataSetController} from "../data/DataSetController";
 import type {PlotView} from "./PlotView";
 import type {PlotTrait} from "./PlotTrait";
@@ -26,12 +27,12 @@ import {LinePlotController} from "../"; // forward import
 import {AreaPlotController} from "../"; // forward import
 
 export abstract class PlotController<X, Y> extends DataSetController<X, Y> {
-  override readonly controllerObservers!: ReadonlyArray<PlotControllerObserver<X, Y>>;
+  override readonly observerType?: Class<PlotControllerObserver<X, Y>>;
 
-  @ControllerProperty({type: Timing, inherit: true})
-  readonly plotTiming!: ControllerProperty<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({type: Timing, inherits: true})
+  readonly plotTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  abstract readonly plot: ControllerViewTrait<this, PlotView<X, Y>, PlotTrait<X, Y>>;
+  abstract readonly plot: TraitViewFastener<this, PlotTrait<X, Y>, PlotView<X, Y>>;
 
   static createPlot<X, Y>(plotTrait: PlotTrait<X, Y>): PlotController<X, Y> | null {
     if (plotTrait instanceof BubblePlotTrait) {

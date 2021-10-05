@@ -99,18 +99,18 @@ export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, 
     }
   }
 
-  /** @hidden */
+  /** @internal */
   containsPoint(that: R2Point): boolean {
     return R2Segment.contains(this.x0, this.y0, this.x1, this.y1, that.x, that.y);
   }
 
-  /** @hidden */
+  /** @internal */
   containsSegment(that: R2Segment): boolean {
     return R2Segment.contains(this.x0, this.y0, this.x1, this.y1, that.x0, that.y0)
         && R2Segment.contains(this.x0, this.y0, this.x1, this.y1, that.x1, that.y1);
   }
 
-  /** @hidden */
+  /** @internal */
   static contains(ax: number, ay: number, bx: number, by: number, cx: number, cy: number): boolean {
     return (ax <= cx && cx <= bx || bx <= cx && cx <= ax)
         && (ay <= cy && cy <= by || by <= cy && cy <= ay)
@@ -129,18 +129,18 @@ export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, 
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsPoint(that: R2Point): boolean {
     return R2Segment.contains(this.x0, this.y0, this.x1, this.y1, that.x, that.y);
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsSegment(that: R2Segment): boolean {
     return R2Segment.intersects(this.x0, this.y0, this.x1 - this.x0, this.y1 - this.y0,
                                 that.x0, that.y0, that.x1 - that.x0, that.y1 - that.y0);
   }
 
-  /** @hidden */
+  /** @internal */
   static intersects(px: number, py: number, rx: number, ry: number,
                     qx: number, qy: number, sx: number, sy: number): boolean {
     const pqx = qx - px;
@@ -204,16 +204,16 @@ export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, 
 
   override writeMove<T>(output: Output<T>): Output<T> {
     output = output.write(77/*'M'*/);
-    output = Format.displayNumber(output, this.x0)
-    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.x0);
+    output = output.write(44/*','*/);
     output = Format.displayNumber(output, this.y0);
     return output;
   }
 
   override writeRest<T>(output: Output<T>): Output<T> {
     output = output.write(76/*'L'*/);
-    output = Format.displayNumber(output, this.x1)
-    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.x1);
+    output = output.write(44/*','*/);
     output = Format.displayNumber(output, this.y1);
     return output;
   }
@@ -284,7 +284,7 @@ export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, 
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is R2SegmentInit {
     if (typeof value === "object" && value !== null) {
       const init = value as R2SegmentInit;
@@ -296,7 +296,7 @@ export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, 
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyR2Segment {
     return value instanceof R2Segment
         || R2Segment.isInit(value);

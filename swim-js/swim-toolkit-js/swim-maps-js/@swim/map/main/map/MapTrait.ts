@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import {GeoBox} from "@swim/geo";
-import {Model, TraitModelType, Trait, TraitProperty, TraitFastener} from "@swim/model";
+import {Model, TraitModelType, Trait, TraitFastener} from "@swim/model";
 import {GeoTrait} from "../geo/GeoTrait";
 import {AnyGeoPerspective, GeoPerspective} from "../geo/GeoPerspective";
 import type {MapTraitObserver} from "./MapTraitObserver";
@@ -24,16 +26,16 @@ export class MapTrait extends GeoTrait {
     this.layerFasteners = [];
   }
 
-  override readonly traitObservers!: ReadonlyArray<MapTraitObserver>;
+  override readonly observerType?: Class<MapTraitObserver>;
 
   override get geoBounds(): GeoBox {
     return GeoBox.globe();
   }
 
   protected willSetGeoPerspective(newGeoPerspective: GeoPerspective | null, oldGeoPerspective: GeoPerspective | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetGeoPerspective !== void 0) {
         traitObserver.traitWillSetGeoPerspective(newGeoPerspective, oldGeoPerspective, this);
       }
@@ -45,16 +47,16 @@ export class MapTrait extends GeoTrait {
   }
 
   protected didSetGeoPerspective(newGeoPerspective: GeoPerspective | null, oldGeoPerspective: GeoPerspective | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetGeoPerspective !== void 0) {
         traitObserver.traitDidSetGeoPerspective(newGeoPerspective, oldGeoPerspective, this);
       }
     }
   }
 
-  @TraitProperty<MapTrait, GeoPerspective | null, AnyGeoPerspective | null>({
+  @Property<MapTrait, GeoPerspective | null, AnyGeoPerspective | null>({
     type: GeoPerspective,
     state: null,
     willSetState(newGeoPerspective: GeoPerspective | null, oldGeoPerspective: GeoPerspective | null): void {
@@ -65,7 +67,7 @@ export class MapTrait extends GeoTrait {
       this.owner.didSetGeoPerspective(newGeoPerspective, oldGeoPerspective);
     },
   })
-  readonly geoPerspective!: TraitProperty<this, GeoPerspective | null, AnyGeoPerspective | null>;
+  readonly geoPerspective!: Property<this, GeoPerspective | null, AnyGeoPerspective | null>;
 
   insertLayer(layerTrait: GeoTrait, targetTrait: Trait | null = null): void {
     const layerFasteners = this.layerFasteners as TraitFastener<this, GeoTrait>[];
@@ -81,7 +83,7 @@ export class MapTrait extends GeoTrait {
     const layerFastener = this.createLayerFastener(layerTrait);
     layerFasteners.splice(targetIndex, 0, layerFastener);
     layerFastener.setTrait(layerTrait, targetTrait);
-    if (this.isMounted()) {
+    if (this.mounted) {
       layerFastener.mount();
     }
   }
@@ -92,7 +94,7 @@ export class MapTrait extends GeoTrait {
       const layerFastener = layerFasteners[i]!;
       if (layerFastener.trait === layerTrait) {
         layerFastener.setTrait(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           layerFastener.unmount();
         }
         layerFasteners.splice(i, 1);
@@ -106,22 +108,22 @@ export class MapTrait extends GeoTrait {
   }
 
   protected attachLayer(layerTrait: GeoTrait, layerFastener: TraitFastener<this, GeoTrait>): void {
-    if (this.isConsuming()) {
-      layerTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      layerTrait.consume(this);
     }
   }
 
   protected detachLayer(layerTrait: GeoTrait, layerFastener: TraitFastener<this, GeoTrait>): void {
-    if (this.isConsuming()) {
-      layerTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      layerTrait.unconsume(this);
     }
   }
 
   protected willSetLayer(newLayerTrait: GeoTrait | null, oldLayerTrait: GeoTrait | null,
                          targetTrait: Trait | null, layerFastener: TraitFastener<this, GeoTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetLayer !== void 0) {
         traitObserver.traitWillSetLayer(newLayerTrait, oldLayerTrait, targetTrait, this);
       }
@@ -141,16 +143,16 @@ export class MapTrait extends GeoTrait {
 
   protected didSetLayer(newLayerTrait: GeoTrait | null, oldLayerTrait: GeoTrait | null,
                         targetTrait: Trait | null, layerFastener: TraitFastener<this, GeoTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetLayer !== void 0) {
         traitObserver.traitDidSetLayer(newLayerTrait, oldLayerTrait, targetTrait, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static LayerFastener = TraitFastener.define<MapTrait, GeoTrait>({
     type: GeoTrait,
     sibling: false,
@@ -166,13 +168,13 @@ export class MapTrait extends GeoTrait {
   });
 
   protected createLayerFastener(layerTrait: GeoTrait): TraitFastener<this, GeoTrait> {
-    return new MapTrait.LayerFastener(this, layerTrait.key, "layer");
+    return MapTrait.LayerFastener.create(this, layerTrait.key ?? "layer");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly layerFasteners: ReadonlyArray<TraitFastener<this, GeoTrait>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountLayerFasteners(): void {
     const layerFasteners = this.layerFasteners;
     for (let i = 0, n = layerFasteners.length; i < n; i += 1) {
@@ -181,7 +183,7 @@ export class MapTrait extends GeoTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountLayerFasteners(): void {
     const layerFasteners = this.layerFasteners;
     for (let i = 0, n = layerFasteners.length; i < n; i += 1) {
@@ -190,24 +192,24 @@ export class MapTrait extends GeoTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected startConsumingLayers(): void {
     const layerFasteners = this.layerFasteners;
     for (let i = 0, n = layerFasteners.length; i < n; i += 1) {
       const layerTrait = layerFasteners[i]!.trait;
       if (layerTrait !== null) {
-        layerTrait.addTraitConsumer(this);
+        layerTrait.consume(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected stopConsumingLayers(): void {
     const layerFasteners = this.layerFasteners;
     for (let i = 0, n = layerFasteners.length; i < n; i += 1) {
       const layerTrait = layerFasteners[i]!.trait;
       if (layerTrait !== null) {
-        layerTrait.removeTraitConsumer(this);
+        layerTrait.unconsume(this);
       }
     }
   }
@@ -217,10 +219,10 @@ export class MapTrait extends GeoTrait {
   }
 
   protected detectModels(model: TraitModelType<this>): void {
-    const childModels = model.childModels;
-    for (let i = 0, n = childModels.length; i < n; i += 1) {
-      const childModel = childModels[i]!;
-      const layerTrait = this.detectLayerModel(childModel);
+    const children = model.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      const layerTrait = this.detectLayerModel(child);
       if (layerTrait !== null) {
         this.insertLayer(layerTrait);
       }
@@ -234,33 +236,35 @@ export class MapTrait extends GeoTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    super.onInsertChildModel(childModel, targetModel);
-    const layerTrait = this.detectLayerModel(childModel);
+  /** @protected */
+  override onInsertChild(child: Model, target: Model | null): void {
+    super.onInsertChild(child, target);
+    const layerTrait = this.detectLayerModel(child);
     if (layerTrait !== null) {
-      const targetTrait = targetModel !== null ? this.detectLayerModel(targetModel) : null;
+      const targetTrait = target !== null ? this.detectLayerModel(target) : null;
       this.insertLayer(layerTrait, targetTrait);
     }
   }
 
-  protected override onRemoveChildModel(childModel: Model): void {
-    super.onRemoveChildModel(childModel);
-    const layerTrait = this.detectLayerModel(childModel);
+  /** @protected */
+  override onRemoveChild(child: Model): void {
+    super.onRemoveChild(child);
+    const layerTrait = this.detectLayerModel(child);
     if (layerTrait !== null) {
       this.removeLayer(layerTrait);
     }
   }
 
-  /** @hidden */
-  protected override mountTraitFasteners(): void {
-    super.mountTraitFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountLayerFasteners();
   }
 
-  /** @hidden */
-  protected override unmountTraitFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountLayerFasteners();
-    super.unmountTraitFasteners();
+    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

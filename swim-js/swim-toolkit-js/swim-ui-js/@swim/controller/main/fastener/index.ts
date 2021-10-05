@@ -13,54 +13,12 @@
 // limitations under the License.
 
 export {
-  ControllerModelMemberType,
-  ControllerModelMemberInit,
-  ControllerModelFlags,
-  ControllerModelInit,
-  ControllerModelDescriptor,
-  ControllerModelConstructor,
-  ControllerModelClass,
-  ControllerModel,
-} from "./ControllerModel";
-
-export {
-  ControllerTraitMemberType,
-  ControllerTraitMemberInit,
-  ControllerTraitFlags,
-  ControllerTraitInit,
-  ControllerTraitDescriptor,
-  ControllerTraitConstructor,
-  ControllerTraitClass,
-  ControllerTrait,
-} from "./ControllerTrait";
-
-export {
-  ControllerViewMemberType,
-  ControllerViewMemberInit,
-  ControllerViewFlags,
-  ControllerViewInit,
-  ControllerViewDescriptor,
-  ControllerViewConstructor,
-  ControllerViewClass,
-  ControllerView,
-} from "./ControllerView";
-
-export {
-  ControllerViewTraitFlags,
-  ControllerViewTraitInit,
-  ControllerViewTraitDescriptor,
-  ControllerViewTraitConstructor,
-  ControllerViewTraitClass,
-  ControllerViewTrait,
-} from "./ControllerViewTrait";
-
-export {
-  ControllerFastenerMemberType,
-  ControllerFastenerMemberInit,
-  ControllerFastenerFlags,
-  ControllerFastenerInit,
-  ControllerFastenerDescriptor,
-  ControllerFastenerConstructor,
-  ControllerFastenerClass,
-  ControllerFastener,
-} from "./ControllerFastener";
+  TraitViewFastenerTraitType,
+  TraitViewFastenerTraitInitType,
+  TraitViewFastenerViewType,
+  TraitViewFastenerViewInitType,
+  TraitViewFastenerInit,
+  TraitViewFastenerDescriptor,
+  TraitViewFastenerClass,
+  TraitViewFastener,
+} from "./TraitViewFastener";

@@ -16,7 +16,7 @@ import {Input, Parser, Unicode} from "@swim/codec";
 import type {ColorStop} from "./ColorStop";
 import {ColorStopParser} from "./ColorStopParser";
 
-/** @hidden */
+/** @internal */
 export class ColorStopListParser extends Parser<ColorStop[]> {
   private readonly stops: ReadonlyArray<ColorStop> | undefined;
   private readonly stopParser: Parser<ColorStop> | undefined;

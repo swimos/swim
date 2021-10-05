@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import type {GeoBox} from "@swim/geo";
-import {GenericTrait} from "@swim/model";
+import {Trait} from "@swim/model";
 import type {GeoTraitObserver} from "./GeoTraitObserver";
 
-export abstract class GeoTrait extends GenericTrait {
-  override readonly traitObservers!: ReadonlyArray<GeoTraitObserver>;
+export abstract class GeoTrait extends Trait {
+  override readonly observerType?: Class<GeoTraitObserver>;
 
   abstract readonly geoBounds: GeoBox;
 }

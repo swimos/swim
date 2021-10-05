@@ -43,7 +43,7 @@ export class Slot extends Field {
 
   override readonly value: Value;
 
-  /** @hidden */
+  /** @internal */
   readonly flags: number;
 
   override isConstant(): boolean {

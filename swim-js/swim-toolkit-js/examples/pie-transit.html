@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .mouseEventsEnabled(true)
@@ -30,7 +30,7 @@ const sliceColors = [swim.Color.parse("#00a6ed"), swim.Color.parse("#7ed321"),
                      swim.Color.parse("#57b8ff"), swim.Color.parse("#5aff15"),
                      swim.Color.parse("#55dde0"), swim.Color.parse("#f7aef8")];
 
-const pieView = canvasView.append(swim.PieView)
+const pieView = canvasView.appendChild(swim.PieView)
     .innerRadius("15%")
     .outerRadius("25%")
     .font("14px sans-serif");
@@ -47,9 +47,9 @@ const vehiclesLink = swim.downlinkMap()
       const sliceColor = sliceColors[index % 8];
       const sliceValue = value.numberValue();
       if (sliceValue > 0) {
-        let sliceView = pieView.getChildView(id);
+        let sliceView = pieView.getChild(id);
         if (sliceView === null) {
-          sliceView = pieView.append(swim.SliceView, id)
+          sliceView = pieView.appendChild(swim.SliceView, id)
               .sliceColor(sliceColor)
               .label(sliceValue.toFixed())
               .legend(id);
@@ -61,7 +61,7 @@ const vehiclesLink = swim.downlinkMap()
     })
     .open();
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
     </script>
   </body>

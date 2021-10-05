@@ -17,7 +17,7 @@ import {Input, Parser} from "@swim/codec";
 import {Recon} from "../Recon";
 import type {ReconParser} from "./ReconParser";
 
-/** @hidden */
+/** @internal */
 export class BitwiseXorOperatorParser<I, V> extends Parser<V> {
   private readonly recon: ReconParser<I, V>;
   private readonly builder: Builder<I, V> | undefined;

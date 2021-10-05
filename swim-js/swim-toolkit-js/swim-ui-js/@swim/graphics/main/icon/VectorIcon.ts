@@ -121,12 +121,18 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
   }
 
   override paint(context: PaintingContext, frame: R2Box): void {
+    // save
+    const contextFillStyle = context.fillStyle;
+
     context.beginPath();
     this.draw(context, frame);
     if (this.fillColor !== null) {
       context.fillStyle = this.fillColor.toString();
     }
     context.fill(this.fillRule);
+
+    // restore
+    context.fillStyle = contextFillStyle;
   }
 
   override draw(context: DrawingContext, frame: R2Box): void {

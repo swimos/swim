@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/util";
+import type {Class, Timing} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
-import {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewEdgeInsets, ViewProperty, ViewAnimator} from "@swim/view";
+import {Look, Feel, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View, ViewEdgeInsets} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {AnyDeckRail, DeckRail} from "./DeckRail";
 import {DeckSlot} from "./DeckSlot";
@@ -30,54 +31,54 @@ export class DeckBar extends HtmlView {
 
   protected initBar(): void {
     this.addClass("deck-bar");
-    this.position.setState("relative", View.Intrinsic);
-    this.height.setState(this.barHeight.state, View.Intrinsic);
-    this.userSelect.setState("none", View.Intrinsic);
+    this.position.setState("relative", Affinity.Intrinsic);
+    this.height.setState(this.barHeight.state, Affinity.Intrinsic);
+    this.userSelect.setState("none", Affinity.Intrinsic);
     this.edgeInsets.setState({
       insetTop: 0,
       insetRight: 0,
       insetBottom: 0,
       insetLeft: 0,
-    }, View.Intrinsic);
+    }, Affinity.Intrinsic);
   }
 
-  override readonly viewObservers!: ReadonlyArray<DeckBarObserver>;
+  override readonly observerType?: Class<DeckBarObserver>;
 
   protected initTheme(): void {
     this.modifyTheme(Feel.default, [[Feel.translucent, 1], [Feel.primary, 1]]);
   }
 
-  @ViewProperty({type: DeckRail, state: null})
-  readonly rail!: ViewProperty<this, DeckRail | null, AnyDeckRail | null>;
+  @Property({type: DeckRail, state: null})
+  readonly rail!: Property<this, DeckRail | null, AnyDeckRail | null>;
 
-  @ViewAnimator({type: Number, inherit: true})
-  readonly deckPhase!: ViewAnimator<this, number | undefined>;
+  @ThemeAnimator({type: Number, inherits: true})
+  readonly deckPhase!: ThemeAnimator<this, number | undefined>;
 
-  @ViewProperty({type: Length, state: Length.px(48), updateFlags: View.NeedsLayout})
-  readonly barHeight!: ViewProperty<this, Length, AnyLength>;
+  @Property({type: Length, state: Length.px(48), updateFlags: View.NeedsLayout})
+  readonly barHeight!: Property<this, Length, AnyLength>;
 
-  @ViewProperty({type: Length, state: Length.zero(), updateFlags: View.NeedsResize})
-  readonly itemSpacing!: ViewProperty<this, Length | null, AnyLength | null>;
+  @Property({type: Length, state: Length.zero(), updateFlags: View.NeedsResize})
+  readonly itemSpacing!: Property<this, Length | null, AnyLength | null>;
 
-  @ViewProperty({type: Object, inherit: true, state: null, updateFlags: View.NeedsResize})
-  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
+  @Property({type: Object, inherits: true, state: null, updateFlags: View.NeedsResize})
+  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
-      this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
+    if (this.backgroundColor.hasAffinity(Affinity.Intrinsic)) {
+      this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, Affinity.Intrinsic);
     }
   }
 
-  override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     if (childView instanceof DeckSlot) {
       this.onInsertSlot(childView);
     }
   }
 
   protected onInsertSlot(childView: DeckSlot): void {
-    childView.position.setState("absolute", View.Intrinsic);
+    childView.position.setState("absolute", Affinity.Intrinsic);
   }
 
   protected override onResize(viewContext: ViewContextType<this>): void {
@@ -86,7 +87,7 @@ export class DeckBar extends HtmlView {
   }
 
   protected resizeBar(viewContext: ViewContextType<this>): void {
-    const oldRail = !this.rail.isInherited() ? this.rail.ownState : null;
+    const oldRail = !this.rail.inherited ? this.rail.state : null;
     if (oldRail !== void 0 && oldRail !== null) {
       const superRail = this.rail.superState;
       let width: Length | string | number | null = null;
@@ -94,10 +95,10 @@ export class DeckBar extends HtmlView {
         width = superRail.width.pxValue();
       }
       if (width === null) {
-        const parentView = this.parentView;
-        if (parentView instanceof HtmlView) {
-          width = parentView.width.state;
-          width = width instanceof Length ? width.pxValue() : parentView.node.offsetWidth;
+        const parent = this.parent;
+        if (parent instanceof HtmlView) {
+          width = parent.width.state;
+          width = width instanceof Length ? width.pxValue() : parent.node.offsetWidth;
         }
       }
       if (width === null) {
@@ -105,7 +106,7 @@ export class DeckBar extends HtmlView {
         width = width instanceof Length ? width.pxValue() : this.node.offsetWidth;
       }
       let edgeInsets = this.edgeInsets.superState;
-      if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.takesPrecedence(View.Intrinsic)) {
+      if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.hasAffinity(Affinity.Intrinsic)) {
         edgeInsets = viewContext.viewport.safeArea;
       }
       const insetTop = edgeInsets !== void 0 && edgeInsets !== null ? edgeInsets.insetTop : 0;
@@ -114,7 +115,7 @@ export class DeckBar extends HtmlView {
       const spacing = this.itemSpacing.getStateOr(Length.zero()).pxValue(width);
       const newRail = oldRail.resized(width, insetLeft, insetRight, spacing);
       this.rail.setState(newRail);
-      this.height.setState(this.barHeight.state.plus(insetTop), View.Intrinsic);
+      this.height.setState(this.barHeight.state.plus(insetTop), Affinity.Intrinsic);
     }
   }
 
@@ -125,30 +126,30 @@ export class DeckBar extends HtmlView {
 
   protected layoutBar(viewContext: ViewContextType<this>): void {
     let edgeInsets = this.edgeInsets.superState;
-    if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.takesPrecedence(View.Intrinsic)) {
+    if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.hasAffinity(Affinity.Intrinsic)) {
       edgeInsets = viewContext.viewport.safeArea;
     }
     const insetTop = edgeInsets !== void 0 && edgeInsets !== null ? edgeInsets.insetTop : 0;
-    this.height.setState(this.barHeight.state.plus(insetTop), View.Intrinsic);
+    this.height.setState(this.barHeight.state.plus(insetTop), Affinity.Intrinsic);
   }
 
-  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
     const needsLayout = (displayFlags & View.NeedsLayout) !== 0;
     if (needsLayout) {
-      this.layoutChildViews(displayFlags, viewContext, displayChildView);
+      this.layoutChildViews(displayFlags, viewContext, displayChild);
     } else {
-      super.displayChildViews(displayFlags, viewContext, displayChildView);
+      super.displayChildren(displayFlags, viewContext, displayChild);
     }
   }
 
   protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                viewContext: ViewContextType<this>) => void): void {
+                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                            viewContext: ViewContextType<this>) => void): void {
     const rail = this.rail.state;
     let edgeInsets = this.edgeInsets.superState;
-    if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.takesPrecedence(View.Intrinsic)) {
+    if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.hasAffinity(Affinity.Intrinsic)) {
       edgeInsets = viewContext.viewport.safeArea;
     }
     let height: Length | number | null = this.height.state;
@@ -165,44 +166,44 @@ export class DeckBar extends HtmlView {
           const post = rail!.getPost(postIndex)!;
           const nextPost = rail!.getPost(postIndex + 1);
           const prevPost = rail!.getPost(postIndex - 1);
-          childView.display.setState("flex", View.Intrinsic);
-          childView.left.setState(post.left, View.Intrinsic);
-          childView.top.setState(slotTop, View.Intrinsic);
-          childView.width.setState(post.width, View.Intrinsic);
-          childView.height.setState(slotHeight, View.Intrinsic);
-          childView.post.setState(post, View.Intrinsic);
-          childView.nextPost.setState(nextPost, View.Intrinsic);
-          childView.prevPost.setState(prevPost, View.Intrinsic);
+          childView.display.setState("flex", Affinity.Intrinsic);
+          childView.left.setState(post.left, Affinity.Intrinsic);
+          childView.top.setState(slotTop, Affinity.Intrinsic);
+          childView.width.setState(post.width, Affinity.Intrinsic);
+          childView.height.setState(slotHeight, Affinity.Intrinsic);
+          childView.post.setState(post, Affinity.Intrinsic);
+          childView.nextPost.setState(nextPost, Affinity.Intrinsic);
+          childView.prevPost.setState(prevPost, Affinity.Intrinsic);
         } else {
-          childView.display.setState("none", View.Intrinsic);
-          childView.left.setState(null, View.Intrinsic);
-          childView.top.setState(null, View.Intrinsic);
-          childView.width.setState(null, View.Intrinsic);
-          childView.height.setState(null, View.Intrinsic);
-          childView.post.setState(null, View.Intrinsic);
-          childView.nextPost.setState(null, View.Intrinsic);
-          childView.prevPost.setState(null, View.Intrinsic);
+          childView.display.setState("none", Affinity.Intrinsic);
+          childView.left.setState(null, Affinity.Intrinsic);
+          childView.top.setState(null, Affinity.Intrinsic);
+          childView.width.setState(null, Affinity.Intrinsic);
+          childView.height.setState(null, Affinity.Intrinsic);
+          childView.post.setState(null, Affinity.Intrinsic);
+          childView.nextPost.setState(null, Affinity.Intrinsic);
+          childView.prevPost.setState(null, Affinity.Intrinsic);
         }
       }
-      displayChildView.call(this, childView, displayFlags, viewContext);
+      displayChild.call(this, childView, displayFlags, viewContext);
     }
-    super.displayChildViews(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, viewContext, layoutChildView);
   }
 
-  /** @hidden */
+  /** @internal */
   didPressBackButton(event: Event | null): void {
-    this.didObserve(function (viewObserver: DeckBarObserver): void {
-      if (viewObserver.deckBarDidPressBackButton !== void 0) {
-        viewObserver.deckBarDidPressBackButton(event, this);
+    this.forEachObserver(function (observer: DeckBarObserver): void {
+      if (observer.deckBarDidPressBackButton !== void 0) {
+        observer.deckBarDidPressBackButton(event, this);
       }
     });
   }
 
-  /** @hidden */
+  /** @internal */
   didPressCloseButton(event: Event | null): void {
-    this.didObserve(function (viewObserver: DeckBarObserver): void {
-      if (viewObserver.deckBarDidPressCloseButton !== void 0) {
-        viewObserver.deckBarDidPressCloseButton(event, this);
+    this.forEachObserver(function (observer: DeckBarObserver): void {
+      if (observer.deckBarDidPressCloseButton !== void 0) {
+        observer.deckBarDidPressCloseButton(event, this);
       }
     });
   }

@@ -164,7 +164,7 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly boundingBox: GeoBox | null;
 
   override get bounds(): GeoBox {
@@ -317,14 +317,14 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     return new GeoPathBuilder();
   }
 
-  /** @hidden */
+  /** @internal */
   static isSplines(value: unknown): value is GeoPathSplines {
     return Array.isArray(value)
         && value.length > 0
         && GeoSpline.isAnySpline(value[0]!);
   }
 
-  /** @hidden */
+  /** @internal */
   static isAnyPath(value: unknown): value is AnyGeoPath {
     return value instanceof GeoPath
         || GeoPath.isSplines(value);

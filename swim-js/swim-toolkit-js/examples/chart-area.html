@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
@@ -26,7 +26,7 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const chartView = canvasView.append(swim.ChartView)
+const chartView = canvasView.appendChild(swim.ChartView)
     .bottomAxis(true)
     .leftAxis(true)
     .fitAspectRatio(1)
@@ -37,7 +37,7 @@ const chartView = canvasView.append(swim.ChartView)
 
 const graphView = chartView.graph.injectView();
 
-const plotView = graphView.append(swim.AreaPlotView)
+const plotView = graphView.appendChild(swim.AreaPlotView)
     .hitMode("plot")
     .on("pointerenter", function (event) {
       plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
@@ -57,7 +57,7 @@ for (let i = 0, n = cycles * samples; i <= n; i += 1) {
   plotView.insertDataPoint({x: x, y: y, y2: y2, opacity: opacity});
 }
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
     </script>
   </body>

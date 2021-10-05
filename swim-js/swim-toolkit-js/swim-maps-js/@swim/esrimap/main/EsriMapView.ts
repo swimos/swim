@@ -14,7 +14,7 @@
 
 /// <reference types="arcgis-js-api"/>
 
-import {Equivalent, Mutable, AnyTiming, Timing} from "@swim/util";
+import {Mutable, Class, Equivalent, AnyTiming, Timing} from "@swim/util";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
@@ -39,7 +39,7 @@ export class EsriMapView extends EsriView {
     this.initMap(map);
   }
 
-  override readonly viewObservers!: ReadonlyArray<EsriMapViewObserver>;
+  override readonly observerType?: Class<EsriMapViewObserver>;
 
   override readonly map: __esri.MapView;
 
@@ -50,11 +50,11 @@ export class EsriMapView extends EsriView {
   override readonly geoViewport!: EsriMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoViewport !== void 0) {
-        viewObserver.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoViewport !== void 0) {
+        observer.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
     }
   }
@@ -64,11 +64,11 @@ export class EsriMapView extends EsriView {
   }
 
   protected didSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!
-      if (viewObserver.viewDidSetGeoViewport !== void 0) {
-        viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!
+      if (observer.viewDidSetGeoViewport !== void 0) {
+        observer.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
     }
   }
@@ -88,7 +88,7 @@ export class EsriMapView extends EsriView {
 
   protected onMapRender(): void {
     if (this.updateGeoViewport()) {
-      const immediate = !this.isHidden() && !this.isCulled();
+      const immediate = !this.isHidden() && !this.culled;
       this.requireUpdate(View.NeedsProject, immediate);
     }
   }
@@ -129,15 +129,15 @@ export class EsriMapView extends EsriView {
 
   protected override attachCanvas(canvasView: CanvasView): void {
     super.attachCanvas(canvasView);
-    if (this.parentView === null) {
-      canvasView.appendChildView(this);
+    if (this.parent === null) {
+      canvasView.appendChild(this);
       canvasView.setEventNode(this.map.container.querySelector(".esri-view-root") as HTMLElement);
     }
   }
 
   protected override detachCanvas(canvasView: CanvasView): void {
-    if (this.parentView === canvasView) {
-      canvasView.removeChildView(this);
+    if (this.parent === canvasView) {
+      canvasView.removeChild(this);
     }
     super.detachCanvas(canvasView);
   }
@@ -162,8 +162,8 @@ export class EsriMapView extends EsriView {
     const esriContainerView = HtmlView.fromNode(this.map.container);
     const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
     const esriSurfaceView = HtmlView.fromNode(esriRootView.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
-    if (canvasView !== null && canvasView.parentView === esriSurfaceView) {
-      esriSurfaceView.removeChildView(containerView);
+    if (canvasView !== null && canvasView.parent === esriSurfaceView) {
+      esriSurfaceView.removeChild(containerView);
     }
     super.detachContainer(containerView);
   }

@@ -15,7 +15,7 @@
 import {Output, WriterException, Writer, Unicode, Utf8} from "@swim/codec";
 import type {ReconWriter} from "./ReconWriter";
 
-/** @hidden */
+/** @internal */
 export class InfixOperatorWriter<I, V> extends Writer {
   private readonly recon: ReconWriter<I, V>;
   private readonly lhs: I;

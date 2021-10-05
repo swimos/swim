@@ -15,7 +15,7 @@
 import {Input, Output, Parser, Diagnostic, Unicode, Base10} from "@swim/codec";
 import {AngleUnits, Angle} from "./Angle";
 
-/** @hidden */
+/** @internal */
 export class AngleParser extends Parser<Angle> {
   private readonly defaultUnits: AngleUnits | undefined;
   private readonly valueParser: Parser<number> | undefined;

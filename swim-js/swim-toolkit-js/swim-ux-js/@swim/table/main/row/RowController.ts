@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import type {Trait} from "@swim/model";
 import type {View} from "@swim/view";
-import {Controller, ControllerViewTrait, ControllerFastener} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener, Controller} from "@swim/controller";
 import {LeafController} from "../leaf/LeafController";
 import {RowView} from "./RowView";
 import {RowTrait} from "./RowTrait";
@@ -24,7 +25,7 @@ import type {TableTrait} from "../table/TableTrait";
 import {TableController} from "../"; // forward import
 
 export class RowController extends LeafController {
-  override readonly controllerObservers!: ReadonlyArray<RowControllerObserver>;
+  override readonly observerType?: Class<RowControllerObserver>;
 
   protected initRowTrait(rowTrait: RowTrait): void {
     // hook
@@ -51,11 +52,11 @@ export class RowController extends LeafController {
   }
 
   protected willSetRowTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetRowTrait !== void 0) {
-        controllerObserver.controllerWillSetRowTrait(newRowTrait, oldRowTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetRowTrait !== void 0) {
+        observer.controllerWillSetRowTrait(newRowTrait, oldRowTrait, this);
       }
     }
   }
@@ -71,11 +72,11 @@ export class RowController extends LeafController {
   }
 
   protected didSetRowTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetRowTrait !== void 0) {
-        controllerObserver.controllerDidSetRowTrait(newRowTrait, oldRowTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetRowTrait !== void 0) {
+        observer.controllerDidSetRowTrait(newRowTrait, oldRowTrait, this);
       }
     }
   }
@@ -104,11 +105,11 @@ export class RowController extends LeafController {
   }
 
   protected willSetRowView(newRowView: RowView | null, oldRowView: RowView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetRowView !== void 0) {
-        controllerObserver.controllerWillSetRowView(newRowView, oldRowView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetRowView !== void 0) {
+        observer.controllerWillSetRowView(newRowView, oldRowView, this);
       }
     }
   }
@@ -124,21 +125,21 @@ export class RowController extends LeafController {
   }
 
   protected didSetRowView(newRowView: RowView | null, oldRowView: RowView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetRowView !== void 0) {
-        controllerObserver.controllerDidSetRowView(newRowView, oldRowView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetRowView !== void 0) {
+        observer.controllerDidSetRowView(newRowView, oldRowView, this);
       }
     }
   }
 
   protected willExpandRowView(rowView: RowView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillExpandRowView !== void 0) {
-        controllerObserver.controllerWillExpandRowView(rowView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillExpandRowView !== void 0) {
+        observer.controllerWillExpandRowView(rowView, this);
       }
     }
   }
@@ -148,21 +149,21 @@ export class RowController extends LeafController {
   }
 
   protected didExpandRowView(rowView: RowView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidExpandRowView !== void 0) {
-        controllerObserver.controllerDidExpandRowView(rowView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidExpandRowView !== void 0) {
+        observer.controllerDidExpandRowView(rowView, this);
       }
     }
   }
 
   protected willCollapseRowView(rowView: RowView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillCollapseRowView !== void 0) {
-        controllerObserver.controllerWillCollapseRowView(rowView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillCollapseRowView !== void 0) {
+        observer.controllerWillCollapseRowView(rowView, this);
       }
     }
   }
@@ -172,19 +173,40 @@ export class RowController extends LeafController {
   }
 
   protected didCollapseRowView(rowView: RowView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidCollapseRowView !== void 0) {
-        controllerObserver.controllerDidCollapseRowView(rowView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidCollapseRowView !== void 0) {
+        observer.controllerDidCollapseRowView(rowView, this);
       }
     }
   }
 
-  /** @hidden */
-  static RowFastener = ControllerViewTrait.define<RowController, RowView, RowTrait>({
+  /** @internal */
+  static RowFastener = TraitViewFastener.define<RowController, RowTrait, RowView>({
+    traitType: RowTrait,
+    observesTrait: true,
+    willSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
+      this.owner.willSetRowTrait(newRowTrait, oldRowTrait);
+    },
+    onSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
+      this.owner.onSetRowTrait(newRowTrait, oldRowTrait);
+    },
+    didSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
+      this.owner.didSetRowTrait(newRowTrait, oldRowTrait);
+    },
+    traitWillSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
+      if (oldTreeTrait !== null) {
+        this.owner.removeTreeTrait(oldTreeTrait);
+      }
+    },
+    traitDidSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
+      if (newTreeTrait !== null) {
+        this.owner.insertTreeTrait(newTreeTrait, targetTrait);
+      }
+    },
     viewType: RowView,
-    observeView: true,
+    observesView: true,
     willSetView(newRowView: RowView | null, oldRowView: RowView | null): void {
       this.owner.willSetRowView(newRowView, oldRowView);
     },
@@ -217,33 +239,12 @@ export class RowController extends LeafController {
     createView(): RowView | null {
       return this.owner.createRowView();
     },
-    traitType: RowTrait,
-    observeTrait: true,
-    willSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
-      this.owner.willSetRowTrait(newRowTrait, oldRowTrait);
-    },
-    onSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
-      this.owner.onSetRowTrait(newRowTrait, oldRowTrait);
-    },
-    didSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
-      this.owner.didSetRowTrait(newRowTrait, oldRowTrait);
-    },
-    traitWillSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-      if (oldTreeTrait !== null) {
-        this.owner.removeTreeTrait(oldTreeTrait);
-      }
-    },
-    traitDidSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-      if (newTreeTrait !== null) {
-        this.owner.insertTreeTrait(newTreeTrait, targetTrait);
-      }
-    },
   });
 
-  @ControllerViewTrait<RowController, RowView, RowTrait>({
+  @TraitViewFastener<RowController, RowTrait, RowView>({
     extends: RowController.RowFastener,
   })
-  readonly row!: ControllerViewTrait<this, RowView, RowTrait>;
+  readonly row!: TraitViewFastener<this, RowTrait, RowView>;
 
   protected createTree(treeTrait: TableTrait): TableController | null {
     return new TableController();
@@ -291,11 +292,11 @@ export class RowController extends LeafController {
   }
 
   protected willSetTree(newTreeController: TableController | null, oldTreeController: TableController | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTree !== void 0) {
-        controllerObserver.controllerWillSetTree(newTreeController, oldTreeController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTree !== void 0) {
+        observer.controllerWillSetTree(newTreeController, oldTreeController, this);
       }
     }
   }
@@ -311,20 +312,20 @@ export class RowController extends LeafController {
   }
 
   protected didSetTree(newTreeController: TableController | null, oldTreeController: TableController | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTree !== void 0) {
-        controllerObserver.controllerDidSetTree(newTreeController, oldTreeController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTree !== void 0) {
+        observer.controllerDidSetTree(newTreeController, oldTreeController, this);
       }
     }
   }
 
   protected insertTreeTrait(treeTrait: TableTrait, targetTrait: Trait | null = null): void {
-    const childControllers = this.childControllers;
+    const children = this.children;
     let targetController: TableController | null = null;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof TableController) {
         if (childController.table.trait === treeTrait) {
           return;
@@ -337,7 +338,7 @@ export class RowController extends LeafController {
     if (treeController instanceof TableController) {
       treeController.table.setTrait(treeTrait);
       this.tree.setController(treeController, targetController);
-      this.insertChildController(treeController, targetController);
+      this.insertChild(treeController, targetController);
       if (treeController.table.view === null) {
         const treeView = treeController.table.createView();
         let targetView: TableView | null = null;
@@ -355,9 +356,9 @@ export class RowController extends LeafController {
   }
 
   protected removeTreeTrait(treeTrait: TableTrait): void {
-    const childControllers = this.childControllers;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof TableController && childController.table.trait === treeTrait) {
         this.tree.setController(null);
         childController.remove();
@@ -379,11 +380,11 @@ export class RowController extends LeafController {
   }
 
   protected willSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTreeTrait !== void 0) {
-        controllerObserver.controllerWillSetTreeTrait(newTreeTrait, oldTreeTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTreeTrait !== void 0) {
+        observer.controllerWillSetTreeTrait(newTreeTrait, oldTreeTrait, this);
       }
     }
   }
@@ -399,11 +400,11 @@ export class RowController extends LeafController {
   }
 
   protected didSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTreeTrait !== void 0) {
-        controllerObserver.controllerDidSetTreeTrait(newTreeTrait, oldTreeTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTreeTrait !== void 0) {
+        observer.controllerDidSetTreeTrait(newTreeTrait, oldTreeTrait, this);
       }
     }
   }
@@ -421,11 +422,11 @@ export class RowController extends LeafController {
   }
 
   protected willSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTreeView !== void 0) {
-        controllerObserver.controllerWillSetTreeView(newTreeView, oldTreeView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTreeView !== void 0) {
+        observer.controllerWillSetTreeView(newTreeView, oldTreeView, this);
       }
     }
   }
@@ -441,19 +442,20 @@ export class RowController extends LeafController {
   }
 
   protected didSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTreeView !== void 0) {
-        controllerObserver.controllerDidSetTreeView(newTreeView, oldTreeView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTreeView !== void 0) {
+        observer.controllerDidSetTreeView(newTreeView, oldTreeView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static TreeFastener = ControllerFastener.define<RowController, TableController>({
     // avoid cyclic reference to type: TableController
-    observe: true,
+    child: true,
+    observes: true,
     willSetController(newTreeController: TableController | null, oldTreeController: TableController | null): void {
       this.owner.willSetTree(newTreeController, oldTreeController);
     },
@@ -488,16 +490,16 @@ export class RowController extends LeafController {
     return controller instanceof TableController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const treeController = this.detectTreeController(childController);
     if (treeController !== null) {
       this.tree.setController(treeController, targetController);
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const treeController = this.detectTreeController(childController);
     if (treeController !== null) {
       this.tree.setController(null);

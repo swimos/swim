@@ -17,7 +17,7 @@ import type {BTreeContext} from "./BTreeContext";
 import {BTreePage} from "./BTreePage";
 import {BTreeNode} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
   constructor(slots: ReadonlyArray<[K, V]>, fold: U | undefined) {
     super();
@@ -25,7 +25,7 @@ export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
     this.fold = fold;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly slots: ReadonlyArray<[K, V]>;
 
   override get arity(): number {
@@ -115,7 +115,7 @@ export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   updatedSlot(x: number, key: K, newValue: V): BTreeLeaf<K, V, U> {
     const oldSlots = this.slots;
     if (newValue !== oldSlots[x]![1]) {
@@ -127,7 +127,7 @@ export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   insertedSlot(x: number, key: K, newValue: V): BTreeLeaf<K, V, U> {
     const oldSlots = this.slots;
     const n = oldSlots.length + 1;
@@ -155,7 +155,7 @@ export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   removedSlot(x: number): BTreeLeaf<K, V, U> {
     const oldSlots = this.slots;
     const newSlots = new Array<[K, V]>(oldSlots.length - 1);
@@ -306,7 +306,7 @@ export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
     return Cursor.array(this.slots, this.slots.length);
   }
 
-  /** @hidden */
+  /** @internal */
   lookup(key: K, tree: BTreeContext<K, V>): number {
     let lo = 0;
     let hi = this.slots.length - 1;

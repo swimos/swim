@@ -25,7 +25,7 @@ export interface HostOptions {
   sendBufferSize?: number;
 }
 
-/** @hidden */
+/** @internal */
 export abstract class Host {
   abstract readonly hostUri: Uri;
 

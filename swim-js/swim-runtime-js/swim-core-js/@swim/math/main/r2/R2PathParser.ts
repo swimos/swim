@@ -17,7 +17,7 @@ import type {R2Spline} from "./R2Spline";
 import {R2SplineParser} from "./R2SplineParser";
 import {R2Path} from "./R2Path";
 
-/** @hidden */
+/** @internal */
 export class R2PathParser extends Parser<R2Path> {
   private readonly splineParser: Parser<R2Spline> | undefined;
   private readonly splines: R2Spline[] | undefined;

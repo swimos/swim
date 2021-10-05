@@ -13,4 +13,5 @@
 // limitations under the License.
 
 export {Murmur3Spec} from "./Murmur3Spec";
+export {LazySpec} from "./LazySpec";
 export {RuntimeSuite} from "./RuntimeSuite";

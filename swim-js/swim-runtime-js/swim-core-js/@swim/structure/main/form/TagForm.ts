@@ -16,7 +16,7 @@ import type {Item} from "../Item";
 import {Attr} from "../Attr";
 import {Form} from "./Form";
 
-/** @hidden */
+/** @internal */
 export class TagForm<T, U = never> extends Form<T, U> {
   constructor(form: Form<T, U>, tag: string) {
     super();
@@ -24,7 +24,7 @@ export class TagForm<T, U = never> extends Form<T, U> {
     this.tag = tag;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly form: Form<T, U>;
 
   override readonly tag: string;
@@ -70,6 +70,5 @@ Object.defineProperty(TagForm.prototype, "unit", {
   get<T, U>(this: TagForm<T, U>): T | undefined {
     return this.form.unit;
   },
-  enumerable: true,
   configurable: true,
 });

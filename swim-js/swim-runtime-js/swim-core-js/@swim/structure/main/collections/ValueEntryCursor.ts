@@ -16,7 +16,7 @@ import {Cursor} from "@swim/util";
 import type {Value} from "../Value";
 import type {Form} from "../form/Form";
 
-/** @hidden */
+/** @internal */
 export class ValueEntryCursor<K, V> extends Cursor<[K, V]> {
   constructor(cursor: Cursor<[Value, Value]>, keyForm: Form<K, unknown>, valueForm: Form<V, unknown>) {
     super();
@@ -25,13 +25,13 @@ export class ValueEntryCursor<K, V> extends Cursor<[K, V]> {
     this.valueForm = valueForm;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly cursor: Cursor<[Value, Value]>;
 
-  /** @hidden */
+  /** @internal */
   readonly keyForm: Form<K, unknown>;
 
-  /** @hidden */
+  /** @internal */
   readonly valueForm: Form<V, unknown>;
 
   override isEmpty(): boolean {

@@ -14,11 +14,17 @@
 
 import {Spec, Unit} from "@swim/unit";
 import {Murmur3Spec} from "./Murmur3Spec";
+import {LazySpec} from "./LazySpec";
 
 @Unit
 export class RuntimeSuite extends Spec {
   @Unit
   murmur3Spec(): Spec {
     return new Murmur3Spec();
+  }
+
+  @Unit
+  lazySpec(): Spec {
+    return new LazySpec();
   }
 }

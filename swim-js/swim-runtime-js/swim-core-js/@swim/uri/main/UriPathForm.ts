@@ -15,7 +15,7 @@
 import {Item, Text, Form} from "@swim/structure";
 import {AnyUriPath, UriPath} from "./UriPath";
 
-/** @hidden */
+/** @internal */
 export class UriPathForm extends Form<UriPath, AnyUriPath> {
   constructor(unit: UriPath | undefined) {
     super();

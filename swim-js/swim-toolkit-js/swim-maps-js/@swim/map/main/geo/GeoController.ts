@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
-import {ControllerProperty, ControllerViewTrait, CompositeController} from "@swim/controller";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Property} from "@swim/fastener";
+import {TraitViewFastener, GenericController} from "@swim/controller";
 import type {GeoView} from "./GeoView";
 import type {GeoTrait} from "./GeoTrait";
 import type {GeoControllerObserver} from "./GeoControllerObserver";
@@ -26,13 +27,13 @@ import {GeoAreaController} from "../"; // forward import
 import {GeoIconTrait} from "../"; // forward import
 import {GeoIconController} from "../"; // forward import
 
-export abstract class GeoController extends CompositeController {
-  override readonly controllerObservers!: ReadonlyArray<GeoControllerObserver>;
+export abstract class GeoController extends GenericController {
+  override readonly observerType?: Class<GeoControllerObserver>;
 
-  @ControllerProperty({type: Timing, inherit: true})
-  readonly geoTiming!: ControllerProperty<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({type: Timing, inherits: true})
+  readonly geoTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  abstract readonly geo: ControllerViewTrait<this, GeoView, GeoTrait>;
+  abstract readonly geo: TraitViewFastener<this, GeoTrait, GeoView>;
 
   static fromTrait(geoTrait: GeoTrait): GeoController | null {
     if (geoTrait instanceof GeoLayerTrait) {

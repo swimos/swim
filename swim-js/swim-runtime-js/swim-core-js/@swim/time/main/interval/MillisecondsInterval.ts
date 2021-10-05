@@ -15,7 +15,7 @@
 import {AnyDateTime, DateTime} from "../DateTime";
 import {TimeInterval} from "./TimeInterval";
 
-/** @hidden */
+/** @internal */
 export class MillisecondsInterval extends TimeInterval {
   private readonly stride: number;
 

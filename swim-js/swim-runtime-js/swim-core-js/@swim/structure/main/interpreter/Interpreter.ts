@@ -35,7 +35,7 @@ export class Interpreter {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly scopeStack: Item[] | null;
 
   readonly scopeDepth: number;

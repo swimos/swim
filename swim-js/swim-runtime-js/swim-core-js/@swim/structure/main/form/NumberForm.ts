@@ -16,7 +16,7 @@ import type {Item} from "../Item";
 import {Num} from "../Num";
 import {Form} from "./Form";
 
-/** @hidden */
+/** @internal */
 export class NumberForm extends Form<number> {
   constructor(unit?: number) {
     super();

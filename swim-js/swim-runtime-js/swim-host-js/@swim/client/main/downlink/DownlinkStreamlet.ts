@@ -21,8 +21,8 @@ import {ValueDownlink} from "./ValueDownlink";
 import type {DownlinkRecord} from "./DownlinkRecord";
 import {MapDownlinkRecord} from "./MapDownlinkRecord";
 import {DownlinkReifier} from "./DownlinkReifier";
-import type {WarpRef} from "../WarpRef";
-import {client} from "..";
+import type {WarpRef} from "../ref/WarpRef";
+import {client} from ".."; // forward import
 
 export class DownlinkStreamlet extends AbstractRecordStreamlet {
   constructor(warp: WarpRef | null = null, scope?: StreamletScope<Value> | null) {
@@ -44,22 +44,22 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
 
   downlink: Downlink | null;
 
-  /** @hidden */
+  /** @internal */
   downlinkRecord: DownlinkRecord | null;
 
-  /** @hidden */
+  /** @internal */
   inputHostUri: string | undefined;
-  /** @hidden */
+  /** @internal */
   inputNodeUri: string | undefined;
-  /** @hidden */
+  /** @internal */
   inputLaneUri: string | undefined;
-  /** @hidden */
+  /** @internal */
   inputPrio: number | undefined;
-  /** @hidden */
+  /** @internal */
   inputRate: number | undefined;
-  /** @hidden */
+  /** @internal */
   inputBody: Value | undefined;
-  /** @hidden */
+  /** @internal */
   inputType: DownlinkType | undefined;
 
   @Inout

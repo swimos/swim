@@ -15,7 +15,7 @@
 import {Input, Parser, Diagnostic, Unicode, Base10} from "@swim/codec";
 import {R2CubicCurve} from "./R2CubicCurve";
 
-/** @hidden */
+/** @internal */
 export class R2CubicCurveParser extends Parser<R2CubicCurve> {
   private readonly x0Parser: Parser<number> | undefined;
   private readonly y0Parser: Parser<number> | undefined;

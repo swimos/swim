@@ -17,7 +17,7 @@ import type {DateTimeInit, DateTime} from "../DateTime";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {Hour12Parser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class Hour12Format extends DateTimeFormat {
   override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
     let hour = date.hour % 12;

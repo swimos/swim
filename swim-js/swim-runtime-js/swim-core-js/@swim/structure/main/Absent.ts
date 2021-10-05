@@ -24,7 +24,7 @@ import type {AnyText} from "./Text";
 export type AnyAbsent = Absent | undefined;
 
 export class Absent extends Value {
-  /** @hidden */
+  /** @internal */
   private constructor() {
     super();
   }

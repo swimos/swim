@@ -39,7 +39,7 @@ import {NegativeOperator} from "./"; // forward import
 import {PositiveOperator} from "./"; // forward import
 
 export abstract class Expression extends Value {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }

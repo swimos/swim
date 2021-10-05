@@ -53,7 +53,7 @@ export class Opt implements Equals, Debug {
 
   readonly args: ReadonlyArray<Arg>;
 
-  /** @hidden */
+  /** @internal */
   withArg(arg: AnyArg): this {
     arg = Arg.fromAny(arg);
     (this.args as Arg[]).push(arg as Arg);

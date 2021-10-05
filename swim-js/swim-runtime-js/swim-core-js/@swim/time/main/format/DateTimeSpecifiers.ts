@@ -32,39 +32,43 @@ export interface DateTimeSpecifiers {
   L: DateTimeFormat;
 }
 
-export const DateTimeSpecifiers = {} as {
-  /** @hidden */
-  _standard?: DateTimeSpecifiers,
-  standard(locale?: DateTimeLocale): DateTimeSpecifiers;
-};
+export const DateTimeSpecifiers = (function () {
+  const DateTimeSpecifiers = {} as {
+    standard(locale?: DateTimeLocale): DateTimeSpecifiers;
+  };
 
-DateTimeSpecifiers.standard = function (locale?: DateTimeLocale): DateTimeSpecifiers {
-  let specifiers: DateTimeSpecifiers | undefined;
-  if (locale === void 0) {
-    locale = DateTimeLocale.standard();
-  }
-  if (locale === DateTimeLocale.standard()) {
-    specifiers = DateTimeSpecifiers._standard;
-  }
-  if (specifiers === void 0) {
-    specifiers = {
-      Y: DateTimeFormat.year,
-      m: DateTimeFormat.monthOfYear,
-      B: DateTimeFormat.month.withLocale(locale),
-      b: DateTimeFormat.shortMonth.withLocale(locale),
-      d: DateTimeFormat.dayOfMonth,
-      A: DateTimeFormat.weekday.withLocale(locale),
-      a: DateTimeFormat.shortWeekday.withLocale(locale),
-      H: DateTimeFormat.hour24,
-      I: DateTimeFormat.hour12,
-      p: DateTimeFormat.period.withLocale(locale),
-      M: DateTimeFormat.minute,
-      S: DateTimeFormat.second,
-      L: DateTimeFormat.millisecond,
-    };
-    if (locale === DateTimeLocale.standard()) {
-      DateTimeSpecifiers._standard = specifiers;
+  let standard: DateTimeSpecifiers | null = null;
+
+  DateTimeSpecifiers.standard = function (locale?: DateTimeLocale): DateTimeSpecifiers {
+    let specifiers: DateTimeSpecifiers | null = null;
+    if (locale === void 0) {
+      locale = DateTimeLocale.standard();
     }
-  }
-  return specifiers;
-};
+    if (locale === DateTimeLocale.standard()) {
+      specifiers = standard;
+    }
+    if (specifiers === null) {
+      specifiers = {
+        Y: DateTimeFormat.year,
+        m: DateTimeFormat.monthOfYear,
+        B: DateTimeFormat.month.withLocale(locale),
+        b: DateTimeFormat.shortMonth.withLocale(locale),
+        d: DateTimeFormat.dayOfMonth,
+        A: DateTimeFormat.weekday.withLocale(locale),
+        a: DateTimeFormat.shortWeekday.withLocale(locale),
+        H: DateTimeFormat.hour24,
+        I: DateTimeFormat.hour12,
+        p: DateTimeFormat.period.withLocale(locale),
+        M: DateTimeFormat.minute,
+        S: DateTimeFormat.second,
+        L: DateTimeFormat.millisecond,
+      };
+      if (locale === DateTimeLocale.standard()) {
+        standard = specifiers;
+      }
+    }
+    return specifiers;
+  };
+
+  return DateTimeSpecifiers;
+})();

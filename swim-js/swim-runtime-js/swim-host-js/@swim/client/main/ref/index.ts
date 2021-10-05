@@ -18,3 +18,6 @@ export {BaseRef} from "./BaseRef";
 export {HostRef} from "./HostRef";
 export {NodeRef} from "./NodeRef";
 export {LaneRef} from "./LaneRef";
+
+export {WarpRef} from "./WarpRef";
+export {WarpObserver} from "./WarpObserver";

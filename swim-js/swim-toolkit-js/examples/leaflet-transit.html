@@ -17,7 +17,7 @@ const VEHICLE_COLOR = swim.Color.parse("#00a6ed");
 const RIPPLE_COLOR = swim.Color.parse("#efefef");
 
 const bodyView = swim.HtmlView.fromNode(document.body);
-const containerView = bodyView.append("div").display("relative").width("100%").height("100%");
+const containerView = bodyView.appendChild("div").display("relative").width("100%").height("100%");
 
 const map = L.map(containerView.node, {
   center: {lng: -118, lat: 33.95},
@@ -31,7 +31,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 const mapView = new swim.LeafletView(map);
 mapView.container.setView(containerView);
 
-const layerView = mapView.append(swim.GeoTreeView);
+const layerView = mapView.appendChild(swim.GeoTreeView);
 //layerView.geoBoundsColor("#008f11");
 //layerView.geoTreeColor("#008f11");
 
@@ -47,7 +47,7 @@ const vehiclesLink = swim.downlinkMap()
       const lat = value.get("latitude").numberValue(0);
       const timing = swim.Easing.linear.withDuration(10000);
 
-      let vehicleView = layerView.getChildView(key);
+      let vehicleView = layerView.getChild(key);
       if (vehicleView !== null) {
         vehicleView.geoCenter([lng, lat], timing);
         vehicleView.ripple({
@@ -63,7 +63,7 @@ const vehiclesLink = swim.downlinkMap()
             .iconHeight(10)
             .iconColor(VEHICLE_COLOR)
             .graphics(vehicleIcon);
-        layerView.setChildView(key, vehicleView);
+        layerView.setChild(key, vehicleView);
       }
     })
     .open();

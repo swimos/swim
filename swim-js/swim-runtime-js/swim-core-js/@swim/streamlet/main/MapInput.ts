@@ -31,7 +31,7 @@ export class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
     (this as Mutable<this>).effects = effects;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly state: BTree<K, V>;
 
   override has(key: K): boolean {

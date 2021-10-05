@@ -17,52 +17,56 @@
  */
 export type ByteOrder = "BE" | "LE";
 
-export const ByteOrder = {} as {
-  /**
-   * Most significant byte first.
-   */
-  readonly BigEndian: ByteOrder;
+export const ByteOrder = (function () {
+  const ByteOrder = {} as {
+    /**
+     * Most significant byte first.
+     */
+    readonly BigEndian: ByteOrder;
 
-  /**
-   * Least significant byte first.
-   */
-  readonly LittleEndian: ByteOrder;
+    /**
+     * Least significant byte first.
+     */
+    readonly LittleEndian: ByteOrder;
 
-  /**
-   * `ByteOrder` of the host machine.
-   */
-  readonly NativeOrder: ByteOrder;
-};
+    /**
+     * `ByteOrder` of the host machine.
+     */
+    readonly NativeOrder: ByteOrder;
+  };
 
-Object.defineProperty(ByteOrder, "BigEndian", {
-  value: "BE",
-  enumerable: true,
-});
+  Object.defineProperty(ByteOrder, "BigEndian", {
+    value: "BE",
+    enumerable: true,
+  });
 
-Object.defineProperty(ByteOrder, "LittleEndian", {
-  value: "LE",
-  enumerable: true,
-});
+  Object.defineProperty(ByteOrder, "LittleEndian", {
+    value: "LE",
+    enumerable: true,
+  });
 
-Object.defineProperty(ByteOrder, "NativeOrder", {
-  get(): ByteOrder {
-    let nativeEndian: ByteOrder;
-    const bom = new ArrayBuffer(2);
-    new Uint16Array(bom)[0] = 0xfeff;
-    const b = new Uint8Array(bom);
-    if (b[0] === 0xfe && b[1] === 0xff) {
-      nativeEndian = ByteOrder.BigEndian;
-    } else if (b[0] === 0xff && b[1] === 0xfe) {
-      nativeEndian = ByteOrder.LittleEndian;
-    } else {
-      throw new Error();
-    }
-    Object.defineProperty(ByteOrder, "NativeOrder", {
-      value: nativeEndian,
-      enumerable: true,
-    });
-    return nativeEndian;
-  },
-  configurable: true,
-  enumerable: true,
-});
+  Object.defineProperty(ByteOrder, "NativeOrder", {
+    get(): ByteOrder {
+      let nativeEndian: ByteOrder;
+      const bom = new ArrayBuffer(2);
+      new Uint16Array(bom)[0] = 0xfeff;
+      const b = new Uint8Array(bom);
+      if (b[0] === 0xfe && b[1] === 0xff) {
+        nativeEndian = ByteOrder.BigEndian;
+      } else if (b[0] === 0xff && b[1] === 0xfe) {
+        nativeEndian = ByteOrder.LittleEndian;
+      } else {
+        throw new Error();
+      }
+      Object.defineProperty(ByteOrder, "NativeOrder", {
+        value: nativeEndian,
+        enumerable: true,
+      });
+      return nativeEndian;
+    },
+    configurable: true,
+    enumerable: true,
+  });
+
+  return ByteOrder;
+})();

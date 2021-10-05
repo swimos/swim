@@ -22,7 +22,7 @@ export abstract class ReduceFieldsOperator<K, V, I, O> extends AbstractMapInletO
     this.state = new BTree();
   }
 
-  /** @hidden */
+  /** @internal */
   readonly state: BTree<K, V, O>;
 
   override get(): O | undefined {

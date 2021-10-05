@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Timing} from "@swim/util";
+import type {Mutable, Class, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {
   Graphics,
   GraphicsView,
@@ -25,7 +26,7 @@ import {
   FilledIcon,
   IconViewInit,
   IconView,
-  IconViewAnimator,
+  IconGraphicsAnimator,
   CanvasRenderer,
 } from "@swim/graphics";
 import type {GeoViewInit} from "../geo/GeoView";
@@ -52,50 +53,39 @@ export class GeoIconView extends GeoLayerView implements IconView {
     });
   }
 
-  override initView(init: GeoIconViewInit): void {
-    super.initView(init);
-    IconView.initView(this, init);
-    if (init.geoCenter !== void 0) {
-      this.geoCenter(init.geoCenter);
-    }
-    if (init.viewCenter !== void 0) {
-      this.viewCenter(init.viewCenter);
-    }
-  }
+  override readonly observerType?: Class<GeoIconViewObserver>;
 
-  override readonly viewObservers!: ReadonlyArray<GeoIconViewObserver>;
-
-  /** @hidden */
+  /** @internal */
   readonly canvas: HTMLCanvasElement | null;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoCenter !== void 0) {
-        viewObserver.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoCenter !== void 0) {
+        observer.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
   protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     this.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
-    if (this.isMounted()) {
+    if (this.mounted) {
       this.projectIcon(this.viewContext as ViewContextType<this>);
     }
   }
 
   protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGeoCenter !== void 0) {
-        viewObserver.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoCenter !== void 0) {
+        observer.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
-  @ViewAnimator<GeoIconView, GeoPoint | null, AnyGeoPoint | null>({
+  @ThemeAnimator<GeoIconView, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
     didSetState(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
@@ -109,9 +99,9 @@ export class GeoIconView extends GeoLayerView implements IconView {
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCemter);
     },
   })
-  readonly geoCenter!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator<GeoIconView, R2Point | null, AnyR2Point | null>({
+  @ThemeAnimator<GeoIconView, R2Point | null, AnyR2Point | null>({
     type: R2Point,
     state: R2Point.undefined(),
     updateFlags: View.NeedsComposite,
@@ -119,9 +109,9 @@ export class GeoIconView extends GeoLayerView implements IconView {
       this.owner.updateViewBounds();
     },
   })
-  readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
+  readonly viewCenter!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator<GeoIconView, number>({
+  @ThemeAnimator<GeoIconView, number>({
     type: Number,
     state: 0.5,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
@@ -129,9 +119,9 @@ export class GeoIconView extends GeoLayerView implements IconView {
       this.owner.updateViewBounds();
     },
   })
-  readonly xAlign!: ViewAnimator<this, number>;
+  readonly xAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator<GeoIconView, number>({
+  @ThemeAnimator<GeoIconView, number>({
     type: Number,
     state: 0.5,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
@@ -139,9 +129,9 @@ export class GeoIconView extends GeoLayerView implements IconView {
       this.owner.updateViewBounds();
     },
   })
-  readonly yAlign!: ViewAnimator<this, number>;
+  readonly yAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator<GeoIconView, Length | null, AnyLength | null>({
+  @ThemeAnimator<GeoIconView, Length | null, AnyLength | null>({
     type: Length,
     state: null,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
@@ -149,9 +139,9 @@ export class GeoIconView extends GeoLayerView implements IconView {
       this.owner.updateViewBounds();
     },
   })
-  readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator<GeoIconView, Length | null, AnyLength | null>({
+  @ThemeAnimator<GeoIconView, Length | null, AnyLength | null>({
     type: Length,
     state: null,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
@@ -159,9 +149,9 @@ export class GeoIconView extends GeoLayerView implements IconView {
       this.owner.updateViewBounds();
     },
   })
-  readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator<GeoIconView, Color | null, AnyColor | null>({
+  @ThemeAnimator<GeoIconView, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
@@ -170,19 +160,19 @@ export class GeoIconView extends GeoLayerView implements IconView {
         const oldGraphics = this.owner.graphics.value;
         if (oldGraphics instanceof FilledIcon) {
           const newGraphics = oldGraphics.withFillColor(newIconColor);
-          this.owner.graphics.setOwnState(newGraphics);
+          this.owner.graphics.setState(newGraphics, Affinity.Reflexive);
         }
       }
     },
   })
-  readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGraphics !== void 0) {
-        viewObserver.viewWillSetGraphics(newGraphics, oldGraphic, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGraphics !== void 0) {
+        observer.viewWillSetGraphics(newGraphics, oldGraphic, this);
       }
     }
   }
@@ -192,17 +182,17 @@ export class GeoIconView extends GeoLayerView implements IconView {
   }
 
   protected didSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGraphics !== void 0) {
-        viewObserver.viewDidSetGraphics(newGraphics, oldGraphic, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGraphics !== void 0) {
+        observer.viewDidSetGraphics(newGraphics, oldGraphic, this);
       }
     }
   }
 
-  @ViewAnimator<GeoIconView, Graphics | null>({
-    extends: IconViewAnimator,
+  @ThemeAnimator<GeoIconView, Graphics | null>({
+    extends: IconGraphicsAnimator,
     type: Object,
     willSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
       this.owner.willSetGraphics(newGraphics, oldGraphics);
@@ -212,15 +202,15 @@ export class GeoIconView extends GeoLayerView implements IconView {
       this.owner.didSetGraphics(newGraphics, oldGraphics);
     },
   })
-  readonly graphics!: ViewAnimator<this, Graphics | null>;
+  readonly graphics!: ThemeAnimator<this, Graphics | null>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (!this.graphics.isInherited()) {
+    if (!this.graphics.inherited) {
       const oldGraphics = this.graphics.value;
       if (oldGraphics instanceof Icon) {
         const newGraphics = oldGraphics.withTheme(theme, mood);
-        this.graphics.setOwnState(newGraphics, oldGraphics.isThemed() ? timing : false);
+        this.graphics.setState(newGraphics, oldGraphics.isThemed() ? timing : false, Affinity.Reflexive);
       }
     }
   }
@@ -231,18 +221,18 @@ export class GeoIconView extends GeoLayerView implements IconView {
   }
 
   protected projectGeoCenter(geoCenter: GeoPoint | null): void {
-    if (this.isMounted()) {
+    if (this.mounted) {
       const viewContext = this.viewContext as ViewContextType<this>;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
                        : null;
-      this.viewCenter.setIntermediateValue(this.viewCenter.value, viewCenter);
+      this.viewCenter.setInterpolatedValue(this.viewCenter.value, viewCenter);
       this.projectIcon(viewContext);
     }
   }
 
   protected projectIcon(viewContext: ViewContextType<this>): void {
-    if (this.viewCenter.takesPrecedence(View.Intrinsic)) {
+    if (this.viewCenter.hasAffinity(Affinity.Intrinsic)) {
       const geoCenter = this.geoCenter.value;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
@@ -264,7 +254,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   protected override onRasterize(viewContext: ViewContextType<this>): void {
     super.onRasterize(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       this.rasterizeIcon(renderer, this.viewBounds);
     }
   }
@@ -303,7 +293,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   protected override onComposite(viewContext: ViewContextType<this>): void {
     super.onComposite(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       this.compositeIcon(renderer, this.viewBounds);
     }
   }
@@ -375,11 +365,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      context.save();
-      const hit = this.hitTestIcon(x, y, renderer, this.viewBounds);
-      context.restore();
-      return hit;
+      return this.hitTestIcon(x, y, renderer, this.viewBounds);
     }
     return null;
   }
@@ -405,26 +391,17 @@ export class GeoIconView extends GeoLayerView implements IconView {
     return GeoRippleView.ripple(this, options);
   }
 
-  static override create(): GeoIconView {
-    return new GeoIconView();
-  }
-
-  static fromInit(init: GeoIconViewInit): GeoIconView {
-    const view = new GeoIconView();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny(value: AnyGeoIconView): GeoIconView {
-    if (value instanceof GeoIconView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+  override init(init: GeoIconViewInit): void {
+    super.init(init);
+    IconView.init(this, init);
+    if (init.geoCenter !== void 0) {
+      this.geoCenter(init.geoCenter);
     }
-    throw new TypeError("" + value);
+    if (init.viewCenter !== void 0) {
+      this.viewCenter(init.viewCenter);
+    }
   }
 
-  static override readonly mountFlags: ViewFlags = GeoLayerView.mountFlags | View.NeedsRasterize;
-  static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsRasterize;
-  static override readonly uncullFlags: ViewFlags = GeoLayerView.uncullFlags | View.NeedsRasterize;
+  static override readonly MountFlags: ViewFlags = GeoLayerView.MountFlags | View.NeedsRasterize;
+  static override readonly UncullFlags: ViewFlags = GeoLayerView.UncullFlags | View.NeedsRasterize;
 }

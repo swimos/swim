@@ -15,24 +15,28 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {R2Vector} from "./R2Vector";
 
-/** @hidden */
-export const R2VectorInterpolator = function (v0: R2Vector, v1: R2Vector): Interpolator<R2Vector> {
-  const interpolator = function (u: number): R2Vector {
-    const v0 = interpolator[0];
-    const v1 = interpolator[1];
-    const x = v0.x + u * (v1.x - v0.x);
-    const y = v0.y + u * (v1.y - v0.y);
-    return new R2Vector(x, y);
-  } as Interpolator<R2Vector>;
-  Object.setPrototypeOf(interpolator, R2VectorInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = v0;
-  (interpolator as Mutable<typeof interpolator>)[1] = v1;
-  return interpolator;
-} as {
-  (v0: R2Vector, v1: R2Vector): Interpolator<R2Vector>;
+/** @internal */
+export const R2VectorInterpolator = (function (_super: typeof Interpolator) {
+  const R2VectorInterpolator = function (v0: R2Vector, v1: R2Vector): Interpolator<R2Vector> {
+    const interpolator = function (u: number): R2Vector {
+      const v0 = interpolator[0];
+      const v1 = interpolator[1];
+      const x = v0.x + u * (v1.x - v0.x);
+      const y = v0.y + u * (v1.y - v0.y);
+      return new R2Vector(x, y);
+    } as Interpolator<R2Vector>;
+    Object.setPrototypeOf(interpolator, R2VectorInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = v0;
+    (interpolator as Mutable<typeof interpolator>)[1] = v1;
+    return interpolator;
+  } as {
+    (v0: R2Vector, v1: R2Vector): Interpolator<R2Vector>;
 
-  /** @hidden */
-  prototype: Interpolator<R2Vector>;
-};
+    /** @internal */
+    prototype: Interpolator<R2Vector>;
+  };
 
-R2VectorInterpolator.prototype = Object.create(Interpolator.prototype);
+  R2VectorInterpolator.prototype = Object.create(_super.prototype);
+
+  return R2VectorInterpolator;
+})(Interpolator);

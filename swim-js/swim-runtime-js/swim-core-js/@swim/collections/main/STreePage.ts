@@ -18,7 +18,7 @@ import {ValuesCursor} from "./ValuesCursor";
 import type {STreeContext} from "./STreeContext";
 import {STreeLeaf} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export abstract class STreePage<V = unknown, I = unknown> {
   abstract readonly arity: number;
 

@@ -260,19 +260,19 @@ export class ColLayout implements Equals, Equivalent, Debug {
     if (width !== void 0 && width !== null) {
       width = Length.fromAny(width);
     } else {
-      width = null
+      width = null;
     }
     let left = init.left;
     if (left !== void 0 && left !== null) {
       left = Length.fromAny(left);
     } else {
-      left = null
+      left = null;
     }
     let right = init.right;
     if (right !== void 0 && right !== null) {
       right = Length.fromAny(right);
     } else {
-      right = null
+      right = null;
     }
     let hidden = init.hidden;
     if (hidden === void 0) {

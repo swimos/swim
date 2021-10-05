@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export {
+  Dictionary,
+  MutableDictionary,
+} from "./Dictionary";
+
 export {Iterator} from "./Iterator";
 export {Cursor} from "./Cursor";
 export {CursorEmpty} from "./CursorEmpty";

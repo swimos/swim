@@ -13,10 +13,12 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {SvgViewInit, SvgView} from "@swim/dom";
 import type {Graphics} from "../graphics/Graphics";
 import {SvgContext} from "../svg/SvgContext";
@@ -24,7 +26,7 @@ import {SvgRenderer} from "../svg/SvgRenderer";
 import {Icon} from "./Icon";
 import {FilledIcon} from "./FilledIcon";
 import {IconViewInit, IconView} from "./IconView";
-import {IconViewAnimator} from "./IconViewAnimator";
+import {IconGraphicsAnimator} from "./IconGraphicsAnimator";
 
 export interface SvgIconViewInit extends SvgViewInit, IconViewInit {
 }
@@ -34,24 +36,19 @@ export class SvgIconView extends SvgView implements IconView {
     super(node);
   }
 
-  override initView(init: SvgIconViewInit): void {
-    super.initView(init);
-    IconView.initView(this, init);
-  }
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly xAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly xAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly yAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly yAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
+  readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
+  readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
-
-  @ViewAnimator<SvgIconView, Color | null, AnyColor | null>({
+  @ThemeAnimator<SvgIconView, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     updateFlags: View.NeedsLayout,
@@ -60,25 +57,37 @@ export class SvgIconView extends SvgView implements IconView {
         const oldGraphics = this.owner.graphics.value;
         if (oldGraphics instanceof FilledIcon) {
           const newGraphics = oldGraphics.withFillColor(newIconColor);
-          this.owner.graphics.setOwnState(newGraphics);
+          this.owner.graphics.setState(newGraphics, Affinity.Reflexive);
         }
       }
     },
   })
-  readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({extends: IconViewAnimator, type: Object, state: null, updateFlags: View.NeedsLayout})
-  readonly graphics!: ViewAnimator<this, Graphics | null>;
+  @ThemeAnimator({extends: IconGraphicsAnimator, type: Object, state: null, updateFlags: View.NeedsLayout})
+  readonly graphics!: ThemeAnimator<this, Graphics | null>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (!this.graphics.isInherited()) {
+    if (!this.graphics.inherited) {
       const oldGraphics = this.graphics.value;
       if (oldGraphics instanceof Icon) {
         const newGraphics = oldGraphics.withTheme(theme, mood);
-        this.graphics.setOwnState(newGraphics, oldGraphics.isThemed() ? timing : false);
+        this.graphics.setState(newGraphics, oldGraphics.isThemed() ? timing : false, Affinity.Reflexive);
       }
     }
+  }
+
+  protected override onResize(viewContext: ViewContextType<this>): void {
+    super.onResize(viewContext);
+    this.requireUpdate(View.NeedsLayout);
+  }
+
+  protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+    if ((this.flags & View.NeedsLayout) === 0) {
+      displayFlags &= ~View.NeedsLayout;
+    }
+    return displayFlags;
   }
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
@@ -90,7 +99,7 @@ export class SvgIconView extends SvgView implements IconView {
     const context = new SvgContext(this);
     context.setPrecision(3);
     context.beginSvg();
-    const graphics = this.graphics.takeValue();
+    const graphics = this.graphics.value;
     if (graphics !== null) {
       const frame = this.iconBounds;
       if (frame.isDefined() && frame.width > 0 && frame.height > 0) {
@@ -124,5 +133,10 @@ export class SvgIconView extends SvgView implements IconView {
     }
   }
 
-  static override readonly mountFlags: ViewFlags = SvgView.mountFlags | View.NeedsAnimate;
+  override init(init: SvgIconViewInit): void {
+    super.init(init);
+    IconView.init(this, init);
+  }
+
+  static override readonly MountFlags: ViewFlags = SvgView.MountFlags | View.NeedsAnimate;
 }

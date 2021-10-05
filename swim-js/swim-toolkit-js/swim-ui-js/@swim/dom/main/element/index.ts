@@ -14,12 +14,10 @@
 
 export {
   ViewElement,
-  ElementViewMemberType,
-  ElementViewMemberInit,
-  ElementViewMemberKey,
-  ElementViewMemberMap,
+  AnyElementView,
   ElementViewInit,
-  ElementViewPrototype,
+  ElementViewFactory,
+  ElementViewClass,
   ElementViewConstructor,
   ElementView,
 } from "./ElementView";

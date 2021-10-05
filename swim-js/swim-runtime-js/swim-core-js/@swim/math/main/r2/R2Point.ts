@@ -192,7 +192,7 @@ export class R2Point extends R2Shape implements Interpolate<R2Point>, HashCode, 
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is R2PointInit {
     if (typeof value === "object" && value !== null) {
       const init = value as R2PointInit;
@@ -202,7 +202,7 @@ export class R2Point extends R2Shape implements Interpolate<R2Point>, HashCode, 
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isTuple(value: unknown): value is R2PointTuple {
     return Array.isArray(value)
         && value.length === 2
@@ -210,7 +210,7 @@ export class R2Point extends R2Shape implements Interpolate<R2Point>, HashCode, 
         && typeof value[1] === "number";
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyR2Point {
     return value instanceof R2Point
         || R2Point.isInit(value)

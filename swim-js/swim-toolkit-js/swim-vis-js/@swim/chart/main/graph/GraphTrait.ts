@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Model, TraitModelType, Trait, TraitFastener, GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Model, TraitModelType, Trait, TraitFastener} from "@swim/model";
 import {PlotTrait} from "../plot/PlotTrait";
 import type {GraphTraitObserver} from "./GraphTraitObserver";
 
-export class GraphTrait<X, Y> extends GenericTrait {
+export class GraphTrait<X, Y> extends Trait {
   constructor() {
     super();
     this.plotFasteners = [];
   }
 
-  override readonly traitObservers!: ReadonlyArray<GraphTraitObserver<X, Y>>;
+  override readonly observerType?: Class<GraphTraitObserver<X, Y>>;
 
   insertPlot(plotTrait: PlotTrait<X, Y>, targetTrait: Trait | null = null): void {
     const plotFasteners = this.plotFasteners as TraitFastener<this, PlotTrait<X, Y>>[];
@@ -38,7 +39,7 @@ export class GraphTrait<X, Y> extends GenericTrait {
     const plotFastener = this.createPlotFastener(plotTrait);
     plotFasteners.splice(targetIndex, 0, plotFastener);
     plotFastener.setTrait(plotTrait, targetTrait);
-    if (this.isMounted()) {
+    if (this.mounted) {
       plotFastener.mount();
     }
   }
@@ -49,7 +50,7 @@ export class GraphTrait<X, Y> extends GenericTrait {
       const plotFastener = plotFasteners[i]!;
       if (plotFastener.trait === plotTrait) {
         plotFastener.setTrait(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           plotFastener.unmount();
         }
         plotFasteners.splice(i, 1);
@@ -63,22 +64,22 @@ export class GraphTrait<X, Y> extends GenericTrait {
   }
 
   protected attachPlot(plotTrait: PlotTrait<X, Y>, plotFastener: TraitFastener<this, PlotTrait<X, Y>>): void {
-    if (this.isConsuming()) {
-      plotTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      plotTrait.consume(this);
     }
   }
 
   protected detachPlot(plotTrait: PlotTrait<X, Y>, plotFastener: TraitFastener<this, PlotTrait<X, Y>>): void {
-    if (this.isConsuming()) {
-      plotTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      plotTrait.unconsume(this);
     }
   }
 
   protected willSetPlot(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null,
                         targetTrait: Trait | null, plotFastener: TraitFastener<this, PlotTrait<X, Y>>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetPlot !== void 0) {
         traitObserver.traitWillSetPlot(newPlotTrait, oldPlotTrait, targetTrait, this);
       }
@@ -98,16 +99,16 @@ export class GraphTrait<X, Y> extends GenericTrait {
 
   protected didSetPlot(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null,
                        targetTrait: Trait | null, plotFastener: TraitFastener<this, PlotTrait<X, Y>>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetPlot !== void 0) {
         traitObserver.traitDidSetPlot(newPlotTrait, oldPlotTrait, targetTrait, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static PlotFastener = TraitFastener.define<GraphTrait<unknown, unknown>, PlotTrait<unknown, unknown>>({
     type: PlotTrait,
     sibling: false,
@@ -123,13 +124,13 @@ export class GraphTrait<X, Y> extends GenericTrait {
   });
 
   protected createPlotFastener(plotTrait: PlotTrait<X, Y>): TraitFastener<this, PlotTrait<X, Y>> {
-    return new GraphTrait.PlotFastener(this as GraphTrait<unknown, unknown>, plotTrait.key, "plot") as TraitFastener<this, PlotTrait<X, Y>>;
+    return GraphTrait.PlotFastener.create(this, plotTrait.key ?? "plot") as TraitFastener<this, PlotTrait<X, Y>>;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly plotFasteners: ReadonlyArray<TraitFastener<this, PlotTrait<X, Y>>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountPlotFasteners(): void {
     const plotFasteners = this.plotFasteners;
     for (let i = 0, n = plotFasteners.length; i < n; i += 1) {
@@ -138,7 +139,7 @@ export class GraphTrait<X, Y> extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountPlotFasteners(): void {
     const plotFasteners = this.plotFasteners;
     for (let i = 0, n = plotFasteners.length; i < n; i += 1) {
@@ -147,24 +148,24 @@ export class GraphTrait<X, Y> extends GenericTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected startConsumingPlots(): void {
     const plotFasteners = this.plotFasteners;
     for (let i = 0, n = plotFasteners.length; i < n; i += 1) {
       const plotTrait = plotFasteners[i]!.trait;
       if (plotTrait !== null) {
-        plotTrait.addTraitConsumer(this);
+        plotTrait.consume(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected stopConsumingPlots(): void {
     const plotFasteners = this.plotFasteners;
     for (let i = 0, n = plotFasteners.length; i < n; i += 1) {
       const plotTrait = plotFasteners[i]!.trait;
       if (plotTrait !== null) {
-        plotTrait.removeTraitConsumer(this);
+        plotTrait.unconsume(this);
       }
     }
   }
@@ -174,10 +175,10 @@ export class GraphTrait<X, Y> extends GenericTrait {
   }
 
   protected detectModels(model: TraitModelType<this>): void {
-    const childModels = model.childModels;
-    for (let i = 0, n = childModels.length; i < n; i += 1) {
-      const childModel = childModels[i]!;
-      const plotTrait = this.detectPlotModel(childModel);
+    const children = model.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      const plotTrait = this.detectPlotModel(child);
       if (plotTrait !== null) {
         this.insertPlot(plotTrait);
       }
@@ -191,33 +192,35 @@ export class GraphTrait<X, Y> extends GenericTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    super.onInsertChildModel(childModel, targetModel);
-    const plotTrait = this.detectPlotModel(childModel);
+  /** @protected */
+  override onInsertChild(child: Model, target: Model | null): void {
+    super.onInsertChild(child, target);
+    const plotTrait = this.detectPlotModel(child);
     if (plotTrait !== null) {
-      const targetTrait = targetModel !== null ? this.detectPlotModel(targetModel) : null;
+      const targetTrait = target !== null ? this.detectPlotModel(target) : null;
       this.insertPlot(plotTrait, targetTrait);
     }
   }
 
-  protected override onRemoveChildModel(childModel: Model): void {
-    super.onRemoveChildModel(childModel);
-    const plotTrait = this.detectPlotModel(childModel);
+  /** @protected */
+  override onRemoveChild(child: Model): void {
+    super.onRemoveChild(child);
+    const plotTrait = this.detectPlotModel(child);
     if (plotTrait !== null) {
       this.removePlot(plotTrait);
     }
   }
 
-  /** @hidden */
-  protected override mountTraitFasteners(): void {
-    super.mountTraitFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountPlotFasteners();
   }
 
-  /** @hidden */
-  protected override unmountTraitFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountPlotFasteners();
-    super.unmountTraitFasteners();
+    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import type {Color} from "@swim/style";
-import {Model} from "@swim/model";
 import {Look, Mood} from "@swim/theme";
-import {View} from "@swim/view";
+import {ViewFastener} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
-import {ControllerProperty, ControllerView, ControllerViewTrait, CompositeController} from "@swim/controller";
+import {TraitViewFastener, GenericController} from "@swim/controller";
 import {SliceView} from "./SliceView";
 import {SliceLabel, SliceLegend, SliceTrait} from "./SliceTrait";
 import type {SliceControllerObserver} from "./SliceControllerObserver";
 
-export class SliceController extends CompositeController {
-  override readonly controllerObservers!: ReadonlyArray<SliceControllerObserver>;
+export class SliceController extends GenericController {
+  override readonly observerType?: Class<SliceControllerObserver>;
 
   protected initSliceTrait(sliceTrait: SliceTrait): void {
     // hook
@@ -48,11 +48,11 @@ export class SliceController extends CompositeController {
   }
 
   protected willSetSliceTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceTrait !== void 0) {
-        controllerObserver.controllerWillSetSliceTrait(newSliceTrait, oldSliceTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceTrait !== void 0) {
+        observer.controllerWillSetSliceTrait(newSliceTrait, oldSliceTrait, this);
       }
     }
   }
@@ -68,29 +68,29 @@ export class SliceController extends CompositeController {
   }
 
   protected didSetSliceTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceTrait !== void 0) {
-        controllerObserver.controllerDidSetSliceTrait(newSliceTrait, oldSliceTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceTrait !== void 0) {
+        observer.controllerDidSetSliceTrait(newSliceTrait, oldSliceTrait, this);
       }
     }
   }
 
   protected updateLabel(value: number, sliceTrait: SliceTrait): void {
-    if (sliceTrait.label.takesPrecedence(Model.Intrinsic)) {
+    if (sliceTrait.label.hasAffinity(Affinity.Intrinsic)) {
       const label = sliceTrait.formatLabel(value);
       if (label !== void 0) {
-        sliceTrait.label.setState(label, Model.Intrinsic);
+        sliceTrait.label.setState(label, Affinity.Intrinsic);
       }
     }
   }
 
   protected updateLegend(value: number, sliceTrait: SliceTrait): void {
-    if (sliceTrait.legend.takesPrecedence(Model.Intrinsic)) {
+    if (sliceTrait.legend.hasAffinity(Affinity.Intrinsic)) {
       const legend = sliceTrait.formatLegend(value);
       if (legend !== void 0) {
-        sliceTrait.legend.setState(legend, Model.Intrinsic);
+        sliceTrait.legend.setState(legend, Affinity.Intrinsic);
       }
     }
   }
@@ -130,11 +130,11 @@ export class SliceController extends CompositeController {
   }
 
   protected willSetSliceView(newSliceView: SliceView | null, oldSliceView: SliceView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceView !== void 0) {
-        controllerObserver.controllerWillSetSliceView(newSliceView, oldSliceView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceView !== void 0) {
+        observer.controllerWillSetSliceView(newSliceView, oldSliceView, this);
       }
     }
   }
@@ -150,18 +150,18 @@ export class SliceController extends CompositeController {
   }
 
   protected didSetSliceView(newSliceView: SliceView | null, oldSliceView: SliceView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceView !== void 0) {
-        controllerObserver.controllerDidSetSliceView(newSliceView, oldSliceView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceView !== void 0) {
+        observer.controllerDidSetSliceView(newSliceView, oldSliceView, this);
       }
     }
   }
 
   protected setValue(value: number, timing?: AnyTiming | boolean): void {
     const sliceView = this.slice.view;
-    if (sliceView !== null && sliceView.value.takesPrecedence(View.Intrinsic)) {
+    if (sliceView !== null && sliceView.value.hasAffinity(Affinity.Intrinsic)) {
       if (timing === void 0 || timing === true) {
         timing = this.sliceTiming.state;
         if (timing === true) {
@@ -170,16 +170,16 @@ export class SliceController extends CompositeController {
       } else {
         timing = Timing.fromAny(timing);
       }
-      sliceView.value.setState(value, timing, View.Intrinsic);
+      sliceView.value.setState(value, timing, Affinity.Intrinsic);
     }
   }
 
   protected willSetValue(newValue: number, oldValue: number, sliceView: SliceView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceValue !== void 0) {
-        controllerObserver.controllerWillSetSliceValue(newValue, oldValue, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceValue !== void 0) {
+        observer.controllerWillSetSliceValue(newValue, oldValue, this);
       }
     }
   }
@@ -194,11 +194,11 @@ export class SliceController extends CompositeController {
   }
 
   protected didSetValue(newValue: number, oldValue: number, sliceView: SliceView): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceValue !== void 0) {
-        controllerObserver.controllerDidSetSliceValue(newValue, oldValue, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceValue !== void 0) {
+        observer.controllerDidSetSliceValue(newValue, oldValue, this);
       }
     }
   }
@@ -215,9 +215,9 @@ export class SliceController extends CompositeController {
         timing = Timing.fromAny(timing);
       }
       if (sliceColor instanceof Look) {
-        sliceView.sliceColor.setLook(sliceColor, timing, View.Intrinsic);
+        sliceView.sliceColor.setLook(sliceColor, timing, Affinity.Intrinsic);
       } else {
-        sliceView.sliceColor.setState(sliceColor, timing, View.Intrinsic);
+        sliceView.sliceColor.setState(sliceColor, timing, Affinity.Intrinsic);
       }
     }
   }
@@ -251,11 +251,11 @@ export class SliceController extends CompositeController {
   }
 
   protected willSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceLabelView !== void 0) {
-        controllerObserver.controllerWillSetSliceLabelView(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceLabelView !== void 0) {
+        observer.controllerWillSetSliceLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -271,11 +271,11 @@ export class SliceController extends CompositeController {
   }
 
   protected didSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceLabelView !== void 0) {
-        controllerObserver.controllerDidSetSliceLabelView(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceLabelView !== void 0) {
+        observer.controllerDidSetSliceLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -309,11 +309,11 @@ export class SliceController extends CompositeController {
   }
 
   protected willSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceLegendView !== void 0) {
-        controllerObserver.controllerWillSetSliceLegendView(newLegendView, oldLegendView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceLegendView !== void 0) {
+        observer.controllerWillSetSliceLegendView(newLegendView, oldLegendView, this);
       }
     }
   }
@@ -329,22 +329,45 @@ export class SliceController extends CompositeController {
   }
 
   protected didSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceLegendView !== void 0) {
-        controllerObserver.controllerDidSetSliceLegendView(newLegendView, oldLegendView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceLegendView !== void 0) {
+        observer.controllerDidSetSliceLegendView(newLegendView, oldLegendView, this);
       }
     }
   }
 
-  @ControllerProperty({type: Timing, inherit: true})
-  readonly sliceTiming!: ControllerProperty<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({type: Timing, inherits: true})
+  readonly sliceTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  /** @hidden */
-  static SliceFastener = ControllerViewTrait.define<SliceController, SliceView, SliceTrait>({
+  /** @internal */
+  static SliceFastener = TraitViewFastener.define<SliceController, SliceTrait, SliceView>({
+    traitType: SliceTrait,
+    observesTrait: true,
+    willSetTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
+      this.owner.willSetSliceTrait(newSliceTrait, oldSliceTrait);
+    },
+    onSetTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
+      this.owner.onSetSliceTrait(newSliceTrait, oldSliceTrait);
+    },
+    didSetTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
+      this.owner.didSetSliceTrait(newSliceTrait, oldSliceTrait);
+    },
+    traitDidSetSliceValue(newValue: number, oldValue: number): void {
+      this.owner.setValue(newValue);
+    },
+    traitDidSetSliceColor(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
+      this.owner.setSliceColor(newSliceColor);
+    },
+    traitDidSetSliceLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
+      this.owner.setLabelView(newLabel);
+    },
+    traitDidSetSliceLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
+      this.owner.setLegendView(newLegend);
+    },
     viewType: SliceView,
-    observeView: true,
+    observesView: true,
     willSetView(newSliceView: SliceView | null, oldSliceView: SliceView | null): void {
       this.owner.willSetSliceView(newSliceView, oldSliceView);
     },
@@ -370,37 +393,14 @@ export class SliceController extends CompositeController {
     createView(): SliceView | null {
       return this.owner.createSliceView();
     },
-    traitType: SliceTrait,
-    observeTrait: true,
-    willSetTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
-      this.owner.willSetSliceTrait(newSliceTrait, oldSliceTrait);
-    },
-    onSetTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
-      this.owner.onSetSliceTrait(newSliceTrait, oldSliceTrait);
-    },
-    didSetTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
-      this.owner.didSetSliceTrait(newSliceTrait, oldSliceTrait);
-    },
-    traitDidSetSliceValue(newValue: number, oldValue: number): void {
-      this.owner.setValue(newValue);
-    },
-    traitDidSetSliceColor(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
-      this.owner.setSliceColor(newSliceColor);
-    },
-    traitDidSetSliceLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
-      this.owner.setLabelView(newLabel);
-    },
-    traitDidSetSliceLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
-      this.owner.setLegendView(newLegend);
-    },
   });
 
-  @ControllerViewTrait<SliceController, SliceView, SliceTrait>({
+  @TraitViewFastener<SliceController, SliceTrait, SliceView>({
     extends: SliceController.SliceFastener,
   })
-  readonly slice!: ControllerViewTrait<this, SliceView, SliceTrait>;
+  readonly slice!: TraitViewFastener<this, SliceTrait, SliceView>;
 
-  @ControllerView<SliceController, GraphicsView>({
+  @ViewFastener<SliceController, GraphicsView>({
     key: true,
     willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.willSetLabelView(newLabelView, oldLabelView);
@@ -412,9 +412,9 @@ export class SliceController extends CompositeController {
       this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
-  readonly label!: ControllerView<this, GraphicsView>;
+  readonly label!: ViewFastener<this, GraphicsView>;
 
-  @ControllerView<SliceController, GraphicsView>({
+  @ViewFastener<SliceController, GraphicsView>({
     key: true,
     willSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
       this.owner.willSetLegendView(newLegendView, oldLegendView);
@@ -426,5 +426,5 @@ export class SliceController extends CompositeController {
       this.owner.didSetLegendView(newLegendView, oldLegendView);
     },
   })
-  readonly legend!: ControllerView<this, GraphicsView>;
+  readonly legend!: ViewFastener<this, GraphicsView>;
 }

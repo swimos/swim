@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {ControllerViewTrait} from "@swim/controller";
+import type {Class} from "@swim/util";
+import type {TraitViewFastener} from "@swim/controller";
 import {PlotController} from "./PlotController";
 import type {SeriesPlotView} from "./SeriesPlotView";
 import type {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {SeriesPlotControllerObserver} from "./SeriesPlotControllerObserver";
 
 export abstract class SeriesPlotController<X, Y> extends PlotController<X, Y> {
-  override readonly controllerObservers!: ReadonlyArray<SeriesPlotControllerObserver<X, Y>>;
+  override readonly observerType?: Class<SeriesPlotControllerObserver<X, Y>>;
 
-  abstract override readonly plot: ControllerViewTrait<this, SeriesPlotView<X, Y>, SeriesPlotTrait<X, Y>>;
+  abstract override readonly plot: TraitViewFastener<this, SeriesPlotTrait<X, Y>, SeriesPlotView<X, Y>>;
 }

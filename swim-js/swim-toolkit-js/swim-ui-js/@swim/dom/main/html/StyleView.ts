@@ -12,75 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Timing} from "@swim/util";
+import type {Class, Timing} from "@swim/util";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
-import type {CssRule} from "../css/CssRule";
-import {StyleSheetContext, StyleSheet} from "../css/StyleSheet";
+import type {StyleContext} from "../css/StyleContext";
+import {StyleSheet} from "../css/StyleSheet";
 import {HtmlViewInit, HtmlView} from "../html/HtmlView";
 import type {StyleViewObserver} from "./StyleViewObserver";
 
 export interface StyleViewInit extends HtmlViewInit {
 }
 
-export class StyleView extends HtmlView implements StyleSheetContext {
+export class StyleView extends HtmlView implements StyleContext {
   constructor(node: HTMLStyleElement) {
     super(node);
-    this.sheet = null;
   }
+
+  override readonly observerType?: Class<StyleViewObserver>;
 
   override readonly node!: HTMLStyleElement;
 
-  override readonly viewObservers!: ReadonlyArray<StyleViewObserver>;
-
-  override initView(init: StyleViewInit): void {
-    super.initView(init);
-  }
-
-  readonly sheet: StyleSheet | null;
-
-  protected createSheet(): StyleSheet | null {
-    const stylesheet = this.node.sheet;
-    return stylesheet !== null ? new StyleSheet(this, stylesheet) : null;
-  }
-
-  hasCssRule(ruleName: string): boolean {
-    const sheet = this.sheet;
-    return sheet !== null && sheet.hasCssRule(ruleName);
-  }
-
-  getCssRule(ruleName: string): CssRule<StyleSheet> | null {
-    const sheet = this.sheet;
-    return sheet !== null ? sheet.getCssRule(ruleName) : null;
-  }
+  @StyleSheet<StyleView>({
+    eager: true,
+    createStylesheet(): CSSStyleSheet {
+      return this.owner.node.sheet!;
+    },
+  })
+  readonly sheet!: StyleSheet<this>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    const sheet = this.sheet;
-    if (sheet !== null) {
-      sheet.applyTheme(theme, mood, timing);
-    }
+    this.sheet.applyTheme(theme, mood, timing);
   }
 
-  protected override onMount(): void {
-    super.onMount();
-    const sheet = this.createSheet();
-    (this as Mutable<this>).sheet = sheet;
-    if (sheet !== null) {
-      sheet.mount();
-    }
+  override init(init: StyleViewInit): void {
+    super.init(init);
   }
 
-  protected override onUnmount(): void {
-    const sheet = this.sheet;
-    if (sheet !== null) {
-      sheet.unmount();
-    }
-    (this as Mutable<this>).sheet = null;
-    super.onUnmount();
-  }
-
-  /** @hidden */
+  /** @internal */
   static override readonly tag: string = "style";
 }
-
-HtmlView.Tag("style")(StyleView, "style");

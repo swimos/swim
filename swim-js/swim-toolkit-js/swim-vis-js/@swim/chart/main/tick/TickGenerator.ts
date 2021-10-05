@@ -86,7 +86,7 @@ export abstract class TickGenerator<D> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static step(dx: number, n: number): number {
     const step0 = Math.abs(dx) / n;
     let step1 = Math.pow(10, Math.floor(Math.log(step0) / Math.LN10));
@@ -103,11 +103,11 @@ export abstract class TickGenerator<D> {
 }
 
 export class NumberTickGenerator extends TickGenerator<number> {
-  /** @hidden */
+  /** @internal */
   protected x0: number;
-  /** @hidden */
+  /** @internal */
   protected dx: number;
-  /** @hidden */
+  /** @internal */
   protected n: number;
 
   constructor(x0: number, x1: number, n: number) {
@@ -187,7 +187,7 @@ export class NumberTickGenerator extends TickGenerator<number> {
     return ticks;
   }
 
-  /** @hidden */
+  /** @internal */
   static interval(dx: number, n: number = 10): number {
     const step = dx / n;
     const power = Math.floor(Math.log(step) / Math.LN10);
@@ -199,13 +199,13 @@ export class NumberTickGenerator extends TickGenerator<number> {
 }
 
 export class TimeTickGenerator extends TickGenerator<DateTime> {
-  /** @hidden */
+  /** @internal */
   protected t0: number;
-  /** @hidden */
+  /** @internal */
   protected dt: number;
-  /** @hidden */
+  /** @internal */
   protected zone: TimeZone;
-  /** @hidden */
+  /** @internal */
   protected n: number;
 
   constructor(t0: AnyDateTime, t1: AnyDateTime, n: number, zone?: TimeZone) {
@@ -297,7 +297,7 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static interval(dt: number, interval: TimeInterval | number = 10): TimeInterval {
     if (typeof interval === "number") {
       const t = Math.abs(dt) / interval;

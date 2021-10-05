@@ -28,7 +28,7 @@ export class Data extends Value {
     this.flags = flags;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly array: Uint8Array | null;
 
   override isConstant(): boolean {
@@ -37,7 +37,7 @@ export class Data extends Value {
 
   readonly size: number;
 
-  /** @hidden */
+  /** @internal */
   readonly flags: number;
 
   getByte(index: number): number {
@@ -61,7 +61,7 @@ export class Data extends Value {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   setByteAliased(index: number, value: number): Data {
     const n = this.size;
     const oldArray = this.array!;
@@ -73,7 +73,7 @@ export class Data extends Value {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   setByteMutable(index: number, value: number): Data {
     this.array![index] = value;
     return this;
@@ -91,7 +91,7 @@ export class Data extends Value {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   addByteAliased(value: number): Data {
     const n = this.size;
     const oldArray = this.array;
@@ -106,7 +106,7 @@ export class Data extends Value {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   addByteMutable(value: number): Data {
     const n = this.size;
     const oldArray = this.array;
@@ -150,7 +150,7 @@ export class Data extends Value {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   addUint8ArrayAliased(array: Uint8Array): Data {
     const size = array.length;
     if (size === 0) {
@@ -169,7 +169,7 @@ export class Data extends Value {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   addUint8ArrayMutable(array: Uint8Array): Data {
     const size = array.length;
     if (size === 0) {
@@ -381,9 +381,9 @@ export class Data extends Value {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static readonly AliasedFlag: number = 1 << 0;
-  /** @hidden */
+  /** @internal */
   static readonly ImmutableFlag: number = 1 << 1;
 
   @Lazy
@@ -443,7 +443,7 @@ export class Data extends Value {
     return new DataOutput(data, OutputSettings.standard());
   }
 
-  /** @hidden */
+  /** @internal */
   static expand(n: number): number {
     n = Math.max(32, n) - 1;
     n |= n >> 1; n |= n >> 2; n |= n >> 4; n |= n >> 8; n |= n >> 16;

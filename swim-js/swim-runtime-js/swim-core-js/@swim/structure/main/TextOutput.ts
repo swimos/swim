@@ -16,7 +16,7 @@ import type {Mutable} from "@swim/util";
 import {AnyOutputSettings, OutputSettings, Output} from "@swim/codec";
 import {Text} from "./Text";
 
-/** @hidden */
+/** @internal */
 export class TextOutput extends Output<Text> {
   constructor(string: string, settings: OutputSettings) {
     super();
@@ -24,7 +24,7 @@ export class TextOutput extends Output<Text> {
     this.settings = settings;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly string: string;
 
   override isCont(): boolean {

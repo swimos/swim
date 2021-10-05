@@ -23,7 +23,7 @@ import {DownlinkModel} from "./DownlinkModel";
 import type {DownlinkType} from "./Downlink";
 import type {MapDownlink} from "./MapDownlink";
 
-/** @hidden */
+/** @internal */
 export class MapDownlinkModel extends DownlinkModel {
   constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
               prio?: number, rate?: number, body?: Value, state: BTree<Value, Value> = new BTree()) {
@@ -33,7 +33,7 @@ export class MapDownlinkModel extends DownlinkModel {
 
   override readonly views!: ReadonlyArray<MapDownlink<unknown, unknown>>;
 
-  /** @hidden */
+  /** @internal */
   readonly state: BTree<Value, Value>;
 
   override get type(): DownlinkType {

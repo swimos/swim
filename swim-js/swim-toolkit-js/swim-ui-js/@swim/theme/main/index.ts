@@ -20,6 +20,8 @@ export * from "./mood";
 
 export * from "./theme";
 
+export * from "./animator";
+
 export * from "./looks";
 
 export * from "./feels";

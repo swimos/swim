@@ -23,10 +23,10 @@ export abstract class AbstractOutlet<O> implements Outlet<O> {
     this.version = -1;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly outputs: ReadonlyArray<Inlet<O>>;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   abstract get(): O | undefined;

@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import {AnyGeoPath, GeoPath, GeoBox} from "@swim/geo";
-import {TraitProperty} from "@swim/model";
 import {GeoTrait} from "../geo/GeoTrait";
 import type {GeoPathTraitObserver} from "./GeoPathTraitObserver";
 
 export abstract class GeoPathTrait extends GeoTrait {
-  override readonly traitObservers!: ReadonlyArray<GeoPathTraitObserver>;
+  override readonly observerType?: Class<GeoPathTraitObserver>;
 
   override get geoBounds(): GeoBox {
     const geoPath = this.geoPath.state;
@@ -26,9 +27,9 @@ export abstract class GeoPathTrait extends GeoTrait {
   }
 
   protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetGeoPath !== void 0) {
         traitObserver.traitWillSetGeoPath(newGeoPath, oldGeoPath, this);
       }
@@ -40,16 +41,16 @@ export abstract class GeoPathTrait extends GeoTrait {
   }
 
   protected didSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetGeoPath !== void 0) {
         traitObserver.traitDidSetGeoPath(newGeoPath, oldGeoPath, this);
       }
     }
   }
 
-  @TraitProperty<GeoPathTrait, GeoPath | null, AnyGeoPath | null>({
+  @Property<GeoPathTrait, GeoPath | null, AnyGeoPath | null>({
     type: GeoPath,
     state: null,
     willSetState(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
@@ -60,5 +61,5 @@ export abstract class GeoPathTrait extends GeoTrait {
       this.owner.didSetGeoPath(newGeoPath, oldGeoPath);
     },
   })
-  readonly geoPath!: TraitProperty<this, GeoPath | null, AnyGeoPath | null>;
+  readonly geoPath!: Property<this, GeoPath | null, AnyGeoPath | null>;
 }

@@ -469,6 +469,6 @@ export class Arc implements Graphics, Equals, Debug {
     };
   }
 
-  /** @hidden */
+  /** @internal */
   static Epsilon: number = 1e-12;
 }

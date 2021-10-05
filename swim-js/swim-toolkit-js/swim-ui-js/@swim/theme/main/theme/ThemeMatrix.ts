@@ -32,16 +32,16 @@ export class ThemeMatrix implements Equals, Debug {
     this.colIndex = colIndex;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly rowArray: ReadonlyArray<[Look<unknown>, LookVector<unknown>]>;
 
-  /** @hidden */
+  /** @internal */
   readonly rowIndex: {readonly [name: string]: number | undefined};
 
-  /** @hidden */
+  /** @internal */
   readonly colArray: ReadonlyArray<[Feel, FeelVector]>;
 
-  /** @hidden */
+  /** @internal */
   readonly colIndex: {readonly [name: string]: number | undefined};
 
   get rowCount(): number {

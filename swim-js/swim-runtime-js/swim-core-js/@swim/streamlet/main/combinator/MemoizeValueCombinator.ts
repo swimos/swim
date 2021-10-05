@@ -22,7 +22,7 @@ export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
     this.state = void 0;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly state: IO | undefined;
 
   override get(): IO | undefined {

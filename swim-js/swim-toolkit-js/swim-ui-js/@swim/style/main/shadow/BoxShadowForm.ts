@@ -17,7 +17,7 @@ import {Length} from "@swim/math";
 import {Color} from "../color/Color";
 import {AnyBoxShadow, BoxShadow} from "./BoxShadow";
 
-/** @hidden */
+/** @internal */
 export class BoxShadowForm extends Form<BoxShadow | null, AnyBoxShadow> {
   constructor(unit: BoxShadow | null | undefined) {
     super();

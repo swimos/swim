@@ -14,14 +14,14 @@
 
 import {Cursor} from "@swim/util";
 
-/** @hidden */
+/** @internal */
 export class ValuesCursor<K, V> extends Cursor<V> {
   constructor(cursor: Cursor<[K, V]>) {
     super();
     this.cursor = cursor;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly cursor: Cursor<[K, V]>;
 
   override isEmpty(): boolean {

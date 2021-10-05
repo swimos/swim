@@ -48,7 +48,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     (this as Mutable<this>).streamletContext = context;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   override isEmpty(): boolean {

@@ -12,222 +12,450 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Arrays, AnyTiming, Timing} from "@swim/util";
+import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
+import {
+  FastenerContext,
+  FastenerOwner,
+  FastenerInit,
+  FastenerClass,
+  Fastener,
+} from "@swim/fastener";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,
-  ConstraintBinding,
+  ConstraintProperty,
   ConstraintRelation,
   AnyConstraintStrength,
   Constraint,
   ConstraintScope,
 } from "@swim/constraint";
-import {Look, Feel, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
-import type {AnimationTrack, AnimationTimeline} from "@swim/view";
-import {CssContext} from "./CssContext";
-import type {CssRule} from "./CssRule";
+import {Look, Feel, Mood, MoodVector, ThemeMatrix, ThemeContext} from "@swim/theme";
+import type {CssContext} from "./CssContext";
+import {CssRule} from "./CssRule";
 
-export interface StyleSheetContext extends AnimationTimeline, ConstraintScope {
-  getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined;
+export interface StyleSheetInit extends FastenerInit {
+  css?: string | (() => string | undefined);
 
-  getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
+  createStylesheet?(): CSSStyleSheet;
+  initStylesheet?(stylesheet: CSSStyleSheet): void;
 }
 
-export class StyleSheet implements AnimationTrack, CssContext {
-  constructor(owner: StyleSheetContext, stylesheet?: CSSStyleSheet) {
-    this.owner = owner;
-    this.stylesheet = stylesheet !== void 0 ? stylesheet : this.createStylesheet();
-    this.cssRules = {};
-    this.animationTracks = Arrays.empty;
-  }
+export type StyleSheetDescriptor<O = unknown, I = {}> = ThisType<StyleSheet<O> & I> & StyleSheetInit & Partial<I>;
 
-  readonly owner: StyleSheetContext;
+export interface StyleSheetClass<F extends StyleSheet<any> = StyleSheet<any>> extends FastenerClass<F> {
+  create(this: StyleSheetClass<F>, owner: FastenerOwner<F>, sheetName: string): F;
+
+  construct(sheetClass: StyleSheetClass, sheet: F | null, owner: FastenerOwner<F>, sheetName: string): F;
+
+  extend(this: StyleSheetClass<F>, classMembers?: {} | null): StyleSheetClass<F>;
+
+  define<O, I = {}>(descriptor: {extends: StyleSheetClass | null} & StyleSheetDescriptor<O, I>): StyleSheetClass<StyleSheet<any> & I>;
+  define<O>(descriptor: StyleSheetDescriptor<O>): StyleSheetClass<StyleSheet<any>>;
+
+  <O, I = {}>(descriptor: {extends: StyleSheetClass | null} & StyleSheetDescriptor<O, I>): PropertyDecorator;
+  <O>(descriptor: StyleSheetDescriptor<O>): PropertyDecorator;
+}
+
+export interface StyleSheet<O = unknown> extends Fastener<O>, FastenerContext, ConstraintScope, ThemeContext, CssContext {
+  /** @override */
+  get familyType(): Class<StyleSheet<any>> | null;
 
   readonly stylesheet: CSSStyleSheet;
 
-  protected createStylesheet(): CSSStyleSheet {
-    return new CSSStyleSheet();
-  }
+  /** @override */
+  getRule(index: number): CSSRule | null;
 
-  getRule(index: number): CSSRule | null {
+  /** @override */
+  insertRule(cssText: string, index?: number): number;
+
+  /** @override */
+  removeRule(index: number): void;
+
+  /** @internal */
+  readonly fasteners: {[fastenerName: string]: Fastener | undefined} | null;
+
+  /** @override */
+  hasFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): boolean;
+
+  /** @override */
+  getFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Class<F>): F | null;
+  /** @override */
+  getFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null;
+
+  /** @override */
+  setFastener(fastenerName: string, fastener: Fastener | null): void;
+
+  /** @override */
+  getLazyFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Class<F>): F | null;
+  /** @override */
+  getLazyFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null;
+
+  /** @override */
+  getSuperFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Class<F>): F | null;
+  /** @override */
+  getSuperFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null;
+  /** @internal @override */
+  getSuperFastener(): Fastener | null;
+
+  /** @internal @protected */
+  mountFasteners(): void;
+
+  /** @internal @protected */
+  unmountFasteners(): void;
+
+  /** @override */
+  requireUpdate(updateFlags: number): void;
+
+  /** @internal */
+  readonly decoherent: ReadonlyArray<Fastener> | null;
+
+  /** @override */
+  decohereFastener(fastener: Fastener): void;
+
+  /** @override */
+  recohere(t: number): void
+
+  /** @internal @protected */
+  recohereFasteners(t: number): void
+
+  /** @override */
+  constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
+             rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint;
+
+  /** @override */
+  hasConstraint(constraint: Constraint): boolean;
+
+  /** @override */
+  addConstraint(constraint: Constraint): void;
+
+  /** @override */
+  removeConstraint(constraint: Constraint): void;
+
+  /** @override */
+  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstraintProperty<unknown, number>;
+
+  /** @override */
+  hasConstraintVariable(variable: ConstraintVariable): boolean;
+
+  /** @override */
+  addConstraintVariable(variable: ConstraintVariable): void;
+
+  /** @override */
+  removeConstraintVariable(variable: ConstraintVariable): void;
+
+  /** @internal @override */
+  setConstraintVariable(constraintVariable: ConstraintVariable, state: number): void;
+
+  /** @override */
+  getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined;
+
+  /** @override */
+  getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
+  /** @override */
+  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
+
+  applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean | null): void;
+
+  /** @protected @override */
+  onMount(): void;
+
+  /** @protected @override */
+  onUnmount(): void;
+
+  /** @internal */
+  createStylesheet(): CSSStyleSheet;
+
+  /** @internal */
+  initStylesheet?(stylesheet: CSSStyleSheet): void;
+
+  /** @internal */
+  initCss?(): string | undefined;
+}
+
+export const StyleSheet = (function (_super: typeof Fastener) {
+  const StyleSheet = _super.extend() as StyleSheetClass;
+
+  Object.defineProperty(StyleSheet.prototype, "familyType", {
+    get: function (this: StyleSheet): Class<StyleSheet<any>> | null {
+      return StyleSheet;
+    },
+    configurable: true,
+  });
+
+  StyleSheet.prototype.getRule = function (this: StyleSheet, index: number): CSSRule | null {
     return this.stylesheet.cssRules.item(index);
-  }
+  };
 
-  insertRule(cssText: string, index?: number): number {
+  StyleSheet.prototype.insertRule = function (this: StyleSheet, cssText: string, index?: number): number {
     return this.stylesheet.insertRule(cssText, index);
-  }
+  };
 
-  removeRule(index: number): void {
+  StyleSheet.prototype.removeRule = function (this: StyleSheet, index: number): void {
     this.stylesheet.deleteRule(index);
-  }
+  };
 
-  /** @hidden */
-  readonly cssRules: {[ruleName: string]: CssRule<StyleSheet> | undefined};
-
-  hasCssRule(ruleName: string): boolean {
-    return this.cssRules[ruleName] !== void 0;
-  }
-
-  getCssRule(ruleName: string): CssRule<this> | null {
-    const cssRule = this.cssRules[ruleName] as CssRule<this> | undefined;
-    return cssRule !== void 0 ? cssRule : null;
-  }
-
-  setCssRule(ruleName: string, cssRule: CssRule<this> | null): void {
-    if (cssRule !== null) {
-      this.cssRules[ruleName] = cssRule;
-    } else {
-      delete this.cssRules[ruleName];
-    }
-  }
-
-  /** @hidden */
-  getLazyCssRule(ruleName: string): CssRule<this> | null {
-    let cssRule = this.getCssRule(ruleName);
-    if (cssRule === null) {
-      const constructor = CssContext.getCssRuleConstructor(ruleName, Object.getPrototypeOf(this));
-      if (constructor !== null) {
-        cssRule = new constructor(this, ruleName);
-        this.setCssRule(ruleName, cssRule);
+  StyleSheet.prototype.hasFastener = function (this: StyleSheet, fastenerName: string, fastenerBound?: Class<Fastener> | null): boolean {
+    const fasteners = this.fasteners;
+    if (fasteners !== null) {
+      const fastener = fasteners[fastenerName];
+      if (fastener !== void 0 && (fastenerBound === void 0 || fastenerBound === null || fastener instanceof fastenerBound)) {
+        return true;
       }
     }
-    return cssRule;
-  }
+    return false;
+  };
 
-  getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
-    return this.owner.getLook(look, mood);
-  }
-
-  getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
-    if (arguments.length === 2) {
-      return this.owner.getLookOr(look, mood as E);
-    } else {
-      return this.owner.getLookOr(look, mood as MoodVector<Feel> | null, elseValue!);
+  StyleSheet.prototype.getFastener = function (this: StyleSheet, fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null {
+    const fasteners = this.fasteners;
+    if (fasteners !== null) {
+      const fastener = fasteners[fastenerName];
+      if (fastener !== void 0 && (fastenerBound === void 0 || fastenerBound === null || fastener instanceof fastenerBound)) {
+        return fastener;
+      }
     }
-  }
+    return null;
+  };
 
-  applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void {
+  StyleSheet.prototype.setFastener = function (this: StyleSheet, fastenerName: string, newFastener: Fastener | null): void {
+    let fasteners = this.fasteners;
+    if (fasteners === null) {
+      fasteners = {};
+      (this as Mutable<typeof this>).fasteners = fasteners;
+    }
+    const oldFastener = fasteners[fastenerName];
+    if (oldFastener !== void 0 && this.mounted) {
+      oldFastener.unmount();
+    }
+    if (newFastener !== null) {
+      fasteners[fastenerName] = newFastener;
+      if (this.mounted) {
+        newFastener.mount();
+      }
+    } else {
+      delete fasteners[fastenerName];
+    }
+  };
+
+  StyleSheet.prototype.getLazyFastener = function (this: StyleSheet, fastenerName: string, fastenerBound?: Class<Fastener> | null): Fastener | null {
+    return FastenerContext.getLazyFastener(this, fastenerName, fastenerBound);
+  };
+
+  StyleSheet.prototype.getSuperFastener = function (this: StyleSheet, fastenerName?: string, fastenerBound?: Class<Fastener> | null): Fastener | null {
+    if (arguments.length === 0) {
+      return _super.prototype.getSuperFastener.call(this);
+    } else {
+      return null;
+    }
+  };
+
+  StyleSheet.prototype.mountFasteners = function (this: StyleSheet): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      fastener.mount();
+    }
+    FastenerContext.init(this);
+  };
+
+  StyleSheet.prototype.unmountFasteners = function (this: StyleSheet): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      fastener.unmount();
+    }
+  };
+
+  StyleSheet.prototype.requireUpdate = function (this: StyleSheet, updateFlags: number): void {
+    const fastenerContext = this.owner;
+    if (FastenerContext.has(fastenerContext, "requireUpdate")) {
+      fastenerContext.requireUpdate(updateFlags);
+    }
+  };
+
+  StyleSheet.prototype.decohereFastener = function (this: StyleSheet, fastener: Fastener): void {
+    let decoherent = this.decoherent as Fastener[];
+    if (decoherent === null) {
+      decoherent = [];
+      (this as Mutable<typeof this>).decoherent = decoherent;
+    }
+    decoherent.push(fastener);
+
+    if (this.coherent) {
+      this.setCoherent(false);
+      this.decohere();
+    }
+  };
+
+  StyleSheet.prototype.recohereFasteners = function (this: StyleSheet, t: number): void {
+    const decoherent = this.decoherent;
+    if (decoherent !== null) {
+      const decoherentCount = decoherent.length;
+      if (decoherentCount !== 0) {
+        (this as Mutable<typeof this>).decoherent = null;
+        for (let i = 0; i < decoherentCount; i += 1) {
+          const fastener = decoherent[i]!;
+          fastener.recohere(t);
+        }
+      }
+    }
+  };
+
+  StyleSheet.prototype.recohere = function (this: StyleSheet, t: number): void {
+    this.recohereFasteners(t);
+    if (this.decoherent === null || this.decoherent.length === 0) {
+      this.setCoherent(true);
+    } else {
+      this.setCoherent(false);
+      this.decohere();
+    }
+  };
+
+  StyleSheet.prototype.constraint = function (this: StyleSheet<ConstraintScope>, lhs: AnyConstraintExpression, relation: ConstraintRelation,
+                                              rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {
+    return this.owner.constraint(lhs, relation, rhs, strength);
+  };
+
+  StyleSheet.prototype.hasConstraint = function (this: StyleSheet<ConstraintScope>, constraint: Constraint): boolean {
+    return this.owner.hasConstraint(constraint);
+  };
+
+  StyleSheet.prototype.addConstraint = function (this: StyleSheet<ConstraintScope>, constraint: Constraint): void {
+    this.owner.addConstraint(constraint);
+  };
+
+  StyleSheet.prototype.removeConstraint = function (this: StyleSheet<ConstraintScope>, constraint: Constraint): void {
+    this.owner.removeConstraint(constraint);
+  };
+
+  StyleSheet.prototype.constraintVariable = function (this: StyleSheet<ConstraintScope>, name: string, value?: number, strength?: AnyConstraintStrength): ConstraintProperty<unknown, number> {
+    return this.owner.constraintVariable(name, value, strength);
+  };
+
+  StyleSheet.prototype.hasConstraintVariable = function (this: StyleSheet<ConstraintScope>, constraintVariable: ConstraintVariable): boolean {
+    return this.owner.hasConstraintVariable(constraintVariable);
+  };
+
+  StyleSheet.prototype.addConstraintVariable = function (this: StyleSheet<ConstraintScope>, constraintVariable: ConstraintVariable): void {
+    this.owner.addConstraintVariable(constraintVariable);
+  };
+
+  StyleSheet.prototype.removeConstraintVariable = function (this: StyleSheet<ConstraintScope>, constraintVariable: ConstraintVariable): void {
+    this.owner.removeConstraintVariable(constraintVariable);
+  };
+
+  StyleSheet.prototype.setConstraintVariable = function (this: StyleSheet<ConstraintScope>, constraintVariable: ConstraintVariable, state: number): void {
+    this.owner.setConstraintVariable(constraintVariable, state);
+  };
+
+  StyleSheet.prototype.getLook = function <T>(this: StyleSheet, look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
+    const themeContext = this.owner;
+    if (ThemeContext.is(themeContext)) {
+      return themeContext.getLook(look, mood);
+    } else {
+      return void 0;
+    }
+  };
+
+  StyleSheet.prototype.getLookOr = function <T, E>(this: StyleSheet, look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
+    const themeContext = this.owner;
+    if (ThemeContext.is(themeContext)) {
+      if (arguments.length === 2) {
+        return themeContext.getLookOr(look, mood as E);
+      } else {
+        return themeContext.getLookOr(look, mood as MoodVector<Feel> | null, elseValue!);
+      }
+    } else if (arguments.length === 2) {
+      return mood as E;
+    } else {
+      return elseValue!;
+    }
+  };
+
+  StyleSheet.prototype.applyTheme = function (this: StyleSheet, theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean | null): void {
     if (timing === void 0 || timing === true) {
       timing = theme.getOr(Look.timing, Mood.ambient, false);
     } else {
       timing = Timing.fromAny(timing);
     }
-    const cssRules = this.cssRules;
-    for (const ruleName in cssRules) {
-      const cssRule = cssRules[ruleName]!;
-      cssRule.applyTheme(theme, mood, timing);
-    }
-  }
-
-  onAnimate(t: number): void {
-    this.updateAnimations(t);
-  }
-
-  /** @hidden */
-  updateAnimations(t: number): void {
-    const animationTracks = this.animationTracks;
-    for (let i = 0, n = animationTracks.length; i < n; i += 1) {
-      const track = animationTracks[i]!;
-      track.onAnimate(t);
-    }
-  }
-
-  /** @hidden */
-  readonly animationTracks: ReadonlyArray<AnimationTrack>;
-
-  trackWillStartAnimating(track: AnimationTrack): void {
-    const oldTracks = this.animationTracks;
-    const newTracks = Arrays.inserted(track, oldTracks);
-    if (oldTracks !== newTracks) {
-      (this as Mutable<this>).animationTracks = newTracks;
-      if (oldTracks.length === 0) {
-        this.owner.trackWillStartAnimating(this);
-        this.owner.trackDidStartAnimating(this);
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      if (fastener instanceof CssRule) {
+        fastener.applyTheme(theme, mood, timing);
       }
     }
-  }
+  };
 
-  trackDidStartAnimating(track: AnimationTrack): void {
-    // hook
-  }
+  StyleSheet.prototype.onMount = function (this: StyleSheet): void {
+    _super.prototype.onMount.call(this);
+    this.mountFasteners();
+  };
 
-  trackWillStopAnimating(track: AnimationTrack): void {
-    // hook
-  }
+  StyleSheet.prototype.onUnmount = function (this: StyleSheet): void {
+    this.unmountFasteners();
+    _super.prototype.onUnmount.call(this);
+  };
 
-  trackDidStopAnimating(track: AnimationTrack): void {
-    const oldTracks = this.animationTracks;
-    const newTracks = Arrays.removed(track, oldTracks);
-    if (oldTracks !== newTracks) {
-      (this as Mutable<this>).animationTracks = newTracks;
-      if (newTracks.length === 0) {
-        this.owner.trackWillStopAnimating(this);
-        this.owner.trackDidStopAnimating(this);
+  StyleSheet.prototype.createStylesheet = function (this: StyleSheet): CSSStyleSheet {
+    return new CSSStyleSheet();
+  };
+
+  StyleSheet.construct = function <F extends StyleSheet<any>>(sheetClass: StyleSheetClass, sheet: F | null, owner: FastenerOwner<F>, sheetName: string): F {
+    sheet = _super.construct(sheetClass, sheet, owner, sheetName) as F;
+    (sheet as Mutable<typeof sheet>).fasteners = null;
+    (sheet as Mutable<typeof sheet>).decoherent = null;
+    (sheet as Mutable<typeof sheet>).stylesheet = null as unknown as CSSStyleSheet;
+    return sheet;
+  };
+
+  StyleSheet.define = function <O>(descriptor: StyleSheetDescriptor<O>): StyleSheetClass<StyleSheet<any>> {
+    let superClass = descriptor.extends as StyleSheetClass | undefined;
+    const affinity = descriptor.affinity;
+    const inherits = descriptor.inherits;
+    let css = descriptor.css;
+    delete descriptor.extends;
+    delete descriptor.affinity;
+    delete descriptor.inherits;
+    delete descriptor.css;
+
+    if (superClass === void 0 || superClass === null) {
+      superClass = this;
+    }
+
+    const sheetClass = superClass.extend(descriptor);
+
+    if (typeof css === "function") {
+      sheetClass.prototype.initCss = css;
+      css = void 0;
+    }
+
+    sheetClass.construct = function (sheetClass: StyleSheetClass, sheet: StyleSheet<O> | null, owner: O, sheetName: string): StyleSheet<O> {
+      sheet = superClass!.construct(sheetClass, sheet, owner, sheetName);
+
+      if (affinity !== void 0) {
+        sheet.initAffinity(affinity);
       }
-    }
-  }
+      if (inherits !== void 0) {
+        sheet.initInherits(inherits);
+      }
 
-  constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
-             rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {
-    return this.owner.constraint(lhs, relation, rhs, strength);
-  }
+      //let cssText: string | undefined;
+      //if (css !== void 0) {
+      //  cssText = css as string;
+      //} else if (sheet.initCss !== void 0) {
+      //  cssText = sheet.initCss();
+      //}
 
-  hasConstraint(constraint: Constraint): boolean {
-    return this.owner.hasConstraint(constraint);
-  }
+      (sheet as Mutable<typeof sheet>).stylesheet = sheet.createStylesheet();
+      if (sheet.initStylesheet !== void 0) {
+        sheet.initStylesheet(sheet.stylesheet);
+      }
 
-  addConstraint(constraint: Constraint): void {
-    return this.owner.addConstraint(constraint);
-  }
+      return sheet;
+    };
 
-  removeConstraint(constraint: Constraint): void {
-    return this.owner.removeConstraint(constraint);
-  }
+    return sheetClass;
+  };
 
-  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstraintBinding {
-    return this.owner.constraintVariable(name, value, strength);
-  }
-
-  hasConstraintVariable(constraintVariable: ConstraintVariable): boolean {
-    return this.owner.hasConstraintVariable(constraintVariable);
-  }
-
-  addConstraintVariable(constraintVariable: ConstraintVariable): void {
-    this.owner.addConstraintVariable(constraintVariable);
-  }
-
-  removeConstraintVariable(constraintVariable: ConstraintVariable): void {
-    this.owner.removeConstraintVariable(constraintVariable);
-  }
-
-  setConstraintVariable(constraintVariable: ConstraintVariable, state: number): void {
-    this.owner.setConstraintVariable(constraintVariable, state);
-  }
-
-  requireUpdate(updateFlags: number): void {
-    if (typeof (this.owner as any).requireUpdate === "function") {
-      (this.owner as any).requireUpdate(updateFlags);
-    }
-  }
-
-  /** @hidden */
-  mount(): void {
-    const cssRules = this.cssRules;
-    for (const ruleName in cssRules) {
-      const cssRule = cssRules[ruleName]!;
-      cssRule.mount();
-    }
-  }
-
-  /** @hidden */
-  unmount(): void {
-    const cssRules = this.cssRules;
-    for (const ruleName in cssRules) {
-      const cssRule = cssRules[ruleName]!;
-      cssRule.unmount();
-    }
-  }
-}
+  return StyleSheet;
+})(Fastener);

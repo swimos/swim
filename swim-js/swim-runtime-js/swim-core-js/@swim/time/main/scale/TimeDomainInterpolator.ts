@@ -16,27 +16,31 @@ import {Mutable, Interpolator} from "@swim/util";
 import {DateTime} from "../DateTime";
 import {TimeDomain} from "./TimeDomain";
 
-/** @hidden */
-export const TimeDomainInterpolator = function (x0: TimeDomain, x1: TimeDomain): Interpolator<TimeDomain> {
-  const interpolator = function (u: number): TimeDomain {
-    const x0 = interpolator[0];
-    const x00 = x0[0];
-    const x01 = x0[1];
-    const x1 = interpolator[1];
-    const x10 = x1[0];
-    const x11 = x1[1];
-    return TimeDomain(new DateTime(x00.time + u * (x10.time - x00.time), u === 0 ? x00.zone : x10.zone),
-                      new DateTime(x01.time + u * (x11.time - x01.time), u === 0 ? x01.zone : x11.zone));
-  } as Interpolator<TimeDomain>;
-  Object.setPrototypeOf(interpolator, TimeDomainInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = x0;
-  (interpolator as Mutable<typeof interpolator>)[1] = x1;
-  return interpolator;
-} as {
-  (x0: TimeDomain, x1: TimeDomain): Interpolator<TimeDomain>;
+/** @internal */
+export const TimeDomainInterpolator = (function (_super: typeof Interpolator) {
+  const TimeDomainInterpolator = function (x0: TimeDomain, x1: TimeDomain): Interpolator<TimeDomain> {
+    const interpolator = function (u: number): TimeDomain {
+      const x0 = interpolator[0];
+      const x00 = x0[0];
+      const x01 = x0[1];
+      const x1 = interpolator[1];
+      const x10 = x1[0];
+      const x11 = x1[1];
+      return TimeDomain(new DateTime(x00.time + u * (x10.time - x00.time), u === 0 ? x00.zone : x10.zone),
+                        new DateTime(x01.time + u * (x11.time - x01.time), u === 0 ? x01.zone : x11.zone));
+    } as Interpolator<TimeDomain>;
+    Object.setPrototypeOf(interpolator, TimeDomainInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = x0;
+    (interpolator as Mutable<typeof interpolator>)[1] = x1;
+    return interpolator;
+  } as {
+    (x0: TimeDomain, x1: TimeDomain): Interpolator<TimeDomain>;
 
-  /** @hidden */
-  prototype: Interpolator<TimeDomain>;
-};
+    /** @internal */
+    prototype: Interpolator<TimeDomain>;
+  };
 
-TimeDomainInterpolator.prototype = Object.create(Interpolator.prototype);
+  TimeDomainInterpolator.prototype = Object.create(_super.prototype);
+
+  return TimeDomainInterpolator;
+})(Interpolator);

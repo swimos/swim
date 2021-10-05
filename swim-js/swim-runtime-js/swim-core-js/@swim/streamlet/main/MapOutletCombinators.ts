@@ -41,85 +41,89 @@ export interface MapOutletCombinators<K, V, O> extends OutletCombinators<O> {
   watch(func: WatchFieldsFunction<K, V>): this;
 }
 
-export const MapOutletCombinators = {} as {
-  define<K, V, O>(prototype: MapOutletCombinators<K, V, O>): void;
+export const MapOutletCombinators = (function () {
+  const MapOutletCombinators = {} as {
+    define<K, V, O>(prototype: MapOutletCombinators<K, V, O>): void;
 
-  /** @hidden */
-  memoize<K, V, O>(this: MapOutlet<K, V, O>): MapOutlet<K, V, O>;
+    /** @internal */
+    memoize<K, V, O>(this: MapOutlet<K, V, O>): MapOutlet<K, V, O>;
 
-  /** @hidden */
-  filter<K, V, O>(this: MapOutlet<K, V, O>, func: FilterFieldsFunction<K, V>): MapOutlet<K, V, Map<K, V>>;
+    /** @internal */
+    filter<K, V, O>(this: MapOutlet<K, V, O>, func: FilterFieldsFunction<K, V>): MapOutlet<K, V, Map<K, V>>;
 
-  /** @hidden */
-  map<K, V, O, O2>(this: MapOutlet<K, V, O>, func: MapValueFunction<O, O2>): Outlet<O2>;
-  /** @hidden */
-  map<K, V, O, V2>(this: MapOutlet<K, V, O>, func: MapFieldValuesFunction<K, V, V2>): MapOutlet<K, V2, Map<K, V2>>;
+    /** @internal */
+    map<K, V, O, O2>(this: MapOutlet<K, V, O>, func: MapValueFunction<O, O2>): Outlet<O2>;
+    /** @internal */
+    map<K, V, O, V2>(this: MapOutlet<K, V, O>, func: MapFieldValuesFunction<K, V, V2>): MapOutlet<K, V2, Map<K, V2>>;
 
-  /** @hidden */
-  reduce<K, V, O, U>(this: MapOutlet<K, V, O>, identity: U, accumulator: (result: U, element: V) => U, combiner: (result: U, result2: U) => U): Outlet<U>;
+    /** @internal */
+    reduce<K, V, O, U>(this: MapOutlet<K, V, O>, identity: U, accumulator: (result: U, element: V) => U, combiner: (result: U, result2: U) => U): Outlet<U>;
 
-  /** @hidden */
-  watch<K, V, O>(this: MapOutlet<K, V, O>, func: WatchValueFunction<O>): MapOutlet<K, V, O>;
-  /** @hidden */
-  watch<K, V, O>(this: MapOutlet<K, V, O>, func: WatchFieldsFunction<K, V>): MapOutlet<K, V, O>;
-};
+    /** @internal */
+    watch<K, V, O>(this: MapOutlet<K, V, O>, func: WatchValueFunction<O>): MapOutlet<K, V, O>;
+    /** @internal */
+    watch<K, V, O>(this: MapOutlet<K, V, O>, func: WatchFieldsFunction<K, V>): MapOutlet<K, V, O>;
+  };
 
-MapOutletCombinators.define = function <K, V, O>(prototype: MapOutlet<K, V, O>): void {
-  if (!Object.prototype.hasOwnProperty.call(prototype, "memoize")) {
-    prototype.memoize = MapOutletCombinators.memoize;
-  }
-  if (!Object.prototype.hasOwnProperty.call(prototype, "filterr")) {
-    prototype.filter = MapOutletCombinators.filter;
-  }
-  if (!Object.prototype.hasOwnProperty.call(prototype, "map")) {
-    prototype.map = MapOutletCombinators.map;
-  }
-  if (!Object.prototype.hasOwnProperty.call(prototype, "reduce")) {
-    prototype.reduce = MapOutletCombinators.reduce;
-  }
-  if (!Object.prototype.hasOwnProperty.call(prototype, "watch")) {
-    prototype.watch = MapOutletCombinators.watch;
-  }
-};
+  MapOutletCombinators.define = function <K, V, O>(prototype: MapOutlet<K, V, O>): void {
+    if (!Object.prototype.hasOwnProperty.call(prototype, "memoize")) {
+      prototype.memoize = MapOutletCombinators.memoize;
+    }
+    if (!Object.prototype.hasOwnProperty.call(prototype, "filterr")) {
+      prototype.filter = MapOutletCombinators.filter;
+    }
+    if (!Object.prototype.hasOwnProperty.call(prototype, "map")) {
+      prototype.map = MapOutletCombinators.map;
+    }
+    if (!Object.prototype.hasOwnProperty.call(prototype, "reduce")) {
+      prototype.reduce = MapOutletCombinators.reduce;
+    }
+    if (!Object.prototype.hasOwnProperty.call(prototype, "watch")) {
+      prototype.watch = MapOutletCombinators.watch;
+    }
+  };
 
-MapOutletCombinators.memoize = function <K, V, O>(this: MapOutlet<K, V, O>): MapOutlet<K, V, O> {
-  const combinator = new MemoizeMapCombinator<K, V, O>();
-  combinator.bindInput(this);
-  return combinator;
-};
-
-MapOutletCombinators.filter = function <K, V, O>(this: MapOutlet<K, V, O>, func: FilterFieldsFunction<K, V>): MapOutlet<K, V, Map<K, V>> {
-  const combinator = new FilterFieldsCombinator<K, V, O>(func);
-  combinator.bindInput(this);
-  return combinator;
-};
-
-MapOutletCombinators.map = function <K, V, O, V2>(this: MapOutlet<K, V, O>, func: MapValueFunction<O, V2> | MapFieldValuesFunction<K, V, V2>): Outlet<V2> | MapOutlet<K, V2, Map<K, V2>> {
-  if (func.length === 1) {
-    const combinator = new MapValueCombinator<O, V2>(func as MapValueFunction<O, V2>);
+  MapOutletCombinators.memoize = function <K, V, O>(this: MapOutlet<K, V, O>): MapOutlet<K, V, O> {
+    const combinator = new MemoizeMapCombinator<K, V, O>();
     combinator.bindInput(this);
     return combinator;
-  } else {
-    const combinator = new MapFieldValuesCombinator<K, V, V2, O>(func as MapFieldValuesFunction<K, V, V2>);
+  };
+
+  MapOutletCombinators.filter = function <K, V, O>(this: MapOutlet<K, V, O>, func: FilterFieldsFunction<K, V>): MapOutlet<K, V, Map<K, V>> {
+    const combinator = new FilterFieldsCombinator<K, V, O>(func);
     combinator.bindInput(this);
     return combinator;
-  }
-} as typeof MapOutletCombinators.map;
+  };
 
-MapOutletCombinators.reduce = function <K, V, O, U>(this: MapOutlet<K, V, O>, identity: U, accumulator: (result: U, element: V) => U, combiner: (result: U, result2: U) => U): Outlet<U> {
-  const combinator = new ReduceFieldsCombinator<K, V, O, U>(identity, accumulator, combiner);
-  combinator.bindInput(this);
-  return combinator;
-};
+  MapOutletCombinators.map = function <K, V, O, V2>(this: MapOutlet<K, V, O>, func: MapValueFunction<O, V2> | MapFieldValuesFunction<K, V, V2>): Outlet<V2> | MapOutlet<K, V2, Map<K, V2>> {
+    if (func.length === 1) {
+      const combinator = new MapValueCombinator<O, V2>(func as MapValueFunction<O, V2>);
+      combinator.bindInput(this);
+      return combinator;
+    } else {
+      const combinator = new MapFieldValuesCombinator<K, V, V2, O>(func as MapFieldValuesFunction<K, V, V2>);
+      combinator.bindInput(this);
+      return combinator;
+    }
+  } as typeof MapOutletCombinators.map;
 
-MapOutletCombinators.watch = function <K, V, O>(this: MapOutlet<K, V, O>, func: WatchValueFunction<O> | WatchFieldsFunction<K, V>): MapOutlet<K, V, O> {
-  if (func.length === 1) {
-    const combinator = new WatchValueCombinator<O>(func as WatchValueFunction<O>);
+  MapOutletCombinators.reduce = function <K, V, O, U>(this: MapOutlet<K, V, O>, identity: U, accumulator: (result: U, element: V) => U, combiner: (result: U, result2: U) => U): Outlet<U> {
+    const combinator = new ReduceFieldsCombinator<K, V, O, U>(identity, accumulator, combiner);
     combinator.bindInput(this);
-    return this;
-  } else {
-    const combinator = new WatchFieldsCombinator<K, V, O>(func as WatchFieldsFunction<K, V>);
-    combinator.bindInput(this);
-    return this;
-  }
-};
+    return combinator;
+  };
+
+  MapOutletCombinators.watch = function <K, V, O>(this: MapOutlet<K, V, O>, func: WatchValueFunction<O> | WatchFieldsFunction<K, V>): MapOutlet<K, V, O> {
+    if (func.length === 1) {
+      const combinator = new WatchValueCombinator<O>(func as WatchValueFunction<O>);
+      combinator.bindInput(this);
+      return this;
+    } else {
+      const combinator = new WatchFieldsCombinator<K, V, O>(func as WatchFieldsFunction<K, V>);
+      combinator.bindInput(this);
+      return this;
+    }
+  };
+
+  return MapOutletCombinators;
+})();

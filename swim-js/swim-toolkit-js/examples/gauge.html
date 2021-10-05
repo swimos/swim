@@ -17,7 +17,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .mouseEventsEnabled(true)
@@ -25,11 +25,11 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const gaugeView = canvasView.append(swim.GaugeView)
+const gaugeView = canvasView.appendChild(swim.GaugeView)
     .font("14px sans-serif")
     .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"));
 
-const dialView = gaugeView.append(swim.DialView)
+const dialView = gaugeView.appendChild(swim.DialView)
     .value(0.33)
     .legend("Legend")
     .on("pointerenter", function (event) {
@@ -44,7 +44,7 @@ setInterval(function () {
   dialView.value(Math.random(), timing);
 }, 1000);
 
-containerView.append(canvasView);
+containerView.appendChild(canvasView);
 
     </script>
   </body>

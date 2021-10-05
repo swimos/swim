@@ -14,7 +14,7 @@
 
 /// <reference types="google.maps"/>
 
-import {Lazy, Equivalent, Mutable, AnyTiming} from "@swim/util";
+import {Mutable, Class, Lazy, Equivalent, AnyTiming} from "@swim/util";
 import {GeoPoint} from "@swim/geo";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {ViewHtml, HtmlView} from "@swim/dom";
@@ -39,7 +39,7 @@ export class GoogleMapView extends MapView {
     this.initMap(map);
   }
 
-  override readonly viewObservers!: ReadonlyArray<GoogleMapViewObserver>;
+  override readonly observerType?: Class<GoogleMapViewObserver>;
 
   readonly map: google.maps.Map;
 
@@ -55,7 +55,7 @@ export class GoogleMapView extends MapView {
     return mapOverlay;
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get MapOverlay(): {new(owner: GoogleMapView): google.maps.OverlayView} {
     return class GoogleMapOverlayView extends google.maps.OverlayView {
@@ -83,11 +83,11 @@ export class GoogleMapView extends MapView {
   override readonly geoViewport!: GoogleMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoViewport !== void 0) {
-        viewObserver.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoViewport !== void 0) {
+        observer.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
     }
   }
@@ -97,11 +97,11 @@ export class GoogleMapView extends MapView {
   }
 
   protected didSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!
-      if (viewObserver.viewDidSetGeoViewport !== void 0) {
-        viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!
+      if (observer.viewDidSetGeoViewport !== void 0) {
+        observer.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
     }
   }
@@ -120,7 +120,7 @@ export class GoogleMapView extends MapView {
   }
 
   protected override willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    if ((this.viewFlags & View.NeedsProject) !== 0 && this.updateGeoViewport()) {
+    if ((this.flags & View.NeedsProject) !== 0 && this.updateGeoViewport()) {
       (viewContext as Mutable<ViewContextType<this>>).geoViewport = this.geoViewport;
     }
     super.willProcess(processFlags, viewContext);
@@ -128,7 +128,7 @@ export class GoogleMapView extends MapView {
 
   protected onMapDraw(): void {
     if (this.updateGeoViewport()) {
-      const immediate = !this.isHidden() && !this.isCulled();
+      const immediate = !this.isHidden() && !this.culled;
       this.requireUpdate(View.NeedsProject, immediate);
     }
   }
@@ -162,14 +162,14 @@ export class GoogleMapView extends MapView {
 
   protected override attachCanvas(canvasView: CanvasView): void {
     super.attachCanvas(canvasView);
-    if (this.parentView === null) {
-      canvasView.appendChildView(this);
+    if (this.parent === null) {
+      canvasView.appendChild(this);
     }
   }
 
   protected override detachCanvas(canvasView: CanvasView): void {
-    if (this.parentView === canvasView) {
-      canvasView.removeChildView(this);
+    if (this.parent === canvasView) {
+      canvasView.removeChild(this);
     }
     super.detachCanvas(canvasView);
   }
@@ -194,8 +194,8 @@ export class GoogleMapView extends MapView {
     const mapPanes = this.mapOverlay.getPanes();
     if (mapPanes !== void 0 && mapPanes !== null) {
       const overlayMouseTargetView = (mapPanes.overlayMouseTarget as ViewHtml).view!;
-      const overlayContainerView = overlayMouseTargetView.parentView as HtmlView;
-      const canvasContainerView = overlayContainerView.parentView as HtmlView;
+      const overlayContainerView = overlayMouseTargetView.parent as HtmlView;
+      const canvasContainerView = overlayContainerView.parent as HtmlView;
       this.canvas.injectView(canvasContainerView);
     } else if (this.canvas.view === null) {
       this.canvas.setView(this.canvas.createView());
@@ -207,10 +207,10 @@ export class GoogleMapView extends MapView {
     const mapPanes = this.mapOverlay.getPanes();
     if (mapPanes !== void 0 && mapPanes !== null) {
       const overlayMouseTargetView = (mapPanes.overlayMouseTarget as ViewHtml).view!;
-      const overlayContainerView = overlayMouseTargetView.parentView as HtmlView;
-      const canvasContainerView = overlayContainerView.parentView as HtmlView;
-      if (canvasView !== null && canvasView.parentView === canvasContainerView) {
-        canvasContainerView.removeChildView(containerView);
+      const overlayContainerView = overlayMouseTargetView.parent as HtmlView;
+      const canvasContainerView = overlayContainerView.parent as HtmlView;
+      if (canvasView !== null && canvasView.parent === canvasContainerView) {
+        canvasContainerView.removeChild(containerView);
       }
     }
     super.detachContainer(containerView);

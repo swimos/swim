@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
-import {View} from "@swim/view";
-import {ControllerViewTrait, ControllerFastener} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener} from "@swim/controller";
 import type {DataPointController} from "../data/DataPointController";
 import {DataSetTrait} from "../data/DataSetTrait";
 import {LinePlotView} from "./LinePlotView";
@@ -26,7 +26,7 @@ import {SeriesPlotController} from "./SeriesPlotController";
 import type {LinePlotControllerObserver} from "./LinePlotControllerObserver";
 
 export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
-  override readonly controllerObservers!: ReadonlyArray<LinePlotControllerObserver<X, Y>>;
+  override readonly observerType?: Class<LinePlotControllerObserver<X, Y>>;
 
   protected detectDataSet(plotTrait: LinePlotTrait<X, Y>): DataSetTrait<X, Y> | null {
     return plotTrait.getTrait(DataSetTrait);
@@ -68,11 +68,11 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected willSetPlotTrait(newPlotTrait: LinePlotTrait<X, Y> | null, oldPlotTrait: LinePlotTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotTrait !== void 0) {
-        controllerObserver.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotTrait !== void 0) {
+        observer.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       }
     }
   }
@@ -88,17 +88,17 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected didSetPlotTrait(newPlotTrait: LinePlotTrait<X, Y> | null, oldPlotTrait: LinePlotTrait<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotTrait !== void 0) {
-        controllerObserver.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotTrait !== void 0) {
+        observer.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       }
     }
   }
 
   protected createPlotView(): LinePlotView<X, Y> {
-    return LinePlotView.create<X, Y>();
+    return new LinePlotView<X, Y>();
   }
 
   protected initPlotView(plotView: LinePlotView<X, Y>): void {
@@ -132,11 +132,11 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected willSetPlotView(newPlotView: LinePlotView<X, Y> | null, oldPlotView: LinePlotView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotView !== void 0) {
-        controllerObserver.controllerWillSetPlotView(newPlotView, oldPlotView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotView !== void 0) {
+        observer.controllerWillSetPlotView(newPlotView, oldPlotView, this);
       }
     }
   }
@@ -152,11 +152,11 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected didSetPlotView(newPlotView: LinePlotView<X, Y> | null, oldPlotView: LinePlotView<X, Y> | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotView !== void 0) {
-        controllerObserver.controllerDidSetPlotView(newPlotView, oldPlotView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotView !== void 0) {
+        observer.controllerDidSetPlotView(newPlotView, oldPlotView, this);
       }
     }
   }
@@ -173,19 +173,19 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
         timing = Timing.fromAny(timing);
       }
       if (stroke instanceof Look) {
-        plotView.stroke.setLook(stroke, timing, View.Intrinsic);
+        plotView.stroke.setLook(stroke, timing, Affinity.Intrinsic);
       } else {
-        plotView.stroke.setState(stroke, timing, View.Intrinsic);
+        plotView.stroke.setState(stroke, timing, Affinity.Intrinsic);
       }
     }
   }
 
   protected willSetPlotStroke(newStroke: Color | null, oldStroke: Color | null, plotView: LinePlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotStroke !== void 0) {
-        controllerObserver.controllerWillSetPlotStroke(newStroke, oldStroke, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotStroke !== void 0) {
+        observer.controllerWillSetPlotStroke(newStroke, oldStroke, this);
       }
     }
   }
@@ -195,11 +195,11 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected didSetPlotStroke(newStroke: Color | null, oldStroke: Color | null, plotView: LinePlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotStroke !== void 0) {
-        controllerObserver.controllerDidSetPlotStroke(newStroke, oldStroke, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotStroke !== void 0) {
+        observer.controllerDidSetPlotStroke(newStroke, oldStroke, this);
       }
     }
   }
@@ -215,16 +215,16 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
       } else {
         timing = Timing.fromAny(timing);
       }
-      plotView.strokeWidth.setState(strokeWidth, timing, View.Intrinsic);
+      plotView.strokeWidth.setState(strokeWidth, timing, Affinity.Intrinsic);
     }
   }
 
   protected willSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, plotView: LinePlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPlotStrokeWidth !== void 0) {
-        controllerObserver.controllerWillSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPlotStrokeWidth !== void 0) {
+        observer.controllerWillSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
     }
   }
@@ -234,19 +234,36 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
   }
 
   protected didSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, plotView: LinePlotView<X, Y>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPlotStrokeWidth !== void 0) {
-        controllerObserver.controllerDidSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPlotStrokeWidth !== void 0) {
+        observer.controllerDidSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
     }
   }
 
-  /** @hidden */
-  static PlotFastener = ControllerViewTrait.define<LinePlotController<unknown, unknown>, LinePlotView<unknown, unknown>, LinePlotTrait<unknown, unknown>>({
+  /** @internal */
+  static PlotFastener = TraitViewFastener.define<LinePlotController<unknown, unknown>, LinePlotTrait<unknown, unknown>, LinePlotView<unknown, unknown>>({
+    traitType: LinePlotTrait,
+    observesTrait: true,
+    willSetTrait(newPlotTrait: LinePlotTrait<unknown, unknown> | null, oldPlotTrait: LinePlotTrait<unknown, unknown> | null): void {
+      this.owner.willSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    onSetTrait(newPlotTrait: LinePlotTrait<unknown, unknown> | null, oldPlotTrait: LinePlotTrait<unknown, unknown> | null): void {
+      this.owner.onSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    didSetTrait(newPlotTrait: LinePlotTrait<unknown, unknown> | null, oldPlotTrait: LinePlotTrait<unknown, unknown> | null): void {
+      this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
+    },
+    traitDidSetPlotStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
+      this.owner.setPlotStroke(newStroke);
+    },
+    traitDidSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+      this.owner.setPlotStrokeWidth(newStrokeWidth);
+    },
     viewType: LinePlotView,
-    observeView: true,
+    observesView: true,
     willSetView(newPlotView: LinePlotView<unknown, unknown> | null, oldPlotView: LinePlotView<unknown, unknown> | null): void {
       this.owner.willSetPlotView(newPlotView, oldPlotView);
     },
@@ -273,27 +290,10 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
     createView(): LinePlotView<unknown, unknown> | null {
       return this.owner.createPlotView();
     },
-    traitType: LinePlotTrait,
-    observeTrait: true,
-    willSetTrait(newPlotTrait: LinePlotTrait<unknown, unknown> | null, oldPlotTrait: LinePlotTrait<unknown, unknown> | null): void {
-      this.owner.willSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    onSetTrait(newPlotTrait: LinePlotTrait<unknown, unknown> | null, oldPlotTrait: LinePlotTrait<unknown, unknown> | null): void {
-      this.owner.onSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    didSetTrait(newPlotTrait: LinePlotTrait<unknown, unknown> | null, oldPlotTrait: LinePlotTrait<unknown, unknown> | null): void {
-      this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
-    },
-    traitDidSetPlotStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.setPlotStroke(newStroke);
-    },
-    traitDidSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.setPlotStrokeWidth(newStrokeWidth);
-    },
   });
 
-  @ControllerViewTrait<LinePlotController<X, Y>, LinePlotView<X, Y>, LinePlotTrait<X, Y>>({
+  @TraitViewFastener<LinePlotController<X, Y>, LinePlotTrait<X, Y>, LinePlotView<X, Y>>({
     extends: LinePlotController.PlotFastener,
   })
-  readonly plot!: ControllerViewTrait<this, LinePlotView<X, Y>, LinePlotTrait<X, Y>>;
+  readonly plot!: TraitViewFastener<this, LinePlotTrait<X, Y>, LinePlotView<X, Y>>;
 }

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {Mutable, Interpolator} from "@swim/util";
 import type {FontStyle} from "./FontStyle";
 import type {FontVariant} from "./FontVariant";
@@ -23,21 +22,21 @@ import type {LineHeight} from "./LineHeight";
 import type {FontFamily} from "./FontFamily";
 import {Font} from "./Font";
 
-/** @hidden */
-export declare abstract class FontInterpolator {
-  /** @hidden */
+/** @intenal */
+export interface FontInterpolator extends Interpolator<Font> {
+  /** @intenal */
   readonly styleInterpolator: Interpolator<FontStyle | undefined>;
-  /** @hidden */
+  /** @intenal */
   readonly variantInterpolator: Interpolator<FontVariant | undefined>;
-  /** @hidden */
+  /** @intenal */
   readonly weightInterpolator: Interpolator<FontWeight | undefined>;
-  /** @hidden */
+  /** @intenal */
   readonly stretchInterpolator: Interpolator<FontStretch | undefined>;
-  /** @hidden */
+  /** @intenal */
   readonly sizeInterpolator: Interpolator<FontSize | null>;
-  /** @hidden */
+  /** @intenal */
   readonly heightInterpolator: Interpolator<LineHeight | null>;
-  /** @hidden */
+  /** @intenal */
   readonly familyInterpolator: Interpolator<FontFamily | ReadonlyArray<FontFamily>>;
 
   get 0(): Font;
@@ -47,74 +46,79 @@ export declare abstract class FontInterpolator {
   equals(that: unknown): boolean;
 }
 
-export interface FontInterpolator extends Interpolator<Font> {
-}
+/** @intenal */
+export const FontInterpolator = (function (_super: typeof Interpolator) {
+  const FontInterpolator = function (f0: Font, f1: Font): FontInterpolator {
+    const interpolator = function (u: number): Font {
+      const style = interpolator.styleInterpolator(u);
+      const variant = interpolator.variantInterpolator(u);
+      const weight = interpolator.weightInterpolator(u);
+      const stretch = interpolator.stretchInterpolator(u);
+      const size = interpolator.sizeInterpolator(u);
+      const height = interpolator.heightInterpolator(u);
+      const family = interpolator.familyInterpolator(u);
+      return new Font(style, variant, weight, stretch, size, height, family);
+    } as FontInterpolator;
+    Object.setPrototypeOf(interpolator, FontInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).styleInterpolator = Interpolator(f0.style, f1.style);
+    (interpolator as Mutable<typeof interpolator>).variantInterpolator = Interpolator(f0.variant, f1.variant);
+    (interpolator as Mutable<typeof interpolator>).weightInterpolator = Interpolator(f0.weight, f1.weight);
+    (interpolator as Mutable<typeof interpolator>).stretchInterpolator = Interpolator(f0.stretch, f1.stretch);
+    (interpolator as Mutable<typeof interpolator>).sizeInterpolator = Interpolator(f0.size, f1.size);
+    (interpolator as Mutable<typeof interpolator>).heightInterpolator = Interpolator(f0.height, f1.height);
+    (interpolator as Mutable<typeof interpolator>).familyInterpolator = Interpolator(f0.family, f1.family);
+    return interpolator;
+  } as {
+    (f0: Font, f1: Font): FontInterpolator;
 
-/** @hidden */
-export function FontInterpolator(y0: Font, y1: Font): FontInterpolator {
-  const interpolator = function (u: number): Font {
-    const style = interpolator.styleInterpolator(u);
-    const variant = interpolator.variantInterpolator(u);
-    const weight = interpolator.weightInterpolator(u);
-    const stretch = interpolator.stretchInterpolator(u);
-    const size = interpolator.sizeInterpolator(u);
-    const height = interpolator.heightInterpolator(u);
-    const family = interpolator.familyInterpolator(u);
-    return new Font(style, variant, weight, stretch, size, height, family);
-  } as FontInterpolator;
-  Object.setPrototypeOf(interpolator, FontInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).styleInterpolator = Interpolator(y0.style, y1.style);
-  (interpolator as Mutable<typeof interpolator>).variantInterpolator = Interpolator(y0.variant, y1.variant);
-  (interpolator as Mutable<typeof interpolator>).weightInterpolator = Interpolator(y0.weight, y1.weight);
-  (interpolator as Mutable<typeof interpolator>).stretchInterpolator = Interpolator(y0.stretch, y1.stretch);
-  (interpolator as Mutable<typeof interpolator>).sizeInterpolator = Interpolator(y0.size, y1.size);
-  (interpolator as Mutable<typeof interpolator>).heightInterpolator = Interpolator(y0.height, y1.height);
-  (interpolator as Mutable<typeof interpolator>).familyInterpolator = Interpolator(y0.family, y1.family);
-  return interpolator;
-}
-__extends(FontInterpolator, Interpolator);
+    /** @internal */
+    prototype: FontInterpolator;
+  };
 
-Object.defineProperty(FontInterpolator.prototype, 0, {
-  get(this: FontInterpolator): Font {
-    const style = this.styleInterpolator[0];
-    const variant = this.variantInterpolator[0];
-    const weight = this.weightInterpolator[0];
-    const stretch = this.stretchInterpolator[0];
-    const size = this.sizeInterpolator[0];
-    const height = this.heightInterpolator[0];
-    const family = this.familyInterpolator[0];
-    return new Font(style, variant, weight, stretch, size, height, family);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  FontInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(FontInterpolator.prototype, 1, {
-  get(this: FontInterpolator): Font {
-    const style = this.styleInterpolator[1];
-    const variant = this.variantInterpolator[1];
-    const weight = this.weightInterpolator[1];
-    const stretch = this.stretchInterpolator[1];
-    const size = this.sizeInterpolator[1];
-    const height = this.heightInterpolator[1];
-    const family = this.familyInterpolator[1];
-    return new Font(style, variant, weight, stretch, size, height, family);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(FontInterpolator.prototype, 0, {
+    get(this: FontInterpolator): Font {
+      const style = this.styleInterpolator[0];
+      const variant = this.variantInterpolator[0];
+      const weight = this.weightInterpolator[0];
+      const stretch = this.stretchInterpolator[0];
+      const size = this.sizeInterpolator[0];
+      const height = this.heightInterpolator[0];
+      const family = this.familyInterpolator[0];
+      return new Font(style, variant, weight, stretch, size, height, family);
+    },
+    configurable: true,
+  });
 
-FontInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof FontInterpolator) {
-    return this.styleInterpolator.equals(that.styleInterpolator)
-        && this.variantInterpolator.equals(that.variantInterpolator)
-        && this.weightInterpolator.equals(that.weightInterpolator)
-        && this.stretchInterpolator.equals(that.stretchInterpolator)
-        && this.sizeInterpolator.equals(that.sizeInterpolator)
-        && this.heightInterpolator.equals(that.heightInterpolator)
-        && this.familyInterpolator.equals(that.familyInterpolator);
-  }
-  return false;
-};
+  Object.defineProperty(FontInterpolator.prototype, 1, {
+    get(this: FontInterpolator): Font {
+      const style = this.styleInterpolator[1];
+      const variant = this.variantInterpolator[1];
+      const weight = this.weightInterpolator[1];
+      const stretch = this.stretchInterpolator[1];
+      const size = this.sizeInterpolator[1];
+      const height = this.heightInterpolator[1];
+      const family = this.familyInterpolator[1];
+      return new Font(style, variant, weight, stretch, size, height, family);
+    },
+    configurable: true,
+  });
+
+  FontInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof FontInterpolator) {
+      return this.styleInterpolator.equals(that.styleInterpolator)
+          && this.variantInterpolator.equals(that.variantInterpolator)
+          && this.weightInterpolator.equals(that.weightInterpolator)
+          && this.stretchInterpolator.equals(that.stretchInterpolator)
+          && this.sizeInterpolator.equals(that.sizeInterpolator)
+          && this.heightInterpolator.equals(that.heightInterpolator)
+          && this.familyInterpolator.equals(that.familyInterpolator);
+    }
+    return false;
+  };
+
+  return FontInterpolator;
+})(Interpolator);

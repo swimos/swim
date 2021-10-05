@@ -12,33 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {TraitModelType, Trait, TraitFastener, GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {TraitModelType, Trait, TraitFastener} from "@swim/model";
 import {DataSetTrait} from "../data/DataSetTrait";
 import type {PlotTraitObserver} from "./PlotTraitObserver";
 
-export class PlotTrait<X, Y> extends GenericTrait {
-  override readonly traitObservers!: ReadonlyArray<PlotTraitObserver<X, Y>>;
+export class PlotTrait<X, Y> extends Trait {
+  override readonly observerType?: Class<PlotTraitObserver<X, Y>>;
 
   protected initDataSet(dataSetTrait: DataSetTrait<X, Y>): void {
     // hook
   }
 
   protected attachDataSet(dataSetTrait: DataSetTrait<X, Y>): void {
-    if (this.isConsuming()) {
-      dataSetTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      dataSetTrait.consume(this);
     }
   }
 
   protected detachDataSet(dataSetTrait: DataSetTrait<X, Y>): void {
-    if (this.isConsuming()) {
-      dataSetTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      dataSetTrait.unconsume(this);
     }
   }
 
   protected willSetDataSet(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetDataSet !== void 0) {
         traitObserver.traitWillSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait, this);
       }
@@ -56,9 +57,9 @@ export class PlotTrait<X, Y> extends GenericTrait {
   }
 
   protected didSetDataSet(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetDataSet !== void 0) {
         traitObserver.traitDidSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait, this);
       }
@@ -104,7 +105,8 @@ export class PlotTrait<X, Y> extends GenericTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  /** @protected */
+  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     if (this.dataSet.trait === null) {
       const dataSetTrait = this.detectDataSetTrait(trait);
@@ -114,7 +116,8 @@ export class PlotTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected override onRemoveTrait(trait: Trait): void {
+  /** @protected */
+  override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const dataSetTrait = this.detectDataSetTrait(trait);
     if (dataSetTrait !== null && this.dataSet.trait === dataSetTrait) {
@@ -126,7 +129,7 @@ export class PlotTrait<X, Y> extends GenericTrait {
     super.onStartConsuming();
     const dataSetTrait = this.dataSet.trait;
     if (dataSetTrait !== null) {
-      dataSetTrait.addTraitConsumer(this);
+      dataSetTrait.consume(this);
     }
   }
 
@@ -134,7 +137,7 @@ export class PlotTrait<X, Y> extends GenericTrait {
     super.onStopConsuming();
     const dataSetTrait = this.dataSet.trait;
     if (dataSetTrait !== null) {
-      dataSetTrait.removeTraitConsumer(this);
+      dataSetTrait.unconsume(this);
     }
   }
 }

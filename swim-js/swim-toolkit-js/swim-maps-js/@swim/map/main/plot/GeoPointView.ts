@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AnyTiming} from "@swim/util";
+import type {Class, AnyTiming} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
 import {
   GraphicsView,
   TypesetView,
@@ -57,19 +59,14 @@ export interface GeoPointViewInit extends GeoViewInit {
 }
 
 export class GeoPointView extends GeoLayerView {
-  override initView(init: GeoPointViewInit): void {
-    super.initView(init);
-    this.setState(init);
-  }
-
-  override readonly viewObservers!: ReadonlyArray<GeoPointViewObserver>;
+  override readonly observerType?: Class<GeoPointViewObserver>;
 
   protected willSetGeoPoint(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoPoint !== void 0) {
-        viewObserver.viewWillSetGeoPoint(newGeoPoint, oldGeoPoint, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoPoint !== void 0) {
+        observer.viewWillSetGeoPoint(newGeoPoint, oldGeoPoint, this);
       }
     }
   }
@@ -80,16 +77,16 @@ export class GeoPointView extends GeoLayerView {
   }
 
   protected didSetGeoPoint(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGeoPoint !== void 0) {
-        viewObserver.viewDidSetGeoPoint(newGeoPoint, oldGeoPoint, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoPoint !== void 0) {
+        observer.viewDidSetGeoPoint(newGeoPoint, oldGeoPoint, this);
       }
     }
   }
 
-  @ViewAnimator<GeoPointView, GeoPoint, AnyGeoPoint>({
+  @ThemeAnimator<GeoPointView, GeoPoint, AnyGeoPoint>({
     type: GeoPoint,
     state: GeoPoint.origin(),
     willSetValue(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
@@ -100,31 +97,31 @@ export class GeoPointView extends GeoLayerView {
       this.owner.didSetGeoPoint(newGeoPoint, oldGeoPoint);
     },
   })
-  readonly geoPoint!: ViewAnimator<this, GeoPoint, AnyGeoPoint>;
+  readonly geoPoint!: ThemeAnimator<this, GeoPoint, AnyGeoPoint>;
 
-  @ViewAnimator({type: R2Point, state: R2Point.origin()})
-  readonly viewPoint!: ViewAnimator<this, R2Point, AnyR2Point>;
+  @ThemeAnimator({type: R2Point, state: R2Point.origin()})
+  readonly viewPoint!: ThemeAnimator<this, R2Point, AnyR2Point>;
 
-  @ViewAnimator({type: Length, state: null})
-  readonly radius!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null})
+  readonly radius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Color, state: null})
-  readonly color!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null})
+  readonly color!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Number})
-  readonly opacity!: ViewAnimator<this, number | undefined>;
+  @ThemeAnimator({type: Number})
+  readonly opacity!: ThemeAnimator<this, number | undefined>;
 
-  @ViewAnimator({type: Length, state: null})
-  readonly labelPadding!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null})
+  readonly labelPadding!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Font, state: null, inherit: true})
-  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
+  @ThemeAnimator({type: Font, state: null, inherits: true})
+  readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
-  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true})
+  readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewProperty({type: Number})
-  readonly hitRadius!: ViewProperty<this, number | undefined>;
+  @Property({type: Number})
+  readonly hitRadius!: Property<this, number | undefined>;
 
   protected initLabel(labelView: GraphicsView): void {
     // hook
@@ -139,11 +136,11 @@ export class GeoPointView extends GeoLayerView {
   }
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoLabel !== void 0) {
-        viewObserver.viewWillSetGeoLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoLabel !== void 0) {
+        observer.viewWillSetGeoLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -159,11 +156,11 @@ export class GeoPointView extends GeoLayerView {
   }
 
   protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGeoLabel !== void 0) {
-        viewObserver.viewDidSetGeoLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoLabel !== void 0) {
+        observer.viewDidSetGeoLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -171,6 +168,7 @@ export class GeoPointView extends GeoLayerView {
   @ViewFastener<GeoPointView, GraphicsView, AnyTextRunView>({
     key: true,
     type: TextRunView,
+    child: true,
     fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
       if (value instanceof GraphicsView) {
         return value;
@@ -193,8 +191,8 @@ export class GeoPointView extends GeoLayerView {
   })
   readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
-  @ViewProperty({type: String, state: "auto"})
-  readonly labelPlacement!: ViewProperty<this, GeoPointLabelPlacement>;
+  @Property({type: String, state: "auto"})
+  readonly labelPlacement!: Property<this, GeoPointLabelPlacement>;
 
   isGradientStop(): boolean {
     return this.color.value !== null || this.opacity.value !== void 0;
@@ -260,9 +258,9 @@ export class GeoPointView extends GeoLayerView {
 
   protected override onProject(viewContext: ViewContextType<this>): void {
     super.onProject(viewContext);
-    if (this.viewPoint.takesPrecedence(View.Intrinsic)) {
+    if (this.viewPoint.hasAffinity(Affinity.Intrinsic)) {
       const viewPoint = viewContext.geoViewport.project(this.geoPoint.getValue());
-      this.viewPoint.setIntermediateValue(viewPoint, viewPoint);
+      this.viewPoint.setInterpolatedValue(viewPoint, viewPoint);
     }
   }
 
@@ -289,9 +287,9 @@ export class GeoPointView extends GeoLayerView {
     }
 
     if (TypesetView.is(labelView)) {
-      labelView.textAlign.setState("center", View.Intrinsic);
-      labelView.textBaseline.setState("bottom", View.Intrinsic);
-      labelView.textOrigin.setState(new R2Point(x, y1), View.Intrinsic);
+      labelView.textAlign.setState("center", Affinity.Intrinsic);
+      labelView.textBaseline.setState("bottom", Affinity.Intrinsic);
+      labelView.textOrigin.setState(new R2Point(x, y1), Affinity.Intrinsic);
     }
   }
 
@@ -310,8 +308,7 @@ export class GeoPointView extends GeoLayerView {
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      return this.hitTestPoint(x, y, context, this.viewFrame);
+      return this.hitTestPoint(x, y, renderer.context, this.viewFrame);
     }
     return null;
   }
@@ -342,7 +339,7 @@ export class GeoPointView extends GeoLayerView {
     const init: GeoPointViewInit = {};
     init.lng = this.geoPoint.value.lng;
     init.lat = this.geoPoint.value.lat;
-    if (!this.viewPoint.takesPrecedence(View.Intrinsic)) {
+    if (!this.viewPoint.hasAffinity(Affinity.Intrinsic)) {
       init.x = this.viewPoint.value.x;
       init.y = this.viewPoint.value.y;
     }
@@ -367,31 +364,12 @@ export class GeoPointView extends GeoLayerView {
     return init;
   }
 
-  static override create(): GeoPointView {
-    return new GeoPointView();
-  }
-
-  static fromGeoPoint(point: AnyGeoPoint): GeoPointView {
-    const view = new GeoPointView();
-    view.setState(point);
-    return view;
-  }
-
-  static fromInit(init: GeoPointViewInit): GeoPointView {
-    const view = new GeoPointView();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny(value: AnyGeoPointView): GeoPointView {
-    if (value instanceof GeoPointView) {
-      return value;
-    } else if (value instanceof GeoPoint || GeoPoint.isTuple(value)) {
-      return this.fromGeoPoint(value);
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+  override init(init: AnyGeoPoint | GeoPointViewInit): void {
+    if (init instanceof GeoPoint || GeoPoint.isTuple(init)) {
+      this.setState(init);
+    } else {
+      super.init(init as GeoPointViewInit);
     }
-    throw new TypeError("" + value);
   }
 }
 Object.defineProperty(GeoPointView.prototype, "viewBounds", {
@@ -399,6 +377,5 @@ Object.defineProperty(GeoPointView.prototype, "viewBounds", {
     const {x, y} = this.viewPoint.getValue();
     return new R2Box(x, y, x, y);
   },
-  enumerable: true,
   configurable: true,
 });

@@ -17,7 +17,7 @@ bodyView.constraint(leftPaneWidth.constrain(), "eq", bodyView.width.divide(4));
 const rightPaneWidth = bodyView.constraintVariable("rightPaneWidth");
 bodyView.constraint(rightPaneWidth.constrain(), "eq", bodyView.width.minus(leftPaneWidth));
 
-const sidebar = bodyView.append("div")
+const sidebar = bodyView.appendChild("div")
     .position("absolute")
     .top(0)
     .bottom(0)
@@ -27,7 +27,7 @@ const sidebar = bodyView.append("div")
     .borderRightColor("#0000cc");
 sidebar.constraint(sidebar.width.constrain(), "eq", leftPaneWidth);
 
-const circle = bodyView.append("div")
+const circle = bodyView.appendChild("div")
     .position("absolute")
     .borderRadius("50%")
     .backgroundColor("#989898");

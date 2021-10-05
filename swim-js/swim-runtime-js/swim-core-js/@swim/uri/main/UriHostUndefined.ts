@@ -15,9 +15,9 @@
 import type {Output} from "@swim/codec";
 import {UriHost} from "./UriHost";
 
-/** @hidden */
+/** @internal */
 export class UriHostUndefined extends UriHost {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }

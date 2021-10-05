@@ -12,63 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
-import {GenericTrait} from "../generic/GenericTrait";
-import {SelectionOptions, SelectionManager} from "../selection/SelectionManager";
-import {SelectionService} from "../service/SelectionService";
-import {TraitService} from "../service/TraitService";
+import type {Mutable, Class} from "@swim/util";
+import {Provider} from "@swim/fastener";
+import {SelectionOptions, SelectionService} from "../selection/SelectionService";
+import {SelectionProvider} from "../selection/SelectionProvider";
+import {Trait} from "../trait/Trait";
 import type {SelectableTraitObserver} from "./SelectableTraitObserver";
 
-export class SelectableTrait extends GenericTrait {
+export class SelectableTrait extends Trait {
   constructor() {
     super();
     this.selected = false;
   }
 
-  override readonly traitObservers!: ReadonlyArray<SelectableTraitObserver>;
+  override readonly observerType?: Class<SelectableTraitObserver>;
 
-  /** @hidden */
   readonly selected: boolean;
-
-  isSelected(): boolean {
-    return this.selected;
-  }
 
   select(options?: SelectionOptions | null): void {
     if (!this.selected) {
       (this as Mutable<this>).selected = true;
-      if (this.isMounted()) {
-        const selectionManager = this.selectionService.manager;
-        if (selectionManager !== void 0 && selectionManager !== null) {
-          selectionManager.select(this.model!, options);
+      if (this.mounted) {
+        const selectionService = this.selectionProvider.service;
+        if (selectionService !== void 0 && selectionService !== null) {
+          selectionService.select(this.model!, options);
         }
       }
     }
   }
 
-  /** @hidden */
+  /** @protected */
   willSelect(options: SelectionOptions | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
-      if (traitObserver.traitWillSelect !== void 0) {
-        traitObserver.traitWillSelect(options, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitWillSelect !== void 0) {
+        observer.traitWillSelect(options, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @protected */
   onSelect(options: SelectionOptions | null): void {
     (this as Mutable<this>).selected = true;
   }
 
-  /** @hidden */
+  /** @protected */
   didSelect(options: SelectionOptions | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
-      if (traitObserver.traitDidSelect !== void 0) {
-        traitObserver.traitDidSelect(options, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitDidSelect !== void 0) {
+        observer.traitDidSelect(options, this);
       }
     }
   }
@@ -76,46 +71,46 @@ export class SelectableTrait extends GenericTrait {
   unselect(): void {
     if (this.selected) {
       (this as Mutable<this>).selected = false;
-      if (this.isMounted()) {
-        const selectionManager = this.selectionService.manager;
-        if (selectionManager !== void 0 && selectionManager !== null) {
-          selectionManager.unselect(this.model!);
+      if (this.mounted) {
+        const selectionService = this.selectionProvider.service;
+        if (selectionService !== void 0 && selectionService !== null) {
+          selectionService.unselect(this.model!);
         }
       }
     }
   }
 
-  /** @hidden */
+  /** @protected */
   willUnselect(): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
-      if (traitObserver.traitWillUnselect !== void 0) {
-        traitObserver.traitWillUnselect(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitWillUnselect !== void 0) {
+        observer.traitWillUnselect(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @protected */
   onUnselect(): void {
     (this as Mutable<this>).selected = false;
   }
 
-  /** @hidden */
+  /** @protected */
   didUnselect(): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
-      if (traitObserver.traitDidUnselect !== void 0) {
-        traitObserver.traitDidUnselect(this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitDidUnselect !== void 0) {
+        observer.traitDidUnselect(this);
       }
     }
   }
 
   unselectAll(): void {
-    const selectionManager = this.selectionService.manager;
-    if (selectionManager !== void 0 && selectionManager !== null) {
-      selectionManager.unselectAll();
+    const selectionService = this.selectionProvider.service;
+    if (selectionService !== void 0 && selectionService !== null) {
+      selectionService.unselectAll();
     }
   }
 
@@ -127,24 +122,19 @@ export class SelectableTrait extends GenericTrait {
     }
   }
 
-  @TraitService<SelectableTrait, SelectionManager | null>({
-    type: SelectionManager,
-    observe: false,
-    manager: null,
-    modelService: {
-      extends: SelectionService,
-      type: SelectionManager,
-      observe: false,
-      manager: null,
-    },
+  @Provider({
+    extends: SelectionProvider,
+    type: SelectionService,
+    observes: false,
+    service: SelectionService.global(),
   })
-  readonly selectionService!: TraitService<this, SelectionManager | null>;
+  readonly selectionProvider!: SelectionProvider<this>;
 
   protected override didMount(): void {
     if (this.selected) {
-      const selectionManager = this.selectionService.manager;
-      if (selectionManager !== void 0 && selectionManager !== null) {
-        selectionManager.select(this.model!);
+      const selectionService = this.selectionProvider.service;
+      if (selectionService !== void 0 && selectionService !== null) {
+        selectionService.select(this.model!);
       }
     }
     super.didMount();
@@ -152,9 +142,9 @@ export class SelectableTrait extends GenericTrait {
 
   protected override willUnmount(): void {
     super.willUnmount();
-    const selectionManager = this.selectionService.manager;
-    if (selectionManager !== void 0 && selectionManager !== null) {
-      selectionManager.unselect(this.model!);
+    const selectionService = this.selectionProvider.service;
+    if (selectionService !== void 0 && selectionService !== null) {
+      selectionService.unselect(this.model!);
     }
   }
 }

@@ -35,7 +35,20 @@ export {ConstraintProduct} from "./ConstraintProduct";
 export {ConstraintConstant} from "./ConstraintConstant";
 
 export {ConstraintVariable} from "./ConstraintVariable";
-export {ConstraintBinding} from "./ConstraintBinding";
+
+export {
+  ConstraintPropertyInit,
+  ConstraintPropertyDescriptor,
+  ConstraintPropertyClass,
+  ConstraintProperty,
+} from "./ConstraintProperty";
+
+export {
+  ConstraintAnimatorInit,
+  ConstraintAnimatorDescriptor,
+  ConstraintAnimatorClass,
+  ConstraintAnimator,
+} from "./ConstraintAnimator";
 
 export {ConstraintRelation} from "./ConstraintRelation";
 export {
@@ -48,6 +61,8 @@ export {Constraint} from "./Constraint";
 export {ConstraintGroup} from "./ConstraintGroup";
 
 export {ConstraintScope} from "./ConstraintScope";
+
+export {ConstraintContext} from "./ConstraintContext";
 
 export {ConstraintRow} from "./ConstraintRow";
 

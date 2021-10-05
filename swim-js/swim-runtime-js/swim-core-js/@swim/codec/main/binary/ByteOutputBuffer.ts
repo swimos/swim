@@ -18,7 +18,7 @@ import {AnyOutputSettings, OutputSettings} from "../output/OutputSettings";
 import {OutputBuffer} from "../output/OutputBuffer";
 import {OutputBufferError} from "../output/OutputBufferError";
 
-/** @hidden */
+/** @internal */
 export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
   constructor(array: Uint8Array, index: number, limit: number,
               part: boolean, settings: OutputSettings) {
@@ -30,10 +30,10 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     this.settings = settings;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly array: Uint8Array;
 
-  /** @hidden */
+  /** @internal */
   readonly part: boolean;
 
   override isCont(): boolean {

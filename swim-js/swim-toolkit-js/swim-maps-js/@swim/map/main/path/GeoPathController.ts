@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {ControllerViewTrait} from "@swim/controller";
+import type {Class} from "@swim/util";
+import type {TraitViewFastener} from "@swim/controller";
 import {GeoController} from "../geo/GeoController";
 import type {GeoPathView} from "./GeoPathView";
 import type {GeoPathTrait} from "./GeoPathTrait";
 import type {GeoPathControllerObserver} from "./GeoPathControllerObserver";
 
 export abstract class GeoPathController extends GeoController {
-  override readonly controllerObservers!: ReadonlyArray<GeoPathControllerObserver>;
+  override readonly observerType?: Class<GeoPathControllerObserver>;
 
-  abstract override readonly geo: ControllerViewTrait<this, GeoPathView, GeoPathTrait>;
+  abstract override readonly geo: TraitViewFastener<this, GeoPathTrait, GeoPathView>;
 }

@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
-import {TraitProperty} from "@swim/model";
 import {Graphics, AnyIconLayout, IconLayout} from "@swim/graphics";
 import {GeoTrait} from "../geo/GeoTrait";
 import type {GeoIconTraitObserver} from "./GeoIconTraitObserver";
 
 export class GeoIconTrait extends GeoTrait {
-  override readonly traitObservers!: ReadonlyArray<GeoIconTraitObserver>;
+  override readonly observerType?: Class<GeoIconTraitObserver>;
 
   override get geoBounds(): GeoBox {
     const geoCenter = this.geoCenter.state;
@@ -27,9 +28,9 @@ export class GeoIconTrait extends GeoTrait {
   }
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetGeoCenter !== void 0) {
         traitObserver.traitWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
@@ -41,16 +42,16 @@ export class GeoIconTrait extends GeoTrait {
   }
 
   protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetGeoCenter !== void 0) {
         traitObserver.traitDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
-  @TraitProperty<GeoIconTrait, GeoPoint | null, AnyGeoPoint | null>({
+  @Property<GeoIconTrait, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
     willSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
@@ -61,12 +62,12 @@ export class GeoIconTrait extends GeoTrait {
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
     },
   })
-  readonly geoCenter!: TraitProperty<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: Property<this, GeoPoint | null, AnyGeoPoint | null>;
 
   protected willSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetIconLayout !== void 0) {
         traitObserver.traitWillSetIconLayout(newIconLayout, oldIconLayout, this);
       }
@@ -78,16 +79,16 @@ export class GeoIconTrait extends GeoTrait {
   }
 
   protected didSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetIconLayout !== void 0) {
         traitObserver.traitDidSetIconLayout(newIconLayout, oldIconLayout, this);
       }
     }
   }
 
-  @TraitProperty<GeoIconTrait, IconLayout | null, AnyIconLayout | null>({
+  @Property<GeoIconTrait, IconLayout | null, AnyIconLayout | null>({
     type: IconLayout,
     state: null,
     willSetState(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
@@ -98,12 +99,12 @@ export class GeoIconTrait extends GeoTrait {
       this.owner.didSetIconLayout(newIconLayout, oldIconLayout);
     },
   })
-  readonly iconLayout!: TraitProperty<this, IconLayout | null, AnyIconLayout | null>;
+  readonly iconLayout!: Property<this, IconLayout | null, AnyIconLayout | null>;
 
   protected willSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetGraphics !== void 0) {
         traitObserver.traitWillSetGraphics(newGraphics, oldGraphics, this);
       }
@@ -115,16 +116,16 @@ export class GeoIconTrait extends GeoTrait {
   }
 
   protected didSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetGraphics !== void 0) {
         traitObserver.traitDidSetGraphics(newGraphics, oldGraphics, this);
       }
     }
   }
 
-  @TraitProperty<GeoIconTrait, Graphics | null>({
+  @Property<GeoIconTrait, Graphics | null>({
     state: null,
     willSetState(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
       this.owner.willSetGraphics(newGraphics, oldGraphics);
@@ -134,5 +135,5 @@ export class GeoIconTrait extends GeoTrait {
       this.owner.didSetGraphics(newGraphics, oldGraphics);
     },
   })
-  readonly graphics!: TraitProperty<this, Graphics | null>;
+  readonly graphics!: Property<this, Graphics | null>;
 }

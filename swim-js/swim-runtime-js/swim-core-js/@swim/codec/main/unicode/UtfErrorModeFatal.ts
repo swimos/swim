@@ -16,7 +16,7 @@ import {Murmur3, Booleans, Constructors} from "@swim/util";
 import type {Output} from "../output/Output";
 import {UtfErrorMode} from "./UtfErrorMode";
 
-/** @hidden */
+/** @internal */
 export class UtfErrorModeFatal extends UtfErrorMode {
   constructor(nonZero: boolean) {
     super();
@@ -34,7 +34,7 @@ export class UtfErrorModeFatal extends UtfErrorMode {
     return 0xfffd;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly nonZero!: boolean;
 
   override isNonZero(): boolean {

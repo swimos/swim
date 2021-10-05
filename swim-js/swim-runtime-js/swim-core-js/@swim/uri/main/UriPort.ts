@@ -19,7 +19,7 @@ import {Uri} from "./Uri";
 export type AnyUriPort = UriPort | number | string;
 
 export class UriPort implements HashCode, Compare, Debug, Display {
-  /** @hidden */
+  /** @internal */
   constructor(portNumber: number) {
     this.number = portNumber;
   }
@@ -118,7 +118,7 @@ export class UriPort implements HashCode, Compare, Debug, Display {
     return Uri.standardParser.parsePortString(portPart);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get cache(): HashGenCacheMap<number, UriPort> {
     const cacheSize = 16;

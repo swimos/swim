@@ -16,11 +16,4 @@ import type {ViewObserver} from "@swim/view";
 import type {NodeView} from "./NodeView";
 
 export interface NodeViewObserver<V extends NodeView = NodeView> extends ViewObserver<V> {
-  viewWillInsertChildNode?(childNode: Node, targetNode: Node | null, view: V): void;
-
-  viewDidInsertChildNode?(childNode: Node, targetNode: Node | null, view: V): void;
-
-  viewWillRemoveChildNode?(childNode: Node, view: V): void;
-
-  viewDidRemoveChildNode?(childNode: Node, view: V): void;
 }

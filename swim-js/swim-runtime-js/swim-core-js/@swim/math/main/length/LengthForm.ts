@@ -15,7 +15,7 @@
 import {Item, Text, Form} from "@swim/structure";
 import {LengthUnits, AnyLength, Length} from "./Length";
 
-/** @hidden */
+/** @internal */
 export class LengthForm extends Form<Length, AnyLength> {
   constructor(defaultUnits: LengthUnits | undefined, unit: Length | undefined) {
     super();

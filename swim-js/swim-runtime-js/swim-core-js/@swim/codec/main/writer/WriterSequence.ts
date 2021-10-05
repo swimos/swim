@@ -15,11 +15,11 @@
 import type {Output} from "../output/Output";
 import {Writer} from "./Writer";
 
-/** @hidden */
+/** @internal */
 export class WriterSequence<O> extends Writer<never, O> {
-  /** @hidden */
+  /** @internal */
   readonly head: Writer<unknown, unknown>;
-  /** @hidden */
+  /** @internal */
   readonly tail: Writer<unknown, O>;
 
   constructor(head: Writer<unknown, unknown>, tail: Writer<unknown, O>) {

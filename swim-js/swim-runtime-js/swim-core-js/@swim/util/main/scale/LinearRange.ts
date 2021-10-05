@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Range} from "../mapping/Range";
 import type {Interpolate} from "../interpolate/Interpolate";
 import type {Interpolator} from "../interpolate/Interpolator";
@@ -36,53 +36,56 @@ export interface LinearRange extends Range<number>, Interpolate<LinearRange> {
   toString(): string;
 }
 
-export const LinearRange = function (y0: number, y1: number): LinearRange {
-  const range = function (u: number): number {
-    const y0 = range[0];
-    const y1 = range[1];
-    return y0 + u * (y1 - y0);
-  } as LinearRange;
-  Object.setPrototypeOf(range, LinearRange.prototype);
-  (range as Mutable<typeof range>)[0] = y0;
-  (range as Mutable<typeof range>)[1] = y1;
-  return range;
-} as {
-  (y0: number, y1: number): LinearRange;
+export const LinearRange = (function (_super: typeof Range) {
+  const LinearRange = function (y0: number, y1: number): LinearRange {
+    const range = function (u: number): number {
+      const y0 = range[0];
+      const y1 = range[1];
+      return y0 + u * (y1 - y0);
+    } as LinearRange;
+    Object.setPrototypeOf(range, LinearRange.prototype);
+    (range as Mutable<typeof range>)[0] = y0;
+    (range as Mutable<typeof range>)[1] = y1;
+    return range;
+  } as {
+    (y0: number, y1: number): LinearRange;
 
-  /** @hidden */
-  prototype: LinearRange;
-};
+    /** @internal */
+    prototype: LinearRange;
+  };
 
-LinearRange.prototype = Object.create(Range.prototype);
+  LinearRange.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(LinearRange.prototype, "inverse", {
-  get(this: LinearRange): LinearDomain {
-    return LinearDomain(this[0], this[1]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(LinearRange.prototype, "inverse", {
+    get(this: LinearRange): LinearDomain {
+      return LinearDomain(this[0], this[1]);
+    },
+    configurable: true,
+  });
 
-LinearRange.prototype.interpolateTo = function (this: LinearRange, that: unknown): Interpolator<LinearRange> | null {
-  if (that instanceof LinearRange) {
-    return LinearRangeInterpolator(this, that);
-  }
-  return null;
-} as typeof LinearRange.prototype.interpolateTo;
+  LinearRange.prototype.interpolateTo = function (this: LinearRange, that: unknown): Interpolator<LinearRange> | null {
+    if (that instanceof LinearRange) {
+      return LinearRangeInterpolator(this, that);
+    }
+    return null;
+  } as typeof LinearRange.prototype.interpolateTo;
 
-LinearRange.prototype.canEqual = function (that: unknown): boolean {
-  return that instanceof LinearRange;
-};
+  LinearRange.prototype.canEqual = function (that: unknown): boolean {
+    return that instanceof LinearRange;
+  };
 
-LinearRange.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof LinearRange) {
-    return that.canEqual(this) && this[0] === that[0] && this[1] === that[1];
-  }
-  return false;
-};
+  LinearRange.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof LinearRange) {
+      return that.canEqual(this) && this[0] === that[0] && this[1] === that[1];
+    }
+    return false;
+  };
 
-LinearRange.prototype.toString = function (): string {
-  return "LinearRange(" + this[0] + ", " + this[1] + ")";
-};
+  LinearRange.prototype.toString = function (): string {
+    return "LinearRange(" + this[0] + ", " + this[1] + ")";
+  };
+
+  return LinearRange;
+})(Range);

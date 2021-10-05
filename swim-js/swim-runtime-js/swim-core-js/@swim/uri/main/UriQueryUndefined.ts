@@ -16,7 +16,7 @@ import type {Output} from "@swim/codec";
 import {AnyUriQuery, UriQuery} from "./UriQuery";
 import {UriQueryBuilder} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export class UriQueryUndefined extends UriQuery {
   override isDefined(): boolean {
     return false;
@@ -42,12 +42,12 @@ export class UriQueryUndefined extends UriQuery {
     throw new Error("undefined query");
   }
 
-  /** @hidden */
+  /** @internal */
   override setTail(tail: UriQuery): void {
     throw new Error("undefined query");
   }
 
-  /** @hidden */
+  /** @internal */
   override dealias(): UriQuery {
     return this;
   }

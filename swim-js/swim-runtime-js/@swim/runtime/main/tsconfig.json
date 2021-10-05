@@ -5,6 +5,7 @@
     "paths": {
       "@swim/util": ["../../../swim-core-js/@swim/util/main"],
       "@swim/codec": ["../../../swim-core-js/@swim/codec/main"],
+      "@swim/fastener": ["../../../swim-core-js/@swim/fastener/main"],
       "@swim/collections": ["../../../swim-core-js/@swim/collections/main"],
       "@swim/constraint": ["../../../swim-core-js/@swim/constraint/main"],
       "@swim/structure": ["../../../swim-core-js/@swim/structure/main"],
@@ -26,6 +27,7 @@
   "references": [
     {"path": "../../../swim-core-js/@swim/util/main"},
     {"path": "../../../swim-core-js/@swim/codec/main"},
+    {"path": "../../../swim-core-js/@swim/fastener/main"},
     {"path": "../../../swim-core-js/@swim/collections/main"},
     {"path": "../../../swim-core-js/@swim/constraint/main"},
     {"path": "../../../swim-core-js/@swim/structure/main"},

@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, AnyTiming} from "@swim/util";
+import type {Mutable, Class, AnyTiming} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {ViewContextType, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -29,9 +31,9 @@ import {
 import type {DataPointCategory, DataPointLabelPlacement} from "./DataPoint";
 import type {DataPointViewObserver} from "./DataPointViewObserver";
 
-export type AnyDataPointView<X, Y> = DataPointView<X, Y> | DataPointViewInit<X, Y>;
+export type AnyDataPointView<X = unknown, Y = unknown> = DataPointView<X, Y> | DataPointViewInit<X, Y>;
 
-export interface DataPointViewInit<X, Y> extends GraphicsViewInit {
+export interface DataPointViewInit<X = unknown, Y = unknown> extends GraphicsViewInit {
   x: X;
   y: Y;
   y2?: Y;
@@ -51,7 +53,7 @@ export interface DataPointViewInit<X, Y> extends GraphicsViewInit {
   label?: GraphicsView | string;
 }
 
-export class DataPointView<X, Y> extends LayerView {
+export class DataPointView<X = unknown, Y = unknown> extends LayerView {
   constructor() {
     super();
     this.xCoord = NaN;
@@ -60,40 +62,35 @@ export class DataPointView<X, Y> extends LayerView {
     this.gradientStop = false;
   }
 
-  override initView(init: DataPointViewInit<X, Y>): void {
-    super.initView(init);
-    this.setState(init);
-  }
-
-  override readonly viewObservers!: ReadonlyArray<DataPointViewObserver<X, Y>>;
+  override readonly observerType?: Class<DataPointViewObserver<X, Y>>;
 
   readonly xCoord: number
 
-  /** @hidden */
+  /** @internal */
   setXCoord(xCoord: number): void {
     (this as Mutable<this>).xCoord = xCoord;
   }
 
   readonly yCoord: number
 
-  /** @hidden */
+  /** @internal */
   setYCoord(yCoord: number): void {
     (this as Mutable<this>).yCoord = yCoord;
   }
 
   readonly y2Coord: number | undefined;
 
-  /** @hidden */
+  /** @internal */
   setY2Coord(y2Coord: number | undefined): void {
     (this as Mutable<this>).y2Coord = y2Coord;
   }
 
   protected willSetX(newX: X | undefined, oldX: X | undefined): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDataPointX !== void 0) {
-        viewObserver.viewWillSetDataPointX(newX, oldX, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDataPointX !== void 0) {
+        observer.viewWillSetDataPointX(newX, oldX, this);
       }
     }
   }
@@ -103,17 +100,17 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected didSetX(newX: X | undefined, oldX: X | undefined): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDataPointX !== void 0) {
-        viewObserver.viewDidSetDataPointX(newX, oldX, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDataPointX !== void 0) {
+        observer.viewDidSetDataPointX(newX, oldX, this);
       }
     }
   }
 
-  @ViewAnimator<DataPointView<X, Y>, X | undefined>({
-    extends: void 0,
+  @ThemeAnimator<DataPointView<X, Y>, X | undefined>({
+    extends: null,
     willSetValue(newX: X | undefined, oldX: X | undefined): void {
       this.owner.willSetX(newX, oldX);
     },
@@ -122,14 +119,14 @@ export class DataPointView<X, Y> extends LayerView {
       this.owner.didSetX(newX, oldX);
     },
   })
-  readonly x!: ViewAnimator<this, X | undefined>;
+  readonly x!: ThemeAnimator<this, X | undefined>;
 
   protected willSetY(newY: Y | undefined, oldY: Y | undefined): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDataPointY !== void 0) {
-        viewObserver.viewWillSetDataPointY(newY, oldY, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDataPointY !== void 0) {
+        observer.viewWillSetDataPointY(newY, oldY, this);
       }
     }
   }
@@ -139,16 +136,16 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected didSetY(newY: Y | undefined, oldY: Y | undefined): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDataPointY !== void 0) {
-        viewObserver.viewDidSetDataPointY(newY, oldY, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDataPointY !== void 0) {
+        observer.viewDidSetDataPointY(newY, oldY, this);
       }
     }
   }
 
-  @ViewAnimator<DataPointView<X, Y>, Y>({
+  @ThemeAnimator<DataPointView<X, Y>, Y>({
     willSetValue(newY: Y | undefined, oldY: Y | undefined): void {
       this.owner.willSetY(newY, oldY);
     },
@@ -157,14 +154,14 @@ export class DataPointView<X, Y> extends LayerView {
       this.owner.didSetY(newY, oldY);
     },
   })
-  readonly y!: ViewAnimator<this, Y>;
+  readonly y!: ThemeAnimator<this, Y>;
 
   protected willSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDataPointY2 !== void 0) {
-        viewObserver.viewWillSetDataPointY2(newY2, oldY2, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDataPointY2 !== void 0) {
+        observer.viewWillSetDataPointY2(newY2, oldY2, this);
       }
     }
   }
@@ -174,16 +171,16 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected didSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDataPointY2 !== void 0) {
-        viewObserver.viewDidSetDataPointY2(newY2, oldY2, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDataPointY2 !== void 0) {
+        observer.viewDidSetDataPointY2(newY2, oldY2, this);
       }
     }
   }
 
-  @ViewAnimator<DataPointView<X, Y>, Y | undefined>({
+  @ThemeAnimator<DataPointView<X, Y>, Y | undefined>({
     willSetValue(newY2: Y | undefined, oldY2: Y | undefined): void {
       this.owner.willSetY2(newY2, oldY2);
     },
@@ -192,14 +189,14 @@ export class DataPointView<X, Y> extends LayerView {
       this.owner.didSetY2(newY2, oldY2);
     },
   })
-  readonly y2!: ViewAnimator<this, Y | undefined>;
+  readonly y2!: ThemeAnimator<this, Y | undefined>;
 
   protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDataPointRadius !== void 0) {
-        viewObserver.viewWillSetDataPointRadius(newRadius, oldRadius, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDataPointRadius !== void 0) {
+        observer.viewWillSetDataPointRadius(newRadius, oldRadius, this);
       }
     }
   }
@@ -209,16 +206,16 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected didSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDataPointRadius !== void 0) {
-        viewObserver.viewDidSetDataPointRadius(newRadius, oldRadius, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDataPointRadius !== void 0) {
+        observer.viewDidSetDataPointRadius(newRadius, oldRadius, this);
       }
     }
   }
 
-  @ViewAnimator<DataPointView<X, Y>, Length | null, AnyLength | null>({
+  @ThemeAnimator<DataPointView<X, Y>, Length | null, AnyLength | null>({
     type: Length,
     state: null,
     willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
@@ -229,17 +226,17 @@ export class DataPointView<X, Y> extends LayerView {
       this.owner.didSetRadius(newRadius, oldRadius);
     },
   })
-  readonly radius!: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly radius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewProperty({type: Number, state: 5})
-  readonly hitRadius!: ViewProperty<this, number>;
+  @Property({type: Number, state: 5})
+  readonly hitRadius!: Property<this, number>;
 
   protected willSetColor(newColor: Color | null, oldColor: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDataPointColor !== void 0) {
-        viewObserver.viewWillSetDataPointColor(newColor, oldColor, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDataPointColor !== void 0) {
+        observer.viewWillSetDataPointColor(newColor, oldColor, this);
       }
     }
   }
@@ -249,16 +246,16 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected didSetColor(newColor: Color | null, oldColor: Color | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDataPointColor !== void 0) {
-        viewObserver.viewDidSetDataPointColor(newColor, oldColor, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDataPointColor !== void 0) {
+        observer.viewDidSetDataPointColor(newColor, oldColor, this);
       }
     }
   }
 
-  @ViewAnimator<DataPointView<X, Y>, Color | null, AnyColor | null>({
+  @ThemeAnimator<DataPointView<X, Y>, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     willSetValue(newColor: Color | null, oldColor: Color | null): void {
@@ -269,14 +266,14 @@ export class DataPointView<X, Y> extends LayerView {
       this.owner.didSetColor(newColor, oldColor);
     },
   })
-  readonly color!: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly color!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDataPointOpacity !== void 0) {
-        viewObserver.viewWillSetDataPointOpacity(newOpacity, oldOpacity, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDataPointOpacity !== void 0) {
+        observer.viewWillSetDataPointOpacity(newOpacity, oldOpacity, this);
       }
     }
   }
@@ -286,16 +283,16 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected didSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDataPointOpacity !== void 0) {
-        viewObserver.viewDidSetDataPointOpacity(newOpacity, oldOpacity, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDataPointOpacity !== void 0) {
+        observer.viewDidSetDataPointOpacity(newOpacity, oldOpacity, this);
       }
     }
   }
 
-  @ViewAnimator<DataPointView<X, Y>, number | undefined>({
+  @ThemeAnimator<DataPointView<X, Y>, number | undefined>({
     type: Number,
     willSetValue(newOpacity: number | undefined, oldOpacity: number | undefined): void {
       this.owner.willSetOpacity(newOpacity, oldOpacity);
@@ -305,19 +302,19 @@ export class DataPointView<X, Y> extends LayerView {
       this.owner.didSetOpacity(newOpacity, oldOpacity);
     },
   })
-  readonly opacity!: ViewAnimator<this, number | undefined>;
+  readonly opacity!: ThemeAnimator<this, number | undefined>;
 
-  @ViewAnimator({type: Font, inherit: true})
-  readonly font!: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
+  @ThemeAnimator({type: Font, inherits: true})
+  readonly font!: ThemeAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  @ViewAnimator({type: Color, inherit: true})
-  readonly textColor!: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  @ThemeAnimator({type: Color, inherits: true})
+  readonly textColor!: ThemeAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewProperty({type: String})
-  readonly category!: ViewProperty<this, DataPointCategory | undefined>;
+  @Property({type: String})
+  readonly category!: Property<this, DataPointCategory | undefined>;
 
-  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsLayout})
-  readonly labelPadding!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsLayout})
+  readonly labelPadding!: ThemeAnimator<this, Length, AnyLength>;
 
   protected initLabel(labelView: GraphicsView): void {
     // hook
@@ -332,11 +329,11 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetDataPointLabel !== void 0) {
-        viewObserver.viewWillSetDataPointLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetDataPointLabel !== void 0) {
+        observer.viewWillSetDataPointLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -352,11 +349,11 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetDataPointLabel !== void 0) {
-        viewObserver.viewDidSetDataPointLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetDataPointLabel !== void 0) {
+        observer.viewDidSetDataPointLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -364,6 +361,7 @@ export class DataPointView<X, Y> extends LayerView {
   @ViewFastener<DataPointView<X, Y>, GraphicsView, AnyTextRunView>({
     key: true,
     type: TextRunView,
+    child: true,
     fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
       if (value instanceof GraphicsView) {
         return value;
@@ -386,8 +384,8 @@ export class DataPointView<X, Y> extends LayerView {
   })
   readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
-  @ViewProperty({type: String, state: "auto"})
-  readonly labelPlacement!: ViewProperty<this, DataPointLabelPlacement>;
+  @Property({type: String, state: "auto"})
+  readonly labelPlacement!: Property<this, DataPointLabelPlacement>;
 
   setState(point: DataPointViewInit<X, Y>, timing?: AnyTiming | boolean): void {
     if (point.x !== void 0) {
@@ -435,7 +433,7 @@ export class DataPointView<X, Y> extends LayerView {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly gradientStop: boolean;
 
   isGradientStop(): boolean {
@@ -481,23 +479,22 @@ export class DataPointView<X, Y> extends LayerView {
     }
 
     if (TypesetView.is(labelView)) {
-      labelView.textAlign.setState("center", View.Intrinsic);
+      labelView.textAlign.setState("center", Affinity.Intrinsic);
       if (placement === "above") {
-        labelView.textBaseline.setState("bottom", View.Intrinsic);
+        labelView.textBaseline.setState("bottom", Affinity.Intrinsic);
       } else if (placement === "below") {
-        labelView.textBaseline.setState("top", View.Intrinsic);
+        labelView.textBaseline.setState("top", Affinity.Intrinsic);
       } else if (placement === "middle") {
-        labelView.textBaseline.setState("middle", View.Intrinsic);
+        labelView.textBaseline.setState("middle", Affinity.Intrinsic);
       }
-      labelView.textOrigin.setState(new R2Point(x, y1), View.Intrinsic);
+      labelView.textOrigin.setState(new R2Point(x, y1), Affinity.Intrinsic);
     }
   }
 
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      return this.hitTestPoint(x, y, context, this.viewFrame);
+      return this.hitTestPoint(x, y, renderer.context, this.viewFrame);
     }
     return null;
   }
@@ -518,22 +515,8 @@ export class DataPointView<X, Y> extends LayerView {
     return null;
   }
 
-  static override create<X, Y>(): DataPointView<X, Y> {
-    return new DataPointView<X, Y>();
-  }
-
-  static fromInit<X, Y>(init: DataPointViewInit<X, Y>): DataPointView<X, Y> {
-    const view = new DataPointView<X, Y>();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny<X, Y>(value: AnyDataPointView<X, Y>): DataPointView<X, Y> {
-    if (value instanceof DataPointView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
-    }
-    throw new TypeError("" + value);
+  override init(init: DataPointViewInit<X, Y>): void {
+    super.init(init);
+    this.setState(init);
   }
 }

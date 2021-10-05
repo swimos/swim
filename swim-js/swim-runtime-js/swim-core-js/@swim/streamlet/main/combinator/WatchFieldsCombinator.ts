@@ -21,7 +21,7 @@ export class WatchFieldsCombinator<K, V, O> extends WatchFieldsOperator<K, V, O>
     this.func = func;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly func: WatchFieldsFunction<K, V>;
 
   override evaluate(key: K, value: V | undefined): void {

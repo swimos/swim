@@ -14,7 +14,7 @@
 
 import {Cursor} from "./Cursor";
 
-/** @hidden */
+/** @internal */
 export class CursorEmpty<T> extends Cursor<T> {
   override isEmpty(): boolean {
     return true;

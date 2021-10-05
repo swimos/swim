@@ -16,13 +16,13 @@ import type {Output} from "../output/Output";
 import {WriterException} from "../writer/WriterException";
 import {Writer} from "../writer/Writer";
 
-/** @hidden */
+/** @internal */
 export class StringWriter extends Writer<unknown, unknown> {
-  /** @hidden */
+  /** @internal */
   readonly value: unknown;
-  /** @hidden */
+  /** @internal */
   readonly input: string;
-  /** @hidden */
+  /** @internal */
   readonly index: number;
 
   constructor(value: unknown, input: string, index: number = 0) {

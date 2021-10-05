@@ -14,7 +14,7 @@
 
 import {Cursor} from "./Cursor";
 
-/** @hidden */
+/** @internal */
 export class CursorUnary<T> extends Cursor<T> {
   constructor(value: T) {
     super();
@@ -22,10 +22,10 @@ export class CursorUnary<T> extends Cursor<T> {
     this.index = 0;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly value: T;
 
-  /** @hidden */
+  /** @internal */
   index: number;
 
   override isEmpty(): boolean {

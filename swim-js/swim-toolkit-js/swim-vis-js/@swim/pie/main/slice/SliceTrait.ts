@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {TraitProperty, GenericTrait} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
+import {Trait} from "@swim/model";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
@@ -24,13 +26,13 @@ export type SliceLabelFunction = (sliceTrait: SliceTrait | null) => GraphicsView
 export type SliceLegend = SliceLegendFunction | string;
 export type SliceLegendFunction = (sliceTrait: SliceTrait | null) => GraphicsView | string | null;
 
-export class SliceTrait extends GenericTrait {
-  override readonly traitObservers!: ReadonlyArray<SliceTraitObserver>;
+export class SliceTrait extends Trait {
+  override readonly observerType?: Class<SliceTraitObserver>;
 
   protected willSetValue(newValue: number, oldValue: number): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetSliceValue !== void 0) {
         traitObserver.traitWillSetSliceValue(newValue, oldValue, this);
       }
@@ -42,16 +44,16 @@ export class SliceTrait extends GenericTrait {
   }
 
   protected didSetValue(newValue: number, oldValue: number): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetSliceValue !== void 0) {
         traitObserver.traitDidSetSliceValue(newValue, oldValue, this);
       }
     }
   }
 
-  @TraitProperty<SliceTrait, number>({
+  @Property<SliceTrait, number>({
     type: Number,
     state: 0,
     willSetState(newValue: number, oldValue: number): void {
@@ -62,12 +64,12 @@ export class SliceTrait extends GenericTrait {
       this.owner.didSetValue(newValue, oldValue);
     },
   })
-  readonly value!: TraitProperty<this, number>;
+  readonly value!: Property<this, number>;
 
   protected willSetSliceColor(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetSliceColor !== void 0) {
         traitObserver.traitWillSetSliceColor(newSliceColor, oldSliceColor, this);
       }
@@ -79,16 +81,16 @@ export class SliceTrait extends GenericTrait {
   }
 
   protected didSetSliceColor(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetSliceColor !== void 0) {
         traitObserver.traitDidSetSliceColor(newSliceColor, oldSliceColor, this);
       }
     }
   }
 
-  @TraitProperty<SliceTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<SliceTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
     state: null,
     willSetState(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
       this.owner.willSetSliceColor(newSliceColor, oldSliceColor);
@@ -104,12 +106,12 @@ export class SliceTrait extends GenericTrait {
       return sliceColor;
     },
   })
-  readonly sliceColor!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly sliceColor!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
   protected willSetLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetSliceLabel !== void 0) {
         traitObserver.traitWillSetSliceLabel(newLabel, oldLabel, this);
       }
@@ -121,9 +123,9 @@ export class SliceTrait extends GenericTrait {
   }
 
   protected didSetLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetSliceLabel !== void 0) {
         traitObserver.traitDidSetSliceLabel(newLabel, oldLabel, this);
       }
@@ -134,7 +136,7 @@ export class SliceTrait extends GenericTrait {
     return void 0;
   }
 
-  @TraitProperty<SliceTrait, SliceLabel | null>({
+  @Property<SliceTrait, SliceLabel | null>({
     state: null,
     willSetState(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
       this.owner.willSetLabel(newLabel, oldLabel);
@@ -144,12 +146,12 @@ export class SliceTrait extends GenericTrait {
       this.owner.didSetLabel(newLabel, oldLabel);
     },
   })
-  readonly label!: TraitProperty<this, SliceLabel | null>;
+  readonly label!: Property<this, SliceLabel | null>;
 
   protected willSetLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetSliceLegend !== void 0) {
         traitObserver.traitWillSetSliceLegend(newLegend, oldLegend, this);
       }
@@ -161,9 +163,9 @@ export class SliceTrait extends GenericTrait {
   }
 
   protected didSetLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetSliceLegend !== void 0) {
         traitObserver.traitDidSetSliceLegend(newLegend, oldLegend, this);
       }
@@ -174,7 +176,7 @@ export class SliceTrait extends GenericTrait {
     return void 0;
   }
 
-  @TraitProperty<SliceTrait, SliceLegend | null>({
+  @Property<SliceTrait, SliceLegend | null>({
     state: null,
     willSetState(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
       this.owner.willSetLegend(newLegend, oldLegend);
@@ -184,5 +186,5 @@ export class SliceTrait extends GenericTrait {
       this.owner.didSetLegend(newLegend, oldLegend);
     },
   })
-  readonly legend!: TraitProperty<this, SliceLegend | null>;
+  readonly legend!: Property<this, SliceLegend | null>;
 }

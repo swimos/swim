@@ -215,7 +215,7 @@ export class Cmd implements Equals, Debug {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   writeFullName(output: Output): void {
     if (this.base !== null) {
       this.base.writeFullName(output);
@@ -224,7 +224,7 @@ export class Cmd implements Equals, Debug {
     output.write(this.name);
   }
 
-  /** @hidden */
+  /** @internal */
   writeHelp(output: Output): void {
     output.write("Usage: ");
     this.writeFullName(output);

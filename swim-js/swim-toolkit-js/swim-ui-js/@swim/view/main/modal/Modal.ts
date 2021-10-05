@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/util";
-import type {View} from "../View";
+import type {View} from "../view/View";
 
 export interface ModalOptions {
   modal?: boolean | number;
@@ -34,18 +34,22 @@ export interface Modal {
   hideModal(timing?: AnyTiming | boolean): void;
 }
 
-export const Modal = {} as {
-  is(object: unknown): object is Modal;
-};
+export const Modal = (function () {
+  const Modal = {} as {
+    is(object: unknown): object is Modal;
+  };
 
-Modal.is = function (object: unknown): object is Modal {
-  if (typeof object === "object" && object !== null) {
-    const modal = object as Modal;
-    return "modalView" in modal
-        && "modalState" in modal
-        && "modality" in modal
-        && typeof modal.showModal === "function"
-        && typeof modal.hideModal === "function";
-  }
-  return false;
-};
+  Modal.is = function (object: unknown): object is Modal {
+    if (typeof object === "object" && object !== null) {
+      const modal = object as Modal;
+      return "modalView" in modal
+          && "modalState" in modal
+          && "modality" in modal
+          && typeof modal.showModal === "function"
+          && typeof modal.hideModal === "function";
+    }
+    return false;
+  };
+
+  return Modal;
+})();

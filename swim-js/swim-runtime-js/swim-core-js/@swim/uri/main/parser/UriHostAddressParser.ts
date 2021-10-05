@@ -17,7 +17,7 @@ import {Uri} from "../Uri";
 import type {UriHost} from "../UriHost";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriHostAddressParser extends Parser<UriHost> {
   private readonly uri: UriParser;
   private readonly output: Output<string> | undefined;

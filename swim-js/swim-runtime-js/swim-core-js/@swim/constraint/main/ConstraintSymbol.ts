@@ -17,32 +17,33 @@ import {ConstraintKey} from "./ConstraintKey";
 import type {Constraint} from "./Constraint";
 import type {ConstraintSolver} from "./ConstraintSolver";
 
-/** @hidden */
+/** @internal */
 export interface ConstraintSymbol extends ConstraintKey {
-  /** @hidden */
+  /** @internal */
   isExternal(): boolean;
 
-  /** @hidden */
+  /** @internal */
   isDummy(): boolean;
 
-  /** @hidden */
+  /** @internal */
   isInvalid(): boolean;
 
-  /** @hidden */
+  /** @internal */
   addConstraintCondition(constraint: Constraint, solver: ConstraintSolver): void;
 
-  /** @hidden */
+  /** @internal */
   removeConstraintCondition(constraint: Constraint, solver: ConstraintSolver): void;
 
+  /** @internal */
   updateConstraintSolution(value: number): void;
 }
 
-/** @hidden */
+/** @internal */
 export const ConstraintSymbol = {} as {
   readonly invalid: ConstraintInvalid; // defined by ConstraintInvalid
 };
 
-/** @hidden */
+/** @internal */
 export class ConstraintSlack implements ConstraintSymbol {
   constructor() {
     this.id = ConstraintKey.nextId();
@@ -75,7 +76,7 @@ export class ConstraintSlack implements ConstraintSymbol {
   }
 }
 
-/** @hidden */
+/** @internal */
 export class ConstraintDummy implements ConstraintSymbol {
   constructor() {
     this.id = ConstraintKey.nextId();
@@ -108,7 +109,7 @@ export class ConstraintDummy implements ConstraintSymbol {
   }
 }
 
-/** @hidden */
+/** @internal */
 export class ConstraintError implements ConstraintSymbol {
   constructor() {
     this.id = ConstraintKey.nextId();
@@ -141,7 +142,7 @@ export class ConstraintError implements ConstraintSymbol {
   }
 }
 
-/** @hidden */
+/** @internal */
 export class ConstraintInvalid implements ConstraintSymbol {
   get id(): number {
     return -1;

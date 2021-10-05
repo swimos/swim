@@ -50,72 +50,76 @@ export type StyleValue = DateTime
                        | number
                        | boolean;
 
-export const StyleValue = {} as {
-  fromAny(value: AnyStyleValue): StyleValue;
+export const StyleValue = (function () {
+  const StyleValue = {} as {
+    fromAny(value: AnyStyleValue): StyleValue;
 
-  parse(input: Input | string): StyleValue;
+    parse(input: Input | string): StyleValue;
 
-  form(): Form<StyleValue, AnyStyleValue>;
-};
+    form(): Form<StyleValue, AnyStyleValue>;
+  };
 
-StyleValue.fromAny = function (value: AnyStyleValue): StyleValue {
-  if (value instanceof DateTime
-      || value instanceof Angle
-      || value instanceof Length
-      || value instanceof Color
-      || value instanceof Font
-      || value instanceof BoxShadow
-      || value instanceof LinearGradient
-      || value instanceof Transform
-      || value instanceof Interpolator
-      || typeof value === "number"
-      || typeof value === "boolean") {
-    return value;
-  } else if (value instanceof Date || DateTime.isInit(value)) {
-    return DateTime.fromAny(value);
-  } else if (Font.isInit(value)) {
-    return Font.fromAny(value);
-  } else if (Color.isInit(value)) {
-    return Color.fromAny(value);
-  } else if (BoxShadow.isInit(value)) {
-    return BoxShadow.fromAny(value)!;
-  } else if (typeof value === "string") {
-    return StyleValue.parse(value);
-  }
-  throw new TypeError("" + value);
-};
+  StyleValue.fromAny = function (value: AnyStyleValue): StyleValue {
+    if (value instanceof DateTime
+        || value instanceof Angle
+        || value instanceof Length
+        || value instanceof Color
+        || value instanceof Font
+        || value instanceof BoxShadow
+        || value instanceof LinearGradient
+        || value instanceof Transform
+        || value instanceof Interpolator
+        || typeof value === "number"
+        || typeof value === "boolean") {
+      return value;
+    } else if (value instanceof Date || DateTime.isInit(value)) {
+      return DateTime.fromAny(value);
+    } else if (Font.isInit(value)) {
+      return Font.fromAny(value);
+    } else if (Color.isInit(value)) {
+      return Color.fromAny(value);
+    } else if (BoxShadow.isInit(value)) {
+      return BoxShadow.fromAny(value)!;
+    } else if (typeof value === "string") {
+      return StyleValue.parse(value);
+    }
+    throw new TypeError("" + value);
+  };
 
-StyleValue.parse = function (input: Input | string): StyleValue {
-  if (typeof input === "string") {
-    input = Unicode.stringInput(input);
-  }
-  while (input.isCont() && Unicode.isWhitespace(input.head())) {
-    input = input.step();
-  }
-  let parser = StyleValueParser.parse(input);
-  if (parser.isDone()) {
+  StyleValue.parse = function (input: Input | string): StyleValue {
+    if (typeof input === "string") {
+      input = Unicode.stringInput(input);
+    }
     while (input.isCont() && Unicode.isWhitespace(input.head())) {
       input = input.step();
     }
-  }
-  if (input.isCont() && !parser.isError()) {
-    parser = Parser.error(Diagnostic.unexpected(input));
-  }
-  return parser.bind();
-};
+    let parser = StyleValueParser.parse(input);
+    if (parser.isDone()) {
+      while (input.isCont() && Unicode.isWhitespace(input.head())) {
+        input = input.step();
+      }
+    }
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    }
+    return parser.bind();
+  };
 
-Object.defineProperty(StyleValue, "form", {
-  value: function (): Form<StyleValue, AnyStyleValue> {
-    const form = new StyleValueForm(void 0);
-    Object.defineProperty(StyleValue, "form", {
-      value: function (): Form<StyleValue, AnyStyleValue> {
-        return form;
-      },
-      enumerable: true,
-      configurable: true,
-    });
-    return form;
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(StyleValue, "form", {
+    value: function (): Form<StyleValue, AnyStyleValue> {
+      const form = new StyleValueForm(void 0);
+      Object.defineProperty(StyleValue, "form", {
+        value: function (): Form<StyleValue, AnyStyleValue> {
+          return form;
+        },
+        enumerable: true,
+        configurable: true,
+      });
+      return form;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return StyleValue;
+})();

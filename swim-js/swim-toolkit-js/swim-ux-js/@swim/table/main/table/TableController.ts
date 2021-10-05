@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class, ObserverType} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import type {Trait} from "@swim/model";
-import {View, PositionGestureInput} from "@swim/view";
+import type {View, PositionGestureInput} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
-import {
-  Controller,
-  ControllerObserverType,
-  ControllerViewTrait,
-  ControllerFastener,
-  CompositeController,
-} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener, GenericController, Controller} from "@swim/controller";
 import type {TableLayout} from "../layout/TableLayout";
 import type {ColLayout} from "../layout/ColLayout";
 import type {CellView} from "../cell/CellView";
@@ -44,17 +40,17 @@ import {TableView} from "./TableView";
 import {TableTrait} from "./TableTrait";
 import type {TableControllerObserver} from "./TableControllerObserver";
 
-export class TableController extends CompositeController {
+export class TableController extends GenericController {
   constructor() {
     super();
     this.colFasteners = [];
     this.rowFasteners = [];
   }
 
-  override readonly controllerObservers!: ReadonlyArray<TableControllerObserver>;
+  override readonly observerType?: Class<TableControllerObserver>;
 
   protected layoutTable(tableLayout: TableLayout, tableView: TableView): void {
-    tableView.layout.setState(tableLayout, View.Intrinsic);
+    tableView.layout.setState(tableLayout, Affinity.Intrinsic);
   }
 
   protected initTableTrait(tableTrait: TableTrait): void {
@@ -114,11 +110,11 @@ export class TableController extends CompositeController {
   }
 
   protected willSetTableTrait(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTableTrait !== void 0) {
-        controllerObserver.controllerWillSetTableTrait(newTableTrait, oldTableTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTableTrait !== void 0) {
+        observer.controllerWillSetTableTrait(newTableTrait, oldTableTrait, this);
       }
     }
   }
@@ -134,21 +130,21 @@ export class TableController extends CompositeController {
   }
 
   protected didSetTableTrait(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTableTrait !== void 0) {
-        controllerObserver.controllerDidSetTableTrait(newTableTrait, oldTableTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTableTrait !== void 0) {
+        observer.controllerDidSetTableTrait(newTableTrait, oldTableTrait, this);
       }
     }
   }
 
   protected willSetTableLayout(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTableLayout !== void 0) {
-        controllerObserver.controllerWillSetTableLayout(newTableLayout, oldTableLayout, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTableLayout !== void 0) {
+        observer.controllerWillSetTableLayout(newTableLayout, oldTableLayout, this);
       }
     }
   }
@@ -158,11 +154,11 @@ export class TableController extends CompositeController {
   }
 
   protected didSetTableLayout(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTableLayout !== void 0) {
-        controllerObserver.controllerDidSetTableLayout(newTableLayout, oldTableLayout, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTableLayout !== void 0) {
+        observer.controllerDidSetTableLayout(newTableLayout, oldTableLayout, this);
       }
     }
   }
@@ -195,7 +191,7 @@ export class TableController extends CompositeController {
       const rowController = rowFasteners[i]!.controller;
       if (rowController !== null) {
         const rowView = rowController.row.view;
-        if (rowView !== null && rowView.parentView === null) {
+        if (rowView !== null && rowView.parent === null) {
           rowController.row.injectView(tableView);
         }
       }
@@ -207,11 +203,11 @@ export class TableController extends CompositeController {
   }
 
   protected willSetTableView(newTableView: TableView | null, oldTableView: TableView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTableView !== void 0) {
-        controllerObserver.controllerWillSetTableView(newTableView, oldTableView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTableView !== void 0) {
+        observer.controllerWillSetTableView(newTableView, oldTableView, this);
       }
     }
   }
@@ -227,39 +223,19 @@ export class TableController extends CompositeController {
   }
 
   protected didSetTableView(newTableView: TableView | null, oldTableView: TableView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTableView !== void 0) {
-        controllerObserver.controllerDidSetTableView(newTableView, oldTableView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTableView !== void 0) {
+        observer.controllerDidSetTableView(newTableView, oldTableView, this);
       }
     }
   }
 
-  /** @hidden */
-  static TableFastener = ControllerViewTrait.define<TableController, TableView, TableTrait>({
-    viewType: TableView,
-    observeView: true,
-    willSetView(newTableView: TableView | null, oldTableView: TableView | null): void {
-      this.owner.willSetTableView(newTableView, oldTableView);
-    },
-    onSetView(newTableView: TableView | null, oldTableView: TableView | null): void {
-      this.owner.onSetTableView(newTableView, oldTableView);
-    },
-    didSetView(newTableView: TableView | null, oldTableView: TableView | null): void {
-      this.owner.didSetTableView(newTableView, oldTableView);
-    },
-    viewDidSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, targetView: View | null): void {
-      const headerController = this.owner.header.controller;
-      if (headerController !== null) {
-        headerController.header.setView(newHeaderView);
-      }
-    },
-    createView(): TableView | null {
-      return this.owner.createTableView();
-    },
+  /** @internal */
+  static TableFastener = TraitViewFastener.define<TableController, TableTrait, TableView>({
     traitType: TableTrait,
-    observeTrait: true,
+    observesTrait: true,
     willSetTrait(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null): void {
       this.owner.willSetTableTrait(newTableTrait, oldTableTrait);
     },
@@ -306,12 +282,32 @@ export class TableController extends CompositeController {
         this.owner.insertRowTrait(newRowTrait, targetTrait);
       }
     },
+    viewType: TableView,
+    observesView: true,
+    willSetView(newTableView: TableView | null, oldTableView: TableView | null): void {
+      this.owner.willSetTableView(newTableView, oldTableView);
+    },
+    onSetView(newTableView: TableView | null, oldTableView: TableView | null): void {
+      this.owner.onSetTableView(newTableView, oldTableView);
+    },
+    didSetView(newTableView: TableView | null, oldTableView: TableView | null): void {
+      this.owner.didSetTableView(newTableView, oldTableView);
+    },
+    viewDidSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, targetView: View | null): void {
+      const headerController = this.owner.header.controller;
+      if (headerController !== null) {
+        headerController.header.setView(newHeaderView);
+      }
+    },
+    createView(): TableView | null {
+      return this.owner.createTableView();
+    },
   });
 
-  @ControllerViewTrait<TableController, TableView, TableTrait>({
+  @TraitViewFastener<TableController, TableTrait, TableView>({
     extends: TableController.TableFastener,
   })
-  readonly table!: ControllerViewTrait<this, TableView, TableTrait>;
+  readonly table!: TraitViewFastener<this, TableTrait, TableView>;
 
   protected createHeader(headerTrait: HeaderTrait): HeaderController | null {
     return new HeaderController();
@@ -359,11 +355,11 @@ export class TableController extends CompositeController {
   }
 
   protected willSetHeader(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetHeader !== void 0) {
-        controllerObserver.controllerWillSetHeader(newHeaderController, oldHeaderController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetHeader !== void 0) {
+        observer.controllerWillSetHeader(newHeaderController, oldHeaderController, this);
       }
     }
   }
@@ -379,20 +375,20 @@ export class TableController extends CompositeController {
   }
 
   protected didSetHeader(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetHeader !== void 0) {
-        controllerObserver.controllerDidSetHeader(newHeaderController, oldHeaderController, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetHeader !== void 0) {
+        observer.controllerDidSetHeader(newHeaderController, oldHeaderController, this);
       }
     }
   }
 
   protected insertHeaderTrait(headerTrait: HeaderTrait, targetTrait: Trait | null = null): void {
-    const childControllers = this.childControllers;
+    const children = this.children;
     let targetController: HeaderController | null = null;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof HeaderController) {
         if (childController.header.trait === headerTrait) {
           return;
@@ -405,7 +401,7 @@ export class TableController extends CompositeController {
     if (headerController instanceof HeaderController) {
       headerController.header.setTrait(headerTrait);
       this.header.setController(headerController, targetController);
-      this.insertChildController(headerController, targetController);
+      this.insertChild(headerController, targetController);
       if (headerController.header.view === null) {
         const headerView = headerController.header.createView();
         let targetView: HeaderView | null = null;
@@ -423,9 +419,9 @@ export class TableController extends CompositeController {
   }
 
   protected removeHeaderTrait(headerTrait: HeaderTrait): void {
-    const childControllers = this.childControllers;
-    for (let i = 0, n = childControllers.length; i < n; i += 1) {
-      const childController = childControllers[i]!;
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const childController = children[i]!;
       if (childController instanceof HeaderController && childController.header.trait === headerTrait) {
         this.header.setController(null);
         childController.remove();
@@ -447,11 +443,11 @@ export class TableController extends CompositeController {
   }
 
   protected willSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetHeaderTrait !== void 0) {
-        controllerObserver.controllerWillSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetHeaderTrait !== void 0) {
+        observer.controllerWillSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
       }
     }
   }
@@ -467,11 +463,11 @@ export class TableController extends CompositeController {
   }
 
   protected didSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetHeaderTrait !== void 0) {
-        controllerObserver.controllerDidSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetHeaderTrait !== void 0) {
+        observer.controllerDidSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
       }
     }
   }
@@ -492,11 +488,11 @@ export class TableController extends CompositeController {
   }
 
   protected willSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetHeaderView !== void 0) {
-        controllerObserver.controllerWillSetHeaderView(newHeaderView, oldHeaderView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetHeaderView !== void 0) {
+        observer.controllerWillSetHeaderView(newHeaderView, oldHeaderView, this);
       }
     }
   }
@@ -512,19 +508,20 @@ export class TableController extends CompositeController {
   }
 
   protected didSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetHeaderView !== void 0) {
-        controllerObserver.controllerDidSetHeaderView(newHeaderView, oldHeaderView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetHeaderView !== void 0) {
+        observer.controllerDidSetHeaderView(newHeaderView, oldHeaderView, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static HeaderFastener = ControllerFastener.define<TableController, HeaderController>({
     type: HeaderController,
-    observe: true,
+    child: true,
+    observes: true,
     willSetController(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
       this.owner.willSetHeader(newHeaderController, oldHeaderController);
     },
@@ -569,7 +566,7 @@ export class TableController extends CompositeController {
     const colFastener = this.createColFastener(colController);
     colFasteners.splice(targetIndex, 0, colFastener);
     colFastener.setController(colController, targetController);
-    if (this.isMounted()) {
+    if (this.mounted) {
       colFastener.mount();
     }
   }
@@ -580,7 +577,7 @@ export class TableController extends CompositeController {
       const colFastener = colFasteners[i]!;
       if (colFastener.controller === colController) {
         colFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           colFastener.unmount();
         }
         colFasteners.splice(i, 1);
@@ -628,11 +625,11 @@ export class TableController extends CompositeController {
 
   protected willSetCol(newColController: ColController | null, oldColController: ColController | null,
                        colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCol !== void 0) {
-        controllerObserver.controllerWillSetCol(newColController, oldColController, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCol !== void 0) {
+        observer.controllerWillSetCol(newColController, oldColController, colFastener);
       }
     }
   }
@@ -650,11 +647,11 @@ export class TableController extends CompositeController {
 
   protected didSetCol(newColController: ColController | null, oldColController: ColController | null,
                       colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCol !== void 0) {
-        controllerObserver.controllerDidSetCol(newColController, oldColController, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCol !== void 0) {
+        observer.controllerDidSetCol(newColController, oldColController, colFastener);
       }
     }
   }
@@ -674,7 +671,7 @@ export class TableController extends CompositeController {
     }
     const colController = this.createCol(colTrait);
     if (colController !== null) {
-      this.insertChildController(colController, targetController);
+      this.insertChild(colController, targetController);
       colController.col.setTrait(colTrait);
     }
   }
@@ -686,7 +683,7 @@ export class TableController extends CompositeController {
       const colController = colFastener.controller;
       if (colController !== null && colController.col.trait === colTrait) {
         colFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           colFastener.unmount();
         }
         colFasteners.splice(i, 1);
@@ -710,11 +707,11 @@ export class TableController extends CompositeController {
 
   protected willSetColTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
                             colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColTrait !== void 0) {
-        controllerObserver.controllerWillSetColTrait(newColTrait, oldColTrait, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColTrait !== void 0) {
+        observer.controllerWillSetColTrait(newColTrait, oldColTrait, colFastener);
       }
     }
   }
@@ -732,22 +729,22 @@ export class TableController extends CompositeController {
 
   protected didSetColTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
                            colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColTrait !== void 0) {
-        controllerObserver.controllerDidSetColTrait(newColTrait, oldColTrait, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColTrait !== void 0) {
+        observer.controllerDidSetColTrait(newColTrait, oldColTrait, colFastener);
       }
     }
   }
 
   protected willSetColLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null,
                              colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColLayout !== void 0) {
-        controllerObserver.controllerWillSetColLayout(newColLayout, oldColLayout, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColLayout !== void 0) {
+        observer.controllerWillSetColLayout(newColLayout, oldColLayout, colFastener);
       }
     }
   }
@@ -759,11 +756,11 @@ export class TableController extends CompositeController {
 
   protected didSetColLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null,
                             colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColLayout !== void 0) {
-        controllerObserver.controllerDidSetColLayout(newColLayout, oldColLayout, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColLayout !== void 0) {
+        observer.controllerDidSetColLayout(newColLayout, oldColLayout, colFastener);
       }
     }
   }
@@ -796,11 +793,11 @@ export class TableController extends CompositeController {
 
   protected willSetColView(newColView: ColView | null, oldColView: ColView | null,
                            colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColView !== void 0) {
-        controllerObserver.controllerWillSetColView(newColView, oldColView, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColView !== void 0) {
+        observer.controllerWillSetColView(newColView, oldColView, colFastener);
       }
     }
   }
@@ -818,11 +815,11 @@ export class TableController extends CompositeController {
 
   protected didSetColView(newColView: ColView | null, oldColView: ColView | null,
                           colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColView !== void 0) {
-        controllerObserver.controllerDidSetColView(newColView, oldColView, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColView !== void 0) {
+        observer.controllerDidSetColView(newColView, oldColView, colFastener);
       }
     }
   }
@@ -841,11 +838,11 @@ export class TableController extends CompositeController {
 
   protected willSetColLabelView(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null,
                                 colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColLabelView !== void 0) {
-        controllerObserver.controllerWillSetColLabelView(newColLabelView, oldColLabelView, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetColLabelView !== void 0) {
+        observer.controllerWillSetColLabelView(newColLabelView, oldColLabelView, colFastener);
       }
     }
   }
@@ -863,20 +860,20 @@ export class TableController extends CompositeController {
 
   protected didSetColLabelView(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null,
                                colFastener: ControllerFastener<this, ColController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColLabelView !== void 0) {
-        controllerObserver.controllerDidSetColLabelView(newColLabelView, oldColLabelView, colFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetColLabelView !== void 0) {
+        observer.controllerDidSetColLabelView(newColLabelView, oldColLabelView, colFastener);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static ColFastener = ControllerFastener.define<TableController, ColController>({
     type: ColController,
     child: false,
-    observe: true,
+    observes: true,
     willSetController(newColController: ColController | null, oldColController: ColController | null): void {
       this.owner.willSetCol(newColController, oldColController, this);
     },
@@ -917,10 +914,10 @@ export class TableController extends CompositeController {
   });
 
   protected createColFastener(colController: ColController): ControllerFastener<this, ColController> {
-    return new TableController.ColFastener(this, colController.key, "col");
+    return TableController.ColFastener.create(this, colController.key ?? "col");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly colFasteners: ReadonlyArray<ControllerFastener<this, ColController>>;
 
   protected getColFastener(colTrait: ColTrait): ControllerFastener<this, ColController> | null {
@@ -935,7 +932,7 @@ export class TableController extends CompositeController {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   protected mountColFasteners(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
@@ -944,7 +941,7 @@ export class TableController extends CompositeController {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountColFasteners(): void {
     const colFasteners = this.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
@@ -967,7 +964,7 @@ export class TableController extends CompositeController {
     const rowFastener = this.createRowFastener(rowController);
     rowFasteners.splice(targetIndex, 0, rowFastener);
     rowFastener.setController(rowController, targetController);
-    if (this.isMounted()) {
+    if (this.mounted) {
       rowFastener.mount();
     }
   }
@@ -978,7 +975,7 @@ export class TableController extends CompositeController {
       const rowFastener = rowFasteners[i]!;
       if (rowFastener.controller === rowController) {
         rowFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           rowFastener.unmount();
         }
         rowFasteners.splice(i, 1);
@@ -1026,11 +1023,11 @@ export class TableController extends CompositeController {
 
   protected willSetRow(newRowController: RowController | null, oldRowController: RowController | null,
                        rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetRow !== void 0) {
-        controllerObserver.controllerWillSetRow(newRowController, oldRowController, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetRow !== void 0) {
+        observer.controllerWillSetRow(newRowController, oldRowController, rowFastener);
       }
     }
   }
@@ -1048,11 +1045,11 @@ export class TableController extends CompositeController {
 
   protected didSetRow(newRowController: RowController | null, oldRowController: RowController | null,
                       rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetRow !== void 0) {
-        controllerObserver.controllerDidSetRow(newRowController, oldRowController, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetRow !== void 0) {
+        observer.controllerDidSetRow(newRowController, oldRowController, rowFastener);
       }
     }
   }
@@ -1073,7 +1070,7 @@ export class TableController extends CompositeController {
     const rowController = this.createRow(rowTrait);
     if (rowController !== null) {
       rowController.row.setTrait(rowTrait);
-      this.insertChildController(rowController, targetController);
+      this.insertChild(rowController, targetController);
       if (rowController.row.view === null) {
         const rowView = this.createRowView(rowController);
         let targetView: RowView | null = null;
@@ -1097,7 +1094,7 @@ export class TableController extends CompositeController {
       const rowController = rowFastener.controller;
       if (rowController !== null && rowController.row.trait === rowTrait) {
         rowFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           rowFastener.unmount();
         }
         rowFasteners.splice(i, 1);
@@ -1121,11 +1118,11 @@ export class TableController extends CompositeController {
 
   protected willSetRowTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null,
                             rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetRowTrait !== void 0) {
-        controllerObserver.controllerWillSetRowTrait(newRowTrait, oldRowTrait, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetRowTrait !== void 0) {
+        observer.controllerWillSetRowTrait(newRowTrait, oldRowTrait, rowFastener);
       }
     }
   }
@@ -1143,11 +1140,11 @@ export class TableController extends CompositeController {
 
   protected didSetRowTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null,
                            rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetRowTrait !== void 0) {
-        controllerObserver.controllerDidSetRowTrait(newRowTrait, oldRowTrait, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetRowTrait !== void 0) {
+        observer.controllerDidSetRowTrait(newRowTrait, oldRowTrait, rowFastener);
       }
     }
   }
@@ -1170,11 +1167,11 @@ export class TableController extends CompositeController {
 
   protected willSetRowView(newRowView: RowView | null, oldRowView: RowView | null,
                            rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetRowView !== void 0) {
-        controllerObserver.controllerWillSetRowView(newRowView, oldRowView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetRowView !== void 0) {
+        observer.controllerWillSetRowView(newRowView, oldRowView, rowFastener);
       }
     }
   }
@@ -1192,11 +1189,11 @@ export class TableController extends CompositeController {
 
   protected didSetRowView(newRowView: RowView | null, oldRowView: RowView | null,
                           rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetRowView !== void 0) {
-        controllerObserver.controllerDidSetRowView(newRowView, oldRowView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetRowView !== void 0) {
+        observer.controllerDidSetRowView(newRowView, oldRowView, rowFastener);
       }
     }
   }
@@ -1215,11 +1212,11 @@ export class TableController extends CompositeController {
 
   protected willSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null,
                              rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLeafTrait !== void 0) {
-        controllerObserver.controllerWillSetLeafTrait(newLeafTrait, oldLeafTrait, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLeafTrait !== void 0) {
+        observer.controllerWillSetLeafTrait(newLeafTrait, oldLeafTrait, rowFastener);
       }
     }
   }
@@ -1237,11 +1234,11 @@ export class TableController extends CompositeController {
 
   protected didSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null,
                             rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLeafTrait !== void 0) {
-        controllerObserver.controllerDidSetLeafTrait(newLeafTrait, oldLeafTrait, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLeafTrait !== void 0) {
+        observer.controllerDidSetLeafTrait(newLeafTrait, oldLeafTrait, rowFastener);
       }
     }
   }
@@ -1260,11 +1257,11 @@ export class TableController extends CompositeController {
 
   protected willSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null,
                             rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetLeafView !== void 0) {
-        controllerObserver.controllerWillSetLeafView(newLeafView, oldLeafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetLeafView !== void 0) {
+        observer.controllerWillSetLeafView(newLeafView, oldLeafView, rowFastener);
       }
     }
   }
@@ -1282,21 +1279,21 @@ export class TableController extends CompositeController {
 
   protected didSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null,
                            rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetLeafView !== void 0) {
-        controllerObserver.controllerDidSetLeafView(newLeafView, oldLeafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetLeafView !== void 0) {
+        observer.controllerDidSetLeafView(newLeafView, oldLeafView, rowFastener);
       }
     }
   }
 
   protected willHighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillHighlightLeafView !== void 0) {
-        controllerObserver.controllerWillHighlightLeafView(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillHighlightLeafView !== void 0) {
+        observer.controllerWillHighlightLeafView(leafView, rowFastener);
       }
     }
   }
@@ -1306,21 +1303,21 @@ export class TableController extends CompositeController {
   }
 
   protected didHighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidHighlightLeafView !== void 0) {
-        controllerObserver.controllerDidHighlightLeafView(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidHighlightLeafView !== void 0) {
+        observer.controllerDidHighlightLeafView(leafView, rowFastener);
       }
     }
   }
 
   protected willUnhighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillUnhighlightLeafView !== void 0) {
-        controllerObserver.controllerWillUnhighlightLeafView(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillUnhighlightLeafView !== void 0) {
+        observer.controllerWillUnhighlightLeafView(leafView, rowFastener);
       }
     }
   }
@@ -1330,11 +1327,11 @@ export class TableController extends CompositeController {
   }
 
   protected didUnhighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidUnhighlightLeafView !== void 0) {
-        controllerObserver.controllerDidUnhighlightLeafView(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidUnhighlightLeafView !== void 0) {
+        observer.controllerDidUnhighlightLeafView(leafView, rowFastener);
       }
     }
   }
@@ -1344,11 +1341,11 @@ export class TableController extends CompositeController {
   }
 
   protected didEnterLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidEnterLeafView !== void 0) {
-        controllerObserver.controllerDidEnterLeafView(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidEnterLeafView !== void 0) {
+        observer.controllerDidEnterLeafView(leafView, rowFastener);
       }
     }
   }
@@ -1358,11 +1355,11 @@ export class TableController extends CompositeController {
   }
 
   protected didLeaveLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidLeaveLeafView !== void 0) {
-        controllerObserver.controllerDidLeaveLeafView(leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidLeaveLeafView !== void 0) {
+        observer.controllerDidLeaveLeafView(leafView, rowFastener);
       }
     }
   }
@@ -1374,11 +1371,11 @@ export class TableController extends CompositeController {
 
   protected didPressLeafView(input: PositionGestureInput, event: Event | null, leafView: LeafView,
                              rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidPressLeafView !== void 0) {
-        controllerObserver.controllerDidPressLeafView(input, event, leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidPressLeafView !== void 0) {
+        observer.controllerDidPressLeafView(input, event, leafView, rowFastener);
       }
     }
   }
@@ -1390,11 +1387,11 @@ export class TableController extends CompositeController {
 
   protected didLongPressLeafView(input: PositionGestureInput, leafView: LeafView,
                                  rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidLongPressLeafView !== void 0) {
-        controllerObserver.controllerDidLongPressLeafView(input, leafView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidLongPressLeafView !== void 0) {
+        observer.controllerDidLongPressLeafView(input, leafView, rowFastener);
       }
     }
   }
@@ -1438,11 +1435,11 @@ export class TableController extends CompositeController {
   protected willSetCell(newCellController: CellController | null, oldCellController: CellController | null,
                         cellFastener: ControllerFastener<RowController, CellController>,
                         rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCell !== void 0) {
-        controllerObserver.controllerWillSetCell(newCellController, oldCellController, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCell !== void 0) {
+        observer.controllerWillSetCell(newCellController, oldCellController, cellFastener, rowFastener);
       }
     }
   }
@@ -1462,11 +1459,11 @@ export class TableController extends CompositeController {
   protected didSetCell(newCellController: CellController | null, oldCellController: CellController | null,
                        cellFastener: ControllerFastener<RowController, CellController>,
                        rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCell !== void 0) {
-        controllerObserver.controllerDidSetCell(newCellController, oldCellController, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCell !== void 0) {
+        observer.controllerDidSetCell(newCellController, oldCellController, cellFastener, rowFastener);
       }
     }
   }
@@ -1489,11 +1486,11 @@ export class TableController extends CompositeController {
   protected willSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null,
                              cellFastener: ControllerFastener<RowController, CellController>,
                              rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCellTrait !== void 0) {
-        controllerObserver.controllerWillSetCellTrait(newCellTrait, oldCellTrait, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCellTrait !== void 0) {
+        observer.controllerWillSetCellTrait(newCellTrait, oldCellTrait, cellFastener, rowFastener);
       }
     }
   }
@@ -1513,11 +1510,11 @@ export class TableController extends CompositeController {
   protected didSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null,
                             cellFastener: ControllerFastener<RowController, CellController>,
                             rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCellTrait !== void 0) {
-        controllerObserver.controllerDidSetCellTrait(newCellTrait, oldCellTrait, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCellTrait !== void 0) {
+        observer.controllerDidSetCellTrait(newCellTrait, oldCellTrait, cellFastener, rowFastener);
       }
     }
   }
@@ -1555,11 +1552,11 @@ export class TableController extends CompositeController {
   protected willSetCellView(newCellView: CellView | null, oldCellView: CellView | null,
                             cellFastener: ControllerFastener<RowController, CellController>,
                             rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCellView !== void 0) {
-        controllerObserver.controllerWillSetCellView(newCellView, oldCellView, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCellView !== void 0) {
+        observer.controllerWillSetCellView(newCellView, oldCellView, cellFastener, rowFastener);
       }
     }
   }
@@ -1579,11 +1576,11 @@ export class TableController extends CompositeController {
   protected didSetCellView(newCellView: CellView | null, oldCellView: CellView | null,
                            cellFastener: ControllerFastener<RowController, CellController>,
                            rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCellView !== void 0) {
-        controllerObserver.controllerDidSetCellView(newCellView, oldCellView, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCellView !== void 0) {
+        observer.controllerDidSetCellView(newCellView, oldCellView, cellFastener, rowFastener);
       }
     }
   }
@@ -1606,11 +1603,11 @@ export class TableController extends CompositeController {
   protected willSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null,
                                    cellFastener: ControllerFastener<RowController, CellController>,
                                    rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCellContentView !== void 0) {
-        controllerObserver.controllerWillSetCellContentView(newCellContentView, oldCellContentView, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCellContentView !== void 0) {
+        observer.controllerWillSetCellContentView(newCellContentView, oldCellContentView, cellFastener, rowFastener);
       }
     }
   }
@@ -1630,11 +1627,11 @@ export class TableController extends CompositeController {
   protected didSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null,
                                   cellFastener: ControllerFastener<RowController, CellController>,
                                   rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCellContentView !== void 0) {
-        controllerObserver.controllerDidSetCellContentView(newCellContentView, oldCellContentView, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCellContentView !== void 0) {
+        observer.controllerDidSetCellContentView(newCellContentView, oldCellContentView, cellFastener, rowFastener);
       }
     }
   }
@@ -1642,11 +1639,11 @@ export class TableController extends CompositeController {
   protected willSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null,
                             cellFastener: ControllerFastener<RowController, CellController>,
                             rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCellIcon !== void 0) {
-        controllerObserver.controllerWillSetCellIcon(newCellIcon, oldCellIcon, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCellIcon !== void 0) {
+        observer.controllerWillSetCellIcon(newCellIcon, oldCellIcon, cellFastener, rowFastener);
       }
     }
   }
@@ -1660,11 +1657,11 @@ export class TableController extends CompositeController {
   protected didSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null,
                            cellFastener: ControllerFastener<RowController, CellController>,
                            rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCellIcon !== void 0) {
-        controllerObserver.controllerDidSetCellIcon(newCellIcon, oldCellIcon, cellFastener, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCellIcon !== void 0) {
+        observer.controllerDidSetCellIcon(newCellIcon, oldCellIcon, cellFastener, rowFastener);
       }
     }
   }
@@ -1704,11 +1701,11 @@ export class TableController extends CompositeController {
 
   protected willSetTree(newTreeController: TableController | null, oldTreeController: TableController | null,
                         rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTree !== void 0) {
-        controllerObserver.controllerWillSetTree(newTreeController, oldTreeController, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTree !== void 0) {
+        observer.controllerWillSetTree(newTreeController, oldTreeController, rowFastener);
       }
     }
   }
@@ -1726,11 +1723,11 @@ export class TableController extends CompositeController {
 
   protected didSetTree(newTreeController: TableController | null, oldTreeController: TableController | null,
                        rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTree !== void 0) {
-        controllerObserver.controllerDidSetTree(newTreeController, oldTreeController, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTree !== void 0) {
+        observer.controllerDidSetTree(newTreeController, oldTreeController, rowFastener);
       }
     }
   }
@@ -1749,11 +1746,11 @@ export class TableController extends CompositeController {
 
   protected willSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null,
                              rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTreeTrait !== void 0) {
-        controllerObserver.controllerWillSetTreeTrait(newTreeTrait, oldTreeTrait, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTreeTrait !== void 0) {
+        observer.controllerWillSetTreeTrait(newTreeTrait, oldTreeTrait, rowFastener);
       }
     }
   }
@@ -1771,11 +1768,11 @@ export class TableController extends CompositeController {
 
   protected didSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null,
                             rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTreeTrait !== void 0) {
-        controllerObserver.controllerDidSetTreeTrait(newTreeTrait, oldTreeTrait, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTreeTrait !== void 0) {
+        observer.controllerDidSetTreeTrait(newTreeTrait, oldTreeTrait, rowFastener);
       }
     }
   }
@@ -1794,11 +1791,11 @@ export class TableController extends CompositeController {
 
   protected willSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null,
                             rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetTreeView !== void 0) {
-        controllerObserver.controllerWillSetTreeView(newTreeView, oldTreeView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetTreeView !== void 0) {
+        observer.controllerWillSetTreeView(newTreeView, oldTreeView, rowFastener);
       }
     }
   }
@@ -1816,21 +1813,21 @@ export class TableController extends CompositeController {
 
   protected didSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null,
                            rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetTreeView !== void 0) {
-        controllerObserver.controllerDidSetTreeView(newTreeView, oldTreeView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetTreeView !== void 0) {
+        observer.controllerDidSetTreeView(newTreeView, oldTreeView, rowFastener);
       }
     }
   }
 
   protected willExpandRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillExpandRowView !== void 0) {
-        controllerObserver.controllerWillExpandRowView(rowView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillExpandRowView !== void 0) {
+        observer.controllerWillExpandRowView(rowView, rowFastener);
       }
     }
   }
@@ -1840,21 +1837,21 @@ export class TableController extends CompositeController {
   }
 
   protected didExpandRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidExpandRowView !== void 0) {
-        controllerObserver.controllerDidExpandRowView(rowView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidExpandRowView !== void 0) {
+        observer.controllerDidExpandRowView(rowView, rowFastener);
       }
     }
   }
 
   protected willCollapseRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillCollapseRowView !== void 0) {
-        controllerObserver.controllerWillCollapseRowView(rowView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillCollapseRowView !== void 0) {
+        observer.controllerWillCollapseRowView(rowView, rowFastener);
       }
     }
   }
@@ -1864,20 +1861,21 @@ export class TableController extends CompositeController {
   }
 
   protected didCollapseRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidCollapseRowView !== void 0) {
-        controllerObserver.controllerDidCollapseRowView(rowView, rowFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidCollapseRowView !== void 0) {
+        observer.controllerDidCollapseRowView(rowView, rowFastener);
       }
     }
   }
 
-  /** @hidden */
-  static RowFastener = ControllerFastener.define<TableController, RowController, never, ControllerObserverType<RowController>>({
+  /** @internal */
+  static RowFastener = ControllerFastener.define<TableController, RowController, never, ObserverType<RowController>>({
+    extends: null,
     type: RowController,
     child: false,
-    observe: true,
+    observes: true,
     willSetController(newRowController: RowController | null, oldRowController: RowController | null): void {
       this.owner.willSetRow(newRowController, oldRowController, this);
     },
@@ -2028,10 +2026,10 @@ export class TableController extends CompositeController {
   });
 
   protected createRowFastener(rowController: RowController): ControllerFastener<this, RowController> {
-    return new TableController.RowFastener(this, rowController.key, "row");
+    return TableController.RowFastener.create(this, rowController.key ?? "row");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly rowFasteners: ReadonlyArray<ControllerFastener<this, RowController>>;
 
   protected getRowFastener(rowTrait: RowTrait): ControllerFastener<this, RowController> | null {
@@ -2046,7 +2044,7 @@ export class TableController extends CompositeController {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   protected mountRowFasteners(): void {
     const rowFasteners = this.rowFasteners;
     for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
@@ -2055,7 +2053,7 @@ export class TableController extends CompositeController {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountRowFasteners(): void {
     const rowFasteners = this.rowFasteners;
     for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
@@ -2072,8 +2070,8 @@ export class TableController extends CompositeController {
     return controller instanceof RowController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const headerController = this.detectHeaderController(childController);
     if (headerController !== null) {
       this.header.setController(headerController, targetController);
@@ -2084,8 +2082,8 @@ export class TableController extends CompositeController {
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const headerController = this.detectHeaderController(childController);
     if (headerController !== null) {
       this.header.setController(null);
@@ -2096,17 +2094,17 @@ export class TableController extends CompositeController {
     }
   }
 
-  /** @hidden */
-  protected override mountControllerFasteners(): void {
-    super.mountControllerFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountColFasteners();
     this.mountRowFasteners();
   }
 
-  /** @hidden */
-  protected override unmountControllerFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountRowFasteners();
     this.unmountColFasteners();
-    super.unmountControllerFasteners();
+    super.unmountFasteners();
   }
 }

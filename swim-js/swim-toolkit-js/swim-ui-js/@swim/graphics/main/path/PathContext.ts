@@ -32,21 +32,21 @@ export class PathContext implements DrawingContext {
     (this as Mutable<this>).precision = precision;
   }
 
-  /** @hidden */
+  /** @internal */
   get anglePrecision(): number {
     const precision = this.precision;
     return precision > 0 ? Math.max(5, precision) : precision;
   }
 
-  /** @hidden */
+  /** @internal */
   x0: number;
-  /** @hidden */
+  /** @internal */
   y0: number;
-  /** @hidden */
+  /** @internal */
   x1: number;
-  /** @hidden */
+  /** @internal */
   y1: number;
-  /** @hidden */
+  /** @internal */
   d: string;
 
   moveTo(x: number, y: number): void {
@@ -253,6 +253,6 @@ export class PathContext implements DrawingContext {
     return this.d;
   }
 
-  /** @hidden */
+  /** @internal */
   static Epsilon: number = 1e-6;
 }

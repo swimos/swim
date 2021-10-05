@@ -18,5 +18,7 @@ export {
   Modal,
 } from "./Modal";
 
-export {ModalManager} from "./ModalManager";
-export {ModalManagerObserver} from "./ModalManagerObserver";
+export {ModalService} from "./ModalService";
+export {ModalServiceObserver} from "./ModalServiceObserver";
+
+export {ModalProvider} from "./ModalProvider";

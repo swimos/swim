@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {TraitObserver} from "../TraitObserver";
-import type {SelectionOptions} from "../selection/SelectionManager";
+import type {SelectionOptions} from "../selection/SelectionService";
+import type {TraitObserver} from "../trait/TraitObserver";
 import type {SelectableTrait} from "./SelectableTrait";
 
 export interface SelectableTraitObserver<R extends SelectableTrait = SelectableTrait> extends TraitObserver<R> {

@@ -20,7 +20,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div")
+const containerView = bodyView.appendChild("div")
   .position("relative")
   .flexGrow(1)
   .margin(60)
@@ -47,7 +47,7 @@ class ExampleTableController extends swim.TableController {
   }
 }
 
-const tableModel = new swim.CompoundModel();
+const tableModel = new swim.GenericModel();
 tableModel.mount();
 const tableTrait = new swim.TableTrait();
 tableModel.setTrait("table", tableTrait);
@@ -62,7 +62,7 @@ const colBTrait = new swim.ColTrait()
 tableTrait.setTrait("b", colBTrait);
 
 function createRowModel(i) {
-  const rowModel = new swim.CompoundModel();
+  const rowModel = new swim.GenericModel();
   const rowTrait = new swim.RowTrait();
   rowModel.setTrait("row", rowTrait);
   rowTrait.getOrCreateCell("a", swim.TextCellTrait).content(i + "A");
@@ -70,7 +70,7 @@ function createRowModel(i) {
   return rowModel;
 }
 for (let i = 1; i <= 100; i += 1) {
-  tableModel.appendChildModel(createRowModel(i));
+  tableModel.appendChild(createRowModel(i));
 }
 
 const tableController = new ExampleTableController();

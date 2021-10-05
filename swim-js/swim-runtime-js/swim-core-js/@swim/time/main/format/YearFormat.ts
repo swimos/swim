@@ -17,7 +17,7 @@ import type {DateTimeInit, DateTime} from "../DateTime";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {YearParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class YearFormat extends DateTimeFormat {
   override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
     output = DateTimeFormat.writeDateNumber4(output, date.year);

@@ -25,7 +25,7 @@ const containerView = swim.HtmlView.create("div")
   .flexGrow(1)
   .userSelect("none");
 
-containerView.addViewObserver({
+containerView.observe({
   viewWillResize(viewContext, view) {
     if (viewContext.viewIdiom === "desktop") {
       view.margin(60);
@@ -35,7 +35,7 @@ containerView.addViewObserver({
   },
 });
 
-bodyView.append(containerView);
+bodyView.appendChild(containerView);
 
 const tableLayout = swim.TableLayout.fromAny({
   cols: [
@@ -84,10 +84,10 @@ function createRowView(i) {
   return rowView;
 }
 for (let i = 1; i <= 100; i += 1) {
-  tableView.appendChildView(createRowView(i));
+  tableView.appendChild(createRowView(i));
 }
 
-containerView.appendChildView(tableView);
+containerView.appendChild(tableView);
 
     </script>
   </body>

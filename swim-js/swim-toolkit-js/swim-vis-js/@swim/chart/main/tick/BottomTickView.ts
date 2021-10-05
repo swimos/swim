@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Affinity} from "@swim/fastener";
 import {R2Point, R2Box} from "@swim/math";
-import {View} from "@swim/view";
 import {GraphicsView, CanvasContext, TypesetView} from "@swim/graphics";
 import {TickOrientation, TickView} from "./TickView";
 
-export class BottomTickView<X> extends TickView<X> {
+export class BottomTickView<X = unknown> extends TickView<X> {
   constructor(value: X) {
     super(value);
   }
@@ -34,9 +34,9 @@ export class BottomTickView<X> extends TickView<X> {
     const y2 = y1 + this.tickLabelPadding.getValue();
 
     if (TypesetView.is(labelView)) {
-      labelView.textAlign.setState("center", View.Intrinsic);
-      labelView.textBaseline.setState("top", View.Intrinsic);
-      labelView.textOrigin.setState(new R2Point(x, y2), View.Intrinsic);
+      labelView.textAlign.setState("center", Affinity.Intrinsic);
+      labelView.textBaseline.setState("top", Affinity.Intrinsic);
+      labelView.textOrigin.setState(new R2Point(x, y2), Affinity.Intrinsic);
     }
   }
 
@@ -47,12 +47,16 @@ export class BottomTickView<X> extends TickView<X> {
     const tickMarkLength = this.tickMarkLength.getValue();
     const y1 = y0 + tickMarkLength;
 
+    // save
+    const contextLineWidth = context.lineWidth;
+    const contextStrokeStyle = context.strokeStyle;
+
     const tickMarkColor = this.tickMarkColor.value;
     const tickMarkWidth = this.tickMarkWidth.getValue();
     if (tickMarkColor !== null && tickMarkWidth !== 0 && tickMarkLength !== 0) {
       context.beginPath();
-      context.strokeStyle = tickMarkColor.toString();
       context.lineWidth = tickMarkWidth;
+      context.strokeStyle = tickMarkColor.toString();
       context.moveTo(x, y0);
       context.lineTo(x, y1);
       context.stroke();
@@ -62,11 +66,15 @@ export class BottomTickView<X> extends TickView<X> {
     const gridLineWidth = this.gridLineWidth.getValue();
     if (gridLineColor !== null && gridLineWidth !== 0 && frame.xMin < x && x < frame.xMax) {
       context.beginPath();
-      context.strokeStyle = gridLineColor.toString();
       context.lineWidth = gridLineWidth;
+      context.strokeStyle = gridLineColor.toString();
       context.moveTo(x, y0);
       context.lineTo(x, frame.yMin);
       context.stroke();
     }
+
+    // restore
+    context.lineWidth = contextLineWidth;
+    context.strokeStyle = contextStrokeStyle;
   }
 }

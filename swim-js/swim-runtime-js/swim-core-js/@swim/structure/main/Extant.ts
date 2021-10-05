@@ -21,7 +21,7 @@ import {Record} from "./Record";
 export type AnyExtant = Extant | null;
 
 export class Extant extends Value {
-  /** @hidden */
+  /** @internal */
   private constructor() {
     super();
   }

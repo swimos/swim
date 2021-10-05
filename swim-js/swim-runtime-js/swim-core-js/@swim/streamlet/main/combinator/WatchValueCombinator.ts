@@ -21,7 +21,7 @@ export class WatchValueCombinator<I> extends WatchValueOperator<I> {
     this.func = func;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly func: WatchValueFunction<I>;
 
   override evaluate(value: I | undefined): void {

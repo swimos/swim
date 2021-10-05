@@ -15,20 +15,27 @@
 import type {Mutable} from "@swim/util";
 
 export interface ConstraintKey {
+  /** @internal */
   readonly id: number;
 }
 
-export const ConstraintKey = {} as {
-  /** @hidden */
-  idCount: number;
+/** @internal */
+export const ConstraintKey = (function () {
+  const ConstraintKey = {} as {
+    /** @internal */
+    idCount: number;
 
-  nextId(): number;
-};
+    /** @internal */
+    nextId(): number;
+  };
 
-(ConstraintKey as Mutable<typeof ConstraintKey>).idCount = 0;
+  (ConstraintKey as Mutable<typeof ConstraintKey>).idCount = 0;
 
-ConstraintKey.nextId = function (): number {
-  const nextId = ConstraintKey.idCount + 1;
-  (ConstraintKey as Mutable<typeof ConstraintKey>).idCount = nextId;
-  return nextId;
-};
+  ConstraintKey.nextId = function (): number {
+    const nextId = ConstraintKey.idCount + 1;
+    (ConstraintKey as Mutable<typeof ConstraintKey>).idCount = nextId;
+    return nextId;
+  };
+
+  return ConstraintKey;
+})();

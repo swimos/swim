@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
+import type {Look, Feel, MoodVector, ThemeMatrix, ThemeContext} from "@swim/theme";
 import {DrawingRenderer} from "../drawing/DrawingRenderer";
 import type {PaintingContext} from "./PaintingContext";
 
-export abstract class PaintingRenderer extends DrawingRenderer {
+export abstract class PaintingRenderer extends DrawingRenderer implements ThemeContext {
   abstract override readonly context: PaintingContext;
 
   abstract readonly theme: ThemeMatrix | null;
 
   abstract readonly mood: MoodVector | null;
 
+  /** @override */
   getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
     const theme = this.theme;
     let value: T | undefined;
@@ -37,7 +38,9 @@ export abstract class PaintingRenderer extends DrawingRenderer {
     return value;
   }
 
+  /** @override */
   getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
+  /** @override */
   getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
   getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
     if (arguments.length === 2) {

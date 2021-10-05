@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
-import {ControllerView, ControllerViewTrait} from "@swim/controller";
+import {TraitViewFastener} from "@swim/controller";
 import {CellController} from "./CellController";
 import {TextCellView} from "./TextCellView";
 import {TextCellContent, TextCellTrait} from "./TextCellTrait";
 import type {TextCellControllerObserver} from "./TextCellControllerObserver";
 
 export class TextCellController extends CellController {
-  override readonly controllerObservers!: ReadonlyArray<TextCellControllerObserver>;
+  override readonly observerType?: Class<TextCellControllerObserver>;
 
   protected override attachCellTrait(cellTrait: TextCellTrait): void {
     super.attachCellTrait(cellTrait);
@@ -49,25 +51,25 @@ export class TextCellController extends CellController {
     this.content.setView(null);
   }
 
-  /** @hidden */
-  static override CellFastener = ControllerViewTrait.define<TextCellController, TextCellView, TextCellTrait>({
+  /** @internal */
+  static override CellFastener = TraitViewFastener.define<TextCellController, TextCellTrait, TextCellView>({
     extends: CellController.CellFastener,
-    viewType: TextCellView,
-    observeView: true,
-    viewDidSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.content.setView(newContentView);
-    },
     traitType: TextCellTrait,
-    observeTrait: true,
+    observesTrait: true,
     traitDidSetContent(newContent: TextCellContent | null, oldContent: TextCellContent | null, cellTrait: TextCellTrait): void {
       this.owner.setContentView(newContent, cellTrait);
     },
-  }) as unknown as typeof CellController.CellFastener;
+    viewType: TextCellView,
+    observesView: true,
+    viewDidSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
+      this.owner.content.setView(newContentView);
+    },
+  });
 
-  @ControllerViewTrait<TextCellController, TextCellView, TextCellTrait>({
+  @TraitViewFastener<TextCellController, TextCellTrait, TextCellView>({
     extends: TextCellController.CellFastener,
   })
-  override readonly cell!: ControllerViewTrait<this, TextCellView, TextCellTrait>;
+  override readonly cell!: TraitViewFastener<this, TextCellTrait, TextCellView>;
 
   protected createContentView(content: TextCellContent, cellTrait: TextCellTrait): HtmlView | string | null {
     if (typeof content === "function") {
@@ -98,11 +100,11 @@ export class TextCellController extends CellController {
   }
 
   protected willSetContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetCellContentView !== void 0) {
-        controllerObserver.controllerWillSetCellContentView(newContentView, oldContentView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetCellContentView !== void 0) {
+        observer.controllerWillSetCellContentView(newContentView, oldContentView, this);
       }
     }
   }
@@ -118,16 +120,16 @@ export class TextCellController extends CellController {
   }
 
   protected didSetContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetCellContentView !== void 0) {
-        controllerObserver.controllerDidSetCellContentView(newContentView, oldContentView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetCellContentView !== void 0) {
+        observer.controllerDidSetCellContentView(newContentView, oldContentView, this);
       }
     }
   }
 
-  @ControllerView<TextCellController, HtmlView>({
+  @ViewFastener<TextCellController, HtmlView>({
     type: HtmlView,
     willSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
       this.owner.willSetContentView(newContentView, oldContentView);
@@ -139,5 +141,5 @@ export class TextCellController extends CellController {
       this.owner.didSetContentView(newContentView, oldContentView);
     },
   })
-  readonly content!: ControllerView<this, HtmlView>;
+  readonly content!: ViewFastener<this, HtmlView>;
 }

@@ -113,13 +113,11 @@ Object.defineProperty(Form.prototype, "tag", {
   get<T, U>(this: Form<T, U>): string | undefined {
     return void 0;
   },
-  enumerable: true,
   configurable: true,
 });
 Object.defineProperty(Form.prototype, "unit", {
   get<T, U>(this: Form<T, U>): T | undefined {
     return void 0;
   },
-  enumerable: true,
   configurable: true,
 });

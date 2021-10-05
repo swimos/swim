@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class} from "@swim/util";
 import {GeoBox} from "@swim/geo";
 import {Model, TraitModelType, Trait, TraitFastener} from "@swim/model";
 import {GeoTrait} from "../geo/GeoTrait";
@@ -25,7 +25,7 @@ export class GeoLayerTrait extends GeoTrait {
     this.featureFasteners = [];
   }
 
-  override readonly traitObservers!: ReadonlyArray<GeoLayerTraitObserver>;
+  override readonly observerType?: Class<GeoLayerTraitObserver>;
 
   override readonly geoBounds: GeoBox;
 
@@ -40,9 +40,9 @@ export class GeoLayerTrait extends GeoTrait {
   }
 
   protected willSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetGeoBounds !== void 0) {
         traitObserver.traitWillSetGeoBounds(newGeoBounds, oldGeoBounds, this);
       }
@@ -54,9 +54,9 @@ export class GeoLayerTrait extends GeoTrait {
   }
 
   protected didSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetGeoBounds !== void 0) {
         traitObserver.traitDidSetGeoBounds(newGeoBounds, oldGeoBounds, this);
       }
@@ -77,7 +77,7 @@ export class GeoLayerTrait extends GeoTrait {
     const featureFastener = this.createFeatureFastener(featureTrait);
     featureFasteners.splice(targetIndex, 0, featureFastener);
     featureFastener.setTrait(featureTrait, targetTrait);
-    if (this.isMounted()) {
+    if (this.mounted) {
       featureFastener.mount();
     }
   }
@@ -88,7 +88,7 @@ export class GeoLayerTrait extends GeoTrait {
       const featureFastener = featureFasteners[i]!;
       if (featureFastener.trait === featureTrait) {
         featureFastener.setTrait(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           featureFastener.unmount();
         }
         featureFasteners.splice(i, 1);
@@ -102,22 +102,22 @@ export class GeoLayerTrait extends GeoTrait {
   }
 
   protected attachFeature(featureTrait: GeoTrait, featureFastener: TraitFastener<this, GeoTrait>): void {
-    if (this.isConsuming()) {
-      featureTrait.addTraitConsumer(this);
+    if (this.consuming) {
+      featureTrait.consume(this);
     }
   }
 
   protected detachFeature(featureTrait: GeoTrait, featureFastener: TraitFastener<this, GeoTrait>): void {
-    if (this.isConsuming()) {
-      featureTrait.removeTraitConsumer(this);
+    if (this.consuming) {
+      featureTrait.unconsume(this);
     }
   }
 
   protected willSetFeature(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null,
                            targetTrait: Trait | null, featureFastener: TraitFastener<this, GeoTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetFeature !== void 0) {
         traitObserver.traitWillSetFeature(newFeatureTrait, oldFeatureTrait, targetTrait, this);
       }
@@ -137,16 +137,16 @@ export class GeoLayerTrait extends GeoTrait {
 
   protected didSetFeature(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null,
                           targetTrait: Trait | null, featureFastener: TraitFastener<this, GeoTrait>): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetFeature !== void 0) {
         traitObserver.traitDidSetFeature(newFeatureTrait, oldFeatureTrait, targetTrait, this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static FeatureFastener = TraitFastener.define<GeoLayerTrait, GeoTrait>({
     type: GeoTrait,
     sibling: false,
@@ -162,13 +162,13 @@ export class GeoLayerTrait extends GeoTrait {
   });
 
   protected createFeatureFastener(featureTrait: GeoTrait): TraitFastener<this, GeoTrait> {
-    return new GeoLayerTrait.FeatureFastener(this, featureTrait.key, "feature");
+    return GeoLayerTrait.FeatureFastener.create(this, featureTrait.key ?? "feature");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly featureFasteners: ReadonlyArray<TraitFastener<this, GeoTrait>>;
 
-  /** @hidden */
+  /** @internal */
   protected mountFeatureFasteners(): void {
     const featureFasteners = this.featureFasteners;
     for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
@@ -177,7 +177,7 @@ export class GeoLayerTrait extends GeoTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountFeatureFasteners(): void {
     const featureFasteners = this.featureFasteners;
     for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
@@ -186,24 +186,24 @@ export class GeoLayerTrait extends GeoTrait {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected startConsumingFeatures(): void {
     const featureFasteners = this.featureFasteners;
     for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
       const featureTrait = featureFasteners[i]!.trait;
       if (featureTrait !== null) {
-        featureTrait.addTraitConsumer(this);
+        featureTrait.consume(this);
       }
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected stopConsumingFeatures(): void {
     const featureFasteners = this.featureFasteners;
     for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
       const featureTrait = featureFasteners[i]!.trait;
       if (featureTrait !== null) {
-        featureTrait.removeTraitConsumer(this);
+        featureTrait.unconsume(this);
       }
     }
   }
@@ -212,18 +212,18 @@ export class GeoLayerTrait extends GeoTrait {
     return model.getTrait(GeoTrait);
   }
 
-  protected detectChildModel(childModel: Model): void {
-    const featureTrait = this.detectFeatureModel(childModel);
+  protected detectChildModel(child: Model): void {
+    const featureTrait = this.detectFeatureModel(child);
     if (featureTrait !== null) {
       this.insertFeature(featureTrait);
     }
   }
 
   protected detectModels(model: TraitModelType<this>): void {
-    const childModels = model.childModels;
-    for (let i = 0, n = childModels.length; i < n; i += 1) {
-      const childModel = childModels[i]!;
-      this.detectChildModel(childModel);
+    const children = model.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      this.detectChildModel(child);
     }
   }
 
@@ -234,41 +234,43 @@ export class GeoLayerTrait extends GeoTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected detectInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    const featureTrait = this.detectFeatureModel(childModel);
+  protected detectInsertChildModel(child: Model, target: Model | null): void {
+    const featureTrait = this.detectFeatureModel(child);
     if (featureTrait !== null) {
-      const targetTrait = targetModel !== null ? this.detectFeatureModel(targetModel) : null;
+      const targetTrait = target !== null ? this.detectFeatureModel(target) : null;
       this.insertFeature(featureTrait, targetTrait);
     }
   }
 
-  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    super.onInsertChildModel(childModel, targetModel);
-    this.detectInsertChildModel(childModel, targetModel);
+  /** @protected */
+  override onInsertChild(child: Model, target: Model | null): void {
+    super.onInsertChild(child, target);
+    this.detectInsertChildModel(child, target);
   }
 
-  protected detectRemoveChildModel(childModel: Model): void {
-    const featureTrait = this.detectFeatureModel(childModel);
+  protected detectRemoveChildModel(child: Model): void {
+    const featureTrait = this.detectFeatureModel(child);
     if (featureTrait !== null) {
       this.removeFeature(featureTrait);
     }
   }
 
-  protected override onRemoveChildModel(childModel: Model): void {
-    super.onRemoveChildModel(childModel);
-    this.detectRemoveChildModel(childModel);
+  /** @protected */
+  override onRemoveChild(child: Model): void {
+    super.onRemoveChild(child);
+    this.detectRemoveChildModel(child);
   }
 
-  /** @hidden */
-  protected override mountTraitFasteners(): void {
-    super.mountTraitFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountFeatureFasteners();
   }
 
-  /** @hidden */
-  protected override unmountTraitFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountFeatureFasteners();
-    super.unmountTraitFasteners();
+    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

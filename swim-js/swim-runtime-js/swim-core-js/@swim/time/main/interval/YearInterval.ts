@@ -16,7 +16,7 @@ import {AnyDateTime, DateTime} from "../DateTime";
 import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
 import {YearsInterval} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class YearInterval extends UnitTimeInterval {
   override offset(t: AnyDateTime, k?: number): DateTime {
     let d = DateTime.fromAny(t);

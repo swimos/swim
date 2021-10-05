@@ -181,8 +181,8 @@ export class R2EllipticCurve extends R2Curve implements Debug {
   override writeMove<T>(output: Output<T>): Output<T> {
     const {x0, y0} = this.toEndpoints();
     output = output.write(77/*'M'*/);
-    output = Format.displayNumber(output, x0)
-    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, x0);
+    output = output.write(44/*','*/);
     output = Format.displayNumber(output, y0);
     return output;
   }
@@ -190,18 +190,18 @@ export class R2EllipticCurve extends R2Curve implements Debug {
   override writeRest<T>(output: Output<T>): Output<T> {
     const {rx, ry, phi, large, sweep, x1, y1} = this.toEndpoints();
     output = output.write(65/*'A'*/);
-    output = Format.displayNumber(output, rx)
-    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, rx);
+    output = output.write(44/*','*/);
     output = Format.displayNumber(output, ry);
-    output = output.write(32/*' '*/)
-    output = Format.displayNumber(output, phi)
-    output = output.write(32/*' '*/)
+    output = output.write(32/*' '*/);
+    output = Format.displayNumber(output, phi);
+    output = output.write(32/*' '*/);
     output = output.write(large ? 49/*'1'*/ : 48/*'0'*/);
-    output = output.write(44/*','*/)
+    output = output.write(44/*','*/);
     output = output.write(sweep ? 49/*'1'*/ : 48/*'0'*/);
-    output = output.write(32/*' '*/)
+    output = output.write(32/*' '*/);
     output = Format.displayNumber(output, x1);
-    output = output.write(44/*','*/)
+    output = output.write(44/*','*/);
     output = Format.displayNumber(output, y1);
     return output;
   }

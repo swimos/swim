@@ -18,7 +18,7 @@ import {ColorStopListParser} from "./ColorStopListParser";
 import {LinearGradientAngle, LinearGradient} from "./LinearGradient";
 import {LinearGradientAngleParser} from "./LinearGradientAngleParser";
 
-/** @hidden */
+/** @internal */
 export class LinearGradientParser extends Parser<LinearGradient> {
   private readonly identOutput: Output<string> | undefined;
   private readonly angleParser: Parser<LinearGradientAngle> | undefined;
@@ -124,7 +124,7 @@ export class LinearGradientParser extends Parser<LinearGradient> {
     return new LinearGradientParser(identOutput, angleParser, stopsParser, step);
   }
 
-  /** @hidden */
+  /** @internal */
   static parseRest(input: Input, identOutput?: Output<string>): Parser<LinearGradient> {
     return LinearGradientParser.parse(input, identOutput, void 0, void 0, 2);
   }

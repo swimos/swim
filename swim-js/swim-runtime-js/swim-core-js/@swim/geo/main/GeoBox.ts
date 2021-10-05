@@ -118,13 +118,13 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     }
   }
 
-  /** @hidden */
+  /** @internal */
   containsPoint(that: GeoPoint): boolean {
     return this.lngMin <= that.lng && that.lng <= this.lngMax
         && this.latMin <= that.lat && that.lat <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsSegment(that: GeoSegment): boolean {
     return this.lngMin <= that.lng0 && that.lng0 <= this.lngMax
         && this.latMin <= that.lat0 && that.lat0 <= this.latMax
@@ -132,13 +132,13 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         && this.latMin <= that.lat1 && that.lat1 <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsTile(that: GeoTile): boolean {
     return this.lngMin <= that.lngMin && that.lngMax <= this.lngMax
         && this.latMin <= that.latMin && that.latMax <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   containsBox(that: GeoBox): boolean {
     return this.lngMin <= that.lngMin && that.lngMax <= this.lngMax
         && this.latMin <= that.latMin && that.latMax <= this.latMax;
@@ -158,13 +158,13 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     }
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsPoint(that: GeoPoint): boolean {
     return this.lngMin <= that.lng && that.lng <= this.lngMax
         && this.latMin <= that.lat && that.lat <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsSegment(that: GeoSegment): boolean {
     const lngMin = this.lngMin;
     const latMin = this.latMin;
@@ -189,13 +189,13 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     }
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsTile(that: GeoTile): boolean {
     return this.lngMin <= that.lngMax && that.lngMin <= this.lngMax
         && this.latMin <= that.latMax && that.latMin <= this.latMax;
   }
 
-  /** @hidden */
+  /** @internal */
   intersectsBox(that: GeoBox): boolean {
     return this.lngMin <= that.lngMax && that.lngMin <= this.lngMax
         && this.latMin <= that.latMax && that.latMin <= this.latMax;
@@ -332,7 +332,7 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is GeoBoxInit {
     if (typeof value === "object" && value !== null) {
       const init = value as GeoBoxInit;
@@ -344,7 +344,7 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyGeoBox {
     return value instanceof GeoBox
         || GeoBox.isInit(value);

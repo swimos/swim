@@ -13,9 +13,11 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View} from "@swim/view";
 import type {GraphicsView} from "../graphics/GraphicsView";
 import {LayerView} from "../layer/LayerView";
 import type {CanvasContext} from "../canvas/CanvasContext";
@@ -30,49 +32,44 @@ export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 }
 
 export class ArcView extends LayerView implements FillView, StrokeView {
-  override initView(init: ArcViewInit): void {
-    super.initView(init);
-    this.setState(init);
-  }
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
+  readonly xAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
-  readonly xAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
+  readonly yAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
-  readonly yAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsRender})
+  readonly center!: ThemeAnimator<this, R2Point, AnyR2Point>;
 
-  @ViewAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsRender})
-  readonly center!: ViewAnimator<this, R2Point, AnyR2Point>;
+  @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
+  readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
-  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
+  readonly outerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
-  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
+  readonly startAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
-  readonly startAngle!: ViewAnimator<this, Angle, AnyAngle>;
+  @ThemeAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
+  readonly sweepAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
-  readonly sweepAngle!: ViewAnimator<this, Angle, AnyAngle>;
+  @ThemeAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
+  readonly padAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator({type: Angle, state: Angle.zero(), updateFlags: View.NeedsRender})
-  readonly padAngle!: ViewAnimator<this, Angle, AnyAngle>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
+  readonly padRadius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
-  readonly padRadius!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
+  readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
-  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Color, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true, updateFlags: View.NeedsRender})
-  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true, updateFlags: View.NeedsRender})
-  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
-
-  @ViewAnimator({type: Length, state: null, inherit: true, updateFlags: View.NeedsRender})
-  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Arc {
     return new Arc(this.center.value, this.innerRadius.value, this.outerRadius.value,
@@ -126,35 +123,39 @@ export class ArcView extends LayerView implements FillView, StrokeView {
   }
 
   protected layoutArc(): void {
-    if (this.center.takesPrecedence(View.Intrinsic)) {
+    if (this.center.hasAffinity(Affinity.Intrinsic)) {
       const viewFrame = this.viewFrame;
       const cx = viewFrame.xMin + viewFrame.width * this.xAlign.getValue();
       const cy = viewFrame.yMin + viewFrame.height * this.yAlign.getValue();
-      this.center.setState(new R2Point(cx, cy), View.Intrinsic);
+      this.center.setState(new R2Point(cx, cy), Affinity.Intrinsic);
     }
   }
 
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       this.layoutArc();
       this.renderArc(renderer.context, this.viewFrame);
-      context.restore();
     }
   }
 
   protected renderArc(context: CanvasContext, frame: R2Box): void {
+    // save
+    const contextFillStyle = context.fillStyle;
+    const contextLineWidth = context.lineWidth;
+    const contextStrokeStyle = context.strokeStyle;
+
     const arc = this.value;
     context.beginPath();
     arc.draw(context, frame);
+
     const fill = this.fill.value;
     if (fill !== null) {
       context.fillStyle = fill.toString();
       context.fill();
     }
+
     const stroke = this.stroke.value;
     if (stroke !== null) {
       const strokeWidth = this.strokeWidth.value;
@@ -165,6 +166,11 @@ export class ArcView extends LayerView implements FillView, StrokeView {
       context.strokeStyle = stroke.toString();
       context.stroke();
     }
+
+    // restore
+    context.fillStyle = contextFillStyle;
+    context.lineWidth = contextLineWidth;
+    context.strokeStyle = contextStrokeStyle;
   }
 
   override get popoverFrame(): R2Box {
@@ -186,13 +192,9 @@ export class ArcView extends LayerView implements FillView, StrokeView {
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      context.save();
       const p = renderer.transform.transform(x, y);
       this.layoutArc();
-      const hit = this.hitTestArc(p.x, p.y, context, this.viewFrame);
-      context.restore();
-      return hit;
+      return this.hitTestArc(p.x, p.y, renderer.context, this.viewFrame);
     }
     return null;
   }
@@ -206,9 +208,17 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     } else if (this.stroke.value !== null) {
       const strokeWidth = this.strokeWidth.value;
       if (strokeWidth !== null) {
+        // save
+        const contextLineWidth = context.lineWidth;
+
         const size = Math.min(frame.width, frame.height);
         context.lineWidth = strokeWidth.pxValue(size);
-        if (context.isPointInStroke(x, y)) {
+        const pointInStroke = context.isPointInStroke(x, y);
+
+        // restore
+        context.lineWidth = contextLineWidth;
+
+        if (pointInStroke) {
           return this;
         }
       }
@@ -216,32 +226,17 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     return null;
   }
 
-  static override create(): ArcView {
-    return new ArcView();
+  override init(init: Arc | ArcViewInit): void {
+    if (!(init instanceof Arc)) {
+      super.init(init);
+    }
+    this.setState(init);
   }
 
   static fromArc(arc: Arc): ArcView {
     const view = new ArcView();
     view.setState(arc);
     return view;
-  }
-
-  static fromInit(init: ArcViewInit): ArcView {
-    const view = new ArcView();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny(value: AnyArcView): ArcView {
-    if (value instanceof ArcView) {
-      return value;
-    } else if (value instanceof Arc) {
-      return this.fromArc(value);
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
-    } else {
-      throw new TypeError("" + value);
-    }
   }
 }
 Object.defineProperty(ArcView.prototype, "viewBounds", {
@@ -253,6 +248,5 @@ Object.defineProperty(ArcView.prototype, "viewBounds", {
     return new R2Box(center.x - radius, center.y - radius,
                      center.x + radius, center.y + radius);
   },
-  enumerable: true,
   configurable: true,
 });

@@ -12,55 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {ViewContextType, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import type {ViewContextType} from "@swim/view";
 import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {ScaledViewInit, ScaledView} from "../scaled/ScaledView";
 import {AnyPlotView, PlotView} from "../plot/PlotView";
 import type {GraphViewObserver} from "./GraphViewObserver";
 
-export type AnyGraphView<X, Y> = GraphView<X, Y> | GraphViewInit<X, Y>;
+export type AnyGraphView<X = unknown, Y = unknown> = GraphView<X, Y> | GraphViewInit<X, Y>;
 
-export interface GraphViewInit<X, Y> extends ScaledViewInit<X, Y> {
+export interface GraphViewInit<X = unknown, Y = unknown> extends ScaledViewInit<X, Y> {
   plots?: AnyPlotView<X, Y>[];
 
   font?: AnyFont;
   textColor?: AnyColor;
 }
 
-export class GraphView<X, Y> extends ScaledView<X, Y> {
-  override readonly viewObservers!: ReadonlyArray<GraphViewObserver<X, Y>>;
+export class GraphView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
+  override readonly observerType?: Class<GraphViewObserver<X, Y>>;
 
-  override initView(init: GraphViewInit<X, Y>): void {
-    super.initView(init);
-    const plots = init.plots;
-    if (plots !== void 0) {
-      for (let i = 0, n = plots.length; i < n; i += 1) {
-        this.addPlot(plots[i]!);
-      }
-    }
+  @ThemeAnimator({type: Font, inherits: true, state: null})
+  readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-    if (init.font !== void 0) {
-      this.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      this.textColor(init.textColor);
-    }
-  }
-
-  @ViewAnimator({type: Font, inherit: true, state: null})
-  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
-
-  @ViewAnimator({type: Color, inherit: true, state: null})
-  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, inherits: true, state: null})
+  readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   addPlot(plot: AnyPlotView<X, Y>, key?: string): void {
     if (key === void 0 && typeof plot === "object" && plot !== null) {
       key = plot.key;
     }
     plot = PlotView.fromAny(plot);
-    this.appendChildView(plot);
+    this.appendChild(plot);
   }
 
   protected override willRender(viewContext: ViewContextType<this>): void {
@@ -92,22 +77,20 @@ export class GraphView<X, Y> extends ScaledView<X, Y> {
     return this;
   }
 
-  static override create<X, Y>(): GraphView<X, Y> {
-    return new GraphView<X, Y>();
-  }
-
-  static fromInit<X, Y>(init: GraphViewInit<X, Y>): GraphView<X, Y> {
-    const view = new GraphView<X, Y>();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny<X, Y>(value: AnyGraphView<X, Y>): GraphView<X, Y> {
-    if (value instanceof GraphView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+  override init(init: GraphViewInit<X, Y>): void {
+    super.init(init);
+    const plots = init.plots;
+    if (plots !== void 0) {
+      for (let i = 0, n = plots.length; i < n; i += 1) {
+        this.addPlot(plots[i]!);
+      }
     }
-    throw new TypeError("" + value);
+
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
   }
 }

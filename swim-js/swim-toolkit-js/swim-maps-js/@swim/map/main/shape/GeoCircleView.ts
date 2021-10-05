@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class} from "@swim/util";
+import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, R2Circle, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
-import {ViewContextType, View, ViewProperty, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import {ViewContextType, View} from "@swim/view";
 import {
   GraphicsView,
   FillViewInit,
@@ -51,61 +53,36 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     });
   }
 
-  override initView(init: GeoCircleViewInit): void {
-    super.initView(init);
-    if (init.geoCenter !== void 0) {
-      this.geoCenter(init.geoCenter);
-    }
-    if (init.viewCenter !== void 0) {
-      this.viewCenter(init.viewCenter);
-    }
-    if (init.radius !== void 0) {
-      this.radius(init.radius);
-    }
-    if (init.hitRadius !== void 0) {
-      this.hitRadius(init.hitRadius);
-    }
-    if (init.fill !== void 0) {
-      this.fill(init.fill);
-    }
-    if (init.stroke !== void 0) {
-      this.stroke(init.stroke);
-    }
-    if (init.strokeWidth !== void 0) {
-      this.strokeWidth(init.strokeWidth);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<GeoCircleViewObserver>;
+  override readonly observerType?: Class<GeoCircleViewObserver>;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoCenter !== void 0) {
-        viewObserver.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoCenter !== void 0) {
+        observer.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
   protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     this.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
-    if (this.isMounted()) {
+    if (this.mounted) {
       this.projectCircle(this.viewContext as ViewContextType<this>);
     }
   }
 
   protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGeoCenter !== void 0) {
-        viewObserver.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoCenter !== void 0) {
+        observer.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
     }
   }
 
-  @ViewAnimator<GeoCircleView, GeoPoint | null, AnyGeoPoint | null>({
+  @ThemeAnimator<GeoCircleView, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
     didSetState(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
@@ -119,9 +96,9 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
     },
   })
-  readonly geoCenter!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator<GeoCircleView, R2Point | null, AnyR2Point | null>({
+  @ThemeAnimator<GeoCircleView, R2Point | null, AnyR2Point | null>({
     type: R2Point,
     state: R2Point.undefined(),
     updateFlags: View.NeedsRender,
@@ -129,22 +106,22 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
       this.owner.updateViewBounds();
     },
   })
-  readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
+  readonly viewCenter!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator({type: Length, state: Length.zero()})
-  readonly radius!: ViewAnimator<this, Length, AnyLength>;
+  @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
+  readonly radius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
-  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
-  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator({type: Color, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, state: null, inherit: true})
-  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, inherits: true, updateFlags: View.NeedsRender})
+  readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewProperty({type: Number})
-  readonly hitRadius!: ViewProperty<this, number | undefined>;
+  @Property({type: Number})
+  readonly hitRadius!: Property<this, number | undefined>;
 
   protected override onProject(viewContext: ViewContextType<this>): void {
     super.onProject(viewContext);
@@ -152,18 +129,18 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   }
 
   protected projectGeoCenter(geoCenter: GeoPoint | null): void {
-    if (this.isMounted()) {
+    if (this.mounted) {
       const viewContext = this.viewContext as ViewContextType<this>;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
                        : null;
-      this.viewCenter.setIntermediateValue(this.viewCenter.value, viewCenter);
+      this.viewCenter.setInterpolatedValue(this.viewCenter.value, viewCenter);
       this.projectCircle(viewContext);
     }
   }
 
   protected projectCircle(viewContext: ViewContextType<this>): void {
-    if (this.viewCenter.takesPrecedence(View.Intrinsic)) {
+    if (this.viewCenter.hasAffinity(Affinity.Intrinsic)) {
       const geoCenter = this.geoCenter.value;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
@@ -187,17 +164,19 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
-      const context = renderer.context;
-      context.save();
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
       this.renderCircle(renderer.context, this.viewFrame);
-      context.restore();
     }
   }
 
   protected renderCircle(context: CanvasContext, frame: R2Box): void {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
+      // save
+      const contextFillStyle = context.fillStyle;
+      const contextLineWidth = context.lineWidth;
+      const contextStrokeStyle = context.strokeStyle;
+
       const size = Math.min(frame.width, frame.height);
       const radius = this.radius.getValue().pxValue(size);
 
@@ -219,6 +198,11 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
         context.strokeStyle = stroke.toString();
         context.stroke();
       }
+
+      // restore
+      context.fillStyle = contextFillStyle;
+      context.lineWidth = contextLineWidth;
+      context.strokeStyle = contextStrokeStyle;
     }
   }
 
@@ -281,8 +265,7 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const context = renderer.context;
-      return this.hitTestCircle(x, y, context, this.viewFrame, renderer.transform);
+      return this.hitTestCircle(x, y, renderer.context, this.viewFrame, renderer.transform);
     }
     return null;
   }
@@ -305,16 +288,20 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
 
       const strokeWidth = this.strokeWidth.value;
       if (this.stroke.value !== null && strokeWidth !== null) {
+        // save
+        const contextLineWidth = context.lineWidth;
+
         const p = transform.transform(x, y);
-        context.save();
         context.beginPath();
         context.arc(viewCenter.x, viewCenter.y, radius, 0, 2 * Math.PI);
         context.lineWidth = strokeWidth.pxValue(size);
-        if (context.isPointInStroke(p.x, p.y)) {
-          context.restore();
+        const pointInStroke = context.isPointInStroke(p.x, p.y);
+
+        // restore
+        context.lineWidth = contextLineWidth;
+
+        if (pointInStroke) {
           return this;
-        } else {
-          context.restore();
         }
       }
     }
@@ -325,22 +312,28 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     return GeoRippleView.ripple(this, options);
   }
 
-  static override create(): GeoCircleView {
-    return new GeoCircleView();
-  }
-
-  static fromInit(init: GeoCircleViewInit): GeoCircleView {
-    const view = new GeoCircleView();
-    view.initView(init);
-    return view;
-  }
-
-  static fromAny(value: AnyGeoCircleView): GeoCircleView {
-    if (value instanceof GeoCircleView) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
+  override init(init: GeoCircleViewInit): void {
+    super.init(init);
+    if (init.geoCenter !== void 0) {
+      this.geoCenter(init.geoCenter);
     }
-    throw new TypeError("" + value);
+    if (init.viewCenter !== void 0) {
+      this.viewCenter(init.viewCenter);
+    }
+    if (init.radius !== void 0) {
+      this.radius(init.radius);
+    }
+    if (init.hitRadius !== void 0) {
+      this.hitRadius(init.hitRadius);
+    }
+    if (init.fill !== void 0) {
+      this.fill(init.fill);
+    }
+    if (init.stroke !== void 0) {
+      this.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      this.strokeWidth(init.strokeWidth);
+    }
   }
 }

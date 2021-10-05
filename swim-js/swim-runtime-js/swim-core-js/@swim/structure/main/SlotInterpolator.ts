@@ -16,11 +16,11 @@ import {Mutable, Interpolator} from "@swim/util";
 import {Slot} from "./Slot";
 import type {Value} from "./Value";
 
-/** @hidden */
+/** @internal */
 export interface SlotInterpolator extends Interpolator<Slot> {
-  /** @hidden */
+  /** @internal */
   readonly keyInterpolator: Interpolator<Value>;
-  /** @hidden */
+  /** @internal */
   readonly valueInterpolator: Interpolator<Value>;
 
   readonly 0: Slot;
@@ -30,48 +30,50 @@ export interface SlotInterpolator extends Interpolator<Slot> {
   equals(that: unknown): boolean;
 }
 
-/** @hidden */
-export const SlotInterpolator = function (y0: Slot, y1: Slot): SlotInterpolator {
-  const interpolator = function (u: number): Slot {
-    const key = interpolator.keyInterpolator(u);
-    const value = interpolator.valueInterpolator(u);
-    return Slot.of(key, value);
-  } as SlotInterpolator;
-  Object.setPrototypeOf(interpolator, SlotInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>).keyInterpolator = y0.key.interpolateTo(y1.key);
-  (interpolator as Mutable<typeof interpolator>).valueInterpolator = y0.value.interpolateTo(y1.value);
-  return interpolator;
-} as {
-  (y0: Slot, y1: Slot): SlotInterpolator;
+/** @internal */
+export const SlotInterpolator = (function (_super: typeof Interpolator) {
+  const SlotInterpolator = function (y0: Slot, y1: Slot): SlotInterpolator {
+    const interpolator = function (u: number): Slot {
+      const key = interpolator.keyInterpolator(u);
+      const value = interpolator.valueInterpolator(u);
+      return Slot.of(key, value);
+    } as SlotInterpolator;
+    Object.setPrototypeOf(interpolator, SlotInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>).keyInterpolator = y0.key.interpolateTo(y1.key);
+    (interpolator as Mutable<typeof interpolator>).valueInterpolator = y0.value.interpolateTo(y1.value);
+    return interpolator;
+  } as {
+    (y0: Slot, y1: Slot): SlotInterpolator;
 
-  /** @hidden */
-  prototype: SlotInterpolator;
-};
+    /** @internal */
+    prototype: SlotInterpolator;
+  };
 
-SlotInterpolator.prototype = Object.create(Interpolator.prototype);
+  SlotInterpolator.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(SlotInterpolator.prototype, 0, {
-  get(this: SlotInterpolator): Slot {
-    return Slot.of(this.keyInterpolator[0], this.valueInterpolator[0]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(SlotInterpolator.prototype, 0, {
+    get(this: SlotInterpolator): Slot {
+      return Slot.of(this.keyInterpolator[0], this.valueInterpolator[0]);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(SlotInterpolator.prototype, 1, {
-  get(this: SlotInterpolator): Slot {
-    return Slot.of(this.keyInterpolator[1], this.valueInterpolator[1]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(SlotInterpolator.prototype, 1, {
+    get(this: SlotInterpolator): Slot {
+      return Slot.of(this.keyInterpolator[1], this.valueInterpolator[1]);
+    },
+    configurable: true,
+  });
 
-SlotInterpolator.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof SlotInterpolator) {
-    return this.keyInterpolator.equals(that.keyInterpolator)
-        && this.valueInterpolator.equals(that.valueInterpolator);
-  }
-  return false;
-};
+  SlotInterpolator.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof SlotInterpolator) {
+      return this.keyInterpolator.equals(that.keyInterpolator)
+          && this.valueInterpolator.equals(that.valueInterpolator);
+    }
+    return false;
+  };
+
+  return SlotInterpolator;
+})(Interpolator);

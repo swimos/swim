@@ -12,17 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
+import {Property} from "@swim/fastener";
 import type {Trait} from "@swim/model";
+import {ViewFastener} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
-import {
-  Controller,
-  ControllerProperty,
-  ControllerView,
-  ControllerViewTrait,
-  ControllerFastener,
-  CompositeController,
-} from "@swim/controller";
+import {TraitViewFastener, ControllerFastener, Controller, GenericController} from "@swim/controller";
 import type {SliceView} from "../slice/SliceView";
 import type {SliceTrait} from "../slice/SliceTrait";
 import {SliceController} from "../slice/SliceController";
@@ -30,13 +25,13 @@ import {PieView} from "./PieView";
 import {PieTitle, PieTrait} from "./PieTrait";
 import type {PieControllerObserver} from "./PieControllerObserver";
 
-export class PieController extends CompositeController {
+export class PieController extends GenericController {
   constructor() {
     super();
     this.sliceFasteners = [];
   }
 
-  override readonly controllerObservers!: ReadonlyArray<PieControllerObserver>;
+  override readonly observerType?: Class<PieControllerObserver>;
 
   protected initPieTrait(pieTrait: PieTrait): void {
     // hook
@@ -73,11 +68,11 @@ export class PieController extends CompositeController {
   }
 
   protected willSetPieTrait(newPieTrait: PieTrait | null, oldPieTrait: PieTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPieTrait !== void 0) {
-        controllerObserver.controllerWillSetPieTrait(newPieTrait, oldPieTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPieTrait !== void 0) {
+        observer.controllerWillSetPieTrait(newPieTrait, oldPieTrait, this);
       }
     }
   }
@@ -93,11 +88,11 @@ export class PieController extends CompositeController {
   }
 
   protected didSetPieTrait(newPieTrait: PieTrait | null, oldPieTrait: PieTrait | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPieTrait !== void 0) {
-        controllerObserver.controllerDidSetPieTrait(newPieTrait, oldPieTrait, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPieTrait !== void 0) {
+        observer.controllerDidSetPieTrait(newPieTrait, oldPieTrait, this);
       }
     }
   }
@@ -123,7 +118,7 @@ export class PieController extends CompositeController {
       const sliceController = sliceFasteners[i]!.controller;
       if (sliceController !== null) {
         const sliceView = sliceController.slice.view;
-        if (sliceView !== null && sliceView.parentView === null) {
+        if (sliceView !== null && sliceView.parent === null) {
           sliceController.slice.injectView(pieView);
         }
       }
@@ -135,11 +130,11 @@ export class PieController extends CompositeController {
   }
 
   protected willSetPieView(newPieView: PieView | null, oldPieView: PieView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPieView !== void 0) {
-        controllerObserver.controllerWillSetPieView(newPieView, oldPieView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPieView !== void 0) {
+        observer.controllerWillSetPieView(newPieView, oldPieView, this);
       }
     }
   }
@@ -155,11 +150,11 @@ export class PieController extends CompositeController {
   }
 
   protected didSetPieView(newPieView: PieView | null, oldPieView: PieView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPieView !== void 0) {
-        controllerObserver.controllerDidSetPieView(newPieView, oldPieView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPieView !== void 0) {
+        observer.controllerDidSetPieView(newPieView, oldPieView, this);
       }
     }
   }
@@ -193,11 +188,11 @@ export class PieController extends CompositeController {
   }
 
   protected willSetTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetPieTitleView !== void 0) {
-        controllerObserver.controllerWillSetPieTitleView(newTitleView, oldTitleView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetPieTitleView !== void 0) {
+        observer.controllerWillSetPieTitleView(newTitleView, oldTitleView, this);
       }
     }
   }
@@ -213,36 +208,19 @@ export class PieController extends CompositeController {
   }
 
   protected didSetTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetPieTitleView !== void 0) {
-        controllerObserver.controllerDidSetPieTitleView(newTitleView, oldTitleView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetPieTitleView !== void 0) {
+        observer.controllerDidSetPieTitleView(newTitleView, oldTitleView, this);
       }
     }
   }
 
-  /** @hidden */
-  static PieFastener = ControllerViewTrait.define<PieController, PieView, PieTrait>({
-    viewType: PieView,
-    observeView: true,
-    willSetView(newPieView: PieView | null, oldPieView: PieView | null): void {
-      this.owner.willSetPieView(newPieView, oldPieView);
-    },
-    onSetView(newPieView: PieView | null, oldPieView: PieView | null): void {
-      this.owner.onSetPieView(newPieView, oldPieView);
-    },
-    didSetView(newPieView: PieView | null, oldPieView: PieView | null): void {
-      this.owner.didSetPieView(newPieView, oldPieView);
-    },
-    viewDidSetPieTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.title.setView(newTitleView);
-    },
-    createView(): PieView | null {
-      return this.owner.createPieView();
-    },
+  /** @internal */
+  static PieFastener = TraitViewFastener.define<PieController, PieTrait, PieView>({
     traitType: PieTrait,
-    observeTrait: true,
+    observesTrait: true,
     willSetTrait(newPieTrait: PieTrait | null, oldPieTrait: PieTrait | null): void {
       this.owner.willSetPieTrait(newPieTrait, oldPieTrait);
     },
@@ -265,14 +243,31 @@ export class PieController extends CompositeController {
         this.owner.insertSliceTrait(newSliceTrait, targetTrait);
       }
     },
+    viewType: PieView,
+    observesView: true,
+    willSetView(newPieView: PieView | null, oldPieView: PieView | null): void {
+      this.owner.willSetPieView(newPieView, oldPieView);
+    },
+    onSetView(newPieView: PieView | null, oldPieView: PieView | null): void {
+      this.owner.onSetPieView(newPieView, oldPieView);
+    },
+    didSetView(newPieView: PieView | null, oldPieView: PieView | null): void {
+      this.owner.didSetPieView(newPieView, oldPieView);
+    },
+    viewDidSetPieTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+      this.owner.title.setView(newTitleView);
+    },
+    createView(): PieView | null {
+      return this.owner.createPieView();
+    },
   });
 
-  @ControllerViewTrait<PieController, PieView, PieTrait>({
+  @TraitViewFastener<PieController, PieTrait, PieView>({
     extends: PieController.PieFastener,
   })
-  readonly pie!: ControllerViewTrait<this, PieView, PieTrait>;
+  readonly pie!: TraitViewFastener<this, PieTrait, PieView>;
 
-  @ControllerView<PieController, GraphicsView>({
+  @ViewFastener<PieController, GraphicsView>({
     key: true,
     willSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
       this.owner.willSetTitleView(newTitleView, oldTitleView);
@@ -284,7 +279,7 @@ export class PieController extends CompositeController {
       this.owner.didSetTitleView(newTitleView, oldTitleView);
     },
   })
-  readonly title!: ControllerView<this, GraphicsView>;
+  readonly title!: ViewFastener<this, GraphicsView>;
 
   insertSlice(sliceController: SliceController, targetController: Controller | null = null): void {
     const sliceFasteners = this.sliceFasteners as ControllerFastener<this, SliceController>[];
@@ -300,7 +295,7 @@ export class PieController extends CompositeController {
     const sliceFastener = this.createSliceFastener(sliceController);
     sliceFasteners.splice(targetIndex, 0, sliceFastener);
     sliceFastener.setController(sliceController, targetController);
-    if (this.isMounted()) {
+    if (this.mounted) {
       sliceFastener.mount();
     }
   }
@@ -311,7 +306,7 @@ export class PieController extends CompositeController {
       const sliceFastener = sliceFasteners[i]!;
       if (sliceFastener.controller === sliceController) {
         sliceFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           sliceFastener.unmount();
         }
         sliceFasteners.splice(i, 1);
@@ -359,11 +354,11 @@ export class PieController extends CompositeController {
 
   protected willSetSlice(newSliceController: SliceController | null, oldSliceController: SliceController | null,
                          sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSlice !== void 0) {
-        controllerObserver.controllerWillSetSlice(newSliceController, oldSliceController, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSlice !== void 0) {
+        observer.controllerWillSetSlice(newSliceController, oldSliceController, sliceFastener);
       }
     }
   }
@@ -381,11 +376,11 @@ export class PieController extends CompositeController {
 
   protected didSetSlice(newSliceController: SliceController | null, oldSliceController: SliceController | null,
                         sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSlice !== void 0) {
-        controllerObserver.controllerDidSetSlice(newSliceController, oldSliceController, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSlice !== void 0) {
+        observer.controllerDidSetSlice(newSliceController, oldSliceController, sliceFastener);
       }
     }
   }
@@ -406,7 +401,7 @@ export class PieController extends CompositeController {
     const sliceController = this.createSlice(sliceTrait);
     if (sliceController !== null) {
       sliceController.slice.setTrait(sliceTrait);
-      this.insertChildController(sliceController, targetController);
+      this.insertChild(sliceController, targetController);
       if (sliceController.slice.view === null) {
         const sliceView = this.createSliceView(sliceController);
         let targetView: SliceView | null = null;
@@ -430,7 +425,7 @@ export class PieController extends CompositeController {
       const sliceController = sliceFastener.controller;
       if (sliceController !== null && sliceController.slice.trait === sliceTrait) {
         sliceFastener.setController(null);
-        if (this.isMounted()) {
+        if (this.mounted) {
           sliceFastener.unmount();
         }
         sliceFasteners.splice(i, 1);
@@ -454,11 +449,11 @@ export class PieController extends CompositeController {
 
   protected willSetSliceTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null,
                               sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceTrait !== void 0) {
-        controllerObserver.controllerWillSetSliceTrait(newSliceTrait, oldSliceTrait, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceTrait !== void 0) {
+        observer.controllerWillSetSliceTrait(newSliceTrait, oldSliceTrait, sliceFastener);
       }
     }
   }
@@ -476,11 +471,11 @@ export class PieController extends CompositeController {
 
   protected didSetSliceTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null,
                              sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceTrait !== void 0) {
-        controllerObserver.controllerDidSetSliceTrait(newSliceTrait, oldSliceTrait, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceTrait !== void 0) {
+        observer.controllerDidSetSliceTrait(newSliceTrait, oldSliceTrait, sliceFastener);
       }
     }
   }
@@ -525,11 +520,11 @@ export class PieController extends CompositeController {
 
   protected willSetSliceView(newSliceView: SliceView | null, oldSliceView: SliceView | null,
                              sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceView !== void 0) {
-        controllerObserver.controllerWillSetSliceView(newSliceView, oldSliceView, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceView !== void 0) {
+        observer.controllerWillSetSliceView(newSliceView, oldSliceView, sliceFastener);
       }
     }
   }
@@ -547,22 +542,22 @@ export class PieController extends CompositeController {
 
   protected didSetSliceView(newSliceView: SliceView | null, oldSliceView: SliceView | null,
                             sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceView !== void 0) {
-        controllerObserver.controllerDidSetSliceView(newSliceView, oldSliceView, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceView !== void 0) {
+        observer.controllerDidSetSliceView(newSliceView, oldSliceView, sliceFastener);
       }
     }
   }
 
   protected willSetSliceValue(newValue: number, oldValue: number,
                               sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceValue !== void 0) {
-        controllerObserver.controllerWillSetSliceValue(newValue, oldValue, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceValue !== void 0) {
+        observer.controllerWillSetSliceValue(newValue, oldValue, sliceFastener);
       }
     }
   }
@@ -582,11 +577,11 @@ export class PieController extends CompositeController {
 
   protected didSetSliceValue(newValue: number, oldValue: number,
                              sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceValue !== void 0) {
-        controllerObserver.controllerDidSetSliceValue(newValue, oldValue, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceValue !== void 0) {
+        observer.controllerDidSetSliceValue(newValue, oldValue, sliceFastener);
       }
     }
   }
@@ -605,11 +600,11 @@ export class PieController extends CompositeController {
 
   protected willSetSliceLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
                                   sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceLabelView !== void 0) {
-        controllerObserver.controllerWillSetSliceLabelView(newLabelView, oldLabelView, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceLabelView !== void 0) {
+        observer.controllerWillSetSliceLabelView(newLabelView, oldLabelView, sliceFastener);
       }
     }
   }
@@ -627,11 +622,11 @@ export class PieController extends CompositeController {
 
   protected didSetSliceLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
                                  sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceLabelView !== void 0) {
-        controllerObserver.controllerDidSetSliceLabelView(newLabelView, oldLabelView, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceLabelView !== void 0) {
+        observer.controllerDidSetSliceLabelView(newLabelView, oldLabelView, sliceFastener);
       }
     }
   }
@@ -650,11 +645,11 @@ export class PieController extends CompositeController {
 
   protected willSetSliceLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null,
                                    sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetSliceLegendView !== void 0) {
-        controllerObserver.controllerWillSetSliceLegendView(newLegendView, oldLegendView, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerWillSetSliceLegendView !== void 0) {
+        observer.controllerWillSetSliceLegendView(newLegendView, oldLegendView, sliceFastener);
       }
     }
   }
@@ -672,23 +667,23 @@ export class PieController extends CompositeController {
 
   protected didSetSliceLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null,
                                   sliceFastener: ControllerFastener<this, SliceController>): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetSliceLegendView !== void 0) {
-        controllerObserver.controllerDidSetSliceLegendView(newLegendView, oldLegendView, sliceFastener);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.controllerDidSetSliceLegendView !== void 0) {
+        observer.controllerDidSetSliceLegendView(newLegendView, oldLegendView, sliceFastener);
       }
     }
   }
 
-  @ControllerProperty({type: Timing, state: true})
-  readonly sliceTiming!: ControllerProperty<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({type: Timing, state: true})
+  readonly sliceTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  /** @hidden */
+  /** @internal */
   static SliceFastener = ControllerFastener.define<PieController, SliceController>({
     type: SliceController,
     child: false,
-    observe: true,
+    observes: true,
     willSetController(newSliceController: SliceController | null, oldSliceController: SliceController | null): void {
       this.owner.willSetSlice(newSliceController, oldSliceController, this);
     },
@@ -736,10 +731,10 @@ export class PieController extends CompositeController {
   });
 
   protected createSliceFastener(sliceController: SliceController): ControllerFastener<this, SliceController> {
-    return new PieController.SliceFastener(this, sliceController.key, "slice");
+    return PieController.SliceFastener.create(this, sliceController.key ?? "slice");
   }
 
-  /** @hidden */
+  /** @internal */
   readonly sliceFasteners: ReadonlyArray<ControllerFastener<this, SliceController>>;
 
   protected getSliceFastener(sliceTrait: SliceTrait): ControllerFastener<this, SliceController> | null {
@@ -754,7 +749,7 @@ export class PieController extends CompositeController {
     return null;
   }
 
-  /** @hidden */
+  /** @internal */
   protected mountSliceFasteners(): void {
     const sliceFasteners = this.sliceFasteners;
     for (let i = 0, n = sliceFasteners.length; i < n; i += 1) {
@@ -763,7 +758,7 @@ export class PieController extends CompositeController {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   protected unmountSliceFasteners(): void {
     const sliceFasteners = this.sliceFasteners;
     for (let i = 0, n = sliceFasteners.length; i < n; i += 1) {
@@ -776,31 +771,31 @@ export class PieController extends CompositeController {
     return controller instanceof SliceController ? controller : null;
   }
 
-  protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChildController(childController, targetController);
+  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
+    super.onInsertChild(childController, targetController);
     const sliceController = this.detectSliceController(childController);
     if (sliceController !== null) {
       this.insertSlice(sliceController, targetController);
     }
   }
 
-  protected override onRemoveChildController(childController: Controller): void {
-    super.onRemoveChildController(childController);
+  protected override onRemoveChild(childController: Controller): void {
+    super.onRemoveChild(childController);
     const sliceController = this.detectSliceController(childController);
     if (sliceController !== null) {
       this.removeSlice(sliceController);
     }
   }
 
-  /** @hidden */
-  protected override mountControllerFasteners(): void {
-    super.mountControllerFasteners();
+  /** @internal */
+  protected override mountFasteners(): void {
+    super.mountFasteners();
     this.mountSliceFasteners();
   }
 
-  /** @hidden */
-  protected override unmountControllerFasteners(): void {
+  /** @internal */
+  protected override unmountFasteners(): void {
     this.unmountSliceFasteners();
-    super.unmountControllerFasteners();
+    super.unmountFasteners();
   }
 }

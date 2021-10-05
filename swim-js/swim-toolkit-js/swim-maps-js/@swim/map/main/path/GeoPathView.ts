@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyR2Point, R2Point, R2Box, R2Path} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox, AnyGeoPath, GeoPath} from "@swim/geo";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ThemeAnimator} from "@swim/theme";
+import type {ViewContextType} from "@swim/view";
 import type {GeoViewInit} from "../geo/GeoView";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
@@ -36,43 +38,36 @@ export class GeoPathView extends GeoLayerView {
     });
   }
 
-  override initView(init: GeoPathViewInit): void {
-    super.initView(init);
-    if (init.geoPath !== void 0) {
-      this.geoPath(init.geoPath);
-    }
-  }
-
-  override readonly viewObservers!: ReadonlyArray<GeoPathViewObserver>;
+  override readonly observerType?: Class<GeoPathViewObserver>;
 
   protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGeoPath !== void 0) {
-        viewObserver.viewWillSetGeoPath(newGeoPath, oldGeoPath, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGeoPath !== void 0) {
+        observer.viewWillSetGeoPath(newGeoPath, oldGeoPath, this);
       }
     }
   }
 
   protected onSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
     this.setGeoBounds(newGeoPath !== null ? newGeoPath.bounds : GeoBox.undefined());
-    if (this.isMounted()) {
+    if (this.mounted) {
       this.projectPath(this.viewContext as ViewContextType<this>);
     }
   }
 
   protected didSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGeoPath !== void 0) {
-        viewObserver.viewDidSetGeoPath(newGeoPath, oldGeoPath, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGeoPath !== void 0) {
+        observer.viewDidSetGeoPath(newGeoPath, oldGeoPath, this);
       }
     }
   }
 
-  @ViewAnimator<GeoPathView, GeoPath | null>({
+  @ThemeAnimator<GeoPathView, GeoPath | null>({
     type: GeoPath,
     state: null,
     willSetValue(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
@@ -83,16 +78,16 @@ export class GeoPathView extends GeoLayerView {
       this.owner.didSetGeoPath(newGeoPath, oldGeoPath);
     },
   })
-  readonly geoPath!: ViewAnimator<this, GeoPath | null, AnyGeoPath | null>;
+  readonly geoPath!: ThemeAnimator<this, GeoPath | null, AnyGeoPath | null>;
 
-  @ViewAnimator({type: R2Path, state: null})
-  readonly viewPath!: ViewAnimator<this, R2Path | null>;
+  @ThemeAnimator({type: R2Path, state: null})
+  readonly viewPath!: ThemeAnimator<this, R2Path | null>;
 
-  @ViewAnimator({type: GeoPoint, state: null})
-  readonly geoCentroid!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  @ThemeAnimator({type: GeoPoint, state: null})
+  readonly geoCentroid!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator({type: R2Point, state: null})
-  readonly viewCentroid!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
+  @ThemeAnimator({type: R2Point, state: null})
+  readonly viewCentroid!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
   protected override onProject(viewContext: ViewContextType<this>): void {
     super.onProject(viewContext);
@@ -103,20 +98,20 @@ export class GeoPathView extends GeoLayerView {
     const geoViewport = viewContext.geoViewport;
 
     let viewPath: R2Path | null;
-    if (this.viewPath.takesPrecedence(View.Intrinsic)) {
+    if (this.viewPath.hasAffinity(Affinity.Intrinsic)) {
       const geoPath = this.geoPath.value;
       viewPath = geoPath !== null && geoPath.isDefined() ? geoPath.project(geoViewport) : null;
-      this.viewPath.setState(viewPath, View.Intrinsic);
+      this.viewPath.setState(viewPath, Affinity.Intrinsic);
     } else {
       viewPath = this.viewPath.value;
     }
 
-    if (this.viewCentroid.takesPrecedence(View.Intrinsic)) {
+    if (this.viewCentroid.hasAffinity(Affinity.Intrinsic)) {
       const geoCentroid = this.geoCentroid.value;
       const viewCentroid = geoCentroid !== null && geoCentroid.isDefined()
                          ? geoViewport.project(geoCentroid)
                          : null;
-      this.viewCentroid.setState(viewCentroid, View.Intrinsic);
+      this.viewCentroid.setState(viewCentroid, Affinity.Intrinsic);
     }
 
     (this as Mutable<this>).viewBounds = viewPath !== null ? viewPath.bounds : this.viewFrame;
@@ -144,5 +139,12 @@ export class GeoPathView extends GeoLayerView {
 
   ripple(options?: GeoRippleOptions): GeoRippleView | null {
     return GeoRippleView.ripple(this, options);
+  }
+
+  override init(init: GeoPathViewInit): void {
+    super.init(init);
+    if (init.geoPath !== void 0) {
+      this.geoPath(init.geoPath);
+    }
   }
 }

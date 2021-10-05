@@ -12,36 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  ControllerContextType,
-  ControllerContext,
-} from "./ControllerContext";
-export {
-  ControllerFlags,
-  ControllerPrecedence,
-  ControllerInit,
-  ControllerPrototype,
-  ControllerConstructor,
-  ControllerClass,
-  Controller,
-} from "./Controller";
-export {
-  ControllerObserverType,
-  ControllerObserver,
-} from "./ControllerObserver";
-
-export * from "./manager";
-
 export * from "./execute";
 
 export * from "./history";
 
 export * from "./storage";
 
-export * from "./service";
-
-export * from "./property";
+export * from "./controller";
 
 export * from "./fastener";
-
-export * from "./generic";

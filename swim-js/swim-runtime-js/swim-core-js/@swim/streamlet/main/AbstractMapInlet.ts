@@ -27,10 +27,10 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
 
   readonly input: MapOutlet<K, V, O> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly effects: BTree<K, KeyEffect>;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   bindInput(newInput: MapOutlet<K, V, O> | null): void {

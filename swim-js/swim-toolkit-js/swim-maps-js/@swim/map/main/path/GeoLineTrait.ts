@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
-import {TraitProperty} from "@swim/model";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {GeoPathTrait} from "./GeoPathTrait";
 import type {GeoLineTraitObserver} from "./GeoLineTraitObserver";
 
 export abstract class GeoLineTrait extends GeoPathTrait {
-  override readonly traitObservers!: ReadonlyArray<GeoLineTraitObserver>;
+  override readonly observerType?: Class<GeoLineTraitObserver>;
 
   protected willSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetStroke !== void 0) {
         traitObserver.traitWillSetStroke(newStroke, oldStroke, this);
       }
@@ -37,16 +38,16 @@ export abstract class GeoLineTrait extends GeoPathTrait {
   }
 
   protected didSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetStroke !== void 0) {
         traitObserver.traitDidSetStroke(newStroke, oldStroke, this);
       }
     }
   }
 
-  @TraitProperty<GeoLineTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<GeoLineTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
     state: null,
     willSetState(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
       this.owner.willSetStroke(newStroke, oldStroke);
@@ -62,12 +63,12 @@ export abstract class GeoLineTrait extends GeoPathTrait {
       return stroke;
     },
   })
-  readonly stroke!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly stroke!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetStrokeWidth !== void 0) {
         traitObserver.traitWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
@@ -79,16 +80,16 @@ export abstract class GeoLineTrait extends GeoPathTrait {
   }
 
   protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetStrokeWidth !== void 0) {
         traitObserver.traitDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
     }
   }
 
-  @TraitProperty<GeoLineTrait, Length | null, AnyLength | null>({
+  @Property<GeoLineTrait, Length | null, AnyLength | null>({
     type: Length,
     state: null,
     willSetState(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
@@ -99,5 +100,5 @@ export abstract class GeoLineTrait extends GeoPathTrait {
       this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
   })
-  readonly strokeWidth!: TraitProperty<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: Property<this, Length | null, AnyLength | null>;
 }

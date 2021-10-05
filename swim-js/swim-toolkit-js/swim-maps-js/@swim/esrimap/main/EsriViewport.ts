@@ -62,10 +62,10 @@ export abstract class EsriViewport implements GeoViewport, Equals {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static webMercatorUtils: __esri.webMercatorUtils | undefined = void 0;
 
-  /** @hidden */
+  /** @internal */
   static init(): void {
     if (EsriViewport.webMercatorUtils === void 0) {
       (window.require as any)(["esri/geometry/support/webMercatorUtils"], function (webMercatorUtils: __esri.webMercatorUtils): void {

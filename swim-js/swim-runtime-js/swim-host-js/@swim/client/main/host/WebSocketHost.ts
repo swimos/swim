@@ -19,7 +19,7 @@ import type {HostContext} from "./HostContext";
 import type {HostOptions} from "./Host";
 import {RemoteHost} from "./RemoteHost";
 
-/** @hidden */
+/** @internal */
 export type WebSocketConstructor = {new(url: string, protocols?: string | string[]): WebSocket};
 
 export interface WebSocketHostOptions extends HostOptions {
@@ -27,7 +27,7 @@ export interface WebSocketHostOptions extends HostOptions {
   WebSocket?: WebSocketConstructor;
 }
 
-/** @hidden */
+/** @internal */
 export class WebSocketHost extends RemoteHost {
   constructor(context: HostContext, hostUri: Uri, options: WebSocketHostOptions = {}) {
     super(context, hostUri, options);
@@ -36,7 +36,7 @@ export class WebSocketHost extends RemoteHost {
 
   override readonly options!: WebSocketHostOptions;
 
-  /** @hidden */
+  /** @internal */
   readonly socket: WebSocket | null;
 
   get WebSocket(): WebSocketConstructor | null {

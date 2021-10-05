@@ -21,7 +21,7 @@ export class MomentumGestureInput extends PositionGestureInput {
   ax: number;
   ay: number;
 
-  /** @hidden */
+  /** @internal */
   readonly path: {x: number; y: number; t: number;}[];
   coasting: boolean;
 
@@ -36,7 +36,7 @@ export class MomentumGestureInput extends PositionGestureInput {
     this.coasting = false;
   }
 
-  /** @hidden */
+  /** @internal */
   updatePosition(hysteresis: number): void {
     const path = this.path;
     const x = this.x;
@@ -48,7 +48,7 @@ export class MomentumGestureInput extends PositionGestureInput {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   deriveVelocity(vMax: number): void {
     const p0 = this.path[0]!;
     const p1 = this.path[this.path.length - 1]!;
@@ -78,7 +78,7 @@ export class MomentumGestureInput extends PositionGestureInput {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   integrateVelocity(t: number): void {
     const dt = t - this.t;
     if (dt !== 0) {

@@ -12,35 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Trait} from "../Trait";
-import type {TraitConsumerType} from "../TraitConsumer";
-import {TraitFastener} from "../fastener/TraitFastener";
-import {GenericTrait} from "../generic/GenericTrait";
+import type {ConsumerType} from "@swim/util";
+import {Trait} from "../trait/Trait";
+import {TraitFastener} from "../trait/TraitFastener";
 
-export abstract class DownlinkTrait extends GenericTrait {
+export abstract class DownlinkTrait extends Trait {
   protected attachDriver(driverTrait: Trait): void {
-    if (driverTrait.isConsuming()) {
-      this.addTraitConsumer(driverTrait as TraitConsumerType<this>);
+    if (driverTrait.consuming) {
+      this.consume(driverTrait as ConsumerType<this>);
     }
   }
 
   protected detachDriver(driverTrait: Trait): void {
-    if (driverTrait.isConsuming()) {
-      this.removeTraitConsumer(driverTrait as TraitConsumerType<this>);
+    if (driverTrait.consuming) {
+      this.unconsume(driverTrait as ConsumerType<this>);
     }
   }
 
   protected driverDidStartConsuming(driverTrait: Trait): void {
-    this.addTraitConsumer(driverTrait as TraitConsumerType<this>);
+    this.consume(driverTrait as ConsumerType<this>);
   }
 
   protected driverWillStopConsuming(driverTrait: Trait): void {
-    this.removeTraitConsumer(driverTrait as TraitConsumerType<this>);
+    this.unconsume(driverTrait as ConsumerType<this>);
   }
 
   @TraitFastener<DownlinkTrait, Trait>({
     type: Trait,
-    observe: true,
+    observes: true,
     onSetTrait(newDriverTrait: Trait | null, oldDriverTrait: Trait | null): void {
       if (oldDriverTrait !== null) {
         this.owner.detachDriver(oldDriverTrait);

@@ -21,7 +21,7 @@ import type {Report} from "./Report";
 import {ConsoleReport} from "./ConsoleReport";
 import {Exam} from "./Exam";
 
-/** @hidden */
+/** @internal */
 export interface SpecClass {
   tests?: SpecTest[];
   units?: SpecUnit[];
@@ -62,7 +62,7 @@ export class Spec {
    */
   readonly parent: Spec | null;
 
-  /** @hidden */
+  /** @internal */
   setParent(parent: Spec | null): void {
     (this as Mutable<this>).parent = parent;
   }
@@ -182,7 +182,7 @@ export class Spec {
 
   /**
    * Initializes the prototype of a `Spec` subclass.
-   * @hidden
+   * @internal
    */
   static init(specClass: SpecClass): void {
     if (!Object.prototype.hasOwnProperty.call(specClass, "tests")) {
@@ -236,7 +236,7 @@ export class Spec {
 
   /**
    * Asynchronously evaluates a list of `tests`.
-   * @hidden
+   * @internal
    */
   static runTests(report: Report, spec: Spec, tests: SpecTest[]): Promise<Spec> {
     if (typeof spec.willRunTests === "function") {
@@ -250,7 +250,7 @@ export class Spec {
 
   /**
    * Asynchronously executes the next test in a list `tests`.
-   * @hidden
+   * @internal
    */
   static runTest(report: Report, spec: Spec, tests: SpecTest[], index: number): Promise<SpecTest[]> {
     if (index < tests.length) {
@@ -264,7 +264,7 @@ export class Spec {
 
   /**
    * Asynchronously completes the evaluation of a successful test.
-   * @hidden
+   * @internal
    */
   static runTestSuccess(report: Report, spec: Spec, result: unknown): Spec {
     report.didRunTests(spec);
@@ -276,7 +276,7 @@ export class Spec {
 
   /**
    * Asynchronously completes the evaluation of a failed test.
-   * @hidden
+   * @internal
    */
   static runTestFailure(report: Report, spec: Spec, error: unknown): never {
     report.didRunTests(spec);
@@ -288,7 +288,7 @@ export class Spec {
 
   /**
    * Asynchronously evaluates a list of child `units`.
-   * @hidden
+   * @internal
    */
   static runUnits(report: Report, spec: Spec, units: SpecUnit[]): Promise<Spec> {
     if (typeof spec.willRunUnits === "function") {
@@ -302,7 +302,7 @@ export class Spec {
 
   /**
    * Asynchronously executes the next unit in a list `units`.
-   * @hidden
+   * @internal
    */
   static runUnit(report: Report, spec: Spec, units: SpecUnit[], index: number): Promise<SpecUnit[]> {
     if (index < units.length) {
@@ -316,7 +316,7 @@ export class Spec {
 
   /**
    * Asynchronously completes the execution of a successful child unit.
-   * @hidden
+   * @internal
    */
   static runUnitsSuccess(report: Report, spec: Spec, result: unknown): Spec {
     report.didRunUnits(spec);
@@ -328,7 +328,7 @@ export class Spec {
 
   /**
    * Asynchronously completes the execution of a failed child unit.
-   * @hidden
+   * @internal
    */
   static runUnitsFailure(report: Report, spec: Spec, error: unknown): never {
     report.didRunUnits(spec);
@@ -340,7 +340,7 @@ export class Spec {
 
   /**
    * Asynchronously completes the successful execution of a `spec`.
-   * @hidden
+   * @internal
    */
   static runSuccess(report: Report, spec: Spec, result: unknown): Report {
     report.didRunSpec(spec);
@@ -352,7 +352,7 @@ export class Spec {
 
   /**
    * Asynchronously completes the failed execution of a `spec`.
-   * @hidden
+   * @internal
    */
   static runFailure(report: Report, spec: Spec, error: unknown): Report {
     report.didRunSpec(spec);

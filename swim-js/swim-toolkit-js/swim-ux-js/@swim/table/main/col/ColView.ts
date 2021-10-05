@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {Look} from "@swim/theme";
-import {View, ViewFastener} from "@swim/view";
+import {ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {ColViewObserver} from "./ColViewObserver";
 
@@ -25,20 +27,20 @@ export class ColView extends HtmlView {
 
   protected initCol(): void {
     this.addClass("col");
-    this.overflowX.setState("hidden", View.Intrinsic);
-    this.overflowY.setState("hidden", View.Intrinsic);
+    this.overflowX.setState("hidden", Affinity.Intrinsic);
+    this.overflowY.setState("hidden", Affinity.Intrinsic);
   }
 
-  override readonly viewObservers!: ReadonlyArray<ColViewObserver>;
+  override readonly observerType?: Class<ColViewObserver>;
 
   protected createLabel(value?: string): HtmlView | null {
-    const labelView = HtmlView.span.create();
-    labelView.alignSelf.setState("center", View.Intrinsic);
-    labelView.whiteSpace.setState("nowrap", View.Intrinsic);
-    labelView.textOverflow.setState("ellipsis", View.Intrinsic);
-    labelView.overflowX.setState("hidden", View.Intrinsic);
-    labelView.overflowY.setState("hidden", View.Intrinsic);
-    labelView.color.setLook(Look.neutralColor, View.Intrinsic);
+    const labelView = HtmlView.fromTag("span");
+    labelView.alignSelf.setState("center", Affinity.Intrinsic);
+    labelView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
+    labelView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
+    labelView.overflowX.setState("hidden", Affinity.Intrinsic);
+    labelView.overflowY.setState("hidden", Affinity.Intrinsic);
+    labelView.color.setLook(Look.neutralColor, Affinity.Intrinsic);
     if (value !== void 0) {
       labelView.text(value);
     }
@@ -58,11 +60,11 @@ export class ColView extends HtmlView {
   }
 
   protected willSetLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetLabel !== void 0) {
-        viewObserver.viewWillSetLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetLabel !== void 0) {
+        observer.viewWillSetLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -78,11 +80,11 @@ export class ColView extends HtmlView {
   }
 
   protected didSetLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetLabel !== void 0) {
-        viewObserver.viewDidSetLabel(newLabelView, oldLabelView, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetLabel !== void 0) {
+        observer.viewDidSetLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -90,6 +92,7 @@ export class ColView extends HtmlView {
   @ViewFastener<ColView, HtmlView, string>({
     key: true,
     type: HtmlView,
+    child: true,
     fromAny(value: HtmlView | string): HtmlView | null {
       if (value instanceof HtmlView) {
         return value;

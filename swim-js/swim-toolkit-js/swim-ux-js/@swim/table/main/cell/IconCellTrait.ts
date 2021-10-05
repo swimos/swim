@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {TraitProperty} from "@swim/model";
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import type {Graphics} from "@swim/graphics";
 import {CellTrait} from "./CellTrait";
 import type {IconCellTraitObserver} from "./IconCellTraitObserver";
 
 export class IconCellTrait extends CellTrait {
-  override readonly traitObservers!: ReadonlyArray<IconCellTraitObserver>;
+  override readonly observerType?: Class<IconCellTraitObserver>;
 
   protected willSetIcon(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetIcon !== void 0) {
         traitObserver.traitWillSetIcon(newIcon, oldIcon, this);
       }
@@ -35,16 +36,16 @@ export class IconCellTrait extends CellTrait {
   }
 
   protected didSetIcon(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetIcon !== void 0) {
         traitObserver.traitDidSetIcon(newIcon, oldIcon, this);
       }
     }
   }
 
-  @TraitProperty<IconCellTrait, Graphics | null>({
+  @Property<IconCellTrait, Graphics | null>({
     state: null,
     willSetState(newIcon: Graphics | null, oldIcon: Graphics | null): void {
       this.owner.willSetIcon(newIcon, oldIcon);
@@ -54,5 +55,5 @@ export class IconCellTrait extends CellTrait {
       this.owner.didSetIcon(newIcon, oldIcon);
     },
   })
-  readonly icon!: TraitProperty<this, Graphics | null>;
+  readonly icon!: Property<this, Graphics | null>;
 }

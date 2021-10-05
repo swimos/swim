@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Mutable} from "@swim/util";
+import {Mutable, Class, Equals} from "@swim/util";
 import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
@@ -26,7 +26,7 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
     this.fill = null;
   }
 
-  override readonly traitObservers!: ReadonlyArray<BubblePlotTraitObserver<X, Y>>;
+  override readonly observerType?: Class<BubblePlotTraitObserver<X, Y>>;
 
   readonly radius: Length | null;
 
@@ -42,9 +42,9 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
   }
 
   protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetPlotRadius !== void 0) {
         traitObserver.traitWillSetPlotRadius(newRadius, oldRadius, this);
       }
@@ -56,9 +56,9 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
   }
 
   protected didSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetPlotRadius !== void 0) {
         traitObserver.traitDidSetPlotRadius(newRadius, oldRadius, this);
       }
@@ -81,9 +81,9 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
   }
 
   protected willSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitWillSetPlotFill !== void 0) {
         traitObserver.traitWillSetPlotFill(newFill, oldFill, this);
       }
@@ -95,9 +95,9 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
   }
 
   protected didSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    const traitObservers = this.traitObservers;
-    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
-      const traitObserver = traitObservers[i]!;
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const traitObserver = observers[i]!;
       if (traitObserver.traitDidSetPlotFill !== void 0) {
         traitObserver.traitDidSetPlotFill(newFill, oldFill, this);
       }

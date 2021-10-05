@@ -17,7 +17,7 @@ import type {DateTimeInit, DateTime} from "../DateTime";
 import {DateTimeFormat} from "./DateTimeFormat";
 import {MinuteParser} from "../"; // forward import
 
-/** @hidden */
+/** @internal */
 export class MinuteFormat extends DateTimeFormat {
   override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
     output = DateTimeFormat.writeDateNumber2(output, date.minute);

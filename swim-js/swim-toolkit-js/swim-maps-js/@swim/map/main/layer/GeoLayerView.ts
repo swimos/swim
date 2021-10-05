@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {GeoBox} from "@swim/geo";
-import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {ViewContextType, ViewFlags, AnyView, View} from "@swim/view";
 import {GraphicsView} from "@swim/graphics";
 import {GeoView} from "../geo/GeoView";
 
 export class GeoLayerView extends GeoView {
   constructor() {
     super();
-    this.childViews = [];
-    this.childViewMap = null;
+    this.children = [];
+    this.childMap = null;
     Object.defineProperty(this, "geoBounds", {
       value: GeoBox.undefined(),
       writable: true,
@@ -32,363 +32,355 @@ export class GeoLayerView extends GeoView {
     });
   }
 
-  override readonly childViews: ReadonlyArray<View>;
+  override readonly children: ReadonlyArray<View>;
 
-  override get childViewCount(): number {
-    return this.childViews.length;
+  override get childCount(): number {
+    return this.children.length;
   }
 
-  override firstChildView(): View | null {
-    const childViews = this.childViews;
-    return childViews.length !== 0 ? childViews[0]! : null;
+  override firstChild(): View | null {
+    const children = this.children;
+    if (children.length !== 0) {
+      return children[0]!;
+    }
+    return null;
   }
 
-  override lastChildView(): View | null {
-    const childViews = this.childViews;
-    return childViews.length !== 0 ? childViews[childViews.length - 1]! : null;
+  override lastChild(): View | null {
+    const children = this.children;
+    const childCount = children.length;
+    if (childCount !== 0) {
+      return children[childCount - 1]!;
+    }
+    return null;
   }
 
-  override nextChildView(targetView: View): View | null {
-    const childViews = this.childViews;
-    const targetIndex = childViews.indexOf(targetView);
-    return targetIndex >= 0 && targetIndex + 1 < childViews.length ? childViews[targetIndex + 1]! : null;
+  override nextChild(target: View): View | null {
+    const children = this.children;
+    const targetIndex = children.indexOf(target);
+    if (targetIndex >= 0 && targetIndex + 1 < children.length) {
+      return children[targetIndex + 1]!;
+    }
+    return null;
   }
 
-  override previousChildView(targetView: View): View | null {
-    const childViews = this.childViews;
-    const targetIndex = childViews.indexOf(targetView);
-    return targetIndex - 1 >= 0 ? childViews[targetIndex - 1]! : null;
+  override previousChild(target: View): View | null {
+    const children = this.children;
+    const targetIndex = children.indexOf(target);
+    if (targetIndex - 1 >= 0) {
+      return children[targetIndex - 1]!;
+    }
+    return null;
   }
 
-  override forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
-  override forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
-                                  thisArg: S): T | undefined;
-  override forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
-                                  thisArg?: S): T | undefined {
+  override forEachChild<T>(callback: (child: View) => T | void): T | undefined;
+  override forEachChild<T, S>(callback: (this: S, child: View) => T | void, thisArg: S): T | undefined;
+  override forEachChild<T, S>(callback: (this: S | undefined, child: View) => T | void, thisArg?: S): T | undefined {
     let result: T | undefined;
-    const childViews = this.childViews;
+    const children = this.children;
     let i = 0;
-    while (i < childViews.length) {
-      const childView = childViews[i]!;
-      result = callback.call(thisArg, childView) as T | undefined;
+    while (i < children.length) {
+      const child = children[i]!;
+      result = callback.call(thisArg, child) as T | undefined;
       if (result !== void 0) {
         break;
       }
-      if (childViews[i] === childView) {
+      if (children[i] === child) {
         i += 1;
       }
     }
     return result;
   }
 
-  /** @hidden */
-  readonly childViewMap: {[key: string]: View | undefined} | null;
+  /** @internal */
+  readonly childMap: Dictionary<View> | null;
 
-  override getChildView(key: string): View | null {
-    const childViewMap = this.childViewMap;
-    if (childViewMap !== null) {
-      const childView = childViewMap[key];
-      if (childView !== void 0) {
-        return childView;
+  /** @internal */
+  protected insertChildMap(child: View): void {
+    const key = child.key;
+    if (key !== void 0) {
+      let childMap = this.childMap as MutableDictionary<View>;
+      if (childMap === null) {
+        childMap = {};
+        (this as Mutable<this>).childMap = childMap;
+      }
+      childMap[key] = child;
+    }
+  }
+
+  /** @internal */
+  protected removeChildMap(child: View): void {
+    const key = child.key;
+    if (key !== void 0) {
+      const childMap = this.childMap as MutableDictionary<View>;
+      if (childMap !== null) {
+        delete childMap[key];
+      }
+    }
+  }
+
+  override getChild<V extends View>(key: string, childBound: Class<V>): V | null;
+  override getChild(key: string, childBound?: Class<View>): View | null;
+  override getChild(key: string, childBound?: Class<View>): View | null {
+    const childMap = this.childMap;
+    if (childMap !== null) {
+      const child = childMap[key];
+      if (child !== void 0 && (childBound === void 0 || child instanceof childBound)) {
+        return child;
       }
     }
     return null;
   }
 
-  override setChildView(key: string, newChildView: View | null): View | null {
-    let targetView: View | null = null;
-    const childViews = this.childViews as View[];
-    if (newChildView !== null) {
-      if (!(newChildView instanceof GraphicsView)) {
-        throw new TypeError("" + newChildView);
-      }
-      if (newChildView.parentView === this) {
-        targetView = childViews[childViews.indexOf(newChildView) + 1] || null;
-      }
-      newChildView.remove();
+  override setChild<V extends View>(key: string, newChild: AnyView<V> | null): View | null;
+  override setChild(key: string, newChild: AnyView | null): View | null;
+  override setChild(key: string, newChild: AnyView | null): View | null {
+    if (newChild !== null) {
+      newChild = View.fromAny(newChild);
     }
+
+    let target: View | null = null;
+    const children = this.children as View[];
+    if (newChild !== null) {
+      if (newChild.parent === this) {
+        target = children[children.indexOf(newChild) + 1] || null;
+      }
+      newChild.remove();
+    }
+
     let index = -1;
-    const oldChildView = this.getChildView(key);
-    if (oldChildView !== null) {
-      index = childViews.indexOf(oldChildView);
+    const oldChild = this.getChild(key);
+    if (oldChild !== null) {
+      index = children.indexOf(oldChild);
       // assert(index >= 0);
-      targetView = childViews[index + 1] || null;
-      this.willRemoveChildView(oldChildView);
-      oldChildView.setParentView(null, this);
-      this.removeChildViewMap(oldChildView);
-      childViews.splice(index, 1);
-      this.onRemoveChildView(oldChildView);
-      this.didRemoveChildView(oldChildView);
-      oldChildView.setKey(void 0);
+      target = children[index + 1] || null;
+      this.willRemoveChild(oldChild);
+      oldChild.setParent(null, this);
+      this.removeChildMap(oldChild);
+      children.splice(index, 1);
+      this.onRemoveChild(oldChild);
+      this.didRemoveChild(oldChild);
+      oldChild.setKey(void 0);
     }
-    if (newChildView !== null) {
-      newChildView.setKey(key);
-      this.willInsertChildView(newChildView, targetView);
+
+    if (newChild !== null) {
+      newChild.setKey(key);
+      this.willInsertChild(newChild, target);
       if (index >= 0) {
-        childViews.splice(index, 0, newChildView);
+        children.splice(index, 0, newChild);
       } else {
-        childViews.push(newChildView);
+        children.push(newChild);
       }
-      this.insertChildViewMap(newChildView);
-      newChildView.setParentView(this, null);
-      this.onInsertChildView(newChildView, targetView);
-      this.didInsertChildView(newChildView, targetView);
-      newChildView.cascadeInsert();
+      this.insertChildMap(newChild);
+      newChild.setParent(this, null);
+      this.onInsertChild(newChild, target);
+      this.didInsertChild(newChild, target);
+      newChild.cascadeInsert();
     }
-    return oldChildView;
+
+    return oldChild;
   }
 
-  /** @hidden */
-  protected insertChildViewMap(childView: View): void {
-    const key = childView.key;
+  override appendChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override appendChild(child: AnyView, key?: string): View;
+  override appendChild(child: AnyView, key?: string): View {
+    child = View.fromAny(child);
+
+    child.remove();
     if (key !== void 0) {
-      let childViewMap = this.childViewMap;
-      if (childViewMap === null) {
-        childViewMap = {};
-        (this as Mutable<this>).childViewMap = childViewMap;
-      }
-      childViewMap[key] = childView;
+      this.removeChild(key);
+      child.setKey(key);
     }
+
+    this.willInsertChild(child, null);
+    (this.children as View[]).push(child);
+    this.insertChildMap(child);
+    child.setParent(this, null);
+    this.onInsertChild(child, null);
+    this.didInsertChild(child, null);
+    child.cascadeInsert();
+
+    return child;
   }
 
-  /** @hidden */
-  protected removeChildViewMap(childView: View): void {
-    const key = childView.key;
+  override prependChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override prependChild(child: AnyView, key?: string): View;
+  override prependChild(child: AnyView, key?: string): View {
+    child = View.fromAny(child);
+
+    child.remove();
     if (key !== void 0) {
-      const childViewMap = this.childViewMap;
-      if (childViewMap !== null) {
-        delete childViewMap[key];
-      }
+      this.removeChild(key);
+      child.setKey(key);
     }
+
+    const children = this.children as View[];
+    const target = children.length !== 0 ? children[0]! : null;
+    this.willInsertChild(child, target);
+    children.unshift(child);
+    this.insertChildMap(child);
+    child.setParent(this, null);
+    this.onInsertChild(child, target);
+    this.didInsertChild(child, target);
+    child.cascadeInsert();
+
+    return child;
   }
 
-  override appendChildView(childView: View, key?: string): void {
-    if (!(childView instanceof GraphicsView)) {
-      throw new TypeError("" + childView);
+  override insertChild<V extends View>(child: AnyView<V>, target: View | null, key?: string): V;
+  override insertChild(child: AnyView, target: View | null, key?: string): View;
+  override insertChild(child: AnyView, target: View | null, key?: string): View {
+    if (target !== null && target.parent !== this) {
+      throw new TypeError("" + target);
     }
-    childView.remove();
-    if (key !== void 0) {
-      this.removeChildView(key);
-      childView.setKey(key);
-    }
-    this.willInsertChildView(childView, null);
-    (this.childViews as View[]).push(childView);
-    this.insertChildViewMap(childView);
-    childView.setParentView(this, null);
-    this.onInsertChildView(childView, null);
-    this.didInsertChildView(childView, null);
-    childView.cascadeInsert();
-  }
 
-  override prependChildView(childView: View, key?: string): void {
-    if (!(childView instanceof GraphicsView)) {
-      throw new TypeError("" + childView);
-    }
-    childView.remove();
-    if (key !== void 0) {
-      this.removeChildView(key);
-      childView.setKey(key);
-    }
-    const childViews = this.childViews as View[];
-    const targetView = childViews.length !== 0 ? childViews[0]! : null;
-    this.willInsertChildView(childView, targetView);
-    childViews.unshift(childView);
-    this.insertChildViewMap(childView);
-    childView.setParentView(this, null);
-    this.onInsertChildView(childView, targetView);
-    this.didInsertChildView(childView, targetView);
-    childView.cascadeInsert();
-  }
+    child = View.fromAny(child);
 
-  override insertChildView(childView: View, targetView: View | null, key?: string): void {
-    if (!(childView instanceof GraphicsView)) {
-      throw new TypeError("" + childView);
-    }
-    if (targetView !== null && !(targetView instanceof GraphicsView)) {
-      throw new TypeError("" + targetView);
-    }
-    if (targetView !== null && targetView.parentView !== this) {
-      throw new TypeError("" + targetView);
-    }
-    childView.remove();
+    child.remove();
     if (key !== void 0) {
-      this.removeChildView(key);
-      childView.setKey(key);
+      this.removeChild(key);
+      child.setKey(key);
     }
-    this.willInsertChildView(childView, targetView);
-    const childViews = this.childViews as View[];
-    const index = targetView !== null ? childViews.indexOf(targetView) : -1;
+
+    this.willInsertChild(child, target);
+    const children = this.children as View[];
+    const index = target !== null ? children.indexOf(target) : -1;
     if (index >= 0) {
-      childViews.splice(index, 0, childView);
+      children.splice(index, 0, child);
     } else {
-      childViews.push(childView);
+      children.push(child);
     }
-    this.insertChildViewMap(childView);
-    childView.setParentView(this, null);
-    this.onInsertChildView(childView, targetView);
-    this.didInsertChildView(childView, targetView);
-    childView.cascadeInsert();
+    this.insertChildMap(child);
+    child.setParent(this, null);
+    this.onInsertChild(child, target);
+    this.didInsertChild(child, target);
+    child.cascadeInsert();
+
+    return child;
   }
 
-  protected override didInsertChildView(childView: View, targetView: View | null): void {
-    if (childView instanceof GeoView) {
-      this.onInsertChildViewBounds(childView, childView.geoBounds);
+  protected override didInsertChild(child: View, target: View | null): void {
+    if (child instanceof GeoView) {
+      this.onInsertChildGeoBounds(child, child.geoBounds);
     }
-    super.didInsertChildView(childView, targetView);
+    super.didInsertChild(child, target);
   }
 
-  override removeChildView(key: string): View | null;
-  override removeChildView(childView: View): void;
-  override removeChildView(key: string | View): View | null | void {
-    let childView: View | null;
+  override removeChild(key: string): View | null;
+  override removeChild(child: View): void;
+  override removeChild(key: string | View): View | null | void {
+    let child: View | null;
     if (typeof key === "string") {
-      childView = this.getChildView(key);
-      if (childView === null) {
+      child = this.getChild(key);
+      if (child === null) {
         return null;
       }
     } else {
-      childView = key;
+      child = key;
     }
-    if (!(childView instanceof GraphicsView)) {
-      throw new TypeError("" + childView);
-    }
-    if (childView.parentView !== this) {
+    if (child.parent !== this) {
       throw new Error("not a child view");
     }
-    this.willRemoveChildView(childView);
-    childView.setParentView(null, this);
-    this.removeChildViewMap(childView);
-    const childViews = this.childViews as View[];
-    const index = childViews.indexOf(childView);
+
+    this.willRemoveChild(child);
+    child.setParent(null, this);
+    this.removeChildMap(child);
+    const children = this.children as View[];
+    const index = children.indexOf(child);
     if (index >= 0) {
-      childViews.splice(index, 1);
+      children.splice(index, 1);
     }
-    this.onRemoveChildView(childView);
-    this.didRemoveChildView(childView);
-    childView.setKey(void 0);
+    this.onRemoveChild(child);
+    this.didRemoveChild(child);
+    child.setKey(void 0);
+
     if (typeof key === "string") {
-      return childView;
+      return child;
     }
   }
 
-  protected override didRemoveChildView(childView: View): void {
-    if (childView instanceof GeoView) {
-      this.onRemoveChildViewBounds(childView, childView.geoBounds);
+  protected override didRemoveChild(child: View): void {
+    if (child instanceof GeoView) {
+      this.onRemoveChildGeoBounds(child, child.geoBounds);
     }
-    super.didRemoveChildView(childView);
+    super.didRemoveChild(child);
   }
 
-  override removeAll(): void {
-    const childViews = this.childViews as View[];
-    do {
-      const count = childViews.length;
-      if (count > 0) {
-        const childView = childViews[count - 1]!;
-        this.willRemoveChildView(childView);
-        childView.setParentView(null, this);
-        this.removeChildViewMap(childView);
-        childViews.pop();
-        this.onRemoveChildView(childView);
-        this.didRemoveChildView(childView);
-        childView.setKey(void 0);
-        continue;
-      }
-      break;
-    } while (true);
+  override removeChildren(): void {
+    const children = this.children as View[];
+    let childCount: number;
+    while (childCount = children.length, childCount !== 0) {
+      const child = children[childCount - 1]!;
+      this.willRemoveChild(child);
+      child.setParent(null, this);
+      this.removeChildMap(child);
+      children.pop();
+      this.onRemoveChild(child);
+      this.didRemoveChild(child);
+      child.setKey(void 0);
+    }
   }
 
-  /** @hidden */
-  override mountChildViews(): void {
-    const childViews = this.childViews;
+  /** @internal */
+  protected override mountChildren(): void {
+    const children = this.children;
     let i = 0;
-    while (i < childViews.length) {
-      const childView = childViews[i]!;
-      childView.cascadeMount();
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
+    while (i < children.length) {
+      const child = children[i]!;
+      child.cascadeMount();
+      if ((child.flags & View.RemovingFlag) !== 0) {
+        child.setFlags(child.flags & ~View.RemovingFlag);
+        this.removeChild(child);
         continue;
       }
       i += 1;
     }
   }
 
-  /** @hidden */
-  override unmountChildViews(): void {
-    const childViews = this.childViews;
+  /** @internal */
+  protected override unmountChildren(): void {
+    const children = this.children;
     let i = 0;
-    while (i < childViews.length) {
-      const childView = childViews[i]!;
-      childView.cascadeUnmount();
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
+    while (i < children.length) {
+      const child = children[i]!;
+      child.cascadeUnmount();
+      if ((child.flags & View.RemovingFlag) !== 0) {
+        child.setFlags(child.flags & ~View.RemovingFlag);
+        this.removeChild(child);
         continue;
       }
       i += 1;
     }
   }
 
-  /** @hidden */
-  override powerChildViews(): void {
-    const childViews = this.childViews;
+  protected override processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     processChild: (this: this, child: View, processFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
+    const children = this.children;
     let i = 0;
-    while (i < childViews.length) {
-      const childView = childViews[i]!;
-      childView.cascadePower();
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
+    while (i < children.length) {
+      const child = children[i]!;
+      processChild.call(this, child, processFlags, viewContext);
+      if ((child.flags & View.RemovingFlag) !== 0) {
+        child.setFlags(child.flags & ~View.RemovingFlag);
+        this.removeChild(child);
         continue;
       }
       i += 1;
     }
   }
 
-  /** @hidden */
-  override unpowerChildViews(): void {
-    const childViews = this.childViews;
+  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                     displayChild: (this: this, child: View, displayFlags: ViewFlags,
+                                                    viewContext: ViewContextType<this>) => void): void {
+    const children = this.children;
     let i = 0;
-    while (i < childViews.length) {
-      const childView = childViews[i]!;
-      childView.cascadeUnpower();
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
-        continue;
-      }
-      i += 1;
-    }
-  }
-
-  protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
-    const childViews = this.childViews;
-    let i = 0;
-    while (i < childViews.length) {
-      const childView = childViews[i]!;
-      processChildView.call(this, childView, processFlags, viewContext);
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
-        continue;
-      }
-      i += 1;
-    }
-  }
-
-  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                          viewContext: ViewContextType<this>) => void): void {
-    const childViews = this.childViews;
-    let i = 0;
-    while (i < childViews.length) {
-      const childView = childViews[i]!;
-      displayChildView.call(this, childView, displayFlags, viewContext);
-      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-        this.removeChildView(childView);
+    while (i < children.length) {
+      const child = children[i]!;
+      displayChild.call(this, child, displayFlags, viewContext);
+      if ((child.flags & View.RemovingFlag) !== 0) {
+        child.setFlags(child.flags & ~View.RemovingFlag);
+        this.removeChild(child);
         continue;
       }
       i += 1;
@@ -411,33 +403,33 @@ export class GeoLayerView extends GeoView {
     this.setGeoBounds(this.deriveGeoBounds());
   }
 
-  protected onInsertChildViewBounds(childView: GeoView, newGeoBounds: GeoBox): void {
+  protected onInsertChildGeoBounds(child: GeoView, newGeoBounds: GeoBox): void {
     this.updateGeoBounds();
   }
 
-  protected onRemoveChildViewBounds(childView: GeoView, oldGeoBounds: GeoBox): void {
+  protected onRemoveChildGeoBounds(child: GeoView, oldGeoBounds: GeoBox): void {
     this.updateGeoBounds();
   }
 
-  override onSetChildViewGeoBounds(childView: GeoView, newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
+  override onSetChildGeoBounds(child: GeoView, newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
     this.updateGeoBounds();
   }
 
-  override onSetChildViewHidden(childView: GeoView, hidden: boolean): void {
+  override onSetChildHidden(child: GeoView, hidden: boolean): void {
     this.updateGeoBounds();
   }
 
-  override onSetChildViewUnbounded(childView: GeoView, unbounded: boolean): void {
+  override onSetChildUnbounded(child: GeoView, unbounded: boolean): void {
     this.updateGeoBounds();
   }
 
   override deriveGeoBounds(): GeoBox {
     let geoBounds = this.ownGeoBounds;
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i]!;
-      if (childView instanceof GeoView && !childView.isHidden() && !childView.isUnbounded()) {
-        const childGeoBounds = childView.geoBounds;
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      if (child instanceof GeoView && !child.isHidden() && !child.unbounded) {
+        const childGeoBounds = child.geoBounds;
         if (childGeoBounds.isDefined()) {
           if (geoBounds !== null) {
             geoBounds = geoBounds.union(childGeoBounds);
@@ -455,16 +447,16 @@ export class GeoLayerView extends GeoView {
 
   override deriveViewBounds(): R2Box {
     let viewBounds: R2Box | null = this.ownViewBounds;
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i]!;
-      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isUnbounded()) {
-        const childViewBounds = childView.viewBounds;
-        if (childViewBounds.isDefined()) {
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      if (child instanceof GraphicsView && !child.isHidden() && !child.unbounded) {
+        const childBounds = child.viewBounds;
+        if (childBounds.isDefined()) {
           if (viewBounds !== null) {
-            viewBounds = viewBounds.union(childViewBounds);
+            viewBounds = viewBounds.union(childBounds);
           } else {
-            viewBounds = childViewBounds;
+            viewBounds = childBounds;
           }
         }
       }
@@ -477,11 +469,11 @@ export class GeoLayerView extends GeoView {
 
   override deriveHitBounds(): R2Box {
     let hitBounds: R2Box | undefined;
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i]!;
-      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isIntangible()) {
-        const childHitBounds = childView.hitBounds;
+    const children = this.children;
+    for (let i = 0, n = children.length; i < n; i += 1) {
+      const child = children[i]!;
+      if (child instanceof GraphicsView && !child.isHidden() && !child.intangible) {
+        const childHitBounds = child.hitBounds;
         if (hitBounds === void 0) {
           hitBounds = childHitBounds;
         } else {
@@ -495,21 +487,17 @@ export class GeoLayerView extends GeoView {
     return hitBounds;
   }
 
-  protected override hitTestChildViews(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const childViews = this.childViews;
-    for (let i = childViews.length - 1; i >= 0; i -= 1) {
-      const childView = childViews[i]!;
-      if (childView instanceof GraphicsView) {
-        const hit = childView.cascadeHitTest(x, y, viewContext);
+  protected override hitTestChildren(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    const children = this.children;
+    for (let i = children.length - 1; i >= 0; i -= 1) {
+      const child = children[i]!;
+      if (child instanceof GraphicsView) {
+        const hit = child.cascadeHitTest(x, y, viewContext);
         if (hit !== null) {
           return hit;
         }
       }
     }
     return null;
-  }
-
-  static create(): GeoLayerView {
-    return new GeoLayerView();
   }
 }

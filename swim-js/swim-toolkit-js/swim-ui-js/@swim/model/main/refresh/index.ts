@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {RefreshContext} from "./RefreshContext";
-export {RefreshManager} from "./RefreshManager";
-export {RefreshManagerObserver} from "./RefreshManagerObserver";
+export {RefreshService} from "./RefreshService";
+export {RefreshServiceObserver} from "./RefreshServiceObserver";
+
+export {RefreshProvider} from "./RefreshProvider";

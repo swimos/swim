@@ -12,54 +12,81 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {View} from "../View";
-import type {GestureContext} from "./GestureContext";
+import type {FastenerOwner} from "@swim/fastener";
 import type {ScaleGestureInput} from "./ScaleGestureInput";
-import {ScaleGesture} from "./ScaleGesture";
+import {ScaleGestureClass, ScaleGesture} from "./ScaleGesture";
+import type {View} from "../view/View";
 
-export class MouseScaleGesture<G extends GestureContext, V extends View, X, Y> extends ScaleGesture<G, V, X, Y> {
-  constructor(owner: G, gestureName: string | undefined) {
-    super(owner, gestureName);
-    this.onMouseEnter = this.onMouseEnter.bind(this);
-    this.onMouseLeave = this.onMouseLeave.bind(this);
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
-    this.onMouseLeaveDocument = this.onMouseLeaveDocument.bind(this);
-    this.onWheel = this.onWheel.bind(this);
-  }
+/** @internal */
+export interface MouseScaleGesture<O = unknown, V extends View = View, X = unknown, Y = unknown> extends ScaleGesture<O, V, X, Y> {
+  /** @internal @protected @override */
+  attachHoverEvents(view: V): void;
 
-  /** @hidden */
-  override attachHoverEvents(view: V): void {
+  /** @internal @protected @override */
+  detachHoverEvents(view: V): void;
+
+  /** @internal @protected @override */
+  attachPressEvents(view: V): void;
+
+  /** @internal @protected @override */
+  detachPressEvents(view: V): void;
+
+  /** @internal @protected */
+  updateInput(input: ScaleGestureInput<X, Y>, event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseEnter(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseLeave(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseDown(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseMove(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseUp(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onMouseLeaveDocument(event: MouseEvent): void;
+
+  /** @internal @protected */
+  onWheel(event: WheelEvent): void;
+}
+
+/** @internal */
+export const MouseScaleGesture = (function (_super: typeof ScaleGesture) {
+  const MouseScaleGesture = _super.extend() as ScaleGestureClass<MouseScaleGesture<any, any, any, any>>;
+
+  MouseScaleGesture.prototype.attachHoverEvents = function (this: MouseScaleGesture, view: View): void {
     view.on("mouseenter", this.onMouseEnter as EventListener);
     view.on("mouseleave", this.onMouseLeave as EventListener);
     view.on("mousedown", this.onMouseDown as EventListener);
     view.on("wheel", this.onWheel as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override detachHoverEvents(view: V): void {
+  MouseScaleGesture.prototype.detachHoverEvents = function (this: MouseScaleGesture, view: View): void {
     view.off("mouseenter", this.onMouseEnter as EventListener);
     view.off("mouseleave", this.onMouseLeave as EventListener);
     view.off("mousedown", this.onMouseDown as EventListener);
     view.off("wheel", this.onWheel as EventListener);
-  }
+  };
 
-  /** @hidden */
-  override attachPressEvents(view: V): void {
+  MouseScaleGesture.prototype.attachPressEvents = function (this: MouseScaleGesture, view: View): void {
     document.body.addEventListener("mousemove", this.onMouseMove);
     document.body.addEventListener("mouseup", this.onMouseUp);
     document.body.addEventListener("mouseleave", this.onMouseLeaveDocument);
-  }
+  };
 
-  /** @hidden */
-  override detachPressEvents(view: V): void {
+  MouseScaleGesture.prototype.detachPressEvents = function (this: MouseScaleGesture, view: View): void {
     document.body.removeEventListener("mousemove", this.onMouseMove);
     document.body.removeEventListener("mouseup", this.onMouseUp);
     document.body.removeEventListener("mouseleave", this.onMouseLeaveDocument);
-  }
+  };
 
-  protected updateInput(input: ScaleGestureInput<X, Y>, event: MouseEvent): void {
+  MouseScaleGesture.prototype.updateInput = function <X, Y>(this: MouseScaleGesture<unknown, View, X, Y>, input: ScaleGestureInput<X, Y>, event: MouseEvent): void {
     input.target = event.target;
     input.button = event.button;
     input.buttons = event.buttons;
@@ -74,9 +101,9 @@ export class MouseScaleGesture<G extends GestureContext, V extends View, X, Y> e
     input.x = event.clientX;
     input.y = event.clientY;
     input.t = event.timeStamp;
-  }
+  };
 
-  protected onMouseEnter(event: MouseEvent): void {
+  MouseScaleGesture.prototype.onMouseEnter = function (this: MouseScaleGesture, event: MouseEvent): void {
     if (event.buttons === 0) {
       const input = this.getOrCreateInput("mouse", "mouse", true,
                                           event.clientX, event.clientY, event.timeStamp);
@@ -87,9 +114,9 @@ export class MouseScaleGesture<G extends GestureContext, V extends View, X, Y> e
         this.beginHover(input, event);
       }
     }
-  }
+  };
 
-  protected onMouseLeave(event: MouseEvent): void {
+  MouseScaleGesture.prototype.onMouseLeave = function (this: MouseScaleGesture, event: MouseEvent): void {
     const input = this.getInput("mouse");
     if (input !== null) {
       if (!input.coasting) {
@@ -97,9 +124,9 @@ export class MouseScaleGesture<G extends GestureContext, V extends View, X, Y> e
       }
       this.endHover(input, event);
     }
-  }
+  };
 
-  protected onMouseDown(event: MouseEvent): void {
+  MouseScaleGesture.prototype.onMouseDown = function (this: MouseScaleGesture, event: MouseEvent): void {
     const input = this.getOrCreateInput("mouse", "mouse", true,
                                         event.clientX, event.clientY, event.timeStamp);
     this.updateInput(input, event);
@@ -109,17 +136,17 @@ export class MouseScaleGesture<G extends GestureContext, V extends View, X, Y> e
     if (event.button !== 0) {
       this.cancelPress(input, event);
     }
-  }
+  };
 
-  protected onMouseMove(event: MouseEvent): void {
+  MouseScaleGesture.prototype.onMouseMove = function (this: MouseScaleGesture, event: MouseEvent): void {
     const input = this.getInput("mouse");
     if (input !== null) {
       this.updateInput(input, event);
       this.movePress(input, event);
     }
-  }
+  };
 
-  protected onMouseUp(event: MouseEvent): void {
+  MouseScaleGesture.prototype.onMouseUp = function (this: MouseScaleGesture, event: MouseEvent): void {
     const input = this.getInput("mouse");
     if (input !== null) {
       this.updateInput(input, event);
@@ -128,21 +155,35 @@ export class MouseScaleGesture<G extends GestureContext, V extends View, X, Y> e
         this.press(input, event);
       }
     }
-  }
+  };
 
-  protected onMouseLeaveDocument(event: MouseEvent): void {
+  MouseScaleGesture.prototype.onMouseLeaveDocument = function (this: MouseScaleGesture, event: MouseEvent): void {
     const input = this.getInput("mouse");
     if (input !== null) {
       this.updateInput(input, event);
       this.cancelPress(input, event);
       this.endHover(input, event);
     }
-  }
+  };
 
-  protected onWheel(event: WheelEvent): void {
+  MouseScaleGesture.prototype.onWheel = function (this: MouseScaleGesture, event: WheelEvent): void {
     if (this.wheel) {
       event.preventDefault();
       this.zoom(event.clientX, event.clientY, event.deltaY, event);
     }
-  }
-}
+  };
+
+  MouseScaleGesture.construct = function <G extends MouseScaleGesture<any, any, any, any>>(gestureClass: ScaleGestureClass<MouseScaleGesture<any, any, any, any>>, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+    gesture.onMouseEnter = gesture.onMouseEnter.bind(gesture);
+    gesture.onMouseLeave = gesture.onMouseLeave.bind(gesture);
+    gesture.onMouseDown = gesture.onMouseDown.bind(gesture);
+    gesture.onMouseMove = gesture.onMouseMove.bind(gesture);
+    gesture.onMouseUp = gesture.onMouseUp.bind(gesture);
+    gesture.onMouseLeaveDocument = gesture.onMouseLeaveDocument.bind(gesture);
+    gesture.onWheel = gesture.onWheel.bind(gesture);
+    return gesture;
+  };
+
+  return MouseScaleGesture;
+})(ScaleGesture);

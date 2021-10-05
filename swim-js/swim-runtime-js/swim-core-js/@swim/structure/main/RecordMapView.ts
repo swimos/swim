@@ -21,7 +21,7 @@ import {Record} from "./Record";
 import {RecordMap} from "./RecordMap";
 import {AnyNum, Num} from "./"; // forward import
 
-/** @hidden */
+/** @internal */
 export class RecordMapView extends Record {
   constructor(record: RecordMap, lower: number, upper: number) {
     super();
@@ -30,13 +30,13 @@ export class RecordMapView extends Record {
     this.upper = upper;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly record: RecordMap;
 
-  /** @hidden */
+  /** @internal */
   readonly lower: number;
 
-  /** @hidden */
+  /** @internal */
   readonly upper: number;
 
   override isEmpty(): boolean {
@@ -235,7 +235,7 @@ export class RecordMapView extends Record {
     return this;
   }
 
-  /** @hidden */
+  /** @internal */
   setItemAliased(index: number, newItem: Item): void {
     const record = this.record;
     const n = record.length;
@@ -258,7 +258,7 @@ export class RecordMapView extends Record {
     (record as Mutable<RecordMap>).flags &= ~Record.AliasedFlag;
   }
 
-  /** @hidden */
+  /** @internal */
   setItemMutable(index: number, newItem: Item): void {
     const record = this.record;
     const array = record.array!;
@@ -287,7 +287,7 @@ export class RecordMapView extends Record {
     return this.length;
   }
 
-  /** @hidden */
+  /** @internal */
   pushAliased(...newItems: AnyItem[]): void {
     const record = this.record;
     const k = newItems.length;
@@ -319,7 +319,7 @@ export class RecordMapView extends Record {
     (this as Mutable<this>).upper += k;
   }
 
-  /** @hidden */
+  /** @internal */
   pushMutable(...newItems: AnyItem[]): void {
     const record = this.record;
     const k = newItems.length;
@@ -387,7 +387,7 @@ export class RecordMapView extends Record {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   deleteAliased(key: Value): Item {
     const record = this.record;
     const n = record.length;
@@ -412,7 +412,7 @@ export class RecordMapView extends Record {
     return Item.absent();
   }
 
-  /** @hidden */
+  /** @internal */
   deleteMutable(key: Value): Item {
     const record = this.record;
     const n = record.length;
@@ -445,7 +445,7 @@ export class RecordMapView extends Record {
     }
   }
 
-  /** @hidden */
+  /** @internal */
   clearAliased(): void {
     const record = this.record;
     const m = record.length;
@@ -479,7 +479,7 @@ export class RecordMapView extends Record {
     (this as Mutable<this>).upper = this.lower;
   }
 
-  /** @hidden */
+  /** @internal */
   clearMutable(): void {
     const record = this.record;
     const m = record.length;
@@ -611,6 +611,5 @@ Object.defineProperty(RecordMapView.prototype, "fieldCount", {
     }
     return k;
   },
-  enumerable: true,
   configurable: true,
 });

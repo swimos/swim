@@ -23,7 +23,7 @@ import {DownlinkModel} from "./DownlinkModel";
 import type {DownlinkType} from "./Downlink";
 import type {ListDownlink} from "./ListDownlink";
 
-/** @hidden */
+/** @internal */
 export class ListDownlinkModel extends DownlinkModel {
   constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
               prio?: number, rate?: number, body?: Value, state: STree<Value, Value> = new STree()) {
@@ -33,7 +33,7 @@ export class ListDownlinkModel extends DownlinkModel {
 
   override readonly views!: ReadonlyArray<ListDownlink<unknown>>;
 
-  /** @hidden */
+  /** @internal */
   readonly state: STree<Value, Value>;
 
   override get type(): DownlinkType {

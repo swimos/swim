@@ -110,17 +110,22 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
   recohere(version: number): void;
 }
 
-export const Streamlet = {} as {
-  is<I, O>(object: unknown): object is Streamlet<I, O>;
-};
+/** @internal */
+export const Streamlet = (function () {
+  const Streamlet = {} as {
+    is<I, O>(object: unknown): object is Streamlet<I, O>;
+  };
 
-Streamlet.is = function <I, O>(object: unknown): object is Streamlet<I, O> {
-  if (typeof object === "object" && object !== null) {
-    const streamlet = object as Streamlet<I, O>;
-    return "streamletScope" in streamlet
-        && typeof streamlet.setStreamletScope === "function"
-        && "streamletContext" in streamlet
-        && typeof streamlet.setStreamletContext === "function";
-  }
-  return false;
-};
+  Streamlet.is = function <I, O>(object: unknown): object is Streamlet<I, O> {
+    if (typeof object === "object" && object !== null || typeof object === "function") {
+      const streamlet = object as Streamlet<I, O>;
+      return "streamletScope" in streamlet
+          && typeof streamlet.setStreamletScope === "function"
+          && "streamletContext" in streamlet
+          && typeof streamlet.setStreamletContext === "function";
+    }
+    return false;
+  };
+
+  return Streamlet;
+})();

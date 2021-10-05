@@ -15,22 +15,26 @@
 import {Mutable, Interpolator} from "@swim/util";
 import {Length} from "./Length";
 
-/** @hidden */
-export const LengthInterpolator = function (l0: Length, l1: Length): Interpolator<Length> {
-  const interpolator = function (u: number): Length {
-    const l0 = interpolator[0];
-    const l1 = interpolator[1];
-    return Length.create(l0.value + u * (l1.value - l0.value), l1.units);
-  } as Interpolator<Length>;
-  Object.setPrototypeOf(interpolator, LengthInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = l0.to(l1.units);
-  (interpolator as Mutable<typeof interpolator>)[1] = l1;
-  return interpolator;
-} as {
-  (l0: Length, l1: Length): Interpolator<Length>;
+/** @internal */
+export const LengthInterpolator = (function (_super: typeof Interpolator) {
+  const LengthInterpolator = function (l0: Length, l1: Length): Interpolator<Length> {
+    const interpolator = function (u: number): Length {
+      const l0 = interpolator[0];
+      const l1 = interpolator[1];
+      return Length.create(l0.value + u * (l1.value - l0.value), l1.units);
+    } as Interpolator<Length>;
+    Object.setPrototypeOf(interpolator, LengthInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = l0.to(l1.units);
+    (interpolator as Mutable<typeof interpolator>)[1] = l1;
+    return interpolator;
+  } as {
+    (l0: Length, l1: Length): Interpolator<Length>;
 
-  /** @hidden */
-  prototype: Interpolator<Length>;
-};
+    /** @internal */
+    prototype: Interpolator<Length>;
+  };
 
-LengthInterpolator.prototype = Object.create(Interpolator.prototype);
+  LengthInterpolator.prototype = Object.create(_super.prototype);
+
+  return LengthInterpolator;
+})(Interpolator);

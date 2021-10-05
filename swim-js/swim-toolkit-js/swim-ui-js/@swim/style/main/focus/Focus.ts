@@ -58,39 +58,39 @@ export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
     }
   }
 
-  isUnfocused(): boolean {
+  get unfocused(): boolean {
     return this.phase === 0 && this.direction === 0;
   }
 
-  isFocused(): boolean {
+  get focused(): boolean {
     return this.phase === 1 && this.direction === 0;
   }
 
-  isFocusing(): boolean {
+  get focusing(): boolean {
     return this.direction > 0;
   }
 
-  isUnfocusing(): boolean {
+  get unfocusing(): boolean {
     return this.direction < 0;
   }
 
-  focusing(): Focus {
-    if (!this.isFocusing()) {
+  asFocusing(): Focus {
+    if (!this.focusing) {
       return Focus.focusing(this.phase);
     } else {
       return this;
     }
   }
 
-  unfocusing(): Focus {
-    if (!this.isUnfocusing()) {
+  asUnfocusing(): Focus {
+    if (!this.unfocusing) {
       return Focus.unfocusing(this.phase);
     } else {
       return this;
     }
   }
 
-  toggling(): Focus {
+  asToggling(): Focus {
     if (this.direction > 0 || this.phase >= 0.5) {
       return Focus.unfocusing(this.phase);
     } else if (this.direction < 0 || this.phase < 0.5) {
@@ -100,7 +100,7 @@ export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
     }
   }
 
-  toggled(): Focus {
+  asToggled(): Focus {
     if (this.direction > 0 || this.phase >= 0.5) {
       return Focus.unfocused();
     } else if (this.direction < 0 || this.phase < 0.5) {
@@ -224,7 +224,7 @@ export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
     throw new TypeError("" + value);
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is FocusInit {
     if (typeof value === "object" && value !== null) {
       const init = value as FocusInit;
@@ -234,7 +234,7 @@ export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyFocus {
     return value instanceof Focus
         || Focus.isInit(value);

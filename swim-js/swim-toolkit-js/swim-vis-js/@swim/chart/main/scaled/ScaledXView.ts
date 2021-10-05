@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
-import type {ViewAnimator} from "@swim/view";
+import type {Class, Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
+import type {Animator} from "@swim/fastener";
 import {GraphicsView} from "@swim/graphics";
 import type {ScaledXViewObserver} from "./ScaledXViewObserver";
 import {ScaledView} from "../"; // forward import
 
 export interface ScaledXView<X> extends GraphicsView {
-  readonly viewObservers: ReadonlyArray<ScaledXViewObserver<X>>;
+  /** @override */
+  readonly observerType?: Class<ScaledXViewObserver<X>>;
 
-  readonly xScale: ViewAnimator<this, ContinuousScale<X, number> | null, string>;
+  readonly xScale: Animator<this, ContinuousScale<X, number> | null, string>;
 
   xDomain(): Domain<X> | null;
   xDomain(xDomain: Domain<X> | null, timing?: AnyTiming | boolean): this;
@@ -36,15 +37,19 @@ export interface ScaledXView<X> extends GraphicsView {
   readonly xDataRange: Range<number> | null;
 }
 
-export const ScaledXView = {} as {
-  is<X>(object: unknown): object is ScaledXView<X>;
-};
+export const ScaledXView = (function () {
+  const ScaledXView = {} as {
+    is<X>(object: unknown): object is ScaledXView<X>;
+  };
 
-ScaledXView.is = function <X>(object: unknown): object is ScaledXView<X> {
-  if (typeof object === "object" && object !== null) {
-    const view = object as ScaledXView<X>;
-    return view instanceof ScaledView
-        || view instanceof GraphicsView && "xScale" in view;
-  }
-  return false;
-};
+  ScaledXView.is = function <X>(object: unknown): object is ScaledXView<X> {
+    if (typeof object === "object" && object !== null) {
+      const view = object as ScaledXView<X>;
+      return view instanceof ScaledView
+          || view instanceof GraphicsView && "xScale" in view;
+    }
+    return false;
+  };
+
+  return ScaledXView;
+})();

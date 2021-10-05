@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/util";
+import type {Class, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
-import {Graphics, Icon, FilledIcon, IconViewAnimator, SvgIconView} from "@swim/graphics";
+import {MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {Graphics, Icon, FilledIcon, IconGraphicsAnimator, SvgIconView} from "@swim/graphics";
 import {CellView} from "./CellView";
 import type {IconCellViewObserver} from "./IconCellViewObserver";
 
@@ -32,12 +33,12 @@ export class IconCellView extends CellView {
     this.addClass("cell-icon");
   }
 
-  override readonly viewObservers!: ReadonlyArray<IconCellViewObserver>;
+  override readonly observerType?: Class<IconCellViewObserver>;
 
   protected initSvg(): void {
     const svgView = this.createSvgView();
     if (svgView !== null) {
-      this.setChildView("svg", svgView);
+      this.setChild("svg", svgView);
     }
   }
 
@@ -46,31 +47,44 @@ export class IconCellView extends CellView {
   }
 
   get svgView(): SvgIconView | null {
-    const svgView = this.getChildView("svg");
+    const svgView = this.getChild("svg");
     return svgView instanceof SvgIconView ? svgView : null;
   }
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly xAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly xAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly yAlign!: ViewAnimator<this, number>;
+  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly yAlign!: ThemeAnimator<this, number>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
+  readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
+  readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Color, state: null, updateFlags: View.NeedsLayout})
-  readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+  @ThemeAnimator<IconCellView, Color | null, AnyColor | null>({
+    type: Color,
+    state: null,
+    updateFlags: View.NeedsLayout,
+    didSetValue(newIconColor: Color | null, oldIconColor: Color | null): void {
+      if (newIconColor !== null) {
+        const oldGraphics = this.owner.graphics.value;
+        if (oldGraphics instanceof FilledIcon) {
+          const newGraphics = oldGraphics.withFillColor(newIconColor);
+          this.owner.graphics.setState(newGraphics, Affinity.Reflexive);
+        }
+      }
+    },
+  })
+  readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetGraphics !== void 0) {
-        viewObserver.viewWillSetGraphics(newGraphics, oldGraphic, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillSetGraphics !== void 0) {
+        observer.viewWillSetGraphics(newGraphics, oldGraphic, this);
       }
     }
   }
@@ -80,17 +94,17 @@ export class IconCellView extends CellView {
   }
 
   protected didSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetGraphics !== void 0) {
-        viewObserver.viewDidSetGraphics(newGraphics, oldGraphic, this);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidSetGraphics !== void 0) {
+        observer.viewDidSetGraphics(newGraphics, oldGraphic, this);
       }
     }
   }
 
-  @ViewAnimator<IconCellView, Graphics | null>({
-    extends: IconViewAnimator,
+  @ThemeAnimator<IconCellView, Graphics | null>({
+    extends: IconGraphicsAnimator,
     type: Object,
     state: null,
     updateFlags: View.NeedsLayout,
@@ -102,32 +116,32 @@ export class IconCellView extends CellView {
       this.owner.didSetGraphics(newGraphics, oldGraphics);
     },
   })
-  readonly graphics!: ViewAnimator<this, Graphics | null>;
+  readonly graphics!: ThemeAnimator<this, Graphics | null>;
 
-  protected override onInsertChildView(childView: View, targetView: View | null): void {
-    super.onInsertChildView(childView, targetView);
+  protected override onInsertChild(childView: View, targetView: View | null): void {
+    super.onInsertChild(childView, targetView);
     if (childView.key === "svg" && childView instanceof SvgIconView) {
       this.onInsertSvg(childView);
     }
   }
 
   protected onInsertSvg(svgView: SvgIconView): void {
-    svgView.xAlign.setInherit(true);
-    svgView.yAlign.setInherit(true);
-    svgView.iconWidth.setInherit(true);
-    svgView.iconHeight.setInherit(true);
-    svgView.iconColor.setInherit(true);
-    svgView.graphics.setInherit(true);
+    svgView.xAlign.setInherits(true);
+    svgView.yAlign.setInherits(true);
+    svgView.iconWidth.setInherits(true);
+    svgView.iconHeight.setInherits(true);
+    svgView.iconColor.setInherits(true);
+    svgView.graphics.setInherits(true);
     svgView.setStyle("position", "absolute");
   }
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (!this.graphics.isInherited()) {
+    if (!this.graphics.inherited) {
       const oldGraphics = this.graphics.value;
       if (oldGraphics instanceof Icon) {
         const newGraphics = oldGraphics.withTheme(theme, mood);
-        this.graphics.setOwnState(newGraphics, oldGraphics.isThemed() ? timing : false);
+        this.graphics.setState(newGraphics, oldGraphics.isThemed() ? timing : false, Affinity.Reflexive);
       }
     }
   }
@@ -137,20 +151,8 @@ export class IconCellView extends CellView {
     this.requireUpdate(View.NeedsLayout);
   }
 
-  protected override onAnimate(viewContext: ViewContextType<this>): void {
-    super.onAnimate(viewContext);
-    const iconColor = this.iconColor.takeUpdatedValue();
-    if (iconColor !== void 0 && iconColor !== null) {
-      const oldGraphics = this.graphics.value;
-      if (oldGraphics instanceof FilledIcon) {
-        const newGraphics = oldGraphics.withFillColor(iconColor);
-        this.graphics.setOwnState(newGraphics);
-      }
-    }
-  }
-
   protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
-    if ((this.viewFlags & View.NeedsLayout) === 0) {
+    if ((this.flags & View.NeedsLayout) === 0) {
       displayFlags &= ~View.NeedsLayout;
     }
     return displayFlags;
@@ -163,16 +165,16 @@ export class IconCellView extends CellView {
 
   protected layoutIcon(): void {
     const svgView = this.svgView;
-    if (svgView !== null && (svgView.width.takesPrecedence(View.Intrinsic)
-                          || svgView.height.takesPrecedence(View.Intrinsic)
-                          || svgView.viewBox.takesPrecedence(View.Intrinsic))) {
+    if (svgView !== null && (svgView.width.hasAffinity(Affinity.Intrinsic)
+                          || svgView.height.hasAffinity(Affinity.Intrinsic)
+                          || svgView.viewBox.hasAffinity(Affinity.Intrinsic))) {
       let viewWidth: Length | number | null = this.width.value;
       viewWidth = viewWidth instanceof Length ? viewWidth.pxValue() : this.node.offsetWidth;
       let viewHeight: Length | number | null = this.height.value;
       viewHeight = viewHeight instanceof Length ? viewHeight.pxValue() : this.node.offsetHeight;
-      svgView.width.setState(viewWidth, View.Intrinsic);
-      svgView.height.setState(viewHeight, View.Intrinsic);
-      svgView.viewBox.setState("0 0 " + viewWidth + " " + viewHeight, View.Intrinsic);
+      svgView.width.setState(viewWidth, Affinity.Intrinsic);
+      svgView.height.setState(viewHeight, Affinity.Intrinsic);
+      svgView.viewBox.setState("0 0 " + viewWidth + " " + viewHeight, Affinity.Intrinsic);
     }
   }
 }

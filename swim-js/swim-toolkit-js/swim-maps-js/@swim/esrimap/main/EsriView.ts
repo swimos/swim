@@ -14,6 +14,7 @@
 
 /// <reference types="arcgis-js-api"/>
 
+import type {Class} from "@swim/util";
 import {MapView} from "@swim/map";
 import {EsriViewport} from "./EsriViewport";
 import type {EsriViewObserver} from "./EsriViewObserver";
@@ -24,7 +25,7 @@ export abstract class EsriView extends MapView {
     EsriViewport.init();
   }
 
-  override readonly viewObservers!: ReadonlyArray<EsriViewObserver>;
+  override readonly observerType?: Class<EsriViewObserver>;
 
   abstract readonly map: __esri.View;
 

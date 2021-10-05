@@ -28,7 +28,7 @@ export interface UriAuthorityInit extends UriUserInit {
 }
 
 export class UriAuthority implements HashCode, Compare, Debug, Display {
-  /** @hidden */
+  /** @internal */
   constructor(user: UriUser, host: UriHost, port: UriPort) {
     this.user = user;
     this.host = host;
@@ -191,7 +191,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly hashValue: number | undefined;
 
   hashCode(): number {
@@ -232,7 +232,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   toString(): string {

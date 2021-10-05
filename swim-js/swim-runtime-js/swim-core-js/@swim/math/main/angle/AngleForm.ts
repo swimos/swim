@@ -15,7 +15,7 @@
 import {Item, Text, Form} from "@swim/structure";
 import {AngleUnits, AnyAngle, Angle} from "./Angle";
 
-/** @hidden */
+/** @internal */
 export class AngleForm extends Form<Angle, AnyAngle> {
   constructor(defaultUnits: AngleUnits | undefined, unit: Angle | undefined) {
     super();

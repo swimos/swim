@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Class} from "@swim/util";
 import {PlotTrait} from "./PlotTrait";
 import type {ScatterPlotTraitObserver} from "./ScatterPlotTraitObserver";
 
 export class ScatterPlotTrait<X, Y> extends PlotTrait<X, Y> {
-  override readonly traitObservers!: ReadonlyArray<ScatterPlotTraitObserver<X, Y>>;
+  override readonly observerType?: Class<ScatterPlotTraitObserver<X, Y>>;
 }

@@ -12,62 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  ModelContextType,
-  ModelContext,
-} from "./ModelContext";
-export {
-  ModelFlags,
-  ModelPrecedence,
-  ModelInit,
-  ModelPrototype,
-  ModelConstructor,
-  ModelClass,
-  Model,
-} from "./Model";
-export {
-  ModelObserverType,
-  ModelObserver,
-} from "./ModelObserver";
-export {
-  ModelConsumerType,
-  ModelConsumer,
-} from "./ModelConsumer";
-
-export {
-  TraitModelType,
-  TraitContextType,
-  TraitFlags,
-  TraitPrototype,
-  TraitConstructor,
-  TraitClass,
-  Trait,
-} from "./Trait";
-export {
-  TraitObserverType,
-  TraitObserver,
-} from "./TraitObserver";
-export {
-  TraitConsumerType,
-  TraitConsumer,
-} from "./TraitConsumer";
-
-export * from "./manager";
-
 export * from "./refresh";
 
 export * from "./selection";
 
-export * from "./warp";
+export * from "./model";
 
-export * from "./service";
-
-export * from "./property";
-
-export * from "./fastener";
-
-export * from "./downlink";
-
-export * from "./generic";
+export * from "./trait";
 
 export * from "./selectable";
+
+export * from "./downlink";

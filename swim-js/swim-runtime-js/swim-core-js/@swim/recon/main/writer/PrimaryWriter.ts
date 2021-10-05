@@ -16,7 +16,7 @@ import type {Cursor} from "@swim/util";
 import {Output, WriterException, Writer} from "@swim/codec";
 import type {ReconWriter} from "./ReconWriter";
 
-/** @hidden */
+/** @internal */
 export class PrimaryWriter<I, V> extends Writer {
   private readonly recon: ReconWriter<I, V>;
   private readonly items: Cursor<I>;

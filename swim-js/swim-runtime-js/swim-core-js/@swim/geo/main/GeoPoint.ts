@@ -199,7 +199,7 @@ export class GeoPoint extends GeoShape implements Interpolate<GeoPoint>, HashCod
     return new GeoPoint(lng, lat);
   }
 
-  /** @hidden */
+  /** @internal */
   static normalizeLng(lng: number): number {
     if (lng < -180) {
       lng = 180 - (-lng + 180) % 360;
@@ -209,13 +209,13 @@ export class GeoPoint extends GeoShape implements Interpolate<GeoPoint>, HashCod
     return lng;
   }
 
-  /** @hidden */
+  /** @internal */
   static normalizeLat(lat: number): number {
     lat = Math.min(Math.max(-90 + Equivalent.Epsilon, lat), 90 - Equivalent.Epsilon);
     return lat;
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is GeoPointInit {
     if (typeof value === "object" && value !== null) {
       const init = value as GeoPointInit;
@@ -225,7 +225,7 @@ export class GeoPoint extends GeoShape implements Interpolate<GeoPoint>, HashCod
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isTuple(value: unknown): value is GeoPointTuple {
     return Array.isArray(value)
         && value.length === 2
@@ -233,7 +233,7 @@ export class GeoPoint extends GeoShape implements Interpolate<GeoPoint>, HashCod
         && typeof value[1] === "number";
   }
 
-  /** @hidden */
+  /** @internal */
   static override isAny(value: unknown): value is AnyGeoPoint {
     return value instanceof GeoPoint
         || GeoPoint.isInit(value)

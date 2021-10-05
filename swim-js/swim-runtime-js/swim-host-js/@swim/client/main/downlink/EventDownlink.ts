@@ -27,7 +27,7 @@ export interface EventDownlinkInit extends EventDownlinkObserver, DownlinkInit {
 }
 
 export class EventDownlink extends Downlink {
-  /** @hidden */
+  /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: EventDownlinkInit,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number,
               rate?: number, body?: Value, flags: number = DownlinkFlags.KeepLinked,
@@ -35,10 +35,10 @@ export class EventDownlink extends Downlink {
     super(context, owner, init, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
   }
 
-  /** @hidden */
+  /** @internal */
   override readonly model!: EventDownlinkModel | null;
 
-  /** @hidden */
+  /** @internal */
   override readonly observers!: ReadonlyArray<EventDownlinkObserver>;
 
   override get type(): DownlinkType {

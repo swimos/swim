@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {DisplayContext} from "./DisplayContext";
-export {DisplayManager} from "./DisplayManager";
-export {DisplayManagerObserver} from "./DisplayManagerObserver";
+export {DisplayService} from "./DisplayService";
+export {DisplayServiceObserver} from "./DisplayServiceObserver";
+
+export {DisplayProvider} from "./DisplayProvider";

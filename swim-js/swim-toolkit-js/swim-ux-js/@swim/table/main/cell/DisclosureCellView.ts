@@ -13,12 +13,8 @@
 // limitations under the License.
 
 import {AnyExpansion, Expansion} from "@swim/style";
-import {
-  ViewAnimator,
-  ExpansionViewAnimator,
-  ViewFastener,
-  PositionGestureInput,
-} from "@swim/view";
+import {ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
+import {ViewFastener, PositionGestureInput} from "@swim/view";
 import {DisclosureButton} from "@swim/button";
 import {CellView} from "./CellView";
 
@@ -29,8 +25,8 @@ export class DisclosureCellView extends CellView {
     this.button.injectView();
   }
 
-  @ViewAnimator({type: Expansion, inherit: true})
-  readonly disclosure!: ExpansionViewAnimator<this, Expansion, AnyExpansion>;
+  @ThemeAnimator({type: Expansion, inherits: true})
+  readonly disclosure!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;
 
   protected initButton(buttonView: DisclosureButton): void {
     // hook
@@ -65,6 +61,7 @@ export class DisclosureCellView extends CellView {
   @ViewFastener<DisclosureCellView, DisclosureButton>({
     key: true,
     type: DisclosureButton,
+    child: true,
     willSetView(newButtonView: DisclosureButton | null, oldButtonView: DisclosureButton | null): void {
       this.owner.willSetButton(newButtonView, oldButtonView);
     },
@@ -79,8 +76,8 @@ export class DisclosureCellView extends CellView {
 
   override didPress(input: PositionGestureInput, event: Event | null): void {
     input.preventDefault();
-    const superDisclosure = this.disclosure.superAnimator;
-    if (superDisclosure instanceof ExpansionViewAnimator) {
+    const superDisclosure = this.disclosure.superFastener;
+    if (superDisclosure instanceof ExpansionThemeAnimator) {
       superDisclosure.toggle();
     }
     super.didPress(input, event);

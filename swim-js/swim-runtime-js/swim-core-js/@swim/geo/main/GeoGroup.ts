@@ -72,7 +72,7 @@ export class GeoGroup<S extends GeoShape = GeoShape> extends GeoShape implements
     }
   }
 
-  /** @hidden */
+  /** @internal */
   readonly boundingBox: GeoBox | null;
 
   override get bounds(): GeoBox {

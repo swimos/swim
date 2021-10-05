@@ -15,17 +15,17 @@
 import type {Mutable} from "@swim/util";
 import type {ConstraintKey} from "./ConstraintKey";
 
-/** @hidden */
+/** @internal */
 export class ConstraintMap<K extends ConstraintKey, V> {
   constructor(index?: {[id: number]: number | undefined}, array?: Array<[K, V]>) {
     this.index = index !== void 0 ? index : {};
     this.array = array !== void 0 ? array : [];
   }
 
-  /** @hidden */
+  /** @internal */
   readonly index: {[id: number]: number | undefined};
 
-  /** @hidden */
+  /** @internal */
   readonly array: Array<[K, V]>;
 
   get size(): number {

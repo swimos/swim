@@ -17,7 +17,7 @@ import {Uri} from "../Uri";
 import type {UriFragment} from "../UriFragment";
 import type {UriParser} from "./UriParser";
 
-/** @hidden */
+/** @internal */
 export class UriFragmentParser extends Parser<UriFragment> {
   private readonly uri: UriParser;
   private readonly output: Output<string> | undefined;

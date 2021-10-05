@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import type {Mutable, Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import {R2Box, Transform} from "@swim/math";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {ThemeConstraintAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
 import type {AnyGraphicsRenderer, GraphicsRendererType, GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
@@ -43,33 +45,25 @@ export class RasterView extends LayerView {
     this.ownRasterFrame = null;
   }
 
-  override initView(init: RasterViewInit): void {
-    super.initView(init);
-    if (init.opacity !== void 0) {
-      this.opacity(init.opacity);
-    }
-    if (init.compositeOperation !== void 0) {
-      this.compositeOperation(init.compositeOperation);
-    }
-  }
+  override readonly contextType?: Class<RasterViewContext>;
 
-  @ViewAnimator({type: Number, state: 1, updateFlags: View.NeedsComposite})
-  readonly opacity!: ViewAnimator<this, number>;
+  @ThemeConstraintAnimator({type: Number, state: 1, updateFlags: View.NeedsComposite})
+  readonly opacity!: ThemeConstraintAnimator<this, number>;
 
-  @ViewAnimator({type: String, state: "source-over", updateFlags: View.NeedsComposite})
-  readonly compositeOperation!: ViewAnimator<this, CanvasCompositeOperation>;
+  @Property({type: String, state: "source-over", updateFlags: View.NeedsComposite})
+  readonly compositeOperation!: Property<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
     return window.devicePixelRatio || 1;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly canvas: HTMLCanvasElement;
 
   get compositor(): GraphicsRenderer | null {
-    const parentView = this.parentView;
-    if (parentView instanceof GraphicsView || parentView instanceof CanvasView) {
-      return parentView.renderer;
+    const parent = this.parent;
+    if (parent instanceof GraphicsView || parent instanceof CanvasView) {
+      return parent.renderer;
     } else {
       return null;
     }
@@ -111,13 +105,13 @@ export class RasterView extends LayerView {
     const rasterFlags = updateFlags & (View.NeedsRender | View.NeedsComposite);
     if (rasterFlags !== 0) {
       updateFlags |= View.NeedsComposite;
-      this.setViewFlags(this.viewFlags | View.NeedsDisplay | View.NeedsComposite | rasterFlags);
+      this.setFlags(this.flags | View.NeedsDisplay | View.NeedsComposite | rasterFlags);
     }
     return updateFlags;
   }
 
   protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
-    if ((this.viewFlags & View.ProcessMask) === 0 && (processFlags & View.NeedsResize) === 0) {
+    if ((this.flags & View.ProcessMask) === 0 && (processFlags & View.NeedsResize) === 0) {
       processFlags = 0;
     }
     return processFlags;
@@ -129,7 +123,7 @@ export class RasterView extends LayerView {
   }
 
   protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
-    if ((this.viewFlags & View.DisplayMask) !== 0) {
+    if ((this.flags & View.DisplayMask) !== 0) {
       displayFlags |= View.NeedsComposite;
     } else if ((displayFlags & View.NeedsComposite) !== 0) {
       displayFlags = View.NeedsDisplay | View.NeedsComposite;
@@ -165,11 +159,9 @@ export class RasterView extends LayerView {
     return rasterViewContext;
   }
 
-  override readonly viewContext!: RasterViewContext;
-
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  /** @hidden */
+  /** @internal */
   readonly ownRasterFrame: R2Box | null;
 
   get rasterFrame(): R2Box {
@@ -180,7 +172,7 @@ export class RasterView extends LayerView {
     return rasterFrame;
   }
 
-  /** @hidden */
+  /** @internal */
   setRasterFrame(rasterFrame: R2Box | null): void {
     (this as Mutable<this>).ownRasterFrame = rasterFrame;
   }
@@ -243,7 +235,7 @@ export class RasterView extends LayerView {
         const globalAlpha = context.globalAlpha;
         const globalCompositeOperation = context.globalCompositeOperation;
         context.globalAlpha = this.opacity.getValue();
-        context.globalCompositeOperation = this.compositeOperation.getValue();
+        context.globalCompositeOperation = this.compositeOperation.getState();
         context.drawImage(canvas, rasterFrame.x, rasterFrame.y, rasterFrame.width, rasterFrame.height);
         context.globalAlpha = globalAlpha;
         context.globalCompositeOperation = globalCompositeOperation;
@@ -251,18 +243,22 @@ export class RasterView extends LayerView {
     }
   }
 
-  static override create(): RasterView {
-    return new RasterView();
+  override init(init: RasterViewInit): void {
+    super.init(init);
+    if (init.opacity !== void 0) {
+      this.opacity(init.opacity);
+    }
+    if (init.compositeOperation !== void 0) {
+      this.compositeOperation(init.compositeOperation);
+    }
   }
 
-  static override readonly mountFlags: ViewFlags = LayerView.mountFlags | View.NeedsRender | View.NeedsComposite;
-  static override readonly powerFlags: ViewFlags = LayerView.powerFlags | View.NeedsRender | View.NeedsComposite;
-  static override readonly uncullFlags: ViewFlags = LayerView.uncullFlags | View.NeedsRender | View.NeedsComposite;
+  static override readonly MountFlags: ViewFlags = LayerView.MountFlags | View.NeedsRender | View.NeedsComposite;
+  static override readonly UncullFlags: ViewFlags = LayerView.UncullFlags | View.NeedsRender | View.NeedsComposite;
 }
 Object.defineProperty(RasterView.prototype, "viewBounds", {
   get(this: RasterView): R2Box {
     return this.deriveViewBounds();
   },
-  enumerable: true,
   configurable: true,
 });

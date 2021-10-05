@@ -92,7 +92,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   toString(): string {
@@ -202,7 +202,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
     return parser.bind();
   }
 
-  /** @hidden */
+  /** @internal */
   static isInit(value: unknown): value is LinearGradientInit {
     if (typeof value === "object" && value !== null) {
       const init = value as LinearGradientInit;
@@ -211,7 +211,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
     return false;
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyLinearGradient {
     return value instanceof LinearGradient
         || LinearGradient.isInit(value)

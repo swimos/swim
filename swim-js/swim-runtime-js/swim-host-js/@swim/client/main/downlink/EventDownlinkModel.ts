@@ -19,7 +19,7 @@ import {DownlinkModel} from "./DownlinkModel";
 import type {DownlinkType} from "./Downlink";
 import type {EventDownlink} from "./EventDownlink";
 
-/** @hidden */
+/** @internal */
 export class EventDownlinkModel extends DownlinkModel {
   constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
               prio?: number, rate?: number, body?: Value) {

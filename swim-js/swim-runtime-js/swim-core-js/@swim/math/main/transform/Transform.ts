@@ -91,7 +91,7 @@ export abstract class Transform implements R2Operator, Interpolate<Transform>, H
   }
 
   toCssTransformComponent(): CSSTransformComponent | null {
-    return null
+    return null;
   }
 
   toCssValue(): CSSStyleValue | null {
@@ -213,7 +213,7 @@ export abstract class Transform implements R2Operator, Interpolate<Transform>, H
     }
   }
 
-  /** @hidden */
+  /** @internal */
   static fromCssTransform(value: CSSTransformValue): Transform {
     const n = value.length;
     if (n === 1) {
@@ -288,7 +288,7 @@ export abstract class Transform implements R2Operator, Interpolate<Transform>, H
     return new TransformForm(Transform.identity());
   }
 
-  /** @hidden */
+  /** @internal */
   static isAny(value: unknown): value is AnyTransform {
     return value instanceof Transform
         || typeof value === "string";

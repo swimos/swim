@@ -12,25 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Interpolator} from "./Interpolator";
 
-/** @hidden */
-export const NumberInterpolator = function (y0: number, y1: number): Interpolator<number> {
-  const interpolator = function (u: number): number {
-    const y0 = interpolator[0];
-    const y1 = interpolator[1];
-    return y0 + u * (y1 - y0);
-  } as Interpolator<number>;
-  Object.setPrototypeOf(interpolator, NumberInterpolator.prototype);
-  (interpolator as Mutable<typeof interpolator>)[0] = y0;
-  (interpolator as Mutable<typeof interpolator>)[1] = y1;
-  return interpolator;
-} as {
-  (y0: number, y1: number): Interpolator<number>;
+/** @internal */
+export const NumberInterpolator = (function (_super: typeof Interpolator) {
+  const NumberInterpolator = function (y0: number, y1: number): Interpolator<number> {
+    const interpolator = function (u: number): number {
+      const y0 = interpolator[0];
+      const y1 = interpolator[1];
+      return y0 + u * (y1 - y0);
+    } as Interpolator<number>;
+    Object.setPrototypeOf(interpolator, NumberInterpolator.prototype);
+    (interpolator as Mutable<typeof interpolator>)[0] = y0;
+    (interpolator as Mutable<typeof interpolator>)[1] = y1;
+    return interpolator;
+  } as {
+    (y0: number, y1: number): Interpolator<number>;
 
-  /** @hidden */
-  prototype: Interpolator<number>;
-};
+    /** @internal */
+    prototype: Interpolator<number>;
+  };
 
-NumberInterpolator.prototype = Object.create(Interpolator.prototype);
+  NumberInterpolator.prototype = Object.create(_super.prototype);
+
+  return NumberInterpolator;
+})(Interpolator);

@@ -33,10 +33,10 @@ export class RecordModel extends AbstractRecordOutlet {
     this.fieldUpdaters = new BTree();
   }
 
-  /** @hidden */
+  /** @internal */
   readonly state: Record;
 
-  /** @hidden */
+  /** @internal */
   readonly fieldUpdaters: BTree<Value, RecordFieldUpdater>;
 
   override isEmpty(): boolean {
@@ -437,6 +437,5 @@ Object.defineProperty(RecordModel.prototype, "fieldCount", {
   get(this: RecordModel): number {
     return this.state.fieldCount;
   },
-  enumerable: true,
   configurable: true,
 });

@@ -18,7 +18,7 @@ import type {Color} from "../color/Color";
 import {ColorParser} from "../color/ColorParser";
 import {BoxShadow} from "./BoxShadow";
 
-/** @hidden */
+/** @internal */
 export class BoxShadowParser extends Parser<BoxShadow | null> {
   private readonly boxShadow: BoxShadow | undefined;
   private readonly identOutput: Output<string> | undefined;

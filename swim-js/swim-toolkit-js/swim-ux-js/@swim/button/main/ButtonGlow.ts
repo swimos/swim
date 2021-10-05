@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import {Mutable, AnyTiming, Timing} from "@swim/util";
+import {Affinity} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {View} from "@swim/view";
-import {StyleAnimator, StyleAnimatorConstraint, HtmlView} from "@swim/dom";
+import {StyleAnimator, StyleConstraintAnimator, HtmlView} from "@swim/dom";
 
 export type ButtonGlowState = "ready" | "glowing" | "pulsing" | "fading";
 
@@ -30,39 +30,39 @@ export class ButtonGlow extends HtmlView {
 
   protected initGlow(): void {
     this.addClass("button-glow");
-    this.position.setState("absolute", View.Intrinsic);
-    this.width.setState(Length.zero(), View.Intrinsic);
-    this.height.setState(Length.zero(), View.Intrinsic);
-    this.borderTopLeftRadius.setState(Length.pct(50), View.Intrinsic);
-    this.borderTopRightRadius.setState(Length.pct(50), View.Intrinsic);
-    this.borderBottomLeftRadius.setState(Length.pct(50), View.Intrinsic);
-    this.borderBottomRightRadius.setState(Length.pct(50), View.Intrinsic);
-    this.pointerEvents.setState("none", View.Intrinsic);
+    this.position.setState("absolute", Affinity.Intrinsic);
+    this.width.setState(Length.zero(), Affinity.Intrinsic);
+    this.height.setState(Length.zero(), Affinity.Intrinsic);
+    this.borderTopLeftRadius.setState(Length.pct(50), Affinity.Intrinsic);
+    this.borderTopRightRadius.setState(Length.pct(50), Affinity.Intrinsic);
+    this.borderBottomLeftRadius.setState(Length.pct(50), Affinity.Intrinsic);
+    this.borderBottomRightRadius.setState(Length.pct(50), Affinity.Intrinsic);
+    this.pointerEvents.setState("none", Affinity.Intrinsic);
   }
 
   readonly glowState: ButtonGlowState;
 
-  /** @hidden */
+  /** @internal */
   glowTimer: number;
 
-  @StyleAnimatorConstraint<ButtonGlow, Length | null, AnyLength | null>({
+  @StyleConstraintAnimator<ButtonGlow, Length | null, AnyLength | null>({
     propertyNames: "left",
     type: Length,
     state: null,
-    get computedValue(): Length | null {
+    get constraintValue(): Length | null {
       const node = this.owner.node;
       return node instanceof HTMLElement ? Length.px(node.offsetLeft) : null;
     },
-    onEnd(): void {
+    didTransition(): void {
       this.owner.didGlow();
     },
   })
-  override readonly left!: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  override readonly left!: StyleConstraintAnimator<this, Length | null, AnyLength | null>;
 
   @StyleAnimator<ButtonGlow, number | undefined>({
     propertyNames: "opacity",
     type: Number,
-    onEnd(opacity: number | undefined): void {
+    didTransition(opacity: number | undefined): void {
       if (this.owner.glowState === "pulsing" && opacity === 0) {
         this.owner.didPulse();
       } else if (this.owner.glowState === "fading" && opacity === 0) {
@@ -73,12 +73,12 @@ export class ButtonGlow extends HtmlView {
   override readonly opacity!: StyleAnimator<this, number | undefined>;
 
   protected override didMount(): void {
-    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
+    if (this.backgroundColor.hasAffinity(Affinity.Intrinsic)) {
       let highlightColor = this.getLookOr(Look.highlightColor, null);
       if (highlightColor !== null) {
         highlightColor = highlightColor.alpha(1);
       }
-      this.backgroundColor.setState(highlightColor, View.Intrinsic);
+      this.backgroundColor.setState(highlightColor, Affinity.Intrinsic);
     }
     super.didMount();
   }
@@ -92,12 +92,12 @@ export class ButtonGlow extends HtmlView {
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
+    if (this.backgroundColor.hasAffinity(Affinity.Intrinsic)) {
       let highlightColor = theme.getOr(Look.highlightColor, mood, null);
       if (highlightColor !== null) {
         highlightColor = highlightColor.alpha(1);
       }
-      this.backgroundColor.setState(highlightColor, View.Intrinsic);
+      this.backgroundColor.setState(highlightColor, Affinity.Intrinsic);
     }
   }
 
@@ -105,7 +105,7 @@ export class ButtonGlow extends HtmlView {
     if (this.glowState === "ready") {
       this.cancelGlow();
       if (delay !== 0) {
-        const glow = this.glow.bind(this, clientX, clientY, timing, View.Intrinsic);
+        const glow = this.glow.bind(this, clientX, clientY, timing, Affinity.Intrinsic);
         this.glowTimer = setTimeout(glow, delay) as any;
       } else {
         if (timing === void 0 || timing === true) {
@@ -124,19 +124,19 @@ export class ButtonGlow extends HtmlView {
           const r = Math.sqrt(rx * rx + ry * ry);
           const highlightColor = this.getLook(Look.highlightColor);
           const opacity = highlightColor !== void 0 ? highlightColor.alpha() : 0.1;
-          this.opacity.setState(opacity, View.Intrinsic);
+          this.opacity.setState(opacity, Affinity.Intrinsic);
           if (timing !== false) {
-            this.left.setState(cx, View.Intrinsic);
-            this.top.setState(cy, View.Intrinsic);
-            this.left.setState(cx - r, timing, View.Intrinsic);
-            this.top.setState(cy - r, timing, View.Intrinsic);
-            this.width.setState(2 * r, timing, View.Intrinsic);
-            this.height.setState(2 * r, timing, View.Intrinsic);
+            this.left.setState(cx, Affinity.Intrinsic);
+            this.top.setState(cy, Affinity.Intrinsic);
+            this.left.setState(cx - r, timing, Affinity.Intrinsic);
+            this.top.setState(cy - r, timing, Affinity.Intrinsic);
+            this.width.setState(2 * r, timing, Affinity.Intrinsic);
+            this.height.setState(2 * r, timing, Affinity.Intrinsic);
           } else {
-            this.left.setState(cx - r, View.Intrinsic);
-            this.top.setState(cy - r, View.Intrinsic);
-            this.width.setState(2 * r, View.Intrinsic);
-            this.height.setState(2 * r, View.Intrinsic);
+            this.left.setState(cx - r, Affinity.Intrinsic);
+            this.top.setState(cy - r, Affinity.Intrinsic);
+            this.width.setState(2 * r, Affinity.Intrinsic);
+            this.height.setState(2 * r, Affinity.Intrinsic);
             this.didGlow();
           }
           (this as Mutable<this>).glowState = "glowing";
@@ -172,9 +172,9 @@ export class ButtonGlow extends HtmlView {
     if (this.glowState === "glowing") {
       this.willPulse();
       if (timing !== false) {
-        this.opacity.setState(0, timing, View.Intrinsic);
+        this.opacity.setState(0, timing, Affinity.Intrinsic);
       } else {
-        this.opacity.setState(0, View.Intrinsic);
+        this.opacity.setState(0, Affinity.Intrinsic);
         this.didPulse();
       }
       (this as Mutable<this>).glowState = "pulsing";
@@ -201,9 +201,9 @@ export class ButtonGlow extends HtmlView {
       }
       this.willFade();
       if (timing !== false) {
-        this.opacity.setState(0, timing, View.Intrinsic);
+        this.opacity.setState(0, timing, Affinity.Intrinsic);
       } else {
-        this.opacity.setState(0, View.Intrinsic);
+        this.opacity.setState(0, Affinity.Intrinsic);
         this.didFade();
       }
     }

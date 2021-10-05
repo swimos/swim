@@ -15,9 +15,9 @@
 import type {Output} from "@swim/codec";
 import {AnyUriPath, UriPath} from "./UriPath";
 
-/** @hidden */
+/** @internal */
 export class UriPathEmpty extends UriPath {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }
@@ -46,12 +46,12 @@ export class UriPathEmpty extends UriPath {
     throw new Error("empty path");
   }
 
-  /** @hidden */
+  /** @internal */
   override setTail(tail: UriPath): void {
     throw new Error("empty path");
   }
 
-  /** @hidden */
+  /** @internal */
   override dealias(): UriPath {
     return this;
   }

@@ -15,7 +15,7 @@
 import {AnyItem, Item} from "../Item";
 import {Form} from "./Form";
 
-/** @hidden */
+/** @internal */
 export class ItemForm extends Form<Item, AnyItem> {
   constructor(unit?: Item) {
     super();

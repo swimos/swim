@@ -116,7 +116,7 @@ export class SpecTest {
 
   /**
    * Asynchronous completes the evaluation of a successful test.
-   * @hidden
+   * @internal
    */
   runTestSuccess(report: Report, spec: Spec, exam: Exam, result: unknown): Exam {
     this.didRunTest(report, spec, exam, result);
@@ -125,7 +125,7 @@ export class SpecTest {
 
   /**
    * Asynchronous completes the evaluation of a failed test.
-   * @hidden
+   * @internal
    */
   runTestFailure(report: Report, spec: Spec, exam: Exam, error: unknown): Exam {
     if (!(error instanceof TestException)) {
@@ -137,7 +137,7 @@ export class SpecTest {
 
   /**
    * Curried [[Test]] method decorator, with captured `options`.
-   * @hidden
+   * @internal
    */
   static decorate(options: TestOptions, target: SpecClass, propertyKey: string | symbol,
                   descriptor: PropertyDescriptor): void {

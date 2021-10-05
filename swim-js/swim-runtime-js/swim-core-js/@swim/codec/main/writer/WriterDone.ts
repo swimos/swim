@@ -15,9 +15,9 @@
 import type {Output} from "../output/Output";
 import {Writer} from "./Writer";
 
-/** @hidden */
+/** @internal */
 export class WriterDone<O> extends Writer<unknown, O> {
-  /** @hidden */
+  /** @internal */
   readonly value!: O;
 
   constructor(value: O) {

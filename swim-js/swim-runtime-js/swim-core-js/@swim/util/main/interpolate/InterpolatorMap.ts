@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "../lang/Mutable";
+import type {Mutable} from "../types/Mutable";
 import {Interpolator} from "./Interpolator";
 
-/** @hidden */
+/** @internal */
 export interface InterpolatorMap<Y, FY> extends Interpolator<FY> {
-  /** @hidden */
+  /** @internal */
   readonly interpolator: Interpolator<Y>;
 
-  /** @hidden */
+  /** @internal */
   readonly transform: (y: Y) => FY;
 
   readonly 0: FY;
@@ -30,46 +30,48 @@ export interface InterpolatorMap<Y, FY> extends Interpolator<FY> {
   equals(that: unknown): boolean;
 }
 
-export const InterpolatorMap = function <Y, FY>(interpolator: Interpolator<Y>,
-                                                transform: (y: Y) => FY): InterpolatorMap<Y, FY> {
-  const map = function (u: number): FY {
-    return map.transform(map.interpolator(u));
-  } as InterpolatorMap<Y, FY>;
-  Object.setPrototypeOf(map, InterpolatorMap.prototype);
-  (map as Mutable<typeof map>).interpolator = interpolator;
-  (map as Mutable<typeof map>).transform = transform;
-  return map;
-} as {
-  <Y, FY>(interpolator: Interpolator<Y>, transform: (y: Y) => FY): InterpolatorMap<Y, FY>;
+export const InterpolatorMap = (function (_super: typeof Interpolator) {
+  const InterpolatorMap = function <Y, FY>(interpolator: Interpolator<Y>,
+                                           transform: (y: Y) => FY): InterpolatorMap<Y, FY> {
+    const map = function (u: number): FY {
+      return map.transform(map.interpolator(u));
+    } as InterpolatorMap<Y, FY>;
+    Object.setPrototypeOf(map, InterpolatorMap.prototype);
+    (map as Mutable<typeof map>).interpolator = interpolator;
+    (map as Mutable<typeof map>).transform = transform;
+    return map;
+  } as {
+    <Y, FY>(interpolator: Interpolator<Y>, transform: (y: Y) => FY): InterpolatorMap<Y, FY>;
 
-  /** @hidden */
-  prototype: InterpolatorMap<any, any>;
-};
+    /** @internal */
+    prototype: InterpolatorMap<any, any>;
+  };
 
-InterpolatorMap.prototype = Object.create(Interpolator.prototype);
+  InterpolatorMap.prototype = Object.create(_super.prototype);
 
-Object.defineProperty(InterpolatorMap.prototype, 0, {
-  get<Y, FY>(this: InterpolatorMap<Y, FY>): FY {
-    return this.transform(this.interpolator[0]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(InterpolatorMap.prototype, 0, {
+    get<Y, FY>(this: InterpolatorMap<Y, FY>): FY {
+      return this.transform(this.interpolator[0]);
+    },
+    configurable: true,
+  });
 
-Object.defineProperty(InterpolatorMap.prototype, 1, {
-  get<Y, FY>(this: InterpolatorMap<Y, FY>): FY {
-    return this.transform(this.interpolator[1]);
-  },
-  enumerable: true,
-  configurable: true,
-});
+  Object.defineProperty(InterpolatorMap.prototype, 1, {
+    get<Y, FY>(this: InterpolatorMap<Y, FY>): FY {
+      return this.transform(this.interpolator[1]);
+    },
+    configurable: true,
+  });
 
-InterpolatorMap.prototype.equals = function (that: unknown): boolean {
-  if (this === that) {
-    return true;
-  } else if (that instanceof InterpolatorMap) {
-    return this.interpolator.equals(that.interpolator)
-        && this.transform === that.transform;
-  }
-  return false;
-};
+  InterpolatorMap.prototype.equals = function (that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof InterpolatorMap) {
+      return this.interpolator.equals(that.interpolator)
+          && this.transform === that.transform;
+    }
+    return false;
+  };
+
+  return InterpolatorMap;
+})(Interpolator);

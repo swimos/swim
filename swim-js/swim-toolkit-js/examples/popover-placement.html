@@ -13,7 +13,7 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const source = bodyView.append("div")
+const source = bodyView.appendChild("div")
   .position("absolute")
   .left(Math.random() * window.innerWidth)
   .top(Math.random() * window.innerHeight)
@@ -22,7 +22,7 @@ const source = bodyView.append("div")
   .borderRadius(50)
   .backgroundColor("#989898")
   .on("click", function (event) {
-    bodyView.modalService.toggleModal(popover);
+    bodyView.modalProvider.toggleModal(popover);
   });
 
 const popover = swim.PopoverView.create()
@@ -33,7 +33,7 @@ const popover = swim.PopoverView.create()
   .backgroundColor("#4a4a4a");
 popover.setSource(source);
 popover.hideModal(false);
-bodyView.modalService.presentModal(popover);
+bodyView.modalProvider.presentModal(popover);
 
 //setInterval(function () {
 //  const timing = swim.Easing.linear.withDuration(1000);

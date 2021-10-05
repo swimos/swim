@@ -15,7 +15,7 @@
 import {Output, WriterException, Writer, Utf8} from "@swim/codec";
 import {Recon} from "../Recon";
 
-/** @hidden */
+/** @internal */
 export class IdentWriter extends Writer {
   private readonly ident: string;
   private readonly index: number | undefined;

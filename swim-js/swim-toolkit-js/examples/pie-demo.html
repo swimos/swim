@@ -161,16 +161,16 @@ const updateRate = document.getElementById("updateRate");
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.append("div").id("ui").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").id("ui").touchAction("none").userSelect("none");
 
-const canvasView = containerView.append(swim.CanvasView)
+const canvasView = containerView.appendChild(swim.CanvasView)
     .mouseEventsEnabled(true)
     .pointerEventsEnabled(true)
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
 // Append a new pie view to the canvas.
-const pieView = canvasView.append(swim.PieView)
+const pieView = canvasView.appendChild(swim.PieView)
     .font("14px sans-serif")
     .title(swim.TextRunView.fromAny("Pie").font("16px sans-serif"));
 
@@ -187,7 +187,7 @@ function createSlice() {
   sliceView.label.view.setHidden(true);
   sliceView.legend.view.setHidden(true);
   sliceView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
-  sliceView.addViewObserver({
+  sliceView.observe({
     viewWillLayout() {
       // Update the slice label.
       sliceView.label.view.text(Math.round(100 * sliceView.value.value / sliceView.total.value) + "%")
@@ -225,7 +225,7 @@ function updatePie() {
     const sliceView = createSlice()
         .value(Math.random(), timing);
     sliceViews[i] = sliceView;
-    pieView.append(sliceView, "Slice " + String.fromCharCode(65/*'A'*/ + (i % 26)) + (Math.floor(i / 26) + 1));
+    pieView.appendChild(sliceView, "Slice " + String.fromCharCode(65/*'A'*/ + (i % 26)) + (Math.floor(i / 26) + 1));
   }
 
   // Remove any excess slices.
@@ -233,7 +233,7 @@ function updatePie() {
     const sliceView = sliceViews[i];
     sliceViews.splice(i, 1);
     sliceView.value(0, timing);
-    sliceView.value.onEnd = function () {
+    sliceView.value.didTransition = function () {
       sliceView.remove();
     };
   }

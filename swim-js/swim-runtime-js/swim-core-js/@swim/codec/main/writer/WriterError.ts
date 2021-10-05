@@ -15,9 +15,9 @@
 import type {Output} from "../output/Output";
 import {Writer} from "./Writer";
 
-/** @hidden */
+/** @internal */
 export class WriterError extends Writer<never, never> {
-  /** @hidden */
+  /** @internal */
   readonly error!: Error;
 
   constructor(error: Error) {

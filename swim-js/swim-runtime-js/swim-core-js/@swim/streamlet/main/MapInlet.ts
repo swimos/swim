@@ -40,16 +40,21 @@ export interface MapInlet<K, V, I> extends Inlet<I> {
   recohereOutputKey(key: K, version: number): void;
 }
 
-export const MapInlet = {} as {
-  is<K, V, I>(object: unknown): object is MapInlet<K, V, I>;
-};
+/** @internal */
+export const MapInlet = (function () {
+  const MapInlet = {} as {
+    is<K, V, I>(object: unknown): object is MapInlet<K, V, I>;
+  };
 
-MapInlet.is = function <K, V, I>(object: unknown): object is MapInlet<K, V, I> {
-  if (typeof object === "object" && object !== null) {
-    const inlet = object as MapInlet<K, V, I>;
-    return Inlet.is(inlet)
-        && typeof inlet.decohereOutputKey === "function"
-        && typeof inlet.recohereOutputKey === "function";
-  }
-  return false;
-};
+  MapInlet.is = function <K, V, I>(object: unknown): object is MapInlet<K, V, I> {
+    if (typeof object === "object" && object !== null) {
+      const inlet = object as MapInlet<K, V, I>;
+      return Inlet.is(inlet)
+          && typeof inlet.decohereOutputKey === "function"
+          && typeof inlet.recohereOutputKey === "function";
+    }
+    return false;
+  };
+
+  return MapInlet;
+})();

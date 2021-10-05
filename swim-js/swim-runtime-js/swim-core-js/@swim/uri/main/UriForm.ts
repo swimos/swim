@@ -15,7 +15,7 @@
 import {Item, Text, Form} from "@swim/structure";
 import {AnyUri, Uri} from "./Uri";
 
-/** @hidden */
+/** @internal */
 export class UriForm extends Form<Uri, AnyUri> {
   constructor(unit: Uri | undefined) {
     super();

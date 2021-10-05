@@ -16,9 +16,9 @@ import {OutputException} from "./OutputException";
 import {AnyOutputSettings, OutputSettings} from "./OutputSettings";
 import {Output} from "./Output";
 
-/** @hidden */
+/** @internal */
 export class OutputError extends Output<never> {
-  /** @hidden */
+  /** @internal */
   readonly error!: Error;
 
   constructor(error: Error, settings: OutputSettings) {

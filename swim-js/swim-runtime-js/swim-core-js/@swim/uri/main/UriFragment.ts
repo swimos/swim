@@ -19,7 +19,7 @@ import {Uri} from "./Uri";
 export type AnyUriFragment = UriFragment | string;
 
 export class UriFragment implements HashCode, Compare, Debug, Display {
-  /** @hidden */
+  /** @internal */
   constructor(identifier: string | undefined) {
     this.identifier = identifier;
     this.stringValue = void 0;
@@ -67,7 +67,7 @@ export class UriFragment implements HashCode, Compare, Debug, Display {
   }
 
   display<T>(output: Output<T>): Output<T> {
-    const stringValue = this.stringValue
+    const stringValue = this.stringValue;
     if (stringValue !== void 0) {
       output = output.write(stringValue);
     } else if (this.identifier !== void 0) {
@@ -76,7 +76,7 @@ export class UriFragment implements HashCode, Compare, Debug, Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly stringValue: string | undefined;
 
   toString(): string {
@@ -123,7 +123,7 @@ export class UriFragment implements HashCode, Compare, Debug, Display {
     return Uri.standardParser.parseFragmentString(fragmentPart);
   }
 
-  /** @hidden */
+  /** @internal */
   @Lazy
   static get cache(): HashGenCacheMap<string, UriFragment> {
     const cacheSize = 32;

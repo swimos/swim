@@ -130,7 +130,12 @@ export class TextRun implements Graphics, Equals, Debug {
   }
 
   protected renderText(context: CanvasContext, frame: R2Box): void {
-    context.save();
+    // save
+    const contextFont = context.font;
+    const contextTextAlign = context.textAlign;
+    const contextTextBaseline = context.textBaseline;
+    const contextFillStyle = context.fillStyle;
+
     if (this.font !== null) {
       context.font = this.font.toString();
     }
@@ -140,15 +145,20 @@ export class TextRun implements Graphics, Equals, Debug {
     if (this.textBaseline !== null) {
       context.textBaseline = this.textBaseline;
     }
+    if (this.textColor !== null) {
+      context.fillStyle = this.textColor.toString();
+    }
     let textOrigin = this.textOrigin;
     if (textOrigin === null) {
       textOrigin = R2Point.origin();
     }
-    if (this.textColor !== null) {
-      context.fillStyle = this.textColor.toString();
-    }
     context.fillText(this.text, textOrigin.x, textOrigin.y);
-    context.restore();
+
+    // restore
+    context.font = contextFont;
+    context.textAlign = contextTextAlign;
+    context.textBaseline = contextTextBaseline;
+    context.fillStyle = contextFillStyle;
   }
 
   protected copy(text: string, font: Font | null, textAlign: CanvasTextAlign | null,

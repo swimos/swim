@@ -27,13 +27,17 @@ export interface GeoViewport extends GeoProjection, GeoPerspective {
   readonly tilt: number;
 }
 
-export const GeoViewport = {} as {
-  is(object: unknown): object is GeoViewport;
-};
+export const GeoViewport = (function () {
+  const GeoViewport = {} as {
+    is(object: unknown): object is GeoViewport;
+  };
 
-GeoViewport.is = function (object: unknown): object is GeoViewport {
-  if (GeoProjection.is(object) && GeoPerspective.is(object)) {
-    return true;
-  }
-  return false;
-};
+  GeoViewport.is = function (object: unknown): object is GeoViewport {
+    if (GeoProjection.is(object) && GeoPerspective.is(object)) {
+      return true;
+    }
+    return false;
+  };
+
+  return GeoViewport;
+})();

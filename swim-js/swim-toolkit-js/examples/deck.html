@@ -48,25 +48,25 @@ backButton.closeIcon.injectView();
 
 const card1 = swim.DeckCard.create();
 card1.cardTitle.setState("Card 1");
-const header1 = card1.append(swim.HtmlView.h2.create().margin(12).text("Card 1")).cursor("pointer");
+const header1 = card1.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 1")).cursor("pointer");
 header1.on("click", () => {
   deckView.pushCard(card2);
 });
 
 const card2 = swim.DeckCard.create();
 card2.cardTitle.setState("Card 2");
-const header2 = card2.append(swim.HtmlView.h2.create().margin(12).text("Card 2")).cursor("pointer");
+const header2 = card2.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 2")).cursor("pointer");
 header2.on("click", () => {
   deckView.pushCard(card3);
 });
 
 const card3 = swim.DeckCard.create();
 card3.cardTitle.setState("Card 3");
-card3.append(swim.HtmlView.h2.create().margin(12).text("Card 3"));
+card3.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 3"));
 
 deckView.pushCard(card1);
 
-bodyView.append(deckView);
+bodyView.appendChild(deckView);
 
     </script>
   </body>

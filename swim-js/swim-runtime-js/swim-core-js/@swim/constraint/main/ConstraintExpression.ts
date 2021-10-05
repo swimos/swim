@@ -39,70 +39,74 @@ export interface ConstraintExpression {
   divide(scalar: number): ConstraintExpression;
 }
 
-export const ConstraintExpression = {} as {
-  fromAny(value: AnyConstraintExpression): ConstraintExpression;
+export const ConstraintExpression = (function () {
+  const ConstraintExpression = {} as {
+    fromAny(value: AnyConstraintExpression): ConstraintExpression;
 
-  sum(...expressions: AnyConstraintExpression[]): ConstraintSum;
+    sum(...expressions: AnyConstraintExpression[]): ConstraintSum;
 
-  product(coefficient: number, variable: ConstraintVariable): ConstraintProduct;
+    product(coefficient: number, variable: ConstraintVariable): ConstraintProduct;
 
-  constant(value: number): ConstraintConstant;
+    constant(value: number): ConstraintConstant;
 
-  readonly zero: ConstraintConstant; // defined by ConstraintConstant
-};
+    readonly zero: ConstraintConstant; // defined by ConstraintConstant
+  };
 
-ConstraintExpression.fromAny = function (value: AnyConstraintExpression): ConstraintExpression {
-  if (typeof value === "number") {
-    return ConstraintExpression.constant(value);
-  } else {
-    return value;
-  }
-};
+  ConstraintExpression.fromAny = function (value: AnyConstraintExpression): ConstraintExpression {
+    if (typeof value === "number") {
+      return ConstraintExpression.constant(value);
+    } else {
+      return value;
+    }
+  };
 
-ConstraintExpression.sum = function (...expressions: AnyConstraintExpression[]): ConstraintSum {
-  const terms = new ConstraintMap<ConstraintVariable, number>();
-  let constant = 0;
-  for (let i = 0, n = expressions.length; i < n; i += 1) {
-    const expression = expressions[i]!;
-    if (typeof expression === "number") {
-      constant += expression;
-    } else if (ConstraintTerm.is(expression)) {
-      const variable = expression.variable;
-      if (variable !== null) {
-        const field = terms.getField(variable);
-        if (field !== void 0) {
-          field[1] += expression.coefficient;
+  ConstraintExpression.sum = function (...expressions: AnyConstraintExpression[]): ConstraintSum {
+    const terms = new ConstraintMap<ConstraintVariable, number>();
+    let constant = 0;
+    for (let i = 0, n = expressions.length; i < n; i += 1) {
+      const expression = expressions[i]!;
+      if (typeof expression === "number") {
+        constant += expression;
+      } else if (ConstraintTerm.is(expression)) {
+        const variable = expression.variable;
+        if (variable !== null) {
+          const field = terms.getField(variable);
+          if (field !== void 0) {
+            field[1] += expression.coefficient;
+          } else {
+            terms.set(variable, expression.coefficient);
+          }
         } else {
-          terms.set(variable, expression.coefficient);
+          constant += expression.constant;
         }
       } else {
+        const subterms = expression.terms;
+        for (let j = 0, k = subterms.size; j < k; j += 1) {
+          const [variable, coefficient] = subterms.getEntry(j)!;
+          const field = terms.getField(variable);
+          if (field !== void 0) {
+            field[1] += coefficient;
+          } else {
+            terms.set(variable, coefficient);
+          }
+        }
         constant += expression.constant;
       }
-    } else {
-      const subterms = expression.terms;
-      for (let j = 0, k = subterms.size; j < k; j += 1) {
-        const [variable, coefficient] = subterms.getEntry(j)!;
-        const field = terms.getField(variable);
-        if (field !== void 0) {
-          field[1] += coefficient;
-        } else {
-          terms.set(variable, coefficient);
-        }
-      }
-      constant += expression.constant;
     }
-  }
-  return new ConstraintSum(terms, constant);
-};
+    return new ConstraintSum(terms, constant);
+  };
 
-ConstraintExpression.product = function (coefficient: number, variable: ConstraintVariable): ConstraintProduct {
-  return new ConstraintProduct(coefficient, variable);
-};
+  ConstraintExpression.product = function (coefficient: number, variable: ConstraintVariable): ConstraintProduct {
+    return new ConstraintProduct(coefficient, variable);
+  };
 
-ConstraintExpression.constant = function (value: number): ConstraintConstant {
-  if (value === 0) {
-    return ConstraintExpression.zero;
-  } else {
-    return new ConstraintConstant(value);
-  }
-};
+  ConstraintExpression.constant = function (value: number): ConstraintConstant {
+    if (value === 0) {
+      return ConstraintExpression.zero;
+    } else {
+      return new ConstraintConstant(value);
+    }
+  };
+
+  return ConstraintExpression;
+})();

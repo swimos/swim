@@ -38,7 +38,7 @@ export class Diagnostic implements Display {
     this.cause = cause;
   }
 
-  /** @hidden */
+  /** @internal */
   readonly input: Input;
 
   /**
@@ -122,7 +122,7 @@ export class Diagnostic implements Display {
     return output;
   }
 
-  /** @hidden */
+  /** @internal */
   static displayMessage<T>(output: Output<T>, severity: Severity, message: string | undefined): Output<T> {
     output = Diagnostic.formatSeverity(output, severity);
     output = output.write(severity.label);

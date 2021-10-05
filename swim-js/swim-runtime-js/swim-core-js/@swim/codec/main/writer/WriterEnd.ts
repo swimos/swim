@@ -16,7 +16,7 @@ import type {Output} from "../output/Output";
 import {WriterException} from "./WriterException";
 import {Writer} from "./Writer";
 
-/** @hidden */
+/** @internal */
 export class WriterEnd extends Writer<unknown, never> {
   constructor() {
     super();

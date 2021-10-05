@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {StorageManager} from "./StorageManager";
-export {StorageManagerObserver} from "./StorageManagerObserver";
+export {StorageService} from "./StorageService";
+export {StorageServiceObserver} from "./StorageServiceObserver";
 
-export {WebStorageManager} from "./WebStorageManager";
+export {WebStorageService} from "./WebStorageService";
 
-export {EphemeralStorageManager} from "./EphemeralStorageManager";
+export {EphemeralStorageService} from "./EphemeralStorageService";
+
+export {StorageProvider} from "./StorageProvider";

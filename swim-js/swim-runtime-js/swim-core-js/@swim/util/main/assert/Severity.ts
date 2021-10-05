@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {Murmur3} from "../runtime/Murmur3";
-import type {HashCode} from "../lang/HashCode";
-import type {Compare} from "../lang/Compare";
-import {Numbers} from "../runtime/Numbers";
-import {Strings} from "../runtime/Strings";
-import {Constructors} from "../runtime/Constructors";
+import type {HashCode} from "../compare/HashCode";
+import type {Compare} from "../compare/Compare";
+import {Numbers} from "../values/Numbers";
+import {Strings} from "../values/Strings";
+import {Constructors} from "../values/Constructors";
 
 /**
  * Level of importance.  Used for log levels and diagnostic classifications.

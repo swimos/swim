@@ -38,7 +38,7 @@ import {NegativeOperator} from "../"; // forward import
 import {PositiveOperator} from "../"; // forward import
 
 export abstract class Operator extends Expression {
-  /** @hidden */
+  /** @internal */
   constructor() {
     super();
   }

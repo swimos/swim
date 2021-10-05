@@ -18,6 +18,6 @@ import {AxisController} from "./AxisController";
 
 export class TopAxisController<X> extends AxisController<X> {
   protected override createAxisView(): AxisView<X> | null {
-    return TopAxisView.create<X>();
+    return new TopAxisView<X>();
   }
 }

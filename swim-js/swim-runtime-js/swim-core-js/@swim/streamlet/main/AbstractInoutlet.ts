@@ -27,10 +27,10 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
 
   readonly input: Outlet<I> | null;
 
-  /** @hidden */
+  /** @internal */
   readonly outputs: ReadonlyArray<Inlet<O>>;
 
-  /** @hidden */
+  /** @internal */
   readonly version: number;
 
   bindInput(newInput: Outlet<I> | null): void {

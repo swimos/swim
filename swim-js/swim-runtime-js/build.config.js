@@ -29,6 +29,21 @@ const core = [
     ],
   },
   {
+    id: "fastener",
+    name: "@swim/fastener",
+    path: "swim-core-js/@swim/fastener",
+    targets: [
+      {
+        id: "main",
+        deps: ["util"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "fastener", "unit"],
+      },
+    ],
+  },
+  {
     id: "args",
     name: "@swim/args",
     path: "swim-core-js/@swim/args",
@@ -39,7 +54,7 @@ const core = [
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "args"],
+        deps: ["util", "codec", "args", "unit"],
       },
     ],
   },
@@ -87,11 +102,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec"],
+        deps: ["util", "codec", "fastener"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "constraint"],
+        deps: ["util", "codec", "fastener", "unit", "constraint"],
       },
     ],
   },
@@ -243,7 +258,7 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
+        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
       },
     ],
   },
@@ -272,11 +287,11 @@ const host = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
+        deps: ["util", "codec", "fastener", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "collections", "unit", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "fastener", "unit", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },
@@ -287,7 +302,7 @@ const host = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "args", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "fastener", "args", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },
