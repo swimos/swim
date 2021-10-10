@@ -356,6 +356,12 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
       if (this.oldValue == null) {
         this.oldValue = Value.absent();
       }
+      if (this.valueForm != null) {
+        this.oldObject = this.valueForm.cast(this.oldValue);
+        if (this.oldObject == null) {
+          this.oldObject = this.valueForm.unit();
+        }
+      }
     }
   }
 

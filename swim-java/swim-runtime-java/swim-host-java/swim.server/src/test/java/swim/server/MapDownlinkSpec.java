@@ -165,6 +165,60 @@ public class MapDownlinkSpec {
   }
 
   @Test
+  public void testOldValue() throws InterruptedException {
+    final CountDownLatch readLinkDidUpdate0 = new CountDownLatch(1);
+    final CountDownLatch readLinkDidUpdate1 = new CountDownLatch(1);
+    final CountDownLatch readLinkDidUpdate2 = new CountDownLatch(1);
+
+    class MapLinkController implements DidUpdateKey<String, String> {
+
+      @Override
+      public void didUpdate(String key, String newValue, String oldValue) {
+
+      }
+
+    }
+
+    class ReadMapLinkController implements DidUpdateKey<String, String> {
+
+      @Override
+      public void didUpdate(String key, String newValue, String oldValue) {
+        if (newValue.equals("apple")) {
+          assertEquals(oldValue, "");
+          readLinkDidUpdate0.countDown();
+        } else if (newValue.equals("alpha")) {
+          assertEquals(oldValue, "apple");
+          readLinkDidUpdate1.countDown();
+        } else if (newValue.equals("alligator")) {
+          assertEquals(oldValue, "alpha");
+          readLinkDidUpdate2.countDown();
+        }
+      }
+
+    }
+
+    final MapDownlink<String, String> mapLink = this.getDownlink("/map/words", "map", new MapLinkController());
+    final MapDownlink<String, String> readMapLink = this.getDownlink("/map/words", "map", new ReadMapLinkController());
+
+    mapLink.put("a", "apple");
+    readLinkDidUpdate0.await(2, TimeUnit.SECONDS);
+    assertEquals(readLinkDidUpdate0.getCount(), 0);
+
+    mapLink.put("a", "alpha");
+    readLinkDidUpdate1.await(2, TimeUnit.SECONDS);
+    assertEquals(readLinkDidUpdate1.getCount(), 0);
+
+    mapLink.put("a", "alligator");
+    readLinkDidUpdate2.await(2, TimeUnit.SECONDS);
+    assertEquals(readLinkDidUpdate2.getCount(), 0);
+
+    assertEquals(mapLink.size(), 1);
+    assertEquals(mapLink.get("a"), "alligator");
+    assertEquals(readMapLink.size(), 1);
+    assertEquals(readMapLink.get("a"), "alligator");
+  }
+
+  @Test
   void testRemove() throws InterruptedException {
     final CountDownLatch didReceive = new CountDownLatch(2);
     final CountDownLatch willRemove = new CountDownLatch(2);
