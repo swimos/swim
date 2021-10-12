@@ -428,6 +428,14 @@ final class JoinMapLaneRelayUpdate extends LaneRelay<JoinMapLaneModel, JoinMapLa
       if (this.oldValue == null) {
         this.oldValue = Value.absent();
       }
+
+      if (this.valueForm != null) {
+        this.oldObject = this.valueForm.cast(this.oldValue);
+        if (this.oldObject == null) {
+          this.oldObject = this.valueForm.unit();
+        }
+      }
+
     }
   }
 
