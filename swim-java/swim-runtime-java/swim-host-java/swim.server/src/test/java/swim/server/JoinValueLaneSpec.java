@@ -60,7 +60,9 @@ public class JoinValueLaneSpec {
                                            .openPlane("test", TestJoinValuePlane.class);
 
     final CountDownLatch joinDidReceive = new CountDownLatch(2);
-    final CountDownLatch joinDidUpdate = new CountDownLatch(2 * 2); // 1 for the initial link and 1 for update for x, same for y
+    final CountDownLatch joinDidUpdate = new CountDownLatch(2);
+    final int[] didUpdate = {0};
+
     class JoinValueLinkController implements WillUpdateKey<String, String>,
         DidUpdateKey<String, String>, WillReceive, DidReceive, WillLink, DidLink,
         WillSync, DidSync, WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
@@ -74,6 +76,7 @@ public class JoinValueLaneSpec {
       @Override
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println("join link didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+        didUpdate[0] += 1;
         joinDidUpdate.countDown();
       }
 
@@ -150,9 +153,13 @@ public class JoinValueLaneSpec {
           .nodeUri("/value/y")
           .laneUri("value")
           .open();
+      CountDownLatch valueDownlinkLatch = new CountDownLatch(4);
       x.set("x0");
       y.set("y0");
+      x.didSet((newValue, oldValue) -> valueDownlinkLatch.countDown());
+      y.didSet((newValue, oldValue) -> valueDownlinkLatch.countDown());
 
+      valueDownlinkLatch.await(2, TimeUnit.SECONDS);
       final MapDownlink<String, String> join = plane.downlinkMap()
           .keyClass(String.class)
           .valueClass(String.class)
@@ -165,7 +172,7 @@ public class JoinValueLaneSpec {
       joinDidReceive.await(2, TimeUnit.SECONDS);
       joinDidUpdate.await(2, TimeUnit.SECONDS);
       assertEquals(joinDidReceive.getCount(), 0);
-      assertEquals(joinDidUpdate.getCount(), 2);
+      assertEquals(didUpdate[0], 2);
       assertEquals(join.size(), 2);
       assertEquals(join.get("x"), "x0");
       assertEquals(join.get("y"), "y0");
