@@ -153,7 +153,7 @@ public class JoinValueLaneSpec {
           .nodeUri("/value/y")
           .laneUri("value")
           .open();
-      CountDownLatch valueDownlinkLatch = new CountDownLatch(4);
+      final CountDownLatch valueDownlinkLatch = new CountDownLatch(4);
       x.set("x0");
       y.set("y0");
       x.didSet((newValue, oldValue) -> valueDownlinkLatch.countDown());
