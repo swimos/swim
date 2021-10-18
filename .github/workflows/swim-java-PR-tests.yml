@@ -1,0 +1,41 @@
+name: Swim Java Tests on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'swim-java/**'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: swim-java
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [ubuntu-latest, ubuntu-18.04, windows-latest, windows-2016, macOs-latest]
+        jdk_version: ['11']
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK ${{ matrix.jdk_version }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.jdk_version }}
+          distribution: 'adopt'
+          cache: gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Test with Gradle
+        run: ./gradlew test -Pslow
+      - name: Publish Failing Test Report
+        uses: mikepenz/action-junit-report@v2
+        if: failure()
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
