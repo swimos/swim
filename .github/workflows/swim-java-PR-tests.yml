@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - continuous-integration
     paths:
       - 'swim-java/**'
   workflow_dispatch:
