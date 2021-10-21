@@ -25,6 +25,8 @@ import {
   FillView,
   StrokeViewInit,
   StrokeView,
+  PaintingContext,
+  PaintingRenderer,
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
@@ -164,12 +166,12 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderCircle(renderer.context, this.viewFrame);
     }
   }
 
-  protected renderCircle(context: CanvasContext, frame: R2Box): void {
+  protected renderCircle(context: PaintingContext, frame: R2Box): void {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
       // save

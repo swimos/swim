@@ -14,7 +14,7 @@
 
 import {Affinity} from "@swim/fastener";
 import {R2Point, R2Box} from "@swim/math";
-import {GraphicsView, CanvasContext, TypesetView} from "@swim/graphics";
+import {GraphicsView, PaintingContext, TypesetView} from "@swim/graphics";
 import {TickOrientation, TickView} from "./TickView";
 
 export class LeftTickView<Y = unknown> extends TickView<Y> {
@@ -40,7 +40,7 @@ export class LeftTickView<Y = unknown> extends TickView<Y> {
     }
   }
 
-  protected override renderTick(context: CanvasContext, frame: R2Box): void {
+  protected override renderTick(context: PaintingContext, frame: R2Box): void {
     const anchor = this.anchor.getValue();
     const x0 = Math.round(anchor.x);
     const y = Math.round(anchor.y);

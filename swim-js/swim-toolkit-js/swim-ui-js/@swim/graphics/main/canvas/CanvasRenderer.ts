@@ -14,19 +14,15 @@
 
 import type {Mutable} from "@swim/util";
 import type {Transform} from "@swim/math";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {CanvasContext} from "./CanvasContext";
 
 export class CanvasRenderer extends PaintingRenderer {
-  constructor(context: CanvasContext, transform: Transform, pixelRatio: number,
-              theme: ThemeMatrix | null, mood: MoodVector | null) {
+  constructor(context: CanvasContext, transform: Transform, pixelRatio: number) {
     super();
     this.context = context;
     this.transform = transform;
     this.pixelRatio = pixelRatio;
-    this.theme = theme;
-    this.mood = mood;
   }
 
   override readonly context: CanvasContext;
@@ -38,8 +34,4 @@ export class CanvasRenderer extends PaintingRenderer {
   }
 
   override readonly pixelRatio: number;
-
-  override readonly theme: ThemeMatrix | null;
-
-  override readonly mood: MoodVector | null;
 }

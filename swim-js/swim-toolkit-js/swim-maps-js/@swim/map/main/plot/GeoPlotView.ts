@@ -19,7 +19,15 @@ import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
-import {GraphicsView, StrokeViewInit, StrokeView, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {
+  GraphicsView,
+  StrokeViewInit,
+  StrokeView,
+  PaintingContext,
+  PaintingRenderer,
+  CanvasContext,
+  CanvasRenderer,
+} from "@swim/graphics";
 import type {GeoViewInit} from "../geo/GeoView";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
@@ -253,8 +261,8 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
-      if (this.gradientStops !== 0) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+      if (this.gradientStops !== 0 && renderer instanceof CanvasRenderer) {
         this.renderPlotGradient(renderer.context, this.viewFrame);
       } else {
         this.renderPlotStroke(renderer.context, this.viewFrame);
@@ -262,7 +270,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     }
   }
 
-  protected renderPlotStroke(context: CanvasContext, frame: R2Box): void {
+  protected renderPlotStroke(context: PaintingContext, frame: R2Box): void {
     const stroke = this.stroke.value;
     if (stroke !== null) {
       const children = this.children;

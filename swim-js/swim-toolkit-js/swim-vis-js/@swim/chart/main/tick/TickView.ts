@@ -21,7 +21,8 @@ import {
   GraphicsViewInit,
   GraphicsView,
   LayerView,
-  CanvasContext,
+  PaintingContext,
+  PaintingRenderer,
   CanvasRenderer,
   AnyTextRunView,
   TextRunView,
@@ -238,7 +239,7 @@ export abstract class TickView<D = unknown> extends LayerView {
 
   protected override onRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderTick(renderer.context, this.viewFrame);
     }
   }
@@ -256,7 +257,7 @@ export abstract class TickView<D = unknown> extends LayerView {
 
   protected abstract layoutLabel(labelView: GraphicsView): void;
 
-  protected abstract renderTick(context: CanvasContext, frame: R2Box): void;
+  protected abstract renderTick(context: PaintingContext, frame: R2Box): void;
 
   override init(init: TickViewInit<D>): void {
     super.init(init);

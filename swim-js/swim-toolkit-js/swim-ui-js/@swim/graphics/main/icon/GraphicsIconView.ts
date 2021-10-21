@@ -22,6 +22,7 @@ import {ViewContextType, View} from "@swim/view";
 import type {Graphics} from "../graphics/Graphics";
 import type {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 import {LayerView} from "../layer/LayerView";
+import {PaintingRenderer} from "../painting/PaintingRenderer";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import {Icon} from "./Icon";
 import {FilledIcon} from "./FilledIcon";
@@ -77,12 +78,12 @@ export class GraphicsIconView extends LayerView implements IconView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderIcon(renderer, this.viewBounds);
     }
   }
 
-  protected renderIcon(renderer: CanvasRenderer, frame: R2Box): void {
+  protected renderIcon(renderer: PaintingRenderer, frame: R2Box): void {
     const graphics = this.graphics.value;
     if (graphics !== null) {
       const context = renderer.context;

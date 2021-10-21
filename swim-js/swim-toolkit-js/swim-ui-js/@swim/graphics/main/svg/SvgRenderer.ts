@@ -13,16 +13,13 @@
 // limitations under the License.
 
 import {Transform} from "@swim/math";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {SvgContext} from "./SvgContext";
 
 export class SvgRenderer extends PaintingRenderer {
-  constructor(context: SvgContext, theme: ThemeMatrix | null, mood: MoodVector | null) {
+  constructor(context: SvgContext) {
     super();
     this.context = context;
-    this.theme = theme;
-    this.mood = mood;
   }
 
   override readonly context: SvgContext;
@@ -34,8 +31,4 @@ export class SvgRenderer extends PaintingRenderer {
   override get pixelRatio(): number {
     return 1;
   }
-
-  override readonly theme: ThemeMatrix | null;
-
-  override readonly mood: MoodVector | null;
 }

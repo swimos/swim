@@ -19,6 +19,8 @@ import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
 import type {GraphicsView} from "../graphics/GraphicsView";
 import {LayerView} from "../layer/LayerView";
+import type {PaintingContext} from "../painting/PaintingContext";
+import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import type {FillViewInit, FillView} from "./FillView";
@@ -94,12 +96,12 @@ export class RectView extends LayerView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderRect(renderer.context, this.viewFrame);
     }
   }
 
-  protected renderRect(context: CanvasContext, frame: R2Box): void {
+  protected renderRect(context: PaintingContext, frame: R2Box): void {
     const x = this.x.getValue().pxValue(frame.width);
     const y = this.y.getValue().pxValue(frame.height);
     const width = this.width.getValue().pxValue(frame.width);

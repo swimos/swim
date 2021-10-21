@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Arrays, ObserverType} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, Provider} from "@swim/fastener";
 import {R2Box, Transform} from "@swim/math";
 import {
   ViewContextType,
@@ -37,6 +37,7 @@ import {
   ViewTouchEvent,
 } from "@swim/view";
 import {AnyNodeView, NodeView, HtmlViewInit, HtmlViewTagMap, HtmlView} from "@swim/dom";
+import {SpriteService} from "../sprite/SpriteService";
 import type {AnyGraphicsRenderer, GraphicsRendererType, GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 import {GraphicsView} from "../graphics/GraphicsView";
@@ -816,6 +817,13 @@ export class CanvasView extends HtmlView {
     }
   }
 
+  @Provider({
+    type: SpriteService,
+    observes: false,
+    service: SpriteService.global(),
+  })
+  readonly spriteProvider!: Provider<this, SpriteService>;
+
   get pixelRatio(): number {
     return window.devicePixelRatio || 1;
   }
@@ -835,8 +843,8 @@ export class CanvasView extends HtmlView {
       const context = this.node.getContext("2d");
       if (context !== null) {
         const pixelRatio = this.pixelRatio;
-        return new CanvasRenderer(context, Transform.affine(pixelRatio, 0, 0, pixelRatio, 0, 0),
-                                  pixelRatio, this.theme.state, this.mood.state);
+        const transform = Transform.affine(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        return new CanvasRenderer(context, transform, pixelRatio);
       } else {
         throw new Error("Failed to create canvas rendering context");
       }

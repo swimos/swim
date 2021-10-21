@@ -20,6 +20,8 @@ import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
 import type {GraphicsView} from "../graphics/GraphicsView";
 import {LayerView} from "../layer/LayerView";
+import type {PaintingContext} from "../painting/PaintingContext";
+import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import type {FillViewInit, FillView} from "./FillView";
@@ -134,13 +136,13 @@ export class ArcView extends LayerView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.layoutArc();
       this.renderArc(renderer.context, this.viewFrame);
     }
   }
 
-  protected renderArc(context: CanvasContext, frame: R2Box): void {
+  protected renderArc(context: PaintingContext, frame: R2Box): void {
     // save
     const contextFillStyle = context.fillStyle;
     const contextLineWidth = context.lineWidth;

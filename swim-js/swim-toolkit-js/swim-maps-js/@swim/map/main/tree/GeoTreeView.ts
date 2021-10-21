@@ -17,7 +17,7 @@ import type {GeoPoint, GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, AnyView, View} from "@swim/view";
-import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoTree} from "./GeoTree";
 
@@ -373,13 +373,13 @@ export class GeoTreeView extends GeoView {
 
   protected renderGeoTree(viewContext: ViewContextType<this>, outlineColor: Color): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderGeoTreeOutline(this.root, viewContext.geoViewport, renderer.context, outlineColor);
     }
   }
 
   protected renderGeoTreeOutline(tree: GeoTree, geoProjection: GeoProjection,
-                                 context: CanvasContext, outlineColor: Color): void {
+                                 context: PaintingContext, outlineColor: Color): void {
     if (tree.southWest !== null) {
       this.renderGeoTreeOutline(tree.southWest, geoProjection, context, outlineColor);
     }

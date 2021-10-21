@@ -156,8 +156,7 @@ export class GeoRasterView extends GeoLayerView {
     if (rendererType === "canvas") {
       const context = this.canvas.getContext("2d");
       if (context !== null) {
-        return new CanvasRenderer(context, Transform.identity(), this.pixelRatio,
-                                  this.theme.state, this.mood.state);
+        return new CanvasRenderer(context, Transform.identity(), this.pixelRatio);
       } else {
         throw new Error("Failed to create canvas rendering context");
       }

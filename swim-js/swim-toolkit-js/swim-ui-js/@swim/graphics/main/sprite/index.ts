@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DrawingRenderer} from "../drawing/DrawingRenderer";
-import type {PaintingContext} from "./PaintingContext";
+export {Sprite} from "./Sprite";
 
-export abstract class PaintingRenderer extends DrawingRenderer {
-  abstract override readonly context: PaintingContext;
-}
+export {SpriteSheet} from "./SpriteSheet";
+
+export {SpriteService} from "./SpriteService";

@@ -23,6 +23,8 @@ import {
   GraphicsView,
   StrokeViewInit,
   StrokeView,
+  PaintingContext,
+  PaintingRenderer,
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
@@ -127,12 +129,12 @@ export class GeoLineView extends GeoPathView implements StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderLine(renderer.context, this.viewFrame);
     }
   }
 
-  protected renderLine(context: CanvasContext, frame: R2Box): void {
+  protected renderLine(context: PaintingContext, frame: R2Box): void {
     const viewPath = this.viewPath.value;
     if (viewPath !== null && viewPath.isDefined()) {
       const stroke = this.stroke.value;

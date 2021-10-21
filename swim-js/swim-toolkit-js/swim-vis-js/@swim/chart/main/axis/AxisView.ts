@@ -19,7 +19,7 @@ import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, AnyView, View} from "@swim/view";
-import {GraphicsViewInit, GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {GraphicsViewInit, GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import type {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import {AnyTickView, TickView} from "../tick/TickView";
 import {TickGenerator} from "../tick/TickGenerator";
@@ -407,13 +407,13 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
 
   protected override didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer) {
+    if (renderer instanceof PaintingRenderer) {
       this.renderDomain(renderer.context, this.origin.getValue(), this.viewFrame);
     }
     super.didRender(viewContext);
   }
 
-  protected abstract renderDomain(context: CanvasContext, origin: R2Point, frame: R2Box): void;
+  protected abstract renderDomain(context: PaintingContext, origin: R2Point, frame: R2Box): void;
 
   override init(init: AxisViewInit<D>): void {
     super.init(init);

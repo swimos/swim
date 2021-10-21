@@ -260,9 +260,9 @@ export class IconButton extends ButtonMembrane implements IconView {
       let viewHeight: Length | number | null = this.height.value;
       viewHeight = viewHeight instanceof Length ? viewHeight.pxValue() : this.node.offsetHeight;
       for (const fastenerName in fasteners) {
-        const viewFastener = fasteners[fastenerName];
-        if (viewFastener instanceof IconButton.IconFastener) {
-          const iconView = viewFastener.view;
+        const fastener = fasteners[fastenerName];
+        if (fastener instanceof IconButton.IconFastener) {
+          const iconView = fastener.view;
           if (iconView !== null) {
             iconView.width.setState(viewWidth, Affinity.Intrinsic);
             iconView.height.setState(viewHeight, Affinity.Intrinsic);

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Arrays, ObserverType} from "@swim/util";
+import {Provider} from "@swim/fastener";
 import {R2Box, Transform} from "@swim/math";
 import type {Color} from "@swim/style";
 import {
@@ -32,6 +33,7 @@ import {
   ViewPointerEvent,
   ViewEventHandler,
 } from "@swim/view";
+import {SpriteService} from "../sprite/SpriteService";
 import type {GraphicsRenderer} from "./GraphicsRenderer";
 import type {GraphicsViewContext} from "./GraphicsViewContext";
 import type {GraphicsViewObserver} from "./GraphicsViewObserver";
@@ -468,6 +470,13 @@ export abstract class GraphicsView extends View {
       }
     }
   }
+
+  @Provider({
+    type: SpriteService,
+    observes: false,
+    service: SpriteService.global(),
+  })
+  readonly spriteProvider!: Provider<this, SpriteService>;
 
   /** @internal */
   readonly ownViewFrame: R2Box | null;

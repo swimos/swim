@@ -25,6 +25,8 @@ import {
   FillView,
   StrokeViewInit,
   StrokeView,
+  PaintingContext,
+  PaintingRenderer,
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
@@ -186,12 +188,12 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderArea(renderer.context, this.viewFrame);
     }
   }
 
-  protected renderArea(context: CanvasContext, frame: R2Box): void {
+  protected renderArea(context: PaintingContext, frame: R2Box): void {
     const viewPath = this.viewPath.value;
     if (viewPath !== null && viewPath.isDefined()) {
       // save

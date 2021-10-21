@@ -27,6 +27,12 @@ export class SvgContext implements PaintingContext {
     this.pathFlags = 0;
     this.fillStyle = "";
     this.strokeStyle = "";
+    this.lineWidth = 1;
+    this.lineCap = "butt";
+    this.lineJoin = "miter";
+    this.miterLimit = 10;
+    this.lineDashOffset = 0;
+    this.lineDash = [];
   }
 
   readonly view: SvgView;
@@ -138,6 +144,27 @@ export class SvgContext implements PaintingContext {
 
   strokeStyle: string | CanvasGradient | CanvasPattern;
 
+  lineWidth: number;
+
+  lineCap: CanvasLineCap;
+
+  lineJoin: CanvasLineJoin;
+
+  miterLimit: number;
+
+  lineDashOffset: number;
+
+  /** @internal */
+  lineDash: number[];
+
+  getLineDash(): number[] {
+    return this.lineDash;
+  }
+
+  setLineDash(segments: number[]): void {
+    this.lineDash = segments;
+  }
+
   beginPath(): void {
     (this as Mutable<this>).pathContext = null;
   }
@@ -217,7 +244,8 @@ export class SvgContext implements PaintingContext {
 
   stroke(): void {
     const strokeStyle = this.strokeStyle;
-    if (typeof strokeStyle === "string") {
+    const lineWidth = this.lineWidth;
+    if (typeof strokeStyle === "string" && lineWidth !== 0 && isFinite(lineWidth)) {
       let pathView = this.pathView;
       if (pathView !== null && (this.pathFlags & SvgContext.StrokeFlag) !== 0) {
         this.finalizePath();
@@ -231,6 +259,32 @@ export class SvgContext implements PaintingContext {
         created = true;
       }
       pathView.stroke.setState(strokeStyle, Affinity.Intrinsic);
+      pathView.strokeWidth.setState(lineWidth, Affinity.Intrinsic);
+      pathView.strokeLinecap.setState(this.lineCap, Affinity.Intrinsic);
+      pathView.strokeLinejoin.setState(this.lineJoin, Affinity.Intrinsic);
+      if (this.lineJoin === "miter") {
+        pathView.strokeMiterlimit.setState(this.miterLimit, Affinity.Intrinsic);
+      } else {
+        pathView.strokeMiterlimit.setState(void 0, Affinity.Intrinsic);
+      }
+      if (this.lineDash.length !== 0) {
+        let dash = "";
+        for (let i = 0; i < this.lineDash.length; i += 1) {
+          if (i !== 0) {
+            dash += " ";
+          }
+          dash += this.lineDash[i];
+        }
+        pathView.strokeDasharray.setState(dash, Affinity.Intrinsic);
+        if (this.lineDashOffset !== 0) {
+          pathView.strokeDashoffset.setState(this.lineDashOffset, Affinity.Intrinsic);
+        } else {
+          pathView.strokeDashoffset.setState(void 0, Affinity.Intrinsic);
+        }
+      } else {
+        pathView.strokeDasharray.setState(void 0, Affinity.Intrinsic);
+        pathView.strokeDashoffset.setState(void 0, Affinity.Intrinsic);
+      }
       this.setPathFlags(this.pathFlags | SvgContext.StrokeFlag);
       if ((this.pathFlags & SvgContext.PathFlag) === 0) {
         const pathString = this.getPathContext().toString();

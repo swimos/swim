@@ -19,7 +19,7 @@ import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {Look, Mood, ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View, ViewFastener} from "@swim/view";
-import {StrokeView, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {StrokeView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import {GeoView} from "../geo/GeoView";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import type {GeoRippleViewObserver} from "./GeoRippleViewObserver";
@@ -164,12 +164,12 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderRipple(renderer.context, this.viewFrame);
     }
   }
 
-  protected renderRipple(context: CanvasContext, frame: R2Box): void {
+  protected renderRipple(context: PaintingContext, frame: R2Box): void {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
       const size = Math.min(frame.width, frame.height);

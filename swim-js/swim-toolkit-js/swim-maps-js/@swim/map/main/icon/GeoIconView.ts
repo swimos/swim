@@ -14,12 +14,13 @@
 
 import type {Mutable, Class, Timing} from "@swim/util";
 import {Affinity} from "@swim/fastener";
-import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, Transform} from "@swim/math";
+import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {
+  Sprite,
   Graphics,
   GraphicsView,
   Icon,
@@ -44,7 +45,7 @@ export interface GeoIconViewInit extends GeoViewInit, IconViewInit {
 export class GeoIconView extends GeoLayerView implements IconView {
   constructor() {
     super();
-    this.canvas = null;
+    this.sprite = null;
     Object.defineProperty(this, "viewBounds", {
       value: R2Box.undefined(),
       writable: true,
@@ -56,7 +57,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   override readonly observerType?: Class<GeoIconViewObserver>;
 
   /** @internal */
-  readonly canvas: HTMLCanvasElement | null;
+  sprite: Sprite | null;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     const observers = this.observers;
@@ -105,9 +106,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
     type: R2Point,
     state: R2Point.undefined(),
     updateFlags: View.NeedsComposite,
-    didSetValue(newViewCenter: R2Point | null, oldViewCenter: R2Point | null): void {
-      this.owner.updateViewBounds();
-    },
   })
   readonly viewCenter!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
@@ -115,9 +113,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
     type: Number,
     state: 0.5,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
-    didSetValue(newXAlign: number, oldXAlign: number): void {
-      this.owner.updateViewBounds();
-    },
   })
   readonly xAlign!: ThemeAnimator<this, number>;
 
@@ -125,9 +120,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
     type: Number,
     state: 0.5,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
-    didSetValue(newYAlign: number, oldYAlign: number): void {
-      this.owner.updateViewBounds();
-    },
   })
   readonly yAlign!: ThemeAnimator<this, number>;
 
@@ -135,9 +127,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
     type: Length,
     state: null,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
-    didSetValue(newIconWidth: Length | null, oldIconWidth: Length | null): void {
-      this.owner.updateViewBounds();
-    },
   })
   readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
@@ -145,9 +134,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
     type: Length,
     state: null,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
-    didSetValue(newIconHeight: Length | null, oldIconHeight: Length | null): void {
-      this.owner.updateViewBounds();
-    },
   })
   readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
@@ -237,8 +223,10 @@ export class GeoIconView extends GeoLayerView implements IconView {
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
                        : null;
-      this.viewCenter.setValue(viewCenter);
+      //this.viewCenter.setValue(viewCenter);
+      (this.viewCenter as Mutable<typeof this.viewCenter>).value = viewCenter;
     }
+    (this as Mutable<GeoIconView>).viewBounds = this.deriveViewBounds();
     const viewFrame = this.viewFrame;
     const p0 = this.viewCenter.value;
     const p1 = this.viewCenter.state;
@@ -253,40 +241,36 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   protected override onRasterize(viewContext: ViewContextType<this>): void {
     super.onRasterize(viewContext);
-    const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
-      this.rasterizeIcon(renderer, this.viewBounds);
+    if (!this.isHidden() && !this.culled) {
+      this.rasterizeIcon(this.viewBounds);
     }
   }
 
-  protected rasterizeIcon(renderer: CanvasRenderer, frame: R2Box): void {
+  protected rasterizeIcon(frame: R2Box): void {
+    let sprite = this.sprite;
     const graphics = this.graphics.value;
     if (graphics !== null && frame.isDefined()) {
-      let canvas = this.canvas;
-      if (canvas === null) {
-        canvas = document.createElement("canvas");
-        (this as Mutable<this>).canvas = canvas;
-      }
-      const pixelRatio = renderer.pixelRatio;
       const width = frame.width;
       const height = frame.height;
-
-      const iconContext = canvas.getContext("2d")!;
-      if (canvas.width !== pixelRatio * width || canvas.height !== pixelRatio * height) {
-        canvas.width = pixelRatio * width;
-        canvas.height = pixelRatio * height;
-        iconContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      if (sprite !== null && (width < sprite.width || height < sprite.height)) {
+        this.sprite = null;
+        sprite.release();
+        sprite = null;
       }
-      iconContext.clearRect(0, 0, width, height);
+      if (sprite === null) {
+        sprite = this.spriteProvider.service!.acquireSprite(width, height);
+        this.sprite = sprite;
+      }
 
-      iconContext.beginPath();
-      const transform = Transform.affine(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      const iconRenderer = new CanvasRenderer(iconContext, transform, pixelRatio,
-                                              this.theme.state, this.mood.state);
-      const iconFrame = new R2Box(0, 0, width, height);
-      graphics.render(iconRenderer, iconFrame);
-    } else {
-      (this as Mutable<this>).canvas = null;
+      const renderer = sprite.getRenderer();
+      const context = renderer.context;
+      context.clearRect(0, 0, sprite.width, sprite.height);
+
+      context.beginPath();
+      graphics.render(renderer, new R2Box(0, 0, width, height));
+    } else if (sprite !== null) {
+      this.sprite = null;
+      sprite.release();
     }
   }
 
@@ -299,9 +283,9 @@ export class GeoIconView extends GeoLayerView implements IconView {
   }
 
   protected compositeIcon(renderer: CanvasRenderer, frame: R2Box): void {
-    const canvas = this.canvas;
-    if (canvas !== null) {
-      renderer.context.drawImage(canvas, frame.x, frame.y, frame.width, frame.height);
+    const sprite = this.sprite;
+    if (sprite !== null) {
+      sprite.draw(renderer.context, frame);
     }
   }
 
@@ -315,27 +299,17 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   override readonly viewBounds!: R2Box;
 
-  protected updateViewBounds(): void {
-    (this as Mutable<GeoIconView>).viewBounds = this.deriveViewBounds();
-  }
-
   override deriveViewBounds(): R2Box {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
       const viewFrame = this.viewFrame;
       const viewSize = Math.min(viewFrame.width, viewFrame.height);
-      let iconWidthValue: Length | number | null = this.iconWidth.value;
-      iconWidthValue = iconWidthValue instanceof Length ? iconWidthValue.pxValue(viewSize) : viewSize;
-      let iconWidthState: Length | number | null = this.iconWidth.state;
-      iconWidthState = iconWidthState instanceof Length ? iconWidthState.pxValue(viewSize) : viewSize;
-      const iconWidth = Math.max(iconWidthValue, iconWidthState);
-      let iconHeightValue: Length | number | null = this.iconHeight.value;
-      iconHeightValue = iconHeightValue instanceof Length ? iconHeightValue.pxValue(viewSize) : viewSize;
-      let iconHeightState: Length | number | null = this.iconHeight.state;
-      iconHeightState = iconHeightState instanceof Length ? iconHeightState.pxValue(viewSize) : viewSize;
-      const iconHeight = Math.max(iconHeightValue, iconHeightState);
-      const x = viewCenter.x - iconWidth * this.xAlign.getValue();
-      const y = viewCenter.y - iconHeight * this.yAlign.getValue();
+      let iconWidth: Length | number | null = this.iconWidth.value;
+      iconWidth = iconWidth instanceof Length ? iconWidth.pxValue(viewSize) : viewSize;
+      let iconHeight: Length | number | null = this.iconHeight.value;
+      iconHeight = iconHeight instanceof Length ? iconHeight.pxValue(viewSize) : viewSize;
+      const x = viewCenter.x - iconWidth * this.xAlign.value;
+      const y = viewCenter.y - iconHeight * this.yAlign.value;
       return new R2Box(x, y, x + iconWidth, y + iconHeight);
     } else {
       return R2Box.undefined();
@@ -389,6 +363,15 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   ripple(options?: GeoRippleOptions): GeoRippleView | null {
     return GeoRippleView.ripple(this, options);
+  }
+
+  protected override onUnmount(): void {
+    super.onUnmount();
+    const sprite = this.sprite;
+    if (sprite !== null) {
+      this.sprite = null;
+      sprite.release();
+    }
   }
 
   override init(init: GeoIconViewInit): void {

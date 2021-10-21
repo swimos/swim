@@ -104,7 +104,7 @@ export class SvgIconView extends SvgView implements IconView {
       const frame = this.iconBounds;
       if (frame.isDefined() && frame.width > 0 && frame.height > 0) {
         context.beginPath();
-        const renderer = new SvgRenderer(context, this.theme.state, this.mood.state);
+        const renderer = new SvgRenderer(context);
         graphics.render(renderer, frame);
       }
     }

@@ -20,6 +20,15 @@ export interface PaintingContext extends DrawingContext {
   fillStyle: string | CanvasGradient | CanvasPattern;
   strokeStyle: string | CanvasGradient | CanvasPattern;
 
+  lineWidth: number;
+  lineCap: CanvasLineCap;
+  lineJoin: CanvasLineJoin;
+  miterLimit: number;
+
+  lineDashOffset: number;
+  getLineDash(): number[];
+  setLineDash(segments: number[]): void;
+
   beginPath(): void;
   fill(fillRule?: PaintingFillRule): void;
   stroke(): void;

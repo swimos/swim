@@ -12,9 +12,6 @@
     <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
     <script>
 
-const VEHICLE_COLOR = swim.Color.parse("#00a6ed");
-const RIPPLE_COLOR = swim.Color.parse("#989898");
-
 const bodyView = swim.HtmlView.fromNode(document.body);
 
 const containerView = bodyView.appendChild("div").width("100%").height("100%");
@@ -25,13 +22,14 @@ const map = new google.maps.Map(containerView.node, {
 });
 
 const mapView = new swim.GoogleMapView(map);
+mapView.modifyTheme(swim.Feel.default, [[swim.Feel.secondary, 1]]);
 mapView.container.setView(containerView);
 
 const layerView = mapView.appendChild(swim.GeoTreeView);
 //layerView.geoBoundsColor("#008f11");
 //layerView.geoTreeColor("#008f11");
 
-const vehicleIcon = swim.VectorIcon.create(24, 24, "M12.289,0.001C17.561,0.021,21.845,0.641,21.996,4.771L22,5L22,17.655C22,18.697,21.542,19.629,20.862,20.312L20.713,20.455L20.713,22.7C20.713,23.35,20.22,23.924,19.593,23.993L19.466,24L18.218,24C17.569,24,17.066,23.467,17.006,22.828L17,22.7L17,21.438L7,21.438L7,22.7C7,23.35,6.503,23.924,5.871,23.993L5.743,24L4.495,24C3.852,24,3.318,23.467,3.254,22.828L3.248,22.7L3.248,20.455C2.537,19.807,2.066,18.902,2.006,17.877L2,17.655L2,5C2,0.664,6.343,0.022,11.711,0.001L12.289,0.001ZM6.5,15C5.395,15,4.5,15.895,4.5,17C4.5,18.105,5.395,19,6.5,19C7.605,19,8.5,18.105,8.5,17C8.5,15.895,7.605,15,6.5,15ZM17.5,15C16.395,15,15.5,15.895,15.5,17C15.5,18.105,16.395,19,17.5,19C18.605,19,19.5,18.105,19.5,17C19.5,15.895,18.605,15,17.5,15ZM19.5,5L4.5,5L4.5,11L19.5,11L19.5,5Z");
+const vehicleIcon = swim.VectorIcon.create(24, 24, "M20,6L20,17C20,17.87,19.57,18.46,19,19L19,21C19,21.56,18.56,22,18,22L17,22C16.44,22,16,21.56,16,21.02L16,20L8,20L8,21C8,21.56,7.56,22,7,22L6,22C5.44,22,5.05,21.56,5,21L5,19C4.43,18.46,4.05,17.87,4,17L4,6C4,3.54,5.89,2.56,8.54,2.2L9,2.14L9,2.14L9.47,2.1L9.47,2.1L9.96,2.06L9.96,2.06L10.45,2.03L10.45,2.03L11.22,2.01L11.22,2.01L12,2L12,2L12.52,2L13.04,2.01L13.04,2.01L13.55,2.02L13.55,2.02L14.04,2.05L14.04,2.05L14.53,2.08C14.61,2.09,14.69,2.1,14.77,2.1L15.24,2.15L15.24,2.15L15.69,2.22C18.22,2.6,20,3.61,20,6ZM7.5,14C6.67,14,6,14.67,6,15.5C6,16.33,6.67,17,7.5,17C8.33,17,9,16.33,9,15.5C9,14.67,8.33,14,7.5,14ZM16.5,14C15.67,14,15,14.67,15,15.5C15,16.33,15.67,17,16.5,17C17.33,17,18,16.33,18,15.5C18,14.67,17.33,14,16.5,14ZM18,6L6,6L6,11L18,11L18,6Z");
 
 const vehiclesLink = swim.downlinkMap()
     .hostUri("warp://transit.swim.services")
@@ -47,19 +45,33 @@ const vehiclesLink = swim.downlinkMap()
       if (vehicleView !== null) {
         vehicleView.geoCenter([lng, lat], timing);
         vehicleView.ripple({
-          color: RIPPLE_COLOR,
+          color: vehicleView.getLook(swim.Look.accentColor),
           opacity: 0.25,
           timing: 2000,
         });
       } else {
-        //vehicleView = new swim.GeoCircleView().geoCenter([lng, lat]).radius(5).fill(VEHICLE_COLOR);
+        //vehicleView = new swim.GeoCircleView().geoCenter([lng, lat]).radius(5);
         vehicleView = new swim.GeoIconView()
             .geoCenter([lng, lat])
-            .iconWidth(10)
-            .iconHeight(10)
-            .iconColor(VEHICLE_COLOR)
+            .iconWidth(14)
+            .iconHeight(14)
             .graphics(vehicleIcon);
+        vehicleView.iconColor.setLook(swim.Look.accentColor);
         layerView.setChild(key, vehicleView);
+      }
+      const warnThreshold = 0.8;
+      const alertThreshold = 0.95;
+      let u = Math.random();
+      if (u < warnThreshold) {
+        vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, void 0]]);
+      } else if (u < alertThreshold) {
+        u = (u - warnThreshold) / (alertThreshold - warnThreshold);
+        u = 0.6 + 0.4 * u;
+        vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, 1], [swim.Feel.alert, void 0]]);
+      } else {
+        u = (u - alertThreshold) / (1 - alertThreshold);
+        u = 0.6 + 0.4 * u;
+        vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, u]]);
       }
     })
     .open();

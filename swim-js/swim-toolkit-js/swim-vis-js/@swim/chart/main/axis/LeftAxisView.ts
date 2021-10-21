@@ -16,7 +16,7 @@ import {ContinuousScale} from "@swim/util";
 import {Affinity, Animator} from "@swim/fastener";
 import {R2Point, R2Box} from "@swim/math";
 import {View} from "@swim/view";
-import type {CanvasContext} from "@swim/graphics";
+import type {PaintingContext} from "@swim/graphics";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import type {TickView} from "../tick/TickView";
 import {AxisOrientation, AxisView} from "./AxisView";
@@ -44,7 +44,7 @@ export class LeftAxisView<Y = unknown> extends AxisView<Y> {
     }
   }
 
-  protected override renderDomain(context: CanvasContext, origin: R2Point, frame: R2Box): void {
+  protected override renderDomain(context: PaintingContext, origin: R2Point, frame: R2Box): void {
     const borderColor = this.borderColor.value;
     const borderWidth = this.borderWidth.getValue();
     if (borderColor !== null && borderWidth !== 0) {

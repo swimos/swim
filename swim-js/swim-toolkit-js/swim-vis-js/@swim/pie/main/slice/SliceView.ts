@@ -22,6 +22,8 @@ import {
   GraphicsViewInit,
   GraphicsView,
   LayerView,
+  PaintingContext,
+  PaintingRenderer,
   CanvasContext,
   CanvasRenderer,
   FillView,
@@ -297,12 +299,12 @@ export class SliceView extends LayerView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderSlice(renderer.context, this.viewFrame);
     }
   }
 
-  protected renderSlice(context: CanvasContext, frame: R2Box): void {
+  protected renderSlice(context: PaintingContext, frame: R2Box): void {
     const width = frame.width;
     const height = frame.height;
     const size = Math.min(width, height);

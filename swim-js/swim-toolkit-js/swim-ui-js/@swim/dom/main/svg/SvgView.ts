@@ -34,6 +34,7 @@ import type {
   CssCursor,
   FillRule,
   StrokeLinecap,
+  StrokeLinejoin,
   SvgPointerEvents,
   TextAnchor,
   TouchAction,
@@ -88,7 +89,10 @@ export interface SvgViewAttributesInit {
   stdDeviation?: AnimatorMemberInit<SvgView, "stdDeviation">;
   stroke?: AnimatorMemberInit<SvgView, "stroke">;
   strokeDasharray?: AnimatorMemberInit<SvgView, "strokeDasharray">;
+  strokeDashoffset?: AnimatorMemberInit<SvgView, "strokeDashoffset">;
   strokeLinecap?: AnimatorMemberInit<SvgView, "strokeLinecap">;
+  strokeLinejoin?: AnimatorMemberInit<SvgView, "strokeLinejoin">;
+  strokeMiterlimit?: AnimatorMemberInit<SvgView, "strokeMiterlimit">;
   strokeWidth?: AnimatorMemberInit<SvgView, "strokeWidth">;
   textAnchor?: AnimatorMemberInit<SvgView, "textAnchor">;
   textLength?: AnimatorMemberInit<SvgView, "textLength">;
@@ -332,8 +336,17 @@ export class SvgView extends ElementView {
   @AttributeAnimator({attributeName: "stroke-dasharray", type: String})
   readonly strokeDasharray!: AttributeAnimator<this, string | undefined>;
 
+  @AttributeAnimator({attributeName: "stroke-dashoffset", type: Number})
+  readonly strokeDashoffset!: AttributeAnimator<this, number | undefined>;
+
   @AttributeAnimator({attributeName: "stroke-linecap", type: String})
   readonly strokeLinecap!: AttributeAnimator<this, StrokeLinecap | undefined>;
+
+  @AttributeAnimator({attributeName: "stroke-linejoin", type: String})
+  readonly strokeLinejoin!: AttributeAnimator<this, StrokeLinejoin | undefined>;
+
+  @AttributeAnimator({attributeName: "stroke-miterlimit", type: Number})
+  readonly strokeMiterlimit!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "stroke-width", type: Number})
   readonly strokeWidth!: AttributeAnimator<this, number | undefined>;
@@ -565,8 +578,17 @@ export class SvgView extends ElementView {
     if (init.strokeDasharray !== void 0) {
       this.strokeDasharray(init.strokeDasharray);
     }
+    if (init.strokeDashoffset !== void 0) {
+      this.strokeDashoffset(init.strokeDashoffset);
+    }
     if (init.strokeLinecap !== void 0) {
       this.strokeLinecap(init.strokeLinecap);
+    }
+    if (init.strokeLinejoin !== void 0) {
+      this.strokeLinejoin(init.strokeLinejoin);
+    }
+    if (init.strokeMiterlimit !== void 0) {
+      this.strokeMiterlimit(init.strokeMiterlimit);
     }
     if (init.strokeWidth !== void 0) {
       this.strokeWidth(init.strokeWidth);

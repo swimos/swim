@@ -295,6 +295,8 @@ export type Position = "absolute"
 
 export type StrokeLinecap = "butt" | "round" | "square";
 
+export type StrokeLinejoin = "arcs" | "bevel" | "miter" | "miter-clip" | "round";
+
 export type TextAlign = "center"
                       | "end"
                       | "justify"

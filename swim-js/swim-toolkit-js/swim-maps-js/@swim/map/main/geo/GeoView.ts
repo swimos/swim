@@ -24,7 +24,7 @@ import {
   ViewWillProject,
   ViewDidProject,
 } from "@swim/view";
-import {GraphicsViewInit, GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {GraphicsViewInit, GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import type {GeoViewport} from "./GeoViewport";
 import type {GeoViewContext} from "./GeoViewContext";
 import type {GeoViewObserver} from "./GeoViewObserver";
@@ -171,12 +171,12 @@ export abstract class GeoView extends GraphicsView {
 
   protected renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled && !this.unbounded) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled && !this.unbounded) {
       this.renderGeoOutline(this.geoBounds, viewContext.geoViewport, renderer.context, outlineColor, outlineWidth);
     }
   }
 
-  protected renderGeoOutline(geoBox: GeoBox, geoProjection: GeoProjection, context: CanvasContext,
+  protected renderGeoOutline(geoBox: GeoBox, geoProjection: GeoProjection, context: PaintingContext,
                              outlineColor: Color, outlineWidth: number): void {
     if (geoBox.isDefined()) {
       // save

@@ -35,6 +35,8 @@ import {
   FillView,
   StrokeViewInit,
   StrokeView,
+  PaintingContext,
+  PaintingRenderer,
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
@@ -217,12 +219,12 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       this.renderArc(renderer.context, this.viewFrame);
     }
   }
 
-  protected renderArc(context: CanvasContext, frame: R2Box): void {
+  protected renderArc(context: PaintingContext, frame: R2Box): void {
     const arc = this.value;
     if (arc !== null && frame.isDefined()) {
       // save
