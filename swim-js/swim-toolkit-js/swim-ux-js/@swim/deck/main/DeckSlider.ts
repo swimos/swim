@@ -311,7 +311,7 @@ export const DeckSliderItem = (function (_super: typeof ViewFastener) {
     }
   };
 
-  DeckSliderItem.construct = function <F extends DeckSliderItem<any, any>>(fastenerClass: ViewFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  DeckSliderItem.construct = function <F extends DeckSliderItem<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
     (fastener as Mutable<typeof fastener>).itemIndex = 0;
     (fastener as Mutable<typeof fastener>).itemWidth = null;

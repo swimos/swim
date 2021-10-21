@@ -18,7 +18,7 @@ import {ToStyleString, ToCssValue} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
 import {StyleMapInit, StyleMap} from "./StyleMap";
 import {CssContext} from "./CssContext";
-import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";
+import {CssRuleInit, CssRule} from "./CssRule";
 
 export interface StyleRuleInit extends CssRuleInit {
   style?: StyleMapInit;
@@ -31,18 +31,21 @@ export interface StyleRuleInit extends CssRuleInit {
 
 export type StyleRuleDescriptor<O = unknown, I = {}> = ThisType<StyleRule<O> & I> & StyleRuleInit & Partial<I>;
 
-export interface StyleRuleClass<F extends StyleRule<any> = StyleRule<any>> extends CssRuleClass<F> {
-  create(this: StyleRuleClass<F>, owner: FastenerOwner<F>, ruleName: string): F;
+export interface StyleRuleClass<F extends StyleRule<any> = StyleRule<any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(ruleClass: StyleRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
+  create(owner: FastenerOwner<F>, ruleName: string): F;
 
-  extend(this: StyleRuleClass<F>, classMembers?: {} | null): StyleRuleClass<F>;
+  construct(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
 
-  define<O, I = {}>(descriptor: {extends: StyleRuleClass | null} & StyleRuleDescriptor<O, I>): StyleRuleClass<StyleRule<any> & I>;
+  extend<I = {}>(classMembers?: Partial<I> | null): StyleRuleClass<F> & I;
+
   define<O>(descriptor: StyleRuleDescriptor<O>): StyleRuleClass<StyleRule<any>>;
+  define<O, I = {}>(descriptor: StyleRuleDescriptor<O, I>): StyleRuleClass<StyleRule<any> & I>;
 
-  <O, I = {}>(descriptor: {extends: StyleRuleClass | null} & StyleRuleDescriptor<O, I>): PropertyDecorator;
   <O>(descriptor: StyleRuleDescriptor<O>): PropertyDecorator;
+  <O, I = {}>(descriptor: StyleRuleDescriptor<O, I>): PropertyDecorator;
 }
 
 export interface StyleRule<O = unknown> extends CssRule<O>, StyleMap {
@@ -85,7 +88,7 @@ export interface StyleRule<O = unknown> extends CssRule<O>, StyleMap {
 }
 
 export const StyleRule = (function (_super: typeof CssRule) {
-  const StyleRule = _super.extend() as StyleRuleClass;
+  const StyleRule: StyleRuleClass = _super.extend();
 
   Object.defineProperty(StyleRule.prototype, "selector", {
     get: function (this: StyleRule): string {
@@ -201,7 +204,7 @@ export const StyleRule = (function (_super: typeof CssRule) {
 
   StyleMap.define(StyleRule.prototype);
 
-  StyleRule.construct = function <F extends StyleRule<any>>(ruleClass: StyleRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
+  StyleRule.construct = function <F extends StyleRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
     if (rule === null) {
       rule = function StyleRule(property: string, value: unknown): unknown | FastenerOwner<F> {
         if (value === void 0) {
@@ -240,7 +243,7 @@ export const StyleRule = (function (_super: typeof CssRule) {
       css = void 0;
     }
 
-    ruleClass.construct = function (ruleClass: StyleRuleClass, rule: StyleRule<O> | null, owner: O, ruleName: string): StyleRule<O> {
+    ruleClass.construct = function (ruleClass: {prototype: StyleRule<any>}, rule: StyleRule<O> | null, owner: O, ruleName: string): StyleRule<O> {
       rule = superClass!.construct(ruleClass, rule, owner, ruleName);
 
       if (affinity !== void 0) {

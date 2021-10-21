@@ -16,7 +16,7 @@ import {Mutable, AnyTiming, Timing} from "@swim/util";
 import type {FastenerOwner} from "@swim/fastener";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {CssContext} from "./CssContext";
-import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";
+import {CssRuleInit, CssRule} from "./CssRule";
 
 export interface MediaRuleInit extends CssRuleInit {
   initRule?(rule: CSSMediaRule): void;
@@ -24,18 +24,21 @@ export interface MediaRuleInit extends CssRuleInit {
 
 export type MediaRuleDescriptor<O = unknown, I = {}> = ThisType<MediaRule<O> & I> & MediaRuleInit & Partial<I>;
 
-export interface MediaRuleClass<F extends MediaRule<any> = MediaRule<any>> extends CssRuleClass<F> {
-  create(this: MediaRuleClass<F>, owner: FastenerOwner<F>, ruleName: string): F;
+export interface MediaRuleClass<F extends MediaRule<any> = MediaRule<any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(ruleClass: MediaRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
+  create(owner: FastenerOwner<F>, ruleName: string): F;
 
-  extend(this: MediaRuleClass<F>, classMembers?: {} | null): MediaRuleClass<F>;
+  construct(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
 
-  define<O, I = {}>(descriptor: {extends: MediaRuleClass | null} & MediaRuleDescriptor<O, I>): MediaRuleClass<MediaRule<any> & I>;
+  extend<I = {}>(classMembers?: Partial<I> | null): MediaRuleClass<F> & I;
+
   define<O>(descriptor: MediaRuleDescriptor<O>): MediaRuleClass<MediaRule<any>>;
+  define<O, I = {}>(descriptor: MediaRuleDescriptor<O, I>): MediaRuleClass<MediaRule<any> & I>;
 
-  <O, I = {}>(descriptor: {extends: MediaRuleClass | null} & MediaRuleDescriptor<O, I>): PropertyDecorator;
   <O>(descriptor: MediaRuleDescriptor<O>): PropertyDecorator;
+  <O, I = {}>(descriptor: MediaRuleDescriptor<O, I>): PropertyDecorator;
 }
 
 export interface MediaRule<O = unknown> extends CssRule<O>, CssContext {
@@ -65,7 +68,7 @@ export interface MediaRule<O = unknown> extends CssRule<O>, CssContext {
 }
 
 export const MediaRule = (function (_super: typeof CssRule) {
-  const MediaRule = _super.extend() as MediaRuleClass;
+  const MediaRule: MediaRuleClass = _super.extend();
 
   MediaRule.prototype.getRule = function (this: MediaRule, index: number): CSSRule | null {
     return this.rule.cssRules.item(index);
@@ -109,7 +112,7 @@ export const MediaRule = (function (_super: typeof CssRule) {
     }
   };
 
-  MediaRule.construct = function <F extends MediaRule<any>>(ruleClass: MediaRuleClass, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
+  MediaRule.construct = function <F extends MediaRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
     rule = _super.construct(ruleClass, rule, owner, ruleName) as F;
     return rule;
   };
@@ -135,7 +138,7 @@ export const MediaRule = (function (_super: typeof CssRule) {
       css = void 0;
     }
 
-    ruleClass.construct = function (ruleClass: MediaRuleClass, rule: MediaRule<O> | null, owner: O, ruleName: string): MediaRule<O> {
+    ruleClass.construct = function (ruleClass: {prototype: MediaRule<any>}, rule: MediaRule<O> | null, owner: O, ruleName: string): MediaRule<O> {
       rule = superClass!.construct(ruleClass, rule, owner, ruleName);
 
       if (affinity !== void 0) {

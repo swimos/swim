@@ -18,7 +18,7 @@ import {AnyValue, Value, Form} from "@swim/structure";
 import {Uri} from "@swim/uri";
 import type {ValueDownlinkObserver, ValueDownlink} from "../downlink/ValueDownlink";
 import type {WarpRef} from "../ref/WarpRef";
-import {DownlinkFastenerInit, DownlinkFastenerClass, DownlinkFastener} from "./DownlinkFastener";
+import {DownlinkFastenerInit, DownlinkFastener} from "./DownlinkFastener";
 
 export type ValueDownlinkFastenerType<F extends ValueDownlinkFastener<any, any>> =
   F extends ValueDownlinkFastener<any, infer V, any> ? V : never;
@@ -34,22 +34,25 @@ export interface ValueDownlinkFastenerInit<V = unknown, VU = never> extends Down
 
 export type ValueDownlinkFastenerDescriptor<O = unknown, V = unknown, VU = never, I = {}> = ThisType<ValueDownlinkFastener<O, V, VU> & I> & ValueDownlinkFastenerInit<V, VU> & Partial<I>;
 
-export interface ValueDownlinkFastenerClass<F extends ValueDownlinkFastener<any, any> = ValueDownlinkFastener<any, any, any>> extends DownlinkFastenerClass<F> {
-  create(this: ValueDownlinkFastenerClass<F>, owner: FastenerOwner<F>, fastenerName: string): F;
+export interface ValueDownlinkFastenerClass<F extends ValueDownlinkFastener<any, any> = ValueDownlinkFastener<any, any, any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(fastenerClass: ValueDownlinkFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
+  create(owner: FastenerOwner<F>, fastenerName: string): F;
 
-  extend(this: ValueDownlinkFastenerClass<F>, classMembers?: {} | null): ValueDownlinkFastenerClass<F>;
+  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
 
-  define<O, V, VU = never, I = {}>(descriptor: {extends: ValueDownlinkFastenerClass | null, valueForm: Form<V, VU>} & ValueDownlinkFastenerDescriptor<O, V, VU, I>): ValueDownlinkFastenerClass<ValueDownlinkFastener<any, V, VU> & I>;
-  define<O, V, VU = never, I = {}>(descriptor: {extends: ValueDownlinkFastenerClass | null} & ValueDownlinkFastenerDescriptor<O, V, VU, I>): ValueDownlinkFastenerClass<ValueDownlinkFastener<any, V, VU> & I>;
-  define<O, V, VU = never>(descriptor: {valueForm: Form<V, VU>} & ValueDownlinkFastenerDescriptor<O, V, VU>): ValueDownlinkFastenerClass<ValueDownlinkFastener<any, V, VU>>;
+  extend<I = {}>(classMembers?: Partial<I> | null): ValueDownlinkFastenerClass<F> & I;
+
   define<O, V extends Value = Value, VU extends AnyValue = AnyValue>(descriptor: ValueDownlinkFastenerDescriptor<O, V, VU>): ValueDownlinkFastenerClass<ValueDownlinkFastener<any, V, VU>>;
+  define<O, V, VU = never>(descriptor: {valueForm: Form<V, VU>} & ValueDownlinkFastenerDescriptor<O, V, VU>): ValueDownlinkFastenerClass<ValueDownlinkFastener<any, V, VU>>;
+  define<O, V extends Value = Value, VU extends AnyValue = AnyValue, I = {}>(descriptor: ValueDownlinkFastenerDescriptor<O, V, VU, I>): ValueDownlinkFastenerClass<ValueDownlinkFastener<any, V, VU> & I>;
+  define<O, V, VU = never, I = {}>(descriptor: {valueForm: Form<V, VU>} & ValueDownlinkFastenerDescriptor<O, V, VU, I>): ValueDownlinkFastenerClass<ValueDownlinkFastener<any, V, VU> & I>;
 
-  <O, V, VU = never, I = {}>(descriptor: {extends: ValueDownlinkFastenerClass | null, valueForm: Form<V, VU>} & ValueDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
-  <O, V, VU = never, I = {}>(descriptor: {extends: ValueDownlinkFastenerClass | null} & ValueDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
-  <O, V, VU = never>(descriptor: {valueForm: Form<V, VU>} & ValueDownlinkFastenerDescriptor<O, V, VU>): PropertyDecorator;
   <O, V extends Value = Value, VU extends AnyValue = AnyValue>(descriptor: ValueDownlinkFastenerDescriptor<O, V, VU>): PropertyDecorator;
+  <O, V, VU = never>(descriptor: {valueForm: Form<V, VU>} & ValueDownlinkFastenerDescriptor<O, V, VU>): PropertyDecorator;
+  <O, V extends Value = Value, VU extends AnyValue = AnyValue, I = {}>(descriptor: ValueDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
+  <O, V, VU = never, I = {}>(descriptor: {valueForm: Form<V, VU>} & ValueDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
 }
 
 export interface ValueDownlinkFastener<O = unknown, V = unknown, VU = never> extends DownlinkFastener<O> {
@@ -80,7 +83,7 @@ export interface ValueDownlinkFastener<O = unknown, V = unknown, VU = never> ext
 }
 
 export const ValueDownlinkFastener = (function (_super: typeof DownlinkFastener) {
-  const ValueDownlinkFastener = _super.extend() as ValueDownlinkFastenerClass;
+  const ValueDownlinkFastener: ValueDownlinkFastenerClass = _super.extend();
 
   ValueDownlinkFastener.prototype.valueForm = function <V, VU>(this: ValueDownlinkFastener<unknown, V, VU>, valueForm?: Form<V, VU> | null): Form<V, VU> | null | typeof this {
     if (valueForm === void 0) {
@@ -114,7 +117,7 @@ export const ValueDownlinkFastener = (function (_super: typeof DownlinkFastener)
     return downlink;
   };
 
-  ValueDownlinkFastener.construct = function <F extends ValueDownlinkFastener<any, any>>(fastenerClass: ValueDownlinkFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  ValueDownlinkFastener.construct = function <F extends ValueDownlinkFastener<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     if (fastener === null) {
       fastener = function ValueDownlinkFastener(value?: ValueDownlinkFastenerType<F> | ValueDownlinkFastenerInitType<F>): ValueDownlinkFastenerType<F> | undefined | FastenerOwner<F> {
         if (arguments.length === 0) {
@@ -159,7 +162,7 @@ export const ValueDownlinkFastener = (function (_super: typeof DownlinkFastener)
 
     const fastenerClass = superClass.extend(descriptor);
 
-    fastenerClass.construct = function (fastenerClass: ValueDownlinkFastenerClass, fastener: ValueDownlinkFastener<O, V, VU> | null, owner: O, fastenerName: string): ValueDownlinkFastener<O, V, VU> {
+    fastenerClass.construct = function (fastenerClass: {prototype: ValueDownlinkFastener<any, any, any>}, fastener: ValueDownlinkFastener<O, V, VU> | null, owner: O, fastenerName: string): ValueDownlinkFastener<O, V, VU> {
       fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);

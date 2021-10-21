@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, FromAny, AnyTiming, Timing} from "@swim/util";
-import {Affinity, FastenerOwner, Property, AnimatorInit, AnimatorClass, Animator} from "@swim/fastener";
+import {Affinity, FastenerOwner, FastenerFlags, Property, AnimatorInit, Animator} from "@swim/fastener";
 import {AnyLength, Length, AnyAngle, Angle, AnyTransform, Transform} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color, AnyFocus, Focus, AnyPresence, Presence, AnyExpansion, Expansion} from "@swim/style";
 import {Look} from "../look/Look";
@@ -41,17 +41,20 @@ export interface ThemeAnimatorInit<T = unknown, U = never> extends AnimatorInit<
 
 export type ThemeAnimatorDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<ThemeAnimator<O, T, U> & I> & ThemeAnimatorInit<T, U> & Partial<I>;
 
-export interface ThemeAnimatorClass<F extends ThemeAnimator<any, any> = ThemeAnimator<any, any, any>> extends AnimatorClass<F> {
-  create(this: ThemeAnimatorClass<F>, owner: FastenerOwner<F>, animatorName: string): F;
+export interface ThemeAnimatorClass<A extends ThemeAnimator<any, any> = ThemeAnimator<any, any, any>> {
+  /** @internal */
+  prototype: A;
 
-  construct(animatorClass: ThemeAnimatorClass, animator: F | null, owner: FastenerOwner<F>, animatorName: string): F;
+  create(owner: FastenerOwner<A>, animatorName: string): A;
+
+  construct(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A;
 
   specialize(type: unknown): ThemeAnimatorClass | null;
 
-  extend(this: ThemeAnimatorClass<F>, classMembers?: {} | null): ThemeAnimatorClass<F>;
+  extend<I = {}>(classMembers?: Partial<I> | null): ThemeAnimatorClass<A> & I;
 
-  define<O, T, U = never, I = {}>(descriptor: {extends: ThemeAnimatorClass | null} & ThemeAnimatorDescriptor<O, T, U, I>): ThemeAnimatorClass<ThemeAnimator<any, T, U> & I>;
   define<O, T, U = never>(descriptor: ThemeAnimatorDescriptor<O, T, U>): ThemeAnimatorClass<ThemeAnimator<any, T, U>>;
+  define<O, T, U = never, I = {}>(descriptor: ThemeAnimatorDescriptor<O, T, U, I>): ThemeAnimatorClass<ThemeAnimator<any, T, U> & I>;
 
   <O, T extends Angle | null | undefined = Angle | null | undefined, U extends AnyAngle | null | undefined = AnyAngle | null | undefined>(descriptor: {type: typeof Angle} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends Length | null | undefined = Length | null | undefined, U extends AnyLength | null | undefined = AnyLength | null | undefined>(descriptor: {type: typeof Length} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
@@ -65,8 +68,13 @@ export interface ThemeAnimatorClass<F extends ThemeAnimator<any, any> = ThemeAni
   <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends boolean | undefined = boolean | undefined, U extends boolean | string | undefined = boolean | string | undefined>(descriptor: {type: typeof Boolean} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = never, I = {}>(descriptor: {extends: ThemeAnimatorClass | null} & ThemeAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
   <O, T, U = never>(descriptor: ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never, I = {}>(descriptor: ThemeAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
+
+  /** @internal @override */
+  readonly FlagShift: number;
+  /** @internal @override */
+  readonly FlagMask: FastenerFlags;
 }
 
 export interface ThemeAnimator<O = unknown, T = unknown, U = never> extends Animator<O, T, U> {
@@ -113,7 +121,7 @@ export interface ThemeAnimator<O = unknown, T = unknown, U = never> extends Anim
 }
 
 export const ThemeAnimator = (function (_super: typeof Animator) {
-  const ThemeAnimator = _super.extend() as ThemeAnimatorClass;
+  const ThemeAnimator: ThemeAnimatorClass = _super.extend();
 
   ThemeAnimator.prototype.onSetAffinity = function (this: ThemeAnimator, newAffinity: Affinity, oldAffinity: Affinity): void {
     if (newAffinity > Affinity.Intrinsic) {
@@ -259,8 +267,8 @@ export const ThemeAnimator = (function (_super: typeof Animator) {
     }
   };
 
-  ThemeAnimator.construct = function <F extends ThemeAnimator<any, any, any>>(animatorClass: ThemeAnimatorClass, animator: F | null, owner: FastenerOwner<F>, animatorName: string): F {
-    animator = _super.construct(animatorClass, animator, owner, animatorName) as F;
+  ThemeAnimator.construct = function <A extends ThemeAnimator<any, any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A {
+    animator = _super.construct(animatorClass, animator, owner, animatorName) as A;
     (animator as Mutable<typeof animator>).look = null;
     return animator;
   };
@@ -318,7 +326,7 @@ export const ThemeAnimator = (function (_super: typeof Animator) {
 
     const animatorClass = superClass.extend(descriptor);
 
-    animatorClass.construct = function (animatorClass: ThemeAnimatorClass, animator: ThemeAnimator<O, T, U> | null, owner: O, animatorName: string): ThemeAnimator<O, T, U> {
+    animatorClass.construct = function (animatorClass: {prototype: ThemeAnimator<any, any, any>}, animator: ThemeAnimator<O, T, U> | null, owner: O, animatorName: string): ThemeAnimator<O, T, U> {
       animator = superClass!.construct(animatorClass, animator, owner, animatorName);
       if (affinity !== void 0) {
         animator.initAffinity(affinity);

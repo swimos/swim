@@ -13,11 +13,11 @@
 // limitations under the License.
 
 export {
-  PropertyMemberState,
-  PropertyMemberStateInit,
-  PropertyMemberKey,
-  PropertyMemberInit,
-  PropertyMemberInitMap,
+  MemberPropertyState,
+  MemberPropertyStateInit,
+  MemberPropertyKey,
+  MemberPropertyInit,
+  MemberPropertyInitMap,
   PropertyState,
   PropertyStateInit,
   PropertyInit,

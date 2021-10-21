@@ -16,14 +16,7 @@ import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
 import {Affinity, FastenerOwner, Property} from "@swim/fastener";
 import {Length} from "@swim/math";
 import {Look, Mood, ThemeAnimator} from "@swim/theme";
-import {
-  ViewContextType,
-  ViewContext,
-  View,
-  ViewEdgeInsets,
-  ViewFastenerClass,
-  ViewFastener,
-} from "@swim/view";
+import {ViewContextType, ViewContext, View, ViewEdgeInsets, ViewFastenerClass, ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {DeckBar} from "./DeckBar";
 import {DeckCard} from "./DeckCard";
@@ -454,7 +447,7 @@ export const DeckViewCard = (function (_super: typeof ViewFastener) {
     }
   };
 
-  DeckViewCard.construct = function <F extends DeckViewCard<any, any>>(fastenerClass: ViewFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  DeckViewCard.construct = function <F extends DeckViewCard<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
     (fastener as Mutable<typeof fastener>).cardIndex = 0;
     return fastener;

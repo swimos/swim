@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, FromAny, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, Fastener} from "@swim/fastener";
 import {AnyModelFactory, Model} from "./Model";
 
 export type ModelFastenerType<F extends ModelFastener<any, any, any>> =
@@ -40,22 +40,25 @@ export interface ModelFastenerInit<M extends Model = Model, U = never> extends F
 
 export type ModelFastenerDescriptor<O = unknown, M extends Model = Model, U = never, I = {}> = ThisType<ModelFastener<O, M, U> & I> & ModelFastenerInit<M, U> & Partial<I>;
 
-export interface ModelFastenerClass<F extends ModelFastener<any, any> = ModelFastener<any, any, any>> extends FastenerClass<F> {
-  create(this: ModelFastenerClass<F>, owner: FastenerOwner<F>, fastenerName: string): F;
+export interface ModelFastenerClass<F extends ModelFastener<any, any> = ModelFastener<any, any, any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(fastenerClass: ModelFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
+  create(owner: FastenerOwner<F>, fastenerName: string): F;
 
-  extend(this: ModelFastenerClass<F>, classMembers?: {} | null): ModelFastenerClass<F>;
+  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
 
-  define<O, M extends Model = Model, U = never, I = {}>(descriptor: {extends: ModelFastenerClass | null, observes: boolean} & ModelFastenerDescriptor<O, M, U, I & ObserverType<M>>): ModelFastenerClass<ModelFastener<any, M, U> & I>;
-  define<O, M extends Model = Model, U = never, I = {}>(descriptor: {extends: ModelFastenerClass | null} & ModelFastenerDescriptor<O, M, U, I>): ModelFastenerClass<ModelFastener<any, M, U> & I>;
-  define<O, M extends Model = Model, U = never>(descriptor: {observes: boolean} & ModelFastenerDescriptor<O, M, U, ObserverType<M>>): ModelFastenerClass<ModelFastener<any, M, U>>;
+  extend<I = {}>(classMembers?: Partial<I> | null): ModelFastenerClass<F> & I;
+
   define<O, M extends Model = Model, U = never>(descriptor: ModelFastenerDescriptor<O, M, U>): ModelFastenerClass<ModelFastener<any, M, U>>;
+  define<O, M extends Model = Model, U = never>(descriptor: {observes: boolean} & ModelFastenerDescriptor<O, M, U, ObserverType<M>>): ModelFastenerClass<ModelFastener<any, M, U>>;
+  define<O, M extends Model = Model, U = never, I = {}>(descriptor: ModelFastenerDescriptor<O, M, U, I>): ModelFastenerClass<ModelFastener<any, M, U> & I>;
+  define<O, M extends Model = Model, U = never, I = {}>(descriptor: {observes: boolean} & ModelFastenerDescriptor<O, M, U, I & ObserverType<M>>): ModelFastenerClass<ModelFastener<any, M, U> & I>;
 
-  <O, M extends Model = Model, U = never, I = {}>(descriptor: {extends: ModelFastenerClass | null, observes: boolean} & ModelFastenerDescriptor<O, M, U, I & ObserverType<M>>): PropertyDecorator;
-  <O, M extends Model = Model, U = never, I = {}>(descriptor: {extends: ModelFastenerClass | null} & ModelFastenerDescriptor<O, M, U, I>): PropertyDecorator;
-  <O, M extends Model = Model, U = never>(descriptor: {observes: boolean} & ModelFastenerDescriptor<O, M, U, ObserverType<M>>): PropertyDecorator;
   <O, M extends Model = Model, U = never>(descriptor: ModelFastenerDescriptor<O, M, U>): PropertyDecorator;
+  <O, M extends Model = Model, U = never>(descriptor: {observes: boolean} & ModelFastenerDescriptor<O, M, U, ObserverType<M>>): PropertyDecorator;
+  <O, M extends Model = Model, U = never, I = {}>(descriptor: ModelFastenerDescriptor<O, M, U, I>): PropertyDecorator;
+  <O, M extends Model = Model, U = never, I = {}>(descriptor: {observes: boolean} & ModelFastenerDescriptor<O, M, U, I & ObserverType<M>>): PropertyDecorator;
 }
 
 export interface ModelFastener<O = unknown, M extends Model = Model, U = never> extends Fastener<O> {
@@ -120,7 +123,7 @@ export interface ModelFastener<O = unknown, M extends Model = Model, U = never> 
 }
 
 export const ModelFastener = (function (_super: typeof Fastener) {
-  const ModelFastener = _super.extend() as ModelFastenerClass;
+  const ModelFastener: ModelFastenerClass = _super.extend();
 
   Object.defineProperty(ModelFastener.prototype, "familyType", {
     get: function (this: ModelFastener): Class<ModelFastener<any, any, any>> | null {
@@ -275,7 +278,7 @@ export const ModelFastener = (function (_super: typeof Fastener) {
     return null;
   };
 
-  ModelFastener.construct = function <F extends ModelFastener<any, any, any>>(fastenerClass: ModelFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  ModelFastener.construct = function <F extends ModelFastener<any, any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     if (fastener === null) {
       fastener = function ModelFastener(model?: ModelFastenerType<F> | ModelFastenerInitType<F> | null, target?: Model | null): ModelFastenerType<F> | null | FastenerOwner<F> {
         if (model === void 0) {
@@ -309,7 +312,7 @@ export const ModelFastener = (function (_super: typeof Fastener) {
 
     const fastenerClass = superClass.extend(descriptor);
 
-    fastenerClass.construct = function (fastenerClass: ModelFastenerClass, fastener: ModelFastener<O, M, U> | null, owner: O, fastenerName: string): ModelFastener<O, M, U> {
+    fastenerClass.construct = function (fastenerClass: {prototype: ModelFastener<any, any, any>}, fastener: ModelFastener<O, M, U> | null, owner: O, fastenerName: string): ModelFastener<O, M, U> {
       fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);

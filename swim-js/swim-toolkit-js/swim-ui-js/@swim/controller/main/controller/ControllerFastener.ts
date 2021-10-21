@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, FromAny, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, Fastener} from "@swim/fastener";
 import {AnyControllerFactory, Controller} from "./Controller";
 
 export type ControllerFastenerType<F extends ControllerFastener<any, any, any>> =
@@ -40,22 +40,25 @@ export interface ControllerFastenerInit<C extends Controller = Controller, U = n
 
 export type ControllerFastenerDescriptor<O = unknown, C extends Controller = Controller, U = never, I = {}> = ThisType<ControllerFastener<O, C, U> & I> & ControllerFastenerInit<C, U> & Partial<I>;
 
-export interface ControllerFastenerClass<F extends ControllerFastener<any, any> = ControllerFastener<any, any, any>> extends FastenerClass<F> {
-  create(this: ControllerFastenerClass<F>, owner: FastenerOwner<F>, fastenerName: string): F;
+export interface ControllerFastenerClass<F extends ControllerFastener<any, any> = ControllerFastener<any, any, any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(fastenerClass: ControllerFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
+  create(owner: FastenerOwner<F>, fastenerName: string): F;
 
-  extend(this: ControllerFastenerClass<F>, classMembers?: {} | null): ControllerFastenerClass<F>;
+  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
 
-  define<O, C extends Controller = Controller, U = never, I = {}>(descriptor: {extends: ControllerFastenerClass | null, observes: boolean} & ControllerFastenerDescriptor<O, C, U, I & ObserverType<C>>): ControllerFastenerClass<ControllerFastener<any, C, U> & I>;
-  define<O, C extends Controller = Controller, U = never, I = {}>(descriptor: {extends: ControllerFastenerClass | null} & ControllerFastenerDescriptor<O, C, U, I>): ControllerFastenerClass<ControllerFastener<any, C, U> & I>;
-  define<O, C extends Controller = Controller, U = never>(descriptor: {observes: boolean} & ControllerFastenerDescriptor<O, C, U, ObserverType<C>>): ControllerFastenerClass<ControllerFastener<any, C, U>>;
+  extend<I = {}>(classMembers?: Partial<I> | null): ControllerFastenerClass<F> & I;
+
   define<O, C extends Controller = Controller, U = never>(descriptor: ControllerFastenerDescriptor<O, C, U>): ControllerFastenerClass<ControllerFastener<any, C, U>>;
+  define<O, C extends Controller = Controller, U = never>(descriptor: {observes: boolean} & ControllerFastenerDescriptor<O, C, U, ObserverType<C>>): ControllerFastenerClass<ControllerFastener<any, C, U>>;
+  define<O, C extends Controller = Controller, U = never, I = {}>(descriptor: ControllerFastenerDescriptor<O, C, U, I>): ControllerFastenerClass<ControllerFastener<any, C, U> & I>;
+  define<O, C extends Controller = Controller, U = never, I = {}>(descriptor: {observes: boolean} & ControllerFastenerDescriptor<O, C, U, I & ObserverType<C>>): ControllerFastenerClass<ControllerFastener<any, C, U> & I>;
 
-  <O, C extends Controller = Controller, U = never, I = {}>(descriptor: {extends: ControllerFastenerClass | null, observes: boolean} & ControllerFastenerDescriptor<O, C, U, I & ObserverType<C>>): PropertyDecorator;
-  <O, C extends Controller = Controller, U = never, I = {}>(descriptor: {extends: ControllerFastenerClass | null} & ControllerFastenerDescriptor<O, C, U, I>): PropertyDecorator;
-  <O, C extends Controller = Controller, U = never>(descriptor: {observes: boolean} & ControllerFastenerDescriptor<O, C, U, ObserverType<C>>): PropertyDecorator;
   <O, C extends Controller = Controller, U = never>(descriptor: ControllerFastenerDescriptor<O, C, U>): PropertyDecorator;
+  <O, C extends Controller = Controller, U = never>(descriptor: {observes: boolean} & ControllerFastenerDescriptor<O, C, U, ObserverType<C>>): PropertyDecorator;
+  <O, C extends Controller = Controller, U = never, I = {}>(descriptor: ControllerFastenerDescriptor<O, C, U, I>): PropertyDecorator;
+  <O, C extends Controller = Controller, U = never, I = {}>(descriptor: {observes: boolean} & ControllerFastenerDescriptor<O, C, U, I & ObserverType<C>>): PropertyDecorator;
 }
 
 export interface ControllerFastener<O = unknown, C extends Controller = Controller, U = never> extends Fastener<O> {
@@ -120,7 +123,7 @@ export interface ControllerFastener<O = unknown, C extends Controller = Controll
 }
 
 export const ControllerFastener = (function (_super: typeof Fastener) {
-  const ControllerFastener = _super.extend() as ControllerFastenerClass;
+  const ControllerFastener: ControllerFastenerClass = _super.extend();
 
   Object.defineProperty(ControllerFastener.prototype, "familyType", {
     get: function (this: ControllerFastener): Class<ControllerFastener<any, any, any>> | null {
@@ -275,7 +278,7 @@ export const ControllerFastener = (function (_super: typeof Fastener) {
     return null;
   };
 
-  ControllerFastener.construct = function <F extends ControllerFastener<any, any, any>>(fastenerClass: ControllerFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  ControllerFastener.construct = function <F extends ControllerFastener<any, any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     if (fastener === null) {
       fastener = function ControllerFastener(controller?: ControllerFastenerType<F> | ControllerFastenerInitType<F> | null, target?: Controller | null): ControllerFastenerType<F> | null | FastenerOwner<F> {
         if (controller === void 0) {
@@ -309,7 +312,7 @@ export const ControllerFastener = (function (_super: typeof Fastener) {
 
     const fastenerClass = superClass.extend(descriptor);
 
-    fastenerClass.construct = function (fastenerClass: ControllerFastenerClass, fastener: ControllerFastener<O, C, U> | null, owner: O, fastenerName: string): ControllerFastener<O, C, U> {
+    fastenerClass.construct = function (fastenerClass: {prototype: ControllerFastener<any, any, any>}, fastener: ControllerFastener<O, C, U> | null, owner: O, fastenerName: string): ControllerFastener<O, C, U> {
       fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);

@@ -17,7 +17,7 @@ import type {FastenerOwner, FastenerFlags} from "@swim/fastener";
 import type {R2Box} from "@swim/math";
 import type {GestureInputType} from "./GestureInput";
 import type {GestureMethod} from "./Gesture";
-import {MomentumGestureInit, MomentumGestureClass, MomentumGesture} from "./MomentumGesture";
+import {MomentumGestureInit, MomentumGesture} from "./MomentumGesture";
 import {ScaleGestureInput} from "./ScaleGestureInput";
 import {MouseScaleGesture} from "./"; // forward import
 import {TouchScaleGesture} from "./"; // forward import
@@ -87,14 +87,17 @@ export interface ScaleGestureInit<V extends View = View, X = unknown, Y = unknow
 
 export type ScaleGestureDescriptor<O = unknown, V extends View = View, X = unknown, Y = unknown, I = {}> = ThisType<ScaleGesture<O, V, X, Y> & I> & ScaleGestureInit<V, X, Y> & Partial<I>;
 
-export interface ScaleGestureClass<G extends ScaleGesture<any, any, any, any> = ScaleGesture<any, any, any, any>> extends MomentumGestureClass<G> {
-  create(this: ScaleGestureClass<G>, owner: FastenerOwner<G>, gestureName: string): G;
+export interface ScaleGestureClass<G extends ScaleGesture<any, any, any, any> = ScaleGesture<any, any, any, any>> {
+  /** @internal */
+  prototype: G;
 
-  construct(gestureClass: ScaleGestureClass, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
+  create(owner: FastenerOwner<G>, gestureName: string): G;
+
+  construct(gestureClass: {prototype: G}, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
 
   specialize(method: GestureMethod): ScaleGestureClass | null;
 
-  extend(this: ScaleGestureClass<G>, classMembers?: {} | null): ScaleGestureClass<G>;
+  extend<I = {}>(classMembers?: Partial<I> | null): ScaleGestureClass<G> & I;
 
   define<O, V extends View = View, X = unknown, Y = unknown, I = {}>(descriptor: {observes: boolean} & ScaleGestureDescriptor<O, V, X, Y, I & ObserverType<V>>): ScaleGestureClass<ScaleGesture<any, V, X, Y> & I>;
   define<O, V extends View = View, X = unknown, Y = unknown, I = {}>(descriptor: ScaleGestureDescriptor<O, V, X, Y, I>): ScaleGestureClass<ScaleGesture<any, V, X, Y> & I>;
@@ -261,7 +264,7 @@ export interface ScaleGesture<O = unknown, V extends View = View, X = unknown, Y
 }
 
 export const ScaleGesture = (function (_super: typeof MomentumGesture) {
-  const ScaleGesture = _super.extend() as ScaleGestureClass;
+  const ScaleGesture: ScaleGestureClass = _super.extend();
 
   ScaleGesture.prototype.createInput = function <X, Y>(this: ScaleGesture<unknown, View, X, Y>, inputId: string, inputType: GestureInputType, isPrimary: boolean,
                                                        x: number, y: number, t: number): ScaleGestureInput<X, Y> {
@@ -1072,7 +1075,7 @@ export const ScaleGesture = (function (_super: typeof MomentumGesture) {
     configurable: true,
   });
 
-  ScaleGesture.construct = function <G extends ScaleGesture<any, any, any, any>>(gestureClass: ScaleGestureClass, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+  ScaleGesture.construct = function <G extends ScaleGesture<any, any, any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
     gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
     gesture.distanceMin = ScaleGesture.DistanceMin;
     gesture.setFlags(gesture.flags | ScaleGesture.WheelFlag);
@@ -1129,7 +1132,7 @@ export const ScaleGesture = (function (_super: typeof MomentumGesture) {
 
     const gestureClass = superClass.extend(descriptor);
 
-    gestureClass.construct = function (gestureClass: ScaleGestureClass, gesture: ScaleGesture<O, V, X, Y> | null, owner: O, gestureName: string): ScaleGesture<O, V, X, Y> {
+    gestureClass.construct = function (gestureClass: {prototype: ScaleGesture<any, any, any, any>}, gesture: ScaleGesture<O, V, X, Y> | null, owner: O, gestureName: string): ScaleGesture<O, V, X, Y> {
       gesture = superClass!.construct(gestureClass, gesture, owner, gestureName);
       if (affinity !== void 0) {
         gesture.initAffinity(affinity);

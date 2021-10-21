@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Equals, Arrays, ConsumerType, Consumable, Consumer} from "@swim/util";
-import {FastenerOwner, FastenerFlags, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerFlags, FastenerInit, Fastener} from "@swim/fastener";
 import {AnyValue, Value} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import type {DownlinkObserver, Downlink} from "../downlink/Downlink";
@@ -44,18 +44,21 @@ export interface DownlinkFastenerInit extends FastenerInit, DownlinkObserver {
 
 export type DownlinkFastenerDescriptor<O = unknown, I = {}> = ThisType<DownlinkFastener<O> & I> & DownlinkFastenerInit & Partial<I>;
 
-export interface DownlinkFastenerClass<F extends DownlinkFastener<any> = DownlinkFastener<any>> extends FastenerClass<F> {
-  create(this: DownlinkFastenerClass<F>, owner: FastenerOwner<F>, fastenerName: string): F;
+export interface DownlinkFastenerClass<F extends DownlinkFastener<any> = DownlinkFastener<any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(fastenerClass: DownlinkFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
+  create(owner: FastenerOwner<F>, fastenerName: string): F;
 
-  extend(this: DownlinkFastenerClass<F>, classMembers?: {} | null): DownlinkFastenerClass<F>;
+  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
 
-  define<O, I = {}>(descriptor: {extends: DownlinkFastenerClass | null} & DownlinkFastenerDescriptor<O, I>): DownlinkFastenerClass<DownlinkFastener<any> & I>;
+  extend<I = {}>(classMembers?: Partial<I> | null): DownlinkFastenerClass<F> & I;
+
   define<O>(descriptor: DownlinkFastenerDescriptor<O>): DownlinkFastenerClass<DownlinkFastener<any>>;
+  define<O, I = {}>(descriptor: DownlinkFastenerDescriptor<O, I>): DownlinkFastenerClass<DownlinkFastener<any> & I>;
 
-  <O, I = {}>(descriptor: {extends: DownlinkFastenerClass | null} & DownlinkFastenerDescriptor<O, I>): PropertyDecorator;
   <O>(descriptor: DownlinkFastenerDescriptor<O>): PropertyDecorator;
+  <O, I = {}>(descriptor: DownlinkFastenerDescriptor<O, I>): PropertyDecorator;
 
   /** @internal */
   readonly ConsumingFlag: FastenerFlags;
@@ -227,7 +230,7 @@ export interface DownlinkFastener<O = unknown> extends Fastener<O>, Consumable {
 }
 
 export const DownlinkFastener = (function (_super: typeof Fastener) {
-  const DownlinkFastener = _super.extend() as DownlinkFastenerClass;
+  const DownlinkFastener: DownlinkFastenerClass = _super.extend();
 
   Object.defineProperty(DownlinkFastener.prototype, "familyType", {
     get: function (this: DownlinkFastener): Class<DownlinkFastener<any>> | null {
@@ -581,7 +584,7 @@ export const DownlinkFastener = (function (_super: typeof Fastener) {
     this.unlink();
   };
 
-  DownlinkFastener.construct = function <F extends DownlinkFastener<any>>(fastenerClass: DownlinkFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  DownlinkFastener.construct = function <F extends DownlinkFastener<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
     (fastener as Mutable<typeof fastener>).ownHostUri = null;
     (fastener as Mutable<typeof fastener>).ownNodeUri = null;
@@ -621,7 +624,7 @@ export const DownlinkFastener = (function (_super: typeof Fastener) {
 
     const fastenerClass = superClass.extend(descriptor);
 
-    fastenerClass.construct = function (fastenerClass: DownlinkFastenerClass, fastener: DownlinkFastener<O> | null, owner: O, fastenerName: string): DownlinkFastener<O> {
+    fastenerClass.construct = function (fastenerClass: {prototype: DownlinkFastener<any>}, fastener: DownlinkFastener<O> | null, owner: O, fastenerName: string): DownlinkFastener<O> {
       fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);

@@ -17,7 +17,7 @@ export {
   GestureInput,
 } from "./GestureInput";
 export {
-  GestureMemberView,
+  MemberGestureView,
   GestureView,
   GestureMethod,
   GestureInit,

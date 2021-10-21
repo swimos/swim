@@ -13,7 +13,7 @@
 // limitations under the License.
 
 export {
-  ProviderMemberService,
+  MemberProviderService,
   ProviderService,
   ProviderInit,
   ProviderDescriptor,

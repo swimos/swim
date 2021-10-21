@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing, Creatable, InitType} from "@swim/util";
-import {Affinity, AnimatorMemberInit} from "@swim/fastener";
+import {Affinity, MemberAnimatorInit} from "@swim/fastener";
 import {Transform} from "@swim/math";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewFlags, View} from "@swim/view";
@@ -44,16 +44,16 @@ export interface HtmlViewInit extends ElementViewInit {
 }
 
 export interface HtmlViewAttributesInit {
-  autocomplete?: AnimatorMemberInit<HtmlView, "autocomplete">;
-  checked?: AnimatorMemberInit<HtmlView, "checked">;
-  colspan?: AnimatorMemberInit<HtmlView, "colspan">;
-  disabled?: AnimatorMemberInit<HtmlView, "disabled">;
-  placeholder?: AnimatorMemberInit<HtmlView, "placeholder">;
-  rowspan?: AnimatorMemberInit<HtmlView, "rowspan">;
-  selected?: AnimatorMemberInit<HtmlView, "selected">;
-  title?: AnimatorMemberInit<HtmlView, "title">;
-  type?: AnimatorMemberInit<HtmlView, "type">;
-  value?: AnimatorMemberInit<HtmlView, "value">;
+  autocomplete?: MemberAnimatorInit<HtmlView, "autocomplete">;
+  checked?: MemberAnimatorInit<HtmlView, "checked">;
+  colspan?: MemberAnimatorInit<HtmlView, "colspan">;
+  disabled?: MemberAnimatorInit<HtmlView, "disabled">;
+  placeholder?: MemberAnimatorInit<HtmlView, "placeholder">;
+  rowspan?: MemberAnimatorInit<HtmlView, "rowspan">;
+  selected?: MemberAnimatorInit<HtmlView, "selected">;
+  title?: MemberAnimatorInit<HtmlView, "title">;
+  type?: MemberAnimatorInit<HtmlView, "type">;
+  value?: MemberAnimatorInit<HtmlView, "value">;
 }
 
 export interface HtmlViewStyleInit extends StyleMapInit {

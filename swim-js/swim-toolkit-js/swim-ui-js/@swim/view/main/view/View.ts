@@ -26,7 +26,7 @@ import {
 import {
   Affinity,
   Fastener,
-  PropertyMemberInitMap,
+  MemberPropertyInitMap,
   Property,
   Animator,
   Provider,
@@ -1356,9 +1356,9 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     }
   }
 
-  setProperties(properties: PropertyMemberInitMap<this>, timingOrAffinity: Affinity | AnyTiming | boolean | null | undefined): void;
-  setProperties(properties: PropertyMemberInitMap<this>, timing?: AnyTiming | boolean | null, affinity?: Affinity): void;
-  setProperties(properties: PropertyMemberInitMap<this>, timing?: Affinity | AnyTiming | boolean | null, affinity?: Affinity): void {
+  setProperties(properties: MemberPropertyInitMap<this>, timingOrAffinity: Affinity | AnyTiming | boolean | null | undefined): void;
+  setProperties(properties: MemberPropertyInitMap<this>, timing?: AnyTiming | boolean | null, affinity?: Affinity): void;
+  setProperties(properties: MemberPropertyInitMap<this>, timing?: Affinity | AnyTiming | boolean | null, affinity?: Affinity): void {
     if (typeof timing === "number") {
       affinity = timing;
       timing = void 0;

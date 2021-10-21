@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import {Mutable, FromAny} from "@swim/util";
-import {Affinity, FastenerOwner} from "@swim/fastener";
+import {Affinity, FastenerOwner, FastenerFlags} from "@swim/fastener";
 import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
 import {FontFamily, AnyColor, Color, AnyBoxShadow, BoxShadow} from "@swim/style";
-import {ThemeAnimatorInit, ThemeAnimatorClass, ThemeAnimator} from "@swim/theme";
+import {ThemeAnimatorInit, ThemeAnimator} from "@swim/theme";
 import {StringStyleAnimator} from "./"; // forward import
 import {NumberStyleAnimator} from "./"; // forward import
 import {LengthStyleAnimator} from "./"; // forward import
@@ -35,17 +35,20 @@ export interface StyleAnimatorInit<T = unknown, U = never> extends ThemeAnimator
 
 export type StyleAnimatorDescriptor<V = unknown, T = unknown, U = never, I = {}> = ThisType<StyleAnimator<V, T, U> & I> & StyleAnimatorInit<T, U> & Partial<I>;
 
-export interface StyleAnimatorClass<A extends StyleAnimator<any, any> = StyleAnimator<any, any, any>> extends ThemeAnimatorClass<A> {
-  create(this: StyleAnimatorClass<A>, owner: FastenerOwner<A>, animatorName: string): A;
+export interface StyleAnimatorClass<A extends StyleAnimator<any, any> = StyleAnimator<any, any, any>> {
+  /** @internal */
+  prototype: A;
 
-  construct(animatorClass: StyleAnimatorClass, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A;
+  create(owner: FastenerOwner<A>, animatorName: string): A;
+
+  construct(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A;
 
   specialize(type: unknown): StyleAnimatorClass | null;
 
-  extend(this: StyleAnimatorClass<A>, classMembers?: {} | null): StyleAnimatorClass<A>;
+  extend<I = {}>(classMembers?: Partial<I> | null): StyleAnimatorClass<A> & I;
 
-  define<V, T, U = never, I = {}>(descriptor: {extends: StyleAnimatorClass | null} & StyleAnimatorDescriptor<V, T, U, I>): StyleAnimatorClass<StyleAnimator<any, T, U> & I>;
   define<V, T, U = never>(descriptor: StyleAnimatorDescriptor<V, T, U>): StyleAnimatorClass<StyleAnimator<any, T, U>>;
+  define<V, T, U = never, I = {}>(descriptor: StyleAnimatorDescriptor<V, T, U, I>): StyleAnimatorClass<StyleAnimator<any, T, U> & I>;
 
   <V, T extends Length | null | undefined = Length | null | undefined, U extends AnyLength | null | undefined = AnyLength | null | undefined>(descriptor: {type: typeof Length} & StyleAnimatorDescriptor<V, T, U>): PropertyDecorator;
   <V, T extends Color | null | undefined = Color | null | undefined, U extends AnyColor | null | undefined = AnyColor | null | undefined>(descriptor: {type: typeof Color} & StyleAnimatorDescriptor<V, T, U>): PropertyDecorator;
@@ -55,8 +58,13 @@ export interface StyleAnimatorClass<A extends StyleAnimator<any, any> = StyleAni
   <V, T extends string | null | undefined = string | null | undefined, U extends string | null | undefined = string | null | undefined>(descriptor: {type: typeof String} & StyleAnimatorDescriptor<V, T, U>): PropertyDecorator;
   <V, T extends number | null | undefined = number | null | undefined, U extends number | string | null | undefined = number | string | null | undefined>(descriptor: {type: typeof Number} & StyleAnimatorDescriptor<V, T, U>): PropertyDecorator;
   <V, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & StyleAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T, U = never, I = {}>(descriptor: {extends: StyleAnimatorClass | null} & StyleAnimatorDescriptor<V, T, U, I>): PropertyDecorator;
   <V, T, U = never>(descriptor: StyleAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V, T, U = never, I = {}>(descriptor: StyleAnimatorDescriptor<V, T, U, I>): PropertyDecorator;
+
+  /** @internal @override */
+  readonly FlagShift: number;
+  /** @internal @override */
+  readonly FlagMask: FastenerFlags;
 }
 
 export interface StyleAnimator<V = unknown, T = unknown, U = never> extends ThemeAnimator<V, T, U> {
@@ -83,7 +91,7 @@ export interface StyleAnimator<V = unknown, T = unknown, U = never> extends Them
 }
 
 export const StyleAnimator = (function (_super: typeof ThemeAnimator) {
-  const StyleAnimator = _super.extend() as StyleAnimatorClass;
+  const StyleAnimator: StyleAnimatorClass = _super.extend();
 
   Object.defineProperty(StyleAnimator.prototype, "propertyNames", {
     get(this: StyleAnimator): string | ReadonlyArray<string> {
@@ -178,7 +186,7 @@ export const StyleAnimator = (function (_super: typeof ThemeAnimator) {
     throw new Error();
   };
 
-  StyleAnimator.construct = function <A extends StyleAnimator<any, any, any>>(animatorClass: StyleAnimatorClass, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A {
+  StyleAnimator.construct = function <A extends StyleAnimator<any, any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A {
     animator = _super.construct(animatorClass, animator, owner, animatorName) as A;
     (animator as Mutable<typeof animator>).priority = void 0;
     return animator;
@@ -229,7 +237,7 @@ export const StyleAnimator = (function (_super: typeof ThemeAnimator) {
 
     const animatorClass = superClass.extend(descriptor);
 
-    animatorClass.construct = function (animatorClass: StyleAnimatorClass, animator: StyleAnimator<V, T, U> | null, owner: V, animatorName: string): StyleAnimator<V, T, U> {
+    animatorClass.construct = function (animatorClass: {prototype: StyleAnimator<any, any, any>}, animator: StyleAnimator<V, T, U> | null, owner: V, animatorName: string): StyleAnimator<V, T, U> {
       animator = superClass!.construct(animatorClass, animator, owner, animatorName);
       if (affinity !== void 0) {
         animator.initAffinity(affinity);

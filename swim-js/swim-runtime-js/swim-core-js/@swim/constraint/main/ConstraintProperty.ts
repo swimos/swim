@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, FromAny} from "@swim/util";
-import {Affinity, FastenerOwner, FastenerFlags, PropertyInit, PropertyClass, Property} from "@swim/fastener";
+import {Affinity, FastenerOwner, FastenerFlags, PropertyInit, Property} from "@swim/fastener";
 import {ConstraintKey} from "./ConstraintKey";
 import {ConstraintMap} from "./ConstraintMap";
 import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpression";
@@ -38,22 +38,25 @@ export interface ConstraintPropertyInit<T = unknown, U = never> extends Property
 
 export type ConstraintPropertyDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<ConstraintProperty<O, T, U> & I> & ConstraintPropertyInit<T, U> & Partial<I>;
 
-export interface ConstraintPropertyClass<P extends ConstraintProperty<any, any> = ConstraintProperty<any, any, any>> extends PropertyClass<P> {
-  create(this: ConstraintPropertyClass<P>, owner: FastenerOwner<P>, propertyName: string): P;
+export interface ConstraintPropertyClass<P extends ConstraintProperty<any, any> = ConstraintProperty<any, any, any>> {
+  /** @internal */
+  prototype: P;
 
-  construct(propertyClass: ConstraintPropertyClass, property: P | null, owner: FastenerOwner<P>, propertyName: string): P;
+  create(owner: FastenerOwner<P>, propertyName: string): P;
+
+  construct(propertyClass: {prototype: P}, property: P | null, owner: FastenerOwner<P>, propertyName: string): P;
 
   specialize(type: unknown): ConstraintPropertyClass | null;
 
-  extend(this: ConstraintPropertyClass<P>, classMembers?: {} | null): ConstraintPropertyClass<P>;
+  extend<I = {}>(classMembers?: Partial<I> | null): ConstraintPropertyClass<P> & I;
 
-  define<O, T, U = never, I = {}>(descriptor: {extends: ConstraintPropertyClass | null} & ConstraintPropertyDescriptor<O, T, U, I>): ConstraintPropertyClass<ConstraintProperty<any, T, U> & I>;
   define<O, T, U = never>(descriptor: ConstraintPropertyDescriptor<O, T, U>): ConstraintPropertyClass<ConstraintProperty<any, T, U>>;
+  define<O, T, U = never, I = {}>(descriptor: ConstraintPropertyDescriptor<O, T, U, I>): ConstraintPropertyClass<ConstraintProperty<any, T, U> & I>;
 
   <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & ConstraintPropertyDescriptor<O, T, U>): PropertyDecorator;
   <O, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & ConstraintPropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = never, I = {}>(descriptor: {extends: ConstraintPropertyClass | null} & ConstraintPropertyDescriptor<O, T, U, I>): PropertyDecorator;
   <O, T, U = never>(descriptor: ConstraintPropertyDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never, I = {}>(descriptor: ConstraintPropertyDescriptor<O, T, U, I>): PropertyDecorator;
 
   /** @internal */
   readonly ConstrainedFlag: FastenerFlags;
@@ -180,7 +183,7 @@ export interface ConstraintProperty<O = unknown, T = unknown, U = never> extends
 }
 
 export const ConstraintProperty = (function (_super: typeof Property) {
-  const ConstraintProperty = _super.extend() as ConstraintPropertyClass;
+  const ConstraintProperty: ConstraintPropertyClass = _super.extend();
 
   ConstraintProperty.prototype.isExternal = function (this: ConstraintProperty): boolean {
     return true;
@@ -413,7 +416,7 @@ export const ConstraintProperty = (function (_super: typeof Property) {
     return value !== void 0 && value !== null ? +value : 0;
   };
 
-  ConstraintProperty.construct = function <P extends ConstraintProperty<any, any, any>>(propertyClass: ConstraintPropertyClass, property: P | null, owner: FastenerOwner<P>, propertyName: string): P {
+  ConstraintProperty.construct = function <P extends ConstraintProperty<any, any, any>>(propertyClass: {prototype: P}, property: P | null, owner: FastenerOwner<P>, propertyName: string): P {
     property = _super.construct(propertyClass, property, owner, propertyName) as P;
     (property as Mutable<typeof property>).id = ConstraintKey.nextId();
     (property as Mutable<typeof property>).strength = ConstraintStrength.Strong;
@@ -453,7 +456,7 @@ export const ConstraintProperty = (function (_super: typeof Property) {
 
     const propertyClass = superClass.extend(descriptor);
 
-    propertyClass.construct = function (propertyClass: ConstraintPropertyClass, property: ConstraintProperty<O, T, U> | null, owner: O, propertyName: string): ConstraintProperty<O, T, U> {
+    propertyClass.construct = function (propertyClass: {prototype: ConstraintProperty<any, any, any>}, property: ConstraintProperty<O, T, U> | null, owner: O, propertyName: string): ConstraintProperty<O, T, U> {
       property = superClass!.construct(propertyClass, property, owner, propertyName);
       if (affinity !== void 0) {
         property.initAffinity(affinity);

@@ -16,25 +16,25 @@ import {Mutable, FromAny, AnyTiming, Timing, Easing, Interpolator} from "@swim/u
 import {Affinity} from "../fastener/Affinity";
 import {FastenerContext} from "../fastener/FastenerContext";
 import type {FastenerOwner, FastenerFlags} from "../fastener/Fastener";
-import {PropertyInit, PropertyClass, Property} from "../property/Property";
+import {PropertyInit, Property} from "../property/Property";
 import {StringAnimator} from "./"; // forward import
 import {NumberAnimator} from "./"; // forward import
 import {BooleanAnimator} from "./"; // forward import
 
-export type AnimatorMemberState<O, K extends keyof O> =
+export type MemberAnimatorState<O, K extends keyof O> =
   O[K] extends Animator<any, infer T> ? T : never;
 
-export type AnimatorMemberStateInit<O, K extends keyof O> =
+export type MemberAnimatorStateInit<O, K extends keyof O> =
   O[K] extends Animator<any, any, infer U> ? U : never;
 
-export type AnimatorMemberKey<O, K extends keyof O> =
+export type MemberAnimatorKey<O, K extends keyof O> =
   O[K] extends Property<any, any> ? K : never;
 
-export type AnimatorMemberInit<O, K extends keyof O> =
+export type MemberAnimatorInit<O, K extends keyof O> =
   O[K] extends Animator<any, infer T, infer U> ? T | U : never;
 
-export type AnimatorMemberInitMap<O> = {
-  -readonly [K in keyof O as AnimatorMemberKey<O, K>]?: AnimatorMemberInit<O, K>;
+export type MemberAnimatorInitMap<O> = {
+  -readonly [K in keyof O as MemberAnimatorKey<O, K>]?: MemberAnimatorInit<O, K>;
 };
 
 export type AnimatorState<A extends Animator<any, any>> =
@@ -59,24 +59,27 @@ export interface AnimatorInit<T = unknown, U = never> extends PropertyInit<T, U>
 
 export type AnimatorDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<Animator<O, T, U> & I> & AnimatorInit<T, U> & Partial<I>;
 
-export interface AnimatorClass<A extends Animator<any, any> = Animator<any, any, any>> extends PropertyClass<A> {
-  create(this: AnimatorClass<A>, owner: FastenerOwner<A>, animatorName: string): A;
+export interface AnimatorClass<A extends Animator<any, any> = Animator<any, any, any>> {
+  /** @internal */
+  prototype: A;
 
-  construct(animatorClass: AnimatorClass, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A;
+  create(owner: FastenerOwner<A>, animatorName: string): A;
+
+  construct(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A;
 
   specialize(type: unknown): AnimatorClass | null;
 
-  extend(this: AnimatorClass<A>, classMembers?: {} | null): AnimatorClass<A>;
+  extend<I = {}>(classMembers?: Partial<I> | null): AnimatorClass<A> & I;
 
-  define<O, T, U = never, I = {}>(descriptor: {extends: AnimatorClass | null} & AnimatorDescriptor<O, T, U, I>): AnimatorClass<Animator<any, T, U> & I>;
   define<O, T, U = never>(descriptor: AnimatorDescriptor<O, T, U>): AnimatorClass<Animator<any, T, U>>;
+  define<O, T, U = never, I = {}>(descriptor: AnimatorDescriptor<O, T, U, I>): AnimatorClass<Animator<any, T, U> & I>;
 
   <O, T extends string | undefined = string | undefined, U extends string | undefined = string | undefined>(descriptor: {type: typeof String} & AnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & AnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends boolean | undefined = boolean | undefined, U extends boolean | string | undefined = boolean | string | undefined>(descriptor: {type: typeof Boolean} & AnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & AnimatorDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = never, I = {}>(descriptor: {extends: AnimatorClass | null} & AnimatorDescriptor<O, T, U, I>): PropertyDecorator;
   <O, T, U = never>(descriptor: AnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never, I = {}>(descriptor: AnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 
   /** @internal */
   readonly TweeningFlag: FastenerFlags;
@@ -190,7 +193,7 @@ export interface Animator<O = unknown, T = unknown, U = never> extends Property<
 }
 
 export const Animator = (function (_super: typeof Property) {
-  const Animator = _super.extend() as AnimatorClass;
+  const Animator: AnimatorClass = _super.extend();
 
   Animator.prototype.onInherit = function <T>(this: Animator<unknown, T>, superFastener: Property<unknown, T>): void {
     const newState = superFastener.state;
@@ -548,7 +551,7 @@ export const Animator = (function (_super: typeof Property) {
     _super.prototype.onUnmount.call(this);
   };
 
-  Animator.construct = function <A extends Animator<any, any>>(animatorClass: AnimatorClass, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A {
+  Animator.construct = function <A extends Animator<any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A {
     if (animator === null) {
       animator = function Animator(state?: AnimatorStateInit<A>, timing?: Affinity | AnyTiming | boolean | null, affinity?: Affinity): AnimatorState<A> | FastenerOwner<A> {
         if (arguments.length === 0) {
@@ -606,7 +609,7 @@ export const Animator = (function (_super: typeof Property) {
 
     const animatorClass = superClass.extend(descriptor);
 
-    animatorClass.construct = function (animatorClass: AnimatorClass, animator: Animator<O, T, U> | null, owner: O, animatorName: string): Animator<O, T, U> {
+    animatorClass.construct = function (animatorClass: {prototype: Animator<any, any, any>}, animator: Animator<O, T, U> | null, owner: O, animatorName: string): Animator<O, T, U> {
       animator = superClass!.construct(animatorClass, animator, owner, animatorName);
       if (affinity !== void 0) {
         animator.initAffinity(affinity);

@@ -20,6 +20,8 @@ export {
 } from "./FastenerContext";
 
 export {
+  MemberFastenerKey,
+  MemberFastener,
   FastenerOwner,
   FastenerFlags,
   FastenerInit,

@@ -28,7 +28,7 @@ import {
   ConstraintSolver,
 } from "@swim/constraint";
 import {AnyLength, Length} from "@swim/math";
-import {ThemeAnimatorInit, ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorInit, ThemeAnimator} from "./ThemeAnimator";
 import {NumberThemeConstraintAnimator} from "./"; // forward import
 import {LengthThemeConstraintAnimator} from "./"; // forward import
 
@@ -46,23 +46,26 @@ export interface ThemeConstraintAnimatorInit<T = unknown, U = never> extends The
 
 export type ThemeConstraintAnimatorDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<ThemeConstraintAnimator<O, T, U> & I> & ThemeConstraintAnimatorInit<T, U> & Partial<I>;
 
-export interface ThemeConstraintAnimatorClass<F extends ThemeConstraintAnimator<any, any> = ThemeConstraintAnimator<any, any, any>> extends ThemeAnimatorClass<F> {
-  create(this: ThemeConstraintAnimatorClass<F>, owner: FastenerOwner<F>, animatorName: string): F;
+export interface ThemeConstraintAnimatorClass<A extends ThemeConstraintAnimator<any, any> = ThemeConstraintAnimator<any, any, any>> {
+  /** @internal */
+  prototype: A;
 
-  construct(animatorClass: ThemeConstraintAnimatorClass, animator: F | null, owner: FastenerOwner<F>, animatorName: string): F;
+  create(owner: FastenerOwner<A>, animatorName: string): A;
+
+  construct(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A;
 
   specialize(type: unknown): ThemeConstraintAnimatorClass | null;
 
-  extend(this: ThemeConstraintAnimatorClass<F>, classMembers?: {} | null): ThemeConstraintAnimatorClass<F>;
+  extend<I = {}>(classMembers?: Partial<I> | null): ThemeConstraintAnimatorClass<A> & I;
 
-  define<O, T, U = never, I = {}>(descriptor: {extends: ThemeConstraintAnimatorClass | null} & ThemeConstraintAnimatorDescriptor<O, T, U, I>): ThemeConstraintAnimatorClass<ThemeConstraintAnimator<any, T, U> & I>;
   define<O, T, U = never>(descriptor: ThemeConstraintAnimatorDescriptor<O, T, U>): ThemeConstraintAnimatorClass<ThemeConstraintAnimator<any, T, U>>;
+  define<O, T, U = never, I = {}>(descriptor: ThemeConstraintAnimatorDescriptor<O, T, U, I>): ThemeConstraintAnimatorClass<ThemeConstraintAnimator<any, T, U> & I>;
 
   <O, T extends Length | null | undefined = Length | null | undefined, U extends AnyLength | null | undefined = AnyLength | null | undefined>(descriptor: {type: typeof Length} & ThemeConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends number | null | undefined = number | null | undefined, U extends number | string | null | undefined = number | string | null | undefined>(descriptor: {type: typeof Number} & ThemeConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & ThemeConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = never, I = {}>(descriptor: {extends: ThemeConstraintAnimatorClass | null} & ThemeConstraintAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
   <O, T, U = never>(descriptor: ThemeConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never, I = {}>(descriptor: ThemeConstraintAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 
   /** @internal */
   readonly ConstrainedFlag: FastenerFlags;
@@ -189,7 +192,7 @@ export interface ThemeConstraintAnimator<O = unknown, T = unknown, U = never> ex
 }
 
 export const ThemeConstraintAnimator = (function (_super: typeof ThemeAnimator) {
-  const ThemeConstraintAnimator = _super.extend() as ThemeConstraintAnimatorClass;
+  const ThemeConstraintAnimator: ThemeConstraintAnimatorClass = _super.extend();
 
   ThemeConstraintAnimator.prototype.isExternal = function (this: ThemeConstraintAnimator): boolean {
     return true;
@@ -422,8 +425,8 @@ export const ThemeConstraintAnimator = (function (_super: typeof ThemeAnimator) 
     return value !== void 0 && value !== null ? +value : 0;
   };
 
-  ThemeConstraintAnimator.construct = function <F extends ThemeConstraintAnimator<any, any, any>>(animatorClass: ThemeConstraintAnimatorClass, animator: F | null, owner: FastenerOwner<F>, animatorName: string): F {
-    animator = _super.construct(animatorClass, animator, owner, animatorName) as F;
+  ThemeConstraintAnimator.construct = function <A extends ThemeConstraintAnimator<any, any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A {
+    animator = _super.construct(animatorClass, animator, owner, animatorName) as A;
     (animator as Mutable<typeof animator>).id = ConstraintKey.nextId();
     (animator as Mutable<typeof animator>).strength = ConstraintStrength.Strong;
     (animator as Mutable<typeof animator>).conditionCount = 0;
@@ -469,7 +472,7 @@ export const ThemeConstraintAnimator = (function (_super: typeof ThemeAnimator) 
 
     const animatorClass = superClass.extend(descriptor);
 
-    animatorClass.construct = function (animatorClass: ThemeConstraintAnimatorClass, animator: ThemeConstraintAnimator<O, T, U> | null, owner: O, animatorName: string): ThemeConstraintAnimator<O, T, U> {
+    animatorClass.construct = function (animatorClass: {prototype: ThemeConstraintAnimator<any, any, any>}, animator: ThemeConstraintAnimator<O, T, U> | null, owner: O, animatorName: string): ThemeConstraintAnimator<O, T, U> {
       animator = superClass!.construct(animatorClass, animator, owner, animatorName);
       if (affinity !== void 0) {
         animator.initAffinity(affinity);

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import type {Mutable, ObserverType} from "@swim/util";
-import type {FastenerOwner} from "@swim/fastener";
+import type {FastenerOwner, FastenerFlags} from "@swim/fastener";
 import type {GestureInputType} from "./GestureInput";
-import {GestureMethod, GestureInit, GestureClass, Gesture} from "./Gesture";
+import {GestureMethod, GestureInit, Gesture} from "./Gesture";
 import {PositionGestureInput} from "./PositionGestureInput";
 import {MousePositionGesture} from "./"; // forward import
 import {TouchPositionGesture} from "./"; // forward import
@@ -59,20 +59,28 @@ export interface PositionGestureInit<V extends View = View> extends GestureInit<
 
 export type PositionGestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<PositionGesture<O, V> & I> & PositionGestureInit<V> & Partial<I>;
 
-export interface PositionGestureClass<G extends PositionGesture<any, any> = PositionGesture<any, any>> extends GestureClass<G> {
-  create(this: PositionGestureClass<G>, owner: FastenerOwner<G>, gestureName: string): G;
+export interface PositionGestureClass<G extends PositionGesture<any, any> = PositionGesture<any, any>> {
+  /** @internal */
+  prototype: G;
 
-  construct(gestureClass: PositionGestureClass, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
+  create(owner: FastenerOwner<G>, gestureName: string): G;
+
+  construct(gestureClass: {prototype: G}, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
 
   specialize(method: GestureMethod): PositionGestureClass | null;
 
-  extend(this: PositionGestureClass<G>, classMembers?: {} | null): PositionGestureClass<G>;
+  extend<I = {}>(classMembers?: Partial<I> | null): PositionGestureClass<G> & I;
 
   define<O, V extends View = View, I = {}>(descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PositionGestureClass<PositionGesture<any, V> & I>;
   define<O, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<O, V, I>): PositionGestureClass<PositionGesture<any, V> & I>;
 
   <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
   <O, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<O, V, I>): PropertyDecorator;
+
+  /** @internal @override */
+  readonly FlagShift: number;
+  /** @internal @override */
+  readonly FlagMask: FastenerFlags;
 }
 
 export interface PositionGesture<O = unknown, V extends View = View> extends Gesture<O, V> {
@@ -268,7 +276,7 @@ export interface PositionGesture<O = unknown, V extends View = View> extends Ges
 }
 
 export const PositionGesture = (function (_super: typeof Gesture) {
-  const PositionGesture = _super.extend() as PositionGestureClass;
+  const PositionGesture: PositionGestureClass = _super.extend();
 
   PositionGesture.prototype.attachEvents = function (this: PositionGesture, view: View): void {
     Gesture.prototype.attachEvents.call(this, view);
@@ -604,7 +612,7 @@ export const PositionGesture = (function (_super: typeof Gesture) {
     // hook
   };
 
-  PositionGesture.construct = function <G extends PositionGesture<any, any>>(gestureClass: PositionGestureClass, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+  PositionGesture.construct = function <G extends PositionGesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
     gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
     (gesture as Mutable<typeof gesture>).hoverCount = 0;
     (gesture as Mutable<typeof gesture>).pressCount = 0;
@@ -649,7 +657,7 @@ export const PositionGesture = (function (_super: typeof Gesture) {
 
     const gestureClass = superClass.extend(descriptor);
 
-    gestureClass.construct = function (gestureClass: PositionGestureClass, gesture: PositionGesture<O, V> | null, owner: O, gestureName: string): PositionGesture<O, V> {
+    gestureClass.construct = function (gestureClass: {prototype: PositionGesture<any, any>}, gesture: PositionGesture<O, V> | null, owner: O, gestureName: string): PositionGesture<O, V> {
       gesture = superClass!.construct(gestureClass, gesture, owner, gestureName);
       if (affinity !== void 0) {
         gesture.initAffinity(affinity);

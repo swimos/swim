@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, FromAny, Arrays, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, Fastener} from "@swim/fastener";
 import {
   AnyConstraintExpression,
   ConstraintExpression,
@@ -38,7 +38,7 @@ export interface ViewFastenerInit<V extends View = View, U = never> extends Fast
   key?: string | boolean;
   type?: AnyViewFactory<V, U>;
   child?: boolean;
-  observes?: boolean;
+  observes?: boolean
 
   willSetView?(newView: V | null, oldView: V | null, target: View | null): void;
   onSetView?(newView: V | null, oldView: V | null, target: View | null): void;
@@ -52,22 +52,25 @@ export interface ViewFastenerInit<V extends View = View, U = never> extends Fast
 
 export type ViewFastenerDescriptor<O = unknown, V extends View = View, U = never, I = {}> = ThisType<ViewFastener<O, V, U> & I> & ViewFastenerInit<V, U> & Partial<I>;
 
-export interface ViewFastenerClass<F extends ViewFastener<any, any> = ViewFastener<any, any, any>> extends FastenerClass<F> {
-  create(this: ViewFastenerClass<F>, owner: FastenerOwner<F>, fastenerName: string): F;
+export interface ViewFastenerClass<F extends ViewFastener<any, any> = ViewFastener<any, any, any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(fastenerClass: ViewFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
+  create(owner: FastenerOwner<F>, fastenerName: string): F;
 
-  extend(this: ViewFastenerClass<F>, classMembers?: {} | null): ViewFastenerClass<F>;
+  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
 
-  define<O, V extends View = View, U = never, I = {}>(descriptor: {extends: ViewFastenerClass | null, observes: boolean} & ViewFastenerDescriptor<O, V, U, I & ObserverType<V>>): ViewFastenerClass<ViewFastener<any, V, U> & I>;
-  define<O, V extends View = View, U = never, I = {}>(descriptor: {extends: ViewFastenerClass | null} & ViewFastenerDescriptor<O, V, U, I>): ViewFastenerClass<ViewFastener<any, V, U> & I>;
-  define<O, V extends View = View, U = never>(descriptor: {observes: boolean} & ViewFastenerDescriptor<O, V, U, ObserverType<V>>): ViewFastenerClass<ViewFastener<any, V, U>>;
+  extend<I = {}>(classMembers?: Partial<I> | null): ViewFastenerClass<F> & I;
+
   define<O, V extends View = View, U = never>(descriptor: ViewFastenerDescriptor<O, V, U>): ViewFastenerClass<ViewFastener<any, V, U>>;
+  define<O, V extends View = View, U = never>(descriptor: {observes: boolean} & ViewFastenerDescriptor<O, V, U, ObserverType<V>>): ViewFastenerClass<ViewFastener<any, V, U>>;
+  define<O, V extends View = View, U = never, I = {}>(descriptor: ViewFastenerDescriptor<O, V, U, I>): ViewFastenerClass<ViewFastener<any, V, U> & I>;
+  define<O, V extends View = View, U = never, I = {}>(descriptor: {observes: boolean} & ViewFastenerDescriptor<O, V, U, I & ObserverType<V>>): ViewFastenerClass<ViewFastener<any, V, U> & I>;
 
-  <O, V extends View = View, U = never, I = {}>(descriptor: {extends: ViewFastenerClass | null, observes: boolean} & ViewFastenerDescriptor<O, V, U, I & ObserverType<V>>): PropertyDecorator;
-  <O, V extends View = View, U = never, I = {}>(descriptor: {extends: ViewFastenerClass | null} & ViewFastenerDescriptor<O, V, U, I>): PropertyDecorator;
-  <O, V extends View = View, U = never>(descriptor: {observes: boolean} & ViewFastenerDescriptor<O, V, U, ObserverType<V>>): PropertyDecorator;
   <O, V extends View = View, U = never>(descriptor: ViewFastenerDescriptor<O, V, U>): PropertyDecorator;
+  <O, V extends View = View, U = never>(descriptor: {observes: boolean} & ViewFastenerDescriptor<O, V, U, ObserverType<V>>): PropertyDecorator;
+  <O, V extends View = View, U = never, I = {}>(descriptor: ViewFastenerDescriptor<O, V, U, I>): PropertyDecorator;
+  <O, V extends View = View, U = never, I = {}>(descriptor: {observes: boolean} & ViewFastenerDescriptor<O, V, U, I & ObserverType<V>>): PropertyDecorator;
 }
 
 export interface ViewFastener<O = unknown, V extends View = View, U = never> extends Fastener<O>, ConstraintScope, ConstraintContext {
@@ -182,7 +185,7 @@ export interface ViewFastener<O = unknown, V extends View = View, U = never> ext
 }
 
 export const ViewFastener = (function (_super: typeof Fastener) {
-  const ViewFastener = _super.extend() as ViewFastenerClass;
+  const ViewFastener: ViewFastenerClass = _super.extend();
 
   Object.defineProperty(ViewFastener.prototype, "familyType", {
     get: function (this: ViewFastener): Class<ViewFastener<any, any, any>> | null {
@@ -468,7 +471,7 @@ export const ViewFastener = (function (_super: typeof Fastener) {
     _super.prototype.onUnmount.call(this);
   };
 
-  ViewFastener.construct = function <F extends ViewFastener<any, any, any>>(fastenerClass: ViewFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  ViewFastener.construct = function <F extends ViewFastener<any, any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     if (fastener === null) {
       fastener = function ViewFastener(view?: ViewFastenerType<F> | ViewFastenerInitType<F> | null, target?: View | null): ViewFastenerType<F> | null | FastenerOwner<F> {
         if (view === void 0) {
@@ -504,7 +507,7 @@ export const ViewFastener = (function (_super: typeof Fastener) {
 
     const fastenerClass = superClass.extend(descriptor);
 
-    fastenerClass.construct = function (fastenerClass: ViewFastenerClass, fastener: ViewFastener<O, V, U> | null, owner: O, fastenerName: string): ViewFastener<O, V, U> {
+    fastenerClass.construct = function (fastenerClass: {prototype: ViewFastener<any, any, any>}, fastener: ViewFastener<O, V, U> | null, owner: O, fastenerName: string): ViewFastener<O, V, U> {
       fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);

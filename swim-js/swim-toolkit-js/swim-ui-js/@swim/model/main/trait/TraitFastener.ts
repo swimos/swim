@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, FromAny, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, Fastener} from "@swim/fastener";
 import {Model} from "../model/Model";
 import {AnyTraitFactory, Trait} from "./Trait";
 
@@ -41,22 +41,25 @@ export interface TraitFastenerInit<R extends Trait = Trait, U = never> extends F
 
 export type TraitFastenerDescriptor<O = unknown, R extends Trait = Trait, U = never, I = {}> = ThisType<TraitFastener<O, R, U> & I> & TraitFastenerInit<R, U> & Partial<I>;
 
-export interface TraitFastenerClass<F extends TraitFastener<any, any> = TraitFastener<any, any, any>> extends FastenerClass<F> {
-  create(this: TraitFastenerClass<F>, owner: FastenerOwner<F>, fastenerName: string): F;
+export interface TraitFastenerClass<F extends TraitFastener<any, any> = TraitFastener<any, any, any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(fastenerClass: TraitFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
+  create(owner: FastenerOwner<F>, fastenerName: string): F;
 
-  extend(this: TraitFastenerClass<F>, classMembers?: {} | null): TraitFastenerClass<F>;
+  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
 
-  define<O, R extends Trait = Trait, U = never, I = {}>(descriptor: {extends: TraitFastenerClass | null, observes: boolean} & TraitFastenerDescriptor<O, R, U, I & ObserverType<R>>): TraitFastenerClass<TraitFastener<any, R, U> & I>;
-  define<O, R extends Trait = Trait, U = never, I = {}>(descriptor: {extends: TraitFastenerClass | null} & TraitFastenerDescriptor<O, R, U, I>): TraitFastenerClass<TraitFastener<any, R, U> & I>;
-  define<O, R extends Trait = Trait, U = never>(descriptor: {observes: boolean} & TraitFastenerDescriptor<O, R, U, ObserverType<R>>): TraitFastenerClass<TraitFastener<any, R, U>>;
+  extend<I = {}>(classMembers?: Partial<I> | null): TraitFastenerClass<F> & I;
+
   define<O, R extends Trait = Trait, U = never>(descriptor: TraitFastenerDescriptor<O, R, U>): TraitFastenerClass<TraitFastener<any, R, U>>;
+  define<O, R extends Trait = Trait, U = never>(descriptor: {observes: boolean} & TraitFastenerDescriptor<O, R, U, ObserverType<R>>): TraitFastenerClass<TraitFastener<any, R, U>>;
+  define<O, R extends Trait = Trait, U = never, I = {}>(descriptor: TraitFastenerDescriptor<O, R, U, I>): TraitFastenerClass<TraitFastener<any, R, U> & I>;
+  define<O, R extends Trait = Trait, U = never, I = {}>(descriptor: {observes: boolean} & TraitFastenerDescriptor<O, R, U, I & ObserverType<R>>): TraitFastenerClass<TraitFastener<any, R, U> & I>;
 
-  <O, R extends Trait = Trait, U = never, I = {}>(descriptor: {extends: TraitFastenerClass | null, observes: boolean} & TraitFastenerDescriptor<O, R, U, I & ObserverType<R>>): PropertyDecorator;
-  <O, R extends Trait = Trait, U = never, I = {}>(descriptor: {extends: TraitFastenerClass | null} & TraitFastenerDescriptor<O, R, U, I>): PropertyDecorator;
-  <O, R extends Trait = Trait, U = never>(descriptor: {observes: boolean} & TraitFastenerDescriptor<O, R, U, ObserverType<R>>): PropertyDecorator;
   <O, R extends Trait = Trait, U = never>(descriptor: TraitFastenerDescriptor<O, R, U>): PropertyDecorator;
+  <O, R extends Trait = Trait, U = never>(descriptor: {observes: boolean} & TraitFastenerDescriptor<O, R, U, ObserverType<R>>): PropertyDecorator;
+  <O, R extends Trait = Trait, U = never, I = {}>(descriptor: TraitFastenerDescriptor<O, R, U, I>): PropertyDecorator;
+  <O, R extends Trait = Trait, U = never, I = {}>(descriptor: {observes: boolean} & TraitFastenerDescriptor<O, R, U, I & ObserverType<R>>): PropertyDecorator;
 }
 
 export interface TraitFastener<O = unknown, R extends Trait = Trait, U = never> extends Fastener<O> {
@@ -121,7 +124,7 @@ export interface TraitFastener<O = unknown, R extends Trait = Trait, U = never> 
 }
 
 export const TraitFastener = (function (_super: typeof Fastener) {
-  const TraitFastener = _super.extend() as TraitFastenerClass;
+  const TraitFastener: TraitFastenerClass = _super.extend();
 
   Object.defineProperty(TraitFastener.prototype, "familyType", {
     get: function (this: TraitFastener): Class<TraitFastener<any, any, any>> | null {
@@ -282,7 +285,7 @@ export const TraitFastener = (function (_super: typeof Fastener) {
     return null;
   };
 
-  TraitFastener.construct = function <F extends TraitFastener<any, any, any>>(fastenerClass: TraitFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  TraitFastener.construct = function <F extends TraitFastener<any, any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     if (fastener === null) {
       fastener = function TraitFastener(trait?: TraitFastenerType<F> | TraitFastenerInitType<F> | null, target?: Trait | null): TraitFastenerType<F> | null | FastenerOwner<F> {
         if (trait === void 0) {
@@ -316,7 +319,7 @@ export const TraitFastener = (function (_super: typeof Fastener) {
 
     const fastenerClass = superClass.extend(descriptor);
 
-    fastenerClass.construct = function (fastenerClass: TraitFastenerClass, fastener: TraitFastener<O, R, U> | null, owner: O, fastenerName: string): TraitFastener<O, R, U> {
+    fastenerClass.construct = function (fastenerClass: {prototype: TraitFastener<any, any, any>}, fastener: TraitFastener<O, R, U> | null, owner: O, fastenerName: string): TraitFastener<O, R, U> {
       fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);

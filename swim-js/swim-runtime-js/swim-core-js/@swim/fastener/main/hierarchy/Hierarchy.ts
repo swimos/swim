@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {Mutable, Class, Family, Arrays, ObserverType, Observable} from "@swim/util";
-import {FastenerContext} from "../fastener/FastenerContext";
-import type {Fastener} from "../fastener/Fastener";
+import {FastenerContextClass, FastenerContext} from "../fastener/FastenerContext";
+import type {MemberFastener, FastenerClass, Fastener} from "../fastener/Fastener";
 import type {HierarchyObserver} from "./HierarchyObserver";
 
 export type HierarchyFlags = number;
@@ -520,6 +520,13 @@ export abstract class Hierarchy implements Family, Observable, FastenerContext {
     return result;
   }
 
+  static getFastenerClass<F extends Fastener<any>>(fastenerName: string, fastenerBound: Class<F>): FastenerClass | null;
+  static getFastenerClass<S extends abstract new (...args: any[]) => InstanceType<S>, K extends keyof InstanceType<S>>(this: S, fastenerName: K): MemberFastener<InstanceType<S>, K> | null;
+  static getFastenerClass(fastenerName: string, fastenerBound?: Class<Fastener> | null): FastenerClass | null;
+  static getFastenerClass(fastenerName: string, fastenerBound?: Class<Fastener> | null): FastenerClass | null {
+    return FastenerContext.getFastenerClass(this as FastenerContextClass, fastenerName, fastenerBound);
+  }
+  
   /** @internal */
   static readonly MountedFlag: HierarchyFlags = 1 << 0;
   /** @internal */

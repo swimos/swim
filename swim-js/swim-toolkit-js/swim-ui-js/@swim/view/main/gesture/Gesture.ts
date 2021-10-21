@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import type {Mutable, Class, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerFlags, FastenerInit, Fastener} from "@swim/fastener";
 import {GestureInputType, GestureInput} from "./GestureInput";
 import {View} from "../"; // forward import
 
-export type GestureMemberView<O, K extends keyof O> =
+export type MemberGestureView<O, K extends keyof O> =
   O[K] extends Gesture<any, infer V> ? V : never;
 
 export type GestureView<G extends Gesture<any, any>> =
@@ -38,20 +38,28 @@ export interface GestureInit<V extends View = View> extends FastenerInit {
 
 export type GestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<Gesture<O, V> & I> & GestureInit<V> & Partial<I>;
 
-export interface GestureClass<G extends Gesture<any, any> = Gesture<any, any>> extends FastenerClass<G> {
-  create(this: GestureClass<G>, owner: FastenerOwner<G>, gestureName: string): G;
+export interface GestureClass<G extends Gesture<any, any> = Gesture<any, any>> {
+  /** @internal */
+  prototype: G;
 
-  construct(gestureClass: GestureClass, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
+  create(owner: FastenerOwner<G>, gestureName: string): G;
+
+  construct(gestureClass: {prototype: G}, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
 
   specialize(method: GestureMethod): GestureClass | null;
 
-  extend(this: GestureClass<G>, classMembers?: {} | null): GestureClass<G>;
+  extend<I = {}>(classMembers?: Partial<I> | null): GestureClass<G> & I;
 
   define<O, V extends View = View, I = {}>(descriptor: {observes: boolean} & GestureDescriptor<O, V, I & ObserverType<V>>): GestureClass<Gesture<any, V> & I>;
   define<O, V extends View = View, I = {}>(descriptor: GestureDescriptor<O, V, I>): GestureClass<Gesture<any, V> & I>;
 
   <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & GestureDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
   <O, V extends View = View, I = {}>(descriptor: GestureDescriptor<O, V, I>): PropertyDecorator;
+
+  /** @internal @override */
+  readonly FlagShift: number;
+  /** @internal @override */
+  readonly FlagMask: FastenerFlags;
 }
 
 export interface Gesture<O = unknown, V extends View = View> extends Fastener<O> {
@@ -126,7 +134,7 @@ export interface Gesture<O = unknown, V extends View = View> extends Fastener<O>
 }
 
 export const Gesture = (function (_super: typeof Fastener) {
-  const Gesture = _super.extend() as GestureClass;
+  const Gesture: GestureClass = _super.extend();
 
   Object.defineProperty(Gesture.prototype, "familyType", {
     get: function (this: Gesture): Class<Gesture<any, any>> | null {
@@ -248,7 +256,7 @@ export const Gesture = (function (_super: typeof Fastener) {
     }
   };
 
-  Gesture.construct = function <G extends Gesture<any, any>>(gestureClass: GestureClass, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+  Gesture.construct = function <G extends Gesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
     if (gesture === null) {
       gesture = function Gesture(view?: GestureView<G> | null, targetView?: View | null): GestureView<G> | null | FastenerOwner<G> {
         if (view === void 0) {
@@ -293,7 +301,7 @@ export const Gesture = (function (_super: typeof Fastener) {
 
     const gestureClass = superClass.extend(descriptor);
 
-    gestureClass.construct = function (gestureClass: GestureClass, gesture: Gesture<O, V> | null, owner: O, gestureName: string): Gesture<O, V> {
+    gestureClass.construct = function (gestureClass: {prototype: Gesture<any, any>}, gesture: Gesture<O, V> | null, owner: O, gestureName: string): Gesture<O, V> {
       gesture = superClass!.construct(gestureClass, gesture, owner, gestureName);
       if (affinity !== void 0) {
         gesture.initAffinity(affinity);

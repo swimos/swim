@@ -13,13 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {
-  FastenerContext,
-  FastenerOwner,
-  FastenerInit,
-  FastenerClass,
-  Fastener,
-} from "@swim/fastener";
+import {FastenerContext, FastenerOwner, FastenerInit, Fastener} from "@swim/fastener";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,
@@ -42,18 +36,21 @@ export interface StyleSheetInit extends FastenerInit {
 
 export type StyleSheetDescriptor<O = unknown, I = {}> = ThisType<StyleSheet<O> & I> & StyleSheetInit & Partial<I>;
 
-export interface StyleSheetClass<F extends StyleSheet<any> = StyleSheet<any>> extends FastenerClass<F> {
-  create(this: StyleSheetClass<F>, owner: FastenerOwner<F>, sheetName: string): F;
+export interface StyleSheetClass<F extends StyleSheet<any> = StyleSheet<any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(sheetClass: StyleSheetClass, sheet: F | null, owner: FastenerOwner<F>, sheetName: string): F;
+  create(owner: FastenerOwner<F>, sheetName: string): F;
 
-  extend(this: StyleSheetClass<F>, classMembers?: {} | null): StyleSheetClass<F>;
+  construct(sheetClass: {prototype: F}, sheet: F | null, owner: FastenerOwner<F>, sheetName: string): F;
 
-  define<O, I = {}>(descriptor: {extends: StyleSheetClass | null} & StyleSheetDescriptor<O, I>): StyleSheetClass<StyleSheet<any> & I>;
+  extend<I = {}>(classMembers?: Partial<I> | null): StyleSheetClass<F> & I;
+
   define<O>(descriptor: StyleSheetDescriptor<O>): StyleSheetClass<StyleSheet<any>>;
+  define<O, I = {}>(descriptor: StyleSheetDescriptor<O, I>): StyleSheetClass<StyleSheet<any> & I>;
 
-  <O, I = {}>(descriptor: {extends: StyleSheetClass | null} & StyleSheetDescriptor<O, I>): PropertyDecorator;
   <O>(descriptor: StyleSheetDescriptor<O>): PropertyDecorator;
+  <O, I = {}>(descriptor: StyleSheetDescriptor<O, I>): PropertyDecorator;
 }
 
 export interface StyleSheet<O = unknown> extends Fastener<O>, FastenerContext, ConstraintScope, ThemeContext, CssContext {
@@ -173,7 +170,7 @@ export interface StyleSheet<O = unknown> extends Fastener<O>, FastenerContext, C
 }
 
 export const StyleSheet = (function (_super: typeof Fastener) {
-  const StyleSheet = _super.extend() as StyleSheetClass;
+  const StyleSheet: StyleSheetClass = _super.extend();
 
   Object.defineProperty(StyleSheet.prototype, "familyType", {
     get: function (this: StyleSheet): Class<StyleSheet<any>> | null {
@@ -400,7 +397,7 @@ export const StyleSheet = (function (_super: typeof Fastener) {
     return new CSSStyleSheet();
   };
 
-  StyleSheet.construct = function <F extends StyleSheet<any>>(sheetClass: StyleSheetClass, sheet: F | null, owner: FastenerOwner<F>, sheetName: string): F {
+  StyleSheet.construct = function <F extends StyleSheet<any>>(sheetClass: {prototype: F}, sheet: F | null, owner: FastenerOwner<F>, sheetName: string): F {
     sheet = _super.construct(sheetClass, sheet, owner, sheetName) as F;
     (sheet as Mutable<typeof sheet>).fasteners = null;
     (sheet as Mutable<typeof sheet>).decoherent = null;
@@ -429,7 +426,7 @@ export const StyleSheet = (function (_super: typeof Fastener) {
       css = void 0;
     }
 
-    sheetClass.construct = function (sheetClass: StyleSheetClass, sheet: StyleSheet<O> | null, owner: O, sheetName: string): StyleSheet<O> {
+    sheetClass.construct = function (sheetClass: {prototype: StyleSheet<any>}, sheet: StyleSheet<O> | null, owner: O, sheetName: string): StyleSheet<O> {
       sheet = superClass!.construct(sheetClass, sheet, owner, sheetName);
 
       if (affinity !== void 0) {

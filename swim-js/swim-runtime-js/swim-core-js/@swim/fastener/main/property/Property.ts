@@ -15,25 +15,25 @@
 import {Mutable, Class, Equals, FromAny} from "@swim/util";
 import {Affinity} from "../fastener/Affinity";
 import {FastenerContext} from "../fastener/FastenerContext";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "../fastener/Fastener";
+import {FastenerOwner, FastenerFlags, FastenerInit, Fastener} from "../fastener/Fastener";
 import {StringProperty} from "./"; // forward import
 import {NumberProperty} from "./"; // forward import
 import {BooleanProperty} from "./"; // forward import
 
-export type PropertyMemberState<O, K extends keyof O> =
+export type MemberPropertyState<O, K extends keyof O> =
   O[K] extends Property<any, infer T> ? T : never;
 
-export type PropertyMemberStateInit<O, K extends keyof O> =
+export type MemberPropertyStateInit<O, K extends keyof O> =
   O[K] extends Property<any, any, infer U> ? U : never;
 
-export type PropertyMemberKey<O, K extends keyof O> =
+export type MemberPropertyKey<O, K extends keyof O> =
   O[K] extends Property ? K : never;
 
-export type PropertyMemberInit<O, K extends keyof O> =
+export type MemberPropertyInit<O, K extends keyof O> =
   O[K] extends Property<any, infer T, infer U> ? T | U : never;
 
-export type PropertyMemberInitMap<O> = {
-  -readonly [K in keyof O as PropertyMemberKey<O, K>]?: PropertyMemberInit<O, K>;
+export type MemberPropertyInitMap<O> = {
+  -readonly [K in keyof O as MemberPropertyKey<O, K>]?: MemberPropertyInit<O, K>;
 };
 
 export type PropertyState<P extends Property<any, any>> =
@@ -69,24 +69,32 @@ export interface PropertyInit<T = unknown, U = never> extends FastenerInit {
 
 export type PropertyDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<Property<O, T, U> & I> & PropertyInit<T, U> & Partial<I>;
 
-export interface PropertyClass<P extends Property<any, any> = Property<any, any, any>> extends FastenerClass<P> {
-  create(this: PropertyClass<P>, owner: FastenerOwner<P>, propertyName: string): P;
+export interface PropertyClass<P extends Property<any, any> = Property<any, any, any>> {
+  /** @internal */
+  prototype: P;
 
-  construct(propertyClass: PropertyClass, property: P | null, owner: FastenerOwner<P>, propertyName: string): P;
+  create(owner: FastenerOwner<P>, propertyName: string): P;
+
+  construct(propertyClass: {prototype: P}, property: P | null, owner: FastenerOwner<P>, propertyName: string): P;
 
   specialize(type: unknown): PropertyClass | null;
 
-  extend(this: PropertyClass<P>, classMembers?: {} | null): PropertyClass<P>;
+  extend<I = {}>(classMembers?: Partial<I> | null): PropertyClass<P> & I;
 
-  define<O, T, U = never, I = {}>(descriptor: {extends: PropertyClass | null} & PropertyDescriptor<O, T, U, I>): PropertyClass<Property<any, T, U> & I>;
   define<O, T, U = never>(descriptor: PropertyDescriptor<O, T, U>): PropertyClass<Property<any, T, U>>;
+  define<O, T, U = never, I = {}>(descriptor: PropertyDescriptor<O, T, U, I>): PropertyClass<Property<any, T, U> & I>;
 
   <O, T extends string | undefined = string | undefined, U extends string | undefined = string | undefined>(descriptor: {type: typeof String} & PropertyDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & PropertyDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends boolean | undefined = boolean | undefined, U extends boolean | string | undefined = boolean | string | undefined>(descriptor: {type: typeof Boolean} & PropertyDescriptor<O, T, U>): PropertyDecorator;
   <O, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = never, I = {}>(descriptor: {extends: PropertyClass | null} & PropertyDescriptor<O, T, U, I>): PropertyDecorator;
   <O, T, U = never>(descriptor: PropertyDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never, I = {}>(descriptor: PropertyDescriptor<O, T, U, I>): PropertyDecorator;
+
+  /** @internal @override */
+  readonly FlagShift: number;
+  /** @internal @override */
+  readonly FlagMask: FastenerFlags;
 }
 
 export interface Property<O = unknown, T = unknown, U = never> extends Fastener<O> {
@@ -195,7 +203,7 @@ export interface Property<O = unknown, T = unknown, U = never> extends Fastener<
 }
 
 export const Property = (function (_super: typeof Fastener) {
-  const Property = _super.extend() as PropertyClass;
+  const Property: PropertyClass = _super.extend();
 
   Object.defineProperty(Property.prototype, "familyType", {
     get: function (this: Property): Class<Property<any, any, any>> | null {
@@ -345,7 +353,7 @@ export const Property = (function (_super: typeof Fastener) {
     return value as T;
   };
 
-  Property.construct = function <P extends Property<any, any>>(propertyClass: PropertyClass, property: P | null, owner: FastenerOwner<P>, propertyName: string): P {
+  Property.construct = function <P extends Property<any, any>>(propertyClass: {prototype: P}, property: P | null, owner: FastenerOwner<P>, propertyName: string): P {
     if (property === null) {
       property = function Property(state?: PropertyState<P> | PropertyStateInit<P>, affinity?: Affinity): PropertyState<P> | FastenerOwner<P> {
         if (arguments.length === 0) {
@@ -404,7 +412,7 @@ export const Property = (function (_super: typeof Fastener) {
 
     const propertyClass = superClass.extend(descriptor);
 
-    propertyClass.construct = function (propertyClass: PropertyClass, property: Property<O, T, U> | null, owner: O, propertyName: string): Property<O, T, U> {
+    propertyClass.construct = function (propertyClass: {prototype: Property<any, any, any>}, property: Property<O, T, U> | null, owner: O, propertyName: string): Property<O, T, U> {
       property = superClass!.construct(propertyClass, property, owner, propertyName);
       if (affinity !== void 0) {
         property.initAffinity(affinity);

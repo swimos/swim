@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, FromAny, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, Fastener} from "@swim/fastener";
 import {Model, AnyTraitFactory, Trait} from "@swim/model";
 import {AnyViewFactory, View} from "@swim/view";
 
@@ -53,30 +53,33 @@ export interface TraitViewFastenerInit<R extends Trait = Trait, V extends View =
 
 export type TraitViewFastenerDescriptor<O = unknown, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}> = ThisType<TraitViewFastener<O, R, V, RU, VU> & I> & TraitViewFastenerInit<R, V, RU, VU> & Partial<I>;
 
-export interface TraitViewFastenerClass<F extends TraitViewFastener<any, any, any> = TraitViewFastener<any, any, any, any, any>> extends FastenerClass<F> {
-  create(this: TraitViewFastenerClass<F>, owner: FastenerOwner<F>, fastenerName: string): F;
+export interface TraitViewFastenerClass<F extends TraitViewFastener<any, any, any> = TraitViewFastener<any, any, any, any, any>> {
+  /** @internal */
+  prototype: F;
 
-  construct(fastenerClass: TraitViewFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
+  create(owner: FastenerOwner<F>, fastenerName: string): F;
 
-  extend(this: TraitViewFastenerClass<F>, classMembers?: {} | null): TraitViewFastenerClass<F>;
+  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
 
-  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {extends: TraitViewFastenerClass | null, observesTrait: boolean, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<R> & ObserverType<V>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU> & I>;
-  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {extends: TraitViewFastenerClass | null, observesTrait: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<R>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU> & I>;
-  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {extends: TraitViewFastenerClass | null, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<V>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU> & I>;
-  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {extends: TraitViewFastenerClass | null} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU> & I>;
-  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: {observesTrait: boolean, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, ObserverType<R> & ObserverType<V>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU>>;
+  extend<I = {}>(classMembers?: Partial<I> | null): TraitViewFastenerClass<F> & I;
+
+  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: TraitViewFastenerDescriptor<O, R, V, RU, VU>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU>>;
   define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: {observesTrait: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, ObserverType<R>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU>>;
   define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: {observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, ObserverType<V>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU>>;
-  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: TraitViewFastenerDescriptor<O, R, V, RU, VU>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU>>;
+  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: {observesTrait: boolean, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, ObserverType<R> & ObserverType<V>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU>>;
+  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: TraitViewFastenerDescriptor<O, R, V, RU, VU, I>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU> & I>;
+  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {observesTrait: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<R>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU> & I>;
+  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<V>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU> & I>;
+  define<O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {observesTrait: boolean, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<R> & ObserverType<V>>): TraitViewFastenerClass<TraitViewFastener<any, R, V, RU, VU> & I>;
 
-  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {extends: TraitViewFastenerClass | null, observesTrait: boolean, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<R> & ObserverType<V>>): PropertyDecorator;
-  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {extends: TraitViewFastenerClass | null, observesTrait: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<R>>): PropertyDecorator;
-  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {extends: TraitViewFastenerClass | null, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<V>>): PropertyDecorator;
-  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {extends: TraitViewFastenerClass | null} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I>): PropertyDecorator;
-  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: {observesTrait: boolean, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, ObserverType<R> & ObserverType<V>>): PropertyDecorator;
+  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: TraitViewFastenerDescriptor<O, R, V, RU, VU>): PropertyDecorator;
   <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: {observesTrait: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, ObserverType<R>>): PropertyDecorator;
   <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: {observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, ObserverType<V>>): PropertyDecorator;
-  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: TraitViewFastenerDescriptor<O, R, V, RU, VU>): PropertyDecorator;
+  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never>(descriptor: {observesTrait: boolean, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, ObserverType<R> & ObserverType<V>>): PropertyDecorator;
+  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: TraitViewFastenerDescriptor<O, R, V, RU, VU, I>): PropertyDecorator;
+  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {observesTrait: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<R>>): PropertyDecorator;
+  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<V>>): PropertyDecorator;
+  <O, R extends Trait = Trait, V extends View = View, RU = never, VU = never, I = {}>(descriptor: {observesTrait: boolean, observesView: boolean} & TraitViewFastenerDescriptor<O, R, V, RU, VU, I & ObserverType<R> & ObserverType<V>>): PropertyDecorator;
 }
 
 export interface TraitViewFastener<O = unknown, R extends Trait = Trait, V extends View = View, RU = never, VU = never> extends Fastener<O> {
@@ -176,7 +179,7 @@ export interface TraitViewFastener<O = unknown, R extends Trait = Trait, V exten
 }
 
 export const TraitViewFastener = (function (_super: typeof Fastener) {
-  const TraitViewFastener = _super.extend() as TraitViewFastenerClass;
+  const TraitViewFastener: TraitViewFastenerClass = _super.extend();
 
   Object.defineProperty(TraitViewFastener.prototype, "familyType", {
     get: function (this: TraitViewFastener): Class<TraitViewFastener<any, any, any>> | null {
@@ -450,7 +453,7 @@ export const TraitViewFastener = (function (_super: typeof Fastener) {
     return null;
   };
 
-  TraitViewFastener.construct = function <F extends TraitViewFastener<any, any, any>>(fastenerClass: TraitViewFastenerClass, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  TraitViewFastener.construct = function <F extends TraitViewFastener<any, any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
     fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
     (fastener as Mutable<typeof fastener>).traitKey = void 0;
     (fastener as Mutable<typeof fastener>).trait = null;
@@ -477,7 +480,7 @@ export const TraitViewFastener = (function (_super: typeof Fastener) {
 
     const fastenerClass = superClass.extend(descriptor);
 
-    fastenerClass.construct = function (fastenerClass: TraitViewFastenerClass, fastener: TraitViewFastener<O, R, V, RU, VU> | null, owner: O, fastenerName: string): TraitViewFastener<O, R, V, RU, VU> {
+    fastenerClass.construct = function (fastenerClass: {prototype: TraitViewFastener<any, any, any, any, any>}, fastener: TraitViewFastener<O, R, V, RU, VU> | null, owner: O, fastenerName: string): TraitViewFastener<O, R, V, RU, VU> {
       fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);
