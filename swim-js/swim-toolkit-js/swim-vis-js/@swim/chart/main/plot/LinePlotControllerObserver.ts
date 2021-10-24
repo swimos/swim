@@ -19,14 +19,14 @@ import type {LinePlotTrait} from "./LinePlotTrait";
 import type {SeriesPlotControllerObserver} from "./SeriesPlotControllerObserver";
 import type {LinePlotController} from "./LinePlotController";
 
-export interface LinePlotControllerObserver<X, Y, C extends LinePlotController<X, Y> = LinePlotController<X, Y>> extends SeriesPlotControllerObserver<X, Y, C> {
-  controllerWillSetPlotTrait?(newPlotTrait: LinePlotTrait<X, Y> | null, oldPlotTrait: LinePlotTrait<X, Y> | null, controller: C): void;
+export interface LinePlotControllerObserver<X = unknown, Y = unknown, C extends LinePlotController<X, Y> = LinePlotController<X, Y>> extends SeriesPlotControllerObserver<X, Y, C> {
+  controllerWillAttachPlotTrait?(plotTrait: LinePlotTrait<X, Y>, controller: C): void;
 
-  controllerDidSetPlotTrait?(newPlotTrait: LinePlotTrait<X, Y> | null, oldPlotTrait: LinePlotTrait<X, Y> | null, controller: C): void;
+  controllerDidDetachPlotTrait?(plotTrait: LinePlotTrait<X, Y>, controller: C): void;
 
-  controllerWillSetPlotView?(newPlotView: LinePlotView<X, Y> | null, oldPlotView: LinePlotView<X, Y> | null, controller: C): void;
+  controllerWillAttachPlotView?(plotView: LinePlotView<X, Y>, controller: C): void;
 
-  controllerDidSetPlotView?(newPlotView: LinePlotView<X, Y> | null, oldPlotView: LinePlotView<X, Y> | null, controller: C): void;
+  controllerDidDetachPlotView?(plotView: LinePlotView<X, Y>, controller: C): void;
 
   controllerWillSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, controller: C): void;
 

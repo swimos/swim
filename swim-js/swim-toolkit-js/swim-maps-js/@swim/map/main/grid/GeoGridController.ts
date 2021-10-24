@@ -13,103 +13,38 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import type {GeoTile} from "@swim/geo";
 import type {Trait} from "@swim/model";
-import {ControllerFastener, TraitViewFastener, Controller} from "@swim/controller";
+import type {View} from "@swim/view";
+import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {GeoViewport} from "../geo/GeoViewport";
 import type {GeoViewContext} from "../geo/GeoViewContext";
 import type {GeoView} from "../geo/GeoView";
+import type {GeoTrait} from "../geo/GeoTrait";
+import {GeoController} from "../geo/GeoController";
 import {GeoLayerController} from "../layer/GeoLayerController";
 import {GeoGridView} from "./GeoGridView";
 import {GeoGridTrait} from "./GeoGridTrait";
 import type {GeoGridControllerObserver} from "./GeoGridControllerObserver";
 
+/** @internal */
+export interface GeoGridControllerTileExt {
+  attachTileTrait(tileTrait: GeoGridTrait, tileController: GeoGridController): void;
+  detachTileTrait(tileTrait: GeoGridTrait, tileController: GeoGridController): void;
+  attachTileView(tileView: GeoView, tileController: GeoGridController): void;
+  detachTileView(tileView: GeoView, tileController: GeoGridController): void;
+}
+
 export class GeoGridController extends GeoLayerController {
   constructor(geoTile: GeoTile) {
     super();
     this.geoTile = geoTile;
-    this.tileFasteners = [];
   }
 
   override readonly observerType?: Class<GeoGridControllerObserver>;
 
   readonly geoTile: GeoTile;
-
-  protected override initGeoTrait(geoTrait: GeoGridTrait): void {
-    super.initGeoTrait(geoTrait);
-  }
-
-  protected override attachGeoTrait(geoTrait: GeoGridTrait): void {
-    super.attachGeoTrait(geoTrait);
-    const tileFasteners = geoTrait.tileFasteners;
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileTrait = tileFasteners[i]!.trait;
-      if (tileTrait !== null) {
-        this.insertTileTrait(tileTrait);
-      }
-    }
-    const geoView = this.geo.view;
-    if (geoView !== null && !geoView.culled) {
-      geoTrait.consume(this);
-    }
-  }
-
-  protected override detachGeoTrait(geoTrait: GeoGridTrait): void {
-    geoTrait.unconsume(this);
-    const tileFasteners = geoTrait.tileFasteners;
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileTrait = tileFasteners[i]!.trait;
-      if (tileTrait !== null) {
-        this.removeTileTrait(tileTrait);
-      }
-    }
-    super.detachGeoTrait(geoTrait);
-  }
-
-  protected override willSetGeoTrait(newGeoTrait: GeoGridTrait | null, oldGeoTrait: GeoGridTrait | null): void {
-    super.willSetGeoTrait(newGeoTrait, oldGeoTrait);
-  }
-
-  protected override onSetGeoTrait(newGeoTrait: GeoGridTrait | null, oldGeoTrait: GeoGridTrait | null): void {
-    super.onSetGeoTrait(newGeoTrait, oldGeoTrait);
-  }
-
-  protected override didSetGeoTrait(newGeoTrait: GeoGridTrait | null, oldGeoTrait: GeoGridTrait | null): void {
-    super.didSetGeoTrait(newGeoTrait, oldGeoTrait);
-  }
-
-  protected override createGeoView(): GeoView | null {
-    return new GeoGridView(this.geoTile);
-  }
-
-  protected override initGeoView(geoView: GeoView): void {
-    super.initGeoView(geoView);
-    geoView.setCulled(true);
-  }
-
-  protected override attachGeoView(geoView: GeoView): void {
-    super.attachGeoView(geoView);
-    const tileFasteners = this.tileFasteners;
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileController = tileFasteners[i]!.controller;
-      if (tileController !== null) {
-        const tileView = tileController.geo.view;
-        if (tileView !== null && tileView.parent === null) {
-          tileController.geo.injectView(geoView);
-        }
-      }
-    }
-  }
-
-  protected override detachGeoView(geoView: GeoView): void {
-    super.detachGeoView(geoView);
-  }
-
-  protected override projectGeoView(viewContext: GeoViewContext, geoView: GeoView): void {
-    super.projectGeoView(viewContext, geoView);
-    this.autoCullGeoView(viewContext.geoViewport, geoView);
-    this.autoConsumeGeoView(viewContext.geoViewport, geoView);
-  }
 
   get minCullZoom(): number {
     return this.geoTile.z;
@@ -146,374 +81,139 @@ export class GeoGridController extends GeoLayerController {
     }
   }
 
-  /** @internal */
-  static override GeoFastener = TraitViewFastener.define<GeoGridController, GeoGridTrait, GeoView>({
-    extends: GeoLayerController.GeoFastener,
+  @TraitViewRef<GeoGridController, GeoGridTrait, GeoView>({
+    extends: true,
     traitType: GeoGridTrait,
     observesTrait: true,
-    traitWillSetTile(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null, targetTrait: Trait): void {
-      if (oldTileTrait !== null) {
-        this.owner.removeTileTrait(oldTileTrait);
+    didAttachTrait(geoTrait: GeoGridTrait, targetTrait: Trait | null): void {
+      const tileTraits = geoTrait.tiles.traits;
+      for (const traitId in tileTraits) {
+        const tileTrait = tileTraits[traitId]!;
+        this.owner.tiles.addTrait(tileTrait);
+      }
+      const geoView = this.view;
+      if (geoView !== null && !geoView.culled) {
+        geoTrait.consume(this.owner);
+      }
+      GeoLayerController.geo.prototype.didAttachTrait.call(this, geoTrait, targetTrait);
+    },
+    willDetachTrait(geoTrait: GeoGridTrait): void {
+      GeoLayerController.geo.prototype.willDetachTrait.call(this, geoTrait);
+      geoTrait.unconsume(this.owner);
+      const tileTraits = geoTrait.tiles.traits;
+      for (const traitId in tileTraits) {
+        const tileTrait = tileTraits[traitId]!;
+        this.owner.tiles.deleteTrait(tileTrait);
       }
     },
-    traitDidSetTile(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null, targetTrait: Trait): void {
-      if (newTileTrait !== null) {
-        this.owner.insertTileTrait(newTileTrait, targetTrait);
+    traitWillAttachTile(tileTrait: GeoGridTrait, targetTrait: Trait): void {
+      this.owner.tiles.addTrait(tileTrait, targetTrait);
+    },
+    traitDidDetachTile(tileTrait: GeoGridTrait): void {
+      this.owner.tiles.deleteTrait(tileTrait);
+    },
+    viewType: GeoGridView,
+    observesView: true,
+    didAttachView(geoView: GeoView, targetView: View | null): void {
+      GeoLayerController.geo.prototype.didAttachView.call(this, geoView, targetView);
+      geoView.setCulled(true);
+      const tileControllers = this.owner.tiles.controllers;
+      for (const controllerId in tileControllers) {
+        const tileController = tileControllers[controllerId]!;
+        const tileView = tileController.geo.view;
+        if (tileView !== null && tileView.parent === null) {
+          tileController.geo.insertView(geoView);
+        }
       }
     },
-  });
-
-  @TraitViewFastener<GeoGridController, GeoGridTrait, GeoView>({
-    extends: GeoGridController.GeoFastener,
+    viewDidProject(viewContext: GeoViewContext, geoView: GeoView): void {
+      this.owner.autoCullGeoView(viewContext.geoViewport, geoView);
+      this.owner.autoConsumeGeoView(viewContext.geoViewport, geoView);
+    },
+    createView(): GeoGridView | null {
+      return new GeoGridView(this.owner.geoTile);
+    },
   })
-  override readonly geo!: TraitViewFastener<this, GeoGridTrait, GeoView>;
+  override readonly geo!: TraitViewRef<this, GeoGridTrait, GeoView>;
+  static override readonly geo: MemberFastenerClass<GeoGridController, "geo">;
 
-  insertTile(tileController: GeoGridController, targetController: Controller | null = null): void {
-    const tileFasteners = this.tileFasteners as ControllerFastener<this, GeoGridController>[];
-    let targetIndex = tileFasteners.length;
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileFastener = tileFasteners[i]!;
-      if (tileFastener.controller === tileController) {
-        return;
-      } else if (tileFastener.controller === targetController) {
-        targetIndex = i;
-      }
-    }
-    const tileFastener = this.createTileFastener(tileController);
-    tileFasteners.splice(targetIndex, 0, tileFastener);
-    tileFastener.setController(tileController, targetController);
-    if (this.mounted) {
-      tileFastener.mount();
-    }
-  }
+  @TraitViewControllerSet<GeoGridController, GeoTrait, GeoView, GeoController>({
+    extends: true,
+    detectController(controller: Controller): GeoController | null {
+      return controller instanceof GeoController && !(controller instanceof GeoGridController) ? controller : null;
+    },
+  })
+  override readonly features!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController>;
+  static override readonly features: MemberFastenerClass<GeoGridController, "features">;
 
-  removeTile(tileController: GeoGridController): void {
-    const tileFasteners = this.tileFasteners as ControllerFastener<this, GeoGridController>[];
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileFastener = tileFasteners[i]!;
-      if (tileFastener.controller === tileController) {
-        tileFastener.setController(null);
-        if (this.mounted) {
-          tileFastener.unmount();
-        }
-        tileFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected createTile(tileTrait: GeoGridTrait): GeoGridController | null {
-    return new GeoGridController(tileTrait.geoTile);
-  }
-
-  protected initTile(tileController: GeoGridController, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const tileTrait = tileController.geo.trait;
-    if (tileTrait !== null) {
-      this.initTileTrait(tileTrait, tileFastener);
-    }
-    const tileView = tileController.geo.view;
-    if (tileView !== null) {
-      this.initTileView(tileView, tileFastener);
-    }
-  }
-
-  protected attachTile(tileController: GeoGridController, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const tileTrait = tileController.geo.trait;
-    if (tileTrait !== null) {
-      this.attachTileTrait(tileTrait, tileFastener);
-    }
-    const tileView = tileController.geo.view;
-    if (tileView !== null) {
-      this.attachTileView(tileView, tileFastener);
-    }
-  }
-
-  protected detachTile(tileController: GeoGridController, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const tileView = tileController.geo.view;
-    if (tileView !== null) {
-      this.detachTileView(tileView, tileFastener);
-    }
-    const tileTrait = tileController.geo.trait;
-    if (tileTrait !== null) {
-      this.detachTileTrait(tileTrait, tileFastener);
-    }
-  }
-
-  protected willSetTile(newTileController: GeoGridController | null, oldTileController: GeoGridController | null,
-                        tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetTile !== void 0) {
-        observer.controllerWillSetTile(newTileController, oldTileController, tileFastener);
-      }
-    }
-  }
-
-  protected onSetTile(newTileController: GeoGridController | null, oldTileController: GeoGridController | null,
-                      tileFastener: ControllerFastener<this, GeoGridController>): void {
-    if (oldTileController !== null) {
-      this.detachTile(oldTileController, tileFastener);
-    }
-    if (newTileController !== null) {
-      this.attachTile(newTileController, tileFastener);
-      this.initTile(newTileController, tileFastener);
-    }
-  }
-
-  protected didSetTile(newTileController: GeoGridController | null, oldTileController: GeoGridController | null,
-                       tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetTile !== void 0) {
-        observer.controllerDidSetTile(newTileController, oldTileController, tileFastener);
-      }
-    }
-  }
-
-  insertTileTrait(tileTrait: GeoGridTrait, targetTrait: Trait | null = null): void {
-    const tileFasteners = this.tileFasteners as ControllerFastener<this, GeoGridController>[];
-    let targetController: GeoGridController | null = null;
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileController = tileFasteners[i]!.controller;
-      if (tileController !== null) {
-        if (tileController.geo.trait === tileTrait) {
-          return;
-        } else if (tileController.geo.trait === targetTrait) {
-          targetController = tileController;
-        }
-      }
-    }
-    const tileController = this.createTile(tileTrait);
-    if (tileController !== null) {
-      tileController.geo.setTrait(tileTrait);
-      this.insertChild(tileController, targetController);
-      if (tileController.geo.view === null) {
-        const tileView = this.createTileView(tileController);
-        let targetView: GeoView | null = null;
-        if (targetController !== null) {
-          targetView = targetController.geo.view;
-        }
-        const geoView = this.geo.view;
-        if (geoView !== null) {
-          tileController.geo.injectView(geoView, tileView, targetView, null);
-        } else {
-          tileController.geo.setView(tileView, targetView);
-        }
-      }
-    }
-  }
-
-  removeTileTrait(tileTrait: GeoGridTrait): void {
-    const tileFasteners = this.tileFasteners as ControllerFastener<this, GeoGridController>[];
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileFastener = tileFasteners[i]!;
-      const tileController = tileFastener.controller;
-      if (tileController !== null && tileController.geo.trait === tileTrait) {
-        tileFastener.setController(null);
-        if (this.mounted) {
-          tileFastener.unmount();
-        }
-        tileFasteners.splice(i, 1);
-        tileController.remove();
-        return;
-      }
-    }
-  }
-
-  protected initTileTrait(tileTrait: GeoGridTrait, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    // hook
-  }
-
-  protected attachTileTrait(tileTrait: GeoGridTrait, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    // hook
-  }
-
-  protected detachTileTrait(tileTrait: GeoGridTrait, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    // hook
-  }
-
-  protected willSetTileTrait(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null,
-                             tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetTileTrait !== void 0) {
-        observer.controllerWillSetTileTrait(newTileTrait, oldTileTrait, tileFastener);
-      }
-    }
-  }
-
-  protected onSetTileTrait(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null,
-                           tileFastener: ControllerFastener<this, GeoGridController>): void {
-    if (oldTileTrait !== null) {
-      this.detachTileTrait(oldTileTrait, tileFastener);
-    }
-    if (newTileTrait !== null) {
-      this.attachTileTrait(newTileTrait, tileFastener);
-      this.initTileTrait(newTileTrait, tileFastener);
-    }
-  }
-
-  protected didSetTileTrait(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null,
-                            tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetTileTrait !== void 0) {
-        observer.controllerDidSetTileTrait(newTileTrait, oldTileTrait, tileFastener);
-      }
-    }
-  }
-
-  protected createTileView(tileController: GeoGridController): GeoView | null {
-    return tileController.geo.createView();
-  }
-
-  protected initTileView(tileView: GeoView, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    // hook
-  }
-
-  protected attachTileView(tileView: GeoView, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    // hook
-  }
-
-  protected detachTileView(tileView: GeoView, tileFastener: ControllerFastener<this, GeoGridController>): void {
-    tileView.remove();
-  }
-
-  protected willSetTileView(newTileView: GeoView | null, oldTileView: GeoView | null,
-                            tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetTileView !== void 0) {
-        observer.controllerWillSetTileView(newTileView, oldTileView, tileFastener);
-      }
-    }
-  }
-
-  protected onSetTileView(newTileView: GeoView | null, oldTileView: GeoView | null,
-                          tileFastener: ControllerFastener<this, GeoGridController>): void {
-    if (oldTileView !== null) {
-      this.detachTileView(oldTileView, tileFastener);
-    }
-    if (newTileView !== null) {
-      this.attachTileView(newTileView, tileFastener);
-      this.initTileView(newTileView, tileFastener);
-    }
-  }
-
-  protected didSetTileView(newTileView: GeoView | null, oldTileView: GeoView | null,
-                           tileFastener: ControllerFastener<this, GeoGridController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetTileView !== void 0) {
-        observer.controllerDidSetTileView(newTileView, oldTileView, tileFastener);
-      }
-    }
-  }
-
-  /** @internal */
-  static TileFastener = ControllerFastener.define<GeoGridController, GeoGridController>({
+  @TraitViewControllerSet<GeoGridController, GeoGridTrait, GeoView, GeoGridController, GeoGridControllerTileExt>({
     type: GeoGridController,
-    child: false,
+    binds: true,
     observes: true,
-    willSetController(newTileController: GeoGridController | null, oldTileController: GeoGridController | null): void {
-      this.owner.willSetTile(newTileController, oldTileController, this);
+    get parentView(): GeoView | null {
+      return this.owner.geo.view;
     },
-    onSetController(newTileController: GeoGridController | null, oldTileController: GeoGridController | null): void {
-      this.owner.onSetTile(newTileController, oldTileController, this);
+    getTraitViewRef(tileController: GeoGridController): TraitViewRef<unknown, GeoGridTrait, GeoView> {
+      return tileController.geo;
     },
-    didSetController(newTileController: GeoGridController | null, oldTileController: GeoGridController | null): void {
-      this.owner.didSetTile(newTileController, oldTileController, this);
+    willAttachController(tileController: GeoGridController): void {
+      this.owner.callObservers("controllerWillAttachTile", tileController, this.owner);
     },
-    controllerWillSetGeoTrait(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null): void {
-      this.owner.willSetTileTrait(newTileTrait, oldTileTrait, this);
-    },
-    controllerDidSetGeoTrait(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null): void {
-      this.owner.onSetTileTrait(newTileTrait, oldTileTrait, this);
-      this.owner.didSetTileTrait(newTileTrait, oldTileTrait, this);
-    },
-    controllerWillSetGeoView(newTileView: GeoView | null, oldTileView: GeoView | null): void {
-      this.owner.willSetTileView(newTileView, oldTileView, this);
-    },
-    controllerDidSetGeoView(newTileView: GeoView | null, oldTileView: GeoView | null): void {
-      this.owner.onSetTileView(newTileView, oldTileView, this);
-      this.owner.didSetTileView(newTileView, oldTileView, this);
-    },
-  });
-
-  protected createTileFastener(tileController: GeoGridController): ControllerFastener<this, GeoGridController> {
-    return GeoGridController.TileFastener.create(this, tileController.key ?? "tile");
-  }
-
-  /** @internal */
-  readonly tileFasteners: ReadonlyArray<ControllerFastener<this, GeoGridController>>;
-
-  protected getTileFastener(tileTrait: GeoGridTrait): ControllerFastener<this, GeoGridController> | null {
-    const tileFasteners = this.tileFasteners;
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileFastener = tileFasteners[i]!;
-      const tileController = tileFastener.controller;
-      if (tileController !== null && tileController.geo.trait === tileTrait) {
-        return tileFastener;
+    didAttachController(tileController: GeoGridController): void {
+      const tileTrait = tileController.geo.trait;
+      if (tileTrait !== null) {
+        this.attachTileTrait(tileTrait, tileController);
       }
-    }
-    return null;
-  }
-
-  /** @internal */
-  protected mountTileFasteners(): void {
-    const tileFasteners = this.tileFasteners;
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileFastener = tileFasteners[i]!;
-      tileFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountTileFasteners(): void {
-    const tileFasteners = this.tileFasteners;
-    for (let i = 0, n = tileFasteners.length; i < n; i += 1) {
-      const tileFastener = tileFasteners[i]!;
-      tileFastener.unmount();
-    }
-  }
-
-  protected detectTileController(controller: Controller): GeoGridController | null {
-    return controller instanceof GeoGridController ? controller : null;
-  }
-
-  protected override detectInsertChildController(childController: Controller, targetController: Controller | null): void {
-    const tileController = this.detectTileController(childController);
-    if (tileController !== null) {
-      this.insertTile(tileController, targetController);
-    } else {
-      super.detectInsertChildController(childController, targetController);
-    }
-  }
-
-  protected override detectRemoveChildController(childController: Controller): void {
-    const tileController = this.detectTileController(childController);
-    if (tileController !== null) {
-      this.removeTile(tileController);
-    } else {
-      super.detectRemoveChildController(childController);
-    }
-  }
-
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountTileFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountTileFasteners();
-    super.unmountFasteners();
-  }
+      const tileView = tileController.geo.view;
+      if (tileView !== null) {
+        this.attachTileView(tileView, tileController);
+      }
+    },
+    willDetachController(tileController: GeoGridController): void {
+      const tileView = tileController.geo.view;
+      if (tileView !== null) {
+        this.detachTileView(tileView, tileController);
+      }
+      const tileTrait = tileController.geo.trait;
+      if (tileTrait !== null) {
+        this.detachTileTrait(tileTrait, tileController);
+      }
+    },
+    didDetachController(tileController: GeoGridController): void {
+      this.owner.callObservers("controllerDidDetachTile", tileController, this.owner);
+    },
+    controllerWillAttachGeoTrait(tileTrait: GeoGridTrait, tileController: GeoGridController): void {
+      this.owner.callObservers("controllerWillAttachTileTrait", tileTrait, tileController, this.owner);
+      this.attachTileTrait(tileTrait, tileController);
+    },
+    controllerDidDetachGeoTrait(tileTrait: GeoGridTrait, tileController: GeoGridController): void {
+      this.detachTileTrait(tileTrait, tileController);
+      this.owner.callObservers("controllerDidDetachTileTrait", tileTrait, tileController, this.owner);
+    },
+    attachTileTrait(tileTrait: GeoGridTrait, tileController: GeoGridController): void {
+      // hook
+    },
+    detachTileTrait(tileTrait: GeoGridTrait, tileController: GeoGridController): void {
+      // hook
+    },
+    controllerWillAttachGeoView(tileView: GeoView, tileController: GeoGridController): void {
+      this.owner.callObservers("controllerWillAttachTileView", tileView, tileController, this.owner);
+      this.attachTileView(tileView, tileController);
+    },
+    controllerDidDetachGeoView(tileView: GeoView, tileController: GeoGridController): void {
+      this.detachTileView(tileView, tileController);
+      this.owner.callObservers("controllerDidDetachTileView", tileView, tileController, this.owner);
+    },
+    attachTileView(tileView: GeoView, tileController: GeoGridController): void {
+      // hook
+    },
+    detachTileView(tileView: GeoView, tileController: GeoGridController): void {
+      tileView.remove();
+    },
+    createController(tileTrait?: GeoGridTrait): GeoGridController | null {
+      return tileTrait !== void 0 ? new GeoGridController(tileTrait.geoTile) : null;
+    },
+  })
+  readonly tiles!: TraitViewControllerSet<this, GeoGridTrait, GeoView, GeoGridController>;
+  static readonly tiles: MemberFastenerClass<GeoGridController, "tiles">;
 }

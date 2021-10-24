@@ -22,8 +22,8 @@ import {TestThemeHierarchy} from "./TestThemeHierarchy";
 export class ThemeAnimatorSpec extends Spec {
   @Test
   testThemeAnimator(exam: Exam): void {
-    const animator = ThemeAnimator.create(null, "foo");
-    exam.equal(animator.name, "foo");
+    const animator = ThemeAnimator.create(null);
+    exam.equal(animator.name, "");
     exam.equal(animator.look, null);
     exam.equal(animator.state, void 0);
     exam.equal(animator.value, void 0);
@@ -39,8 +39,8 @@ export class ThemeAnimatorSpec extends Spec {
 
   @Test
   testThemeAnimatorDefine(exam: Exam): void {
-    const testAnimator = ThemeAnimator.define({type: Number, state: 0});
-    const animator = testAnimator.create(null, "foo");
+    const testAnimator = ThemeAnimator.define("foo", {type: Number, state: 0});
+    const animator = testAnimator.create(null);
     exam.equal(animator.name, "foo");
     exam.equal(animator.state, 0);
     exam.equal(animator.value, 0);

@@ -55,6 +55,7 @@ export const LinearRange = (function (_super: typeof Range) {
   };
 
   LinearRange.prototype = Object.create(_super.prototype);
+  LinearRange.prototype.constructor = LinearRange;
 
   Object.defineProperty(LinearRange.prototype, "inverse", {
     get(this: LinearRange): LinearDomain {

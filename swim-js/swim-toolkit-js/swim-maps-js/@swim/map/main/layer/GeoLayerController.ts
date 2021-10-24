@@ -13,616 +13,158 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import type {GeoBox} from "@swim/geo";
 import type {Trait} from "@swim/model";
-import {ControllerFastener, TraitViewFastener, Controller} from "@swim/controller";
-import type {GeoViewContext} from "../geo/GeoViewContext";
-import {GeoView} from "../geo/GeoView";
+import {TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import type {GeoView} from "../geo/GeoView";
 import type {GeoTrait} from "../geo/GeoTrait";
 import {GeoController} from "../geo/GeoController";
 import {GeoTreeView} from "../tree/GeoTreeView";
 import {GeoLayerTrait} from "./GeoLayerTrait";
 import type {GeoLayerControllerObserver} from "./GeoLayerControllerObserver";
 
-export class GeoLayerController extends GeoController {
-  constructor() {
-    super();
-    this.featureFasteners = [];
-  }
+/** @internal */
+export interface GeoLayerControllerFeatureExt {
+  attachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void;
+  detachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void;
+  attachFeatureView(featureView: GeoView, featureController: GeoController): void;
+  detachFeatureView(featureView: GeoView, featureController: GeoController): void;
+}
 
+export class GeoLayerController extends GeoController {
   override readonly observerType?: Class<GeoLayerControllerObserver>;
 
-  protected initGeoTrait(geoTrait: GeoLayerTrait): void {
-    // hook
-  }
-
-  protected attachGeoTrait(geoTrait: GeoLayerTrait): void {
-    const featureFasteners = geoTrait.featureFasteners;
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureTrait = featureFasteners[i]!.trait;
-      if (featureTrait !== null) {
-        this.insertFeatureTrait(featureTrait);
-      }
-    }
-  }
-
-  protected detachGeoTrait(geoTrait: GeoLayerTrait): void {
-    const featureFasteners = geoTrait.featureFasteners;
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureTrait = featureFasteners[i]!.trait;
-      if (featureTrait !== null) {
-        this.removeFeatureTrait(featureTrait);
-      }
-    }
-  }
-
-  protected willSetGeoTrait(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoTrait !== void 0) {
-        observer.controllerWillSetGeoTrait(newGeoTrait, oldGeoTrait, this);
-      }
-    }
-  }
-
-  protected onSetGeoTrait(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null): void {
-    if (oldGeoTrait !== null) {
-      this.detachGeoTrait(oldGeoTrait);
-    }
-    if (newGeoTrait !== null) {
-      this.attachGeoTrait(newGeoTrait);
-      this.initGeoTrait(newGeoTrait);
-    }
-  }
-
-  protected didSetGeoTrait(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoTrait !== void 0) {
-        observer.controllerDidSetGeoTrait(newGeoTrait, oldGeoTrait, this);
-      }
-    }
-  }
-
-  protected willSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoBounds !== void 0) {
-        observer.controllerWillSetGeoBounds(newGeoBounds, oldGeoBounds, this);
-      }
-    }
-  }
-
-  protected onSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    // hook
-  }
-
-  protected didSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoBounds !== void 0) {
-        observer.controllerDidSetGeoBounds(newGeoBounds, oldGeoBounds, this);
-      }
-    }
-  }
-
-  protected createGeoView(): GeoView | null {
-    return GeoTreeView.create();
-  }
-
-  protected initGeoView(geoView: GeoView): void {
-    // hook
-  }
-
-  protected attachGeoView(geoView: GeoView): void {
-    const featureFasteners = this.featureFasteners;
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureController = featureFasteners[i]!.controller;
-      if (featureController !== null) {
-        const featureView = featureController.geo.view;
-        if (featureView !== null && featureView.parent === null) {
-          featureController.geo.injectView(geoView);
-        }
-      }
-    }
-  }
-
-  protected detachGeoView(geoView: GeoView): void {
-    // hook
-  }
-
-  protected willSetGeoView(newGeoView: GeoView | null, oldGeoView: GeoView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoView !== void 0) {
-        observer.controllerWillSetGeoView(newGeoView, oldGeoView, this);
-      }
-    }
-  }
-
-  protected onSetGeoView(newGeoView: GeoView | null, oldGeoView: GeoView | null): void {
-    if (oldGeoView !== null) {
-      this.detachGeoView(oldGeoView);
-    }
-    if (newGeoView !== null) {
-      this.attachGeoView(newGeoView);
-      this.initGeoView(newGeoView);
-    }
-  }
-
-  protected didSetGeoView(newGeoView: GeoView | null, oldGeoView: GeoView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoView !== void 0) {
-        observer.controllerDidSetGeoView(newGeoView, oldGeoView, this);
-      }
-    }
-  }
-
-  protected projectGeoView(viewContext: GeoViewContext, geoView: GeoView): void {
-    // hook
-  }
-
-  protected cullGeoView(geoView: GeoView): void {
-    // hook
-  }
-
-  protected uncullGeoView(geoView: GeoView): void {
-    // hook
-  }
-
-  /** @internal */
-  static GeoFastener = TraitViewFastener.define<GeoLayerController, GeoLayerTrait, GeoView>({
+  @TraitViewRef<GeoLayerController, GeoLayerTrait, GeoView>({
     traitType: GeoLayerTrait,
     observesTrait: true,
-    willSetTrait(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null): void {
-      this.owner.willSetGeoTrait(newGeoTrait, oldGeoTrait);
+    willAttachTrait(geoTrait: GeoLayerTrait): void {
+      this.owner.callObservers("controllerWillAttachGeoTrait", geoTrait, this.owner);
     },
-    onSetTrait(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null): void {
-      this.owner.onSetGeoTrait(newGeoTrait, oldGeoTrait);
+    didAttachTrait(geoTrait: GeoLayerTrait): void {
+      const featureTraits = geoTrait.features.traits;
+      for (const traitId in featureTraits) {
+        const featureTrait = featureTraits[traitId]!;
+        this.owner.features.addTrait(featureTrait);
+      }
     },
-    didSetTrait(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null): void {
-      this.owner.didSetGeoTrait(newGeoTrait, oldGeoTrait);
+    willDetachTrait(geoTrait: GeoLayerTrait): void {
+      const featureTraits = geoTrait.features.traits;
+      for (const traitId in featureTraits) {
+        const featureTrait = featureTraits[traitId]!;
+        this.owner.features.deleteTrait(featureTrait);
+      }
+    },
+    didDetachTrait(geoTrait: GeoLayerTrait): void {
+      this.owner.callObservers("controllerDidDetachGeoTrait", geoTrait, this.owner);
     },
     traitWillSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-      this.owner.willSetGeoBounds(newGeoBounds, oldGeoBounds);
+      this.owner.callObservers("controllerWillSetGeoBounds", newGeoBounds, oldGeoBounds, this.owner);
     },
     traitDidSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-      this.owner.onSetGeoBounds(newGeoBounds, oldGeoBounds);
-      this.owner.didSetGeoBounds(newGeoBounds, oldGeoBounds);
+      this.owner.callObservers("controllerDidSetGeoBounds", newGeoBounds, oldGeoBounds, this.owner);
     },
-    traitWillSetFeature(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null, targetTrait: Trait): void {
-      if (oldFeatureTrait !== null) {
-        this.owner.removeFeatureTrait(oldFeatureTrait);
+    traitWillAttachFeature(featureTrait: GeoTrait, targetTrait: Trait | null): void {
+      this.owner.features.addTrait(featureTrait, targetTrait);
+    },
+    traitDidDetachFeature(featureTrait: GeoTrait): void {
+      this.owner.features.deleteTrait(featureTrait);
+    },
+    viewType: GeoTreeView,
+    willAttachView(geoView: GeoView): void {
+      this.owner.callObservers("controllerWillAttachGeoView", geoView, this.owner);
+    },
+    didAttachView(geoView: GeoView): void {
+      const featureControllers = this.owner.features.controllers;
+      for (const controllerId in featureControllers) {
+        const featureController = featureControllers[controllerId]!;
+        const featureView = featureController.geo.view;
+        if (featureView !== null && featureView.parent === null) {
+          featureController.geo.insertView(geoView);
+        }
       }
     },
-    traitDidSetFeature(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null, targetTrait: Trait): void {
-      if (newFeatureTrait !== null) {
-        this.owner.insertFeatureTrait(newFeatureTrait, targetTrait);
-      }
+    didDetachView(geoView: GeoView): void {
+      this.owner.callObservers("controllerDidDetachGeoView", geoView, this.owner);
     },
-    viewType: GeoView,
-    observesView: true,
-    willSetView(newGeoView: GeoView | null, oldGeoView: GeoView | null): void {
-      this.owner.willSetGeoView(newGeoView, oldGeoView);
-    },
-    onSetView(newGeoView: GeoView | null, oldGeoView: GeoView | null): void {
-      this.owner.onSetGeoView(newGeoView, oldGeoView);
-    },
-    didSetView(newGeoView: GeoView | null, oldGeoView: GeoView | null): void {
-      this.owner.didSetGeoView(newGeoView, oldGeoView);
-    },
-    viewWillProject(viewContext: GeoViewContext, geoView: GeoView): void {
-      this.owner.projectGeoView(viewContext, geoView);
-    },
-    viewDidCull(geoView: GeoView): void {
-      this.owner.cullGeoView(geoView);
-    },
-    viewWillUncull(geoView: GeoView): void {
-      this.owner.uncullGeoView(geoView);
-    },
-    createView(): GeoView | null {
-      return this.owner.createGeoView();
-    },
-  });
-
-  @TraitViewFastener<GeoLayerController, GeoLayerTrait, GeoView>({
-    extends: GeoLayerController.GeoFastener,
   })
-  readonly geo!: TraitViewFastener<this, GeoLayerTrait, GeoView>;
+  readonly geo!: TraitViewRef<this, GeoLayerTrait, GeoView>;
+  static readonly geo: MemberFastenerClass<GeoLayerController, "geo">;
 
-  insertFeature(featureController: GeoController, targetController: Controller | null = null): void {
-    const featureFasteners = this.featureFasteners as ControllerFastener<this, GeoController>[];
-    let targetIndex = featureFasteners.length;
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureFastener = featureFasteners[i]!;
-      if (featureFastener.controller === featureController) {
-        return;
-      } else if (featureFastener.controller === targetController) {
-        targetIndex = i;
-      }
-    }
-    const featureFastener = this.createFeatureFastener(featureController);
-    featureFasteners.splice(targetIndex, 0, featureFastener);
-    featureFastener.setController(featureController, targetController);
-    if (this.mounted) {
-      featureFastener.mount();
-    }
-  }
-
-  removeFeature(featureController: GeoController): void {
-    const featureFasteners = this.featureFasteners as ControllerFastener<this, GeoController>[];
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureFastener = featureFasteners[i]!;
-      if (featureFastener.controller === featureController) {
-        featureFastener.setController(null);
-        if (this.mounted) {
-          featureFastener.unmount();
-        }
-        featureFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected createFeature(featureTrait: GeoTrait): GeoController | null {
-    return GeoController.fromTrait(featureTrait);
-  }
-
-  protected initFeature(featureController: GeoController, featureFastener: ControllerFastener<this, GeoController>): void {
-    const featureTrait = featureController.geo.trait;
-    if (featureTrait !== null) {
-      this.initFeatureTrait(featureTrait, featureFastener);
-    }
-    const featureView = featureController.geo.view;
-    if (featureView !== null) {
-      this.initFeatureView(featureView, featureFastener);
-    }
-  }
-
-  protected attachFeature(featureController: GeoController, featureFastener: ControllerFastener<this, GeoController>): void {
-    const featureTrait = featureController.geo.trait;
-    if (featureTrait !== null) {
-      this.attachFeatureTrait(featureTrait, featureFastener);
-    }
-    const featureView = featureController.geo.view;
-    if (featureView !== null) {
-      this.attachFeatureView(featureView, featureFastener);
-    }
-  }
-
-  protected detachFeature(featureController: GeoController, featureFastener: ControllerFastener<this, GeoController>): void {
-    const featureView = featureController.geo.view;
-    if (featureView !== null) {
-      this.detachFeatureView(featureView, featureFastener);
-    }
-    const featureTrait = featureController.geo.trait;
-    if (featureTrait !== null) {
-      this.detachFeatureTrait(featureTrait, featureFastener);
-    }
-  }
-
-  protected willSetFeature(newFeatureController: GeoController | null, oldFeatureController: GeoController | null,
-                           featureFastener: ControllerFastener<this, GeoController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetFeature !== void 0) {
-        observer.controllerWillSetFeature(newFeatureController, oldFeatureController, featureFastener);
-      }
-    }
-  }
-
-  protected onSetFeature(newFeatureController: GeoController | null, oldFeatureController: GeoController | null,
-                         featureFastener: ControllerFastener<this, GeoController>): void {
-    if (oldFeatureController !== null) {
-      this.detachFeature(oldFeatureController, featureFastener);
-    }
-    if (newFeatureController !== null) {
-      this.attachFeature(newFeatureController, featureFastener);
-      this.initFeature(newFeatureController, featureFastener);
-    }
-  }
-
-  protected didSetFeature(newFeatureController: GeoController | null, oldFeatureController: GeoController | null,
-                          featureFastener: ControllerFastener<this, GeoController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetFeature !== void 0) {
-        observer.controllerDidSetFeature(newFeatureController, oldFeatureController, featureFastener);
-      }
-    }
-  }
-
-  insertFeatureTrait(featureTrait: GeoTrait, targetTrait: Trait | null = null): void {
-    const featureFasteners = this.featureFasteners as ControllerFastener<this, GeoController>[];
-    let targetController: GeoController | null = null;
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureController = featureFasteners[i]!.controller;
-      if (featureController !== null) {
-        if (featureController.geo.trait === featureTrait) {
-          return;
-        } else if (featureController.geo.trait === targetTrait) {
-          targetController = featureController;
-        }
-      }
-    }
-    const featureController = this.createFeature(featureTrait);
-    if (featureController !== null) {
-      featureController.geo.setTrait(featureTrait);
-      this.insertChild(featureController, targetController);
-      if (featureController.geo.view === null) {
-        const featureView = this.createFeatureView(featureController);
-        let targetView: GeoView | null = null;
-        if (targetController !== null) {
-          targetView = targetController.geo.view;
-        }
-        const geoView = this.geo.view;
-        if (geoView !== null) {
-          featureController.geo.injectView(geoView, featureView, targetView, null);
-        } else {
-          featureController.geo.setView(featureView, targetView);
-        }
-      }
-    }
-  }
-
-  removeFeatureTrait(featureTrait: GeoTrait): void {
-    const featureFasteners = this.featureFasteners as ControllerFastener<this, GeoController>[];
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureFastener = featureFasteners[i]!;
-      const featureController = featureFastener.controller;
-      if (featureController !== null && featureController.geo.trait === featureTrait) {
-        featureFastener.setController(null);
-        if (this.mounted) {
-          featureFastener.unmount();
-        }
-        featureFasteners.splice(i, 1);
-        featureController.remove();
-        return;
-      }
-    }
-  }
-
-  protected initFeatureTrait(featureTrait: GeoTrait, featureFastener: ControllerFastener<this, GeoController>): void {
-    // hook
-  }
-
-  protected attachFeatureTrait(featureTrait: GeoTrait, featureFastener: ControllerFastener<this, GeoController>): void {
-    // hook
-  }
-
-  protected detachFeatureTrait(featureTrait: GeoTrait, featureFastener: ControllerFastener<this, GeoController>): void {
-    // hook
-  }
-
-  protected willSetFeatureTrait(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null,
-                                featureFastener: ControllerFastener<this, GeoController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetFeatureTrait !== void 0) {
-        observer.controllerWillSetFeatureTrait(newFeatureTrait, oldFeatureTrait, featureFastener);
-      }
-    }
-  }
-
-  protected onSetFeatureTrait(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null,
-                              featureFastener: ControllerFastener<this, GeoController>): void {
-    if (oldFeatureTrait !== null) {
-      this.detachFeatureTrait(oldFeatureTrait, featureFastener);
-    }
-    if (newFeatureTrait !== null) {
-      this.attachFeatureTrait(newFeatureTrait, featureFastener);
-      this.initFeatureTrait(newFeatureTrait, featureFastener);
-    }
-  }
-
-  protected didSetFeatureTrait(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null,
-                               featureFastener: ControllerFastener<this, GeoController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetFeatureTrait !== void 0) {
-        observer.controllerDidSetFeatureTrait(newFeatureTrait, oldFeatureTrait, featureFastener);
-      }
-    }
-  }
-
-  protected createFeatureView(featureController: GeoController): GeoView | null {
-    return featureController.geo.createView();
-  }
-
-  protected initFeatureView(featureView: GeoView, featureFastener: ControllerFastener<this, GeoController>): void {
-    // hook
-  }
-
-  protected attachFeatureView(featureView: GeoView, featureFastener: ControllerFastener<this, GeoController>): void {
-    // hook
-  }
-
-  protected detachFeatureView(featureView: GeoView, featureFastener: ControllerFastener<this, GeoController>): void {
-    featureView.remove();
-  }
-
-  protected willSetFeatureView(newFeatureView: GeoView | null, oldFeatureView: GeoView | null,
-                               featureFastener: ControllerFastener<this, GeoController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetFeatureView !== void 0) {
-        observer.controllerWillSetFeatureView(newFeatureView, oldFeatureView, featureFastener);
-      }
-    }
-  }
-
-  protected onSetFeatureView(newFeatureView: GeoView | null, oldFeatureView: GeoView | null,
-                             featureFastener: ControllerFastener<this, GeoController>): void {
-    if (oldFeatureView !== null) {
-      this.detachFeatureView(oldFeatureView, featureFastener);
-    }
-    if (newFeatureView !== null) {
-      this.attachFeatureView(newFeatureView, featureFastener);
-      this.initFeatureView(newFeatureView, featureFastener);
-    }
-  }
-
-  protected didSetFeatureView(newFeatureView: GeoView | null, oldFeatureView: GeoView | null,
-                              featureFastener: ControllerFastener<this, GeoController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetFeatureView !== void 0) {
-        observer.controllerDidSetFeatureView(newFeatureView, oldFeatureView, featureFastener);
-      }
-    }
-  }
-
-  protected willSetFeatureGeoBounds(newFeatureGeoBounds: GeoBox, oldFeatureGeoBounds: GeoBox,
-                                    featureFastener: ControllerFastener<this, GeoController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetFeatureGeoBounds !== void 0) {
-        observer.controllerWillSetFeatureGeoBounds(newFeatureGeoBounds, oldFeatureGeoBounds, featureFastener);
-      }
-    }
-  }
-
-  protected onSetFeatureGeoBounds(newFeatureGeoBounds: GeoBox, oldFeatureGeoBounds: GeoBox,
-                                  featureFastener: ControllerFastener<this, GeoController>): void {
-    // hook
-  }
-
-  protected didSetFeatureGeoBounds(newFeatureGeoBounds: GeoBox, oldFeatureGeoBounds: GeoBox,
-                                   featureFastener: ControllerFastener<this, GeoController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetFeatureGeoBounds !== void 0) {
-        observer.controllerDidSetFeatureGeoBounds(newFeatureGeoBounds, oldFeatureGeoBounds, featureFastener);
-      }
-    }
-  }
-
-  /** @internal */
-  static FeatureFastener = ControllerFastener.define<GeoLayerController, GeoController>({
+  @TraitViewControllerSet<GeoLayerController, GeoTrait, GeoView, GeoController, GeoLayerControllerFeatureExt>({
     type: GeoController,
-    child: false,
+    binds: true,
     observes: true,
-    willSetController(newFeatureController: GeoController | null, oldFeatureController: GeoController | null): void {
-      this.owner.willSetFeature(newFeatureController, oldFeatureController, this);
+    get parentView(): GeoView | null {
+      return this.owner.geo.view;
     },
-    onSetController(newFeatureController: GeoController | null, oldFeatureController: GeoController | null): void {
-      this.owner.onSetFeature(newFeatureController, oldFeatureController, this);
+    getTraitViewRef(featureController: GeoController): TraitViewRef<unknown, GeoTrait, GeoView> {
+      return featureController.geo;
     },
-    didSetController(newFeatureController: GeoController | null, oldFeatureController: GeoController | null): void {
-      this.owner.didSetFeature(newFeatureController, oldFeatureController, this);
+    willAttachController(featureController: GeoController): void {
+      this.owner.callObservers("controllerWillAttachFeature", featureController, this.owner);
     },
-    controllerWillSetGeoTrait(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null): void {
-      this.owner.willSetFeatureTrait(newFeatureTrait, oldFeatureTrait, this);
-    },
-    controllerDidSetGeoTrait(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null): void {
-      this.owner.onSetFeatureTrait(newFeatureTrait, oldFeatureTrait, this);
-      this.owner.didSetFeatureTrait(newFeatureTrait, oldFeatureTrait, this);
-    },
-    controllerWillSetGeoView(newFeatureView: GeoView | null, oldFeatureView: GeoView | null): void {
-      this.owner.willSetFeatureView(newFeatureView, oldFeatureView, this);
-    },
-    controllerDidSetGeoView(newFeatureView: GeoView | null, oldFeatureView: GeoView | null): void {
-      this.owner.onSetFeatureView(newFeatureView, oldFeatureView, this);
-      this.owner.didSetFeatureView(newFeatureView, oldFeatureView, this);
-    },
-    controllerWillSetGeoBounds(newFeatureGeoBounds: GeoBox, oldFeatureGeoBounds: GeoBox): void {
-      this.owner.willSetFeatureGeoBounds(newFeatureGeoBounds, oldFeatureGeoBounds, this);
-    },
-    controllerDidSetGeoBounds(newFeatureGeoBounds: GeoBox, oldFeatureGeoBounds: GeoBox): void {
-      this.owner.onSetFeatureGeoBounds(newFeatureGeoBounds, oldFeatureGeoBounds, this);
-      this.owner.didSetFeatureGeoBounds(newFeatureGeoBounds, oldFeatureGeoBounds, this);
-    },
-  });
-
-  protected createFeatureFastener(featureController: GeoController): ControllerFastener<this, GeoController> {
-    return GeoLayerController.FeatureFastener.create(this, featureController.key ?? "feature");
-  }
-
-  /** @internal */
-  readonly featureFasteners: ReadonlyArray<ControllerFastener<this, GeoController>>;
-
-  protected getFeatureFastener(featureTrait: GeoTrait): ControllerFastener<this, GeoController> | null {
-    const featureFasteners = this.featureFasteners;
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureFastener = featureFasteners[i]!;
-      const featureController = featureFastener.controller;
-      if (featureController !== null && featureController.geo.trait === featureTrait) {
-        return featureFastener;
+    didAttachController(featureController: GeoController): void {
+      const featureTrait = featureController.geo.trait;
+      if (featureTrait !== null) {
+        this.attachFeatureTrait(featureTrait, featureController);
       }
-    }
-    return null;
-  }
-
-  /** @internal */
-  protected mountFeatureFasteners(): void {
-    const featureFasteners = this.featureFasteners;
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureFastener = featureFasteners[i]!;
-      featureFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountFeatureFasteners(): void {
-    const featureFasteners = this.featureFasteners;
-    for (let i = 0, n = featureFasteners.length; i < n; i += 1) {
-      const featureFastener = featureFasteners[i]!;
-      featureFastener.unmount();
-    }
-  }
-
-  protected detectFeatureController(controller: Controller): GeoController | null {
-    return controller instanceof GeoController ? controller : null;
-  }
-
-  protected detectInsertChildController(childController: Controller, targetController: Controller | null): void {
-    const featureController = this.detectFeatureController(childController);
-    if (featureController !== null) {
-      this.insertFeature(featureController, targetController);
-    }
-  }
-
-  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChild(childController, targetController);
-    this.detectInsertChildController(childController, targetController);
-  }
-
-  protected detectRemoveChildController(childController: Controller): void {
-    const featureController = this.detectFeatureController(childController);
-    if (featureController !== null) {
-      this.removeFeature(featureController);
-    }
-  }
-
-  protected override onRemoveChild(childController: Controller): void {
-    super.onRemoveChild(childController);
-    this.detectRemoveChildController(childController);
-  }
-
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountFeatureFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountFeatureFasteners();
-    super.unmountFasteners();
-  }
+      const featureView = featureController.geo.view;
+      if (featureView !== null) {
+        this.attachFeatureView(featureView, featureController);
+      }
+    },
+    willDetachController(featureController: GeoController): void {
+      const featureView = featureController.geo.view;
+      if (featureView !== null) {
+        this.detachFeatureView(featureView, featureController);
+      }
+      const featureTrait = featureController.geo.trait;
+      if (featureTrait !== null) {
+        this.detachFeatureTrait(featureTrait, featureController);
+      }
+    },
+    didDetachController(featureController: GeoController): void {
+      this.owner.callObservers("controllerDidDetachFeature", featureController, this.owner);
+    },
+    controllerWillAttachGeoTrait(featureTrait: GeoTrait, featureController: GeoController): void {
+      this.owner.callObservers("controllerWillAttachFeatureTrait", featureTrait, featureController, this.owner);
+      this.attachFeatureTrait(featureTrait, featureController);
+    },
+    controllerDidDetachGeoTrait(featureTrait: GeoTrait, featureController: GeoController): void {
+      this.detachFeatureTrait(featureTrait, featureController);
+      this.owner.callObservers("controllerDidDetachFeatureTrait", featureTrait, featureController, this.owner);
+    },
+    attachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void {
+      // hook
+    },
+    detachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void {
+      // hook
+    },
+    controllerWillAttachGeoView(featureView: GeoView, featureController: GeoController): void {
+      this.owner.callObservers("controllerWillAttachFeatureView", featureView, featureController, this.owner);
+      this.attachFeatureView(featureView, featureController);
+    },
+    controllerDidDetachGeoView(featureView: GeoView, featureController: GeoController): void {
+      this.detachFeatureView(featureView, featureController);
+      this.owner.callObservers("controllerDidDetachFeatureView", featureView, featureController, this.owner);
+    },
+    attachFeatureView(featureView: GeoView, featureController: GeoController): void {
+      // hook
+    },
+    detachFeatureView(featureView: GeoView, featureController: GeoController): void {
+      featureView.remove();
+    },
+    controllerWillSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, featureController: GeoController): void {
+      this.owner.callObservers("controllerWillSetFeatureGeoBounds", newGeoBounds, oldGeoBounds, featureController, this.owner);
+    },
+    controllerDidSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, featureController: GeoController): void {
+      this.owner.callObservers("controllerDidSetFeatureGeoBounds", newGeoBounds, oldGeoBounds, featureController, this.owner);
+    },
+    createController(featureTrait?: GeoTrait): GeoController | null {
+      return featureTrait !== void 0 ? GeoController.fromTrait(featureTrait) : null;
+    },
+  })
+  readonly features!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController>;
+  static readonly features: MemberFastenerClass<GeoLayerController, "features">;
 }

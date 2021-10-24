@@ -71,6 +71,7 @@ export const BoxShadowInterpolator = (function (_super: typeof Interpolator) {
   };
 
   BoxShadowInterpolator.prototype = Object.create(_super.prototype);
+  BoxShadowInterpolator.prototype.constructor = BoxShadowInterpolator;
 
   Object.defineProperty(BoxShadowInterpolator.prototype, 0, {
     get(this: BoxShadowInterpolator): BoxShadow {

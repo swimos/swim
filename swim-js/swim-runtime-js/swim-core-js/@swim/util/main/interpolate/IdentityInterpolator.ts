@@ -44,6 +44,7 @@ export const IdentityInterpolator = (function (_super: typeof Interpolator) {
   };
 
   IdentityInterpolator.prototype = Object.create(_super.prototype);
+  IdentityInterpolator.prototype.constructor = IdentityInterpolator;
 
   Object.defineProperty(IdentityInterpolator.prototype, 0, {
     get<Y>(this: IdentityInterpolator<Y>): Y {

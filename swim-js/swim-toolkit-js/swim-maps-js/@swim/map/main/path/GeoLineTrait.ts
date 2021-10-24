@@ -23,38 +23,13 @@ import type {GeoLineTraitObserver} from "./GeoLineTraitObserver";
 export abstract class GeoLineTrait extends GeoPathTrait {
   override readonly observerType?: Class<GeoLineTraitObserver>;
 
-  protected willSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetStroke !== void 0) {
-        traitObserver.traitWillSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
-  protected onSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-    // hook
-  }
-
-  protected didSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetStroke !== void 0) {
-        traitObserver.traitDidSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
   @Property<GeoLineTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
     state: null,
     willSetState(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.willSetStroke(newStroke, oldStroke);
+      this.owner.callObservers("traitWillSetStroke", newStroke, oldStroke, this.owner);
     },
     didSetState(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.onSetStroke(newStroke, oldStroke);
-      this.owner.didSetStroke(newStroke, oldStroke);
+      this.owner.callObservers("traitDidSetStroke", newStroke, oldStroke, this.owner);
     },
     fromAny(stroke: Look<Color> | AnyColor | null): Look<Color> | Color | null {
       if (stroke !== null && !(stroke instanceof Look)) {
@@ -65,39 +40,14 @@ export abstract class GeoLineTrait extends GeoPathTrait {
   })
   readonly stroke!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
-  protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetStrokeWidth !== void 0) {
-        traitObserver.traitWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
-  protected onSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    // hook
-  }
-
-  protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetStrokeWidth !== void 0) {
-        traitObserver.traitDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
   @Property<GeoLineTrait, Length | null, AnyLength | null>({
     type: Length,
     state: null,
     willSetState(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.willSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      this.owner.callObservers("traitWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
     didSetState(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.onSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
-      this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      this.owner.callObservers("traitDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: Property<this, Length | null, AnyLength | null>;

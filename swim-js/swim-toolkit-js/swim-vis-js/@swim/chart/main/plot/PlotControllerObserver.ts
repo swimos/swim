@@ -17,12 +17,12 @@ import type {PlotView} from "./PlotView";
 import type {PlotTrait} from "./PlotTrait";
 import type {PlotController} from "./PlotController";
 
-export interface PlotControllerObserver<X, Y, C extends PlotController<X, Y> = PlotController<X, Y>> extends DataSetControllerObserver<X, Y, C> {
-  controllerWillSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, controller: C): void;
+export interface PlotControllerObserver<X = unknown, Y = unknown, C extends PlotController<X, Y> = PlotController<X, Y>> extends DataSetControllerObserver<X, Y, C> {
+  controllerWillAttachPlotTrait?(plotTrait: PlotTrait<X, Y>, controller: C): void;
 
-  controllerDidSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, controller: C): void;
+  controllerDidDetachPlotTrait?(plotTrait: PlotTrait<X, Y>, controller: C): void;
 
-  controllerWillSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, controller: C): void;
+  controllerWillAttachPlotView?(plotView: PlotView<X, Y>, controller: C): void;
 
-  controllerDidSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, controller: C): void;
+  controllerDidDetachPlotView?(plotView: PlotView<X, Y>, controller: C): void;
 }

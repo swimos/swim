@@ -16,5 +16,5 @@ import type {ScaledXViewObserver} from "./ScaledXViewObserver";
 import type {ScaledYViewObserver} from "./ScaledYViewObserver";
 import type {ScaledXYView} from "./ScaledXYView";
 
-export interface ScaledXYViewObserver<X, Y, V extends ScaledXYView<X, Y> = ScaledXYView<X, Y>> extends ScaledXViewObserver<X, V>, ScaledYViewObserver<Y, V> {
+export interface ScaledXYViewObserver<X = unknown, Y = unknown, V extends ScaledXYView<X, Y> = ScaledXYView<X, Y>> extends ScaledXViewObserver<X, V>, ScaledYViewObserver<Y, V> {
 }

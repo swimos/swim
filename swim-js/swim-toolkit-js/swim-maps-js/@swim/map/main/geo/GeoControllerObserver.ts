@@ -19,13 +19,13 @@ import type {GeoTrait} from "./GeoTrait";
 import type {GeoController} from "./GeoController";
 
 export interface GeoControllerObserver<C extends GeoController = GeoController> extends ControllerObserver<C> {
-  controllerWillSetGeoTrait?(newGeoTrait: GeoTrait | null, oldGeoTrait: GeoTrait | null, controller: C): void;
+  controllerWillAttachGeoTrait?(geoTrait: GeoTrait, controller: C): void;
 
-  controllerDidSetGeoTrait?(newGeoTrait: GeoTrait | null, oldGeoTrait: GeoTrait | null, controller: C): void;
+  controllerDidDetachGeoTrait?(geoTrait: GeoTrait, controller: C): void;
 
-  controllerWillSetGeoView?(newGeoView: GeoView | null, oldGeoView: GeoView | null, controller: C): void;
+  controllerWillAttachGeoView?(geoView: GeoView, controller: C): void;
 
-  controllerDidSetGeoView?(newGeoView: GeoView | null, oldGeoView: GeoView | null, controller: C): void;
+  controllerDidDetachGeoView?(geoView: GeoView, controller: C): void;
 
   controllerWillSetGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, controller: C): void;
 

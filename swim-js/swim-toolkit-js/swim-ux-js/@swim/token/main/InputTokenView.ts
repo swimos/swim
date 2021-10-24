@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import type {Class, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/fastener";
 import {Color} from "@swim/style";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewFastener} from "@swim/view";
+import {ViewRef} from "@swim/view";
 import {StyleRule, StyleSheet, HtmlView, StyleView} from "@swim/dom";
 import {TokenViewInit, TokenView} from "./TokenView";
 import type {InputTokenViewObserver} from "./InputTokenViewObserver";
@@ -35,22 +35,22 @@ export class InputTokenView extends TokenView {
   override readonly observerType?: Class<InputTokenViewObserver>;
 
   protected override initToken(): void {
-    this.stylesheet.injectView();
+    this.stylesheet.insertView();
     super.initToken();
     this.addClass("input-token");
-    this.label.setView(this.label.createView());
+    this.label.attachView();
   }
 
   protected initStylesheet(styleView: StyleView): void {
     const sheet = styleView.sheet;
     if (sheet !== null) {
-      const placeholder = InputTokenView.PlaceholderRule.create(sheet, "placeholder");
+      const placeholder = InputTokenView.PlaceholderRule.create(sheet);
       sheet.setFastener("placeholder", placeholder);
     }
   }
 
   /** @internal */
-  static PlaceholderRule = StyleRule.define<StyleSheet>({
+  static PlaceholderRule = StyleRule.define<StyleSheet>("PlaceholderRule", {
     css: "::placeholder {}",
   });
 
@@ -71,32 +71,30 @@ export class InputTokenView extends TokenView {
     labelView.pointerEvents.setState("auto", Affinity.Intrinsic);
   }
 
-  @ViewFastener<InputTokenView, StyleView>({
+  @ViewRef<InputTokenView, StyleView>({
     key: true,
     type: StyleView,
-    child: true,
+    binds: true,
     observes: true,
     viewDidMount(styleView: StyleView): void {
       this.owner.initStylesheet(styleView);
     },
   })
-  readonly stylesheet!: ViewFastener<this, StyleView>;
+  readonly stylesheet!: ViewRef<this, StyleView>;
+  static readonly stylesheet: MemberFastenerClass<InputTokenView, "stylesheet">;
 
-  @ViewFastener<InputTokenView, HtmlView>({
+  @ViewRef<InputTokenView, HtmlView>({
     type: HtmlView.forTag("input"),
-    child: false,
     observes: true,
-    onSetView(labelView: HtmlView | null): void {
-      if (labelView !== null) {
-        if (labelView.parent === null) {
-          this.owner.labelContainer.injectView();
-          const labelContainer = this.owner.labelContainer.view;
-          if (labelContainer !== null) {
-            labelContainer.appendChild(labelView);
-          }
+    didAttachView(labelView: HtmlView): void {
+      if (labelView.parent === null) {
+        this.owner.labelContainer.insertView();
+        const labelContainer = this.owner.labelContainer.view;
+        if (labelContainer !== null) {
+          labelContainer.appendChild(labelView);
         }
-        this.owner.initLabel(labelView);
       }
+      this.owner.initLabel(labelView);
     },
     viewDidMount(labelView: HtmlView): void {
       labelView.on("input", this.owner.onInputUpdate as EventListener);
@@ -109,7 +107,8 @@ export class InputTokenView extends TokenView {
       labelView.off("keydown", this.owner.onInputKey);
     },
   })
-  override readonly label!: ViewFastener<this, HtmlView>;
+  override readonly label!: ViewRef<this, HtmlView>;
+  static override readonly label: MemberFastenerClass<InputTokenView, "label">;
 
   /** @internal */
   get placeholderLook(): Look<Color> {

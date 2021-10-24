@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {FastenerContext, FastenerOwner, FastenerInit, Fastener} from "@swim/fastener";
+import {FastenerContext, FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,
@@ -28,6 +28,7 @@ import type {CssContext} from "./CssContext";
 import {CssRule} from "./CssRule";
 
 export interface StyleSheetInit extends FastenerInit {
+  extends?: {prototype: StyleSheet<any>} | string | boolean | null;
   css?: string | (() => string | undefined);
 
   createStylesheet?(): CSSStyleSheet;
@@ -36,18 +37,14 @@ export interface StyleSheetInit extends FastenerInit {
 
 export type StyleSheetDescriptor<O = unknown, I = {}> = ThisType<StyleSheet<O> & I> & StyleSheetInit & Partial<I>;
 
-export interface StyleSheetClass<F extends StyleSheet<any> = StyleSheet<any>> {
-  /** @internal */
-  prototype: F;
+export interface StyleSheetClass<F extends StyleSheet<any> = StyleSheet<any>> extends FastenerClass<F> {
+}
 
-  create(owner: FastenerOwner<F>, sheetName: string): F;
+export interface StyleSheetFactory<F extends StyleSheet<any> = StyleSheet<any>> extends StyleSheetClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): StyleSheetFactory<F> & I;
 
-  construct(sheetClass: {prototype: F}, sheet: F | null, owner: FastenerOwner<F>, sheetName: string): F;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): StyleSheetClass<F> & I;
-
-  define<O>(descriptor: StyleSheetDescriptor<O>): StyleSheetClass<StyleSheet<any>>;
-  define<O, I = {}>(descriptor: StyleSheetDescriptor<O, I>): StyleSheetClass<StyleSheet<any> & I>;
+  define<O>(className: string, descriptor: StyleSheetDescriptor<O>): StyleSheetFactory<StyleSheet<any>>;
+  define<O, I = {}>(className: string, descriptor: StyleSheetDescriptor<O, I>): StyleSheetFactory<StyleSheet<any> & I>;
 
   <O>(descriptor: StyleSheetDescriptor<O>): PropertyDecorator;
   <O, I = {}>(descriptor: StyleSheetDescriptor<O, I>): PropertyDecorator;
@@ -170,7 +167,7 @@ export interface StyleSheet<O = unknown> extends Fastener<O>, FastenerContext, C
 }
 
 export const StyleSheet = (function (_super: typeof Fastener) {
-  const StyleSheet: StyleSheetClass = _super.extend();
+  const StyleSheet: StyleSheetFactory = _super.extend("StyleSheet");
 
   Object.defineProperty(StyleSheet.prototype, "familyType", {
     get: function (this: StyleSheet): Class<StyleSheet<any>> | null {
@@ -397,16 +394,16 @@ export const StyleSheet = (function (_super: typeof Fastener) {
     return new CSSStyleSheet();
   };
 
-  StyleSheet.construct = function <F extends StyleSheet<any>>(sheetClass: {prototype: F}, sheet: F | null, owner: FastenerOwner<F>, sheetName: string): F {
-    sheet = _super.construct(sheetClass, sheet, owner, sheetName) as F;
+  StyleSheet.construct = function <F extends StyleSheet<any>>(sheetClass: {prototype: F}, sheet: F | null, owner: FastenerOwner<F>): F {
+    sheet = _super.construct(sheetClass, sheet, owner) as F;
     (sheet as Mutable<typeof sheet>).fasteners = null;
     (sheet as Mutable<typeof sheet>).decoherent = null;
     (sheet as Mutable<typeof sheet>).stylesheet = null as unknown as CSSStyleSheet;
     return sheet;
   };
 
-  StyleSheet.define = function <O>(descriptor: StyleSheetDescriptor<O>): StyleSheetClass<StyleSheet<any>> {
-    let superClass = descriptor.extends as StyleSheetClass | undefined;
+  StyleSheet.define = function <O>(className: string, descriptor: StyleSheetDescriptor<O>): StyleSheetFactory<StyleSheet<any>> {
+    let superClass = descriptor.extends as StyleSheetFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let css = descriptor.css;
@@ -419,15 +416,15 @@ export const StyleSheet = (function (_super: typeof Fastener) {
       superClass = this;
     }
 
-    const sheetClass = superClass.extend(descriptor);
+    const sheetClass = superClass.extend(className, descriptor);
 
     if (typeof css === "function") {
       sheetClass.prototype.initCss = css;
       css = void 0;
     }
 
-    sheetClass.construct = function (sheetClass: {prototype: StyleSheet<any>}, sheet: StyleSheet<O> | null, owner: O, sheetName: string): StyleSheet<O> {
-      sheet = superClass!.construct(sheetClass, sheet, owner, sheetName);
+    sheetClass.construct = function (sheetClass: {prototype: StyleSheet<any>}, sheet: StyleSheet<O> | null, owner: O): StyleSheet<O> {
+      sheet = superClass!.construct(sheetClass, sheet, owner);
 
       if (affinity !== void 0) {
         sheet.initAffinity(affinity);

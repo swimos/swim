@@ -27,38 +27,33 @@ class ExampleMapboxController extends swim.MapController {
     });
     return new swim.MapboxView(map);
   }
-  initMapView(mapView) {
-    super.initMapView(mapView);
+}
+swim.TraitViewRef({
+  extends: true,
+  initView(mapView) {
+    swim.MapController.map.prototype.initView.call(this, mapView);
     mapView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
-  }
-  initCanvasView(canvasView) {
-    super.initCanvasView(canvasView);
+  },
+})(ExampleMapboxController.prototype, "map");
+swim.ViewRef({
+  extends: true,
+  initView(canvasView) {
+    swim.MapController.canvas.prototype.initView.call(this, canvasView);
     canvasView.pointerEventsEnabled(true).touchAction("manipulation");
-  }
-  createLayer(layerTrait) {
+  },
+})(ExampleMapboxController.prototype, "canvas");
+swim.TraitViewControllerSet({
+  extends: true,
+  createController(layerTrait) {
     if (layerTrait instanceof swim.GeoLayerTrait) {
       return new ExampleLayerController();
     } else {
-      return super.createLayer(layerTrait);
+      return swim.MapController.layers.prototype.createController.call(this, layerTrait);
     }
-  }
-}
+  },
+})(ExampleMapboxController.prototype, "layers");
 
 class ExampleLayerController extends swim.GeoLayerController {
-  initGeoView(layerView) {
-    super.initGeoView(layerView);
-    //layerView.geoTreeColor("#008f11");
-  }
-  projectGeoView(viewContext, layerView) {
-    super.projectGeoView(viewContext, layerView);
-    //console.log(viewContext.geoViewport);
-  }
-  initFeatureView(featureView) {
-    super.initFeatureView(featureView);
-    //if (featureView instanceof swim.GeoIconView) {
-    //  featureView.iconWidth(24).iconHeight(24);
-    //}
-  }
 }
 
 const layerModel = new swim.GenericModel();

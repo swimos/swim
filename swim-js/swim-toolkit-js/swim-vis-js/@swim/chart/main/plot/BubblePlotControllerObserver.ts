@@ -19,14 +19,14 @@ import type {BubblePlotTrait} from "./BubblePlotTrait";
 import type {ScatterPlotControllerObserver} from "./ScatterPlotControllerObserver";
 import type {BubblePlotController} from "./BubblePlotController";
 
-export interface BubblePlotControllerObserver<X, Y, C extends BubblePlotController<X, Y> = BubblePlotController<X, Y>> extends ScatterPlotControllerObserver<X, Y, C> {
-  controllerWillSetPlotTrait?(newPlotTrait: BubblePlotTrait<X, Y> | null, oldPlotTrait: BubblePlotTrait<X, Y> | null, controller: C): void;
+export interface BubblePlotControllerObserver<X = unknown, Y = unknown, C extends BubblePlotController<X, Y> = BubblePlotController<X, Y>> extends ScatterPlotControllerObserver<X, Y, C> {
+  controllerWillAttachPlotTrait?(plotTrait: BubblePlotTrait<X, Y>, controller: C): void;
 
-  controllerDidSetPlotTrait?(newPlotTrait: BubblePlotTrait<X, Y> | null, oldPlotTrait: BubblePlotTrait<X, Y> | null, controller: C): void;
+  controllerDidDetachPlotTrait?(plotTrait: BubblePlotTrait<X, Y>, controller: C): void;
 
-  controllerWillSetPlotView?(newPlotView: BubblePlotView<X, Y> | null, oldPlotView: BubblePlotView<X, Y> | null, controller: C): void;
+  controllerWillAttachPlotView?(plotView: BubblePlotView<X, Y>, controller: C): void;
 
-  controllerDidSetPlotView?(newPlotView: BubblePlotView<X, Y> | null, oldPlotView: BubblePlotView<X, Y> | null, controller: C): void;
+  controllerDidDetachPlotView?(plotView: BubblePlotView<X, Y>, controller: C): void;
 
   controllerWillSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, controller: C): void;
 

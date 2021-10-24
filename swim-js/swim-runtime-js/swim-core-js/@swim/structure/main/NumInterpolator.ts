@@ -35,6 +35,7 @@ export const NumInterpolator = (function (_super: typeof Interpolator) {
   };
 
   NumInterpolator.prototype = Object.create(_super.prototype);
+  NumInterpolator.prototype.constructor = NumInterpolator;
 
   return NumInterpolator;
 })(Interpolator);

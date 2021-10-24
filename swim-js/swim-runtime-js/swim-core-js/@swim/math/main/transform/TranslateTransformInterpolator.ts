@@ -39,6 +39,7 @@ export const TranslateTransformInterpolator = (function (_super: typeof Interpol
   };
 
   TranslateTransformInterpolator.prototype = Object.create(_super.prototype);
+  TranslateTransformInterpolator.prototype.constructor = TranslateTransformInterpolator;
 
   return TranslateTransformInterpolator;
 })(Interpolator);

@@ -67,6 +67,7 @@ export const FeelVectorInterpolator = (function (_super: typeof Interpolator) {
   };
 
   FeelVectorInterpolator.prototype = Object.create(_super.prototype);
+  FeelVectorInterpolator.prototype.constructor = FeelVectorInterpolator;
 
   Object.defineProperty(FeelVectorInterpolator.prototype, 0, {
     get(this: FeelVectorInterpolator): FeelVector {

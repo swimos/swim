@@ -58,6 +58,7 @@ export const TransformListInterpolator = (function (_super: typeof Interpolator)
   };
 
   TransformListInterpolator.prototype = Object.create(_super.prototype);
+  TransformListInterpolator.prototype.constructor = TransformListInterpolator;
 
   Object.defineProperty(TransformListInterpolator.prototype, 0, {
     get(this: TransformListInterpolator): TransformList {

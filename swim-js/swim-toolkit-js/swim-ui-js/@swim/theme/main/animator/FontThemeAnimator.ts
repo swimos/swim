@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyFont, Font} from "@swim/style";
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 /** @internal */
 export const FontThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const FontThemeAnimator = _super.extend() as ThemeAnimatorClass<ThemeAnimator<any, Font | null | undefined, AnyFont | null | undefined>>;
+  const FontThemeAnimator = _super.extend("FontThemeAnimator") as ThemeAnimatorFactory<ThemeAnimator<any, Font | null | undefined, AnyFont | null | undefined>>;
 
   FontThemeAnimator.prototype.fromAny = function (value: AnyFont | null | undefined): Font | null | undefined {
     return value !== void 0 && value !== null ? Font.fromAny(value) : value;

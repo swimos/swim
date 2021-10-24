@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AttributeAnimatorClass, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorFactory, AttributeAnimator} from "./AttributeAnimator";
 
 /** @internal */
 export const BooleanAttributeAnimator = (function (_super: typeof AttributeAnimator) {
-  const BooleanAttributeAnimator = _super.extend() as AttributeAnimatorClass<AttributeAnimator<any, boolean | undefined, string>>;
+  const BooleanAttributeAnimator = _super.extend("BooleanAttributeAnimator") as AttributeAnimatorFactory<AttributeAnimator<any, boolean | undefined, string>>;
 
   BooleanAttributeAnimator.prototype.parse = function (value: string): boolean | undefined {
     return !!value;

@@ -13,16 +13,17 @@
 // limitations under the License.
 
 import {Mutable, Class, Lazy, ObserverType, Service} from "@swim/util";
+import {R2Box} from "@swim/math";
 import type {ViewIdiom} from "./ViewIdiom";
 import {Viewport} from "./Viewport";
 import type {ViewportServiceObserver} from "./ViewportServiceObserver";
-import type {ViewContext} from "../view/ViewContext";
+import {ViewContext} from "../view/ViewContext";
 import {View} from "../"; // forward import
 
 export class ViewportService<V extends View = View> extends Service<V> {
   constructor() {
     super();
-    this.viewContext = this.createViewContext();
+    this.viewContext = ViewContext.create();
     this.viewportResizeTimer = 0;
     this.reorientationTimer = 0;
 
@@ -38,25 +39,12 @@ export class ViewportService<V extends View = View> extends Service<V> {
 
   readonly viewContext: ViewContext;
 
-  protected createViewContext(): ViewContext {
-    return {
-      updateTime: 0,
-      viewIdiom: "unspecified",
-      viewport: this.detectViewport(),
-    };
-  }
-
   get viewport(): Viewport {
     return this.viewContext.viewport;
   }
 
   get viewIdiom(): ViewIdiom {
     return this.viewContext.viewIdiom;
-  }
-
-  /** @internal */
-  detectViewport(): Viewport {
-    return Viewport.detect();
   }
 
   /** @internal */
@@ -201,8 +189,10 @@ export class ViewportService<V extends View = View> extends Service<V> {
 
   /** @internal */
   throttleResize(): void {
-    const viewport = this.detectViewport();
+    const viewport = Viewport.detect();
+    const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
     (this.viewContext as Mutable<ViewContext>).viewport = viewport;
+    (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
     this.updateViewIdiom(viewport);
 
     const roots = this.roots;
@@ -230,8 +220,10 @@ export class ViewportService<V extends View = View> extends Service<V> {
       this.viewportResizeTimer = 0;
     }
 
-    const viewport = this.detectViewport();
+    const viewport = Viewport.detect();
+    const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
     (this.viewContext as Mutable<ViewContext>).viewport = viewport;
+    (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
     this.updateViewIdiom(viewport);
 
     const roots = this.roots;
@@ -259,8 +251,10 @@ export class ViewportService<V extends View = View> extends Service<V> {
       this.reorientationTimer = 0;
     }
 
-    const viewport = this.detectViewport();
+    const viewport = Viewport.detect();
+    const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
     (this.viewContext as Mutable<ViewContext>).viewport = viewport;
+    (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
     this.willReorient(viewport.orientation);
     this.updateViewIdiom(viewport);
     this.onReorient(viewport.orientation);

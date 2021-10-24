@@ -35,6 +35,7 @@ export const LengthInterpolator = (function (_super: typeof Interpolator) {
   };
 
   LengthInterpolator.prototype = Object.create(_super.prototype);
+  LengthInterpolator.prototype.constructor = LengthInterpolator;
 
   return LengthInterpolator;
 })(Interpolator);

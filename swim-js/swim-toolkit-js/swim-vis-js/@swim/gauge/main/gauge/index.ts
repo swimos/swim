@@ -15,6 +15,7 @@
 export {
   AnyGaugeView,
   GaugeViewInit,
+  GaugeViewDialExt,
   GaugeView,
 } from "./GaugeView";
 export {GaugeViewObserver} from "./GaugeViewObserver";
@@ -26,5 +27,8 @@ export {
 } from "./GaugeTrait";
 export {GaugeTraitObserver} from "./GaugeTraitObserver";
 
-export {GaugeController} from "./GaugeController";
+export {
+  GaugeControllerDialExt,
+  GaugeController,
+} from "./GaugeController";
 export {GaugeControllerObserver} from "./GaugeControllerObserver";

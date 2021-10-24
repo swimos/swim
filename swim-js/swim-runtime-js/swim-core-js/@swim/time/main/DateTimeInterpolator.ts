@@ -35,6 +35,7 @@ export const DateTimeInterpolator = (function (_super: typeof Interpolator) {
   };
 
   DateTimeInterpolator.prototype = Object.create(_super.prototype);
+  DateTimeInterpolator.prototype.constructor = DateTimeInterpolator;
 
   return DateTimeInterpolator;
 })(Interpolator);

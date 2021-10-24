@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
@@ -51,11 +51,11 @@ export class IconCellView extends CellView {
     return svgView instanceof SvgIconView ? svgView : null;
   }
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly xAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly xAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly yAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly yAlign!: Animator<this, number>;
 
   @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
   readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
@@ -79,41 +79,17 @@ export class IconCellView extends CellView {
   })
   readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected willSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGraphics !== void 0) {
-        observer.viewWillSetGraphics(newGraphics, oldGraphic, this);
-      }
-    }
-  }
-
-  protected onSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    this.requireUpdate(View.NeedsRasterize | View.NeedsComposite);
-  }
-
-  protected didSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGraphics !== void 0) {
-        observer.viewDidSetGraphics(newGraphics, oldGraphic, this);
-      }
-    }
-  }
-
   @ThemeAnimator<IconCellView, Graphics | null>({
     extends: IconGraphicsAnimator,
     type: Object,
     state: null,
     updateFlags: View.NeedsLayout,
     willSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.willSetGraphics(newGraphics, oldGraphics);
+      this.owner.callObservers("viewWillSetGraphics", newGraphics, oldGraphics, this.owner);
     },
     didSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.onSetGraphics(newGraphics, oldGraphics);
-      this.owner.didSetGraphics(newGraphics, oldGraphics);
+      this.owner.requireUpdate(View.NeedsRasterize | View.NeedsComposite);
+      this.owner.callObservers("viewDidSetGraphics", newGraphics, oldGraphics, this.owner);
     },
   })
   readonly graphics!: ThemeAnimator<this, Graphics | null>;

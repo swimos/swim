@@ -21,13 +21,13 @@ import type {GeoPathControllerObserver} from "./GeoPathControllerObserver";
 import type {GeoLineController} from "./GeoLineController";
 
 export interface GeoLineControllerObserver<C extends GeoLineController = GeoLineController> extends GeoPathControllerObserver<C> {
-  controllerWillSetGeoTrait?(newGeoTrait: GeoLineTrait | null, oldGeoTrait: GeoLineTrait | null, controller: C): void;
+  controllerWillAttachGeoTrait?(geoTrait: GeoLineTrait, controller: C): void;
 
-  controllerDidSetGeoTrait?(newGeoTrait: GeoLineTrait | null, oldGeoTrait: GeoLineTrait | null, controller: C): void;
+  controllerDidDetachGeoTrait?(geoTrait: GeoLineTrait, controller: C): void;
 
-  controllerWillSetGeoView?(newGeoView: GeoLineView | null, oldGeoView: GeoLineView | null, controller: C): void;
+  controllerWillAttachGeoView?(geoView: GeoLineView, controller: C): void;
 
-  controllerDidSetGeoView?(newGeoView: GeoLineView | null, oldGeoView: GeoLineView | null, controller: C): void;
+  controllerDidDetachGeoView?(geoView: GeoLineView, controller: C): void;
 
   controllerWillSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, controller: C): void;
 

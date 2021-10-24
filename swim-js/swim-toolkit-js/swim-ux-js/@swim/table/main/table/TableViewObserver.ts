@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {View, ViewFastener, PositionGestureInput} from "@swim/view";
+import type {PositionGestureInput, View} from "@swim/view";
 import type {HtmlViewObserver} from "@swim/dom";
 import type {LeafView} from "../leaf/LeafView";
 import type {RowView} from "../row/RowView";
@@ -20,43 +20,43 @@ import type {HeaderView} from "../header/HeaderView";
 import type {TableView} from "./TableView";
 
 export interface TableViewObserver<V extends TableView = TableView> extends HtmlViewObserver<V> {
-  viewWillSetHeader?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, view: V): void;
+  viewWillAttachHeader?(headerView: HeaderView, view: V): void;
 
-  viewDidSetHeader?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, view: V): void;
+  viewDidDetachHeader?(headerView: HeaderView, view: V): void;
 
-  viewWillSetRow?(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null, view: V): void;
+  viewWillAttachRow?(rowView: RowView, targetView: View | null, view: V): void;
 
-  viewDidSetRow?(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null, view: V): void;
+  viewDidDetachRow?(rowView: RowView, view: V): void;
 
-  viewWillSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ViewFastener<V, RowView>): void;
+  viewWillAttachLeaf?(leafView: LeafView, rowView: RowView): void;
 
-  viewDidSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ViewFastener<V, RowView>): void;
+  viewDidDetachLeaf?(leafView: LeafView, rowView: RowView): void;
 
-  viewWillHighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
+  viewWillHighlightLeaf?(leafView: LeafView, rowView: RowView): void;
 
-  viewDidHighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
+  viewDidHighlightLeaf?(leafView: LeafView, rowView: RowView): void;
 
-  viewWillUnhighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
+  viewWillUnhighlightLeaf?(leafView: LeafView, rowView: RowView): void;
 
-  viewDidUnhighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
+  viewDidUnhighlightLeaf?(leafView: LeafView, rowView: RowView): void;
 
-  viewDidEnterLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
+  viewDidEnterLeaf?(leafView: LeafView, rowView: RowView): void;
 
-  viewDidLeaveLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
+  viewDidLeaveLeaf?(leafView: LeafView, rowView: RowView): void;
 
-  viewDidPressLeaf?(input: PositionGestureInput, event: Event | null, leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
+  viewDidPressLeaf?(input: PositionGestureInput, event: Event | null, leafView: LeafView, rowView: RowView): void;
 
-  viewDidLongPressLeaf?(input: PositionGestureInput, leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
+  viewDidLongPressLeaf?(input: PositionGestureInput, leafView: LeafView, rowView: RowView): void;
 
-  viewWillSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ViewFastener<V, RowView>): void;
+  viewWillAttachTree?(treeView: TableView, rowView: RowView): void;
 
-  viewDidSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ViewFastener<V, RowView>): void;
+  viewDidDetachTree?(treeView: TableView, rowView: RowView): void;
 
-  viewWillExpandRow?(rowFastener: ViewFastener<V, RowView>): void;
+  viewWillExpandRow?(rowView: RowView): void;
 
-  viewDidExpandRow?(rowFastener: ViewFastener<V, RowView>): void;
+  viewDidExpandRow?(rowView: RowView): void;
 
-  viewWillCollapseRow?(rowFastener: ViewFastener<V, RowView>): void;
+  viewWillCollapseRow?(rowView: RowView): void;
 
-  viewDidCollapseRow?(rowFastener: ViewFastener<V, RowView>): void;
+  viewDidCollapseRow?(rowView: RowView): void;
 }

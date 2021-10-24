@@ -17,7 +17,7 @@ import {Affinity, FastenerOwner} from "@swim/fastener";
 import {Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewContext, View, ViewFastenerClass, ViewFastener} from "@swim/view";
+import {ViewContextType, ViewContext, View, ViewRefFactory, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {DeckSlot} from "./DeckSlot";
 import type {DeckSliderObserver} from "./DeckSliderObserver";
@@ -71,18 +71,22 @@ export class DeckSlider extends DeckSlot {
     this.itemCount = newItemCount;
 
     const oldItemKey = "item" + oldItemCount;
-    const oldItemFastener = this.getFastener(oldItemKey, ViewFastener) as DeckSliderItem<this, HtmlView> | null;
-    const oldItemView = oldItemFastener !== null ? oldItemFastener.view : null;
+    const oldItemRef = this.getFastener(oldItemKey, ViewRef) as DeckSliderItem<this, HtmlView> | null;
+    const oldItemView = oldItemRef !== null ? oldItemRef.view : null;
 
     const newItemKey = "item" + newItemCount;
-    const newItemFastener = DeckSliderItemFastener.create(this, newItemKey) as DeckSliderItem<this, HtmlView>;
-    newItemFastener.itemIndex = newItemCount;
+    const newItemRef = DeckSliderItemRef.create(this) as DeckSliderItem<this, HtmlView>;
+    Object.defineProperty(newItemRef, "name", {
+      value: newItemKey,
+      configurable: true,
+    })
+    newItemRef.itemIndex = newItemCount;
     this.willPushItem(newItemView, oldItemView);
-    this.item = newItemFastener;
+    this.item = newItemRef;
 
-    this.setFastener(newItemKey, newItemFastener);
-    newItemFastener.setView(newItemView);
-    newItemFastener.injectView();
+    this.setFastener(newItemKey, newItemRef);
+    newItemRef.setView(newItemView);
+    newItemRef.insertView();
 
     if (timing === void 0 && oldItemCount === 0) {
       timing = false;
@@ -125,17 +129,17 @@ export class DeckSlider extends DeckSlot {
     this.itemCount = newItemCount;
 
     const oldItemKey = "item" + oldItemCount;
-    const oldItemFastener = this.getFastener(oldItemKey, ViewFastener) as DeckSliderItem<this, HtmlView> | null;
-    const oldItemView = oldItemFastener !== null ? oldItemFastener.view : null;
+    const oldItemRef = this.getFastener(oldItemKey, ViewRef) as DeckSliderItem<this, HtmlView> | null;
+    const oldItemView = oldItemRef !== null ? oldItemRef.view : null;
 
     if (oldItemView !== null) {
       const newItemKey = "item" + newItemCount;
-      const newItemFastener = this.getFastener(newItemKey, ViewFastener) as DeckSliderItem<this, HtmlView> | null;
-      const newItemView = newItemFastener !== null ? newItemFastener.view : null;
+      const newItemRef = this.getFastener(newItemKey, ViewRef) as DeckSliderItem<this, HtmlView> | null;
+      const newItemView = newItemRef !== null ? newItemRef.view : null;
       this.willPopItem(newItemView, oldItemView);
-      this.item = newItemFastener;
-      if (newItemFastener !== null) {
-        newItemFastener.injectView();
+      this.item = newItemRef;
+      if (newItemRef !== null) {
+        newItemRef.insertView();
       }
 
       if (timing === void 0 || timing === true) {
@@ -167,8 +171,8 @@ export class DeckSlider extends DeckSlot {
     const oldItemKey = oldItemView.key;
     oldItemView.remove();
     if (oldItemKey !== void 0) {
-      const oldItemFastener = this.getFastener(oldItemKey, ViewFastener) as DeckSliderItem<this, HtmlView> | null;
-      if (oldItemFastener !== null && oldItemFastener.itemIndex > this.itemCount) {
+      const oldItemRef = this.getFastener(oldItemKey, ViewRef) as DeckSliderItem<this, HtmlView> | null;
+      if (oldItemRef !== null && oldItemRef.itemIndex > this.itemCount) {
         this.setFastener(oldItemKey, null);
       }
     }
@@ -185,15 +189,15 @@ export class DeckSlider extends DeckSlot {
       if (deckPhase !== void 0) {
         const nextItemIndex = Math.round(deckPhase + 1);
         const nextItemKey = "item" + nextItemIndex;
-        const nextItemFastener = this.getFastener(nextItemKey, ViewFastener) as DeckSliderItem<this, HtmlView> | null;
-        const nextItemView = nextItemFastener !== null ? nextItemFastener.view : null;
+        const nextItemRef = this.getFastener(nextItemKey, ViewRef) as DeckSliderItem<this, HtmlView> | null;
+        const nextItemView = nextItemRef !== null ? nextItemRef.view : null;
         if (nextItemView !== null) {
           this.didPopItem(this.item !== null ? this.item.view : null, nextItemView);
         } else if (this.item !== null && this.item.view !== null && Math.round(deckPhase) > 0) {
           const prevItemIndex = Math.round(deckPhase - 1);
           const prevItemKey = "item" + prevItemIndex;
-          const prevItemFastener = this.getFastener(prevItemKey, ViewFastener) as DeckSliderItem<this, HtmlView> | null;
-          const prevItemView = prevItemFastener !== null ? prevItemFastener.view : null;
+          const prevItemRef = this.getFastener(prevItemKey, ViewRef) as DeckSliderItem<this, HtmlView> | null;
+          const prevItemView = prevItemRef !== null ? prevItemRef.view : null;
           this.didPushItem(this.item.view, prevItemView);
         }
       }
@@ -203,40 +207,38 @@ export class DeckSlider extends DeckSlot {
 }
 
 /** @internal */
-export interface DeckSliderItem<V extends DeckSlider = DeckSlider, T extends HtmlView = HtmlView> extends ViewFastener<V, T> {
+export interface DeckSliderItem<O extends DeckSlider = DeckSlider, V extends HtmlView = HtmlView> extends ViewRef<O, V> {
   itemIndex: number;
 
   /** @internal */
   itemWidth: Length | string | null;
 
   /** @override */
-  onSetView(itemView: T | null): void;
+  didAttachView(itemView: V): void;
 
   /** @override */
-  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
 
   /** @protected */
-  viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, itemView: T): void;
+  viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, itemView: V): void;
 
-  viewDidLayout(viewContext: ViewContext, itemView: T): void;
-
-  /** @protected */
-  initItem(itemView: T): void;
+  viewDidLayout(viewContext: ViewContext, itemView: V): void;
 
   /** @protected */
-  layoutItem(itemView: T): void;
+  initItem(itemView: V): void;
+
+  /** @protected */
+  layoutItem(itemView: V): void;
 }
 /** @internal */
-export const DeckSliderItem = (function (_super: typeof ViewFastener) {
-  const DeckSliderItem = _super.extend() as ViewFastenerClass<DeckSliderItem<any, any>>;
+export const DeckSliderItem = (function (_super: typeof ViewRef) {
+  const DeckSliderItem = _super.extend("DeckSliderItem") as ViewRefFactory<DeckSliderItem<any, any>>;
 
-  DeckSliderItem.prototype.onSetView = function (this: DeckSliderItem, itemView: HtmlView | null): void {
-    if (itemView !== null) {
-      this.initItem(itemView);
-    }
+  DeckSliderItem.prototype.didAttachView = function (this: DeckSliderItem, itemView: HtmlView): void {
+    this.initItem(itemView);
   };
 
-  DeckSliderItem.prototype.insertView = function (this: DeckSliderItem, parent: View, childView: HtmlView, targetView: View | null, key: string | undefined): void {
+  DeckSliderItem.prototype.insertChild = function (this: DeckSliderItem, parent: View, childView: HtmlView, targetView: View | null, key: string | undefined): void {
     const targetKey = "item" + (this.itemIndex + 1);
     targetView = parent.getChild(targetKey);
     parent.insertChild(childView, targetView, key);
@@ -311,20 +313,19 @@ export const DeckSliderItem = (function (_super: typeof ViewFastener) {
     }
   };
 
-  DeckSliderItem.construct = function <F extends DeckSliderItem<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
-    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+  DeckSliderItem.construct = function <F extends DeckSliderItem<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
+    fastener = _super.construct(fastenerClass, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).itemIndex = 0;
     (fastener as Mutable<typeof fastener>).itemWidth = null;
     return fastener;
   };
 
   return DeckSliderItem;
-})(ViewFastener);
+})(ViewRef);
 /** @internal */
-export const DeckSliderItemFastener = ViewFastener.define<DeckSlider, HtmlView>({
+export const DeckSliderItemRef = ViewRef.define<DeckSlider, HtmlView>("DeckSliderItemRef", {
   extends: DeckSliderItem,
   key: true,
   type: HtmlView,
-  child: false,
   observes: true,
 });

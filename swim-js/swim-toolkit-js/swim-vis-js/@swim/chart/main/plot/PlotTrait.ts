@@ -13,73 +13,35 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {TraitModelType, Trait, TraitFastener} from "@swim/model";
+import type {MemberFastenerClass} from "@swim/fastener";
+import {TraitModelType, Trait, TraitRef} from "@swim/model";
 import {DataSetTrait} from "../data/DataSetTrait";
 import type {PlotTraitObserver} from "./PlotTraitObserver";
 
-export class PlotTrait<X, Y> extends Trait {
+export class PlotTrait<X = unknown, Y = unknown> extends Trait {
   override readonly observerType?: Class<PlotTraitObserver<X, Y>>;
 
-  protected initDataSet(dataSetTrait: DataSetTrait<X, Y>): void {
-    // hook
-  }
-
-  protected attachDataSet(dataSetTrait: DataSetTrait<X, Y>): void {
-    if (this.consuming) {
-      dataSetTrait.consume(this);
-    }
-  }
-
-  protected detachDataSet(dataSetTrait: DataSetTrait<X, Y>): void {
-    if (this.consuming) {
-      dataSetTrait.unconsume(this);
-    }
-  }
-
-  protected willSetDataSet(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetDataSet !== void 0) {
-        traitObserver.traitWillSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetDataSet(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null): void {
-    if (oldDataSetTrait !== null) {
-      this.detachDataSet(oldDataSetTrait);
-    }
-    if (newDataSetTrait !== null) {
-      this.attachDataSet(newDataSetTrait);
-      this.initDataSet(newDataSetTrait);
-    }
-  }
-
-  protected didSetDataSet(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetDataSet !== void 0) {
-        traitObserver.traitDidSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait, this);
-      }
-    }
-  }
-
-  @TraitFastener<PlotTrait<X, Y>, DataSetTrait<X, Y>>({
+  @TraitRef<PlotTrait<X, Y>, DataSetTrait<X, Y>>({
     type: DataSetTrait,
-    sibling: false,
-    willSetTrait(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null): void {
-      this.owner.willSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait);
+    willAttachTrait(dataSetTrait: DataSetTrait<X, Y>, targetTrait: Trait | null): void {
+      this.owner.callObservers("traitWillAttachDataSet", dataSetTrait, this.owner);
     },
-    onSetTrait(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null): void {
-      this.owner.onSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait);
+    didAttachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
+      if (this.owner.consuming) {
+        dataSetTrait.consume(this.owner);
+      }
     },
-    didSetTrait(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null): void {
-      this.owner.didSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait);
+    willDetachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
+      if (this.owner.consuming) {
+        dataSetTrait.unconsume(this.owner);
+      }
+    },
+    didDetachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
+      this.owner.callObservers("traitDidDetachDataSet", dataSetTrait, this.owner);
     },
   })
-  readonly dataSet!: TraitFastener<this, DataSetTrait<X, Y>>;
+  readonly dataSet!: TraitRef<this, DataSetTrait<X, Y>>;
+  static readonly dataSet: MemberFastenerClass<PlotTrait, "dataSet">;
 
   protected detectDataSetTrait(trait: Trait): DataSetTrait<X, Y> | null {
     return trait instanceof DataSetTrait ? trait : null;
@@ -98,11 +60,9 @@ export class PlotTrait<X, Y> extends Trait {
     }
   }
 
-  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
-    if (newModel !== null) {
-      this.detectTraits(newModel);
-    }
-    super.didSetModel(newModel, oldModel);
+  protected override onAttachModel(model: TraitModelType<this>): void {
+    super.onAttachModel(model);
+    this.detectTraits(model);
   }
 
   /** @protected */

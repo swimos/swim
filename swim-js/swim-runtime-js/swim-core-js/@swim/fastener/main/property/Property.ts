@@ -15,7 +15,7 @@
 import {Mutable, Class, Equals, FromAny} from "@swim/util";
 import {Affinity} from "../fastener/Affinity";
 import {FastenerContext} from "../fastener/FastenerContext";
-import {FastenerOwner, FastenerFlags, FastenerInit, Fastener} from "../fastener/Fastener";
+import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "../fastener/Fastener";
 import {StringProperty} from "./"; // forward import
 import {NumberProperty} from "./"; // forward import
 import {BooleanProperty} from "./"; // forward import
@@ -26,15 +26,11 @@ export type MemberPropertyState<O, K extends keyof O> =
 export type MemberPropertyStateInit<O, K extends keyof O> =
   O[K] extends Property<any, any, infer U> ? U : never;
 
-export type MemberPropertyKey<O, K extends keyof O> =
-  O[K] extends Property ? K : never;
-
 export type MemberPropertyInit<O, K extends keyof O> =
   O[K] extends Property<any, infer T, infer U> ? T | U : never;
 
-export type MemberPropertyInitMap<O> = {
-  -readonly [K in keyof O as MemberPropertyKey<O, K>]?: MemberPropertyInit<O, K>;
-};
+export type MemberPropertyInitMap<O> =
+  {-readonly [K in keyof O as O[K] extends Property ? K : never]?: MemberPropertyInit<O, K>};
 
 export type PropertyState<P extends Property<any, any>> =
   P extends Property<any, infer T> ? T : never;
@@ -42,7 +38,8 @@ export type PropertyState<P extends Property<any, any>> =
 export type PropertyStateInit<P extends Property<any, any>> =
   P extends Property<any, infer T, infer U> ? T | U : never;
 
-export interface PropertyInit<T = unknown, U = never> extends FastenerInit {
+export interface PropertyInit<T = unknown, U = T> extends FastenerInit {
+  extends?: {prototype: Property<any, any>} | string | boolean | null;
   type?: unknown;
 
   state?: T | U;
@@ -67,42 +64,33 @@ export interface PropertyInit<T = unknown, U = never> extends FastenerInit {
   fromAny?(value: T | U): T;
 }
 
-export type PropertyDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<Property<O, T, U> & I> & PropertyInit<T, U> & Partial<I>;
+export type PropertyDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<Property<O, T, U> & I> & PropertyInit<T, U> & Partial<I>;
 
-export interface PropertyClass<P extends Property<any, any> = Property<any, any, any>> {
-  /** @internal */
-  prototype: P;
+export interface PropertyClass<P extends Property<any, any> = Property<any, any>> extends FastenerClass<P> {
+}
 
-  create(owner: FastenerOwner<P>, propertyName: string): P;
+export interface PropertyFactory<P extends Property<any, any> = Property<any, any>> extends PropertyClass<P> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): PropertyFactory<P> & I;
 
-  construct(propertyClass: {prototype: P}, property: P | null, owner: FastenerOwner<P>, propertyName: string): P;
+  specialize(type: unknown): PropertyFactory | null;
 
-  specialize(type: unknown): PropertyClass | null;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): PropertyClass<P> & I;
-
-  define<O, T, U = never>(descriptor: PropertyDescriptor<O, T, U>): PropertyClass<Property<any, T, U>>;
-  define<O, T, U = never, I = {}>(descriptor: PropertyDescriptor<O, T, U, I>): PropertyClass<Property<any, T, U> & I>;
+  define<O, T, U = T>(className: string, descriptor: PropertyDescriptor<O, T, U>): PropertyFactory<Property<any, T, U>>;
+  define<O, T, U = T, I = {}>(className: string, descriptor: PropertyDescriptor<O, T, U, I>): PropertyFactory<Property<any, T, U> & I>;
 
   <O, T extends string | undefined = string | undefined, U extends string | undefined = string | undefined>(descriptor: {type: typeof String} & PropertyDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & PropertyDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends boolean | undefined = boolean | undefined, U extends boolean | string | undefined = boolean | string | undefined>(descriptor: {type: typeof Boolean} & PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = never>(descriptor: PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = never, I = {}>(descriptor: PropertyDescriptor<O, T, U, I>): PropertyDecorator;
-
-  /** @internal @override */
-  readonly FlagShift: number;
-  /** @internal @override */
-  readonly FlagMask: FastenerFlags;
+  <O, T, U = T>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & PropertyDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = T>(descriptor: PropertyDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = T, I = {}>(descriptor: PropertyDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
-export interface Property<O = unknown, T = unknown, U = never> extends Fastener<O> {
+export interface Property<O = unknown, T = unknown, U = T> extends Fastener<O> {
   (): T;
   (state: T | U, affinity?: Affinity): O;
 
   /** @override */
-  get familyType(): Class<Property<any, any, any>> | null;
+  get familyType(): Class<Property<any, any>> | null;
 
   /** @internal @override */
   setInherited(inherited: boolean, superFastener: Property<unknown, T>): void;
@@ -203,10 +191,10 @@ export interface Property<O = unknown, T = unknown, U = never> extends Fastener<
 }
 
 export const Property = (function (_super: typeof Fastener) {
-  const Property: PropertyClass = _super.extend();
+  const Property: PropertyFactory = _super.extend("Property");
 
   Object.defineProperty(Property.prototype, "familyType", {
-    get: function (this: Property): Class<Property<any, any, any>> | null {
+    get: function (this: Property): Class<Property<any, any>> | null {
       return Property;
     },
     configurable: true,
@@ -256,7 +244,12 @@ export const Property = (function (_super: typeof Fastener) {
   Property.prototype.getSuperState = function <T>(this: Property<unknown, T>): NonNullable<T> {
     const superState = this.superState;
     if (superState === void 0 || superState === null) {
-      throw new TypeError(superState + " " + this.name + " super state");
+      let message = superState + " ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "super state";
+      throw new TypeError(message);
     }
     return superState as NonNullable<T>;
   };
@@ -272,7 +265,12 @@ export const Property = (function (_super: typeof Fastener) {
   Property.prototype.getState = function <T>(this: Property<unknown, T>): NonNullable<T> {
     const state = this.state;
     if (state === void 0 || state === null) {
-      throw new TypeError(state + " " + this.name + " state");
+      let message = state + " ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "state";
+      throw new TypeError(message);
     }
     return state as NonNullable<T>;
   };
@@ -353,9 +351,9 @@ export const Property = (function (_super: typeof Fastener) {
     return value as T;
   };
 
-  Property.construct = function <P extends Property<any, any>>(propertyClass: {prototype: P}, property: P | null, owner: FastenerOwner<P>, propertyName: string): P {
+  Property.construct = function <P extends Property<any, any>>(propertyClass: {prototype: P}, property: P | null, owner: FastenerOwner<P>): P {
     if (property === null) {
-      property = function Property(state?: PropertyState<P> | PropertyStateInit<P>, affinity?: Affinity): PropertyState<P> | FastenerOwner<P> {
+      property = function (state?: PropertyState<P> | PropertyStateInit<P>, affinity?: Affinity): PropertyState<P> | FastenerOwner<P> {
         if (arguments.length === 0) {
           return property!.state;
         } else {
@@ -363,9 +361,10 @@ export const Property = (function (_super: typeof Fastener) {
           return property!.owner;
         }
       } as P;
+      delete (property as Partial<Mutable<P>>).name; // don't clobber prototype name
       Object.setPrototypeOf(property, propertyClass.prototype);
     }
-    property = _super.construct(propertyClass, property, owner, propertyName) as P;
+    property = _super.construct(propertyClass, property, owner) as P;
     Object.defineProperty(property, "superFastener", { // override getter
       value: null,
       writable: true,
@@ -377,7 +376,7 @@ export const Property = (function (_super: typeof Fastener) {
     return property;
   };
 
-  Property.specialize = function (type: unknown): PropertyClass | null {
+  Property.specialize = function (type: unknown): PropertyFactory | null {
     if (type === String) {
       return StringProperty;
     } else if (type === Number) {
@@ -388,8 +387,8 @@ export const Property = (function (_super: typeof Fastener) {
     return null;
   };
 
-  Property.define = function <O, T, U>(descriptor: PropertyDescriptor<O, T, U>): PropertyClass<Property<any, T, U>> {
-    let superClass = descriptor.extends as PropertyClass | null | undefined;
+  Property.define = function <O, T, U>(className: string, descriptor: PropertyDescriptor<O, T, U>): PropertyFactory<Property<any, T, U>> {
+    let superClass = descriptor.extends as PropertyFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     const state = descriptor.state;
@@ -410,10 +409,10 @@ export const Property = (function (_super: typeof Fastener) {
       }
     }
 
-    const propertyClass = superClass.extend(descriptor);
+    const propertyClass = superClass.extend(className, descriptor);
 
-    propertyClass.construct = function (propertyClass: {prototype: Property<any, any, any>}, property: Property<O, T, U> | null, owner: O, propertyName: string): Property<O, T, U> {
-      property = superClass!.construct(propertyClass, property, owner, propertyName);
+    propertyClass.construct = function (propertyClass: {prototype: Property<any, any>}, property: Property<O, T, U> | null, owner: O): Property<O, T, U> {
+      property = superClass!.construct(propertyClass, property, owner);
       if (affinity !== void 0) {
         property.initAffinity(affinity);
       }

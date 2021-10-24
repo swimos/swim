@@ -62,8 +62,7 @@ export class DisplayService<V extends View = View> extends Service<V> {
       deltaUpdateFlags |= View.NeedsDisplay;
     }
     this.setFlags(this.flags | deltaUpdateFlags);
-    if (immediate && (this.flags & View.TraversingFlag) === 0
-        && this.updateDelay <= DisplayService.MaxProcessInterval) {
+    if (immediate && (this.flags & View.TraversingFlag) === 0 && this.updateDelay <= DisplayService.MaxProcessInterval) {
       this.runImmediatePass();
     } else {
       this.scheduleUpdate();
@@ -85,19 +84,13 @@ export class DisplayService<V extends View = View> extends Service<V> {
   }
 
   protected runImmediatePass(): void {
-    this.setFlags(this.flags | View.ImmediateFlag);
-    try {
-      if ((this.flags & View.ProcessMask) !== 0) {
-        this.cancelUpdate();
-        this.runProcessPass(true);
-      }
-      if ((this.flags & View.DisplayMask) !== 0
-          && this.updateDelay <= DisplayService.MaxProcessInterval) {
-        this.cancelUpdate();
-        this.runDisplayPass(void 0, true);
-      }
-    } finally {
-      this.setFlags(this.flags & ~View.ImmediateFlag);
+    if ((this.flags & View.ProcessMask) !== 0) {
+      this.cancelUpdate();
+      this.runProcessPass(true);
+    }
+    if ((this.flags & View.DisplayMask) !== 0 && this.updateDelay <= DisplayService.MaxProcessInterval) {
+      this.cancelUpdate();
+      this.runDisplayPass(void 0, true);
     }
   }
 

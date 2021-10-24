@@ -18,8 +18,8 @@ import {Affinity, Property, GenericHierarchy} from "@swim/fastener";
 export class PropertySpec extends Spec {
   @Test
   testProperty(exam: Exam): void {
-    const property = Property.create(null, "foo");
-    exam.equal(property.name, "foo");
+    const property = Property.create(null);
+    exam.equal(property.name, "");
     exam.equal(property.state, void 0);
 
     property.setState("bar");
@@ -31,8 +31,8 @@ export class PropertySpec extends Spec {
 
   @Test
   testPropertyDefine(exam: Exam): void {
-    const testProperty = Property.define({state: "bar"});
-    const property = testProperty.create(null, "foo");
+    const testProperty = Property.define("foo", {state: "bar"});
+    const property = testProperty.create(null);
     exam.equal(property.name, "foo");
     exam.equal(property.state, "bar");
 

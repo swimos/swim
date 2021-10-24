@@ -42,7 +42,7 @@ const chartView = canvasView.appendChild(swim.ChartView)
     .yScaleGestures(true)
     .font("12px sans-serif");
 
-const graphView = chartView.graph.injectView();
+const graphView = chartView.graph.insertView();
 
 chartView.leftAxis.view.gridLineWidth(1);
 

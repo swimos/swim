@@ -68,6 +68,7 @@ export const LinearScale = (function (_super: typeof ContinuousScale) {
   };
 
   LinearScale.prototype = Object.create(_super.prototype);
+  LinearScale.prototype.constructor = LinearScale;
 
   Object.defineProperty(LinearScale.prototype, "inverse", {
     get(this: LinearScale): LinearScale {

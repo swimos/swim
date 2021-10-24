@@ -19,20 +19,20 @@ import type {ColTrait} from "../col/ColTrait";
 import type {HeaderTrait} from "../header/HeaderTrait";
 import type {TableTrait} from "./TableTrait";
 
-export interface TableTraitObserver<R extends TableTrait = TableTrait> extends TraitObserver<R> {
-  traitWillSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: R): void;
+export interface TableTraitObserver<T extends TableTrait = TableTrait> extends TraitObserver<T> {
+  traitWillSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: T): void;
 
-  traitDidSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: R): void;
+  traitDidSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: T): void;
 
-  traitWillSetHeader?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillAttachHeader?(headerTrait: HeaderTrait, trait: T): void;
 
-  traitDidSetHeader?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachHeader?(headerTrait: HeaderTrait, trait: T): void;
 
-  traitWillSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillAttachCol?(colTrait: ColTrait, targetTrait: Trait | null, trait: T): void;
 
-  traitDidSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachCol?(colTrait: ColTrait, trait: T): void;
 
-  traitWillSetRow?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillAttachRow?(rowTrait: RowTrait, targetTrait: Trait | null, trait: T): void;
 
-  traitDidSetRow?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachRow?(rowTrait: RowTrait, trait: T): void;
 }

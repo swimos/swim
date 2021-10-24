@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnimatorClass, Animator} from "./Animator";
+import {AnimatorFactory, Animator} from "./Animator";
 
 /** @internal */
 export const StringAnimator = (function (_super: typeof Animator) {
-  const StringAnimator = _super.extend() as AnimatorClass<Animator<any, string | null | undefined, string | null | undefined>>;
+  const StringAnimator = _super.extend("StringAnimator") as AnimatorFactory<Animator<any, string | null | undefined, string | null | undefined>>;
 
   StringAnimator.prototype.fromAny = function (value: string | null | undefined): string | null | undefined {
     return value;

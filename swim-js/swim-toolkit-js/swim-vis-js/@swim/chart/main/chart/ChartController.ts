@@ -13,14 +13,16 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import type {Trait} from "@swim/model";
-import {TraitViewFastener, ControllerFastener, Controller} from "@swim/controller";
+import type {View} from "@swim/view";
+import {Controller, TraitViewRef, TraitViewControllerRef} from "@swim/controller";
 import type {GraphView} from "../graph/GraphView";
 import type {GraphTrait} from "../graph/GraphTrait";
 import {GraphController} from "../graph/GraphController";
 import type {AxisView} from "../axis/AxisView";
 import type {AxisTrait} from "../axis/AxisTrait";
-import {AxisController} from "../axis/AxisController";
+import type {AxisController} from "../axis/AxisController";
 import {TopAxisController} from "../axis/TopAxisController";
 import {RightAxisController} from "../axis/RightAxisController";
 import {BottomAxisController} from "../axis/BottomAxisController";
@@ -29,1237 +31,425 @@ import {ChartView} from "./ChartView";
 import {ChartTrait} from "./ChartTrait";
 import type {ChartControllerObserver} from "./ChartControllerObserver";
 
-export class ChartController<X, Y> extends GraphController<X, Y> {
+/** @internal */
+export interface ChartControllerAxisExt<D = unknown> {
+  attachAxisTrait(axisTrait: AxisTrait<D>): void;
+  detachAxisTrait(axisTrait: AxisTrait<D>): void;
+  attachAxisView(axisView: AxisView<D>): void;
+  detachAxisView(axisView: AxisView<D>): void;
+}
+
+export class ChartController<X = unknown, Y = unknown> extends GraphController<X, Y> {
   override readonly observerType?: Class<ChartControllerObserver<X, Y>>;
 
-  protected initChartTrait(chartTrait: ChartTrait<X, Y>): void {
-    // hook
-  }
-
-  protected attachChartTrait(chartTrait: ChartTrait<X, Y>): void {
-    this.graph.setTrait(chartTrait.graph.trait);
-    const topAxisTrait = chartTrait.topAxis.trait;
-    if (topAxisTrait !== null) {
-      this.insertTopAxisTrait(topAxisTrait);
-    }
-    const rightAxisTrait = chartTrait.rightAxis.trait;
-    if (rightAxisTrait !== null) {
-      this.insertRightAxisTrait(rightAxisTrait);
-    }
-    const bottomAxisTrait = chartTrait.bottomAxis.trait;
-    if (bottomAxisTrait !== null) {
-      this.insertBottomAxisTrait(bottomAxisTrait);
-    }
-    const leftAxisTrait = chartTrait.leftAxis.trait;
-    if (leftAxisTrait !== null) {
-      this.insertLeftAxisTrait(leftAxisTrait);
-    }
-  }
-
-  protected detachChartTrait(chartTrait: ChartTrait<X, Y>): void {
-    const leftAxisTrait = chartTrait.leftAxis.trait;
-    if (leftAxisTrait !== null) {
-      this.removeLeftAxisTrait(leftAxisTrait);
-    }
-    const bottomAxisTrait = chartTrait.bottomAxis.trait;
-    if (bottomAxisTrait !== null) {
-      this.removeBottomAxisTrait(bottomAxisTrait);
-    }
-    const rightAxisTrait = chartTrait.rightAxis.trait;
-    if (rightAxisTrait !== null) {
-      this.removeRightAxisTrait(rightAxisTrait);
-    }
-    const topAxisTrait = chartTrait.topAxis.trait;
-    if (topAxisTrait !== null) {
-      this.removeTopAxisTrait(topAxisTrait);
-    }
-    this.graph.setTrait(null);
-  }
-
-  protected willSetChartTrait(newGraphTrait: ChartTrait<X, Y> | null, oldGraphTrait: ChartTrait<X, Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetChartTrait !== void 0) {
-        observer.controllerWillSetChartTrait(newGraphTrait, oldGraphTrait, this);
-      }
-    }
-  }
-
-  protected onSetChartTrait(newGraphTrait: ChartTrait<X, Y> | null, oldGraphTrait: ChartTrait<X, Y> | null): void {
-    if (oldGraphTrait !== null) {
-      this.detachChartTrait(oldGraphTrait);
-    }
-    if (newGraphTrait !== null) {
-      this.attachChartTrait(newGraphTrait);
-      this.initChartTrait(newGraphTrait);
-    }
-  }
-
-  protected didSetChartTrait(newGraphTrait: ChartTrait<X, Y> | null, oldGraphTrait: ChartTrait<X, Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetChartTrait !== void 0) {
-        observer.controllerDidSetChartTrait(newGraphTrait, oldGraphTrait, this);
-      }
-    }
-  }
-
-  protected createChartView(): ChartView<X, Y> | null {
-    return new ChartView<X, Y>();
-  }
-
-  protected initChartView(chartView: ChartView<X, Y>): void {
-    // hook
-  }
-
-  protected attachChartView(chartView: ChartView<X, Y>): void {
-    const topAxisController = this.topAxis.controller;
-    if (topAxisController !== null) {
-      topAxisController.axis.injectView(chartView);
-    }
-    const rightAxisController = this.rightAxis.controller;
-    if (rightAxisController !== null) {
-      rightAxisController.axis.injectView(chartView);
-    }
-    const bottomAxisController = this.bottomAxis.controller;
-    if (bottomAxisController !== null) {
-      bottomAxisController.axis.injectView(chartView);
-    }
-    const leftAxisController = this.leftAxis.controller;
-    if (leftAxisController !== null) {
-      leftAxisController.axis.injectView(chartView);
-    }
-    if (this.graph.view !== null || this.graph.trait !== null) {
-      this.graph.injectView(chartView);
-    }
-  }
-
-  protected detachChartView(chartView: ChartView<X, Y>): void {
-    // hook
-  }
-
-  protected willSetChartView(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetChartView !== void 0) {
-        observer.controllerWillSetChartView(newChartView, oldChartView, this);
-      }
-    }
-  }
-
-  protected onSetChartView(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null): void {
-    if (oldChartView !== null) {
-      this.detachChartView(oldChartView);
-    }
-    if (newChartView !== null) {
-      this.attachChartView(newChartView);
-      this.initChartView(newChartView);
-    }
-  }
-
-  protected didSetChartView(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetChartView !== void 0) {
-        observer.controllerDidSetChartView(newChartView, oldChartView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static ChartFastener = TraitViewFastener.define<ChartController<unknown, unknown>, ChartTrait<unknown, unknown>, ChartView<unknown, unknown>>({
+  @TraitViewRef<ChartController<X, Y>, ChartTrait<X, Y>, ChartView<X, Y>>({
     traitType: ChartTrait,
     observesTrait: true,
-    willSetTrait(newChartTrait: ChartTrait<unknown, unknown> | null, oldChartTrait: ChartTrait<unknown, unknown> | null): void {
-      this.owner.willSetChartTrait(newChartTrait, oldChartTrait);
+    willAttachTrait(newChartTrait: ChartTrait<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachChartTrait", newChartTrait, this.owner);
     },
-    onSetTrait(newChartTrait: ChartTrait<unknown, unknown> | null, oldChartTrait: ChartTrait<unknown, unknown> | null): void {
-      this.owner.onSetChartTrait(newChartTrait, oldChartTrait);
-    },
-    didSetTrait(newChartTrait: ChartTrait<unknown, unknown> | null, oldChartTrait: ChartTrait<unknown, unknown> | null): void {
-      this.owner.didSetChartTrait(newChartTrait, oldChartTrait);
-    },
-    traitWillSetTopAxis(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
-      if (oldTopAxisTrait !== null) {
-        this.owner.removeTopAxisTrait(oldTopAxisTrait);
+    didAttachTrait(chartTrait: ChartTrait<X, Y>): void {
+      this.owner.graph.setTrait(chartTrait.graph.trait);
+      const topAxisTrait = chartTrait.topAxis.trait;
+      if (topAxisTrait !== null) {
+        this.owner.topAxis.setTrait(topAxisTrait);
+      }
+      const rightAxisTrait = chartTrait.rightAxis.trait;
+      if (rightAxisTrait !== null) {
+        this.owner.rightAxis.setTrait(rightAxisTrait);
+      }
+      const bottomAxisTrait = chartTrait.bottomAxis.trait;
+      if (bottomAxisTrait !== null) {
+        this.owner.bottomAxis.setTrait(bottomAxisTrait);
+      }
+      const leftAxisTrait = chartTrait.leftAxis.trait;
+      if (leftAxisTrait !== null) {
+        this.owner.leftAxis.setTrait(leftAxisTrait);
       }
     },
-    traitDidSetTopAxis(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
-      if (newTopAxisTrait !== null) {
-        this.owner.insertTopAxisTrait(newTopAxisTrait);
+    willDetachTrait(chartTrait: ChartTrait<X, Y>): void {
+      const leftAxisTrait = chartTrait.leftAxis.trait;
+      if (leftAxisTrait !== null) {
+        this.owner.leftAxis.deleteTrait(leftAxisTrait);
       }
+      const bottomAxisTrait = chartTrait.bottomAxis.trait;
+      if (bottomAxisTrait !== null) {
+        this.owner.bottomAxis.deleteTrait(bottomAxisTrait);
+      }
+      const rightAxisTrait = chartTrait.rightAxis.trait;
+      if (rightAxisTrait !== null) {
+        this.owner.rightAxis.deleteTrait(rightAxisTrait);
+      }
+      const topAxisTrait = chartTrait.topAxis.trait;
+      if (topAxisTrait !== null) {
+        this.owner.topAxis.deleteTrait(topAxisTrait);
+      }
+      this.owner.graph.setTrait(null);
     },
-    traitWillSetRightAxis(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
-      if (oldRightAxisTrait !== null) {
-        this.owner.removeRightAxisTrait(oldRightAxisTrait);
-      }
+    didDetachTrait(newChartTrait: ChartTrait<X, Y>): void {
+      this.owner.callObservers("controllerDidDetachChartTrait", newChartTrait, this.owner);
     },
-    traitDidSetRightAxis(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
-      if (newRightAxisTrait !== null) {
-        this.owner.insertRightAxisTrait(newRightAxisTrait);
-      }
+    traitWillAttachTopAxis(topAxisTrait: AxisTrait<unknown>): void {
+      this.owner.topAxis.setTrait(topAxisTrait);
     },
-    traitWillSetBottomAxis(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
-      if (oldBottomAxisTrait !== null) {
-        this.owner.removeBottomAxisTrait(oldBottomAxisTrait);
-      }
+    traitDidDetachTopAxis(topAxisTrait: AxisTrait<unknown>): void {
+      this.owner.topAxis.setTrait(null);
     },
-    traitDidSetBottomAxis(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
-      if (newBottomAxisTrait !== null) {
-        this.owner.insertBottomAxisTrait(newBottomAxisTrait);
-      }
+    traitWillAttachRightAxis(rightAxisTrait: AxisTrait<unknown>): void {
+      this.owner.rightAxis.setTrait(rightAxisTrait);
     },
-    traitWillSetLeftAxis(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
-      if (oldLeftAxisTrait !== null) {
-        this.owner.removeLeftAxisTrait(oldLeftAxisTrait);
-      }
+    traitDidDetachRightAxis(rightAxisTrait: AxisTrait<unknown>): void {
+      this.owner.rightAxis.setTrait(null);
     },
-    traitDidSetLeftAxis(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
-      if (newLeftAxisTrait !== null) {
-        this.owner.insertLeftAxisTrait(newLeftAxisTrait);
-      }
+    traitWillAttachBottomAxis(bottomAxisTrait: AxisTrait<unknown>): void {
+      this.owner.bottomAxis.setTrait(bottomAxisTrait);
+    },
+    traitDidDetachBottomAxis(bottomAxisTrait: AxisTrait<unknown>): void {
+      this.owner.bottomAxis.setTrait(null);
+    },
+    traitWillAttachLeftAxis(leftAxisTrait: AxisTrait<unknown>): void {
+      this.owner.leftAxis.setTrait(leftAxisTrait);
+    },
+    traitDidDetachLeftAxis(leftAxisTrait: AxisTrait<unknown>): void {
+      this.owner.leftAxis.setTrait(null);
     },
     viewType: ChartView,
-    willSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
-      this.owner.willSetChartView(newChartView, oldChartView);
+    willAttachView(chartView: ChartView<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachChartView", chartView, this.owner);
     },
-    onSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
-      this.owner.onSetChartView(newChartView, oldChartView);
+    didAttachView(chartView: ChartView<X, Y>): void {
+      const topAxisController = this.owner.topAxis.controller;
+      if (topAxisController !== null) {
+        topAxisController.axis.insertView(chartView);
+      }
+      const rightAxisController = this.owner.rightAxis.controller;
+      if (rightAxisController !== null) {
+        rightAxisController.axis.insertView(chartView);
+      }
+      const bottomAxisController = this.owner.bottomAxis.controller;
+      if (bottomAxisController !== null) {
+        bottomAxisController.axis.insertView(chartView);
+      }
+      const leftAxisController = this.owner.leftAxis.controller;
+      if (leftAxisController !== null) {
+        leftAxisController.axis.insertView(chartView);
+      }
+      if (this.owner.graph.view !== null || this.owner.graph.trait !== null) {
+        this.owner.graph.insertView(chartView);
+      }
     },
-    didSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
-      this.owner.didSetChartView(newChartView, oldChartView);
+    didDetachView(chartView: ChartView<X, Y>): void {
+      this.owner.callObservers("controllerDidDetachChartView", chartView, this.owner);
     },
-    createView(): ChartView<unknown, unknown> | null {
-      return this.owner.createChartView();
-    },
-  });
-
-  @TraitViewFastener<ChartController<X, Y>, ChartTrait<X, Y>, ChartView<X, Y>>({
-    extends: ChartController.ChartFastener,
   })
-  readonly chart!: TraitViewFastener<this, ChartTrait<X, Y>, ChartView<X, Y>>;
+  readonly chart!: TraitViewRef<this, ChartTrait<X, Y>, ChartView<X, Y>>;
+  static readonly chart: MemberFastenerClass<ChartController, "chart">;
 
-  protected override attachGraphTrait(graphTrait: GraphTrait<X, Y>): void {
-    super.attachGraphTrait(graphTrait);
-    const chartView = this.chart.view;
-    if (chartView !== null) {
-      this.graph.injectView(chartView);
-    }
-  }
-
-  protected override attachGraphView(graphView: GraphView<X, Y>): void {
-    super.attachGraphView(graphView);
-    const chartView = this.chart.view;
-    if (chartView !== null) {
-      this.graph.injectView(chartView);
-    }
-  }
-
-  protected override detachGraphView(graphView: GraphView<X, Y>): void {
-    graphView.remove();
-  }
-
-  protected createTopAxis(topAxisTrait: AxisTrait<X>): AxisController<X> | null {
-    return new TopAxisController<X>();
-  }
-
-  protected initTopAxis(topAxisController: AxisController<X>): void {
-    const topAxisTrait = topAxisController.axis.trait;
-    if (topAxisTrait !== null) {
-      this.initTopAxisTrait(topAxisTrait);
-    }
-    const topAxisView = topAxisController.axis.view;
-    if (topAxisView !== null) {
-      this.initTopAxisView(topAxisView);
-    }
-  }
-
-  protected attachTopAxis(topAxisController: AxisController<X>): void {
-    const topAxisTrait = topAxisController.axis.trait;
-    if (topAxisTrait !== null) {
-      this.attachTopAxisTrait(topAxisTrait);
-    }
-    const topAxisView = topAxisController.axis.view;
-    if (topAxisView !== null) {
-      this.attachTopAxisView(topAxisView);
-    }
-  }
-
-  protected detachTopAxis(topAxisController: AxisController<X>): void {
-    const topAxisTrait = topAxisController.axis.trait;
-    if (topAxisTrait !== null) {
-      this.detachTopAxisTrait(topAxisTrait);
-    }
-    const topAxisView = topAxisController.axis.view;
-    if (topAxisView !== null) {
-      this.detachTopAxisView(topAxisView);
-    }
-  }
-
-  protected willSetTopAxis(newTopAxisController: AxisController<X> | null, oldTopAxisController: AxisController<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetTopAxis !== void 0) {
-        observer.controllerWillSetTopAxis(newTopAxisController, oldTopAxisController, this);
+  @TraitViewRef<ChartController<X, Y>, GraphTrait<X, Y>, GraphView<X, Y>>({
+    extends: true,
+    didAttachTrait(graphTrait: GraphTrait<X, Y>, targetTrait: Trait | null): void {
+      const chartView = this.owner.chart.view;
+      if (chartView !== null) {
+        this.insertView(chartView);
       }
-    }
-  }
-
-  protected onSetTopAxis(newTopAxisController: AxisController<X> | null, oldTopAxisController: AxisController<X> | null): void {
-    if (oldTopAxisController !== null) {
-      this.detachTopAxis(oldTopAxisController);
-    }
-    if (newTopAxisController !== null) {
-      this.attachTopAxis(newTopAxisController);
-      this.initTopAxis(newTopAxisController);
-    }
-  }
-
-  protected didSetTopAxis(newTopAxisController: AxisController<X> | null, oldTopAxisController: AxisController<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetTopAxis !== void 0) {
-        observer.controllerDidSetTopAxis(newTopAxisController, oldTopAxisController, this);
+      GraphController.graph.prototype.didAttachTrait.call(this, graphTrait as GraphTrait, targetTrait);
+    },
+    didAttachView(graphView: GraphView<X, Y>, targetView: View | null): void {
+      const chartView = this.owner.chart.view;
+      if (chartView !== null) {
+        this.insertView(chartView);
       }
-    }
-  }
+      GraphController.graph.prototype.didAttachView.call(this, graphView as GraphView, targetView);
+    },
+    willDetachView(graphView: GraphView<X, Y>): void {
+      GraphController.graph.prototype.willDetachView.call(this, graphView as GraphView);
+      graphView.remove();
+    },
+  })
+  override readonly graph!: TraitViewRef<this, GraphTrait<X, Y>, GraphView<X, Y>>;
+  static override readonly graph: MemberFastenerClass<ChartController, "graph">;
 
-  protected insertTopAxisTrait(topAxisTrait: AxisTrait<X>, targetTrait: Trait | null = null): void {
-    const children = this.children;
-    let targetController: AxisController<unknown> | null = null;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const childController = children[i]!;
-      if (childController instanceof AxisController) {
-        if (childController.axis.trait === topAxisTrait) {
-          return;
-        } else if (childController.axis.trait === targetTrait) {
-          targetController = childController;
-        }
-      }
-    }
-    const topAxisController = this.createTopAxis(topAxisTrait);
-    if (topAxisController !== null) {
-      topAxisController.axis.setTrait(topAxisTrait);
-      this.topAxis.setController(topAxisController, targetController);
-      this.insertChild(topAxisController, targetController);
-      if (topAxisController.axis.view === null) {
-        const topAxisView = this.createTopAxisView(topAxisController);
-        let targetView: AxisView<unknown> | null = null;
-        if (targetController !== null) {
-          targetView = targetController.axis.view;
-        }
-        const chartView = this.chart.view;
-        if (chartView !== null) {
-          topAxisController.axis.injectView(chartView, topAxisView, targetView, null);
-        } else {
-          topAxisController.axis.setView(topAxisView, targetView);
-        }
-      }
-    }
-  }
-
-  protected removeTopAxisTrait(topAxisTrait: AxisTrait<X>): void {
-    const children = this.children;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const childController = children[i]!;
-      if (childController instanceof AxisController && childController.axis.trait === topAxisTrait) {
-        this.topAxis.setController(null);
-        childController.remove();
-        return;
-      }
-    }
-  }
-
-  protected initTopAxisTrait(topAxisTrait: AxisTrait<X>): void {
-    // hook
-  }
-
-  protected attachTopAxisTrait(topAxisTrait: AxisTrait<X>): void {
-    // hook
-  }
-
-  protected detachTopAxisTrait(topAxisTrait: AxisTrait<X>): void {
-    // hook
-  }
-
-  protected willSetTopAxisTrait(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetTopAxisTrait !== void 0) {
-        observer.controllerWillSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
-      }
-    }
-  }
-
-  protected onSetTopAxisTrait(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null): void {
-    if (oldTopAxisTrait !== null) {
-      this.detachTopAxisTrait(oldTopAxisTrait);
-    }
-    if (newTopAxisTrait !== null) {
-      this.attachTopAxisTrait(newTopAxisTrait);
-      this.initTopAxisTrait(newTopAxisTrait);
-    }
-  }
-
-  protected didSetTopAxisTrait(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetTopAxisTrait !== void 0) {
-        observer.controllerDidSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
-      }
-    }
-  }
-
-  protected createTopAxisView(topAxisController: AxisController<X>): AxisView<X> | null {
-    return topAxisController.axis.createView();
-  }
-
-  protected initTopAxisView(topAxisView: AxisView<X>): void {
-    // hook
-  }
-
-  protected attachTopAxisView(topAxisView: AxisView<X>): void {
-    // hook
-  }
-
-  protected detachTopAxisView(topAxisView: AxisView<X>): void {
-    topAxisView.remove();
-  }
-
-  protected willSetTopAxisView(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetTopAxisView !== void 0) {
-        observer.controllerWillSetTopAxisView(newTopAxisView, oldTopAxisView, this);
-      }
-    }
-  }
-
-  protected onSetTopAxisView(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null): void {
-    if (oldTopAxisView !== null) {
-      this.detachTopAxisView(oldTopAxisView);
-    }
-    if (newTopAxisView !== null) {
-      this.attachTopAxisView(newTopAxisView);
-      this.initTopAxisView(newTopAxisView);
-    }
-  }
-
-  protected didSetTopAxisView(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetTopAxisView !== void 0) {
-        observer.controllerDidSetTopAxisView(newTopAxisView, oldTopAxisView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static TopAxisFastener = ControllerFastener.define<ChartController<unknown, unknown>, AxisController<unknown>>({
+  @TraitViewControllerRef<ChartController<X, Y>, AxisTrait<X>, AxisView<X>, AxisController<X>, ChartControllerAxisExt<X>>({
     type: TopAxisController,
-    child: true,
+    binds: true,
     observes: true,
-    willSetController(newTopAxisController: AxisController<unknown> | null, oldTopAxisController: AxisController<unknown> | null): void {
-      this.owner.willSetTopAxis(newTopAxisController, oldTopAxisController);
+    get parentView(): View | null {
+      return this.owner.chart.view;
     },
-    onSetController(newTopAxisController: AxisController<unknown> | null, oldTopAxisController: AxisController<unknown> | null): void {
-      this.owner.onSetTopAxis(newTopAxisController, oldTopAxisController);
+    getTraitViewRef(controller: AxisController<X>): TraitViewRef<unknown, AxisTrait<X>, AxisView<X>> {
+      return controller.axis;
     },
-    didSetController(newTopAxisController: AxisController<unknown> | null, oldTopAxisController: AxisController<unknown> | null): void {
-      this.owner.didSetTopAxis(newTopAxisController, oldTopAxisController);
+    willAttachController(topAxisController: AxisController<X> ): void {
+      this.owner.callObservers("controllerWillAttachTopAxis", topAxisController, this.owner);
     },
-    controllerWillSetAxisTrait(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.willSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait);
+    didAttachController(topAxisController: AxisController<X>): void {
+      const topAxisTrait = topAxisController.axis.trait;
+      if (topAxisTrait !== null) {
+        this.attachAxisTrait(topAxisTrait);
+      }
+      const topAxisView = topAxisController.axis.view;
+      if (topAxisView !== null) {
+        this.attachAxisView(topAxisView);
+      }
     },
-    controllerDidSetAxisTrait(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.onSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait);
-      this.owner.didSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait);
+    willDetachController(topAxisController: AxisController<X>): void {
+      const topAxisView = topAxisController.axis.view;
+      if (topAxisView !== null) {
+        this.detachAxisView(topAxisView);
+      }
+      const topAxisTrait = topAxisController.axis.trait;
+      if (topAxisTrait !== null) {
+        this.detachAxisTrait(topAxisTrait);
+      }
     },
-    controllerWillSetAxisView(newTopAxisView: AxisView<unknown> | null, oldTopAxisView: AxisView<unknown> | null): void {
-      this.owner.willSetTopAxisView(newTopAxisView, oldTopAxisView);
+    didDetachController(topAxisController: AxisController<X>): void {
+      this.owner.callObservers("controllerDidDetachTopAxis", topAxisController, this.owner);
     },
-    controllerDidSetAxisView(newTopAxisView: AxisView<unknown> | null, oldTopAxisView: AxisView<unknown> | null): void {
-      this.owner.onSetTopAxisView(newTopAxisView, oldTopAxisView);
-      this.owner.didSetTopAxisView(newTopAxisView, oldTopAxisView);
+    controllerWillAttachAxisTrait(topAxisTrait: AxisTrait<X>): void {
+      this.owner.callObservers("controllerWillAttachTopAxisTrait", topAxisTrait, this.owner);
+      this.attachAxisTrait(topAxisTrait);
     },
-  });
-
-  @ControllerFastener<ChartController<X, Y>, AxisController<X>>({
-    extends: ChartController.TopAxisFastener,
+    controllerDidDetachAxisTrait(topAxisTrait: AxisTrait<X>): void {
+      this.detachAxisTrait(topAxisTrait);
+      this.owner.callObservers("controllerDidDetachTopAxisTrait", topAxisTrait, this.owner);
+    },
+    attachAxisTrait(topAxisTrait: AxisTrait<X>): void {
+      // hook
+    },
+    detachAxisTrait(topAxisTrait: AxisTrait<X>): void {
+      // hook
+    },
+    controllerWillAttachAxisView(topAxisView: AxisView<X>): void {
+      this.owner.callObservers("controllerWillAttachTopAxisView", topAxisView, this.owner);
+      this.attachAxisView(topAxisView);
+    },
+    controllerDidDetachAxisView(topAxisView: AxisView<X>): void {
+      this.detachAxisView(topAxisView);
+      this.owner.callObservers("controllerDidDetachTopAxisView", topAxisView, this.owner);
+    },
+    attachAxisView(topAxisView: AxisView<X>): void {
+      // hook
+    },
+    detachAxisView(topAxisView: AxisView<X>): void {
+      topAxisView.remove();
+    },
+    detectController(controller: Controller): AxisController<X> | null {
+      return controller instanceof TopAxisController ? controller : null;
+    },
   })
-  readonly topAxis!: ControllerFastener<this, AxisController<X>>;
+  readonly topAxis!: TraitViewControllerRef<this, AxisTrait<X>, AxisView<X>, AxisController<X>>;
+  static readonly topAxis: MemberFastenerClass<ChartController, "topAxis">;
 
-  protected createRightAxis(rightAxisTrait: AxisTrait<Y>): AxisController<Y> | null {
-    return new RightAxisController<Y>();
-  }
-
-  protected initRightAxis(rightAxisController: AxisController<Y>): void {
-    const rightAxisTrait = rightAxisController.axis.trait;
-    if (rightAxisTrait !== null) {
-      this.initRightAxisTrait(rightAxisTrait);
-    }
-    const rightAxisView = rightAxisController.axis.view;
-    if (rightAxisView !== null) {
-      this.initRightAxisView(rightAxisView);
-    }
-  }
-
-  protected attachRightAxis(rightAxisController: AxisController<Y>): void {
-    const rightAxisTrait = rightAxisController.axis.trait;
-    if (rightAxisTrait !== null) {
-      this.attachRightAxisTrait(rightAxisTrait);
-    }
-    const rightAxisView = rightAxisController.axis.view;
-    if (rightAxisView !== null) {
-      this.attachRightAxisView(rightAxisView);
-    }
-  }
-
-  protected detachRightAxis(rightAxisController: AxisController<Y>): void {
-    const rightAxisTrait = rightAxisController.axis.trait;
-    if (rightAxisTrait !== null) {
-      this.detachRightAxisTrait(rightAxisTrait);
-    }
-    const rightAxisView = rightAxisController.axis.view;
-    if (rightAxisView !== null) {
-      this.detachRightAxisView(rightAxisView);
-    }
-  }
-
-  protected willSetRightAxis(newRightAxisController: AxisController<Y> | null, oldRightAxisController: AxisController<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetRightAxis !== void 0) {
-        observer.controllerWillSetRightAxis(newRightAxisController, oldRightAxisController, this);
-      }
-    }
-  }
-
-  protected onSetRightAxis(newRightAxisController: AxisController<Y> | null, oldRightAxisController: AxisController<Y> | null): void {
-    if (oldRightAxisController !== null) {
-      this.detachRightAxis(oldRightAxisController);
-    }
-    if (newRightAxisController !== null) {
-      this.attachRightAxis(newRightAxisController);
-      this.initRightAxis(newRightAxisController);
-    }
-  }
-
-  protected didSetRightAxis(newRightAxisController: AxisController<Y> | null, oldRightAxisController: AxisController<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetRightAxis !== void 0) {
-        observer.controllerDidSetRightAxis(newRightAxisController, oldRightAxisController, this);
-      }
-    }
-  }
-
-  protected insertRightAxisTrait(rightAxisTrait: AxisTrait<Y>, targetTrait: Trait | null = null): void {
-    const children = this.children;
-    let targetController: AxisController<unknown> | null = null;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const childController = children[i]!;
-      if (childController instanceof AxisController) {
-        if (childController.axis.trait === rightAxisTrait) {
-          return;
-        } else if (childController.axis.trait === targetTrait) {
-          targetController = childController;
-        }
-      }
-    }
-    const rightAxisController = this.createRightAxis(rightAxisTrait);
-    if (rightAxisController !== null) {
-      rightAxisController.axis.setTrait(rightAxisTrait);
-      this.rightAxis.setController(rightAxisController, targetController);
-      this.insertChild(rightAxisController, targetController);
-      if (rightAxisController.axis.view === null) {
-        const rightAxisView = this.createRightAxisView(rightAxisController);
-        let targetView: AxisView<unknown> | null = null;
-        if (targetController !== null) {
-          targetView = targetController.axis.view;
-        }
-        const chartView = this.chart.view;
-        if (chartView !== null) {
-          rightAxisController.axis.injectView(chartView, rightAxisView, targetView, null);
-        } else {
-          rightAxisController.axis.setView(rightAxisView, targetView);
-        }
-      }
-    }
-  }
-
-  protected removeRightAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
-    const children = this.children;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const childController = children[i]!;
-      if (childController instanceof AxisController && childController.axis.trait === rightAxisTrait) {
-        this.rightAxis.setController(null);
-        childController.remove();
-        return;
-      }
-    }
-  }
-
-  protected initRightAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
-    // hook
-  }
-
-  protected attachRightAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
-    // hook
-  }
-
-  protected detachRightAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
-    // hook
-  }
-
-  protected willSetRightAxisTrait(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllertWillSetRightAxisTrait !== void 0) {
-        observer.controllertWillSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
-      }
-    }
-  }
-
-  protected onSetRightAxisTrait(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null): void {
-    if (oldRightAxisTrait !== null) {
-      this.detachRightAxisTrait(oldRightAxisTrait);
-    }
-    if (newRightAxisTrait !== null) {
-      this.attachRightAxisTrait(newRightAxisTrait);
-      this.initRightAxisTrait(newRightAxisTrait);
-    }
-  }
-
-  protected didSetRightAxisTrait(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetRightAxisTrait !== void 0) {
-        observer.controllerDidSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
-      }
-    }
-  }
-
-  protected createRightAxisView(rightAxisController: AxisController<Y>): AxisView<Y> | null {
-    return rightAxisController.axis.createView();
-  }
-
-  protected initRightAxisView(rightAxisView: AxisView<Y>): void {
-    // hook
-  }
-
-  protected attachRightAxisView(rightAxisView: AxisView<Y>): void {
-    // hook
-  }
-
-  protected detachRightAxisView(rightAxisView: AxisView<Y>): void {
-    rightAxisView.remove();
-  }
-
-  protected willSetRightAxisView(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetRightAxisView !== void 0) {
-        observer.controllerWillSetRightAxisView(newRightAxisView, oldRightAxisView, this);
-      }
-    }
-  }
-
-  protected onSetRightAxisView(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null): void {
-    if (oldRightAxisView !== null) {
-      this.detachRightAxisView(oldRightAxisView);
-    }
-    if (newRightAxisView !== null) {
-      this.attachRightAxisView(newRightAxisView);
-      this.initRightAxisView(newRightAxisView);
-    }
-  }
-
-  protected didSetRightAxisView(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetRightAxisView !== void 0) {
-        observer.controllerDidSetRightAxisView(newRightAxisView, oldRightAxisView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static RightAxisFastener = ControllerFastener.define<ChartController<unknown, unknown>, AxisController<unknown>>({
+  @TraitViewControllerRef<ChartController<X, Y>, AxisTrait<Y>, AxisView<Y>, AxisController<Y>, ChartControllerAxisExt<Y>>({
     type: RightAxisController,
-    child: true,
+    binds: true,
     observes: true,
-    willSetController(newRightAxisController: AxisController<unknown> | null, oldRightAxisController: AxisController<unknown> | null): void {
-      this.owner.willSetRightAxis(newRightAxisController, oldRightAxisController);
+    get parentView(): View | null {
+      return this.owner.chart.view;
     },
-    onSetController(newRightAxisController: AxisController<unknown> | null, oldRightAxisController: AxisController<unknown> | null): void {
-      this.owner.onSetRightAxis(newRightAxisController, oldRightAxisController);
+    getTraitViewRef(controller: AxisController<Y>): TraitViewRef<unknown, AxisTrait<Y>, AxisView<Y>> {
+      return controller.axis;
     },
-    didSetController(newRightAxisController: AxisController<unknown> | null, oldRightAxisController: AxisController<unknown> | null): void {
-      this.owner.didSetRightAxis(newRightAxisController, oldRightAxisController);
+    willAttachController(rightAxisController: AxisController<Y>): void {
+      this.owner.callObservers("controllerWillAttachRightAxis", rightAxisController, this.owner);
     },
-    controllerWillSetAxisTrait(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.willSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait);
+    didAttachController(rightAxisController: AxisController<Y>): void {
+      const rightAxisTrait = rightAxisController.axis.trait;
+      if (rightAxisTrait !== null) {
+        this.attachAxisTrait(rightAxisTrait);
+      }
+      const rightAxisView = rightAxisController.axis.view;
+      if (rightAxisView !== null) {
+        this.attachAxisView(rightAxisView);
+      }
     },
-    controllerDidSetAxisTrait(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.onSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait);
-      this.owner.didSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait);
+    willDetachController(rightAxisController: AxisController<Y>): void {
+      const rightAxisView = rightAxisController.axis.view;
+      if (rightAxisView !== null) {
+        this.detachAxisView(rightAxisView);
+      }
+      const rightAxisTrait = rightAxisController.axis.trait;
+      if (rightAxisTrait !== null) {
+        this.detachAxisTrait(rightAxisTrait);
+      }
     },
-    controllerWillSetAxisView(newRightAxisView: AxisView<unknown> | null, oldRightAxisView: AxisView<unknown> | null): void {
-      this.owner.willSetRightAxisView(newRightAxisView, oldRightAxisView);
+    didDetachController(rightAxisController: AxisController<Y>): void {
+      this.owner.callObservers("controllerDidDetachRightAxis", rightAxisController, this.owner);
     },
-    controllerDidSetAxisView(newRightAxisView: AxisView<unknown> | null, oldRightAxisView: AxisView<unknown> | null): void {
-      this.owner.onSetRightAxisView(newRightAxisView, oldRightAxisView);
-      this.owner.didSetRightAxisView(newRightAxisView, oldRightAxisView);
+    controllerWillAttachAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
+      this.owner.callObservers("controllerWillAttachRightAxisTrait", rightAxisTrait, this.owner);
+      this.attachAxisTrait(rightAxisTrait);
     },
-  });
-
-  @ControllerFastener<ChartController<X, Y>, AxisController<Y>>({
-    extends: ChartController.RightAxisFastener,
+    controllerDidDetachAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
+      this.detachAxisTrait(rightAxisTrait);
+      this.owner.callObservers("controllerDidDetachRightAxisTrait", rightAxisTrait, this.owner);
+    },
+    attachAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
+      // hook
+    },
+    detachAxisTrait(rightAxisTrait: AxisTrait<Y>): void {
+      // hook
+    },
+    controllerWillAttachAxisView(rightAxisView: AxisView<Y>): void {
+      this.owner.callObservers("controllerWillAttachRightAxisView", rightAxisView, this.owner);
+      this.attachAxisView(rightAxisView);
+    },
+    controllerDidDetachAxisView(rightAxisView: AxisView<Y>): void {
+      this.detachAxisView(rightAxisView);
+      this.owner.callObservers("controllerDidDetachRightAxisView", rightAxisView, this.owner);
+    },
+    attachAxisView(rightAxisView: AxisView<Y>): void {
+      // hook
+    },
+    detachAxisView(rightAxisView: AxisView<Y>): void {
+      rightAxisView.remove();
+    },
+    detectController(controller: Controller): AxisController<Y> | null {
+      return controller instanceof RightAxisController ? controller : null;
+    },
   })
-  readonly rightAxis!: ControllerFastener<this, AxisController<Y>>;
+  readonly rightAxis!: TraitViewControllerRef<this, AxisTrait<Y>, AxisView<Y>, AxisController<Y>>;
+  static readonly rightAxis: MemberFastenerClass<ChartController, "rightAxis">;
 
-  protected createBottomAxis(bottomAxisTrait: AxisTrait<X>): AxisController<X> | null {
-    return new BottomAxisController<X>();
-  }
-
-  protected initBottomAxis(bottomAxisController: AxisController<X>): void {
-    const bottomAxisTrait = bottomAxisController.axis.trait;
-    if (bottomAxisTrait !== null) {
-      this.initBottomAxisTrait(bottomAxisTrait);
-    }
-    const bottomAxisView = bottomAxisController.axis.view;
-    if (bottomAxisView !== null) {
-      this.initBottomAxisView(bottomAxisView);
-    }
-  }
-
-  protected attachBottomAxis(bottomAxisController: AxisController<X>): void {
-    const bottomAxisTrait = bottomAxisController.axis.trait;
-    if (bottomAxisTrait !== null) {
-      this.attachBottomAxisTrait(bottomAxisTrait);
-    }
-    const bottomAxisView = bottomAxisController.axis.view;
-    if (bottomAxisView !== null) {
-      this.attachBottomAxisView(bottomAxisView);
-    }
-  }
-
-  protected detachBottomAxis(bottomAxisController: AxisController<X>): void {
-    const bottomAxisTrait = bottomAxisController.axis.trait;
-    if (bottomAxisTrait !== null) {
-      this.detachBottomAxisTrait(bottomAxisTrait);
-    }
-    const bottomAxisView = bottomAxisController.axis.view;
-    if (bottomAxisView !== null) {
-      this.detachBottomAxisView(bottomAxisView);
-    }
-  }
-
-  protected willSetBottomAxis(newBottomAxisController: AxisController<X> | null, oldBottomAxisController: AxisController<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetBottomAxis !== void 0) {
-        observer.controllerWillSetBottomAxis(newBottomAxisController, oldBottomAxisController, this);
-      }
-    }
-  }
-
-  protected onSetBottomAxis(newBottomAxisController: AxisController<X> | null, oldBottomAxisController: AxisController<X> | null): void {
-    if (oldBottomAxisController !== null) {
-      this.detachBottomAxis(oldBottomAxisController);
-    }
-    if (newBottomAxisController !== null) {
-      this.attachBottomAxis(newBottomAxisController);
-      this.initBottomAxis(newBottomAxisController);
-    }
-  }
-
-  protected didSetBottomAxis(newBottomAxisController: AxisController<X> | null, oldBottomAxisController: AxisController<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetBottomAxis !== void 0) {
-        observer.controllerDidSetBottomAxis(newBottomAxisController, oldBottomAxisController, this);
-      }
-    }
-  }
-
-  protected insertBottomAxisTrait(bottomAxisTrait: AxisTrait<X>, targetTrait: Trait | null = null): void {
-    const children = this.children;
-    let targetController: AxisController<unknown> | null = null;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const childController = children[i]!;
-      if (childController instanceof AxisController) {
-        if (childController.axis.trait === bottomAxisTrait) {
-          return;
-        } else if (childController.axis.trait === targetTrait) {
-          targetController = childController;
-        }
-      }
-    }
-    const bottomAxisController = this.createBottomAxis(bottomAxisTrait);
-    if (bottomAxisController !== null) {
-      bottomAxisController.axis.setTrait(bottomAxisTrait);
-      this.bottomAxis.setController(bottomAxisController, targetController);
-      this.insertChild(bottomAxisController, targetController);
-      if (bottomAxisController.axis.view === null) {
-        const bottomAxisView = this.createBottomAxisView(bottomAxisController);
-        let targetView: AxisView<unknown> | null = null;
-        if (targetController !== null) {
-          targetView = targetController.axis.view;
-        }
-        const chartView = this.chart.view;
-        if (chartView !== null) {
-          bottomAxisController.axis.injectView(chartView, bottomAxisView, targetView, null);
-        } else {
-          bottomAxisController.axis.setView(bottomAxisView, targetView);
-        }
-      }
-    }
-  }
-
-  protected removeBottomAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
-    const children = this.children;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const childController = children[i]!;
-      if (childController instanceof AxisController && childController.axis.trait === bottomAxisTrait) {
-        this.bottomAxis.setController(null);
-        childController.remove();
-        return;
-      }
-    }
-  }
-
-  protected initBottomAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
-    // hook
-  }
-
-  protected attachBottomAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
-    // hook
-  }
-
-  protected detachBottomAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
-    // hook
-  }
-
-  protected willSetBottomAxisTrait(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetBottomAxisTrait !== void 0) {
-        observer.controllerWillSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
-      }
-    }
-  }
-
-  protected onSetBottomAxisTrait(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null): void {
-    if (oldBottomAxisTrait !== null) {
-      this.detachBottomAxisTrait(oldBottomAxisTrait);
-    }
-    if (newBottomAxisTrait !== null) {
-      this.attachBottomAxisTrait(newBottomAxisTrait);
-      this.initBottomAxisTrait(newBottomAxisTrait);
-    }
-  }
-
-  protected didSetBottomAxisTrait(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetBottomAxisTrait !== void 0) {
-        observer.controllerDidSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
-      }
-    }
-  }
-
-  protected createBottomAxisView(bottomAxisController: AxisController<X>): AxisView<X> | null {
-    return bottomAxisController.axis.createView();
-  }
-
-  protected initBottomAxisView(bottomAxisView: AxisView<X>): void {
-    // hook
-  }
-
-  protected attachBottomAxisView(bottomAxisView: AxisView<X>): void {
-    // hook
-  }
-
-  protected detachBottomAxisView(bottomAxisView: AxisView<X>): void {
-    bottomAxisView.remove();
-  }
-
-  protected willSetBottomAxisView(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetBottomAxisView !== void 0) {
-        observer.controllerWillSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
-      }
-    }
-  }
-
-  protected onSetBottomAxisView(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null): void {
-    if (oldBottomAxisView !== null) {
-      this.detachBottomAxisView(oldBottomAxisView);
-    }
-    if (newBottomAxisView !== null) {
-      this.attachBottomAxisView(newBottomAxisView);
-      this.initBottomAxisView(newBottomAxisView);
-    }
-  }
-
-  protected didSetBottomAxisView(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetBottomAxisView !== void 0) {
-        observer.controllerDidSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static BottomAxisFastener = ControllerFastener.define<ChartController<unknown, unknown>, AxisController<unknown>>({
+  @TraitViewControllerRef<ChartController<X, Y>, AxisTrait<X>, AxisView<X>, AxisController<X>, ChartControllerAxisExt<X>>({
     type: BottomAxisController,
-    child: true,
+    binds: true,
     observes: true,
-    willSetController(newBottomAxisController: AxisController<unknown> | null, oldBottomAxisController: AxisController<unknown> | null): void {
-      this.owner.willSetBottomAxis(newBottomAxisController, oldBottomAxisController);
+    get parentView(): View | null {
+      return this.owner.chart.view;
     },
-    onSetController(newBottomAxisController: AxisController<unknown> | null, oldBottomAxisController: AxisController<unknown> | null): void {
-      this.owner.onSetBottomAxis(newBottomAxisController, oldBottomAxisController);
+    getTraitViewRef(controller: AxisController<X>): TraitViewRef<unknown, AxisTrait<X>, AxisView<X>> {
+      return controller.axis;
     },
-    didSetController(newBottomAxisController: AxisController<unknown> | null, oldBottomAxisController: AxisController<unknown> | null): void {
-      this.owner.didSetBottomAxis(newBottomAxisController, oldBottomAxisController);
+    willAttachController(bottomAxisController: AxisController<X>): void {
+      this.owner.callObservers("controllerWillAttachBottomAxis", bottomAxisController, this.owner);
     },
-    controllerWillSetAxisTrait(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.willSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait);
+    didAttachController(bottomAxisController: AxisController<X>): void {
+      const bottomAxisTrait = bottomAxisController.axis.trait;
+      if (bottomAxisTrait !== null) {
+        this.attachAxisTrait(bottomAxisTrait);
+      }
+      const bottomAxisView = bottomAxisController.axis.view;
+      if (bottomAxisView !== null) {
+        this.attachAxisView(bottomAxisView);
+      }
     },
-    controllerDidSetAxisTrait(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.onSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait);
-      this.owner.didSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait);
+    willDetachController(bottomAxisController: AxisController<X>): void {
+      const bottomAxisView = bottomAxisController.axis.view;
+      if (bottomAxisView !== null) {
+        this.detachAxisView(bottomAxisView);
+      }
+      const bottomAxisTrait = bottomAxisController.axis.trait;
+      if (bottomAxisTrait !== null) {
+        this.detachAxisTrait(bottomAxisTrait);
+      }
     },
-    controllerWillSetAxisView(newBottomAxisView: AxisView<unknown> | null, oldBottomAxisView: AxisView<unknown> | null): void {
-      this.owner.willSetBottomAxisView(newBottomAxisView, oldBottomAxisView);
+    didDetachController(bottomAxisController: AxisController<X>): void {
+      this.owner.callObservers("controllerDidDetachBottomAxis", bottomAxisController, this.owner);
     },
-    controllerDidSetAxisView(newBottomAxisView: AxisView<unknown> | null, oldBottomAxisView: AxisView<unknown> | null): void {
-      this.owner.onSetBottomAxisView(newBottomAxisView, oldBottomAxisView);
-      this.owner.didSetBottomAxisView(newBottomAxisView, oldBottomAxisView);
+    controllerWillAttachAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
+      this.owner.callObservers("controllerWillAttachBottomAxisTrait", bottomAxisTrait, this.owner);
+      this.attachAxisTrait(bottomAxisTrait);
     },
-  });
-
-  @ControllerFastener<ChartController<X, Y>, AxisController<X>>({
-    extends: ChartController.BottomAxisFastener,
+    controllerDidDetachAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
+      this.detachAxisTrait(bottomAxisTrait);
+      this.owner.callObservers("controllerDidDetachBottomAxisTrait", bottomAxisTrait, this.owner);
+    },
+    attachAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
+      // hook
+    },
+    detachAxisTrait(bottomAxisTrait: AxisTrait<X>): void {
+      // hook
+    },
+    controllerWillAttachAxisView(bottomAxisView: AxisView<X>): void {
+      this.owner.callObservers("controllerWillAttachBottomAxisView", bottomAxisView, this.owner);
+      this.attachAxisView(bottomAxisView);
+    },
+    controllerDidDetachAxisView(bottomAxisView: AxisView<X>): void {
+      this.detachAxisView(bottomAxisView);
+      this.owner.callObservers("controllerDidDetachBottomAxisView", bottomAxisView, this.owner);
+    },
+    attachAxisView(bottomAxisView: AxisView<X>): void {
+      // hook
+    },
+    detachAxisView(bottomAxisView: AxisView<X>): void {
+      bottomAxisView.remove();
+    },
+    detectController(controller: Controller): AxisController<X> | null {
+      return controller instanceof BottomAxisController ? controller : null;
+    },
   })
-  readonly bottomAxis!: ControllerFastener<this, AxisController<X>>;
+  readonly bottomAxis!: TraitViewControllerRef<this, AxisTrait<X>, AxisView<X>, AxisController<X>>;
+  static readonly bottomAxis: MemberFastenerClass<ChartController, "bottomAxis">;
 
-  protected createLeftAxis(leftAxisTrait: AxisTrait<Y>): AxisController<Y> | null {
-    return new LeftAxisController<Y>();
-  }
-
-  protected initLeftAxis(leftAxisController: AxisController<Y>): void {
-    const leftAxisTrait = leftAxisController.axis.trait;
-    if (leftAxisTrait !== null) {
-      this.initLeftAxisTrait(leftAxisTrait);
-    }
-    const leftAxisView = leftAxisController.axis.view;
-    if (leftAxisView !== null) {
-      this.initLeftAxisView(leftAxisView);
-    }
-  }
-
-  protected attachLeftAxis(leftAxisController: AxisController<Y>): void {
-    const leftAxisTrait = leftAxisController.axis.trait;
-    if (leftAxisTrait !== null) {
-      this.attachLeftAxisTrait(leftAxisTrait);
-    }
-    const leftAxisView = leftAxisController.axis.view;
-    if (leftAxisView !== null) {
-      this.attachLeftAxisView(leftAxisView);
-    }
-  }
-
-  protected detachLeftAxis(leftAxisController: AxisController<Y>): void {
-    const leftAxisTrait = leftAxisController.axis.trait;
-    if (leftAxisTrait !== null) {
-      this.detachLeftAxisTrait(leftAxisTrait);
-    }
-    const leftAxisView = leftAxisController.axis.view;
-    if (leftAxisView !== null) {
-      this.detachLeftAxisView(leftAxisView);
-    }
-  }
-
-  protected willSetLeftAxis(newLeftAxisController: AxisController<Y> | null, oldLeftAxisController: AxisController<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetLeftAxis !== void 0) {
-        observer.controllerWillSetLeftAxis(newLeftAxisController, oldLeftAxisController, this);
-      }
-    }
-  }
-
-  protected onSetLeftAxis(newLeftAxisController: AxisController<Y> | null, oldLeftAxisController: AxisController<Y> | null): void {
-    if (oldLeftAxisController !== null) {
-      this.detachLeftAxis(oldLeftAxisController);
-    }
-    if (newLeftAxisController !== null) {
-      this.attachLeftAxis(newLeftAxisController);
-      this.initLeftAxis(newLeftAxisController);
-    }
-  }
-
-  protected didSetLeftAxis(newLeftAxisController: AxisController<Y> | null, oldLeftAxisController: AxisController<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetLeftAxis !== void 0) {
-        observer.controllerDidSetLeftAxis(newLeftAxisController, oldLeftAxisController, this);
-      }
-    }
-  }
-
-  protected insertLeftAxisTrait(leftAxisTrait: AxisTrait<Y>, targetTrait: Trait | null = null): void {
-    const children = this.children;
-    let targetController: AxisController<unknown> | null = null;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const childController = children[i]!;
-      if (childController instanceof AxisController) {
-        if (childController.axis.trait === leftAxisTrait) {
-          return;
-        } else if (childController.axis.trait === targetTrait) {
-          targetController = childController;
-        }
-      }
-    }
-    const leftAxisController = this.createLeftAxis(leftAxisTrait);
-    if (leftAxisController !== null) {
-      leftAxisController.axis.setTrait(leftAxisTrait);
-      this.leftAxis.setController(leftAxisController, targetController);
-      this.insertChild(leftAxisController, targetController);
-      if (leftAxisController.axis.view === null) {
-        const leftAxisView = this.createLeftAxisView(leftAxisController);
-        let targetView: AxisView<unknown> | null = null;
-        if (targetController !== null) {
-          targetView = targetController.axis.view;
-        }
-        const chartView = this.chart.view;
-        if (chartView !== null) {
-          leftAxisController.axis.injectView(chartView, leftAxisView, targetView, null);
-        } else {
-          leftAxisController.axis.setView(leftAxisView, targetView);
-        }
-      }
-    }
-  }
-
-  protected removeLeftAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
-    const children = this.children;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const childController = children[i]!;
-      if (childController instanceof AxisController && childController.axis.trait === leftAxisTrait) {
-        this.leftAxis.setController(null);
-        childController.remove();
-        return;
-      }
-    }
-  }
-
-  protected initLeftAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
-    // hook
-  }
-
-  protected attachLeftAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
-    // hook
-  }
-
-  protected detachLeftAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
-    // hook
-  }
-
-  protected willSetLeftAxisTrait(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetLeftAxisTrait !== void 0) {
-        observer.controllerWillSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
-      }
-    }
-  }
-
-  protected onSetLeftAxisTrait(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null): void {
-    if (oldLeftAxisTrait !== null) {
-      this.detachLeftAxisTrait(oldLeftAxisTrait);
-    }
-    if (newLeftAxisTrait !== null) {
-      this.attachLeftAxisTrait(newLeftAxisTrait);
-      this.initLeftAxisTrait(newLeftAxisTrait);
-    }
-  }
-
-  protected didSetLeftAxisTrait(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetLeftAxisTrait !== void 0) {
-        observer.controllerDidSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
-      }
-    }
-  }
-
-  protected createLeftAxisView(leftAxisController: AxisController<Y>): AxisView<Y> | null {
-    return leftAxisController.axis.createView();
-  }
-
-  protected initLeftAxisView(leftAxisView: AxisView<Y>): void {
-    // hook
-  }
-
-  protected attachLeftAxisView(leftAxisView: AxisView<Y>): void {
-    // hook
-  }
-
-  protected detachLeftAxisView(leftAxisView: AxisView<Y>): void {
-    leftAxisView.remove();
-  }
-
-  protected willSetLeftAxisView(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetLeftAxisView !== void 0) {
-        observer.controllerWillSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
-      }
-    }
-  }
-
-  protected onSetLeftAxisView(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null): void {
-    if (oldLeftAxisView !== null) {
-      this.detachLeftAxisView(oldLeftAxisView);
-    }
-    if (newLeftAxisView !== null) {
-      this.attachLeftAxisView(newLeftAxisView);
-      this.initLeftAxisView(newLeftAxisView);
-    }
-  }
-
-  protected didSetLeftAxisView(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetLeftAxisView !== void 0) {
-        observer.controllerDidSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static LeftAxisFastener = ControllerFastener.define<ChartController<unknown, unknown>, AxisController<unknown>>({
+  @TraitViewControllerRef<ChartController<X, Y>, AxisTrait<Y>, AxisView<Y>, AxisController<Y>, ChartControllerAxisExt<Y>>({
     type: LeftAxisController,
-    child: true,
+    binds: true,
     observes: true,
-    willSetController(newLeftAxisController: AxisController<unknown> | null, oldLeftAxisController: AxisController<unknown> | null): void {
-      this.owner.willSetLeftAxis(newLeftAxisController, oldLeftAxisController);
+    get parentView(): View | null {
+      return this.owner.chart.view;
     },
-    onSetController(newLeftAxisController: AxisController<unknown> | null, oldLeftAxisController: AxisController<unknown> | null): void {
-      this.owner.onSetLeftAxis(newLeftAxisController, oldLeftAxisController);
+    getTraitViewRef(controller: AxisController<Y>): TraitViewRef<unknown, AxisTrait<Y>, AxisView<Y>> {
+      return controller.axis;
     },
-    didSetController(newLeftAxisController: AxisController<unknown> | null, oldLeftAxisController: AxisController<unknown> | null): void {
-      this.owner.didSetLeftAxis(newLeftAxisController, oldLeftAxisController);
+    willAttachController(leftAxisController: AxisController<Y>): void {
+      this.owner.callObservers("controllerWillAttachLeftAxis", leftAxisController, this.owner);
     },
-    controllerWillSetAxisTrait(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.willSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait);
+    didAttachController(leftAxisController: AxisController<Y>): void {
+      const leftAxisTrait = leftAxisController.axis.trait;
+      if (leftAxisTrait !== null) {
+        this.attachAxisTrait(leftAxisTrait);
+      }
+      const leftAxisView = leftAxisController.axis.view;
+      if (leftAxisView !== null) {
+        this.attachAxisView(leftAxisView);
+      }
     },
-    controllerDidSetAxisTrait(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.onSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait);
-      this.owner.didSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait);
+    willDetachController(leftAxisController: AxisController<Y>): void {
+      const leftAxisView = leftAxisController.axis.view;
+      if (leftAxisView !== null) {
+        this.detachAxisView(leftAxisView);
+      }
+      const leftAxisTrait = leftAxisController.axis.trait;
+      if (leftAxisTrait !== null) {
+        this.detachAxisTrait(leftAxisTrait);
+      }
     },
-    controllerWillSetAxisView(newLeftAxisView: AxisView<unknown> | null, oldLeftAxisView: AxisView<unknown> | null): void {
-      this.owner.willSetLeftAxisView(newLeftAxisView, oldLeftAxisView);
+    didDetachController(leftAxisController: AxisController<Y>): void {
+      this.owner.callObservers("controllerDidDetachLeftAxis", leftAxisController, this.owner);
     },
-    controllerDidSetAxisView(newLeftAxisView: AxisView<unknown> | null, oldLeftAxisView: AxisView<unknown> | null): void {
-      this.owner.onSetLeftAxisView(newLeftAxisView, oldLeftAxisView);
-      this.owner.didSetLeftAxisView(newLeftAxisView, oldLeftAxisView);
+    controllerWillAttachAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
+      this.owner.callObservers("controllerWillAttachLeftAxisTrait", leftAxisTrait, this.owner);
+      this.attachAxisTrait(leftAxisTrait);
     },
-  });
-
-  @ControllerFastener<ChartController<X, Y>, AxisController<Y>>({
-    extends: ChartController.LeftAxisFastener,
+    controllerDidDetachAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
+      this.detachAxisTrait(leftAxisTrait);
+      this.owner.callObservers("controllerDidDetachLeftAxisTrait", leftAxisTrait, this.owner);
+    },
+    attachAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
+      // hook
+    },
+    detachAxisTrait(leftAxisTrait: AxisTrait<Y>): void {
+      // hook
+    },
+    controllerWillAttachAxisView(leftAxisView: AxisView<Y>): void {
+      this.owner.callObservers("controllerWillAttachLeftAxisView", leftAxisView, this.owner);
+      this.attachAxisView(leftAxisView);
+    },
+    controllerDidDetachAxisView(leftAxisView: AxisView<Y>): void {
+      this.detachAxisView(leftAxisView);
+      this.owner.callObservers("controllerDidDetachLeftAxisView", leftAxisView, this.owner);
+    },
+    attachAxisView(leftAxisView: AxisView<Y>): void {
+      // hook
+    },
+    detachAxisView(leftAxisView: AxisView<Y>): void {
+      leftAxisView.remove();
+    },
+    detectController(controller: Controller): AxisController<Y> | null {
+      return controller instanceof LeftAxisController ? controller : null;
+    },
   })
-  readonly leftAxis!: ControllerFastener<this, AxisController<Y>>;
-
-  protected detectTopAxisController(controller: Controller): AxisController<X> | null {
-    return controller instanceof TopAxisController ? controller : null;
-  }
-
-  protected detectRightAxisController(controller: Controller): AxisController<Y> | null {
-    return controller instanceof RightAxisController ? controller : null;
-  }
-
-  protected detectBottomAxisController(controller: Controller): AxisController<X> | null {
-    return controller instanceof BottomAxisController ? controller : null;
-  }
-
-  protected detectLeftAxisController(controller: Controller): AxisController<Y> | null {
-    return controller instanceof LeftAxisController ? controller : null;
-  }
-
-  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChild(childController, targetController);
-    const topAxisController = this.detectTopAxisController(childController);
-    if (topAxisController !== null) {
-      this.topAxis.setController(topAxisController, targetController);
-    }
-    const rightAxisController = this.detectRightAxisController(childController);
-    if (rightAxisController !== null) {
-      this.rightAxis.setController(rightAxisController, targetController);
-    }
-    const bottomAxisController = this.detectBottomAxisController(childController);
-    if (bottomAxisController !== null) {
-      this.bottomAxis.setController(bottomAxisController, targetController);
-    }
-    const leftAxisController = this.detectLeftAxisController(childController);
-    if (leftAxisController !== null) {
-      this.leftAxis.setController(leftAxisController, targetController);
-    }
-  }
-
-  protected override onRemoveChild(childController: Controller): void {
-    super.onRemoveChild(childController);
-    const topAxisController = this.detectTopAxisController(childController);
-    if (topAxisController !== null) {
-      this.topAxis.setController(null);
-    }
-    const rightAxisController = this.detectRightAxisController(childController);
-    if (rightAxisController !== null) {
-      this.rightAxis.setController(null);
-    }
-    const bottomAxisController = this.detectBottomAxisController(childController);
-    if (bottomAxisController !== null) {
-      this.bottomAxis.setController(null);
-    }
-    const leftAxisController = this.detectLeftAxisController(childController);
-    if (leftAxisController !== null) {
-      this.leftAxis.setController(null);
-    }
-  }
+  readonly leftAxis!: TraitViewControllerRef<this, AxisTrait<Y>, AxisView<Y>, AxisController<Y>>;
+  static readonly leftAxis: MemberFastenerClass<ChartController, "leftAxis">;
 }

@@ -16,4 +16,10 @@ export {
   ObserverType,
   Observable,
 } from "./Observable";
-export {Observer} from "./Observer";
+export {
+  ObserverMethods,
+  ObserverMethod,
+  ObserverParameters,
+  ObserverReturnType,
+  Observer,
+} from "./Observer";

@@ -41,6 +41,7 @@ export const TimeRangeInterpolator = (function (_super: typeof Interpolator) {
   };
 
   TimeRangeInterpolator.prototype = Object.create(_super.prototype);
+  TimeRangeInterpolator.prototype.constructor = TimeRangeInterpolator;
 
   return TimeRangeInterpolator;
 })(Interpolator);

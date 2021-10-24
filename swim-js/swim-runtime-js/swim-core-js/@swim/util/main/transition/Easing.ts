@@ -110,6 +110,7 @@ export const Easing = (function (_super: typeof Timing) {
   };
 
   Easing.prototype = Object.create(_super.prototype);
+  Easing.prototype.constructor = Easing;
 
   Object.defineProperty(Easing.prototype, 0, {
     value: 0,

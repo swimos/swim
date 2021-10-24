@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {TraitViewFastener} from "@swim/controller";
+import type {TraitViewRef} from "@swim/controller";
 import {GeoController} from "../geo/GeoController";
 import type {GeoPathView} from "./GeoPathView";
 import type {GeoPathTrait} from "./GeoPathTrait";
@@ -22,5 +22,5 @@ import type {GeoPathControllerObserver} from "./GeoPathControllerObserver";
 export abstract class GeoPathController extends GeoController {
   override readonly observerType?: Class<GeoPathControllerObserver>;
 
-  abstract override readonly geo: TraitViewFastener<this, GeoPathTrait, GeoPathView>;
+  abstract override readonly geo: TraitViewRef<this, GeoPathTrait, GeoPathView>;
 }

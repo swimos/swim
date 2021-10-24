@@ -20,14 +20,14 @@ import type {DataPointView} from "./DataPointView";
 import type {DataPointTrait} from "./DataPointTrait";
 import type {DataPointController} from "./DataPointController";
 
-export interface DataPointControllerObserver<X, Y, C extends DataPointController<X, Y> = DataPointController<X, Y>> extends ControllerObserver<C> {
-  controllerWillSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, controller: C): void;
+export interface DataPointControllerObserver<X = unknown, Y = unknown, C extends DataPointController<X, Y> = DataPointController<X, Y>> extends ControllerObserver<C> {
+  controllerWillAttachDataPointTrait?(dataPointTrait: DataPointTrait<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, controller: C): void;
+  controllerDidDetachDataPointTrait?(dataPointTrait: DataPointTrait<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointVIew: DataPointView<X, Y> | null, controller: C): void;
+  controllerWillAttachDataPointView?(dataPointView: DataPointView<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointVIew: DataPointView<X, Y> | null, controller: C): void;
+  controllerDidDetachDataPointView?(dataPointView: DataPointView<X, Y> , controller: C): void;
 
   controllerWillSetDataPointX?(newX: X | undefined, oldX: X | undefined, controller: C): void;
 
@@ -53,7 +53,7 @@ export interface DataPointControllerObserver<X, Y, C extends DataPointController
 
   controllerDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, controller: C): void;
 
-  controllertWillSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, controller: C): void;
+  controllerWillAttachDataPointLabelView?(labelView: GraphicsView, controller: C): void;
 
-  controllerDidSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, controller: C): void;
+  controllerDidDetachDataPointLabelView?(labelView: GraphicsView, controller: C): void;
 }

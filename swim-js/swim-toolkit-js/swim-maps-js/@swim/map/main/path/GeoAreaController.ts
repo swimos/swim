@@ -18,7 +18,7 @@ import type {Length} from "@swim/math";
 import type {GeoPath} from "@swim/geo";
 import type {Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
-import {TraitViewFastener} from "@swim/controller";
+import {TraitViewRef} from "@swim/controller";
 import {GeoAreaView} from "./GeoAreaView";
 import {GeoAreaTrait} from "./GeoAreaTrait";
 import {GeoPathController} from "./GeoPathController";
@@ -26,124 +26,6 @@ import type {GeoAreaControllerObserver} from "./GeoAreaControllerObserver";
 
 export class GeoAreaController extends GeoPathController {
   override readonly observerType?: Class<GeoAreaControllerObserver>;
-
-  protected initGeoTrait(geoTrait: GeoAreaTrait): void {
-    // hook
-  }
-
-  protected attachGeoTrait(geoTrait: GeoAreaTrait): void {
-    const geoView = this.geo.view;
-    if (geoView !== null) {
-      this.setGeoPath(geoTrait.geoPath.state, geoTrait);
-      const fill = geoTrait.fill.state;
-      if (fill !== null) {
-        this.setFill(fill, geoTrait);
-      }
-      const stroke = geoTrait.stroke.state;
-      if (stroke !== null) {
-        this.setStroke(stroke, geoTrait);
-      }
-      const strokeWidth = geoTrait.strokeWidth.state;
-      if (strokeWidth !== null) {
-        this.setStrokeWidth(strokeWidth, geoTrait);
-      }
-    }
-  }
-
-  protected detachGeoTrait(geoTrait: GeoAreaTrait): void {
-    // hook
-  }
-
-  protected willSetGeoTrait(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoTrait !== void 0) {
-        observer.controllerWillSetGeoTrait(newGeoTrait, oldGeoTrait, this);
-      }
-    }
-  }
-
-  protected onSetGeoTrait(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null): void {
-    if (oldGeoTrait !== null) {
-      this.detachGeoTrait(oldGeoTrait);
-    }
-    if (newGeoTrait !== null) {
-      this.attachGeoTrait(newGeoTrait);
-      this.initGeoTrait(newGeoTrait);
-    }
-  }
-
-  protected didSetGeoTrait(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoTrait !== void 0) {
-        observer.controllerDidSetGeoTrait(newGeoTrait, oldGeoTrait, this);
-      }
-    }
-  }
-
-  protected createGeoView(): GeoAreaView {
-    return GeoAreaView.create();
-  }
-
-  protected initGeoView(geoView: GeoAreaView): void {
-    // hook
-  }
-
-  protected attachGeoView(geoView: GeoAreaView): void {
-    const geoTrait = this.geo.trait;
-    if (geoTrait !== null) {
-      this.setGeoPath(geoTrait.geoPath.state, geoTrait);
-      const fill = geoTrait.fill.state;
-      if (fill !== null) {
-        this.setFill(fill, geoTrait);
-      }
-      const stroke = geoTrait.stroke.state;
-      if (stroke !== null) {
-        this.setStroke(stroke, geoTrait);
-      }
-      const strokeWidth = geoTrait.strokeWidth.state;
-      if (strokeWidth !== null) {
-        this.setStrokeWidth(strokeWidth, geoTrait);
-      }
-    }
-  }
-
-  protected detachGeoView(geoView: GeoAreaView): void {
-    // hook
-  }
-
-  protected willSetGeoView(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoView !== void 0) {
-        observer.controllerWillSetGeoView(newGeoView, oldGeoView, this);
-      }
-    }
-  }
-
-  protected onSetGeoView(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null): void {
-    if (oldGeoView !== null) {
-      this.detachGeoView(oldGeoView);
-    }
-    if (newGeoView !== null) {
-      this.attachGeoView(newGeoView);
-      this.initGeoView(newGeoView);
-    }
-  }
-
-  protected didSetGeoView(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoView !== void 0) {
-        observer.controllerDidSetGeoView(newGeoView, oldGeoView, this);
-      }
-    }
-  }
 
   protected setGeoPath(geoPath: GeoPath | null, geoTrait: GeoAreaTrait, timing?: AnyTiming | boolean): void {
     const geoView = this.geo.view;
@@ -157,30 +39,6 @@ export class GeoAreaController extends GeoPathController {
         timing = Timing.fromAny(timing);
       }
       geoView.geoPath.setState(geoPath, timing, Affinity.Intrinsic);
-    }
-  }
-
-  protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoPath !== void 0) {
-        observer.controllerWillSetGeoPath(newGeoPath, oldGeoPath, this);
-      }
-    }
-  }
-
-  protected onSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
-    // hook
-  }
-
-  protected didSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoPath !== void 0) {
-        observer.controllerDidSetGeoPath(newGeoPath, oldGeoPath, this);
-      }
     }
   }
 
@@ -199,30 +57,6 @@ export class GeoAreaController extends GeoPathController {
         geoView.fill.setLook(fill, timing, Affinity.Intrinsic);
       } else {
         geoView.fill.setState(fill, timing, Affinity.Intrinsic);
-      }
-    }
-  }
-
-  protected willSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, geoView: GeoAreaView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetFill !== void 0) {
-        observer.controllerWillSetFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  protected onSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, geoView: GeoAreaView): void {
-    // hook
-  }
-
-  protected didSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, geoView: GeoAreaView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetFill !== void 0) {
-        observer.controllerDidSetFill(newFill, oldFill, this);
       }
     }
   }
@@ -246,30 +80,6 @@ export class GeoAreaController extends GeoPathController {
     }
   }
 
-  protected willSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoAreaView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetStroke !== void 0) {
-        observer.controllerWillSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
-  protected onSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoAreaView): void {
-    // hook
-  }
-
-  protected didSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoAreaView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetStroke !== void 0) {
-        observer.controllerDidSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
   protected setStrokeWidth(strokeWidth: Length | null, geoTrait: GeoAreaTrait, timing?: AnyTiming | boolean): void {
     const geoView = this.geo.view;
     if (geoView !== null) {
@@ -285,42 +95,32 @@ export class GeoAreaController extends GeoPathController {
     }
   }
 
-  protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoAreaView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetStrokeWidth !== void 0) {
-        observer.controllerWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
-  protected onSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoAreaView): void {
-    // hook
-  }
-
-  protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoAreaView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetStrokeWidth !== void 0) {
-        observer.controllerDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static GetFastener = TraitViewFastener.define<GeoAreaController, GeoAreaTrait, GeoAreaView>({
+  @TraitViewRef<GeoAreaController, GeoAreaTrait, GeoAreaView>({
     traitType: GeoAreaTrait,
     observesTrait: true,
-    willSetTrait(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null): void {
-      this.owner.willSetGeoTrait(newGeoTrait, oldGeoTrait);
+    willAttachTrait(geoTrait: GeoAreaTrait): void {
+      this.owner.callObservers("controllerWillAttachGeoTrait", geoTrait, this.owner);
     },
-    onSetTrait(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null): void {
-      this.owner.onSetGeoTrait(newGeoTrait, oldGeoTrait);
+    didAttachTrait(geoTrait: GeoAreaTrait): void {
+      const geoView = this.view;
+      if (geoView !== null) {
+        this.owner.setGeoPath(geoTrait.geoPath.state, geoTrait);
+        const fill = geoTrait.fill.state;
+        if (fill !== null) {
+          this.owner.setFill(fill, geoTrait);
+        }
+        const stroke = geoTrait.stroke.state;
+        if (stroke !== null) {
+          this.owner.setStroke(stroke, geoTrait);
+        }
+        const strokeWidth = geoTrait.strokeWidth.state;
+        if (strokeWidth !== null) {
+          this.owner.setStrokeWidth(strokeWidth, geoTrait);
+        }
+      }
     },
-    didSetTrait(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null): void {
-      this.owner.didSetGeoTrait(newGeoTrait, oldGeoTrait);
+    didDetachTrait(geoTrait: GeoAreaTrait): void {
+      this.owner.callObservers("controllerDidDetachGeoTrait", geoTrait, this.owner);
     },
     traitDidSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoTrait: GeoAreaTrait): void {
       this.owner.setGeoPath(newGeoPath, geoTrait);
@@ -336,50 +136,54 @@ export class GeoAreaController extends GeoPathController {
     },
     viewType: GeoAreaView,
     observesView: true,
-    willSetView(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null): void {
-      this.owner.willSetGeoView(newGeoView, oldGeoView);
+    willAttachView(geoView: GeoAreaView): void {
+      this.owner.callObservers("controllerWillAttachGeoView", geoView, this.owner);
     },
-    onSetView(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null): void {
-      this.owner.onSetGeoView(newGeoView, oldGeoView);
+    didAttachView(geoView: GeoAreaView): void {
+      const geoTrait = this.trait;
+      if (geoTrait !== null) {
+        this.owner.setGeoPath(geoTrait.geoPath.state, geoTrait);
+        const fill = geoTrait.fill.state;
+        if (fill !== null) {
+          this.owner.setFill(fill, geoTrait);
+        }
+        const stroke = geoTrait.stroke.state;
+        if (stroke !== null) {
+          this.owner.setStroke(stroke, geoTrait);
+        }
+        const strokeWidth = geoTrait.strokeWidth.state;
+        if (strokeWidth !== null) {
+          this.owner.setStrokeWidth(strokeWidth, geoTrait);
+        }
+      }
     },
-    didSetView(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null): void {
-      this.owner.didSetGeoView(newGeoView, oldGeoView);
+    didDetachView(geoView: GeoAreaView): void {
+      this.owner.callObservers("controllerDidDetachGeoView", geoView, this.owner);
     },
-    viewWillSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
-      this.owner.willSetGeoPath(newGeoPath, oldGeoPath, geoView);
+    viewWillSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
+      this.owner.callObservers("controllerWillSetGeoPath", newGeoPath, oldGeoPath, this.owner);
     },
-    viewDidSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
-      this.owner.onSetGeoPath(newGeoPath, oldGeoPath, geoView);
-      this.owner.didSetGeoPath(newGeoPath, oldGeoPath, geoView);
+    viewDidSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
+      this.owner.callObservers("controllerDidSetGeoPath", newGeoPath, oldGeoPath, this.owner);
     },
-    viewWillSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, geoView: GeoAreaView): void {
-      this.owner.willSetFill(newFill, oldFill, geoView);
+    viewWillSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.callObservers("controllerWillSetFill", newFill, oldFill, this.owner);
     },
-    viewDidSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, geoView: GeoAreaView): void {
-      this.owner.onSetFill(newFill, oldFill, geoView);
-      this.owner.didSetFill(newFill, oldFill, geoView);
+    viewDidSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.callObservers("controllerDidSetFill", newFill, oldFill, this.owner);
     },
-    viewWillSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoAreaView): void {
-      this.owner.willSetStroke(newStroke, oldStroke, geoView);
+    viewWillSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
+      this.owner.callObservers("controllerWillSetStroke", newStroke, oldStroke, this.owner);
     },
-    viewDidSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoAreaView): void {
-      this.owner.onSetStroke(newStroke, oldStroke, geoView);
-      this.owner.didSetStroke(newStroke, oldStroke, geoView);
+    viewDidSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
+      this.owner.callObservers("controllerDidSetStroke", newStroke, oldStroke, this.owner);
     },
-    viewWillSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoAreaView): void {
-      this.owner.willSetStrokeWidth(newStrokeWidth, oldStrokeWidth, geoView);
+    viewWillSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+      this.owner.callObservers("controllerWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
-    viewDidSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoAreaView): void {
-      this.owner.onSetStrokeWidth(newStrokeWidth, oldStrokeWidth, geoView);
-      this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth, geoView);
+    viewDidSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+      this.owner.callObservers("controllerDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
-    createView(): GeoAreaView | null {
-      return this.owner.createGeoView();
-    },
-  });
-
-  @TraitViewFastener<GeoAreaController, GeoAreaTrait, GeoAreaView>({
-    extends: GeoAreaController.GetFastener,
   })
-  readonly geo!: TraitViewFastener<this, GeoAreaTrait, GeoAreaView>;
+  readonly geo!: TraitViewRef<this, GeoAreaTrait, GeoAreaView>;
 }

@@ -26,7 +26,7 @@ export abstract class MapDownlinkTrait extends DownlinkTrait {
   }
 
   @MapDownlinkFastener<MapDownlinkTrait, Value, Value, AnyValue, AnyValue>({
-    eager: true,
+    lazy: false,
     consumed: true,
     didUpdate(key: Value, newValue: Value, oldValue: Value): void {
       if (this.owner.consuming) {

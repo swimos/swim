@@ -58,6 +58,7 @@ export const BinaryOperatorInterpolator = (function (_super: typeof Interpolator
   };
 
   BinaryOperatorInterpolator.prototype = Object.create(_super.prototype);
+  BinaryOperatorInterpolator.prototype.constructor = BinaryOperatorInterpolator;
 
   Object.defineProperty(BinaryOperatorInterpolator.prototype, 0, {
     get(this: BinaryOperatorInterpolator): BinaryOperator {

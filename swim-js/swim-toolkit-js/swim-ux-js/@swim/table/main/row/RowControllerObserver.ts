@@ -21,25 +21,25 @@ import type {TableTrait} from "../table/TableTrait";
 import type {TableController} from "../table/TableController";
 
 export interface RowControllerObserver<C extends RowController = RowController> extends LeafControllerObserver<C> {
-  controllerWillSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, controller: C): void;
+  controllerWillAttachRowTrait?(rowTrait: RowTrait, controller: C): void;
 
-  controllerDidSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, controller: C): void;
+  controllerDidDetachRowTrait?(rowTrait: RowTrait, controller: C): void;
 
-  controllerWillSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, controller: C): void;
+  controllerWillAttachRowView?(rowView: RowView, controller: C): void;
 
-  controllerDidSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, controller: C): void;
+  controllerDidDetachRowView?(rowView: RowView, controller: C): void;
 
-  controllerWillSetTree?(newTreeController: TableController | null, oldTreeController: TableController | null, controller: C): void;
+  controllerWillAttachTree?(treeController: TableController, controller: C): void;
 
-  controllerDidSetTree?(newTreeController: TableController | null, oldTreeController: TableController | null, controller: C): void;
+  controllerDidDetachTree?(treeController: TableController, controller: C): void;
 
-  controllerWillSetTreeTrait?(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, controller: C): void;
+  controllerWillAttachTreeTrait?(treeTrait: TableTrait, treeController: TableController, controller: C): void;
 
-  controllerDidSetTreeTrait?(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, controller: C): void;
+  controllerDidDetachTreeTrait?(treeTrait: TableTrait, treeController: TableController, controller: C): void;
 
-  controllerWillSetTreeView?(newTreeView: TableView | null, oldTreeView: TableView | null, controller: C): void;
+  controllerWillAttachTreeView?(treeView: TableView, treeController: TableController, controller: C): void;
 
-  controllerDidSetTreeView?(newTreeView: TableView | null, oldTreeView: TableView | null, controller: C): void;
+  controllerDidDetachTreeView?(treeView: TableView, treeController: TableController, controller: C): void;
 
   controllerWillExpandRowView?(rowView: RowView, controller: C): void;
 

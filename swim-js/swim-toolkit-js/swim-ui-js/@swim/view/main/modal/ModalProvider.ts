@@ -34,7 +34,7 @@ export interface ModalProvider<V extends View, S extends ModalService<V> | null 
 }
 
 export const ModalProvider = (function (_super: typeof Provider) {
-  const ModalProvider = _super.extend() as ProviderClass<ModalProvider<any, any>>;
+  const ModalProvider = _super.extend("ModalProvider") as ProviderClass<ModalProvider<any, any>>;
 
   ModalProvider.prototype.presentModal = function <V extends View, S extends ModalService<V>>(this: ModalProvider<V, S>, modal: Modal, options?: ModalOptions): void {
     let service: ModalService<V> | null | undefined = this.service;

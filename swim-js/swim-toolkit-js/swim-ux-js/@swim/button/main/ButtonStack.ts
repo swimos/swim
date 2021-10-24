@@ -13,18 +13,18 @@
 // limitations under the License.
 
 import {Mutable, Class, Lazy, AnyTiming, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/fastener";
 import {Length} from "@swim/math";
 import {Expansion} from "@swim/style";
 import {Look, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
 import {
-  ViewContextType,
-  View,
   ModalOptions,
   ModalState,
   Modal,
   PositionGestureInput,
   PositionGesture,
+  ViewContextType,
+  View,
 } from "@swim/view";
 import {StyleAnimator, ViewNode, HtmlView} from "@swim/dom";
 import {Graphics, VectorIcon} from "@swim/graphics";
@@ -69,8 +69,7 @@ export class ButtonStack extends HtmlView implements Modal {
     return FloatingButton.create();
   }
 
-  /** @internal */
-  static Gesture = PositionGesture.define<ButtonStack, HtmlView>({
+  @PositionGesture<ButtonStack, HtmlView>({
     didMovePress(input: PositionGestureInput, event: Event | null): void {
       if (!input.defaultPrevented && !this.owner.disclosure.expanded) {
         const stackHeight = this.owner.stackHeight;
@@ -118,12 +117,9 @@ export class ButtonStack extends HtmlView implements Modal {
       input.preventDefault();
       this.owner.disclosure.toggle();
     },
-  });
-
-  @PositionGesture<ButtonStack, HtmlView>({
-    extends: ButtonStack.Gesture,
   })
   readonly gesture!: PositionGesture<this, HtmlView>;
+  static readonly gesture: MemberFastenerClass<ButtonStack, "gesture">;
 
   @ThemeAnimator<ButtonStack, Expansion>({
     type: Expansion,

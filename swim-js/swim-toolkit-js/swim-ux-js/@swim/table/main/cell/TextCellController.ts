@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {ViewFastener} from "@swim/view";
+import type {MemberFastenerClass} from "@swim/fastener";
+import {ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
-import {TraitViewFastener} from "@swim/controller";
+import {TraitViewRef} from "@swim/controller";
 import {CellController} from "./CellController";
 import {TextCellView} from "./TextCellView";
 import {TextCellContent, TextCellTrait} from "./TextCellTrait";
@@ -24,52 +25,40 @@ import type {TextCellControllerObserver} from "./TextCellControllerObserver";
 export class TextCellController extends CellController {
   override readonly observerType?: Class<TextCellControllerObserver>;
 
-  protected override attachCellTrait(cellTrait: TextCellTrait): void {
-    super.attachCellTrait(cellTrait);
-    this.setContentView(cellTrait.content.state, cellTrait);
-  }
-
-  protected override detachCellTrait(cellTrait: TextCellTrait): void {
-    this.setContentView(null, cellTrait);
-    super.detachCellTrait(cellTrait);
-  }
-
-  protected override createCellView(): TextCellView | null {
-    return TextCellView.create();
-  }
-
-  protected override attachCellView(cellView: TextCellView): void {
-    this.content.setView(cellView.content.view);
-
-    const cellTrait = this.cell.trait;
-    if (cellTrait !== null) {
-      this.setContentView(cellTrait.content.state, cellTrait);
-    }
-  }
-
-  protected override detachCellView(cellView: TextCellView): void {
-    this.content.setView(null);
-  }
-
-  /** @internal */
-  static override CellFastener = TraitViewFastener.define<TextCellController, TextCellTrait, TextCellView>({
-    extends: CellController.CellFastener,
+  @TraitViewRef<TextCellController, TextCellTrait, TextCellView>({
+    extends: true,
     traitType: TextCellTrait,
     observesTrait: true,
+    didAttachTrait(cellTrait: TextCellTrait): void {
+      this.owner.setContentView(cellTrait.content.state, cellTrait);
+    },
+    willDetachTrait(cellTrait: TextCellTrait): void {
+      this.owner.setContentView(null, cellTrait);
+    },
     traitDidSetContent(newContent: TextCellContent | null, oldContent: TextCellContent | null, cellTrait: TextCellTrait): void {
       this.owner.setContentView(newContent, cellTrait);
     },
     viewType: TextCellView,
     observesView: true,
-    viewDidSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.content.setView(newContentView);
+    didAttachView(cellView: TextCellView): void {
+      this.owner.content.setView(cellView.content.view);
+      const cellTrait = this.trait;
+      if (cellTrait !== null) {
+        this.owner.setContentView(cellTrait.content.state, cellTrait);
+      }
     },
-  });
-
-  @TraitViewFastener<TextCellController, TextCellTrait, TextCellView>({
-    extends: TextCellController.CellFastener,
+    willDetachView(cellView: TextCellView): void {
+      this.owner.content.setView(null);
+    },
+    viewWillAttachContent(contentView: HtmlView): void {
+      this.owner.content.setView(contentView);
+    },
+    viewDidDetachContent(contentView: HtmlView): void {
+      this.owner.content.setView(null);
+    },
   })
-  override readonly cell!: TraitViewFastener<this, TextCellTrait, TextCellView>;
+  override readonly cell!: TraitViewRef<this, TextCellTrait, TextCellView>;
+  static readonly cell: MemberFastenerClass<TextCellController, "cell">;
 
   protected createContentView(content: TextCellContent, cellTrait: TextCellTrait): HtmlView | string | null {
     if (typeof content === "function") {
@@ -87,59 +76,15 @@ export class TextCellController extends CellController {
     }
   }
 
-  protected initContentView(contentView: HtmlView): void {
-    // hook
-  }
-
-  protected attachContentView(contentView: HtmlView): void {
-    // hook
-  }
-
-  protected detachContentView(contentView: HtmlView): void {
-    // hook
-  }
-
-  protected willSetContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCellContentView !== void 0) {
-        observer.controllerWillSetCellContentView(newContentView, oldContentView, this);
-      }
-    }
-  }
-
-  protected onSetContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    if (oldContentView !== null) {
-      this.detachContentView(oldContentView);
-    }
-    if (newContentView !== null) {
-      this.attachContentView(newContentView);
-      this.initContentView(newContentView);
-    }
-  }
-
-  protected didSetContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCellContentView !== void 0) {
-        observer.controllerDidSetCellContentView(newContentView, oldContentView, this);
-      }
-    }
-  }
-
-  @ViewFastener<TextCellController, HtmlView>({
+  @ViewRef<TextCellController, HtmlView>({
     type: HtmlView,
-    willSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.willSetContentView(newContentView, oldContentView);
+    willAttachView(contentView: HtmlView): void {
+      this.owner.callObservers("controllerWillAttachCellContentView", contentView, this.owner);
     },
-    onSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.onSetContentView(newContentView, oldContentView);
-    },
-    didSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.didSetContentView(newContentView, oldContentView);
+    didDetachView(contentView: HtmlView): void {
+      this.owner.callObservers("controllerDidDetachCellContentView", contentView, this.owner);
     },
   })
-  readonly content!: ViewFastener<this, HtmlView>;
+  readonly content!: ViewRef<this, HtmlView>;
+  static readonly content: MemberFastenerClass<TextCellController, "content">;
 }

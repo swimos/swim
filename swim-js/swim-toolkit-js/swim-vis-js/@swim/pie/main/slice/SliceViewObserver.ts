@@ -21,11 +21,11 @@ export interface SliceViewObserver<V extends SliceView = SliceView> extends View
 
   viewDidSetSliceValue?(newValue: number, oldValue: number, view: V): void;
 
-  viewWillSetSliceLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewWillAttachSliceLabel?(labelView: GraphicsView, view: V): void;
 
-  viewDidSetSliceLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewDidDetachSliceLabel?(labelView: GraphicsView, view: V): void;
 
-  viewWillSetSliceLegend?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, view: V): void;
+  viewWillAttachSliceLegend?(legendView: GraphicsView, view: V): void;
 
-  viewDidSetSliceLegend?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, view: V): void;
+  viewDidDetachSliceLegend?(legendView: GraphicsView, view: V): void;
 }

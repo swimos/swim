@@ -230,7 +230,11 @@ export class ConstraintSolver implements ConstraintScope {
     } else {
       strength = ConstraintStrength.Strong;
     }
-    const property = ConstraintProperty.create(this, name) as ConstraintProperty<unknown, number>;
+    const property = ConstraintProperty.create(this) as ConstraintProperty<unknown, number>;
+    Object.defineProperty(property, "name", {
+      value: name,
+      configurable: true,
+    });
     if (value !== void 0) {
       property.setState(value);
     }

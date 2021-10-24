@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import type {GeoBox} from "@swim/geo";
-import type {ControllerFastener} from "@swim/controller";
 import type {GeoView} from "../geo/GeoView";
 import type {GeoTrait} from "../geo/GeoTrait";
 import type {GeoController} from "../geo/GeoController";
@@ -22,27 +21,27 @@ import type {GeoLayerTrait} from "./GeoLayerTrait";
 import type {GeoLayerController} from "./GeoLayerController";
 
 export interface GeoLayerControllerObserver<C extends GeoLayerController = GeoLayerController> extends GeoControllerObserver<C> {
-  controllerWillSetGeoTrait?(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null, controller: C): void;
+  controllerWillAttachGeoTrait?(geoTrait: GeoLayerTrait, controller: C): void;
 
-  controllerDidSetGeoTrait?(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null, controller: C): void;
+  controllerDidDetachGeoTrait?(geoTrait: GeoLayerTrait, controller: C): void;
 
-  controllerWillSetGeoView?(newGeoView: GeoView | null, oldGeoView: GeoView | null, controller: C): void;
+  controllerWillAttachGeoView?(geoView: GeoView, controller: C): void;
 
-  controllerDidSetGeoView?(newGeoView: GeoView | null, oldGeoView: GeoView | null, controller: C): void;
+  controllerDidDetachGeoView?(geoView: GeoView, controller: C): void;
 
-  controllerWillSetFeature?(newFeatureController: GeoController | null, oldFeatureController: GeoController | null, featureFastener: ControllerFastener<C, GeoController>): void;
+  controllerWillAttachFeature?(featureController: GeoController, controller: C): void;
 
-  controllerDidSetFeature(newFeatureController: GeoController | null, oldFeatureController: GeoController | null, featureFastener: ControllerFastener<C, GeoController>): void;
+  controllerDidDetachFeature(featureController: GeoController, controller: C): void;
 
-  controllerWillSetFeatureTrait?(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null, featureFastener: ControllerFastener<C, GeoController>): void;
+  controllerWillAttachFeatureTrait?(featureTrait: GeoTrait, featureController: GeoController, controller: C): void;
 
-  controllerDidSetFeatureTrait?(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null, featureFastener: ControllerFastener<C, GeoController>): void;
+  controllerDidDetachFeatureTrait?(featureTrait: GeoTrait, featureController: GeoController, controller: C): void;
 
-  controllerWillSetFeatureView?(newFeatureView: GeoView | null, oldFeatureView: GeoView | null, featureFastener: ControllerFastener<C, GeoController>): void;
+  controllerWillAttachFeatureView?(featureView: GeoView, featureController: GeoController, controller: C): void;
 
-  controllerDidSetFeatureView?(newFeatureView: GeoView | null, oldFeatureView: GeoView | null, featureFastener: ControllerFastener<C, GeoController>): void;
+  controllerDidDetachFeatureView?(featureView: GeoView, featureController: GeoController, controller: C): void;
 
-  controllerWillSetFeatureGeoBounds?(newFeatureGeoBounds: GeoBox, oldFeatureGeoBounds: GeoBox, featureFastener: ControllerFastener<C, GeoController>): void;
+  controllerWillSetFeatureGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, featureController: GeoController, controller: C): void;
 
-  controllerDidSetFeatureGeoBounds?(newFeatureGeoBounds: GeoBox, oldFeatureGeoBounds: GeoBox, featureFastener: ControllerFastener<C, GeoController>): void;
+  controllerDidSetFeatureGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, featureController: GeoController, controller: C): void;
 }

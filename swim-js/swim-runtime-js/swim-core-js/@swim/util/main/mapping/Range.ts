@@ -58,6 +58,7 @@ export const Range = (function (_super: typeof Mapping) {
   };
 
   Range.prototype = Object.create(_super.prototype);
+  Range.prototype.constructor = Range;
 
   Object.defineProperty(Range.prototype, "domain", {
     get(): LinearDomain {

@@ -38,6 +38,7 @@ export const RotateTransformInterpolator = (function (_super: typeof Interpolato
   };
 
   RotateTransformInterpolator.prototype = Object.create(_super.prototype);
+  RotateTransformInterpolator.prototype.constructor = RotateTransformInterpolator;
 
   return RotateTransformInterpolator;
 })(Interpolator);

@@ -14,7 +14,7 @@
 
 import {Class, AnyTiming, Timing} from "@swim/util";
 import {Property} from "@swim/fastener";
-import {TraitViewFastener, GenericController} from "@swim/controller";
+import {GenericController, TraitViewRef} from "@swim/controller";
 import type {GeoView} from "./GeoView";
 import type {GeoTrait} from "./GeoTrait";
 import type {GeoControllerObserver} from "./GeoControllerObserver";
@@ -33,7 +33,7 @@ export abstract class GeoController extends GenericController {
   @Property({type: Timing, inherits: true})
   readonly geoTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  abstract readonly geo: TraitViewFastener<this, GeoTrait, GeoView>;
+  abstract readonly geo: TraitViewRef<this, GeoTrait, GeoView>;
 
   static fromTrait(geoTrait: GeoTrait): GeoController | null {
     if (geoTrait instanceof GeoLayerTrait) {

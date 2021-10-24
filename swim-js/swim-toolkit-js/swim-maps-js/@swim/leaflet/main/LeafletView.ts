@@ -15,10 +15,10 @@
 /// <reference types="leaflet"/>
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/fastener";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
-import {View} from "@swim/view";
+import {View, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
 import {AnyGeoPerspective, MapView} from "@swim/map";
@@ -54,13 +54,7 @@ export class LeafletView extends MapView {
   override readonly geoViewport!: LeafletViewport;
 
   protected willSetGeoViewport(newGeoViewport: LeafletViewport, oldGeoViewport: LeafletViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoViewport !== void 0) {
-        observer.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected onSetGeoViewport(newGeoViewport: LeafletViewport, oldGeoViewport: LeafletViewport): void {
@@ -68,13 +62,7 @@ export class LeafletView extends MapView {
   }
 
   protected didSetGeoViewport(newGeoViewport: LeafletViewport, oldGeoViewport: LeafletViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!
-      if (observer.viewDidSetGeoViewport !== void 0) {
-        observer.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected updateGeoViewport(): boolean {
@@ -128,58 +116,49 @@ export class LeafletView extends MapView {
   }
 
   protected willMoveMap(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillMoveMap !== void 0) {
-        observer.viewWillMoveMap(this);
-      }
-    }
+    this.callObservers("viewWillMoveMap", this);
   }
 
   protected didMoveMap(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!
-      if (observer.viewDidMoveMap !== void 0) {
-        observer.viewDidMoveMap(this);
+    this.callObservers("viewDidMoveMap", this);
+  }
+
+  @ViewRef<LeafletView, CanvasView>({
+    extends: true,
+    didAttachView(canvasView: CanvasView, targetView: View | null): void {
+      if (this.owner.parent === null) {
+        canvasView.appendChild(this.owner);
       }
-    }
-  }
+      MapView.canvas.prototype.didAttachView.call(this, canvasView, targetView);
+    },
+    willDetachView(canvasView: CanvasView): void {
+      MapView.canvas.prototype.willDetachView.call(this, canvasView);
+      if (this.owner.parent === canvasView) {
+        canvasView.removeChild(this.owner);
+      }
+    },
+  })
+  override readonly canvas!: ViewRef<this, CanvasView>;
+  static override readonly canvas: MemberFastenerClass<LeafletView, "canvas">;
 
-  protected override attachCanvas(canvasView: CanvasView): void {
-    super.attachCanvas(canvasView);
-    if (this.parent === null) {
-      canvasView.appendChild(this);
-    }
-  }
-
-  protected override detachCanvas(canvasView: CanvasView): void {
-    if (this.parent === canvasView) {
-      canvasView.removeChild(this);
-    }
-    super.detachCanvas(canvasView);
-  }
-
-  protected override initContainer(containerView: HtmlView): void {
-    super.initContainer(containerView);
-    HtmlView.fromNode(containerView.node.querySelector(".leaflet-control-container") as HTMLDivElement);
-  }
-
-  protected override attachContainer(containerView: HtmlView): void {
-    super.attachContainer(containerView);
-    const controlContainerView = HtmlView.fromNode(containerView.node.querySelector(".leaflet-control-container") as HTMLDivElement);
-    const canvasView = this.canvas.injectView(containerView, void 0, controlContainerView);
-    if (canvasView !== null) {
-      canvasView.zIndex.setState(500, Affinity.Intrinsic);
-    }
-  }
-
-  protected override detachContainer(containerView: HtmlView): void {
-    const canvasView = this.canvas.view;
-    if (canvasView !== null && canvasView.parent === containerView) {
-      containerView.removeChild(containerView);
-    }
-    super.detachContainer(containerView);
-  }
+  @ViewRef<LeafletView, HtmlView>({
+    extends: true,
+    didAttachView(containerView: HtmlView, targetView: View | null): void {
+      const controlContainerView = HtmlView.fromNode(containerView.node.querySelector(".leaflet-control-container") as HTMLDivElement);
+      const canvasView = this.owner.canvas.insertView(containerView, void 0, controlContainerView);
+      if (canvasView !== null) {
+        canvasView.zIndex.setState(500, Affinity.Intrinsic);
+      }
+      MapView.container.prototype.didAttachView.call(this, containerView, targetView);
+    },
+    willDetachView(containerView: HtmlView): void {
+      MapView.container.prototype.willDetachView.call(this, containerView);
+      const canvasView = this.owner.canvas.view;
+      if (canvasView !== null && canvasView.parent === containerView) {
+        containerView.removeChild(containerView);
+      }
+    },
+  })
+  override readonly container!: ViewRef<this, HtmlView>;
+  static override readonly container: MemberFastenerClass<LeafletView, "container">;
 }

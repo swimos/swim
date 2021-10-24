@@ -68,7 +68,7 @@ export const Recon = (function () {
     value: function (): ReconStructureParser {
       const structureParser = new ReconStructureParser();
       Object.defineProperty(Recon, "structureParser", {
-        value: function(): ReconStructureParser {
+        value: function (): ReconStructureParser {
           return structureParser;
         },
         enumerable: true,
@@ -81,7 +81,7 @@ export const Recon = (function () {
   });
 
   Object.defineProperty(Recon, "structureWriter", {
-    value: function(): ReconStructureWriter {
+    value: function (): ReconStructureWriter {
       const structureWriter = new ReconStructureWriter();
       Object.defineProperty(Recon, "structureWriter", {
         value: function (): ReconStructureWriter {

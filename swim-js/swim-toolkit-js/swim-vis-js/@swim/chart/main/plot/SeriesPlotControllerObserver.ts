@@ -17,12 +17,12 @@ import type {SeriesPlotView} from "./SeriesPlotView";
 import type {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {SeriesPlotController} from "./SeriesPlotController";
 
-export interface SeriesPlotControllerObserver<X, Y, C extends SeriesPlotController<X, Y> = SeriesPlotController<X, Y>> extends PlotControllerObserver<X, Y, C> {
-  controllerWillSetPlotTrait?(newPlotTrait: SeriesPlotTrait<X, Y> | null, oldPlotTrait: SeriesPlotTrait<X, Y> | null, controller: C): void;
+export interface SeriesPlotControllerObserver<X = unknown, Y = unknown, C extends SeriesPlotController<X, Y> = SeriesPlotController<X, Y>> extends PlotControllerObserver<X, Y, C> {
+  controllerWillAttachPlotTrait?(plotTrait: SeriesPlotTrait<X, Y>, controller: C): void;
 
-  controllerDidSetPlotTrait?(newPlotTrait: SeriesPlotTrait<X, Y> | null, oldPlotTrait: SeriesPlotTrait<X, Y> | null, controller: C): void;
+  controllerDidDetachPlotTrait?(plotTrait: SeriesPlotTrait<X, Y>, controller: C): void;
 
-  controllerWillSetPlotView?(newPlotView: SeriesPlotView<X, Y> | null, oldPlotView: SeriesPlotView<X, Y> | null, controller: C): void;
+  controllerWillAttachPlotView?(plotView: SeriesPlotView<X, Y>, controller: C): void;
 
-  controllerDidSetPlotView?(newPlotView: SeriesPlotView<X, Y> | null, oldPlotView: SeriesPlotView<X, Y> | null, controller: C): void;
+  controllerDidDetachPlotView?(plotView: SeriesPlotView<X, Y>, controller: C): void;
 }

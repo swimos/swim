@@ -15,5 +15,5 @@
 import type {PlotViewObserver} from "./PlotViewObserver";
 import type {SeriesPlotView} from "./SeriesPlotView";
 
-export interface SeriesPlotViewObserver<X, Y, V extends SeriesPlotView<X, Y> = SeriesPlotView<X, Y>> extends PlotViewObserver<X, Y, V> {
+export interface SeriesPlotViewObserver<X = unknown, Y = unknown, V extends SeriesPlotView<X, Y> = SeriesPlotView<X, Y>> extends PlotViewObserver<X, Y, V> {
 }

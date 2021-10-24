@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyColor, Color} from "@swim/style";
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 /** @internal */
 export const ColorThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const ColorThemeAnimator = _super.extend() as ThemeAnimatorClass<ThemeAnimator<any, Color | null | undefined, AnyColor | null | undefined>>;
+  const ColorThemeAnimator = _super.extend("ColorThemeAnimator") as ThemeAnimatorFactory<ThemeAnimator<any, Color | null | undefined, AnyColor | null | undefined>>;
 
   ColorThemeAnimator.prototype.fromAny = function (value: AnyColor | null): Color | null {
     return value !== void 0 && value !== null ? Color.fromAny(value) : value;

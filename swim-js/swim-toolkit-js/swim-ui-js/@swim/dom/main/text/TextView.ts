@@ -26,7 +26,7 @@ export type AnyTextView<V extends TextView = TextView> = AnyNodeView<V> | string
 export interface TextViewInit extends NodeViewInit {
 }
 
-export interface TextViewConstructor<V extends TextView = TextView> extends NodeViewConstructor<V> {
+export interface TextViewConstructor<V extends TextView = TextView, U = AnyTextView<V>> extends NodeViewConstructor<V, U> {
   new(node: Text): V;
 }
 

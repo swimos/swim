@@ -19,7 +19,6 @@ export {
   ViewFlags,
   AnyView,
   ViewInit,
-  AnyViewFactory,
   ViewFactory,
   ViewClass,
   ViewConstructor,
@@ -49,10 +48,28 @@ export {
 } from "./ViewObserver";
 
 export {
-  ViewFastenerType,
-  ViewFastenerInitType,
-  ViewFastenerInit,
-  ViewFastenerDescriptor,
-  ViewFastenerClass,
-  ViewFastener,
-} from "./ViewFastener";
+  ViewRelationType,
+  ViewRelationInit,
+  ViewRelationDescriptor,
+  ViewRelationClass,
+  ViewRelationFactory,
+  ViewRelation,
+} from "./ViewRelation";
+
+export {
+  ViewRefType,
+  ViewRefInit,
+  ViewRefDescriptor,
+  ViewRefClass,
+  ViewRefFactory,
+  ViewRef,
+} from "./ViewRef";
+
+export {
+  ViewSetType,
+  ViewSetInit,
+  ViewSetDescriptor,
+  ViewSetClass,
+  ViewSetFactory,
+  ViewSet,
+} from "./ViewSet";

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, AnyTiming, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/fastener";
 import {Length, Angle, Transform} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {
@@ -26,11 +26,11 @@ import {
   ExpansionThemeAnimator,
 } from "@swim/theme";
 import {
-  ViewContextType,
-  ViewContext,
-  ViewFastener,
   PositionGestureInput,
   PositionGesture,
+  ViewContextType,
+  ViewContext,
+  ViewRef,
 } from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import {Graphics, HtmlIconView} from "@swim/graphics";
@@ -82,9 +82,8 @@ export class FloatingButton extends ButtonMembrane {
     }
   }
 
-  /** @internal */
-  static override Gesture = PositionGesture.define<FloatingButton, HtmlView>({
-    extends: ButtonMembrane.Gesture,
+  @PositionGesture<FloatingButton, HtmlView>({
+    extends: true,
     didStartHovering(): void {
       this.owner.modifyMood(Feel.default, [[Feel.hovering, 1]]);
       if (this.owner.backgroundColor.hasAffinity(Affinity.Intrinsic)) {
@@ -102,18 +101,13 @@ export class FloatingButton extends ButtonMembrane {
     didMovePress(input: PositionGestureInput, event: Event | null): void {
       // nop
     },
-  }) as typeof ButtonMembrane.Gesture;
-
-  @PositionGesture<FloatingButton, HtmlView>({
-    extends: FloatingButton.Gesture,
   })
   override readonly gesture!: PositionGesture<this, HtmlView>;
+  static override readonly gesture: MemberFastenerClass<FloatingButton, "gesture">;
 
   /** @internal */
-  static IconFastener = ViewFastener.define<FloatingButton, HtmlIconView, never, {iconIndex: number}>({
-    extends: null,
+  static IconRef = ViewRef.define<FloatingButton, HtmlIconView, {iconIndex: number}>("IconRef", {
     type: HtmlIconView,
-    child: false,
     observes: true,
     init(): void {
       this.iconIndex = 0;
@@ -135,7 +129,7 @@ export class FloatingButton extends ButtonMembrane {
   /** @internal */
   iconCount: number;
 
-  icon: ViewFastener<this, HtmlIconView> | null;
+  icon: ViewRef<this, HtmlIconView> | null;
 
   pushIcon(icon: Graphics, timing?: AnyTiming | boolean): void {
     if (timing === void 0 || timing === true) {
@@ -146,8 +140,8 @@ export class FloatingButton extends ButtonMembrane {
 
     const oldIconCount = this.iconCount;
     const oldIconKey = "icon" + oldIconCount;
-    const oldIconFastener = this.getFastener(oldIconKey, ViewFastener) as ViewFastener<this, HtmlIconView> | null;
-    const oldIconView = oldIconFastener !== null ? oldIconFastener.view : null;
+    const oldIconRef: ViewRef<this, HtmlIconView> | null = this.getFastener(oldIconKey, ViewRef);
+    const oldIconView = oldIconRef !== null ? oldIconRef.view : null;
     if (oldIconView !== null) {
       if (timing !== false) {
         oldIconView.opacity.setState(0, timing, Affinity.Intrinsic);
@@ -159,8 +153,13 @@ export class FloatingButton extends ButtonMembrane {
 
     const newIconCount = oldIconCount + 1;
     const newIconKey = "icon" + newIconCount;
-    const newIconFastener = FloatingButton.IconFastener.create(this, newIconKey);
-    newIconFastener.iconIndex = newIconCount;
+    const newIconRef = FloatingButton.IconRef.create(this);
+    Object.defineProperty(newIconRef, "name", {
+      value: newIconKey,
+      enumerable: true,
+      configurable: true,
+    });
+    newIconRef.iconIndex = newIconCount;
     const newIconView = HtmlIconView.create();
     newIconView.position.setState("absolute", Affinity.Intrinsic);
     newIconView.left.setState(0, Affinity.Intrinsic);
@@ -176,12 +175,12 @@ export class FloatingButton extends ButtonMembrane {
     newIconView.iconHeight.setState(24, Affinity.Intrinsic);
     newIconView.iconColor.setAffinity(Affinity.Extrinsic);
     newIconView.graphics.setState(icon, Affinity.Intrinsic);
-    newIconFastener.setView(newIconView);
-    this.setFastener(newIconKey, newIconFastener);
+    newIconRef.setView(newIconView);
+    this.setFastener(newIconKey, newIconRef);
     this.appendChild(newIconView, newIconKey);
 
     this.iconCount = newIconCount;
-    this.icon = newIconFastener;
+    this.icon = newIconRef;
   }
 
   popIcon(timing?: AnyTiming | boolean): void {
@@ -193,8 +192,8 @@ export class FloatingButton extends ButtonMembrane {
 
     const oldIconCount = this.iconCount;
     const oldIconKey = "icon" + oldIconCount;
-    const oldIconFastener = this.getFastener(oldIconKey, ViewFastener) as ViewFastener<this, HtmlIconView> | null;
-    const oldIconView = oldIconFastener !== null ? oldIconFastener.view : null;
+    const oldIconRef: ViewRef<this, HtmlIconView> | null = this.getFastener(oldIconKey, ViewRef);
+    const oldIconView = oldIconRef !== null ? oldIconRef.view : null;
     if (oldIconView !== null) {
       if (timing !== false) {
         oldIconView.opacity.setState(0, timing, Affinity.Intrinsic);
@@ -206,8 +205,8 @@ export class FloatingButton extends ButtonMembrane {
 
     const newIconCount = oldIconCount - 1;
     const newIconKey = "icon" + newIconCount;
-    const newIconFastener = this.getFastener(newIconKey, ViewFastener) as ViewFastener<this, HtmlIconView> | null;
-    const newIconView = newIconFastener !== null ? newIconFastener.view : null;
+    const newIconRef: ViewRef<this, HtmlIconView> | null = this.getFastener(newIconKey, ViewRef);
+    const newIconView = newIconRef !== null ? newIconRef.view : null;
     if (newIconView !== null) {
       newIconView.opacity.setState(1, timing, Affinity.Intrinsic);
       newIconView.transform.setState(Transform.rotate(Angle.deg(0)), timing, Affinity.Intrinsic);
@@ -215,7 +214,7 @@ export class FloatingButton extends ButtonMembrane {
     }
 
     this.iconCount = newIconCount;
-    this.icon = newIconFastener;
+    this.icon = newIconRef;
   }
 
   @ThemeAnimator({type: Expansion, inherits: true})

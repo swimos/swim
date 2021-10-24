@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyTransform, Transform} from "@swim/math";
-import {AttributeAnimatorClass, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorFactory, AttributeAnimator} from "./AttributeAnimator";
 
 /** @internal */
 export const TransformAttributeAnimator = (function (_super: typeof AttributeAnimator) {
-  const TransformAttributeAnimator = _super.extend() as AttributeAnimatorClass<AttributeAnimator<any, Transform | null, AnyTransform | null>>;
+  const TransformAttributeAnimator = _super.extend("TransformAttributeAnimator") as AttributeAnimatorFactory<AttributeAnimator<any, Transform | null, AnyTransform | null>>;
 
   TransformAttributeAnimator.prototype.parse = function (value: string): Transform | null {
     return Transform.parse(value);

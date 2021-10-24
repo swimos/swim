@@ -17,7 +17,7 @@ import type {Affinity} from "@swim/fastener";
 import {AnyFocus, Focus} from "@swim/style";
 import {Look} from "../look/Look";
 import {ThemeContext} from "../theme/ThemeContext";
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 export interface FocusThemeAnimatorInit {
   willFocus?(): void;
@@ -81,7 +81,7 @@ export interface FocusThemeAnimator<O, T extends Focus | null | undefined = Focu
 }
 
 export const FocusThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const FocusThemeAnimator = _super.extend() as ThemeAnimatorClass<FocusThemeAnimator<any, Focus | null | undefined, AnyFocus | null | undefined>>;
+  const FocusThemeAnimator = _super.extend("FocusThemeAnimator") as ThemeAnimatorFactory<FocusThemeAnimator<any, Focus | null | undefined, AnyFocus | null | undefined>>;
 
   Object.defineProperty(FocusThemeAnimator.prototype, "phase", {
     get(this: FocusThemeAnimator<unknown>): number | undefined {

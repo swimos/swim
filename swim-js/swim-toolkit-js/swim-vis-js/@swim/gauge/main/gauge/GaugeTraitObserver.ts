@@ -21,7 +21,7 @@ export interface GaugeTraitObserver<R extends GaugeTrait = GaugeTrait> extends T
 
   traitDidSetGaugeTitle?(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, trait: R): void;
 
-  traitWillSetDial?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillAttachDial?(dialTrait: DialTrait, targetTrait: Trait | null, trait: R): void;
 
-  traitDidSetDial?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachDial?(dialTrait: DialTrait, trait: R): void;
 }

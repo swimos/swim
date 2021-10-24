@@ -56,6 +56,7 @@ export const RecordInterpolator = (function (_super: typeof Interpolator) {
   };
 
   RecordInterpolator.prototype = Object.create(_super.prototype);
+  RecordInterpolator.prototype.constructor = RecordInterpolator;
 
   Object.defineProperty(RecordInterpolator.prototype, 0, {
     get(this: RecordInterpolator): Record {

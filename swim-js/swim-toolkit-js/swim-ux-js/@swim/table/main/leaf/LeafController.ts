@@ -13,11 +13,12 @@
 // limitations under the License.
 
 import type {Class, ObserverType} from "@swim/util";
-import type {TraitConstructor, TraitClass, Trait} from "@swim/model";
+import type {MemberFastenerClass} from "@swim/fastener";
+import type {TraitConstructor, Trait} from "@swim/model";
 import type {PositionGestureInput} from "@swim/view";
 import type {HtmlViewClass, HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
-import {TraitViewFastener, ControllerFastener, Controller, GenericController} from "@swim/controller";
+import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {CellView} from "../cell/CellView";
 import {TextCellView} from "../cell/TextCellView";
 import type {CellTrait} from "../cell/CellTrait";
@@ -28,411 +29,100 @@ import {LeafView} from "./LeafView";
 import {LeafTrait} from "./LeafTrait";
 import type {LeafControllerObserver} from "./LeafControllerObserver";
 
-export class LeafController extends GenericController {
-  constructor() {
-    super();
-    this.cellFasteners = [];
-  }
+/** @internal */
+export interface LeafControllerCellExt {
+  attachCellTrait(cellTrait: CellTrait, cellController: CellController): void;
+  detachCellTrait(cellTrait: CellTrait, cellController: CellController): void;
+  attachCellView(cellView: CellView, cellController: CellController): void;
+  detachCellView(cellView: CellView, cellController: CellController): void;
+  attachCellContentView(cellContentView: HtmlView, cellController: CellController): void;
+  detachCellContentView(cellContentView: HtmlView, cellController: CellController): void;
+}
 
+export class LeafController extends GenericController {
   override readonly observerType?: Class<LeafControllerObserver>;
 
-  protected initLeafTrait(leafTrait: LeafTrait): void {
-    // hook
-  }
-
-  protected attachLeafTrait(leafTrait: LeafTrait): void {
-    const cellFasteners = leafTrait.cellFasteners;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellTrait = cellFasteners[i]!.trait;
-      if (cellTrait !== null) {
-        this.insertCellTrait(cellTrait);
+  @TraitViewRef<LeafController, LeafTrait, LeafView>({
+    traitType: LeafTrait,
+    observesTrait: true,
+    willAttachTrait(leafTrait: LeafTrait): void {
+      this.owner.callObservers("controllerWillAttachLeafTrait", leafTrait, this.owner);
+    },
+    didDetachTrait(leafTrait: LeafTrait): void {
+      this.owner.callObservers("controllerDidDetachLeafTrait", leafTrait, this.owner);
+    },
+    didAttachTrait(leafTrait: LeafTrait): void {
+      const cellTraits = leafTrait.cells.traits;
+      for (const traitId in cellTraits) {
+        const cellTrait = cellTraits[traitId]!;
+        this.owner.cells.addTrait(cellTrait);
       }
-    }
-  }
-
-  protected detachLeafTrait(leafTrait: LeafTrait): void {
-    const cellFasteners = leafTrait.cellFasteners;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellTrait = cellFasteners[i]!.trait;
-      if (cellTrait !== null) {
-        this.removeCellTrait(cellTrait);
+    },
+    willDetachTrait(leafTrait: LeafTrait): void {
+      const cellTraits = leafTrait.cells.traits;
+      for (const traitId in cellTraits) {
+        const cellTrait = cellTraits[traitId]!;
+        this.owner.cells.deleteTrait(cellTrait);
       }
-    }
-  }
-
-  protected willSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetLeafTrait !== void 0) {
-        observer.controllerWillSetLeafTrait(newLeafTrait, oldLeafTrait, this);
-      }
-    }
-  }
-
-  protected onSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null): void {
-    if (oldLeafTrait !== null) {
-      this.detachLeafTrait(oldLeafTrait);
-    }
-    if (newLeafTrait !== null) {
-      this.attachLeafTrait(newLeafTrait);
-      this.initLeafTrait(newLeafTrait);
-    }
-  }
-
-  protected didSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetLeafTrait !== void 0) {
-        observer.controllerDidSetLeafTrait(newLeafTrait, oldLeafTrait, this);
-      }
-    }
-  }
-
-  protected createLeafView(): LeafView | null {
-    return LeafView.create();
-  }
-
-  protected initLeafView(leafView: LeafView): void {
-    // hook
-  }
-
-  protected attachLeafView(leafView: LeafView): void {
-    const cellFasteners = this.cellFasteners;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellController = cellFasteners[i]!.controller;
-      if (cellController !== null) {
+    },
+    traitWillAttachCell(cellTrait: CellTrait, targetTrait: Trait | null): void {
+      this.owner.cells.addTrait(cellTrait, targetTrait);
+    },
+    traitDidDetachCell(cellTrait: CellTrait): void {
+      this.owner.cells.deleteTrait(cellTrait);
+    },
+    viewType: LeafView,
+    observesView: true,
+    willAttachView(leafView: LeafView): void {
+      this.owner.callObservers("controllerWillAttachLeafView", leafView, this.owner);
+    },
+    didAttachView(leafView: LeafView): void {
+      const cellControllers = this.owner.cells.controllers;
+      for (const controllerId in cellControllers) {
+        const cellController = cellControllers[controllerId]!;
         const cellView = cellController.cell.view;
         if (cellView !== null && cellView.parent === null) {
           const cellTrait = cellController.cell.trait;
           if (cellTrait !== null) {
-            cellController.cell.injectView(leafView, void 0, void 0, cellTrait.key);
+            cellController.cell.insertView(leafView, void 0, void 0, cellTrait.key);
           }
         }
       }
-    }
-  }
-
-  protected detachLeafView(leafView: LeafView): void {
-    // hook
-  }
-
-  protected willSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetLeafView !== void 0) {
-        observer.controllerWillSetLeafView(newLeafView, oldLeafView, this);
-      }
-    }
-  }
-
-  protected onSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-    if (oldLeafView !== null) {
-      this.detachLeafView(oldLeafView);
-    }
-    if (newLeafView !== null) {
-      this.attachLeafView(newLeafView);
-      this.initLeafView(newLeafView);
-    }
-  }
-
-  protected didSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetLeafView !== void 0) {
-        observer.controllerDidSetLeafView(newLeafView, oldLeafView, this);
-      }
-    }
-  }
-
-  protected willHighlightLeafView(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillHighlightLeafView !== void 0) {
-        observer.controllerWillHighlightLeafView(leafView, this);
-      }
-    }
-  }
-
-  protected onHighlightLeafView(leafView: LeafView): void {
-    // hook
-  }
-
-  protected didHighlightLeafView(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidHighlightLeafView !== void 0) {
-        observer.controllerDidHighlightLeafView(leafView, this);
-      }
-    }
-  }
-
-  protected willUnhighlightLeafView(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillUnhighlightLeafView !== void 0) {
-        observer.controllerWillUnhighlightLeafView(leafView, this);
-      }
-    }
-  }
-
-  protected onUnhighlightLeafView(leafView: LeafView): void {
-    // hook
-  }
-
-  protected didUnhighlightLeafView(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidUnhighlightLeafView !== void 0) {
-        observer.controllerDidUnhighlightLeafView(leafView, this);
-      }
-    }
-  }
-
-  protected onEnterLeafView(leafView: LeafView): void {
-    // hook
-  }
-
-  protected didEnterLeafView(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidEnterLeafView !== void 0) {
-        observer.controllerDidEnterLeafView(leafView, this);
-      }
-    }
-  }
-
-  protected onLeaveLeafView(leafView: LeafView): void {
-    // hook
-  }
-
-  protected didLeaveLeafView(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidLeaveLeafView !== void 0) {
-        observer.controllerDidLeaveLeafView(leafView, this);
-      }
-    }
-  }
-
-  protected onPressLeafView(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
-    // hook
-  }
-
-  protected didPressLeafView(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidPressLeafView !== void 0) {
-        observer.controllerDidPressLeafView(input, event, leafView, this);
-      }
-    }
-  }
-
-  protected onLongPressLeafView(input: PositionGestureInput, leafView: LeafView): void {
-    // hook
-  }
-
-  protected didLongPressLeafView(input: PositionGestureInput, leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidLongPressLeafView !== void 0) {
-        observer.controllerDidLongPressLeafView(input, leafView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static LeafFastener = TraitViewFastener.define<LeafController, LeafTrait, LeafView>({
-    traitType: LeafTrait,
-    observesTrait: true,
-    willSetTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null): void {
-      this.owner.willSetLeafTrait(newLeafTrait, oldLeafTrait);
     },
-    onSetTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null): void {
-      this.owner.onSetLeafTrait(newLeafTrait, oldLeafTrait);
-    },
-    didSetTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null): void {
-      this.owner.didSetLeafTrait(newLeafTrait, oldLeafTrait);
-    },
-    traitWillSetCell(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait): void {
-      if (oldCellTrait !== null) {
-        this.owner.removeCellTrait(oldCellTrait);
-      }
-    },
-    traitDidSetCell(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait): void {
-      if (newCellTrait !== null) {
-        this.owner.insertCellTrait(newCellTrait, targetTrait);
-      }
-    },
-    viewType: LeafView,
-    observesView: true,
-    willSetView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-      this.owner.willSetLeafView(newLeafView, oldLeafView);
-    },
-    onSetView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-      this.owner.onSetLeafView(newLeafView, oldLeafView);
-    },
-    didSetView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-      this.owner.didSetLeafView(newLeafView, oldLeafView);
+    didDetachView(leafView: LeafView): void {
+      this.owner.callObservers("controllerDidDetachLeafView", leafView, this.owner);
     },
     viewWillHighlight(leafView: LeafView): void {
-      this.owner.willHighlightLeafView(leafView);
-      this.owner.onHighlightLeafView(leafView);
+      this.owner.callObservers("controllerWillHighlightLeafView", leafView, this.owner);
     },
     viewDidHighlight(leafView: LeafView): void {
-      this.owner.didHighlightLeafView(leafView);
+      this.owner.callObservers("controllerDidHighlightLeafView", leafView, this.owner);
     },
     viewWillUnhighlight(leafView: LeafView): void {
-      this.owner.willUnhighlightLeafView(leafView);
+      this.owner.callObservers("controllerWillUnhighlightLeafView", leafView, this.owner);
     },
     viewDidUnhighlight(leafView: LeafView): void {
-      this.owner.onUnhighlightLeafView(leafView);
-      this.owner.didUnhighlightLeafView(leafView);
+      this.owner.callObservers("controllerDidUnhighlightLeafView", leafView, this.owner);
     },
     viewDidEnter(leafView: LeafView): void {
-      this.owner.onEnterLeafView(leafView);
-      this.owner.didEnterLeafView(leafView);
+      this.owner.callObservers("controllerDidEnterLeafView", leafView, this.owner);
     },
     viewDidLeave(leafView: LeafView): void {
-      this.owner.onLeaveLeafView(leafView);
-      this.owner.didLeaveLeafView(leafView);
+      this.owner.callObservers("controllerDidLeaveLeafView", leafView, this.owner);
     },
     viewDidPress(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
-      this.owner.onPressLeafView(input, event, leafView);
-      this.owner.didPressLeafView(input, event, leafView);
+      this.owner.callObservers("controllerDidPressLeafView", input, event, leafView, this.owner);
     },
     viewDidLongPress(input: PositionGestureInput, leafView: LeafView): void {
-      this.owner.onLongPressLeafView(input, leafView);
-      this.owner.didLongPressLeafView(input, leafView);
+      this.owner.callObservers("controllerDidLongPressLeafView", input, leafView, this.owner);
     },
-    createView(): LeafView | null {
-      return this.owner.createLeafView();
-    },
-  });
-
-  @TraitViewFastener<LeafController, LeafTrait, LeafView>({
-    extends: LeafController.LeafFastener,
   })
-  readonly leaf!: TraitViewFastener<this, LeafTrait, LeafView>;
-
-  insertCell(cellController: CellController, targetController: Controller | null = null): void {
-    const cellFasteners = this.cellFasteners as ControllerFastener<this, CellController>[];
-    let targetIndex = cellFasteners.length;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      if (cellFastener.controller === cellController) {
-        return;
-      } else if (cellFastener.controller === targetController) {
-        targetIndex = i;
-      }
-    }
-    const cellFastener = this.createCellFastener(cellController);
-    cellFasteners.splice(targetIndex, 0, cellFastener);
-    cellFastener.setController(cellController, targetController);
-    if (this.mounted) {
-      cellFastener.mount();
-    }
-  }
-
-  removeCell(cellController: CellController): void {
-    const cellFasteners = this.cellFasteners as ControllerFastener<this, CellController>[];
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      if (cellFastener.controller === cellController) {
-        cellFastener.setController(null);
-        if (this.mounted) {
-          cellFastener.unmount();
-        }
-        cellFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected createCell(cellTrait: CellTrait): CellController | null {
-    return CellController.createCell(cellTrait);
-  }
-
-  protected initCell(cellController: CellController, cellFastener: ControllerFastener<this, CellController>): void {
-    const cellTrait = cellController.cell.trait;
-    if (cellTrait !== null) {
-      this.initCellTrait(cellTrait, cellFastener);
-    }
-    const cellView = cellController.cell.view;
-    if (cellView !== null) {
-      this.initCellView(cellView, cellFastener);
-    }
-  }
-
-  protected attachCell(cellController: CellController, cellFastener: ControllerFastener<this, CellController>): void {
-    const cellTrait = cellController.cell.trait;
-    if (cellTrait !== null) {
-      this.attachCellTrait(cellTrait, cellFastener);
-    }
-    const cellView = cellController.cell.view;
-    if (cellView !== null) {
-      this.attachCellView(cellView, cellFastener);
-    }
-  }
-
-  protected detachCell(cellController: CellController, cellFastener: ControllerFastener<this, CellController>): void {
-    const cellView = cellController.cell.view;
-    if (cellView !== null) {
-      this.detachCellView(cellView, cellFastener);
-    }
-    const cellTrait = cellController.cell.trait;
-    if (cellTrait !== null) {
-      this.detachCellTrait(cellTrait, cellFastener);
-    }
-  }
-
-  protected willSetCell(newCellController: CellController | null, oldCellController: CellController | null,
-                        cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCell !== void 0) {
-        observer.controllerWillSetCell(newCellController, oldCellController, cellFastener);
-      }
-    }
-  }
-
-  protected onSetCell(newCellController: CellController | null, oldCellController: CellController | null,
-                      cellFastener: ControllerFastener<this, CellController>): void {
-    if (oldCellController !== null) {
-      this.detachCell(oldCellController, cellFastener);
-    }
-    if (newCellController !== null) {
-      this.attachCell(newCellController, cellFastener);
-      this.initCell(newCellController, cellFastener);
-    }
-  }
-
-  protected didSetCell(newCellController: CellController | null, oldCellController: CellController | null,
-                       cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCell !== void 0) {
-        observer.controllerDidSetCell(newCellController, oldCellController, cellFastener);
-      }
-    }
-  }
+  readonly leaf!: TraitViewRef<this, LeafTrait, LeafView>;
+  static readonly leaf: MemberFastenerClass<LeafController, "leaf">;
 
   getCellTrait(key: string): CellTrait | null;
-  getCellTrait<R extends CellTrait>(key: string, cellTraitClass: TraitClass<R>): R | null;
-  getCellTrait(key: string, cellTraitClass?: TraitClass<CellTrait>): CellTrait | null {
+  getCellTrait<R extends CellTrait>(key: string, cellTraitClass: Class<R>): R | null;
+  getCellTrait(key: string, cellTraitClass?: Class<CellTrait>): CellTrait | null {
     const leafTrait = this.leaf.trait;
     return leafTrait !== null ? leafTrait.getCell(key, cellTraitClass!) : null;
   }
@@ -451,101 +141,6 @@ export class LeafController extends GenericController {
       throw new Error("no leaf trait");
     }
     leafTrait.setCell(key, cellTrait);
-  }
-
-  insertCellTrait(cellTrait: CellTrait, targetTrait: Trait | null = null): void {
-    const cellFasteners = this.cellFasteners as ControllerFastener<this, CellController>[];
-    let targetController: CellController | null = null;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellController = cellFasteners[i]!.controller;
-      if (cellController !== null) {
-        if (cellController.cell.trait === cellTrait) {
-          return;
-        } else if (cellController.cell.trait === targetTrait) {
-          targetController = cellController;
-        }
-      }
-    }
-    const cellController = this.createCell(cellTrait);
-    if (cellController !== null) {
-      cellController.cell.setTrait(cellTrait);
-      this.insertChild(cellController, targetController, cellTrait.key);
-      if (cellController.cell.view === null) {
-        const cellView = this.createCellView(cellController);
-        let targetView: CellView | null = null;
-        if (targetController !== null) {
-          targetView = targetController.cell.view;
-        }
-        const leafView = this.leaf.view;
-        if (leafView !== null) {
-          cellController.cell.injectView(leafView, cellView, targetView, cellTrait.key);
-        } else {
-          cellController.cell.setView(cellView, targetView);
-        }
-      }
-    }
-  }
-
-  removeCellTrait(cellTrait: CellTrait): void {
-    const cellFasteners = this.cellFasteners as ControllerFastener<this, CellController>[];
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      const cellController = cellFastener.controller;
-      if (cellController !== null && cellController.cell.trait === cellTrait) {
-        cellFastener.setController(null);
-        if (this.mounted) {
-          cellFastener.unmount();
-        }
-        cellFasteners.splice(i, 1);
-        cellController.remove();
-        return;
-      }
-    }
-  }
-
-  protected initCellTrait(cellTrait: CellTrait | null, cellFastener: ControllerFastener<this, CellController>): void {
-    // hook
-  }
-
-  protected attachCellTrait(cellTrait: CellTrait | null, cellFastener: ControllerFastener<this, CellController>): void {
-    // hook
-  }
-
-  protected detachCellTrait(cellTrait: CellTrait | null, cellFastener: ControllerFastener<this, CellController>): void {
-    // hook
-  }
-
-  protected willSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null,
-                             cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCellTrait !== void 0) {
-        observer.controllerWillSetCellTrait(newCellTrait, oldCellTrait, cellFastener);
-      }
-    }
-  }
-
-  protected onSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null,
-                           cellFastener: ControllerFastener<this, CellController>): void {
-    if (oldCellTrait !== null) {
-      this.detachCellTrait(oldCellTrait, cellFastener);
-    }
-    if (newCellTrait !== null) {
-      this.attachCellTrait(oldCellTrait, cellFastener);
-      this.initCellTrait(newCellTrait, cellFastener);
-    }
-  }
-
-  protected didSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null,
-                            cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCellTrait !== void 0) {
-        observer.controllerDidSetCellTrait(newCellTrait, oldCellTrait, cellFastener);
-      }
-    }
   }
 
   getCellView(key: string): CellView | null;
@@ -579,282 +174,111 @@ export class LeafController extends GenericController {
     leafView.setCell(key, cellView);
   }
 
-  protected createCellView(cellController: CellController): CellView | null {
-    return cellController.cell.createView();
-  }
-
-  protected initCellView(cellView: CellView, cellFastener: ControllerFastener<this, CellController>): void {
-    if (cellView instanceof TextCellView) {
-      const cellContentView = cellView.content.view;
-      if (cellContentView !== null) {
-        this.initCellContentView(cellContentView, cellFastener);
-      }
-    }
-  }
-
-  protected attachCellView(cellView: CellView, cellFastener: ControllerFastener<this, CellController>): void {
-    if (cellView instanceof TextCellView) {
-      const cellContentView = cellView.content.view;
-      if (cellContentView !== null) {
-        this.attachCellContentView(cellContentView, cellFastener);
-      }
-    }
-  }
-
-  protected detachCellView(cellView: CellView, cellFastener: ControllerFastener<this, CellController>): void {
-    if (cellView instanceof TextCellView) {
-      const cellContentView = cellView.content.view;
-      if (cellContentView !== null) {
-        this.detachCellContentView(cellContentView, cellFastener);
-      }
-    }
-    cellView.remove();
-  }
-
-  protected willSetCellView(newCellView: CellView | null, oldCellView: CellView | null,
-                            cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCellView !== void 0) {
-        observer.controllerWillSetCellView(newCellView, oldCellView, cellFastener);
-      }
-    }
-  }
-
-  protected onSetCellView(newCellView: CellView | null, oldCellView: CellView | null,
-                          cellFastener: ControllerFastener<this, CellController>): void {
-    if (oldCellView !== null) {
-      this.detachCellView(oldCellView, cellFastener);
-    }
-    if (newCellView !== null) {
-      this.attachCellView(newCellView, cellFastener);
-      this.initCellView(newCellView, cellFastener);
-    }
-  }
-
-  protected didSetCellView(newCellView: CellView | null, oldCellView: CellView | null,
-                           cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCellView !== void 0) {
-        observer.controllerDidSetCellView(newCellView, oldCellView, cellFastener);
-      }
-    }
-  }
-
-  protected didPressCellView(input: PositionGestureInput, event: Event | null, cellView: CellView,
-                             cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidPressCellView !== void 0) {
-        observer.controllerDidPressCellView(input, event, cellView, cellFastener);
-      }
-    }
-  }
-
-  protected didLongPressCellView(input: PositionGestureInput, cellView: CellView,
-                                 cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidLongPressCellView !== void 0) {
-        observer.controllerDidLongPressCellView(input, cellView, cellFastener);
-      }
-    }
-  }
-
-  protected initCellContentView(cellContentView: HtmlView, cellFastener: ControllerFastener<this, CellController>): void {
-    // hook
-  }
-
-  protected attachCellContentView(cellContentView: HtmlView, cellFastener: ControllerFastener<this, CellController>): void {
-    // hook
-  }
-
-  protected detachCellContentView(cellContentView: HtmlView, cellFastener: ControllerFastener<this, CellController>): void {
-    // hook
-  }
-
-  protected willSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null,
-                                   cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCellContentView !== void 0) {
-        observer.controllerWillSetCellContentView(newCellContentView, oldCellContentView, cellFastener);
-      }
-    }
-  }
-
-  protected onSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null,
-                                 cellFastener: ControllerFastener<this, CellController>): void {
-    if (oldCellContentView !== null) {
-      this.detachCellContentView(oldCellContentView, cellFastener);
-    }
-    if (newCellContentView !== null) {
-      this.attachCellContentView(newCellContentView, cellFastener);
-      this.initCellContentView(newCellContentView, cellFastener);
-    }
-  }
-
-  protected didSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null,
-                                  cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCellContentView !== void 0) {
-        observer.controllerDidSetCellContentView(newCellContentView, oldCellContentView, cellFastener);
-      }
-    }
-  }
-
-  protected willSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null,
-                            cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCellIcon !== void 0) {
-        observer.controllerWillSetCellIcon(newCellIcon, oldCellIcon, cellFastener);
-      }
-    }
-  }
-
-  protected onSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null,
-                          cellFastener: ControllerFastener<this, CellController>): void {
-    // hook
-  }
-
-  protected didSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null,
-                           cellFastener: ControllerFastener<this, CellController>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCellIcon !== void 0) {
-        observer.controllerDidSetCellIcon(newCellIcon, oldCellIcon, cellFastener);
-      }
-    }
-  }
-
-  /** @internal */
-  static CellFastener = ControllerFastener.define<LeafController, CellController, never, ObserverType<CellController | TextCellController | IconCellController>>({
-    extends: null,
+  @TraitViewControllerSet<LeafController, CellTrait, CellView, CellController, LeafControllerCellExt & ObserverType<CellController | TextCellController | IconCellController>>({
     type: CellController,
-    child: false,
+    binds: true,
     observes: true,
-    willSetController(newCellController: CellController | null, oldCellController: CellController | null): void {
-      this.owner.willSetCell(newCellController, oldCellController, this);
+    get parentView(): LeafView | null {
+      return this.owner.leaf.view;
     },
-    onSetController(newCellController: CellController | null, oldCellController: CellController | null): void {
-      this.owner.onSetCell(newCellController, oldCellController, this);
+    getTraitViewRef(cellController: CellController): TraitViewRef<unknown, CellTrait, CellView> {
+      return cellController.cell;
     },
-    didSetController(newCellController: CellController | null, oldCellController: CellController | null): void {
-      this.owner.didSetCell(newCellController, oldCellController, this);
+    willAttachController(cellController: CellController): void {
+      this.owner.callObservers("controllerWillAttachCell", cellController, this.owner);
     },
-    controllerWillSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
-      this.owner.willSetCellTrait(newCellTrait, oldCellTrait, this);
-    },
-    controllerDidSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
-      this.owner.onSetCellTrait(newCellTrait, oldCellTrait, this);
-      this.owner.didSetCellTrait(newCellTrait, oldCellTrait, this);
-    },
-    controllerWillSetCellView(newCellView: CellView | null, oldCellView: CellView | null): void {
-      this.owner.willSetCellView(newCellView, oldCellView, this);
-    },
-    controllerDidSetCellView(newCellView: CellView | null, oldCellView: CellView | null): void {
-      this.owner.onSetCellView(newCellView, oldCellView, this);
-      this.owner.didSetCellView(newCellView, oldCellView, this);
-    },
-    controllerDidPressCellView(input: PositionGestureInput, event: Event | null, cellView: CellView): void {
-      this.owner.didPressCellView(input, event, cellView, this);
-    },
-    controllerDidLongPressCellView(input: PositionGestureInput, cellView: CellView): void {
-      this.owner.didLongPressCellView(input, cellView, this);
-    },
-    controllerWillSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null): void {
-      this.owner.willSetCellContentView(newCellContentView, oldCellContentView, this);
-    },
-    controllerDidSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null): void {
-      this.owner.onSetCellContentView(newCellContentView, oldCellContentView, this);
-      this.owner.didSetCellContentView(newCellContentView, oldCellContentView, this);
-    },
-    controllerWillSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
-      this.owner.willSetCellIcon(newCellIcon, oldCellIcon, this);
-    },
-    controllerDidSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
-      this.owner.onSetCellIcon(newCellIcon, oldCellIcon, this);
-      this.owner.didSetCellIcon(newCellIcon, oldCellIcon, this);
-    },
-  });
-
-  protected createCellFastener(cellController: CellController): ControllerFastener<this, CellController> {
-    return LeafController.CellFastener.create(this, cellController.key ?? "cell");
-  }
-
-  /** @internal */
-  readonly cellFasteners: ReadonlyArray<ControllerFastener<this, CellController>>;
-
-  protected getCellFastener(cellTrait: CellTrait): ControllerFastener<this, CellController> | null {
-    const cellFasteners = this.cellFasteners;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      const cellController = cellFastener.controller;
-      if (cellController !== null && cellController.cell.trait === cellTrait) {
-        return cellFastener;
+    didAttachController(cellController: CellController): void {
+      const cellTrait = cellController.cell.trait;
+      if (cellTrait !== null) {
+        this.attachCellTrait(cellTrait, cellController);
       }
-    }
-    return null;
-  }
-
-  /** @internal */
-  protected mountCellFasteners(): void {
-    const cellFasteners = this.cellFasteners;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      cellFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountCellFasteners(): void {
-    const cellFasteners = this.cellFasteners;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      cellFastener.unmount();
-    }
-  }
-
-  protected detectCellController(controller: Controller): CellController | null {
-    return controller instanceof CellController ? controller : null;
-  }
-
-  protected override onInsertChild(childController: Controller, targetController: Controller | null): void {
-    super.onInsertChild(childController, targetController);
-    const cellController = this.detectCellController(childController);
-    if (cellController !== null) {
-      this.insertCell(cellController, targetController);
-    }
-  }
-
-  protected override onRemoveChild(childController: Controller): void {
-    super.onRemoveChild(childController);
-    const cellController = this.detectCellController(childController);
-    if (cellController !== null) {
-      this.removeCell(cellController);
-    }
-  }
-
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountCellFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountCellFasteners();
-    super.unmountFasteners();
-  }
+      const cellView = cellController.cell.view;
+      if (cellView !== null) {
+        this.attachCellView(cellView, cellController);
+      }
+    },
+    willDetachController(cellController: CellController): void {
+      const cellView = cellController.cell.view;
+      if (cellView !== null) {
+        this.detachCellView(cellView, cellController);
+      }
+      const cellTrait = cellController.cell.trait;
+      if (cellTrait !== null) {
+        this.detachCellTrait(cellTrait, cellController);
+      }
+    },
+    didDetachController(cellController: CellController): void {
+      this.owner.callObservers("controllerDidDetachCell", cellController, this.owner);
+    },
+    controllerWillAttachCellTrait(cellTrait: CellTrait, cellController: CellController): void {
+      this.owner.callObservers("controllerWillAttachCellTrait", cellTrait, cellController, this.owner);
+      this.attachCellTrait(cellTrait, cellController);
+    },
+    controllerDidDetachCellTrait(cellTrait: CellTrait, cellController: CellController): void {
+      this.detachCellTrait(cellTrait, cellController);
+      this.owner.callObservers("controllerDidDetachCellTrait", cellTrait, cellController, this.owner);
+    },
+    attachCellTrait(cellTrait: CellTrait, cellController: CellController): void {
+      // hook
+    },
+    detachCellTrait(cellTrait: CellTrait, cellController: CellController): void {
+      // hook
+    },
+    controllerWillAttachCellView(cellView: CellView, cellController: CellController): void {
+      this.owner.callObservers("controllerWillAttachCellView", cellView, cellController, this.owner);
+      this.attachCellView(cellView, cellController);
+    },
+    controllerDidDetachCellView(cellView: CellView, cellController: CellController): void {
+      this.detachCellView(cellView, cellController);
+      this.owner.callObservers("controllerDidDetachCellView", cellView, cellController, this.owner);
+    },
+    attachCellView(cellView: CellView, cellController: CellController): void {
+      if (cellView instanceof TextCellView) {
+        const cellContentView = cellView.content.view;
+        if (cellContentView !== null) {
+          this.attachCellContentView(cellContentView, cellController);
+        }
+      }
+    },
+    detachCellView(cellView: CellView, cellController: CellController): void {
+      if (cellView instanceof TextCellView) {
+        const cellContentView = cellView.content.view;
+        if (cellContentView !== null) {
+          this.detachCellContentView(cellContentView, cellController);
+        }
+      }
+      cellView.remove();
+    },
+    controllerDidPressCellView(input: PositionGestureInput, event: Event | null, cellView: CellView, cellController: CellController): void {
+      this.owner.callObservers("controllerDidPressCellView", input, event, cellView, cellController, this.owner);
+    },
+    controllerDidLongPressCellView(input: PositionGestureInput, cellView: CellView, cellController: CellController): void {
+      this.owner.callObservers("controllerDidLongPressCellView", input, cellView, cellController, this.owner);
+    },
+    controllerWillAttachCellContentView(contentView: HtmlView, cellController: CellController): void {
+      this.attachCellContentView(contentView, cellController);
+      this.owner.callObservers("controllerWillAttachCellContentView", contentView, cellController, this.owner);
+    },
+    controllerDidDetachCellContentView(contentView: HtmlView, cellController: CellController): void {
+      this.owner.callObservers("controllerDidDetachCellContentView", contentView, cellController, this.owner);
+      this.detachCellContentView(contentView, cellController);
+    },
+    attachCellContentView(cellContentView: HtmlView, cellController: CellController): void {
+      // hook
+    },
+    detachCellContentView(cellContentView: HtmlView, cellController: CellController): void {
+      // hook
+    },
+    controllerWillSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController): void {
+      this.owner.callObservers("controllerWillSetCellIcon", newCellIcon, oldCellIcon, cellController, this.owner);
+    },
+    controllerDidSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController): void {
+      this.owner.callObservers("controllerDidSetCellIcon", newCellIcon, oldCellIcon, cellController, this.owner);
+    },
+    createController(cellTrait: CellTrait): CellController | null {
+      return CellController.fromTrait(cellTrait);
+    },
+  })
+  readonly cells!: TraitViewControllerSet<this, CellTrait, CellView, CellController>;
+  static readonly cells: MemberFastenerClass<LeafController, "cells">;
 }

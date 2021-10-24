@@ -16,6 +16,7 @@ import {
   Mutable,
   Class,
   Arrays,
+  FromAny,
   AnyTiming,
   Timing,
   Creatable,
@@ -70,7 +71,7 @@ import {ThemeProvider} from "../theme/ThemeProvider";
 import {ModalService} from "../modal/ModalService";
 import {ModalProvider} from "../modal/ModalProvider";
 import {Gesture} from "../gesture/Gesture";
-import type {ViewContext} from "./ViewContext";
+import {ViewContext} from "./ViewContext";
 import type {
   ViewObserver,
   ViewWillResize,
@@ -85,7 +86,7 @@ import type {
   ViewDidLayout,
   ViewObserverCache,
 } from "./ViewObserver";
-import {ViewFastener} from "./"; // forward import
+import {ViewRelation} from "./"; // forward import
 
 export type ViewContextType<V extends View> =
   V extends {readonly contextType?: Class<infer T>} ? T : never;
@@ -105,21 +106,15 @@ export interface ViewInit {
   themeModifier?: MoodMatrix;
 }
 
-export interface AnyViewFactory<V extends View = View, U = never> {
-  create?(): V;
-
-  fromAny?(value: V | U): V;
-}
-
-export interface ViewFactory<V extends View = View> extends Creatable<V> {
+export interface ViewFactory<V extends View = View, U = AnyView<V>> extends Creatable<V>, FromAny<V, U> {
   fromInit(init: InitType<V>): V;
 }
 
-export interface ViewClass<V extends View = View> extends Function, ViewFactory<V> {
+export interface ViewClass<V extends View = View, U = AnyView<V>> extends Function, ViewFactory<V, U> {
   readonly prototype: V;
 }
 
-export interface ViewConstructor<V extends View = View> extends ViewClass<V> {
+export interface ViewConstructor<V extends View = View, U = AnyView<V>> extends ViewClass<V, U> {
   new(): V;
 }
 
@@ -148,47 +143,76 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   abstract override readonly parent: View | null;
 
   /** @internal */
-  override setParent(newParent: View | null, oldParent: View | null): void {
-    super.setParent(newParent, oldParent);
-  }
-
-  /** @internal */
-  protected override attachParent(parent: View): void {
-    super.attachParent(parent);
-    if (parent.mounted && parent.culled) {
-      this.cascadeCull();
+  override attachParent(parent: View): void {
+    // assert(this.parent === null);
+    this.willAttachParent(parent);
+    if (parent.mounted) {
+      if (parent.culled) {
+        this.cascadeCull();
+      }
+      this.cascadeMount();
     }
+    this.onAttachParent(parent);
+    this.didAttachParent(parent);
   }
 
-  /** @internal */
-  protected override detachParent(parent: View): void {
-    super.detachParent(parent);
-  }
-
-  protected override willSetParent(newParent: View | null, oldParent: View | null): void {
-    super.willSetParent(newParent, oldParent);
+  protected override willAttachParent(parent: View): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.viewWillSetParent !== void 0) {
-        observer.viewWillSetParent(newParent, oldParent, this);
+      if (observer.viewWillAttachParent !== void 0) {
+        observer.viewWillAttachParent(parent, this);
       }
     }
   }
 
-  protected override onSetParent(newParent: View | null, oldParent: View | null): void {
-    super.onSetParent(newParent, oldParent);
+  protected override onAttachParent(parent: View): void {
+    // hook
   }
 
-  protected override didSetParent(newParent: View | null, oldParent: View | null): void {
+  protected override didAttachParent(parent: View): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.viewDidSetParent !== void 0) {
-        observer.viewDidSetParent(newParent, oldParent, this);
+      if (observer.viewDidAttachParent !== void 0) {
+        observer.viewDidAttachParent(parent, this);
       }
     }
-    super.didSetParent(newParent, oldParent);
+  }
+
+  /** @internal */
+  override detachParent(parent: View): void {
+    // assert(this.parent === parent);
+    this.willDetachParent(parent);
+    if (this.mounted) {
+      this.cascadeUnmount();
+    }
+    this.onDetachParent(parent);
+    this.didDetachParent(parent);
+  }
+
+  protected override willDetachParent(parent: View): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillDetachParent !== void 0) {
+        observer.viewWillDetachParent(parent, this);
+      }
+    }
+  }
+
+  protected override onDetachParent(parent: View): void {
+    // hook
+  }
+
+  protected override didDetachParent(parent: View): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidDetachParent !== void 0) {
+        observer.viewDidDetachParent(parent, this);
+      }
+    }
   }
 
   abstract override readonly childCount: number;
@@ -209,17 +233,20 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   abstract override getChild<V extends View>(key: string, childBound: Class<V>): V | null;
   abstract override getChild(key: string, childBound?: Class<View>): View | null;
 
-  abstract override setChild<V extends View>(key: string, newChild: AnyView<V> | null): View | null;
+  abstract override setChild<V extends View>(key: string, newChild: V | null): View | null;
   abstract override setChild(key: string, newChild: AnyView | null): View | null;
 
-  abstract override appendChild<V extends View>(child: AnyView<V>, key?: string): V;
+  abstract override appendChild<V extends View>(child: V, key?: string): V;
   abstract override appendChild(child: AnyView, key?: string): View;
 
-  abstract override prependChild<V extends View>(child: AnyView<V>, key?: string): V;
+  abstract override prependChild<V extends View>(child: V, key?: string): V;
   abstract override prependChild(child: AnyView, key?: string): View;
 
-  abstract override insertChild<V extends View>(child: AnyView<V>, target: View | null, key?: string): V;
+  abstract override insertChild<V extends View>(child: V, target: View | null, key?: string): V;
   abstract override insertChild(child: AnyView, target: View | null, key?: string): View;
+
+  abstract override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  abstract override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
 
   override get insertChildFlags(): ViewFlags {
     return (this.constructor as typeof View).InsertChildFlags;
@@ -238,7 +265,7 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   protected override onInsertChild(child: View, target: View | null): void {
     super.onInsertChild(child, target);
-    this.attachChildFasteners(child, target);
+    this.bindChildFasteners(child, target);
   }
 
   protected override didInsertChild(child: View, target: View | null): void {
@@ -269,7 +296,7 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   }
 
   abstract override removeChild(key: string): View | null;
-  abstract override removeChild(child: View): void;
+  abstract override removeChild<V extends View>(child: V): V;
 
   override get removeChildFlags(): ViewFlags {
     return (this.constructor as typeof View).RemoveChildFlags;
@@ -288,7 +315,7 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   protected override onRemoveChild(child: View): void {
     super.onRemoveChild(child);
-    this.detachChildFasteners(child);
+    this.unbindChildFasteners(child);
   }
 
   protected override didRemoveChild(child: View): void {
@@ -300,38 +327,6 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
       }
     }
     super.didRemoveChild(child);
-  }
-
-  /** @internal */
-  protected attachChildFasteners(child: View, target: View | null): void {
-    const fastenerName = child.key;
-    if (fastenerName !== void 0) {
-      const viewFastener = this.getLazyFastener(fastenerName, ViewFastener);
-      if (viewFastener !== null && viewFastener.child === true) {
-        viewFastener.setOwnView(child, target);
-      }
-
-      const gesture = this.getLazyFastener(fastenerName, Gesture);
-      if (gesture !== null && gesture.child === true) {
-        gesture.setView(child, target);
-      }
-    }
-  }
-
-  /** @internal */
-  protected detachChildFasteners(child: View): void {
-    const fastenerName = child.key;
-    if (fastenerName !== void 0) {
-      const gesture = this.getFastener(fastenerName, Gesture);
-      if (gesture !== null && gesture.child === true && gesture.view === child) {
-        gesture.setView(null, null);
-      }
-
-      const viewFastener = this.getFastener(fastenerName, ViewFastener);
-      if (viewFastener !== null && viewFastener.child === true && viewFastener.view === child) {
-        viewFastener.setOwnView(null, null);
-      }
-    }
   }
 
   override get mountFlags(): ViewFlags {
@@ -1115,13 +1110,48 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     // hook
   }
 
-  protected override attachFastener(fastenerName: string, fastener: Fastener): void {
-    super.attachFastener(fastenerName, fastener);
-    if (fastener instanceof ViewFastener && fastener.child === true) {
-      const child = this.getChild(fastenerName);
-      if (child !== null) {
-        fastener.setOwnView(child, null);
-      }
+  protected override onAttachFastener(fastenerName: string, fastener: Fastener): void {
+    super.onAttachFastener(fastenerName, fastener);
+    this.bindFastener(fastener);
+  }
+
+  protected bindFastener(fastener: Fastener): void {
+    if ((fastener instanceof ViewRelation || fastener instanceof Gesture) && fastener.binds) {
+      this.forEachChild(function (child: View): void {
+        fastener.bindView(child, null);
+      }, this);
+    }
+  }
+
+  /** @internal */
+  protected bindChildFasteners(child: View, target: View | null): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.bindChildFastener(fastener, child, target);
+    }
+  }
+
+  /** @internal */
+  protected bindChildFastener(fastener: Fastener, child: View, target: View | null): void {
+    if (fastener instanceof ViewRelation || fastener instanceof Gesture) {
+      fastener.bindView(child, target);
+    }
+  }
+
+  /** @internal */
+  protected unbindChildFasteners(child: View): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.unbindChildFastener(fastener, child);
+    }
+  }
+
+  /** @internal */
+  protected unbindChildFastener(fastener: Fastener, child: View): void {
+    if (fastener instanceof ViewRelation || fastener instanceof Gesture) {
+      fastener.unbindView(child);
     }
   }
 
@@ -1250,7 +1280,11 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     } else {
       strength = ConstraintStrength.Strong;
     }
-    const property = ConstraintProperty.create(this, name) as ConstraintProperty<unknown, number>;
+    const property = ConstraintProperty.create(this) as ConstraintProperty<unknown, number>;
+    Object.defineProperty(property, "name", {
+      value: name,
+      configurable: true,
+    });
     if (value !== void 0) {
       property.setState(value);
     }
@@ -1386,7 +1420,11 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   }
 
   get viewContext(): ViewContextType<this> {
-    return this.extendViewContext(this.superViewContext);
+    if ((this.flags & View.ContextualFlag) !== 0) {
+      return ViewContext.current as ViewContextType<this>;
+    } else {
+      return this.extendViewContext(this.superViewContext);
+    }
   }
 
   get viewIdiom(): ViewIdiom {
@@ -1583,29 +1621,39 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   }
 
   /** @internal */
-  static override readonly MountedFlag: ViewFlags = Hierarchy.MountedFlag;
+  static override uid: () => number = (function () {
+    let nextId = 1;
+    return function uid(): number {
+      const id = ~~nextId;
+      nextId += 1;
+      return id;
+    }
+  })();
+
   /** @internal */
-  static override readonly TraversingFlag: ViewFlags = Hierarchy.TraversingFlag;
+  static override readonly MountedFlag: ViewFlags = Hierarchy.MountedFlag;
   /** @internal */
   static override readonly RemovingFlag: ViewFlags = Hierarchy.RemovingFlag;
   /** @internal */
-  static readonly CullFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 0);
+  static override readonly TraversingFlag: ViewFlags = Hierarchy.TraversingFlag;
   /** @internal */
-  static readonly CulledFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 1);
+  static readonly ProcessingFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 0);
   /** @internal */
-  static readonly HideFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 2);
+  static readonly DisplayingFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 1);
   /** @internal */
-  static readonly HiddenFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 3);
+  static readonly ContextualFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 2);
   /** @internal */
-  static readonly UnboundedFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 4);
+  static readonly CullFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 3);
   /** @internal */
-  static readonly IntangibleFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 5);
+  static readonly CulledFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 4);
   /** @internal */
-  static readonly ProcessingFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 6);
+  static readonly HideFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 5);
   /** @internal */
-  static readonly DisplayingFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 7);
+  static readonly HiddenFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 6);
   /** @internal */
-  static readonly ImmediateFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 8);
+  static readonly UnboundedFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 7);
+  /** @internal */
+  static readonly IntangibleFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 8);
   /** @internal */
   static readonly CulledMask: ViewFlags = View.CullFlag
                                         | View.CulledFlag;
@@ -1617,16 +1665,16 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
                                           | View.DisplayingFlag;
   /** @internal */
   static readonly StatusMask: ViewFlags = View.MountedFlag
-                                        | View.TraversingFlag
                                         | View.RemovingFlag
+                                        | View.TraversingFlag
+                                        | View.ProcessingFlag
+                                        | View.DisplayingFlag
+                                        | View.ContextualFlag
                                         | View.CullFlag
                                         | View.CulledFlag
                                         | View.HiddenFlag
                                         | View.UnboundedFlag
-                                        | View.IntangibleFlag
-                                        | View.ProcessingFlag
-                                        | View.DisplayingFlag
-                                        | View.ImmediateFlag;
+                                        | View.IntangibleFlag;
 
   static readonly NeedsProcess: ViewFlags = 1 << (Hierarchy.FlagShift + 9);
   static readonly NeedsResize: ViewFlags = 1 << (Hierarchy.FlagShift + 10);

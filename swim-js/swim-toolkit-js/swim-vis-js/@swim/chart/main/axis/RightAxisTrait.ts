@@ -16,6 +16,6 @@ import type {Class} from "@swim/util";
 import {AxisTrait} from "./AxisTrait";
 import type {AxisTraitObserver} from "./AxisTraitObserver";
 
-export abstract class RightAxisTrait<Y> extends AxisTrait<Y> {
+export abstract class RightAxisTrait<Y = unknown> extends AxisTrait<Y> {
   override readonly observerType?: Class<AxisTraitObserver<Y, RightAxisTrait<Y>>>;
 }

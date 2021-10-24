@@ -16,8 +16,8 @@ import type {Trait, TraitObserver} from "@swim/model";
 import type {ColTrait} from "../col/ColTrait";
 import type {HeaderTrait} from "./HeaderTrait";
 
-export interface HeaderTraitObserver<R extends HeaderTrait = HeaderTrait> extends TraitObserver<R> {
-  traitWillSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
+export interface HeaderTraitObserver<T extends HeaderTrait = HeaderTrait> extends TraitObserver<T> {
+  traitWillAttachCol?(colTrait: ColTrait, targetTrait: Trait | null, trait: T): void;
 
-  traitDidSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachCol?(colTrait: ColTrait, trait: T): void;
 }

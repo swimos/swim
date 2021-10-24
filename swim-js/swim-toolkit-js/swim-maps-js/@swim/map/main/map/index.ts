@@ -18,5 +18,8 @@ export {MapViewObserver} from "./MapViewObserver";
 export {MapTrait} from "./MapTrait";
 export {MapTraitObserver} from "./MapTraitObserver";
 
-export {MapController} from "./MapController";
+export {
+  MapControllerLayerExt,
+  MapController,
+} from "./MapController";
 export {MapControllerObserver} from "./MapControllerObserver";

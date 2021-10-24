@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
@@ -36,11 +36,11 @@ export class SvgIconView extends SvgView implements IconView {
     super(node);
   }
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly xAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly xAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly yAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly yAlign!: Animator<this, number>;
 
   @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
   readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;

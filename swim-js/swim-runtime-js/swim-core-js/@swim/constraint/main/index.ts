@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {ConstraintKey} from "./ConstraintKey";
+export {ConstraintId} from "./ConstraintId";
 
 export {ConstraintMap} from "./ConstraintMap";
 
@@ -40,6 +40,7 @@ export {
   ConstraintPropertyInit,
   ConstraintPropertyDescriptor,
   ConstraintPropertyClass,
+  ConstraintPropertyFactory,
   ConstraintProperty,
 } from "./ConstraintProperty";
 
@@ -47,6 +48,7 @@ export {
   ConstraintAnimatorInit,
   ConstraintAnimatorDescriptor,
   ConstraintAnimatorClass,
+  ConstraintAnimatorFactory,
   ConstraintAnimator,
 } from "./ConstraintAnimator";
 

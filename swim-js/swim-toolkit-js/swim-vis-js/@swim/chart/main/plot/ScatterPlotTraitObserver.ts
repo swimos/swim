@@ -15,5 +15,5 @@
 import type {PlotTraitObserver} from "./PlotTraitObserver";
 import type {ScatterPlotTrait} from "./ScatterPlotTrait";
 
-export interface ScatterPlotTraitObserver<X, Y, R extends ScatterPlotTrait<X, Y> = ScatterPlotTrait<X, Y>> extends PlotTraitObserver<X, Y, R> {
+export interface ScatterPlotTraitObserver<X = unknown, Y = unknown, R extends ScatterPlotTrait<X, Y> = ScatterPlotTrait<X, Y>> extends PlotTraitObserver<X, Y, R> {
 }

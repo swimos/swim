@@ -39,6 +39,7 @@ export const R2BoxInterpolator = (function (_super: typeof Interpolator) {
   };
 
   R2BoxInterpolator.prototype = Object.create(_super.prototype);
+  R2BoxInterpolator.prototype.constructor = R2BoxInterpolator;
 
   return R2BoxInterpolator;
 })(Interpolator);

@@ -80,6 +80,7 @@ export const Timing = (function (_super: typeof Domain) {
   };
 
   Timing.prototype = Object.create(_super.prototype);
+  Timing.prototype.constructor = Timing;
 
   Object.defineProperty(Timing.prototype, "duration", {
     get(this: Timing): number {

@@ -16,6 +16,7 @@ export {Identity} from "./Identity";
 export {Booleans} from "./Booleans";
 export {Numbers} from "./Numbers";
 export {Strings} from "./Strings";
+export {Identifiers} from "./Identifiers";
 export {Functions} from "./Functions";
 export {Constructors} from "./Constructors";
 export {Arrays} from "./Arrays";

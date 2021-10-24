@@ -17,7 +17,7 @@ import type {Affinity} from "@swim/fastener";
 import {AnyPresence, Presence} from "@swim/style";
 import {Look} from "../look/Look";
 import {ThemeContext} from "../theme/ThemeContext";
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 export interface PresenceThemeAnimatorInit {
   willPresent?(): void;
@@ -83,7 +83,7 @@ export interface PresenceThemeAnimator<O, T extends Presence | null | undefined 
 }
 
 export const PresenceThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const PresenceThemeAnimator = _super.extend() as ThemeAnimatorClass<PresenceThemeAnimator<any, Presence | null | undefined, AnyPresence | null | undefined>>;
+  const PresenceThemeAnimator = _super.extend("PresenceThemeAnimator") as ThemeAnimatorFactory<PresenceThemeAnimator<any, Presence | null | undefined, AnyPresence | null | undefined>>;
 
   Object.defineProperty(PresenceThemeAnimator.prototype, "phase", {
     get(this: PresenceThemeAnimator<unknown>): number | undefined {

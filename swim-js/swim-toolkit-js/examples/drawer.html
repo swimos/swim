@@ -79,7 +79,7 @@ const listView = drawerView.appendChild(swim.TableView)
 listView.modifyTheme(swim.Feel.default, [[swim.Feel.unselected, 1]]);
 
 const item1 = listView.appendChild(swim.RowView, "agents");
-const leaf1 = item1.leaf.injectView();
+const leaf1 = item1.leaf.insertView();
 leaf1.appendChild(swim.IconCellView, "icon")
   .iconWidth(24)
   .iconHeight(24)
@@ -87,7 +87,7 @@ leaf1.appendChild(swim.IconCellView, "icon")
 leaf1.appendChild(swim.TextCellView, "name").content("Agents");
 
 const item2 = listView.appendChild(swim.RowView, "fabric");
-const leaf2 = item2.leaf.injectView();
+const leaf2 = item2.leaf.insertView();
 leaf2.appendChild(swim.IconCellView, "icon")
   .iconWidth(24)
   .iconHeight(24)
@@ -96,7 +96,7 @@ leaf2.appendChild(swim.TextCellView, "name").content("Fabric");
 
 const settingsItem = drawerView.appendChild(swim.RowView).hovers(true).layout(listLayout).rowHeight(44);
 settingsItem.modifyTheme(swim.Feel.default, [[swim.Feel.unselected, 1]]);
-const settingsLeaf = settingsItem.leaf.injectView();
+const settingsLeaf = settingsItem.leaf.insertView();
 settingsLeaf.appendChild(swim.IconCellView, "icon")
   .iconWidth(20)
   .iconHeight(20)

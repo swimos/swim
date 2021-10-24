@@ -19,7 +19,7 @@ import type {ScaledYView} from "./ScaledYView";
 import type {ScaledXYViewObserver} from "./ScaledXYViewObserver";
 import {ScaledView} from "../"; // forward import
 
-export interface ScaledXYView<X, Y> extends GraphicsView, ScaledXView<X>, ScaledYView<Y> {
+export interface ScaledXYView<X = unknown, Y = unknown> extends GraphicsView, ScaledXView<X>, ScaledYView<Y> {
   /** @override */
   readonly observerType?: Class<ScaledXYViewObserver<X, Y>>;
 }

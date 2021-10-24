@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyColor, Color} from "@swim/style";
-import {AttributeAnimatorClass, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorFactory, AttributeAnimator} from "./AttributeAnimator";
 
 /** @internal */
 export const ColorAttributeAnimator = (function (_super: typeof AttributeAnimator) {
-  const ColorAttributeAnimator = _super.extend() as AttributeAnimatorClass<AttributeAnimator<any, Color | null, AnyColor | null>>;
+  const ColorAttributeAnimator = _super.extend("ColorAttributeAnimator") as AttributeAnimatorFactory<AttributeAnimator<any, Color | null, AnyColor | null>>;
 
   ColorAttributeAnimator.prototype.parse = function (value: string): Color | null {
     return Color.parse(value);

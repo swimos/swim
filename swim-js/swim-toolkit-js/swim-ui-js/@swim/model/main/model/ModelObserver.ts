@@ -16,9 +16,13 @@ import type {ModelContextType, Model} from "./Model";
 import type {Trait} from "../trait/Trait";
 
 export interface ModelObserver<M extends Model = Model> {
-  modelWillSetParent?(newParent: Model | null, oldParent: Model | null, model: M): void;
+  modelWillAttachParent?(parent: Model, model: M): void;
 
-  modelDidSetParent?(newParent: Model | null, oldParent: Model | null, model: M): void;
+  modelDidAttachParent?(parent: Model, model: M): void;
+
+  modelWillDetachParent?(parent: Model, model: M): void;
+
+  modelDidDetachParent?(parent: Model, model: M): void;
 
   modelWillInsertChild?(child: Model, target: Model | null, model: M): void;
 

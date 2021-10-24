@@ -12,20 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import type {Class, Initable} from "@swim/util";
+import {Affinity, MemberFastenerClass, Animator} from "@swim/fastener";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View, ViewFastener} from "@swim/view";
-import {
-  GraphicsViewInit,
-  GraphicsView,
-  LayerView,
-  TypesetView,
-  AnyTextRunView,
-  TextRunView,
-} from "@swim/graphics";
+import {ViewContextType, AnyView, View, ViewRef, ViewSet} from "@swim/view";
+import {GraphicsViewInit, GraphicsView, LayerView, TypesetView, TextRunView} from "@swim/graphics";
 import {AnySliceView, SliceView} from "../slice/SliceView";
 import type {PieViewObserver} from "./PieViewObserver";
 
@@ -54,19 +47,22 @@ export interface PieViewInit extends GraphicsViewInit {
   slices?: AnySliceView[];
 }
 
-export class PieView extends LayerView {
-  constructor() {
-    super();
-    this.sliceFasteners = [];
-  }
+/** @internal */
+export interface PieViewSliceExt {
+  attachLabelView(labelView: GraphicsView): void;
+  detachLabelView(labelView: GraphicsView): void;
+  attachLegendView(legendView: GraphicsView): void;
+  detachLegendView(legendView: GraphicsView): void;
+}
 
+export class PieView extends LayerView {
   override readonly observerType?: Class<PieViewObserver>;
 
-  @ThemeAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
-  readonly limit!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0, updateFlags: View.NeedsLayout})
+  readonly limit!: Animator<this, number>;
 
-  @ThemeAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsLayout})
-  readonly center!: ThemeAnimator<this, R2Point, AnyR2Point>;
+  @Animator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsLayout})
+  readonly center!: Animator<this, R2Point, AnyR2Point>;
 
   @ThemeAnimator({type: Angle, state: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
   readonly baseAngle!: ThemeAnimator<this, Angle, AnyAngle>;
@@ -116,261 +112,99 @@ export class PieView extends LayerView {
   @ThemeAnimator({type: Color, state: null, look: Look.mutedColor})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected initTitle(titleView: GraphicsView): void {
-    if (TypesetView.is(titleView)) {
-      titleView.textAlign.setState("center", Affinity.Intrinsic);
-      titleView.textBaseline.setState("middle", Affinity.Intrinsic);
-      titleView.textOrigin.setState(this.center.state, Affinity.Intrinsic);
-    }
-  }
-
-  protected attachTitle(titleView: GraphicsView): void {
-    // hook
-  }
-
-  protected detachTitle(titleView: GraphicsView): void {
-    // hook
-  }
-
-  protected willSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetPieTitle !== void 0) {
-        observer.viewWillSetPieTitle(newTitleView, oldTitleView, this);
-      }
-    }
-  }
-
-  protected onSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    if (oldTitleView !== null) {
-      this.detachTitle(oldTitleView);
-    }
-    if (newTitleView !== null) {
-      this.attachTitle(newTitleView);
-      this.initTitle(newTitleView);
-    }
-  }
-
-  protected didSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetPieTitle !== void 0) {
-        observer.viewDidSetPieTitle(newTitleView, oldTitleView, this);
-      }
-    }
-  }
-
-  @ViewFastener<PieView, GraphicsView, AnyTextRunView>({
+  @ViewRef<PieView, GraphicsView & Initable<GraphicsViewInit | string>>({
     key: true,
     type: TextRunView,
-    child: true,
-    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
-      if (value instanceof GraphicsView) {
-        return value;
-      } else if (typeof value === "string" && this.view instanceof TextRunView) {
-        this.view.text(value);
-        return this.view;
-      } else {
-        return TextRunView.fromAny(value);
+    binds: true,
+    initView(titleView: GraphicsView): void {
+      if (TypesetView.is(titleView)) {
+        titleView.textAlign.setState("center", Affinity.Intrinsic);
+        titleView.textBaseline.setState("middle", Affinity.Intrinsic);
+        titleView.textOrigin.setState(this.owner.center.state, Affinity.Intrinsic);
       }
     },
-    willSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.willSetTitle(newTitleView, oldTitleView);
+    willAttachView(titleView: GraphicsView): void {
+      this.owner.callObservers("viewWillAttachPieTitle", titleView, this.owner);
     },
-    onSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.onSetTitle(newTitleView, oldTitleView);
+    didDetachView(titleView: GraphicsView): void {
+      this.owner.callObservers("viewDidDetachPieTitle", titleView, this.owner);
     },
-    didSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.didSetTitle(newTitleView, oldTitleView);
+    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
+      if (typeof value === "string") {
+        if (this.view instanceof TextRunView) {
+          this.view.text(value);
+          return this.view;
+        } else {
+          return TextRunView.fromAny(value);
+        }
+      } else {
+        return GraphicsView.fromAny(value);
+      }
     },
   })
-  readonly title!: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly title!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
+  static readonly title: MemberFastenerClass<PieView, "title">;
 
-  insertSlice(sliceView: AnySliceView, targetView: View | null = null): void {
-    sliceView = SliceView.fromAny(sliceView);
-    const sliceFasteners = this.sliceFasteners as ViewFastener<this, SliceView>[];
-    let targetIndex = sliceFasteners.length;
-    for (let i = 0, n = sliceFasteners.length; i < n; i += 1) {
-      const sliceFastener = sliceFasteners[i]!;
-      if (sliceFastener.view === sliceView) {
-        return;
-      } else if (sliceFastener.view === targetView) {
-        targetIndex = i;
-      }
-    }
-    const sliceFastener = this.createSliceFastener(sliceView);
-    sliceFasteners.splice(targetIndex, 0, sliceFastener);
-    sliceFastener.setView(sliceView, targetView);
-    if (this.mounted) {
-      sliceFastener.mount();
-    }
-  }
-
-  removeSlice(sliceView: SliceView): void {
-    const sliceFasteners = this.sliceFasteners as ViewFastener<this, SliceView>[];
-    for (let i = 0, n = sliceFasteners.length; i < n; i += 1) {
-      const sliceFastener = sliceFasteners[i]!;
-      if (sliceFastener.view === sliceView) {
-        sliceFastener.setView(null);
-        if (this.mounted) {
-          sliceFastener.unmount();
-        }
-        sliceFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected initSlice(sliceView: SliceView, sliceFastener: ViewFastener<this, SliceView>): void {
-    const labelView = sliceView.label.view;
-    if (labelView !== null) {
-      this.initSliceLabel(labelView, sliceFastener);
-    }
-    const legendView = sliceView.legend.view;
-    if (legendView !== null) {
-      this.initSliceLegend(legendView, sliceFastener);
-    }
-  }
-
-  protected attachSlice(sliceView: SliceView, sliceFastener: ViewFastener<this, SliceView>): void {
-    // hook
-  }
-
-  protected detachSlice(sliceView: SliceView, sliceFastener: ViewFastener<this, SliceView>): void {
-    // hook
-  }
-
-  protected willSetSlice(newSliceView: SliceView | null, oldSliceView: SliceView | null,
-                         targetView: View | null, sliceFastener: ViewFastener<this, SliceView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetSlice !== void 0) {
-        observer.viewWillSetSlice(newSliceView, oldSliceView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetSlice(newSliceView: SliceView | null, oldSliceView: SliceView | null,
-                       targetView: View | null, sliceFastener: ViewFastener<this, SliceView>): void {
-    if (oldSliceView !== null) {
-      this.detachSlice(oldSliceView, sliceFastener);
-    }
-    if (newSliceView !== null) {
-      this.attachSlice(newSliceView, sliceFastener);
-      this.initSlice(newSliceView, sliceFastener);
-    }
-  }
-
-  protected didSetSlice(newSliceView: SliceView | null, oldSliceView: SliceView | null,
-                        targetView: View | null, sliceFastener: ViewFastener<this, SliceView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetSlice !== void 0) {
-        observer.viewDidSetSlice(newSliceView, oldSliceView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetSliceValue(newValue: number, oldValue: number,
-                            sliceFastener: ViewFastener<this, SliceView>): void {
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected initSliceLabel(labelView: GraphicsView, sliceFastener: ViewFastener<this, SliceView>): void {
-    // hook
-  }
-
-  protected onSetSliceLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
-                            sliceFastener: ViewFastener<this, SliceView>): void {
-    if (newLabelView !== null) {
-      this.initSliceLabel(newLabelView, sliceFastener);
-    }
-  }
-
-  protected initSliceLegend(legendView: GraphicsView, sliceFastener: ViewFastener<this, SliceView>): void {
-    // hook
-  }
-
-  protected onSetSliceLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null,
-                             sliceFastener: ViewFastener<this, SliceView>): void {
-    if (newLegendView !== null) {
-      this.initSliceLegend(newLegendView, sliceFastener);
-    }
-  }
-
-  /** @internal */
-  static SliceFastener = ViewFastener.define<PieView, SliceView>({
+  @ViewSet<PieView, SliceView, PieViewSliceExt>({
     type: SliceView,
-    child: false,
+    binds: true,
     observes: true,
-    willSetView(newSliceView: SliceView | null, oldSliceView: SliceView | null, targetView: View | null): void {
-      this.owner.willSetSlice(newSliceView, oldSliceView, targetView, this);
+    willAttachView(sliceView: SliceView, targetView: View | null): void {
+      this.owner.callObservers("viewWillAttachSlice", sliceView, targetView, this.owner);
     },
-    onSetView(newSliceView: SliceView | null, oldSliceView: SliceView | null, targetView: View | null): void {
-      this.owner.onSetSlice(newSliceView, oldSliceView, targetView, this);
+    didAttachView(sliceView: SliceView): void {
+      const labelView = sliceView.label.view;
+      if (labelView !== null) {
+        this.attachLabelView(labelView);
+      }
+      const legendView = sliceView.legend.view;
+      if (legendView !== null) {
+        this.attachLegendView(legendView);
+      }
     },
-    didSetView(newSliceView: SliceView | null, oldSliceView: SliceView | null, targetView: View | null): void {
-      this.owner.didSetSlice(newSliceView, oldSliceView, targetView, this);
+    willDetachView(sliceView: SliceView): void {
+      const legendView = sliceView.legend.view;
+      if (legendView !== null) {
+        this.detachLegendView(legendView);
+      }
+      const labelView = sliceView.label.view;
+      if (labelView !== null) {
+        this.detachLabelView(labelView);
+      }
+    },
+    didDetachView(sliceView: SliceView): void {
+      this.owner.callObservers("viewDidDetachSlice", sliceView, this.owner);
     },
     viewDidSetSliceValue(newValue: number, oldValue: number): void {
-      this.owner.onSetSliceValue(newValue, oldValue, this);
+      this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetSliceLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetSliceLabel(newLabelView, oldLabelView, this);
+    viewWillAttachSliceLabel(labelView: GraphicsView): void {
+      this.attachLabelView(labelView);
     },
-    viewDidSetSliceLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.onSetSliceLegend(newLegendView, oldLegendView, this);
+    viewDidDetachSliceLabel(labelView: GraphicsView): void {
+      this.detachLabelView(labelView);
     },
-  });
-
-  protected createSliceFastener(sliceView: SliceView): ViewFastener<this, SliceView> {
-    return PieView.SliceFastener.create(this, sliceView.key ?? "slice");
-  }
-
-  /** @internal */
-  readonly sliceFasteners: ReadonlyArray<ViewFastener<this, SliceView>>;
-
-  /** @internal */
-  protected mountSliceFasteners(): void {
-    const sliceFasteners = this.sliceFasteners;
-    for (let i = 0, n = sliceFasteners.length; i < n; i += 1) {
-      const sliceFastener = sliceFasteners[i]!;
-      sliceFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountSliceFasteners(): void {
-    const sliceFasteners = this.sliceFasteners;
-    for (let i = 0, n = sliceFasteners.length; i < n; i += 1) {
-      const sliceFastener = sliceFasteners[i]!;
-      sliceFastener.unmount();
-    }
-  }
-
-  protected detectSlice(view: View): SliceView | null {
-    return view instanceof SliceView ? view : null;
-  }
-
-  protected override onInsertChild(childView: View, targetView: View | null): void {
-    super.onInsertChild(childView, targetView);
-    const sliceView = this.detectSlice(childView);
-    if (sliceView !== null) {
-      this.insertSlice(sliceView, targetView);
-    }
-  }
-
-  protected override onRemoveChild(childView: View): void {
-    super.onRemoveChild(childView);
-    const sliceView = this.detectSlice(childView);
-    if (sliceView !== null) {
-      this.removeSlice(sliceView);
-    }
-  }
+    attachLabelView(labelView: GraphicsView): void {
+      // hook
+    },
+    detachLabelView(labelView: GraphicsView): void {
+      // hook
+    },
+    viewWillAttachSliceLegend(legendView: GraphicsView): void {
+      this.attachLegendView(legendView);
+    },
+    viewDidDetachSliceLegend(legendView: GraphicsView): void {
+      this.detachLegendView(legendView);
+    },
+    attachLegendView(legendView: GraphicsView): void {
+      // hook
+    },
+    detachLegendView(legendView: GraphicsView): void {
+      // hook
+    },
+  })
+  readonly slices!: ViewSet<this, SliceView>;
+  static readonly slices: MemberFastenerClass<PieView, "slices">;
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
@@ -384,32 +218,27 @@ export class PieView extends LayerView {
       this.center.setState(new R2Point(cx, cy), Affinity.Intrinsic);
     }
 
-    const sliceFasteners = this.sliceFasteners;
-    const sliceCount = sliceFasteners.length;
+    const sliceViews = this.slices.views;
 
     let total = 0;
-    for (let i = 0; i < sliceCount; i += 1) {
-      const sliceView = sliceFasteners[i]!.view;
-      if (sliceView !== null) {
-        const value = sliceView.value.getValue();
-        if (isFinite(value)) {
-          total += value;
-        }
+    for (const viewId in sliceViews) {
+      const sliceView = sliceViews[viewId]!;
+      const value = sliceView.value.getValue();
+      if (isFinite(value)) {
+        total += value;
       }
     }
     total = Math.max(total, this.limit.getValue());
 
     let baseAngle = this.baseAngle.getValue().rad();
-    for (let i = 0; i < sliceCount; i += 1) {
-      const sliceView = sliceFasteners[i]!.view;
-      if (sliceView !== null) {
-        sliceView.total.setState(total, Affinity.Intrinsic);
-        sliceView.phaseAngle.setState(baseAngle, Affinity.Intrinsic);
-        const value = sliceView.value.getValue();
-        if (isFinite(value)) {
-          const delta = total !== 0 ? value / total : 0;
-          baseAngle = Angle.rad(baseAngle.value + 2 * Math.PI * delta);
-        }
+    for (const viewId in sliceViews) {
+      const sliceView = sliceViews[viewId]!;
+      sliceView.total.setState(total, Affinity.Intrinsic);
+      sliceView.phaseAngle.setState(baseAngle, Affinity.Intrinsic);
+      const value = sliceView.value.getValue();
+      if (isFinite(value)) {
+        const delta = total !== 0 ? value / total : 0;
+        baseAngle = Angle.rad(baseAngle.value + 2 * Math.PI * delta);
       }
     }
 
@@ -417,18 +246,6 @@ export class PieView extends LayerView {
     if (TypesetView.is(titleView)) {
       titleView.textOrigin.setState(this.center.value, Affinity.Intrinsic);
     }
-  }
-
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountSliceFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountSliceFasteners();
-    super.unmountFasteners();
   }
 
   override init(init: PieViewInit): void {

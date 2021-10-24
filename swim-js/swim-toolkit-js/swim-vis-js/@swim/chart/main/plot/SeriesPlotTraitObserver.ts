@@ -15,5 +15,5 @@
 import type {PlotTraitObserver} from "./PlotTraitObserver";
 import type {SeriesPlotTrait} from "./SeriesPlotTrait";
 
-export interface SeriesPlotTraitObserver<X, Y, R extends SeriesPlotTrait<X, Y> = SeriesPlotTrait<X, Y>> extends PlotTraitObserver<X, Y, R> {
+export interface SeriesPlotTraitObserver<X = unknown, Y = unknown, R extends SeriesPlotTrait<X, Y> = SeriesPlotTrait<X, Y>> extends PlotTraitObserver<X, Y, R> {
 }

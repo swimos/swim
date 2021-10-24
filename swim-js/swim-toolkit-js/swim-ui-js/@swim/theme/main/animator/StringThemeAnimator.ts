@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 /** @internal */
 export const StringThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const StringThemeAnimator = _super.extend() as ThemeAnimatorClass<ThemeAnimator<any, string | null | undefined, string | null | undefined>>;
+  const StringThemeAnimator = _super.extend("StringThemeAnimator") as ThemeAnimatorFactory<ThemeAnimator<any, string | null | undefined, string | null | undefined>>;
 
   StringThemeAnimator.prototype.fromAny = function (value: string | null | undefined): string | null | undefined {
     return value;

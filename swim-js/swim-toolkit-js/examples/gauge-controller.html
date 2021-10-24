@@ -26,30 +26,39 @@ const canvasView = containerView.appendChild(swim.CanvasView)
     .touchAction("manipulation");
 
 class ExampleGaugeController extends swim.GaugeController {
-  initGaugeView(gaugeView) {
-    super.initGaugeView(gaugeView);
+  createDialFastener(dialController) {
+    return ExampleGaugeController.DialFastener.create(this);
+  }
+}
+swim.TraitViewRef({
+  extends: true,
+  initView(gaugeView) {
+    swim.GaugeController.gauge.prototype.initView.call(this, gaugeView);
     gaugeView.innerRadius(swim.Length.pct(25))
              .startAngle(swim.Angle.rad(3 * Math.PI / 4))
              .sweepAngle(swim.Angle.rad(3 * Math.PI / 2))
              .cornerRadius(0)
              .tickAlign(1)
              .font("14px sans-serif");
-  }
-  initDialView(dialView) {
-    super.initDialView(dialView);
+  },
+})(ExampleGaugeController.prototype, "gauge");
+swim.TraitViewControllerSet({
+  extends: true,
+  attachDialView(dialView, dialController) {
+    swim.GaugeController.dials.prototype.attachDialView.call(this, dialView, dialController);
     dialView.on("pointerenter", function (event) {
-              dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
-            })
-            .on("pointerleave", function (event) {
-              dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
-            });
-  }
-  onSetDialValue(newValue, oldValue, dialFastener) {
-    super.onSetDialValue(newValue, oldValue, dialFastener);
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+    });
+    dialView.on("pointerleave", function (event) {
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+    });
+  },
+  controllerWillSetDialValue(newValue, oldValue, dialController, gaugeController) {
+    swim.GaugeController.dials.prototype.controllerWillSetDialValue.call(this, newValue, oldValue, dialController, gaugeController);
     const label = Math.round(100 * newValue).toString();
-    dialFastener.controller.dial.trait.label.setState(label);
-  }
-}
+    dialController.dial.trait.label.setState(label);
+  },
+})(ExampleGaugeController.prototype, "dials");
 
 const dial1Model = new swim.GenericModel();
 const dial1Trait = new swim.DialTrait()
@@ -79,7 +88,7 @@ gaugeModel.appendChild(dial3Model, "dial3");
 
 const gaugeController = new ExampleGaugeController();
 gaugeController.mount();
-gaugeController.gauge.injectView(canvasView);
+gaugeController.gauge.insertView(canvasView);
 gaugeController.gauge.setTrait(gaugeTrait);
 
 setInterval(function () {

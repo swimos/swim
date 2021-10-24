@@ -15,7 +15,7 @@
 import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {GeoBox} from "@swim/geo";
-import {ViewContextType, ViewFlags, AnyView, View} from "@swim/view";
+import {ViewContextType, ViewFlags, AnyView, ViewFactory, View} from "@swim/view";
 import {GraphicsView} from "@swim/graphics";
 import {GeoView} from "../geo/GeoView";
 
@@ -119,6 +119,19 @@ export class GeoLayerView extends GeoView {
     }
   }
 
+  /** @internal */
+  protected replaceChildMap(newChild: View, oldChild: View): void {
+    const key = oldChild.key;
+    if (key !== void 0) {
+      let childMap = this.childMap as MutableDictionary<View>;
+      if (childMap === null) {
+        childMap = {};
+        (this as Mutable<this>).childMap = childMap;
+      }
+      childMap[key] = newChild;
+    }
+  }
+
   override getChild<V extends View>(key: string, childBound: Class<V>): V | null;
   override getChild(key: string, childBound?: Class<View>): View | null;
   override getChild(key: string, childBound?: Class<View>): View | null {
@@ -132,56 +145,71 @@ export class GeoLayerView extends GeoView {
     return null;
   }
 
-  override setChild<V extends View>(key: string, newChild: AnyView<V> | null): View | null;
+  override setChild<V extends View>(key: string, newChild: V | ViewFactory<V> | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null {
     if (newChild !== null) {
       newChild = View.fromAny(newChild);
     }
-
-    let target: View | null = null;
-    const children = this.children as View[];
-    if (newChild !== null) {
-      if (newChild.parent === this) {
-        target = children[children.indexOf(newChild) + 1] || null;
-      }
-      newChild.remove();
-    }
-
-    let index = -1;
     const oldChild = this.getChild(key);
-    if (oldChild !== null) {
+    const children = this.children as View[];
+    let index = -1;
+    let target: View | null = null;
+
+    if (oldChild !== null && newChild !== null && oldChild !== newChild) { // replace
+      newChild.remove();
       index = children.indexOf(oldChild);
       // assert(index >= 0);
-      target = children[index + 1] || null;
+      target = index + 1 < children.length ? children[index + 1]! : null;
+      newChild.setKey(oldChild.key);
       this.willRemoveChild(oldChild);
-      oldChild.setParent(null, this);
-      this.removeChildMap(oldChild);
-      children.splice(index, 1);
-      this.onRemoveChild(oldChild);
-      this.didRemoveChild(oldChild);
-      oldChild.setKey(void 0);
-    }
-
-    if (newChild !== null) {
-      newChild.setKey(key);
       this.willInsertChild(newChild, target);
-      if (index >= 0) {
-        children.splice(index, 0, newChild);
-      } else {
-        children.push(newChild);
-      }
-      this.insertChildMap(newChild);
-      newChild.setParent(this, null);
+      oldChild.detachParent(this);
+      children[index] = newChild;
+      this.replaceChildMap(newChild, oldChild);
+      newChild.attachParent(this);
+      this.onRemoveChild(oldChild);
       this.onInsertChild(newChild, target);
+      this.didRemoveChild(oldChild);
       this.didInsertChild(newChild, target);
+      oldChild.setKey(void 0);
       newChild.cascadeInsert();
+    } else if (newChild !== oldChild || newChild !== null && newChild.key !== key) {
+      if (oldChild !== null) { // remove
+        this.willRemoveChild(oldChild);
+        oldChild.detachParent(this);
+        this.removeChildMap(oldChild);
+        index = children.indexOf(oldChild);
+        // assert(index >= 0);
+        children.splice(index, 1);
+        this.onRemoveChild(oldChild);
+        this.didRemoveChild(oldChild);
+        oldChild.setKey(void 0);
+        if (index < children.length) {
+          target = children[index]!;
+        }
+      }
+      if (newChild !== null) { // insert
+        newChild.remove();
+        newChild.setKey(key);
+        this.willInsertChild(newChild, target);
+        if (index >= 0) {
+          children.splice(index, 0, newChild);
+        } else {
+          children.push(newChild);
+        }
+        this.insertChildMap(newChild);
+        newChild.attachParent(this);
+        this.onInsertChild(newChild, target);
+        this.didInsertChild(newChild, target);
+        newChild.cascadeInsert();
+      }
     }
 
     return oldChild;
   }
 
-  override appendChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override appendChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override appendChild(child: AnyView, key?: string): View;
   override appendChild(child: AnyView, key?: string): View {
     child = View.fromAny(child);
@@ -195,7 +223,7 @@ export class GeoLayerView extends GeoView {
     this.willInsertChild(child, null);
     (this.children as View[]).push(child);
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, null);
     this.didInsertChild(child, null);
     child.cascadeInsert();
@@ -203,7 +231,7 @@ export class GeoLayerView extends GeoView {
     return child;
   }
 
-  override prependChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override prependChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override prependChild(child: AnyView, key?: string): View;
   override prependChild(child: AnyView, key?: string): View {
     child = View.fromAny(child);
@@ -219,7 +247,7 @@ export class GeoLayerView extends GeoView {
     this.willInsertChild(child, target);
     children.unshift(child);
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
@@ -227,7 +255,7 @@ export class GeoLayerView extends GeoView {
     return child;
   }
 
-  override insertChild<V extends View>(child: AnyView<V>, target: View | null, key?: string): V;
+  override insertChild<V extends View>(child: V | ViewFactory<V>, target: View | null, key?: string): V;
   override insertChild(child: AnyView, target: View | null, key?: string): View;
   override insertChild(child: AnyView, target: View | null, key?: string): View {
     if (target !== null && target.parent !== this) {
@@ -251,12 +279,44 @@ export class GeoLayerView extends GeoView {
       children.push(child);
     }
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
 
     return child;
+  }
+
+  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
+  override replaceChild(newChild: AnyView, oldChild: View): View {
+    const children = this.children as View[];
+    if (oldChild.parent !== this) {
+      throw new TypeError("" + oldChild);
+    }
+
+    newChild = View.fromAny(newChild);
+    if (newChild !== oldChild) {
+      newChild.remove();
+      const index = children.indexOf(oldChild);
+      // assert(index >= 0);
+      const target = index + 1 < children.length ? children[index + 1]! : null;
+      newChild.setKey(oldChild.key);
+      this.willRemoveChild(oldChild);
+      this.willInsertChild(newChild, target);
+      oldChild.detachParent(this);
+      children[index] = newChild;
+      this.replaceChildMap(newChild, oldChild);
+      newChild.attachParent(this);
+      this.onRemoveChild(oldChild);
+      this.onInsertChild(newChild, target);
+      this.didRemoveChild(oldChild);
+      this.didInsertChild(newChild, target);
+      oldChild.setKey(void 0);
+      newChild.cascadeInsert();
+    }
+
+    return oldChild;
   }
 
   protected override didInsertChild(child: View, target: View | null): void {
@@ -267,8 +327,8 @@ export class GeoLayerView extends GeoView {
   }
 
   override removeChild(key: string): View | null;
-  override removeChild(child: View): void;
-  override removeChild(key: string | View): View | null | void {
+  override removeChild<V extends View>(child: V): V;
+  override removeChild(key: string | View): View | null {
     let child: View | null;
     if (typeof key === "string") {
       child = this.getChild(key);
@@ -277,26 +337,23 @@ export class GeoLayerView extends GeoView {
       }
     } else {
       child = key;
-    }
-    if (child.parent !== this) {
-      throw new Error("not a child view");
+      if (child.parent !== this) {
+        throw new Error("not a child view");
+      }
     }
 
     this.willRemoveChild(child);
-    child.setParent(null, this);
+    child.detachParent(this);
     this.removeChildMap(child);
     const children = this.children as View[];
     const index = children.indexOf(child);
-    if (index >= 0) {
-      children.splice(index, 1);
-    }
+    // assert(index >= 0);
+    children.splice(index, 1);
     this.onRemoveChild(child);
     this.didRemoveChild(child);
     child.setKey(void 0);
 
-    if (typeof key === "string") {
-      return child;
-    }
+    return child;
   }
 
   protected override didRemoveChild(child: View): void {
@@ -312,7 +369,7 @@ export class GeoLayerView extends GeoView {
     while (childCount = children.length, childCount !== 0) {
       const child = children[childCount - 1]!;
       this.willRemoveChild(child);
-      child.setParent(null, this);
+      child.detachParent(this);
       this.removeChildMap(child);
       children.pop();
       this.onRemoveChild(child);

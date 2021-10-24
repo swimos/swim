@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AxisView} from "./AxisView";
+import {TraitViewRef} from "@swim/controller";
+import {LeftAxisTrait} from "./LeftAxisTrait";
 import {LeftAxisView} from "./LeftAxisView";
 import {AxisController} from "./AxisController";
 
-export class LeftAxisController<Y> extends AxisController<Y> {
-  protected override createAxisView(): AxisView<Y> | null {
-    return new LeftAxisView<Y>();
-  }
+export class LeftAxisController<Y = unknown> extends AxisController<Y> {
+  @TraitViewRef<LeftAxisController<Y>, LeftAxisTrait<Y>, LeftAxisView<Y>>({
+    extends: true,
+    traitType: LeftAxisTrait,
+    viewType: LeftAxisView,
+  })
+  override readonly axis!: TraitViewRef<this, LeftAxisTrait<Y>, LeftAxisView<Y>>;
 }

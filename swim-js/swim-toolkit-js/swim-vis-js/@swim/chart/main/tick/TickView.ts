@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Timing} from "@swim/util";
+import type {Mutable, Class, Initable, Timing} from "@swim/util";
+import {MemberFastenerClass, Animator} from "@swim/fastener";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View, ViewFastener} from "@swim/view";
+import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -24,7 +25,6 @@ import {
   PaintingContext,
   PaintingRenderer,
   CanvasRenderer,
-  AnyTextRunView,
   TextRunView,
 } from "@swim/graphics";
 import type {TickViewObserver} from "./TickViewObserver";
@@ -89,8 +89,8 @@ export abstract class TickView<D = unknown> extends LayerView {
   /** @internal */
   readonly tickState: TickState;
 
-  @ThemeAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsRender})
-  readonly anchor!: ThemeAnimator<this, R2Point, AnyR2Point>;
+  @Animator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsRender})
+  readonly anchor!: Animator<this, R2Point, AnyR2Point>;
 
   @ThemeAnimator({type: Number, state: 1, updateFlags: View.NeedsRender})
   readonly opacity!: ThemeAnimator<this, number>;
@@ -119,73 +119,31 @@ export abstract class TickView<D = unknown> extends LayerView {
   @ThemeAnimator({type: Color, inherits: true, state: null})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected initLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected attachLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected detachLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetTickLabel !== void 0) {
-        observer.viewWillSetTickLabel(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  protected onSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    if (oldLabelView !== null) {
-      this.detachLabel(oldLabelView);
-    }
-    if (newLabelView !== null) {
-      this.attachLabel(newLabelView);
-      this.initLabel(newLabelView);
-    }
-  }
-
-  protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetTickLabel !== void 0) {
-        observer.viewDidSetTickLabel(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  @ViewFastener<TickView<D>, GraphicsView, AnyTextRunView>({
+  @ViewRef<TickView<D>, GraphicsView & Initable<GraphicsViewInit | string>>({
     key: true,
     type: TextRunView,
-    child: true,
-    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
-      if (value instanceof GraphicsView) {
-        return value;
-      } else if (typeof value === "string" && this.view instanceof TextRunView) {
-        this.view.text(value);
-        return this.view;
+    binds: true,
+    willAttachView(labelView: GraphicsView): void {
+      this.owner.callObservers("viewWillAttachTickLabel", labelView, this.owner);
+    },
+    didDetachView(labelView: GraphicsView): void {
+      this.owner.callObservers("viewDidDetachTickLabel", labelView, this.owner);
+    },
+    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
+      if (typeof value === "string") {
+        if (this.view instanceof TextRunView) {
+          this.view.text(value);
+          return this.view;
+        } else {
+          return TextRunView.fromAny(value);
+        }
       } else {
-        return TextRunView.fromAny(value);
+        return GraphicsView.fromAny(value);
       }
     },
-    willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.willSetLabel(newLabelView, oldLabelView);
-    },
-    onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetLabel(newLabelView, oldLabelView);
-    },
-    didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.didSetLabel(newLabelView, oldLabelView);
-    },
   })
-  readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly label!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
+  static readonly label: MemberFastenerClass<TickView, "label">;
 
   /** @internal */
   readonly preserved: boolean;

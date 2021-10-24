@@ -39,6 +39,7 @@ export const R2SegmentInterpolator = (function (_super: typeof Interpolator) {
   };
 
   R2SegmentInterpolator.prototype = Object.create(_super.prototype);
+  R2SegmentInterpolator.prototype.constructor = R2SegmentInterpolator;
 
   return R2SegmentInterpolator;
 })(Interpolator);

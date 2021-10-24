@@ -16,7 +16,7 @@ import type {Color} from "@swim/style";
 import type {SeriesPlotViewObserver} from "./SeriesPlotViewObserver";
 import type {AreaPlotView} from "./AreaPlotView";
 
-export interface AreaPlotViewObserver<X, Y, V extends AreaPlotView<X, Y> = AreaPlotView<X, Y>> extends SeriesPlotViewObserver<X, Y, V> {
+export interface AreaPlotViewObserver<X = unknown, Y = unknown, V extends AreaPlotView<X, Y> = AreaPlotView<X, Y>> extends SeriesPlotViewObserver<X, Y, V> {
   viewWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
 
   viewDidSetPlotFill?(newFill: Color | null, oldFill: Color | null, view: V): void;

@@ -18,23 +18,18 @@ import {BTree} from "@swim/collections";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, AnyView, View} from "@swim/view";
+import {ViewContextType, ViewFlags, AnyView, ViewFactory, View} from "@swim/view";
 import {GraphicsViewInit, GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import type {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import {AnyTickView, TickView} from "../tick/TickView";
 import {TickGenerator} from "../tick/TickGenerator";
 import type {AxisViewObserver} from "./AxisViewObserver";
-import {TopAxisView} from "../"; // forward import
-import {RightAxisView} from "../"; // forward import
-import {BottomAxisView} from "../"; // forward import
-import {LeftAxisView} from "../"; // forward import
 
 export type AxisOrientation = "top" | "right" | "bottom" | "left";
 
 export type AnyAxisView<D = unknown> = AxisView<D> | AxisViewInit<D>;
 
 export interface AxisViewInit<D = unknown> extends GraphicsViewInit {
-  orientation?: AxisOrientation;
   scale?: ContinuousScale<D, number> | string;
   ticks?: AnyTickView<D>[];
   tickGenerator?: TickGenerator<D> | true | null;
@@ -82,7 +77,7 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     tick.remove();
     this.willInsertChild(tick, null);
     this.ticks.set(tick.value, tick);
-    tick.setParent(this, null);
+    tick.attachParent(this);
     this.onInsertChild(tick, null);
     this.didInsertChild(tick, null);
     tick.cascadeInsert();
@@ -96,7 +91,7 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
         throw new Error("not a child view");
       }
       this.willRemoveChild(tick);
-      tick.setParent(null, this);
+      tick.detachParent(this);
       this.ticks.delete(value);
       this.onRemoveChild(tick);
       this.didRemoveChild(tick);
@@ -109,7 +104,7 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
   @Property({type: TickGenerator, state: true})
   readonly tickGenerator!: Property<this, TickGenerator<D> | true | null>;
 
-  @ThemeAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsLayout | View.NeedsRender})
   readonly origin!: ThemeAnimator<this, R2Point, AnyR2Point>;
 
   @ThemeAnimator({type: Color, inherits: true, state: null, updateFlags: View.NeedsRender})
@@ -211,13 +206,13 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     return null;
   }
 
-  override setChild<V extends View>(key: string, newChild: AnyView<V> | null): View | null;
+  override setChild<V extends View>(key: string, newChild: V | ViewFactory<V> | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null {
     throw new Error("unsupported");
   }
 
-  override appendChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override appendChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override appendChild(child: AnyView, key?: string): View;
   override appendChild(child: AnyView, key?: string): View {
     if (key !== void 0) {
@@ -230,7 +225,7 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     return this.insertTick(child);
   }
 
-  override prependChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override prependChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override prependChild(child: AnyView, key?: string): View;
   override prependChild(child: AnyView, key?: string): View {
     if (key !== void 0) {
@@ -243,7 +238,7 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     return this.insertTick(child);
   }
 
-  override insertChild<V extends View>(child: AnyView<V>, target: View | null, key?: string): V;
+  override insertChild<V extends View>(child: V | ViewFactory<V>, target: View | null, key?: string): V;
   override insertChild(child: AnyView, target: View | null, key?: string): View;
   override insertChild(child: AnyView, target: View | null, key?: string): View {
     if (key !== void 0) {
@@ -256,9 +251,29 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     return this.insertTick(child);
   }
 
+  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
+  override replaceChild(newChild: AnyView, oldChild: View): View {
+    if (!(oldChild instanceof TickView)) {
+      throw new TypeError("" + oldChild);
+    }
+    if (oldChild.parent !== this) {
+      throw new TypeError("" + oldChild);
+    }
+    newChild = View.fromAny(newChild);
+    if (!(newChild instanceof TickView)) {
+      throw new TypeError("" + newChild);
+    }
+    if (newChild !== oldChild) {
+      this.removeTick(oldChild.value);
+      this.insertTick(newChild);
+    }
+    return oldChild;
+  }
+
   override removeChild(key: string): View | null;
-  override removeChild(child: View): void;
-  override removeChild(child: string | View): View | null | void {
+  override removeChild<V extends View>(child: V): V;
+  override removeChild(child: string | View): View | null {
     if (typeof child === "string") {
       throw new Error("unsupported");
     }
@@ -266,12 +281,13 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
       throw new TypeError("" + child);
     }
     this.removeTick(child.value);
+    return child;
   }
 
   override removeChildren(): void {
     this.ticks.forEach(function (key: D, child: TickView<D>): void {
       this.willRemoveChild(child);
-      child.setParent(null, this);
+      child.detachParent(this);
       this.ticks.delete(key);
       this.onRemoveChild(child);
       this.didRemoveChild(child);
@@ -472,27 +488,6 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     }
     if (init.textColor !== void 0) {
       this.textColor(init.textColor);
-    }
-  }
-
-  static override fromInit<D>(init: AxisViewInit<D>): AxisView<D>;
-  static override fromInit(init: AxisViewInit): AxisView;
-  static override fromInit(init: AxisViewInit): AxisView {
-    if (this === AxisView) {
-      const orientation = init.orientation;
-      if (orientation === "top") {
-        return TopAxisView.fromInit(init);
-      } else if (orientation === "right") {
-        return RightAxisView.fromInit(init);
-      } else if (orientation === "bottom") {
-        return BottomAxisView.fromInit(init);
-      } else if (orientation === "left") {
-        return LeftAxisView.fromInit(init);
-      } else {
-        throw new Error("unknown axis orientation: " + orientation);
-      }
-    } else {
-      return View.fromInit.call(this, init);
     }
   }
 }

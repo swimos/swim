@@ -19,13 +19,13 @@ import type {CellTrait} from "./CellTrait";
 import type {CellController} from "./CellController";
 
 export interface CellControllerObserver<C extends CellController = CellController> extends ControllerObserver<C> {
-  controllerWillSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, controller: C): void;
+  controllerWillAttachCellTrait?(cellTrait: CellTrait, controller: C): void;
 
-  controllerDidSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, controller: C): void;
+  controllerDidDetachCellTrait?(cellTrait: CellTrait, controller: C): void;
 
-  controllerWillSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, controller: C): void;
+  controllerWillAttachCellView?(cellView: CellView, controller: C): void;
 
-  controllerDidSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, controller: C): void;
+  controllerDidDetachCellView?(cellView: CellView, controller: C): void;
 
   controllerDidPressCellView?(input: PositionGestureInput, event: Event | null, cellView: CellView, controller: C): void;
 

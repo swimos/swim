@@ -27,8 +27,14 @@ const canvasView = swim.CanvasView.create()
     .touchAction("manipulation");
 
 class ExampleChartController extends swim.ChartController {
-  initChartView(chartView) {
-    super.initChartView(chartView);
+  createPlotFastener(plotController) {
+    return ExampleChartController.PlotFastener.create(this);
+  }
+}
+swim.TraitViewRef({
+  extends: true,
+  initView(chartView) {
+    swim.ChartController.chart.prototype.initView.call(this, chartView);
     chartView.xDomainPadding([Math.PI, Math.PI])
              .yDomainPadding([1, 1])
              //.xRangePadding([2, 2])
@@ -37,22 +43,23 @@ class ExampleChartController extends swim.ChartController {
              .preserveAspectRatio(true)
              .domainTracking(true)
              .xScaleGestures(true)
-             .yScaleGestures(true);
-  }
-  initPlotView(plotView, plotFastener) {
-    super.initPlotView(plotView, plotFastener);
-    plotView.hitMode("plot")
-            .on("pointerenter", function (event) {
-              plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
-            })
-            .on("pointerleave", function (event) {
-              plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
-            });
-  }
-  initDataPointView(dataPointView, dataPointFastener, plotFastener) {
-    super.initDataPointView(dataPointView, dataPointFastener, plotFastener);
-  }
-}
+             .yScaleGestures(true)
+             .font("12px sans-serif");
+  },
+})(ExampleChartController.prototype, "chart");
+swim.TraitViewControllerSet({
+  extends: true,
+  attachPlotView(plotView, plotController) {
+    swim.ChartController.plots.prototype.attachPlotView.call(this, plotView, plotController);
+    plotView.hitMode("plot");
+    plotView.on("pointerenter", function (event) {
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+    });
+    plotView.on("pointerleave", function (event) {
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+    });
+  },
+})(ExampleChartController.prototype, "plots");
 
 const plot1Model = new swim.GenericModel();
 const plot1Trait = new swim.LinePlotTrait()
@@ -94,7 +101,7 @@ chartModel.appendChild(plot1Model);
 
 const chartController = new ExampleChartController();
 chartController.mount();
-chartController.chart.injectView(canvasView);
+chartController.chart.insertView(canvasView);
 chartController.chart.setTrait(chartTrait);
 
 containerView.appendChild(canvasView);

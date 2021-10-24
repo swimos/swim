@@ -17,7 +17,7 @@ import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {View, ViewFastener} from "@swim/view";
+import {View, ViewRef} from "@swim/view";
 import type {GraphicsView, CanvasContext, CanvasRenderer, StrokeViewInit, StrokeView} from "@swim/graphics";
 import type {DataPointView} from "../data/DataPointView";
 import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
@@ -36,86 +36,37 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     return "line";
   }
 
-  protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetPlotStroke !== void 0) {
-        observer.viewWillSetPlotStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
-  protected onSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    // hook
-  }
-
-  protected didSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetPlotStroke !== void 0) {
-        observer.viewDidSetPlotStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
   @ThemeAnimator<LinePlotView<X, Y>, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     look: Look.accentColor,
     updateFlags: View.NeedsRender,
     willSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.willSetStroke(newStroke, oldStroke);
+      this.owner.callObservers("viewWillSetPlotStroke", newStroke, oldStroke, this.owner);
     },
     didSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.onSetStroke(newStroke, oldStroke);
-      this.owner.didSetStroke(newStroke, oldStroke);
+      this.owner.callObservers("viewDidSetPlotStroke", newStroke, oldStroke, this.owner);
     },
   })
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
-
-  protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetPlotStrokeWidth !== void 0) {
-        observer.viewWillSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
-  protected onSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    if (this.xRangePadding.hasAffinity(Affinity.Intrinsic) || this.yRangePadding.hasAffinity(Affinity.Intrinsic)) {
-      const frame = this.viewFrame;
-      const size = Math.min(frame.width, frame.height);
-      const strokeWidth = this.strokeWidth.getValueOr(Length.zero()).pxValue(size);
-      const strokeRadius = strokeWidth / 2;
-      this.xRangePadding.setState([strokeRadius, strokeRadius], Affinity.Intrinsic);
-      this.yRangePadding.setState([strokeRadius, strokeRadius], Affinity.Intrinsic);
-    }
-  }
-
-  protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetPlotStrokeWidth !== void 0) {
-        observer.viewDidSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
 
   @ThemeAnimator<LinePlotView<X, Y>, Length | null, AnyLength | null>({
     type: Length,
     state: Length.px(1),
     updateFlags: View.NeedsRender,
     willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.willSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      this.owner.callObservers("viewWillSetPlotStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
     didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.onSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
-      this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      if (this.owner.xRangePadding.hasAffinity(Affinity.Intrinsic) || this.owner.yRangePadding.hasAffinity(Affinity.Intrinsic)) {
+        const frame = this.owner.viewFrame;
+        const size = Math.min(frame.width, frame.height);
+        const strokeWidth = this.getValueOr(Length.zero()).pxValue(size);
+        const strokeRadius = strokeWidth / 2;
+        this.owner.xRangePadding.setState([strokeRadius, strokeRadius], Affinity.Intrinsic);
+        this.owner.yRangePadding.setState([strokeRadius, strokeRadius], Affinity.Intrinsic);
+      }
+      this.owner.callObservers("viewDidSetPlotStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
@@ -133,10 +84,10 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     let x0: number;
     let x1: number;
     let dx: number;
-    const dataPointFasteners = this.dataPointFasteners;
-    if (!dataPointFasteners.isEmpty()) {
-      const p0 = dataPointFasteners.firstValue()!.view!;
-      const p1 = dataPointFasteners.lastValue()!.view!;
+    const dataPointRefs = this.dataPointRefs;
+    if (!dataPointRefs.isEmpty()) {
+      const p0 = dataPointRefs.firstValue()!.view!;
+      const p1 = dataPointRefs.lastValue()!.view!;
       x0 = p0.xCoord;
       x1 = p1.xCoord;
       dx = x1 - x0;
@@ -152,8 +103,8 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     context.beginPath();
     let i = 0;
     type self = this;
-    dataPointFasteners.forEach(function (x: X, dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
-      const p = dataPointFastener.view!;
+    dataPointRefs.forEach(function (x: X, dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
+      const p = dataPointRef.view!;
       const xCoord = p.xCoord;
       const yCoord = p.yCoord;
       if (i === 0) {
@@ -199,8 +150,8 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     context.beginPath();
     let i = 0;
     type self = this;
-    this.dataPointFasteners.forEach(function (x: X, dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
-      const p = dataPointFastener.view!;
+    this.dataPointRefs.forEach(function (x: X, dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
+      const p = dataPointRef.view!;
       const xCoord = p.xCoord;
       const yCoord = p.yCoord;
       if (i === 0) {

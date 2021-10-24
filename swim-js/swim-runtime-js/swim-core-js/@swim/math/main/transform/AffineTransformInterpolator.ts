@@ -43,6 +43,7 @@ export const AffineTransformInterpolator = (function (_super: typeof Interpolato
   };
 
   AffineTransformInterpolator.prototype = Object.create(_super.prototype);
+  AffineTransformInterpolator.prototype.constructor = AffineTransformInterpolator;
 
   return AffineTransformInterpolator;
 })(Interpolator);

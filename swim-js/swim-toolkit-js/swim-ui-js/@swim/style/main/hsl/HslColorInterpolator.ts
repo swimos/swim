@@ -39,6 +39,7 @@ export const HslColorInterpolator = (function (_super: typeof Interpolator) {
   };
 
   HslColorInterpolator.prototype = Object.create(_super.prototype);
+  HslColorInterpolator.prototype.constructor = HslColorInterpolator;
 
   return HslColorInterpolator;
 })(Interpolator);

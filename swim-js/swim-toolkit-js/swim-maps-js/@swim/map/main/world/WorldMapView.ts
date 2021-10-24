@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import type {Mutable, Class, AnyTiming} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import {R2Box} from "@swim/math";
-import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewRef} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
 import type {AnyGeoPerspective} from "../geo/GeoPerspective";
@@ -39,13 +40,7 @@ export class WorldMapView extends MapView {
   override readonly geoViewport!: WorldMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoViewport !== void 0) {
-        observer.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected onSetGeoViewport(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport): void {
@@ -53,13 +48,7 @@ export class WorldMapView extends MapView {
   }
 
   protected didSetGeoViewport(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGeoViewport !== void 0) {
-        observer.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected updateGeoViewport(): boolean {
@@ -87,32 +76,40 @@ export class WorldMapView extends MapView {
     // nop
   }
 
-  protected override attachCanvas(canvasView: CanvasView): void {
-    super.attachCanvas(canvasView);
-    if (this.parent === null) {
-      canvasView.appendChild(this);
-    }
-  }
+  @ViewRef<WorldMapView, CanvasView>({
+    extends: true,
+    didAttachView(canvasView: CanvasView, targetView: View | null): void {
+      if (this.owner.parent === null) {
+        canvasView.appendChild(this.owner);
+      }
+      MapView.canvas.prototype.didAttachView.call(this, canvasView, targetView);
+    },
+    willDetachView(canvasView: CanvasView): void {
+      MapView.canvas.prototype.willDetachView.call(this, canvasView);
+      if (this.owner.parent === canvasView) {
+        canvasView.removeChild(this.owner);
+      }
+    },
+  })
+  override readonly canvas!: ViewRef<this, CanvasView>;
+  static override readonly canvas: MemberFastenerClass<WorldMapView, "canvas">;
 
-  protected override detachCanvas(canvasView: CanvasView): void {
-    if (this.parent === canvasView) {
-      canvasView.removeChild(this);
-    }
-    super.detachCanvas(canvasView);
-  }
-
-  protected override attachContainer(containerView: HtmlView): void {
-    super.attachContainer(containerView);
-    this.canvas.injectView(containerView);
-  }
-
-  protected override detachContainer(containerView: HtmlView): void {
-    const canvasView = this.canvas.view;
-    if (canvasView !== null && canvasView.parent === containerView) {
-      containerView.removeChild(containerView);
-    }
-    super.detachContainer(containerView);
-  }
+  @ViewRef<WorldMapView, HtmlView>({
+    extends: true,
+    didAttachView(containerView: HtmlView, targetView: View | null): void {
+      this.owner.canvas.insertView(containerView);
+      MapView.container.prototype.didAttachView.call(this, containerView, targetView);
+    },
+    willDetachView(containerView: HtmlView): void {
+      MapView.container.prototype.willDetachView.call(this, containerView);
+      const canvasView = this.owner.canvas.view;
+      if (canvasView !== null && canvasView.parent === containerView) {
+        containerView.removeChild(canvasView);
+      }
+    },
+  })
+  override readonly container!: ViewRef<this, HtmlView>;
+  static override readonly container: MemberFastenerClass<WorldMapView, "container">;
 
   static override create(geoViewport?: WorldMapViewport): WorldMapView;
   static override create(): WorldMapView;

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnimatorClass, Animator} from "./Animator";
+import {AnimatorFactory, Animator} from "./Animator";
 
 /** @internal */
 export const BooleanAnimator = (function (_super: typeof Animator) {
-  const BooleanAnimator = _super.extend() as AnimatorClass<Animator<any, boolean | null | undefined, boolean | string | null | undefined>>;
+  const BooleanAnimator = _super.extend("BooleanAnimator") as AnimatorFactory<Animator<any, boolean | null | undefined, boolean | string | null | undefined>>;
 
   BooleanAnimator.prototype.fromAny = function (value: boolean | string | null | undefined): boolean | null | undefined {
     return !!value;

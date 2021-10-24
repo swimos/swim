@@ -38,7 +38,7 @@ const chartView = canvasView.appendChild(swim.ChartView)
     .yScaleGestures(true)
     .font("12px sans-serif");
 
-const graphView = chartView.graph.injectView();
+const graphView = chartView.graph.insertView();
 
 const zeroTick = chartView.leftAxis.view.insertTick({
   value: 0,

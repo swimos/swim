@@ -18,7 +18,7 @@ import {AnyValue, Value, Form} from "@swim/structure";
 import {Uri} from "@swim/uri";
 import type {ListDownlinkObserver, ListDownlink} from "../downlink/ListDownlink";
 import type {WarpRef} from "../ref/WarpRef";
-import {DownlinkFastenerInit, DownlinkFastener} from "./DownlinkFastener";
+import {DownlinkFastenerInit, DownlinkFastenerClass, DownlinkFastener} from "./DownlinkFastener";
 
 export type ListDownlinkFastenerType<F extends ListDownlinkFastener<any, any>> =
   F extends ListDownlinkFastener<any, infer V, any> ? V : never;
@@ -26,36 +26,33 @@ export type ListDownlinkFastenerType<F extends ListDownlinkFastener<any, any>> =
 export type ListDownlinkFastenerInitType<F extends ListDownlinkFastener<any, any>> =
   F extends ListDownlinkFastener<any, infer V, infer VU> ? V | VU : never;
 
-export interface ListDownlinkFastenerInit<V = unknown, VU = never> extends DownlinkFastenerInit, ListDownlinkObserver<V, VU> {
+export interface ListDownlinkFastenerInit<V = unknown, VU = V> extends DownlinkFastenerInit, ListDownlinkObserver<V, VU> {
+  extends?: {prototype: ListDownlinkFastener<any, any>} | string | boolean | null;
   valueForm?: Form<V, VU>;
 
   initDownlink?(downlink: ListDownlink<V, VU>): ListDownlink<V, VU>;
 }
 
-export type ListDownlinkFastenerDescriptor<O = unknown, V = unknown, VU = never, I = {}> = ThisType<ListDownlinkFastener<O, V, VU> & I> & ListDownlinkFastenerInit<V, VU> & Partial<I>;
+export type ListDownlinkFastenerDescriptor<O = unknown, V = unknown, VU = V, I = {}> = ThisType<ListDownlinkFastener<O, V, VU> & I> & ListDownlinkFastenerInit<V, VU> & Partial<I>;
 
-export interface ListDownlinkFastenerClass<F extends ListDownlinkFastener<any, any> = ListDownlinkFastener<any, any, any>> {
-  /** @internal */
-  prototype: F;
-
-  create(owner: FastenerOwner<F>, fastenerName: string): F;
-
-  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): ListDownlinkFastenerClass<F> & I;
-
-  define<O, V extends Value = Value, VU extends AnyValue = AnyValue>(descriptor: ListDownlinkFastenerDescriptor<O, V, VU>): ListDownlinkFastenerClass<ListDownlinkFastener<any, V, VU>>;
-  define<O, V, VU = never>(descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU>): ListDownlinkFastenerClass<ListDownlinkFastener<any, V, VU>>;
-  define<O, V extends Value, VU extends AnyValue = AnyValue, I = {}>(descriptor: ListDownlinkFastenerDescriptor<O, V, VU, I>): ListDownlinkFastenerClass<ListDownlinkFastener<any, V, VU> & I>;
-  define<O, V, VU = never, I = {}>(descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU, I>): ListDownlinkFastenerClass<ListDownlinkFastener<any, V, VU> & I>;
-
-  <O, V extends Value = Value, VU extends AnyValue = AnyValue>(descriptor: ListDownlinkFastenerDescriptor<O, V, VU>): PropertyDecorator;
-  <O, V, VU = never>(descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU>): PropertyDecorator;
-  <O, V extends Value, VU extends AnyValue = AnyValue, I = {}>(descriptor: ListDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
-  <O, V, VU = never, I = {}>(descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
+export interface ListDownlinkFastenerClass<F extends ListDownlinkFastener<any, any> = ListDownlinkFastener<any, any>> extends DownlinkFastenerClass<F> {
 }
 
-export interface ListDownlinkFastener<O = unknown, V = unknown, VU = never> extends DownlinkFastener<O> {
+export interface ListDownlinkFastenerFactory<F extends ListDownlinkFastener<any, any> = ListDownlinkFastener<any, any>> extends ListDownlinkFastenerClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): ListDownlinkFastenerFactory<F> & I;
+
+  define<O, V extends Value = Value, VU extends AnyValue = AnyValue>(className: string, descriptor: ListDownlinkFastenerDescriptor<O, V, VU>): ListDownlinkFastenerFactory<ListDownlinkFastener<any, V, VU>>;
+  define<O, V, VU = V>(className: string, descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU>): ListDownlinkFastenerFactory<ListDownlinkFastener<any, V, VU>>;
+  define<O, V extends Value, VU extends AnyValue = AnyValue, I = {}>(className: string, descriptor: ListDownlinkFastenerDescriptor<O, V, VU, I>): ListDownlinkFastenerFactory<ListDownlinkFastener<any, V, VU> & I>;
+  define<O, V, VU = V, I = {}>(className: string, descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU, I>): ListDownlinkFastenerFactory<ListDownlinkFastener<any, V, VU> & I>;
+
+  <O, V extends Value = Value, VU extends AnyValue = AnyValue>(descriptor: ListDownlinkFastenerDescriptor<O, V, VU>): PropertyDecorator;
+  <O, V, VU = V>(descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU>): PropertyDecorator;
+  <O, V extends Value, VU extends AnyValue = AnyValue, I = {}>(descriptor: ListDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
+  <O, V, VU = V, I = {}>(descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
+}
+
+export interface ListDownlinkFastener<O = unknown, V = unknown, VU = V> extends DownlinkFastener<O> {
   (index: number): V | undefined;
   (index: number, newObject: V | VU): O;
 
@@ -116,7 +113,7 @@ export interface ListDownlinkFastener<O = unknown, V = unknown, VU = never> exte
 }
 
 export const ListDownlinkFastener = (function (_super: typeof DownlinkFastener) {
-  const ListDownlinkFastener: ListDownlinkFastenerClass = _super.extend();
+  const ListDownlinkFastener: ListDownlinkFastenerFactory = _super.extend("ListDownlinkFastener");
 
   ListDownlinkFastener.prototype.valueForm = function <V, VU>(this: ListDownlinkFastener<unknown, V, VU>, valueForm?: Form<V, VU> | null): Form<V, VU> | null | typeof this {
     if (valueForm === void 0) {
@@ -245,9 +242,9 @@ export const ListDownlinkFastener = (function (_super: typeof DownlinkFastener) 
     return downlink;
   };
 
-  ListDownlinkFastener.construct = function <F extends ListDownlinkFastener<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  ListDownlinkFastener.construct = function <F extends ListDownlinkFastener<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
     if (fastener === null) {
-      fastener = function ListDownlinkFastener(index: number, value?: ListDownlinkFastenerType<F> | ListDownlinkFastenerInitType<F>): ListDownlinkFastenerType<F> | undefined | FastenerOwner<F> {
+      fastener = function (index: number, value?: ListDownlinkFastenerType<F> | ListDownlinkFastenerInitType<F>): ListDownlinkFastenerType<F> | undefined | FastenerOwner<F> {
         if (arguments.length === 0) {
           return fastener!.get(index);
         } else {
@@ -255,15 +252,16 @@ export const ListDownlinkFastener = (function (_super: typeof DownlinkFastener) 
           return fastener!.owner;
         }
       } as F;
+      delete (fastener as Partial<Mutable<F>>).name; // don't clobber prototype name
       Object.setPrototypeOf(fastener, fastenerClass.prototype);
     }
-    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+    fastener = _super.construct(fastenerClass, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).ownValueForm = null;
     return fastener;
   };
 
-  ListDownlinkFastener.define = function <O, V, VU>(descriptor: ListDownlinkFastenerDescriptor<O, V, VU>): ListDownlinkFastenerClass<ListDownlinkFastener<any, V, VU>> {
-    let superClass = descriptor.extends as ListDownlinkFastenerClass | undefined;
+  ListDownlinkFastener.define = function <O, V, VU>(className: string, descriptor: ListDownlinkFastenerDescriptor<O, V, VU>): ListDownlinkFastenerFactory<ListDownlinkFastener<any, V, VU>> {
+    let superClass = descriptor.extends as ListDownlinkFastenerFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     const valueForm = descriptor.valueForm;
@@ -288,10 +286,10 @@ export const ListDownlinkFastener = (function (_super: typeof DownlinkFastener) 
       superClass = this;
     }
 
-    const fastenerClass = superClass.extend(descriptor);
+    const fastenerClass = superClass.extend(className, descriptor);
 
-    fastenerClass.construct = function (fastenerClass: {prototype: ListDownlinkFastener<any, any, any>}, fastener: ListDownlinkFastener<O, V, VU> | null, owner: O, fastenerName: string): ListDownlinkFastener<O, V, VU> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
+    fastenerClass.construct = function (fastenerClass: {prototype: ListDownlinkFastener<any, any>}, fastener: ListDownlinkFastener<O, V, VU> | null, owner: O): ListDownlinkFastener<O, V, VU> {
+      fastener = superClass!.construct(fastenerClass, fastener, owner);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);
       }

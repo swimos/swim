@@ -23,7 +23,7 @@ export interface WarpProvider<O, S extends WarpService<O> | null | undefined = W
 }
 
 export const WarpProvider = (function (_super: typeof Provider) {
-  const WarpProvider = _super.extend() as ProviderClass<WarpProvider<any, any>>;
+  const WarpProvider = _super.extend("WarpProvider") as ProviderClass<WarpProvider<any, any>>;
 
   Object.defineProperty(WarpProvider.prototype, "client", {
     get<O, S extends WarpService<O> | null | undefined>(this: WarpProvider<O, S>): WarpClient {

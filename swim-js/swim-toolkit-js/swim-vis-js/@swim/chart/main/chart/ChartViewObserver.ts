@@ -17,24 +17,24 @@ import type {GraphView} from "../graph/GraphView";
 import type {AxisView} from "../axis/AxisView";
 import type {ChartView} from "./ChartView";
 
-export interface ChartViewObserver<X, Y, V extends ChartView<X, Y> = ChartView<X, Y>> extends ScaledViewObserver<X, Y, V> {
-  viewWillSetGraph?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, view: V): void;
+export interface ChartViewObserver<X = unknown, Y = unknown, V extends ChartView<X, Y> = ChartView<X, Y>> extends ScaledViewObserver<X, Y, V> {
+  viewWillAttachGraph?(graphView: GraphView<X, Y>, view: V): void;
 
-  viewDidSetGraph?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, view: V): void;
+  viewDidDetachGraph?(graphView: GraphView<X, Y>, view: V): void;
 
-  viewWillSetTopAxis?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, view: V): void;
+  viewWillAttachTopAxis?(topAxisView: AxisView<X>, view: V): void;
 
-  viewDidSetTopAxis?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, view: V): void;
+  viewDidDetachTopAxis?(topAxisView: AxisView<X>, view: V): void;
 
-  viewWillSetRightAxis?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, view: V): void;
+  viewWillAttachRightAxis?(rightAxisView: AxisView<Y> , view: V): void;
 
-  viewDidSetRightAxis?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, view: V): void;
+  viewDidDetachRightAxis?(rightAxisView: AxisView<Y>, view: V): void;
 
-  viewWillSetBottomAxis?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, view: V): void;
+  viewWillAttachBottomAxis?(bottomAxisView: AxisView<X>, view: V): void;
 
-  viewDidSetBottomAxis?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, view: V): void;
+  viewDidDetachBottomAxis?(bottomAxisView: AxisView<X>, view: V): void;
 
-  viewWillSetLeftAxis?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, view: V): void;
+  viewWillAttachLeftAxis?(leftAxisView: AxisView<Y>, view: V): void;
 
-  viewDidSetLeftAxis?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, view: V): void;
+  viewDidDetachLeftAxis?(leftAxisView: AxisView<Y>, view: V): void;
 }

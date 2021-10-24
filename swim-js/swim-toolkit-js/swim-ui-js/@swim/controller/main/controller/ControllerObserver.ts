@@ -16,9 +16,13 @@ import type {HierarchyObserver} from "@swim/fastener";
 import type {ControllerContextType, Controller} from "./Controller";
 
 export interface ControllerObserver<C extends Controller = Controller> extends HierarchyObserver<C> {
-  controllerWillSetParent?(newParent: Controller | null, oldParent: Controller | null, controller: C): void;
+  controllerWillAttachParent?(parent: Controller, controller: C): void;
 
-  controllerDidSetParent?(newParent: Controller | null, oldParent: Controller | null, controller: C): void;
+  controllerDidAttachParent?(parent: Controller, controller: C): void;
+
+  controllerWillDetachParent?(parent: Controller, controller: C): void;
+
+  controllerDidDetachParent?(parent: Controller, controller: C): void;
 
   controllerWillInsertChild?(child: Controller, target: Controller | null, controller: C): void;
 

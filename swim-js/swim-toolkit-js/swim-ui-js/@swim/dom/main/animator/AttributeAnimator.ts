@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import {Mutable, FromAny} from "@swim/util";
-import {Affinity, FastenerOwner, FastenerFlags} from "@swim/fastener";
+import {Affinity, FastenerOwner} from "@swim/fastener";
 import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
-import {ThemeAnimatorInit, ThemeAnimator} from "@swim/theme";
+import {ThemeAnimatorInit, ThemeAnimatorClass, ThemeAnimator} from "@swim/theme";
 import {StringAttributeAnimator} from "./"; // forward import
 import {NumberAttributeAnimator} from "./"; // forward import
 import {BooleanAttributeAnimator} from "./"; // forward import
@@ -26,45 +26,37 @@ import {TransformAttributeAnimator} from "./"; // forward import
 import {ElementView} from "../"; // forward import
 
 export interface AttributeAnimatorInit<T = unknown, U = never> extends ThemeAnimatorInit<T, U> {
+  extends?: {prototype: AttributeAnimator<any, any>} | string | boolean | null;
   attributeName: string;
 
   parse?(value: string): T;
 }
 
-export type AttributeAnimatorDescriptor<V = unknown, T = unknown, U = never, I = {}> = ThisType<AttributeAnimator<V, T, U> & I> & AttributeAnimatorInit<T, U> & Partial<I>;
+export type AttributeAnimatorDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<AttributeAnimator<O, T, U> & I> & AttributeAnimatorInit<T, U> & Partial<I>;
 
-export interface AttributeAnimatorClass<A extends AttributeAnimator<any, any> = AttributeAnimator<any, any, any>> {
-  /** @internal */
-  prototype: A;
-
-  create(owner: FastenerOwner<A>, animatorName: string): A;
-
-  construct(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A;
-
-  specialize(type: unknown): AttributeAnimatorClass | null;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): AttributeAnimatorClass<A> & I;
-
-  define<V, T, U = never>(descriptor: AttributeAnimatorDescriptor<V, T, U>): AttributeAnimatorClass<AttributeAnimator<any, T, U>>;
-  define<V, T, U = never, I = {}>(descriptor: AttributeAnimatorDescriptor<V, T, U, I>): AttributeAnimatorClass<AttributeAnimator<any, T, U> & I>;
-
-  <V, T extends Length | undefined = Length | undefined, U extends AnyLength | undefined = AnyLength | undefined>(descriptor: {type: typeof Length} & AttributeAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T extends Color | undefined = Color | undefined, U extends AnyColor | undefined = AnyColor | undefined>(descriptor: {type: typeof Color} & AttributeAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T extends Transform | undefined = Transform | undefined, U extends AnyTransform | undefined = AnyTransform | undefined>(descriptor: {type: typeof Transform} & AttributeAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T extends string | undefined = string | undefined, U extends string | undefined = string | undefined>(descriptor: {type: typeof String} & AttributeAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & AttributeAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T extends boolean | undefined = boolean | undefined, U extends boolean | string | undefined = boolean | string | undefined>(descriptor: {type: typeof Boolean} & AttributeAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & AttributeAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T, U = never>(descriptor: AttributeAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T, U = never, I = {}>(descriptor: AttributeAnimatorDescriptor<V, T, U, I>): PropertyDecorator;
-
-  /** @internal @override */
-  readonly FlagShift: number;
-  /** @internal @override */
-  readonly FlagMask: FastenerFlags;
+export interface AttributeAnimatorClass<A extends AttributeAnimator<any, any> = AttributeAnimator<any, any, any>> extends ThemeAnimatorClass<A> {
 }
 
-export interface AttributeAnimator<V = unknown, T = unknown, U = never> extends ThemeAnimator<V, T, U> {
+export interface AttributeAnimatorFactory<A extends AttributeAnimator<any, any> = AttributeAnimator<any, any, any>> extends AttributeAnimatorClass<A> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): AttributeAnimatorFactory<A> & I;
+
+  specialize(type: unknown): AttributeAnimatorFactory | null;
+
+  define<O, T, U = never>(className: string, descriptor: AttributeAnimatorDescriptor<O, T, U>): AttributeAnimatorFactory<AttributeAnimator<any, T, U>>;
+  define<O, T, U = never, I = {}>(className: string, descriptor: AttributeAnimatorDescriptor<O, T, U, I>): AttributeAnimatorFactory<AttributeAnimator<any, T, U> & I>;
+
+  <O, T extends Length | undefined = Length | undefined, U extends AnyLength | undefined = AnyLength | undefined>(descriptor: {type: typeof Length} & AttributeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T extends Color | undefined = Color | undefined, U extends AnyColor | undefined = AnyColor | undefined>(descriptor: {type: typeof Color} & AttributeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T extends Transform | undefined = Transform | undefined, U extends AnyTransform | undefined = AnyTransform | undefined>(descriptor: {type: typeof Transform} & AttributeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T extends string | undefined = string | undefined, U extends string | undefined = string | undefined>(descriptor: {type: typeof String} & AttributeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & AttributeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T extends boolean | undefined = boolean | undefined, U extends boolean | string | undefined = boolean | string | undefined>(descriptor: {type: typeof Boolean} & AttributeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & AttributeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never>(descriptor: AttributeAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never, I = {}>(descriptor: AttributeAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
+}
+
+export interface AttributeAnimator<O = unknown, T = unknown, U = never> extends ThemeAnimator<O, T, U> {
   get attributeName(): string;
 
   get attributeValue(): T | undefined;
@@ -82,7 +74,7 @@ export interface AttributeAnimator<V = unknown, T = unknown, U = never> extends 
 }
 
 export const AttributeAnimator = (function (_super: typeof ThemeAnimator) {
-  const AttributeAnimator: AttributeAnimatorClass = _super.extend();
+  const AttributeAnimator: AttributeAnimatorFactory = _super.extend("AttributeAnimator");
 
   Object.defineProperty(AttributeAnimator.prototype, "attributeName", {
     get(this: AttributeAnimator): string {
@@ -139,12 +131,12 @@ export const AttributeAnimator = (function (_super: typeof ThemeAnimator) {
     throw new Error();
   };
 
-  AttributeAnimator.construct = function <A extends AttributeAnimator<any, any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A {
-    animator = _super.construct(animatorClass, animator, owner, animatorName) as A;
+  AttributeAnimator.construct = function <A extends AttributeAnimator<any, any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>): A {
+    animator = _super.construct(animatorClass, animator, owner) as A;
     return animator;
   };
 
-  AttributeAnimator.specialize = function (type: unknown): AttributeAnimatorClass | null {
+  AttributeAnimator.specialize = function (type: unknown): AttributeAnimatorFactory | null {
     if (type === String) {
       return StringAttributeAnimator;
     } else if (type === Number) {
@@ -161,8 +153,8 @@ export const AttributeAnimator = (function (_super: typeof ThemeAnimator) {
     return null;
   };
 
-  AttributeAnimator.define = function <V, T, U>(descriptor: AttributeAnimatorDescriptor<V, T, U>): AttributeAnimatorClass<AttributeAnimator<any, T, U>> {
-    let superClass = descriptor.extends as AttributeAnimatorClass | null | undefined;
+  AttributeAnimator.define = function <O, T, U>(className: string, descriptor: AttributeAnimatorDescriptor<O, T, U>): AttributeAnimatorFactory<AttributeAnimator<any, T, U>> {
+    let superClass = descriptor.extends as AttributeAnimatorFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     const look = descriptor.look;
@@ -185,10 +177,10 @@ export const AttributeAnimator = (function (_super: typeof ThemeAnimator) {
       }
     }
 
-    const animatorClass = superClass.extend(descriptor);
+    const animatorClass = superClass.extend(className, descriptor);
 
-    animatorClass.construct = function (animatorClass: {prototype: AttributeAnimator<any, any, any>}, animator: AttributeAnimator<V, T, U> | null, owner: V, animatorName: string): AttributeAnimator<V, T, U> {
-      animator = superClass!.construct(animatorClass, animator, owner, animatorName);
+    animatorClass.construct = function (animatorClass: {prototype: AttributeAnimator<any, any, any>}, animator: AttributeAnimator<O, T, U> | null, owner: O): AttributeAnimator<O, T, U> {
+      animator = superClass!.construct(animatorClass, animator, owner);
       if (affinity !== void 0) {
         animator.initAffinity(affinity);
       }

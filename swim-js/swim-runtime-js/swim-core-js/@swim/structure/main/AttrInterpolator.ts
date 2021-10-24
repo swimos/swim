@@ -51,6 +51,7 @@ export const AttrInterpolator = (function (_super: typeof Interpolator) {
   };
 
   AttrInterpolator.prototype = Object.create(_super.prototype);
+  AttrInterpolator.prototype.constructor = AttrInterpolator;
 
   Object.defineProperty(AttrInterpolator.prototype, 0, {
     get(this: AttrInterpolator): Attr {

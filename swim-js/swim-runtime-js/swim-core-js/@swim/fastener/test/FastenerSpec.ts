@@ -18,14 +18,14 @@ import {Affinity, Fastener, GenericHierarchy} from "@swim/fastener";
 export class FastenerSpec extends Spec {
   @Test
   testFastener(exam: Exam): void {
-    const fastener = Fastener.create(null, "foo");
-    exam.equal(fastener.name, "foo");
+    const fastener = Fastener.create(null);
+    exam.equal(fastener.name, "");
   }
 
   @Test
   testFastenerDefine(exam: Exam): void {
-    const testFastener = Fastener.define({});
-    const fastener = testFastener.create(null, "foo");
+    const testFastener = Fastener.define("foo", {});
+    const fastener = testFastener.create(null);
     exam.equal(fastener.name, "foo");
   }
 

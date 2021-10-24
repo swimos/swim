@@ -37,6 +37,7 @@ export const ExpansionInterpolator = (function (_super: typeof Interpolator) {
   };
 
   ExpansionInterpolator.prototype = Object.create(_super.prototype);
+  ExpansionInterpolator.prototype.constructor = ExpansionInterpolator;
 
   return ExpansionInterpolator;
 })(Interpolator);

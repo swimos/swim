@@ -51,16 +51,16 @@ export interface ElementViewInit extends NodeViewInit {
   classList?: string[];
 }
 
-export interface ElementViewFactory<V extends ElementView = ElementView, U = AnyElementView> extends NodeViewFactory<V, U> {
+export interface ElementViewFactory<V extends ElementView = ElementView, U = AnyElementView<V>> extends NodeViewFactory<V, U> {
   fromTag(tag: string): V;
 }
 
-export interface ElementViewClass<V extends ElementView = ElementView, U = AnyElementView> extends NodeViewClass<V, U>, ElementViewFactory<V, U> {
+export interface ElementViewClass<V extends ElementView = ElementView, U = AnyElementView<V>> extends NodeViewClass<V, U>, ElementViewFactory<V, U> {
   readonly tag?: string;
   readonly namespace?: string;
 }
 
-export interface ElementViewConstructor<V extends ElementView = ElementView, U = AnyElementView> extends NodeViewConstructor<V, U>, ElementViewClass<V, U> {
+export interface ElementViewConstructor<V extends ElementView = ElementView, U = AnyElementView<V>> extends NodeViewConstructor<V, U>, ElementViewClass<V, U> {
 }
 
 export class ElementView extends NodeView implements StyleContext {

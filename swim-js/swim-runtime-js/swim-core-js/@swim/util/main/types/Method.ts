@@ -12,30 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+export type Methods<O> =
+  {[K in keyof O as O[K] extends (...args: any) => any ? K : never]: O[K]};
 
-export interface ConstraintKey {
-  /** @internal */
-  readonly id: number;
-}
+export type MethodParameters<O, K extends keyof Methods<O>> =
+  Methods<O>[K] extends (...args: infer P) => any ? P : never;
 
-/** @internal */
-export const ConstraintKey = (function () {
-  const ConstraintKey = {} as {
-    /** @internal */
-    idCount: number;
-
-    /** @internal */
-    nextId(): number;
-  };
-
-  (ConstraintKey as Mutable<typeof ConstraintKey>).idCount = 0;
-
-  ConstraintKey.nextId = function (): number {
-    const nextId = ConstraintKey.idCount + 1;
-    (ConstraintKey as Mutable<typeof ConstraintKey>).idCount = nextId;
-    return nextId;
-  };
-
-  return ConstraintKey;
-})();
+export type MethodReturnType<O, K extends keyof Methods<O>> =
+  Methods<O>[K] extends (...args: any) => infer R ? R : never;

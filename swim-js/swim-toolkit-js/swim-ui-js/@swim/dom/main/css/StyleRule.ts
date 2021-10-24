@@ -18,9 +18,10 @@ import {ToStyleString, ToCssValue} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
 import {StyleMapInit, StyleMap} from "./StyleMap";
 import {CssContext} from "./CssContext";
-import {CssRuleInit, CssRule} from "./CssRule";
+import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";
 
 export interface StyleRuleInit extends CssRuleInit {
+  extends?: {prototype: StyleRule<any>} | string | boolean | null;
   style?: StyleMapInit;
 
   willSetStyle?(propertyName: string, value: unknown, priority: string | undefined): void;
@@ -31,18 +32,14 @@ export interface StyleRuleInit extends CssRuleInit {
 
 export type StyleRuleDescriptor<O = unknown, I = {}> = ThisType<StyleRule<O> & I> & StyleRuleInit & Partial<I>;
 
-export interface StyleRuleClass<F extends StyleRule<any> = StyleRule<any>> {
-  /** @internal */
-  prototype: F;
+export interface StyleRuleClass<F extends StyleRule<any> = StyleRule<any>> extends CssRuleClass<F> {
+}
 
-  create(owner: FastenerOwner<F>, ruleName: string): F;
+export interface StyleRuleFactory<F extends StyleRule<any> = StyleRule<any>> extends StyleRuleClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): StyleRuleFactory<F> & I;
 
-  construct(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): StyleRuleClass<F> & I;
-
-  define<O>(descriptor: StyleRuleDescriptor<O>): StyleRuleClass<StyleRule<any>>;
-  define<O, I = {}>(descriptor: StyleRuleDescriptor<O, I>): StyleRuleClass<StyleRule<any> & I>;
+  define<O>(className: string, descriptor: StyleRuleDescriptor<O>): StyleRuleFactory<StyleRule<any>>;
+  define<O, I = {}>(className: string, descriptor: StyleRuleDescriptor<O, I>): StyleRuleFactory<StyleRule<any> & I>;
 
   <O>(descriptor: StyleRuleDescriptor<O>): PropertyDecorator;
   <O, I = {}>(descriptor: StyleRuleDescriptor<O, I>): PropertyDecorator;
@@ -88,7 +85,7 @@ export interface StyleRule<O = unknown> extends CssRule<O>, StyleMap {
 }
 
 export const StyleRule = (function (_super: typeof CssRule) {
-  const StyleRule: StyleRuleClass = _super.extend();
+  const StyleRule: StyleRuleFactory = _super.extend("StyleRule");
 
   Object.defineProperty(StyleRule.prototype, "selector", {
     get: function (this: StyleRule): string {
@@ -204,9 +201,9 @@ export const StyleRule = (function (_super: typeof CssRule) {
 
   StyleMap.define(StyleRule.prototype);
 
-  StyleRule.construct = function <F extends StyleRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
+  StyleRule.construct = function <F extends StyleRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>): F {
     if (rule === null) {
-      rule = function StyleRule(property: string, value: unknown): unknown | FastenerOwner<F> {
+      rule = function (property: string, value: unknown): unknown | FastenerOwner<F> {
         if (value === void 0) {
           return rule!.getStyle(property);
          } else {
@@ -214,14 +211,15 @@ export const StyleRule = (function (_super: typeof CssRule) {
           return rule!.owner;
         }
       } as F;
+      delete (rule as Partial<Mutable<F>>).name; // don't clobber prototype name
       Object.setPrototypeOf(rule, ruleClass.prototype);
     }
-    rule = _super.construct(ruleClass, rule, owner, ruleName) as F;
+    rule = _super.construct(ruleClass, rule, owner) as F;
     return rule;
   };
 
-  StyleRule.define = function <O>(descriptor: StyleRuleDescriptor<O>): StyleRuleClass<StyleRule<any>> {
-    let superClass = descriptor.extends as StyleRuleClass | undefined;
+  StyleRule.define = function <O>(className: string, descriptor: StyleRuleDescriptor<O>): StyleRuleFactory<StyleRule<any>> {
+    let superClass = descriptor.extends as StyleRuleFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let css = descriptor.css;
@@ -236,15 +234,15 @@ export const StyleRule = (function (_super: typeof CssRule) {
       superClass = this;
     }
 
-    const ruleClass = superClass.extend(descriptor);
+    const ruleClass = superClass.extend(className, descriptor);
 
     if (typeof css === "function") {
       ruleClass.prototype.initCss = css;
       css = void 0;
     }
 
-    ruleClass.construct = function (ruleClass: {prototype: StyleRule<any>}, rule: StyleRule<O> | null, owner: O, ruleName: string): StyleRule<O> {
-      rule = superClass!.construct(ruleClass, rule, owner, ruleName);
+    ruleClass.construct = function (ruleClass: {prototype: StyleRule<any>}, rule: StyleRule<O> | null, owner: O): StyleRule<O> {
+      rule = superClass!.construct(ruleClass, rule, owner);
 
       if (affinity !== void 0) {
         rule.initAffinity(affinity);

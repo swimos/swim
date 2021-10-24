@@ -51,6 +51,7 @@ export const Mapping = (function (_super: typeof Function) {
   };
 
   Mapping.prototype = Object.create(_super.prototype);
+  Mapping.prototype.constructor = Mapping;
 
   Mapping.prototype.equivalentTo = function (that: unknown, epsilon?: number): boolean {
     if (this === that) {

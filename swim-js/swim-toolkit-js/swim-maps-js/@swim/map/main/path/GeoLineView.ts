@@ -14,8 +14,7 @@
 
 import type {Class} from "@swim/util";
 import {AnyLength, Length, R2Box} from "@swim/math";
-import {Affinity, Property} from "@swim/fastener";
-import type {GeoPath} from "@swim/geo";
+import {Property} from "@swim/fastener";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
@@ -38,68 +37,19 @@ export interface GeoLineViewInit extends GeoPathViewInit, StrokeViewInit {
 export class GeoLineView extends GeoPathView implements StrokeView {
   override readonly observerType?: Class<GeoLineViewObserver>;
 
-  protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetStroke !== void 0) {
-        observer.viewWillSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
-  protected onSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    this.requireUpdate(View.NeedsRender);
-  }
-
-  protected didSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetStroke !== void 0) {
-        observer.viewDidSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
   @ThemeAnimator<GeoLineView, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     inherits: true,
     updateFlags: View.NeedsRender,
     willSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.willSetStroke(newStroke, oldStroke);
+      this.owner.callObservers("viewWillSetStroke", newStroke, oldStroke, this.owner);
     },
     didSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.onSetStroke(newStroke, oldStroke);
-      this.owner.didSetStroke(newStroke, oldStroke);
+      this.owner.callObservers("viewDidSetStroke", newStroke, oldStroke, this.owner);
     },
   })
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
-
-  protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetStrokeWidth !== void 0) {
-        observer.viewWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
-  protected onSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    this.requireUpdate(View.NeedsRender);
-  }
-
-  protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetStrokeWidth !== void 0) {
-        observer.viewDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
 
   @ThemeAnimator<GeoLineView, Length | null, AnyLength | null>({
     type: Length,
@@ -107,11 +57,10 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     inherits: true,
     updateFlags: View.NeedsRender,
     willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.willSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      this.owner.callObservers("viewWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
     didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.onSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
-      this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      this.owner.callObservers("viewDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
@@ -119,18 +68,11 @@ export class GeoLineView extends GeoPathView implements StrokeView {
   @Property({type: Number})
   readonly hitWidth!: Property<this, number | undefined>;
 
-  protected override onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
-    super.onSetGeoPath(newGeoPath, oldGeoPath);
-    if (this.geoCentroid.hasAffinity(Affinity.Intrinsic)) {
-      this.geoCentroid.setState(newGeoPath.centroid(), Affinity.Intrinsic);
-    }
-  }
-
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
-      this.renderLine(renderer.context, this.viewFrame);
+      this.renderLine(renderer.context, viewContext.viewFrame);
     }
   }
 
@@ -163,7 +105,7 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
-      return this.hitTestLine(p.x, p.y, renderer.context, this.viewFrame);
+      return this.hitTestLine(p.x, p.y, renderer.context, viewContext.viewFrame);
     }
     return null;
   }

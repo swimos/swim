@@ -27,7 +27,7 @@ export interface StorageProvider<C extends Controller, S extends StorageService<
 }
 
 export const StorageProvider = (function (_super: typeof Provider) {
-  const StorageProvider = _super.extend() as ProviderClass<StorageProvider<any, any>>;
+  const StorageProvider = _super.extend("StorageProvider") as ProviderClass<StorageProvider<any, any>>;
 
   StorageProvider.prototype.get = function <C extends Controller, S extends StorageService<C> | null | undefined>(key: string): string | undefined {
     let service: StorageService<C> | null | undefined = this.service;

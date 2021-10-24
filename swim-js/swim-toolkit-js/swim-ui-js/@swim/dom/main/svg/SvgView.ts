@@ -26,7 +26,7 @@ import {
   AnyColor,
   Color,
 } from "@swim/style";
-import {View} from "@swim/view";
+import {ViewFactory, View} from "@swim/view";
 import {AttributeAnimator} from "../animator/AttributeAnimator";
 import {StyleAnimator} from "../animator/StyleAnimator";
 import type {
@@ -194,15 +194,15 @@ export interface SvgViewTagMap {
   view: SvgView;
 }
 
-export interface SvgViewFactory<V extends SvgView = SvgView, U = AnySvgView> extends ElementViewFactory<V, U> {
+export interface SvgViewFactory<V extends SvgView = SvgView, U = AnySvgView<V>> extends ElementViewFactory<V, U> {
 }
 
-export interface SvgViewClass<V extends SvgView = SvgView, U = AnySvgView> extends ElementViewClass<V, U>, SvgViewFactory<V, U> {
+export interface SvgViewClass<V extends SvgView = SvgView, U = AnySvgView<V>> extends ElementViewClass<V, U>, SvgViewFactory<V, U> {
   readonly tag: string;
   readonly namespace: string;
 }
 
-export interface SvgViewConstructor<V extends SvgView = SvgView, U = AnySvgView> extends ElementViewConstructor<V, U>, SvgViewClass<V, U> {
+export interface SvgViewConstructor<V extends SvgView = SvgView, U = AnySvgView<V>> extends ElementViewConstructor<V, U>, SvgViewClass<V, U> {
   readonly tag: string;
   readonly namespace: string;
 }
@@ -216,7 +216,7 @@ export class SvgView extends ElementView {
 
   override readonly node!: SVGElement;
 
-  override setChild<V extends NodeView>(key: string, newChild: AnyNodeView<V> | null): View | null;
+  override setChild<V extends NodeView>(key: string, newChild: V | ViewFactory<V> | null): View | null;
   override setChild(key: string, newChild: AnyNodeView | keyof SvgViewTagMap | null): View | null;
   override setChild(key: string, newChild: AnyNodeView | keyof SvgViewTagMap | null): View | null {
     if (typeof newChild === "string") {
@@ -225,7 +225,7 @@ export class SvgView extends ElementView {
     return super.setChild(key, newChild);
   }
 
-  override appendChild<V extends NodeView>(child: AnyNodeView<V>, key?: string): V;
+  override appendChild<V extends NodeView>(child: V | ViewFactory<V>, key?: string): V;
   override appendChild<K extends keyof SvgViewTagMap>(tag: K, key?: string): SvgViewTagMap[K];
   override appendChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView;
   override appendChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView {
@@ -235,7 +235,7 @@ export class SvgView extends ElementView {
     return super.appendChild(child, key);
   }
 
-  override prependChild<V extends NodeView>(child: AnyNodeView<V>, key?: string): V;
+  override prependChild<V extends NodeView>(child: V | ViewFactory<V>, key?: string): V;
   override prependChild<K extends keyof SvgViewTagMap>(tag: K, key?: string): SvgViewTagMap[K];
   override prependChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView;
   override prependChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView {
@@ -245,7 +245,7 @@ export class SvgView extends ElementView {
     return super.prependChild(child, key);
   }
 
-  override insertChild<V extends NodeView>(child: AnyNodeView<V>, target: View | Node | null, key?: string): V;
+  override insertChild<V extends NodeView>(child: V | ViewFactory<V>, target: View | Node | null, key?: string): V;
   override insertChild<K extends keyof SvgViewTagMap>(tag: K, target: View | Node | null, key?: string): SvgViewTagMap[K];
   override insertChild(child: AnyNodeView | keyof SvgViewTagMap, target: View | Node | null, key?: string): NodeView;
   override insertChild(child: AnyNodeView | keyof SvgViewTagMap, target: View | Node | null, key?: string): NodeView {
@@ -253,6 +253,15 @@ export class SvgView extends ElementView {
       child = SvgView.fromTag(child);
     }
     return super.insertChild(child, target, key);
+  }
+
+  override replaceChild<V extends NodeView>(newChild: NodeView, oldChild: V): V;
+  override replaceChild<V extends NodeView>(newChild: AnyNodeView | keyof SvgViewTagMap, oldChild: V): V;
+  override replaceChild(newChild: AnyNodeView | keyof SvgViewTagMap, oldChild: NodeView): NodeView {
+    if (typeof newChild === "string") {
+      newChild = SvgView.fromTag(newChild);
+    }
+    return super.replaceChild(newChild, oldChild);
   }
 
   @AttributeAnimator({attributeName: "alignment-baseline", type: String})
@@ -780,7 +789,7 @@ export class SvgViewTagFactory<V extends SvgView> implements SvgViewFactory<V> {
     return view;
   }
 
-  fromAny(value: AnySvgView): V {
+  fromAny(value: AnySvgView<V>): V {
     return this.factory.fromAny(value);
   }
 }

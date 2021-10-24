@@ -20,7 +20,7 @@ import {IconView} from "./"; // forward import
 
 /** @internal */
 export const IconGraphicsAnimator = (function (_super: typeof ThemeAnimator) {
-  const IconGraphicsAnimator = _super.extend() as ThemeAnimatorClass<ThemeAnimator<any, Graphics | null | undefined, Graphics | null | undefined>>;
+  const IconGraphicsAnimator = _super.extend("IconGraphicsAnimator") as ThemeAnimatorClass<ThemeAnimator<any, Graphics | null | undefined, Graphics | null | undefined>>;
 
   IconGraphicsAnimator.prototype.fromAny = function (this: ThemeAnimator<unknown, Graphics | null>, value: Graphics | null): Graphics | null {
     const iconView = this.owner;

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {PropertyClass, Property} from "./Property";
+import {PropertyFactory, Property} from "./Property";
 
 /** @internal */
 export const BooleanProperty = (function (_super: typeof Property) {
-  const BooleanProperty = _super.extend() as PropertyClass<Property<any, boolean | null | undefined, boolean | string | null | undefined>>;
+  const BooleanProperty = _super.extend("BooleanProperty") as PropertyFactory<Property<any, boolean | null | undefined, boolean | string | null | undefined>>;
 
   BooleanProperty.prototype.fromAny = function (value: boolean | string | null | undefined): boolean | null | undefined {
     return !!value;

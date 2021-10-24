@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {TraitModelType, Trait, TraitFastener} from "@swim/model";
+import type {MemberFastenerClass} from "@swim/fastener";
+import {Model, Trait, TraitRef} from "@swim/model";
 import {LeafTrait} from "../leaf/LeafTrait";
 import type {RowTraitObserver} from "./RowTraitObserver";
 import {TableTrait} from "../"; // forward import
@@ -21,101 +22,25 @@ import {TableTrait} from "../"; // forward import
 export class RowTrait extends LeafTrait {
   override readonly observerType?: Class<RowTraitObserver>;
 
-  protected initTree(treeTrait: TableTrait): void {
-    // hook
-  }
-
-  protected attachTree(treeTrait: TableTrait): void {
-    // hook
-  }
-
-  protected detachTree(treeTrait: TableTrait): void {
-    // hook
-  }
-
-  protected willSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetTree !== void 0) {
-        traitObserver.traitWillSetTree(newTreeTrait, oldTreeTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-    if (oldTreeTrait !== null) {
-      this.detachTree(oldTreeTrait);
-    }
-    if (newTreeTrait !== null) {
-      this.attachTree(newTreeTrait);
-      this.initTree(newTreeTrait);
-    }
-  }
-
-  protected didSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetTree !== void 0) {
-        traitObserver.traitDidSetTree(newTreeTrait, oldTreeTrait, targetTrait, this);
-      }
-    }
-  }
-
-  @TraitFastener<RowTrait, TableTrait>({
-    // avoid cyclic reference to type: TableTrait
-    sibling: false,
-    willSetTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-      this.owner.willSetTree(newTreeTrait, oldTreeTrait, targetTrait);
+  @TraitRef<RowTrait, TableTrait>({
+    // avoid cyclic static reference to type: TableTrait
+    binds: true,
+    willAttachTrait(treeTrait: TableTrait): void {
+      this.owner.callObservers("traitWillAttachTree", treeTrait, this.owner);
     },
-    onSetTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-      this.owner.onSetTree(newTreeTrait, oldTreeTrait, targetTrait);
+    didDetachTrait(treeTrait: TableTrait): void {
+      this.owner.callObservers("traitDidDetachTree", treeTrait, this.owner);
     },
-    didSetTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-      this.owner.didSetTree(newTreeTrait, oldTreeTrait, targetTrait);
+    detectModel(model: Model): TableTrait | null {
+      return model.getTrait(TableTrait);
+    },
+    detectTrait(trait: Trait): TableTrait | null {
+      return trait instanceof TableTrait ? trait : null;
+    },
+    createTrait(): TableTrait {
+      return TableTrait.create();
     },
   })
-  readonly tree!: TraitFastener<this, TableTrait>;
-
-  protected detectTreeTrait(trait: Trait): TableTrait | null {
-    return trait instanceof TableTrait ? trait : null;
-  }
-
-  protected override detectTraits(model: TraitModelType<this>): void {
-    const traits = model.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      const trait = traits[i]!;
-      const cellTrait = this.detectCellTrait(trait);
-      if (cellTrait !== null) {
-        this.insertCell(cellTrait);
-      }
-      if (this.tree.trait === null) {
-        const treeTrait = this.detectTreeTrait(trait);
-        if (treeTrait !== null) {
-          this.tree.setTrait(treeTrait);
-        }
-      }
-    }
-  }
-
-  /** @protected */
-  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
-    super.onInsertTrait(trait, targetTrait);
-    if (this.tree.trait === null) {
-      const treeTrait = this.detectTreeTrait(trait);
-      if (treeTrait !== null) {
-        this.tree.setTrait(treeTrait, targetTrait);
-      }
-    }
-  }
-
-  /** @protected */
-  override onRemoveTrait(trait: Trait): void {
-    super.onRemoveTrait(trait);
-    const treeTrait = this.detectTreeTrait(trait);
-    if (treeTrait !== null && this.tree.trait === treeTrait) {
-      this.tree.setTrait(null);
-    }
-  }
+  readonly tree!: TraitRef<this, TableTrait>;
+  static readonly tree: MemberFastenerClass<RowTrait, "tree">;
 }

@@ -37,6 +37,7 @@ export const PresenceInterpolator = (function (_super: typeof Interpolator) {
   };
 
   PresenceInterpolator.prototype = Object.create(_super.prototype);
+  PresenceInterpolator.prototype.constructor = PresenceInterpolator;
 
   return PresenceInterpolator;
 })(Interpolator);

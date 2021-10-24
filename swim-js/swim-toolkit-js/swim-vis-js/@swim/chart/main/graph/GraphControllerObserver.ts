@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {GraphicsView} from "@swim/graphics";
-import type {ControllerObserver, ControllerFastener} from "@swim/controller";
+import type {ControllerObserver} from "@swim/controller";
 import type {DataPointView} from "../data/DataPointView";
 import type {DataPointTrait} from "../data/DataPointTrait";
 import type {DataPointController} from "../data/DataPointController";
@@ -25,44 +25,44 @@ import type {GraphView} from "./GraphView";
 import type {GraphTrait} from "./GraphTrait";
 import type {GraphController} from "./GraphController";
 
-export interface GraphControllerObserver<X, Y, C extends GraphController<X, Y> = GraphController<X, Y>> extends ControllerObserver<C> {
-  controllerWillSetGraphTrait?(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, controller: C): void;
+export interface GraphControllerObserver<X = unknown, Y = unknown, C extends GraphController<X, Y> = GraphController<X, Y>> extends ControllerObserver<C> {
+  controllerWillAttachGraphTrait?(graphTrait: GraphTrait<X, Y> | null, controller: C): void;
 
-  controllerDidSetGraphTrait?(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, controller: C): void;
+  controllerDidDetachGraphTrait?(graphTrait: GraphTrait<X, Y>, controller: C): void;
 
-  controllerWillSetGraphView?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, controller: C): void;
+  controllerWillAttachGraphView?(graphView: GraphView<X, Y>, controller: C): void;
 
-  controllerDidSetGraphView?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, controller: C): void;
+  controllerDidDetachGraphView?(graphView: GraphView<X, Y>, controller: C): void;
 
-  controllerWillSetPlot?(newPlotController: PlotController<X, Y> | null, oldPlotController: PlotController<X, Y> | null, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerWillAttachPlot?(plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerDidSetPlot?(newPlotController: PlotController<X, Y> | null, oldPlotController: PlotController<X, Y> | null, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerDidDetachPlot?(plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerWillSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerWillAttachPlotTrait?(plotTrait: PlotTrait<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerDidSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerDidDetachPlotTrait?(plotTrait: PlotTrait<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerWillSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerWillAttachPlotView?(plotView: PlotView<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerDidSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerDidDetachPlotView?(plotView: PlotView<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerWillSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerWillAttachDataSetTrait?(dataSetTrait: DataSetTrait<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerDidSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerDidDetachDataSetTrait?(dataSetTrait: DataSetTrait<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPoint?(newDataPointController: DataPointController<X, Y> | null, oldDataPointController: DataPointController<X, Y> | null, dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerWillAttachDataPoint?(dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPoint?(newDataPointController: DataPointController<X, Y> | null, oldDataPointController: DataPointController<X, Y> | null, dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerDidDetachDataPoint?(dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerWillAttachDataPointTrait?(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerDidDetachDataPointTrait?(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerWillAttachDataPointView?(dataPointView: DataPointView<X, Y>, dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerDidDetachDataPointView?(dataPointView: DataPointView<X, Y>, dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllertWillSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerWillAttachDataPointLabelView?(labelView: GraphicsView, dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ControllerFastener<PlotController<X, Y>, DataPointController<X, Y>>, plotFastener: ControllerFastener<C, PlotController<X, Y>>): void;
+  controllerDidDetachDataPointLabelView?(labelView: GraphicsView, dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>, controller: C): void;
 }

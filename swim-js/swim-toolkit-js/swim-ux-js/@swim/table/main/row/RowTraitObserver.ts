@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Trait} from "@swim/model";
 import type {LeafTraitObserver} from "../leaf/LeafTraitObserver";
 import type {RowTrait} from "./RowTrait";
 import type {TableTrait} from "../table/TableTrait";
 
-export interface RowTraitObserver<R extends RowTrait = RowTrait> extends LeafTraitObserver<R> {
-  traitWillSetTree?(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null, trait: R): void;
+export interface RowTraitObserver<T extends RowTrait = RowTrait> extends LeafTraitObserver<T> {
+  traitWillAttachTree?(treeTrait: TableTrait, trait: T): void;
 
-  traitDidSetTree?(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachTree?(treeTrait: TableTrait, trait: T): void;
 }

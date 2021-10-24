@@ -13,16 +13,11 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
-import {
-  Look,
-  ThemeAnimator,
-  ExpansionThemeAnimator,
-  ThemeConstraintAnimator,
-} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
+import {Look, ThemeAnimator, ExpansionThemeAnimator, ThemeConstraintAnimator} from "@swim/theme";
+import {ViewContextType, ViewFlags, View, ViewSet} from "@swim/view";
 import {HtmlViewClass, HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {ColView} from "../col/ColView";
@@ -31,7 +26,6 @@ import type {HeaderViewObserver} from "./HeaderViewObserver";
 export class HeaderView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    this.colFasteners = [];
     this.initHeader();
   }
 
@@ -47,19 +41,7 @@ export class HeaderView extends HtmlView {
   @Property({type: TableLayout, inherits: true, state: null, updateFlags: View.NeedsLayout})
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
-  protected didSetDepth(newDepth: number, oldDepth: number): void {
-    // hook
-  }
-
-  @Property<HeaderView, number>({
-    type: Number,
-    inherits: true,
-    state: 0,
-    updateFlags: View.NeedsLayout,
-    didSetState(newDepth: number, oldDepth: number): void {
-      this.owner.didSetDepth(newDepth, oldDepth);
-    },
-  })
+  @Property({type: Number, inherits: true, state: 0, updateFlags: View.NeedsLayout})
   readonly depth!: Property<this, number>;
 
   @ThemeConstraintAnimator({type: Length, inherits: true, state: null, updateFlags: View.NeedsLayout})
@@ -99,149 +81,26 @@ export class HeaderView extends HtmlView {
     this.setChild(key, colView);
   }
 
-  insertCol(colView: ColView, targetView: View | null = null): void {
-    const colFasteners = this.colFasteners as ViewFastener<this, ColView>[];
-    let targetIndex = colFasteners.length;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colFastener = colFasteners[i]!;
-      if (colFastener.view === colView) {
-        return;
-      } else if (colFastener.view === targetView) {
-        targetIndex = i;
-      }
-    }
-    const colFastener = this.createColFastener(colView);
-    colFasteners.splice(targetIndex, 0, colFastener);
-    colFastener.setView(colView, targetView);
-    if (this.mounted) {
-      colFastener.mount();
-    }
-  }
-
-  removeCol(colView: ColView): void {
-    const colFasteners = this.colFasteners as ViewFastener<this, ColView>[];
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colFastener = colFasteners[i]!;
-      if (colFastener.view === colView) {
-        colFastener.setView(null);
-        if (this.mounted) {
-          colFastener.unmount();
-        }
-        colFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected initCol(colView: ColView, colFastener: ViewFastener<this, ColView>): void {
-    colView.display.setState("none", Affinity.Intrinsic);
-    colView.position.setState("absolute", Affinity.Intrinsic);
-    colView.left.setState(0, Affinity.Intrinsic);
-    colView.top.setState(0, Affinity.Intrinsic);
-    colView.width.setState(0, Affinity.Intrinsic);
-    colView.height.setState(this.height.state, Affinity.Intrinsic);
-  }
-
-  protected attachCol(colView: ColView, colFastener: ViewFastener<this, ColView>): void {
-    // hook
-  }
-
-  protected detachCol(colView: ColView, colFastener: ViewFastener<this, ColView>): void {
-    // hook
-  }
-
-  protected willSetCol(newColView: ColView | null, oldColView: ColView | null,
-                       targetView: View | null, colFastener: ViewFastener<this, ColView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetCol !== void 0) {
-        observer.viewWillSetCol(newColView, oldColView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetCol(newColView: ColView | null, oldColView: ColView | null,
-                     targetView: View | null, colFastener: ViewFastener<this, ColView>): void {
-    if (oldColView !== null) {
-      this.detachCol(oldColView, colFastener);
-    }
-    if (newColView !== null) {
-      this.attachCol(newColView, colFastener);
-      this.initCol(newColView, colFastener);
-    }
-  }
-
-  protected didSetCol(newColView: ColView | null, oldColView: ColView | null,
-                      targetView: View | null, colFastener: ViewFastener<this, ColView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetCol !== void 0) {
-        observer.viewDidSetCol(newColView, oldColView, targetView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static ColFastener = ViewFastener.define<HeaderView, ColView>({
+  @ViewSet<HeaderView, ColView>({
     type: ColView,
-    child: false,
-    willSetView(newColView: ColView | null, oldColView: ColView | null, targetView: View | null): void {
-      this.owner.willSetCol(newColView, oldColView, targetView, this);
+    binds: true,
+    initView(colView: ColView): void {
+      colView.display.setState("none", Affinity.Intrinsic);
+      colView.position.setState("absolute", Affinity.Intrinsic);
+      colView.left.setState(0, Affinity.Intrinsic);
+      colView.top.setState(0, Affinity.Intrinsic);
+      colView.width.setState(0, Affinity.Intrinsic);
+      colView.height.setState(this.owner.height.state, Affinity.Intrinsic);
     },
-    onSetView(newColView: ColView | null, oldColView: ColView | null, targetView: View | null): void {
-      this.owner.onSetCol(newColView, oldColView, targetView, this);
+    willAttachView(colView: ColView, targetView: View | null): void {
+      this.owner.callObservers("viewWillAttachCol", colView, targetView, this.owner);
     },
-    didSetView(newColView: ColView | null, oldColView: ColView | null, targetView: View | null): void {
-      this.owner.didSetCol(newColView, oldColView, targetView, this);
+    didDetachView(colView: ColView): void {
+      this.owner.callObservers("viewDidDetachCol", colView, this.owner);
     },
-  });
-
-  protected createColFastener(colView: ColView): ViewFastener<this, ColView> {
-    return HeaderView.ColFastener.create(this, colView.key ?? "col");
-  }
-
-  /** @internal */
-  readonly colFasteners: ReadonlyArray<ViewFastener<this, ColView>>;
-
-  /** @internal */
-  protected mountColFasteners(): void {
-    const colFasteners = this.colFasteners;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colFastener = colFasteners[i]!;
-      colFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountColFasteners(): void {
-    const colFasteners = this.colFasteners;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colFastener = colFasteners[i]!;
-      colFastener.unmount();
-    }
-  }
-
-  protected detectCol(view: View): ColView | null {
-    return view instanceof ColView ? view : null;
-  }
-
-  protected override onInsertChild(childView: View, targetView: View | null): void {
-    super.onInsertChild(childView, targetView);
-    const colView = this.detectCol(childView);
-    if (colView !== null) {
-      this.insertCol(colView, targetView);
-    }
-  }
-
-  protected override onRemoveChild(childView: View): void {
-    super.onRemoveChild(childView);
-    const colView = this.detectCol(childView);
-    if (colView !== null) {
-      this.removeCol(colView);
-    }
-  }
+  })
+  readonly cols!: ViewSet<this, ColView>;
+  static readonly cols: MemberFastenerClass<HeaderView, "cols">;
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
@@ -301,17 +160,5 @@ export class HeaderView extends HtmlView {
       displayChild.call(this, childView, displayFlags, viewContext);
     }
     super.displayChildren(displayFlags, viewContext, layoutChildView);
-  }
-
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountColFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountColFasteners();
-    super.unmountFasteners();
   }
 }

@@ -16,14 +16,7 @@ import {Class, Arrays, ObserverType} from "@swim/util";
 import {GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {
-  ViewContextType,
-  ViewContext,
-  ViewFlags,
-  View,
-  ViewWillProject,
-  ViewDidProject,
-} from "@swim/view";
+import {ViewContextType, ViewContext, ViewFlags, View, ViewWillProject, ViewDidProject} from "@swim/view";
 import {GraphicsViewInit, GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import type {GeoViewport} from "./GeoViewport";
 import type {GeoViewContext} from "./GeoViewContext";
@@ -46,13 +39,15 @@ export abstract class GeoView extends GraphicsView {
 
   override cascadeProcess(processFlags: ViewFlags, baseViewContext: ViewContext): void {
     const viewContext = this.extendViewContext(baseViewContext);
-    processFlags &= ~View.NeedsProcess;
-    processFlags |= this.flags & View.UpdateMask;
-    processFlags = this.needsProcess(processFlags, viewContext);
-    if ((processFlags & View.ProcessMask) !== 0) {
-      let cascadeFlags = processFlags;
-      this.setFlags(this.flags & ~View.NeedsProcess | (View.TraversingFlag | View.ProcessingFlag));
-      try {
+    const outerViewContext = ViewContext.current;
+    try {
+      ViewContext.current = viewContext;
+      processFlags &= ~View.NeedsProcess;
+      processFlags |= this.flags & View.UpdateMask;
+      processFlags = this.needsProcess(processFlags, viewContext);
+      if ((processFlags & View.ProcessMask) !== 0) {
+        let cascadeFlags = processFlags;
+        this.setFlags(this.flags & ~View.NeedsProcess | (View.TraversingFlag | View.ProcessingFlag | View.ContextualFlag));
         this.willProcess(cascadeFlags, viewContext);
         if (((this.flags | processFlags) & View.NeedsResize) !== 0) {
           cascadeFlags |= View.NeedsResize;
@@ -106,7 +101,9 @@ export abstract class GeoView extends GraphicsView {
         }
 
         if ((cascadeFlags & View.ProcessMask) !== 0) {
+          this.setFlags(this.flags & ~View.ContextualFlag);
           this.processChildren(cascadeFlags, viewContext, this.processChild);
+          this.setFlags(this.flags | View.ContextualFlag);
         }
 
         if ((cascadeFlags & View.NeedsProject) !== 0) {
@@ -128,9 +125,10 @@ export abstract class GeoView extends GraphicsView {
           this.didResize(viewContext);
         }
         this.didProcess(cascadeFlags, viewContext);
-      } finally {
-        this.setFlags(this.flags & ~(View.TraversingFlag | View.ProcessingFlag));
       }
+    } finally {
+      this.setFlags(this.flags & ~(View.TraversingFlag | View.ProcessingFlag | View.ContextualFlag));
+      ViewContext.current = outerViewContext;
     }
   }
 

@@ -19,26 +19,24 @@ import {Uri} from "@swim/uri";
 import type {DownlinkObserver} from "../downlink/Downlink";
 import type {EventDownlink} from "../downlink/EventDownlink";
 import type {WarpRef} from "../ref/WarpRef";
-import {DownlinkFastenerInit, DownlinkFastener} from "./DownlinkFastener";
+import {DownlinkFastenerInit, DownlinkFastenerClass, DownlinkFastener} from "./DownlinkFastener";
 
 export interface EventDownlinkFastenerInit extends DownlinkFastenerInit, DownlinkObserver {
+  extends?: {prototype: EventDownlinkFastener<any>} | string | boolean | null;
+
   initDownlink?(downlink: EventDownlink): EventDownlink;
 }
 
 export type EventDownlinkFastenerDescriptor<O = unknown, I = {}> = ThisType<EventDownlinkFastener<O> & I> & EventDownlinkFastenerInit & Partial<I>;
 
-export interface EventDownlinkFastenerClass<F extends EventDownlinkFastener<any> = EventDownlinkFastener<any>> {
-  /** @internal */
-  prototype: F;
+export interface EventDownlinkFastenerClass<F extends EventDownlinkFastener<any> = EventDownlinkFastener<any>> extends DownlinkFastenerClass<F> {
+}
 
-  create(owner: FastenerOwner<F>, fastenerName: string): F;
+export interface EventDownlinkFastenerFactory<F extends EventDownlinkFastener<any> = EventDownlinkFastener<any>> extends EventDownlinkFastenerClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): EventDownlinkFastenerFactory<F> & I;
 
-  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): EventDownlinkFastenerClass<F> & I;
-
-  define<O>(descriptor: EventDownlinkFastenerDescriptor<O>): EventDownlinkFastenerClass<EventDownlinkFastener<any>>;
-  define<O, I = {}>(descriptor: EventDownlinkFastenerDescriptor<O, I>): EventDownlinkFastenerClass<EventDownlinkFastener<any> & I>;
+  define<O>(className: string, descriptor: EventDownlinkFastenerDescriptor<O>): EventDownlinkFastenerFactory<EventDownlinkFastener<any>>;
+  define<O, I = {}>(className: string, descriptor: EventDownlinkFastenerDescriptor<O, I>): EventDownlinkFastenerFactory<EventDownlinkFastener<any> & I>;
 
   <O>(descriptor: EventDownlinkFastenerDescriptor<O>): PropertyDecorator;
   <O, I = {}>(descriptor: EventDownlinkFastenerDescriptor<O, I>): PropertyDecorator;
@@ -59,19 +57,19 @@ export interface EventDownlinkFastener<O = unknown> extends DownlinkFastener<O> 
 }
 
 export const EventDownlinkFastener = (function (_super: typeof DownlinkFastener) {
-  const EventDownlinkFastener: EventDownlinkFastenerClass = _super.extend();
+  const EventDownlinkFastener: EventDownlinkFastenerFactory = _super.extend("EventDownlinkFastener");
 
   EventDownlinkFastener.prototype.createDownlink = function <V, VU>(this: EventDownlinkFastener<unknown>, warp: WarpRef): EventDownlink {
     return warp.downlink();
   };
 
-  EventDownlinkFastener.construct = function <F extends EventDownlinkFastener<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
-    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+  EventDownlinkFastener.construct = function <F extends EventDownlinkFastener<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
+    fastener = _super.construct(fastenerClass, fastener, owner) as F;
     return fastener;
   };
 
-  EventDownlinkFastener.define = function <O>(descriptor: EventDownlinkFastenerDescriptor<O>): EventDownlinkFastenerClass<EventDownlinkFastener<any>> {
-    let superClass = descriptor.extends as EventDownlinkFastenerClass | undefined;
+  EventDownlinkFastener.define = function <O>(className: string, descriptor: EventDownlinkFastenerDescriptor<O>): EventDownlinkFastenerFactory<EventDownlinkFastener<any>> {
+    let superClass = descriptor.extends as EventDownlinkFastenerFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let hostUri = descriptor.hostUri;
@@ -94,10 +92,10 @@ export const EventDownlinkFastener = (function (_super: typeof DownlinkFastener)
       superClass = this;
     }
 
-    const fastenerClass = superClass.extend(descriptor);
+    const fastenerClass = superClass.extend(className, descriptor);
 
-    fastenerClass.construct = function (fastenerClass: {prototype: EventDownlinkFastener<any>}, fastener: EventDownlinkFastener<O> | null, owner: O, fastenerName: string): EventDownlinkFastener<O> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
+    fastenerClass.construct = function (fastenerClass: {prototype: EventDownlinkFastener<any>}, fastener: EventDownlinkFastener<O> | null, owner: O): EventDownlinkFastener<O> {
+      fastener = superClass!.construct(fastenerClass, fastener, owner);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);
       }

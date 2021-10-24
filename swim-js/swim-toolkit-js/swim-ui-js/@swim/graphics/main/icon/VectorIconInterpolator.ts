@@ -69,6 +69,7 @@ export const VectorIconInterpolator = (function (_super: typeof Interpolator) {
   };
 
   VectorIconInterpolator.prototype = Object.create(_super.prototype);
+  VectorIconInterpolator.prototype.constructor = VectorIconInterpolator;
 
   Object.defineProperty(VectorIconInterpolator.prototype, 0, {
     get(this: VectorIconInterpolator): VectorIcon {

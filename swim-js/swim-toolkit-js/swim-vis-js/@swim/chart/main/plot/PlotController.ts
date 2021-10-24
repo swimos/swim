@@ -14,7 +14,7 @@
 
 import {Class, AnyTiming, Timing} from "@swim/util";
 import {Property} from "@swim/fastener";
-import type {TraitViewFastener} from "@swim/controller";
+import type {TraitViewRef} from "@swim/controller";
 import {DataSetController} from "../data/DataSetController";
 import type {PlotView} from "./PlotView";
 import type {PlotTrait} from "./PlotTrait";
@@ -26,15 +26,15 @@ import {BubblePlotController} from "../"; // forward import
 import {LinePlotController} from "../"; // forward import
 import {AreaPlotController} from "../"; // forward import
 
-export abstract class PlotController<X, Y> extends DataSetController<X, Y> {
+export abstract class PlotController<X = unknown, Y = unknown> extends DataSetController<X, Y> {
   override readonly observerType?: Class<PlotControllerObserver<X, Y>>;
 
   @Property({type: Timing, inherits: true})
   readonly plotTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  abstract readonly plot: TraitViewFastener<this, PlotTrait<X, Y>, PlotView<X, Y>>;
+  abstract readonly plot: TraitViewRef<this, PlotTrait<X, Y>, PlotView<X, Y>>;
 
-  static createPlot<X, Y>(plotTrait: PlotTrait<X, Y>): PlotController<X, Y> | null {
+  static fromTrait<X, Y>(plotTrait: PlotTrait<X, Y>): PlotController<X, Y> | null {
     if (plotTrait instanceof BubblePlotTrait) {
       return new BubblePlotController<X, Y>();
     } else if (plotTrait instanceof LinePlotTrait) {

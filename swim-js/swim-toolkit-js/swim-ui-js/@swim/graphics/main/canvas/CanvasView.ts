@@ -20,6 +20,7 @@ import {
   ViewContext,
   ViewFlags,
   AnyView,
+  ViewFactory,
   View,
   ViewWillRender,
   ViewDidRender,
@@ -36,7 +37,7 @@ import {
   ViewTouch,
   ViewTouchEvent,
 } from "@swim/view";
-import {AnyNodeView, NodeView, HtmlViewInit, HtmlViewTagMap, HtmlView} from "@swim/dom";
+import {ViewNode, AnyNodeView, NodeView, HtmlViewInit, HtmlViewTagMap, HtmlView} from "@swim/dom";
 import {SpriteService} from "../sprite/SpriteService";
 import type {AnyGraphicsRenderer, GraphicsRendererType, GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
@@ -188,87 +189,100 @@ export class CanvasView extends HtmlView {
     return null;
   }
 
-  override setChild<V extends NodeView>(key: string, newChild: AnyNodeView<V> | null): View | null;
+  override setChild<V extends View>(key: string, newChild: V | ViewFactory<V> | null): View | null;
   override setChild(key: string, newChild: AnyView | AnyNodeView | keyof HtmlViewTagMap | null): View | null;
   override setChild(key: string, newChild: AnyView | AnyNodeView | keyof HtmlViewTagMap | null): View | null {
-    let newChildView: View | null;
-    let newChildNode: Node | null;
+    let newView: View | null;
+    let newNode: Node | null;
     if (newChild === null) {
-      newChildView = null;
-      newChildNode = null;
+      newView = null;
+      newNode = null;
     } else {
       if (typeof newChild === "string") {
-        newChildView = HtmlView.fromTag(newChild);
+        newView = HtmlView.fromTag(newChild);
       } else if (newChild instanceof Node) {
-        newChildView = NodeView.fromNode(newChild);
+        newView = NodeView.fromNode(newChild);
       } else {
-        newChildView = View.fromAny(newChild as AnyView);
+        newView = View.fromAny(newChild as AnyView);
       }
-      if (newChildView instanceof NodeView) {
-        newChildNode = newChildView.node;
+      if (newView instanceof NodeView) {
+        newNode = newView.node;
       } else {
-        newChildNode = null;
+        newNode = null;
       }
     }
-
+    const oldView = this.getChild(key);
+    const oldNode = oldView !== null ? (oldView as NodeView).node : null;
+    const children = this.children as View[];
+    let index = -1;
     let targetView: View | null = null;
     let targetNode: Node | null = null;
-    const children = this.children as View[];
-    if (newChildView !== null) {
-      if (newChildView.parent === this) {
-        targetView = children[children.indexOf(newChildView) + 1] || null;
-        if (targetView instanceof NodeView) {
-          targetNode = targetView.node;
-        }
-      }
-      newChildView.remove();
-    }
 
-    let index = -1;
-    const oldChildView = this.getChild(key) as View | null;
-    if (oldChildView !== null) {
-      index = children.indexOf(oldChildView);
+    if (oldView !== null && newView !== null && oldView !== newView) { // replace
+      newView.remove();
+      index = children.indexOf(oldView);
       // assert(index >= 0);
-      if (targetView === null) {
-        targetView = children[index + 1] || null;
-        if (targetView instanceof NodeView) {
-          targetNode = targetView.node;
+      targetView = index + 1 < children.length ? children[index + 1]! : null;
+      targetNode = targetView instanceof NodeView ? targetView.node : null;
+      newView.setKey(oldView.key);
+      this.willRemoveChild(oldView);
+      this.willInsertChild(newView, targetView);
+      oldView.detachParent(this);
+      children[index] = newView;
+      if (newNode !== null && oldView instanceof NodeView) {
+        this.node.replaceChild(newNode, oldView.node);
+      }
+      this.replaceChildMap(newView, oldView);
+      newView.attachParent(this);
+      this.onRemoveChild(oldView);
+      this.onInsertChild(newView, targetView);
+      this.didRemoveChild(oldView);
+      this.didInsertChild(newView, targetView);
+      oldView.setKey(void 0);
+      newView.cascadeInsert();
+    } else if (newView !== oldView || newView !== null && newView.key !== key) {
+      if (oldView !== null) { // remove
+        this.willRemoveChild(oldView);
+        oldView.detachParent(this);
+        this.removeChildMap(oldView);
+        if (oldNode !== null) {
+          this.node.removeChild(oldNode);
+        }
+        index = children.indexOf(oldView);
+        // assert(index >= 0);
+        children.splice(index, 1);
+        this.onRemoveChild(oldView);
+        this.didRemoveChild(oldView);
+        oldView.setKey(void 0);
+        if (index < children.length) {
+          targetView = children[index]!;
+          targetNode = targetView instanceof NodeView ? targetView.node : null;
         }
       }
-      this.willRemoveChild(oldChildView);
-      oldChildView.setParent(null, this);
-      this.removeChildMap(oldChildView);
-      if (oldChildView instanceof NodeView) {
-        this.node.removeChild(oldChildView.node);
+      if (newView !== null) { // insert
+        newView.remove();
+        newView.setKey(key);
+        this.willInsertChild(newView, targetView);
+        if (index >= 0) {
+          children.splice(index, 0, newView);
+        } else {
+          children.push(newView);
+        }
+        if (newNode !== null) {
+          this.node.insertBefore(newNode, targetNode);
+        }
+        this.insertChildMap(newView);
+        newView.attachParent(this);
+        this.onInsertChild(newView, targetView);
+        this.didInsertChild(newView, targetView);
+        newView.cascadeInsert();
       }
-      children.splice(index, 1);
-      this.onRemoveChild(oldChildView);
-      this.didRemoveChild(oldChildView);
-      oldChildView.setKey(void 0);
     }
 
-    if (newChildView !== null) {
-      newChildView.setKey(key);
-      this.willInsertChild(newChildView, targetView);
-      if (index >= 0) {
-        children.splice(index, 0, newChildView);
-      } else {
-        children.push(newChildView);
-      }
-      if (newChildNode !== null) {
-        this.node.insertBefore(newChildNode, targetNode);
-      }
-      this.insertChildMap(newChildView);
-      newChildView.setParent(this, null);
-      this.onInsertChild(newChildView, targetView);
-      this.didInsertChild(newChildView, targetView);
-      newChildView.cascadeInsert();
-    }
-
-    return oldChildView;
+    return oldView;
   }
 
-  override appendChild<V extends NodeView>(child: AnyNodeView<V>, key?: string): V;
+  override appendChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override appendChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
   override appendChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, key?: string): View;
   override appendChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, key?: string): View {
@@ -301,7 +315,7 @@ export class CanvasView extends HtmlView {
       this.node.appendChild(childNode);
     }
     this.insertChildMap(childView);
-    childView.setParent(this, null);
+    childView.attachParent(this);
     this.onInsertChild(childView, null);
     this.didInsertChild(childView, null);
     childView.cascadeInsert();
@@ -309,7 +323,7 @@ export class CanvasView extends HtmlView {
     return childView;
   }
 
-  override prependChild<V extends NodeView>(child: AnyNodeView<V>, key?: string): V;
+  override prependChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override prependChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
   override prependChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, key?: string): View;
   override prependChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, key?: string): View {
@@ -346,7 +360,7 @@ export class CanvasView extends HtmlView {
       this.node.insertBefore(childNode, targetNode);
     }
     this.insertChildMap(childView);
-    childView.setParent(this, null);
+    childView.attachParent(this);
     this.onInsertChild(childView, targetView);
     this.didInsertChild(childView, targetView);
     childView.cascadeInsert();
@@ -354,7 +368,7 @@ export class CanvasView extends HtmlView {
     return childView;
   }
 
-  override insertChild<V extends NodeView>(child: AnyNodeView<V>, target: View | Node | null, key?: string): V;
+  override insertChild<V extends View>(child: V | ViewFactory<V>, target: View | Node | null, key?: string): V;
   override insertChild<K extends keyof HtmlViewTagMap>(tag: K, target: View | Node | null, key?: string): HtmlViewTagMap[K];
   override insertChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, target: View | Node | null, key?: string): View;
   override insertChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, target: View | Node | null, key?: string): View {
@@ -371,7 +385,7 @@ export class CanvasView extends HtmlView {
         targetNode = null;
       }
     } else if (target instanceof Node) {
-      targetView = null;
+      targetView = (target as ViewNode).view ?? null;
       targetNode = target;
     } else {
       throw new TypeError("" + target);
@@ -415,7 +429,7 @@ export class CanvasView extends HtmlView {
       this.node.insertBefore(childNode, targetNode);
     }
     this.insertChildMap(childView);
-    childView.setParent(this, null);
+    childView.attachParent(this);
     this.onInsertChild(childView, targetView);
     this.didInsertChild(childView, targetView);
     childView.cascadeInsert();
@@ -423,9 +437,62 @@ export class CanvasView extends HtmlView {
     return childView;
   }
 
+  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  override replaceChild<V extends View>(newChild: AnyView | AnyNodeView | keyof HtmlViewTagMap, oldChild: V): V;
+  override replaceChild(newChild: AnyView | AnyNodeView | keyof HtmlViewTagMap, oldChild: View): View {
+    const children = this.children as View[];
+    if (oldChild.parent !== this) {
+      throw new TypeError("" + oldChild);
+    }
+
+    let newView: View;
+    let newNode: Node | null;
+    if (typeof newChild === "string") {
+      newView = HtmlView.fromTag(newChild);
+      newNode = (newView as NodeView).node;
+    } else if (newChild instanceof Node) {
+      newView = NodeView.fromNode(newChild);
+      newNode = newChild;
+    } else {
+      newView = View.fromAny(newChild as AnyView);
+      if (newView instanceof NodeView) {
+        newNode = newView.node;
+      } else {
+        newNode = null;
+      }
+    }
+
+    if (newView !== oldChild) {
+      newView.remove();
+
+      const index = children.indexOf(oldChild);
+      // assert(index >= 0);
+      const targetView = index + 1 < children.length ? children[index + 1]! : null;
+      newView.setKey(oldChild.key);
+      this.willRemoveChild(oldChild);
+      this.willInsertChild(newView, targetView);
+      oldChild.detachParent(this);
+      children[index] = newView;
+      if (newNode !== null && oldChild instanceof NodeView) {
+        this.node.replaceChild(newNode, oldChild.node);
+      }
+      this.replaceChildMap(newView, oldChild);
+      newView.attachParent(this);
+      this.onRemoveChild(oldChild);
+      this.onInsertChild(newView, targetView);
+      this.didRemoveChild(oldChild);
+      this.didInsertChild(newView, targetView);
+      oldChild.setKey(void 0);
+      newView.cascadeInsert();
+    }
+
+    return oldChild;
+  }
+
   override removeChild(key: string): View | null;
-  override removeChild(child: View | Node): void;
-  override removeChild(child: string | View | Node): View | null | void {
+  override removeChild<V extends View>(child: V): V;
+  override removeChild(child: Node): View;
+  override removeChild(child: string | View | Node): View | null {
     let childView: View | null;
     let childNode: Node | null;
     if (typeof child === "string") {
@@ -435,40 +502,43 @@ export class CanvasView extends HtmlView {
       } else if (childView instanceof NodeView) {
         childNode = childView.node;
       } else {
-        throw new TypeError("" + child);
-      }
-    } else if (child instanceof Node) {
-      childView = NodeView.fromNode(child);
-      childNode = child;
-    } else if (child instanceof View) {
-      childView = child;
-      if (child instanceof NodeView) {
-        childNode = child.node;
-      } else {
         childNode = null;
       }
     } else {
-      throw new TypeError("" + child);
+      if (child instanceof View) {
+        childView = child;
+        if (child instanceof NodeView) {
+          childNode = child.node;
+        } else {
+          childNode = null;
+        }
+      } else {
+        childView = (child as ViewNode).view as NodeView;
+        childNode = child;
+        if (!(childView instanceof NodeView)) {
+          throw new Error("not a child view");
+        }
+      }
+      if (childView.parent !== this) {
+        throw new Error("not a child view");
+      }
     }
 
     this.willRemoveChild(childView);
-    childView.setParent(null, this);
+    childView.detachParent(this);
     this.removeChildMap(childView);
     if (childNode !== null) {
       this.node.removeChild(childNode);
     }
     const children = this.children as View[];
     const index = children.indexOf(childView);
-    if (index >= 0) {
-      children.splice(index, 1);
-    }
+    // assert(index >= 0);
+    children.splice(index, 1);
     this.onRemoveChild(childView);
     this.didRemoveChild(childView);
     childView.setKey(void 0);
 
-    if (typeof child === "string") {
-      return childView;
-    }
+    return childView;
   }
 
   override removeChildren(): void {
@@ -477,7 +547,7 @@ export class CanvasView extends HtmlView {
     while (childCount = children.length, childCount !== 0) {
       const child: View = children[childCount - 1]!;
       this.willRemoveChild(child);
-      child.setParent(null, this);
+      child.detachParent(this);
       this.removeChildMap(child);
       if (child instanceof NodeView) {
         this.node.removeChild(child.node);
@@ -652,13 +722,15 @@ export class CanvasView extends HtmlView {
 
   override cascadeDisplay(displayFlags: ViewFlags, baseViewContext: ViewContext): void {
     const viewContext = this.extendViewContext(baseViewContext);
-    displayFlags &= ~View.NeedsDisplay;
-    displayFlags |= this.flags & View.UpdateMask;
-    displayFlags = this.needsDisplay(displayFlags, viewContext);
-    if ((displayFlags & View.DisplayMask) !== 0) {
-      let cascadeFlags = displayFlags;
-      this.setFlags(this.flags & ~View.NeedsDisplay | (View.TraversingFlag | View.DisplayingFlag));
-      try {
+    const outerViewContext = ViewContext.current;
+    try {
+      ViewContext.current = viewContext;
+      displayFlags &= ~View.NeedsDisplay;
+      displayFlags |= this.flags & View.UpdateMask;
+      displayFlags = this.needsDisplay(displayFlags, viewContext);
+      if ((displayFlags & View.DisplayMask) !== 0) {
+        let cascadeFlags = displayFlags;
+        this.setFlags(this.flags & ~View.NeedsDisplay | (View.TraversingFlag | View.DisplayingFlag | View.ContextualFlag));
         this.willDisplay(cascadeFlags, viewContext);
         if (((this.flags | displayFlags) & View.NeedsLayout) !== 0) {
           cascadeFlags |= View.NeedsLayout;
@@ -696,7 +768,9 @@ export class CanvasView extends HtmlView {
         }
 
         if ((cascadeFlags & View.DisplayMask) !== 0 && !this.isHidden() && !this.culled) {
+          this.setFlags(this.flags & ~View.ContextualFlag);
           this.displayChildren(cascadeFlags, viewContext, this.displayChild);
+          this.setFlags(this.flags | View.ContextualFlag);
         }
 
         if ((cascadeFlags & View.NeedsComposite) !== 0) {
@@ -712,9 +786,10 @@ export class CanvasView extends HtmlView {
           this.didLayout(viewContext);
         }
         this.didDisplay(cascadeFlags, viewContext);
-      } finally {
-        this.setFlags(this.flags & ~(View.TraversingFlag | View.DisplayingFlag));
       }
+    } finally {
+      this.setFlags(this.flags & ~(View.TraversingFlag | View.DisplayingFlag | View.ContextualFlag));
+      ViewContext.current = outerViewContext;
     }
   }
 
@@ -870,6 +945,7 @@ export class CanvasView extends HtmlView {
 
   override extendViewContext(viewContext: ViewContext): ViewContextType<this> {
     const canvasViewContext = Object.create(viewContext);
+    canvasViewContext.viewFrame = this.viewFrame;
     canvasViewContext.renderer = this.renderer;
     return canvasViewContext;
   }
@@ -899,7 +975,15 @@ export class CanvasView extends HtmlView {
         const viewContext = this.extendViewContext(baseViewContext);
         let hit = this.hitTestChildren(x, y, viewContext);
         if (hit === null) {
-          hit = this.hitTest(x, y, viewContext);
+          const outerViewContext = ViewContext.current;
+          try {
+            ViewContext.current = viewContext;
+            this.setFlags(this.flags | View.ContextualFlag);
+            hit = this.hitTest(x, y, viewContext);
+          } finally {
+            this.setFlags(this.flags & ~View.ContextualFlag);
+            ViewContext.current = outerViewContext;
+          }
         }
         return hit;
       }

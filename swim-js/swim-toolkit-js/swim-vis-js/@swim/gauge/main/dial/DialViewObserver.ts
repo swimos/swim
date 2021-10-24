@@ -25,11 +25,11 @@ export interface DialViewObserver<V extends DialView = DialView> extends ViewObs
 
   viewDidSetDialLimit?(newLimit: number, oldLimit: number, view: V): void;
 
-  viewWillSetDialLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewWillAttachDialLabel?(labelView: GraphicsView, view: V): void;
 
-  viewDidSetDialLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewDidDetachDialLabel?(labelView: GraphicsView, view: V): void;
 
-  viewWillSetDialLegend?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, view: V): void;
+  viewWillAttachDialLegend?(legendView: GraphicsView, view: V): void;
 
-  viewDidSetDialLegend?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, view: V): void;
+  viewDidDetachDialLegend?(legendView: GraphicsView, view: V): void;
 }

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import {Affinity} from "@swim/fastener";
-import {ViewFastener} from "@swim/view";
-import {HtmlView} from "@swim/dom";
+import type {Class, Initable} from "@swim/util";
+import {Affinity, MemberFastenerClass} from "@swim/fastener";
+import {AnyView, ViewRef} from "@swim/view";
+import {HtmlViewInit, HtmlView} from "@swim/dom";
 import {CellView} from "./CellView";
 import type {TextCellViewObserver} from "./TextCellViewObserver";
 
@@ -27,81 +27,36 @@ export class TextCellView extends CellView {
 
   override readonly observerType?: Class<TextCellViewObserver>;
 
-  protected createContent(value?: string): HtmlView | null {
-    const contentView = HtmlView.fromTag("span");
-    contentView.alignSelf.setState("center", Affinity.Intrinsic);
-    contentView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
-    contentView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
-    contentView.overflowX.setState("hidden", Affinity.Intrinsic);
-    contentView.overflowY.setState("hidden", Affinity.Intrinsic);
-    if (value !== void 0) {
-      contentView.text(value);
-    }
-    return contentView;
-  }
-
-  protected initContent(contentView: HtmlView): void {
-    // hook
-  }
-
-  protected attachContent(contentView: HtmlView): void {
-    // hook
-  }
-
-  protected detachContent(contentView: HtmlView): void {
-    // hook
-  }
-
-  protected willSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetContent !== void 0) {
-        observer.viewWillSetContent(newContentView, oldContentView, this);
-      }
-    }
-  }
-
-  protected onSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    if (oldContentView !== null) {
-      this.detachContent(oldContentView);
-    }
-    if (newContentView !== null) {
-      this.attachContent(newContentView);
-      this.initContent(newContentView);
-    }
-  }
-
-  protected didSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetContent !== void 0) {
-        observer.viewDidSetContent(newContentView, oldContentView, this);
-      }
-    }
-  }
-
-  @ViewFastener<TextCellView, HtmlView, string>({
+  @ViewRef<TextCellView, HtmlView & Initable<HtmlViewInit | string>, {create(value?: string): HtmlView}>({
     key: true,
     type: HtmlView,
-    child: true,
-    willSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.willSetContent(newContentView, oldContentView);
+    binds: true,
+    willAttachView(contentView: HtmlView): void {
+      this.owner.callObservers("viewWillAttachContent", contentView, this.owner);
     },
-    onSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.onSetContent(newContentView, oldContentView);
+    didDetachView(contentView: HtmlView): void {
+      this.owner.callObservers("viewDidDetachContent", contentView, this.owner);
     },
-    didSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.didSetContent(newContentView, oldContentView);
+    create(value?: string): HtmlView {
+      const contentView = HtmlView.fromTag("span");
+      contentView.alignSelf.setState("center", Affinity.Intrinsic);
+      contentView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
+      contentView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
+      contentView.overflowX.setState("hidden", Affinity.Intrinsic);
+      contentView.overflowY.setState("hidden", Affinity.Intrinsic);
+      if (value !== void 0) {
+        contentView.text(value);
+      }
+      return contentView;
     },
-    fromAny(value: HtmlView | string): HtmlView | null {
-      if (value instanceof HtmlView) {
-        return value;
+    fromAny(value: AnyView<HtmlView> | string): HtmlView {
+      if (typeof value === "string") {
+        return this.create(value);
       } else {
-        return this.owner.createContent(value);
+        return HtmlView.fromAny(value);
       }
     },
   })
-  readonly content!: ViewFastener<this, HtmlView, string>;
+  readonly content!: ViewRef<this, HtmlView & Initable<HtmlViewInit | string>> & {create(value?: string): HtmlView};
+  static readonly content: MemberFastenerClass<TextCellView, "content">;
 }

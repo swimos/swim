@@ -18,10 +18,13 @@ export interface ControllerContext {
 
 export const ControllerContext = (function () {
   const ControllerContext = {} as {
-    default(): ControllerContext;
+    current: ControllerContext | null;
+    create(): ControllerContext;
   };
 
-  ControllerContext.default = function (): ControllerContext {
+  ControllerContext.current = null;
+
+  ControllerContext.create = function (): ControllerContext {
     return {
       updateTime: performance.now(),
     };

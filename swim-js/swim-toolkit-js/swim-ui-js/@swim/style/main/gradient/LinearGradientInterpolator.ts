@@ -62,6 +62,7 @@ export const LinearGradientInterpolator = (function (_super: typeof Interpolator
   };
 
   LinearGradientInterpolator.prototype = Object.create(_super.prototype);
+  LinearGradientInterpolator.prototype.constructor = LinearGradientInterpolator;
 
   Object.defineProperty(LinearGradientInterpolator.prototype, 0, {
     get(this: LinearGradientInterpolator): LinearGradient {

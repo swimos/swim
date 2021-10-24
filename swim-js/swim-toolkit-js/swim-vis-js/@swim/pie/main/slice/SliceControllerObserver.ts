@@ -19,23 +19,23 @@ import type {SliceTrait} from "./SliceTrait";
 import type {SliceController} from "./SliceController";
 
 export interface SliceControllerObserver<C extends SliceController = SliceController> extends ControllerObserver<C> {
-  controllerWillSetSliceTrait?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, controller: C): void;
+  controllerWillAttachSliceTrait?(sliceTrait: SliceTrait, controller: C): void;
 
-  controllerDidSetSliceTrait?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, controller: C): void;
+  controllerDidDetachSliceTrait?(sliceTrait: SliceTrait, controller: C): void;
 
-  controllerWillSetSliceView?(newSliceView: SliceView | null, oldSliceView: SliceView | null, controller: C): void;
+  controllerWillAttachSliceView?(sliceView: SliceView, controller: C): void;
 
-  controllerDidSetSliceView?(newSliceView: SliceView | null, oldSliceView: SliceView | null, controller: C): void;
+  controllerDidDetachSliceView?(sliceView: SliceView, controller: C): void;
 
   controllerWillSetSliceValue?(newValue: number, oldValue: number, controller: C): void;
 
   controllerDidSetSliceValue?(newValue: number, oldValue: number, controller: C): void;
 
-  controllerWillSetSliceLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, controller: C): void;
+  controllerWillAttachSliceLabelView?(labelView: GraphicsView, controller: C): void;
 
-  controllerDidSetSliceLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, controller: C): void;
+  controllerDidDetachSliceLabelView?(labelView: GraphicsView, controller: C): void;
 
-  controllerWillSetSliceLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, controller: C): void;
+  controllerWillAttachSliceLegendView?(legendView: GraphicsView, controller: C): void;
 
-  controllerDidSetSliceLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, controller: C): void;
+  controllerDidDetachSliceLegendView?(legendView: GraphicsView, controller: C): void;
 }

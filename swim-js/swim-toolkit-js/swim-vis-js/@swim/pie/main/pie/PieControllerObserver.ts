@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {GraphicsView} from "@swim/graphics";
-import type {ControllerObserver, ControllerFastener} from "@swim/controller";
+import type {ControllerObserver} from "@swim/controller";
 import type {SliceView} from "../slice/SliceView";
 import type {SliceTrait} from "../slice/SliceTrait";
 import type {SliceController} from "../slice/SliceController";
@@ -22,39 +22,39 @@ import type {PieTrait} from "./PieTrait";
 import type {PieController} from "./PieController";
 
 export interface PieControllerObserver<C extends PieController = PieController> extends ControllerObserver<C> {
-  controllerWillSetPieTrait?(newPieTrait: PieTrait | null, oldPieTrait: PieTrait | null, controller: C): void;
+  controllerWillAttachPieTrait?(pieTrait: PieTrait, controller: C): void;
 
-  controllerDidSetPieTrait?(newPieTrait: PieTrait | null, oldPieTrait: PieTrait | null, controller: C): void;
+  controllerDidDetachPieTrait?(pieTrait: PieTrait, controller: C): void;
 
-  controllerWillSetPieView?(newPieView: PieView | null, oldPieView: PieView | null, controller: C): void;
+  controllerWillAttachPieView?(pieView: PieView, controller: C): void;
 
-  controllerDidSetPieView?(newPieView: PieView | null, oldPieView: PieView | null, controller: C): void;
+  controllerDidDetachPieView?(pieView: PieView, controller: C): void;
 
-  controllerWillSetPieTitleView?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, controller: C): void;
+  controllerWillAttachPieTitleView?(titleView: GraphicsView, controller: C): void;
 
-  controllerDidSetPieTitleView?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, controller: C): void;
+  controllerDidDetachPieTitleView?(titleView: GraphicsView, controller: C): void;
 
-  controllerWillSetSlice?(newSliceController: SliceController | null, oldSliceController: SliceController | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerWillAttachSlice?(sliceController: SliceController, controller: C): void;
 
-  controllerDidSetSlice?(newSliceController: SliceController | null, oldSliceController: SliceController | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerDidDetachSlice?(sliceController: SliceController, controller: C): void;
 
-  controllerWillSetSliceTrait?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerWillAttachSliceTrait?(sliceTrait: SliceTrait, sliceController: SliceController, controller: C): void;
 
-  controllerDidSetSliceTrait?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerDidDetachSliceTrait?(sliceTrait: SliceTrait, sliceController: SliceController, controller: C): void;
 
-  controllerWillSetSliceView?(newSliceView: SliceView | null, oldSliceView: SliceView | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerWillAttachSliceView?(sliceView: SliceView, sliceController: SliceController, controller: C): void;
 
-  controllerDidSetSliceView?(newSliceView: SliceView | null, oldSliceView: SliceView | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerDidDetachSliceView?(sliceView: SliceView, sliceController: SliceController, controller: C): void;
 
-  controllerWillSetSliceValue?(newValue: number, oldValue: number, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerWillSetSliceValue?(newValue: number, oldValue: number, sliceController: SliceController, controller: C): void;
 
-  controllerDidSetSliceValue?(newValue: number, oldValue: number, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerDidSetSliceValue?(newValue: number, oldValue: number, sliceController: SliceController, controller: C): void;
 
-  controllerWillSetSliceLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerWillAttachSliceLabelView?(labelView: GraphicsView, sliceController: SliceController, controller: C): void;
 
-  controllerDidSetSliceLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerDidDetachSliceLabelView?(labelView: GraphicsView, sliceController: SliceController, controller: C): void;
 
-  controllerWillSetSliceLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerWillAttachSliceLegendView?(legendView: GraphicsView, sliceController: SliceController, controller: C): void;
 
-  controllerDidSetSliceLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, sliceFastener: ControllerFastener<C, SliceController>): void;
+  controllerDidDetachSliceLegendView?(legendView: GraphicsView, sliceController: SliceController, controller: C): void;
 }

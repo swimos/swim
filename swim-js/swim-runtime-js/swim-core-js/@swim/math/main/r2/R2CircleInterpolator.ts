@@ -38,6 +38,7 @@ export const R2CircleInterpolator = (function (_super: typeof Interpolator) {
   };
 
   R2CircleInterpolator.prototype = Object.create(_super.prototype);
+  R2CircleInterpolator.prototype.constructor = R2CircleInterpolator;
 
   return R2CircleInterpolator;
 })(Interpolator);

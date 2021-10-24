@@ -14,7 +14,7 @@
 
 import type {Class} from "@swim/util";
 import type {PositionGestureInput} from "@swim/view";
-import {TraitViewFastener, GenericController} from "@swim/controller";
+import {GenericController, TraitViewRef} from "@swim/controller";
 import {CellView} from "./CellView";
 import {CellTrait} from "./CellTrait";
 import {TextCellTrait} from "./TextCellTrait";
@@ -26,154 +26,32 @@ import {IconCellController} from "../"; // forward import
 export class CellController extends GenericController {
   override readonly observerType?: Class<CellControllerObserver>;
 
-  protected initCellTrait(cellTrait: CellTrait): void {
-    // hook
-  }
-
-  protected attachCellTrait(cellTrait: CellTrait): void {
-    // hook
-  }
-
-  protected detachCellTrait(cellTrait: CellTrait): void {
-    // hook
-  }
-
-  protected willSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCellTrait !== void 0) {
-        observer.controllerWillSetCellTrait(newCellTrait, oldCellTrait, this);
-      }
-    }
-  }
-
-  protected onSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
-    if (oldCellTrait !== null) {
-      this.detachCellTrait(oldCellTrait);
-    }
-    if (newCellTrait !== null) {
-      this.attachCellTrait(newCellTrait);
-      this.initCellTrait(newCellTrait);
-    }
-  }
-
-  protected didSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCellTrait !== void 0) {
-        observer.controllerDidSetCellTrait(newCellTrait, oldCellTrait, this);
-      }
-    }
-  }
-
-  protected createCellView(): CellView | null {
-    return CellView.create();
-  }
-
-  protected initCellView(cellView: CellView): void {
-    // hook
-  }
-
-  protected attachCellView(cellView: CellView): void {
-    // hook
-  }
-
-  protected detachCellView(cellView: CellView): void {
-    // hook
-  }
-
-  protected willSetCellView(newCellView: CellView | null, oldCellView: CellView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCellView !== void 0) {
-        observer.controllerWillSetCellView(newCellView, oldCellView, this);
-      }
-    }
-  }
-
-  protected onSetCellView(newCellView: CellView | null, oldCellView: CellView | null): void {
-    if (oldCellView !== null) {
-      this.detachCellView(oldCellView);
-    }
-    if (newCellView !== null) {
-      this.attachCellView(newCellView);
-      this.initCellView(newCellView);
-    }
-  }
-
-  protected didSetCellView(newCellView: CellView | null, oldCellView: CellView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCellView !== void 0) {
-        observer.controllerDidSetCellView(newCellView, oldCellView, this);
-      }
-    }
-  }
-
-  protected didPressCellView(input: PositionGestureInput, event: Event | null, cellView: CellView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidPressCellView !== void 0) {
-        observer.controllerDidPressCellView(input, event, cellView, this);
-      }
-    }
-  }
-
-  protected didLongPressCellView(input: PositionGestureInput, cellView: CellView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidLongPressCellView !== void 0) {
-        observer.controllerDidLongPressCellView(input, cellView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static CellFastener = TraitViewFastener.define<CellController, CellTrait, CellView>({
+  @TraitViewRef<CellController, CellTrait, CellView>({
     traitType: CellTrait,
-    willSetTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
-      this.owner.willSetCellTrait(newCellTrait, oldCellTrait);
+    willAttachTrait(cellTrait: CellTrait): void {
+      this.owner.callObservers("controllerWillAttachCellTrait", cellTrait, this.owner);
     },
-    onSetTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
-      this.owner.onSetCellTrait(newCellTrait, oldCellTrait);
-    },
-    didSetTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
-      this.owner.didSetCellTrait(newCellTrait, oldCellTrait);
+    didDetachTrait(cellTrait: CellTrait): void {
+      this.owner.callObservers("controllerDidDetachCellTrait", cellTrait, this.owner);
     },
     viewType: CellView,
     observesView: true,
-    willSetView(newCellView: CellView | null, oldCellView: CellView | null): void {
-      this.owner.willSetCellView(newCellView, oldCellView);
+    willAttachView(cellView: CellView): void {
+      this.owner.callObservers("controllerWillAttachCellView", cellView, this.owner);
     },
-    onSetView(newCellView: CellView | null, oldCellView: CellView | null): void {
-      this.owner.onSetCellView(newCellView, oldCellView);
-    },
-    didSetView(newCellView: CellView | null, oldCellView: CellView | null): void {
-      this.owner.didSetCellView(newCellView, oldCellView);
+    didDetachView(cellView: CellView): void {
+      this.owner.callObservers("controllerDidDetachCellView", cellView, this.owner);
     },
     viewDidPress(input: PositionGestureInput, event: Event | null, cellView: CellView): void {
-      this.owner.didPressCellView(input, event, cellView);
+      this.owner.callObservers("controllerDidPressCellView", input, event, cellView, this.owner);
     },
     viewDidLongPress(input: PositionGestureInput, cellView: CellView): void {
-      this.owner.didLongPressCellView(input, cellView);
+      this.owner.callObservers("controllerDidLongPressCellView", input, cellView, this.owner);
     },
-    createView(): CellView | null {
-      return this.owner.createCellView();
-    },
-  });
-
-  @TraitViewFastener<CellController, CellTrait, CellView>({
-    extends: CellController.CellFastener,
   })
-  readonly cell!: TraitViewFastener<this, CellTrait, CellView>;
+  readonly cell!: TraitViewRef<this, CellTrait, CellView>;
 
-  static createCell(cellTrait: CellTrait): CellController {
+  static fromTrait(cellTrait: CellTrait): CellController {
     if (cellTrait instanceof TextCellTrait) {
       return new TextCellController();
     } else if (cellTrait instanceof IconCellTrait) {

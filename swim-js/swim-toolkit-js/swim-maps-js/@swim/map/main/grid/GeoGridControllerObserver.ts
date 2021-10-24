@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {ControllerFastener} from "@swim/controller";
 import type {GeoView} from "../geo/GeoView";
 import type {GeoTrait} from "../geo/GeoTrait";
 import type {GeoLayerControllerObserver} from "../layer/GeoLayerControllerObserver";
@@ -20,19 +19,19 @@ import type {GeoGridTrait} from "./GeoGridTrait";
 import type {GeoGridController} from "./GeoGridController";
 
 export interface GeoGridControllerObserver<C extends GeoGridController = GeoGridController> extends GeoLayerControllerObserver<C> {
-  controllerWillSetGeoTrait?(newGeoTrait: GeoGridTrait | null, oldGeoTrait: GeoGridTrait | null, controller: C): void;
+  controllerWillAttachGeoTrait?(geoTrait: GeoGridTrait, controller: C): void;
 
-  controllerDidSetGeoTrait?(newGeoTrait: GeoGridTrait | null, oldGeoTrait: GeoGridTrait | null, controller: C): void;
+  controllerDidDetachGeoTrait?(geoTrait: GeoGridTrait, controller: C): void;
 
-  controllerWillSetTile?(newTileController: GeoGridController | null, oldTileController: GeoGridController | null, tileFastener: ControllerFastener<C, GeoGridController>): void;
+  controllerWillAttachTile?(tileController: GeoGridController, controller: C): void;
 
-  controllerDidSetTile(newTileController: GeoGridController | null, oldTileController: GeoGridController | null, tileFastener: ControllerFastener<C, GeoGridController>): void;
+  controllerDidDetachTile(tileController: GeoGridController, controller: C): void;
 
-  controllerWillSetTileTrait?(newTileTrait: GeoTrait | null, oldTileTrait: GeoTrait | null, tileFastener: ControllerFastener<C, GeoGridController>): void;
+  controllerWillAttachTileTrait?(tileTrait: GeoTrait, tileController: GeoGridController, controller: C): void;
 
-  controllerDidSetTileTrait?(newTileTrait: GeoTrait | null, oldTileTrait: GeoTrait | null, tileFastener: ControllerFastener<C, GeoGridController>): void;
+  controllerDidDetachTileTrait?(tileTrait: GeoTrait, tileController: GeoGridController, controller: C): void;
 
-  controllerWillSetTileView?(newTileView: GeoView | null, oldTileView: GeoView | null, tileFastener: ControllerFastener<C, GeoGridController>): void;
+  controllerWillAttachTileView?(tileView: GeoView, tileController: GeoGridController, controller: C): void;
 
-  controllerDidSetTileView?(newTileView: GeoView | null, oldTileView: GeoView | null, tileFastener: ControllerFastener<C, GeoGridController>): void;
+  controllerDidDetachTileView?(tileView: GeoView, tileController: GeoGridController, controller: C): void;
 }

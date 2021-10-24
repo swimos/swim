@@ -13,47 +13,31 @@
 // limitations under the License.
 
 import type {ConsumerType} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import {Trait} from "../trait/Trait";
-import {TraitFastener} from "../trait/TraitFastener";
+import {TraitRef} from "../trait/TraitRef";
 
 export abstract class DownlinkTrait extends Trait {
-  protected attachDriver(driverTrait: Trait): void {
-    if (driverTrait.consuming) {
-      this.consume(driverTrait as ConsumerType<this>);
-    }
-  }
-
-  protected detachDriver(driverTrait: Trait): void {
-    if (driverTrait.consuming) {
-      this.unconsume(driverTrait as ConsumerType<this>);
-    }
-  }
-
-  protected driverDidStartConsuming(driverTrait: Trait): void {
-    this.consume(driverTrait as ConsumerType<this>);
-  }
-
-  protected driverWillStopConsuming(driverTrait: Trait): void {
-    this.unconsume(driverTrait as ConsumerType<this>);
-  }
-
-  @TraitFastener<DownlinkTrait, Trait>({
+  @TraitRef<DownlinkTrait, Trait>({
     type: Trait,
     observes: true,
-    onSetTrait(newDriverTrait: Trait | null, oldDriverTrait: Trait | null): void {
-      if (oldDriverTrait !== null) {
-        this.owner.detachDriver(oldDriverTrait);
+    didAttachTrait(driverTrait: Trait): void {
+      if (driverTrait.consuming) {
+        this.owner.consume(driverTrait as ConsumerType<DownlinkTrait>);
       }
-      if (newDriverTrait !== null) {
-        this.owner.attachDriver(newDriverTrait);
+    },
+    willDetachTrait(driverTrait: Trait): void {
+      if (driverTrait.consuming) {
+        this.owner.unconsume(driverTrait as ConsumerType<DownlinkTrait>);
       }
     },
     traitDidStartConsuming(driverTrait: Trait): void {
-      this.owner.driverDidStartConsuming(driverTrait);
+      this.owner.consume(driverTrait as ConsumerType<DownlinkTrait>);
     },
     traitWillStopConsuming(driverTrait: Trait): void {
-      this.owner.driverWillStopConsuming(driverTrait);
+      this.owner.unconsume(driverTrait as ConsumerType<DownlinkTrait>);
     },
   })
-  readonly driver!: TraitFastener<this, Trait>;
+  readonly driver!: TraitRef<this, Trait>;
+  static readonly driver: MemberFastenerClass<DownlinkTrait, "driver">;
 }

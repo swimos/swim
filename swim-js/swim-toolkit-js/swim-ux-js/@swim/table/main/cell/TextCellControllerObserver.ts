@@ -19,15 +19,15 @@ import type {TextCellTrait} from "./TextCellTrait";
 import type {TextCellController} from "./TextCellController";
 
 export interface TextCellControllerObserver<C extends TextCellController = TextCellController> extends CellControllerObserver<C> {
-  controllerWillSetCellTrait?(newCellTrait: TextCellTrait | null, oldCellTrait: TextCellTrait | null, controller: C): void;
+  controllerWillAttachCellTrait?(cellTrait: TextCellTrait, controller: C): void;
 
-  controllerDidSetCellTrait?(newCellTrait: TextCellTrait | null, oldCellTrait: TextCellTrait | null, controller: C): void;
+  controllerDidDetachCellTrait?(cellTrait: TextCellTrait, controller: C): void;
 
-  controllerWillSetCellView?(newCellView: TextCellView | null, oldCellView: TextCellView | null, controller: C): void;
+  controllerWillAttachCellView?(cellView: TextCellView, controller: C): void;
 
-  controllerDidSetCellView?(newCellView: TextCellView | null, oldCellView: TextCellView | null, controller: C): void;
+  controllerDidDetachCellView?(cellView: TextCellView, controller: C): void;
 
-  controllerWillSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, controller: C): void;
+  controllerWillAttachCellContentView?(cellContentView: HtmlView, controller: C): void;
 
-  controllerDidSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, controller: C): void;
+  controllerDidDetachCellContentView?(cellContentView: HtmlView, controller: C): void;
 }

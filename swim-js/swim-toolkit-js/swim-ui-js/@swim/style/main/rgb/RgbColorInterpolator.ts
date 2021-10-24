@@ -39,6 +39,7 @@ export const RgbColorInterpolator = (function (_super: typeof Interpolator) {
   };
 
   RgbColorInterpolator.prototype = Object.create(_super.prototype);
+  RgbColorInterpolator.prototype.constructor = RgbColorInterpolator;
 
   return RgbColorInterpolator;
 })(Interpolator);

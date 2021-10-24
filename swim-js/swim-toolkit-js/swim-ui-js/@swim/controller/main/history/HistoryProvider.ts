@@ -28,7 +28,7 @@ export interface HistoryProvider<C extends Controller, S extends HistoryService<
 }
 
 export const HistoryProvider = (function (_super: typeof Provider) {
-  const HistoryProvider = _super.extend() as ProviderClass<HistoryProvider<any, any>>;
+  const HistoryProvider = _super.extend("HistoryProvider") as ProviderClass<HistoryProvider<any, any>>;
 
   Object.defineProperty(HistoryProvider.prototype, "historyState", {
     get<C extends Controller, S extends HistoryService<C> | null | undefined>(this: HistoryProvider<C, S>): HistoryState {

@@ -29,112 +29,37 @@ export type DialLegendFunction = (dialTrait: DialTrait | null) => GraphicsView |
 export class DialTrait extends Trait {
   override readonly observerType?: Class<DialTraitObserver>;
 
-  protected willSetValue(newValue: number, oldValue: number): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetDialValue !== void 0) {
-        traitObserver.traitWillSetDialValue(newValue, oldValue, this);
-      }
-    }
-  }
-
-  protected onSetValue(newValue: number, oldValue: number): void {
-    // hook
-  }
-
-  protected didSetValue(newValue: number, oldValue: number): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetDialValue !== void 0) {
-        traitObserver.traitDidSetDialValue(newValue, oldValue, this);
-      }
-    }
-  }
-
   @Property<DialTrait, number>({
     type: Number,
     state: 0,
     willSetState(newValue: number, oldValue: number): void {
-      this.owner.willSetValue(newValue, oldValue);
+      this.owner.callObservers("traitWillSetDialValue", newValue, oldValue, this.owner);
     },
     didSetState(newValue: number, oldValue: number): void {
-      this.owner.onSetValue(newValue, oldValue);
-      this.owner.didSetValue(newValue, oldValue);
+      this.owner.callObservers("traitDidSetDialValue", newValue, oldValue, this.owner);
     },
   })
   readonly value!: Property<this, number>;
-
-  protected willSetLimit(newLimit: number, oldLimit: number): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetDialLimit !== void 0) {
-        traitObserver.traitWillSetDialLimit(newLimit, oldLimit, this);
-      }
-    }
-  }
-
-  protected onSetLimit(newLimit: number, oldLimit: number): void {
-    // hook
-  }
-
-  protected didSetLimit(newLimit: number, oldLimit: number): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetDialLimit !== void 0) {
-        traitObserver.traitDidSetDialLimit(newLimit, oldLimit, this);
-      }
-    }
-  }
 
   @Property<DialTrait, number>({
     type: Number,
     state: 1,
     willSetState(newLimit: number, oldLimit: number): void {
-      this.owner.willSetLimit(newLimit, oldLimit);
+      this.owner.callObservers("traitWillSetDialLimit", newLimit, oldLimit, this.owner);
     },
     didSetState(newLimit: number, oldLimit: number): void {
-      this.owner.onSetLimit(newLimit, oldLimit);
-      this.owner.didSetLimit(newLimit, oldLimit);
+      this.owner.callObservers("traitDidSetDialLimit", newLimit, oldLimit, this.owner);
     },
   })
   readonly limit!: Property<this, number>;
 
-  protected willSetDialColor(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetDialColor !== void 0) {
-        traitObserver.traitWillSetDialColor(newDialColor, oldDialColor, this);
-      }
-    }
-  }
-
-  protected onSetDialColor(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
-    // hook
-  }
-
-  protected didSetDialColor(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetDialColor !== void 0) {
-        traitObserver.traitDidSetDialColor(newDialColor, oldDialColor, this);
-      }
-    }
-  }
-
   @Property<DialTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
     state: null,
     willSetState(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
-      this.owner.willSetDialColor(newDialColor, oldDialColor);
+      this.owner.callObservers("traitWillSetDialColor", newDialColor, oldDialColor, this.owner);
     },
     didSetState(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
-      this.owner.onSetDialColor(newDialColor, oldDialColor);
-      this.owner.didSetDialColor(newDialColor, oldDialColor);
+      this.owner.callObservers("traitDidSetDialColor", newDialColor, oldDialColor, this.owner);
     },
     fromAny(dialColor: Look<Color> | AnyColor | null): Look<Color> | Color | null {
       if (dialColor !== null && !(dialColor instanceof Look)) {
@@ -145,38 +70,13 @@ export class DialTrait extends Trait {
   })
   readonly dialColor!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
-  protected willSetMeterColor(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetMeterColor !== void 0) {
-        traitObserver.traitWillSetMeterColor(newMeterColor, oldMeterColor, this);
-      }
-    }
-  }
-
-  protected onSetMeterColor(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
-    // hook
-  }
-
-  protected didSetMeterColor(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetMeterColor !== void 0) {
-        traitObserver.traitDidSetMeterColor(newMeterColor, oldMeterColor, this);
-      }
-    }
-  }
-
   @Property<DialTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
     state: null,
     willSetState(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
-      this.owner.willSetMeterColor(newMeterColor, oldMeterColor);
+      this.owner.callObservers("traitWillSetMeterColor", newMeterColor, oldMeterColor, this.owner);
     },
     didSetState(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
-      this.owner.onSetMeterColor(newMeterColor, oldMeterColor);
-      this.owner.didSetMeterColor(newMeterColor, oldMeterColor);
+      this.owner.callObservers("traitDidSetMeterColor", newMeterColor, oldMeterColor, this.owner);
     },
     fromAny(meterColor: Look<Color> | AnyColor | null): Look<Color> | Color | null {
       if (meterColor !== null && !(meterColor instanceof Look)) {
@@ -187,30 +87,6 @@ export class DialTrait extends Trait {
   })
   readonly meterColor!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
-  protected willSetLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetDialLabel !== void 0) {
-        traitObserver.traitWillSetDialLabel(newLabel, oldLabel, this);
-      }
-    }
-  }
-
-  protected onSetLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
-    // hook
-  }
-
-  protected didSetLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetDialLabel !== void 0) {
-        traitObserver.traitDidSetDialLabel(newLabel, oldLabel, this);
-      }
-    }
-  }
-
   formatLabel(value: number, limit: number): string | undefined {
     return void 0;
   }
@@ -218,38 +94,13 @@ export class DialTrait extends Trait {
   @Property<DialTrait, DialLabel | null>({
     state: null,
     willSetState(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
-      this.owner.willSetLabel(newLabel, oldLabel);
+      this.owner.callObservers("traitWillSetDialLabel", newLabel, oldLabel, this.owner);
     },
     didSetState(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
-      this.owner.onSetLabel(newLabel, oldLabel);
-      this.owner.didSetLabel(newLabel, oldLabel);
+      this.owner.callObservers("traitDidSetDialLabel", newLabel, oldLabel, this.owner);
     },
   })
   readonly label!: Property<this, DialLabel | null>;
-
-  protected willSetLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetDialLegend !== void 0) {
-        traitObserver.traitWillSetDialLegend(newLegend, oldLegend, this);
-      }
-    }
-  }
-
-  protected onSetLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
-    // hook
-  }
-
-  protected didSetLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetDialLegend !== void 0) {
-        traitObserver.traitDidSetDialLegend(newLegend, oldLegend, this);
-      }
-    }
-  }
 
   formatLegend(value: number, limit: number): string | undefined {
     return void 0;
@@ -258,11 +109,10 @@ export class DialTrait extends Trait {
   @Property<DialTrait, DialLegend | null>({
     state: null,
     willSetState(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
-      this.owner.willSetLegend(newLegend, oldLegend);
+      this.owner.callObservers("traitWillSetDialLegend", newLegend, oldLegend, this.owner);
     },
     didSetState(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
-      this.owner.onSetLegend(newLegend, oldLegend);
-      this.owner.didSetLegend(newLegend, oldLegend);
+      this.owner.callObservers("traitDidSetDialLegend", newLegend, oldLegend, this.owner);
     },
   })
   readonly legend!: Property<this, DialLegend | null>;

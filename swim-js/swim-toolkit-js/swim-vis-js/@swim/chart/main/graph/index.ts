@@ -22,5 +22,8 @@ export {GraphViewObserver} from "./GraphViewObserver";
 export {GraphTrait} from "./GraphTrait";
 export {GraphTraitObserver} from "./GraphTraitObserver";
 
-export {GraphController} from "./GraphController";
+export {
+  GraphControllerPlotExt,
+  GraphController,
+} from "./GraphController";
 export {GraphControllerObserver} from "./GraphControllerObserver";

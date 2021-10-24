@@ -22,7 +22,7 @@ export abstract class ValueDownlinkTrait extends DownlinkTrait {
   }
 
   @ValueDownlinkFastener<ValueDownlinkTrait, Value, AnyValue>({
-    eager: true,
+    lazy: false,
     consumed: true,
     didSet(newValue: Value, oldValue: Value): void {
       if (this.owner.consuming) {

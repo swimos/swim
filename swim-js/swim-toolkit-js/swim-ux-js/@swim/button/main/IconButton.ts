@@ -13,17 +13,17 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Animator} from "@swim/fastener";
 import {AnyLength, Length, Angle, Transform} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look, Feel, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
 import {
+  PositionGesture,
   ViewContextType,
   ViewContext,
   ViewFlags,
   View,
-  ViewFastener,
-  PositionGesture,
+  ViewRef,
 } from "@swim/view";
 import type {HtmlView, HtmlViewObserver} from "@swim/dom";
 import {
@@ -75,11 +75,11 @@ export class IconButton extends ButtonMembrane implements IconView {
     this.modifyTheme(Feel.default, [[Feel.translucent, 1]]);
   }
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly xAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly xAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  readonly yAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly yAlign!: Animator<this, number>;
 
   @ThemeAnimator({type: Length, state: Length.px(24), updateFlags: View.NeedsLayout})
   readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
@@ -107,10 +107,8 @@ export class IconButton extends ButtonMembrane implements IconView {
   readonly graphics!: ThemeAnimator<this, Graphics | null>;
 
   /** @internal */
-  static IconFastener = ViewFastener.define<IconButton, SvgIconView, never, {iconIndex: number}>({
-    extends: null,
+  static IconRef = ViewRef.define<IconButton, SvgIconView, {iconIndex: number}>("IconRef", {
     type: SvgIconView,
-    child: false,
     observes: true,
     init(): void {
       this.iconIndex = 0;
@@ -128,7 +126,7 @@ export class IconButton extends ButtonMembrane implements IconView {
   /** @internal */
   iconCount: number;
 
-  icon: ViewFastener<this, SvgIconView> | null;
+  icon: ViewRef<this, SvgIconView> | null;
 
   pushIcon(icon: Graphics, timing?: AnyTiming | boolean): void {
     const oldIconCount = this.iconCount;
@@ -144,8 +142,8 @@ export class IconButton extends ButtonMembrane implements IconView {
     }
 
     const oldIconKey = "icon" + oldIconCount;
-    const oldIconFastener = this.getFastener(oldIconKey, ViewFastener) as ViewFastener<this, SvgIconView> | null;
-    const oldIconView = oldIconFastener !== null ? oldIconFastener.view : null;
+    const oldIconRef: ViewRef<this, SvgIconView> | null = this.getFastener(oldIconKey, ViewRef);
+    const oldIconView = oldIconRef !== null ? oldIconRef.view : null;
     if (oldIconView !== null) {
       if (timing !== false) {
         oldIconView.opacity.setState(0, timing, Affinity.Intrinsic);
@@ -156,9 +154,14 @@ export class IconButton extends ButtonMembrane implements IconView {
     }
 
     const newIconKey = "icon" + newIconCount;
-    const newIconFastener = IconButton.IconFastener.create(this, newIconKey);
-    newIconFastener.iconIndex = newIconCount;
-    this.icon = newIconFastener;
+    const newIconRef = IconButton.IconRef.create(this);
+    Object.defineProperty(newIconRef, "name", {
+      value: newIconKey,
+      enumerable: true,
+      configurable: true,
+    });
+    newIconRef.iconIndex = newIconCount;
+    this.icon = newIconRef;
     const newIconView = SvgIconView.create();
 
     newIconView.setStyle("position", "absolute");
@@ -175,8 +178,8 @@ export class IconButton extends ButtonMembrane implements IconView {
     newIconView.iconHeight.setInherits(true);
     newIconView.iconColor.setInherits(true);
     newIconView.graphics.setState(icon, Affinity.Intrinsic);
-    newIconFastener.setView(newIconView);
-    this.setFastener(newIconKey, newIconFastener);
+    newIconRef.setView(newIconView);
+    this.setFastener(newIconKey, newIconRef);
     this.appendChild(newIconView, newIconKey);
   }
 
@@ -192,8 +195,8 @@ export class IconButton extends ButtonMembrane implements IconView {
     }
 
     const oldIconKey = "icon" + oldIconCount;
-    const oldIconFastener = this.getFastener(oldIconKey, ViewFastener) as ViewFastener<this, SvgIconView> | null;
-    const oldIconView = oldIconFastener !== null ? oldIconFastener.view : null;
+    const oldIconRef: ViewRef<this, SvgIconView> | null = this.getFastener(oldIconKey, ViewRef);
+    const oldIconView = oldIconRef !== null ? oldIconRef.view : null;
     if (oldIconView !== null) {
       if (timing !== false) {
         oldIconView.opacity.setState(0, timing, Affinity.Intrinsic);
@@ -205,9 +208,9 @@ export class IconButton extends ButtonMembrane implements IconView {
     }
 
     const newIconKey = "icon" + newIconCount;
-    const newIconFastener = this.getFastener(newIconKey, ViewFastener) as ViewFastener<this, SvgIconView> | null;
-    this.icon = newIconFastener;
-    const newIconView = newIconFastener !== null ? newIconFastener.view : null;
+    const newIconRef: ViewRef<this, SvgIconView> | null = this.getFastener(newIconKey, ViewRef);
+    this.icon = newIconRef;
+    const newIconView = newIconRef !== null ? newIconRef.view : null;
     if (newIconView !== null) {
       newIconView.opacity.setState(1, timing, Affinity.Intrinsic);
       newIconView.cssTransform.setState(Transform.rotate(Angle.deg(0)), timing, Affinity.Intrinsic);
@@ -261,7 +264,7 @@ export class IconButton extends ButtonMembrane implements IconView {
       viewHeight = viewHeight instanceof Length ? viewHeight.pxValue() : this.node.offsetHeight;
       for (const fastenerName in fasteners) {
         const fastener = fasteners[fastenerName];
-        if (fastener instanceof IconButton.IconFastener) {
+        if (fastener instanceof IconButton.IconRef) {
           const iconView = fastener.view;
           if (iconView !== null) {
             iconView.width.setState(viewWidth, Affinity.Intrinsic);
@@ -296,9 +299,8 @@ export class IconButton extends ButtonMembrane implements IconView {
     }
   }
 
-  /** @internal */
-  static override Gesture = PositionGesture.define<IconButton, HtmlView>({
-    extends: ButtonMembrane.Gesture,
+  @PositionGesture<IconButton, HtmlView>({
+    extends: true,
     didStartHovering(): void {
       if (this.owner.hovers) {
         this.owner.modifyMood(Feel.default, [[Feel.hovering, 1]]);
@@ -319,12 +321,9 @@ export class IconButton extends ButtonMembrane implements IconView {
         this.owner.backgroundColor.setState(backgroundColor, timing, Affinity.Intrinsic);
       }
     },
-  }) as typeof ButtonMembrane.Gesture;
-
-  @PositionGesture<IconButton, HtmlView>({
-    extends: IconButton.Gesture,
   })
   override readonly gesture!: PositionGesture<this, HtmlView>;
+  static override readonly gesture: MemberFastenerClass<IconButton, "gesture">;
 
   protected onClick(event: MouseEvent): void {
     event.stopPropagation();

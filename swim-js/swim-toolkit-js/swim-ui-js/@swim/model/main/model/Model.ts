@@ -16,6 +16,7 @@ import {
   Mutable,
   Class,
   Arrays,
+  FromAny,
   Dictionary,
   MutableDictionary,
   Creatable,
@@ -31,11 +32,11 @@ import {RefreshService} from "../refresh/RefreshService";
 import {RefreshProvider} from "../refresh/RefreshProvider";
 import {SelectionService} from "../selection/SelectionService";
 import {SelectionProvider} from "../selection/SelectionProvider";
-import type {ModelContext} from "./ModelContext";
+import {ModelContext} from "./ModelContext";
 import type {ModelObserver} from "./ModelObserver";
-import {ModelFastener} from "./"; // forward import
-import {AnyTrait, Trait} from "../"; // forward import
-import {TraitFastener} from "../"; // forward import
+import {ModelRelation} from "./"; // forward import
+import {AnyTrait, TraitFactory, Trait} from "../"; // forward import
+import {TraitRelation} from "../"; // forward import
 
 export type ModelContextType<M extends Model> =
   M extends {readonly contextType?: Class<infer T>} ? T : never;
@@ -51,21 +52,15 @@ export interface ModelInit {
   children?: AnyModel[];
 }
 
-export interface AnyModelFactory<M extends Model = Model, U = never> {
-  create?(): M;
-
-  fromAny?(value: M | U): M;
-}
-
-export interface ModelFactory<M extends Model = Model> extends Creatable<M> {
+export interface ModelFactory<M extends Model = Model, U = AnyModel<M>> extends Creatable<M>, FromAny<M, U> {
   fromInit(init: InitType<M>): M;
 }
 
-export interface ModelClass<M extends Model = Model> extends Function, ModelFactory<M> {
+export interface ModelClass<M extends Model = Model, U = AnyModel<M>> extends Function, ModelFactory<M, U> {
   readonly prototype: M;
 }
 
-export interface ModelConstructor<M extends Model = Model> extends ModelClass<M> {
+export interface ModelConstructor<M extends Model = Model, U = AnyModel<M>> extends ModelClass<M, U> {
   new(): M;
 }
 
@@ -98,68 +93,97 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
   override readonly parent: Model | null;
 
   /** @internal */
-  override setParent(newParent: Model | null, oldParent: Model | null): void {
-    super.setParent(newParent, oldParent);
-  }
-
-  /** @internal */
-  protected override attachParent(parent: Model): void {
-    super.attachParent(parent);
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      traits[i]!.attachParent(parent);
+  override attachParent(parent: Model): void {
+    // assert(this.parent === null);
+    this.willAttachParent(parent);
+    (this as Mutable<this>).parent = parent;
+    if (parent.mounted) {
+      this.cascadeMount();
     }
+    this.onAttachParent(parent);
+    this.didAttachParent(parent);
   }
 
-  /** @internal */
-  protected override detachParent(parent: Model): void {
-    try {
-      const traits = this.traits;
-      for (let i = 0, n = traits.length; i < n; i += 1) {
-        traits[i]!.detachParent(parent);
-      }
-    } finally {
-      super.detachParent(parent);
-    }
-  }
-
-  protected override willSetParent(newParent: Model | null, oldParent: Model | null): void {
-    super.willSetParent(newParent, oldParent);
+  protected override willAttachParent(parent: Model): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.modelWillSetParent !== void 0) {
-        observer.modelWillSetParent(newParent, oldParent, this);
+      if (observer.modelWillAttachParent !== void 0) {
+        observer.modelWillAttachParent(parent, this);
       }
     }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      traits[i]!.willSetParent(newParent, oldParent);
+      traits[i]!.willAttachParent(parent);
     }
   }
 
-  protected override onSetParent(newParent: Model | null, oldParent: Model | null): void {
-    (this as Mutable<this>).parent = newParent;
-    super.onSetParent(newParent, oldParent);
+  protected override onAttachParent(parent: Model): void {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      traits[i]!.onSetParent(newParent, oldParent);
+      traits[i]!.onAttachParent(parent);
     }
   }
 
-  protected override didSetParent(newParent: Model | null, oldParent: Model | null): void {
+  protected override didAttachParent(parent: Model): void {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      traits[i]!.didSetParent(newParent, oldParent);
+      traits[i]!.didAttachParent(parent);
     }
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.modelDidSetParent !== void 0) {
-        observer.modelDidSetParent(newParent, oldParent, this);
+      if (observer.modelDidAttachParent !== void 0) {
+        observer.modelDidAttachParent(parent, this);
       }
     }
-    super.didSetParent(newParent, oldParent);
+  }
+
+  /** @internal */
+  override detachParent(parent: Model): void {
+    // assert(this.parent === parent);
+    this.willDetachParent(parent);
+    if (this.mounted) {
+      this.cascadeUnmount();
+    }
+    this.onDetachParent(parent);
+    (this as Mutable<this>).parent = null;
+    this.didDetachParent(parent);
+  }
+
+  protected override willDetachParent(parent: Model): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.modelWillDetachParent !== void 0) {
+        observer.modelWillDetachParent(parent, this);
+      }
+    }
+    const traits = this.traits;
+    for (let i = 0, n = traits.length; i < n; i += 1) {
+      traits[i]!.willDetachParent(parent);
+    }
+  }
+
+  protected override onDetachParent(parent: Model): void {
+    const traits = this.traits;
+    for (let i = 0, n = traits.length; i < n; i += 1) {
+      traits[i]!.onDetachParent(parent);
+    }
+  }
+
+  protected override didDetachParent(parent: Model): void {
+    const traits = this.traits;
+    for (let i = 0, n = traits.length; i < n; i += 1) {
+      traits[i]!.didDetachParent(parent);
+    }
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.modelDidDetachParent !== void 0) {
+        observer.modelDidDetachParent(parent, this);
+      }
+    }
   }
 
   abstract override readonly childCount: number;
@@ -180,17 +204,20 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
   abstract override getChild<M extends Model>(key: string, childBound: Class<M>): M | null;
   abstract override getChild(key: string, childBound?: Class<Model>): Model | null;
 
-  abstract override setChild<M extends Model>(key: string, newChild: AnyModel<M> | null): Model | null;
+  abstract override setChild<M extends Model>(key: string, newChild: M | ModelFactory<M> | null): Model | null;
   abstract override setChild(key: string, newChild: AnyModel | null): Model | null;
 
-  abstract override appendChild<M extends Model>(child: AnyModel<M>, key?: string): M;
+  abstract override appendChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
   abstract override appendChild(child: AnyModel, key?: string): Model;
 
-  abstract override prependChild<M extends Model>(child: AnyModel<M>, key?: string): M;
+  abstract override prependChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
   abstract override prependChild(child: AnyModel, key?: string): Model;
 
-  abstract override insertChild<M extends Model>(child: AnyModel<M>, target: Model | null, key?: string): M;
+  abstract override insertChild<M extends Model>(child: M | ModelFactory<M>, target: Model | null, key?: string): M;
   abstract override insertChild(child: AnyModel, target: Model | null, key?: string): Model;
+
+  abstract override replaceChild<M extends Model>(newChild: Model, oldChild: M): M;
+  abstract override replaceChild<M extends Model>(newChild: AnyModel, oldChild: M): M;
 
   override get insertChildFlags(): ModelFlags {
     return (this.constructor as typeof Model).InsertChildFlags;
@@ -213,7 +240,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
 
   protected override onInsertChild(child: Model, target: Model | null): void {
     super.onInsertChild(child, target);
-    this.attachChildFasteners(child, target);
+    this.bindChildFasteners(child, target);
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       traits[i]!.onInsertChild(child, target);
@@ -252,7 +279,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
   }
 
   abstract override removeChild(key: string): Model | null;
-  abstract override removeChild(child: Model): void;
+  abstract override removeChild<M extends Model>(child: M): M;
 
   override get removeChildFlags(): ModelFlags {
     return (this.constructor as typeof Model).RemoveChildFlags;
@@ -279,7 +306,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     for (let i = 0, n = traits.length; i < n; i += 1) {
       traits[i]!.onRemoveChild(child);
     }
-    this.detachChildFasteners(child);
+    this.unbindChildFasteners(child);
   }
 
   protected override didRemoveChild(child: Model): void {
@@ -295,28 +322,6 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
       }
     }
     super.didRemoveChild(child);
-  }
-
-  /** @internal */
-  protected attachChildFasteners(child: Model, target: Model | null): void {
-    const fastenerName = child.key;
-    if (fastenerName !== void 0) {
-      const modelFastener = this.getLazyFastener(fastenerName, ModelFastener);
-      if (modelFastener !== null && modelFastener.child === true) {
-        modelFastener.setOwnModel(child, target);
-      }
-    }
-  }
-
-  /** @internal */
-  protected detachChildFasteners(child: Model): void {
-    const fastenerName = child.key;
-    if (fastenerName !== void 0) {
-      const modelFastener = this.getFastener(fastenerName, ModelFastener);
-      if (modelFastener !== null && modelFastener.child === true && modelFastener.model === child) {
-        modelFastener.setOwnModel(null, null);
-      }
-    }
   }
 
   get traitCount(): number {
@@ -406,10 +411,22 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     }
   }
 
+  /** @internal */
+  protected replaceTraitMap(newTrait: Trait, oldTrait: Trait): void {
+    const key = oldTrait.key;
+    if (key !== void 0) {
+      let traitMap = this.traitMap as MutableDictionary<Trait>;
+      if (traitMap === null) {
+        traitMap = {};
+        (this as Mutable<this>).traitMap = traitMap;
+      }
+      traitMap[key] = newTrait;
+    }
+  }
 
-  getTrait<R extends Trait>(key: string, traitBound: Class<R>): R | null;
+  getTrait<T extends Trait>(key: string, traitBound: Class<T>): T | null;
   getTrait(key: string, traitBound?: Class<Trait>): Trait | null;
-  getTrait<R extends Trait>(traitBound: Class<R>): R | null;
+  getTrait<T extends Trait>(traitBound: Class<T>): T | null;
   getTrait(key: string | Class<Trait>, traitBound?: Class<Trait>): Trait | null {
     if (typeof key === "string") {
       const traitMap = this.traitMap;
@@ -431,55 +448,69 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     return null;
   }
 
-  setTrait<R extends Trait>(key: string, newTrait: AnyTrait<R> | null): Trait | null;
+  setTrait<T extends Trait>(key: string, newTrait: T | TraitFactory<T> | null): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null {
     if (newTrait !== null) {
       newTrait = Trait.fromAny(newTrait);
     }
-
-    let target: Trait | null = null;
-    const traits = this.traits as Trait[];
-    if (newTrait !== null) {
-      if (newTrait.model === this) {
-        target = traits[traits.indexOf(newTrait) + 1] || null;
-      }
-      newTrait.remove();
-    }
-
-    let index = -1;
     const oldTrait = this.getTrait(key);
-    if (oldTrait !== null) {
+    const traits = this.traits as Trait[];
+    let index = -1;
+    let target: Trait | null = null;
+
+    if (oldTrait !== null && newTrait !== null && oldTrait !== newTrait) { // replace
+      newTrait.remove();
       index = traits.indexOf(oldTrait);
       // assert(index >= 0);
-      target = traits[index + 1] || null;
+      target = index + 1 < traits.length ? traits[index + 1]! : null;
+      newTrait.setKey(oldTrait.key);
       this.willRemoveTrait(oldTrait);
-      oldTrait.setModel(null, this);
-      this.removeTraitMap(oldTrait);
-      traits.splice(index, 1);
-      this.onRemoveTrait(oldTrait);
-      this.didRemoveTrait(oldTrait);
-      oldTrait.setKey(void 0);
-    }
-
-    if (newTrait !== null) {
-      newTrait.setKey(key);
       this.willInsertTrait(newTrait, target);
-      if (index >= 0) {
-        traits.splice(index, 0, newTrait);
-      } else {
-        traits.push(newTrait);
-      }
-      this.insertTraitMap(newTrait);
-      newTrait.setModel(this, null);
+      oldTrait.detachModel(this);
+      traits[index] = newTrait;
+      this.replaceTraitMap(newTrait, oldTrait);
+      newTrait.attachModel(this);
+      this.onRemoveTrait(oldTrait);
       this.onInsertTrait(newTrait, target);
+      this.didRemoveTrait(oldTrait);
       this.didInsertTrait(newTrait, target);
+      oldTrait.setKey(void 0);
+    } else if (newTrait !== oldTrait || newTrait !== null && newTrait.key !== key) {
+      if (oldTrait !== null) { // remove
+        this.willRemoveTrait(oldTrait);
+        oldTrait.detachModel(this);
+        this.removeTraitMap(oldTrait);
+        index = traits.indexOf(oldTrait);
+        // assert(index >= 0);
+        traits.splice(index, 1);
+        this.onRemoveTrait(oldTrait);
+        this.didRemoveTrait(oldTrait);
+        oldTrait.setKey(void 0);
+        if (index < traits.length) {
+          target = traits[index]!;
+        }
+      }
+      if (newTrait !== null) { // insert
+        newTrait.remove();
+        newTrait.setKey(key);
+        this.willInsertTrait(newTrait, target);
+        if (index >= 0) {
+          traits.splice(index, 0, newTrait);
+        } else {
+          traits.push(newTrait);
+        }
+        this.insertTraitMap(newTrait);
+        newTrait.attachModel(this);
+        this.onInsertTrait(newTrait, target);
+        this.didInsertTrait(newTrait, target);
+      }
     }
 
     return oldTrait;
   }
 
-  appendTrait<R extends Trait>(trait: AnyTrait<R>, key?: string): R;
+  appendTrait<T extends Trait>(trait: T | TraitFactory<T>, key?: string): T;
   appendTrait(trait: AnyTrait, key?: string): Trait;
   appendTrait(trait: AnyTrait, key?: string): Trait {
     trait = Trait.fromAny(trait);
@@ -493,14 +524,14 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     this.willInsertTrait(trait, null);
     (this.traits as Trait[]).push(trait);
     this.insertTraitMap(trait);
-    trait.setModel(this, null);
+    trait.attachModel(this);
     this.onInsertTrait(trait, null);
     this.didInsertTrait(trait, null);
 
     return trait;
   }
 
-  prependTrait<R extends Trait>(trait: AnyTrait<R>, key?: string): R;
+  prependTrait<T extends Trait>(trait: T | TraitFactory<T>, key?: string): T;
   prependTrait(trait: AnyTrait, key?: string): Trait;
   prependTrait(trait: AnyTrait, key?: string): Trait {
     trait = Trait.fromAny(trait);
@@ -516,14 +547,14 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     this.willInsertTrait(trait, target);
     traits.unshift(trait);
     this.insertTraitMap(trait);
-    trait.setModel(this, null);
+    trait.attachModel(this);
     this.onInsertTrait(trait, target);
     this.didInsertTrait(trait, target);
 
     return trait;
   }
 
-  insertTrait<R extends Trait>(trait: AnyTrait<R>, target: Trait | null, key?: string): R;
+  insertTrait<T extends Trait>(trait: T | TraitFactory<T>, target: Trait | null, key?: string): T;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait {
     if (target !== null && target.model !== this) {
@@ -547,12 +578,44 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
       traits.push(trait);
     }
     this.insertTraitMap(trait);
-    trait.setModel(this, null);
+    trait.attachModel(this);
     this.onInsertTrait(trait, target);
     this.didInsertTrait(trait, target);
 
     return trait;
   }
+
+  replaceTrait<T extends Trait>(newTrait: Trait, oldTrait: T): T;
+  replaceTrait<T extends Trait>(newTrait: AnyTrait, oldTrait: T): T;
+  replaceTrait(newTrait: AnyTrait, oldTrait: Trait): Trait {
+    const traits = this.traits as Trait[];
+    let index: number
+    if (oldTrait.model !== this || (index = traits.indexOf(oldTrait), index < 0)) {
+      throw new TypeError("" + oldTrait);
+    }
+
+    newTrait = Trait.fromAny(newTrait);
+    if (newTrait !== oldTrait) {
+      newTrait.remove();
+      newTrait.setKey(oldTrait.key);
+
+      const target = index + 1 < traits.length ? traits[index + 1]! : null;
+      this.willRemoveTrait(oldTrait);
+      this.willInsertTrait(newTrait, target);
+      oldTrait.detachModel(this);
+      traits[index] = newTrait;
+      this.replaceTraitMap(newTrait, oldTrait);
+      newTrait.attachModel(this);
+      this.onRemoveTrait(oldTrait);
+      this.onInsertTrait(newTrait, target);
+      this.didRemoveTrait(oldTrait);
+      this.didInsertTrait(newTrait, target);
+      oldTrait.setKey(void 0);
+    }
+
+    return oldTrait;
+  }
+
 
   get insertTraitFlags(): ModelFlags {
     return (this.constructor as typeof Model).InsertTraitFlags;
@@ -574,7 +637,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
 
   protected onInsertTrait(trait: Trait, target: Trait | null): void {
     this.requireUpdate(this.insertTraitFlags);
-    this.attachTraitFasteners(trait, target);
+    this.bindTraitFasteners(trait, target);
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       traits[i]!.onInsertTrait(trait, target);
@@ -612,7 +675,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     }
 
     this.willRemoveTrait(trait);
-    trait.setModel(null, this);
+    trait.detachModel(this);
     this.removeTraitMap(trait);
     const traits = this.traits as Trait[];
     const index = traits.indexOf(trait);
@@ -652,7 +715,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     for (let i = 0, n = traits.length; i < n; i += 1) {
       traits[i]!.onRemoveTrait(trait);
     }
-    this.detachTraitFasteners(trait);
+    this.unbindTraitFasteners(trait);
   }
 
   protected didRemoveTrait(trait: Trait): void {
@@ -665,28 +728,6 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
       const observer = observers[i]!;
       if (observer.modelDidRemoveTrait !== void 0) {
         observer.modelDidRemoveTrait(trait, this);
-      }
-    }
-  }
-
-  /** @internal */
-  protected attachTraitFasteners(trait: Trait, target: Trait | null): void {
-    const fastenerName = trait.key;
-    if (fastenerName !== void 0) {
-      const traitFastener = this.getLazyFastener(fastenerName, TraitFastener);
-      if (traitFastener !== null && traitFastener.sibling === true) {
-        traitFastener.setOwnTrait(trait, null);
-      }
-    }
-  }
-
-  /** @internal */
-  protected detachTraitFasteners(trait: Trait): void {
-    const fastenerName = trait.key;
-    if (fastenerName !== void 0) {
-      const traitFastener = this.getFastener(fastenerName, TraitFastener);
-      if (traitFastener !== null && traitFastener.sibling === true && traitFastener.trait === trait) {
-        traitFastener.setOwnTrait(null, null);
       }
     }
   }
@@ -707,7 +748,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     }
   }
 
-  getSuperTrait<R extends Trait>(superBound: Class<R>): R | null {
+  getSuperTrait<T extends Trait>(superBound: Class<T>): T | null {
     const parent = this.parent;
     if (parent === null) {
       return null;
@@ -721,7 +762,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     }
   }
 
-  getBaseTrait<R extends Trait>(baseBound: Class<R>): R | null {
+  getBaseTrait<T extends Trait>(baseBound: Class<T>): T | null {
     const parent = this.parent;
     if (parent === null) {
       return null;
@@ -905,13 +946,15 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
 
   cascadeAnalyze(analyzeFlags: ModelFlags, baesModelContext: ModelContext): void {
     const modelContext = this.extendModelContext(baesModelContext);
-    analyzeFlags &= ~Model.NeedsAnalyze;
-    analyzeFlags |= this.flags & Model.UpdateMask;
-    analyzeFlags = this.needsAnalyze(analyzeFlags, modelContext);
-    if ((analyzeFlags & Model.AnalyzeMask) !== 0) {
-      let cascadeFlags = analyzeFlags;
-      this.setFlags(this.flags & ~Model.NeedsAnalyze | (Model.TraversingFlag | Model.AnalyzingFlag));
-      try {
+    const outerModelContext = ModelContext.current;
+    try {
+      ModelContext.current = modelContext;
+      analyzeFlags &= ~Model.NeedsAnalyze;
+      analyzeFlags |= this.flags & Model.UpdateMask;
+      analyzeFlags = this.needsAnalyze(analyzeFlags, modelContext);
+      if ((analyzeFlags & Model.AnalyzeMask) !== 0) {
+        let cascadeFlags = analyzeFlags;
+        this.setFlags(this.flags & ~Model.NeedsAnalyze | (Model.TraversingFlag | Model.AnalyzingFlag | Model.ContextualFlag));
         this.willAnalyze(cascadeFlags, modelContext);
         if (((this.flags | analyzeFlags) & Model.NeedsMutate) !== 0) {
           cascadeFlags |= Model.NeedsMutate;
@@ -941,7 +984,9 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
         }
 
         if ((cascadeFlags & Model.AnalyzeMask) !== 0) {
+          this.setFlags(this.flags & ~Model.ContextualFlag);
           this.analyzeChildren(cascadeFlags, modelContext, this.analyzeChild);
+          this.setFlags(this.flags | Model.ContextualFlag);
         }
 
         if ((cascadeFlags & Model.NeedsCorrelate) !== 0) {
@@ -954,9 +999,10 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
           this.didMutate(modelContext);
         }
         this.didAnalyze(cascadeFlags, modelContext);
-      } finally {
-        this.setFlags(this.flags & ~(Model.TraversingFlag | Model.AnalyzingFlag));
       }
+    } finally {
+      this.setFlags(this.flags & ~(Model.TraversingFlag | Model.AnalyzingFlag | Model.ContextualFlag));
+      ModelContext.current = outerModelContext;
     }
   }
 
@@ -1143,13 +1189,15 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
 
   cascadeRefresh(refreshFlags: ModelFlags, baseModelContext: ModelContext): void {
     const modelContext = this.extendModelContext(baseModelContext);
-    refreshFlags &= ~Model.NeedsRefresh;
-    refreshFlags |= this.flags & Model.UpdateMask;
-    refreshFlags = this.needsRefresh(refreshFlags, modelContext);
-    if ((refreshFlags & Model.RefreshMask) !== 0) {
-      let cascadeFlags = refreshFlags;
-      this.setFlags(this.flags & ~Model.NeedsRefresh | (Model.TraversingFlag | Model.RefreshingFlag));
-      try {
+    const outerModelContext = ModelContext.current;
+    try {
+      ModelContext.current = modelContext;
+      refreshFlags &= ~Model.NeedsRefresh;
+      refreshFlags |= this.flags & Model.UpdateMask;
+      refreshFlags = this.needsRefresh(refreshFlags, modelContext);
+      if ((refreshFlags & Model.RefreshMask) !== 0) {
+        let cascadeFlags = refreshFlags;
+        this.setFlags(this.flags & ~Model.NeedsRefresh | (Model.TraversingFlag | Model.RefreshingFlag | Model.ContextualFlag));
         this.willRefresh(cascadeFlags, modelContext);
         if (((this.flags | refreshFlags) & Model.NeedsValidate) !== 0) {
           cascadeFlags |= Model.NeedsValidate;
@@ -1171,7 +1219,9 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
         }
 
         if ((cascadeFlags & Model.RefreshMask)) {
+          this.setFlags(this.flags & ~Model.ContextualFlag);
           this.refreshChildren(cascadeFlags, modelContext, this.refreshChild);
+          this.setFlags(this.flags | Model.ContextualFlag);
         }
 
         if ((cascadeFlags & Model.NeedsReconcile) !== 0) {
@@ -1181,9 +1231,10 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
           this.didValidate(modelContext);
         }
         this.didRefresh(cascadeFlags, modelContext);
-      } finally {
-        this.setFlags(this.flags & ~(Model.TraversingFlag | Model.RefreshingFlag));
       }
+    } finally {
+      this.setFlags(this.flags & ~(Model.TraversingFlag | Model.RefreshingFlag | Model.ContextualFlag));
+      ModelContext.current = outerModelContext;
     }
   }
 
@@ -1321,25 +1372,88 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     child.cascadeRefresh(refreshFlags, modelContext);
   }
 
-  protected override attachFastener(fastenerName: string, fastener: Fastener): void {
-    super.attachFastener(fastenerName, fastener);
+  protected override onAttachFastener(fastenerName: string, fastener: Fastener): void {
+    super.onAttachFastener(fastenerName, fastener);
+    this.bindFastener(fastener);
+  }
 
-    if (fastener instanceof ModelFastener && fastener.child === true) {
-      const child = this.getChild(fastenerName);
-      if (child !== null) {
-        fastener.setOwnModel(child, null);
-      }
+  protected bindFastener(fastener: Fastener): void {
+    if ((fastener instanceof ModelRelation || fastener instanceof TraitRelation) && fastener.binds) {
+      this.forEachChild(function (child: Model): void {
+        fastener.bindModel(child, null);
+      }, this);
     }
-
-    if (fastener instanceof TraitFastener && fastener.sibling === true) {
-      const trait = this.getTrait(fastenerName);
-      if (trait !== null) {
-        fastener.setOwnTrait(trait, null);
-      }
+    if (fastener instanceof TraitRelation && fastener.binds) {
+      this.forEachTrait(function (trait: Trait): void {
+        fastener.bindTrait(trait, null);
+      }, this);
     }
-
     if (fastener instanceof DownlinkFastener && fastener.consumed === true && this.consuming) {
       fastener.consume(this);
+    }
+  }
+
+  /** @internal */
+  protected bindChildFasteners(child: Model, target: Model | null): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.bindChildFastener(fastener, child, target);
+    }
+  }
+
+  /** @internal */
+  protected bindChildFastener(fastener: Fastener, child: Model, target: Model | null): void {
+    if (fastener instanceof ModelRelation || fastener instanceof TraitRelation) {
+      fastener.bindModel(child, target);
+    }
+  }
+
+  /** @internal */
+  protected unbindChildFasteners(child: Model): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.unbindChildFastener(fastener, child);
+    }
+  }
+
+  /** @internal */
+  protected unbindChildFastener(fastener: Fastener, child: Model): void {
+    if (fastener instanceof ModelRelation || fastener instanceof TraitRelation) {
+      fastener.unbindModel(child);
+    }
+  }
+
+  /** @internal */
+  protected bindTraitFasteners(trait: Trait, target: Trait | null): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.bindTraitFastener(fastener, trait, target);
+    }
+  }
+
+  /** @internal */
+  protected bindTraitFastener(fastener: Fastener, trait: Trait, target: Trait | null): void {
+    if (fastener instanceof TraitRelation) {
+      fastener.bindTrait(trait, target);
+    }
+  }
+
+  /** @internal */
+  protected unbindTraitFasteners(trait: Trait): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.unbindTraitFastener(fastener, trait);
+    }
+  }
+
+  /** @internal */
+  protected unbindTraitFastener(fastener: Fastener, trait: Trait): void {
+    if (fastener instanceof TraitRelation) {
+      fastener.unbindTrait(trait);
     }
   }
 
@@ -1596,7 +1710,11 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
   }
 
   get modelContext(): ModelContextType<this> {
-    return this.extendModelContext(this.superModelContext);
+    if ((this.flags & Model.ContextualFlag) !== 0) {
+      return ModelContext.current as ModelContextType<this>;
+    } else {
+      return this.extendModelContext(this.superModelContext);
+    }
   }
 
   /** @override */
@@ -1637,30 +1755,40 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
   }
 
   /** @internal */
-  static override readonly MountedFlag: ModelFlags = Hierarchy.MountedFlag;
+  static override uid: () => number = (function () {
+    let nextId = 1;
+    return function uid(): number {
+      const id = ~~nextId;
+      nextId += 1;
+      return id;
+    }
+  })();
+
   /** @internal */
-  static override readonly TraversingFlag: ModelFlags = Hierarchy.TraversingFlag;
+  static override readonly MountedFlag: ModelFlags = Hierarchy.MountedFlag;
   /** @internal */
   static override readonly RemovingFlag: ModelFlags = Hierarchy.RemovingFlag;
   /** @internal */
-  static readonly ConsumingFlag: ModelFlags = 1 << (Hierarchy.FlagShift + 0);
+  static override readonly TraversingFlag: ModelFlags = Hierarchy.TraversingFlag;
   /** @internal */
-  static readonly AnalyzingFlag: ModelFlags = 1 << (Hierarchy.FlagShift + 1);
+  static readonly AnalyzingFlag: ModelFlags = 1 << (Hierarchy.FlagShift + 0);
   /** @internal */
-  static readonly RefreshingFlag: ModelFlags = 1 << (Hierarchy.FlagShift + 2);
+  static readonly RefreshingFlag: ModelFlags = 1 << (Hierarchy.FlagShift + 1);
   /** @internal */
-  static readonly ImmediateFlag: ModelFlags = 1 << (Hierarchy.FlagShift + 3);
+  static readonly ContextualFlag: ModelFlags = 1 << (Hierarchy.FlagShift + 2);
+  /** @internal */
+  static readonly ConsumingFlag: ModelFlags = 1 << (Hierarchy.FlagShift + 3);
   /** @internal */
   static readonly UpdatingMask: ModelFlags = Model.AnalyzingFlag
                                            | Model.RefreshingFlag;
   /** @internal */
   static readonly StatusMask: ModelFlags = Model.MountedFlag
-                                         | Model.TraversingFlag
                                          | Model.RemovingFlag
-                                         | Model.ConsumingFlag
+                                         | Model.TraversingFlag
                                          | Model.AnalyzingFlag
                                          | Model.RefreshingFlag
-                                         | Model.ImmediateFlag;
+                                         | Model.ContextualFlag
+                                         | Model.ConsumingFlag;
 
   static readonly NeedsAnalyze: ModelFlags = 1 << (Hierarchy.FlagShift + 4);
   static readonly NeedsMutate: ModelFlags = 1 << (Hierarchy.FlagShift + 5);

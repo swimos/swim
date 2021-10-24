@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {GraphicsView} from "@swim/graphics";
-import type {ControllerObserver, ControllerFastener} from "@swim/controller";
+import type {ControllerObserver} from "@swim/controller";
 import type {DialView} from "../dial/DialView";
 import type {DialTrait} from "../dial/DialTrait";
 import type {DialController} from "../dial/DialController";
@@ -22,43 +22,43 @@ import type {GaugeTrait} from "./GaugeTrait";
 import type {GaugeController} from "./GaugeController";
 
 export interface GaugeControllerObserver<C extends GaugeController = GaugeController> extends ControllerObserver<C> {
-  controllerWillSetGaugeTrait?(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null, controller: C): void;
+  controllerWillAttachGaugeTrait?(gaugeTrait: GaugeTrait, controller: C): void;
 
-  controllerDidSetGaugeTrait?(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null, controller: C): void;
+  controllerDidDetachGaugeTrait?(gaugeTrait: GaugeTrait, controller: C): void;
 
-  controllerWillSetGaugeView?(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null, controller: C): void;
+  controllerWillAttachGaugeView?(gaugeView: GaugeView, controller: C): void;
 
-  controllerDidSetGaugeView?(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null, controller: C): void;
+  controllerDidDetachGaugeView?(gaugeView: GaugeView | null, controller: C): void;
 
-  controllerWillSetGaugeTitleView?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, controller: C): void;
+  controllerWillAttachGaugeTitleView?(titleView: GraphicsView, controller: C): void;
 
-  controllerDidSetGaugeTitleView?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, controller: C): void;
+  controllerDidDetachGaugeTitleView?(titleView: GraphicsView, controller: C): void;
 
-  controllerWillSetDial?(newDialController: DialController | null, oldDialController: DialController | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerWillAttachDial?(dialController: DialController, controller: C): void;
 
-  controllerDidSetDial?(newDialController: DialController | null, oldDialController: DialController | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerDidDetachDial?(dialController: DialController, controller: C): void;
 
-  controllerWillSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerWillAttachDialTrait?(dialTrait: DialTrait, dialController: DialController, controller: C): void;
 
-  controllerDidSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerDidDetachDialTrait?(dialTrait: DialTrait, dialController: DialController, controller: C): void;
 
-  controllerWillSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerWillAttachDialView?(dialView: DialView, dialController: DialController, controller: C): void;
 
-  controllerDidSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerDidDetachDialView?(dialView: DialView, dialController: DialController, controller: C): void;
 
-  controllerWillSetDialValue?(newValue: number, oldValue: number, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerWillSetDialValue?(newValue: number, oldValue: number, dialController: DialController, controller: C): void;
 
-  controllerDidSetDialValue?(newValue: number, oldValue: number, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerDidSetDialValue?(newValue: number, oldValue: number, dialController: DialController, controller: C): void;
 
-  controllerWillSetDialLimit?(newLimit: number, oldLimit: number, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerWillSetDialLimit?(newLimit: number, oldLimit: number, dialController: DialController, controller: C): void;
 
-  controllerDidSetDialLimit?(newLimit: number, oldLimit: number, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerDidSetDialLimit?(newLimit: number, oldLimit: number, dialController: DialController, controller: C): void;
 
-  controllerWillSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerWillAttachDialLabelView?(labelView: GraphicsView, dialController: DialController, controller: C): void;
 
-  controllerDidSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerDidDetachDialLabelView?(labelView: GraphicsView, dialController: DialController, controller: C): void;
 
-  controllerWillSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerWillAttachDialLegendView?(legendView: GraphicsView, dialController: DialController, controller: C): void;
 
-  controllerDidSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, dialFastener: ControllerFastener<C, DialController>): void;
+  controllerDidDetachDialLegendView?(legendView: GraphicsView, dialController: DialController, controller: C): void;
 }

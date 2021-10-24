@@ -35,6 +35,7 @@ export const AngleInterpolator = (function (_super: typeof Interpolator) {
   };
 
   AngleInterpolator.prototype = Object.create(_super.prototype);
+  AngleInterpolator.prototype.constructor = AngleInterpolator;
 
   return AngleInterpolator;
 })(Interpolator);

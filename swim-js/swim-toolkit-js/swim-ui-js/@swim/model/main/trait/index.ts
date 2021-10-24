@@ -18,7 +18,6 @@ export {
   TraitFlags,
   AnyTrait,
   TraitInit,
-  AnyTraitFactory,
   TraitFactory,
   TraitClass,
   TraitConstructor,
@@ -27,10 +26,28 @@ export {
 export {TraitObserver} from "./TraitObserver";
 
 export {
-  TraitFastenerType,
-  TraitFastenerInitType,
-  TraitFastenerInit,
-  TraitFastenerDescriptor,
-  TraitFastenerClass,
-  TraitFastener,
-} from "./TraitFastener";
+  TraitRelationType,
+  TraitRelationInit,
+  TraitRelationDescriptor,
+  TraitRelationClass,
+  TraitRelationFactory,
+  TraitRelation,
+} from "./TraitRelation";
+
+export {
+  TraitRefType,
+  TraitRefInit,
+  TraitRefDescriptor,
+  TraitRefClass,
+  TraitRefFactory,
+  TraitRef,
+} from "./TraitRef";
+
+export {
+  TraitSetType,
+  TraitSetInit,
+  TraitSetDescriptor,
+  TraitSetClass,
+  TraitSetFactory,
+  TraitSet,
+} from "./TraitSet";

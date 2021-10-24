@@ -18,10 +18,13 @@ export interface ModelContext {
 
 export const ModelContext = (function () {
   const ModelContext = {} as {
-    default(): ModelContext;
+    current: ModelContext | null;
+    create(): ModelContext;
   };
 
-  ModelContext.default = function (): ModelContext {
+  ModelContext.current = null;
+
+  ModelContext.create = function (): ModelContext {
     return {
       updateTime: performance.now(),
     };

@@ -18,7 +18,7 @@ import type {Length} from "@swim/math";
 import type {GeoPath} from "@swim/geo";
 import type {Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
-import {TraitViewFastener} from "@swim/controller";
+import {TraitViewRef} from "@swim/controller";
 import {GeoLineView} from "./GeoLineView";
 import {GeoLineTrait} from "./GeoLineTrait";
 import {GeoPathController} from "./GeoPathController";
@@ -26,116 +26,6 @@ import type {GeoLineControllerObserver} from "./GeoLineControllerObserver";
 
 export class GeoLineController extends GeoPathController {
   override readonly observerType?: Class<GeoLineControllerObserver>;
-
-  protected initGeoTrait(geoTrait: GeoLineTrait): void {
-    // hook
-  }
-
-  protected attachGeoTrait(geoTrait: GeoLineTrait): void {
-    const geoView = this.geo.view;
-    if (geoView !== null) {
-      this.setGeoPath(geoTrait.geoPath.state, geoTrait);
-      const stroke = geoTrait.stroke.state;
-      if (stroke !== null) {
-        this.setStroke(stroke, geoTrait);
-      }
-      const strokeWidth = geoTrait.strokeWidth.state;
-      if (strokeWidth !== null) {
-        this.setStrokeWidth(strokeWidth, geoTrait);
-      }
-    }
-  }
-
-  protected detachGeoTrait(geoTrait: GeoLineTrait): void {
-    // hook
-  }
-
-  protected willSetGeoTrait(newGeoTrait: GeoLineTrait | null, oldGeoTrait: GeoLineTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoTrait !== void 0) {
-        observer.controllerWillSetGeoTrait(newGeoTrait, oldGeoTrait, this);
-      }
-    }
-  }
-
-  protected onSetGeoTrait(newGeoTrait: GeoLineTrait | null, oldGeoTrait: GeoLineTrait | null): void {
-    if (oldGeoTrait !== null) {
-      this.detachGeoTrait(oldGeoTrait);
-    }
-    if (newGeoTrait !== null) {
-      this.attachGeoTrait(newGeoTrait);
-      this.initGeoTrait(newGeoTrait);
-    }
-  }
-
-  protected didSetGeoTrait(newGeoTrait: GeoLineTrait | null, oldGeoTrait: GeoLineTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoTrait !== void 0) {
-        observer.controllerDidSetGeoTrait(newGeoTrait, oldGeoTrait, this);
-      }
-    }
-  }
-
-  protected createGeoView(): GeoLineView {
-    return GeoLineView.create();
-  }
-
-  protected initGeoView(geoView: GeoLineView): void {
-    // hook
-  }
-
-  protected attachGeoView(geoView: GeoLineView): void {
-    const geoTrait = this.geo.trait;
-    if (geoTrait !== null) {
-      this.setGeoPath(geoTrait.geoPath.state, geoTrait);
-      const stroke = geoTrait.stroke.state;
-      if (stroke !== null) {
-        this.setStroke(stroke, geoTrait);
-      }
-      const strokeWidth = geoTrait.strokeWidth.state;
-      if (strokeWidth !== null) {
-        this.setStrokeWidth(strokeWidth, geoTrait);
-      }
-    }
-  }
-
-  protected detachGeoView(geoView: GeoLineView): void {
-    // hook
-  }
-
-  protected willSetGeoView(newGeoView: GeoLineView | null, oldGeoView: GeoLineView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoView !== void 0) {
-        observer.controllerWillSetGeoView(newGeoView, oldGeoView, this);
-      }
-    }
-  }
-
-  protected onSetGeoView(newGeoView: GeoLineView | null, oldGeoView: GeoLineView | null): void {
-    if (oldGeoView !== null) {
-      this.detachGeoView(oldGeoView);
-    }
-    if (newGeoView !== null) {
-      this.attachGeoView(newGeoView);
-      this.initGeoView(newGeoView);
-    }
-  }
-
-  protected didSetGeoView(newGeoView: GeoLineView | null, oldGeoView: GeoLineView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoView !== void 0) {
-        observer.controllerDidSetGeoView(newGeoView, oldGeoView, this);
-      }
-    }
-  }
 
   protected setGeoPath(geoPath: GeoPath | null, geoTrait: GeoLineTrait, timing?: AnyTiming | boolean): void {
     const geoView = this.geo.view;
@@ -149,30 +39,6 @@ export class GeoLineController extends GeoPathController {
         timing = Timing.fromAny(timing);
       }
       geoView.geoPath.setState(geoPath, timing, Affinity.Intrinsic);
-    }
-  }
-
-  protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoLineView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetGeoPath !== void 0) {
-        observer.controllerWillSetGeoPath(newGeoPath, oldGeoPath, this);
-      }
-    }
-  }
-
-  protected onSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoLineView): void {
-    // hook
-  }
-
-  protected didSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoLineView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetGeoPath !== void 0) {
-        observer.controllerDidSetGeoPath(newGeoPath, oldGeoPath, this);
-      }
     }
   }
 
@@ -195,30 +61,6 @@ export class GeoLineController extends GeoPathController {
     }
   }
 
-  protected willSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoLineView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetStroke !== void 0) {
-        observer.controllerWillSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
-  protected onSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoLineView): void {
-    // hook
-  }
-
-  protected didSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoLineView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetStroke !== void 0) {
-        observer.controllerDidSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
   protected setStrokeWidth(strokeWidth: Length | null, geoTrait: GeoLineTrait, timing?: AnyTiming | boolean): void {
     const geoView = this.geo.view;
     if (geoView !== null) {
@@ -234,42 +76,28 @@ export class GeoLineController extends GeoPathController {
     }
   }
 
-  protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoLineView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetStrokeWidth !== void 0) {
-        observer.controllerWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
-  protected onSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoLineView): void {
-    // hook
-  }
-
-  protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoLineView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetStrokeWidth !== void 0) {
-        observer.controllerDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static GetFastener = TraitViewFastener.define<GeoLineController, GeoLineTrait, GeoLineView>({
+  @TraitViewRef<GeoLineController, GeoLineTrait, GeoLineView>({
     traitType: GeoLineTrait,
     observesTrait: true,
-    willSetTrait(newGeoTrait: GeoLineTrait | null, oldGeoTrait: GeoLineTrait | null): void {
-      this.owner.willSetGeoTrait(newGeoTrait, oldGeoTrait);
+    willAttachTrait(geoTrait: GeoLineTrait): void {
+      this.owner.callObservers("controllerWillAttachGeoTrait", geoTrait, this.owner);
     },
-    onSetTrait(newGeoTrait: GeoLineTrait | null, oldGeoTrait: GeoLineTrait | null): void {
-      this.owner.onSetGeoTrait(newGeoTrait, oldGeoTrait);
+    didAttachTrait(geoTrait: GeoLineTrait): void {
+      const geoView = this.view;
+      if (geoView !== null) {
+        this.owner.setGeoPath(geoTrait.geoPath.state, geoTrait);
+        const stroke = geoTrait.stroke.state;
+        if (stroke !== null) {
+          this.owner.setStroke(stroke, geoTrait);
+        }
+        const strokeWidth = geoTrait.strokeWidth.state;
+        if (strokeWidth !== null) {
+          this.owner.setStrokeWidth(strokeWidth, geoTrait);
+        }
+      }
     },
-    didSetTrait(newGeoTrait: GeoLineTrait | null, oldGeoTrait: GeoLineTrait | null): void {
-      this.owner.didSetGeoTrait(newGeoTrait, oldGeoTrait);
+    didDetachTrait(geoTrait: GeoLineTrait): void {
+      this.owner.callObservers("controllerDidDetachGeoTrait", geoTrait, this.owner);
     },
     traitDidSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoTrait: GeoLineTrait): void {
       this.owner.setGeoPath(newGeoPath, geoTrait);
@@ -282,43 +110,44 @@ export class GeoLineController extends GeoPathController {
     },
     viewType: GeoLineView,
     observesView: true,
-    willSetView(newGeoView: GeoLineView | null, oldGeoView: GeoLineView | null): void {
-      this.owner.willSetGeoView(newGeoView, oldGeoView);
+    willAttachView(geoView: GeoLineView): void {
+      this.owner.callObservers("controllerWillAttachGeoView", geoView, this.owner);
     },
-    onSetView(newGeoView: GeoLineView | null, oldGeoView: GeoLineView | null): void {
-      this.owner.onSetGeoView(newGeoView, oldGeoView);
+    didAttachView(geoView: GeoLineView): void {
+      const geoTrait = this.trait;
+      if (geoTrait !== null) {
+        this.owner.setGeoPath(geoTrait.geoPath.state, geoTrait);
+        const stroke = geoTrait.stroke.state;
+        if (stroke !== null) {
+          this.owner.setStroke(stroke, geoTrait);
+        }
+        const strokeWidth = geoTrait.strokeWidth.state;
+        if (strokeWidth !== null) {
+          this.owner.setStrokeWidth(strokeWidth, geoTrait);
+        }
+      }
     },
-    didSetView(newGeoView: GeoLineView | null, oldGeoView: GeoLineView | null): void {
-      this.owner.didSetGeoView(newGeoView, oldGeoView);
+    didDetachView(geoView: GeoLineView): void {
+      this.owner.callObservers("controllerDidDetachGeoView", geoView, this.owner);
     },
-    viewWillSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoLineView): void {
-      this.owner.willSetGeoPath(newGeoPath, oldGeoPath, geoView);
+    viewWillSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
+      this.owner.callObservers("controllerWillSetGeoPath", newGeoPath, oldGeoPath, this.owner);
     },
-    viewDidSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoLineView): void {
-      this.owner.onSetGeoPath(newGeoPath, oldGeoPath, geoView);
-      this.owner.didSetGeoPath(newGeoPath, oldGeoPath, geoView);
+    viewDidSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
+      this.owner.callObservers("controllerDidSetGeoPath", newGeoPath, oldGeoPath, this.owner);
     },
-    viewWillSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoLineView): void {
-      this.owner.willSetStroke(newStroke, oldStroke, geoView);
+    viewWillSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
+      this.owner.callObservers("controllerWillSetStroke", newStroke, oldStroke, this.owner);
     },
-    viewDidSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, geoView: GeoLineView): void {
-      this.owner.onSetStroke(newStroke, oldStroke, geoView);
-      this.owner.didSetStroke(newStroke, oldStroke, geoView);
+    viewDidSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
+      this.owner.callObservers("controllerDidSetStroke", newStroke, oldStroke, this.owner);
     },
-    viewWillSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoLineView): void {
-      this.owner.willSetStrokeWidth(newStrokeWidth, oldStrokeWidth, geoView);
+    viewWillSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+      this.owner.callObservers("controllerWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
-    viewDidSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, geoView: GeoLineView): void {
-      this.owner.onSetStrokeWidth(newStrokeWidth, oldStrokeWidth, geoView);
-      this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth, geoView);
+    viewDidSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+      this.owner.callObservers("controllerDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
-    createView(): GeoLineView | null {
-      return this.owner.createGeoView();
-    },
-  });
-
-  @TraitViewFastener<GeoLineController, GeoLineTrait, GeoLineView>({
-    extends: GeoLineController.GetFastener,
   })
-  readonly geo!: TraitViewFastener<this, GeoLineTrait, GeoLineView>;
+  readonly geo!: TraitViewRef<this, GeoLineTrait, GeoLineView>;
 }

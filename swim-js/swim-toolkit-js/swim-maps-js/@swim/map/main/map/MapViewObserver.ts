@@ -23,11 +23,11 @@ export interface MapViewObserver<V extends MapView = MapView> extends GeoViewObs
 
   viewDidSetGeoViewport?(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, view: V): void;
 
-  viewWillSetMapCanvas?(newMapCanvasView: CanvasView | null, oldMapCanvasView: CanvasView | null, view: V): void;
+  viewWillAttachMapCanvas?(mapCanvasView: CanvasView, view: V): void;
 
-  viewDidSetMapCanvas?(newMapCanvasView: CanvasView | null, oldMapCanvasView: CanvasView | null, view: V): void;
+  viewDidDetachMapCanvas?(mapCanvasView: CanvasView, view: V): void;
 
-  viewWillSetMapContainer?(newMapContainerView: HtmlView | null, oldMapContainerView: HtmlView | null, view: V): void;
+  viewWillAttachMapContainer?(mapContainerView: HtmlView, view: V): void;
 
-  viewDidSetMapContainer?(newMapContainerView: HtmlView | null, oldMapContainerView: HtmlView | null, view: V): void;
+  viewDidDetachMapContainer?(mapContainerView: HtmlView, view: V): void;
 }

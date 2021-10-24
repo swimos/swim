@@ -52,6 +52,7 @@ export const ContinuousScale = (function (_super: typeof Scale) {
   };
 
   ContinuousScale.prototype = Object.create(_super.prototype);
+  ContinuousScale.prototype.constructor = ContinuousScale;
 
   ContinuousScale.prototype.canEqual = function (that: unknown): boolean {
     return that instanceof ContinuousScale;

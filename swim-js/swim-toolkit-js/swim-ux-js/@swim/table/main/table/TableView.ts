@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {
@@ -24,13 +24,14 @@ import {
   ThemeConstraintAnimator,
 } from "@swim/theme";
 import {
+  PositionGestureInput,
+  ViewEdgeInsets,
   ViewContextType,
   ViewContext,
   ViewFlags,
   View,
-  ViewEdgeInsets,
-  ViewFastener,
-  PositionGestureInput,
+  ViewRef,
+  ViewSet,
 } from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
@@ -43,7 +44,6 @@ import type {TableViewObserver} from "./TableViewObserver";
 export class TableView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    this.rowFasteners = [];
     this.visibleViews = [];
     this.visibleFrame = new R2Box(0, 0, window.innerWidth, window.innerHeight);
     this.initTable();
@@ -65,17 +65,13 @@ export class TableView extends HtmlView {
   @Property({type: Object, inherits: true, state: null, updateFlags: View.NeedsLayout})
   readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
 
-  protected didSetDepth(newDepth: number, oldDepth: number): void {
-    this.modifyTheme(Feel.default, [[Feel.nested, newDepth !== 0 ? 1 : void 0]], false);
-  }
-
   @Property<TableView, number>({
     type: Number,
     inherits: true,
     state: 0,
     updateFlags: View.NeedsLayout,
     didSetState(newDepth: number, oldDepth: number): void {
-      this.owner.didSetDepth(newDepth, oldDepth);
+      this.owner.modifyTheme(Feel.default, [[Feel.nested, newDepth !== 0 ? 1 : void 0]], false);
     },
   })
   readonly depth!: Property<this, number>;
@@ -101,470 +97,102 @@ export class TableView extends HtmlView {
   @ThemeAnimator({type: Expansion, inherits: true, state: null, updateFlags: View.NeedsLayout})
   readonly stretch!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  protected createHeader(): HeaderView | null {
-    return HeaderView.create();
-  }
-
-  protected initHeader(headerView: HeaderView): void {
-    headerView.display.setState("none", Affinity.Intrinsic);
-    headerView.position.setState("absolute", Affinity.Intrinsic);
-    headerView.left.setState(0, Affinity.Intrinsic);
-    headerView.top.setState(null, Affinity.Intrinsic);
-    const layout = this.layout.state;
-    headerView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
-    headerView.setCulled(true);
-  }
-
-  protected attachHeader(headerView: HeaderView): void {
-    // hook
-  }
-
-  protected detachHeader(headerView: HeaderView): void {
-    // hook
-  }
-
-  protected willSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetHeader !== void 0) {
-        observer.viewWillSetHeader(newHeaderView, oldHeaderView, this);
-      }
-    }
-  }
-
-  protected onSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    if (oldHeaderView !== null) {
-      this.detachHeader(oldHeaderView);
-    }
-    if (newHeaderView !== null) {
-      this.attachHeader(newHeaderView);
-      this.initHeader(newHeaderView);
-    }
-  }
-
-  protected didSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetHeader !== void 0) {
-        observer.viewDidSetHeader(newHeaderView, oldHeaderView, this);
-      }
-    }
-  }
-
-  @ViewFastener<TableView, HeaderView>({
+  @ViewRef<TableView, HeaderView>({
     key: true,
     type: HeaderView,
-    child: true,
-    willSetView(newTreeView: HeaderView | null, oldTreeView: HeaderView | null): void {
-      this.owner.willSetHeader(newTreeView, oldTreeView);
+    binds: true,
+    initView(headerView: HeaderView): void {
+      headerView.display.setState("none", Affinity.Intrinsic);
+      headerView.position.setState("absolute", Affinity.Intrinsic);
+      headerView.left.setState(0, Affinity.Intrinsic);
+      headerView.top.setState(null, Affinity.Intrinsic);
+      const layout = this.owner.layout.state;
+      headerView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
+      headerView.setCulled(true);
     },
-    onSetView(newTreeView: HeaderView | null, oldTreeView: HeaderView | null): void {
-      this.owner.onSetHeader(newTreeView, oldTreeView);
+    willAttachView(headerView: HeaderView): void {
+      this.owner.callObservers("viewWillAttachHeader", headerView, this.owner);
     },
-    didSetView(newTreeView: HeaderView | null, oldTreeView: HeaderView | null): void {
-      this.owner.didSetHeader(newTreeView, oldTreeView);
+    didDetachView(headerView: HeaderView): void {
+      this.owner.callObservers("viewDidDetachHeader", headerView, this.owner);
     },
-    createView(): HeaderView | null {
-      return this.owner.createHeader();
-    },
-    insertView(parent: View, childView: HeaderView, targetView: View | null, key: string | undefined): void {
+    insertChild(parent: View, childView: HeaderView, targetView: View | null, key: string | undefined): void {
       parent.prependChild(childView, key);
     }
   })
-  readonly header!: ViewFastener<this, HeaderView>;
+  readonly header!: ViewRef<this, HeaderView>;
+  static readonly header: MemberFastenerClass<TableView, "header">;
 
-  insertRow(rowView: RowView, targetView: View | null = null): void {
-    const rowFasteners = this.rowFasteners as ViewFastener<this, RowView>[];
-    let targetIndex = rowFasteners.length;
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowFastener = rowFasteners[i]!;
-      if (rowFastener.view === rowView) {
-        return;
-      } else if (rowFastener.view === targetView) {
-        targetIndex = i;
-      }
-    }
-    const rowFastener = this.createRowFastener(rowView);
-    rowFasteners.splice(targetIndex, 0, rowFastener);
-    rowFastener.setView(rowView, targetView);
-    if (this.mounted) {
-      rowFastener.mount();
-    }
-  }
-
-  removeRow(rowView: RowView): void {
-    const rowFasteners = this.rowFasteners as ViewFastener<this, RowView>[];
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowFastener = rowFasteners[i]!;
-      if (rowFastener.view === rowView) {
-        rowFastener.setView(null);
-        if (this.mounted) {
-          rowFastener.unmount();
-        }
-        rowFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected initRow(rowView: RowView, rowFastener: ViewFastener<this, RowView>): void {
-    rowView.display.setState("none", Affinity.Intrinsic);
-    rowView.position.setState("absolute", Affinity.Intrinsic);
-    rowView.left.setState(0, Affinity.Intrinsic);
-    rowView.top.setState(null, Affinity.Intrinsic);
-    const layout = this.layout.state;
-    rowView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
-    rowView.setCulled(true);
-  }
-
-  protected attachRow(rowView: RowView, rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected detachRow(rowView: RowView, rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected willSetRow(newRowView: RowView | null, oldRowView: RowView | null,
-                       targetView: View | null, rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetRow !== void 0) {
-        observer.viewWillSetRow(newRowView, oldRowView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetRow(newRowView: RowView | null, oldRowView: RowView | null,
-                     targetView: View | null, rowFastener: ViewFastener<this, RowView>): void {
-    if (oldRowView !== null) {
-      this.detachRow(oldRowView, rowFastener);
-    }
-    if (newRowView !== null) {
-      this.attachRow(newRowView, rowFastener);
-      this.initRow(newRowView, rowFastener);
-    }
-  }
-
-  protected didSetRow(newRowView: RowView | null, oldRowView: RowView | null,
-                      targetView: View | null, rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetRow !== void 0) {
-        observer.viewDidSetRow(newRowView, oldRowView, targetView, this);
-      }
-    }
-  }
-
-  protected willSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null,
-                        rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetLeaf !== void 0) {
-        observer.viewWillSetLeaf(newLeafView, oldLeafView, rowFastener);
-      }
-    }
-  }
-
-  protected onSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null,
-                      rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected didSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null,
-                       rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetLeaf !== void 0) {
-        observer.viewDidSetLeaf(newLeafView, oldLeafView, rowFastener);
-      }
-    }
-  }
-
-  protected willHighlightLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillHighlightLeaf !== void 0) {
-        observer.viewWillHighlightLeaf(leafView, rowFastener);
-      }
-    }
-  }
-
-  protected didHighlightLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidHighlightLeaf !== void 0) {
-        observer.viewDidHighlightLeaf(leafView, rowFastener);
-      }
-    }
-  }
-
-  protected willUnhighlightLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillUnhighlightLeaf !== void 0) {
-        observer.viewWillUnhighlightLeaf(leafView, rowFastener);
-      }
-    }
-  }
-
-  protected didUnhighlightLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidUnhighlightLeaf !== void 0) {
-        observer.viewDidUnhighlightLeaf(leafView, rowFastener);
-      }
-    }
-  }
-
-  protected onEnterLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected didEnterLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidEnterLeaf !== void 0) {
-        observer.viewDidEnterLeaf(leafView, rowFastener);
-      }
-    }
-  }
-
-  protected onLeaveLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected didLeaveLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidLeaveLeaf !== void 0) {
-        observer.viewDidLeaveLeaf(leafView, rowFastener);
-      }
-    }
-  }
-
-  protected onPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView,
-                        rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected didPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView,
-                         rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidPressLeaf !== void 0) {
-        observer.viewDidPressLeaf(input, event, leafView, rowFastener);
-      }
-    }
-  }
-
-  protected onLongPressLeaf(input: PositionGestureInput, leafView: LeafView,
-                            rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected didLongPressLeaf(input: PositionGestureInput, leafView: LeafView,
-                             rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidLongPressLeaf !== void 0) {
-        observer.viewDidLongPressLeaf(input, leafView, rowFastener);
-      }
-    }
-  }
-
-  protected willSetTree(newTreeView: TableView | null, oldTreeView: TableView | null,
-                        rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetTree !== void 0) {
-        observer.viewWillSetTree(newTreeView, oldTreeView, rowFastener);
-      }
-    }
-  }
-
-  protected onSetTree(newTreeView: TableView | null, oldTreeView: TableView | null,
-                      rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected didSetTree(newTreeView: TableView | null, oldTreeView: TableView | null,
-                       rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetTree !== void 0) {
-        observer.viewDidSetTree(newTreeView, oldTreeView, rowFastener);
-      }
-    }
-  }
-
-  protected willExpandRow(rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillExpandRow !== void 0) {
-        observer.viewWillExpandRow(rowFastener);
-      }
-    }
-  }
-
-  protected onExpandRow(rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected didExpandRow(rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidExpandRow !== void 0) {
-        observer.viewDidExpandRow(rowFastener);
-      }
-    }
-  }
-
-  protected willCollapseRow(rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillCollapseRow !== void 0) {
-        observer.viewWillCollapseRow(rowFastener);
-      }
-    }
-  }
-
-  protected onCollapseRow(rowFastener: ViewFastener<this, RowView>): void {
-    // hook
-  }
-
-  protected didCollapseRow(rowFastener: ViewFastener<this, RowView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidCollapseRow !== void 0) {
-        observer.viewDidCollapseRow(rowFastener);
-      }
-    }
-  }
-
-  /** @internal */
-  static RowFastener = ViewFastener.define<TableView, RowView>({
+  @ViewSet<TableView, RowView>({
     type: RowView,
-    child: false,
+    binds: true,
     observes: true,
-    willSetView(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null): void {
-      this.owner.willSetRow(newRowView, oldRowView, targetView, this);
+    initView(rowView: RowView): void {
+      rowView.display.setState("none", Affinity.Intrinsic);
+      rowView.position.setState("absolute", Affinity.Intrinsic);
+      rowView.left.setState(0, Affinity.Intrinsic);
+      rowView.top.setState(null, Affinity.Intrinsic);
+      const layout = this.owner.layout.state;
+      rowView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
+      rowView.setCulled(true);
     },
-    onSetView(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null): void {
-      this.owner.onSetRow(newRowView, oldRowView, targetView, this);
+    willAttachView(rowView: RowView, targetView: View | null): void {
+      this.owner.callObservers("viewWillAttachRow", rowView, targetView, this.owner);
     },
-    didSetView(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null): void {
-      this.owner.didSetRow(newRowView, oldRowView, targetView, this);
+    didDetachView(rowView: RowView): void {
+      this.owner.callObservers("viewDidDetachRow", rowView, this.owner);
     },
-    viewWillSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-      this.owner.willSetLeaf(newLeafView, oldLeafView, this);
+    viewWillAttachLeaf(leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewWillAttachLeaf", leafView, rowView);
     },
-    viewDidSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-      this.owner.onSetLeaf(newLeafView, oldLeafView, this);
-      this.owner.didSetLeaf(newLeafView, oldLeafView, this);
+    viewDidDetachLeaf(leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewDidDetachLeaf", leafView, rowView);
     },
-    viewDidEnterLeaf(leafView: LeafView): void {
-      this.owner.onEnterLeaf(leafView, this);
-      this.owner.didEnterLeaf(leafView, this);
+    viewDidEnterLeaf(leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewDidEnterLeaf", leafView, rowView);
     },
-    viewDidLeaveLeaf(leafView: LeafView): void {
-      this.owner.onLeaveLeaf(leafView, this);
-      this.owner.didLeaveLeaf(leafView, this);
+    viewDidLeaveLeaf(leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewDidLeaveLeaf", leafView, rowView);
     },
-    viewDidPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
-      this.owner.onPressLeaf(input, event, leafView, this);
-      this.owner.didPressLeaf(input, event, leafView, this);
+    viewDidPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewDidPressLeaf", input, event, leafView, rowView);
     },
-    viewDidLongPressLeaf(input: PositionGestureInput, leafView: LeafView): void {
-      this.owner.onLongPressLeaf(input, leafView, this);
-      this.owner.didLongPressLeaf(input, leafView, this);
+    viewDidLongPressLeaf(input: PositionGestureInput, leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewDidLongPressLeaf", input, leafView, rowView);
     },
-    viewWillSetTree(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-      this.owner.willSetTree(newTreeView, oldTreeView, this);
+    viewWillAttachTree(treeView: TableView, rowView: RowView): void {
+      this.owner.callObservers("viewWillAttachTree", treeView, rowView);
     },
-    viewDidSetTree(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-      this.owner.didSetTree(newTreeView, oldTreeView, this);
+    viewDidDetachTree(treeView: TableView, rowView: RowView): void {
+      this.owner.callObservers("viewDidDetachTree", treeView, rowView);
     },
-    viewWillExpand(): void {
-      this.owner.willExpandRow(this);
-      this.owner.onExpandRow(this);
+    viewWillHighlightLeaf(leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewWillHighlightLeaf", leafView, rowView);
     },
-    viewDidExpand(): void {
-      this.owner.didExpandRow(this);
+    viewDidHighlightLeaf(leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewDidHighlightLeaf", leafView, rowView);
     },
-    viewWillCollapse(): void {
-      this.owner.willCollapseRow(this);
+    viewWillUnhighlightLeaf(leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewWillUnhighlightLeaf", leafView, rowView);
     },
-    viewDidCollapse(): void {
-      this.owner.onCollapseRow(this);
-      this.owner.didCollapseRow(this);
+    viewDidUnhighlightLeaf(leafView: LeafView, rowView: RowView): void {
+      this.owner.callObservers("viewDidUnhighlightLeaf", leafView, rowView);
     },
-  });
-
-  protected createRowFastener(rowView: RowView): ViewFastener<this, RowView> {
-    return TableView.RowFastener.create(this, rowView.key ?? "row");
-  }
-
-  /** @internal */
-  readonly rowFasteners: ReadonlyArray<ViewFastener<this, RowView>>;
-
-  /** @internal */
-  protected mountRowFasteners(): void {
-    const rowFasteners = this.rowFasteners;
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowFastener = rowFasteners[i]!;
-      rowFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountRowFasteners(): void {
-    const rowFasteners = this.rowFasteners;
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowFastener = rowFasteners[i]!;
-      rowFastener.unmount();
-    }
-  }
-
-  protected detectRow(view: View): RowView | null {
-    return view instanceof RowView ? view : null;
-  }
-
-  protected override onInsertChild(childView: View, targetView: View | null): void {
-    super.onInsertChild(childView, targetView);
-    const rowView = this.detectRow(childView);
-    if (rowView !== null) {
-      this.insertRow(rowView, targetView);
-    }
-  }
-
-  protected override onRemoveChild(childView: View): void {
-    super.onRemoveChild(childView);
-    const rowView = this.detectRow(childView);
-    if (rowView !== null) {
-      this.removeRow(rowView);
-    }
-  }
+    viewWillExpand(rowView: RowView): void {
+      this.owner.callObservers("viewWillExpandRow", rowView);
+    },
+    viewDidExpand(rowView: RowView): void {
+      this.owner.callObservers("viewDidExpandRow", rowView);
+    },
+    viewWillCollapse(rowView: RowView): void {
+      this.owner.callObservers("viewWillCollapseRow", rowView);
+    },
+    viewDidCollapse(rowView: RowView): void {
+      this.owner.callObservers("viewDidCollapseRow", rowView);
+    },
+  })
+  readonly rows!: ViewSet<this, RowView>;
+  static readonly rows: MemberFastenerClass<TableView, "rows">;
 
   /** @internal */
   readonly visibleViews: ReadonlyArray<View>;
@@ -806,17 +434,5 @@ export class TableView extends HtmlView {
 
     const disclosurePhase = this.disclosure.getPhaseOr(1);
     this.opacity.setState(disclosurePhase, Affinity.Intrinsic);
-  }
-
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountRowFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountRowFasteners();
-    super.unmountFasteners();
   }
 }

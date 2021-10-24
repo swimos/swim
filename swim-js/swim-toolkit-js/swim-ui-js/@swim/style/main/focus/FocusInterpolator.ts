@@ -37,6 +37,7 @@ export const FocusInterpolator = (function (_super: typeof Interpolator) {
   };
 
   FocusInterpolator.prototype = Object.create(_super.prototype);
+  FocusInterpolator.prototype.constructor = FocusInterpolator;
 
   return FocusInterpolator;
 })(Interpolator);

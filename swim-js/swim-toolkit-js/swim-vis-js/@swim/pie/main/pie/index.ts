@@ -15,6 +15,7 @@
 export {
   AnyPieView,
   PieViewInit,
+  PieViewSliceExt,
   PieView,
 } from "./PieView";
 export {PieViewObserver} from "./PieViewObserver";
@@ -26,5 +27,8 @@ export {
 } from "./PieTrait";
 export {PieTraitObserver} from "./PieTraitObserver";
 
-export {PieController} from "./PieController";
+export {
+  PieControllerSliceExt,
+  PieController,
+} from "./PieController";
 export {PieControllerObserver} from "./PieControllerObserver";

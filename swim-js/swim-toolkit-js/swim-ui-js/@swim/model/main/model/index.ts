@@ -19,7 +19,6 @@ export {
   ModelFlags,
   AnyModel,
   ModelInit,
-  AnyModelFactory,
   ModelFactory,
   ModelClass,
   ModelConstructor,
@@ -30,10 +29,28 @@ export {ModelObserver} from "./ModelObserver";
 export {GenericModel} from "./GenericModel";
 
 export {
-  ModelFastenerType,
-  ModelFastenerInitType,
-  ModelFastenerInit,
-  ModelFastenerDescriptor,
-  ModelFastenerClass,
-  ModelFastener,
-} from "./ModelFastener";
+  ModelRelationType,
+  ModelRelationInit,
+  ModelRelationDescriptor,
+  ModelRelationClass,
+  ModelRelationFactory,
+  ModelRelation,
+} from "./ModelRelation";
+
+export {
+  ModelRefType,
+  ModelRefInit,
+  ModelRefDescriptor,
+  ModelRefClass,
+  ModelRefFactory,
+  ModelRef,
+} from "./ModelRef";
+
+export {
+  ModelSetType,
+  ModelSetInit,
+  ModelSetDescriptor,
+  ModelSetClass,
+  ModelSetFactory,
+  ModelSet,
+} from "./ModelSet";

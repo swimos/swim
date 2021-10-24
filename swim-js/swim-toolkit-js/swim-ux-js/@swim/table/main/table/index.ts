@@ -19,5 +19,10 @@ export {TableViewObserver} from "./TableViewObserver";
 export {TableTrait} from "./TableTrait";
 export {TableTraitObserver} from "./TableTraitObserver";
 
-export {TableController} from "./TableController";
+export {
+  TableControllerHeaderExt,
+  TableControllerColExt,
+  TableControllerRowExt,
+  TableController,
+} from "./TableController";
 export {TableControllerObserver} from "./TableControllerObserver";

@@ -73,6 +73,7 @@ export const EnclosedIconInterpolator = (function (_super: typeof Interpolator) 
   };
 
   EnclosedIconInterpolator.prototype = Object.create(_super.prototype);
+  EnclosedIconInterpolator.prototype.constructor = EnclosedIconInterpolator;
 
   Object.defineProperty(EnclosedIconInterpolator.prototype, 0, {
     get(this: EnclosedIconInterpolator): EnclosedIcon {

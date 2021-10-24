@@ -86,13 +86,29 @@ export abstract class GraphicsView extends View {
 
   override readonly parent: View | null;
 
-  protected override onSetParent(newParent: View | null, oldParent: View | null): void {
-    (this as Mutable<this>).parent = newParent;
-    super.onSetParent(newParent, oldParent);
+  /** @internal */
+  override attachParent(parent: View): void {
+    this.willAttachParent(parent);
+    (this as Mutable<this>).parent = parent;
+    if (parent.mounted) {
+      if (parent.culled) {
+        this.cascadeCull();
+      }
+      this.cascadeMount();
+    }
+    this.onAttachParent(parent);
+    this.didAttachParent(parent);
   }
 
-  cullViewFrame(viewFrame: R2Box = this.viewFrame): void {
-    this.setCulled(!viewFrame.intersects(this.viewBounds));
+  /** @internal */
+  override detachParent(parent: View): void {
+    this.willDetachParent(parent);
+    if (this.mounted) {
+      this.cascadeUnmount();
+    }
+    this.onDetachParent(parent);
+    (this as Mutable<this>).parent = null;
+    this.didDetachParent(parent);
   }
 
   declare readonly renderer: GraphicsRenderer | null; // getter defined below to work around useDefineForClassFields lunacy
@@ -106,14 +122,15 @@ export abstract class GraphicsView extends View {
 
   override cascadeProcess(processFlags: ViewFlags, baseViewContext: ViewContext): void {
     const viewContext = this.extendViewContext(baseViewContext);
-    processFlags &= ~View.NeedsProcess;
-    processFlags |= this.flags & View.UpdateMask;
-    processFlags = this.needsProcess(processFlags, viewContext);
-    if ((processFlags & View.ProcessMask) !== 0) {
-      let cascadeFlags = processFlags;
-      this.setFlags(this.flags & ~(View.NeedsProcess | View.NeedsProject)
-                               |  (View.TraversingFlag | View.ProcessingFlag));
-      try {
+    const outerViewContext = ViewContext.current;
+    try {
+      ViewContext.current = viewContext;
+      processFlags &= ~View.NeedsProcess;
+      processFlags |= this.flags & View.UpdateMask;
+      processFlags = this.needsProcess(processFlags, viewContext);
+      if ((processFlags & View.ProcessMask) !== 0) {
+        let cascadeFlags = processFlags;
+        this.setFlags(this.flags & ~(View.NeedsProcess | View.NeedsProject) | (View.TraversingFlag | View.ProcessingFlag | View.ContextualFlag));
         this.willProcess(cascadeFlags, viewContext);
         if (((this.flags | processFlags) & View.NeedsResize) !== 0) {
           cascadeFlags |= View.NeedsResize;
@@ -151,7 +168,9 @@ export abstract class GraphicsView extends View {
         }
 
         if ((cascadeFlags & View.ProcessMask) !== 0) {
+          this.setFlags(this.flags & ~View.ContextualFlag);
           this.processChildren(cascadeFlags, viewContext, this.processChild);
+          this.setFlags(this.flags | View.ContextualFlag);
         }
 
         if ((cascadeFlags & View.NeedsAnimate) !== 0) {
@@ -167,21 +186,24 @@ export abstract class GraphicsView extends View {
           this.didResize(viewContext);
         }
         this.didProcess(cascadeFlags, viewContext);
-      } finally {
-        this.setFlags(this.flags & ~(View.TraversingFlag | View.ProcessingFlag));
       }
+    } finally {
+      this.setFlags(this.flags & ~(View.TraversingFlag | View.ProcessingFlag | View.ContextualFlag));
+      ViewContext.current = outerViewContext;
     }
   }
 
   override cascadeDisplay(displayFlags: ViewFlags, baseViewContext: ViewContext): void {
     const viewContext = this.extendViewContext(baseViewContext);
-    displayFlags &= ~View.NeedsDisplay;
-    displayFlags |= this.flags & View.UpdateMask;
-    displayFlags = this.needsDisplay(displayFlags, viewContext);
-    if ((displayFlags & View.DisplayMask) !== 0) {
-      let cascadeFlags = displayFlags;
-      this.setFlags(this.flags & ~View.NeedsDisplay | (View.TraversingFlag | View.DisplayingFlag));
-      try {
+    const outerViewContext = ViewContext.current;
+    try {
+      ViewContext.current = viewContext;
+      displayFlags &= ~View.NeedsDisplay;
+      displayFlags |= this.flags & View.UpdateMask;
+      displayFlags = this.needsDisplay(displayFlags, viewContext);
+      if ((displayFlags & View.DisplayMask) !== 0) {
+        let cascadeFlags = displayFlags;
+        this.setFlags(this.flags & ~View.NeedsDisplay | (View.TraversingFlag | View.DisplayingFlag | View.ContextualFlag));
         this.willDisplay(cascadeFlags, viewContext);
         if (((this.flags | displayFlags) & View.NeedsLayout) !== 0) {
           cascadeFlags |= View.NeedsLayout;
@@ -219,7 +241,9 @@ export abstract class GraphicsView extends View {
         }
 
         if ((cascadeFlags & View.DisplayMask) !== 0 && !this.isHidden() && !this.culled) {
+          this.setFlags(this.flags & ~View.ContextualFlag);
           this.displayChildren(cascadeFlags, viewContext, this.displayChild);
+          this.setFlags(this.flags | View.ContextualFlag);
         }
 
         if ((cascadeFlags & View.NeedsComposite) !== 0) {
@@ -235,9 +259,10 @@ export abstract class GraphicsView extends View {
           this.didLayout(viewContext);
         }
         this.didDisplay(cascadeFlags, viewContext);
-      } finally {
-        this.setFlags(this.flags & ~(View.TraversingFlag | View.DisplayingFlag));
       }
+    } finally {
+      this.setFlags(this.flags & ~(View.TraversingFlag | View.DisplayingFlag | View.ContextualFlag));
+      ViewContext.current = outerViewContext;
     }
   }
 
@@ -510,6 +535,10 @@ export abstract class GraphicsView extends View {
     }
   }
 
+  cullViewFrame(viewFrame: R2Box = this.viewFrame): void {
+    this.setCulled(!viewFrame.intersects(this.viewBounds));
+  }
+
   /**
    * The self-defined view-coordinate bounding box surrounding all graphics
    * this view could possibly render.  Views with view bounds that don't
@@ -578,7 +607,15 @@ export abstract class GraphicsView extends View {
         const viewContext = this.extendViewContext(baseViewContext);
         let hit = this.hitTestChildren(x, y, viewContext);
         if (hit === null) {
-          hit = this.hitTest(x, y, viewContext);
+          const outerViewContext = ViewContext.current;
+          try {
+            ViewContext.current = viewContext;
+            this.setFlags(this.flags | View.ContextualFlag);
+            hit = this.hitTest(x, y, viewContext);
+          } finally {
+            this.setFlags(this.flags & ~View.ContextualFlag);
+            ViewContext.current = outerViewContext;
+          }
         }
         return hit;
       }

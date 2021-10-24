@@ -17,7 +17,7 @@ import type {Color} from "@swim/style";
 import type {GraphicsView, GraphicsViewObserver} from "@swim/graphics";
 import type {DataPointView} from "./DataPointView";
 
-export interface DataPointViewObserver<X, Y, V extends DataPointView<X, Y> = DataPointView<X, Y>> extends GraphicsViewObserver<V> {
+export interface DataPointViewObserver<X = unknown, Y = unknown, V extends DataPointView<X, Y> = DataPointView<X, Y>> extends GraphicsViewObserver<V> {
   viewWillSetDataPointX?(newX: X | undefined, oldX: X | undefined, view: V): void;
 
   viewDidSetDataPointX?(newX: X | undefined, oldX: X | undefined, view: V): void;
@@ -42,7 +42,7 @@ export interface DataPointViewObserver<X, Y, V extends DataPointView<X, Y> = Dat
 
   viewDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, view: V): void;
 
-  viewWillSetDataPointLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewWillAttachDataPointLabel?(labelView: GraphicsView, view: V): void;
 
-  viewDidSetDataPointLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewDidDetachDataPointLabel?(labelView: GraphicsView | null, view: V): void;
 }

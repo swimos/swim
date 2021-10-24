@@ -27,6 +27,7 @@ export {
   CssRuleInit,
   CssRuleDescriptor,
   CssRuleClass,
+  CssRuleFactory,
   CssRule,
 } from "./CssRule";
 
@@ -34,6 +35,7 @@ export {
   StyleRuleInit,
   StyleRuleDescriptor,
   StyleRuleClass,
+  StyleRuleFactory,
   StyleRule,
 } from "./StyleRule";
 
@@ -41,6 +43,7 @@ export {
   MediaRuleInit,
   MediaRuleDescriptor,
   MediaRuleClass,
+  MediaRuleFactory,
   MediaRule,
 } from "./MediaRule";
 
@@ -48,5 +51,6 @@ export {
   StyleSheetInit,
   StyleSheetDescriptor,
   StyleSheetClass,
+  StyleSheetFactory,
   StyleSheet,
 } from "./StyleSheet";

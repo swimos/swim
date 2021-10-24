@@ -27,8 +27,14 @@ const canvasView = swim.CanvasView.create()
     .touchAction("manipulation");
 
 class ExampleGraphController extends swim.GraphController {
-  initGraphView(graphView) {
-    super.initGraphView(graphView);
+  createPlotFastener(plotController) {
+    return ExampleGraphController.PlotFastener.create(this);
+  }
+}
+swim.TraitViewRef({
+  extends: true,
+  initView(graphView) {
+    swim.GraphController.graph.prototype.initView.call(this, graphView);
     graphView.xDomainPadding([Math.PI, Math.PI])
              .yDomainPadding([1, 1])
              .xRangePadding([2, 2])
@@ -38,21 +44,21 @@ class ExampleGraphController extends swim.GraphController {
              .domainTracking(true)
              .xScaleGestures(true)
              .yScaleGestures(true);
-  }
-  initPlotView(plotView, plotFastener) {
-    super.initPlotView(plotView, plotFastener);
-    plotView.hitMode("plot")
-            .on("pointerenter", function (event) {
-              plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
-            })
-            .on("pointerleave", function (event) {
-              plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
-            });
-  }
-  initDataPointView(dataPointView, dataPointFastener, plotFastener) {
-    super.initDataPointView(dataPointView, dataPointFastener, plotFastener);
-  }
-}
+  },
+})(ExampleGraphController.prototype, "graph");
+swim.TraitViewControllerSet({
+  extends: true,
+  attachPlotView(plotView, plotController) {
+    swim.GraphController.plots.prototype.attachPlotView.call(this, plotView, plotController);
+    plotView.hitMode("plot");
+    plotView.on("pointerenter", function (event) {
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+    });
+    plotView.on("pointerleave", function (event) {
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+    });
+  },
+})(ExampleGraphController.prototype, "plots");
 
 const plot1Model = new swim.GenericModel();
 const plot1Trait = new swim.LinePlotTrait()
@@ -84,7 +90,7 @@ graphModel.appendChild(plot1Model);
 
 const graphController = new ExampleGraphController();
 graphController.mount();
-graphController.graph.injectView(canvasView);
+graphController.graph.insertView(canvasView);
 graphController.graph.setTrait(graphTrait);
 
 containerView.appendChild(canvasView);

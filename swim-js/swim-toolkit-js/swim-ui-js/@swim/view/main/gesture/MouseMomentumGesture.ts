@@ -14,7 +14,7 @@
 
 import type {FastenerOwner} from "@swim/fastener";
 import type {MomentumGestureInput} from "./MomentumGestureInput";
-import {MomentumGestureClass, MomentumGesture} from "./MomentumGesture";
+import {MomentumGestureClass, MomentumGestureFactory, MomentumGesture} from "./MomentumGesture";
 import type {View} from "../view/View";
 
 /** @internal */
@@ -55,7 +55,7 @@ export interface MouseMomentumGesture<O = unknown, V extends View = View> extend
 
 /** @internal */
 export const MouseMomentumGesture = (function (_super: typeof MomentumGesture) {
-  const MouseMomentumGesture = _super.extend() as MomentumGestureClass<MouseMomentumGesture<any, any>>;
+  const MouseMomentumGesture = _super.extend("MouseMomentumGesture") as MomentumGestureFactory<MouseMomentumGesture<any, any>>;
 
   MouseMomentumGesture.prototype.attachHoverEvents = function (this: MouseMomentumGesture, view: View): void {
     view.on("mouseenter", this.onMouseEnter as EventListener);
@@ -155,8 +155,8 @@ export const MouseMomentumGesture = (function (_super: typeof MomentumGesture) {
     }
   };
 
-  MouseMomentumGesture.construct = function <G extends MouseMomentumGesture<any, any>>(gestureClass: MomentumGestureClass<MouseMomentumGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
-    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+  MouseMomentumGesture.construct = function <G extends MouseMomentumGesture<any, any>>(gestureClass: MomentumGestureClass<MouseMomentumGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct(gestureClass, gesture, owner) as G;
     gesture.onMouseEnter = gesture.onMouseEnter.bind(gesture);
     gesture.onMouseLeave = gesture.onMouseLeave.bind(gesture);
     gesture.onMouseDown = gesture.onMouseDown.bind(gesture);

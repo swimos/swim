@@ -13,23 +13,11 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
-import {
-  Look,
-  ThemeAnimator,
-  ExpansionThemeAnimator,
-  ThemeConstraintAnimator,
-} from "@swim/theme";
-import {
-  ViewContextType,
-  ViewContext,
-  ViewFlags,
-  View,
-  ViewFastener,
-  PositionGestureInput,
-} from "@swim/view";
+import {Look, ThemeAnimator, ExpansionThemeAnimator, ThemeConstraintAnimator} from "@swim/theme";
+import {PositionGestureInput, ViewContextType, ViewContext, ViewFlags, View, ViewRef} from "@swim/view";
 import {HtmlViewClass, HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import type {CellView} from "../cell/CellView";
@@ -57,20 +45,16 @@ export class RowView extends HtmlView {
   @Property({type: TableLayout, inherits: true, state: null, updateFlags: View.NeedsLayout})
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
-  protected didSetDepth(newDepth: number, oldDepth: number): void {
-    const treeView = this.tree.view;
-    if (treeView !== null) {
-      treeView.depth.setState(newDepth + 1, Affinity.Intrinsic);
-    }
-  }
-
   @Property<RowView, number>({
     type: Number,
     inherits: true,
     state: 0,
     updateFlags: View.NeedsLayout,
     didSetState(newDepth: number, oldDepth: number): void {
-      this.owner.didSetDepth(newDepth, oldDepth);
+      const treeView = this.owner.tree.view;
+      if (treeView !== null) {
+        treeView.depth.setState(newDepth + 1, Affinity.Intrinsic);
+      }
     },
   })
   readonly depth!: Property<this, number>;
@@ -95,7 +79,7 @@ export class RowView extends HtmlView {
   }
 
   getOrCreateCell<V extends CellView>(key: string, cellViewClass: HtmlViewClass<V>): V {
-    const leafView = this.leaf.injectView();
+    const leafView = this.leaf.insertView();
     if (leafView === null) {
       throw new Error("no leaf view");
     }
@@ -103,493 +87,164 @@ export class RowView extends HtmlView {
   }
 
   setCell(key: string, cellView: CellView): void {
-    const leafView = this.leaf.injectView();
+    const leafView = this.leaf.insertView();
     if (leafView === null) {
       throw new Error("no leaf view");
     }
     leafView.setCell(key, cellView);
   }
 
-  protected createLeaf(): LeafView | null {
-    return LeafView.create();
-  }
-
-  protected initLeaf(leafView: LeafView): void {
-    leafView.display.setState("none", Affinity.Intrinsic);
-    leafView.position.setState("absolute", Affinity.Intrinsic);
-    leafView.left.setState(0, Affinity.Intrinsic);
-    leafView.top.setState(0, Affinity.Intrinsic);
-    const layout = this.layout.state;
-    leafView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
-    leafView.zIndex.setState(1, Affinity.Intrinsic);
-  }
-
-  protected attachLeaf(leafView: LeafView): void {
-    // hook
-  }
-
-  protected detachLeaf(leafView: LeafView): void {
-    // hook
-  }
-
-  protected willSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetLeaf !== void 0) {
-        observer.viewWillSetLeaf(newLeafView, oldLeafView, this);
-      }
-    }
-  }
-
-  protected onSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-    if (oldLeafView !== null) {
-      this.detachLeaf(oldLeafView);
-    }
-    if (newLeafView !== null) {
-      this.attachLeaf(newLeafView);
-      this.initLeaf(newLeafView);
-    }
-  }
-
-  protected didSetLeaf(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetLeaf !== void 0) {
-        observer.viewDidSetLeaf(newLeafView, oldLeafView, this);
-      }
-    }
-  }
-
-  protected willHighlightLeaf(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillHighlightLeaf !== void 0) {
-        observer.viewWillHighlightLeaf(leafView, this);
-      }
-    }
-  }
-
-  protected onHighlightLeaf(leafView: LeafView): void {
-    // hook
-  }
-
-  protected didHighlightLeaf(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidHighlightLeaf !== void 0) {
-        observer.viewDidHighlightLeaf(leafView, this);
-      }
-    }
-  }
-
-  protected willUnhighlightLeaf(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillUnhighlightLeaf !== void 0) {
-        observer.viewWillUnhighlightLeaf(leafView, this);
-      }
-    }
-  }
-
-  protected onUnhighlightLeaf(leafView: LeafView): void {
-    // hook
-  }
-
-  protected didUnhighlightLeaf(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidUnhighlightLeaf !== void 0) {
-        observer.viewDidUnhighlightLeaf(leafView, this);
-      }
-    }
-  }
-
-  protected onEnterLeaf(leafView: LeafView): void {
-    // hook
-  }
-
-  protected didEnterLeaf(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidEnterLeaf !== void 0) {
-        observer.viewDidEnterLeaf(leafView, this);
-      }
-    }
-  }
-
-  protected onLeaveLeaf(leafView: LeafView): void {
-    // hook
-  }
-
-  protected didLeaveLeaf(leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidLeaveLeaf !== void 0) {
-        observer.viewDidLeaveLeaf(leafView, this);
-      }
-    }
-  }
-
-  protected onPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
-    // hook
-  }
-
-  protected didPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidPressLeaf !== void 0) {
-        observer.viewDidPressLeaf(input, event, leafView, this);
-      }
-    }
-  }
-
-  protected onLongPressLeaf(input: PositionGestureInput, leafView: LeafView): void {
-    // hook
-  }
-
-  protected didLongPressLeaf(input: PositionGestureInput, leafView: LeafView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidLongPressLeaf !== void 0) {
-        observer.viewDidLongPressLeaf(input, leafView, this);
-      }
-    }
-  }
-
-  @ViewFastener<RowView, LeafView>({
+  @ViewRef<RowView, LeafView>({
     key: true,
     type: LeafView,
-    child: true,
+    binds: true,
     observes: true,
-    willSetView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-      this.owner.willSetLeaf(newLeafView, oldLeafView);
+    initView(leafView: LeafView): void {
+      leafView.display.setState("none", Affinity.Intrinsic);
+      leafView.position.setState("absolute", Affinity.Intrinsic);
+      leafView.left.setState(0, Affinity.Intrinsic);
+      leafView.top.setState(0, Affinity.Intrinsic);
+      const layout = this.owner.layout.state;
+      leafView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
+      leafView.zIndex.setState(1, Affinity.Intrinsic);
     },
-    onSetView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-      this.owner.onSetLeaf(newLeafView, oldLeafView);
+    willAttachView(leafView: LeafView): void {
+      this.owner.callObservers("viewWillAttachLeaf", leafView, this.owner);
     },
-    didSetView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
-      this.owner.didSetLeaf(newLeafView, oldLeafView);
+    didDetachView(leafView: LeafView): void {
+      this.owner.callObservers("viewDidDetachLeaf", leafView, this.owner);
     },
     viewWillHighlight(leafView: LeafView): void {
-      this.owner.willHighlightLeaf(leafView);
-      this.owner.onHighlightLeaf(leafView);
+      this.owner.callObservers("viewWillHighlightLeaf", leafView, this.owner);
     },
     viewDidHighlight(leafView: LeafView): void {
-      this.owner.didHighlightLeaf(leafView);
+      this.owner.callObservers("viewDidHighlightLeaf", leafView, this.owner);
     },
     viewWillUnhighlight(leafView: LeafView): void {
-      this.owner.willUnhighlightLeaf(leafView);
+      this.owner.callObservers("viewWillUnhighlightLeaf", leafView, this.owner);
     },
     viewDidUnhighlight(leafView: LeafView): void {
-      this.owner.onUnhighlightLeaf(leafView);
-      this.owner.didUnhighlightLeaf(leafView);
+      this.owner.callObservers("viewDidUnhighlightLeaf", leafView, this.owner);
     },
     viewDidEnter(leafView: LeafView): void {
-      this.owner.onEnterLeaf(leafView);
-      this.owner.didEnterLeaf(leafView);
+      this.owner.callObservers("viewDidEnterLeaf", leafView, this.owner);
     },
     viewDidLeave(leafView: LeafView): void {
-      this.owner.onLeaveLeaf(leafView);
-      this.owner.didLeaveLeaf(leafView);
+      this.owner.callObservers("viewDidLeaveLeaf", leafView, this.owner);
     },
     viewDidPress(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
-      this.owner.onPressLeaf(input, event, leafView);
-      this.owner.didPressLeaf(input, event, leafView);
+      this.owner.callObservers("viewDidPressLeaf", input, event, leafView, this.owner);
     },
     viewDidLongPress(input: PositionGestureInput, leafView: LeafView): void {
-      this.owner.onLongPressLeaf(input, leafView);
-      this.owner.didLongPressLeaf(input, leafView);
-    },
-    createView(): LeafView | null {
-      return this.owner.createLeaf();
+      this.owner.callObservers("viewDidLongPressLeaf", input, leafView, this.owner);
     },
   })
-  readonly leaf!: ViewFastener<this, LeafView>;
+  readonly leaf!: ViewRef<this, LeafView>;
+  static readonly leaf: MemberFastenerClass<RowView, "leaf">;
 
-  protected initHead(headView: HtmlView): void {
-    headView.addClass("head");
-    headView.display.setState("none", Affinity.Intrinsic);
-    headView.position.setState("absolute", Affinity.Intrinsic);
-    headView.left.setState(0, Affinity.Intrinsic);
-    headView.top.setState(this.rowHeight.state, Affinity.Intrinsic);
-    const layout = this.layout.state;
-    headView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
-    headView.height.setState(this.rowSpacing.state, Affinity.Intrinsic);
-    headView.backgroundColor.setLook(Look.accentColor, Affinity.Intrinsic);
-    headView.opacity.setState(this.disclosing.phase, Affinity.Intrinsic);
-    headView.zIndex.setState(1, Affinity.Intrinsic);
-  }
-
-  protected attachHead(headView: HtmlView): void {
-    // hook
-  }
-
-  protected detachHead(headView: HtmlView): void {
-    // hook
-  }
-
-  protected willSetHead(newHeadView: HtmlView | null, oldHeadView: HtmlView | null): void {
-    // hook
-  }
-
-  protected onSetHead(newHeadView: HtmlView | null, oldHeadView: HtmlView | null): void {
-    if (oldHeadView !== null) {
-      this.detachHead(oldHeadView);
-    }
-    if (newHeadView !== null) {
-      this.attachHead(newHeadView);
-      this.initHead(newHeadView);
-    }
-  }
-
-  protected didSetHead(newHeadView: HtmlView | null, oldHeadView: HtmlView | null): void {
-    // hook
-  }
-
-  @ViewFastener<RowView, HtmlView>({
+  @ViewRef<RowView, HtmlView>({
     key: true,
     type: HtmlView,
-    child: true,
-    willSetView(newHeadView: HtmlView | null, oldHeadView: HtmlView | null): void {
-      this.owner.willSetHead(newHeadView, oldHeadView);
-    },
-    onSetView(newHeadView: HtmlView | null, oldHeadView: HtmlView | null): void {
-      this.owner.onSetHead(newHeadView, oldHeadView);
-    },
-    didSetView(newHeadView: HtmlView | null, oldHeadView: HtmlView | null): void {
-      this.owner.didSetHead(newHeadView, oldHeadView);
+    binds: true,
+    initView(headView: HtmlView): void {
+      headView.addClass("head");
+      headView.display.setState("none", Affinity.Intrinsic);
+      headView.position.setState("absolute", Affinity.Intrinsic);
+      headView.left.setState(0, Affinity.Intrinsic);
+      headView.top.setState(this.owner.rowHeight.state, Affinity.Intrinsic);
+      const layout = this.owner.layout.state;
+      headView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
+      headView.height.setState(this.owner.rowSpacing.state, Affinity.Intrinsic);
+      headView.backgroundColor.setLook(Look.accentColor, Affinity.Intrinsic);
+      headView.opacity.setState(this.owner.disclosing.phase, Affinity.Intrinsic);
+      headView.zIndex.setState(1, Affinity.Intrinsic);
     },
   })
-  readonly head!: ViewFastener<this, HtmlView>;
+  readonly head!: ViewRef<this, HtmlView>;
+  static readonly head: MemberFastenerClass<RowView, "head">;
 
-  protected createTree(): TableView | null {
-    return TableView.create();
-  }
-
-  protected initTree(treeView: TableView): void {
-    treeView.addClass("tree");
-    treeView.display.setState(this.disclosure.collapsed ? "none" : "block", Affinity.Intrinsic);
-    treeView.position.setState("absolute", Affinity.Intrinsic);
-    treeView.left.setState(0, Affinity.Intrinsic);
-    const layout = this.layout.state;
-    treeView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
-    treeView.zIndex.setState(0, Affinity.Intrinsic);
-    treeView.depth.setState(this.depth.state + 1, Affinity.Intrinsic);
-  }
-
-  protected attachTree(treeView: TableView): void {
-    // hook
-  }
-
-  protected detachTree(treeView: TableView): void {
-    // hook
-  }
-
-  protected willSetTree(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetTree !== void 0) {
-        observer.viewWillSetTree(newTreeView, oldTreeView, this);
-      }
-    }
-  }
-
-  protected onSetTree(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-    if (oldTreeView !== null) {
-      this.detachTree(oldTreeView);
-    }
-    if (newTreeView !== null) {
-      this.attachTree(newTreeView);
-      this.initTree(newTreeView);
-    }
-  }
-
-  protected didSetTree(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetTree !== void 0) {
-        observer.viewDidSetTree(newTreeView, oldTreeView, this);
-      }
-    }
-  }
-
-  @ViewFastener<RowView, TableView>({
+  @ViewRef<RowView, TableView>({
     key: true,
-    // avoid cyclic reference to type: TableView
-    child: true,
-    willSetView(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-      this.owner.willSetTree(newTreeView, oldTreeView);
+    // avoid cyclic static reference to type: TableView
+    binds: true,
+    initView(treeView: TableView): void {
+      treeView.addClass("tree");
+      treeView.display.setState(this.owner.disclosure.collapsed ? "none" : "block", Affinity.Intrinsic);
+      treeView.position.setState("absolute", Affinity.Intrinsic);
+      treeView.left.setState(0, Affinity.Intrinsic);
+      const layout = this.owner.layout.state;
+      treeView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
+      treeView.zIndex.setState(0, Affinity.Intrinsic);
+      treeView.depth.setState(this.owner.depth.state + 1, Affinity.Intrinsic);
     },
-    onSetView(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-      this.owner.onSetTree(newTreeView, oldTreeView);
+    willAttachView(treeView: TableView): void {
+      this.owner.callObservers("viewWillAttachTree", treeView, this.owner);
     },
-    didSetView(newTreeView: TableView | null, oldTreeView: TableView | null): void {
-      this.owner.didSetTree(newTreeView, oldTreeView);
+    didDetachView(treeView: TableView): void {
+      this.owner.callObservers("viewDidDetachTree", treeView, this.owner);
     },
-    createView(): TableView | null {
-      return this.owner.createTree();
+    createView(): TableView {
+      return TableView.create();
     },
   })
-  readonly tree!: ViewFastener<this, TableView>;
+  readonly tree!: ViewRef<this, TableView>;
+  static readonly tree: MemberFastenerClass<RowView, "tree">;
 
-  protected initFoot(footView: HtmlView): void {
-    footView.addClass("foot");
-    footView.display.setState("none", Affinity.Intrinsic);
-    footView.position.setState("absolute", Affinity.Intrinsic);
-    footView.left.setState(0, Affinity.Intrinsic);
-    footView.top.setState(this.rowHeight.state, Affinity.Intrinsic);
-    const layout = this.layout.state;
-    footView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
-    footView.height.setState(this.rowSpacing.state, Affinity.Intrinsic);
-    footView.backgroundColor.setLook(Look.borderColor, Affinity.Intrinsic);
-    footView.opacity.setState(this.disclosing.phase, Affinity.Intrinsic);
-    footView.zIndex.setState(1, Affinity.Intrinsic);
-  }
-
-  protected attachFoot(footView: HtmlView): void {
-    // hook
-  }
-
-  protected detachFoot(footView: HtmlView): void {
-    // hook
-  }
-
-  protected willSetFoot(newFootView: HtmlView | null, oldFootView: HtmlView | null): void {
-    // hook
-  }
-
-  protected onSetFoot(newFootView: HtmlView | null, oldFootView: HtmlView | null): void {
-    if (oldFootView !== null) {
-      this.detachFoot(oldFootView);
-    }
-    if (newFootView !== null) {
-      this.attachFoot(newFootView);
-      this.initFoot(newFootView);
-    }
-  }
-
-  protected didSetFoot(newFootView: HtmlView | null, oldFootView: HtmlView | null): void {
-    // hook
-  }
-
-  @ViewFastener<RowView, HtmlView>({
+  @ViewRef<RowView, HtmlView>({
     key: true,
     type: HtmlView,
-    child: true,
-    willSetView(newFootView: HtmlView | null, oldFootView: HtmlView | null): void {
-      this.owner.willSetFoot(newFootView, oldFootView);
-    },
-    onSetView(newFootView: HtmlView | null, oldFootView: HtmlView | null): void {
-      this.owner.onSetFoot(newFootView, oldFootView);
-    },
-    didSetView(newFootView: HtmlView | null, oldFootView: HtmlView | null): void {
-      this.owner.didSetFoot(newFootView, oldFootView);
+    binds: true,
+    initView(footView: HtmlView): void {
+      footView.addClass("foot");
+      footView.display.setState("none", Affinity.Intrinsic);
+      footView.position.setState("absolute", Affinity.Intrinsic);
+      footView.left.setState(0, Affinity.Intrinsic);
+      footView.top.setState(this.owner.rowHeight.state, Affinity.Intrinsic);
+      const layout = this.owner.layout.state;
+      footView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
+      footView.height.setState(this.owner.rowSpacing.state, Affinity.Intrinsic);
+      footView.backgroundColor.setLook(Look.borderColor, Affinity.Intrinsic);
+      footView.opacity.setState(this.owner.disclosing.phase, Affinity.Intrinsic);
+      footView.zIndex.setState(1, Affinity.Intrinsic);
     },
   })
-  readonly foot!: ViewFastener<this, HtmlView>;
-
-  protected willExpand(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillExpand !== void 0) {
-        observer.viewWillExpand(this);
-      }
-    }
-
-    const treeView = this.tree.view;
-    if (treeView !== null) {
-      treeView.display.setState("block", Affinity.Intrinsic);
-    }
-  }
-
-  protected onExpand(): void {
-    // hook
-  }
-
-  protected didExpand(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidExpand !== void 0) {
-        observer.viewDidExpand(this);
-      }
-    }
-  }
-
-  protected willCollapse(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillCollapse !== void 0) {
-        observer.viewWillCollapse(this);
-      }
-    }
-  }
-
-  protected onCollapse(): void {
-    // hook
-  }
-
-  protected didCollapse(): void {
-    const treeView = this.tree.view;
-    if (treeView !== null) {
-      treeView.display.setState("none", Affinity.Intrinsic);
-    }
-
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidCollapse !== void 0) {
-        observer.viewDidCollapse(this);
-      }
-    }
-  }
-
-  protected didSetDisclosure(newDisclosure: Expansion, oldDisclosure: Expansion): void {
-    if (newDisclosure.direction !== 0) {
-      this.disclosing.setState(newDisclosure, Affinity.Intrinsic);
-    } else {
-      this.disclosing.setState(null, Affinity.Intrinsic);
-      this.disclosing.setAffinity(Affinity.Transient);
-    }
-    const tableView = this.getBase(TableView);
-    if (tableView !== null) {
-      tableView.requireUpdate(View.NeedsLayout);
-    }
-  }
+  readonly foot!: ViewRef<this, HtmlView>;
+  static readonly foot: MemberFastenerClass<RowView, "foot">;
 
   @ThemeAnimator<RowView, Expansion>({
     type: Expansion,
     state: Expansion.collapsed(),
     willExpand(): void {
-      this.owner.willExpand();
-      this.owner.onExpand();
+      this.owner.callObservers("viewWillExpand", this.owner);
+      const treeView = this.owner.tree.view;
+      if (treeView !== null) {
+        treeView.display.setState("block", Affinity.Intrinsic);
+      }
     },
     didExpand(): void {
-      this.owner.didExpand();
+      this.owner.callObservers("viewDidExpand", this.owner);
     },
     willCollapse(): void {
-      this.owner.willCollapse();
+      this.owner.callObservers("viewWillCollapse", this.owner);
     },
     didCollapse(): void {
-      this.owner.onCollapse();
-      this.owner.didCollapse();
+      const treeView = this.owner.tree.view;
+      if (treeView !== null) {
+        treeView.display.setState("none", Affinity.Intrinsic);
+      }
+      this.owner.callObservers("viewDidCollapse", this.owner);
     },
     didSetValue(newDisclosure: Expansion, oldDisclosure: Expansion): void {
-      this.owner.didSetDisclosure(newDisclosure, oldDisclosure);
+      if (newDisclosure.direction !== 0) {
+        this.owner.disclosing.setState(newDisclosure, Affinity.Intrinsic);
+      } else {
+        this.owner.disclosing.setState(null, Affinity.Intrinsic);
+        this.owner.disclosing.setAffinity(Affinity.Transient);
+      }
+      const tableView = this.owner.getBase(TableView);
+      if (tableView !== null) {
+        tableView.requireUpdate(View.NeedsLayout);
+      }
     },
   })
   readonly disclosure!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;

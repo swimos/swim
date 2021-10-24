@@ -14,7 +14,7 @@
 
 import type {FastenerOwner} from "@swim/fastener";
 import type {ScaleGestureInput} from "./ScaleGestureInput";
-import {ScaleGestureClass, ScaleGesture} from "./ScaleGesture";
+import {ScaleGestureClass, ScaleGestureFactory, ScaleGesture} from "./ScaleGesture";
 import type {View} from "../view/View";
 
 /** @internal */
@@ -58,7 +58,7 @@ export interface MouseScaleGesture<O = unknown, V extends View = View, X = unkno
 
 /** @internal */
 export const MouseScaleGesture = (function (_super: typeof ScaleGesture) {
-  const MouseScaleGesture = _super.extend() as ScaleGestureClass<MouseScaleGesture<any, any, any, any>>;
+  const MouseScaleGesture = _super.extend("MouseScaleGesture") as ScaleGestureFactory<MouseScaleGesture<any, any, any, any>>;
 
   MouseScaleGesture.prototype.attachHoverEvents = function (this: MouseScaleGesture, view: View): void {
     view.on("mouseenter", this.onMouseEnter as EventListener);
@@ -173,8 +173,8 @@ export const MouseScaleGesture = (function (_super: typeof ScaleGesture) {
     }
   };
 
-  MouseScaleGesture.construct = function <G extends MouseScaleGesture<any, any, any, any>>(gestureClass: ScaleGestureClass<MouseScaleGesture<any, any, any, any>>, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
-    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+  MouseScaleGesture.construct = function <G extends MouseScaleGesture<any, any, any, any>>(gestureClass: ScaleGestureClass<MouseScaleGesture<any, any, any, any>>, gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct(gestureClass, gesture, owner) as G;
     gesture.onMouseEnter = gesture.onMouseEnter.bind(gesture);
     gesture.onMouseLeave = gesture.onMouseLeave.bind(gesture);
     gesture.onMouseDown = gesture.onMouseDown.bind(gesture);

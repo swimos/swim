@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {FontFamily, Font} from "@swim/style";
-import {StyleAnimatorClass, StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorFactory, StyleAnimator} from "./StyleAnimator";
 
 /** @internal */
 export const FontFamilyStyleAnimator = (function (_super: typeof StyleAnimator) {
-  const FontFamilyStyleAnimator = _super.extend() as StyleAnimatorClass<StyleAnimator<any, FontFamily | ReadonlyArray<FontFamily> | undefined, FontFamily | ReadonlyArray<FontFamily> | undefined>>;
+  const FontFamilyStyleAnimator = _super.extend("FontFamilyStyleAnimator") as StyleAnimatorFactory<StyleAnimator<any, FontFamily | ReadonlyArray<FontFamily> | undefined, FontFamily | ReadonlyArray<FontFamily> | undefined>>;
 
   FontFamilyStyleAnimator.prototype.parse = function (value: string): FontFamily | ReadonlyArray<FontFamily> | undefined {
     return Font.parse(value).family;

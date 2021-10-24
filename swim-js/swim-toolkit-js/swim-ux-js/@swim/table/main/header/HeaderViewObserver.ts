@@ -18,7 +18,7 @@ import type {ColView} from "../col/ColView";
 import type {HeaderView} from "./HeaderView";
 
 export interface HeaderViewObserver<V extends HeaderView = HeaderView> extends HtmlViewObserver<V> {
-  viewWillSetCol?(newColView: ColView | null, oldColView: ColView | null, targetView: View | null, view: V): void;
+  viewWillAttachCol?(colView: ColView, targetView: View | null, view: V): void;
 
-  viewDidSetCol?(newColView: ColView | null, oldColView: ColView | null, targetView: View | null, view: V): void;
+  viewDidDetachCol?(colView: ColView, view: V): void;
 }

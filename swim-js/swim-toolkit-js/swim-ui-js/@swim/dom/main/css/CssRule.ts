@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, AnyTiming} from "@swim/util";
-import {FastenerContext, FastenerOwner, FastenerInit, Fastener} from "@swim/fastener";
+import {FastenerContext, FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,
@@ -27,6 +27,7 @@ import {Look, Feel, MoodVector, ThemeMatrix, ThemeContext} from "@swim/theme";
 import {CssContext} from "./CssContext";
 
 export interface CssRuleInit extends FastenerInit {
+  extends?: {prototype: CssRule<any>} | string | boolean | null;
   css?: string | (() => string);
 
   initRule?(rule: CSSRule): void;
@@ -34,18 +35,14 @@ export interface CssRuleInit extends FastenerInit {
 
 export type CssRuleDescriptor<O = unknown, I = {}> = ThisType<CssRule<O> & I> & CssRuleInit & Partial<I>;
 
-export interface CssRuleClass<F extends CssRule<any> = CssRule<any>> {
-  /** @internal */
-  prototype: F;
+export interface CssRuleClass<F extends CssRule<any> = CssRule<any>> extends FastenerClass<F> {
+}
 
-  create(owner: FastenerOwner<F>, ruleName: string): F;
+export interface CssRuleFactory<F extends CssRule<any> = CssRule<any>> extends CssRuleClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): CssRuleFactory<F> & I;
 
-  construct(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): CssRuleClass<F> & I;
-
-  define<O>(descriptor: CssRuleDescriptor<O>): CssRuleClass<CssRule<any>>;
-  define<O, I = {}>(descriptor: CssRuleDescriptor<O, I>): CssRuleClass<CssRule<any> & I>;
+  define<O>(className: string, descriptor: CssRuleDescriptor<O>): CssRuleFactory<CssRule<any>>;
+  define<O, I = {}>(className: string, descriptor: CssRuleDescriptor<O, I>): CssRuleFactory<CssRule<any> & I>;
 
   <O>(descriptor: CssRuleDescriptor<O>): PropertyDecorator;
   <O, I = {}>(descriptor: CssRuleDescriptor<O, I>): PropertyDecorator;
@@ -159,7 +156,7 @@ export interface CssRule<O = unknown> extends Fastener<O>, FastenerContext, Cons
 }
 
 export const CssRule = (function (_super: typeof Fastener) {
-  const CssRule: CssRuleClass = _super.extend();
+  const CssRule: CssRuleFactory = _super.extend("CssRule");
 
   Object.defineProperty(CssRule.prototype, "familyType", {
     get: function (this: CssRule): Class<CssRule<any>> | null {
@@ -374,16 +371,16 @@ export const CssRule = (function (_super: typeof Fastener) {
     }
   };
 
-  CssRule.construct = function <F extends CssRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
-    rule = _super.construct(ruleClass, rule, owner, ruleName) as F;
+  CssRule.construct = function <F extends CssRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>): F {
+    rule = _super.construct(ruleClass, rule, owner) as F;
     (rule as Mutable<typeof rule>).fasteners = null;
     (rule as Mutable<typeof rule>).decoherent = null;
     (rule as Mutable<typeof rule>).rule = null as unknown as CSSRule;
     return rule;
   };
 
-  CssRule.define = function <O>(descriptor: CssRuleDescriptor<O>): CssRuleClass<CssRule<any>> {
-    let superClass = descriptor.extends as CssRuleClass | undefined;
+  CssRule.define = function <O>(className: string, descriptor: CssRuleDescriptor<O>): CssRuleFactory<CssRule<any>> {
+    let superClass = descriptor.extends as CssRuleFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let css = descriptor.css;
@@ -396,15 +393,15 @@ export const CssRule = (function (_super: typeof Fastener) {
       superClass = this;
     }
 
-    const ruleClass = superClass.extend(descriptor);
+    const ruleClass = superClass.extend(className, descriptor);
 
     if (typeof css === "function") {
       ruleClass.prototype.initCss = css;
       css = void 0;
     }
 
-    ruleClass.construct = function (ruleClass: {prototype: CssRule<any>}, rule: CssRule<O> | null, owner: O, ruleName: string): CssRule<O> {
-      rule = superClass!.construct(ruleClass, rule, owner, ruleName);
+    ruleClass.construct = function (ruleClass: {prototype: CssRule<any>}, rule: CssRule<O> | null, owner: O): CssRule<O> {
+      rule = superClass!.construct(ruleClass, rule, owner);
 
       if (affinity !== void 0) {
         rule.initAffinity(affinity);

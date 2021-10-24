@@ -14,14 +14,14 @@
 
 import {Mutable, Class, Lazy, Service} from "@swim/util";
 import type {ExecuteServiceObserver} from "./ExecuteServiceObserver";
-import type {ControllerContext} from "../controller/ControllerContext";
+import {ControllerContext} from "../controller/ControllerContext";
 import {ControllerFlags, Controller} from "../"; // forward import
 
 export class ExecuteService<C extends Controller = Controller> extends Service<C> {
   constructor() {
     super();
     this.flags = 0;
-    this.controllerContext = this.createControllerContext();
+    this.controllerContext = ControllerContext.create();
     this.updateDelay = ExecuteService.MinUpdateDelay;
     this.compileTimer = 0;
     this.executeTimer = 0;
@@ -41,12 +41,6 @@ export class ExecuteService<C extends Controller = Controller> extends Service<C
   }
 
   readonly controllerContext: ControllerContext;
-
-  protected createControllerContext(): ControllerContext {
-    return {
-      updateTime: 0,
-    };
-  }
 
   updatedControllerContext(): ControllerContext {
     const controllerContext = this.controllerContext;
@@ -71,8 +65,7 @@ export class ExecuteService<C extends Controller = Controller> extends Service<C
       deltaUpdateFlags |= Controller.NeedsExecute;
     }
     this.setFlags(this.flags | deltaUpdateFlags);
-    if (immediate && (this.flags & Controller.TraversingFlag) === 0
-        && this.updateDelay <= ExecuteService.MaxCompileInterval) {
+    if (immediate && (this.flags & Controller.TraversingFlag) === 0 && this.updateDelay <= ExecuteService.MaxCompileInterval) {
       this.runImmediatePass();
     } else {
       this.scheduleUpdate();
@@ -94,19 +87,13 @@ export class ExecuteService<C extends Controller = Controller> extends Service<C
   }
 
   protected runImmediatePass(): void {
-    this.setFlags(this.flags | Controller.ImmediateFlag);
-    try {
-      if ((this.flags & Controller.CompileMask) !== 0) {
-        this.cancelUpdate();
-        this.runCompilePass(true);
-      }
-      if ((this.flags & Controller.ExecuteMask) !== 0
-          && this.updateDelay <= ExecuteService.MaxCompileInterval) {
-        this.cancelUpdate();
-        this.runExecutePass(true);
-      }
-    } finally {
-      this.setFlags(this.flags & ~Controller.ImmediateFlag);
+    if ((this.flags & Controller.CompileMask) !== 0) {
+      this.cancelUpdate();
+      this.runCompilePass(true);
+    }
+    if ((this.flags & Controller.ExecuteMask) !== 0 && this.updateDelay <= ExecuteService.MaxCompileInterval) {
+      this.cancelUpdate();
+      this.runExecutePass(true);
     }
   }
 

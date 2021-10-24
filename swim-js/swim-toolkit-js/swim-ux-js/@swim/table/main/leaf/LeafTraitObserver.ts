@@ -16,8 +16,8 @@ import type {Trait, TraitObserver} from "@swim/model";
 import type {CellTrait} from "../cell/CellTrait";
 import type {LeafTrait} from "./LeafTrait";
 
-export interface LeafTraitObserver<R extends LeafTrait = LeafTrait> extends TraitObserver<R> {
-  traitWillSetCell?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait | null, trait: R): void;
+export interface LeafTraitObserver<T extends LeafTrait = LeafTrait> extends TraitObserver<T> {
+  traitWillAttachCell?(cellTrait: CellTrait, targetTrait: Trait | null, trait: T): void;
 
-  traitDidSetCell?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachCell?(cellTrait: CellTrait, trait: T): void;
 }

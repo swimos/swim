@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Equivalent} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Class, Equivalent, Initable} from "@swim/util";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View, ViewFastener} from "@swim/view";
+import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -27,7 +27,6 @@ import {
   FillView,
   Arc,
   TypesetView,
-  AnyTextRunView,
   TextRunView,
 } from "@swim/graphics";
 import type {DialViewObserver} from "./DialViewObserver";
@@ -64,84 +63,34 @@ export interface DialViewInit extends GraphicsViewInit {
 export class DialView extends LayerView {
   override readonly observerType?: Class<DialViewObserver>;
 
-  protected willSetValue(newValue: number, oldValue: number): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDialValue !== void 0) {
-        observer.viewWillSetDialValue(newValue, oldValue, this);
-      }
-    }
-  }
-
-  protected onSetValue(newValue: number, oldValue: number): void {
-    // hook
-  }
-
-  protected didSetValue(newValue: number, oldValue: number): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDialValue !== void 0) {
-        observer.viewDidSetDialValue(newValue, oldValue, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<DialView, number>({
+  @Animator<DialView, number>({
     type: Number,
     state: 0,
     updateFlags: View.NeedsRender,
     willSetValue(newValue: number, oldValue: number): void {
-      this.owner.willSetValue(newValue, oldValue);
+      this.owner.callObservers("viewWillSetDialValue", newValue, oldValue, this.owner);
     },
     didSetValue(newValue: number, oldValue: number): void {
-      this.owner.onSetValue(newValue, oldValue);
-      this.owner.didSetValue(newValue, oldValue);
+      this.owner.callObservers("viewDidSetDialValue", newValue, oldValue, this.owner);
     },
   })
-  readonly value!: ThemeAnimator<this, number>;
+  readonly value!: Animator<this, number>;
 
-  protected willSetLimit(newLimit: number, oldLimit: number): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDialLimit !== void 0) {
-        observer.viewWillSetDialLimit(newLimit, oldLimit, this);
-      }
-    }
-  }
-
-  protected onSetLimit(newLimit: number, oldLimit: number): void {
-    // hook
-  }
-
-  protected didSetLimit(newLimit: number, oldLimit: number): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDialLimit !== void 0) {
-        observer.viewDidSetDialLimit(newLimit, oldLimit, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<DialView, number>({
+  @Animator<DialView, number>({
     type: Number,
     state: 1,
     updateFlags: View.NeedsRender,
     willSetValue(newLimit: number, oldLimit: number): void {
-      this.owner.willSetLimit(newLimit, oldLimit);
+      this.owner.callObservers("viewWillSetDialLimit", newLimit, oldLimit, this.owner);
     },
     didSetValue(newLimit: number, oldLimit: number): void {
-      this.owner.onSetLimit(newLimit, oldLimit);
-      this.owner.didSetLimit(newLimit, oldLimit);
+      this.owner.callObservers("viewDidSetDialLimit", newLimit, oldLimit, this.owner);
     },
   })
-  readonly limit!: ThemeAnimator<this, number>;
+  readonly limit!: Animator<this, number>;
 
-  @ThemeAnimator({type: R2Point, inherits: true, state: R2Point.origin(), updateFlags: View.NeedsRender})
-  readonly center!: ThemeAnimator<this, R2Point, AnyR2Point>;
+  @Animator({type: R2Point, inherits: true, state: R2Point.origin(), updateFlags: View.NeedsRender})
+  readonly center!: Animator<this, R2Point, AnyR2Point>;
 
   @ThemeAnimator({type: Length, inherits: true, state: Length.pct(30), updateFlags: View.NeedsRender})
   readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
@@ -191,141 +140,57 @@ export class DialView extends LayerView {
   @ThemeAnimator({type: Color, inherits: true, look: Look.mutedColor, updateFlags: View.NeedsRender})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected initLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected attachLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected detachLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDialLabel !== void 0) {
-        observer.viewWillSetDialLabel(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  protected onSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    if (oldLabelView !== null) {
-      this.detachLabel(oldLabelView);
-    }
-    if (newLabelView !== null) {
-      this.attachLabel(newLabelView);
-      this.initLabel(newLabelView);
-    }
-  }
-
-  protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDialLabel !== void 0) {
-        observer.viewDidSetDialLabel(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  @ViewFastener<DialView, GraphicsView, AnyTextRunView>({
+  @ViewRef<DialView, GraphicsView & Initable<GraphicsViewInit | string>>({
     key: true,
     type: TextRunView,
-    child: true,
-    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
-      if (value instanceof GraphicsView) {
-        return value;
-      } else if (typeof value === "string" && this.view instanceof TextRunView) {
-        this.view.text(value);
-        return this.view;
+    binds: true,
+    willAttachView(labelView: GraphicsView): void {
+      this.owner.callObservers("viewWillAttachDialLabel", labelView, this.owner);
+    },
+    didDetachView(labelView: GraphicsView): void {
+      this.owner.callObservers("viewDidDetachDialLabel", labelView, this.owner);
+    },
+    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
+      if (typeof value === "string") {
+        if (this.view instanceof TextRunView) {
+          this.view.text(value);
+          return this.view;
+        } else {
+          return TextRunView.fromAny(value);
+        }
       } else {
-        return TextRunView.fromAny(value);
+        return GraphicsView.fromAny(value);
       }
-    },
-    willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.willSetLabel(newLabelView, oldLabelView);
-    },
-    onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetLabel(newLabelView, oldLabelView);
-    },
-    didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.didSetLabel(newLabelView, oldLabelView);
     },
   })
-  readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly label!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
+  static readonly label: MemberFastenerClass<DialView, "label">;
 
-  protected initLegend(legendView: GraphicsView | null): void {
-    // hook
-  }
-
-  protected attachLegend(legendView: GraphicsView | null): void {
-    // hook
-  }
-
-  protected detachLegend(legendView: GraphicsView | null): void {
-    // hook
-  }
-
-  protected willSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDialLegend !== void 0) {
-        observer.viewWillSetDialLegend(newLegendView, oldLegendView, this);
-      }
-    }
-  }
-
-  protected onSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    if (oldLegendView !== null) {
-      this.detachLegend(oldLegendView);
-    }
-    if (newLegendView !== null) {
-      this.attachLegend(newLegendView);
-      this.initLegend(newLegendView);
-    }
-  }
-
-  protected didSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDialLegend !== void 0) {
-        observer.viewDidSetDialLegend(newLegendView, oldLegendView, this);
-      }
-    }
-  }
-
-  @ViewFastener<DialView, GraphicsView, AnyTextRunView>({
+  @ViewRef<DialView, GraphicsView & Initable<GraphicsViewInit | string>>({
     key: true,
     type: TextRunView,
-    child: true,
-    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
-      if (value instanceof GraphicsView) {
-        return value;
-      } else if (typeof value === "string" && this.view instanceof TextRunView) {
-        this.view.text(value);
-        return this.view;
+    binds: true,
+    willAttachView(legendView: GraphicsView): void {
+      this.owner.callObservers("viewWillAttachDialLegend", legendView, this.owner);
+    },
+    didDetachView(legendView: GraphicsView): void {
+      this.owner.callObservers("viewDidDetachDialLegend", legendView, this.owner);
+    },
+    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
+      if (typeof value === "string") {
+        if (this.view instanceof TextRunView) {
+          this.view.text(value);
+          return this.view;
+        } else {
+          return TextRunView.fromAny(value);
+        }
       } else {
-        return TextRunView.fromAny(value);
+        return GraphicsView.fromAny(value);
       }
     },
-    willSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.willSetLegend(newLegendView, oldLegendView);
-    },
-    onSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.onSetLegend(newLegendView, oldLegendView);
-    },
-    didSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.didSetLegend(newLegendView, oldLegendView);
-    },
   })
-  readonly legend!: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly legend!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
+  static readonly legend: MemberFastenerClass<DialView, "legend">;
 
   @Property({type: String, state: "auto"})
   readonly arrangement!: Property<this, DialViewArrangement>;

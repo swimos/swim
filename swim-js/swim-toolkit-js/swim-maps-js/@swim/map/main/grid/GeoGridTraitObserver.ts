@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Trait} from "@swim/model";
 import type {GeoLayerTraitObserver} from "../layer/GeoLayerTraitObserver";
 import type {GeoGridTrait} from "./GeoGridTrait";
 
 export interface GeoGridTraitObserver<R extends GeoGridTrait = GeoGridTrait> extends GeoLayerTraitObserver<R> {
-  traitWillSetTile?(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillAttachTile?(tileTrait: GeoGridTrait, trait: R): void;
 
-  traitDidSetTile?(newTileTrait: GeoGridTrait | null, oldTileTrait: GeoGridTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachTile?(tileTrait: GeoGridTrait, trait: R): void;
 }

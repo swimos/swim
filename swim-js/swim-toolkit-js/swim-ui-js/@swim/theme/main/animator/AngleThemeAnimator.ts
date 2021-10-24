@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyAngle, Angle} from "@swim/math";
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 /** @internal */
 export const AngleThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const AngleThemeAnimator = _super.extend() as ThemeAnimatorClass<ThemeAnimator<any, Angle | null | undefined, AnyAngle | null | undefined>>;
+  const AngleThemeAnimator = _super.extend("AngleThemeAnimator") as ThemeAnimatorFactory<ThemeAnimator<any, Angle | null | undefined, AnyAngle | null | undefined>>;
 
   AngleThemeAnimator.prototype.fromAny = function (value: AnyAngle | null): Angle | null {
     return value !== void 0 && value !== null ? Angle.fromAny(value) : value;

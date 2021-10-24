@@ -39,6 +39,7 @@ export const GeoBoxInterpolator = (function (_super: typeof Interpolator) {
   };
 
   GeoBoxInterpolator.prototype = Object.create(_super.prototype);
+  GeoBoxInterpolator.prototype.constructor = GeoBoxInterpolator;
 
   return GeoBoxInterpolator;
 })(Interpolator);

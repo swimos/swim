@@ -24,38 +24,13 @@ export type TextCellContentFunction = (cellTrait: TextCellTrait) => HtmlView | s
 export class TextCellTrait extends CellTrait {
   override readonly observerType?: Class<TextCellTraitObserver>;
 
-  protected willSetContent(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetContent !== void 0) {
-        traitObserver.traitWillSetContent(newContent, oldContent, this);
-      }
-    }
-  }
-
-  protected onSetContent(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-    // hook
-  }
-
-  protected didSetContent(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetContent !== void 0) {
-        traitObserver.traitDidSetContent(newContent, oldContent, this);
-      }
-    }
-  }
-
   @Property<TextCellTrait, TextCellContent | null>({
     state: null,
     willSetState(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-      this.owner.willSetContent(newContent, oldContent);
+      this.owner.callObservers("traitWillSetContent", newContent, oldContent, this.owner);
     },
     didSetState(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-      this.owner.onSetContent(newContent, oldContent);
-      this.owner.didSetContent(newContent, oldContent);
+      this.owner.callObservers("traitDidSetContent", newContent, oldContent, this.owner);
     },
   })
   readonly content!: Property<this, TextCellContent | null>;

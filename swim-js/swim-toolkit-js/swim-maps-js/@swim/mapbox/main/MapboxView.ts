@@ -15,9 +15,10 @@
 /// <reference types="mapbox-gl"/>
 
 import {Mutable, Class, Equivalent, AnyTiming, Timing} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
-import {View} from "@swim/view";
+import {View, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
 import {AnyGeoPerspective, MapView} from "@swim/map";
@@ -53,13 +54,7 @@ export class MapboxView extends MapView {
   override readonly geoViewport!: MapboxViewport;
 
   protected willSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoViewport !== void 0) {
-        observer.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected onSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport): void {
@@ -67,13 +62,7 @@ export class MapboxView extends MapView {
   }
 
   protected didSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGeoViewport !== void 0) {
-        observer.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected updateGeoViewport(): boolean {
@@ -138,58 +127,49 @@ export class MapboxView extends MapView {
   }
 
   protected willMoveMap(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillMoveMap !== void 0) {
-        observer.viewWillMoveMap(this);
-      }
-    }
+    this.callObservers("viewWillMoveMap", this);
   }
 
   protected didMoveMap(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidMoveMap !== void 0) {
-        observer.viewDidMoveMap(this);
+    this.callObservers("viewDidMoveMap", this);
+  }
+
+  @ViewRef<MapboxView, CanvasView>({
+    extends: true,
+    didAttachView(canvasView: CanvasView, targetView: View | null): void {
+      if (this.owner.parent === null) {
+        canvasView.appendChild(this.owner);
+        canvasView.setEventNode(this.owner.map.getCanvasContainer());
       }
-    }
-  }
+      MapView.canvas.prototype.didAttachView.call(this, canvasView, targetView);
+    },
+    willDetachView(canvasView: CanvasView): void {
+      MapView.canvas.prototype.willDetachView.call(this, canvasView);
+      if (this.owner.parent === canvasView) {
+        canvasView.removeChild(this.owner);
+      }
+    },
+  })
+  override readonly canvas!: ViewRef<this, CanvasView>;
+  static override readonly canvas: MemberFastenerClass<MapboxView, "canvas">;
 
-  protected override attachCanvas(canvasView: CanvasView): void {
-    super.attachCanvas(canvasView);
-    if (this.parent === null) {
-      canvasView.appendChild(this);
-      canvasView.setEventNode(this.map.getCanvasContainer());
-    }
-  }
-
-  protected override detachCanvas(canvasView: CanvasView): void {
-    if (this.parent === canvasView) {
-      canvasView.removeChild(this);
-    }
-    super.detachCanvas(canvasView);
-  }
-
-  protected override initContainer(containerView: HtmlView): void {
-    super.initContainer(containerView);
-    HtmlView.fromNode(this.map.getContainer());
-    HtmlView.fromNode(this.map.getCanvasContainer());
-  }
-
-  protected override attachContainer(containerView: HtmlView): void {
-    super.attachContainer(containerView);
-    const canvasContainerView = HtmlView.fromNode(this.map.getCanvasContainer());
-    this.canvas.injectView(canvasContainerView);
-  }
-
-  protected override detachContainer(containerView: HtmlView): void {
-    const canvasView = this.canvas.view;
-    const canvasContainerView = HtmlView.fromNode(this.map.getCanvasContainer());
-    if (canvasView !== null && canvasView.parent === canvasContainerView) {
-      canvasContainerView.removeChild(containerView);
-    }
-    super.detachContainer(containerView);
-  }
+  @ViewRef<MapboxView, HtmlView>({
+    extends: true,
+    didAttachView(containerView: HtmlView, targetView: View | null): void {
+      HtmlView.fromNode(this.owner.map.getContainer());
+      const canvasContainerView =  HtmlView.fromNode(this.owner.map.getCanvasContainer());
+      this.owner.canvas.insertView(canvasContainerView);
+      MapView.container.prototype.didAttachView.call(this, containerView, targetView);
+    },
+    willDetachView(containerView: HtmlView): void {
+      MapView.container.prototype.willDetachView.call(this, containerView);
+      const canvasView = this.owner.canvas.view;
+      const canvasContainerView = HtmlView.fromNode(this.owner.map.getCanvasContainer());
+      if (canvasView !== null && canvasView.parent === canvasContainerView) {
+        canvasContainerView.removeChild(containerView);
+      }
+    },
+  })
+  override readonly container!: ViewRef<this, HtmlView>;
+  static override readonly container: MemberFastenerClass<MapboxView, "container">;
 }

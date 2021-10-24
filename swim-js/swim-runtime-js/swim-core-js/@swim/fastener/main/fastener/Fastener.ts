@@ -12,15 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Family} from "@swim/util";
+import {Mutable, Class, Family, Identifiers} from "@swim/util";
 import {Affinity} from "./Affinity";
-import {FastenerContext} from "./FastenerContext";
+import {FastenerContextClass, FastenerContext} from "./FastenerContext";
 
-export type MemberFastenerKey<O, K extends keyof O> =
-  O[K] extends Fastener ? K : never;
+export type MemberFasteners<O, F extends Fastener<any> = Fastener<any>> =
+  {[K in keyof O as O[K] extends F ? K : never]: O[K]};
 
-export type MemberFastener<O, K extends keyof O> =
-  O[K] extends Fastener ? O[K] : never;
+export type MemberFastener<O, K extends keyof MemberFasteners<O, F>, F extends Fastener<any> = Fastener<any>> =
+  MemberFasteners<O, F>[K] extends F ? MemberFasteners<O, F>[K] : never;
+
+export type MemberFastenerClass<O, K extends keyof MemberFasteners<O, F>, F extends Fastener<any> = Fastener<any>> =
+  MemberFasteners<O, F>[K] extends F ? FastenerClass<MemberFasteners<O, F>[K]> : never;
 
 export type FastenerOwner<F> =
   F extends Fastener<infer O> ? O : never;
@@ -28,8 +31,10 @@ export type FastenerOwner<F> =
 export type FastenerFlags = number;
 
 export interface FastenerInit {
-  extends?: unknown,
-  eager?: boolean;
+  name?: string;
+  lazy?: boolean;
+  static?: string | boolean;
+  extends?: {prototype: Fastener<any>} | string | boolean | null;
   affinity?: Affinity;
   inherits?: string | boolean;
 
@@ -59,21 +64,16 @@ export interface FastenerInit {
 
 export type FastenerDescriptor<O = unknown, I = {}> = ThisType<Fastener<O> & I> & FastenerInit & Partial<I>;
 
-export interface FastenerClass<F extends Fastener<any> = Fastener<any>> {
+export interface FastenerClass<F extends Fastener<any> = Fastener<any>> extends Function {
   /** @internal */
   prototype: F;
 
-  create(owner: FastenerOwner<F>, fastenerName: string): F;
+  /** @internal */
+  contextClass?: FastenerContextClass;
 
-  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
+  create(owner: FastenerOwner<F>): F;
 
-  extend<I = {}>(classMembers?: Partial<I> | null): FastenerClass<F> & I;
-
-  define<O>(descriptor: FastenerDescriptor<O>): FastenerClass<Fastener<any>>;
-  define<O, I = {}>(descriptor: FastenerDescriptor<O, I>): FastenerClass<Fastener<any> & I>;
-
-  <O>(descriptor: FastenerDescriptor<O>): PropertyDecorator;
-  <O, I = {}>(descriptor: FastenerDescriptor<O, I>): PropertyDecorator;
+  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F;
 
   /** @internal */
   readonly MountedFlag: FastenerFlags;
@@ -90,9 +90,17 @@ export interface FastenerClass<F extends Fastener<any> = Fastener<any>> {
   readonly FlagMask: FastenerFlags;
 }
 
-export interface Fastener<O = unknown> extends Family {
-  readonly name: string;
+export interface FastenerFactory<F extends Fastener<any> = Fastener<any>> extends FastenerClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): FastenerFactory<F> & I;
 
+  define<O>(className: string, descriptor: FastenerDescriptor<O>): FastenerFactory<Fastener<any>>;
+  define<O, I = {}>(className: string, descriptor: FastenerDescriptor<O, I>): FastenerFactory<Fastener<any> & I>;
+
+  <O>(descriptor: FastenerDescriptor<O>): PropertyDecorator;
+  <O, I = {}>(descriptor: FastenerDescriptor<O, I>): PropertyDecorator;
+}
+
+export interface Fastener<O = unknown> extends Family {
   readonly owner: O;
 
   /** @internal */
@@ -100,6 +108,8 @@ export interface Fastener<O = unknown> extends Family {
 
   /** @override */
   get familyType(): Class<Fastener<any>> | null;
+
+  get name(): string;
 
   /** @internal */
   readonly flags: FastenerFlags;
@@ -245,15 +255,19 @@ export interface Fastener<O = unknown> extends Family {
   toString(): string;
 
   /** @internal */
-  get eager(): boolean | undefined; // optional prototype field
+  get lazy(): boolean; // prototype property
+
+  /** @internal */
+  get static(): string | boolean; // prototype property
 }
 
 export const Fastener = (function (_super: typeof Object) {
-  const Fastener = function <O>(descriptor: FastenerDescriptor<O>): PropertyDecorator {
-    return FastenerContext.decorator(Fastener.define(descriptor));
-  } as FastenerClass;
+  const Fastener = function (descriptor: FastenerDescriptor): PropertyDecorator {
+    return FastenerContext.decorator(Fastener, descriptor);
+  } as FastenerFactory;
 
   Fastener.prototype = Object.create(_super.prototype);
+  Fastener.prototype.constructor = Fastener;
 
   Fastener.prototype.init = function (this: Fastener): void {
     // hook
@@ -263,6 +277,11 @@ export const Fastener = (function (_super: typeof Object) {
     get: function (this: Fastener): Class<Fastener<any>> | null {
       return null;
     },
+    configurable: true,
+  });
+
+  Object.defineProperty(Fastener.prototype, "name", {
+    value: "",
     configurable: true,
   });
 
@@ -618,42 +637,86 @@ export const Fastener = (function (_super: typeof Object) {
     return this.name;
   };
 
-  Fastener.create = function <F extends Fastener<any>>(this: FastenerClass<F>, owner: FastenerOwner<F>, fastenerName: string): F {
-    const fastener = this.construct(this, null, owner, fastenerName);
+  Object.defineProperty(Fastener.prototype, "lazy", {
+    get: function (this: Fastener): boolean {
+      return true;
+    },
+    configurable: true,
+  });
+
+  Object.defineProperty(Fastener.prototype, "static", {
+    get: function (this: Fastener): string | boolean {
+      return false;
+    },
+    configurable: true,
+  });
+
+  Fastener.create = function <F extends Fastener<any>>(this: FastenerClass<F>, owner: FastenerOwner<F>): F {
+    const fastener = this.construct(this, null, owner);
     fastener.init();
     return fastener;
   };
 
-  Fastener.construct = function <F extends Fastener<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  Fastener.construct = function <F extends Fastener<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
     if (fastener === null) {
       fastener = Object.create(fastenerClass.prototype) as F;
     }
-    Object.defineProperty(fastener, "name", {
-      value: fastenerName,
-      enumerable: true,
-      configurable: true,
-    });
     (fastener as Mutable<typeof fastener>).owner = owner;
     (fastener as Mutable<typeof fastener>).flags = 0;
     return fastener;
   };
 
-  Fastener.extend = function <I>(classMembers?: Partial<I> | null): FastenerClass & I {
-    if (classMembers === void 0 || classMembers === null) {
-      classMembers = {};
+  Fastener.extend = function <I>(className: string, classMembers?: {readonly name?: string} & Partial<I> | null): FastenerFactory & I {
+    let classIdentifier: string | undefined;
+    if (classMembers !== void 0 && classMembers !== null && typeof classMembers.name === "string" && Identifiers.isValid(classMembers.name)) {
+      classIdentifier = classMembers.name;
+      className = classIdentifier;
+    } else if (Identifiers.isValid(className)) {
+      classIdentifier = className;
     }
-    const fastenerClass = function FastenerDecorator(descriptor: FastenerDescriptor): PropertyDecorator {
-      return FastenerContext.decorator(fastenerClass.define(descriptor));
-    } as FastenerClass & I;
+
+    let fastenerClass: FastenerFactory & I;
+    if (classIdentifier !== void 0) {
+      fastenerClass = new Function("FastenerContext",
+        "return function " + className + "(descriptor) { return FastenerContext.decorator(" + className + ", descriptor); }"
+      )(FastenerContext);
+    } else {
+      fastenerClass = function (descriptor: FastenerDescriptor): PropertyDecorator {
+        return FastenerContext.decorator(fastenerClass, descriptor);
+      } as FastenerFactory & I;
+      Object.defineProperty(fastenerClass, "name", {
+        value: className,
+        configurable: true,
+      });
+    }
+
+    const classProperties: PropertyDescriptorMap = {};
+    if (classMembers !== void 0 && classMembers !== null) {
+      classProperties.name = {
+        value: className,
+        configurable: true,
+      };
+      const classMemberNames = Object.getOwnPropertyNames(classMembers);
+      for (let i = 0; i < classMemberNames.length; i += 1) {
+        const classMemberName = classMemberNames[i]!;
+        classProperties[classMemberName] = Object.getOwnPropertyDescriptor(classMembers, classMemberName)!;
+      }
+    } else {
+      classProperties.name = {
+        value: "",
+        configurable: true,
+      };
+    }
+
     Object.setPrototypeOf(fastenerClass, this);
-    fastenerClass.prototype = classMembers as Fastener & Partial<I>;
+    fastenerClass.prototype = Object.create(this.prototype, classProperties);
     fastenerClass.prototype.constructor = fastenerClass;
-    Object.setPrototypeOf(fastenerClass.prototype, this.prototype);
+
     return fastenerClass;
   }
 
-  Fastener.define = function <O>(descriptor: FastenerDescriptor<O>): FastenerClass<Fastener<any>> {
-    let superClass = descriptor.extends as FastenerClass | undefined;
+  Fastener.define = function <O>(className: string, descriptor: FastenerDescriptor<O>): FastenerFactory<Fastener<any>> {
+    let superClass = descriptor.extends as FastenerFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     delete descriptor.extends;
@@ -664,10 +727,10 @@ export const Fastener = (function (_super: typeof Object) {
       superClass = this;
     }
 
-    const fastenerClass = superClass.extend(descriptor);
+    const fastenerClass = superClass.extend(className, descriptor);
 
-    fastenerClass.construct = function (fastenerClass: {prototype: Fastener<any>}, fastener: Fastener<O> | null, owner: O, fastenerName: string): Fastener<O> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
+    fastenerClass.construct = function (fastenerClass: {prototype: Fastener<any>}, fastener: Fastener<O> | null, owner: O): Fastener<O> {
+      fastener = superClass!.construct(fastenerClass, fastener, owner);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);
       }

@@ -28,7 +28,7 @@ export interface RefreshProvider<M extends Model, S extends RefreshService<M> | 
 }
 
 export const RefreshProvider = (function (_super: typeof Provider) {
-  const RefreshProvider = _super.extend() as ProviderClass<RefreshProvider<any, any>>;
+  const RefreshProvider = _super.extend("RefreshProvider") as ProviderClass<RefreshProvider<any, any>>;
 
   Object.defineProperty(RefreshProvider.prototype, "modelContext", {
     get<M extends Model, S extends RefreshService<M> | null | undefined>(this: RefreshProvider<M, S>): ModelContext {

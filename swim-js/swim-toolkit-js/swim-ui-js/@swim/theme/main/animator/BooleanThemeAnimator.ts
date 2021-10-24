@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 /** @internal */
 export const BooleanThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const BooleanThemeAnimator = _super.extend() as ThemeAnimatorClass<ThemeAnimator<any, boolean | null | undefined, boolean | string | null | undefined>>;
+  const BooleanThemeAnimator = _super.extend("BooleanThemeAnimator") as ThemeAnimatorFactory<ThemeAnimator<any, boolean | null | undefined, boolean | string | null | undefined>>;
 
   BooleanThemeAnimator.prototype.fromAny = function (value: boolean | string | null | undefined): boolean | null | undefined {
     return !!value;

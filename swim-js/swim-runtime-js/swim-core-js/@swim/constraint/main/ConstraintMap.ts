@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import type {Mutable} from "@swim/util";
-import type {ConstraintKey} from "./ConstraintKey";
+import type {ConstraintId} from "./ConstraintId";
 
 /** @internal */
-export class ConstraintMap<K extends ConstraintKey, V> {
+export class ConstraintMap<K extends ConstraintId, V> {
   constructor(index?: {[id: number]: number | undefined}, array?: Array<[K, V]>) {
     this.index = index !== void 0 ? index : {};
     this.array = array !== void 0 ? array : [];

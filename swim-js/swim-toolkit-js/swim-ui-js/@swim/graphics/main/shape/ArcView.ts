@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/fastener";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
@@ -34,14 +34,14 @@ export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 }
 
 export class ArcView extends LayerView implements FillView, StrokeView {
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
-  readonly xAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
+  readonly xAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
-  readonly yAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
+  readonly yAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsRender})
-  readonly center!: ThemeAnimator<this, R2Point, AnyR2Point>;
+  @Animator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsRender})
+  readonly center!: Animator<this, R2Point, AnyR2Point>;
 
   @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
   readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;

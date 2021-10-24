@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {PropertyClass, Property} from "./Property";
+import {PropertyFactory, Property} from "./Property";
 
 /** @internal */
 export const StringProperty = (function (_super: typeof Property) {
-  const StringProperty = _super.extend() as PropertyClass<Property<any, string | null | undefined, string | null | undefined>>;
+  const StringProperty = _super.extend("StringProperty") as PropertyFactory<Property<any, string | null | undefined, string | null | undefined>>;
 
   StringProperty.prototype.fromAny = function (value: string | null | undefined): string | null | undefined {
     return value;

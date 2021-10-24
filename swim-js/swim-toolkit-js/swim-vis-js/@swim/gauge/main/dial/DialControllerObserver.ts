@@ -19,13 +19,13 @@ import type {DialTrait} from "./DialTrait";
 import type {DialController} from "./DialController";
 
 export interface DialControllerObserver<C extends DialController = DialController> extends ControllerObserver<C> {
-  controllerWillSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, controller: C): void;
+  controllerWillAttachDialTrait?(dialTrait: DialTrait, controller: C): void;
 
-  controllerDidSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, controller: C): void;
+  controllerDidDetachDialTrait?(dialTrait: DialTrait, controller: C): void;
 
-  controllerWillSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, controller: C): void;
+  controllerWillAttachDialView?(dialView: DialView, controller: C): void;
 
-  controllerDidSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, controller: C): void;
+  controllerDidDetachDialView?(dialView: DialView, controller: C): void;
 
   controllerWillSetDialValue?(newValue: number, oldValue: number, controller: C): void;
 
@@ -35,11 +35,11 @@ export interface DialControllerObserver<C extends DialController = DialControlle
 
   controllerDidSetDialLimit?(newLimit: number, oldLimit: number, controller: C): void;
 
-  controllerWillSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, controller: C): void;
+  controllerWillAttachDialLabelView?(labelView: GraphicsView, controller: C): void;
 
-  controllerDidSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, controller: C): void;
+  controllerDidDetachDialLabelView?(labelView: GraphicsView, controller: C): void;
 
-  controllerWillSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, controller: C): void;
+  controllerWillAttachDialLegendView?(legendView: GraphicsView, controller: C): void;
 
-  controllerDidSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, controller: C): void;
+  controllerDidDetachDialLegendView?(legendView: GraphicsView, controller: C): void;
 }

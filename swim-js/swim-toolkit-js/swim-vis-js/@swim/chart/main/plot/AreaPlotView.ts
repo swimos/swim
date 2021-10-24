@@ -33,41 +33,16 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     return "area";
   }
 
-  protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetPlotFill !== void 0) {
-        observer.viewWillSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  protected onSetFill(newFill: Color | null, oldFill: Color | null): void {
-    // hook
-  }
-
-  protected didSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetPlotFill !== void 0) {
-        observer.viewDidSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
-
   @ThemeAnimator<AreaPlotView<X, Y>, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     look: Look.accentColor,
     updateFlags: View.NeedsRender,
     willSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.willSetFill(newFill, oldFill);
+      this.owner.callObservers("viewWillSetPlotFill", newFill, oldFill, this.owner);
     },
     didSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.onSetFill(newFill, oldFill);
-      this.owner.didSetFill(newFill, oldFill);
+      this.owner.callObservers("viewDidSetPlotFill", newFill, oldFill, this.owner);
     },
   })
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
@@ -82,10 +57,10 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     let x0: number;
     let x1: number;
     let dx: number;
-    const dataPointFasteners = this.dataPointFasteners;
-    if (!dataPointFasteners.isEmpty()) {
-      const p0 = dataPointFasteners.firstValue()!.view!;
-      const p1 = dataPointFasteners.lastValue()!.view!;
+    const dataPointRefs = this.dataPointRefs;
+    if (!dataPointRefs.isEmpty()) {
+      const p0 = dataPointRefs.firstValue()!.view!;
+      const p1 = dataPointRefs.lastValue()!.view!;
       x0 = p0.xCoord;
       x1 = p1.xCoord;
       dx = x1 - x0;
@@ -107,7 +82,7 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
       dx = NaN;
     }
 
-    const cursor = dataPointFasteners.values();
+    const cursor = dataPointRefs.values();
     cursor.next();
     while (cursor.hasNext()) {
       const p = cursor.next().value!.view!;
@@ -126,7 +101,7 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
       const p = cursor.previous().value!.view!;
       context.lineTo(p.xCoord, p.y2Coord!);
     }
-    if (!dataPointFasteners.isEmpty()) {
+    if (!dataPointRefs.isEmpty()) {
       context.closePath();
     }
 
@@ -142,10 +117,10 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
 
   protected hitTestPlot(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null {
     const context = renderer.context;
-    const dataPointFasteners = this.dataPointFasteners;
+    const dataPointRefs = this.dataPointRefs;
 
     context.beginPath();
-    const cursor = dataPointFasteners.values();
+    const cursor = dataPointRefs.values();
     if (cursor.hasNext()) {
       const p = cursor.next().value!.view!;
       context.moveTo(p.xCoord, p.yCoord);
@@ -158,7 +133,7 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
       const p = cursor.previous().value!.view!;
       context.lineTo(p.xCoord, p.y2Coord!);
     }
-    if (!dataPointFasteners.isEmpty()) {
+    if (!dataPointRefs.isEmpty()) {
       context.closePath();
     }
 

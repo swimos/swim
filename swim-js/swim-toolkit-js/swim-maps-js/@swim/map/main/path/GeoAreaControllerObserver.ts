@@ -21,13 +21,13 @@ import type {GeoPathControllerObserver} from "./GeoPathControllerObserver";
 import type {GeoAreaController} from "./GeoAreaController";
 
 export interface GeoAreaControllerObserver<C extends GeoAreaController = GeoAreaController> extends GeoPathControllerObserver<C> {
-  controllerWillSetGeoTrait?(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null, controller: C): void;
+  controllerWillAttachGeoTrait?(geoTrait: GeoAreaTrait, controller: C): void;
 
-  controllerDidSetGeoTrait?(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null, controller: C): void;
+  controllerDidDetachGeoTrait?(geoTrait: GeoAreaTrait, controller: C): void;
 
-  controllerWillSetGeoView?(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null, controller: C): void;
+  controllerWillAttachGeoView?(geoView: GeoAreaView, controller: C): void;
 
-  controllerDidSetGeoView?(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null, controller: C): void;
+  controllerDidDetachGeoView?(geoView: GeoAreaView, controller: C): void;
 
   controllerWillSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, controller: C): void;
 

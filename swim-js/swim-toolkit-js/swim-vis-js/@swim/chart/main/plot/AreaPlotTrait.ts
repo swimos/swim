@@ -19,41 +19,16 @@ import {Look} from "@swim/theme";
 import {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {AreaPlotTraitObserver} from "./AreaPlotTraitObserver";
 
-export class AreaPlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
+export class AreaPlotTrait<X = unknown, Y = unknown> extends SeriesPlotTrait<X, Y> {
   override readonly observerType?: Class<AreaPlotTraitObserver<X, Y>>;
-
-  protected willSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetPlotFill !== void 0) {
-        traitObserver.traitWillSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  protected onSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    // hook
-  }
-
-  protected didSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetPlotFill !== void 0) {
-        traitObserver.traitDidSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
 
   @Property<AreaPlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
     state: null,
     willSetState(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.willSetFill(newFill, oldFill);
+      this.owner.callObservers("traitWillSetPlotFill", newFill, oldFill, this.owner);
     },
     didSetState(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.onSetFill(newFill, oldFill);
-      this.owner.didSetFill(newFill, oldFill);
+      this.owner.callObservers("traitDidSetPlotFill", newFill, oldFill, this.owner);
     },
     fromAny(fill: Look<Color> | AnyColor | null): Look<Color> | Color | null {
       if (fill !== null && !(fill instanceof Look)) {

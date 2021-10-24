@@ -13,17 +13,17 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
 import {Length, R2Box} from "@swim/math";
 import type {Color} from "@swim/style";
-import {Look, Feel, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
+import {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
 import {
+  PositionGestureInput,
+  PositionGesture,
   ViewContextType,
   ViewFlags,
   View,
-  ViewFastener,
-  PositionGestureInput,
-  PositionGesture,
+  ViewRef,
 } from "@swim/view";
 import {HtmlViewInit, HtmlView, SvgView} from "@swim/dom";
 import {Graphics, PathContext, PathRenderer} from "@swim/graphics";
@@ -52,7 +52,7 @@ export class TokenView extends HtmlView {
     this.height.setState(32, Affinity.Intrinsic);
     this.boxSizing.setState("content-box", Affinity.Intrinsic);
     this.userSelect.setState("none", Affinity.Intrinsic);
-    this.shape.injectView();
+    this.shape.insertView();
   }
 
   protected initShape(shapeView: SvgView): void {
@@ -61,11 +61,11 @@ export class TokenView extends HtmlView {
     shapeView.setStyle("top", "0");
     shapeView.setStyle("left", "0");
 
-    this.head.injectView(shapeView);
-    this.headIcon.setView(this.headIcon.createView());
-    this.body.injectView(shapeView);
-    this.foot.injectView(shapeView);
-    this.footIcon.setView(this.footIcon.createView());
+    this.head.insertView(shapeView);
+    this.headIcon.attachView();
+    this.body.insertView(shapeView);
+    this.foot.insertView(shapeView);
+    this.footIcon.attachView();
   }
 
   protected initHead(headView: SvgView): void {
@@ -126,7 +126,7 @@ export class TokenView extends HtmlView {
     return this.tokenState === "collapsed" || this.tokenState === "collapsing";
   }
 
-  @ThemeAnimator<TokenView, number>({
+  @Animator<TokenView, number>({
     type: Number,
     state: 1,
     updateFlags: View.NeedsLayout,
@@ -139,35 +139,34 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  readonly expandedPhase!: ThemeAnimator<this, number>;
+  readonly expandedPhase!: Animator<this, number>;
 
-  @ViewFastener<TokenView, SvgView>({
+  @ViewRef<TokenView, SvgView>({
     key: true,
     type: SvgView,
-    child: true,
-    onSetView(shapeView: SvgView | null): void {
-      if (shapeView !== null) {
-        this.owner.initShape(shapeView);
-      }
+    binds: true,
+    didAttachView(shapeView: SvgView): void {
+      this.owner.initShape(shapeView);
     },
   })
-  readonly shape!: ViewFastener<this, SvgView>;
+  readonly shape!: ViewRef<this, SvgView>;
+  static readonly shape: MemberFastenerClass<TokenView, "shape">;
 
   /** @internal */
   get fillLook(): Look<Color> {
     return Look.accentColor;
   }
 
-  @ViewFastener<TokenView, SvgView>({
+  @ViewRef<TokenView, SvgView>({
     key: true,
     type: SvgView.forTag("path"),
-    child: false,
     observes: true,
-    onSetView(headView: SvgView | null): void {
-      if (headView !== null) {
-        this.owner.initHead(headView);
-      }
+    didAttachView(headView: SvgView): void {
+      this.owner.initHead(headView);
       this.owner.headGesture.setView(headView);
+    },
+    willDetachView(headView: SvgView): void {
+      this.owner.headGesture.setView(null);
     },
     viewDidMount(headView: SvgView): void {
       headView.on("click", this.owner.onClickHead);
@@ -184,10 +183,10 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  readonly head!: ViewFastener<this, SvgView>;
+  readonly head!: ViewRef<this, SvgView>;
+  static readonly head: MemberFastenerClass<TokenView, "head">;
 
-  /** @internal */
-  static HeadGesture = PositionGesture.define<TokenView, SvgView>({
+  @PositionGesture<TokenView, SvgView>({
     didStartHovering(): void {
       const headView = this.view!;
       headView.modifyMood(Feel.default, [[Feel.hovering, 1]]);
@@ -230,34 +229,28 @@ export class TokenView extends HtmlView {
         this.endHover(input, event);
       }
     },
-  });
-
-  @PositionGesture<TokenView, SvgView>({
-    extends: TokenView.HeadGesture,
   })
   readonly headGesture!: PositionGesture<this, SvgView>;
+  static readonly headGesture: MemberFastenerClass<TokenView, "headGesture">;
 
   /** @internal */
-  @ViewFastener<TokenView, SvgView>({
+  @ViewRef<TokenView, SvgView>({
     key: true,
     type: SvgView.forTag("path"),
-    child: false,
-    onSetView(headIconView: SvgView | null): void {
-      if (headIconView !== null) {
-        this.owner.initHeadIcon(headIconView);
-      }
+    didAttachView(headIconView: SvgView): void {
+      this.owner.initHeadIcon(headIconView);
     },
-    insertView(parent: View, childView: SvgView, targetView: View | null, key: string | undefined): void {
+    insertChild(parent: View, childView: SvgView, targetView: View | null, key: string | undefined): void {
       const shapeView = this.owner.shape.view;
       if (shapeView !== null) {
         shapeView.insertChild(childView, this.owner.body.view, key);
       }
     },
   })
-  readonly headIcon!: ViewFastener<this, SvgView>;
+  readonly headIcon!: ViewRef<this, SvgView>;
+  static readonly headIcon: MemberFastenerClass<TokenView, "headIcon">;
 
   @Property<TokenView, Graphics | null, never, {embossed: boolean}>({
-    extends: null,
     type: Object,
     state: null,
     updateFlags: View.NeedsLayout,
@@ -265,16 +258,16 @@ export class TokenView extends HtmlView {
   })
   readonly icon!: Property<this, Graphics | null> & {embossed: boolean};
 
-  @ViewFastener<TokenView, SvgView>({
+  @ViewRef<TokenView, SvgView>({
     key: true,
     type: SvgView.forTag("path"),
-    child: false,
     observes: true,
-    onSetView(bodyView: SvgView | null): void {
-      if (bodyView !== null) {
-        this.owner.initBody(bodyView);
-      }
+    didAttachView(bodyView: SvgView): void {
+      this.owner.initBody(bodyView);
       this.owner.bodyGesture.setView(bodyView);
+    },
+    willDetachView(bodyView: SvgView): void {
+      this.owner.bodyGesture.setView(null);
     },
     viewDidMount(headView: SvgView): void {
       headView.on("click", this.owner.onClickBody);
@@ -290,10 +283,10 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  readonly body!: ViewFastener<this, SvgView>;
+  readonly body!: ViewRef<this, SvgView>;
+  static readonly body: MemberFastenerClass<TokenView, "body">;
 
-  /** @internal */
-  static BodyGesture = PositionGesture.define<TokenView, SvgView>({
+  @PositionGesture<TokenView, SvgView>({
     didStartHovering(): void {
       const bodyView = this.view!;
       bodyView.modifyMood(Feel.default, [[Feel.hovering, 1]]);
@@ -334,23 +327,20 @@ export class TokenView extends HtmlView {
         this.endHover(input, event);
       }
     },
-  });
-
-  @PositionGesture<TokenView, SvgView>({
-    extends: TokenView.BodyGesture,
   })
   readonly bodyGesture!: PositionGesture<this, SvgView>;
+  static readonly bodyGesture: MemberFastenerClass<TokenView, "bodyGesture">;
 
-  @ViewFastener<TokenView, SvgView>({
+  @ViewRef<TokenView, SvgView>({
     key: true,
     type: SvgView.forTag("path"),
-    child: false,
     observes: true,
-    onSetView(footView: SvgView | null): void {
-      if (footView !== null) {
-        this.owner.initFoot(footView);
-      }
+    didAttachView(footView: SvgView): void {
+      this.owner.initFoot(footView);
       this.owner.footGesture.setView(footView);
+    },
+    willDetachView(footView: SvgView): void {
+      this.owner.footGesture.setView(null);
     },
     viewDidMount(footView: SvgView): void {
       footView.on("click", this.owner.onClickFoot);
@@ -367,10 +357,10 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  readonly foot!: ViewFastener<this, SvgView>;
+  readonly foot!: ViewRef<this, SvgView>;
+  static readonly foot: MemberFastenerClass<TokenView, "foot">;
 
-  /** @internal */
-  static FootGesture = PositionGesture.define<TokenView, SvgView>({
+  @PositionGesture<TokenView, SvgView>({
     didStartHovering(): void {
       const footView = this.view!;
       footView.modifyMood(Feel.default, [[Feel.hovering, 1]]);
@@ -413,34 +403,28 @@ export class TokenView extends HtmlView {
         this.endHover(input, event);
       }
     },
-  });
-
-  @PositionGesture<TokenView, SvgView>({
-    extends: TokenView.FootGesture,
   })
   readonly footGesture!: PositionGesture<this, SvgView>;
+  static readonly footGesture: MemberFastenerClass<TokenView, "footGesture">;
 
   /** @internal */
-  @ViewFastener<TokenView, SvgView>({
+  @ViewRef<TokenView, SvgView>({
     key: true,
     type: SvgView.forTag("path"),
-    child: false,
-    onSetView(footIconView: SvgView | null): void {
-      if (footIconView !== null) {
-        this.owner.initFootIcon(footIconView);
-      }
+    didAttachView(footIconView: SvgView): void {
+      this.owner.initFootIcon(footIconView);
     },
-    insertView(parent: View, childView: SvgView, targetView: View | null, key: string | undefined): void {
+    insertChild(parent: View, childView: SvgView, targetView: View | null, key: string | undefined): void {
       const shapeView = this.owner.shape.view;
       if (shapeView !== null) {
         shapeView.appendChild(childView, key);
       }
     },
   })
-  readonly footIcon!: ViewFastener<this, SvgView>;
+  readonly footIcon!: ViewRef<this, SvgView>;
+  static readonly footIcon: MemberFastenerClass<TokenView, "footIcon">;
 
   @Property<TokenView, Graphics | null, never, {embossed: boolean}>({
-    extends: null,
     type: Object,
     state: null,
     updateFlags: View.NeedsLayout,
@@ -450,36 +434,33 @@ export class TokenView extends HtmlView {
   })
   readonly accessory!: Property<this, Graphics | null> & {embossed: boolean};
 
-  @ViewFastener<TokenView, HtmlView>({
+  @ViewRef<TokenView, HtmlView>({
     key: true,
     type: HtmlView,
-    child: true,
-    onSetView(labelContainer: HtmlView | null): void {
-      if (labelContainer !== null) {
-        this.owner.initLabelContainer(labelContainer);
-      }
+    binds: true,
+    didAttachView(labelContainer: HtmlView): void {
+      this.owner.initLabelContainer(labelContainer);
     },
   })
-  readonly labelContainer!: ViewFastener<this, HtmlView>;
+  readonly labelContainer!: ViewRef<this, HtmlView>;
+  static readonly labelContainer: MemberFastenerClass<TokenView, "labelContainer">;
 
-  @ViewFastener<TokenView, HtmlView>({
+  @ViewRef<TokenView, HtmlView>({
     key: true,
     type: HtmlView,
-    child: false,
-    onSetView(labelView: HtmlView | null): void {
-      if (labelView !== null) {
-        if (labelView.parent === null) {
-          this.owner.labelContainer.injectView();
-          const labelContainer = this.owner.labelContainer.view;
-          if (labelContainer !== null) {
-            labelContainer.appendChild(labelView);
-          }
+    didAttachView(labelView: HtmlView): void {
+      if (labelView.parent === null) {
+        this.owner.labelContainer.insertView();
+        const labelContainer = this.owner.labelContainer.view;
+        if (labelContainer !== null) {
+          labelContainer.appendChild(labelView);
         }
-        this.owner.initLabel(labelView);
       }
+      this.owner.initLabel(labelView);
     },
   })
-  readonly label!: ViewFastener<this, HtmlView>;
+  readonly label!: ViewRef<this, HtmlView>;
+  static readonly label: MemberFastenerClass<TokenView, "label">;
 
   protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsLayout) !== 0) {
@@ -581,7 +562,7 @@ export class TokenView extends HtmlView {
         const frame = new R2Box(paddingLeft, paddingTop, paddingLeft + tokenHeight, paddingTop + tokenHeight);
         icon.render(renderer, frame);
         headIconView.d.setState(context.toString(), Affinity.Intrinsic);
-        this.headIcon.injectView();
+        this.headIcon.insertView();
       } else {
         this.headIcon.removeView();
       }
@@ -629,7 +610,7 @@ export class TokenView extends HtmlView {
           accessoryIcon.render(renderer, frame);
         }
         footIconView.d.setState(context.toString(), Affinity.Intrinsic);
-        this.footIcon.injectView();
+        this.footIcon.insertView();
       } else {
         this.footIcon.removeView();
       }

@@ -13,16 +13,16 @@
 // limitations under the License.
 
 import {Output, Debug, Format} from "@swim/codec";
-import {ConstraintKey} from "./ConstraintKey";
+import {ConstraintId} from "./ConstraintId";
 import type {ConstraintExpression} from "./ConstraintExpression";
 import type {ConstraintRelation} from "./ConstraintRelation";
 import {ConstraintStrength} from "./ConstraintStrength";
 import type {ConstraintScope} from "./ConstraintScope";
 
-export class Constraint implements ConstraintKey, Debug {
+export class Constraint implements ConstraintId, Debug {
   constructor(scope: ConstraintScope, expression: ConstraintExpression,
               relation: ConstraintRelation, strength: ConstraintStrength) {
-    this.id = ConstraintKey.nextId();
+    this.id = ConstraintId.next();
     this.scope = scope;
     this.expression = expression;
     this.relation = relation;

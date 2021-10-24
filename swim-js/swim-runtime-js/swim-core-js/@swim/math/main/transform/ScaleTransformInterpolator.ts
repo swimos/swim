@@ -37,6 +37,7 @@ export const ScaleTransformInterpolator = (function (_super: typeof Interpolator
   };
 
   ScaleTransformInterpolator.prototype = Object.create(_super.prototype);
+  ScaleTransformInterpolator.prototype.constructor = Interpolator;
 
   return ScaleTransformInterpolator;
 })(Interpolator);

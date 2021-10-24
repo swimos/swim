@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import type {Mutable, ObserverType} from "@swim/util";
-import type {FastenerOwner, FastenerFlags} from "@swim/fastener";
+import type {FastenerOwner} from "@swim/fastener";
 import type {GestureInputType} from "./GestureInput";
-import {GestureMethod, GestureInit, Gesture} from "./Gesture";
+import {GestureMethod, GestureInit, GestureClass, Gesture} from "./Gesture";
 import {PositionGestureInput} from "./PositionGestureInput";
 import {MousePositionGesture} from "./"; // forward import
 import {TouchPositionGesture} from "./"; // forward import
@@ -23,6 +23,8 @@ import {PointerPositionGesture} from "./"; // forward import
 import type {View} from "../view/View";
 
 export interface PositionGestureInit<V extends View = View> extends GestureInit<V> {
+  extends?: {prototype: PositionGesture<any, any>} | string | boolean | null;
+
   willStartHovering?(): void;
   didStartHovering?(): void;
   willStopHovering?(): void;
@@ -59,28 +61,19 @@ export interface PositionGestureInit<V extends View = View> extends GestureInit<
 
 export type PositionGestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<PositionGesture<O, V> & I> & PositionGestureInit<V> & Partial<I>;
 
-export interface PositionGestureClass<G extends PositionGesture<any, any> = PositionGesture<any, any>> {
-  /** @internal */
-  prototype: G;
+export interface PositionGestureClass<G extends PositionGesture<any, any> = PositionGesture<any, any>> extends GestureClass<G> {
+}
 
-  create(owner: FastenerOwner<G>, gestureName: string): G;
+export interface PositionGestureFactory<G extends PositionGesture<any, any> = PositionGesture<any, any>> extends PositionGestureClass<G> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): PositionGestureFactory<G> & I;
 
-  construct(gestureClass: {prototype: G}, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
+  specialize(method: GestureMethod): PositionGestureFactory | null;
 
-  specialize(method: GestureMethod): PositionGestureClass | null;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): PositionGestureClass<G> & I;
-
-  define<O, V extends View = View, I = {}>(descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PositionGestureClass<PositionGesture<any, V> & I>;
-  define<O, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<O, V, I>): PositionGestureClass<PositionGesture<any, V> & I>;
+  define<O, V extends View = View, I = {}>(className: string, descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PositionGestureFactory<PositionGesture<any, V> & I>;
+  define<O, V extends View = View, I = {}>(className: string, descriptor: PositionGestureDescriptor<O, V, I>): PositionGestureFactory<PositionGesture<any, V> & I>;
 
   <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
   <O, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<O, V, I>): PropertyDecorator;
-
-  /** @internal @override */
-  readonly FlagShift: number;
-  /** @internal @override */
-  readonly FlagMask: FastenerFlags;
 }
 
 export interface PositionGesture<O = unknown, V extends View = View> extends Gesture<O, V> {
@@ -276,7 +269,7 @@ export interface PositionGesture<O = unknown, V extends View = View> extends Ges
 }
 
 export const PositionGesture = (function (_super: typeof Gesture) {
-  const PositionGesture: PositionGestureClass = _super.extend();
+  const PositionGesture: PositionGestureFactory = _super.extend("PositionGesture");
 
   PositionGesture.prototype.attachEvents = function (this: PositionGesture, view: View): void {
     Gesture.prototype.attachEvents.call(this, view);
@@ -612,14 +605,14 @@ export const PositionGesture = (function (_super: typeof Gesture) {
     // hook
   };
 
-  PositionGesture.construct = function <G extends PositionGesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
-    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+  PositionGesture.construct = function <G extends PositionGesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct(gestureClass, gesture, owner) as G;
     (gesture as Mutable<typeof gesture>).hoverCount = 0;
     (gesture as Mutable<typeof gesture>).pressCount = 0;
     return gesture;
   };
 
-  PositionGesture.specialize = function (method: GestureMethod): PositionGestureClass | null {
+  PositionGesture.specialize = function (method: GestureMethod): PositionGestureFactory | null {
     if (method === "pointer") {
       return PointerPositionGesture;
     } else if (method === "touch") {
@@ -635,8 +628,8 @@ export const PositionGesture = (function (_super: typeof Gesture) {
     }
   };
 
-  PositionGesture.define = function <O, V extends View>(descriptor: PositionGestureDescriptor<O, V>): PositionGestureClass<PositionGesture<any, V>> {
-    let superClass = descriptor.extends as PositionGestureClass | null | undefined;
+  PositionGesture.define = function <O, V extends View>(className: string, descriptor: PositionGestureDescriptor<O, V>): PositionGestureFactory<PositionGesture<any, V>> {
+    let superClass = descriptor.extends as PositionGestureFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let method = descriptor.method;
@@ -644,6 +637,18 @@ export const PositionGesture = (function (_super: typeof Gesture) {
     delete descriptor.affinity;
     delete descriptor.inherits;
     delete descriptor.method;
+
+    if (descriptor.key === true) {
+      Object.defineProperty(descriptor, "key", {
+        value: className,
+        configurable: true,
+      });
+    } else if (descriptor.key === false) {
+      Object.defineProperty(descriptor, "key", {
+        value: void 0,
+        configurable: true,
+      });
+    }
 
     if (method === void 0) {
       method = "auto";
@@ -655,10 +660,10 @@ export const PositionGesture = (function (_super: typeof Gesture) {
       superClass = this;
     }
 
-    const gestureClass = superClass.extend(descriptor);
+    const gestureClass = superClass.extend(className, descriptor);
 
-    gestureClass.construct = function (gestureClass: {prototype: PositionGesture<any, any>}, gesture: PositionGesture<O, V> | null, owner: O, gestureName: string): PositionGesture<O, V> {
-      gesture = superClass!.construct(gestureClass, gesture, owner, gestureName);
+    gestureClass.construct = function (gestureClass: {prototype: PositionGesture<any, any>}, gesture: PositionGesture<O, V> | null, owner: O): PositionGesture<O, V> {
+      gesture = superClass!.construct(gestureClass, gesture, owner);
       if (affinity !== void 0) {
         gesture.initAffinity(affinity);
       }

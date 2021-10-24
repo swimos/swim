@@ -32,7 +32,7 @@ export class StyleView extends HtmlView implements StyleContext {
   override readonly node!: HTMLStyleElement;
 
   @StyleSheet<StyleView>({
-    eager: true,
+    lazy: false,
     createStylesheet(): CSSStyleSheet {
       return this.owner.node.sheet!;
     },

@@ -13,152 +13,29 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {TraitViewFastener, GenericController} from "@swim/controller";
+import {GenericController, TraitViewRef} from "@swim/controller";
 import {AxisView} from "./AxisView";
 import {AxisTrait} from "./AxisTrait";
-import {TopAxisTrait} from "./TopAxisTrait";
-import {RightAxisTrait} from "./RightAxisTrait";
-import {BottomAxisTrait} from "./BottomAxisTrait";
-import {LeftAxisTrait} from "./LeftAxisTrait";
 import type {AxisControllerObserver} from "./AxisControllerObserver";
-import {TopAxisController} from "../"; // forward import
-import {RightAxisController} from "../"; // forward import
-import {BottomAxisController} from "../"; // forward import
-import {LeftAxisController} from "../"; // forward import
 
-export abstract class AxisController<D> extends GenericController {
+export abstract class AxisController<D = unknown> extends GenericController {
   override readonly observerType?: Class<AxisControllerObserver<D>>;
 
-  protected initAxisTrait(axisTrait: AxisTrait<D>): void {
-    // hook
-  }
-
-  protected attachAxisTrait(axisTrait: AxisTrait<D>): void {
-    // hook
-  }
-
-  protected detachAxisTrait(axisTrait: AxisTrait<D>): void {
-    // hook
-  }
-
-  protected willSetAxisTrait(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetAxisTrait !== void 0) {
-        observer.controllerWillSetAxisTrait(newAxisTrait, oldAxisTrait, this);
-      }
-    }
-  }
-
-  protected onSetAxisTrait(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null): void {
-    if (oldAxisTrait !== null) {
-      this.detachAxisTrait(oldAxisTrait);
-    }
-    if (newAxisTrait !== null) {
-      this.attachAxisTrait(newAxisTrait);
-      this.initAxisTrait(newAxisTrait);
-    }
-  }
-
-  protected didSetAxisTrait(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetAxisTrait !== void 0) {
-        observer.controllerDidSetAxisTrait(newAxisTrait, oldAxisTrait, this);
-      }
-    }
-  }
-
-  protected abstract createAxisView(): AxisView<D> | null;
-
-  protected initAxisView(axisView: AxisView<D>): void {
-    // hook
-  }
-
-  protected attachAxisView(axisView: AxisView<D>): void {
-    // hook
-  }
-
-  protected detachAxisView(axisView: AxisView<D>): void {
-    // hook
-  }
-
-  protected willSetAxisView(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetAxisView !== void 0) {
-        observer.controllerWillSetAxisView(newAxisView, oldAxisView, this);
-      }
-    }
-  }
-
-  protected onSetAxisView(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null): void {
-    if (oldAxisView !== null) {
-      this.detachAxisView(oldAxisView);
-    }
-    if (newAxisView !== null) {
-      this.attachAxisView(newAxisView);
-      this.initAxisView(newAxisView);
-    }
-  }
-
-  protected didSetAxisView(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetAxisView !== void 0) {
-        observer.controllerDidSetAxisView(newAxisView, oldAxisView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static AxisFastener = TraitViewFastener.define<AxisController<unknown>, AxisTrait<unknown>, AxisView<unknown>>({
+  @TraitViewRef<AxisController<D>, AxisTrait<D>, AxisView<D>>({
     traitType: AxisTrait,
-    observesTrait: true,
-    willSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.willSetAxisTrait(newAxisTrait, oldAxisTrait);
+    willAttachTrait(axisTrait: AxisTrait<D>): void {
+      this.owner.callObservers("controllerWillAttachAxisTrait", axisTrait, this.owner);
     },
-    onSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.onSetAxisTrait(newAxisTrait, oldAxisTrait);
-    },
-    didSetTrait(newAxisTrait: AxisTrait<unknown> | null, oldAxisTrait: AxisTrait<unknown> | null): void {
-      this.owner.didSetAxisTrait(newAxisTrait, oldAxisTrait);
+    didDetachTrait(axisTrait: AxisTrait<D>): void {
+      this.owner.callObservers("controllerDidDetachAxisTrait", axisTrait, this.owner);
     },
     viewType: AxisView,
-    willSetView(newAxisView: AxisView<unknown> | null, oldAxisView: AxisView<unknown> | null): void {
-      this.owner.willSetAxisView(newAxisView, oldAxisView);
+    willAttachView(axisView: AxisView<D>): void {
+      this.owner.callObservers("controllerWillAttachAxisView", axisView, this.owner);
     },
-    onSetView(newAxisView: AxisView<unknown> | null, oldAxisView: AxisView<unknown> | null): void {
-      this.owner.onSetAxisView(newAxisView, oldAxisView);
+    didDetachView(axisView: AxisView<D>): void {
+      this.owner.callObservers("controllerDidDetachAxisView", axisView, this.owner);
     },
-    didSetView(newAxisView: AxisView<unknown> | null, oldAxisView: AxisView<unknown> | null): void {
-      this.owner.didSetAxisView(newAxisView, oldAxisView);
-    },
-    createView(): AxisView<unknown> | null {
-      return this.owner.createAxisView();
-    },
-  });
-
-  @TraitViewFastener<AxisController<D>, AxisTrait<D>, AxisView<D>>({
-    extends: AxisController.AxisFastener,
   })
-  readonly axis!: TraitViewFastener<this, AxisTrait<D>, AxisView<D>>;
-
-  protected createAxis<D>(axisTrait: AxisTrait<D>): AxisController<D> | null {
-    if (axisTrait instanceof TopAxisTrait) {
-      return new TopAxisController<D>();
-    } else if (axisTrait instanceof RightAxisTrait) {
-      return new RightAxisController<D>();
-    } else if (axisTrait instanceof BottomAxisTrait) {
-      return new BottomAxisController<D>();
-    } else if (axisTrait instanceof LeftAxisTrait) {
-      return new LeftAxisController<D>();
-    } else {
-      return null;
-    }
-  }
+  readonly axis!: TraitViewRef<this, AxisTrait<D>, AxisView<D>>;
 }

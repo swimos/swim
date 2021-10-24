@@ -18,7 +18,7 @@ import type {Look} from "@swim/theme";
 import type {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
 import type {LinePlotTrait} from "./LinePlotTrait";
 
-export interface LinePlotTraitObserver<X, Y, R extends LinePlotTrait<X, Y> = LinePlotTrait<X, Y>> extends SeriesPlotTraitObserver<X, Y, R> {
+export interface LinePlotTraitObserver<X = unknown, Y = unknown, R extends LinePlotTrait<X, Y> = LinePlotTrait<X, Y>> extends SeriesPlotTraitObserver<X, Y, R> {
   traitWillSetPlotStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
 
   traitDidSetPlotStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;

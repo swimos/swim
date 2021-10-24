@@ -15,8 +15,8 @@
 import type {CellTraitObserver} from "./CellTraitObserver";
 import type {TextCellContent, TextCellTrait} from "./TextCellTrait";
 
-export interface TextCellTraitObserver<R extends TextCellTrait = TextCellTrait> extends CellTraitObserver<R> {
-  traitWillSetContent?(newContent: TextCellContent | null, oldContent: TextCellContent | null, trait: R): void;
+export interface TextCellTraitObserver<T extends TextCellTrait = TextCellTrait> extends CellTraitObserver<T> {
+  traitWillSetContent?(newContent: TextCellContent | null, oldContent: TextCellContent | null, trait: T): void;
 
-  traitDidSetContent?(newContent: TextCellContent | null, oldContent: TextCellContent | null, trait: R): void;
+  traitDidSetContent?(newContent: TextCellContent | null, oldContent: TextCellContent | null, trait: T): void;
 }

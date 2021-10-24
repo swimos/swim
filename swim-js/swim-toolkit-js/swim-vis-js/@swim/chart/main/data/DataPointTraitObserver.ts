@@ -18,7 +18,7 @@ import type {Look} from "@swim/theme";
 import type {TraitObserver} from "@swim/model";
 import type {DataPointLabel, DataPointTrait} from "./DataPointTrait";
 
-export interface DataPointTraitObserver<X, Y, R extends DataPointTrait<X, Y> = DataPointTrait<X, Y>> extends TraitObserver<R> {
+export interface DataPointTraitObserver<X = unknown, Y = unknown, R extends DataPointTrait<X, Y> = DataPointTrait<X, Y>> extends TraitObserver<R> {
   traitWillSetDataPointX?(newX: X, oldX: X, trait: R): void;
 
   traitDidSetDataPointX?(newX: X, oldX: X, trait: R): void;

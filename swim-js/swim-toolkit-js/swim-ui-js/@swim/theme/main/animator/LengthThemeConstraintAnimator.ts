@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyLength, Length} from "@swim/math";
-import {ThemeConstraintAnimatorClass, ThemeConstraintAnimator} from "./ThemeConstraintAnimator";
+import {ThemeConstraintAnimatorFactory, ThemeConstraintAnimator} from "./ThemeConstraintAnimator";
 
 /** @internal */
 export const LengthThemeConstraintAnimator = (function (_super: typeof ThemeConstraintAnimator) {
-  const LengthThemeConstraintAnimator = _super.extend() as ThemeConstraintAnimatorClass<ThemeConstraintAnimator<any, Length | null | undefined, AnyLength | null | undefined>>;
+  const LengthThemeConstraintAnimator = _super.extend("LengthThemeConstraintAnimator") as ThemeConstraintAnimatorFactory<ThemeConstraintAnimator<any, Length | null | undefined, AnyLength | null | undefined>>;
 
   LengthThemeConstraintAnimator.prototype.toNumber = function (value: Length | null | undefined): number {
     try {

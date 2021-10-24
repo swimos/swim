@@ -14,5 +14,17 @@
 
 import type {Observable} from "./Observable";
 
+export type ObserverMethods<O> =
+  {[K in keyof O as O[K] extends ((...args: any) => any) | undefined ? K : never]: O[K]};
+
+export type ObserverMethod<O, K extends keyof ObserverMethods<O>> =
+  ObserverMethods<O>[K] extends ((...args: any) => any) | undefined ? ObserverMethods<O>[K] : never;
+
+export type ObserverParameters<O, K extends keyof ObserverMethods<O>> =
+  ObserverMethods<O>[K] extends ((...args: infer P) => any) | undefined ? P : never;
+
+export type ObserverReturnType<O, K extends keyof ObserverMethods<O>> =
+  ObserverMethods<O>[K] extends ((...args: any) => infer R) | undefined ? R : never;
+
 export interface Observer<O extends Observable = Observable> {
 }

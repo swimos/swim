@@ -17,7 +17,7 @@ import type {Color} from "@swim/style";
 import type {SeriesPlotViewObserver} from "./SeriesPlotViewObserver";
 import type {LinePlotView} from "./LinePlotView";
 
-export interface LinePlotViewObserver<X, Y, V extends LinePlotView<X, Y> = LinePlotView<X, Y>> extends SeriesPlotViewObserver<X, Y, V> {
+export interface LinePlotViewObserver<X = unknown, Y = unknown, V extends LinePlotView<X, Y> = LinePlotView<X, Y>> extends SeriesPlotViewObserver<X, Y, V> {
   viewWillSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;
 
   viewDidSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;

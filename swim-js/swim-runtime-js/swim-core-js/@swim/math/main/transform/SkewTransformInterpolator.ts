@@ -39,6 +39,7 @@ export const SkewTransformInterpolator = (function (_super: typeof Interpolator)
   };
 
   SkewTransformInterpolator.prototype = Object.create(_super.prototype);
+  SkewTransformInterpolator.prototype.constructor = SkewTransformInterpolator;
 
   return SkewTransformInterpolator;
 })(Interpolator);

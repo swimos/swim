@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
-import {Affinity, AnimatorClass, Animator} from "@swim/fastener"
+import {Affinity, AnimatorFactory, Animator} from "@swim/fastener"
 import type {View} from "@swim/view";
 import {ScaledView} from "../"; // forward import
 
-export interface ContinuousScaleAnimator<V extends View = View, X = unknown, Y = unknown> extends Animator<V, ContinuousScale<X, Y> | null, string> {
+export interface ContinuousScaleAnimator<O extends View = View, X = unknown, Y = unknown, T extends ContinuousScale<X, Y> | null | undefined = ContinuousScale<X, Y> | null, U extends string = string> extends Animator<O, T, U> {
   setScale(domain: Domain<X> | string, range: Range<Y>, timing?: AnyTiming | boolean | null): void;
   setScale(xMin: X, xMax: X, yMin: Y, yMax: Y, timing?: AnyTiming | boolean | null): void;
 
@@ -37,11 +37,11 @@ export interface ContinuousScaleAnimator<V extends View = View, X = unknown, Y =
   setBaseRange(yMin: Y, yMax: Y, timing?: AnyTiming | boolean | null): void;
 
   /** @override */
-  fromAny(value: ContinuousScale<X, Y> | string | null): ContinuousScale<X, Y> | null;
+  fromAny(value: T | U): T;
 }
 
 export const ContinuousScaleAnimator = (function (_super: typeof Animator) {
-  const ContinuousScaleAnimator = _super.extend() as AnimatorClass<ContinuousScaleAnimator<any, any, any>>;
+  const ContinuousScaleAnimator = _super.extend("ContinuousScaleAnimator") as AnimatorFactory<ContinuousScaleAnimator<any, any, any, any, any>>;
 
   ContinuousScaleAnimator.prototype.setScale = function <X, Y>(this: ContinuousScaleAnimator<View, X, Y>, xMin?: Domain<X> | X | string, xMax?: Range<Y> | X,
                                                                yMin?: Y | AnyTiming | boolean | null, yMax?: Y, timing?: AnyTiming | boolean | null): void {
@@ -59,7 +59,7 @@ export const ContinuousScaleAnimator = (function (_super: typeof Animator) {
     }
     const oldState = this.state;
     let newState: ContinuousScale<X, Y>;
-    if (oldState !== null) {
+    if (oldState !== void 0 && oldState !== null) {
       newState = oldState.withDomain(xMin as X, xMax as X);
       if (yMin !== void 0 && yMax !== void 0) {
         newState = newState.overRange(yMin as Y, yMax);
@@ -87,7 +87,7 @@ export const ContinuousScaleAnimator = (function (_super: typeof Animator) {
     }
     const oldState = this.state;
     let newState: ContinuousScale<X, Y>;
-    if (oldState !== null) {
+    if (oldState !== void 0 && oldState !== null) {
       newState = oldState.withDomain(xMin as X, xMax as X);
       if ((timing === void 0 || timing === null || timing === false) && (this.flags & Animator.TweeningFlag) !== 0) {
         const oldValue = this.getValue();
@@ -103,7 +103,7 @@ export const ContinuousScaleAnimator = (function (_super: typeof Animator) {
 
   ContinuousScaleAnimator.prototype.setRange = function <X, Y>(this: ContinuousScaleAnimator<View, X, Y>, yMin?: Range<Y> | Y, yMax?: Y | AnyTiming | boolean | null, timing?: AnyTiming | boolean | null): void {
     const oldState = this.state;
-    if (oldState !== null) {
+    if (oldState !== void 0 && oldState !== null) {
       if (yMin instanceof Range) {
         timing = yMax as AnyTiming | boolean | null;
         yMax = (yMin as Range<Y>)[1];

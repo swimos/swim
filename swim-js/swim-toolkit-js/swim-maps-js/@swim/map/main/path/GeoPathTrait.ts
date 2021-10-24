@@ -26,39 +26,14 @@ export abstract class GeoPathTrait extends GeoTrait {
     return geoPath !== null ? geoPath.bounds : GeoBox.undefined();
   }
 
-  protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetGeoPath !== void 0) {
-        traitObserver.traitWillSetGeoPath(newGeoPath, oldGeoPath, this);
-      }
-    }
-  }
-
-  protected onSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    // hook
-  }
-
-  protected didSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetGeoPath !== void 0) {
-        traitObserver.traitDidSetGeoPath(newGeoPath, oldGeoPath, this);
-      }
-    }
-  }
-
   @Property<GeoPathTrait, GeoPath | null, AnyGeoPath | null>({
     type: GeoPath,
     state: null,
     willSetState(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-      this.owner.willSetGeoPath(newGeoPath, oldGeoPath);
+      this.owner.callObservers("traitWillSetGeoPath", newGeoPath, oldGeoPath, this.owner);
     },
     didSetState(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-      this.owner.onSetGeoPath(newGeoPath, oldGeoPath);
-      this.owner.didSetGeoPath(newGeoPath, oldGeoPath);
+      this.owner.callObservers("traitDidSetGeoPath", newGeoPath, oldGeoPath, this.owner);
     },
   })
   readonly geoPath!: Property<this, GeoPath | null, AnyGeoPath | null>;

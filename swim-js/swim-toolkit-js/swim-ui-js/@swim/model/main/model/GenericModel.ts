@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
-import {ModelContextType, ModelFlags, AnyModel, Model} from "./Model";
+import {ModelContextType, ModelFlags, AnyModel, ModelFactory, Model} from "./Model";
 
 export class GenericModel extends Model {
   constructor() {
@@ -109,6 +109,19 @@ export class GenericModel extends Model {
     }
   }
 
+  /** @internal */
+  protected replaceChildMap(newChild: Model, oldChild: Model): void {
+    const key = oldChild.key;
+    if (key !== void 0) {
+      let childMap = this.childMap as MutableDictionary<Model>;
+      if (childMap === null) {
+        childMap = {};
+        (this as Mutable<this>).childMap = childMap;
+      }
+      childMap[key] = newChild;
+    }
+  }
+
   override getChild<M extends Model>(key: string, childBound: Class<M>): M | null;
   override getChild(key: string, childBound?: Class<Model>): Model | null;
   override getChild(key: string, childBound?: Class<Model>): Model | null {
@@ -122,56 +135,71 @@ export class GenericModel extends Model {
     return null;
   }
 
-  override setChild<M extends Model>(key: string, newChild: AnyModel<M> | null): Model | null;
+  override setChild<M extends Model>(key: string, newChild: M | ModelFactory<M> | null): Model | null;
   override setChild(key: string, newChild: AnyModel | null): Model | null;
   override setChild(key: string, newChild: AnyModel | null): Model | null {
     if (newChild !== null) {
       newChild = Model.fromAny(newChild);
     }
-
-    let target: Model | null = null;
-    const children = this.children as Model[];
-    if (newChild !== null) {
-      if (newChild.parent === this) {
-        target = children[children.indexOf(newChild) + 1] || null;
-      }
-      newChild.remove();
-    }
-
-    let index = -1;
     const oldChild = this.getChild(key);
-    if (oldChild !== null) {
+    const children = this.children as Model[];
+    let index = -1;
+    let target: Model | null = null;
+
+    if (oldChild !== null && newChild !== null && oldChild !== newChild) { // replace
+      newChild.remove();
       index = children.indexOf(oldChild);
       // assert(index >= 0);
-      target = children[index + 1] || null;
+      target = index + 1 < children.length ? children[index + 1]! : null;
+      newChild.setKey(oldChild.key);
       this.willRemoveChild(oldChild);
-      oldChild.setParent(null, this);
-      this.removeChildMap(oldChild);
-      children.splice(index, 1);
-      this.onRemoveChild(oldChild);
-      this.didRemoveChild(oldChild);
-      oldChild.setKey(void 0);
-    }
-
-    if (newChild !== null) {
-      newChild.setKey(key);
       this.willInsertChild(newChild, target);
-      if (index >= 0) {
-        children.splice(index, 0, newChild);
-      } else {
-        children.push(newChild);
-      }
-      this.insertChildMap(newChild);
-      newChild.setParent(this, null);
+      oldChild.detachParent(this);
+      children[index] = newChild;
+      this.replaceChildMap(newChild, oldChild);
+      newChild.attachParent(this);
+      this.onRemoveChild(oldChild);
       this.onInsertChild(newChild, target);
+      this.didRemoveChild(oldChild);
       this.didInsertChild(newChild, target);
+      oldChild.setKey(void 0);
       newChild.cascadeInsert();
+    } else if (newChild !== oldChild || newChild !== null && newChild.key !== key) {
+      if (oldChild !== null) { // remove
+        this.willRemoveChild(oldChild);
+        oldChild.detachParent(this);
+        this.removeChildMap(oldChild);
+        index = children.indexOf(oldChild);
+        // assert(index >= 0);
+        children.splice(index, 1);
+        this.onRemoveChild(oldChild);
+        this.didRemoveChild(oldChild);
+        oldChild.setKey(void 0);
+        if (index < children.length) {
+          target = children[index]!;
+        }
+      }
+      if (newChild !== null) { // insert
+        newChild.remove();
+        newChild.setKey(key);
+        this.willInsertChild(newChild, target);
+        if (index >= 0) {
+          children.splice(index, 0, newChild);
+        } else {
+          children.push(newChild);
+        }
+        this.insertChildMap(newChild);
+        newChild.attachParent(this);
+        this.onInsertChild(newChild, target);
+        this.didInsertChild(newChild, target);
+        newChild.cascadeInsert();
+      }
     }
 
     return oldChild;
   }
 
-  override appendChild<M extends Model>(child: AnyModel<M>, key?: string): M;
+  override appendChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
   override appendChild(child: AnyModel, key?: string): Model;
   override appendChild(child: AnyModel, key?: string): Model {
     child = Model.fromAny(child);
@@ -185,7 +213,7 @@ export class GenericModel extends Model {
     this.willInsertChild(child, null);
     (this.children as Model[]).push(child);
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, null);
     this.didInsertChild(child, null);
     child.cascadeInsert();
@@ -193,7 +221,7 @@ export class GenericModel extends Model {
     return child;
   }
 
-  override prependChild<M extends Model>(child: AnyModel<M>, key?: string): M;
+  override prependChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
   override prependChild(child: AnyModel, key?: string): Model;
   override prependChild(child: AnyModel, key?: string): Model {
     child = Model.fromAny(child);
@@ -209,7 +237,7 @@ export class GenericModel extends Model {
     this.willInsertChild(child, target);
     children.unshift(child);
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
@@ -217,7 +245,7 @@ export class GenericModel extends Model {
     return child;
   }
 
-  override insertChild<M extends Model>(child: AnyModel<M>, target: Model | null, key?: string): M;
+  override insertChild<M extends Model>(child: M | ModelFactory<M>, target: Model | null, key?: string): M;
   override insertChild(child: AnyModel, target: Model | null, key?: string): Model;
   override insertChild(child: AnyModel, target: Model | null, key?: string): Model {
     if (target !== null && target.parent !== this) {
@@ -241,7 +269,7 @@ export class GenericModel extends Model {
       children.push(child);
     }
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
@@ -249,9 +277,41 @@ export class GenericModel extends Model {
     return child;
   }
 
+  override replaceChild<M extends Model>(newChild: Model, oldChild: M): M;
+  override replaceChild<M extends Model>(newChild: AnyModel, oldChild: M): M;
+  override replaceChild(newChild: AnyModel, oldChild: Model): Model {
+    const children = this.children as Model[];
+    if (oldChild.parent !== this) {
+      throw new TypeError("" + oldChild);
+    }
+
+    newChild = Model.fromAny(newChild);
+    if (newChild !== oldChild) {
+      newChild.remove();
+      const index = children.indexOf(oldChild);
+      // assert(index >= 0);
+      const target = index + 1 < children.length ? children[index + 1]! : null;
+      newChild.setKey(oldChild.key);
+      this.willRemoveChild(oldChild);
+      this.willInsertChild(newChild, target);
+      oldChild.detachParent(this);
+      children[index] = newChild;
+      this.replaceChildMap(newChild, oldChild);
+      newChild.attachParent(this);
+      this.onRemoveChild(oldChild);
+      this.onInsertChild(newChild, target);
+      this.didRemoveChild(oldChild);
+      this.didInsertChild(newChild, target);
+      oldChild.setKey(void 0);
+      newChild.cascadeInsert();
+    }
+
+    return oldChild;
+  }
+
   override removeChild(key: string): Model | null;
-  override removeChild(child: Model): void;
-  override removeChild(key: string | Model): Model | null | void {
+  override removeChild<M extends Model>(child: M): M;
+  override removeChild(key: string | Model): Model | null {
     let child: Model | null;
     if (typeof key === "string") {
       child = this.getChild(key);
@@ -260,26 +320,23 @@ export class GenericModel extends Model {
       }
     } else {
       child = key;
-    }
-    if (child.parent !== this) {
-      throw new Error("not a child model");
+      if (child.parent !== this) {
+        throw new Error("not a child model");
+      }
     }
 
     this.willRemoveChild(child);
-    child.setParent(null, this);
+    child.detachParent(this);
     this.removeChildMap(child);
     const children = this.children as Model[];
     const index = children.indexOf(child);
-    if (index >= 0) {
-      children.splice(index, 1);
-    }
+    // assert(index >= 0);
+    children.splice(index, 1);
     this.onRemoveChild(child);
     this.didRemoveChild(child);
     child.setKey(void 0);
 
-    if (typeof key === "string") {
-      return child;
-    }
+    return child;
   }
 
   override removeChildren(): void {
@@ -288,7 +345,7 @@ export class GenericModel extends Model {
     while (childCount = children.length, childCount !== 0) {
       const child = children[childCount - 1]!;
       this.willRemoveChild(child);
-      child.setParent(null, this);
+      child.detachParent(this);
       this.removeChildMap(child);
       children.pop();
       this.onRemoveChild(child);

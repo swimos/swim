@@ -39,6 +39,7 @@ export const GeoSegmentInterpolator = (function (_super: typeof Interpolator) {
   };
 
   GeoSegmentInterpolator.prototype = Object.create(_super.prototype);
+  GeoSegmentInterpolator.prototype.constructor = GeoSegmentInterpolator;
 
   return GeoSegmentInterpolator;
 })(Interpolator);

@@ -44,6 +44,7 @@ export const Scale = (function (_super: typeof Mapping) {
   };
 
   Scale.prototype = Object.create(_super.prototype);
+  Scale.prototype.constructor = Scale;
 
   Scale.prototype.canEqual = function (that: unknown): boolean {
     return that instanceof Scale;

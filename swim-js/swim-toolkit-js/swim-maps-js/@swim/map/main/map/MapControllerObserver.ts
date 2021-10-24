@@ -15,7 +15,7 @@
 import type {GeoBox} from "@swim/geo";
 import type {HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
-import type {ControllerObserver, ControllerFastener} from "@swim/controller";
+import type {ControllerObserver} from "@swim/controller";
 import type {GeoViewport} from "../geo/GeoViewport";
 import type {GeoView} from "../geo/GeoView";
 import type {GeoTrait} from "../geo/GeoTrait";
@@ -25,39 +25,39 @@ import type {MapTrait} from "./MapTrait";
 import type {MapController} from "./MapController";
 
 export interface MapControllerObserver<C extends MapController = MapController> extends ControllerObserver<C> {
-  controllerWillSetMapTrait?(newMapTrait: MapTrait | null, oldMapTrait: MapTrait | null, controller: C): void;
+  controllerWillAttachMapTrait?(mapTrait: MapTrait, controller: C): void;
 
-  controllerDidSetMapTrait?(newMapTrait: MapTrait | null, oldMapTrait: MapTrait | null, controller: C): void;
+  controllerDidDetachMapTrait?(mapTrait: MapTrait, controller: C): void;
 
-  controllerWillSetMapView?(newMapView: MapView | null, oldMapView: MapView | null, controller: C): void;
+  controllerWillAttachMapView?(mapView: MapView, controller: C): void;
 
-  controllerDidSetMapView?(newMapView: MapView | null, oldMapView: MapView | null, controller: C): void;
+  controllerDidDetachMapView?(mapView: MapView, controller: C): void;
 
-  controllerWillSetCanvasView?(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null, controller: C): void;
+  controllerWillAttachMapCanvasView?(mapCanvasView: CanvasView, controller: C): void;
 
-  controllerDidSetCanvasView?(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null, controller: C): void;
+  controllerDidDetachMapCanvasView?(mapCanvasView: CanvasView, controller: C): void;
 
-  controllerWillSetContainerView?(newContainerView: HtmlView | null, oldContainerView: HtmlView | null, controller: C): void;
+  controllerWillAttachMapContainerView?(mapContainerView: HtmlView, controller: C): void;
 
-  controllerDidSetContainerView?(newContainerView: HtmlView | null, oldContainerView: HtmlView | null, controller: C): void;
+  controllerDidDetachMapContainerView?(mapContainerView: HtmlView, controller: C): void;
 
   controllerWillSetGeoViewport?(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, controller: C): void;
 
   controllerDidSetGeoViewport?(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, controller: C): void;
 
-  controllerWillSetLayer?(newLayerController: GeoController | null, oldLayerController: GeoController | null, layerFastener: ControllerFastener<C, GeoController>): void;
+  controllerWillAttachLayer?(layerController: GeoController, controller: C): void;
 
-  controllerDidSetLayer(newLayerController: GeoController | null, oldLayerController: GeoController | null, layerFastener: ControllerFastener<C, GeoController>): void;
+  controllerDidDetachLayer(layerController: GeoController, controller: C): void;
 
-  controllerWillSetLayerTrait?(newLayerTrait: GeoTrait | null, oldLayerTrait: GeoTrait | null, layerFastener: ControllerFastener<C, GeoController>): void;
+  controllerWillAttachLayerTrait?(layerTrait: GeoTrait, layerController: GeoController, controller: C): void;
 
-  controllerDidSetLayerTrait?(newLayerTrait: GeoTrait | null, oldLayerTrait: GeoTrait | null, layerFastener: ControllerFastener<C, GeoController>): void;
+  controllerDidDetachLayerTrait?(layerTrait: GeoTrait, layerController: GeoController, controller: C): void;
 
-  controllerWillSetLayerView?(newLayerView: GeoView | null, oldLayerView: GeoView | null, layerFastener: ControllerFastener<C, GeoController>): void;
+  controllerWillAttachLayerView?(layerView: GeoView, layerController: GeoController, controller: C): void;
 
-  controllerDidSetLayerView?(newLayerView: GeoView | null, oldLayerView: GeoView | null, layerFastener: ControllerFastener<C, GeoController>): void;
+  controllerDidDetachLayerView?(layerView: GeoView, layerController: GeoController, controller: C): void;
 
-  controllerWillSetLayerGeoBounds?(newLayerGeoBounds: GeoBox, oldLayerGeoBounds: GeoBox, layerFastener: ControllerFastener<C, GeoController>): void;
+  controllerWillSetLayerGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, layerController: GeoController, controller: C): void;
 
-  controllerDidSetLayerGeoBounds?(newLayerGeoBounds: GeoBox, oldLayerGeoBounds: GeoBox, layerFastener: ControllerFastener<C, GeoController>): void;
+  controllerDidSetLayerGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, layerController: GeoController, controller: C): void;
 }

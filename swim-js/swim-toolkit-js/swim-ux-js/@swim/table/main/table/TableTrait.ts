@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
-import {Model, TraitModelType, Trait, TraitFastener} from "@swim/model";
+import {Model, Trait, TraitRef, TraitSet} from "@swim/model";
 import type {ColLayout} from "../layout/ColLayout";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {RowTrait} from "../row/RowTrait";
@@ -24,24 +24,16 @@ import {HeaderTrait} from "../header/HeaderTrait";
 import type {TableTraitObserver} from "./TableTraitObserver";
 
 export class TableTrait extends Trait {
-  constructor() {
-    super();
-    this.colFasteners = [];
-    this.rowFasteners = [];
-  }
-
   override readonly observerType?: Class<TableTraitObserver>;
 
   protected createLayout(): TableLayout | null {
     const colLayouts: ColLayout[] = [];
-    const colFasteners = this.colFasteners;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colTrait = colFasteners[i]!.trait;
-      if (colTrait !== null) {
-        const colLayout = colTrait.layout.state;
-        if (colLayout !== null) {
-          colLayouts.push(colLayout);
-        }
+    const colTraits = this.cols.traits;
+    for (const traitId in colTraits) {
+      const colTrait = colTraits[traitId]!;
+      const colLayout = colTrait.layout.state;
+      if (colLayout !== null) {
+        colLayouts.push(colLayout);
       }
     }
     const colSpacing = this.colSpacing.state;
@@ -53,544 +45,138 @@ export class TableTrait extends Trait {
     this.layout.setState(layout, Affinity.Intrinsic);
   }
 
-  protected willSetLayout(newLayout: TableLayout | null, oldLayout: TableLayout | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetTableLayout !== void 0) {
-        traitObserver.traitWillSetTableLayout(newLayout, oldLayout, this);
-      }
-    }
-  }
-
-  protected onSetLayout(newLayout: TableLayout | null, oldLayout: TableLayout | null): void {
-    // hook
-  }
-
-  protected didSetLayout(newLayout: TableLayout | null, oldLayout: TableLayout | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetTableLayout !== void 0) {
-        traitObserver.traitDidSetTableLayout(newLayout, oldLayout, this);
-      }
-    }
-  }
-
   @Property<TableTrait, TableLayout | null, AnyTableLayout | null>({
     type: TableLayout,
     state: null,
     willSetState(newLayout: TableLayout | null, oldLayout: TableLayout | null): void {
-      this.owner.willSetLayout(newLayout, oldLayout);
+      this.owner.callObservers("traitWillSetTableLayout", newLayout, oldLayout, this.owner);
     },
     didSetState(newLayout: TableLayout | null, oldLayout: TableLayout | null): void {
-      this.owner.onSetLayout(newLayout, oldLayout);
-      this.owner.didSetLayout(newLayout, oldLayout);
+      this.owner.callObservers("traitDidSetTableLayout", newLayout, oldLayout, this.owner);
     },
   })
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
-
-  protected onSetColSpacing(newColSpacing: Length | null, oldColSpacing: Length | null): void {
-    this.updateLayout();
-  }
 
   @Property<TableTrait, Length | null, AnyLength | null>({
     type: Length,
     state: null,
     didSetState(newColSpacing: Length | null, oldColSpacing: Length | null): void {
-      this.owner.onSetColSpacing(newColSpacing, oldColSpacing);
+      this.owner.updateLayout();
     },
   })
   readonly colSpacing!: Property<this, Length | null, AnyLength | null>;
 
-  protected createHeader(): HeaderTrait | null {
-    return new HeaderTrait();
-  }
-
-  protected initHeader(headerTrait: HeaderTrait): void {
-    // hook
-  }
-
-  protected attachHeader(headerTrait: HeaderTrait): void {
-    // hook
-  }
-
-  protected detachHeader(headerTrait: HeaderTrait): void {
-    // hook
-  }
-
-  protected willSetHeader(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetHeader !== void 0) {
-        traitObserver.traitWillSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetHeader(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
-    if (oldHeaderTrait !== null) {
-      this.detachHeader(oldHeaderTrait);
-    }
-    if (newHeaderTrait !== null) {
-      this.attachHeader(newHeaderTrait);
-      this.initHeader(newHeaderTrait);
-    }
-  }
-
-  protected didSetHeader(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetHeader !== void 0) {
-        traitObserver.traitDidSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait, this);
-      }
-    }
-  }
-
-  @TraitFastener<TableTrait, HeaderTrait>({
+  @TraitRef<TableTrait, HeaderTrait>({
     type: HeaderTrait,
-    sibling: false,
-    willSetTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
-      this.owner.willSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait);
+    binds: true,
+    willAttachTrait(headerTrait: HeaderTrait): void {
+      this.owner.callObservers("traitWillAttachHeader", headerTrait, this.owner);
     },
-    onSetTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
-      this.owner.onSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait);
+    didDetachTrait(headerTrait: HeaderTrait): void {
+      this.owner.callObservers("traitDidDetachHeader", headerTrait, this.owner);
     },
-    didSetTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
-      this.owner.didSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait);
-    },
-    createTrait(): HeaderTrait | null {
-      return this.owner.createHeader();
+    detectTrait(trait: Trait): HeaderTrait | null {
+      return trait instanceof HeaderTrait ? trait : null;
     },
   })
-  readonly header!: TraitFastener<this, HeaderTrait>;
+  readonly header!: TraitRef<this, HeaderTrait>;
+  static readonly header: MemberFastenerClass<TableTrait, "header">;
 
-  insertCol(colTrait: ColTrait, targetTrait: Trait | null = null): void {
-    const colFasteners = this.colFasteners as TraitFastener<this, ColTrait>[];
-    let targetIndex = colFasteners.length;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colFastener = colFasteners[i]!;
-      if (colFastener.trait === colTrait) {
-        return;
-      } else if (colFastener.trait === targetTrait) {
-        targetIndex = i;
-      }
-    }
-    const colFastener = this.createColFastener(colTrait);
-    colFasteners.splice(targetIndex, 0, colFastener);
-    colFastener.setTrait(colTrait, targetTrait);
-    if (this.mounted) {
-      colFastener.mount();
-    }
-  }
-
-  removeCol(colTrait: ColTrait): void {
-    const colFasteners = this.colFasteners as TraitFastener<this, ColTrait>[];
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colFastener = colFasteners[i]!;
-      if (colFastener.trait === colTrait) {
-        colFastener.setTrait(null);
-        if (this.mounted) {
-          colFastener.unmount();
-        }
-        colFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected initCol(colTrait: ColTrait, colFastener: TraitFastener<this, ColTrait>): void {
-    // hook
-  }
-
-  protected attachCol(colTrait: ColTrait, colFastener: TraitFastener<this, ColTrait>): void {
-    if (this.consuming) {
-      colTrait.consume(this);
-    }
-  }
-
-  protected detachCol(colTrait: ColTrait, colFastener: TraitFastener<this, ColTrait>): void {
-    if (this.consuming) {
-      colTrait.unconsume(this);
-    }
-  }
-
-  protected willSetCol(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
-                       targetTrait: Trait | null, colFastener: TraitFastener<this, ColTrait>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetCol !== void 0) {
-        traitObserver.traitWillSetCol(newColTrait, oldColTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetCol(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
-                     targetTrait: Trait | null, colFastener: TraitFastener<this, ColTrait>): void {
-    if (oldColTrait !== null) {
-      this.detachCol(oldColTrait, colFastener);
-    }
-    if (newColTrait !== null) {
-      this.attachCol(newColTrait, colFastener);
-      this.initCol(newColTrait, colFastener);
-    }
-    this.updateLayout();
-  }
-
-  protected didSetCol(newColTrait: ColTrait | null, oldColTrait: ColTrait | null,
-                      targetTrait: Trait | null, colFastener: TraitFastener<this, ColTrait>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetCol !== void 0) {
-        traitObserver.traitDidSetCol(newColTrait, oldColTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetColLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null,
-                           colFastener: TraitFastener<this, ColTrait>): void {
-    this.updateLayout();
-  }
-
-  /** @internal */
-  static ColFastener = TraitFastener.define<TableTrait, ColTrait>({
+  @TraitSet<TableTrait, ColTrait>({
     type: ColTrait,
-    sibling: false,
+    binds: true,
     observes: true,
-    willSetTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null): void {
-      this.owner.willSetCol(newColTrait, oldColTrait, targetTrait, this);
+    willAttachTrait(colTrait: ColTrait, targetTrait: Trait | null): void {
+      this.owner.callObservers("traitWillAttachCol", colTrait, targetTrait, this.owner);
     },
-    onSetTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null): void {
-      this.owner.onSetCol(newColTrait, oldColTrait, targetTrait, this);
+    didAttachTrait(colTrait: ColTrait): void {
+      this.owner.updateLayout();
+      if (this.owner.consuming) {
+        colTrait.consume(this.owner);
+      }
     },
-    didSetTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null): void {
-      this.owner.didSetCol(newColTrait, oldColTrait, targetTrait, this);
+    willDetachTrait(colTrait: ColTrait): void {
+      if (this.owner.consuming) {
+        colTrait.unconsume(this.owner);
+      }
+    },
+    didDetachTrait(colTrait: ColTrait): void {
+      this.owner.updateLayout();
+      this.owner.callObservers("traitDidDetachCol", colTrait, this.owner);
     },
     traitDidSetLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null): void {
-      this.owner.onSetColLayout(newColLayout, oldColLayout, this);
+      this.owner.updateLayout();
     },
-  });
-
-  protected createColFastener(colTrait: ColTrait): TraitFastener<this, ColTrait> {
-    return TableTrait.ColFastener.create(this, colTrait.key ?? "col");
-  }
-
-  /** @internal */
-  readonly colFasteners: ReadonlyArray<TraitFastener<this, ColTrait>>;
-
-  /** @internal */
-  protected mountColFasteners(): void {
-    const colFasteners = this.colFasteners;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colFastener = colFasteners[i]!;
-      colFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountColFasteners(): void {
-    const colFasteners = this.colFasteners;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colFastener = colFasteners[i]!;
-      colFastener.unmount();
-    }
-  }
+    detectModel(model: Model): ColTrait | null {
+      return model.getTrait(ColTrait);
+    },
+  })
+  readonly cols!: TraitSet<this, ColTrait>;
+  static readonly cols: MemberFastenerClass<TableTrait, "cols">;
 
   /** @internal */
   protected startConsumingCols(): void {
-    const colFasteners = this.colFasteners;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colTrait = colFasteners[i]!.trait;
-      if (colTrait !== null) {
-        colTrait.consume(this);
-      }
+    const colTraits = this.cols.traits;
+    for (const traitId in colTraits) {
+      const colTrait = colTraits[traitId]!;
+      colTrait.consume(this);
     }
   }
 
   /** @internal */
   protected stopConsumingCols(): void {
-    const colFasteners = this.colFasteners;
-    for (let i = 0, n = colFasteners.length; i < n; i += 1) {
-      const colTrait = colFasteners[i]!.trait;
-      if (colTrait !== null) {
-        colTrait.unconsume(this);
-      }
+    const colTraits = this.cols.traits;
+    for (const traitId in colTraits) {
+      const colTrait = colTraits[traitId]!;
+      colTrait.unconsume(this);
     }
   }
 
-  insertRow(rowTrait: RowTrait, targetTrait: Trait | null = null): void {
-    const rowFasteners = this.rowFasteners as TraitFastener<this, RowTrait>[];
-    let targetIndex = rowFasteners.length;
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowFastener = rowFasteners[i]!;
-      if (rowFastener.trait === rowTrait) {
-        return;
-      } else if (rowFastener.trait === targetTrait) {
-        targetIndex = i;
-      }
-    }
-    const rowFastener = this.createRowFastener(rowTrait);
-    rowFasteners.splice(targetIndex, 0, rowFastener);
-    rowFastener.setTrait(rowTrait, targetTrait);
-    if (this.mounted) {
-      rowFastener.mount();
-    }
-  }
-
-  removeRow(rowTrait: RowTrait): void {
-    const rowFasteners = this.rowFasteners as TraitFastener<this, RowTrait>[];
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowFastener = rowFasteners[i]!;
-      if (rowFastener.trait === rowTrait) {
-        rowFastener.setTrait(null);
-        if (this.mounted) {
-          rowFastener.unmount();
-        }
-        rowFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected initRow(rowTrait: RowTrait, rowFastener: TraitFastener<this, RowTrait>): void {
-    // hook
-  }
-
-  protected attachRow(rowTrait: RowTrait, rowFastener: TraitFastener<this, RowTrait>): void {
-    if (this.consuming) {
-      rowTrait.consume(this);
-    }
-  }
-
-  protected detachRow(rowTrait: RowTrait, rowFastener: TraitFastener<this, RowTrait>): void {
-    if (this.consuming) {
-      rowTrait.unconsume(this);
-    }
-  }
-
-  protected willSetRow(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null,
-                       targetTrait: Trait | null, rowFastener: TraitFastener<this, RowTrait>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetRow !== void 0) {
-        traitObserver.traitWillSetRow(newRowTrait, oldRowTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetRow(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null,
-                     targetTrait: Trait | null, rowFastener: TraitFastener<this, RowTrait>): void {
-    if (oldRowTrait !== null) {
-      this.detachRow(oldRowTrait, rowFastener);
-    }
-    if (newRowTrait !== null) {
-      this.attachRow(newRowTrait, rowFastener);
-      this.initRow(newRowTrait, rowFastener);
-    }
-  }
-
-  protected didSetRow(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null,
-                      targetTrait: Trait | null, rowFastener: TraitFastener<this, RowTrait>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetRow !== void 0) {
-        traitObserver.traitDidSetRow(newRowTrait, oldRowTrait, targetTrait, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static RowFastener = TraitFastener.define<TableTrait, RowTrait>({
+  @TraitSet<TableTrait, RowTrait>({
     type: RowTrait,
-    sibling: false,
-    willSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null): void {
-      this.owner.willSetRow(newRowTrait, oldRowTrait, targetTrait, this);
+    binds: true,
+    willAttachTrait(rowTrait: RowTrait, targetTrait: Trait | null): void {
+      this.owner.callObservers("traitWillAttachRow", rowTrait, targetTrait, this.owner);
     },
-    onSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null): void {
-      this.owner.onSetRow(newRowTrait, oldRowTrait, targetTrait, this);
+    didAttachTrait(rowTrait: RowTrait): void {
+      if (this.owner.consuming) {
+        rowTrait.consume(this.owner);
+      }
     },
-    didSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null): void {
-      this.owner.didSetRow(newRowTrait, oldRowTrait, targetTrait, this);
+    willDetachTrait(rowTrait: RowTrait): void {
+      if (this.owner.consuming) {
+        rowTrait.unconsume(this.owner);
+      }
     },
-  });
-
-  protected createRowFastener(rowTrait: RowTrait): TraitFastener<this, RowTrait> {
-    return TableTrait.RowFastener.create(this, rowTrait.key ?? "row");
-  }
-
-  /** @internal */
-  readonly rowFasteners: ReadonlyArray<TraitFastener<this, RowTrait>>;
-
-  /** @internal */
-  protected mountRowFasteners(): void {
-    const rowFasteners = this.rowFasteners;
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowFastener = rowFasteners[i]!;
-      rowFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountRowFasteners(): void {
-    const rowFasteners = this.rowFasteners;
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowFastener = rowFasteners[i]!;
-      rowFastener.unmount();
-    }
-  }
+    didDetachTrait(rowTrait: RowTrait): void {
+      this.owner.callObservers("traitDidDetachRow", rowTrait, this.owner);
+    },
+    detectModel(model: Model): RowTrait | null {
+      return model.getTrait(RowTrait);
+    },
+    detectTrait(trait: Trait): RowTrait | null {
+      return null;
+    },
+  })
+  readonly rows!: TraitSet<this, RowTrait>;
+  static readonly rows: MemberFastenerClass<TableTrait, "rows">;
 
   /** @internal */
   protected startConsumingRows(): void {
-    const rowFasteners = this.rowFasteners;
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowTrait = rowFasteners[i]!.trait;
-      if (rowTrait !== null) {
-        rowTrait.consume(this);
-      }
+    const rowTraits = this.rows.traits;
+    for (const traitId in rowTraits) {
+      const rowTrait = rowTraits[traitId]!;
+      rowTrait.consume(this);
     }
   }
 
   /** @internal */
   protected stopConsumingRows(): void {
-    const rowFasteners = this.rowFasteners;
-    for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
-      const rowTrait = rowFasteners[i]!.trait;
-      if (rowTrait !== null) {
-        rowTrait.unconsume(this);
-      }
+    const rowTraits = this.rows.traits;
+    for (const traitId in rowTraits) {
+      const rowTrait = rowTraits[traitId]!;
+      rowTrait.unconsume(this);
     }
-  }
-
-  protected detectColModel(model: Model): ColTrait | null {
-    return model.getTrait(ColTrait);
-  }
-
-  protected detectRowModel(model: Model): RowTrait | null {
-    return model.getTrait(RowTrait);
-  }
-
-  protected detectModels(model: TraitModelType<this>): void {
-    const children = model.children;
-    for (let i = 0, n = children.length; i < n; i += 1) {
-      const child = children[i]!;
-      const colTrait = this.detectColModel(child);
-      if (colTrait !== null) {
-        this.insertCol(colTrait);
-      }
-      const rowTrait = this.detectRowModel(child);
-      if (rowTrait !== null) {
-        this.insertRow(rowTrait);
-      }
-    }
-  }
-
-  protected detectHeaderTrait(trait: Trait): HeaderTrait | null {
-    return trait instanceof HeaderTrait ? trait : null;
-  }
-
-  protected detectColTrait(trait: Trait): ColTrait | null {
-    return trait instanceof ColTrait ? trait : null;
-  }
-
-  protected detectTraits(model: TraitModelType<this>): void {
-    const traits = model.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      const trait = traits[i]!;
-      if (this.header.trait === null) {
-        const headerTrait = this.detectHeaderTrait(trait);
-        if (headerTrait !== null) {
-          this.header.setTrait(headerTrait);
-        }
-      }
-      const colTrait = this.detectColTrait(trait);
-      if (colTrait !== null) {
-        this.insertCol(colTrait);
-      }
-    }
-  }
-
-  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
-    if (newModel !== null) {
-      this.detectTraits(newModel);
-      this.detectModels(newModel);
-    }
-    super.didSetModel(newModel, oldModel);
-  }
-
-  /** @protected */
-  override onInsertChild(child: Model, target: Model | null): void {
-    super.onInsertChild(child, target);
-    const colTrait = this.detectColModel(child);
-    if (colTrait !== null) {
-      const targetTrait = target !== null ? this.detectColModel(target) : null;
-      this.insertCol(colTrait, targetTrait);
-    }
-    const rowTrait = this.detectRowModel(child);
-    if (rowTrait !== null) {
-      const targetTrait = target !== null ? this.detectRowModel(target) : null;
-      this.insertRow(rowTrait, targetTrait);
-    }
-  }
-
-  /** @protected */
-  override onRemoveChild(child: Model): void {
-    super.onRemoveChild(child);
-    const colTrait = this.detectColModel(child);
-    if (colTrait !== null) {
-      this.removeCol(colTrait);
-    }
-    const rowTrait = this.detectRowModel(child);
-    if (rowTrait !== null) {
-      this.removeRow(rowTrait);
-    }
-  }
-
-  /** @protected */
-  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
-    super.onInsertTrait(trait, targetTrait);
-    if (this.header.trait === null) {
-      const headerTrait = this.detectHeaderTrait(trait);
-      if (headerTrait !== null) {
-        this.header.setTrait(headerTrait, targetTrait);
-      }
-    }
-    const colTrait = this.detectColTrait(trait);
-    if (colTrait !== null) {
-      this.insertCol(colTrait, targetTrait);
-    }
-  }
-
-  /** @protected */
-  override onRemoveTrait(trait: Trait): void {
-    super.onRemoveTrait(trait);
-    const headerTrait = this.detectHeaderTrait(trait);
-    if (headerTrait !== null && this.header.trait === headerTrait) {
-      this.header.setTrait(null);
-    }
-    const colTrait = this.detectColTrait(trait);
-    if (colTrait !== null) {
-      this.removeCol(colTrait);
-    }
-  }
-
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountColFasteners();
-    this.mountRowFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountRowFasteners();
-    this.unmountColFasteners();
-    super.unmountFasteners();
   }
 
   protected override onStartConsuming(): void {

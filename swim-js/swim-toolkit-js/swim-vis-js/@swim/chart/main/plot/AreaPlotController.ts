@@ -13,147 +13,35 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/fastener";
 import type {Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
-import {TraitViewFastener, ControllerFastener} from "@swim/controller";
+import {TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import type {DataPointView} from "../data/DataPointView";
+import type {DataPointTrait} from "../data/DataPointTrait";
 import type {DataPointController} from "../data/DataPointController";
+import type {DataSetControllerDataPointExt} from "../data/DataSetController";
 import {DataSetTrait} from "../data/DataSetTrait";
 import {AreaPlotView} from "./AreaPlotView";
 import {AreaPlotTrait} from "./AreaPlotTrait";
 import {SeriesPlotController} from "./SeriesPlotController";
 import type {AreaPlotControllerObserver} from "./AreaPlotControllerObserver";
 
-export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
+export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotController<X, Y> {
   override readonly observerType?: Class<AreaPlotControllerObserver<X, Y>>;
 
   protected detectDataSet(plotTrait: AreaPlotTrait<X, Y>): DataSetTrait<X, Y> | null {
     return plotTrait.getTrait(DataSetTrait);
   }
 
-  protected override attachDataPoint(dataPointController: DataPointController<X, Y>, dataPointFastener: ControllerFastener<this, DataPointController<X, Y>>): void {
-    super.attachDataPoint(dataPointController, dataPointFastener);
-    const dataPointView = dataPointController.dataPoint.view;
-    if (dataPointView !== null && dataPointView.parent === null) {
-      const plotView = this.plot.view;
-      if (plotView !== null) {
-        dataPointController.dataPoint.injectView(plotView);
-      }
-    }
-  }
-
-  protected initPlotTrait(plotTrait: AreaPlotTrait<X, Y>): void {
-    if (this.dataSet.trait === null) {
-      const dataSetTrait = this.detectDataSet(plotTrait);
-      if (dataSetTrait !== null) {
-        this.dataSet.setTrait(dataSetTrait);
-      }
-    }
-  }
-
-  protected attachPlotTrait(plotTrait: AreaPlotTrait<X, Y>): void {
-    const plotView = this.plot.view;
-    if (plotView !== null) {
-      const fill = plotTrait.fill.state;
-      if (fill !== null) {
-        this.setPlotFill(fill);
-      }
-    }
-  }
-
-  protected detachPlotTrait(plotTrait: AreaPlotTrait<X, Y>): void {
-    // hook
-  }
-
-  protected willSetPlotTrait(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetPlotTrait !== void 0) {
-        observer.controllerWillSetPlotTrait(newPlotTrait, oldPlotTrait, this);
-      }
-    }
-  }
-
-  protected onSetPlotTrait(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null): void {
-    if (oldPlotTrait !== null) {
-      this.detachPlotTrait(oldPlotTrait);
-    }
-    if (newPlotTrait !== null) {
-      this.attachPlotTrait(newPlotTrait);
-      this.initPlotTrait(newPlotTrait);
-    }
-  }
-
-  protected didSetPlotTrait(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetPlotTrait !== void 0) {
-        observer.controllerDidSetPlotTrait(newPlotTrait, oldPlotTrait, this);
-      }
-    }
-  }
-
-  protected createPlotView(): AreaPlotView<X, Y> {
-    return new AreaPlotView<X, Y>();
-  }
-
-  protected initPlotView(plotView: AreaPlotView<X, Y>): void {
-    // hook
-  }
-
-  protected attachPlotView(plotView: AreaPlotView<X, Y>): void {
-    const plotTrait = this.plot.trait;
-    if (plotTrait !== null) {
-      const fill = plotTrait.fill.state;
-      if (fill !== null) {
-        this.setPlotFill(fill);
-      }
-    }
-
-    const dataPointFasteners = this.dataPointFasteners;
-    for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
-      const dataPointController = dataPointFasteners[i]!.controller;
-      if (dataPointController !== null) {
-        dataPointController.dataPoint.injectView(plotView);
-      }
-    }
-  }
-
-  protected detachPlotView(plotView: AreaPlotView<X, Y>): void {
-    // hook
-  }
-
-  protected willSetPlotView(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetPlotView !== void 0) {
-        observer.controllerWillSetPlotView(newPlotView, oldPlotView, this);
-      }
-    }
-  }
-
-  protected onSetPlotView(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null): void {
-    if (oldPlotView !== null) {
-      this.detachPlotView(oldPlotView);
-    }
-    if (newPlotView !== null) {
-      this.attachPlotView(newPlotView);
-      this.initPlotView(newPlotView);
-    }
-  }
-
-  protected didSetPlotView(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetPlotView !== void 0) {
-        observer.controllerDidSetPlotView(newPlotView, oldPlotView, this);
-      }
-    }
-  }
+  @TraitViewControllerSet<AreaPlotController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>, DataSetControllerDataPointExt<X, Y>>({
+    extends: true,
+    get parentView(): AreaPlotView<X, Y> | null {
+      return this.owner.plot.view;
+    },
+  })
+  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>>;
+  static override readonly dataPoints: MemberFastenerClass<AreaPlotController, "dataPoints">;
 
   protected setPlotFill(fill: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
@@ -198,47 +86,63 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
     }
   }
 
-  /** @internal */
-  static PlotFastener = TraitViewFastener.define<AreaPlotController<unknown, unknown>, AreaPlotTrait<unknown, unknown>, AreaPlotView<unknown, unknown>>({
+  @TraitViewRef<AreaPlotController<X, Y>, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>({
     traitType: AreaPlotTrait,
     observesTrait: true,
-    willSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
-      this.owner.willSetPlotTrait(newPlotTrait, oldPlotTrait);
+    willAttachTrait(plotTrait: AreaPlotTrait<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotTrait", plotTrait, this.owner);
     },
-    onSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
-      this.owner.onSetPlotTrait(newPlotTrait, oldPlotTrait);
+    didAttachTrait(plotTrait: AreaPlotTrait<X, Y>): void {
+      const plotView = this.view;
+      if (plotView !== null) {
+        const fill = plotTrait.fill.state;
+        if (fill !== null) {
+          this.owner.setPlotFill(fill);
+        }
+      }
+      if (this.owner.dataSet.trait === null) {
+        const dataSetTrait = this.owner.detectDataSet(plotTrait);
+        if (dataSetTrait !== null) {
+          this.owner.dataSet.setTrait(dataSetTrait);
+        }
+      }
     },
-    didSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
-      this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
+    didDetachTrait(plotTrait: AreaPlotTrait<X, Y>): void {
+      this.owner.callObservers("controllerDidDetachPlotTrait", plotTrait, this.owner);
     },
     traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
       this.owner.setPlotFill(newFill);
     },
     viewType: AreaPlotView,
     observesView: true,
-    willSetView(newPlotView: AreaPlotView<unknown, unknown> | null, oldPlotView: AreaPlotView<unknown, unknown> | null): void {
-      this.owner.willSetPlotView(newPlotView, oldPlotView);
+    willAttachView(plotVIew: AreaPlotView<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotView", plotVIew, this.owner);
     },
-    onSetView(newPlotView: AreaPlotView<unknown, unknown> | null, oldPlotView: AreaPlotView<unknown, unknown> | null): void {
-      this.owner.onSetPlotView(newPlotView, oldPlotView);
+    didAttachView(plotView: AreaPlotView<X, Y>): void {
+      const plotTrait = this.trait;
+      if (plotTrait !== null) {
+        const fill = plotTrait.fill.state;
+        if (fill !== null) {
+          this.owner.setPlotFill(fill);
+        }
+      }
+      const dataPointControllers = this.owner.dataPoints.controllers;
+      for (const controllerId in dataPointControllers) {
+        const dataPointController = dataPointControllers[controllerId]!;
+        dataPointController.dataPoint.insertView(plotView);
+      }
     },
-    didSetView(newPlotView: AreaPlotView<unknown, unknown> | null, oldPlotView: AreaPlotView<unknown, unknown> | null): void {
-      this.owner.didSetPlotView(newPlotView, oldPlotView);
+    didDetachView(plotVIew: AreaPlotView<X, Y>): void {
+      this.owner.callObservers("controllerDidDetachPlotView", plotVIew, this.owner);
     },
-    viewWillSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<unknown, unknown>): void {
+    viewWillSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
       this.owner.willSetPlotFill(newFill, oldFill, plotView);
     },
-    viewDidSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<unknown, unknown>): void {
+    viewDidSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
       this.owner.onSetPlotFill(newFill, oldFill, plotView);
       this.owner.didSetPlotFill(newFill, oldFill, plotView);
     },
-    createView(): AreaPlotView<unknown, unknown> | null {
-      return this.owner.createPlotView();
-    },
-  });
-
-  @TraitViewFastener<AreaPlotController<X, Y>, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>({
-    extends: AreaPlotController.PlotFastener,
   })
-  readonly plot!: TraitViewFastener<this, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>;
+  readonly plot!: TraitViewRef<this, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>;
+  static readonly plot: MemberFastenerClass<AreaPlotController, "plot">;
 }

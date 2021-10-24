@@ -15,7 +15,7 @@
 import type {Timing} from "@swim/util";
 import {Affinity, Property} from "@swim/fastener";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewEdgeInsets, ViewFastener} from "@swim/view";
+import {ViewEdgeInsets, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 
 export class DeckCard extends HtmlView {
@@ -45,15 +45,15 @@ export class DeckCard extends HtmlView {
   @Property({type: String})
   readonly cardTitle!: Property<this, string | undefined>;
 
-  @ViewFastener({type: HtmlView, child: false})
-  readonly backItem!: ViewFastener<this, HtmlView>;
+  @ViewRef({type: HtmlView})
+  readonly backItem!: ViewRef<this, HtmlView>;
 
-  @ViewFastener({type: HtmlView, child: false})
-  readonly titleView!: ViewFastener<this, HtmlView>;
+  @ViewRef({type: HtmlView})
+  readonly titleView!: ViewRef<this, HtmlView>;
 
-  @ViewFastener({type: HtmlView, child: false})
-  readonly leftItem!: ViewFastener<this, HtmlView>;
+  @ViewRef({type: HtmlView})
+  readonly leftItem!: ViewRef<this, HtmlView>;
 
-  @ViewFastener({type: HtmlView, child: false})
-  readonly rightItem!: ViewFastener<this, HtmlView>;
+  @ViewRef({type: HtmlView})
+  readonly rightItem!: ViewRef<this, HtmlView>;
 }

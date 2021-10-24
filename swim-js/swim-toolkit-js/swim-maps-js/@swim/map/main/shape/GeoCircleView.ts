@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, Property, Animator} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, R2Circle, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
@@ -57,58 +57,31 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
 
   override readonly observerType?: Class<GeoCircleViewObserver>;
 
-  protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoCenter !== void 0) {
-        observer.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-      }
-    }
-  }
-
-  protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    this.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
-    if (this.mounted) {
-      this.projectCircle(this.viewContext as ViewContextType<this>);
-    }
-  }
-
-  protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGeoCenter !== void 0) {
-        observer.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<GeoCircleView, GeoPoint | null, AnyGeoPoint | null>({
+  @Animator<GeoCircleView, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
-    didSetState(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
+    didSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
       this.owner.projectGeoCenter(newGeoCenter);
     },
     willSetValue(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.willSetGeoCenter(newGeoCenter, oldGeoCenter);
+      this.owner.callObservers("viewWillSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
     },
     didSetValue(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.onSetGeoCenter(newGeoCenter, oldGeoCenter);
-      this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
+      this.owner.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
+      if (this.mounted) {
+        this.owner.projectCircle(this.owner.viewContext);
+      }
+      this.owner.callObservers("viewDidSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
     },
   })
-  readonly geoCenter!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: Animator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ThemeAnimator<GeoCircleView, R2Point | null, AnyR2Point | null>({
+  @Animator<GeoCircleView, R2Point | null, AnyR2Point | null>({
     type: R2Point,
     state: R2Point.undefined(),
     updateFlags: View.NeedsRender,
-    didSetValue(newViewCenter: R2Point | null, oldViewCenter: R2Point | null): void {
-      this.owner.updateViewBounds();
-    },
   })
-  readonly viewCenter!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
+  readonly viewCenter!: Animator<this, R2Point | null, AnyR2Point | null>;
 
   @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
   readonly radius!: ThemeAnimator<this, Length, AnyLength>;
@@ -142,14 +115,14 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   }
 
   protected projectCircle(viewContext: ViewContextType<this>): void {
-    if (this.viewCenter.hasAffinity(Affinity.Intrinsic)) {
+    if (Affinity.Intrinsic >= this.viewCenter.affinity) { // this.viewCenter.hasAffinity(Affinity.Intrinsic)
       const geoCenter = this.geoCenter.value;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
                        : null;
-      this.viewCenter.setValue(viewCenter);
+      (this.viewCenter as Mutable<typeof this.viewCenter>).value = viewCenter; // this.viewCenter.setValue(viewCenter)
     }
-    const viewFrame = this.viewFrame;
+    const viewFrame = viewContext.viewFrame;
     const size = Math.min(viewFrame.width, viewFrame.height);
     const r = this.radius.getValue().pxValue(size);
     const p0 = this.viewCenter.value;
@@ -167,7 +140,7 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
-      this.renderCircle(renderer.context, this.viewFrame);
+      this.renderCircle(renderer.context, viewContext.viewFrame);
     }
   }
 
@@ -216,11 +189,26 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     // nop
   }
 
+  override readonly viewBounds!: R2Box;
+
+  override deriveViewBounds(): R2Box {
+    const viewCenter = this.viewCenter.value;
+    if (viewCenter !== null && viewCenter.isDefined()) {
+      const viewFrame = this.viewContext.viewFrame;
+      const size = Math.min(viewFrame.width, viewFrame.height);
+      const radius = this.radius.getValue().pxValue(size);
+      return new R2Box(viewCenter.x - radius, viewCenter.y - radius,
+                       viewCenter.x + radius, viewCenter.y + radius);
+    } else {
+      return R2Box.undefined();
+    }
+  }
+
   override get popoverFrame(): R2Box {
     const viewCenter = this.viewCenter.value;
-    const frame = this.viewFrame;
     if (viewCenter !== null && viewCenter.isDefined()) {
-      const size = Math.min(frame.width, frame.height);
+      const viewFrame = this.viewContext.viewFrame;
+      const size = Math.min(viewFrame.width, viewFrame.height);
       const inversePageTransform = this.pageTransform.inverse();
       const px = inversePageTransform.transformX(viewCenter.x, viewCenter.y);
       const py = inversePageTransform.transformY(viewCenter.x, viewCenter.y);
@@ -231,30 +219,11 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     }
   }
 
-  override readonly viewBounds!: R2Box;
-
-  protected updateViewBounds(): void {
-    (this as Mutable<GeoCircleView>).viewBounds = this.deriveViewBounds();
-  }
-
-  override deriveViewBounds(): R2Box {
-    const viewCenter = this.viewCenter.value;
-    if (viewCenter !== null && viewCenter.isDefined()) {
-      const viewFrame = this.viewFrame;
-      const size = Math.min(viewFrame.width, viewFrame.height);
-      const radius = this.radius.getValue().pxValue(size);
-      return new R2Box(viewCenter.x - radius, viewCenter.y - radius,
-                       viewCenter.x + radius, viewCenter.y + radius);
-    } else {
-      return R2Box.undefined();
-    }
-  }
-
   override get hitBounds(): R2Box {
     const viewCenter = this.viewCenter.value;
-    const frame = this.viewFrame;
     if (viewCenter !== null && viewCenter.isDefined()) {
-      const size = Math.min(frame.width, frame.height);
+      const viewFrame = this.viewContext.viewFrame;
+      const size = Math.min(viewFrame.width, viewFrame.height);
       const radius = this.radius.getValue().pxValue(size);
       const hitRadius = Math.max(this.hitRadius.getStateOr(radius), radius);
       return new R2Box(viewCenter.x - hitRadius, viewCenter.y - hitRadius,
@@ -267,7 +236,7 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      return this.hitTestCircle(x, y, renderer.context, this.viewFrame, renderer.transform);
+      return this.hitTestCircle(x, y, renderer.context, viewContext.viewFrame, renderer.transform);
     }
     return null;
   }

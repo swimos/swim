@@ -18,7 +18,7 @@ import {GraphicsView} from "@swim/graphics";
 import type {ScaledYViewObserver} from "./ScaledYViewObserver";
 import {ScaledView} from "../"; // forward import
 
-export interface ScaledYView<Y> extends GraphicsView {
+export interface ScaledYView<Y = unknown> extends GraphicsView {
   /** @override */
   readonly observerType?: Class<ScaledYViewObserver<Y>>;
 

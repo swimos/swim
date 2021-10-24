@@ -16,7 +16,7 @@ import {Lazy, AnyTiming} from "@swim/util";
 import {Affinity} from "@swim/fastener";
 import {Length} from "@swim/math";
 import {Look} from "@swim/theme";
-import {ViewContextType, ViewFastener} from "@swim/view";
+import {ViewContextType, ViewRef} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import {Graphics, VectorIcon, SvgIconView} from "@swim/graphics";
 import {ButtonMembrane} from "@swim/button";
@@ -40,10 +40,10 @@ export class TitleDeckBar extends DeckBar {
     const rail = DeckRail.create([backPost, titlePost, morePost]);
     this.rail.setState(rail, Affinity.Intrinsic);
 
-    this.backMembrane.injectView();
-    this.backButton.injectView();
-    this.titleSlider.injectView();
-    this.moreSlider.injectView();
+    this.backMembrane.insertView();
+    this.backButton.insertView();
+    this.titleSlider.insertView();
+    this.moreSlider.insertView();
   }
 
   get closeIcon(): Graphics {
@@ -91,7 +91,7 @@ export class TitleDeckBar extends DeckBar {
   createBackButton(): DeckButton | null {
     const backButton = DeckButton.create();
     backButton.backIcon.setView(this.createBackIcon());
-    backButton.backIcon.injectView();
+    backButton.backIcon.insertView();
     return backButton;
   }
 
@@ -111,11 +111,11 @@ export class TitleDeckBar extends DeckBar {
     const titleSlider = this.titleSlider.view;
     const backButton = this.backButton.view;
     if (titleSlider !== null && backButton !== null) {
-      const titleFastener = titleSlider.item;
+      const titleRef = titleSlider.item;
       let titleView: HtmlView | null = null;
-      if (titleFastener !== null) {
-        titleView = titleFastener.view;
-        titleFastener.setView(null);
+      if (titleRef !== null) {
+        titleView = titleRef.view;
+        titleRef.setView(null);
         titleSlider.item = null;
       }
       titleSlider.pushItem(title, timing);
@@ -143,48 +143,44 @@ export class TitleDeckBar extends DeckBar {
   }
 
   didPopBackButton(newLabelView: HtmlView | null, oldLabelView: HtmlView, backButton: DeckButton): void {
-    const backFastener = backButton.getFastener(oldLabelView.key!, ViewFastener);
-    if (backFastener !== null) {
-      backFastener.setView(null);
-      backButton.setFastener(backFastener.key!, null);
+    const backRef = backButton.getFastener(oldLabelView.key!, ViewRef);
+    if (backRef !== null) {
+      backRef.setView(null);
+      backButton.setFastener(backRef.key!, null);
     }
     const titleSlider = this.titleSlider.view;
     if (titleSlider !== null) {
       const titleKey = "item" + titleSlider.itemCount;
-      const titleFastener = titleSlider.getFastener(titleKey, ViewFastener) as DeckSliderItem<DeckSlider, HtmlView> | null;
-      if (titleFastener !== null) {
-        titleFastener.setView(oldLabelView);
+      const titleRef = titleSlider.getFastener(titleKey, ViewRef) as DeckSliderItem<DeckSlider, HtmlView> | null;
+      if (titleRef !== null) {
+        titleRef.setView(oldLabelView);
       }
-      titleSlider.item = titleFastener;
+      titleSlider.item = titleRef;
       titleSlider.appendChild(oldLabelView, titleKey);
     }
   }
 
-  @ViewFastener<TitleDeckBar, ButtonMembrane>({
+  @ViewRef<TitleDeckBar, ButtonMembrane>({
     key: true,
     type: ButtonMembrane,
-    child: true,
-    onSetView(newBackMembrane: ButtonMembrane | null, oldBackMembrane: ButtonMembrane | null): void {
-      if (oldBackMembrane !== null) {
-        oldBackMembrane.off("click", this.owner.onBackButtonClick);
-      }
-      if (newBackMembrane !== null) {
-        this.owner.initBackMembrane(newBackMembrane);
-        newBackMembrane.on("click", this.owner.onBackButtonClick);
-      }
+    binds: true,
+    didAttachView(backMembrane: ButtonMembrane): void {
+      this.owner.initBackMembrane(backMembrane);
+      backMembrane.on("click", this.owner.onBackButtonClick);
+    },
+    willDetachView(backMembrane: ButtonMembrane): void {
+      backMembrane.off("click", this.owner.onBackButtonClick);
     },
   })
-  readonly backMembrane!: ViewFastener<this, ButtonMembrane>;
+  readonly backMembrane!: ViewRef<this, ButtonMembrane>;
 
-  @ViewFastener<TitleDeckBar, DeckButton>({
+  @ViewRef<TitleDeckBar, DeckButton>({
     key: true,
     type: DeckButton,
-    child: true,
+    binds: true,
     observes: true,
-    onSetView(backButton: DeckButton | null): void {
-      if (backButton !== null) {
-        this.owner.initBackButton(backButton);
-      }
+    didAttachView(backButton: DeckButton): void {
+      this.owner.initBackButton(backButton);
     },
     createView(): DeckButton | null {
       return this.owner.createBackButton();
@@ -193,31 +189,27 @@ export class TitleDeckBar extends DeckBar {
       this.owner.didPopBackButton(newLabelView, oldLabelView, backButton);
     },
   })
-  readonly backButton!: ViewFastener<this, DeckButton>;
+  readonly backButton!: ViewRef<this, DeckButton>;
 
-  @ViewFastener<TitleDeckBar, DeckSlider>({
+  @ViewRef<TitleDeckBar, DeckSlider>({
     key: true,
     type: DeckSlider,
-    child: true,
-    onSetView(titleSlider: DeckSlider | null): void {
-      if (titleSlider !== null) {
-        this.owner.initTitleSlider(titleSlider);
-      }
+    binds: true,
+    didAttachView(titleSlider: DeckSlider): void {
+      this.owner.initTitleSlider(titleSlider);
     },
   })
-  readonly titleSlider!: ViewFastener<this, DeckSlider>;
+  readonly titleSlider!: ViewRef<this, DeckSlider>;
 
-  @ViewFastener<TitleDeckBar, DeckSlider>({
+  @ViewRef<TitleDeckBar, DeckSlider>({
     key: true,
     type: DeckSlider,
-    child: true,
-    onSetView(moreSlider: DeckSlider | null): void {
-      if (moreSlider !== null) {
-        this.owner.initMoreSlider(moreSlider);
-      }
+    binds: true,
+    didAttachView(moreSlider: DeckSlider): void {
+      this.owner.initMoreSlider(moreSlider);
     },
   })
-  readonly moreSlider!: ViewFastener<this, DeckSlider>;
+  readonly moreSlider!: ViewRef<this, DeckSlider>;
 
   protected override didLayout(viewContext: ViewContextType<this>): void {
     const backMembrane = this.backMembrane.view;

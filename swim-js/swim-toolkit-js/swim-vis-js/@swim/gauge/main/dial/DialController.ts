@@ -13,74 +13,18 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
 import type {Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
-import {ViewFastener} from "@swim/view";
+import {ViewRef} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
-import {TraitViewFastener, GenericController} from "@swim/controller";
+import {GenericController, TraitViewRef} from "@swim/controller";
 import {DialView} from "./DialView";
 import {DialLabel, DialLegend, DialTrait} from "./DialTrait";
 import type {DialControllerObserver} from "./DialControllerObserver";
 
 export class DialController extends GenericController {
   override readonly observerType?: Class<DialControllerObserver>;
-
-  protected initDialTrait(dialTrait: DialTrait): void {
-    // hook
-  }
-
-  protected attachDialTrait(dialTrait: DialTrait): void {
-    const dialView = this.dial.view;
-    if (dialView !== null) {
-      this.setValue(dialTrait.value.state);
-      this.setLimit(dialTrait.limit.state);
-      const dialColor = dialTrait.dialColor.state;
-      if (dialColor !== null) {
-        this.setDialColor(dialColor);
-      }
-      const meterColor = dialTrait.meterColor.state;
-      if (meterColor !== null) {
-        this.setMeterColor(meterColor);
-      }
-      this.setLabelView(dialTrait.label.state);
-      this.setLegendView(dialTrait.legend.state);
-    }
-  }
-
-  protected detachDialTrait(dialTrait: DialTrait): void {
-    // hook
-  }
-
-  protected willSetDialTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetDialTrait !== void 0) {
-        observer.controllerWillSetDialTrait(newDialTrait, oldDialTrait, this);
-      }
-    }
-  }
-
-  protected onSetDialTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
-    if (oldDialTrait !== null) {
-      this.detachDialTrait(oldDialTrait);
-    }
-    if (newDialTrait !== null) {
-      this.attachDialTrait(newDialTrait);
-      this.initDialTrait(newDialTrait);
-    }
-  }
-
-  protected didSetDialTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetDialTrait !== void 0) {
-        observer.controllerDidSetDialTrait(newDialTrait, oldDialTrait, this);
-      }
-    }
-  }
 
   protected updateLabel(value: number, limit: number, dialTrait: DialTrait): void {
     if (dialTrait.label.hasAffinity(Affinity.Intrinsic)) {
@@ -100,75 +44,6 @@ export class DialController extends GenericController {
     }
   }
 
-  protected createDialView(): DialView {
-    return DialView.create();
-  }
-
-  protected initDialView(dialView: DialView): void {
-    const dialTrait = this.dial.trait;
-    if (dialTrait !== null) {
-      const value = dialView.value.value;
-      const limit = dialView.limit.value;
-      this.updateLabel(value, limit, dialTrait);
-      this.updateLegend(value, limit, dialTrait);
-      this.setValue(dialTrait.value.state);
-      this.setLimit(dialTrait.limit.state);
-      this.setLabelView(dialTrait.label.state);
-      this.setLegendView(dialTrait.legend.state);
-    }
-  }
-
-  protected attachDialView(dialView: DialView): void {
-    const dialTrait = this.dial.trait;
-    if (dialTrait !== null) {
-      const dialColor = dialTrait.dialColor.state;
-      if (dialColor !== null) {
-        this.setDialColor(dialColor);
-      }
-      const meterColor = dialTrait.meterColor.state;
-      if (meterColor !== null) {
-        this.setMeterColor(meterColor);
-      }
-    }
-    this.label.setView(dialView.label.view);
-    this.legend.setView(dialView.legend.view);
-  }
-
-  protected detachDialView(dialView: DialView): void {
-    this.label.setView(null);
-    this.legend.setView(null);
-  }
-
-  protected willSetDialView(newDialView: DialView | null, oldDialView: DialView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetDialView !== void 0) {
-        observer.controllerWillSetDialView(newDialView, oldDialView, this);
-      }
-    }
-  }
-
-  protected onSetDialView(newDialView: DialView | null, oldDialView: DialView | null): void {
-    if (oldDialView !== null) {
-      this.detachDialView(oldDialView);
-    }
-    if (newDialView !== null) {
-      this.attachDialView(newDialView);
-      this.initDialView(newDialView);
-    }
-  }
-
-  protected didSetDialView(newDialView: DialView | null, oldDialView: DialView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetDialView !== void 0) {
-        observer.controllerDidSetDialView(newDialView, oldDialView, this);
-      }
-    }
-  }
-
   protected setValue(value: number, timing?: AnyTiming | boolean): void {
     const dialView = this.dial.view;
     if (dialView !== null && dialView.value.hasAffinity(Affinity.Intrinsic)) {
@@ -184,35 +59,6 @@ export class DialController extends GenericController {
     }
   }
 
-  protected willSetValue(newValue: number, oldValue: number, dialView: DialView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetDialValue !== void 0) {
-        observer.controllerWillSetDialValue(newValue, oldValue, this);
-      }
-    }
-  }
-
-  protected onSetValue(newValue: number, oldValue: number, dialView: DialView): void {
-    const dialTrait = this.dial.trait;
-    if (dialTrait !== null) {
-      const limit = dialView.limit.value;
-      this.updateLabel(newValue, limit, dialTrait);
-      this.updateLegend(newValue, limit, dialTrait);
-    }
-  }
-
-  protected didSetValue(newValue: number, oldValue: number, dialView: DialView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetDialValue !== void 0) {
-        observer.controllerDidSetDialValue(newValue, oldValue, this);
-      }
-    }
-  }
-
   protected setLimit(limit: number, timing?: AnyTiming | boolean): void {
     const dialView = this.dial.view;
     if (dialView !== null && dialView.limit.hasAffinity(Affinity.Intrinsic)) {
@@ -225,35 +71,6 @@ export class DialController extends GenericController {
         timing = Timing.fromAny(timing);
       }
       dialView.limit.setState(limit, timing, Affinity.Intrinsic);
-    }
-  }
-
-  protected willSetLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetDialLimit !== void 0) {
-        observer.controllerWillSetDialLimit(newLimit, oldLimit, this);
-      }
-    }
-  }
-
-  protected onSetLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
-    const dialTrait = this.dial.trait;
-    if (dialTrait !== null) {
-      const value = dialView.value.value;
-      this.updateLabel(value, newLimit, dialTrait);
-      this.updateLegend(value, newLimit, dialTrait);
-    }
-  }
-
-  protected didSetLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetDialLimit !== void 0) {
-        observer.controllerDidSetDialLimit(newLimit, oldLimit, this);
-      }
     }
   }
 
@@ -311,48 +128,6 @@ export class DialController extends GenericController {
     }
   }
 
-  protected initLabelView(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected attachLabelView(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected detachLabelView(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected willSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetDialLabelView !== void 0) {
-        observer.controllerWillSetDialLabelView(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  protected onSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    if (oldLabelView !== null) {
-      this.detachLabelView(oldLabelView);
-    }
-    if (newLabelView !== null) {
-      this.attachLabelView(newLabelView);
-      this.initLabelView(newLabelView);
-    }
-  }
-
-  protected didSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetDialLabelView !== void 0) {
-        observer.controllerDidSetDialLabelView(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
   protected createLegendView(legend: DialLegend): GraphicsView | string | null {
     if (typeof legend === "function") {
       return legend(this.dial.trait);
@@ -369,63 +144,34 @@ export class DialController extends GenericController {
     }
   }
 
-  protected initLegendView(legendView: GraphicsView): void {
-    // hook
-  }
-
-  protected attachLegendView(legendView: GraphicsView): void {
-    // hook
-  }
-
-  protected detachLegendView(legendView: GraphicsView): void {
-    // hook
-  }
-
-  protected willSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetDialLegendView !== void 0) {
-        observer.controllerWillSetDialLegendView(newLegendView, oldLegendView, this);
-      }
-    }
-  }
-
-  protected onSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    if (oldLegendView !== null) {
-      this.detachLegendView(oldLegendView);
-    }
-    if (newLegendView !== null) {
-      this.attachLegendView(newLegendView);
-      this.initLegendView(newLegendView);
-    }
-  }
-
-  protected didSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetDialLegendView !== void 0) {
-        observer.controllerDidSetDialLegendView(newLegendView, oldLegendView, this);
-      }
-    }
-  }
-
   @Property({type: Timing, inherits: true})
   readonly dialTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
 
-  /** @internal */
-  static DialFastener = TraitViewFastener.define<DialController, DialTrait, DialView>({
+  @TraitViewRef<DialController, DialTrait, DialView>({
     traitType: DialTrait,
     observesTrait: true,
-    willSetTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
-      this.owner.willSetDialTrait(newDialTrait, oldDialTrait);
+    willAttachTrait(dialTrait: DialTrait): void {
+      this.owner.callObservers("controllerWillAttachDialTrait", dialTrait, this.owner);
     },
-    onSetTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
-      this.owner.onSetDialTrait(newDialTrait, oldDialTrait);
+    didAttachTrait(dialTrait: DialTrait): void {
+      const dialView = this.view;
+      if (dialView !== null) {
+        this.owner.setValue(dialTrait.value.state);
+        this.owner.setLimit(dialTrait.limit.state);
+        const dialColor = dialTrait.dialColor.state;
+        if (dialColor !== null) {
+          this.owner.setDialColor(dialColor);
+        }
+        const meterColor = dialTrait.meterColor.state;
+        if (meterColor !== null) {
+          this.owner.setMeterColor(meterColor);
+        }
+        this.owner.setLabelView(dialTrait.label.state);
+        this.owner.setLegendView(dialTrait.legend.state);
+      }
     },
-    didSetTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
-      this.owner.didSetDialTrait(newDialTrait, oldDialTrait);
+    didDetachTrait(dialTrait: DialTrait): void {
+      this.owner.callObservers("controllerDidDetachDialTrait", dialTrait, this.owner);
     },
     traitDidSetDialValue(newValue: number, oldValue: number): void {
       this.owner.setValue(newValue);
@@ -447,70 +193,102 @@ export class DialController extends GenericController {
     },
     viewType: DialView,
     observesView: true,
-    willSetView(newDialView: DialView | null, oldDialView: DialView | null): void {
-      this.owner.willSetDialView(newDialView, oldDialView);
+    willAttachView(dialView: DialView): void {
+      this.owner.callObservers("controllerWillAttachDialView", dialView, this.owner);
     },
-    onSetView(newDialView: DialView | null, oldDialView: DialView | null): void {
-      this.owner.onSetDialView(newDialView, oldDialView);
+    didAttachView(dialView: DialView): void {
+      const dialTrait = this.trait;
+      if (dialTrait !== null) {
+        const dialColor = dialTrait.dialColor.state;
+        if (dialColor !== null) {
+          this.owner.setDialColor(dialColor);
+        }
+        const meterColor = dialTrait.meterColor.state;
+        if (meterColor !== null) {
+          this.owner.setMeterColor(meterColor);
+        }
+      }
+      this.owner.label.setView(dialView.label.view);
+      this.owner.legend.setView(dialView.legend.view);
+      if (dialTrait !== null) {
+        const value = dialView.value.value;
+        const limit = dialView.limit.value;
+        this.owner.updateLabel(value, limit, dialTrait);
+        this.owner.updateLegend(value, limit, dialTrait);
+        this.owner.setValue(dialTrait.value.state);
+        this.owner.setLimit(dialTrait.limit.state);
+        this.owner.setLabelView(dialTrait.label.state);
+        this.owner.setLegendView(dialTrait.legend.state);
+      }
     },
-    didSetView(newDialView: DialView | null, oldDialView: DialView | null): void {
-      this.owner.didSetDialView(newDialView, oldDialView);
+    willDetachView(dialView: DialView): void {
+      this.owner.label.setView(null);
+      this.owner.legend.setView(null);
+    },
+    didDetachView(dialView: DialView): void {
+      this.owner.callObservers("controllerDidDetachDialView", dialView, this.owner);
     },
     viewWillSetDialValue(newValue: number, oldValue: number, dialView: DialView): void {
-      this.owner.willSetValue(newValue, oldValue, dialView);
+      this.owner.callObservers("controllerWillSetDialValue", newValue, oldValue, this.owner);
     },
     viewDidSetDialValue(newValue: number, oldValue: number, dialView: DialView): void {
-      this.owner.onSetValue(newValue, oldValue, dialView);
-      this.owner.didSetValue(newValue, oldValue, dialView);
+      const dialTrait = this.trait;
+      if (dialTrait !== null) {
+        const limit = dialView.limit.value;
+        this.owner.updateLabel(newValue, limit, dialTrait);
+        this.owner.updateLegend(newValue, limit, dialTrait);
+      }
+      this.owner.callObservers("controllerDidSetDialValue", newValue, oldValue, this.owner);
     },
     viewWillSetDialLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
-      this.owner.willSetLimit(newLimit, oldLimit, dialView);
+      this.owner.callObservers("controllerWillSetDialLimit", newLimit, oldLimit, this.owner);
     },
     viewDidSetDialLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
-      this.owner.onSetLimit(newLimit, oldLimit, dialView);
-      this.owner.didSetLimit(newLimit, oldLimit, dialView);
+      const dialTrait = this.trait;
+      if (dialTrait !== null) {
+        const value = dialView.value.value;
+        this.owner.updateLabel(value, newLimit, dialTrait);
+        this.owner.updateLegend(value, newLimit, dialTrait);
+      }
+      this.owner.callObservers("controllerDidSetDialLimit", newLimit, oldLimit, this.owner);
     },
-    viewDidSetDialLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.label.setView(newLabelView);
+    viewWillAttachDialLabel(labelView: GraphicsView): void {
+      this.owner.label.setView(labelView);
     },
-    viewDidSetDialLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.legend.setView(newLegendView);
+    viewDidDetachDialLabel(labelView: GraphicsView): void {
+      this.owner.label.setView(null);
     },
-    createView(): DialView | null {
-      return this.owner.createDialView();
+    viewWillAttachDialLegend(legendView: GraphicsView): void {
+      this.owner.legend.setView(legendView);
     },
-  });
-
-  @TraitViewFastener<DialController, DialTrait, DialView>({
-    extends: DialController.DialFastener,
+    viewDidDetachDialLegend(legendView: GraphicsView): void {
+      this.owner.legend.setView(null);
+    },
   })
-  readonly dial!: TraitViewFastener<this, DialTrait, DialView>;
+  readonly dial!: TraitViewRef<this, DialTrait, DialView>;
+  static readonly dial: MemberFastenerClass<DialController, "dial">;
 
-  @ViewFastener<DialController, GraphicsView>({
+  @ViewRef<DialController, GraphicsView>({
     key: true,
-    willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.willSetLabelView(newLabelView, oldLabelView);
+    willAttachView(labelView: GraphicsView): void {
+      this.owner.callObservers("controllerWillAttachDialLabelView", labelView, this.owner);
     },
-    onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetLabelView(newLabelView, oldLabelView);
-    },
-    didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.didSetLabelView(newLabelView, oldLabelView);
+    didDetachView(labelView: GraphicsView): void {
+      this.owner.callObservers("controllerDidDetachDialLabelView", labelView, this.owner);
     },
   })
-  readonly label!: ViewFastener<this, GraphicsView>;
+  readonly label!: ViewRef<this, GraphicsView>;
+  static readonly label: MemberFastenerClass<DialController, "label">;
 
-  @ViewFastener<DialController, GraphicsView>({
+  @ViewRef<DialController, GraphicsView>({
     key: true,
-    willSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.willSetLegendView(newLegendView, oldLegendView);
+    willAttachView(legendView: GraphicsView): void {
+      this.owner.callObservers("controllerWillAttachDialLegendView", legendView, this.owner);
     },
-    onSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.onSetLegendView(newLegendView, oldLegendView);
-    },
-    didSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.didSetLegendView(newLegendView, oldLegendView);
+    didDetachView(legendView: GraphicsView): void {
+      this.owner.callObservers("controllerDidDetachDialLegendView", legendView, this.owner);
     },
   })
-  readonly legend!: ViewFastener<this, GraphicsView>;
+  readonly legend!: ViewRef<this, GraphicsView>;
+  static readonly legend: MemberFastenerClass<DialController, "legend">;
 }

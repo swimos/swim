@@ -17,5 +17,8 @@ export {GeoGridView} from "./GeoGridView";
 export {GeoGridTrait} from "./GeoGridTrait";
 export {GeoGridTraitObserver} from "./GeoGridTraitObserver";
 
-export {GeoGridController} from "./GeoGridController";
+export {
+  GeoGridControllerTileExt,
+  GeoGridController,
+} from "./GeoGridController";
 export {GeoGridControllerObserver} from "./GeoGridControllerObserver";

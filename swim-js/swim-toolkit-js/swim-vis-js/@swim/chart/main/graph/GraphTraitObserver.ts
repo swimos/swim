@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Trait, TraitObserver} from "@swim/model";
+import type {TraitObserver} from "@swim/model";
 import type {PlotTrait} from "../plot/PlotTrait";
 import type {GraphTrait} from "./GraphTrait";
 
-export interface GraphTraitObserver<X, Y, R extends GraphTrait<X, Y> = GraphTrait<X, Y>> extends TraitObserver<R> {
-  traitWillSetPlot?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+export interface GraphTraitObserver<X = unknown, Y = unknown, R extends GraphTrait<X, Y> = GraphTrait<X, Y>> extends TraitObserver<R> {
+  traitWillAttachPlot?(plotTrait: PlotTrait<X, Y>, trait: R): void;
 
-  traitDidSetPlot?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachPlot?(plotTrait: PlotTrait<X, Y>, trait: R): void;
 }

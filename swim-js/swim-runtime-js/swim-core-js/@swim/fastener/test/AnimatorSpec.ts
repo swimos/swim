@@ -19,8 +19,8 @@ import {Affinity, Animator, GenericHierarchy} from "@swim/fastener";
 export class AnimatorSpec extends Spec {
   @Test
   testAnimator(exam: Exam): void {
-    const animator = Animator.create(null, "foo");
-    exam.equal(animator.name, "foo");
+    const animator = Animator.create(null);
+    exam.equal(animator.name, "");
     exam.equal(animator.state, void 0);
     exam.equal(animator.value, void 0);
 
@@ -34,8 +34,8 @@ export class AnimatorSpec extends Spec {
 
   @Test
   testAnimatorDefine(exam: Exam): void {
-    const testAnimator = Animator.define({type: Number, state: 0});
-    const animator = testAnimator.create(null, "foo");
+    const testAnimator = Animator.define("foo", {type: Number, state: 0});
+    const animator = testAnimator.create(null);
     exam.equal(animator.name, "foo");
     exam.equal(animator.state, 0);
     exam.equal(animator.value, 0);
@@ -138,8 +138,8 @@ export class AnimatorSpec extends Spec {
 
   @Test
   testAnimatorTweening(exam: Exam): void {
-    const testAnimator = Animator.define({type: Number, state: 0});
-    const animator = testAnimator.create(null, "foo");
+    const testAnimator = Animator.define("foo", {type: Number, state: 0});
+    const animator = testAnimator.create(null);
     exam.equal(animator.name, "foo");
     exam.equal(animator.state, 0);
     exam.equal(animator.value, 0);

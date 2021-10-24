@@ -37,13 +37,7 @@ export class CellView extends HtmlView {
   }
 
   didPress(input: PositionGestureInput, event: Event | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidPress !== void 0) {
-        observer.viewDidPress(input, event, this);
-      }
-    }
+    this.callObservers("viewDidPress", input, event, this);
   }
 
   onLongPress(input: PositionGestureInput): void {
@@ -51,12 +45,6 @@ export class CellView extends HtmlView {
   }
 
   didLongPress(input: PositionGestureInput): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidLongPress !== void 0) {
-        observer.viewDidLongPress(input, this);
-      }
-    }
+    this.callObservers("viewDidLongPress", input, this);
   }
 }

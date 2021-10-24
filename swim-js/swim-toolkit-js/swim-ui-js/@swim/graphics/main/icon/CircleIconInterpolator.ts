@@ -57,6 +57,7 @@ export const CircleIconInterpolator = (function (_super: typeof Interpolator) {
   };
 
   CircleIconInterpolator.prototype = Object.create(_super.prototype);
+  CircleIconInterpolator.prototype.constructor = CircleIconInterpolator;
 
   Object.defineProperty(CircleIconInterpolator.prototype, 0, {
     get(this: CircleIconInterpolator): CircleIcon {

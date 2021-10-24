@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, AnyTiming} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import type {Class, Initable, AnyTiming} from "@swim/util";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
+import {ViewContextType, ViewFlags, AnyView, View, ViewRef} from "@swim/view";
 import {
+  GraphicsViewInit,
   GraphicsView,
   TypesetView,
-  AnyTextRunView,
   TextRunView,
   CanvasContext,
   CanvasRenderer,
@@ -61,46 +61,22 @@ export interface GeoPointViewInit extends GeoViewInit {
 export class GeoPointView extends GeoLayerView {
   override readonly observerType?: Class<GeoPointViewObserver>;
 
-  protected willSetGeoPoint(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoPoint !== void 0) {
-        observer.viewWillSetGeoPoint(newGeoPoint, oldGeoPoint, this);
-      }
-    }
-  }
-
-  protected onSetGeoPoint(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-    this.setGeoBounds(newGeoPoint.bounds);
-    this.requireUpdate(View.NeedsProject);
-  }
-
-  protected didSetGeoPoint(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGeoPoint !== void 0) {
-        observer.viewDidSetGeoPoint(newGeoPoint, oldGeoPoint, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<GeoPointView, GeoPoint, AnyGeoPoint>({
+  @Animator<GeoPointView, GeoPoint, AnyGeoPoint>({
     type: GeoPoint,
     state: GeoPoint.origin(),
+    updateFlags: View.NeedsProject,
     willSetValue(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-      this.owner.willSetGeoPoint(newGeoPoint, oldGeoPoint);
+      this.owner.callObservers("viewWillSetGeoPoint", newGeoPoint, oldGeoPoint, this.owner);
     },
     didSetValue(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-      this.owner.onSetGeoPoint(newGeoPoint, oldGeoPoint);
-      this.owner.didSetGeoPoint(newGeoPoint, oldGeoPoint);
+      this.owner.setGeoBounds(newGeoPoint.bounds);
+      this.owner.callObservers("viewDidSetGeoPoint", newGeoPoint, oldGeoPoint, this.owner);
     },
   })
-  readonly geoPoint!: ThemeAnimator<this, GeoPoint, AnyGeoPoint>;
+  readonly geoPoint!: Animator<this, GeoPoint, AnyGeoPoint>;
 
-  @ThemeAnimator({type: R2Point, state: R2Point.origin()})
-  readonly viewPoint!: ThemeAnimator<this, R2Point, AnyR2Point>;
+  @Animator({type: R2Point, state: R2Point.origin()})
+  readonly viewPoint!: Animator<this, R2Point, AnyR2Point>;
 
   @ThemeAnimator({type: Length, state: null})
   readonly radius!: ThemeAnimator<this, Length | null, AnyLength | null>;
@@ -123,73 +99,31 @@ export class GeoPointView extends GeoLayerView {
   @Property({type: Number})
   readonly hitRadius!: Property<this, number | undefined>;
 
-  protected initLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected attachLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected detachLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoLabel !== void 0) {
-        observer.viewWillSetGeoLabel(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  protected onSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    if (oldLabelView !== null) {
-      this.detachLabel(oldLabelView);
-    }
-    if (newLabelView !== null) {
-      this.attachLabel(newLabelView);
-      this.initLabel(newLabelView);
-    }
-  }
-
-  protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGeoLabel !== void 0) {
-        observer.viewDidSetGeoLabel(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  @ViewFastener<GeoPointView, GraphicsView, AnyTextRunView>({
+  @ViewRef<GeoPointView, GraphicsView & Initable<GraphicsViewInit | string>>({
     key: true,
     type: TextRunView,
-    child: true,
-    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
-      if (value instanceof GraphicsView) {
-        return value;
-      } else if (typeof value === "string" && this.view instanceof TextRunView) {
-        this.view.text(value);
-        return this.view;
+    binds: true,
+    willAttachView(labelView: GraphicsView): void {
+      this.owner.callObservers("viewWillAttachGeoLabel", labelView, this.owner);
+    },
+    didDetachView(labelView: GraphicsView): void {
+      this.owner.callObservers("viewDidDetachGeoLabel", labelView, this.owner);
+    },
+    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
+      if (typeof value === "string") {
+        if (this.view instanceof TextRunView) {
+          this.view.text(value);
+          return this.view;
+        } else {
+          return TextRunView.fromAny(value);
+        }
       } else {
-        return TextRunView.fromAny(value);
+        return GraphicsView.fromAny(value);
       }
     },
-    willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.willSetLabel(newLabelView, oldLabelView);
-    },
-    onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetLabel(newLabelView, oldLabelView);
-    },
-    didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.didSetLabel(newLabelView, oldLabelView);
-    },
   })
-  readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly label!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
+  static readonly label: MemberFastenerClass<GeoPointView, "label">;
 
   @Property({type: String, state: "auto"})
   readonly labelPlacement!: Property<this, GeoPointLabelPlacement>;
@@ -268,7 +202,7 @@ export class GeoPointView extends GeoLayerView {
     super.onLayout(viewContext);
     const labelView = this.label.view;
     if (labelView !== null) {
-      this.layoutLabel(labelView, this.viewFrame);
+      this.layoutLabel(labelView, viewContext.viewFrame);
     }
   }
 
@@ -308,7 +242,7 @@ export class GeoPointView extends GeoLayerView {
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
-      return this.hitTestPoint(x, y, renderer.context, this.viewFrame);
+      return this.hitTestPoint(x, y, renderer.context, viewContext.viewFrame);
     }
     return null;
   }

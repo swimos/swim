@@ -19,9 +19,9 @@ import type {RowView} from "./RowView";
 import type {TableView} from "../table/TableView";
 
 export interface RowViewObserver<V extends RowView = RowView> extends HtmlViewObserver<V> {
-  viewWillSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, view: V): void;
+  viewWillAttachLeaf?(leafView: LeafView, view: V): void;
 
-  viewDidSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, view: V): void;
+  viewDidDetachLeaf?(leafView: LeafView, view: V): void;
 
   viewWillHighlightLeaf?(leafView: LeafView, view: V): void;
 
@@ -39,9 +39,9 @@ export interface RowViewObserver<V extends RowView = RowView> extends HtmlViewOb
 
   viewDidLongPressLeaf?(input: PositionGestureInput, leafView: LeafView, view: V): void;
 
-  viewWillSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, view: V): void;
+  viewWillAttachTree?(treeView: TableView, view: V): void;
 
-  viewDidSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, view: V): void;
+  viewDidDetachTree?(treeView: TableView, view: V): void;
 
   viewWillExpand?(view: V): void;
 

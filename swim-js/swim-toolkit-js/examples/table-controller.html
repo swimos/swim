@@ -27,31 +27,34 @@ const containerView = bodyView.appendChild("div")
   .userSelect("none");
 
 class ExampleTableController extends swim.TableController {
-  initTableView(tableView) {
-    super.initTableView(tableView);
+  createRowFastener(rowController) {
+    return ExampleTableController.RowFastener.create(this);
   }
-  onEnterLeafView(leafView, rowFastener) {
+}
+swim.TraitViewControllerSet({
+  extends: true,
+  controllerDidEnterLeafView(leafView, rowController) {
     leafView.hover.focus(false);
-  }
-  onLeaveLeafView(leafView, rowFastener) {
+  },
+  controllerDidLeaveLeafView(leafView, rowController) {
     leafView.hover.unfocus(false);
-  }
-  onPressLeafView(input, event, leafView, rowFastener) {
+  },
+  controllerDidPressLeafView(input, event, leafView, rowController) {
     leafView.highlight.toggle();
-  }
-  initCellView(cellView, cellFastener, rowFastener) {
-    super.initCellView(cellView, cellFastener, rowFastener);
+  },
+  attachCellView(cellView, cellController, rowController) {
+    swim.TableController.rows.prototype.attachCellView.call(this, cellView, cellController, rowController);
     if (cellFastener.key === "a") {
       cellView.color("#989898");
     }
-  }
-}
+  },
+})(ExampleTableController.prototype, "rows");
 
 const tableModel = new swim.GenericModel();
 tableModel.mount();
 const tableTrait = new swim.TableTrait();
 tableModel.setTrait("table", tableTrait);
-tableTrait.header.injectTrait();
+tableTrait.header.insertTrait();
 const colATrait = new swim.ColTrait()
   .layout({key: "a", grow: 2, textColor: swim.Look.mutedColor})
   .label("A");
@@ -75,7 +78,7 @@ for (let i = 1; i <= 100; i += 1) {
 
 const tableController = new ExampleTableController();
 tableController.mount();
-tableController.table.injectView(containerView);
+tableController.table.insertView(containerView);
 tableController.table.setTrait(tableTrait);
 
     </script>

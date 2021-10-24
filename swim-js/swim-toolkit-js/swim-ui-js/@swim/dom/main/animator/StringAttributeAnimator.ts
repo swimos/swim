@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AttributeAnimatorClass, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorFactory, AttributeAnimator} from "./AttributeAnimator";
 
 /** @internal */
 export const StringAttributeAnimator = (function (_super: typeof AttributeAnimator) {
-  const StringAttributeAnimator = _super.extend() as AttributeAnimatorClass<AttributeAnimator<any, string | undefined, string | undefined>>;
+  const StringAttributeAnimator = _super.extend("StringAttributeAnimator") as AttributeAnimatorFactory<AttributeAnimator<any, string | undefined, string | undefined>>;
 
   StringAttributeAnimator.prototype.parse = function (value: string): string | undefined {
     return value;

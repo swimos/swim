@@ -34,67 +34,18 @@ export class BubblePlotView<X = unknown, Y = unknown> extends ScatterPlotView<X,
     return "bubble";
   }
 
-  protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetPlotRadius !== void 0) {
-        observer.viewWillSetPlotRadius(newRadius, oldRadius, this);
-      }
-    }
-  }
-
-  protected onSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    // hook
-  }
-
-  protected didSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetPlotRadius !== void 0) {
-        observer.viewDidSetPlotRadius(newRadius, oldRadius, this);
-      }
-    }
-  }
-
   @ThemeAnimator<BubblePlotView<X, Y>, Length | null, AnyLength | null>({
     type: Length,
     state: Length.px(5),
     updateFlags: View.NeedsRender,
     willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.willSetRadius(newRadius, oldRadius);
+      this.owner.callObservers("viewWillSetPlotRadius", newRadius, oldRadius, this.owner);
     },
     didSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.onSetRadius(newRadius, oldRadius);
-      this.owner.didSetRadius(newRadius, oldRadius);
+      this.owner.callObservers("viewDidSetPlotRadius", newRadius, oldRadius, this.owner);
     },
   })
   readonly radius!: ThemeAnimator<this, Length | null, AnyLength | null>;
-
-  protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetPlotFill !== void 0) {
-        observer.viewWillSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  protected onSetFill(newFill: Color | null, oldFill: Color | null): void {
-    // hook
-  }
-
-  protected didSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetPlotFill !== void 0) {
-        observer.viewDidSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
 
   @ThemeAnimator<BubblePlotView<X, Y>, Color | null, AnyColor | null>({
     type: Color,
@@ -102,11 +53,10 @@ export class BubblePlotView<X = unknown, Y = unknown> extends ScatterPlotView<X,
     look: Look.accentColor,
     updateFlags: View.NeedsRender,
     willSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.willSetFill(newFill, oldFill);
+      this.owner.callObservers("viewWillSetPlotFill", newFill, oldFill, this.owner);
     },
     didSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.onSetFill(newFill, oldFill);
-      this.owner.didSetFill(newFill, oldFill);
+      this.owner.callObservers("viewDidSetPlotFill", newFill, oldFill, this.owner);
     },
   })
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
@@ -129,9 +79,9 @@ export class BubblePlotView<X = unknown, Y = unknown> extends ScatterPlotView<X,
     const contextLineWidth = context.lineWidth;
     const contextStrokeStyle = context.strokeStyle;
 
-    const dataPointFasteners = this.dataPointFasteners;
-    for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
-      const p = dataPointFasteners[i]!.view!;
+    const dataPointViews = this.dataPoints.views;
+    for (const viewId in dataPointViews) {
+      const p = dataPointViews[viewId]!;
       context.beginPath();
       const r = p.radius.getValueOr(radius).pxValue(size);
       context.arc(p.xCoord, p.yCoord, r, 0, 2 * Math.PI);

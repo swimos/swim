@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {ThemeAnimator} from "@swim/theme";
@@ -62,57 +62,33 @@ export class GeoRasterView extends GeoLayerView {
 
   override readonly contextType?: Class<GeoRasterViewContext>;
 
-  protected willSetGeoAnchor(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoAnchor !== void 0) {
-        observer.viewWillSetGeoAnchor(newGeoAnchor, oldGeoAnchor, this);
-      }
-    }
-  }
-
-  protected onSetGeoAnchor(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
-    this.setGeoBounds(newGeoAnchor !== null ? newGeoAnchor.bounds : GeoBox.undefined());
-    if (this.mounted) {
-      this.projectRaster(this.viewContext as ViewContextType<this>);
-    }
-  }
-
-  protected didSetGeoAnchor(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGeoAnchor !== void 0) {
-        observer.viewDidSetGeoAnchor(newGeoAnchor, oldGeoAnchor, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<GeoRasterView, GeoPoint | null, AnyGeoPoint | null>({
+  @Animator<GeoRasterView, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
-    didSetState(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
+    didSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
       this.owner.projectGeoAnchor(newGeoCenter);
     },
     willSetValue(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
-      this.owner.willSetGeoAnchor(newGeoAnchor, oldGeoAnchor);
+      this.owner.callObservers("viewWillSetGeoAnchor", newGeoAnchor, oldGeoAnchor, this.owner);
     },
     didSetValue(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
-      this.owner.onSetGeoAnchor(newGeoAnchor, oldGeoAnchor);
-      this.owner.didSetGeoAnchor(newGeoAnchor, oldGeoAnchor);
+      this.owner.setGeoBounds(newGeoAnchor !== null ? newGeoAnchor.bounds : GeoBox.undefined());
+      if (this.mounted) {
+        this.owner.projectRaster(this.owner.viewContext);
+      }
+      this.owner.callObservers("viewDidSetGeoAnchor", newGeoAnchor, oldGeoAnchor, this.owner);
     },
   })
-  readonly geoAnchor!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoAnchor!: Animator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ThemeAnimator({type: R2Point, state: R2Point.undefined()})
-  readonly viewAnchor!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
+  @Animator({type: R2Point, state: R2Point.undefined()})
+  readonly viewAnchor!: Animator<this, R2Point | null, AnyR2Point | null>;
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsComposite})
-  readonly xAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsComposite})
+  readonly xAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsComposite})
-  readonly yAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsComposite})
+  readonly yAlign!: Animator<this, number>;
 
   @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
   readonly width!: ThemeAnimator<this, Length | null, AnyLength | null>;
@@ -123,8 +99,8 @@ export class GeoRasterView extends GeoLayerView {
   @ThemeAnimator({type: Number, state: 1, updateFlags: View.NeedsComposite})
   readonly opacity!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: String, state: "source-over", updateFlags: View.NeedsComposite})
-  readonly compositeOperation!: ThemeAnimator<this, CanvasCompositeOperation>;
+  @Animator({type: String, state: "source-over", updateFlags: View.NeedsComposite})
+  readonly compositeOperation!: Animator<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
     return window.devicePixelRatio || 1;
@@ -222,7 +198,7 @@ export class GeoRasterView extends GeoLayerView {
       viewAnchor = this.viewAnchor.value;
     }
     if (viewAnchor !== null) {
-      const viewFrame = this.deriveViewFrame();
+      const viewFrame = viewContext.viewFrame;
       const viewWidth = viewFrame.width;
       const viewHeight = viewFrame.height;
       const viewSize = Math.min(viewWidth, viewHeight);

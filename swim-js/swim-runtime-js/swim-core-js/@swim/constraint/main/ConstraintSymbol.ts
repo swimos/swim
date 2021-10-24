@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import type {Mutable} from "@swim/util";
-import {ConstraintKey} from "./ConstraintKey";
+import {ConstraintId} from "./ConstraintId";
 import type {Constraint} from "./Constraint";
 import type {ConstraintSolver} from "./ConstraintSolver";
 
 /** @internal */
-export interface ConstraintSymbol extends ConstraintKey {
+export interface ConstraintSymbol extends ConstraintId {
   /** @internal */
   isExternal(): boolean;
 
@@ -46,7 +46,7 @@ export const ConstraintSymbol = {} as {
 /** @internal */
 export class ConstraintSlack implements ConstraintSymbol {
   constructor() {
-    this.id = ConstraintKey.nextId();
+    this.id = ConstraintId.next();
   }
 
   readonly id: number;
@@ -79,7 +79,7 @@ export class ConstraintSlack implements ConstraintSymbol {
 /** @internal */
 export class ConstraintDummy implements ConstraintSymbol {
   constructor() {
-    this.id = ConstraintKey.nextId();
+    this.id = ConstraintId.next();
   }
 
   readonly id: number;
@@ -112,7 +112,7 @@ export class ConstraintDummy implements ConstraintSymbol {
 /** @internal */
 export class ConstraintError implements ConstraintSymbol {
   constructor() {
-    this.id = ConstraintKey.nextId();
+    this.id = ConstraintId.next();
   }
 
   readonly id: number;

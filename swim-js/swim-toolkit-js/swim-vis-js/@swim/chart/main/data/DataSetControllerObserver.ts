@@ -15,55 +15,55 @@
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import type {GraphicsView} from "@swim/graphics";
-import type {ControllerObserver, ControllerFastener} from "@swim/controller";
+import type {ControllerObserver} from "@swim/controller";
 import type {DataPointView} from "./DataPointView";
 import type {DataPointTrait} from "./DataPointTrait";
 import type {DataPointController} from "./DataPointController";
 import type {DataSetTrait} from "./DataSetTrait";
 import type {DataSetController} from "./DataSetController";
 
-export interface DataSetControllerObserver<X, Y, C extends DataSetController<X, Y> = DataSetController<X, Y>> extends ControllerObserver<C> {
-  controllerWillSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, controller: C): void;
+export interface DataSetControllerObserver<X = unknown, Y = unknown, C extends DataSetController<X, Y> = DataSetController<X, Y>> extends ControllerObserver<C> {
+  controllerWillAttachDataSetTrait?(dataSetTrait: DataSetTrait<X, Y>, controller: C): void;
 
-  controllerDidSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, controller: C): void;
+  controllerDidDetachDataSetTrait?(dataSetTrait: DataSetTrait<X, Y>, controller: C): void;
 
-  controllerWillSetDataPoint?(newDataPointController: DataPointController<X, Y> | null, oldDataPointController: DataPointController<X, Y> | null, dataPointDastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillAttachDataPoint?(dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPoint?(newDataPointController: DataPointController<X, Y> | null, oldDataPointController: DataPointController<X, Y> | null, dataPointDastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidDetachDataPoint?(dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillAttachDataPointTrait?(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidDetachDataPointTrait?(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillAttachDataPointView?(dataPointView: DataPointView<X, Y>, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidDetachDataPointView?(dataPointView: DataPointView<X, Y>, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointX?(newX: X | undefined, oldX: X | undefined, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillSetDataPointX?(newX: X | undefined, oldX: X | undefined, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointX?(newX: X | undefined, oldX: X | undefined, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidSetDataPointX?(newX: X | undefined, oldX: X | undefined, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointColor?(newColor: Color | null, oldColor: Color | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillSetDataPointColor?(newColor: Color | null, oldColor: Color | null, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointColor?(newColor: Color | null, oldColor: Color | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidSetDataPointColor?(newColor: Color | null, oldColor: Color | null, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerWillSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllertWillSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerWillAttachDataPointLabelView?(labelView: GraphicsView | null, dataPointController: DataPointController<X, Y>, controller: C): void;
 
-  controllerDidSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ControllerFastener<C, DataPointController<X, Y>>): void;
+  controllerDidDetachDataPointLabelView?(labelView: GraphicsView | null, dataPointController: DataPointController<X, Y>, controller: C): void;
 }

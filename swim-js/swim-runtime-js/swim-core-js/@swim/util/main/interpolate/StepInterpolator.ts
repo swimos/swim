@@ -33,6 +33,7 @@ export const StepInterpolator = (function (_super: typeof Interpolator) {
   };
 
   StepInterpolator.prototype = Object.create(_super.prototype);
+  StepInterpolator.prototype.constructor = StepInterpolator;
 
   return StepInterpolator;
 })(Interpolator);

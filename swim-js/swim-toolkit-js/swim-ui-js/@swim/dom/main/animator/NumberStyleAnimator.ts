@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {StyleAnimatorClass, StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorFactory, StyleAnimator} from "./StyleAnimator";
 
 /** @internal */
 export const NumberStyleAnimator = (function (_super: typeof StyleAnimator) {
-  const NumberStyleAnimator = _super.extend() as StyleAnimatorClass<StyleAnimator<any, number | undefined, string>>;
+  const NumberStyleAnimator = _super.extend("NumberStyleAnimator") as StyleAnimatorFactory<StyleAnimator<any, number | undefined, string>>;
 
   NumberStyleAnimator.prototype.parse = function (value: string): number | undefined {
     const number = +value;

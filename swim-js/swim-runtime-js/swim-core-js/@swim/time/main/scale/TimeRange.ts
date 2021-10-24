@@ -53,6 +53,7 @@ export const TimeRange = (function (_super: typeof Range) {
   };
 
   TimeRange.prototype = Object.create(_super.prototype);
+  TimeRange.prototype.constructor = TimeRange;
 
   Object.defineProperty(TimeRange.prototype, "inverse", {
     get(this: TimeRange): TimeDomain {

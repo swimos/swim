@@ -12,13 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  TraitViewFastenerTraitType,
-  TraitViewFastenerTraitInitType,
-  TraitViewFastenerViewType,
-  TraitViewFastenerViewInitType,
-  TraitViewFastenerInit,
-  TraitViewFastenerDescriptor,
-  TraitViewFastenerClass,
-  TraitViewFastener,
-} from "./TraitViewFastener";
+export interface ConstraintId {
+  /** @internal */
+  readonly id: number;
+}
+
+/** @internal */
+export const ConstraintId = (function () {
+  const ConstraintId = {} as {
+    /** @internal */
+    next(): number;
+  };
+
+  let nextId = 1;
+  ConstraintId.next = function (): number {
+    const id = ~~nextId;
+    nextId += 1;
+    return id;
+  };
+
+  return ConstraintId;
+})();

@@ -32,7 +32,7 @@ export interface ViewportProvider<V extends View, S extends ViewportService<V> |
 }
 
 export const ViewportProvider = (function (_super: typeof Provider) {
-  const ViewportProvider = _super.extend() as ProviderClass<ViewportProvider<any, any>>;
+  const ViewportProvider = _super.extend("ViewportProvider") as ProviderClass<ViewportProvider<any, any>>;
 
   Object.defineProperty(ViewportProvider.prototype, "viewContext", {
     get<V extends View, S extends ViewportService<V> | null | undefined>(this: ViewportProvider<V, S>): ViewContext {

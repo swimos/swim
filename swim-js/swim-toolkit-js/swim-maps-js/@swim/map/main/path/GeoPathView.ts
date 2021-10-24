@@ -13,10 +13,9 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/fastener";
 import {AnyR2Point, R2Point, R2Box, R2Path} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox, AnyGeoPath, GeoPath} from "@swim/geo";
-import {ThemeAnimator} from "@swim/theme";
 import type {ViewContextType} from "@swim/view";
 import type {GeoViewInit} from "../geo/GeoView";
 import {GeoLayerView} from "../layer/GeoLayerView";
@@ -40,54 +39,30 @@ export class GeoPathView extends GeoLayerView {
 
   override readonly observerType?: Class<GeoPathViewObserver>;
 
-  protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoPath !== void 0) {
-        observer.viewWillSetGeoPath(newGeoPath, oldGeoPath, this);
-      }
-    }
-  }
-
-  protected onSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    this.setGeoBounds(newGeoPath !== null ? newGeoPath.bounds : GeoBox.undefined());
-    if (this.mounted) {
-      this.projectPath(this.viewContext as ViewContextType<this>);
-    }
-  }
-
-  protected didSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGeoPath !== void 0) {
-        observer.viewDidSetGeoPath(newGeoPath, oldGeoPath, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<GeoPathView, GeoPath | null>({
+  @Animator<GeoPathView, GeoPath | null, AnyGeoPath | null>({
     type: GeoPath,
     state: null,
     willSetValue(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-      this.owner.willSetGeoPath(newGeoPath, oldGeoPath);
+      this.owner.callObservers("viewWillSetGeoPath", newGeoPath, oldGeoPath, this.owner);
     },
     didSetValue(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-      this.owner.onSetGeoPath(newGeoPath, oldGeoPath);
-      this.owner.didSetGeoPath(newGeoPath, oldGeoPath);
+      this.owner.setGeoBounds(newGeoPath !== null ? newGeoPath.bounds : GeoBox.undefined());
+      if (this.mounted) {
+        this.owner.projectPath(this.owner.viewContext);
+      }
+      this.owner.callObservers("viewDidSetGeoPath", newGeoPath, oldGeoPath, this.owner);
     },
   })
-  readonly geoPath!: ThemeAnimator<this, GeoPath | null, AnyGeoPath | null>;
+  readonly geoPath!: Animator<this, GeoPath | null, AnyGeoPath | null>;
 
-  @ThemeAnimator({type: R2Path, state: null})
-  readonly viewPath!: ThemeAnimator<this, R2Path | null>;
+  @Animator({type: R2Path, state: null})
+  readonly viewPath!: Animator<this, R2Path | null>;
 
-  @ThemeAnimator({type: GeoPoint, state: null})
-  readonly geoCentroid!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  @Animator({type: GeoPoint, state: null})
+  readonly geoCentroid!: Animator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ThemeAnimator({type: R2Point, state: null})
-  readonly viewCentroid!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
+  @Animator({type: R2Point, state: null})
+  readonly viewCentroid!: Animator<this, R2Point | null, AnyR2Point | null>;
 
   protected override onProject(viewContext: ViewContextType<this>): void {
     super.onProject(viewContext);
@@ -114,7 +89,7 @@ export class GeoPathView extends GeoLayerView {
       this.viewCentroid.setState(viewCentroid, Affinity.Intrinsic);
     }
 
-    (this as Mutable<this>).viewBounds = viewPath !== null ? viewPath.bounds : this.viewFrame;
+    (this as Mutable<this>).viewBounds = viewPath !== null ? viewPath.bounds : viewContext.viewFrame;
 
     this.cullGeoFrame(viewContext.geoViewport.geoFrame);
   }

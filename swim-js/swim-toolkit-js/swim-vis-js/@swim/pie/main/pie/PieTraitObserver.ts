@@ -21,7 +21,7 @@ export interface PieTraitObserver<R extends PieTrait = PieTrait> extends TraitOb
 
   traitDidSetPieTitle?(newTitle: PieTitle | null, oldTitle: PieTitle | null, trait: R): void;
 
-  traitWillSetSlice?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillAttachSlice?(sliceTrait: SliceTrait, targetTrait: Trait | null, trait: R): void;
 
-  traitDidSetSlice?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachSlice?(sliceTrait: SliceTrait, trait: R): void;
 }

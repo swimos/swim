@@ -15,7 +15,6 @@
 export {
   MemberAnimatorState,
   MemberAnimatorStateInit,
-  MemberAnimatorKey,
   MemberAnimatorInit,
   MemberAnimatorInitMap,
   AnimatorState,
@@ -23,6 +22,7 @@ export {
   AnimatorInit,
   AnimatorDescriptor,
   AnimatorClass,
+  AnimatorFactory,
   Animator,
 } from "./Animator";
 

@@ -17,7 +17,7 @@ import {Affinity, FastenerOwner, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewContext, View, ViewFastenerClass, ViewFastener} from "@swim/view";
+import {ViewContextType, ViewContext, View, ViewRefFactory, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {SvgIconView} from "@swim/graphics";
 import {DeckSlot} from "./DeckSlot";
@@ -81,18 +81,22 @@ export class DeckButton extends DeckSlot {
     this.labelCount = newLabelCount;
 
     const oldLabelKey = "label" + oldLabelCount;
-    const oldLabelFastener = this.getFastener(oldLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
-    const oldLabelView = oldLabelFastener !== null ? oldLabelFastener.view : null;
+    const oldLabelRef = this.getFastener(oldLabelKey, ViewRef) as DeckButtonLabel<this, HtmlView> | null;
+    const oldLabelView = oldLabelRef !== null ? oldLabelRef.view : null;
 
     const newLabelKey = "label" + newLabelCount;
-    const newLabelFastener = DeckButtonLabelFastener.create(this, newLabelKey) as DeckButtonLabel<this, HtmlView>;
-    newLabelFastener.labelIndex = newLabelCount;
+    const newLabelRef = DeckButtonLabelRef.create(this) as DeckButtonLabel<this, HtmlView>;
+    Object.defineProperty(newLabelRef, "name", {
+      value: newLabelKey,
+      configurable: true,
+    })
+    newLabelRef.labelIndex = newLabelCount;
     this.willPushLabel(newLabelView, oldLabelView);
-    this.label = newLabelFastener;
+    this.label = newLabelRef;
 
-    this.setFastener(newLabelKey, newLabelFastener);
-    newLabelFastener.setView(newLabelView);
-    newLabelFastener.injectView();
+    this.setFastener(newLabelKey, newLabelRef);
+    newLabelRef.setView(newLabelView);
+    newLabelRef.insertView();
 
     if (timing === void 0 && oldLabelCount === 0) {
       timing = false;
@@ -135,17 +139,17 @@ export class DeckButton extends DeckSlot {
     this.labelCount = newLabelCount;
 
     const oldLabelKey = "label" + oldLabelCount;
-    const oldLabelFastener = this.getFastener(oldLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
-    const oldLabelView = oldLabelFastener !== null ? oldLabelFastener.view : null;
+    const oldLabelRef = this.getFastener(oldLabelKey, ViewRef) as DeckButtonLabel<this, HtmlView> | null;
+    const oldLabelView = oldLabelRef !== null ? oldLabelRef.view : null;
 
     if (oldLabelView !== null) {
       const newLabelKey = "label" + newLabelCount;
-      const newLabelFastener = this.getFastener(newLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
-      const newLabelView = newLabelFastener !== null ? newLabelFastener.view : null;
+      const newLabelRef = this.getFastener(newLabelKey, ViewRef) as DeckButtonLabel<this, HtmlView> | null;
+      const newLabelView = newLabelRef !== null ? newLabelRef.view : null;
       this.willPopLabel(newLabelView, oldLabelView);
-      this.label = newLabelFastener;
-      if (newLabelFastener !== null) {
-        newLabelFastener.injectView();
+      this.label = newLabelRef;
+      if (newLabelRef !== null) {
+        newLabelRef.insertView();
       }
 
       if (timing === void 0 || timing === true) {
@@ -177,8 +181,8 @@ export class DeckButton extends DeckSlot {
     const oldLabelKey = oldLabelView.key;
     oldLabelView.remove();
     if (oldLabelKey !== void 0) {
-      const oldLabelFastener = this.getFastener(oldLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
-      if (oldLabelFastener !== null && oldLabelFastener.labelIndex > this.labelCount) {
+      const oldLabelRef = this.getFastener(oldLabelKey, ViewRef) as DeckButtonLabel<this, HtmlView> | null;
+      if (oldLabelRef !== null && oldLabelRef.labelIndex > this.labelCount) {
         this.setFastener(oldLabelKey, null);
       }
     }
@@ -195,15 +199,15 @@ export class DeckButton extends DeckSlot {
       if (deckPhase !== void 0) {
         const nextLabelIndex = Math.round(deckPhase + 1);
         const nextLabelKey = "label" + nextLabelIndex;
-        const nextLabelFastener = this.getFastener(nextLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
-        const nextLabelView = nextLabelFastener !== null ? nextLabelFastener.view : null;
+        const nextLabelRef = this.getFastener(nextLabelKey, ViewRef) as DeckButtonLabel<this, HtmlView> | null;
+        const nextLabelView = nextLabelRef !== null ? nextLabelRef.view : null;
         if (nextLabelView !== null) {
           this.didPopLabel(this.label !== null ? this.label.view : null, nextLabelView);
         } else if (this.label !== null && this.label.view !== null && Math.round(deckPhase) > 0) {
           const prevLabelIndex = Math.round(deckPhase - 1);
           const prevLabelKey = "label" + prevLabelIndex;
-          const prevLabelFastener = this.getFastener(prevLabelKey, ViewFastener) as DeckButtonLabel<this, HtmlView> | null;
-          const prevLabelView = prevLabelFastener !== null ? prevLabelFastener.view : null;
+          const prevLabelRef = this.getFastener(prevLabelKey, ViewRef) as DeckButtonLabel<this, HtmlView> | null;
+          const prevLabelView = prevLabelRef !== null ? prevLabelRef.view : null;
           this.didPushLabel(this.label.view, prevLabelView);
         }
       }
@@ -213,32 +217,30 @@ export class DeckButton extends DeckSlot {
 }
 
 /** @internal */
-export interface DeckButtonCloseIcon<V extends DeckButton = DeckButton, T extends SvgIconView = SvgIconView> extends ViewFastener<V, T> {
+export interface DeckButtonCloseIcon<O extends DeckButton = DeckButton, V extends SvgIconView = SvgIconView> extends ViewRef<O, V> {
   /** @override */
-  onSetView(iconView: T | null): void;
+  didAttachView(iconView: V): void;
 
   /** @override */
-  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
 
-  viewDidLayout(viewContext: ViewContext, iconView: T): void;
+  viewDidLayout(viewContext: ViewContext, iconView: V): void;
 
   /** @protected */
-  initIcon(iconView: T): void;
+  initIcon(iconView: V): void;
 
   /** @protected */
-  layoutIcon(iconView: T): void;
+  layoutIcon(iconView: V): void;
 }
 /** @internal */
-export const DeckButtonCloseIcon = (function (_super: typeof ViewFastener) {
-  const DeckButtonCloseIcon = _super.extend() as ViewFastenerClass<DeckButtonCloseIcon<any, any>>;
+export const DeckButtonCloseIcon = (function (_super: typeof ViewRef) {
+  const DeckButtonCloseIcon = _super.extend("DeckButtonCloseIcon") as ViewRefFactory<DeckButtonCloseIcon<any, any>>;
 
-  DeckButtonCloseIcon.prototype.onSetView = function (this: DeckButtonCloseIcon, iconView: SvgIconView | null): void {
-    if (iconView !== null) {
-      this.initIcon(iconView);
-    }
+  DeckButtonCloseIcon.prototype.didAttachView = function (this: DeckButtonCloseIcon, iconView: SvgIconView): void {
+    this.initIcon(iconView);
   };
 
-  DeckButtonCloseIcon.prototype.insertView = function (this: DeckButtonCloseIcon, parent: View, childView: SvgIconView, targetView: View | null, key: string | undefined): void {
+  DeckButtonCloseIcon.prototype.insertChild = function (this: DeckButtonCloseIcon, parent: View, childView: SvgIconView, targetView: View | null, key: string | undefined): void {
     parent.prependChild(childView, key);
   };
 
@@ -277,8 +279,8 @@ export const DeckButtonCloseIcon = (function (_super: typeof ViewFastener) {
   };
 
   return DeckButtonCloseIcon;
-})(ViewFastener);
-ViewFastener({
+})(ViewRef);
+ViewRef({
   extends: DeckButtonCloseIcon,
   key: true,
   type: SvgIconView,
@@ -286,32 +288,30 @@ ViewFastener({
 })(DeckButton.prototype, "closeIcon");
 
 /** @internal */
-export interface DeckButtonBackIcon<V extends DeckButton = DeckButton, T extends SvgIconView = SvgIconView> extends ViewFastener<V, T> {
+export interface DeckButtonBackIcon<O extends DeckButton = DeckButton, V extends SvgIconView = SvgIconView> extends ViewRef<O, V> {
   /** @override */
-  onSetView(iconView: T | null): void;
+  didAttachView(iconView: V): void;
 
   /** @override */
-  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
 
-  viewDidLayout(viewContext: ViewContext, iconView: T): void;
+  viewDidLayout(viewContext: ViewContext, iconView: V): void;
 
   /** @protected */
-  initIcon(iconView: T): void;
+  initIcon(iconView: V): void;
 
   /** @protected */
-  layoutIcon(iconView: T): void;
+  layoutIcon(iconView: V): void;
 }
 /** @internal */
-export const DeckButtonBackIcon = (function (_super: typeof ViewFastener) {
-  const DeckButtonBackIcon = _super.extend() as ViewFastenerClass<DeckButtonBackIcon<any, any>>;
+export const DeckButtonBackIcon = (function (_super: typeof ViewRef) {
+  const DeckButtonBackIcon = _super.extend("DeckButtonBackIcon") as ViewRefFactory<DeckButtonBackIcon<any, any>>;
 
-  DeckButtonBackIcon.prototype.onSetView = function (this: DeckButtonBackIcon, iconView: SvgIconView | null): void {
-    if (iconView !== null) {
-      this.initIcon(iconView);
-    }
+  DeckButtonBackIcon.prototype.didAttachView = function (this: DeckButtonBackIcon, iconView: SvgIconView): void {
+    this.initIcon(iconView);
   };
 
-  DeckButtonBackIcon.prototype.insertView = function (this: DeckButtonBackIcon, parent: View, childView: SvgIconView, targetView: View | null, key: string | undefined): void {
+  DeckButtonBackIcon.prototype.insertChild = function (this: DeckButtonBackIcon, parent: View, childView: SvgIconView, targetView: View | null, key: string | undefined): void {
     parent.prependChild(childView, key);
   };
 
@@ -395,8 +395,8 @@ export const DeckButtonBackIcon = (function (_super: typeof ViewFastener) {
   };
 
   return DeckButtonBackIcon;
-})(ViewFastener);
-ViewFastener({
+})(ViewRef);
+ViewRef({
   extends: DeckButtonBackIcon,
   key: true,
   type: SvgIconView,
@@ -404,7 +404,7 @@ ViewFastener({
 })(DeckButton.prototype, "backIcon");
 
 /** @internal */
-export interface DeckButtonLabel<V extends DeckButton = DeckButton, T extends HtmlView = HtmlView> extends ViewFastener<V, T> {
+export interface DeckButtonLabel<O extends DeckButton = DeckButton, V extends HtmlView = HtmlView> extends ViewRef<O, V> {
   labelIndex: number;
 
   /** @internal */
@@ -414,33 +414,31 @@ export interface DeckButtonLabel<V extends DeckButton = DeckButton, T extends Ht
   layoutWidth: number;
 
   /** @override */
-  onSetView(labelView: T | null): void;
+  didAttachView(labelView: V): void;
 
   /** @override */
-  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
 
   /** @protected */
-  viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, labelView: T): void;
+  viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, labelView: V): void;
 
-  viewDidLayout(viewContext: ViewContext, labelView: T): void;
-
-  /** @protected */
-  initLabel(labelView: T): void;
+  viewDidLayout(viewContext: ViewContext, labelView: V): void;
 
   /** @protected */
-  layoutLabel(labelView: T): void;
+  initLabel(labelView: V): void;
+
+  /** @protected */
+  layoutLabel(labelView: V): void;
 }
 /** @internal */
-export const DeckButtonLabel = (function (_super: typeof ViewFastener) {
-  const DeckButtonLabel = _super.extend() as ViewFastenerClass<DeckButtonLabel<any, any>>;
+export const DeckButtonLabel = (function (_super: typeof ViewRef) {
+  const DeckButtonLabel = _super.extend("DeckButtonLabel") as ViewRefFactory<DeckButtonLabel<any, any>>;
 
-  DeckButtonLabel.prototype.onSetView = function (this: DeckButtonLabel, labelView: HtmlView | null): void {
-    if (labelView !== null) {
-      this.initLabel(labelView);
-    }
+  DeckButtonLabel.prototype.didAttachView = function (this: DeckButtonLabel, labelView: HtmlView): void {
+    this.initLabel(labelView);
   };
 
-  DeckButtonLabel.prototype.insertView = function (this: DeckButtonLabel, parent: View, childView: HtmlView, targetView: View | null, key: string | undefined): void {
+  DeckButtonLabel.prototype.insertChild = function (this: DeckButtonLabel, parent: View, childView: HtmlView, targetView: View | null, key: string | undefined): void {
     const targetKey = "label" + (this.labelIndex + 1);
     targetView = parent.getChild(targetKey);
     parent.insertChild(childView, targetView, key);
@@ -561,8 +559,8 @@ export const DeckButtonLabel = (function (_super: typeof ViewFastener) {
     this.layoutWidth = iconLeft + iconWidth + labelWidth + iconPadding;
   };
 
-  DeckButtonLabel.construct = function <F extends DeckButtonLabel<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
-    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+  DeckButtonLabel.construct = function <F extends DeckButtonLabel<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
+    fastener = _super.construct(fastenerClass, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).labelIndex = 0;
     (fastener as Mutable<typeof fastener>).labelWidth = null;
     (fastener as Mutable<typeof fastener>).layoutWidth = 0;
@@ -570,12 +568,11 @@ export const DeckButtonLabel = (function (_super: typeof ViewFastener) {
   };
 
   return DeckButtonLabel;
-})(ViewFastener);
+})(ViewRef);
 /** @internal */
-export const DeckButtonLabelFastener = ViewFastener.define<DeckButton, HtmlView>({
+export const DeckButtonLabelRef = ViewRef.define<DeckButton, HtmlView>("DeckButtonLabelRef", {
   extends: DeckButtonLabel,
   key: true,
   type: HtmlView,
-  child: false,
   observes: true,
 });

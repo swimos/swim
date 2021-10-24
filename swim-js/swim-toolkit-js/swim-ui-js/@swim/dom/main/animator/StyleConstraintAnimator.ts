@@ -15,7 +15,7 @@
 import {Mutable, FromAny} from "@swim/util";
 import {Affinity, FastenerOwner, FastenerFlags} from "@swim/fastener";
 import {
-  ConstraintKey,
+  ConstraintId,
   ConstraintMap,
   AnyConstraintExpression,
   ConstraintExpression,
@@ -28,11 +28,12 @@ import {
   ConstraintSolver,
 } from "@swim/constraint";
 import {AnyLength, Length} from "@swim/math";
-import {StyleAnimatorInit, StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorInit, StyleAnimatorClass, StyleAnimator} from "./StyleAnimator";
 import {NumberStyleConstraintAnimator} from "./"; // forward import
 import {LengthStyleConstraintAnimator} from "./"; // forward import
 
 export interface StyleConstraintAnimatorInit<T = unknown, U = never> extends StyleAnimatorInit<T, U> {
+  extends?: {prototype: StyleConstraintAnimator<any, any>} | string | boolean | null;
   constrain?: boolean;
   strength?: AnyConstraintStrength;
 
@@ -45,29 +46,9 @@ export interface StyleConstraintAnimatorInit<T = unknown, U = never> extends Sty
   toNumber?(value: T): number;
 }
 
-export type StyleConstraintAnimatorDescriptor<V = unknown, T = unknown, U = never, I = {}> = ThisType<StyleConstraintAnimator<V, T, U> & I> & StyleConstraintAnimatorInit<T, U> & Partial<I>;
+export type StyleConstraintAnimatorDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<StyleConstraintAnimator<O, T, U> & I> & StyleConstraintAnimatorInit<T, U> & Partial<I>;
 
-export interface StyleConstraintAnimatorClass<A extends StyleConstraintAnimator<any, any> = StyleConstraintAnimator<any, any, any>> {
-  /** @internal */
-  prototype: A;
-
-  create(owner: FastenerOwner<A>, animatorName: string): A;
-
-  construct(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A;
-
-  specialize(type: unknown): StyleConstraintAnimatorClass | null;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): StyleConstraintAnimatorClass<A> & I;
-
-  define<V, T, U = never>(descriptor: StyleConstraintAnimatorDescriptor<V, T, U>): StyleConstraintAnimatorClass<StyleConstraintAnimator<any, T, U>>;
-  define<V, T, U = never, I = {}>(descriptor: StyleConstraintAnimatorDescriptor<V, T, U, I>): StyleConstraintAnimatorClass<StyleConstraintAnimator<any, T, U> & I>;
-
-  <V, T extends Length | null | undefined = Length | null | undefined, U extends AnyLength | null | undefined = AnyLength | null | undefined>(descriptor: {type: typeof Length} & StyleConstraintAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & StyleConstraintAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & StyleConstraintAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T, U = never>(descriptor: StyleConstraintAnimatorDescriptor<V, T, U>): PropertyDecorator;
-  <V, T, U = never, I = {}>(descriptor: StyleConstraintAnimatorDescriptor<V, T, U, I>): PropertyDecorator;
-
+export interface StyleConstraintAnimatorClass<A extends StyleConstraintAnimator<any, any> = StyleConstraintAnimator<any, any, any>> extends StyleAnimatorClass<A> {
   /** @internal */
   readonly ConstrainedFlag: FastenerFlags;
   /** @internal */
@@ -79,7 +60,22 @@ export interface StyleConstraintAnimatorClass<A extends StyleConstraintAnimator<
   readonly FlagMask: FastenerFlags;
 }
 
-export interface StyleConstraintAnimator<V = unknown, T = unknown, U = never> extends StyleAnimator<V, T, U>, ConstraintVariable {
+export interface StyleConstraintAnimatorFactory<A extends StyleConstraintAnimator<any, any> = StyleConstraintAnimator<any, any, any>> extends StyleConstraintAnimatorClass<A> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): StyleConstraintAnimatorFactory<A> & I;
+
+  specialize(type: unknown): StyleConstraintAnimatorFactory | null;
+
+  define<O, T, U = never>(className: string, descriptor: StyleConstraintAnimatorDescriptor<O, T, U>): StyleConstraintAnimatorFactory<StyleConstraintAnimator<any, T, U>>;
+  define<O, T, U = never, I = {}>(className: string, descriptor: StyleConstraintAnimatorDescriptor<O, T, U, I>): StyleConstraintAnimatorFactory<StyleConstraintAnimator<any, T, U> & I>;
+
+  <O, T extends Length | null | undefined = Length | null | undefined, U extends AnyLength | null | undefined = AnyLength | null | undefined>(descriptor: {type: typeof Length} & StyleConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & StyleConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & StyleConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never>(descriptor: StyleConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
+  <O, T, U = never, I = {}>(descriptor: StyleConstraintAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
+}
+
+export interface StyleConstraintAnimator<O = unknown, T = unknown, U = never> extends StyleAnimator<O, T, U>, ConstraintVariable {
   /** @internal @override */
   readonly id: number;
 
@@ -196,7 +192,7 @@ export interface StyleConstraintAnimator<V = unknown, T = unknown, U = never> ex
 }
 
 export const StyleConstraintAnimator = (function (_super: typeof StyleAnimator) {
-  const StyleConstraintAnimator: StyleConstraintAnimatorClass = _super.extend();
+  const StyleConstraintAnimator: StyleConstraintAnimatorFactory = _super.extend("StyleConstraintAnimator");
 
   StyleConstraintAnimator.prototype.isExternal = function (this: StyleConstraintAnimator): boolean {
     return true;
@@ -438,15 +434,15 @@ export const StyleConstraintAnimator = (function (_super: typeof StyleAnimator) 
     return value !== void 0 && value !== null ? +value : 0;
   };
 
-  StyleConstraintAnimator.construct = function <A extends StyleConstraintAnimator<any, any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>, animatorName: string): A {
-    animator = _super.construct(animatorClass, animator, owner, animatorName) as A;
-    (animator as Mutable<typeof animator>).id = ConstraintKey.nextId();
+  StyleConstraintAnimator.construct = function <A extends StyleConstraintAnimator<any, any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>): A {
+    animator = _super.construct(animatorClass, animator, owner) as A;
+    (animator as Mutable<typeof animator>).id = ConstraintId.next();
     (animator as Mutable<typeof animator>).strength = ConstraintStrength.Strong;
     (animator as Mutable<typeof animator>).conditionCount = 0;
     return animator;
   };
 
-  StyleConstraintAnimator.specialize = function (type: unknown): StyleConstraintAnimatorClass | null {
+  StyleConstraintAnimator.specialize = function (type: unknown): StyleConstraintAnimatorFactory | null {
     if (type === Number) {
       return NumberStyleConstraintAnimator;
     } else if (type === Length) {
@@ -455,8 +451,8 @@ export const StyleConstraintAnimator = (function (_super: typeof StyleAnimator) 
     return null;
   };
 
-  StyleConstraintAnimator.define = function <V, T, U>(descriptor: StyleConstraintAnimatorDescriptor<V, T, U>): StyleConstraintAnimatorClass<StyleConstraintAnimator<any, T, U>> {
-    let superClass = descriptor.extends as StyleConstraintAnimatorClass | null | undefined;
+  StyleConstraintAnimator.define = function <O, T, U>(className: string, descriptor: StyleConstraintAnimatorDescriptor<O, T, U>): StyleConstraintAnimatorFactory<StyleConstraintAnimator<any, T, U>> {
+    let superClass = descriptor.extends as StyleConstraintAnimatorFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     const strength = descriptor.strength !== void 0 ? ConstraintStrength.fromAny(descriptor.strength) : void 0;
@@ -483,10 +479,10 @@ export const StyleConstraintAnimator = (function (_super: typeof StyleAnimator) 
       }
     }
 
-    const animatorClass = superClass.extend(descriptor);
+    const animatorClass = superClass.extend(className, descriptor);
 
-    animatorClass.construct = function (animatorClass: {prototype: StyleConstraintAnimator<any, any, any>}, animator: StyleConstraintAnimator<V, T, U> | null, owner: V, animatorName: string): StyleConstraintAnimator<V, T, U> {
-      animator = superClass!.construct(animatorClass, animator, owner, animatorName);
+    animatorClass.construct = function (animatorClass: {prototype: StyleConstraintAnimator<any, any, any>}, animator: StyleConstraintAnimator<O, T, U> | null, owner: O): StyleConstraintAnimator<O, T, U> {
+      animator = superClass!.construct(animatorClass, animator, owner);
       if (affinity !== void 0) {
         animator.initAffinity(affinity);
       }

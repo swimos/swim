@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
@@ -33,11 +33,11 @@ export interface GraphicsIconViewInit extends GraphicsViewInit, IconViewInit {
 }
 
 export class GraphicsIconView extends LayerView implements IconView {
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
-  readonly xAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
+  readonly xAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
-  readonly yAlign!: ThemeAnimator<this, number>;
+  @Animator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
+  readonly yAlign!: Animator<this, number>;
 
   @ThemeAnimator({type: Length, state: null, updateFlags: View.NeedsRender})
   readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;

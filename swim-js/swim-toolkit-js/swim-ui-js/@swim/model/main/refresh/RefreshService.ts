@@ -14,14 +14,14 @@
 
 import {Mutable, Class, Lazy, Service} from "@swim/util";
 import type {RefreshServiceObserver} from "./RefreshServiceObserver";
-import type {ModelContext} from "../model/ModelContext";
+import {ModelContext} from "../model/ModelContext";
 import {ModelFlags, Model} from "../"; // forward import
 
 export class RefreshService<M extends Model = Model> extends Service<M> {
   constructor() {
     super();
     this.flags = 0;
-    this.modelContext = this.createModelContext();
+    this.modelContext = ModelContext.create();
     this.updateDelay = RefreshService.MinUpdateDelay;
     this.analyzeTimer = 0;
     this.refreshTimer = 0;
@@ -41,12 +41,6 @@ export class RefreshService<M extends Model = Model> extends Service<M> {
   }
 
   readonly modelContext: ModelContext;
-
-  protected createModelContext(): ModelContext {
-    return {
-      updateTime: 0,
-    };
-  }
 
   updatedModelContext(): ModelContext {
     const modelContext = this.modelContext;
@@ -71,8 +65,7 @@ export class RefreshService<M extends Model = Model> extends Service<M> {
       deltaUpdateFlags |= Model.NeedsRefresh;
     }
     this.setFlags(this.flags | deltaUpdateFlags);
-    if (immediate && (this.flags & Model.TraversingFlag) === 0
-        && this.updateDelay <= RefreshService.MaxAnalyzeInterval) {
+    if (immediate && (this.flags & Model.TraversingFlag) === 0 && this.updateDelay <= RefreshService.MaxAnalyzeInterval) {
       this.runImmediatePass();
     } else {
       this.scheduleUpdate();
@@ -94,19 +87,13 @@ export class RefreshService<M extends Model = Model> extends Service<M> {
   }
 
   protected runImmediatePass(): void {
-    this.setFlags(this.flags | Model.ImmediateFlag);
-    try {
-      if ((this.flags & Model.AnalyzeMask) !== 0) {
-        this.cancelUpdate();
-        this.runAnalyzePass(true);
-      }
-      if ((this.flags & Model.RefreshMask) !== 0
-          && this.updateDelay <= RefreshService.MaxAnalyzeInterval) {
-        this.cancelUpdate();
-        this.runRefreshPass(true);
-      }
-    } finally {
-      this.setFlags(this.flags & ~Model.ImmediateFlag);
+    if ((this.flags & Model.AnalyzeMask) !== 0) {
+      this.cancelUpdate();
+      this.runAnalyzePass(true);
+    }
+    if ((this.flags & Model.RefreshMask) !== 0 && this.updateDelay <= RefreshService.MaxAnalyzeInterval) {
+      this.cancelUpdate();
+      this.runRefreshPass(true);
     }
   }
 

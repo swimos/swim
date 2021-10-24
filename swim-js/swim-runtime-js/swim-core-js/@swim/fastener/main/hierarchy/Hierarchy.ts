@@ -12,15 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Family, Arrays, ObserverType, Observable} from "@swim/util";
-import {FastenerContextClass, FastenerContext} from "../fastener/FastenerContext";
-import type {MemberFastener, FastenerClass, Fastener} from "../fastener/Fastener";
+import {
+  Mutable,
+  Class,
+  Family,
+  Arrays,
+  HashCode,
+  ObserverType,
+  Observable,
+  ObserverMethods,
+  ObserverParameters,
+} from "@swim/util";
+import {FastenerContext} from "../fastener/FastenerContext";
+import type {Fastener} from "../fastener/Fastener";
 import type {HierarchyObserver} from "./HierarchyObserver";
 
 export type HierarchyFlags = number;
 
-export abstract class Hierarchy implements Family, Observable, FastenerContext {
+export abstract class Hierarchy implements HashCode, Family, Observable, FastenerContext {
   constructor() {
+    this.uid = (this.constructor as typeof Hierarchy).uid();
     this.key = void 0;
     this.flags = 0;
     this.fasteners = null;
@@ -33,6 +44,9 @@ export abstract class Hierarchy implements Family, Observable, FastenerContext {
 
   /** @override */
   readonly observerType?: Class<HierarchyObserver>;
+
+  /** @internal */
+  readonly uid: number;
 
   readonly key: string | undefined;
 
@@ -52,41 +66,48 @@ export abstract class Hierarchy implements Family, Observable, FastenerContext {
   abstract readonly parent: Hierarchy | null;
 
   /** @internal */
-  setParent(newParent: Hierarchy | null, oldParent: Hierarchy | null): void {
-    this.willSetParent(newParent, oldParent);
-    if (oldParent !== null) {
-      this.detachParent(oldParent);
-    }
-    this.onSetParent(newParent, oldParent);
-    if (newParent !== null) {
-      this.attachParent(newParent);
-    }
-    this.didSetParent(newParent, oldParent);
-  }
-
-  /** @internal */
-  protected attachParent(parent: Hierarchy): void {
+  attachParent(parent: Hierarchy): void {
+    // assert(this.parent === null);
+    this.willAttachParent(parent);
     if (parent.mounted) {
       this.cascadeMount();
     }
+    this.onAttachParent(parent);
+    this.didAttachParent(parent);
+  }
+
+  protected willAttachParent(parent: Hierarchy): void {
+    // hook
+  }
+
+  protected onAttachParent(parent: Hierarchy): void {
+    // hook
+  }
+
+  protected didAttachParent(parent: Hierarchy): void {
+    // hook
   }
 
   /** @internal */
-  protected detachParent(parent: Hierarchy): void {
+  detachParent(parent: Hierarchy): void {
+    // assert(this.parent === parent);
+    this.willDetachParent(parent);
     if (this.mounted) {
       this.cascadeUnmount();
     }
+    this.onDetachParent(parent);
+    this.didDetachParent(parent);
   }
 
-  protected willSetParent(newParent: Hierarchy | null, oldParent: Hierarchy | null): void {
+  protected willDetachParent(parent: Hierarchy): void {
     // hook
   }
 
-  protected onSetParent(newParent: Hierarchy | null, oldParent: Hierarchy | null): void {
+  protected onDetachParent(parent: Hierarchy): void {
     // hook
   }
 
-  protected didSetParent(newParent: Hierarchy | null, oldParent: Hierarchy | null): void {
+  protected didDetachParent(parent: Hierarchy): void {
     // hook
   }
 
@@ -116,6 +137,8 @@ export abstract class Hierarchy implements Family, Observable, FastenerContext {
 
   abstract insertChild<H extends Hierarchy>(child: H, target: Hierarchy | null, key?: string): H;
 
+  abstract replaceChild<H extends Hierarchy>(newChild: Hierarchy, oldChild: H): H;
+
   get insertChildFlags(): HierarchyFlags {
     return (this.constructor as typeof Hierarchy).InsertChildFlags;
   }
@@ -138,7 +161,7 @@ export abstract class Hierarchy implements Family, Observable, FastenerContext {
   }
 
   abstract removeChild(key: string): Hierarchy | null;
-  abstract removeChild(child: Hierarchy): void;
+  abstract removeChild<H extends Hierarchy>(child: H): H;
 
   get removeChildFlags(): HierarchyFlags {
     return (this.constructor as typeof Hierarchy).RemoveChildFlags;
@@ -328,56 +351,70 @@ export abstract class Hierarchy implements Family, Observable, FastenerContext {
 
   /** @override */
   setFastener(fastenerName: string, newFastener: Fastener | null): void {
+    const fasteners = this.fasteners;
+    const oldFastener: Fastener | null | undefined = fasteners !== null ? fasteners[fastenerName] ?? null : null;
+    if (oldFastener !== newFastener) {
+      if (oldFastener !== null) {
+        this.detachFastener(fastenerName, oldFastener);
+      }
+      if (newFastener !== null) {
+        this.attachFastener(fastenerName, newFastener);
+      }
+    }
+  }
+
+  /** @internal */
+  protected attachFastener(fastenerName: string, fastener: Fastener): void {
     let fasteners = this.fasteners;
     if (fasteners === null) {
       fasteners = {};
       (this as Mutable<this>).fasteners = fasteners;
     }
-    let oldFastener: Fastener | null | undefined = fasteners[fastenerName];
-    if (oldFastener === void 0) {
-      oldFastener = null;
+    // assert(fasteners[fastenerName] === void 0);
+    this.willAttachFastener(fastenerName, fastener);
+    fasteners[fastenerName] = fastener;
+    if (this.mounted) {
+      fastener.mount();
     }
-    if (newFastener !== oldFastener) {
-      this.willSetFastener(fastenerName, newFastener, oldFastener);
-      if (oldFastener !== null) {
-        this.detachFastener(fastenerName, oldFastener);
-        if (this.mounted) {
-          oldFastener.unmount();
-        }
-      }
-      if (newFastener !== null) {
-        fasteners[fastenerName] = newFastener;
-        if (this.mounted) {
-          newFastener.mount();
-        }
-      } else {
-        delete fasteners[fastenerName];
-      }
-      this.onSetFastener(fastenerName, newFastener, oldFastener);
-      if (newFastener !== null) {
-        this.attachFastener(fastenerName, newFastener);
-      }
-      this.didSetFastener(fastenerName, newFastener, oldFastener);
-    }
+    this.onAttachFastener(fastenerName, fastener);
+    this.didAttachFastener(fastenerName, fastener);
   }
 
-  protected attachFastener(fastenerName: string, fastener: Fastener): void {
+  protected willAttachFastener(fastenerName: string, fastener: Fastener): void {
     // hook
   }
 
+  protected onAttachFastener(fastenerName: string, fastener: Fastener): void {
+    // hook
+  }
+
+  protected didAttachFastener(fastenerName: string, fastener: Fastener): void {
+    // hook
+  }
+
+  /** @internal */
   protected detachFastener(fastenerName: string, fastener: Fastener): void {
+    const fasteners = this.fasteners!;
+    // assert(fasteners !== null);
+    // assert(fasteners[fastenerName] === fastener);
+    this.willDetachFastener(fastenerName, fastener);
+    this.onDetachFastener(fastenerName, fastener);
+    if (this.mounted) {
+      fastener.unmount();
+    }
+    delete fasteners[fastenerName];
+    this.didDetachFastener(fastenerName, fastener);
+  }
+
+  protected willDetachFastener(fastenerName: string, fastener: Fastener): void {
     // hook
   }
 
-  protected willSetFastener(fastenerName: string, newFastener: Fastener | null, oldFastener: Fastener | null): void {
+  protected onDetachFastener(fastenerName: string, fastener: Fastener): void {
     // hook
   }
 
-  protected onSetFastener(fastenerName: string, newFastener: Fastener | null, oldFastener: Fastener | null): void {
-    // hook
-  }
-
-  protected didSetFastener(fastenerName: string, newFastener: Fastener | null, oldFastener: Fastener | null): void {
+  protected didDetachFastener(fastenerName: string, fastener: Fastener): void {
     // hook
   }
 
@@ -507,7 +544,7 @@ export abstract class Hierarchy implements Family, Observable, FastenerContext {
     // hook
   }
 
-  protected forEachObserver<T>(callback: (this: this, observer: ObserverType<this>) => T | void): T | undefined {
+  forEachObserver<T>(callback: (this: this, observer: ObserverType<this>) => T | void): T | undefined {
     let result: T | undefined;
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -520,19 +557,43 @@ export abstract class Hierarchy implements Family, Observable, FastenerContext {
     return result;
   }
 
-  static getFastenerClass<F extends Fastener<any>>(fastenerName: string, fastenerBound: Class<F>): FastenerClass | null;
-  static getFastenerClass<S extends abstract new (...args: any[]) => InstanceType<S>, K extends keyof InstanceType<S>>(this: S, fastenerName: K): MemberFastener<InstanceType<S>, K> | null;
-  static getFastenerClass(fastenerName: string, fastenerBound?: Class<Fastener> | null): FastenerClass | null;
-  static getFastenerClass(fastenerName: string, fastenerBound?: Class<Fastener> | null): FastenerClass | null {
-    return FastenerContext.getFastenerClass(this as FastenerContextClass, fastenerName, fastenerBound);
+  callObservers<O, K extends keyof ObserverMethods<O>>(this: this & {readonly observerType?: Class<O>}, key: K, ...args: ObserverParameters<O, K>): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]! as ObserverMethods<O>;
+      const method = observer[key];
+      if (typeof method === "function") {
+        method.call(observer, ...args);
+      }
+    }
   }
-  
+
+  /** @override */
+  equals(that: unknown): boolean {
+    return this === that;
+  }
+
+  /** @override */
+  hashCode(): number {
+    return this.uid;
+  }
+
+  /** @internal */
+  static uid: () => number = (function () {
+    let nextId = 1;
+    return function uid(): number {
+      const id = ~~nextId;
+      nextId += 1;
+      return id;
+    }
+  })();
+
   /** @internal */
   static readonly MountedFlag: HierarchyFlags = 1 << 0;
   /** @internal */
-  static readonly TraversingFlag: HierarchyFlags = 1 << 1;
+  static readonly RemovingFlag: HierarchyFlags = 1 << 1;
   /** @internal */
-  static readonly RemovingFlag: HierarchyFlags = 1 << 2;
+  static readonly TraversingFlag: HierarchyFlags = 1 << 2;
 
   /** @internal */
   static readonly FlagShift: number = 3;

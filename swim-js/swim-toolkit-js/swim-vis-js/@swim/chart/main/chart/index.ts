@@ -22,5 +22,8 @@ export {ChartViewObserver} from "./ChartViewObserver";
 export {ChartTrait} from "./ChartTrait";
 export {ChartTraitObserver} from "./ChartTraitObserver";
 
-export {ChartController} from "./ChartController";
+export {
+  ChartControllerAxisExt,
+  ChartController,
+} from "./ChartController";
 export {ChartControllerObserver} from "./ChartControllerObserver";

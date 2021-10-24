@@ -37,6 +37,7 @@ export const R2VectorInterpolator = (function (_super: typeof Interpolator) {
   };
 
   R2VectorInterpolator.prototype = Object.create(_super.prototype);
+  R2VectorInterpolator.prototype.constructor = R2VectorInterpolator;
 
   return R2VectorInterpolator;
 })(Interpolator);

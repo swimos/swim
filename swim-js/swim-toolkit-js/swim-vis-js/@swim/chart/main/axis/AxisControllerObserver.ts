@@ -17,12 +17,12 @@ import type {AxisView} from "./AxisView";
 import type {AxisTrait} from "./AxisTrait";
 import type {AxisController} from "./AxisController";
 
-export interface AxisControllerObserver<D, C extends AxisController<D> = AxisController<D>> extends ControllerObserver<C> {
-  controllerWillSetAxisTrait?(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null, controller: C): void;
+export interface AxisControllerObserver<D = unknown, C extends AxisController<D> = AxisController<D>> extends ControllerObserver<C> {
+  controllerWillAttachAxisTrait?(axisTrait: AxisTrait<D>, controller: C): void;
 
-  controllerDidSetAxisTrait?(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null, controller: C): void;
+  controllerDidDetachAxisTrait?(axisTrait: AxisTrait<D>, controller: C): void;
 
-  controllerWillSetAxisView?(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null, controller: C): void;
+  controllerWillAttachAxisView?(axisView: AxisView<D>, controller: C): void;
 
-  controllerDidSetAxisView?(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null, controller: C): void;
+  controllerDidDetachAxisView?(axisView: AxisView<D>, controller: C): void;
 }

@@ -18,7 +18,7 @@ import type {Look} from "@swim/theme";
 import type {ScatterPlotTraitObserver} from "./ScatterPlotTraitObserver";
 import type {BubblePlotTrait} from "./BubblePlotTrait";
 
-export interface BubblePlotTraitObserver<X, Y, R extends BubblePlotTrait<X, Y> = BubblePlotTrait<X, Y>> extends ScatterPlotTraitObserver<X, Y, R> {
+export interface BubblePlotTraitObserver<X = unknown, Y = unknown, R extends BubblePlotTrait<X, Y> = BubblePlotTrait<X, Y>> extends ScatterPlotTraitObserver<X, Y, R> {
   traitWillSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
 
   traitDidSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;

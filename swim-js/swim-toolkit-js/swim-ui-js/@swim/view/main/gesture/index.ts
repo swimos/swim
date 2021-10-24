@@ -23,6 +23,7 @@ export {
   GestureInit,
   GestureDescriptor,
   GestureClass,
+  GestureFactory,
   Gesture,
 } from "./Gesture";
 
@@ -31,6 +32,7 @@ export {
   PositionGestureInit,
   PositionGestureDescriptor,
   PositionGestureClass,
+  PositionGestureFactory,
   PositionGesture,
 } from "./PositionGesture";
 export {PointerPositionGesture} from "./PointerPositionGesture";
@@ -42,6 +44,7 @@ export {
   MomentumGestureInit,
   MomentumGestureDescriptor,
   MomentumGestureClass,
+  MomentumGestureFactory,
   MomentumGesture,
 } from "./MomentumGesture";
 export {PointerMomentumGesture} from "./PointerMomentumGesture";
@@ -53,6 +56,7 @@ export {
   ScaleGestureInit,
   ScaleGestureDescriptor,
   ScaleGestureClass,
+  ScaleGestureFactory,
   ScaleGesture,
 } from "./ScaleGesture";
 export {PointerScaleGesture} from "./PointerScaleGesture";

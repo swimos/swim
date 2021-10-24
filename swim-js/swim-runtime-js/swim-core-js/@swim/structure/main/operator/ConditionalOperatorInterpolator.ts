@@ -54,6 +54,7 @@ export const ConditionalOperatorInterpolator = (function (_super: typeof Interpo
   };
 
   ConditionalOperatorInterpolator.prototype = Object.create(_super.prototype);
+  ConditionalOperatorInterpolator.prototype.constructor = ConditionalOperatorInterpolator;
 
   Object.defineProperty(ConditionalOperatorInterpolator.prototype, 0, {
     get(this: ConditionalOperatorInterpolator): ConditionalOperator {

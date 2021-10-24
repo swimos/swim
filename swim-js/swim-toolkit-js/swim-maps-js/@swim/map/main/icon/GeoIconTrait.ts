@@ -27,112 +27,37 @@ export class GeoIconTrait extends GeoTrait {
     return geoCenter !== null ? geoCenter.bounds : GeoBox.undefined();
   }
 
-  protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetGeoCenter !== void 0) {
-        traitObserver.traitWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-      }
-    }
-  }
-
-  protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    // hook
-  }
-
-  protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetGeoCenter !== void 0) {
-        traitObserver.traitDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-      }
-    }
-  }
-
   @Property<GeoIconTrait, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
     willSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.willSetGeoCenter(newGeoCenter, oldGeoCenter);
+      this.owner.callObservers("traitWillSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
     },
     didSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.onSetGeoCenter(newGeoCenter, oldGeoCenter);
-      this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
+      this.owner.callObservers("traitDidSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
     },
   })
   readonly geoCenter!: Property<this, GeoPoint | null, AnyGeoPoint | null>;
-
-  protected willSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetIconLayout !== void 0) {
-        traitObserver.traitWillSetIconLayout(newIconLayout, oldIconLayout, this);
-      }
-    }
-  }
-
-  protected onSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-    // hook
-  }
-
-  protected didSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetIconLayout !== void 0) {
-        traitObserver.traitDidSetIconLayout(newIconLayout, oldIconLayout, this);
-      }
-    }
-  }
 
   @Property<GeoIconTrait, IconLayout | null, AnyIconLayout | null>({
     type: IconLayout,
     state: null,
     willSetState(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-      this.owner.willSetIconLayout(newIconLayout, oldIconLayout);
+      this.owner.callObservers("traitWillSetIconLayout", newIconLayout, oldIconLayout, this.owner);
     },
     didSetState(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-      this.owner.onSetIconLayout(newIconLayout, oldIconLayout);
-      this.owner.didSetIconLayout(newIconLayout, oldIconLayout);
+      this.owner.callObservers("traitDidSetIconLayout", newIconLayout, oldIconLayout, this.owner);
     },
   })
   readonly iconLayout!: Property<this, IconLayout | null, AnyIconLayout | null>;
 
-  protected willSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetGraphics !== void 0) {
-        traitObserver.traitWillSetGraphics(newGraphics, oldGraphics, this);
-      }
-    }
-  }
-
-  protected onSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-    // hook
-  }
-
-  protected didSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetGraphics !== void 0) {
-        traitObserver.traitDidSetGraphics(newGraphics, oldGraphics, this);
-      }
-    }
-  }
-
   @Property<GeoIconTrait, Graphics | null>({
     state: null,
     willSetState(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.willSetGraphics(newGraphics, oldGraphics);
+      this.owner.callObservers("traitWillSetGraphics", newGraphics, oldGraphics, this.owner);
     },
     didSetState(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.onSetGraphics(newGraphics, oldGraphics);
-      this.owner.didSetGraphics(newGraphics, oldGraphics);
+      this.owner.callObservers("traitDidSetGraphics", newGraphics, oldGraphics, this.owner);
     },
   })
   readonly graphics!: Property<this, Graphics | null>;

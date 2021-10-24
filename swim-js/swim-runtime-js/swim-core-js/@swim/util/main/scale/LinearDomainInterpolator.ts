@@ -40,6 +40,7 @@ export const LinearDomainInterpolator = (function (_super: typeof Interpolator) 
   };
 
   LinearDomainInterpolator.prototype = Object.create(_super.prototype);
+  LinearDomainInterpolator.prototype.constructor = LinearDomainInterpolator;
 
   return LinearDomainInterpolator;
 })(Interpolator);

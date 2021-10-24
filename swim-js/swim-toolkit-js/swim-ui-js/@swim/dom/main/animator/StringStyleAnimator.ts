@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {StyleAnimatorClass, StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorFactory, StyleAnimator} from "./StyleAnimator";
 
 /** @internal */
 export const StringStyleAnimator = (function (_super: typeof StyleAnimator) {
-  const StringStyleAnimator = _super.extend() as StyleAnimatorClass<StyleAnimator<any, string | undefined, string | undefined>>;
+  const StringStyleAnimator = _super.extend("StringStyleAnimator") as StyleAnimatorFactory<StyleAnimator<any, string | undefined, string | undefined>>;
 
   StringStyleAnimator.prototype.parse = function (value: string): string | undefined {
     return value;

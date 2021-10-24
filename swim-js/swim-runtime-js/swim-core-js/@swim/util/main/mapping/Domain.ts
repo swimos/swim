@@ -60,6 +60,7 @@ export const Domain = (function (_super: typeof Mapping) {
   };
 
   Domain.prototype = Object.create(_super.prototype);
+  Domain.prototype.constructor = Domain;
 
   Object.defineProperty(Domain.prototype, "domain", {
     get<X>(this: Domain<X>): Domain<X> {

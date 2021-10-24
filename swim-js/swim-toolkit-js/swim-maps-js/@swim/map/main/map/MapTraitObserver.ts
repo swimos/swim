@@ -23,7 +23,7 @@ export interface MapTraitObserver<R extends MapTrait = MapTrait> extends GeoTrai
 
   traitDidSetGeoPerspective?(newGeoPerspective: GeoPerspective | null, oldGeoPerspective: GeoPerspective | null, trait: R): void;
 
-  traitWillSetLayer?(newLayerTrait: GeoTrait | null, oldLayerTrait: GeoTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillAttachLayer?(layerTrait: GeoTrait, targetTrait: Trait | null, trait: R): void;
 
-  traitDidSetLayer?(newLayerTrait: GeoTrait | null, oldLayerTrait: GeoTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachLayer?(layerTrait: GeoTrait, trait: R): void;
 }

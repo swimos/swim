@@ -12,95 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Equals} from "@swim/util";
+import type {Class} from "@swim/util";
+import {Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {ScatterPlotTrait} from "./ScatterPlotTrait";
 import type {BubblePlotTraitObserver} from "./BubblePlotTraitObserver";
 
-export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
-  constructor() {
-    super();
-    this.radius = null;
-    this.fill = null;
-  }
-
+export class BubblePlotTrait<X = unknown, Y = unknown> extends ScatterPlotTrait<X, Y> {
   override readonly observerType?: Class<BubblePlotTraitObserver<X, Y>>;
 
-  readonly radius: Length | null;
+  @Property<BubblePlotTrait<X, Y>, Length | null, AnyLength | null>({
+    type: Length,
+    state: null,
+    willSetState(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.callObservers("traitWillSetPlotRadius", newRadius, oldRadius, this.owner);
+    },
+    didSetState(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.callObservers("traitDidSetPlotRadius", newRadius, oldRadius, this.owner);
+    },
+  })
+  readonly radius!: Property<this, Length | null, AnyLength | null>;
 
-  setRadius(newRadius: AnyLength): void {
-    newRadius = Length.fromAny(newRadius);
-    const oldRadius = this.radius;
-    if (!Equals(newRadius, oldRadius)) {
-      this.willSetRadius(newRadius, oldRadius);
-      (this as Mutable<this>).radius = newRadius;
-      this.onSetRadius(newRadius, oldRadius);
-      this.didSetRadius(newRadius, oldRadius);
-    }
-  }
-
-  protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetPlotRadius !== void 0) {
-        traitObserver.traitWillSetPlotRadius(newRadius, oldRadius, this);
+  @Property<BubblePlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+    state: null,
+    willSetState(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.callObservers("traitWillSetPlotFill", newFill, oldFill, this.owner);
+    },
+    didSetState(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.callObservers("traitDidSetPlotFill", newFill, oldFill, this.owner);
+    },
+    fromAny(fill: Look<Color> | AnyColor | null): Look<Color> | Color | null {
+      if (fill !== null && !(fill instanceof Look)) {
+        fill = Color.fromAny(fill);
       }
-    }
-  }
-
-  protected onSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    // hook
-  }
-
-  protected didSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetPlotRadius !== void 0) {
-        traitObserver.traitDidSetPlotRadius(newRadius, oldRadius, this);
-      }
-    }
-  }
-
-  readonly fill: Look<Color> | Color | null;
-
-  setFill(newFill: Look<Color> | AnyColor | null): void {
-    if (newFill !== null && !(newFill instanceof Look)) {
-      newFill = Color.fromAny(newFill);
-    }
-    const oldFill = this.fill;
-    if (!Equals(newFill, oldFill)) {
-      this.willSetFill(newFill, oldFill);
-      (this as Mutable<this>).fill = newFill;
-      this.onSetFill(newFill, oldFill);
-      this.didSetFill(newFill, oldFill);
-    }
-  }
-
-  protected willSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetPlotFill !== void 0) {
-        traitObserver.traitWillSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  protected onSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    // hook
-  }
-
-  protected didSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetPlotFill !== void 0) {
-        traitObserver.traitDidSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
+      return fill;
+    },
+  })
+  readonly fill!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 }

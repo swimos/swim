@@ -18,5 +18,6 @@ export {
   ProviderInit,
   ProviderDescriptor,
   ProviderClass,
+  ProviderFactory,
   Provider,
 } from "./Provider";

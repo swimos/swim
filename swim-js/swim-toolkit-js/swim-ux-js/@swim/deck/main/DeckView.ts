@@ -16,7 +16,7 @@ import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
 import {Affinity, FastenerOwner, Property} from "@swim/fastener";
 import {Length} from "@swim/math";
 import {Look, Mood, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewContext, View, ViewEdgeInsets, ViewFastenerClass, ViewFastener} from "@swim/view";
+import {ViewContextType, ViewContext, View, ViewEdgeInsets, ViewRefFactory, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {DeckBar} from "./DeckBar";
 import {DeckCard} from "./DeckCard";
@@ -56,7 +56,7 @@ export class DeckView extends HtmlView {
   /** @internal */
   cardCount: number;
 
-  card: ViewFastener<this, DeckCard> | null;
+  card: ViewRef<this, DeckCard> | null;
 
   pushCard(newCardView: DeckCard, timing?: AnyTiming | boolean): void {
     if (this.deckPhase.tweening) {
@@ -68,18 +68,22 @@ export class DeckView extends HtmlView {
     this.cardCount = newCardCount;
 
     const oldCardKey = "card" + oldCardCount;
-    const oldCardFastener = this.getFastener(oldCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
-    const oldCardView = oldCardFastener !== null ? oldCardFastener.view : null;
+    const oldCardRef = this.getFastener(oldCardKey, ViewRef) as DeckViewCard<this, DeckCard> | null;
+    const oldCardView = oldCardRef !== null ? oldCardRef.view : null;
 
     const newCardKey = "card" + newCardCount;
-    const newCardFastener = DeckViewCardFastener.create(this, newCardKey) as DeckViewCard<this, DeckCard>;
-    newCardFastener.cardIndex = newCardCount;
+    const newCardRef = DeckViewCardRef.create(this) as DeckViewCard<this, DeckCard>;
+    Object.defineProperty(newCardRef, "name", {
+      value: newCardKey,
+      configurable: true,
+    })
+    newCardRef.cardIndex = newCardCount;
     this.willPushCard(newCardView, oldCardView);
-    this.card = newCardFastener;
+    this.card = newCardRef;
 
-    this.setFastener(newCardKey, newCardFastener);
-    newCardFastener.setView(newCardView);
-    newCardFastener.injectView();
+    this.setFastener(newCardKey, newCardRef);
+    newCardRef.setView(newCardView);
+    newCardRef.insertView();
 
     if (timing === void 0 && oldCardCount === 0) {
       timing = false;
@@ -129,17 +133,17 @@ export class DeckView extends HtmlView {
     this.cardCount = newCardCount;
 
     const oldCardKey = "card" + oldCardCount;
-    const oldCardFastener = this.getFastener(oldCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
-    const oldCardView = oldCardFastener !== null ? oldCardFastener.view : null;
+    const oldCardRef = this.getFastener(oldCardKey, ViewRef) as DeckViewCard<this, DeckCard> | null;
+    const oldCardView = oldCardRef !== null ? oldCardRef.view : null;
 
     if (oldCardView !== null) {
       const newCardKey = "card" + newCardCount;
-      const newCardFastener = this.getFastener(newCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
-      const newCardView = newCardFastener !== null ? newCardFastener.view : null;
+      const newCardRef = this.getFastener(newCardKey, ViewRef) as DeckViewCard<this, DeckCard> | null;
+      const newCardView = newCardRef !== null ? newCardRef.view : null;
       this.willPopCard(newCardView, oldCardView);
-      this.card = newCardFastener;
-      if (newCardFastener !== null) {
-        newCardFastener.injectView();
+      this.card = newCardRef;
+      if (newCardRef !== null) {
+        newCardRef.insertView();
       }
 
       if (timing === void 0 || timing === true) {
@@ -174,8 +178,8 @@ export class DeckView extends HtmlView {
     const oldCardKey = oldCardView.key;
     oldCardView.remove();
     if (oldCardKey !== void 0) {
-      const oldCardFastener = this.getFastener(oldCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
-      if (oldCardFastener !== null && oldCardFastener.cardIndex > this.cardCount) {
+      const oldCardRef = this.getFastener(oldCardKey, ViewRef) as DeckViewCard<this, DeckCard> | null;
+      if (oldCardRef !== null && oldCardRef.cardIndex > this.cardCount) {
         this.setFastener(oldCardKey, null);
       }
     }
@@ -192,15 +196,15 @@ export class DeckView extends HtmlView {
       if (deckPhase !== void 0) {
         const nextCardIndex = Math.round(deckPhase + 1);
         const nextCardKey = "card" + nextCardIndex;
-        const nextCardFastener = this.getFastener(nextCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
-        const nextCardView = nextCardFastener !== null ? nextCardFastener.view : null;
+        const nextCardRef = this.getFastener(nextCardKey, ViewRef) as DeckViewCard<this, DeckCard> | null;
+        const nextCardView = nextCardRef !== null ? nextCardRef.view : null;
         if (nextCardView !== null) {
           this.didPopCard(this.card !== null ? this.card.view : null, nextCardView);
         } else if (this.card !== null && this.card.view !== null && Math.round(deckPhase) > 0) {
           const prevCardIndex = Math.round(deckPhase - 1);
           const prevCardKey = "card" + prevCardIndex;
-          const prevCardFastener = this.getFastener(prevCardKey, ViewFastener) as DeckViewCard<this, DeckCard> | null;
-          const catdCardView = prevCardFastener !== null ? prevCardFastener.view : null;
+          const prevCardRef = this.getFastener(prevCardKey, ViewRef) as DeckViewCard<this, DeckCard> | null;
+          const catdCardView = prevCardRef !== null ? prevCardRef.view : null;
           this.didPushCard(this.card.view, catdCardView);
         }
       }
@@ -228,36 +232,34 @@ export class DeckView extends HtmlView {
 }
 
 /** @internal */
-export interface DeckViewBar<V extends DeckView = DeckView, T extends DeckBar = DeckBar> extends ViewFastener<V, T> {
+export interface DeckViewBar<O extends DeckView = DeckView, V extends DeckBar = DeckBar> extends ViewRef<O, V> {
   /** @override */
-  onSetView(barView: T | null): void;
+  didAttachView(barView: V): void;
 
   /** @override */
-  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
 
-  viewDidResize(viewContext: ViewContext, barView: T): void;
+  viewDidResize(viewContext: ViewContext, barView: V): void;
 
   /** @protected */
-  initBar(barView: T): void;
+  initBar(barView: V): void;
 
   /** @protected */
-  resizeBar(barView: T): void;
+  resizeBar(barView: V): void;
 
-  deckBarDidPressBackButton(event: Event | null, view: V): void;
+  deckBarDidPressBackButton(event: Event | null, view: O): void;
 
-  deckBarDidPressCloseButton(event: Event | null, view: V): void;
+  deckBarDidPressCloseButton(event: Event | null, view: O): void;
 }
 /** @internal */
-export const DeckViewBar = (function (_super: typeof ViewFastener) {
-  const DeckViewBar = _super.extend() as ViewFastenerClass<DeckViewBar<any, any>>;
+export const DeckViewBar = (function (_super: typeof ViewRef) {
+  const DeckViewBar = _super.extend("DeckSliderItem") as ViewRefFactory<DeckViewBar<any, any>>;
 
-  DeckViewBar.prototype.onSetView = function (this: DeckViewBar, barView: DeckBar | null): void {
-    if (barView !== null) {
-      this.initBar(barView);
-    }
+  DeckViewBar.prototype.didAttachView = function (this: DeckViewBar, barView: DeckBar): void {
+    this.initBar(barView);
   };
 
-  DeckViewBar.prototype.insertView = function (this: DeckViewBar, parent: View, childView: DeckBar, targetView: View | null, key: string | undefined): void {
+  DeckViewBar.prototype.insertChild = function (this: DeckViewBar, parent: View, childView: DeckBar, targetView: View | null, key: string | undefined): void {
     parent.prependChild(childView, key);
   };
 
@@ -290,49 +292,47 @@ export const DeckViewBar = (function (_super: typeof ViewFastener) {
   };
 
   return DeckViewBar;
-})(ViewFastener);
-ViewFastener({
+})(ViewRef);
+ViewRef({
   extends: DeckViewBar,
   key: true,
   type: DeckBar,
-  child: true,
+  binds: true,
   observes: true,
 })(DeckView.prototype, "bar");
 
 /** @internal */
-export interface DeckViewCard<V extends DeckView = DeckView, T extends DeckCard = DeckCard> extends ViewFastener<V, T> {
+export interface DeckViewCard<O extends DeckView = DeckView, V extends DeckCard = DeckCard> extends ViewRef<O, V> {
   cardIndex: number;
 
   /** @override */
-  onSetView(cardView: T | null): void;
+  didAttachView(cardView: V): void;
 
   /** @override */
-  insertView(parent: View, childView: T, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
 
-  viewDidResize(viewContext: ViewContext, cardView: T): void;
+  viewDidResize(viewContext: ViewContext, cardView: V): void;
 
-  viewDidLayout(viewContext: ViewContext, cardView: T): void;
-
-  /** @protected */
-  initCard(cardView: T): void;
+  viewDidLayout(viewContext: ViewContext, cardView: V): void;
 
   /** @protected */
-  resizeCard(cardView: T, viewContext: ViewContext): void;
+  initCard(cardView: V): void;
 
   /** @protected */
-  layoutCard(cardView: T, viewContext: ViewContext): void;
+  resizeCard(cardView: V, viewContext: ViewContext): void;
+
+  /** @protected */
+  layoutCard(cardView: V, viewContext: ViewContext): void;
 }
 /** @internal */
-export const DeckViewCard = (function (_super: typeof ViewFastener) {
-  const DeckViewCard = _super.extend() as ViewFastenerClass<DeckViewCard<any, any>>;
+export const DeckViewCard = (function (_super: typeof ViewRef) {
+  const DeckViewCard = _super.extend("DeckSliderItem") as ViewRefFactory<DeckViewCard<any, any>>;
 
-  DeckViewCard.prototype.onSetView = function (this: DeckViewCard, cardView: DeckCard | null): void {
-    if (cardView !== null) {
-      this.initCard(cardView);
-    }
+  DeckViewCard.prototype.didAttachView = function (this: DeckViewCard, cardView: DeckCard): void {
+    this.initCard(cardView);
   };
 
-  DeckViewCard.prototype.insertView = function (this: DeckViewCard, parent: View, childView: DeckCard, targetView: View | null, key: string | undefined): void {
+  DeckViewCard.prototype.insertChild = function (this: DeckViewCard, parent: View, childView: DeckCard, targetView: View | null, key: string | undefined): void {
     const targetKey = "card" + (this.cardIndex + 1);
     targetView = parent.getChild(targetKey);
     parent.insertChild(childView, targetView, key);
@@ -447,19 +447,18 @@ export const DeckViewCard = (function (_super: typeof ViewFastener) {
     }
   };
 
-  DeckViewCard.construct = function <F extends DeckViewCard<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
-    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+  DeckViewCard.construct = function <F extends DeckViewCard<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
+    fastener = _super.construct(fastenerClass, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).cardIndex = 0;
     return fastener;
   };
 
   return DeckViewCard;
-})(ViewFastener);
+})(ViewRef);
 /** @internal */
-export const DeckViewCardFastener = ViewFastener.define<DeckView, DeckCard>({
+export const DeckViewCardRef = ViewRef.define<DeckView, DeckCard>("DeckViewCardRef", {
   extends: DeckViewCard,
   key: true,
   type: DeckCard,
-  child: false,
   observes: true,
 });

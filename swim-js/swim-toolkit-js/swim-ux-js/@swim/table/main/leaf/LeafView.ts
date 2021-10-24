@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {AnyFocus, Focus, AnyExpansion, Expansion} from "@swim/style";
 import {
@@ -25,12 +25,12 @@ import {
   ThemeConstraintAnimator,
 } from "@swim/theme";
 import {
+  PositionGestureInput,
+  PositionGesture,
   ViewContextType,
   ViewFlags,
   View,
-  ViewFastener,
-  PositionGestureInput,
-  PositionGesture,
+  ViewSet,
 } from "@swim/view";
 import {ViewNode, HtmlViewClass, HtmlView} from "@swim/dom";
 import {ButtonGlow} from "@swim/button";
@@ -41,7 +41,6 @@ import type {LeafViewObserver} from "./LeafViewObserver";
 export class LeafView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    this.cellFasteners = [];
     this.initLeaf();
   }
 
@@ -64,19 +63,7 @@ export class LeafView extends HtmlView {
   @Property({type: TableLayout, inherits: true, state: null, updateFlags: View.NeedsLayout})
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
-  protected didSetDepth(newDepth: number, oldDepth: number): void {
-    // hook
-  }
-
-  @Property<LeafView, number>({
-    type: Number,
-    inherits: true,
-    state: 0,
-    updateFlags: View.NeedsLayout,
-    didSetState(newDepth: number, oldDepth: number): void {
-      this.owner.didSetDepth(newDepth, oldDepth);
-    },
-  })
+  @Property({type: Number, inherits: true, state: 0, updateFlags: View.NeedsLayout})
   readonly depth!: Property<this, number>;
 
   @ThemeConstraintAnimator({type: Length, inherits: true, state: null, updateFlags: View.NeedsLayout})
@@ -88,21 +75,6 @@ export class LeafView extends HtmlView {
   @ThemeAnimator({type: Expansion, inherits: true, state: null, updateFlags: View.NeedsLayout})
   readonly stretch!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  protected didSetHover(newHover: Focus, oldHover: Focus): void {
-    const highlightPhase = this.highlight.getPhase();
-    const hoverPhase = newHover.phase;
-    const backgroundPhase = Math.max(highlightPhase, hoverPhase);
-    this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
-                                   [Feel.hovering, hoverPhase * (1 - highlightPhase)],
-                                   [Feel.selected, highlightPhase]], false);
-    if (backgroundPhase !== 0) {
-      this.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
-    } else {
-      this.backgroundColor.setLook(null, Affinity.Intrinsic);
-      this.backgroundColor.setState(null, Affinity.Intrinsic);
-    }
-  }
-
   @Property({type: Boolean, inherits: true, state: false})
   readonly hovers!: Property<this, boolean>;
 
@@ -110,93 +82,50 @@ export class LeafView extends HtmlView {
     type: Focus,
     state: Focus.unfocused(),
     didSetValue(newHover: Focus, oldHover: Focus): void {
-      this.owner.didSetHover(newHover, oldHover);
+      const highlightPhase = this.owner.highlight.getPhase();
+      const hoverPhase = newHover.phase;
+      const backgroundPhase = Math.max(highlightPhase, hoverPhase);
+      this.owner.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
+                                           [Feel.hovering, hoverPhase * (1 - highlightPhase)],
+                                           [Feel.selected, highlightPhase]], false);
+      if (backgroundPhase !== 0) {
+        this.owner.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
+      } else {
+        this.owner.backgroundColor.setLook(null, Affinity.Intrinsic);
+        this.owner.backgroundColor.setState(null, Affinity.Intrinsic);
+      }
     },
   })
   readonly hover!: FocusThemeAnimator<this>;
-
-  protected willHighlight(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillHighlight !== void 0) {
-        observer.viewWillHighlight(this);
-      }
-    }
-  }
-
-  protected onHighlight(): void {
-    // hook
-  }
-
-  protected didHighlight(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidHighlight !== void 0) {
-        observer.viewDidHighlight(this);
-      }
-    }
-  }
-
-  protected willUnhighlight(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillUnhighlight !== void 0) {
-        observer.viewWillUnhighlight(this);
-      }
-    }
-  }
-
-  protected onUnhighlight(): void {
-    // hook
-  }
-
-  protected didUnhighlight(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidUnhighlight !== void 0) {
-        observer.viewDidUnhighlight(this);
-      }
-    }
-  }
-
-  protected didSetHighlight(newHighlight: Focus, oldHighlight: Focus): void {
-    const highlightPhase = newHighlight.phase;
-    const hoverPhase = this.hover.getPhase();
-    const backgroundPhase = Math.max(highlightPhase, hoverPhase);
-    this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
-                                   [Feel.hovering, hoverPhase * (1 - highlightPhase)],
-                                   [Feel.selected, highlightPhase]], false);
-    if (backgroundPhase !== 0) {
-      this.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
-    } else {
-      this.backgroundColor.setLook(null, Affinity.Intrinsic);
-      this.backgroundColor.setState(null, Affinity.Intrinsic);
-    }
-  }
 
   @ThemeAnimator<LeafView, Focus, AnyFocus>({
     type: Focus,
     state: Focus.unfocused(),
     willFocus(): void {
-      this.owner.willHighlight();
-      this.owner.onHighlight();
+      this.owner.callObservers("viewWillHighlight", this.owner);
     },
     didFocus(): void {
-      this.owner.didHighlight();
+      this.owner.callObservers("viewDidHighlight", this.owner);
     },
     willUnfocus(): void {
-      this.owner.willUnhighlight();
+      this.owner.callObservers("viewWillUnhighlight", this.owner);
     },
     didUnfocus(): void {
-      this.owner.onUnhighlight();
-      this.owner.didUnhighlight();
+      this.owner.callObservers("viewDidUnhighlight", this.owner);
     },
     didSetValue(newHighlight: Focus, oldHighlight: Focus): void {
-      this.owner.didSetHighlight(newHighlight, oldHighlight);
+      const highlightPhase = newHighlight.phase;
+      const hoverPhase = this.owner.hover.getPhase();
+      const backgroundPhase = Math.max(highlightPhase, hoverPhase);
+      this.owner.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
+                                           [Feel.hovering, hoverPhase * (1 - highlightPhase)],
+                                           [Feel.selected, highlightPhase]], false);
+      if (backgroundPhase !== 0) {
+        this.owner.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
+      } else {
+        this.owner.backgroundColor.setLook(null, Affinity.Intrinsic);
+        this.owner.backgroundColor.setState(null, Affinity.Intrinsic);
+      }
     },
   })
   readonly highlight!: FocusThemeAnimator<this>;
@@ -224,149 +153,26 @@ export class LeafView extends HtmlView {
     this.setChild(key, cellView);
   }
 
-  insertCell(cellView: CellView, targetView: View | null = null): void {
-    const cellFasteners = this.cellFasteners as ViewFastener<this, CellView>[];
-    let targetIndex = cellFasteners.length;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      if (cellFastener.view === cellView) {
-        return;
-      } else if (cellFastener.view === targetView) {
-        targetIndex = i;
-      }
-    }
-    const cellFastener = this.createCellFastener(cellView);
-    cellFasteners.splice(targetIndex, 0, cellFastener);
-    cellFastener.setView(cellView, targetView);
-    if (this.mounted) {
-      cellFastener.mount();
-    }
-  }
-
-  removeCell(cellView: CellView): void {
-    const cellFasteners = this.cellFasteners as ViewFastener<this, CellView>[];
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      if (cellFastener.view === cellView) {
-        cellFastener.setView(null);
-        if (this.mounted) {
-          cellFastener.unmount();
-        }
-        cellFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected initCell(cellView: CellView, cellFastener: ViewFastener<this, CellView>): void {
-    cellView.display.setState("none", Affinity.Intrinsic);
-    cellView.position.setState("absolute", Affinity.Intrinsic);
-    cellView.left.setState(0, Affinity.Intrinsic);
-    cellView.top.setState(0, Affinity.Intrinsic);
-    cellView.width.setState(0, Affinity.Intrinsic);
-    cellView.height.setState(this.height.state, Affinity.Intrinsic);
-  }
-
-  protected attachCell(cellView: CellView, cellFastener: ViewFastener<this, CellView>): void {
-    // hook
-  }
-
-  protected detachCell(cellView: CellView, cellFastener: ViewFastener<this, CellView>): void {
-    // hook
-  }
-
-  protected willSetCell(newCellView: CellView | null, oldCellView: CellView | null,
-                        targetView: View | null, cellFastener: ViewFastener<this, CellView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetCell !== void 0) {
-        observer.viewWillSetCell(newCellView, oldCellView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetCell(newCellView: CellView | null, oldCellView: CellView | null,
-                      targetView: View | null, cellFastener: ViewFastener<this, CellView>): void {
-    if (oldCellView !== null) {
-      this.detachCell(oldCellView, cellFastener);
-    }
-    if (newCellView !== null) {
-      this.attachCell(newCellView, cellFastener);
-      this.initCell(newCellView, cellFastener);
-    }
-  }
-
-  protected didSetCell(newCellView: CellView | null, oldCellView: CellView | null,
-                       targetView: View | null, cellFastener: ViewFastener<this, CellView>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetCell !== void 0) {
-        observer.viewDidSetCell(newCellView, oldCellView, targetView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static CellFastener = ViewFastener.define<LeafView, CellView>({
+  @ViewSet<LeafView, CellView>({
     type: CellView,
-    child: false,
-    willSetView(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null): void {
-      this.owner.willSetCell(newCellView, oldCellView, targetView, this);
+    binds: true,
+    initView(cellView: CellView): void {
+      cellView.display.setState("none", Affinity.Intrinsic);
+      cellView.position.setState("absolute", Affinity.Intrinsic);
+      cellView.left.setState(0, Affinity.Intrinsic);
+      cellView.top.setState(0, Affinity.Intrinsic);
+      cellView.width.setState(0, Affinity.Intrinsic);
+      cellView.height.setState(this.owner.height.state, Affinity.Intrinsic);
     },
-    onSetView(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null): void {
-      this.owner.onSetCell(newCellView, oldCellView, targetView, this);
+    willAttachView(cellView: CellView, targetView: View | null): void {
+      this.owner.callObservers("viewWillAttachCell", cellView, targetView, this.owner);
     },
-    didSetView(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null): void {
-      this.owner.didSetCell(newCellView, oldCellView, targetView, this);
+    didDetachView(cellView: CellView): void {
+      this.owner.callObservers("viewDidDetachCell", cellView, this.owner);
     },
-  });
-
-  protected createCellFastener(cellView: CellView): ViewFastener<this, CellView> {
-    return LeafView.CellFastener.create(this, cellView.key ?? "cell");
-  }
-
-  /** @internal */
-  readonly cellFasteners: ReadonlyArray<ViewFastener<this, CellView>>;
-
-  /** @internal */
-  protected mountCellFasteners(): void {
-    const cellFasteners = this.cellFasteners;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      cellFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountCellFasteners(): void {
-    const cellFasteners = this.cellFasteners;
-    for (let i = 0, n = cellFasteners.length; i < n; i += 1) {
-      const cellFastener = cellFasteners[i]!;
-      cellFastener.unmount();
-    }
-  }
-
-  protected detectCell(view: View): CellView | null {
-    return view instanceof CellView ? view : null;
-  }
-
-  protected override onInsertChild(childView: View, targetView: View | null): void {
-    super.onInsertChild(childView, targetView);
-    const cellView = this.detectCell(childView);
-    if (cellView !== null) {
-      this.insertCell(cellView, targetView);
-    }
-  }
-
-  protected override onRemoveChild(childView: View): void {
-    super.onRemoveChild(childView);
-    const cellView = this.detectCell(childView);
-    if (cellView !== null) {
-      this.removeCell(cellView);
-    }
-  }
+  })
+  readonly cells!: ViewSet<this, CellView>;
+  static readonly cells: MemberFastenerClass<LeafView, "cells">;
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
@@ -428,18 +234,6 @@ export class LeafView extends HtmlView {
     super.displayChildren(displayFlags, viewContext, layoutChildView);
   }
 
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountCellFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountCellFasteners();
-    super.unmountFasteners();
-  }
-
   @Property({type: Boolean, inherits: true, state: true})
   readonly glows!: Property<this, boolean>;
 
@@ -455,68 +249,8 @@ export class LeafView extends HtmlView {
     }
   }
 
-  protected onEnter(): void {
-    if (this.hovers.state) {
-      this.hover.focus(false);
-    }
-  }
-
-  protected didEnter(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidEnter !== void 0) {
-        observer.viewDidEnter(this);
-      }
-    }
-  }
-
-  protected onLeave(): void {
-    if (this.hovers.state) {
-      this.hover.unfocus();
-    }
-  }
-
-  protected didLeave(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidLeave !== void 0) {
-        observer.viewDidLeave(this);
-      }
-    }
-  }
-
-  protected onPress(input: PositionGestureInput, event: Event | null): void {
-    // hook
-  }
-
-  protected didPress(input: PositionGestureInput, event: Event | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidPress !== void 0) {
-        observer.viewDidPress(input, event, this);
-      }
-    }
-  }
-
-  protected onLongPress(input: PositionGestureInput): void {
-    // hook
-  }
-
-  protected didLongPress(input: PositionGestureInput): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidLongPress !== void 0) {
-        observer.viewDidLongPress(input, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static Gesture = PositionGesture.define<LeafView, LeafView>({
+  @PositionGesture<LeafView, LeafView>({
+    self: true,
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
       if (this.owner.glows.state) {
         this.owner.glow(input);
@@ -555,12 +289,16 @@ export class LeafView extends HtmlView {
       }
     },
     didStartHovering(): void {
-      this.owner.onEnter();
-      this.owner.didEnter();
+      if (this.owner.hovers.state) {
+        this.owner.hover.focus(false);
+      }
+      this.owner.callObservers("viewDidEnter", this.owner);
     },
     didStopHovering(): void {
-      this.owner.onLeave();
-      this.owner.didLeave();
+      if (this.owner.hovers.state) {
+        this.owner.hover.unfocus();
+      }
+      this.owner.callObservers("viewDidLeave", this.owner);
     },
     didPress(input: PositionGestureInput, event: Event | null): void {
       if (this.owner.clientBounds.contains(input.x, input.y)) {
@@ -577,8 +315,7 @@ export class LeafView extends HtmlView {
           }
         }
         if (!input.defaultPrevented) {
-          this.owner.onPress(input, event);
-          this.owner.didPress(input, event);
+          this.owner.callObservers("viewDidPress", input, event, this.owner);
         }
       }
     },
@@ -596,16 +333,10 @@ export class LeafView extends HtmlView {
         }
       }
       if (!input.defaultPrevented) {
-        this.owner.onLongPress(input);
-        this.owner.didLongPress(input);
+        this.owner.callObservers("viewDidLongPress", input, this.owner);
       }
     },
-  });
-
-  @PositionGesture<LeafView, LeafView>({
-    extends: LeafView.Gesture,
-    eager: true,
-    self: true,
   })
   readonly gesture!: PositionGesture<this, LeafView>;
+  static readonly gesture: MemberFastenerClass<LeafView, "gesture">;
 }

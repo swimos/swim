@@ -20,60 +20,60 @@ import type {ChartView} from "./ChartView";
 import type {ChartTrait} from "./ChartTrait";
 import type {ChartController} from "./ChartController";
 
-export interface ChartControllerObserver<X, Y, C extends ChartController<X, Y> = ChartController<X, Y>> extends GraphControllerObserver<X, Y, C> {
-  controllerWillSetChartTrait?(newChartTraitt: ChartTrait<X, Y> | null, oldChartTrait: ChartTrait<X, Y> | null, controller: C): void;
+export interface ChartControllerObserver<X = unknown, Y = unknown, C extends ChartController<X, Y> = ChartController<X, Y>> extends GraphControllerObserver<X, Y, C> {
+  controllerWillAttachChartTrait?(chartTrait: ChartTrait<X, Y>, controller: C): void;
 
-  controllerDidSetChartTrait?(newChartTraitt: ChartTrait<X, Y> | null, oldChartTrait: ChartTrait<X, Y> | null, controller: C): void;
+  controllerDidDetachChartTrait?(chartTrait: ChartTrait<X, Y>, controller: C): void;
 
-  controllerWillSetChartView?(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null, controller: C): void;
+  controllerWillAttachChartView?(chartView: ChartView<X, Y>, controller: C): void;
 
-  controllerDidSetChartView?(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null, controller: C): void;
+  controllerDidDetachChartView?(chartView: ChartView<X, Y>, controller: C): void;
 
-  controllerWillSetTopAxis?(newTopAxisController: AxisController<X> | null, oldTopAxisController: AxisController<X> | null, controller: C): void;
+  controllerWillAttachTopAxis?(topAxisController: AxisController<X>, controller: C): void;
 
-  controllerDidSetTopAxis?(newTopAxisController: AxisController<X> | null, oldTopAxisController: AxisController<X> | null, controller: C): void;
+  controllerDidDetachTopAxis?(topAxisController: AxisController<X>, controller: C): void;
 
-  controllerWillSetTopAxisTrait?(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, controller: C): void;
+  controllerWillAttachTopAxisTrait?(topAxisTrait: AxisTrait<X>, controller: C): void;
 
-  controllerDidSetTopAxisTrait?(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, controller: C): void;
+  controllerDidDetachTopAxisTrait?(topAxisTrait: AxisTrait<X>, controller: C): void;
 
-  controllerWillSetTopAxisView?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, controller: C): void;
+  controllerWillAttachTopAxisView?(topAxisView: AxisView<X>, controller: C): void;
 
-  controllerDidSetTopAxisView?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, controller: C): void;
+  controllerDidDetachTopAxisView?(topAxisView: AxisView<X>, controller: C): void;
 
-  controllerWillSetRightAxis?(newRightAxisController: AxisController<Y> | null, oldRightAxisController: AxisController<Y> | null, controller: C): void;
+  controllerWillAttachRightAxis?(rightAxisController: AxisController<Y>, controller: C): void;
 
-  controllerDidSetRightAxis?(newRightAxisController: AxisController<Y> | null, oldRightAxisController: AxisController<Y> | null, controller: C): void;
+  controllerDidDetachRightAxis?(rightAxisController: AxisController<Y>, controller: C): void;
 
-  controllertWillSetRightAxisTrait?(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, controller: C): void;
+  controllerWillAttachRightAxisTrait?(rightAxisTrait: AxisTrait<Y>, controller: C): void;
 
-  controllerDidSetRightAxisTrait?(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, controller: C): void;
+  controllerDidDetachRightAxisTrait?(rightAxisTrait: AxisTrait<Y>, controller: C): void;
 
-  controllerWillSetRightAxisView?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, controller: C): void;
+  controllerWillAttachRightAxisView?(rightAxisView: AxisView<Y>, controller: C): void;
 
-  controllerDidSetRightAxisView?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, controller: C): void;
+  controllerDidDetachRightAxisView?(rightAxisView: AxisView<Y>, controller: C): void;
 
-  controllerWillSetBottomAxis?(newBottomAxisController: AxisController<X> | null, oldBottomAxisController: AxisController<X> | null, controller: C): void;
+  controllerWillAttachBottomAxis?(bottomAxisController: AxisController<X>, controller: C): void;
 
-  controllerDidSetBottomAxis?(newBottomAxisController: AxisController<X> | null, oldBottomAxisController: AxisController<X> | null, controller: C): void;
+  controllerDidDetachBottomAxis?(bottomAxisController: AxisController<X>, controller: C): void;
 
-  controllerWillSetBottomAxisTrait?(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, controller: C): void;
+  controllerWillAttachBottomAxisTrait?(bottomAxisTrait: AxisTrait<X>, controller: C): void;
 
-  controllerDidSetBottomAxisTrait?(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, controller: C): void;
+  controllerDidDetachBottomAxisTrait?(bottomAxisTrait: AxisTrait<X>, controller: C): void;
 
-  controllerWillSetBottomAxisView?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, controller: C): void;
+  controllerWillAttachBottomAxisView?(bottomAxisView: AxisView<X>, controller: C): void;
 
-  controllerDidSetBottomAxisView?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, controller: C): void;
+  controllerDidDetachBottomAxisView?(bottomAxisView: AxisView<X>, controller: C): void;
 
-  controllerWillSetLeftAxis?(newLeftAxisController: AxisController<Y> | null, oldLeftAxisController: AxisController<Y> | null, controller: C): void;
+  controllerWillAttachLeftAxis?(leftAxisController: AxisController<Y>, controller: C): void;
 
-  controllerDidSetLeftAxis?(newLeftAxisController: AxisController<Y> | null, oldLeftAxisController: AxisController<Y> | null, controller: C): void;
+  controllerDidDetachLeftAxis?(leftAxisController: AxisController<Y>, controller: C): void;
 
-  controllerWillSetLeftAxisTrait?(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, controller: C): void;
+  controllerWillAttachLeftAxisTrait?(leftAxisTrait: AxisTrait<Y>, controller: C): void;
 
-  controllerDidSetLeftAxisTrait?(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, controller: C): void;
+  controllerDidDetachLeftAxisTrait?(leftAxisTrait: AxisTrait<Y>, controller: C): void;
 
-  controllerWillSetLeftAxisView?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, controller: C): void;
+  controllerWillAttachLeftAxisView?(leftAxisView: AxisView<Y>, controller: C): void;
 
-  controllerDidSetLeftAxisView?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, controller: C): void;
+  controllerDidDetachLeftAxisView?(leftAxisView: AxisView<Y>, controller: C): void;
 }

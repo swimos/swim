@@ -50,6 +50,7 @@ export const SlotInterpolator = (function (_super: typeof Interpolator) {
   };
 
   SlotInterpolator.prototype = Object.create(_super.prototype);
+  SlotInterpolator.prototype.constructor = SlotInterpolator;
 
   Object.defineProperty(SlotInterpolator.prototype, 0, {
     get(this: SlotInterpolator): Slot {

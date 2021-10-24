@@ -18,8 +18,8 @@ import {Provider, GenericHierarchy} from "@swim/fastener";
 export class ProviderSpec extends Spec {
   @Test
   testProviderDefine(exam: Exam): void {
-    const testProvider = Provider.define({service: "bar"});
-    const provider = testProvider.create(null, "foo");
+    const testProvider = Provider.define("foo", {service: "bar"});
+    const provider = testProvider.create(null);
     exam.equal(provider.name, "foo");
     exam.equal(provider.service, "bar");
     exam.equal(provider(), "bar", "accessor");
@@ -70,7 +70,7 @@ export class ProviderSpec extends Spec {
     let id = 0;
     class TestHierarchy extends GenericHierarchy {
       @Provider<TestHierarchy, {id: number} | undefined>({
-        eager: true,
+        lazy: false,
         inherits: true,
         createService(): {id: number} | undefined {
           const service = {id};

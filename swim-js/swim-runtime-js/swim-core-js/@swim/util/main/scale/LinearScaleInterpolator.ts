@@ -52,6 +52,7 @@ export const LinearScaleInterpolator = (function (_super: typeof Interpolator) {
   };
 
   LinearScaleInterpolator.prototype = Object.create(_super.prototype);
+  LinearScaleInterpolator.prototype.constructor = LinearScaleInterpolator;
 
   return LinearScaleInterpolator;
 })(Interpolator);

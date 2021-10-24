@@ -55,6 +55,7 @@ export const ColorStopInterpolator = (function (_super: typeof Interpolator) {
   };
 
   ColorStopInterpolator.prototype = Object.create(_super.prototype);
+  ColorStopInterpolator.prototype.constructor = ColorStopInterpolator;
 
   Object.defineProperty(ColorStopInterpolator.prototype, 0, {
     get(this: ColorStopInterpolator): ColorStop {

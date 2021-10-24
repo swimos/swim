@@ -19,7 +19,6 @@ export {
   ControllerFlags,
   AnyController,
   ControllerInit,
-  AnyControllerFactory,
   ControllerFactory,
   ControllerClass,
   ControllerConstructor,
@@ -30,10 +29,28 @@ export {ControllerObserver} from "./ControllerObserver";
 export {GenericController} from "./GenericController";
 
 export {
-  ControllerFastenerType,
-  ControllerFastenerInitType,
-  ControllerFastenerInit,
-  ControllerFastenerDescriptor,
-  ControllerFastenerClass,
-  ControllerFastener,
-} from "./ControllerFastener";
+  ControllerRelationType,
+  ControllerRelationInit,
+  ControllerRelationDescriptor,
+  ControllerRelationClass,
+  ControllerRelationFactory,
+  ControllerRelation,
+} from "./ControllerRelation";
+
+export {
+  ControllerRefType,
+  ControllerRefInit,
+  ControllerRefDescriptor,
+  ControllerRefClass,
+  ControllerRefFactory,
+  ControllerRef,
+} from "./ControllerRef";
+
+export {
+  ControllerSetType,
+  ControllerSetInit,
+  ControllerSetDescriptor,
+  ControllerSetClass,
+  ControllerSetFactory,
+  ControllerSet,
+} from "./ControllerSet";

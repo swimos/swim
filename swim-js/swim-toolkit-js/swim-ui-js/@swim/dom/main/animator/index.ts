@@ -16,6 +16,7 @@ export {
   AttributeAnimatorInit,
   AttributeAnimatorDescriptor,
   AttributeAnimatorClass,
+  AttributeAnimatorFactory,
   AttributeAnimator,
 } from "./AttributeAnimator";
 
@@ -35,6 +36,7 @@ export {
   StyleAnimatorInit,
   StyleAnimatorDescriptor,
   StyleAnimatorClass,
+  StyleAnimatorFactory,
   StyleAnimator,
 } from "./StyleAnimator";
 
@@ -56,6 +58,7 @@ export {
   StyleConstraintAnimatorInit,
   StyleConstraintAnimatorDescriptor,
   StyleConstraintAnimatorClass,
+  StyleConstraintAnimatorFactory,
   StyleConstraintAnimator,
 } from "./StyleConstraintAnimator";
 

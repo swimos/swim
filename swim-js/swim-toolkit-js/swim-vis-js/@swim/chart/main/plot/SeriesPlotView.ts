@@ -13,17 +13,17 @@
 // limitations under the License.
 
 import {Mutable, Class, Equals, Values, Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, Property, Animator} from "@swim/fastener";
 import {BTree} from "@swim/collections";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, AnyView, View, ViewFastener} from "@swim/view";
+import {ViewContextType, ViewFlags, AnyView, ViewFactory, View, ViewRef} from "@swim/view";
 import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import type {DataPointCategory} from "../data/DataPoint";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
-import type {PlotViewInit, PlotView} from "./PlotView";
+import type {PlotViewInit, PlotViewDataPointExt, PlotView} from "./PlotView";
 import type {SeriesPlotViewObserver} from "./SeriesPlotViewObserver";
 
 export type SeriesPlotHitMode = "domain" | "plot" | "data" | "none";
@@ -40,7 +40,7 @@ export interface SeriesPlotViewInit<X = unknown, Y = unknown> extends PlotViewIn
 export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsView implements PlotView<X, Y> {
   constructor() {
     super();
-    this.dataPointFasteners = new BTree();
+    this.dataPointRefs = new BTree();
     this.xDataDomain = null;
     this.yDataDomain = null;
     this.xDataRange = null;
@@ -61,82 +61,34 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   @Property({type: String, state: "domain"})
   readonly hitMode!: Property<this, SeriesPlotHitMode>;
 
-  protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetXScale !== void 0) {
-        observer.viewWillSetXScale(newXScale, oldXScale, this);
-      }
-    }
-  }
-
-  protected onSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    this.updateXDataRange();
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected didSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetXScale !== void 0) {
-        observer.viewDidSetXScale(newXScale, oldXScale, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<SeriesPlotView<X, Y>, ContinuousScale<X, number> | null>({
+  @Animator<SeriesPlotView<X, Y>, ContinuousScale<X, number> | null>({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
     inherits: true,
     state: null,
+    updateFlags: View.NeedsLayout,
     willSetValue(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-      this.owner.willSetXScale(newXScale, oldXScale);
+      this.owner.callObservers("viewWillSetXScale", newXScale, oldXScale, this.owner);
     },
     didSetValue(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-      this.owner.onSetXScale(newXScale, oldXScale);
-      this.owner.didSetXScale(newXScale, oldXScale);
+      this.owner.updateXDataRange();
+      this.owner.callObservers("viewDidSetXScale", newXScale, oldXScale, this.owner);
     },
   })
   readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
-  protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetYScale !== void 0) {
-        observer.viewWillSetYScale(newYScale, oldYScale, this);
-      }
-    }
-  }
-
-  protected onSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    this.updateYDataRange();
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected didSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetYScale !== void 0) {
-        observer.viewDidSetYScale(newYScale, oldYScale, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<SeriesPlotView<X, Y>, ContinuousScale<Y, number> | null>({
+  @Animator<SeriesPlotView<X, Y>, ContinuousScale<Y, number> | null>({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
     inherits: true,
     state: null,
+    updateFlags: View.NeedsLayout,
     willSetValue(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-      this.owner.willSetYScale(newYScale, oldYScale);
+      this.owner.callObservers("viewWillSetYScale", newYScale, oldYScale, this.owner);
     },
     didSetValue(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-      this.owner.onSetYScale(newYScale, oldYScale);
-      this.owner.didSetYScale(newYScale, oldYScale);
+      this.owner.updateYDataRange();
+      this.owner.callObservers("viewDidSetYScale", newYScale, oldYScale, this.owner);
     },
   })
   readonly yScale!: ContinuousScaleAnimator<this, Y, number>;
@@ -179,78 +131,28 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     return yScale !== null ? yScale.range : null;
   }
 
-  protected willSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetXRangePadding !== void 0) {
-        observer.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
-      }
-    }
-  }
-
-  protected onSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    // hook
-  }
-
-  protected didSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetXRangePadding !== void 0) {
-        observer.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
-      }
-    }
-  }
-
   @Property<SeriesPlotView<X, Y>, readonly [number, number]>({
     initState(): readonly [number, number] {
       return [0, 0];
     },
     willSetState(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-      this.owner.willSetXRangePadding(newXRangePadding, oldXRangePadding);
+      this.owner.callObservers("viewWillSetXRangePadding", newXRangePadding, oldXRangePadding, this.owner);
     },
     didSetState(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-      this.owner.onSetXRangePadding(newXRangePadding, oldXRangePadding);
-      this.owner.didSetXRangePadding(newXRangePadding, oldXRangePadding);
+      this.owner.callObservers("viewDidSetXRangePadding", newXRangePadding, oldXRangePadding, this.owner);
     },
   })
   readonly xRangePadding!: Property<this, readonly [number, number]>
-
-  protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetYRangePadding !== void 0) {
-        observer.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
-      }
-    }
-  }
-
-  protected onSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    // hook
-  }
-
-  protected didSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetYRangePadding !== void 0) {
-        observer.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
-      }
-    }
-  }
 
   @Property<SeriesPlotView<X, Y>, readonly [number, number]>({
     initState(): readonly [number, number] {
       return [0, 0];
     },
     willSetState(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-      this.owner.willSetYRangePadding(newYRangePadding, oldYRangePadding);
+      this.owner.callObservers("viewWillSetYRangePadding", newYRangePadding, oldYRangePadding, this.owner);
     },
     didSetState(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-      this.owner.onSetYRangePadding(newYRangePadding, oldYRangePadding);
-      this.owner.didSetYRangePadding(newYRangePadding, oldYRangePadding);
+      this.owner.callObservers("viewDidSetYRangePadding", newYRangePadding, oldYRangePadding, this.owner);
     },
   })
   readonly yRangePadding!: Property<this, readonly [number, number]>
@@ -268,13 +170,7 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   }
 
   protected willSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetXDataDomain !== void 0) {
-        observer.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
-      }
-    }
+    this.callObservers("viewWillSetXDataDomain", newXDataDomain, oldXDataDomain, this);
   }
 
   protected onSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
@@ -283,19 +179,13 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   }
 
   protected didSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetXDataDomain !== void 0) {
-        observer.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
-      }
-    }
+    this.callObservers("viewDidSetXDataDomain", newXDataDomain, oldXDataDomain, this);
   }
 
   protected updateXDataDomain(dataPointView: DataPointView<X, Y>): void {
-    const dataPointFasteners = this.dataPointFasteners;
-    const xMin = dataPointFasteners.firstKey();
-    const xMax = dataPointFasteners.lastKey();
+    const dataPointRefs = this.dataPointRefs;
+    const xMin = dataPointRefs.firstKey();
+    const xMax = dataPointRefs.lastKey();
     let xDataDomain: Domain<X> | null;
     if (xMin !== void 0 && xMax !== void 0) {
       xDataDomain = Domain<X>(xMin, xMax);
@@ -319,13 +209,7 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   }
 
   protected willSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetYDataDomain !== void 0) {
-        observer.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
-      }
-    }
+    this.callObservers("viewWillSetYDataDomain", newYDataDomain, oldYDataDomain, this);
   }
 
   protected onSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
@@ -334,13 +218,7 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   }
 
   protected didSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetYDataDomain !== void 0) {
-        observer.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
-      }
-    }
+    this.callObservers("viewDidSetYDataDomain", newYDataDomain, oldYDataDomain, this);
   }
 
   protected updateYDataDomain(dataPointView: DataPointView<X, Y>): void {
@@ -410,16 +288,16 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     dataPointView.remove();
     const x = dataPointView.x.getState();
     this.removeDataPoint(x);
-    const dataPointFastener = this.createDataPointFastener(dataPointView);
+    const dataPointRef = this.createDataPointRef(dataPointView);
     this.willInsertChild(dataPointView, null);
-    this.dataPointFasteners.set(x, dataPointFastener);
-    dataPointFastener.setView(dataPointView, targetView);
-    dataPointView.setParent(this, null);
+    this.dataPointRefs.set(x, dataPointRef);
+    dataPointRef.setView(dataPointView, targetView);
+    dataPointView.attachParent(this);
     this.onInsertChild(dataPointView, null);
     this.didInsertChild(dataPointView, null);
     dataPointView.cascadeInsert();
     if (this.mounted) {
-      dataPointFastener.mount();
+      dataPointRef.mount();
     }
     return dataPointView;
   }
@@ -436,194 +314,138 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     if (x instanceof DataPointView) {
       x = x.x.getState();
     }
-    const dataPointFastener = this.dataPointFasteners.get(x);
-    if (dataPointFastener !== void 0) {
-      const dataPointView = dataPointFastener.view!;
+    const dataPointRef = this.dataPointRefs.get(x);
+    if (dataPointRef !== void 0) {
+      const dataPointView = dataPointRef.view!;
       if (dataPointView.parent !== this) {
         throw new Error("not a child view");
       }
       this.willRemoveChild(dataPointView);
-      dataPointView.setParent(null, this);
-      this.dataPointFasteners.delete(x);
+      dataPointView.detachParent(this);
+      this.dataPointRefs.delete(x);
       this.onRemoveChild(dataPointView);
       this.didRemoveChild(dataPointView);
       dataPointView.setKey(void 0);
-      dataPointFastener.setView(null);
+      dataPointRef.setView(null);
       if (this.mounted) {
-        dataPointFastener.unmount();
+        dataPointRef.unmount();
       }
-    }
-  }
-
-  protected initDataPoint(dataPointView: DataPointView<X, Y>, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const labelView = dataPointView.label.view;
-    if (labelView !== null) {
-      this.initDataPointLabel(labelView, dataPointView, dataPointFastener);
-    }
-  }
-
-  protected attachDataPoint(dataPointView: DataPointView<X, Y>, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateXDataDomain(dataPointView);
-    this.updateYDataDomain(dataPointView);
-  }
-
-  protected detachDataPoint(dataPointView: DataPointView<X, Y>, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateXDataDomain(dataPointView);
-    // yDataDomain will be recomputed next layout pass
-  }
-
-  protected willSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
-                             targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPoint !== void 0) {
-        observer.viewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
-                           targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    if (oldDataPointView !== null) {
-      this.detachDataPoint(oldDataPointView, dataPointFastener);
-    }
-    if (newDataPointView !== null) {
-      this.attachDataPoint(newDataPointView, dataPointFastener);
-      this.initDataPoint(newDataPointView, dataPointFastener);
-    }
-  }
-
-  protected didSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
-                            targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPoint !== void 0) {
-        observer.viewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>,
-                            dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateXDataDomain(dataPointView);
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected onSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>,
-                            dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateYDataDomain(dataPointView);
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected onSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>,
-                             dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateYDataDomain(dataPointView);
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected initDataPointLabel(labelView: GraphicsView, dataPointView: DataPointView<X, Y>,
-                               dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected onSetDataPointLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointView: DataPointView<X, Y>,
-                                dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    if (newLabelView !== null) {
-      this.initDataPointLabel(newLabelView, dataPointView, dataPointFastener);
     }
   }
 
   /** @internal */
-  static DataPointFastener = ViewFastener.define<SeriesPlotView<unknown, unknown>, DataPointView<unknown, unknown>>({
-    child: false,
+  static DataPointRef = ViewRef.define<SeriesPlotView, DataPointView, PlotViewDataPointExt>("DataPointRef", {
     observes: true,
-    willSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null, targetView: View | null): void {
-      this.owner.willSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    willAttachView(dataPointView: DataPointView, targetView: View | null): void {
+      this.owner.callObservers("viewWillAttachDataPoint", dataPointView, targetView, this.owner);
     },
-    onSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null, targetView: View | null): void {
-      this.owner.onSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    didAttachView(dataPointView: DataPointView): void {
+      this.owner.updateXDataDomain(dataPointView);
+      this.owner.updateYDataDomain(dataPointView);
+      const labelView = dataPointView.label.view;
+      if (labelView !== null) {
+        this.attachDataPointLabelView(labelView);
+      }
     },
-    didSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null, targetView: View | null): void {
-      this.owner.didSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    willDetachView(dataPointView: DataPointView): void {
+      const labelView = dataPointView.label.view;
+      if (labelView !== null) {
+        this.detachDataPointLabelView(labelView);
+      }
+      this.owner.updateXDataDomain(dataPointView);
+      // yDataDomain will be recomputed next layout pass
     },
-    viewDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointX(newX, oldX, dataPointView, this);
+    didDetachView(dataPointView: DataPointView): void {
+      this.owner.callObservers("viewDidDetachDataPoint", dataPointView, this.owner);
     },
-    viewDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointY(newY, oldY, dataPointView, this);
+    viewDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView): void {
+      this.owner.updateXDataDomain(dataPointView);
+      this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointY2(newY2, oldY2, dataPointView, this);
+    viewDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView): void {
+      this.owner.updateYDataDomain(dataPointView);
+      this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetDataPointLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointLabel(newLabelView, oldLabelView, dataPointView, this);
+    viewDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView): void {
+      this.owner.updateYDataDomain(dataPointView);
+      this.owner.requireUpdate(View.NeedsLayout);
+    },
+    viewWillAttachDataPointLabel(labelView: GraphicsView): void {
+      this.attachDataPointLabelView(labelView);
+    },
+    viewDidDetachDataPointLabel(labelView: GraphicsView): void {
+      this.detachDataPointLabelView(labelView);
+    },
+    attachDataPointLabelView(labelView: GraphicsView): void {
+      this.owner.requireUpdate(View.NeedsLayout);
+    },
+    detachDataPointLabelView(labelView: GraphicsView): void {
+      // hook
     },
   });
 
-  protected createDataPointFastener(dataPointView: DataPointView<X, Y>): ViewFastener<this, DataPointView<X, Y>> {
-    return SeriesPlotView.DataPointFastener.create(this, dataPointView.key ?? "dataPoint") as ViewFastener<this, DataPointView<X, Y>>;
+  protected createDataPointRef(dataPointView: DataPointView<X, Y>): ViewRef<this, DataPointView<X, Y>> {
+    return SeriesPlotView.DataPointRef.create(this) as ViewRef<this, DataPointView<X, Y>>;
   }
 
   /** @internal */
-  readonly dataPointFasteners: BTree<X, ViewFastener<this, DataPointView<X, Y>>>;
+  readonly dataPointRefs: BTree<X, ViewRef<this, DataPointView<X, Y>>>;
 
   /** @internal */
-  getDataPointFastener(x: X): ViewFastener<this, DataPointView<X, Y>> | null {
-    const dataPointFastener = this.dataPointFasteners.get(x);
-    return dataPointFastener !== void 0 ? dataPointFastener : null;
+  getDataPointRef(x: X): ViewRef<this, DataPointView<X, Y>> | null {
+    const dataPointRef = this.dataPointRefs.get(x);
+    return dataPointRef !== void 0 ? dataPointRef : null;
   }
 
   getDataPointView(x: X): DataPointView<X, Y> | null {
-    const dataPointFastener = this.dataPointFasteners.get(x);
-    return dataPointFastener !== void 0 ? dataPointFastener.view : null;
+    const dataPointRef = this.dataPointRefs.get(x);
+    return dataPointRef !== void 0 ? dataPointRef.view : null;
   }
 
   /** @internal */
-  protected mountDataPointFasteners(): void {
+  protected mountDataPointRefs(): void {
     type self = this;
-    this.dataPointFasteners.forEachValue(function (dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
-      dataPointFastener.mount();
+    this.dataPointRefs.forEachValue(function (dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
+      dataPointRef.mount();
     }, this);
   }
 
   /** @internal */
-  protected unmountDataPointFasteners(): void {
+  protected unmountDataPointRefs(): void {
     type self = this;
-    this.dataPointFasteners.forEachValue(function (dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
-      dataPointFastener.unmount();
+    this.dataPointRefs.forEachValue(function (dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
+      dataPointRef.unmount();
     }, this);
   }
 
   override get childCount(): number {
-    return this.dataPointFasteners.size;
+    return this.dataPointRefs.size;
   }
 
   override get children(): ReadonlyArray<View> {
     const children: View[] = [];
     type self = this;
-    this.dataPointFasteners.forEachValue(function (dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
-      children.push(dataPointFastener.view!);
+    this.dataPointRefs.forEachValue(function (dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
+      children.push(dataPointRef.view!);
     }, this);
     return children;
   }
 
   override firstChild(): View | null {
-    const dataPointFastener = this.dataPointFasteners.firstValue();
-    return dataPointFastener !== void 0 ? dataPointFastener.view! : null;
+    const dataPointRef = this.dataPointRefs.firstValue();
+    return dataPointRef !== void 0 ? dataPointRef.view! : null;
   }
 
   override lastChild(): View | null {
-    const dataPointFastener = this.dataPointFasteners.lastValue();
-    return dataPointFastener !== void 0 ? dataPointFastener.view! : null;
+    const dataPointRef = this.dataPointRefs.lastValue();
+    return dataPointRef !== void 0 ? dataPointRef.view! : null;
   }
 
   override nextChild(targetView: View): View | null {
     if (targetView instanceof DataPointView) {
-      const dataPointFastener = this.dataPointFasteners.nextValue(targetView.x.getState());
-      if (dataPointFastener !== void 0) {
-        return dataPointFastener.view!;
+      const dataPointRef = this.dataPointRefs.nextValue(targetView.x.getState());
+      if (dataPointRef !== void 0) {
+        return dataPointRef.view!;
       }
     }
     return null;
@@ -631,22 +453,20 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
 
   override previousChild(targetView: View): View | null {
     if (targetView instanceof DataPointView) {
-      const dataPointFastener = this.dataPointFasteners.previousValue(targetView.x.getState());
-      if (dataPointFastener !== void 0) {
-        return dataPointFastener.view!;
+      const dataPointRef = this.dataPointRefs.previousValue(targetView.x.getState());
+      if (dataPointRef !== void 0) {
+        return dataPointRef.view!;
       }
     }
     return null;
   }
 
   override forEachChild<T>(callback: (child: View) => T | void): T | undefined;
-  override forEachChild<T, S>(callback: (this: S, child: View) => T | void,
-                              thisArg: S): T | undefined;
-  override forEachChild<T, S>(callback: (this: S | undefined, child: View) => T | void,
-                              thisArg?: S): T | undefined {
+  override forEachChild<T, S>(callback: (this: S, child: View) => T | void, thisArg: S): T | undefined;
+  override forEachChild<T, S>(callback: (this: S | undefined, child: View) => T | void, thisArg?: S): T | undefined {
     type self = this;
-    return this.dataPointFasteners.forEachValue(function (dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): T | void {
-      const result = callback.call(thisArg, dataPointFastener.view!);
+    return this.dataPointRefs.forEachValue(function (dataPointRef: ViewRef<self, DataPointView<X, Y>>): T | void {
+      const result = callback.call(thisArg, dataPointRef.view!);
       if (result !== void 0) {
         return result;
       }
@@ -659,13 +479,13 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     return null;
   }
 
-  override setChild<V extends View>(key: string, newChild: AnyView<V> | null): View | null;
+  override setChild<V extends View>(key: string, newChild: V | ViewFactory<V> | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null {
     throw new Error("unsupported");
   }
 
-  override appendChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override appendChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override appendChild(child: AnyView, key?: string): View;
   override appendChild(child: AnyView, key?: string): View {
     if (key !== void 0) {
@@ -678,7 +498,7 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     return this.insertDataPoint(child);
   }
 
-  override prependChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override prependChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override prependChild(child: AnyView, key?: string): View;
   override prependChild(child: AnyView, key?: string): View {
     if (key !== void 0) {
@@ -691,7 +511,7 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     return this.insertDataPoint(child);
   }
 
-  override insertChild<V extends View>(child: AnyView<V>, target: View | null, key?: string): V;
+  override insertChild<V extends View>(child: V | ViewFactory<V>, target: View | null, key?: string): V;
   override insertChild(child: AnyView, target: View | null, key?: string): View;
   override insertChild(child: AnyView, target: View | null, key?: string): View {
     if (key !== void 0) {
@@ -704,9 +524,29 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     return this.insertDataPoint(child);
   }
 
+  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
+  override replaceChild(newChild: AnyView, oldChild: View): View {
+    if (!(oldChild instanceof DataPointView)) {
+      throw new TypeError("" + oldChild);
+    }
+    if (oldChild.parent !== this) {
+      throw new TypeError("" + oldChild);
+    }
+    newChild = View.fromAny(newChild);
+    if (!(newChild instanceof DataPointView)) {
+      throw new TypeError("" + newChild);
+    }
+    if (newChild !== oldChild) {
+      this.removeDataPoint(oldChild.x.getState());
+      this.insertDataPoint(newChild);
+    }
+    return oldChild;
+  }
+
   override removeChild(key: string): View | null;
-  override removeChild(child: View): void;
-  override removeChild(child: string | View): View | null | void {
+  override removeChild<V extends View>(child: V): V;
+  override removeChild(child: string | View): View | null {
     if (typeof child === "string") {
       throw new Error("unsupported");
     }
@@ -714,21 +554,22 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
       throw new TypeError("" + child);
     }
     this.removeDataPoint(child.x.getState());
+    return child;
   }
 
   override removeChildren(): void {
     type self = this;
-    this.dataPointFasteners.forEach(function (x: X, dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
-      const child = dataPointFastener.view!;
+    this.dataPointRefs.forEach(function (x: X, dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
+      const child = dataPointRef.view!;
       this.willRemoveChild(child);
-      child.setParent(null, this);
-      this.dataPointFasteners.delete(x);
+      child.detachParent(this);
+      this.dataPointRefs.delete(x);
       this.onRemoveChild(child);
       this.didRemoveChild(child);
       child.setKey(void 0);
-      dataPointFastener.setView(null);
+      dataPointRef.setView(null);
       if (this.mounted) {
-        dataPointFastener.unmount();
+        dataPointRef.unmount();
       }
     }, this);
   }
@@ -924,8 +765,8 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     const xScale = this.xScale.value;
     if (xScale !== null) {
       const d = xScale.inverse(x);
-      const v0 = this.dataPointFasteners.previousValue(d);
-      const v1 = this.dataPointFasteners.nextValue(d);
+      const v0 = this.dataPointRefs.previousValue(d);
+      const v1 = this.dataPointRefs.nextValue(d);
       const x0 = v0 !== void 0 ? v0.view!.x.value : void 0;
       const x1 = v1 !== void 0 ? v1.view!.x.value : void 0;
       const dx0 = x0 !== void 0 ? +d - +x0 : NaN;
@@ -948,12 +789,12 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   /** @internal */
   protected override mountFasteners(): void {
     super.mountFasteners();
-    this.mountDataPointFasteners();
+    this.mountDataPointRefs();
   }
 
   /** @internal */
   protected override unmountFasteners(): void {
-    this.unmountDataPointFasteners();
+    this.unmountDataPointRefs();
     super.unmountFasteners();
   }
 
@@ -969,7 +810,7 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     const data = init.data;
     if (data !== void 0) {
       for (let i = 0, n = data.length; i < n; i += 1) {
-        this.insertDataPoint(data[i]!);
+        this.appendChild(DataPointView.fromAny(data[i]! as AnyDataPointView));
       }
     }
 

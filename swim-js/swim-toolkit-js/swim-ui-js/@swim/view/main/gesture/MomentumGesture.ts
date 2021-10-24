@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import type {Mutable, ObserverType} from "@swim/util";
-import type {FastenerOwner, FastenerFlags} from "@swim/fastener";
+import type {FastenerOwner} from "@swim/fastener";
 import type {GestureInputType} from "./GestureInput";
 import type {GestureMethod} from "./Gesture";
-import {PositionGestureInit, PositionGesture} from "./PositionGesture";
+import {PositionGestureInit, PositionGestureClass, PositionGesture} from "./PositionGesture";
 import {MomentumGestureInput} from "./MomentumGestureInput";
 import {MouseMomentumGesture} from "./"; // forward import
 import {TouchMomentumGesture} from "./"; // forward import
@@ -25,6 +25,8 @@ import type {ViewContext} from "../view/ViewContext";
 import {View} from "../"; // forward import
 
 export interface MomentumGestureInit<V extends View = View> extends PositionGestureInit<V> {
+  extends?: {prototype: MomentumGesture<any, any>} | string | boolean | null;
+
   /**
    * The time delta for velocity derivation, in milliseconds.
    */
@@ -86,35 +88,25 @@ export interface MomentumGestureInit<V extends View = View> extends PositionGest
 
 export type MomentumGestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<MomentumGesture<O, V> & I> & MomentumGestureInit<V> & Partial<I>;
 
-export interface MomentumGestureClass<G extends MomentumGesture<any, any> = MomentumGesture<any, any>> {
-  /** @internal */
-  prototype: G;
-
-  create(owner: FastenerOwner<G>, gestureName: string): G;
-
-  construct(gestureClass: {prototype: G}, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
-
-  specialize(method: GestureMethod): MomentumGestureClass | null;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): MomentumGestureClass<G> & I;
-
-  define<O, V extends View = View, I = {}>(descriptor: {observes: boolean} & MomentumGestureDescriptor<O, V, I & ObserverType<V>>): MomentumGestureClass<MomentumGesture<any, V> & I>;
-  define<O, V extends View = View, I = {}>(descriptor: MomentumGestureDescriptor<O, V, I>): MomentumGestureClass<MomentumGesture<any, V> & I>;
-
-  <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & MomentumGestureDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
-  <O, V extends View = View, I = {}>(descriptor: MomentumGestureDescriptor<O, V, I>): PropertyDecorator;
-
+export interface MomentumGestureClass<G extends MomentumGesture<any, any> = MomentumGesture<any, any>> extends PositionGestureClass<G> {
   /** @internal */
   readonly Hysteresis: number;
   /** @internal */
   readonly Acceleration: number;
   /** @internal */
   readonly VelocityMax: number;
+}
 
-  /** @internal @override */
-  readonly FlagShift: number;
-  /** @internal @override */
-  readonly FlagMask: FastenerFlags;
+export interface MomentumGestureFactory<G extends MomentumGesture<any, any> = MomentumGesture<any, any>> extends MomentumGestureClass<G> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): MomentumGestureFactory<G> & I;
+
+  specialize(method: GestureMethod): MomentumGestureFactory | null;
+
+  define<O, V extends View = View, I = {}>(className: string, descriptor: {observes: boolean} & MomentumGestureDescriptor<O, V, I & ObserverType<V>>): MomentumGestureFactory<MomentumGesture<any, V> & I>;
+  define<O, V extends View = View, I = {}>(className: string, descriptor: MomentumGestureDescriptor<O, V, I>): MomentumGestureFactory<MomentumGesture<any, V> & I>;
+
+  <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & MomentumGestureDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
+  <O, V extends View = View, I = {}>(descriptor: MomentumGestureDescriptor<O, V, I>): PropertyDecorator;
 }
 
 export interface MomentumGesture<O = unknown, V extends View = View> extends PositionGesture<O, V> {
@@ -270,7 +262,7 @@ export interface MomentumGesture<O = unknown, V extends View = View> extends Pos
 }
 
 export const MomentumGesture = (function (_super: typeof PositionGesture) {
-  const MomentumGesture: MomentumGestureClass = _super.extend();
+  const MomentumGesture: MomentumGestureFactory = _super.extend("MomentumGesture");
 
   Object.defineProperty(MomentumGesture.prototype, "observes", {
     value: true,
@@ -518,7 +510,7 @@ export const MomentumGesture = (function (_super: typeof PositionGesture) {
     // hook
   };
 
-  MomentumGesture.prototype.doCoast = function(this: MomentumGesture, t: number): void {
+  MomentumGesture.prototype.doCoast = function (this: MomentumGesture, t: number): void {
     if (this.coastCount !== 0) {
       this.willCoast();
       this.integrate(t);
@@ -537,19 +529,19 @@ export const MomentumGesture = (function (_super: typeof PositionGesture) {
     }
   };
 
-  MomentumGesture.prototype.willCoast = function(this: MomentumGesture): void {
+  MomentumGesture.prototype.willCoast = function (this: MomentumGesture): void {
     // hook
   };
 
-  MomentumGesture.prototype.onCoast = function(this: MomentumGesture): void {
+  MomentumGesture.prototype.onCoast = function (this: MomentumGesture): void {
     // hook
   };
 
-  MomentumGesture.prototype.didCoast = function(this: MomentumGesture): void {
+  MomentumGesture.prototype.didCoast = function (this: MomentumGesture): void {
     // hook
   };
 
-  MomentumGesture.prototype.integrate = function(this: MomentumGesture, t: number): void {
+  MomentumGesture.prototype.integrate = function (this: MomentumGesture, t: number): void {
     const inputs = this.inputs;
     for (const inputId in inputs) {
       const input = inputs[inputId]!;
@@ -559,8 +551,8 @@ export const MomentumGesture = (function (_super: typeof PositionGesture) {
     }
   };
 
-  MomentumGesture.construct = function <G extends MomentumGesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
-    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+  MomentumGesture.construct = function <G extends MomentumGesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct(gestureClass, gesture, owner) as G;
     (gesture as Mutable<typeof gesture>).coastCount = 0;
     gesture.hysteresis = MomentumGesture.Hysteresis;
     gesture.acceleration = MomentumGesture.Acceleration;
@@ -568,7 +560,7 @@ export const MomentumGesture = (function (_super: typeof PositionGesture) {
     return gesture;
   };
 
-  MomentumGesture.specialize = function (method: GestureMethod): MomentumGestureClass | null {
+  MomentumGesture.specialize = function (method: GestureMethod): MomentumGestureFactory | null {
     if (method === "pointer") {
       return PointerMomentumGesture;
     } else if (method === "touch") {
@@ -584,8 +576,8 @@ export const MomentumGesture = (function (_super: typeof PositionGesture) {
     }
   };
 
-  MomentumGesture.define = function <O, V extends View>(descriptor: MomentumGestureDescriptor<O, V>): MomentumGestureClass<MomentumGesture<any, V>> {
-    let superClass = descriptor.extends as MomentumGestureClass | null | undefined;
+  MomentumGesture.define = function <O, V extends View>(className: string, descriptor: MomentumGestureDescriptor<O, V>): MomentumGestureFactory<MomentumGesture<any, V>> {
+    let superClass = descriptor.extends as MomentumGestureFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let method = descriptor.method;
@@ -600,6 +592,18 @@ export const MomentumGesture = (function (_super: typeof PositionGesture) {
     delete descriptor.acceleration;
     delete descriptor.velocityMax;
 
+    if (descriptor.key === true) {
+      Object.defineProperty(descriptor, "key", {
+        value: className,
+        configurable: true,
+      });
+    } else if (descriptor.key === false) {
+      Object.defineProperty(descriptor, "key", {
+        value: void 0,
+        configurable: true,
+      });
+    }
+
     if (method === void 0) {
       method = "auto";
     }
@@ -610,10 +614,10 @@ export const MomentumGesture = (function (_super: typeof PositionGesture) {
       superClass = this;
     }
 
-    const gestureClass = superClass.extend(descriptor);
+    const gestureClass = superClass.extend(className, descriptor);
 
-    gestureClass.construct = function (gestureClass: {prototype: MomentumGesture<any, any>}, gesture: MomentumGesture<O, V> | null, owner: O, gestureName: string): MomentumGesture<O, V> {
-      gesture = superClass!.construct(gestureClass, gesture, owner, gestureName);
+    gestureClass.construct = function (gestureClass: {prototype: MomentumGesture<any, any>}, gesture: MomentumGesture<O, V> | null, owner: O): MomentumGesture<O, V> {
+      gesture = superClass!.construct(gestureClass, gesture, owner);
       if (affinity !== void 0) {
         gesture.initAffinity(affinity);
       }

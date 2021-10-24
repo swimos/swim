@@ -20,6 +20,12 @@ export {
 } from "./Class";
 
 export {
+  Methods,
+  MethodParameters,
+  MethodReturnType,
+} from "./Method";
+
+export {
   FamilyType,
   Family,
 } from "./Family";

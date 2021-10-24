@@ -17,6 +17,7 @@ export {
   DownlinkFastenerInit,
   DownlinkFastenerDescriptor,
   DownlinkFastenerClass,
+  DownlinkFastenerFactory,
   DownlinkFastener,
 } from "./DownlinkFastener";
 
@@ -24,6 +25,7 @@ export {
   EventDownlinkFastenerInit,
   EventDownlinkFastenerDescriptor,
   EventDownlinkFastenerClass,
+  EventDownlinkFastenerFactory,
   EventDownlinkFastener,
 } from "./EventDownlinkFastener";
 
@@ -33,6 +35,7 @@ export {
   ListDownlinkFastenerInit,
   ListDownlinkFastenerDescriptor,
   ListDownlinkFastenerClass,
+  ListDownlinkFastenerFactory,
   ListDownlinkFastener,
 } from "./ListDownlinkFastener";
 
@@ -44,6 +47,7 @@ export {
   MapDownlinkFastenerInit,
   MapDownlinkFastenerDescriptor,
   MapDownlinkFastenerClass,
+  MapDownlinkFastenerFactory,
   MapDownlinkFastener,
 } from "./MapDownlinkFastener";
 
@@ -53,5 +57,6 @@ export {
   ValueDownlinkFastenerInit,
   ValueDownlinkFastenerDescriptor,
   ValueDownlinkFastenerClass,
+  ValueDownlinkFastenerFactory,
   ValueDownlinkFastener,
 } from "./ValueDownlinkFastener";

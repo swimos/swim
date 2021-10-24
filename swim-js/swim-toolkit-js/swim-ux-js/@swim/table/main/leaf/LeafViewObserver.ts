@@ -18,9 +18,9 @@ import type {CellView} from "../cell/CellView";
 import type {LeafView} from "./LeafView";
 
 export interface LeafViewObserver<V extends LeafView = LeafView> extends HtmlViewObserver<V> {
-  viewWillSetCell?(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null, view: V): void;
+  viewWillAttachCell?(cellView: CellView, targetView: View | null, view: V): void;
 
-  viewDidSetCell?(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null, view: V): void;
+  viewDidDetachCell?(cellView: CellView, view: V): void;
 
   viewWillHighlight?(view: V): void;
 

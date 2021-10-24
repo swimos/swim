@@ -13,28 +13,24 @@
 // limitations under the License.
 
 import type {GeoPoint} from "@swim/geo";
-import type {Graphics, IconLayout} from "@swim/graphics";
+import type {Graphics} from "@swim/graphics";
 import type {GeoIconView} from "./GeoIconView";
 import type {GeoIconTrait} from "./GeoIconTrait";
 import type {GeoControllerObserver} from "../geo/GeoControllerObserver";
 import type {GeoIconController} from "./GeoIconController";
 
 export interface GeoIconControllerObserver<C extends GeoIconController = GeoIconController> extends GeoControllerObserver<C> {
-  controllerWillSetGeoTrait?(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null, controller: C): void;
+  controllerWillAttachGeoTrait?(geoTrait: GeoIconTrait, controller: C): void;
 
-  controllerDidSetGeoTrait?(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null, controller: C): void;
+  controllerDidDetachGeoTrait?(geoTrait: GeoIconTrait, controller: C): void;
 
-  controllerWillSetGeoView?(newGeoView: GeoIconView | null, oldGeoView: GeoIconView | null, controller: C): void;
+  controllerWillAttachGeoView?(geoView: GeoIconView, controller: C): void;
 
-  controllerDidSetGeoView?(newGeoView: GeoIconView | null, oldGeoView: GeoIconView | null, controller: C): void;
+  controllerDidDetachGeoView?(geoView: GeoIconView, controller: C): void;
 
   controllerWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, controller: C): void;
 
   controllerDidSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, controller: C): void;
-
-  controllerWillSetIconLayout?(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null, controller: C): void;
-
-  controllerDidSetIconLayout?(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null, controller: C): void;
 
   controllerWillSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, controller: C): void;
 

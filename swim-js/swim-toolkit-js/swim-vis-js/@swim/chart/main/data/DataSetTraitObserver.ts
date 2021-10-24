@@ -16,8 +16,8 @@ import type {Trait, TraitObserver} from "@swim/model";
 import type {DataPointTrait} from "./DataPointTrait";
 import type {DataSetTrait} from "./DataSetTrait";
 
-export interface DataSetTraitObserver<X, Y, R extends DataSetTrait<X, Y> = DataSetTrait<X, Y>> extends TraitObserver<R> {
-  traitWillSetDataPoint?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+export interface DataSetTraitObserver<X = unknown, Y = unknown, R extends DataSetTrait<X, Y> = DataSetTrait<X, Y>> extends TraitObserver<R> {
+  traitWillAttachDataPoint?(dataPointTrait: DataPointTrait<X, Y>, targetTrait: Trait | null, trait: R): void;
 
-  traitDidSetDataPoint?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+  traitDidDetachDataPoint?(dataPointTrait: DataPointTrait<X, Y>, trait: R): void;
 }

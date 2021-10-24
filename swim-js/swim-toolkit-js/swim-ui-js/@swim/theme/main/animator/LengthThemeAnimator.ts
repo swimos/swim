@@ -26,11 +26,11 @@
 // limitations under the License.
 
 import {AnyLength, Length} from "@swim/math";
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 /** @internal */
 export const LengthThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const LengthThemeAnimator = _super.extend() as ThemeAnimatorClass<ThemeAnimator<any, Length | null | undefined, AnyLength | null | undefined>>;
+  const LengthThemeAnimator = _super.extend("LengthThemeAnimator") as ThemeAnimatorFactory<ThemeAnimator<any, Length | null | undefined, AnyLength | null | undefined>>;
 
   LengthThemeAnimator.prototype.fromAny = function (value: AnyLength | null | undefined): Length | null | undefined {
     return value !== void 0 && value !== null ? Length.fromAny(value) : null;

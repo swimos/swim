@@ -51,13 +51,13 @@ export const Identity = (function () {
     }
   };
 
-  let nextId = -1;
+  let nextId = 1;
   Identity.hash = function (x: object | null | undefined): number {
     if (typeof x === "object" && x !== null) {
       let hashCode = (x as any)._hashCode as number | undefined;
       if (hashCode === void 0) {
         hashCode = ~~nextId;
-        nextId -= 1;
+        nextId += 1;
         Object.defineProperty(x, "_hashCode", {
           value: hashCode,
           configurable: true,

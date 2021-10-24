@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {TraitModelType, Trait, TraitFastener} from "@swim/model";
+import type {MemberFastenerClass} from "@swim/fastener";
+import {Model, Trait, TraitRef} from "@swim/model";
 import {GraphTrait} from "../graph/GraphTrait";
 import type {AxisTrait} from "../axis/AxisTrait";
 import {TopAxisTrait} from "../axis/TopAxisTrait";
@@ -22,433 +23,153 @@ import {BottomAxisTrait} from "../axis/BottomAxisTrait";
 import {LeftAxisTrait} from "../axis/LeftAxisTrait";
 import type {ChartTraitObserver} from "./ChartTraitObserver";
 
-export class ChartTrait<X, Y> extends Trait {
+export class ChartTrait<X = unknown, Y = unknown> extends Trait {
   override readonly observerType?: Class<ChartTraitObserver<X, Y>>;
 
-  protected initGraph(graphTrait: GraphTrait<X, Y>): void {
-    // hook
-  }
-
-  protected attachGraph(graphTrait: GraphTrait<X, Y>): void {
-    if (this.consuming) {
-      graphTrait.consume(this);
-    }
-  }
-
-  protected detachGraph(graphTrait: GraphTrait<X, Y>): void {
-    if (this.consuming) {
-      graphTrait.unconsume(this);
-    }
-  }
-
-  protected willSetGraph(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetGraph !== void 0) {
-        traitObserver.traitWillSetGraph(newGraphTrait, oldGraphTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetGraph(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, targetTrait: Trait | null): void {
-    if (oldGraphTrait !== null) {
-      this.detachGraph(oldGraphTrait);
-    }
-    if (newGraphTrait !== null) {
-      this.attachGraph(newGraphTrait);
-      this.initGraph(newGraphTrait);
-    }
-  }
-
-  protected didSetGraph(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetGraph !== void 0) {
-        traitObserver.traitDidSetGraph(newGraphTrait, oldGraphTrait, targetTrait, this);
-      }
-    }
-  }
-
-  @TraitFastener<ChartTrait<X, Y>, GraphTrait<X, Y>>({
+  @TraitRef<ChartTrait<X, Y>, GraphTrait<X, Y>>({
     type: GraphTrait,
-    sibling: false,
-    willSetTrait(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, targetTrait: Trait | null): void {
-      this.owner.willSetGraph(newGraphTrait, oldGraphTrait, targetTrait);
+    binds: true,
+    willAttachTrait(graphTrait: GraphTrait<X, Y>): void {
+      this.owner.callObservers("traitWillAttachGraph", graphTrait, this.owner);
     },
-    onSetTrait(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, targetTrait: Trait | null): void {
-      this.owner.onSetGraph(newGraphTrait, oldGraphTrait, targetTrait);
-    },
-    didSetTrait(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, targetTrait: Trait | null): void {
-      this.owner.didSetGraph(newGraphTrait, oldGraphTrait, targetTrait);
-    },
-  })
-  readonly graph!: TraitFastener<this, GraphTrait<X, Y>>;
-
-  protected initTopAxis(topAxisTrait: AxisTrait<X>): void {
-    // hook
-  }
-
-  protected attachTopAxis(topAxisTrait: AxisTrait<X>): void {
-    if (this.consuming) {
-      topAxisTrait.consume(this);
-    }
-  }
-
-  protected detachTopAxis(topAxisTrait: AxisTrait<X>): void {
-    if (this.consuming) {
-      topAxisTrait.unconsume(this);
-    }
-  }
-
-  protected willSetTopAxis(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetTopAxis !== void 0) {
-        traitObserver.traitWillSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait, this);
+    didAttachTrait(graphTrait: GraphTrait<X, Y>): void {
+      if (this.owner.consuming) {
+        graphTrait.consume(this.owner);
       }
-    }
-  }
-
-  protected onSetTopAxis(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    if (oldTopAxisTrait !== null) {
-      this.detachTopAxis(oldTopAxisTrait);
-    }
-    if (newTopAxisTrait !== null) {
-      this.attachTopAxis(newTopAxisTrait);
-      this.initTopAxis(newTopAxisTrait);
-    }
-  }
-
-  protected didSetTopAxis(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetTopAxis !== void 0) {
-        traitObserver.traitDidSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait, this);
+    },
+    willDetachTrait(graphTrait: GraphTrait<X, Y>): void {
+      if (this.owner.consuming) {
+        graphTrait.unconsume(this.owner);
       }
-    }
-  }
-
-  @TraitFastener<ChartTrait<X, Y>, AxisTrait<X>>({
-    sibling: false,
-    willSetTrait(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-      this.owner.willSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait);
     },
-    onSetTrait(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-      this.owner.onSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait);
+    didDetachTrait(graphTrait: GraphTrait<X, Y>): void {
+      this.owner.callObservers("traitDidDetachGraph", graphTrait, this.owner);
     },
-    didSetTrait(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-      this.owner.didSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait);
+    detectModel(model: Model): GraphTrait<X, Y> | null {
+      return model.getTrait(GraphTrait);
+    },
+    detectTrait(trait: Trait): GraphTrait<X, Y> | null {
+      return trait instanceof GraphTrait ? trait : null;
     },
   })
-  readonly topAxis!: TraitFastener<this, AxisTrait<X>>;
+  readonly graph!: TraitRef<this, GraphTrait<X, Y>>;
+  static readonly graph: MemberFastenerClass<ChartTrait, "graph">;
 
-  protected initRightAxis(rightAxisTrait: AxisTrait<Y>): void {
-    // hook
-  }
-
-  protected attachRightAxis(rightAxisTrait: AxisTrait<Y>): void {
-    if (this.consuming) {
-      rightAxisTrait.consume(this);
-    }
-  }
-
-  protected detachRightAxis(rightAxisTrait: AxisTrait<Y>): void {
-    if (this.consuming) {
-      rightAxisTrait.unconsume(this);
-    }
-  }
-
-  protected willSetRightAxis(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetRightAxis !== void 0) {
-        traitObserver.traitWillSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetRightAxis(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    if (oldRightAxisTrait !== null) {
-      this.detachRightAxis(oldRightAxisTrait);
-    }
-    if (newRightAxisTrait !== null) {
-      this.attachRightAxis(newRightAxisTrait);
-      this.initRightAxis(newRightAxisTrait);
-    }
-  }
-
-  protected didSetRightAxis(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetRightAxis !== void 0) {
-        traitObserver.traitDidSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait, this);
-      }
-    }
-  }
-
-  @TraitFastener<ChartTrait<X, Y>, AxisTrait<Y>>({
-    sibling: false,
-    willSetTrait(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-      this.owner.willSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait);
+  @TraitRef<ChartTrait<X, Y>, AxisTrait<X>>({
+    type: TopAxisTrait,
+    binds: true,
+    willAttachTrait(topAxisTrait: AxisTrait<X>): void {
+      this.owner.callObservers("traitWillAttachTopAxis", topAxisTrait, this.owner);
     },
-    onSetTrait(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-      this.owner.onSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait);
+    didAttachTrait(topAxisTrait: AxisTrait<X>): void {
+      if (this.owner.consuming) {
+        topAxisTrait.consume(this.owner);
+      }
     },
-    didSetTrait(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-      this.owner.didSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait);
+    willDetachTrait(topAxisTrait: AxisTrait<X>): void {
+      if (this.owner.consuming) {
+        topAxisTrait.unconsume(this.owner);
+      }
+    },
+    didDetachTrait(topAxisTrait: AxisTrait<X>): void {
+      this.owner.callObservers("traitDidDetachTopAxis", topAxisTrait, this.owner);
+    },
+    detectModel(model: Model): AxisTrait<X> | null {
+      return model.getTrait(TopAxisTrait);
+    },
+    detectTrait(trait: Trait): AxisTrait<X> | null {
+      return trait instanceof TopAxisTrait ? trait : null;
     },
   })
-  readonly rightAxis!: TraitFastener<this, AxisTrait<Y>>;
+  readonly topAxis!: TraitRef<this, AxisTrait<X>>;
+  static readonly topAxis: MemberFastenerClass<ChartTrait, "topAxis">;
 
-  protected initBottomAxis(bottomAxisTrait: AxisTrait<X>): void {
-    // hook
-  }
-
-  protected attachBottomAxis(bottomAxisTrait: AxisTrait<X>): void {
-    if (this.consuming) {
-      bottomAxisTrait.consume(this);
-    }
-  }
-
-  protected detachBottomAxis(bottomAxisTrait: AxisTrait<X>): void {
-    if (this.consuming) {
-      bottomAxisTrait.unconsume(this);
-    }
-  }
-
-  protected willSetBottomAxis(newBottomAxisTrrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetBottomAxis !== void 0) {
-        traitObserver.traitWillSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetBottomAxis(newBottomAxisTrrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    if (oldBottomAxisTrait !== null) {
-      this.detachBottomAxis(oldBottomAxisTrait);
-    }
-    if (newBottomAxisTrrait !== null) {
-      this.attachBottomAxis(newBottomAxisTrrait);
-      this.initBottomAxis(newBottomAxisTrrait);
-    }
-  }
-
-  protected didSetBottomAxis(newBottomAxisTrrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetBottomAxis !== void 0) {
-        traitObserver.traitDidSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait, this);
-      }
-    }
-  }
-
-  @TraitFastener<ChartTrait<X, Y>, AxisTrait<X>>({
-    sibling: false,
-    willSetTrait(newBottomAxisTrrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-      this.owner.willSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait);
+  @TraitRef<ChartTrait<X, Y>, AxisTrait<Y>>({
+    type: RightAxisTrait,
+    binds: true,
+    willAttachTrait(rightAxisTrait: AxisTrait<Y>): void {
+      this.owner.callObservers("traitWillAttachRightAxis", rightAxisTrait, this.owner);
     },
-    onSetTrait(newBottomAxisTrrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-      this.owner.onSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait);
+    didAttachTrait(rightAxisTrait: AxisTrait<Y>): void {
+      if (this.owner.consuming) {
+        rightAxisTrait.consume(this.owner);
+      }
     },
-    didSetTrait(newBottomAxisTrrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, targetTrait: Trait | null): void {
-      this.owner.didSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait);
+    willDetachTrait(rightAxisTrait: AxisTrait<Y>): void {
+      if (this.owner.consuming) {
+        rightAxisTrait.unconsume(this.owner);
+      }
+    },
+    didDetachTrait(rightAxisTrait: AxisTrait<Y>): void {
+      this.owner.callObservers("traitDidDetachRightAxis", rightAxisTrait, this.owner);
+    },
+    detectModel(model: Model): AxisTrait<Y> | null {
+      return model.getTrait(RightAxisTrait);
+    },
+    detectTrait(trait: Trait): AxisTrait<Y> | null {
+      return trait instanceof RightAxisTrait ? trait : null;
     },
   })
-  readonly bottomAxis!: TraitFastener<this, AxisTrait<X>>;
+  readonly rightAxis!: TraitRef<this, AxisTrait<Y>>;
+  static readonly rightAxis: MemberFastenerClass<ChartTrait, "rightAxis">;
 
-  protected initLeftAxis(leftAxisTrait: AxisTrait<Y>): void {
-    // hook
-  }
-
-  protected attachLeftAxis(leftAxisTrait: AxisTrait<Y>): void {
-    if (this.consuming) {
-      leftAxisTrait.consume(this);
-    }
-  }
-
-  protected detachLeftAxis(leftAxisTrait: AxisTrait<Y>): void {
-    if (this.consuming) {
-      leftAxisTrait.unconsume(this);
-    }
-  }
-
-  protected willSetLeftAxis(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetLeftAxis !== void 0) {
-        traitObserver.traitWillSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait, this);
-      }
-    }
-  }
-
-  protected onSetLeftAxis(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    if (oldLeftAxisTrait !== null) {
-      this.detachLeftAxis(oldLeftAxisTrait);
-    }
-    if (newLeftAxisTrait !== null) {
-      this.attachLeftAxis(newLeftAxisTrait);
-      this.initLeftAxis(newLeftAxisTrait);
-    }
-  }
-
-  protected didSetLeftAxis(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetLeftAxis !== void 0) {
-        traitObserver.traitDidSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait, this);
-      }
-    }
-  }
-
-  @TraitFastener<ChartTrait<X, Y>, AxisTrait<Y>>({
-    sibling: false,
-    willSetTrait(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-      this.owner.willSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait);
+  @TraitRef<ChartTrait<X, Y>, AxisTrait<X>>({
+    type: BottomAxisTrait,
+    binds: true,
+    willAttachTrait(bottomAxisTrait: AxisTrait<X>): void {
+      this.owner.callObservers("traitWillAttachBottomAxis", bottomAxisTrait, this.owner);
     },
-    onSetTrait(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-      this.owner.onSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait);
+    didAttachTrait(bottomAxisTrait: AxisTrait<X>): void {
+      if (this.owner.consuming) {
+        bottomAxisTrait.consume(this.owner);
+      }
     },
-    didSetTrait(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, targetTrait: Trait | null): void {
-      this.owner.didSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait);
+    willDetachTrait(bottomAxisTrait: AxisTrait<X>): void {
+      if (this.owner.consuming) {
+        bottomAxisTrait.unconsume(this.owner);
+      }
+    },
+    didDetachTrait(bottomAxisTrait: AxisTrait<X>): void {
+      this.owner.callObservers("traitDidDetachBottomAxis", bottomAxisTrait, this.owner);
+    },
+    detectModel(model: Model): AxisTrait<X> | null {
+      return model.getTrait(BottomAxisTrait);
+    },
+    detectTrait(trait: Trait): AxisTrait<X> | null {
+      return trait instanceof BottomAxisTrait ? trait : null;
     },
   })
-  readonly leftAxis!: TraitFastener<this, AxisTrait<Y>>;
+  readonly bottomAxis!: TraitRef<this, AxisTrait<X>>;
+  static readonly bottomAxis: MemberFastenerClass<ChartTrait, "bottomAxis">;
 
-  protected detectGraphTrait(trait: Trait): GraphTrait<X, Y> | null {
-    return trait instanceof GraphTrait ? trait : null;
-  }
-
-  protected detectTopAxisTrait(trait: Trait): AxisTrait<X> | null {
-    return trait instanceof TopAxisTrait ? trait : null;
-  }
-
-  protected detectRightAxisTrait(trait: Trait): AxisTrait<Y> | null {
-    return trait instanceof RightAxisTrait ? trait : null;
-  }
-
-  protected detectBottomAxisTrait(trait: Trait): AxisTrait<X> | null {
-    return trait instanceof BottomAxisTrait ? trait : null;
-  }
-
-  protected detectLeftAxisTrait(trait: Trait): AxisTrait<Y> | null {
-    return trait instanceof LeftAxisTrait ? trait : null;
-  }
-
-  protected detectTraits(model: TraitModelType<this>): void {
-    const traits = model.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      const trait = traits[i]!;
-      if (this.graph.trait === null) {
-        const graphTrait = this.detectGraphTrait(trait);
-        if (graphTrait !== null) {
-          this.graph.setTrait(graphTrait);
-        }
+  @TraitRef<ChartTrait<X, Y>, AxisTrait<Y>>({
+    type: LeftAxisTrait,
+    binds: true,
+    willAttachTrait(leftAxisTrait: AxisTrait<Y>): void {
+      this.owner.callObservers("traitWillAttachLeftAxis", leftAxisTrait, this.owner);
+    },
+    didAttachTrait(leftAxisTrait: AxisTrait<Y>): void {
+      if (this.owner.consuming) {
+        leftAxisTrait.consume(this.owner);
       }
-      if (this.topAxis.trait === null) {
-        const topAxisTrait = this.detectTopAxisTrait(trait);
-        if (topAxisTrait !== null) {
-          this.topAxis.setTrait(topAxisTrait);
-        }
+    },
+    willDetachTrait(leftAxisTrait: AxisTrait<Y>): void {
+      if (this.owner.consuming) {
+        leftAxisTrait.unconsume(this.owner);
       }
-      if (this.rightAxis.trait === null) {
-        const rightAxisTrait = this.detectRightAxisTrait(trait);
-        if (rightAxisTrait !== null) {
-          this.rightAxis.setTrait(rightAxisTrait);
-        }
-      }
-      if (this.bottomAxis.trait === null) {
-        const bottomAxisTrait = this.detectBottomAxisTrait(trait);
-        if (bottomAxisTrait !== null) {
-          this.bottomAxis.setTrait(bottomAxisTrait);
-        }
-      }
-      if (this.leftAxis.trait === null) {
-        const leftAxisTrait = this.detectLeftAxisTrait(trait);
-        if (leftAxisTrait !== null) {
-          this.leftAxis.setTrait(leftAxisTrait);
-        }
-      }
-    }
-  }
-
-  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
-    if (newModel !== null) {
-      this.detectTraits(newModel);
-    }
-    super.didSetModel(newModel, oldModel);
-  }
-
-  /** @protected */
-  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
-    super.onInsertTrait(trait, targetTrait);
-    if (this.graph.trait === null) {
-      const graphTrait = this.detectGraphTrait(trait);
-      if (graphTrait !== null) {
-        this.graph.setTrait(graphTrait, targetTrait);
-      }
-    }
-    if (this.topAxis.trait === null) {
-      const topAxisTrait = this.detectTopAxisTrait(trait);
-      if (topAxisTrait !== null) {
-        this.topAxis.setTrait(topAxisTrait, targetTrait);
-      }
-    }
-    if (this.rightAxis.trait === null) {
-      const rightAxisTrait = this.detectRightAxisTrait(trait);
-      if (rightAxisTrait !== null) {
-        this.rightAxis.setTrait(rightAxisTrait, targetTrait);
-      }
-    }
-    if (this.bottomAxis.trait === null) {
-      const bottomAxisTrait = this.detectBottomAxisTrait(trait);
-      if (bottomAxisTrait !== null) {
-        this.bottomAxis.setTrait(bottomAxisTrait, targetTrait);
-      }
-    }
-    if (this.leftAxis.trait === null) {
-      const leftAxisTrait = this.detectLeftAxisTrait(trait);
-      if (leftAxisTrait !== null) {
-        this.leftAxis.setTrait(leftAxisTrait, targetTrait);
-      }
-    }
-  }
-
-  /** @protected */
-  override onRemoveTrait(trait: Trait): void {
-    super.onRemoveTrait(trait);
-    const graphTrait = this.detectGraphTrait(trait);
-    if (graphTrait !== null && this.graph.trait === graphTrait) {
-      this.graph.setTrait(null);
-    }
-    const topAxisTrait = this.detectTopAxisTrait(trait);
-    if (topAxisTrait !== null && this.topAxis.trait === topAxisTrait) {
-      this.topAxis.setTrait(null);
-    }
-    const rightAxisTrait = this.detectRightAxisTrait(trait);
-    if (rightAxisTrait !== null && this.rightAxis.trait === rightAxisTrait) {
-      this.rightAxis.setTrait(null);
-    }
-    const bottomAxisTrait = this.detectBottomAxisTrait(trait);
-    if (bottomAxisTrait !== null && this.bottomAxis.trait === bottomAxisTrait) {
-      this.bottomAxis.setTrait(null);
-    }
-    const leftAxisTrait = this.detectLeftAxisTrait(trait);
-    if (leftAxisTrait !== null && this.leftAxis.trait === leftAxisTrait) {
-      this.leftAxis.setTrait(null);
-    }
-  }
+    },
+    didDetachTrait(leftAxisTrait: AxisTrait<Y>): void {
+      this.owner.callObservers("traitDidDetachLeftAxis", leftAxisTrait, this.owner);
+    },
+    detectModel(model: Model): AxisTrait<Y> | null {
+      return model.getTrait(LeftAxisTrait);
+    },
+    detectTrait(trait: Trait): AxisTrait<Y> | null {
+      return trait instanceof LeftAxisTrait ? trait : null;
+    },
+  })
+  readonly leftAxis!: TraitRef<this, AxisTrait<Y>>;
+  static readonly leftAxis: MemberFastenerClass<ChartTrait, "leftAxis">;
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();

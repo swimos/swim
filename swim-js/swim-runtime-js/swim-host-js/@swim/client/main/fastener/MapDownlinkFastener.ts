@@ -18,7 +18,7 @@ import {AnyValue, Value, Form} from "@swim/structure";
 import {Uri} from "@swim/uri";
 import type {MapDownlinkObserver, MapDownlink} from "../downlink/MapDownlink";
 import type {WarpRef} from "../ref/WarpRef";
-import {DownlinkFastenerInit, DownlinkFastener} from "./DownlinkFastener";
+import {DownlinkFastenerInit, DownlinkFastenerClass, DownlinkFastener} from "./DownlinkFastener";
 
 export type MapDownlinkFastenerKeyType<F extends MapDownlinkFastener<any, any, any>> =
   F extends MapDownlinkFastener<any, infer K, any, any, any> ? K : never;
@@ -32,45 +32,42 @@ export type MapDownlinkFastenerValueType<F extends MapDownlinkFastener<any, any,
 export type MapDownlinkFastenerValueInitType<F extends MapDownlinkFastener<any, any, any>> =
   F extends MapDownlinkFastener<any, any, any, infer V, infer VU> ? V | VU : never;
 
-export interface MapDownlinkFastenerInit<K = unknown, V = unknown, KU = never, VU = never> extends DownlinkFastenerInit, MapDownlinkObserver<K, V, KU, VU> {
+export interface MapDownlinkFastenerInit<K = unknown, V = unknown, KU = K, VU = V> extends DownlinkFastenerInit, MapDownlinkObserver<K, V, KU, VU> {
+  extends?: {prototype: MapDownlinkFastener<any, any, any>} | string | boolean | null;
   keyForm?: Form<K, KU>;
   valueForm?: Form<V, VU>;
 
   initDownlink?(downlink: MapDownlink<K, V, KU, VU>): MapDownlink<K, V, KU, VU>;
 }
 
-export type MapDownlinkFastenerDescriptor<O = unknown, K = unknown, V = unknown, KU = never, VU = never, I = {}> = ThisType<MapDownlinkFastener<O, K, V, KU, VU> & I> & MapDownlinkFastenerInit<K, V, KU, VU> & Partial<I>;
+export type MapDownlinkFastenerDescriptor<O = unknown, K = unknown, V = unknown, KU = K, VU = V, I = {}> = ThisType<MapDownlinkFastener<O, K, V, KU, VU> & I> & MapDownlinkFastenerInit<K, V, KU, VU> & Partial<I>;
 
-export interface MapDownlinkFastenerClass<F extends MapDownlinkFastener<any, any, any> = MapDownlinkFastener<any, any, any, any, any>> {
-  /** @internal */
-  prototype: F;
-
-  create(owner: FastenerOwner<F>, fastenerName: string): F;
-
-  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): MapDownlinkFastenerClass<F> & I;
-
-  define<O, K extends Value = Value, V extends Value = Value, KU extends AnyValue = AnyValue, VU extends AnyValue = AnyValue>(descriptor: MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU>>;
-  define<O, K = unknown, V extends Value = Value, KU = never, VU extends AnyValue = AnyValue>(descriptor: {keyForm: Form<K, KU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU>>;
-  define<O, K extends Value = Value, V = unknown, KU extends AnyValue = AnyValue, VU = never>(descriptor: {valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU>>;
-  define<O, K, V, KU = never, VU = never>(descriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU>>;
-  define<O, K extends Value = Value, V extends Value = Value, KU extends AnyValue = AnyValue, VU extends AnyValue = AnyValue, I = {}>(descriptor: MapDownlinkFastenerDescriptor<O, V, VU, I>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU> & I>;
-  define<O, K = unknown, V extends Value = Value, KU = never, VU extends AnyValue = AnyValue, I = {}>(descriptor: {keyForm: Form<K, KU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU> & I>;
-  define<O, K extends Value = Value, V = unknown, KU extends AnyValue = AnyValue, VU = never, I = {}>(descriptor: {valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU> & I>;
-  define<O, K, V, KU = never, VU = never, I = {}>(descriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU> & I>;
-
-  <O, K extends Value = Value, V extends Value = Value, KU extends AnyValue = AnyValue, VU extends AnyValue = AnyValue>(descriptor: MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): PropertyDecorator;
-  <O, K = unknown, V extends Value = Value, KU = never, VU extends AnyValue = AnyValue>(descriptor: {keyForm: Form<K, KU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): PropertyDecorator;
-  <O, K extends Value = Value, V = unknown, KU extends AnyValue = AnyValue, VU = never>(descriptor: {valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): PropertyDecorator;
-  <O, K, V, KU = never, VU = never>(descriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): PropertyDecorator;
-  <O, K extends Value = Value, V extends Value = Value, KU extends AnyValue = AnyValue, VU extends AnyValue = AnyValue, I = {}>(descriptor: MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
-  <O, K = unknown, V extends Value = Value, KU = never, VU extends AnyValue = AnyValue, I = {}>(descriptor: {keyForm: Form<K, KU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
-  <O, K extends Value = Value, V = unknown, KU extends AnyValue = AnyValue, VU = never, I = {}>(descriptor: {valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
-  <O, K, V, KU = never, VU = never, I = {}>(descriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
+export interface MapDownlinkFastenerClass<F extends MapDownlinkFastener<any, any, any> = MapDownlinkFastener<any, any, any>> extends DownlinkFastenerClass<F> {
 }
 
-export interface MapDownlinkFastener<O = unknown, K = unknown, V = unknown, KU = never, VU = never> extends DownlinkFastener<O> {
+export interface MapDownlinkFastenerFactory<F extends MapDownlinkFastener<any, any, any> = MapDownlinkFastener<any, any, any>> extends MapDownlinkFastenerClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): MapDownlinkFastenerFactory<F> & I;
+
+  define<O, K extends Value = Value, V extends Value = Value, KU extends AnyValue = AnyValue, VU extends AnyValue = AnyValue>(className: string, descriptor: MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU>>;
+  define<O, K = unknown, V extends Value = Value, KU = K, VU extends AnyValue = AnyValue>(className: string, descriptor: {keyForm: Form<K, KU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU>>;
+  define<O, K extends Value = Value, V = unknown, KU extends AnyValue = AnyValue, VU = V>(className: string, descriptor: {valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU>>;
+  define<O, K, V, KU = K, VU = V>(className: string, escriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU>>;
+  define<O, K extends Value = Value, V extends Value = Value, KU extends AnyValue = AnyValue, VU extends AnyValue = AnyValue, I = {}>(className: string, descriptor: MapDownlinkFastenerDescriptor<O, V, VU, I>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU> & I>;
+  define<O, K = unknown, V extends Value = Value, KU = K, VU extends AnyValue = AnyValue, I = {}>(className: string, descriptor: {keyForm: Form<K, KU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU> & I>;
+  define<O, K extends Value = Value, V = unknown, KU extends AnyValue = AnyValue, VU = V, I = {}>(className: string, descriptor: {valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU> & I>;
+  define<O, K, V, KU = K, VU = V, I = {}>(className: string, descriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU> & I>;
+
+  <O, K extends Value = Value, V extends Value = Value, KU extends AnyValue = AnyValue, VU extends AnyValue = AnyValue>(descriptor: MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): PropertyDecorator;
+  <O, K = unknown, V extends Value = Value, KU = K, VU extends AnyValue = AnyValue>(descriptor: {keyForm: Form<K, KU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): PropertyDecorator;
+  <O, K extends Value = Value, V = unknown, KU extends AnyValue = AnyValue, VU = V>(descriptor: {valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): PropertyDecorator;
+  <O, K, V, KU = K, VU = V>(descriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): PropertyDecorator;
+  <O, K extends Value = Value, V extends Value = Value, KU extends AnyValue = AnyValue, VU extends AnyValue = AnyValue, I = {}>(descriptor: MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
+  <O, K = unknown, V extends Value = Value, KU = K, VU extends AnyValue = AnyValue, I = {}>(descriptor: {keyForm: Form<K, KU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
+  <O, K extends Value = Value, V = unknown, KU extends AnyValue = AnyValue, VU = V, I = {}>(descriptor: {valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
+  <O, K, V, KU = K, VU = V, I = {}>(descriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
+}
+
+export interface MapDownlinkFastener<O = unknown, K = unknown, V = unknown, KU = K, VU = V> extends DownlinkFastener<O> {
   (key: K | KU): V | undefined;
   (key: K | KU, value: V | VU): O;
 
@@ -153,7 +150,7 @@ export interface MapDownlinkFastener<O = unknown, K = unknown, V = unknown, KU =
 }
 
 export const MapDownlinkFastener = (function (_super: typeof DownlinkFastener) {
-  const MapDownlinkFastener: MapDownlinkFastenerClass = _super.extend();
+  const MapDownlinkFastener: MapDownlinkFastenerFactory = _super.extend("MapDownlinkFastener");
 
   MapDownlinkFastener.prototype.keyForm = function <K, V, KU, VU>(this: MapDownlinkFastener<unknown, K, V, KU, VU>, keyForm?: Form<K, KU> | null): Form<K, KU> | null | typeof this {
     if (keyForm === void 0) {
@@ -341,9 +338,9 @@ export const MapDownlinkFastener = (function (_super: typeof DownlinkFastener) {
     return downlink;
   };
 
-  MapDownlinkFastener.construct = function <F extends MapDownlinkFastener<any, any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
+  MapDownlinkFastener.construct = function <F extends MapDownlinkFastener<any, any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
     if (fastener === null) {
-      fastener = function MapDownlinkFastener(key: MapDownlinkFastenerKeyType<F> | MapDownlinkFastenerKeyInitType<F>, value?: MapDownlinkFastenerValueType<F> | MapDownlinkFastenerValueInitType<F>): MapDownlinkFastenerValueType<F> | undefined | FastenerOwner<F> {
+      fastener = function (key: MapDownlinkFastenerKeyType<F> | MapDownlinkFastenerKeyInitType<F>, value?: MapDownlinkFastenerValueType<F> | MapDownlinkFastenerValueInitType<F>): MapDownlinkFastenerValueType<F> | undefined | FastenerOwner<F> {
         if (arguments.length === 1) {
           return fastener!.get(key);
         } else {
@@ -351,16 +348,17 @@ export const MapDownlinkFastener = (function (_super: typeof DownlinkFastener) {
           return fastener!.owner;
         }
       } as F;
+      delete (fastener as Partial<Mutable<F>>).name; // don't clobber prototype name
       Object.setPrototypeOf(fastener, fastenerClass.prototype);
     }
-    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+    fastener = _super.construct(fastenerClass, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).ownKeyForm = null;
     (fastener as Mutable<typeof fastener>).ownValueForm = null;
     return fastener;
   };
 
-  MapDownlinkFastener.define = function <O, K, V, KU, VU>(descriptor: MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerClass<MapDownlinkFastener<any, K, V, KU, VU>> {
-    let superClass = descriptor.extends as MapDownlinkFastenerClass | undefined;
+  MapDownlinkFastener.define = function <O, K, V, KU, VU>(className: string, descriptor: MapDownlinkFastenerDescriptor<O, K, V, KU, VU>): MapDownlinkFastenerFactory<MapDownlinkFastener<any, K, V, KU, VU>> {
+    let superClass = descriptor.extends as MapDownlinkFastenerFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     const keyForm = descriptor.keyForm;
@@ -387,10 +385,10 @@ export const MapDownlinkFastener = (function (_super: typeof DownlinkFastener) {
       superClass = this;
     }
 
-    const fastenerClass = superClass.extend(descriptor);
+    const fastenerClass = superClass.extend(className, descriptor);
 
-    fastenerClass.construct = function (fastenerClass: {prototype: MapDownlinkFastener<any, any, any, any, any>}, fastener: MapDownlinkFastener<O, K, V, KU, VU> | null, owner: O, fastenerName: string): MapDownlinkFastener<O, K, V, KU, VU> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
+    fastenerClass.construct = function (fastenerClass: {prototype: MapDownlinkFastener<any, any, any>}, fastener: MapDownlinkFastener<O, K, V, KU, VU> | null, owner: O): MapDownlinkFastener<O, K, V, KU, VU> {
+      fastener = superClass!.construct(fastenerClass, fastener, owner);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);
       }

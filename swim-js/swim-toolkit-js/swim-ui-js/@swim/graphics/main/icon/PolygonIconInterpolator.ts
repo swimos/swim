@@ -68,6 +68,7 @@ export const PolygonIconInterpolator = (function (_super: typeof Interpolator) {
   };
 
   PolygonIconInterpolator.prototype = Object.create(_super.prototype);
+  PolygonIconInterpolator.prototype.constructor = PolygonIconInterpolator;
 
   Object.defineProperty(PolygonIconInterpolator.prototype, 0, {
     get(this: PolygonIconInterpolator): PolygonIcon {

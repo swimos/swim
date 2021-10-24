@@ -52,6 +52,7 @@ export const TimeScaleInterpolator = (function (_super: typeof Interpolator) {
   };
 
   TimeScaleInterpolator.prototype = Object.create(_super.prototype);
+  TimeScaleInterpolator.prototype.constructor = TimeScaleInterpolator;
 
   return TimeScaleInterpolator;
 })(Interpolator);

@@ -25,9 +25,26 @@ export class GenericHierarchy extends Hierarchy {
 
   readonly parent: Hierarchy | null;
 
-  protected override onSetParent(newParent: Hierarchy | null, oldParent: Hierarchy | null): void {
-    (this as Mutable<this>).parent = newParent;
-    super.onSetParent(newParent, oldParent);
+  /** @internal */
+  override attachParent(parent: Hierarchy): void {
+    this.willAttachParent(parent);
+    (this as Mutable<this>).parent = parent;
+    if (parent.mounted) {
+      this.cascadeMount();
+    }
+    this.onAttachParent(parent);
+    this.didAttachParent(parent);
+  }
+
+  /** @internal */
+  override detachParent(parent: Hierarchy): void {
+    this.willDetachParent(parent);
+    if (this.mounted) {
+      this.cascadeUnmount();
+    }
+    this.onDetachParent(parent);
+    (this as Mutable<this>).parent = null;
+    this.didDetachParent(parent);
   }
 
   get childCount(): number {
@@ -117,6 +134,19 @@ export class GenericHierarchy extends Hierarchy {
     }
   }
 
+  /** @internal */
+  protected replaceChildMap(newChild: Hierarchy, oldChild: Hierarchy): void {
+    const key = oldChild.key;
+    if (key !== void 0) {
+      let childMap = this.childMap as MutableDictionary<Hierarchy>;
+      if (childMap === null) {
+        childMap = {};
+        (this as Mutable<this>).childMap = childMap;
+      }
+      childMap[key] = newChild;
+    }
+  }
+
   override getChild<H extends Hierarchy>(key: string, childBound: Class<H>): H | null;
   override getChild(key: string, childBound?: Class<Hierarchy>): Hierarchy | null;
   override getChild(key: string, childBound?: Class<Hierarchy>): Hierarchy | null {
@@ -131,43 +161,59 @@ export class GenericHierarchy extends Hierarchy {
   }
 
   override setChild(key: string, newChild: Hierarchy | null): Hierarchy | null {
-    let target: Hierarchy | null = null;
-    const children = this.children as Hierarchy[];
-    if (newChild !== null) {
-      if (newChild.parent === this) {
-        target = children[children.indexOf(newChild) + 1] || null;
-      }
-      newChild.remove();
-    }
-
-    let index = -1;
     const oldChild = this.getChild(key);
-    if (oldChild !== null) {
+    const children = this.children as Hierarchy[];
+    let index = -1;
+    let target: Hierarchy | null = null;
+
+    if (oldChild !== null && newChild !== null && oldChild !== newChild) { // replace
+      newChild.remove();
       index = children.indexOf(oldChild);
       // assert(index >= 0);
-      target = children[index + 1] || null;
+      target = index + 1 < children.length ? children[index + 1]! : null;
+      newChild.setKey(oldChild.key);
       this.willRemoveChild(oldChild);
-      oldChild.setParent(null, this);
-      this.removeChildMap(oldChild);
-      children.splice(index, 1);
-      this.onRemoveChild(oldChild);
-      this.didRemoveChild(oldChild);
-      oldChild.setKey(void 0);
-    }
-
-    if (newChild !== null) {
-      newChild.setKey(key);
       this.willInsertChild(newChild, target);
-      if (index >= 0) {
-        children.splice(index, 0, newChild);
-      } else {
-        children.push(newChild);
-      }
-      this.insertChildMap(newChild);
-      newChild.setParent(this, null);
+      oldChild.detachParent(this);
+      children[index] = newChild;
+      this.replaceChildMap(newChild, oldChild);
+      newChild.attachParent(this);
+      this.onRemoveChild(oldChild);
       this.onInsertChild(newChild, target);
+      this.didRemoveChild(oldChild);
       this.didInsertChild(newChild, target);
+      oldChild.setKey(void 0);
       newChild.cascadeInsert();
+    } else if (newChild !== oldChild || newChild !== null && newChild.key !== key) {
+      if (oldChild !== null) { // remove
+        this.willRemoveChild(oldChild);
+        oldChild.detachParent(this);
+        this.removeChildMap(oldChild);
+        index = children.indexOf(oldChild);
+        // assert(index >= 0);
+        children.splice(index, 1);
+        this.onRemoveChild(oldChild);
+        this.didRemoveChild(oldChild);
+        oldChild.setKey(void 0);
+        if (index < children.length) {
+          target = children[index]!;
+        }
+      }
+      if (newChild !== null) { // insert
+        newChild.remove();
+        newChild.setKey(key);
+        this.willInsertChild(newChild, target);
+        if (index >= 0) {
+          children.splice(index, 0, newChild);
+        } else {
+          children.push(newChild);
+        }
+        this.insertChildMap(newChild);
+        newChild.attachParent(this);
+        this.onInsertChild(newChild, target);
+        this.didInsertChild(newChild, target);
+        newChild.cascadeInsert();
+      }
     }
 
     return oldChild;
@@ -183,7 +229,7 @@ export class GenericHierarchy extends Hierarchy {
     this.willInsertChild(child, null);
     (this.children as Hierarchy[]).push(child);
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, null);
     this.didInsertChild(child, null);
     child.cascadeInsert();
@@ -203,7 +249,7 @@ export class GenericHierarchy extends Hierarchy {
     this.willInsertChild(child, target);
     children.unshift(child);
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
@@ -231,7 +277,7 @@ export class GenericHierarchy extends Hierarchy {
       children.push(child);
     }
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
@@ -239,9 +285,38 @@ export class GenericHierarchy extends Hierarchy {
     return child;
   }
 
+  override replaceChild<H extends Hierarchy>(newChild: Hierarchy, oldChild: H): H {
+    const children = this.children as Hierarchy[];
+    if (oldChild.parent !== this) {
+      throw new TypeError("" + oldChild);
+    }
+
+    if (newChild !== oldChild) {
+      newChild.remove();
+      const index = children.indexOf(oldChild);
+      // assert(index >= 0);
+      const target = index + 1 < children.length ? children[index + 1]! : null;
+      newChild.setKey(oldChild.key);
+      this.willRemoveChild(oldChild);
+      this.willInsertChild(newChild, target);
+      oldChild.detachParent(this);
+      children[index] = newChild;
+      this.replaceChildMap(newChild, oldChild);
+      newChild.attachParent(this);
+      this.onRemoveChild(oldChild);
+      this.onInsertChild(newChild, target);
+      this.didRemoveChild(oldChild);
+      this.didInsertChild(newChild, target);
+      oldChild.setKey(void 0);
+      newChild.cascadeInsert();
+    }
+
+    return oldChild;
+  }
+
   override removeChild(key: string): Hierarchy | null;
-  override removeChild(child: Hierarchy): void;
-  override removeChild(key: string | Hierarchy): Hierarchy | null | void {
+  override removeChild<H extends Hierarchy>(child: H): H;
+  override removeChild(key: string | Hierarchy): Hierarchy | null {
     let child: Hierarchy | null;
     if (typeof key === "string") {
       child = this.getChild(key);
@@ -250,26 +325,23 @@ export class GenericHierarchy extends Hierarchy {
       }
     } else {
       child = key;
-    }
-    if (child.parent !== this) {
-      throw new Error("not a child");
+      if (child.parent !== this) {
+        throw new Error("not a child");
+      }
     }
 
     this.willRemoveChild(child);
-    child.setParent(null, this);
+    child.detachParent(this);
     this.removeChildMap(child);
     const children = this.children as Hierarchy[];
     const index = children.indexOf(child);
-    if (index >= 0) {
-      children.splice(index, 1);
-    }
+    // assert(index >= 0);
+    children.splice(index, 1);
     this.onRemoveChild(child);
     this.didRemoveChild(child);
     child.setKey(void 0);
 
-    if (typeof key === "string") {
-      return child;
-    }
+    return child;
   }
 
   override removeChildren(): void {
@@ -278,7 +350,7 @@ export class GenericHierarchy extends Hierarchy {
     while (childCount = children.length, childCount !== 0) {
       const child = children[childCount - 1]!;
       this.willRemoveChild(child);
-      child.setParent(null, this);
+      child.detachParent(this);
       this.removeChildMap(child);
       children.pop();
       this.onRemoveChild(child);

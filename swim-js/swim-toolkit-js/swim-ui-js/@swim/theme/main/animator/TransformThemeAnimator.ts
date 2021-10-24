@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyTransform, Transform} from "@swim/math";
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 /** @internal */
 export const TransformThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const TransformThemeAnimator = _super.extend() as ThemeAnimatorClass<ThemeAnimator<any, Transform | null | undefined, AnyTransform | null | undefined>>;
+  const TransformThemeAnimator = _super.extend("TransformThemeAnimator") as ThemeAnimatorFactory<ThemeAnimator<any, Transform | null | undefined, AnyTransform | null | undefined>>;
 
   TransformThemeAnimator.prototype.fromAny = function (value: AnyTransform | null | undefined): Transform | null | undefined {
     return value !== void 0 && value !== null ? Transform.fromAny(value) : null;

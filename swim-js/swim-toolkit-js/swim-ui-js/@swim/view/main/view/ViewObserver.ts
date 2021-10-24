@@ -18,9 +18,13 @@ import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {ViewContextType, View} from "./View";
 
 export interface ViewObserver<V extends View = View> extends HierarchyObserver<V> {
-  viewWillSetParent?(newParent: View | null, oldParent: View | null, view: V): void;
+  viewWillAttachParent?(parent: View, view: V): void;
 
-  viewDidSetParent?(newParent: View | null, oldParent: View | null, view: V): void;
+  viewDidAttachParent?(parent: View, view: V): void;
+
+  viewWillDetachParent?(parent: View, view: V): void;
+
+  viewDidDetachParent?(parent: View, view: V): void;
 
   viewWillInsertChild?(child: View, target: View | null, view: V): void;
 

@@ -15,8 +15,9 @@
 /// <reference types="google.maps"/>
 
 import {Mutable, Class, Lazy, Equivalent, AnyTiming} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import {GeoPoint} from "@swim/geo";
-import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewRef} from "@swim/view";
 import {ViewHtml, HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
 import {AnyGeoPerspective, MapView} from "@swim/map";
@@ -67,8 +68,7 @@ export class GoogleMapView extends MapView {
       override onAdd(): void {
         const containerView = this.owner.container.view;
         if (containerView !== null) {
-          this.owner.initContainer(containerView);
-          this.owner.attachContainer(containerView);
+          this.owner.container.materializeView(containerView);
         }
       }
       override onRemove(): void {
@@ -83,13 +83,7 @@ export class GoogleMapView extends MapView {
   override readonly geoViewport!: GoogleMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoViewport !== void 0) {
-        observer.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected onSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
@@ -97,13 +91,7 @@ export class GoogleMapView extends MapView {
   }
 
   protected didSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!
-      if (observer.viewDidSetGeoViewport !== void 0) {
-        observer.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected updateGeoViewport(): boolean {
@@ -160,59 +148,63 @@ export class GoogleMapView extends MapView {
     }
   }
 
-  protected override attachCanvas(canvasView: CanvasView): void {
-    super.attachCanvas(canvasView);
-    if (this.parent === null) {
-      canvasView.appendChild(this);
-    }
-  }
-
-  protected override detachCanvas(canvasView: CanvasView): void {
-    if (this.parent === canvasView) {
-      canvasView.removeChild(this);
-    }
-    super.detachCanvas(canvasView);
-  }
-
-  protected override initContainer(containerView: HtmlView): void {
-    super.initContainer(containerView);
-    const mapPanes = this.mapOverlay.getPanes();
-    if (mapPanes !== void 0 && mapPanes !== null) {
-      materializeAncestors(mapPanes.overlayMouseTarget as HTMLElement);
-    }
-    function materializeAncestors(node: HTMLElement): HtmlView {
-      const parentNode = node.parentNode;
-      if (parentNode instanceof HTMLElement && (parentNode as ViewHtml).view === void 0) {
-        materializeAncestors(parentNode);
+  @ViewRef<GoogleMapView, CanvasView>({
+    extends: true,
+    didAttachView(canvasView: CanvasView, targetView: View | null): void {
+      if (this.owner.parent === null) {
+        canvasView.appendChild(this.owner);
       }
-      return HtmlView.fromNode(node);
-    }
-  }
-
-  protected override attachContainer(containerView: HtmlView): void {
-    super.attachContainer(containerView);
-    const mapPanes = this.mapOverlay.getPanes();
-    if (mapPanes !== void 0 && mapPanes !== null) {
-      const overlayMouseTargetView = (mapPanes.overlayMouseTarget as ViewHtml).view!;
-      const overlayContainerView = overlayMouseTargetView.parent as HtmlView;
-      const canvasContainerView = overlayContainerView.parent as HtmlView;
-      this.canvas.injectView(canvasContainerView);
-    } else if (this.canvas.view === null) {
-      this.canvas.setView(this.canvas.createView());
-    }
-  }
-
-  protected override detachContainer(containerView: HtmlView): void {
-    const canvasView = this.canvas.view;
-    const mapPanes = this.mapOverlay.getPanes();
-    if (mapPanes !== void 0 && mapPanes !== null) {
-      const overlayMouseTargetView = (mapPanes.overlayMouseTarget as ViewHtml).view!;
-      const overlayContainerView = overlayMouseTargetView.parent as HtmlView;
-      const canvasContainerView = overlayContainerView.parent as HtmlView;
-      if (canvasView !== null && canvasView.parent === canvasContainerView) {
-        canvasContainerView.removeChild(containerView);
+      MapView.canvas.prototype.didAttachView.call(this, canvasView, targetView);
+    },
+    willDetachView(canvasView: CanvasView): void {
+      MapView.canvas.prototype.willDetachView.call(this, canvasView);
+      if (this.owner.parent === canvasView) {
+        canvasView.removeChild(this.owner);
       }
-    }
-    super.detachContainer(containerView);
-  }
+    },
+  })
+  override readonly canvas!: ViewRef<this, CanvasView>;
+  static override readonly canvas: MemberFastenerClass<GoogleMapView, "canvas">;
+
+  @ViewRef<GoogleMapView, HtmlView, {materializeView(containerView: HtmlView): void}>({
+    extends: true,
+    materializeView(containerView: HtmlView): void {
+      function materializeAncestors(node: HTMLElement): HtmlView {
+        const parentNode = node.parentNode;
+        if (parentNode instanceof HTMLElement && (parentNode as ViewHtml).view === void 0) {
+          materializeAncestors(parentNode);
+        }
+        return HtmlView.fromNode(node);
+      }
+      const mapPanes = this.owner.mapOverlay.getPanes();
+      if (mapPanes !== void 0 && mapPanes !== null) {
+        materializeAncestors(mapPanes.overlayMouseTarget as HTMLElement);
+        const overlayMouseTargetView = (mapPanes.overlayMouseTarget as ViewHtml).view!;
+        const overlayContainerView = overlayMouseTargetView.parent as HtmlView;
+        const canvasContainerView = overlayContainerView.parent as HtmlView;
+        this.owner.canvas.insertView(canvasContainerView);
+      } else if (this.owner.canvas.view === null) {
+        this.owner.canvas.attachView();
+      }
+    },
+    didAttachView(containerView: HtmlView, targetView: View | null): void {
+      this.materializeView(containerView);
+      MapView.container.prototype.didAttachView.call(this, containerView, targetView);
+    },
+    willDetachView(containerView: HtmlView): void {
+      MapView.container.prototype.willDetachView.call(this, containerView);
+      const canvasView = this.owner.canvas.view;
+      const mapPanes = this.owner.mapOverlay.getPanes();
+      if (mapPanes !== void 0 && mapPanes !== null) {
+        const overlayMouseTargetView = (mapPanes.overlayMouseTarget as ViewHtml).view!;
+        const overlayContainerView = overlayMouseTargetView.parent as HtmlView;
+        const canvasContainerView = overlayContainerView.parent as HtmlView;
+        if (canvasView !== null && canvasView.parent === canvasContainerView) {
+          canvasContainerView.removeChild(containerView);
+        }
+      }
+    },
+  })
+  override readonly container!: ViewRef<this, HtmlView> & {materializeView(containerView: HtmlView): void};
+  static override readonly container: MemberFastenerClass<GoogleMapView, "container">;
 }

@@ -14,7 +14,7 @@
 
 import {Mutable, Class, Observable, ObserverType, Service} from "@swim/util";
 import {Affinity} from "../fastener/Affinity";
-import {FastenerOwner, FastenerFlags, FastenerInit, Fastener} from "../fastener/Fastener";
+import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "../fastener/Fastener";
 
 export type MemberProviderService<O, K extends keyof O> =
   O[K] extends Provider<any, infer S> ? S : never;
@@ -23,6 +23,7 @@ export type ProviderService<P extends Provider<any, any>> =
   P extends Provider<any, infer S> ? S : never;
 
 export interface ProviderInit<S = unknown> extends FastenerInit {
+  extends?: {prototype: Provider<any, any>} | string | boolean | null;
   type?: unknown;
   observes?: boolean;
 
@@ -42,30 +43,21 @@ export interface ProviderInit<S = unknown> extends FastenerInit {
 
 export type ProviderDescriptor<O = unknown, S = unknown, I = {}> = ThisType<Provider<O, S> & I> & ProviderInit<S> & Partial<I>;
 
-export interface ProviderClass<P extends Provider<any, any> = Provider<any, any>> {
-  /** @internal */
-  prototype: P;
+export interface ProviderClass<P extends Provider<any, any> = Provider<any, any>> extends FastenerClass<P> {
+}
 
-  create(owner: FastenerOwner<P>, providerName: string): P;
+export interface ProviderFactory<P extends Provider<any, any> = Provider<any, any>> extends ProviderClass<P> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): ProviderFactory<P> & I;
 
-  construct(providerClass: {prototype: P}, provider: P | null, owner: FastenerOwner<P>, providerName: string): P;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): ProviderClass<P> & I;
-
-  define<O, S>(descriptor: ProviderDescriptor<O, S>): ProviderClass;
-  define<O, S extends Observable>(descriptor: {observes: boolean} & ProviderDescriptor<O, S, ObserverType<S>>): ProviderClass<Provider<any, S>>;
-  define<O, S, I = {}>(descriptor: ProviderDescriptor<O, S, I>): ProviderClass<Provider<any, S> & I>;
-  define<O, S extends Observable, I = {}>(descriptor: {observes: boolean} & ProviderDescriptor<O, S, I & ObserverType<S>>): ProviderClass<Provider<any, S> & I>;
+  define<O, S>(className: string, descriptor: ProviderDescriptor<O, S>): ProviderFactory;
+  define<O, S extends Observable>(className: string, descriptor: {observes: boolean} & ProviderDescriptor<O, S, ObserverType<S>>): ProviderFactory<Provider<any, S>>;
+  define<O, S, I = {}>(className: string, descriptor: ProviderDescriptor<O, S, I>): ProviderFactory<Provider<any, S> & I>;
+  define<O, S extends Observable, I = {}>(className: string, descriptor: {observes: boolean} & ProviderDescriptor<O, S, I & ObserverType<S>>): ProviderFactory<Provider<any, S> & I>;
 
   <O, S>(descriptor: ProviderDescriptor<O, S>): PropertyDecorator;
   <O, S extends Observable>(descriptor: {observes: boolean} & ProviderDescriptor<O, S, ObserverType<S>>): PropertyDecorator;
   <O, S, I = {}>(descriptor: ProviderDescriptor<O, S, I>): PropertyDecorator;
   <O, S extends Observable, I = {}>(descriptor: {observes: boolean} & ProviderDescriptor<O, S, I & ObserverType<S>>): PropertyDecorator;
-
-  /** @internal @override */
-  readonly FlagShift: number;
-  /** @internal @override */
-  readonly FlagMask: FastenerFlags;
 }
 
 export interface Provider<O = unknown, S = unknown> extends Fastener<O> {
@@ -145,7 +137,7 @@ export interface Provider<O = unknown, S = unknown> extends Fastener<O> {
 }
 
 export const Provider = (function (_super: typeof Fastener) {
-  const Provider: ProviderClass = _super.extend();
+  const Provider: ProviderFactory = _super.extend("Provider");
 
   Object.defineProperty(Provider.prototype, "familyType", {
     get: function (this: Provider): Class<Provider<any, any>> | null {
@@ -175,7 +167,12 @@ export const Provider = (function (_super: typeof Fastener) {
   Provider.prototype.getService = function <S>(this: Provider<unknown, S>): NonNullable<S> {
     const service = this.service;
     if (service === void 0 || service === null) {
-      throw new TypeError(service + " " + this.name + " service");
+      let message = service + " ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "service";
+      throw new TypeError(message);
     }
     return service as NonNullable<S>;
   };
@@ -222,22 +219,23 @@ export const Provider = (function (_super: typeof Fastener) {
     _super.prototype.onUnmount.call(this);
   };
 
-  Provider.construct = function <P extends Provider<any, any>>(providerClass: {prototype: P}, provider: P | null, owner: FastenerOwner<P>, providerName: string): P {
+  Provider.construct = function <P extends Provider<any, any>>(providerClass: {prototype: P}, provider: P | null, owner: FastenerOwner<P>): P {
     if (provider === null) {
-      provider = function Provider(): ProviderService<P> {
+      provider = function (): ProviderService<P> {
         return provider!.service;
       } as P;
+      delete (provider as Partial<Mutable<P>>).name; // don't clobber prototype name
       Object.setPrototypeOf(provider, providerClass.prototype);
     }
-    provider = _super.construct(providerClass, provider, owner, providerName) as P;
+    provider = _super.construct(providerClass, provider, owner) as P;
     (provider as Mutable<typeof provider>).service = void 0 as unknown as ProviderService<P>;
     provider.initAffinity(Affinity.Inherited);
     provider.initInherits(true);
     return provider;
   };
 
-  Provider.define = function <O, S>(descriptor: ProviderDescriptor<O, S>): ProviderClass<Provider<any, S>> {
-    let superClass = descriptor.extends as ProviderClass | undefined;
+  Provider.define = function <O, S>(className: string, descriptor: ProviderDescriptor<O, S>): ProviderFactory<Provider<any, S>> {
+    let superClass = descriptor.extends as ProviderFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     const service = descriptor.service;
@@ -250,10 +248,10 @@ export const Provider = (function (_super: typeof Fastener) {
       superClass = this;
     }
 
-    const providerClass = superClass.extend(descriptor);
+    const providerClass = superClass.extend(className, descriptor);
 
-    providerClass.construct = function (providerClass: {prototype: Provider<any, any>}, provider: Provider<O, S> | null, owner: O, providerName: string): Provider<O, S> {
-      provider = superClass!.construct(providerClass, provider, owner, providerName);
+    providerClass.construct = function (providerClass: {prototype: Provider<any, any>}, provider: Provider<O, S> | null, owner: O): Provider<O, S> {
+      provider = superClass!.construct(providerClass, provider, owner);
       if (affinity !== void 0) {
         provider.initAffinity(affinity);
       }

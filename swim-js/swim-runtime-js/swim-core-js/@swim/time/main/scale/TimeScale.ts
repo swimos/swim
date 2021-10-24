@@ -72,6 +72,7 @@ export const TimeScale = (function (_super: typeof ContinuousScale) {
   };
 
   TimeScale.prototype = Object.create(_super.prototype);
+  TimeScale.prototype.constructor = TimeScale;
 
   Object.defineProperty(TimeScale.prototype, "inverse", {
     get(this: TimeScale): Mapping<number, DateTime> {

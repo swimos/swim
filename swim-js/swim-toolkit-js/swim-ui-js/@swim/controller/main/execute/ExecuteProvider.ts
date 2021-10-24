@@ -28,7 +28,7 @@ export interface ExecuteProvider<C extends Controller, S extends ExecuteService<
 }
 
 export const ExecuteProvider = (function (_super: typeof Provider) {
-  const ExecuteProvider = _super.extend() as ProviderClass<ExecuteProvider<any, any>>;
+  const ExecuteProvider = _super.extend("ExecuteProvider") as ProviderClass<ExecuteProvider<any, any>>;
 
   Object.defineProperty(ExecuteProvider.prototype, "controllerContext", {
     get<C extends Controller, S extends ExecuteService<C> | null | undefined>(this: ExecuteProvider<C, S>): ControllerContext {

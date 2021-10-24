@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
-import {ControllerContextType, ControllerFlags, AnyController, Controller} from "./Controller";
+import {ControllerContextType, ControllerFlags, AnyController, ControllerFactory, Controller} from "./Controller";
 
 export class GenericController extends Controller {
   constructor() {
@@ -109,6 +109,19 @@ export class GenericController extends Controller {
     }
   }
 
+  /** @internal */
+  protected replaceChildMap(newChild: Controller, oldChild: Controller): void {
+    const key = oldChild.key;
+    if (key !== void 0) {
+      let childMap = this.childMap as MutableDictionary<Controller>;
+      if (childMap === null) {
+        childMap = {};
+        (this as Mutable<this>).childMap = childMap;
+      }
+      childMap[key] = newChild;
+    }
+  }
+
   override getChild<C extends Controller>(key: string, childBound: Class<C>): C | null;
   override getChild(key: string, childBound?: Class<Controller>): Controller | null;
   override getChild(key: string, childBound?: Class<Controller>): Controller | null {
@@ -122,56 +135,71 @@ export class GenericController extends Controller {
     return null;
   }
 
-  override setChild<C extends Controller>(key: string, newChild: AnyController<C> | null): Controller | null;
+  override setChild<C extends Controller>(key: string, newChild: C | ControllerFactory<C> | null): Controller | null;
   override setChild(key: string, newChild: AnyController | null): Controller | null;
   override setChild(key: string, newChild: AnyController | null): Controller | null {
     if (newChild !== null) {
       newChild = Controller.fromAny(newChild);
     }
-
-    let target: Controller | null = null;
-    const children = this.children as Controller[];
-    if (newChild !== null) {
-      if (newChild.parent === this) {
-        target = children[children.indexOf(newChild) + 1] || null;
-      }
-      newChild.remove();
-    }
-
-    let index = -1;
     const oldChild = this.getChild(key);
-    if (oldChild !== null) {
+    const children = this.children as Controller[];
+    let index = -1;
+    let target: Controller | null = null;
+
+    if (oldChild !== null && newChild !== null && oldChild !== newChild) { // replace
+      newChild.remove();
       index = children.indexOf(oldChild);
       // assert(index >= 0);
-      target = children[index + 1] || null;
+      target = index + 1 < children.length ? children[index + 1]! : null;
+      newChild.setKey(oldChild.key);
       this.willRemoveChild(oldChild);
-      oldChild.setParent(null, this);
-      this.removeChildMap(oldChild);
-      children.splice(index, 1);
-      this.onRemoveChild(oldChild);
-      this.didRemoveChild(oldChild);
-      oldChild.setKey(void 0);
-    }
-
-    if (newChild !== null) {
-      newChild.setKey(key);
       this.willInsertChild(newChild, target);
-      if (index >= 0) {
-        children.splice(index, 0, newChild);
-      } else {
-        children.push(newChild);
-      }
-      this.insertChildMap(newChild);
-      newChild.setParent(this, null);
+      oldChild.detachParent(this);
+      children[index] = newChild;
+      this.replaceChildMap(newChild, oldChild);
+      newChild.attachParent(this);
+      this.onRemoveChild(oldChild);
       this.onInsertChild(newChild, target);
+      this.didRemoveChild(oldChild);
       this.didInsertChild(newChild, target);
+      oldChild.setKey(void 0);
       newChild.cascadeInsert();
+    } else if (newChild !== oldChild || newChild !== null && newChild.key !== key) {
+      if (oldChild !== null) { // remove
+        this.willRemoveChild(oldChild);
+        oldChild.detachParent(this);
+        this.removeChildMap(oldChild);
+        index = children.indexOf(oldChild);
+        // assert(index >= 0);
+        children.splice(index, 1);
+        this.onRemoveChild(oldChild);
+        this.didRemoveChild(oldChild);
+        oldChild.setKey(void 0);
+        if (index < children.length) {
+          target = children[index]!;
+        }
+      }
+      if (newChild !== null) { // insert
+        newChild.remove();
+        newChild.setKey(key);
+        this.willInsertChild(newChild, target);
+        if (index >= 0) {
+          children.splice(index, 0, newChild);
+        } else {
+          children.push(newChild);
+        }
+        this.insertChildMap(newChild);
+        newChild.attachParent(this);
+        this.onInsertChild(newChild, target);
+        this.didInsertChild(newChild, target);
+        newChild.cascadeInsert();
+      }
     }
 
     return oldChild;
   }
 
-  override appendChild<C extends Controller>(child: AnyController<C>, key?: string): C;
+  override appendChild<C extends Controller>(child: C | ControllerFactory<C>, key?: string): C;
   override appendChild(child: AnyController, key?: string): Controller;
   override appendChild(child: AnyController, key?: string): Controller {
     child = Controller.fromAny(child);
@@ -185,7 +213,7 @@ export class GenericController extends Controller {
     this.willInsertChild(child, null);
     (this.children as Controller[]).push(child);
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, null);
     this.didInsertChild(child, null);
     child.cascadeInsert();
@@ -193,7 +221,7 @@ export class GenericController extends Controller {
     return child;
   }
 
-  override prependChild<C extends Controller>(child: AnyController<C>, key?: string): C;
+  override prependChild<C extends Controller>(child: C | ControllerFactory<C>, key?: string): C;
   override prependChild(child: AnyController, key?: string): Controller;
   override prependChild(child: AnyController, key?: string): Controller {
     child = Controller.fromAny(child);
@@ -209,7 +237,7 @@ export class GenericController extends Controller {
     this.willInsertChild(child, target);
     children.unshift(child);
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
@@ -217,7 +245,7 @@ export class GenericController extends Controller {
     return child;
   }
 
-  override insertChild<C extends Controller>(child: AnyController<C>, target: Controller | null, key?: string): C;
+  override insertChild<C extends Controller>(child: C | ControllerFactory<C>, target: Controller | null, key?: string): C;
   override insertChild(child: AnyController, target: Controller | null, key?: string): Controller;
   override insertChild(child: AnyController, target: Controller | null, key?: string): Controller {
     if (target !== null && target.parent !== this) {
@@ -241,7 +269,7 @@ export class GenericController extends Controller {
       children.push(child);
     }
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
@@ -249,9 +277,41 @@ export class GenericController extends Controller {
     return child;
   }
 
+  override replaceChild<C extends Controller>(newChild: Controller, oldChild: C): C;
+  override replaceChild<C extends Controller>(newChild: AnyController, oldChild: C): C;
+  override replaceChild(newChild: AnyController, oldChild: Controller): Controller {
+    const children = this.children as Controller[];
+    if (oldChild.parent !== this) {
+      throw new TypeError("" + oldChild);
+    }
+
+    newChild = Controller.fromAny(newChild);
+    if (newChild !== oldChild) {
+      newChild.remove();
+      const index = children.indexOf(oldChild);
+      // assert(index >= 0);
+      const target = index + 1 < children.length ? children[index + 1]! : null;
+      newChild.setKey(oldChild.key);
+      this.willRemoveChild(oldChild);
+      this.willInsertChild(newChild, target);
+      oldChild.detachParent(this);
+      children[index] = newChild;
+      this.replaceChildMap(newChild, oldChild);
+      newChild.attachParent(this);
+      this.onRemoveChild(oldChild);
+      this.onInsertChild(newChild, target);
+      this.didRemoveChild(oldChild);
+      this.didInsertChild(newChild, target);
+      oldChild.setKey(void 0);
+      newChild.cascadeInsert();
+    }
+
+    return oldChild;
+  }
+
   override removeChild(key: string): Controller | null;
-  override removeChild(child: Controller): void;
-  override removeChild(key: string | Controller): Controller | null | void {
+  override removeChild<C extends Controller>(child: C): C;
+  override removeChild(key: string | Controller): Controller | null {
     let child: Controller | null;
     if (typeof key === "string") {
       child = this.getChild(key);
@@ -260,26 +320,23 @@ export class GenericController extends Controller {
       }
     } else {
       child = key;
-    }
-    if (child.parent !== this) {
-      throw new Error("not a child controller");
+      if (child.parent !== this) {
+        throw new Error("not a child controller");
+      }
     }
 
     this.willRemoveChild(child);
-    child.setParent(null, this);
+    child.detachParent(this);
     this.removeChildMap(child);
     const children = this.children as Controller[];
     const index = children.indexOf(child);
-    if (index >= 0) {
-      children.splice(index, 1);
-    }
+    // assert(index >= 0);
+    children.splice(index, 1);
     this.onRemoveChild(child);
     this.didRemoveChild(child);
     child.setKey(void 0);
 
-    if (typeof key === "string") {
-      return child;
-    }
+    return child;
   }
 
   override removeChildren(): void {
@@ -288,7 +345,7 @@ export class GenericController extends Controller {
     while (childCount = children.length, childCount !== 0) {
       const child = children[childCount - 1]!;
       this.willRemoveChild(child);
-      child.setParent(null, this);
+      child.detachParent(this);
       this.removeChildMap(child);
       children.pop();
       this.onRemoveChild(child);

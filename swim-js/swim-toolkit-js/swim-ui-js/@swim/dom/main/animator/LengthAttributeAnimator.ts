@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyLength, Length} from "@swim/math";
-import {AttributeAnimatorClass, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorFactory, AttributeAnimator} from "./AttributeAnimator";
 
 /** @internal */
 export const LengthAttributeAnimator = (function (_super: typeof AttributeAnimator) {
-  const LengthAttributeAnimator = _super.extend() as AttributeAnimatorClass<AttributeAnimator<any, Length | null, AnyLength | null>>;
+  const LengthAttributeAnimator = _super.extend("LengthAttributeAnimator") as AttributeAnimatorFactory<AttributeAnimator<any, Length | null, AnyLength | null>>;
 
   LengthAttributeAnimator.prototype.parse = function (value: string): Length | null {
     return Length.parse(value);

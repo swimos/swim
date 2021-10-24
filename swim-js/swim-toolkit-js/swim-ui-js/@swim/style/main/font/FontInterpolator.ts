@@ -76,6 +76,7 @@ export const FontInterpolator = (function (_super: typeof Interpolator) {
   };
 
   FontInterpolator.prototype = Object.create(_super.prototype);
+  FontInterpolator.prototype.constructor = FontInterpolator;
 
   Object.defineProperty(FontInterpolator.prototype, 0, {
     get(this: FontInterpolator): Font {

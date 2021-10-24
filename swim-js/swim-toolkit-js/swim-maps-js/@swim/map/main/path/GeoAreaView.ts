@@ -14,8 +14,8 @@
 
 import type {Class} from "@swim/util";
 import {AnyLength, Length, R2Box} from "@swim/math";
-import {Affinity, Property} from "@swim/fastener";
-import type {GeoBox, GeoPath} from "@swim/geo";
+import {Property} from "@swim/fastener";
+import type {GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
@@ -40,68 +40,19 @@ export interface GeoAreaViewInit extends GeoPathViewInit, FillViewInit, StrokeVi
 export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   override readonly observerType?: Class<GeoAreaViewObserver>;
 
-  protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetFill !== void 0) {
-        observer.viewWillSetFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  protected onSetFill(newFill: Color | null, oldFill: Color | null): void {
-    this.requireUpdate(View.NeedsRender);
-  }
-
-  protected didSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetFill !== void 0) {
-        observer.viewDidSetFill(newFill, oldFill, this);
-      }
-    }
-  }
-
   @ThemeAnimator<GeoAreaView, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     inherits: true,
     updateFlags: View.NeedsRender,
     willSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.willSetFill(newFill, oldFill);
+      this.owner.callObservers("viewWillSetFill", newFill, oldFill, this.owner);
     },
     didSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.onSetFill(newFill, oldFill);
-      this.owner.didSetFill(newFill, oldFill);
+      this.owner.callObservers("viewDidSetFill", newFill, oldFill, this.owner);
     },
   })
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
-
-  protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetStroke !== void 0) {
-        observer.viewWillSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
-
-  protected onSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    this.requireUpdate(View.NeedsRender);
-  }
-
-  protected didSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetStroke !== void 0) {
-        observer.viewDidSetStroke(newStroke, oldStroke, this);
-      }
-    }
-  }
 
   @ThemeAnimator<GeoAreaView, Color | null, AnyColor | null>({
     type: Color,
@@ -109,38 +60,13 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     inherits: true,
     updateFlags: View.NeedsRender,
     willSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.willSetStroke(newStroke, oldStroke);
+      this.owner.callObservers("viewWillSetStroke", newStroke, oldStroke, this.owner);
     },
     didSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.onSetStroke(newStroke, oldStroke);
-      this.owner.didSetStroke(newStroke, oldStroke);
+      this.owner.callObservers("viewDidSetStroke", newStroke, oldStroke, this.owner);
     },
   })
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
-
-  protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetStrokeWidth !== void 0) {
-        observer.viewWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
-
-  protected onSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    this.requireUpdate(View.NeedsRender);
-  }
-
-  protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetStrokeWidth !== void 0) {
-        observer.viewDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-      }
-    }
-  }
 
   @ThemeAnimator<GeoAreaView, Length | null, AnyLength | null>({
     type: Length,
@@ -148,11 +74,10 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     inherits: true,
     updateFlags: View.NeedsRender,
     willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.willSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      this.owner.callObservers("viewWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
     didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.onSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
-      this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      this.owner.callObservers("viewDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
@@ -160,25 +85,18 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   @Property({type: Boolean, state: true})
   readonly clipViewport!: Property<this, boolean>;
 
-  protected override onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
-    super.onSetGeoPath(newGeoPath, oldGeoPath);
-    if (this.geoCentroid.hasAffinity(Affinity.Intrinsic)) {
-      this.geoCentroid.setState(newGeoPath.centroid(), Affinity.Intrinsic);
-    }
-  }
-
   override cullGeoFrame(geoFrame: GeoBox = this.geoFrame): void {
     let culled: boolean;
     if (geoFrame.intersects(this.geoBounds)) {
-      const frame = this.viewFrame;
+      const viewFrame = this.viewContext.viewFrame;
       const bounds = this.viewBounds;
       // check if 9x9 view frame fully contains view bounds
       const contained = !this.clipViewport.state
-                     || frame.xMin - 4 * frame.width <= bounds.xMin
-                     && bounds.xMax <= frame.xMax + 4 * frame.width
-                     && frame.yMin - 4 * frame.height <= bounds.yMin
-                     && bounds.yMax <= frame.yMax + 4 * frame.height;
-      culled = !contained || !frame.intersects(bounds);
+                     || viewFrame.xMin - 4 * viewFrame.width <= bounds.xMin
+                     && bounds.xMax <= viewFrame.xMax + 4 * viewFrame.width
+                     && viewFrame.yMin - 4 * viewFrame.height <= bounds.yMin
+                     && bounds.yMax <= viewFrame.yMax + 4 * viewFrame.height;
+      culled = !contained || !viewFrame.intersects(bounds);
     } else {
       culled = true;
     }
@@ -189,7 +107,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
-      this.renderArea(renderer.context, this.viewFrame);
+      this.renderArea(renderer.context, viewContext.viewFrame);
     }
   }
 
@@ -228,7 +146,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
-      return this.hitTestArea(p.x, p.y, renderer.context, this.viewFrame);
+      return this.hitTestArea(p.x, p.y, renderer.context, viewContext.viewFrame);
     }
     return null;
   }

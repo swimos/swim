@@ -16,29 +16,33 @@ import {
   Mutable,
   Class,
   Arrays,
+  HashCode,
+  FromAny,
   Creatable,
   InitType,
   Initable,
   ObserverType,
   Observable,
+  ObserverMethods,
+  ObserverParameters,
   ConsumerType,
   Consumable,
   Consumer,
 } from "@swim/util";
 import {FastenerContext, Fastener, Property, Provider} from "@swim/fastener";
 import {WarpRef, WarpService, WarpProvider, DownlinkFastener} from "@swim/client";
-import {ModelContextType, ModelFlags, AnyModel, Model} from "../model/Model";
-import {ModelFastener} from "../model/ModelFastener";
+import {ModelContextType, ModelFlags, AnyModel, ModelFactory, Model} from "../model/Model";
+import {ModelRelation} from "../model/ModelRelation";
 import type {TraitObserver} from "./TraitObserver";
-import {TraitFastener} from "./"; // forward import
+import {TraitRelation} from "./"; // forward import
 
-export type TraitModelType<R extends Trait> = R extends {readonly model: infer M | null} ? M : never;
+export type TraitModelType<T extends Trait> = T extends {readonly model: infer M | null} ? M : never;
 
-export type TraitContextType<R extends Trait> = ModelContextType<TraitModelType<R>>;
+export type TraitContextType<T extends Trait> = ModelContextType<TraitModelType<T>>;
 
 export type TraitFlags = number;
 
-export type AnyTrait<R extends Trait = Trait> = R | TraitFactory<R> | InitType<R>;
+export type AnyTrait<T extends Trait = Trait> = T | TraitFactory<T> | InitType<T>;
 
 export interface TraitInit {
   type?: Creatable<Trait>;
@@ -46,26 +50,21 @@ export interface TraitInit {
   traits?: AnyTrait[];
 }
 
-export interface AnyTraitFactory<R extends Trait = Trait, U = never> {
-  create?(): R;
-
-  fromAny?(value: R | U): R;
+export interface TraitFactory<T extends Trait = Trait, U = AnyTrait<T>> extends Creatable<T>, FromAny<T, U> {
+  fromInit(init: InitType<T>): T;
 }
 
-export interface TraitFactory<R extends Trait = Trait> extends Creatable<R> {
-  fromInit(init: InitType<R>): R;
+export interface TraitClass<T extends Trait = Trait, U = AnyTrait<T>> extends Function, TraitFactory<T, U> {
+  readonly prototype: T;
 }
 
-export interface TraitClass<R extends Trait = Trait> extends Function, TraitFactory<R> {
-  readonly prototype: R;
+export interface TraitConstructor<T extends Trait = Trait, U = AnyTrait<T>> extends TraitClass<T, U> {
+  new(): T;
 }
 
-export interface TraitConstructor<R extends Trait = Trait> extends TraitClass<R> {
-  new(): R;
-}
-
-export abstract class Trait implements Initable<TraitInit>, Observable, Consumable, FastenerContext {
+export abstract class Trait implements HashCode, Initable<TraitInit>, Observable, Consumable, FastenerContext {
   constructor() {
+    this.uid = (this.constructor as typeof Trait).uid();
     this.key = void 0;
     this.flags = 0;
     this.fasteners = null;
@@ -79,6 +78,9 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
 
   /** @override */
   readonly consumerType?: Class<Consumer>;
+
+  /** @internal */
+  readonly uid: number;
 
   readonly key: string | undefined;
 
@@ -97,51 +99,73 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
   readonly model: Model | null;
 
   /** @internal */
-  setModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
-    this.willSetModel(newModel, oldModel);
-    if (oldModel !== null) {
-      this.detachModel(oldModel);
-    }
-    (this as Mutable<this>).model = newModel;
-    this.onSetModel(newModel, oldModel);
-    if (newModel !== null) {
-      this.attachModel(newModel);
-    }
-    this.didSetModel(newModel, oldModel);
-  }
-
-  protected attachModel(model: TraitModelType<this>): void {
+  attachModel(model: Model): void {
+    // assert(this.model === null);
+    this.willAttachModel(model);
+    (this as Mutable<this>).model = model;
     if (model.mounted) {
       this.mountTrait();
     }
+    this.onAttachModel(model);
+    this.didAttachModel(model);
   }
 
-  protected detachModel(model: TraitModelType<this>): void {
-    if (this.mounted) {
-      this.unmountTrait();
-    }
-  }
-
-  protected willSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected willAttachModel(model: Model): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.traitWillSetModel !== void 0) {
-        observer.traitWillSetModel(newModel, oldModel, this);
+      if (observer.traitWillAttachModel !== void 0) {
+        observer.traitWillAttachModel(model, this);
       }
     }
   }
 
-  protected onSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
-    // hook
+  protected onAttachModel(model: Model): void {
+    this.bindModelFasteners(model);
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected didAttachModel(model: Model): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.traitDidSetModel !== void 0) {
-        observer.traitDidSetModel(newModel, oldModel, this);
+      if (observer.traitDidAttachModel !== void 0) {
+        observer.traitDidAttachModel(model, this);
+      }
+    }
+  }
+
+  /** @internal */
+  detachModel(model: Model): void {
+    // assert(this.model === model);
+    this.willDetachModel(model);
+    if (this.mounted) {
+      this.unmountTrait();
+    }
+    this.onDetachModel(model);
+    (this as Mutable<this>).model = null;
+    this.didDetachModel(model);
+  }
+
+  protected willDetachModel(model: Model): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitWillDetachModel !== void 0) {
+        observer.traitWillDetachModel(model, this);
+      }
+    }
+  }
+
+  protected onDetachModel(model: Model): void {
+    this.unbindModelFasteners(model);
+  }
+
+  protected didDetachModel(model: Model): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitDidDetachModel !== void 0) {
+        observer.traitDidDetachModel(model, this);
       }
     }
   }
@@ -173,38 +197,55 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
   }
 
   /** @protected */
-  attachParent(parent: Model): void {
-    // hook
-  }
-
-  /** @protected */
-  detachParent(parent: Model): void {
-    // hook
-  }
-
-  /** @protected */
-  willSetParent(newParent: Model | null, oldParent: Model | null): void {
+  willAttachParent(parent: Model): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.traitWillSetParent !== void 0) {
-        observer.traitWillSetParent(newParent, oldParent, this);
+      if (observer.traitWillAttachParent !== void 0) {
+        observer.traitWillAttachParent(parent, this);
       }
     }
   }
 
   /** @protected */
-  onSetParent(newParent: Model | null, oldParent: Model | null): void {
+  onAttachParent(parent: Model): void {
     // hook
   }
 
   /** @protected */
-  didSetParent(newParent: Model | null, oldParent: Model | null): void {
+  didAttachParent(parent: Model): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.traitDidSetParent !== void 0) {
-        observer.traitDidSetParent(newParent, oldParent, this);
+      if (observer.traitDidAttachParent !== void 0) {
+        observer.traitDidAttachParent(parent, this);
+      }
+    }
+  }
+
+  /** @protected */
+  willDetachParent(parent: Model): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitWillDetachParent !== void 0) {
+        observer.traitWillDetachParent(parent, this);
+      }
+    }
+  }
+
+  /** @protected */
+  onDetachParent(parent: Model): void {
+    // hook
+  }
+
+  /** @protected */
+  didDetachParent(parent: Model): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitDidDetachParent !== void 0) {
+        observer.traitDidDetachParent(parent, this);
       }
     }
   }
@@ -253,7 +294,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     return model !== null ? model.getChild(key, childBound) : null;
   }
 
-  setChild<M extends Model>(key: string, newChild: AnyModel<M> | null): Model | null;
+  setChild<M extends Model>(key: string, newChild: M | ModelFactory<M> | null): Model | null;
   setChild(key: string, newChild: AnyModel | null): Model | null;
   setChild(key: string, newChild: AnyModel | null): Model | null {
     const model = this.model;
@@ -264,7 +305,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     }
   }
 
-  appendChild<M extends Model>(child: AnyModel<M>, key?: string): M;
+  appendChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
   appendChild(child: AnyModel, key?: string): Model;
   appendChild(child: AnyModel, key?: string): Model {
     const model = this.model;
@@ -275,7 +316,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     }
   }
 
-  prependChild<M extends Model>(child: AnyModel<M>, key?: string): M;
+  prependChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
   prependChild(child: AnyModel, key?: string): Model;
   prependChild(child: AnyModel, key?: string): Model {
     const model = this.model;
@@ -286,12 +327,23 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     }
   }
 
-  insertChild<M extends Model>(child: AnyModel<M>, target: Model | null, key?: string): M;
+  insertChild<M extends Model>(child: M | ModelFactory<M>, target: Model | null, key?: string): M;
   insertChild(child: AnyModel, target: Model | null, key?: string): Model;
   insertChild(child: AnyModel, target: Model | null, key?: string): Model {
     const model = this.model;
     if (model !== null) {
       return model.insertChild(child, target, key);
+    } else {
+      throw new Error("no model");
+    }
+  }
+
+  replaceChild<M extends Model>(newChild: Model, oldChild: M): M;
+  replaceChild<M extends Model>(newChild: AnyModel, oldChild: M): M;
+  replaceChild(newChild: AnyModel, oldChild: Model): Model {
+    const model = this.model;
+    if (model !== null) {
+      return model.replaceChild(newChild, oldChild);
     } else {
       throw new Error("no model");
     }
@@ -315,7 +367,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
   /** @protected */
   onInsertChild(child: Model, target: Model | null): void {
     this.requireUpdate(this.insertChildFlags);
-    this.attachChildFasteners(child, target);
+    this.bindChildFasteners(child, target);
   }
 
   /** @protected */
@@ -358,7 +410,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
 
   /** @protected */
   onRemoveChild(child: Model): void {
-    this.detachChildFastenerss(child);
+    this.unbindChildFasteners(child);
   }
 
   /** @protected */
@@ -419,15 +471,15 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     return model !== null ? model.forEachTrait(callback, thisArg) : void 0;
   }
 
-  getTrait<R extends Trait>(key: string, traitBound: Class<R>): R | null;
+  getTrait<T extends Trait>(key: string, traitBound: Class<T>): T | null;
   getTrait(key: string, traitBound?: Class<Trait>): Trait | null;
-  getTrait<R extends Trait>(traitBound: Class<R>): R | null;
+  getTrait<T extends Trait>(traitBound: Class<T>): T | null;
   getTrait(key: string | Class<Trait>, traitBound?: Class<Trait>): Trait | null {
     const model = this.model;
     return model !== null ? model.getTrait(key as string, traitBound) : null;
   }
 
-  setTrait<R extends Trait>(key: string, newTrait: AnyTrait<R> | null): Trait | null;
+  setTrait<T extends Trait>(key: string, newTrait: T | TraitFactory<T> | null): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null {
     const model = this.model;
@@ -438,7 +490,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     }
   }
 
-  appendTrait<R extends Trait>(trait: AnyTrait<R>, key?: string): R;
+  appendTrait<T extends Trait>(trait: T | TraitFactory<T>, key?: string): T;
   appendTrait(trait: AnyTrait, key?: string): Trait;
   appendTrait(trait: AnyTrait, key?: string): Trait {
     const model = this.model;
@@ -449,7 +501,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     }
   }
 
-  prependTrait<R extends Trait>(trait: AnyTrait<R>, key?: string): R;
+  prependTrait<T extends Trait>(trait: T | TraitFactory<T>, key?: string): T;
   prependTrait(trait: AnyTrait, key?: string): Trait;
   prependTrait(trait: AnyTrait, key?: string): Trait {
     const model = this.model;
@@ -460,12 +512,23 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     }
   }
 
-  insertTrait<R extends Trait>(trait: AnyTrait<R>, target: Trait | null, key?: string): R;
+  insertTrait<T extends Trait>(trait: T | TraitFactory<T>, target: Trait | null, key?: string): T;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait {
     const model = this.model;
     if (model !== null) {
       return model.insertTrait(trait, target, key);
+    } else {
+      throw new Error("no model");
+    }
+  }
+
+  replaceTraitt<T extends Trait>(newTrait: Trait, oldTrait: T): T;
+  replaceTraitt<T extends Trait>(newTrait: AnyTrait, oldTrait: T): T;
+  replaceTraitt(newTrait: AnyTrait, oldTrait: Trait): Trait {
+    const model = this.model;
+    if (model !== null) {
+      return model.replaceTrait(newTrait, oldTrait);
     } else {
       throw new Error("no model");
     }
@@ -489,7 +552,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
   /** @protected */
   onInsertTrait(trait: Trait, target: Trait | null): void {
     this.requireUpdate(this.insertTraitFlags);
-    this.attachTraitFasteners(trait, target);
+    this.bindTraitFasteners(trait, target);
   }
 
   /** @protected */
@@ -532,7 +595,7 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
   /** @protected */
   onRemoveTrait(trait: Trait): void {
     this.requireUpdate(this.removeTraitFlags);
-    this.detachTraitFasteners(trait);
+    this.unbindTraitFasteners(trait);
   }
 
   /** @protected */
@@ -546,34 +609,12 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     }
   }
 
-  /** @internal */
-  protected attachTraitFasteners(trait: Trait, target: Trait | null): void {
-    const fastenerName = trait.key;
-    if (fastenerName !== void 0) {
-      const traitFastener = this.getLazyFastener(fastenerName, TraitFastener);
-      if (traitFastener !== null && traitFastener.sibling === true) {
-        traitFastener.setOwnTrait(trait, null);
-      }
-    }
-  }
-
-  /** @internal */
-  protected detachTraitFasteners(trait: Trait): void {
-    const fastenerName = trait.key;
-    if (fastenerName !== void 0) {
-      const traitFastener = this.getFastener(fastenerName, TraitFastener);
-      if (traitFastener !== null && traitFastener.sibling === true && traitFastener.trait === trait) {
-        traitFastener.setOwnTrait(null, null);
-      }
-    }
-  }
-
-  getSuperTrait<R extends Trait>(superBounds: Class<R>): R | null {
+  getSuperTrait<T extends Trait>(superBounds: Class<T>): T | null {
     const model = this.model;
     return model !== null ? model.getSuperTrait(superBounds) : null;
   }
 
-  getBaseTrait<R extends Trait>(baseBound: Class<R>): R | null {
+  getBaseTrait<T extends Trait>(baseBound: Class<T>): T | null {
     const model = this.model;
     return model !== null ? model.getBaseTrait(baseBound) : null;
   }
@@ -593,28 +634,6 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     updateFlags: Model.NeedsReconcile,
   })
   readonly warpRef!: Property<this, WarpRef | null>;
-
-  /** @internal */
-  protected attachChildFasteners(child: Model, target: Model | null): void {
-    const fastenerName = child.key;
-    if (fastenerName !== void 0) {
-      const modelFastener = this.getLazyFastener(fastenerName, ModelFastener);
-      if (modelFastener !== null && modelFastener.child === true) {
-        modelFastener.setOwnModel(child, target);
-      }
-    }
-  }
-
-  /** @internal */
-  protected detachChildFastenerss(child: Model): void {
-    const fastenerName = child.key;
-    if (fastenerName !== void 0) {
-      const modelFastener = this.getFastener(fastenerName, ModelFastener);
-      if (modelFastener !== null && modelFastener.child === true && modelFastener.model === child) {
-        modelFastener.setOwnModel(null, null);
-      }
-    }
-  }
 
   get mounted(): boolean {
     return (this.flags & Trait.MountedFlag) !== 0;
@@ -977,72 +996,70 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
 
   /** @override */
   setFastener(fastenerName: string, newFastener: Fastener | null): void {
+    const fasteners = this.fasteners;
+    const oldFastener: Fastener | null | undefined = fasteners !== null ? fasteners[fastenerName] ?? null : null;
+    if (oldFastener !== newFastener) {
+      if (oldFastener !== null) {
+        this.detachFastener(fastenerName, oldFastener);
+      }
+      if (newFastener !== null) {
+        this.attachFastener(fastenerName, newFastener);
+      }
+    }
+  }
+
+  /** @internal */
+  protected attachFastener(fastenerName: string, fastener: Fastener): void {
     let fasteners = this.fasteners;
     if (fasteners === null) {
       fasteners = {};
       (this as Mutable<this>).fasteners = fasteners;
     }
-    let oldFastener: Fastener | null | undefined = fasteners[fastenerName];
-    if (oldFastener === void 0) {
-      oldFastener = null;
+    // assert(fasteners[fastenerName] === void 0);
+    this.willAttachFastener(fastenerName, fastener);
+    fasteners[fastenerName] = fastener;
+    if (this.mounted) {
+      fastener.mount();
     }
-    if (newFastener !== oldFastener) {
-      this.willSetFastener(fastenerName, newFastener, oldFastener);
-      if (oldFastener !== null) {
-        this.detachFastener(fastenerName, oldFastener);
-        if (this.mounted) {
-          oldFastener.unmount();
-        }
-      }
-      if (newFastener !== null) {
-        fasteners[fastenerName] = newFastener;
-        if (this.mounted) {
-          newFastener.mount();
-        }
-      } else {
-        delete fasteners[fastenerName];
-      }
-      this.onSetFastener(fastenerName, newFastener, oldFastener);
-      if (newFastener !== null) {
-        this.attachFastener(fastenerName, newFastener);
-      }
-      this.didSetFastener(fastenerName, newFastener, oldFastener);
-    }
+    this.onAttachFastener(fastenerName, fastener);
+    this.didAttachFastener(fastenerName, fastener);
   }
 
-  protected attachFastener(fastenerName: string, fastener: Fastener): void {
-    if (fastener instanceof ModelFastener && fastener.child === true) {
-      const child = this.getChild(fastenerName);
-      if (child !== null) {
-        fastener.setOwnModel(child, null);
-      }
-    }
-
-    if (fastener instanceof TraitFastener && fastener.sibling === true) {
-      const trait = this.getTrait(fastenerName);
-      if (trait !== null) {
-        fastener.setOwnTrait(trait, null);
-      }
-    }
-
-    if (fastener instanceof DownlinkFastener && fastener.consumed === true && this.consuming) {
-      fastener.consume(this);
-    }
+  protected willAttachFastener(fastenerName: string, fastener: Fastener): void {
+    // hook
   }
 
+  protected onAttachFastener(fastenerName: string, fastener: Fastener): void {
+    this.bindFastener(fastener);
+  }
+
+  protected didAttachFastener(fastenerName: string, fastener: Fastener): void {
+    // hook
+  }
+
+  /** @internal */
   protected detachFastener(fastenerName: string, fastener: Fastener): void {
+    const fasteners = this.fasteners!;
+    // assert(fasteners !== null);
+    // assert(fasteners[fastenerName] === fastener);
+    this.willDetachFastener(fastenerName, fastener);
+    this.onDetachFastener(fastenerName, fastener);
+    if (this.mounted) {
+      fastener.unmount();
+    }
+    delete fasteners[fastenerName];
+    this.didDetachFastener(fastenerName, fastener);
+  }
+
+  protected willDetachFastener(fastenerName: string, fastener: Fastener): void {
     // hook
   }
 
-  protected willSetFastener(fastenerName: string, newFastener: Fastener | null, oldFastener: Fastener | null): void {
+  protected onDetachFastener(fastenerName: string, fastener: Fastener): void {
     // hook
   }
 
-  protected onSetFastener(fastenerName: string, newFastener: Fastener | null, oldFastener: Fastener | null): void {
-    // hook
-  }
-
-  protected didSetFastener(fastenerName: string, newFastener: Fastener | null, oldFastener: Fastener | null): void {
+  protected didDetachFastener(fastenerName: string, fastener: Fastener): void {
     // hook
   }
 
@@ -1088,6 +1105,120 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
     for (const fastenerName in fasteners) {
       const fastener = fasteners[fastenerName]!;
       fastener.unmount();
+    }
+  }
+
+  protected bindFastener(fastener: Fastener): void {
+    if ((fastener instanceof ModelRelation || fastener instanceof TraitRelation) && fastener.binds) {
+      this.forEachChild(function (child: Model): void {
+        fastener.bindModel(child, null);
+      }, this);
+    }
+    if (fastener instanceof TraitRelation && fastener.binds) {
+      this.forEachTrait(function (trait: Trait): void {
+        fastener.bindTrait(trait, null);
+      }, this);
+    }
+    if (fastener instanceof DownlinkFastener && fastener.consumed === true && this.consuming) {
+      fastener.consume(this);
+    }
+  }
+
+  /** @internal */
+  protected bindModelFasteners(model: Model): void {
+    const fasteners = this.fasteners;
+    model.forEachChild(function (child: Model): void {
+      for (const fastenerName in fasteners) {
+        const fastener = fasteners[fastenerName]!;
+        this.bindChildFastener(fastener, child, null);
+      }
+    }, this);
+    model.forEachTrait(function (trait: Trait): void {
+      for (const fastenerName in fasteners) {
+        const fastener = fasteners[fastenerName]!;
+        this.bindTraitFastener(fastener, trait, null);
+      }
+    }, this);
+  }
+
+  /** @internal */
+  protected unbindModelFasteners(model: Model): void {
+    const fasteners = this.fasteners;
+    model.forEachTrait(function (trait: Trait): void {
+      for (const fastenerName in fasteners) {
+        const fastener = fasteners[fastenerName]!;
+        this.unbindTraitFastener(fastener, trait);
+      }
+    }, this);
+    model.forEachChild(function (child: Model): void {
+      for (const fastenerName in fasteners) {
+        const fastener = fasteners[fastenerName]!;
+        this.unbindChildFastener(fastener, child);
+      }
+    }, this);
+  }
+
+  /** @internal */
+  protected bindChildFasteners(child: Model, target: Model | null): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.bindChildFastener(fastener, child, target);
+    }
+  }
+
+  /** @internal */
+  protected bindChildFastener(fastener: Fastener, child: Model, target: Model | null): void {
+    if (fastener instanceof ModelRelation || fastener instanceof TraitRelation) {
+      fastener.bindModel(child, target);
+    }
+  }
+
+  /** @internal */
+  protected unbindChildFasteners(child: Model): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.unbindChildFastener(fastener, child);
+    }
+  }
+
+  /** @internal */
+  protected unbindChildFastener(fastener: Fastener, child: Model): void {
+    if (fastener instanceof ModelRelation || fastener instanceof TraitRelation) {
+      fastener.unbindModel(child);
+    }
+  }
+
+  /** @internal */
+  protected bindTraitFasteners(trait: Trait, target: Trait | null): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.bindTraitFastener(fastener, trait, target);
+    }
+  }
+
+  /** @internal */
+  protected bindTraitFastener(fastener: Fastener, trait: Trait, target: Trait | null): void {
+    if (fastener instanceof TraitRelation) {
+      fastener.bindTrait(trait, target);
+    }
+  }
+
+  /** @internal */
+  protected unbindTraitFasteners(trait: Trait): void {
+    const fasteners = this.fasteners;
+    for (const fastenerName in fasteners) {
+      const fastener = fasteners[fastenerName]!;
+      this.unbindTraitFastener(fastener, trait);
+    }
+  }
+
+  /** @internal */
+  protected unbindTraitFastener(fastener: Fastener, trait: Trait): void {
+    if (fastener instanceof TraitRelation) {
+      fastener.unbindTrait(trait);
     }
   }
 
@@ -1212,6 +1343,17 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
       }
     }
     return result;
+  }
+
+  callObservers<O, K extends keyof ObserverMethods<O>>(this: this & {readonly observerType?: Class<O>}, key: K, ...args: ObserverParameters<O, K>): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]! as ObserverMethods<O>;
+      const method = observer[key];
+      if (typeof method === "function") {
+        method.call(observer, ...args);
+      }
+    }
   }
 
   /** @internal */
@@ -1379,6 +1521,16 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
   }
 
   /** @override */
+  equals(that: unknown): boolean {
+    return this === that;
+  }
+
+  /** @override */
+  hashCode(): number {
+    return this.uid;
+  }
+
+  /** @override */
   init(init: TraitInit): void {
     // hook
   }
@@ -1414,6 +1566,16 @@ export abstract class Trait implements Initable<TraitInit>, Observable, Consumab
       return (this as unknown as TraitFactory<InstanceType<S>>).fromInit(value);
     }
   }
+
+  /** @internal */
+  static uid: () => number = (function () {
+    let nextId = 1;
+    return function uid(): number {
+      const id = ~~nextId;
+      nextId += 1;
+      return id;
+    }
+  })();
 
   /** @internal */
   static readonly MountedFlag: TraitFlags = 1 << 0;

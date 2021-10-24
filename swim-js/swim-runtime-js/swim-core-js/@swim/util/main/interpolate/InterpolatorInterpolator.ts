@@ -39,6 +39,7 @@ export const InterpolatorInterpolator = (function (_super: typeof Interpolator) 
   };
 
   InterpolatorInterpolator.prototype = Object.create(_super.prototype);
+  InterpolatorInterpolator.prototype.constructor = InterpolatorInterpolator;
 
   return InterpolatorInterpolator;
 })(Interpolator);

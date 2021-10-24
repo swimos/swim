@@ -41,6 +41,7 @@ export const TimeDomainInterpolator = (function (_super: typeof Interpolator) {
   };
 
   TimeDomainInterpolator.prototype = Object.create(_super.prototype);
+  TimeDomainInterpolator.prototype.constructor = TimeDomainInterpolator;
 
   return TimeDomainInterpolator;
 })(Interpolator);

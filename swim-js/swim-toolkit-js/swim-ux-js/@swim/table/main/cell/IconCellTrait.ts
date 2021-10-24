@@ -21,38 +21,13 @@ import type {IconCellTraitObserver} from "./IconCellTraitObserver";
 export class IconCellTrait extends CellTrait {
   override readonly observerType?: Class<IconCellTraitObserver>;
 
-  protected willSetIcon(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetIcon !== void 0) {
-        traitObserver.traitWillSetIcon(newIcon, oldIcon, this);
-      }
-    }
-  }
-
-  protected onSetIcon(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-    // hook
-  }
-
-  protected didSetIcon(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetIcon !== void 0) {
-        traitObserver.traitDidSetIcon(newIcon, oldIcon, this);
-      }
-    }
-  }
-
   @Property<IconCellTrait, Graphics | null>({
     state: null,
     willSetState(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-      this.owner.willSetIcon(newIcon, oldIcon);
+      this.owner.callObservers("traitWillSetIcon", newIcon, oldIcon, this.owner);
     },
     didSetState(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-      this.owner.onSetIcon(newIcon, oldIcon);
-      this.owner.didSetIcon(newIcon, oldIcon);
+      this.owner.callObservers("traitDidSetIcon", newIcon, oldIcon, this.owner);
     },
   })
   readonly icon!: Property<this, Graphics | null>;

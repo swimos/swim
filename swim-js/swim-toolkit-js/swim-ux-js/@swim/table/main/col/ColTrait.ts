@@ -25,75 +25,25 @@ export type ColLabelFunction = (colTrait: ColTrait) => HtmlView | string | null;
 export class ColTrait extends Trait {
   override readonly observerType?: Class<ColTraitObserver>;
 
-  protected willSetLayout(newLayout: ColLayout | null, oldLabel: ColLayout | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetLayout !== void 0) {
-        traitObserver.traitWillSetLayout(newLayout, oldLabel, this);
-      }
-    }
-  }
-
-  protected onSetLayout(newLayout: ColLayout | null, oldLabel: ColLayout | null): void {
-    // hook
-  }
-
-  protected didSetLayout(newLayout: ColLayout | null, oldLabel: ColLayout | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetLayout !== void 0) {
-        traitObserver.traitDidSetLayout(newLayout, oldLabel, this);
-      }
-    }
-  }
-
   @Property<ColTrait, ColLayout | null, AnyColLayout | null>({
     type: ColLayout,
     state: null,
     willSetState(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
-      this.owner.willSetLayout(newLayout, oldLayout);
+      this.owner.callObservers("traitWillSetLayout", newLayout, oldLayout, this.owner);
     },
     didSetState(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
-      this.owner.onSetLayout(newLayout, oldLayout);
-      this.owner.didSetLayout(newLayout, oldLayout);
+      this.owner.callObservers("traitDidSetLayout", newLayout, oldLayout, this.owner);
     },
   })
   readonly layout!: Property<this, ColLayout | null, AnyColLayout | null>;
 
-  protected willSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitWillSetLabel !== void 0) {
-        traitObserver.traitWillSetLabel(newLabel, oldLabel, this);
-      }
-    }
-  }
-
-  protected onSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-    // hook
-  }
-
-  protected didSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const traitObserver = observers[i]!;
-      if (traitObserver.traitDidSetLabel !== void 0) {
-        traitObserver.traitDidSetLabel(newLabel, oldLabel, this);
-      }
-    }
-  }
-
   @Property<ColTrait, ColLabel | null>({
     state: null,
     willSetState(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-      this.owner.willSetLabel(newLabel, oldLabel);
+      this.owner.callObservers("traitWillSetLabel", newLabel, oldLabel, this.owner);
     },
     didSetState(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-      this.owner.onSetLabel(newLabel, oldLabel);
-      this.owner.didSetLabel(newLabel, oldLabel);
+      this.owner.callObservers("traitDidSetLabel", newLabel, oldLabel, this.owner);
     },
   })
   readonly label!: Property<this, ColLabel | null>;

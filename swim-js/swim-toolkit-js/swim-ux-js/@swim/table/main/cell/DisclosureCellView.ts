@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {MemberFastenerClass} from "@swim/fastener";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
-import {ViewFastener, PositionGestureInput} from "@swim/view";
+import {ViewRef, PositionGestureInput} from "@swim/view";
 import {DisclosureButton} from "@swim/button";
 import {CellView} from "./CellView";
 
@@ -22,57 +23,19 @@ export class DisclosureCellView extends CellView {
   protected override initCell(): void {
     super.initCell();
     this.addClass("cell-disclosure");
-    this.button.injectView();
+    this.button.insertView();
   }
 
   @ThemeAnimator({type: Expansion, inherits: true})
   readonly disclosure!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;
 
-  protected initButton(buttonView: DisclosureButton): void {
-    // hook
-  }
-
-  protected attachButton(buttonView: DisclosureButton): void {
-    // hook
-  }
-
-  protected detachButton(buttonView: DisclosureButton): void {
-    // hook
-  }
-
-  protected willSetButton(newButtonView: DisclosureButton | null, oldButtonView: DisclosureButton | null): void {
-    // hook
-  }
-
-  protected onSetButton(newButtonView: DisclosureButton | null, oldButtonView: DisclosureButton | null): void {
-    if (oldButtonView !== null) {
-      this.detachButton(oldButtonView);
-    }
-    if (newButtonView !== null) {
-      this.attachButton(newButtonView);
-      this.initButton(newButtonView);
-    }
-  }
-
-  protected didSetButton(newButtonView: DisclosureButton | null, oldButtonView: DisclosureButton | null): void {
-    // hook
-  }
-
-  @ViewFastener<DisclosureCellView, DisclosureButton>({
+  @ViewRef<DisclosureCellView, DisclosureButton>({
     key: true,
     type: DisclosureButton,
-    child: true,
-    willSetView(newButtonView: DisclosureButton | null, oldButtonView: DisclosureButton | null): void {
-      this.owner.willSetButton(newButtonView, oldButtonView);
-    },
-    onSetView(newButtonView: DisclosureButton | null, oldButtonView: DisclosureButton | null): void {
-      this.owner.onSetButton(newButtonView, oldButtonView);
-    },
-    didSetView(newButtonView: DisclosureButton | null, oldButtonView: DisclosureButton | null): void {
-      this.owner.didSetButton(newButtonView, oldButtonView);
-    },
+    binds: true,
   })
-  readonly button!: ViewFastener<this, DisclosureButton>;
+  readonly button!: ViewRef<this, DisclosureButton>;
+  static readonly button: MemberFastenerClass<DisclosureCellView, "button">;
 
   override didPress(input: PositionGestureInput, event: Event | null): void {
     input.preventDefault();

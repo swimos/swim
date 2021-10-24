@@ -17,7 +17,7 @@ import type {CellViewObserver} from "./CellViewObserver";
 import type {TextCellView} from "./TextCellView";
 
 export interface TextCellViewObserver<V extends TextCellView = TextCellView> extends CellViewObserver<V> {
-  viewWillSetContent?(newContentView: HtmlView | null, oldContentView: HtmlView | null, view: V): void;
+  viewWillAttachContent?(contentView: HtmlView, view: V): void;
 
-  viewDidSetContent?(newContentView: HtmlView | null, oldContentView: HtmlView | null, view: V): void;
+  viewDidDetachContent?(contentView: HtmlView, view: V): void;
 }

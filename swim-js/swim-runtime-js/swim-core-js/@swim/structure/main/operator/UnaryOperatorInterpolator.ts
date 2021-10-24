@@ -54,6 +54,7 @@ export const UnaryOperatorInterpolator = (function (_super: typeof Interpolator)
   };
 
   UnaryOperatorInterpolator.prototype = Object.create(_super.prototype);
+  UnaryOperatorInterpolator.prototype.constructor = UnaryOperatorInterpolator;
 
   Object.defineProperty(UnaryOperatorInterpolator.prototype, 0, {
     get(this: UnaryOperatorInterpolator): UnaryOperator {

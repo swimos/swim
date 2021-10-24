@@ -37,6 +37,7 @@ export const R2PointInterpolator = (function (_super: typeof Interpolator) {
   };
 
   R2PointInterpolator.prototype = Object.create(_super.prototype);
+  R2PointInterpolator.prototype.constructor = R2PointInterpolator;
 
   return R2PointInterpolator;
 })(Interpolator);

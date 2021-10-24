@@ -50,6 +50,7 @@ export const InvokeOperatorInterpolator = (function (_super: typeof Interpolator
   };
 
   InvokeOperatorInterpolator.prototype = Object.create(_super.prototype);
+  InvokeOperatorInterpolator.prototype.constructor = InvokeOperatorInterpolator;
 
   Object.defineProperty(InvokeOperatorInterpolator.prototype, 0, {
     get(this: InvokeOperatorInterpolator): InvokeOperator {

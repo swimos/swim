@@ -37,5 +37,8 @@ export {DataSetTraitObserver} from "./DataSetTraitObserver";
 export {DataPointController} from "./DataPointController";
 export {DataPointControllerObserver} from "./DataPointControllerObserver";
 
-export {DataSetController} from "./DataSetController";
+export {
+  DataSetControllerDataPointExt,
+  DataSetController,
+} from "./DataSetController";
 export {DataSetControllerObserver} from "./DataSetControllerObserver";

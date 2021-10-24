@@ -16,7 +16,7 @@ import type {Domain, ContinuousScale} from "@swim/util";
 import type {GraphicsViewObserver} from "@swim/graphics";
 import type {ScaledYView} from "./ScaledYView";
 
-export interface ScaledYViewObserver<Y, V extends ScaledYView<Y> = ScaledYView<Y>> extends GraphicsViewObserver<V> {
+export interface ScaledYViewObserver<Y = unknown, V extends ScaledYView<Y> = ScaledYView<Y>> extends GraphicsViewObserver<V> {
   viewWillSetYScale?(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null, view: V): void;
 
   viewDidSetYScale?(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null, view: V): void;

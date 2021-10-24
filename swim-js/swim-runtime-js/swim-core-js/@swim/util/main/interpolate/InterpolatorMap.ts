@@ -48,6 +48,7 @@ export const InterpolatorMap = (function (_super: typeof Interpolator) {
   };
 
   InterpolatorMap.prototype = Object.create(_super.prototype);
+  InterpolatorMap.prototype.constructor = InterpolatorMap;
 
   Object.defineProperty(InterpolatorMap.prototype, 0, {
     get<Y, FY>(this: InterpolatorMap<Y, FY>): FY {

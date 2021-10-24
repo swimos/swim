@@ -26,7 +26,7 @@ export interface DisplayProvider<V extends View, S extends DisplayService<V> | n
 }
 
 export const DisplayProvider = (function (_super: typeof Provider) {
-  const DisplayProvider = _super.extend() as ProviderClass<DisplayProvider<any, any>>;
+  const DisplayProvider = _super.extend("DisplayProvider") as ProviderClass<DisplayProvider<any, any>>;
 
   DisplayProvider.prototype.updatedViewContext = function <V extends View, S extends DisplayService<V> | null | undefined>(this: DisplayProvider<V, S>, viewContext: ViewContext): ViewContext {
     let service: DisplayService<V> | null | undefined = this.service;

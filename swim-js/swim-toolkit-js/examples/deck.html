@@ -44,7 +44,7 @@ const deckBar = deckView.bar.view;
 
 const backButton = deckBar.backButton.view;
 backButton.closeIcon.setView(deckBar.createCloseIcon());
-backButton.closeIcon.injectView();
+backButton.closeIcon.insertView();
 
 const card1 = swim.DeckCard.create();
 card1.cardTitle.setState("Card 1");

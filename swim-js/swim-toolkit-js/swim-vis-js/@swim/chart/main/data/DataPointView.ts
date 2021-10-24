@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, AnyTiming} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import type {Mutable, Class, Initable, AnyTiming} from "@swim/util";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
 import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View, ViewFastener} from "@swim/view";
+import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -25,7 +25,6 @@ import {
   CanvasContext,
   CanvasRenderer,
   TypesetView,
-  AnyTextRunView,
   TextRunView,
 } from "@swim/graphics";
 import type {DataPointCategory, DataPointLabelPlacement} from "./DataPoint";
@@ -85,145 +84,44 @@ export class DataPointView<X = unknown, Y = unknown> extends LayerView {
     (this as Mutable<this>).y2Coord = y2Coord;
   }
 
-  protected willSetX(newX: X | undefined, oldX: X | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPointX !== void 0) {
-        observer.viewWillSetDataPointX(newX, oldX, this);
-      }
-    }
-  }
-
-  protected onSetX(newX: X | undefined, oldX: X | undefined): void {
-    // hook
-  }
-
-  protected didSetX(newX: X | undefined, oldX: X | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPointX !== void 0) {
-        observer.viewDidSetDataPointX(newX, oldX, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<DataPointView<X, Y>, X | undefined>({
-    extends: null,
+  @Animator<DataPointView<X, Y>, X | undefined>({
     willSetValue(newX: X | undefined, oldX: X | undefined): void {
-      this.owner.willSetX(newX, oldX);
+      this.owner.callObservers("viewWillSetDataPointX", newX, oldX, this.owner);
     },
     didSetValue(newX: X | undefined, oldX: X | undefined): void {
-      this.owner.onSetX(newX, oldX);
-      this.owner.didSetX(newX, oldX);
+      this.owner.callObservers("viewDidSetDataPointX", newX, oldX, this.owner);
     },
   })
-  readonly x!: ThemeAnimator<this, X | undefined>;
+  readonly x!: Animator<this, X | undefined>;
 
-  protected willSetY(newY: Y | undefined, oldY: Y | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPointY !== void 0) {
-        observer.viewWillSetDataPointY(newY, oldY, this);
-      }
-    }
-  }
-
-  protected onSetY(newY: Y | undefined, oldY: Y | undefined): void {
-    // hook
-  }
-
-  protected didSetY(newY: Y | undefined, oldY: Y | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPointY !== void 0) {
-        observer.viewDidSetDataPointY(newY, oldY, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<DataPointView<X, Y>, Y>({
+  @Animator<DataPointView<X, Y>, Y>({
     willSetValue(newY: Y | undefined, oldY: Y | undefined): void {
-      this.owner.willSetY(newY, oldY);
+      this.owner.callObservers("viewWillSetDataPointY", newY, oldY, this.owner);
     },
     didSetValue(newY: Y | undefined, oldY: Y | undefined): void {
-      this.owner.onSetY(newY, oldY);
-      this.owner.didSetY(newY, oldY);
+      this.owner.callObservers("viewDidSetDataPointY", newY, oldY, this.owner);
     },
   })
-  readonly y!: ThemeAnimator<this, Y>;
+  readonly y!: Animator<this, Y>;
 
-  protected willSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPointY2 !== void 0) {
-        observer.viewWillSetDataPointY2(newY2, oldY2, this);
-      }
-    }
-  }
-
-  protected onSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
-    // hook
-  }
-
-  protected didSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPointY2 !== void 0) {
-        observer.viewDidSetDataPointY2(newY2, oldY2, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<DataPointView<X, Y>, Y | undefined>({
+  @Animator<DataPointView<X, Y>, Y | undefined>({
     willSetValue(newY2: Y | undefined, oldY2: Y | undefined): void {
-      this.owner.willSetY2(newY2, oldY2);
+      this.owner.callObservers("viewWillSetDataPointY2", newY2, oldY2, this.owner);
     },
     didSetValue(newY2: Y | undefined, oldY2: Y | undefined): void {
-      this.owner.onSetY2(newY2, oldY2);
-      this.owner.didSetY2(newY2, oldY2);
+      this.owner.callObservers("viewDidSetDataPointY2", newY2, oldY2, this.owner);
     },
   })
-  readonly y2!: ThemeAnimator<this, Y | undefined>;
-
-  protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPointRadius !== void 0) {
-        observer.viewWillSetDataPointRadius(newRadius, oldRadius, this);
-      }
-    }
-  }
-
-  protected onSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    // hook
-  }
-
-  protected didSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPointRadius !== void 0) {
-        observer.viewDidSetDataPointRadius(newRadius, oldRadius, this);
-      }
-    }
-  }
+  readonly y2!: Animator<this, Y | undefined>;
 
   @ThemeAnimator<DataPointView<X, Y>, Length | null, AnyLength | null>({
     type: Length,
     state: null,
     willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.willSetRadius(newRadius, oldRadius);
+      this.owner.callObservers("viewWillSetDataPointRadius", newRadius, oldRadius, this.owner);
     },
     didSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.onSetRadius(newRadius, oldRadius);
-      this.owner.didSetRadius(newRadius, oldRadius);
+      this.owner.callObservers("viewDidSetDataPointRadius", newRadius, oldRadius, this.owner);
     },
   })
   readonly radius!: ThemeAnimator<this, Length | null, AnyLength | null>;
@@ -231,75 +129,27 @@ export class DataPointView<X = unknown, Y = unknown> extends LayerView {
   @Property({type: Number, state: 5})
   readonly hitRadius!: Property<this, number>;
 
-  protected willSetColor(newColor: Color | null, oldColor: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPointColor !== void 0) {
-        observer.viewWillSetDataPointColor(newColor, oldColor, this);
-      }
-    }
-  }
-
-  protected onSetColor(newColor: Color | null, oldColor: Color | null): void {
-    this.updateGradientStop();
-  }
-
-  protected didSetColor(newColor: Color | null, oldColor: Color | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPointColor !== void 0) {
-        observer.viewDidSetDataPointColor(newColor, oldColor, this);
-      }
-    }
-  }
-
   @ThemeAnimator<DataPointView<X, Y>, Color | null, AnyColor | null>({
     type: Color,
     state: null,
     willSetValue(newColor: Color | null, oldColor: Color | null): void {
-      this.owner.willSetColor(newColor, oldColor);
+      this.owner.callObservers("viewWillSetDataPointColor", newColor, oldColor, this.owner);
     },
     didSetValue(newColor: Color | null, oldColor: Color | null): void {
-      this.owner.onSetColor(newColor, oldColor);
-      this.owner.didSetColor(newColor, oldColor);
+      this.owner.updateGradientStop();
+      this.owner.callObservers("viewDidSetDataPointColor", newColor, oldColor, this.owner);
     },
   })
   readonly color!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected willSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPointOpacity !== void 0) {
-        observer.viewWillSetDataPointOpacity(newOpacity, oldOpacity, this);
-      }
-    }
-  }
-
-  protected onSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-    this.updateGradientStop();
-  }
-
-  protected didSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPointOpacity !== void 0) {
-        observer.viewDidSetDataPointOpacity(newOpacity, oldOpacity, this);
-      }
-    }
-  }
-
   @ThemeAnimator<DataPointView<X, Y>, number | undefined>({
     type: Number,
     willSetValue(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-      this.owner.willSetOpacity(newOpacity, oldOpacity);
+      this.owner.callObservers("viewWillSetDataPointOpacity", newOpacity, oldOpacity, this.owner);
     },
     didSetValue(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-      this.owner.onSetOpacity(newOpacity, oldOpacity);
-      this.owner.didSetOpacity(newOpacity, oldOpacity);
+      this.owner.updateGradientStop();
+      this.owner.callObservers("viewDidSetDataPointOpacity", newOpacity, oldOpacity, this.owner);
     },
   })
   readonly opacity!: ThemeAnimator<this, number | undefined>;
@@ -316,73 +166,31 @@ export class DataPointView<X = unknown, Y = unknown> extends LayerView {
   @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsLayout})
   readonly labelPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  protected initLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected attachLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected detachLabel(labelView: GraphicsView): void {
-    // hook
-  }
-
-  protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPointLabel !== void 0) {
-        observer.viewWillSetDataPointLabel(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  protected onSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    if (oldLabelView !== null) {
-      this.detachLabel(oldLabelView);
-    }
-    if (newLabelView !== null) {
-      this.attachLabel(newLabelView);
-      this.initLabel(newLabelView);
-    }
-  }
-
-  protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPointLabel !== void 0) {
-        observer.viewDidSetDataPointLabel(newLabelView, oldLabelView, this);
-      }
-    }
-  }
-
-  @ViewFastener<DataPointView<X, Y>, GraphicsView, AnyTextRunView>({
+  @ViewRef<DataPointView<X, Y>, GraphicsView & Initable<GraphicsViewInit | string>>({
     key: true,
     type: TextRunView,
-    child: true,
-    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
-      if (value instanceof GraphicsView) {
-        return value;
-      } else if (typeof value === "string" && this.view instanceof TextRunView) {
-        this.view.text(value);
-        return this.view;
+    binds: true,
+    willAttachView(labelView: GraphicsView): void {
+      this.owner.callObservers("viewWillAttachDataPointLabel", labelView, this.owner);
+    },
+    didDetachView(labelView: GraphicsView): void {
+      this.owner.callObservers("viewDidDetachDataPointLabel", labelView, this.owner);
+    },
+    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
+      if (typeof value === "string") {
+        if (this.view instanceof TextRunView) {
+          this.view.text(value);
+          return this.view;
+        } else {
+          return TextRunView.fromAny(value);
+        }
       } else {
-        return TextRunView.fromAny(value);
+        return GraphicsView.fromAny(value);
       }
     },
-    willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.willSetLabel(newLabelView, oldLabelView);
-    },
-    onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetLabel(newLabelView, oldLabelView);
-    },
-    didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.didSetLabel(newLabelView, oldLabelView);
-    },
   })
-  readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly label!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
+  static readonly label: MemberFastenerClass<DataPointView, "label">;
 
   @Property({type: String, state: "auto"})
   readonly labelPlacement!: Property<this, DataPointLabelPlacement>;

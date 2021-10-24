@@ -263,9 +263,9 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     const renderer = viewContext.renderer;
     if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
       if (this.gradientStops !== 0 && renderer instanceof CanvasRenderer) {
-        this.renderPlotGradient(renderer.context, this.viewFrame);
+        this.renderPlotGradient(renderer.context, viewContext.viewFrame);
       } else {
-        this.renderPlotStroke(renderer.context, this.viewFrame);
+        this.renderPlotStroke(renderer.context, viewContext.viewFrame);
       }
     }
   }
@@ -379,7 +379,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
-      return this.hitTestPlot(p.x, p.y, renderer.context, this.viewFrame);
+      return this.hitTestPlot(p.x, p.y, renderer.context, viewContext.viewFrame);
     }
     return null;
   }

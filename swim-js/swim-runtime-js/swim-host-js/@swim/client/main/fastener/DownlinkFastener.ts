@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Equals, Arrays, ConsumerType, Consumable, Consumer} from "@swim/util";
-import {FastenerOwner, FastenerFlags, FastenerInit, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerFlags, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
 import {AnyValue, Value} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import type {DownlinkObserver, Downlink} from "../downlink/Downlink";
@@ -21,6 +21,7 @@ import type {WarpRef} from "../ref/WarpRef";
 import type {DownlinkFastenerContext} from "./DownlinkFastenerContext";
 
 export interface DownlinkFastenerInit extends FastenerInit, DownlinkObserver {
+  extends?: {prototype: DownlinkFastener<any>} | string | boolean | null;
   consumed?: boolean;
 
   hostUri?: AnyUri | (() => AnyUri | null);
@@ -44,22 +45,7 @@ export interface DownlinkFastenerInit extends FastenerInit, DownlinkObserver {
 
 export type DownlinkFastenerDescriptor<O = unknown, I = {}> = ThisType<DownlinkFastener<O> & I> & DownlinkFastenerInit & Partial<I>;
 
-export interface DownlinkFastenerClass<F extends DownlinkFastener<any> = DownlinkFastener<any>> {
-  /** @internal */
-  prototype: F;
-
-  create(owner: FastenerOwner<F>, fastenerName: string): F;
-
-  construct(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): DownlinkFastenerClass<F> & I;
-
-  define<O>(descriptor: DownlinkFastenerDescriptor<O>): DownlinkFastenerClass<DownlinkFastener<any>>;
-  define<O, I = {}>(descriptor: DownlinkFastenerDescriptor<O, I>): DownlinkFastenerClass<DownlinkFastener<any> & I>;
-
-  <O>(descriptor: DownlinkFastenerDescriptor<O>): PropertyDecorator;
-  <O, I = {}>(descriptor: DownlinkFastenerDescriptor<O, I>): PropertyDecorator;
-
+export interface DownlinkFastenerClass<F extends DownlinkFastener<any> = DownlinkFastener<any>> extends FastenerClass<F> {
   /** @internal */
   readonly ConsumingFlag: FastenerFlags;
   /** @internal */
@@ -71,6 +57,16 @@ export interface DownlinkFastenerClass<F extends DownlinkFastener<any> = Downlin
   readonly FlagShift: number;
   /** @internal @override */
   readonly FlagMask: FastenerFlags;
+}
+
+export interface DownlinkFastenerFactory<F extends DownlinkFastener<any> = DownlinkFastener<any>> extends DownlinkFastenerClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): DownlinkFastenerFactory<F> & I;
+
+  define<O>(className: string, descriptor: DownlinkFastenerDescriptor<O>): DownlinkFastenerFactory<DownlinkFastener<any>>;
+  define<O, I = {}>(className: string, descriptor: DownlinkFastenerDescriptor<O, I>): DownlinkFastenerFactory<DownlinkFastener<any> & I>;
+
+  <O>(descriptor: DownlinkFastenerDescriptor<O>): PropertyDecorator;
+  <O, I = {}>(descriptor: DownlinkFastenerDescriptor<O, I>): PropertyDecorator;
 }
 
 export interface DownlinkFastener<O = unknown> extends Fastener<O>, Consumable {
@@ -230,7 +226,7 @@ export interface DownlinkFastener<O = unknown> extends Fastener<O>, Consumable {
 }
 
 export const DownlinkFastener = (function (_super: typeof Fastener) {
-  const DownlinkFastener: DownlinkFastenerClass = _super.extend();
+  const DownlinkFastener: DownlinkFastenerFactory = _super.extend("DownlinkFastener");
 
   Object.defineProperty(DownlinkFastener.prototype, "familyType", {
     get: function (this: DownlinkFastener): Class<DownlinkFastener<any>> | null {
@@ -584,8 +580,8 @@ export const DownlinkFastener = (function (_super: typeof Fastener) {
     this.unlink();
   };
 
-  DownlinkFastener.construct = function <F extends DownlinkFastener<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>, fastenerName: string): F {
-    fastener = _super.construct(fastenerClass, fastener, owner, fastenerName) as F;
+  DownlinkFastener.construct = function <F extends DownlinkFastener<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
+    fastener = _super.construct(fastenerClass, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).ownHostUri = null;
     (fastener as Mutable<typeof fastener>).ownNodeUri = null;
     (fastener as Mutable<typeof fastener>).ownLaneUri = null;
@@ -598,8 +594,8 @@ export const DownlinkFastener = (function (_super: typeof Fastener) {
     return fastener;
   };
 
-  DownlinkFastener.define = function <O>(descriptor: DownlinkFastenerDescriptor<O>): DownlinkFastenerClass<DownlinkFastener<any>> {
-    let superClass = descriptor.extends as DownlinkFastenerClass | undefined;
+  DownlinkFastener.define = function <O>(className: string, descriptor: DownlinkFastenerDescriptor<O>): DownlinkFastenerFactory<DownlinkFastener<any>> {
+    let superClass = descriptor.extends as DownlinkFastenerFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let hostUri = descriptor.hostUri;
@@ -622,10 +618,10 @@ export const DownlinkFastener = (function (_super: typeof Fastener) {
       superClass = this;
     }
 
-    const fastenerClass = superClass.extend(descriptor);
+    const fastenerClass = superClass.extend(className, descriptor);
 
-    fastenerClass.construct = function (fastenerClass: {prototype: DownlinkFastener<any>}, fastener: DownlinkFastener<O> | null, owner: O, fastenerName: string): DownlinkFastener<O> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner, fastenerName);
+    fastenerClass.construct = function (fastenerClass: {prototype: DownlinkFastener<any>}, fastener: DownlinkFastener<O> | null, owner: O): DownlinkFastener<O> {
+      fastener = superClass!.construct(fastenerClass, fastener, owner);
       if (affinity !== void 0) {
         fastener.initAffinity(affinity);
       }

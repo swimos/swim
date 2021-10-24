@@ -13,19 +13,19 @@
 // limitations under the License.
 
 import {Mutable, Class, Arrays, AnyTiming, Timing} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Box, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
 import {
+  ModalOptions,
+  ModalState,
+  Modal,
   ViewContextType,
   ViewContext,
   ViewFlags,
   View,
-  ModalOptions,
-  ModalState,
-  Modal,
-  ViewFastener,
+  ViewRef,
 } from "@swim/view";
 import {StyleAnimator, HtmlViewInit, HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {PopoverViewObserver} from "./PopoverViewObserver";
@@ -102,62 +102,16 @@ export class PopoverView extends HtmlView implements Modal {
   @ThemeAnimator({type: Length, state: Length.px(8)})
   readonly arrowHeight!: ThemeAnimator<this, Length, AnyLength>;
 
-  protected initSourceView(sourceView: View): void {
-    // hook
-  }
-
-  protected attachSourceView(sourceView: View): void {
-    // hook
-  }
-
-  protected detachSourceView(sourceView: View): void {
-    // hook
-  }
-
-  protected willSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.popoverWillSetSource !== void 0) {
-        observer.popoverWillSetSource(newSourceView, oldSourceView, this);
-      }
-    }
-  }
-
-  protected onSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected didSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.popoverDidSetSource !== void 0) {
-        observer.popoverDidSetSource(newSourceView, oldSourceView, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static SourceFastener = ViewFastener.define<PopoverView, View, never, HtmlViewObserver>({
-    extends: null,
-    child: false,
+  @ViewRef<PopoverView, View, HtmlViewObserver>({
     observes: true,
-    willSetView(newSourceView: View | null, oldSourceView: View | null, popoverView: PopoverView): void {
-      this.owner.willSetSourceView(newSourceView, oldSourceView);
+    willAttachView(sourceView: View): void {
+      this.owner.callObservers("popoverWillAttachSource", sourceView, this.owner);
     },
-    onSetView(newSourceView: View | null, oldSourceView: View | null, popoverView: PopoverView): void {
-      if (oldSourceView !== null) {
-        this.owner.detachSourceView(oldSourceView);
-      }
-      this.owner.onSetSourceView(newSourceView, oldSourceView);
-      if (newSourceView !== null) {
-        this.owner.attachSourceView(newSourceView);
-        this.owner.initSourceView(newSourceView);
-      }
+    didAttachView(sourceView: View): void {
+      this.owner.requireUpdate(View.NeedsLayout);
     },
-    didSetView(newSourceView: View | null, oldSourceView: View | null, popoverView: PopoverView): void {
-      this.owner.didSetSourceView(newSourceView, oldSourceView);
+    didDetachView(sourceView: View): void {
+      this.owner.callObservers("popoverDidDetachSource", sourceView, this.owner);
     },
     viewDidMount(view: View): void {
       this.owner.place();
@@ -183,12 +137,9 @@ export class PopoverView extends HtmlView implements Modal {
     viewDidSetStyle(name: string, value: unknown, priority: string | undefined, view: HtmlView): void {
       this.owner.place();
     },
-  });
-
-  @ViewFastener<PopoverView, View>({
-    extends: PopoverView.SourceFastener,
   })
-  readonly source!: ViewFastener<this, View>;
+  readonly source!: ViewRef<this, View>;
+  static readonly source: MemberFastenerClass<PopoverView, "source">;
 
   setSource(sourceView: View | null): void {
     this.source.setView(sourceView);

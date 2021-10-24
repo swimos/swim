@@ -66,6 +66,7 @@ export const GeoPointInterpolator = (function (_super: typeof Interpolator) {
   };
 
   GeoPointInterpolator.prototype = Object.create(_super.prototype);
+  GeoPointInterpolator.prototype.constructor = GeoPointInterpolator;
 
   return GeoPointInterpolator;
 })(Interpolator);

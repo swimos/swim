@@ -36,7 +36,7 @@ const chartView = canvasView.appendChild(swim.ChartView)
     .xScaleGestures(true)
     .font("12px sans-serif");
 
-const graphView = chartView.graph.injectView();
+const graphView = chartView.graph.insertView();
 
 const plotView = graphView.appendChild(swim.LinePlotView)
     .hitMode("domain")

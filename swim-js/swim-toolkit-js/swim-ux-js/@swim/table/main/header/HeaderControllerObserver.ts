@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {HtmlView} from "@swim/dom";
-import type {ControllerObserver, ControllerFastener} from "@swim/controller";
+import type {ControllerObserver} from "@swim/controller";
 import type {ColLayout} from "../layout/ColLayout";
 import type {ColView} from "../col/ColView";
 import type {ColTrait} from "../col/ColTrait";
@@ -23,31 +23,31 @@ import type {HeaderTrait} from "./HeaderTrait";
 import type {HeaderController} from "./HeaderController";
 
 export interface HeaderControllerObserver<C extends HeaderController = HeaderController> extends ControllerObserver<C> {
-  controllerWillSetHeaderTrait?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, controller: C): void;
+  controllerWillAttachHeaderTrait?(headerTrait: HeaderTrait, controller: C): void;
 
-  controllerDidSetHeaderTrait?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, controller: C): void;
+  controllerDidDetachHeaderTrait?(headerTrait: HeaderTrait, controller: C): void;
 
-  controllerWillSetHeaderView?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, controller: C): void;
+  controllerWillAttachHeaderView?(headerView: HeaderView, controller: C): void;
 
-  controllerDidSetHeaderView?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, controller: C): void;
+  controllerDidDetachHeaderView?(headerView: HeaderView, controller: C): void;
 
-  controllerWillSetCol?(newColController: ColController | null, oldColController: ColController | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillAttachCol?(colController: ColController, controller: C): void;
 
-  controllerDidSetCol?(newColController: ColController | null, oldColController: ColController | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidDetachCol?(colController: ColController, controller: C): void;
 
-  controllerWillSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillAttachColTrait?(colTrait: ColTrait, colController: ColController, controller: C): void;
 
-  controllerDidSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidDetachColTrait?(colTrait: ColTrait, colController: ColController, controller: C): void;
 
-  controllerWillSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillAttachColView?(colView: ColView, colController: ColController, controller: C): void;
 
-  controllerDidSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidDetachColView?(colView: ColView, colController: ColController, controller: C): void;
 
-  controllerWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController, controller: C): void;
 
-  controllerDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController, controller: C): void;
 
-  controllerWillSetColLabelView?(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillAttachColLabelView?(colLabelView: HtmlView, colController: ColController, controller: C): void;
 
-  controllerDidSetColLabelView?(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidDetachColLabelView?(colLabelView: HtmlView, colController: ColController, controller: C): void;
 }

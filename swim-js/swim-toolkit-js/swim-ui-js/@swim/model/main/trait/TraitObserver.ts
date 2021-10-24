@@ -12,17 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Observer} from "@swim/util";
 import type {Model} from "../model/Model";
 import type {TraitModelType, TraitContextType, Trait} from "./Trait";
 
-export interface TraitObserver<R extends Trait = Trait> {
-  traitWillSetModel?(newModel: TraitModelType<R> | null, oldModel: TraitModelType<R> | null, trait: R): void;
+export interface TraitObserver<R extends Trait = Trait> extends Observer<R> {
+  traitWillAttachModel?(model: TraitModelType<R>, trait: R): void;
 
-  traitDidSetModel?(newModel: TraitModelType<R> | null, oldModel: TraitModelType<R> | null, trait: R): void;
+  traitDidAttachModel?(model: TraitModelType<R>, trait: R): void;
 
-  traitWillSetParent?(newParent: Model | null, oldParent: Model | null, trait: R): void;
+  traitWillDetachModel?(model: TraitModelType<R>, trait: R): void;
 
-  traitDidSetParent?(newParent: Model | null, oldParent: Model | null, trait: R): void;
+  traitDidDetachModel?(model: TraitModelType<R>, trait: R): void;
+
+  traitWillAttachParent?(parent: Model, trait: R): void;
+
+  traitDidAttachParent?(parent: Model, trait: R): void;
+
+  traitWillDetachParent?(parent: Model, trait: R): void;
+
+  traitDidDetachParent?(parent: Model, trait: R): void;
 
   traitWillInsertChild?(child: Model, target: Model | null, trait: R): void;
 

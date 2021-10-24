@@ -16,6 +16,7 @@ export {
   ThemeAnimatorInit,
   ThemeAnimatorDescriptor,
   ThemeAnimatorClass,
+  ThemeAnimatorFactory,
   ThemeAnimator,
 } from "./ThemeAnimator";
 
@@ -54,6 +55,7 @@ export {
   ThemeConstraintAnimatorInit,
   ThemeConstraintAnimatorDescriptor,
   ThemeConstraintAnimatorClass,
+  ThemeConstraintAnimatorFactory,
   ThemeConstraintAnimator,
 } from "./ThemeConstraintAnimator";
 

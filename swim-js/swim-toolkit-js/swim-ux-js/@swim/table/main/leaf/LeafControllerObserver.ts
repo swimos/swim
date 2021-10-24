@@ -15,7 +15,7 @@
 import type {PositionGestureInput} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
-import type {ControllerObserver, ControllerFastener} from "@swim/controller";
+import type {ControllerObserver} from "@swim/controller";
 import type {CellView} from "../cell/CellView";
 import type {CellTrait} from "../cell/CellTrait";
 import type {CellController} from "../cell/CellController";
@@ -24,13 +24,13 @@ import type {LeafTrait} from "./LeafTrait";
 import type {LeafController} from "./LeafController";
 
 export interface LeafControllerObserver<C extends LeafController = LeafController> extends ControllerObserver<C> {
-  controllerWillSetLeafTrait?(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null, controller: C): void;
+  controllerWillAttachLeafTrait?(leafTrait: LeafTrait, controller: C): void;
 
-  controllerDidSetLeafTrait?(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null, controller: C): void;
+  controllerDidDetachLeafTrait?(leafTrait: LeafTrait, controller: C): void;
 
-  controllerWillSetLeafView?(newLeafView: LeafView | null, oldLeafView: LeafView | null, controller: C): void;
+  controllerWillAttachLeafView?(leafView: LeafView, controller: C): void;
 
-  controllerDidSetLeafView?(newLeafView: LeafView | null, oldLeafView: LeafView | null, controller: C): void;
+  controllerDidDetachLeafView?(leafView: LeafView, controller: C): void;
 
   controllerWillHighlightLeafView?(leafView: LeafView, controller: C): void;
 
@@ -48,27 +48,27 @@ export interface LeafControllerObserver<C extends LeafController = LeafControlle
 
   controllerDidLongPressLeafView?(input: PositionGestureInput, leafView: LeafView, controller: C): void;
 
-  controllerWillSetCell?(newCellController: CellController | null, oldCellController: CellController | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerWillAttachCell?(cellController: CellController, controller: C): void;
 
-  controllerDidSetCell?(newCellController: CellController | null, oldCellController: CellController | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerDidDetachCell?(cellController: CellController, controller: C): void;
 
-  controllerWillSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerWillAttachCellTrait?(cellTrait: CellTrait, cellController: CellController, controller: C): void;
 
-  controllerDidSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerDidDetachCellTrait?(cellTrait: CellTrait, cellController: CellController, controller: C): void;
 
-  controllerWillSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerWillAttachCellView?(cellView: CellView, cellController: CellController, controller: C): void;
 
-  controllerDidSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerDidDetachCellView?(cellView: CellView, cellController: CellController, controller: C): void;
 
-  controllerDidPressCellView?(input: PositionGestureInput, event: Event | null, cellView: CellView, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerDidPressCellView?(input: PositionGestureInput, event: Event | null, cellView: CellView, cellController: CellController, controller: C): void;
 
-  controllerDidLongPressCellView?(input: PositionGestureInput, cellView: CellView, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerDidLongPressCellView?(input: PositionGestureInput, cellView: CellView, cellController: CellController, controller: C): void;
 
-  controllerWillSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerWillAttachCellContentView?(cellContentView: HtmlView, cellController: CellController, controller: C): void;
 
-  controllerDidSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerDidDetachCellContentView?(cellContentView: HtmlView, cellController: CellController, controller: C): void;
 
-  controllerWillSetCellIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerWillSetCellIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, cellController: CellController, controller: C): void;
 
-  controllerDidSetCellIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, cellFastener: ControllerFastener<C, CellController>): void;
+  controllerDidSetCellIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, cellController: CellController, controller: C): void;
 }

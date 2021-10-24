@@ -55,6 +55,7 @@ export const ArrayInterpolator = (function (_super: typeof Interpolator) {
   };
 
   ArrayInterpolator.prototype = Object.create(_super.prototype);
+  ArrayInterpolator.prototype.constructor = ArrayInterpolator;
 
   Object.defineProperty(ArrayInterpolator.prototype, 0, {
     get<Y>(this: ArrayInterpolator<Y>): ReadonlyArray<Y> {

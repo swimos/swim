@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerFlags, FastenerInit, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
 import {GestureInputType, GestureInput} from "./GestureInput";
 import {View} from "../"; // forward import
 
@@ -26,40 +26,37 @@ export type GestureView<G extends Gesture<any, any>> =
 export type GestureMethod = "auto" | "pointer" | "touch" | "mouse";
 
 export interface GestureInit<V extends View = View> extends FastenerInit {
+  extends?: {prototype: Gesture<any, any>} | string | boolean | null;
   method?: GestureMethod;
+  key?: string | boolean;
   self?: boolean;
-  child?: boolean;
+  binds?: boolean;
   observes?: boolean;
 
-  willSetView?(newView: V | null, oldView: V | null, targetView: View | null): void;
-  onSetView?(newView: V | null, oldView: V | null, targetView: View | null): void;
-  didSetView?(newView: V | null, oldView: V | null, targetView: View | null): void;
+  willAttachView?(view: V, target: View | null): void;
+  didAttachView?(view: V, target: View | null): void;
+
+  willDetachView?(view: V): void;
+  didDetachView?(view: V): void;
+
+  detectView?(view: View): V | null;
 }
 
 export type GestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<Gesture<O, V> & I> & GestureInit<V> & Partial<I>;
 
-export interface GestureClass<G extends Gesture<any, any> = Gesture<any, any>> {
-  /** @internal */
-  prototype: G;
+export interface GestureClass<G extends Gesture<any, any> = Gesture<any, any>> extends FastenerClass<G> {
+}
 
-  create(owner: FastenerOwner<G>, gestureName: string): G;
+export interface GestureFactory<G extends Gesture<any, any> = Gesture<any, any>> extends GestureClass<G> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): GestureFactory<G> & I;
 
-  construct(gestureClass: {prototype: G}, fastener: G | null, owner: FastenerOwner<G>, gestureName: string): G;
+  specialize(method: GestureMethod): GestureFactory | null;
 
-  specialize(method: GestureMethod): GestureClass | null;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): GestureClass<G> & I;
-
-  define<O, V extends View = View, I = {}>(descriptor: {observes: boolean} & GestureDescriptor<O, V, I & ObserverType<V>>): GestureClass<Gesture<any, V> & I>;
-  define<O, V extends View = View, I = {}>(descriptor: GestureDescriptor<O, V, I>): GestureClass<Gesture<any, V> & I>;
+  define<O, V extends View = View, I = {}>(className: string, descriptor: {observes: boolean} & GestureDescriptor<O, V, I & ObserverType<V>>): GestureFactory<Gesture<any, V> & I>;
+  define<O, V extends View = View, I = {}>(className: string, descriptor: GestureDescriptor<O, V, I>): GestureFactory<Gesture<any, V> & I>;
 
   <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & GestureDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
   <O, V extends View = View, I = {}>(descriptor: GestureDescriptor<O, V, I>): PropertyDecorator;
-
-  /** @internal @override */
-  readonly FlagShift: number;
-  /** @internal @override */
-  readonly FlagMask: FastenerFlags;
 }
 
 export interface Gesture<O = unknown, V extends View = View> extends Fastener<O> {
@@ -75,26 +72,29 @@ export interface Gesture<O = unknown, V extends View = View> extends Fastener<O>
 
   setView(newView: V | null, targetView?: View | null): V | null;
 
-  /** @internal */
-  attachView(newView: V): void;
+  /** @protected */
+  willAttachView(view: V, target: View | null): void;
 
-  /** @internal */
-  detachView(oldView: V): void;
+  /** @protected */
+  onAttachView(view: V, target: View | null): void;
 
-  /** @internal */
-  willSetView(newView: V | null, oldView: V | null, targetView: View | null): void;
+  /** @protected */
+  didAttachView(view: V, target: View | null): void;
 
-  /** @internal */
-  onSetView(newView: V | null, oldView: V | null, targetView: View | null): void;
+  /** @protected */
+  willDetachView(view: V): void;
 
-  /** @internal */
-  didSetView(newView: V | null, oldView: V | null, targetView: View | null): void;
+  /** @protected */
+  onDetachView(view: V): void;
+
+  /** @protected */
+  didDetachView(view: V): void;
 
   /** @internal @protected */
-  attachEvents(newView: V): void;
+  attachEvents(view: V): void;
 
   /** @internal @protected */
-  detachEvents(oldView: V): void;
+  detachEvents(view: V): void;
 
   /** @internal */
   readonly inputs: {readonly [inputId: string]: GestureInput | undefined};
@@ -118,23 +118,40 @@ export interface Gesture<O = unknown, V extends View = View> extends Fastener<O>
   clearInputs(): void;
 
   /** @internal */
+  bindView(view: View, target?: View | null): void;
+
+  /** @internal */
+  unbindView(view: View): void;
+
+  detectView(view: View): V | null;
+
+  /** @internal */
   viewWillUnmount(view: V): void;
 
   /** @protected @override */
   onMount(): void;
 
   /** @internal */
-  get observes(): boolean | undefined; // optional prototype property
-
-  /** @internal */
-  get child(): boolean | undefined; // optional prototype property
+  get key(): string | undefined; // optional prototype field
 
   /** @internal */
   get self(): boolean | undefined; // optional prototype property
+
+  /** @internal */
+  get binds(): boolean | undefined; // optional prototype property
+
+  /** @internal */
+  get observes(): boolean | undefined; // optional prototype property
+
+  /** @internal @override */
+  get lazy(): boolean; // prototype property
+
+  /** @internal @override */
+  get static(): string | boolean; // prototype property
 }
 
 export const Gesture = (function (_super: typeof Fastener) {
-  const Gesture: GestureClass = _super.extend();
+  const Gesture: GestureFactory = _super.extend("Gesture");
 
   Object.defineProperty(Gesture.prototype, "familyType", {
     get: function (this: Gesture): Class<Gesture<any, any>> | null {
@@ -151,50 +168,56 @@ export const Gesture = (function (_super: typeof Fastener) {
     return view;
   };
 
-  Gesture.prototype.setView = function <V extends View>(this: Gesture<unknown, V>, newView: V | null, targetView?: View | null): V | null {
+  Gesture.prototype.setView = function <V extends View>(this: Gesture<unknown, V>, newView: V | null, target?: View | null): V | null {
     const oldView = this.view;
     if (oldView !== newView) {
-      if (targetView === void 0) {
-        targetView = null;
-      }
-      this.willSetView(newView, oldView, targetView);
       if (oldView !== null) {
-        this.detachView(oldView);
+        this.willDetachView(oldView);
+        (this as Mutable<typeof this>).view = null;
+        this.onDetachView(oldView);
+        this.didDetachView(oldView);
       }
-      (this as Mutable<typeof this>).view = newView;
       if (newView !== null) {
-        this.attachView(newView);
+        if (target === void 0) {
+          target = null;
+        }
+        this.willAttachView(newView, target);
+        (this as Mutable<typeof this>).view = newView;
+        this.onAttachView(newView, target);
+        this.didAttachView(newView, target);
       }
-      this.onSetView(newView, oldView, targetView);
-      this.didSetView(newView, oldView, targetView);
     }
     return oldView;
   };
 
-  Gesture.prototype.attachView = function <V extends View>(this: Gesture<unknown, V>, newView: V): void {
-    this.attachEvents(newView);
+  Gesture.prototype.willAttachView = function <V extends View>(this: Gesture<unknown, V>, view: V, target: View | null): void {
+    // hook
+  };
+
+  Gesture.prototype.onAttachView = function <V extends View>(this: Gesture<unknown, V>, view: V, target: View | null): void {
+    this.attachEvents(view);
     if (this.observes === true) {
-      newView.observe(this as ObserverType<V>);
+      view.observe(this as ObserverType<V>);
     }
   };
 
-  Gesture.prototype.detachView = function <V extends View>(this: Gesture<unknown, V>, oldView: V): void {
+  Gesture.prototype.didAttachView = function <V extends View>(this: Gesture<unknown, V>, view: V, target: View | null): void {
+    // hook
+  };
+
+  Gesture.prototype.willDetachView = function <V extends View>(this: Gesture<unknown, V>, view: V): void {
+    // hook
+  };
+
+  Gesture.prototype.onDetachView = function <V extends View>(this: Gesture<unknown, V>, view: V): void {
     this.clearInputs();
     if (this.observes === true) {
-      oldView.unobserve(this as ObserverType<V>);
+      view.unobserve(this as ObserverType<V>);
     }
-    this.detachEvents(oldView);
+    this.detachEvents(view);
   };
 
-  Gesture.prototype.willSetView = function <V extends View>(this: Gesture<unknown, V>, newView: V | null, oldView: V | null, targetView: View | null): void {
-    // hook
-  };
-
-  Gesture.prototype.onSetView = function <V extends View>(this: Gesture<unknown, V>, newView: V | null, oldView: V | null, targetView: View | null): void {
-    // hook
-  };
-
-  Gesture.prototype.didSetView = function <V extends View>(this: Gesture<unknown, V>, newView: V | null, oldView: V | null, targetView: View | null): void {
+  Gesture.prototype.didDetachView = function <V extends View>(this: Gesture<unknown, V>, view: V): void {
     // hook
   };
 
@@ -245,6 +268,28 @@ export const Gesture = (function (_super: typeof Fastener) {
     (this as Mutable<typeof this>).inputCount = 0;
   };
 
+  Gesture.prototype.bindView = function <V extends View>(this: Gesture<unknown, V>, view: View, target?: View | null): void {
+    if (this.binds && this.view === null) {
+      const newView = this.detectView(view);
+      if (newView !== null) {
+        this.setView(newView, target);
+      }
+    }
+  };
+
+  Gesture.prototype.unbindView = function <V extends View>(this: Gesture<unknown, V>, view: View): void {
+    if (this.binds && this.view === view) {
+      this.setView(null);
+    }
+  };
+
+  Gesture.prototype.detectView = function <V extends View>(this: Gesture<unknown, V>, view: View): V | null {
+    if (this.key !== void 0 && this.key === view.key) {
+      return view as V;
+    }
+    return null;
+  };
+
   Gesture.prototype.viewWillUnmount = function (this: Gesture, view: View): void {
     this.clearInputs();
   };
@@ -256,9 +301,23 @@ export const Gesture = (function (_super: typeof Fastener) {
     }
   };
 
-  Gesture.construct = function <G extends Gesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
+  Object.defineProperty(Gesture.prototype, "lazy", {
+    get: function (this: Gesture): boolean {
+      return false;
+    },
+    configurable: true,
+  });
+
+  Object.defineProperty(Gesture.prototype, "static", {
+    get: function (this: Gesture): string | boolean {
+      return true;
+    },
+    configurable: true,
+  });
+
+  Gesture.construct = function <G extends Gesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>): G {
     if (gesture === null) {
-      gesture = function Gesture(view?: GestureView<G> | null, targetView?: View | null): GestureView<G> | null | FastenerOwner<G> {
+      gesture = function (view?: GestureView<G> | null, targetView?: View | null): GestureView<G> | null | FastenerOwner<G> {
         if (view === void 0) {
           return gesture!.view;
         } else {
@@ -266,21 +325,22 @@ export const Gesture = (function (_super: typeof Fastener) {
           return gesture!.owner;
         }
       } as G;
+      delete (gesture as Partial<Mutable<G>>).name; // don't clobber prototype name
       Object.setPrototypeOf(gesture, gestureClass.prototype);
     }
-    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+    gesture = _super.construct(gestureClass, gesture, owner) as G;
     (gesture as Mutable<typeof gesture>).view = null;
     (gesture as Mutable<typeof gesture>).inputs = {};
     (gesture as Mutable<typeof gesture>).inputCount = 0;
     return gesture;
   };
 
-  Gesture.specialize = function (method: GestureMethod): GestureClass | null {
+  Gesture.specialize = function (method: GestureMethod): GestureFactory | null {
     return null;
   };
 
-  Gesture.define = function <O, V extends View>(descriptor: GestureDescriptor<O, V>): GestureClass<Gesture<any, V>> {
-    let superClass = descriptor.extends as GestureClass | null | undefined;
+  Gesture.define = function <O, V extends View>(className: string, descriptor: GestureDescriptor<O, V>): GestureFactory<Gesture<any, V>> {
+    let superClass = descriptor.extends as GestureFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let method = descriptor.method;
@@ -288,6 +348,18 @@ export const Gesture = (function (_super: typeof Fastener) {
     delete descriptor.affinity;
     delete descriptor.inherits;
     delete descriptor.method;
+
+    if (descriptor.key === true) {
+      Object.defineProperty(descriptor, "key", {
+        value: className,
+        configurable: true,
+      });
+    } else if (descriptor.key === false) {
+      Object.defineProperty(descriptor, "key", {
+        value: void 0,
+        configurable: true,
+      });
+    }
 
     if (method === void 0) {
       method = "auto";
@@ -299,10 +371,10 @@ export const Gesture = (function (_super: typeof Fastener) {
       superClass = this;
     }
 
-    const gestureClass = superClass.extend(descriptor);
+    const gestureClass = superClass.extend(className, descriptor);
 
-    gestureClass.construct = function (gestureClass: {prototype: Gesture<any, any>}, gesture: Gesture<O, V> | null, owner: O, gestureName: string): Gesture<O, V> {
-      gesture = superClass!.construct(gestureClass, gesture, owner, gestureName);
+    gestureClass.construct = function (gestureClass: {prototype: Gesture<any, any>}, gesture: Gesture<O, V> | null, owner: O): Gesture<O, V> {
+      gesture = superClass!.construct(gestureClass, gesture, owner);
       if (affinity !== void 0) {
         gesture.initAffinity(affinity);
       }

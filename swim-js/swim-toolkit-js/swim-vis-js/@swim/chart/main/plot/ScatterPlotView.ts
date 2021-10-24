@@ -13,15 +13,15 @@
 // limitations under the License.
 
 import {Mutable, Class, Equals, Values, Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewSet} from "@swim/view";
 import {GraphicsView, LayerView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
-import type {PlotViewInit, PlotView} from "./PlotView";
+import type {PlotViewInit, PlotViewDataPointExt, PlotView} from "./PlotView";
 import type {ScatterPlotViewObserver} from "./ScatterPlotViewObserver";
 
 export type ScatterPlotType = "bubble";
@@ -35,7 +35,6 @@ export interface ScatterPlotViewInit<X = unknown, Y = unknown> extends PlotViewI
 export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerView implements PlotView<X, Y> {
   constructor() {
     super();
-    this.dataPointFasteners = [];
     this.xDataDomain = null;
     this.yDataDomain = null;
     this.xDataRange = null;
@@ -52,82 +51,34 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
   @ThemeAnimator({type: Color, state: null, inherits: true})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetXScale !== void 0) {
-        observer.viewWillSetXScale(newXScale, oldXScale, this);
-      }
-    }
-  }
-
-  protected onSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    this.updateXDataRange();
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected didSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetXScale !== void 0) {
-        observer.viewDidSetXScale(newXScale, oldXScale, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<ScatterPlotView<X, Y>, ContinuousScale<X, number> | null>({
+  @Animator<ScatterPlotView<X, Y>, ContinuousScale<X, number> | null>({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
     inherits: true,
     state: null,
+    updateFlags: View.NeedsLayout,
     willSetValue(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-      this.owner.willSetXScale(newXScale, oldXScale);
+      this.owner.callObservers("viewWillSetXScale", newXScale, oldXScale, this.owner);
     },
     didSetValue(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-      this.owner.onSetXScale(newXScale, oldXScale);
-      this.owner.didSetXScale(newXScale, oldXScale);
+      this.owner.updateXDataRange();
+      this.owner.callObservers("viewDidSetXScale", newXScale, oldXScale, this.owner);
     },
   })
   readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
-  protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetYScale !== void 0) {
-        observer.viewWillSetYScale(newYScale, oldYScale, this);
-      }
-    }
-  }
-
-  protected onSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    this.updateYDataRange();
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected didSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetYScale !== void 0) {
-        observer.viewDidSetYScale(newYScale, oldYScale, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<ScatterPlotView<X, Y>, ContinuousScale<Y, number> | null>({
+  @Animator<ScatterPlotView<X, Y>, ContinuousScale<Y, number> | null>({
     extends: ContinuousScaleAnimator,
     type: ContinuousScale,
     inherits: true,
     state: null,
+    updateFlags: View.NeedsLayout,
     willSetValue(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-      this.owner.willSetYScale(newYScale, oldYScale);
+      this.owner.callObservers("viewWillSetYScale", newYScale, oldYScale, this.owner);
     },
     didSetValue(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-      this.owner.onSetYScale(newYScale, oldYScale);
-      this.owner.didSetYScale(newYScale, oldYScale);
+      this.owner.updateYDataRange();
+      this.owner.callObservers("viewDidSetYScale", newYScale, oldYScale, this.owner);
     },
   })
   readonly yScale!: ContinuousScaleAnimator<this, Y, number>;
@@ -170,78 +121,28 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
     return yScale !== null ? yScale.range : null;
   }
 
-  protected willSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetXRangePadding !== void 0) {
-        observer.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
-      }
-    }
-  }
-
-  protected onSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    // hook
-  }
-
-  protected didSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetXRangePadding !== void 0) {
-        observer.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
-      }
-    }
-  }
-
   @Property<ScatterPlotView<X, Y>, readonly [number, number]>({
     initState(): readonly [number, number] {
       return [0, 0];
     },
     willSetState(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-      this.owner.willSetXRangePadding(newXRangePadding, oldXRangePadding);
+      this.owner.callObservers("viewWillSetXRangePadding", newXRangePadding, oldXRangePadding, this.owner);
     },
     didSetState(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-      this.owner.onSetXRangePadding(newXRangePadding, oldXRangePadding);
-      this.owner.didSetXRangePadding(newXRangePadding, oldXRangePadding);
+      this.owner.callObservers("viewDidSetXRangePadding", newXRangePadding, oldXRangePadding, this.owner);
     },
   })
   readonly xRangePadding!: Property<this, readonly [number, number]>
-
-  protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetYRangePadding !== void 0) {
-        observer.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
-      }
-    }
-  }
-
-  protected onSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    // hook
-  }
-
-  protected didSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetYRangePadding !== void 0) {
-        observer.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
-      }
-    }
-  }
 
   @Property<ScatterPlotView<X, Y>, readonly [number, number]>({
     initState(): readonly [number, number] {
       return [0, 0];
     },
     willSetState(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-      this.owner.willSetYRangePadding(newYRangePadding, oldYRangePadding);
+      this.owner.callObservers("viewWillSetYRangePadding", newYRangePadding, oldYRangePadding, this.owner);
     },
     didSetState(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-      this.owner.onSetYRangePadding(newYRangePadding, oldYRangePadding);
-      this.owner.didSetYRangePadding(newYRangePadding, oldYRangePadding);
+      this.owner.callObservers("viewDidSetYRangePadding", newYRangePadding, oldYRangePadding, this.owner);
     },
   })
   readonly yRangePadding!: Property<this, readonly [number, number]>
@@ -259,13 +160,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
   }
 
   protected willSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetXDataDomain !== void 0) {
-        observer.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
-      }
-    }
+    this.callObservers("viewWillSetXDataDomain", newXDataDomain, oldXDataDomain, this);
   }
 
   protected onSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
@@ -274,13 +169,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
   }
 
   protected didSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetXDataDomain !== void 0) {
-        observer.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
-      }
-    }
+    this.callObservers("viewDidSetXDataDomain", newXDataDomain, oldXDataDomain, this);
   }
 
   protected updateXDataDomain(dataPointView: DataPointView<X, Y>): void {
@@ -311,13 +200,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
   }
 
   protected willSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetYDataDomain !== void 0) {
-        observer.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
-      }
-    }
+    this.callObservers("viewWillSetYDataDomain", newYDataDomain, oldYDataDomain, this);
   }
 
   protected onSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
@@ -326,13 +209,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
   }
 
   protected didSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetYDataDomain !== void 0) {
-        observer.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
-      }
-    }
+    this.callObservers("viewDidSetYDataDomain", newYDataDomain, oldYDataDomain, this);
   }
 
   protected updateYDataDomain(dataPointView: DataPointView<X, Y>): void {
@@ -394,197 +271,58 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
     }
   }
 
-  insertDataPoint(dataPointView: AnyDataPointView<X, Y>, targetView: View | null = null): void {
-    dataPointView = DataPointView.fromAny(dataPointView as AnyDataPointView) as DataPointView<X, Y>;
-    const dataPointFasteners = this.dataPointFasteners as ViewFastener<this, DataPointView<X, Y>>[];
-    let targetIndex = dataPointFasteners.length;
-    for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
-      const dataPointFastener = dataPointFasteners[i]!;
-      if (dataPointFastener.view === dataPointView) {
-        return;
-      } else if (dataPointFastener.view === targetView) {
-        targetIndex = i;
-      }
-    }
-    const dataPointFastener = this.createDataPointFastener(dataPointView);
-    dataPointFasteners.splice(targetIndex, 0, dataPointFastener);
-    dataPointFastener.setView(dataPointView, targetView);
-    if (this.mounted) {
-      dataPointFastener.mount();
-    }
-  }
-
-  insertDataPoints(...dataPointViews: AnyDataPointView<X, Y>[]): void {
-    for (let i = 0, n = dataPointViews.length; i < n; i += 1) {
-      this.insertDataPoint(dataPointViews[i]!);
-    }
-  }
-
-  removeDataPoint(dataPointView: DataPointView<X, Y>): void {
-    const dataPointFasteners = this.dataPointFasteners as ViewFastener<this, DataPointView<X, Y>>[];
-    for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
-      const dataPointFastener = dataPointFasteners[i]!;
-      if (dataPointFastener.view === dataPointView) {
-        dataPointFastener.setView(null);
-        if (this.mounted) {
-          dataPointFastener.unmount();
-        }
-        dataPointFasteners.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  protected initDataPoint(dataPointView: DataPointView<X, Y>, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const labelView = dataPointView.label.view;
-    if (labelView !== null) {
-      this.initDataPointLabel(labelView, dataPointView, dataPointFastener);
-    }
-  }
-
-  protected attachDataPoint(dataPointView: DataPointView<X, Y>, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateXDataDomain(dataPointView);
-    this.updateYDataDomain(dataPointView);
-  }
-
-  protected detachDataPoint(dataPointView: DataPointView<X, Y>, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    // xDataDomain and yDataDomain will be recomputed next layout pass
-  }
-
-  protected willSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
-                             targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetDataPoint !== void 0) {
-        observer.viewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
-                           targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    if (oldDataPointView !== null) {
-      this.detachDataPoint(oldDataPointView, dataPointFastener);
-    }
-    if (newDataPointView !== null) {
-      this.attachDataPoint(newDataPointView, dataPointFastener);
-      this.initDataPoint(newDataPointView, dataPointFastener);
-    }
-  }
-
-  protected didSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
-                            targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetDataPoint !== void 0) {
-        observer.viewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
-      }
-    }
-  }
-
-  protected onSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>,
-                            dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateXDataDomain(dataPointView);
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected onSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>,
-                            dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateYDataDomain(dataPointView);
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected onSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>,
-                             dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.updateYDataDomain(dataPointView);
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected initDataPointLabel(labelView: GraphicsView, dataPointView: DataPointView<X, Y>,
-                               dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected onSetDataPointLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointView: DataPointView<X, Y>,
-                                dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    if (newLabelView !== null) {
-      this.initDataPointLabel(newLabelView, dataPointView, dataPointFastener);
-    }
-  }
-
-  /** @internal */
-  static DataPointFastener = ViewFastener.define<ScatterPlotView<unknown, unknown>, DataPointView<unknown, unknown>>({
-    child: false,
+  @ViewSet<ScatterPlotView, DataPointView, PlotViewDataPointExt>({
+    type: DataPointView,
+    binds: true,
     observes: true,
-    willSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null, targetView: View | null): void {
-      this.owner.willSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    willAttachView(newDataPointView: DataPointView, targetView: View | null): void {
+      this.owner.callObservers("viewWillAttachDataPoint", newDataPointView, targetView, this.owner);
     },
-    onSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null, targetView: View | null): void {
-      this.owner.onSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    didAttachView(dataPointView: DataPointView): void {
+      this.owner.updateXDataDomain(dataPointView);
+      this.owner.updateYDataDomain(dataPointView);
+      const labelView = dataPointView.label.view;
+      if (labelView !== null) {
+        this.attachDataPointLabelView(labelView);
+      }
     },
-    didSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null, targetView: View | null): void {
-      this.owner.didSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    willDetachView(dataPointView: DataPointView): void {
+      const labelView = dataPointView.label.view;
+      if (labelView !== null) {
+        this.detachDataPointLabelView(labelView);
+      }
+      // xDataDomain and yDataDomain will be recomputed next layout pass
     },
-    viewDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointX(newX, oldX, dataPointView, this);
+    didDetachView(newDataPointView: DataPointView): void {
+      this.owner.callObservers("viewDidDetachDataPoint", newDataPointView, this.owner);
     },
-    viewDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointY(newY, oldY, dataPointView, this);
+    viewDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView): void {
+      this.owner.updateXDataDomain(dataPointView);
+      this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointY2(newY2, oldY2, dataPointView, this);
+    viewDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView): void {
+      this.owner.updateYDataDomain(dataPointView);
+      this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetDataPointLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointLabel(newLabelView, oldLabelView, dataPointView, this);
+    viewDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView): void {
+      this.owner.updateYDataDomain(dataPointView);
+      this.owner.requireUpdate(View.NeedsLayout);
     },
-  });
-
-  protected createDataPointFastener(dataPointView: DataPointView<X, Y>): ViewFastener<this, DataPointView<X, Y>> {
-    return ScatterPlotView.DataPointFastener.create(this, dataPointView.key ?? "dataPoint") as ViewFastener<this, DataPointView<X, Y>>;
-  }
-
-  /** @internal */
-  readonly dataPointFasteners: ReadonlyArray<ViewFastener<this, DataPointView<X, Y>>>;
-
-  /** @internal */
-  protected mountDataPointFasteners(): void {
-    const dataPointFasteners = this.dataPointFasteners;
-    for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
-      const dataPointFastener = dataPointFasteners[i]!;
-      dataPointFastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountDataPointFasteners(): void {
-    const dataPointFasteners = this.dataPointFasteners;
-    for (let i = 0, n = dataPointFasteners.length; i < n; i += 1) {
-      const dataPointFastener = dataPointFasteners[i]!;
-      dataPointFastener.unmount();
-    }
-  }
-
-  protected detectDataPoint(view: View): DataPointView<X, Y> | null {
-    return view instanceof DataPointView ? view : null;
-  }
-
-  protected override onInsertChild(childView: View, targetView: View | null): void {
-    super.onInsertChild(childView, targetView);
-    const dataPointView = this.detectDataPoint(childView);
-    if (dataPointView !== null) {
-      this.insertDataPoint(dataPointView, targetView);
-    }
-  }
-
-  protected override onRemoveChild(childView: View): void {
-    super.onRemoveChild(childView);
-    const dataPointView = this.detectDataPoint(childView);
-    if (dataPointView !== null) {
-      this.removeDataPoint(dataPointView);
-    }
-  }
+    viewWillAttachDataPointLabel(labelView: GraphicsView): void {
+      this.attachDataPointLabelView(labelView);
+    },
+    viewDidDetachDataPointLabel(labelView: GraphicsView): void {
+      this.detachDataPointLabelView(labelView);
+    },
+    attachDataPointLabelView(labelView: GraphicsView): void {
+      this.owner.requireUpdate(View.NeedsLayout);
+    },
+    detachDataPointLabelView(labelView: GraphicsView): void {
+      // hook
+    },
+  })
+  readonly dataPoints!: ViewSet<this, DataPointView<X, Y>>;
+  static readonly dataPoints: MemberFastenerClass<ScatterPlotView, "dataPoints">;
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
@@ -708,18 +446,6 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
 
   protected abstract renderPlot(context: CanvasContext, frame: R2Box): void;
 
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountDataPointFasteners();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountDataPointFasteners();
-    super.unmountFasteners();
-  }
-
   override init(init: ScatterPlotViewInit<X, Y>): void {
     super.init(init);
     if (init.xScale !== void 0) {
@@ -732,7 +458,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
     const data = init.data;
     if (data !== void 0) {
       for (let i = 0, n = data.length; i < n; i += 1) {
-        this.insertDataPoint(data[i]!);
+        this.appendChild(DataPointView.fromAny(data[i]! as AnyDataPointView));
       }
     }
 

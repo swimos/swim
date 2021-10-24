@@ -19,13 +19,13 @@ import type {IconCellTrait} from "./IconCellTrait";
 import type {IconCellController} from "./IconCellController";
 
 export interface IconCellControllerObserver<C extends IconCellController = IconCellController> extends CellControllerObserver<C> {
-  controllerWillSetCellTrait?(newCellTrait: IconCellTrait | null, oldCellTrait: IconCellTrait | null, controller: C): void;
+  controllerWillAttachCellTrait?(cellTrait: IconCellTrait, controller: C): void;
 
-  controllerDidSetCellTrait?(newCellTrait: IconCellTrait | null, oldCellTrait: IconCellTrait | null, controller: C): void;
+  controllerDidDetachCellTrait?(cellTrait: IconCellTrait, controller: C): void;
 
-  controllerWillSetCellView?(newCellView: IconCellView | null, oldCellView: IconCellView | null, controller: C): void;
+  controllerWillAttachCellView?(cellView: IconCellView, controller: C): void;
 
-  controllerDidSetCellView?(newCellView: IconCellView | null, oldCellView: IconCellView | null, controller: C): void;
+  controllerDidDetachCellView?(cellView: IconCellView, controller: C): void;
 
   controllerWillSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, controller: C): void;
 

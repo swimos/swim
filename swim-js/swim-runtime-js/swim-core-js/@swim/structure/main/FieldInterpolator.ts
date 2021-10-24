@@ -51,6 +51,7 @@ export const FieldInterpolator = (function (_super: typeof Interpolator) {
   };
 
   FieldInterpolator.prototype = Object.create(_super.prototype);
+  FieldInterpolator.prototype.constructor = FieldInterpolator;
 
   Object.defineProperty(FieldInterpolator.prototype, 0, {
     get(this: FieldInterpolator): Field {

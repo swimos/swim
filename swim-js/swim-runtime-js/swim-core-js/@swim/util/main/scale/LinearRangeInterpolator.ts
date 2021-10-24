@@ -40,6 +40,7 @@ export const LinearRangeInterpolator = (function (_super: typeof Interpolator) {
   };
 
   LinearRangeInterpolator.prototype = Object.create(_super.prototype);
+  LinearRangeInterpolator.prototype.constructor = LinearRangeInterpolator;
 
   return LinearRangeInterpolator;
 })(Interpolator);

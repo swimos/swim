@@ -14,7 +14,7 @@
 
 import type {FastenerOwner} from "@swim/fastener";
 import type {MomentumGestureInput} from "./MomentumGestureInput";
-import {MomentumGestureClass, MomentumGesture} from "./MomentumGesture";
+import {MomentumGestureClass, MomentumGestureFactory, MomentumGesture} from "./MomentumGesture";
 import type {View} from "../view/View";
 
 /** @internal */
@@ -49,7 +49,7 @@ export interface TouchMomentumGesture<O = unknown, V extends View = View> extend
 
 /** @internal */
 export const TouchMomentumGesture = (function (_super: typeof MomentumGesture) {
-  const TouchMomentumGesture = _super.extend() as MomentumGestureClass<TouchMomentumGesture<any, any>>;
+  const TouchMomentumGesture = _super.extend("TouchMomentumGesture") as MomentumGestureFactory<TouchMomentumGesture<any, any>>;
 
   TouchMomentumGesture.prototype.attachHoverEvents = function (this: TouchMomentumGesture, view: View): void {
     view.on("touchstart", this.onTouchStart as EventListener);
@@ -139,8 +139,8 @@ export const TouchMomentumGesture = (function (_super: typeof MomentumGesture) {
     }
   };
 
-  TouchMomentumGesture.construct = function <G extends TouchMomentumGesture<any, any>>(gestureClass: MomentumGestureClass<TouchMomentumGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>, gestureName: string): G {
-    gesture = _super.construct(gestureClass, gesture, owner, gestureName) as G;
+  TouchMomentumGesture.construct = function <G extends TouchMomentumGesture<any, any>>(gestureClass: MomentumGestureClass<TouchMomentumGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct(gestureClass, gesture, owner) as G;
     gesture.onTouchStart = gesture.onTouchStart.bind(gesture);
     gesture.onTouchMove = gesture.onTouchMove.bind(gesture);
     gesture.onTouchEnd = gesture.onTouchEnd.bind(gesture);

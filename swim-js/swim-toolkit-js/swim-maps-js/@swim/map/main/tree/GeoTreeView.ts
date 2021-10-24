@@ -16,7 +16,7 @@ import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
 import type {GeoPoint, GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, AnyView, View} from "@swim/view";
+import {ViewContextType, ViewFlags, AnyView, ViewFactory, View} from "@swim/view";
 import {GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoTree} from "./GeoTree";
@@ -29,11 +29,37 @@ export class GeoTreeView extends GeoView {
   constructor(geoFrame?: GeoBox, depth?: number, maxDepth?: number, density?: number) {
     super();
     this.root = GeoTree.empty(geoFrame, depth, maxDepth, density);
+    this.stem = null;
     this.childMap = null;
   }
 
   /** @internal */
   readonly root: GeoTree;
+
+  /** @internal */
+  updateRoot(newRoot: GeoTree): void {
+    const oldRoot = this.root;
+    const oldGeoBounds = oldRoot.geoBounds;
+    const newGeoBounds = newRoot.geoBounds;
+    (this as Mutable<this>).root = newRoot;
+    (this as Mutable<this>).stem = null;
+    if (!newGeoBounds.equals(oldGeoBounds)) {
+      this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
+    }
+  }
+
+  /** @internal */
+  readonly stem: GeoTree | null;
+
+  /** @internal */
+  getStem(geoBounds: GeoBox): GeoTree {
+    let stem = this.stem;
+    if (stem === null) {
+      stem = this.root.getTree(geoBounds);
+      (this as Mutable<this>).stem = stem;
+    }
+    return stem;
+  }
 
   override get childCount(): number {
     return this.root.size;
@@ -94,10 +120,8 @@ export class GeoTreeView extends GeoView {
   }
 
   override forEachChild<T>(callback: (child: View) => T | void): T | undefined;
-  override forEachChild<T, S>(callback: (this: S, child: View) => T | void,
-                              thisArg: S): T | undefined;
-  override forEachChild<T, S>(callback: (this: S | undefined, child: View) => T | void,
-                              thisArg?: S): T | undefined {
+  override forEachChild<T, S>(callback: (this: S, child: View) => T | void, thisArg: S): T | undefined;
+  override forEachChild<T, S>(callback: (this: S | undefined, child: View) => T | void, thisArg?: S): T | undefined {
     return this.root.forEach(callback, thisArg);
   }
 
@@ -141,7 +165,7 @@ export class GeoTreeView extends GeoView {
     return null;
   }
 
-  override setChild<V extends View>(key: string, newChild: AnyView<V> | null): View | null;
+  override setChild<V extends View>(key: string, newChild: V | ViewFactory<V> | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null {
     if (newChild !== null) {
@@ -154,32 +178,20 @@ export class GeoTreeView extends GeoView {
 
     const oldChild = this.getChild(key);
     if (oldChild !== null) {
-      const oldChildGeoBounds = oldChild.geoBounds;
       this.willRemoveChild(oldChild);
-      oldChild.setParent(null, this);
+      oldChild.detachParent(this);
       this.removeChildMap(oldChild);
-      const oldGeoBounds = this.root.geoBounds;
-      (this as Mutable<this>).root = this.root.removed(oldChild, oldChildGeoBounds);
-      const newGeoBounds = this.root.geoBounds;
-      if (!newGeoBounds.equals(oldGeoBounds)) {
-        this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
-      }
+      this.updateRoot(this.root.removed(oldChild, oldChild.geoBounds));
       this.onRemoveChild(oldChild);
       this.didRemoveChild(oldChild);
       oldChild.setKey(void 0);
     }
 
     if (newChild !== null) {
-      const newChildGeoBounds = newChild.geoBounds;
       newChild.setKey(key);
-      const oldGeoBounds = this.root.geoBounds;
-      (this as Mutable<this>).root = this.root.inserted(newChild, newChildGeoBounds);
-      const newGeoBounds = this.root.geoBounds;
-      if (!newGeoBounds.equals(oldGeoBounds)) {
-        this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
-      }
+      this.updateRoot(this.root.inserted(newChild, newChild.geoBounds));
       this.insertChildMap(newChild);
-      newChild.setParent(this, null);
+      newChild.attachParent(this);
       this.onInsertChild(newChild, null);
       this.didInsertChild(newChild, null);
       newChild.cascadeInsert();
@@ -188,7 +200,7 @@ export class GeoTreeView extends GeoView {
     return oldChild;
   }
 
-  override appendChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override appendChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override appendChild(child: AnyView, key?: string): View;
   override appendChild(child: AnyView, key?: string): View {
     child = View.fromAny(child);
@@ -202,16 +214,10 @@ export class GeoTreeView extends GeoView {
       child.setKey(key);
     }
 
-    const childViewBounds = child.geoBounds;
     this.willInsertChild(child, null);
-    const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.inserted(child, childViewBounds);
-    const newGeoBounds = this.root.geoBounds;
-    if (!newGeoBounds.equals(oldGeoBounds)) {
-      this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
-    }
+    this.updateRoot(this.root.inserted(child, child.geoBounds));
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, null);
     this.didInsertChild(child, null);
     child.cascadeInsert();
@@ -219,7 +225,7 @@ export class GeoTreeView extends GeoView {
     return child;
   }
 
-  override prependChild<V extends View>(child: AnyView<V>, key?: string): V;
+  override prependChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
   override prependChild(child: AnyView, key?: string): View;
   override prependChild(child: AnyView, key?: string): View {
     child = View.fromAny(child);
@@ -233,16 +239,10 @@ export class GeoTreeView extends GeoView {
       child.setKey(key);
     }
 
-    const childViewBounds = child.geoBounds;
     this.willInsertChild(child, null);
-    const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.inserted(child, childViewBounds);
-    const newGeoBounds = this.root.geoBounds;
-    if (!newGeoBounds.equals(oldGeoBounds)) {
-      this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
-    }
+    this.updateRoot(this.root.inserted(child, child.geoBounds));
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, null);
     this.didInsertChild(child, null);
     child.cascadeInsert();
@@ -250,7 +250,7 @@ export class GeoTreeView extends GeoView {
     return child;
   }
 
-  override insertChild<V extends View>(child: AnyView<V>, target: View | null, key?: string): V;
+  override insertChild<V extends View>(child: V | ViewFactory<V>, target: View | null, key?: string): V;
   override insertChild(child: AnyView, target: View | null, key?: string): View;
   override insertChild(child: AnyView, target: View | null, key?: string): View {
     if (target !== null && target.parent !== this) {
@@ -268,16 +268,10 @@ export class GeoTreeView extends GeoView {
       child.setKey(key);
     }
 
-    const childViewBounds = child.geoBounds;
     this.willInsertChild(child, target);
-    const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.inserted(child, childViewBounds);
-    const newGeoBounds = this.root.geoBounds;
-    if (!newGeoBounds.equals(oldGeoBounds)) {
-      this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
-    }
+    this.updateRoot(this.root.inserted(child, child.geoBounds));
     this.insertChildMap(child);
-    child.setParent(this, null);
+    child.attachParent(this);
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
@@ -285,9 +279,29 @@ export class GeoTreeView extends GeoView {
     return child;
   }
 
+  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
+  override replaceChild(newChild: AnyView, oldChild: View): View {
+    if (!(oldChild instanceof GeoView)) {
+      throw new TypeError("" + oldChild);
+    }
+    if (oldChild.parent !== this) {
+      throw new TypeError("" + oldChild);
+    }
+    newChild = View.fromAny(newChild);
+    if (!(newChild instanceof GeoView)) {
+      throw new TypeError("" + newChild);
+    }
+    if (newChild !== oldChild) {
+      this.removeChild(oldChild);
+      this.appendChild(newChild);
+    }
+    return oldChild;
+  }
+
   override removeChild(key: string): View | null;
-  override removeChild(child: View): void;
-  override removeChild(key: string | View): View | null | void {
+  override removeChild<V extends View>(child: V): V;
+  override removeChild(key: string | View): View | null {
     let child: View | null;
     if (typeof key === "string") {
       child = this.getChild(key);
@@ -296,29 +310,23 @@ export class GeoTreeView extends GeoView {
       }
     } else {
       child = key;
+      if (child.parent !== this) {
+        throw new Error("not a child view");
+      }
     }
     if (!(child instanceof GeoView)) {
       throw new TypeError("" + child);
     }
-    if (child.parent !== this) {
-      throw new Error("not a child view");
-    }
-    const childViewBounds = child.geoBounds;
+
     this.willRemoveChild(child);
-    child.setParent(null, this);
+    child.detachParent(this);
     this.removeChildMap(child);
-    const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.removed(child, childViewBounds);
-    const newGeoBounds = this.root.geoBounds;
-    if (!newGeoBounds.equals(oldGeoBounds)) {
-      this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
-    }
+    this.updateRoot(this.root.removed(child, child.geoBounds));
     this.onRemoveChild(child);
     this.didRemoveChild(child);
     child.setKey(void 0);
-    if (typeof key === "string") {
-      return child;
-    }
+
+    return child;
   }
 
   override removeChildren(): void {
@@ -327,10 +335,16 @@ export class GeoTreeView extends GeoView {
     }, this);
   }
 
+  protected override willProject(viewContext: ViewContextType<this>): void {
+    super.willProject(viewContext);
+    (this as Mutable<this>).stem = null;
+  }
+
   protected override processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
                                      processChild: (this: this, child: View, processFlags: ViewFlags,
                                                     viewContext: ViewContextType<this>) => void): void {
-    this.processTree(this.root, processFlags, viewContext, processChild);
+    const stem = this.getStem(viewContext.geoViewport.geoFrame);
+    this.processTree(stem, processFlags, viewContext, processChild);
   }
 
   /** @internal */
@@ -403,7 +417,8 @@ export class GeoTreeView extends GeoView {
   protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
                                      displayChild: (this: this, child: View, displayFlags: ViewFlags,
                                                     viewContext: ViewContextType<this>) => void): void {
-    this.displayTree(this.root, displayFlags, viewContext, displayChild);
+    const stem = this.getStem(viewContext.geoViewport.geoFrame);
+    this.displayTree(stem, displayFlags, viewContext, displayChild);
   }
 
   /** @internal */
@@ -434,19 +449,16 @@ export class GeoTreeView extends GeoView {
   }
 
   override onSetChildGeoBounds(child: GeoView, newChildViewGeoBounds: GeoBox, oldChildViewGeoBounds: GeoBox): void {
-    const oldGeoBounds = this.root.geoBounds;
-    (this as Mutable<this>).root = this.root.moved(child, newChildViewGeoBounds, oldChildViewGeoBounds);
-    const newGeoBounds = this.root.geoBounds;
-    if (!newGeoBounds.equals(oldGeoBounds)) {
-      this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
-    }
+    this.updateRoot(this.root.moved(child, newChildViewGeoBounds, oldChildViewGeoBounds));
   }
 
   declare readonly geoBounds: GeoBox; // getter defined below to work around useDefineForClassFields lunacy
 
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const geoPoint = viewContext.geoViewport.unproject(x, y);
-    return this.hitTestTree(this.root, x, y, geoPoint, viewContext);
+    const geoViewport = viewContext.geoViewport;
+    const geoPoint = geoViewport.unproject(x, y);
+    const stem = this.getStem(geoViewport.geoFrame);
+    return this.hitTestTree(stem, x, y, geoPoint, viewContext);
   }
 
   protected hitTestTree(tree: GeoTree, x: number, y: number, geoPoint: GeoPoint,

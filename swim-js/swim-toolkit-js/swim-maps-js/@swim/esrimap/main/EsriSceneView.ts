@@ -15,9 +15,10 @@
 /// <reference types="arcgis-js-api"/>
 
 import {Mutable, Class, Equivalent, AnyTiming, Timing} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
-import {View} from "@swim/view";
+import {View, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
 import type {AnyGeoPerspective} from "@swim/map";
@@ -50,13 +51,7 @@ export class EsriSceneView extends EsriView {
   override readonly geoViewport!: EsriSceneViewport;
 
   protected willSetGeoViewport(newGeoViewport: EsriSceneViewport, oldGeoViewport: EsriSceneViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoViewport !== void 0) {
-        observer.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected onSetGeoViewport(newGeoViewport: EsriSceneViewport, oldGeoViewport: EsriSceneViewport): void {
@@ -64,13 +59,7 @@ export class EsriSceneView extends EsriView {
   }
 
   protected didSetGeoViewport(newGeoViewport: EsriSceneViewport, oldGeoViewport: EsriSceneViewport): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!
-      if (observer.viewDidSetGeoViewport !== void 0) {
-        observer.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-      }
-    }
+    this.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this);
   }
 
   protected updateGeoViewport(): boolean {
@@ -127,44 +116,45 @@ export class EsriSceneView extends EsriView {
     this.map.goTo(target, options);
   }
 
-  protected override attachCanvas(canvasView: CanvasView): void {
-    super.attachCanvas(canvasView);
-    if (this.parent === null) {
-      canvasView.appendChild(this);
-      canvasView.setEventNode(this.map.container.querySelector(".esri-view-root") as HTMLElement);
-    }
-  }
+  @ViewRef<EsriSceneView, CanvasView>({
+    extends: true,
+    didAttachView(canvasView: CanvasView, targetView: View | null): void {
+      if (this.owner.parent === null) {
+        canvasView.appendChild(this.owner);
+        canvasView.setEventNode(this.owner.map.container.querySelector(".esri-view-root") as HTMLElement);
+      }
+      EsriView.canvas.prototype.didAttachView.call(this, canvasView, targetView);
+    },
+    willDetachView(canvasView: CanvasView): void {
+      EsriView.canvas.prototype.willDetachView.call(this, canvasView);
+      if (this.owner.parent === canvasView) {
+        canvasView.removeChild(this.owner);
+      }
+    },
+  })
+  override readonly canvas!: ViewRef<this, CanvasView>;
+  static override readonly canvas: MemberFastenerClass<EsriSceneView, "canvas">;
 
-  protected override detachCanvas(canvasView: CanvasView): void {
-    if (this.parent === canvasView) {
-      canvasView.removeChild(this);
-    }
-    super.detachCanvas(canvasView);
-  }
-
-  protected override initContainer(containerView: HtmlView): void {
-    super.initContainer(containerView);
-    const esriContainerView = HtmlView.fromNode(this.map.container);
-    const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
-    HtmlView.fromNode(esriRootView.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
-  }
-
-  protected override attachContainer(containerView: HtmlView): void {
-    super.attachContainer(containerView);
-    const esriContainerView = HtmlView.fromNode(this.map.container);
-    const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
-    const esriOverlayView = HtmlView.fromNode(esriRootView.node.querySelector(".esri-view-surface") as HTMLDivElement);
-    this.canvas.injectView(esriOverlayView);
-  }
-
-  protected override detachContainer(containerView: HtmlView): void {
-    const canvasView = this.canvas.view;
-    const esriContainerView = HtmlView.fromNode(this.map.container);
-    const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
-    const esriSurfaceView = HtmlView.fromNode(esriRootView.node.querySelector(".esri-view-surface") as HTMLDivElement);
-    if (canvasView !== null && canvasView.parent === esriSurfaceView) {
-      esriSurfaceView.removeChild(containerView);
-    }
-    super.detachContainer(containerView);
-  }
+  @ViewRef<EsriSceneView, HtmlView>({
+    extends: true,
+    didAttachView(containerView: HtmlView, targetView: View | null): void {
+      const esriContainerView = HtmlView.fromNode(this.owner.map.container);
+      const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
+      const esriOverlayView = HtmlView.fromNode(esriRootView.node.querySelector(".esri-view-surface") as HTMLDivElement);
+      this.owner.canvas.insertView(esriOverlayView);
+      EsriView.container.prototype.didAttachView.call(this, containerView, targetView);
+    },
+    willDetachView(containerView: HtmlView): void {
+      EsriView.container.prototype.willDetachView.call(this, containerView);
+      const canvasView = this.owner.canvas.view;
+      const esriContainerView = HtmlView.fromNode(this.owner.map.container);
+      const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
+      const esriSurfaceView = HtmlView.fromNode(esriRootView.node.querySelector(".esri-view-surface") as HTMLDivElement);
+      if (canvasView !== null && canvasView.parent === esriSurfaceView) {
+        esriSurfaceView.removeChild(containerView);
+      }
+    },
+  })
+  override readonly container!: ViewRef<this, HtmlView>;
+  static override readonly container: MemberFastenerClass<EsriSceneView, "container">;
 }

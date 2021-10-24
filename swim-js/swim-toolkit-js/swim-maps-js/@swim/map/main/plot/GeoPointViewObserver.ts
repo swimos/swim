@@ -22,7 +22,7 @@ export interface GeoPointViewObserver<V extends GeoPointView = GeoPointView> ext
 
   viewDidSetGeoPoint?(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint, view: V): void;
 
-  viewWillSetGeoLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewWillAttachGeoLabel?(labelView: GraphicsView, view: V): void;
 
-  viewDidSetGeoLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewDidDetachGeoLabel?(labelView: GraphicsView, view: V): void;
 }

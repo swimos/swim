@@ -17,5 +17,8 @@ export {GeoLayerView} from "./GeoLayerView";
 export {GeoLayerTrait} from "./GeoLayerTrait";
 export {GeoLayerTraitObserver} from "./GeoLayerTraitObserver";
 
-export {GeoLayerController} from "./GeoLayerController";
+export {
+  GeoLayerControllerFeatureExt,
+  GeoLayerController,
+} from "./GeoLayerController";
 export {GeoLayerControllerObserver} from "./GeoLayerControllerObserver";

@@ -30,7 +30,7 @@ export interface ThemeProvider<V extends View, S extends ThemeService<V> | null 
 }
 
 export const ThemeProvider = (function (_super: typeof Provider) {
-  const ThemeProvider = _super.extend() as ProviderClass<ThemeProvider<any, any>>;
+  const ThemeProvider = _super.extend("ThemeProvider") as ProviderClass<ThemeProvider<any, any>>;
 
   Object.defineProperty(ThemeProvider.prototype, "mood", {
     get<V extends View, S extends ThemeService<V>>(this: ThemeProvider<V, S>): MoodVector {

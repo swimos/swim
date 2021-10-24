@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AxisView} from "./AxisView";
+import {TraitViewRef} from "@swim/controller";
+import {TopAxisTrait} from "./TopAxisTrait";
 import {TopAxisView} from "./TopAxisView";
 import {AxisController} from "./AxisController";
 
-export class TopAxisController<X> extends AxisController<X> {
-  protected override createAxisView(): AxisView<X> | null {
-    return new TopAxisView<X>();
-  }
+export class TopAxisController<X = unknown> extends AxisController<X> {
+  @TraitViewRef<TopAxisController<X>, TopAxisTrait<X>, TopAxisView<X>>({
+    extends: true,
+    traitType: TopAxisTrait,
+    viewType: TopAxisView,
+  })
+  override readonly axis!: TraitViewRef<this, TopAxisTrait<X>, TopAxisView<X>>;
 }

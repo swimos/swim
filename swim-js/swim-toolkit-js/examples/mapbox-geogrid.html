@@ -27,47 +27,59 @@ class ExampleMapboxController extends swim.MapController {
     });
     return new swim.MapboxView(map);
   }
-  initMapView(mapView) {
-    super.initMapView(mapView);
+}
+swim.TraitViewRef({
+  extends: true,
+  initView(mapView) {
+    swim.MapController.map.prototype.initView.call(this, mapView);
     mapView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
-  }
-  initCanvasView(canvasView) {
-    super.initCanvasView(canvasView);
+  },
+})(ExampleMapboxController.prototype, "map");
+swim.ViewRef({
+  extends: true,
+  initView(canvasView) {
+    swim.MapController.canvas.prototype.initView.call(this, canvasView);
     canvasView.pointerEventsEnabled(true).touchAction("manipulation");
-  }
-  createLayer(layerTrait) {
-    if (layerTrait instanceof ExampleGridTrait) {
-      return new ExampleGridController(swim.GeoTile.root());
+  },
+})(ExampleMapboxController.prototype, "canvas");
+swim.TraitViewControllerSet({
+  extends: true,
+  createController(layerTrait) {
+    if (layerTrait instanceof ExampleTileTrait) {
+      return new ExampleTileController(swim.GeoTile.root());
     } else {
-      return super.createLayer(layerTrait);
+      return swim.MapController.layers.prototype.createController.call(this, layerTrait);
     }
-  }
-}
+  },
+})(ExampleMapboxController.prototype, "layers");
 
-class ExampleGridController extends swim.GeoGridController {
-  initGeoView(layerView) {
-    super.initGeoView(layerView);
-    layerView.geoBoundsColor("#008f11");
-  }
-  projectGeoView(viewContext, layerView) {
-    super.projectGeoView(viewContext, layerView);
-  }
-  createTile(tileTrait) {
-    return new ExampleGridController(tileTrait.geoTile);
-  }
-  initTileView(tileView) {
-    super.initTileView(tileView);
-  }
+class ExampleTileController extends swim.GeoGridController {
 }
+swim.TraitViewRef({
+  extends: true,
+  initView(tileView) {
+    swim.GeoGridController.geo.prototype.initView.call(this, tileView);
+    tileView.geoBoundsColor("#008f11");
+  },
+})(ExampleTileController.prototype, "geo");
+swim.TraitViewControllerSet({
+  extends: true,
+  attachTileView(tileView, tileController) {
+    swim.GeoGridController.tiles.prototype.attachTileView.call(this, tileView, tileController);
+  },
+  createController(tileTrait) {
+    return tileTrait !== void 0 ? new ExampleTileController(tileTrait.geoTile) : null;
+  },
+})(ExampleTileController.prototype, "tiles");
 
-class ExampleGridTrait extends swim.GeoGridTrait {
+class ExampleTileTrait extends swim.GeoGridTrait {
   constructor(geoTile) {
     super(geoTile);
     const tileId = geoTile.x + "," + geoTile.y + "," + geoTile.z;
     this.vehiclesDownlink.nodeUri(swim.Uri.path(swim.UriPath.of("/", "map", "/", tileId)));
   }
   createTileTrait(geoTile) {
-    return new ExampleGridTrait(geoTile);
+    return new ExampleTileTrait(geoTile);
   }
   onStartConsuming() {
     super.onStartConsuming();
@@ -79,16 +91,16 @@ class ExampleGridTrait extends swim.GeoGridTrait {
   }
 }
 swim.MapDownlinkFastener({
-  eager: true,
+  lazy: false,
   consumed: true,
   laneUri: "vehicles",
   didUpdate(key, value) {
     console.log(this.nodeUri() + " updateVehicle " + key.toAny() + ":", value.toAny());
   },
-})(ExampleGridTrait.prototype, "vehiclesDownlink")
+})(ExampleTileTrait.prototype, "vehiclesDownlink")
 
 const layerModel = new swim.GenericModel();
-const layerTrait = new ExampleGridTrait(swim.GeoTile.root());
+const layerTrait = new ExampleTileTrait(swim.GeoTile.root());
 layerModel.setTrait("layer", layerTrait);
 
 const mapModel = new swim.GenericModel();

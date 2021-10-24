@@ -48,6 +48,7 @@ export const Tweening = (function (_super: typeof Mapping) {
   };
 
   Tweening.prototype = Object.create(_super.prototype);
+  Tweening.prototype.constructor = Tweening;
 
   Tweening.prototype.withDomain = function <Y>(this: Tweening<Y>, t0: number, t1: number): Tweening<Y> {
     return this.domain.withDomain(t0, t1).overRange(this.range);

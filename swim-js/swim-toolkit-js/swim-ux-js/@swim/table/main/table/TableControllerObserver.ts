@@ -15,7 +15,7 @@
 import type {PositionGestureInput} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
-import type {ControllerObserver, ControllerFastener} from "@swim/controller";
+import type {ControllerObserver} from "@swim/controller";
 import type {TableLayout} from "../layout/TableLayout";
 import type {ColLayout} from "../layout/ColLayout";
 import type {CellView} from "../cell/CellView";
@@ -37,123 +37,123 @@ import type {TableTrait} from "./TableTrait";
 import type {TableController} from "./TableController";
 
 export interface TableControllerObserver<C extends TableController = TableController> extends ControllerObserver<C> {
-  controllerWillSetTableTrait?(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null, controller: C): void;
+  controllerWillAttachTableTrait?(tableTrait: TableTrait, controller: C): void;
 
-  controllerDidSetTableTrait?(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null, controller: C): void;
+  controllerDidDetachTableTrait?(tableTrait: TableTrait, controller: C): void;
 
   controllerWillSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, controller: C): void;
 
   controllerDidSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, controller: C): void;
 
-  controllerWillSetTableView?(newTableView: TableView | null, oldTableView: TableView | null, controller: C): void;
+  controllerWillAttachTableView?(tableView: TableView, controller: C): void;
 
-  controllerDidSetTableView?(newTableView: TableView | null, oldTableView: TableView | null, controller: C): void;
+  controllerDidDetachTableView?(tableView: TableView, controller: C): void;
 
-  controllerWillSetHeader?(newColController: HeaderController | null, oldColController: HeaderController | null, controller: C): void;
+  controllerWillAttachHeader?(headerController: HeaderController, controller: C): void;
 
-  controllerDidSetHeader?(newColController: HeaderController | null, oldColController: HeaderController | null, controller: C): void;
+  controllerDidDetachHeader?(headerController: HeaderController, controller: C): void;
 
-  controllerWillSetHeaderTrait?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, controller: C): void;
+  controllerWillAttachHeaderTrait?(headerTrait: HeaderTrait, controller: C): void;
 
-  controllerDidSetHeaderTrait?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, controller: C): void;
+  controllerDidDetachHeaderTrait?(headerTrait: HeaderTrait, controller: C): void;
 
-  controllerWillSetHeaderView?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, controller: C): void;
+  controllerWillAttachHeaderView?(headerView: HeaderView, controller: C): void;
 
-  controllerDidSetHeaderView?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, controller: C): void;
+  controllerDidDetachHeaderView?(headerView: HeaderView, controller: C): void;
 
-  controllerWillSetCol?(newColController: ColController | null, oldColController: ColController | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillAttachCol?(colController: ColController, controller: C): void;
 
-  controllerDidSetCol?(newColController: ColController | null, oldColController: ColController | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidDetachCol?(colController: ColController, controller: C): void;
 
-  controllerWillSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillAttachColTrait?(colTrait: ColTrait, colController: ColController, controller: C): void;
 
-  controllerDidSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidDetachColTrait?(colTrait: ColTrait, colController: ColController, controller: C): void;
 
-  controllerWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController, controller: C): void;
 
-  controllerDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController, controller: C): void;
 
-  controllerWillSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillAttachColView?(colView: ColView, colController: ColController, controller: C): void;
 
-  controllerDidSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidDetachColView?(colView: ColView, colController: ColController, controller: C): void;
 
-  controllerWillSetColLabelView?(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillAttachColLabelView?(colLabelView: HtmlView, colController: ColController, controller: C): void;
 
-  controllerDidSetColLabelView?(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidDetachColLabelView?(colLabelView: HtmlView, colController: ColController, controller: C): void;
 
-  controllerWillSetRow?(newRowController: RowController | null, oldRowController: RowController | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachRow?(rowController: RowController, controller: C): void;
 
-  controllerDidSetRow?(newRowController: RowController | null, oldRowController: RowController | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachRow?(rowController: RowController, controller: C): void;
 
-  controllerWillSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachRowTrait?(rowTrait: RowTrait, rowController: RowController, controller: C): void;
 
-  controllerDidSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachRowTrait?(rowTrait: RowTrait, rowController: RowController, controller: C): void;
 
-  controllerWillSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachRowView?(rowView: RowView, rowController: RowController, controller: C): void;
 
-  controllerDidSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachRowView?(rowView: RowView, rowController: RowController, controller: C): void;
 
-  controllerWillSetLeafTrait?(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachLeafTrait?(leafTrait: LeafTrait, rowController: RowController, controller: C): void;
 
-  controllerDidSetLeafTrait?(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachLeafTrait?(leafTrait: LeafTrait, rowController: RowController, controller: C): void;
 
-  controllerWillSetLeafView?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachLeafView?(leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerDidSetLeafView?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachLeafView?(leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerWillHighlightLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillHighlightLeafView?(leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerDidHighlightLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidHighlightLeafView?(leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerWillUnhighlightLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillUnhighlightLeafView?(leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerDidUnhighlightLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidUnhighlightLeafView?(leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerDidEnterLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidEnterLeafView?(leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerDidLeaveLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidLeaveLeafView?(leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerDidPressLeafView?(input: PositionGestureInput, event: Event | null, leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidPressLeafView?(input: PositionGestureInput, event: Event | null, leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerDidLongPressLeafView?(input: PositionGestureInput, leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidLongPressLeafView?(input: PositionGestureInput, leafView: LeafView, rowController: RowController, controller: C): void;
 
-  controllerWillSetCell?(newCellController: CellController | null, oldCellController: CellController | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachCell?(cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerDidSetCell?(newCellController: CellController | null, oldCellController: CellController | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachCell?(cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerWillSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachCellTrait?(cellTrait: CellTrait, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerDidSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachCellTrait?(cellTrait: CellTrait, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerWillSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachCellView?(cellView: CellView, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerDidSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachCellView?(cellView: CellView, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerWillSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachCellContentView?(cellContentView: HtmlView, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerDidSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachCellContentView?(cellContentView: HtmlView, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerWillSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerDidSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerWillSetTree?(newTreeController: TableController | null, oldTreeController: TableController | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachTree?(treeController: TableController, rowController: RowController, controller: C): void;
 
-  controllerDidSetTree?(newTreeController: TableController | null, oldTreeController: TableController | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachTree?(treeController: TableController, rowController: RowController, controller: C): void;
 
-  controllerWillSetTreeTrait?(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachTreeTrait?(treeTrait: TableTrait, treeController: TableController, rowController: RowController, controller: C): void;
 
-  controllerDidSetTreeTrait?(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachTreeTrait?(treeTrait: TableTrait, treeController: TableController, rowController: RowController, controller: C): void;
 
-  controllerWillSetTreeView?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillAttachTreeView?(treeView: TableView, treeController: TableController, rowController: RowController, controller: C): void;
 
-  controllerDidSetTreeView?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidDetachTreeView?(treeView: TableView, treeController: TableController, rowController: RowController, controller: C): void;
 
-  controllerWillExpandRowView?(rowView: RowView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillExpandRowView?(rowView: RowView, rowController: RowController, controller: C): void;
 
-  controllerDidExpandRowView?(rowView: RowView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidExpandRowView?(rowView: RowView, rowController: RowController, controller: C): void;
 
-  controllerWillCollapseRowView?(rowView: RowView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerWillCollapseRowView?(rowView: RowView, rowController: RowController, controller: C): void;
 
-  controllerDidCollapseRowView?(rowView: RowView, rowFastener: ControllerFastener<C, RowController>): void;
+  controllerDidCollapseRowView?(rowView: RowView, rowController: RowController, controller: C): void;
 }

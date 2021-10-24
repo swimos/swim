@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AttributeAnimatorClass, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorFactory, AttributeAnimator} from "./AttributeAnimator";
 
 /** @internal */
 export const NumberAttributeAnimator = (function (_super: typeof AttributeAnimator) {
-  const NumberAttributeAnimator = _super.extend() as AttributeAnimatorClass<AttributeAnimator<any, number | undefined, string>>;
+  const NumberAttributeAnimator = _super.extend("NumberAttributeAnimator") as AttributeAnimatorFactory<AttributeAnimator<any, number | undefined, string>>;
 
   NumberAttributeAnimator.prototype.parse = function (value: string): number | undefined {
     const number = +value;

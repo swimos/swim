@@ -29,7 +29,7 @@ export interface SelectionProvider<M, S extends SelectionService<M> | null | und
 }
 
 export const SelectionProvider = (function (_super: typeof Provider) {
-  const SelectionProvider = _super.extend() as ProviderClass<SelectionProvider<any, any>>;
+  const SelectionProvider = _super.extend("SelectionProvider") as ProviderClass<SelectionProvider<any, any>>;
 
   Object.defineProperty(SelectionProvider.prototype, "selections", {
     get<M, S extends SelectionService<M> | null | undefined>(this: SelectionProvider<M, S>): ReadonlyArray<Model> {

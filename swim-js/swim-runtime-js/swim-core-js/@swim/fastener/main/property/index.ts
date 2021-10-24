@@ -15,7 +15,6 @@
 export {
   MemberPropertyState,
   MemberPropertyStateInit,
-  MemberPropertyKey,
   MemberPropertyInit,
   MemberPropertyInitMap,
   PropertyState,

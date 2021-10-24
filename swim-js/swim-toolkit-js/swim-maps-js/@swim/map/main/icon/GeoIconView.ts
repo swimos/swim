@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/fastener";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
@@ -59,69 +59,45 @@ export class GeoIconView extends GeoLayerView implements IconView {
   /** @internal */
   sprite: Sprite | null;
 
-  protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGeoCenter !== void 0) {
-        observer.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-      }
-    }
-  }
-
-  protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    this.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
-    if (this.mounted) {
-      this.projectIcon(this.viewContext as ViewContextType<this>);
-    }
-  }
-
-  protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGeoCenter !== void 0) {
-        observer.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-      }
-    }
-  }
-
-  @ThemeAnimator<GeoIconView, GeoPoint | null, AnyGeoPoint | null>({
+  @Animator<GeoIconView, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
     state: null,
-    didSetState(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
+    didSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
       this.owner.projectGeoCenter(newGeoCenter);
     },
-    willSetValue(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
-      this.owner.willSetGeoCenter(newGeoCenter, oldGeoCemter);
+    willSetValue(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
+      this.owner.callObservers("viewWillSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
     },
-    didSetValue(newGeoCenter: GeoPoint | null, oldGeoCemter: GeoPoint | null): void {
-      this.owner.onSetGeoCenter(newGeoCenter, oldGeoCemter);
-      this.owner.didSetGeoCenter(newGeoCenter, oldGeoCemter);
+    didSetValue(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
+      this.owner.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
+      if (this.mounted) {
+        this.owner.projectIcon(this.owner.viewContext);
+      }
+      this.owner.callObservers("viewDidSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
     },
   })
-  readonly geoCenter!: ThemeAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: Animator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ThemeAnimator<GeoIconView, R2Point | null, AnyR2Point | null>({
+  @Animator<GeoIconView, R2Point | null, AnyR2Point | null>({
     type: R2Point,
     state: R2Point.undefined(),
     updateFlags: View.NeedsComposite,
   })
-  readonly viewCenter!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
+  readonly viewCenter!: Animator<this, R2Point | null, AnyR2Point | null>;
 
-  @ThemeAnimator<GeoIconView, number>({
+  @Animator<GeoIconView, number>({
     type: Number,
     state: 0.5,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
   })
-  readonly xAlign!: ThemeAnimator<this, number>;
+  readonly xAlign!: Animator<this, number>;
 
-  @ThemeAnimator<GeoIconView, number>({
+  @Animator<GeoIconView, number>({
     type: Number,
     state: 0.5,
     updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
   })
-  readonly yAlign!: ThemeAnimator<this, number>;
+  readonly yAlign!: Animator<this, number>;
 
   @ThemeAnimator<GeoIconView, Length | null, AnyLength | null>({
     type: Length,
@@ -153,39 +129,15 @@ export class GeoIconView extends GeoLayerView implements IconView {
   })
   readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected willSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetGraphics !== void 0) {
-        observer.viewWillSetGraphics(newGraphics, oldGraphic, this);
-      }
-    }
-  }
-
-  protected onSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    this.requireUpdate(View.NeedsRender | View.NeedsRasterize | View.NeedsComposite);
-  }
-
-  protected didSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetGraphics !== void 0) {
-        observer.viewDidSetGraphics(newGraphics, oldGraphic, this);
-      }
-    }
-  }
-
   @ThemeAnimator<GeoIconView, Graphics | null>({
     extends: IconGraphicsAnimator,
     type: Object,
+    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
     willSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.willSetGraphics(newGraphics, oldGraphics);
+      this.owner.callObservers("viewWillSetGraphics", newGraphics, oldGraphics, this.owner);
     },
     didSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.onSetGraphics(newGraphics, oldGraphics);
-      this.owner.didSetGraphics(newGraphics, oldGraphics);
+      this.owner.callObservers("viewDidSetGraphics", newGraphics, oldGraphics, this.owner);
     },
   })
   readonly graphics!: ThemeAnimator<this, Graphics | null>;
@@ -218,16 +170,15 @@ export class GeoIconView extends GeoLayerView implements IconView {
   }
 
   protected projectIcon(viewContext: ViewContextType<this>): void {
-    if (this.viewCenter.hasAffinity(Affinity.Intrinsic)) {
+    if (Affinity.Intrinsic >= this.viewCenter.affinity) { // this.viewCenter.hasAffinity(Affinity.Intrinsic)
       const geoCenter = this.geoCenter.value;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
                        ? viewContext.geoViewport.project(geoCenter)
                        : null;
-      //this.viewCenter.setValue(viewCenter);
-      (this.viewCenter as Mutable<typeof this.viewCenter>).value = viewCenter;
+      (this.viewCenter as Mutable<typeof this.viewCenter>).value = viewCenter; // this.viewCenter.setValue(viewCenter)
     }
-    (this as Mutable<GeoIconView>).viewBounds = this.deriveViewBounds();
-    const viewFrame = this.viewFrame;
+    const viewFrame = viewContext.viewFrame;
+    (this as Mutable<GeoIconView>).viewBounds = this.deriveViewBounds(viewFrame);
     const p0 = this.viewCenter.value;
     const p1 = this.viewCenter.state;
     if (p0 !== null && p1 !== null && (
@@ -299,10 +250,12 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   override readonly viewBounds!: R2Box;
 
-  override deriveViewBounds(): R2Box {
+  override deriveViewBounds(viewFrame?: R2Box): R2Box {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
-      const viewFrame = this.viewFrame;
+      if (viewFrame === void 0) {
+        viewFrame = this.viewContext.viewFrame;
+      }
       const viewSize = Math.min(viewFrame.width, viewFrame.height);
       let iconWidth: Length | number | null = this.iconWidth.value;
       iconWidth = iconWidth instanceof Length ? iconWidth.pxValue(viewSize) : viewSize;
@@ -318,8 +271,8 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   override get popoverFrame(): R2Box {
     const viewCenter = this.viewCenter.value;
-    const viewFrame = this.viewFrame;
     if (viewCenter !== null && viewCenter.isDefined()) {
+      const viewFrame = this.viewContext.viewFrame;
       const viewSize = Math.min(viewFrame.width, viewFrame.height);
       const inversePageTransform = this.pageTransform.inverse();
       const px = inversePageTransform.transformX(viewCenter.x, viewCenter.y);

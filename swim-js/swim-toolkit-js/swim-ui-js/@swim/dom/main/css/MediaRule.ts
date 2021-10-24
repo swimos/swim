@@ -16,26 +16,24 @@ import {Mutable, AnyTiming, Timing} from "@swim/util";
 import type {FastenerOwner} from "@swim/fastener";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {CssContext} from "./CssContext";
-import {CssRuleInit, CssRule} from "./CssRule";
+import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";
 
 export interface MediaRuleInit extends CssRuleInit {
+  extends?: {prototype: MediaRule<any>} | string | boolean | null;
+
   initRule?(rule: CSSMediaRule): void;
 }
 
 export type MediaRuleDescriptor<O = unknown, I = {}> = ThisType<MediaRule<O> & I> & MediaRuleInit & Partial<I>;
 
-export interface MediaRuleClass<F extends MediaRule<any> = MediaRule<any>> {
-  /** @internal */
-  prototype: F;
+export interface MediaRuleClass<F extends MediaRule<any> = MediaRule<any>> extends CssRuleClass<F> {
+}
 
-  create(owner: FastenerOwner<F>, ruleName: string): F;
+export interface MediaRuleFactory<F extends MediaRule<any> = MediaRule<any>> extends MediaRuleClass<F> {
+  extend<I = {}>(className: string, classMembers?: Partial<I> | null): MediaRuleFactory<F> & I;
 
-  construct(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F;
-
-  extend<I = {}>(classMembers?: Partial<I> | null): MediaRuleClass<F> & I;
-
-  define<O>(descriptor: MediaRuleDescriptor<O>): MediaRuleClass<MediaRule<any>>;
-  define<O, I = {}>(descriptor: MediaRuleDescriptor<O, I>): MediaRuleClass<MediaRule<any> & I>;
+  define<O>(className: string, descriptor: MediaRuleDescriptor<O>): MediaRuleFactory<MediaRule<any>>;
+  define<O, I = {}>(className: string, descriptor: MediaRuleDescriptor<O, I>): MediaRuleFactory<MediaRule<any> & I>;
 
   <O>(descriptor: MediaRuleDescriptor<O>): PropertyDecorator;
   <O, I = {}>(descriptor: MediaRuleDescriptor<O, I>): PropertyDecorator;
@@ -68,7 +66,7 @@ export interface MediaRule<O = unknown> extends CssRule<O>, CssContext {
 }
 
 export const MediaRule = (function (_super: typeof CssRule) {
-  const MediaRule: MediaRuleClass = _super.extend();
+  const MediaRule: MediaRuleFactory = _super.extend("MediaRule");
 
   MediaRule.prototype.getRule = function (this: MediaRule, index: number): CSSRule | null {
     return this.rule.cssRules.item(index);
@@ -112,13 +110,13 @@ export const MediaRule = (function (_super: typeof CssRule) {
     }
   };
 
-  MediaRule.construct = function <F extends MediaRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>, ruleName: string): F {
-    rule = _super.construct(ruleClass, rule, owner, ruleName) as F;
+  MediaRule.construct = function <F extends MediaRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>): F {
+    rule = _super.construct(ruleClass, rule, owner) as F;
     return rule;
   };
 
-  MediaRule.define = function <O>(descriptor: MediaRuleDescriptor<O>): MediaRuleClass<MediaRule<any>> {
-    let superClass = descriptor.extends as MediaRuleClass | undefined;
+  MediaRule.define = function <O>(className: string, descriptor: MediaRuleDescriptor<O>): MediaRuleFactory<MediaRule<any>> {
+    let superClass = descriptor.extends as MediaRuleFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
     let css = descriptor.css;
@@ -131,15 +129,15 @@ export const MediaRule = (function (_super: typeof CssRule) {
       superClass = this;
     }
 
-    const ruleClass = superClass.extend(descriptor);
+    const ruleClass = superClass.extend(className, descriptor);
 
     if (typeof css === "function") {
       ruleClass.prototype.initCss = css;
       css = void 0;
     }
 
-    ruleClass.construct = function (ruleClass: {prototype: MediaRule<any>}, rule: MediaRule<O> | null, owner: O, ruleName: string): MediaRule<O> {
-      rule = superClass!.construct(ruleClass, rule, owner, ruleName);
+    ruleClass.construct = function (ruleClass: {prototype: MediaRule<any>}, rule: MediaRule<O> | null, owner: O): MediaRule<O> {
+      rule = superClass!.construct(ruleClass, rule, owner);
 
       if (affinity !== void 0) {
         rule.initAffinity(affinity);

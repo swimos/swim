@@ -16,8 +16,8 @@ import type {Graphics} from "@swim/graphics";
 import type {CellTraitObserver} from "./CellTraitObserver";
 import type {IconCellTrait} from "./IconCellTrait";
 
-export interface IconCellTraitObserver<R extends IconCellTrait = IconCellTrait> extends CellTraitObserver<R> {
-  traitWillSetIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, trait: R): void;
+export interface IconCellTraitObserver<T extends IconCellTrait = IconCellTrait> extends CellTraitObserver<T> {
+  traitWillSetIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, trait: T): void;
 
-  traitDidSetIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, trait: R): void;
+  traitDidSetIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, trait: T): void;
 }

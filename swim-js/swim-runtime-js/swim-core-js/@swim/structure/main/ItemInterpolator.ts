@@ -33,6 +33,7 @@ export const ItemInterpolator = (function (_super: typeof Interpolator) {
   };
 
   ItemInterpolator.prototype = Object.create(_super.prototype);
+  ItemInterpolator.prototype.constructor = ItemInterpolator;
 
   return ItemInterpolator;
 })(Interpolator);

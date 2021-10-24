@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {AnyLength, Length} from "@swim/math";
-import {StyleConstraintAnimatorClass, StyleConstraintAnimator} from "./StyleConstraintAnimator";
+import {StyleConstraintAnimatorFactory, StyleConstraintAnimator} from "./StyleConstraintAnimator";
 
 /** @internal */
 export const LengthStyleConstraintAnimator = (function (_super: typeof StyleConstraintAnimator) {
-  const LengthStyleConstraintAnimator = _super.extend() as StyleConstraintAnimatorClass<StyleConstraintAnimator<any, Length | null, AnyLength | null>>;
+  const LengthStyleConstraintAnimator = _super.extend("LengthStyleConstraintAnimator") as StyleConstraintAnimatorFactory<StyleConstraintAnimator<any, Length | null, AnyLength | null>>;
 
   LengthStyleConstraintAnimator.prototype.toNumber = function (value: Length): number {
     try {

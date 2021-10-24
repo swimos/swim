@@ -17,7 +17,7 @@ import type {Affinity} from "@swim/fastener";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {Look} from "../look/Look";
 import {ThemeContext} from "../theme/ThemeContext";
-import {ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
+import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
 export interface ExpansionThemeAnimatorInit {
   willExpand?(): void;
@@ -83,7 +83,7 @@ export interface ExpansionThemeAnimator<O, T extends Expansion | null | undefine
 }
 
 export const ExpansionThemeAnimator = (function (_super: typeof ThemeAnimator) {
-  const ExpansionThemeAnimator = _super.extend() as ThemeAnimatorClass<ExpansionThemeAnimator<any, Expansion | null | undefined, AnyExpansion | null | undefined>>;
+  const ExpansionThemeAnimator = _super.extend("ExpansionThemeAnimator") as ThemeAnimatorFactory<ExpansionThemeAnimator<any, Expansion | null | undefined, AnyExpansion | null | undefined>>;
 
   Object.defineProperty(ExpansionThemeAnimator.prototype, "phase", {
     get(this: ExpansionThemeAnimator<unknown>): number | undefined {

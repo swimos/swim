@@ -14,7 +14,7 @@
 
 import type {Class} from "@swim/util";
 import type {Graphics} from "@swim/graphics";
-import {TraitViewFastener} from "@swim/controller";
+import {TraitViewRef} from "@swim/controller";
 import {CellController} from "./CellController";
 import {IconCellView} from "./IconCellView";
 import {IconCellTrait} from "./IconCellTrait";
@@ -23,31 +23,6 @@ import type {IconCellControllerObserver} from "./IconCellControllerObserver";
 export class IconCellController extends CellController {
   override readonly observerType?: Class<IconCellControllerObserver>;
 
-  protected override attachCellTrait(cellTrait: IconCellTrait): void {
-    super.attachCellTrait(cellTrait);
-    this.setIcon(cellTrait.icon.state);
-  }
-
-  protected override detachCellTrait(cellTrait: IconCellTrait): void {
-    this.setIcon(null);
-    super.detachCellTrait(cellTrait);
-  }
-
-  protected override createCellView(): IconCellView | null {
-    return IconCellView.create();
-  }
-
-  protected override attachCellView(cellView: IconCellView): void {
-    const cellTrait = this.cell.trait;
-    if (cellTrait !== null) {
-      this.setIcon(cellTrait.icon.state);
-    }
-  }
-
-  protected override detachCellView(cellView: IconCellView): void {
-    // hook
-  }
-
   protected setIcon(icon: Graphics | null): void {
     const cellView = this.cell.view;
     if (cellView !== null) {
@@ -55,51 +30,33 @@ export class IconCellController extends CellController {
     }
   }
 
-  protected willSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellView: IconCellView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetCellIcon !== void 0) {
-        observer.controllerWillSetCellIcon(newCellIcon, oldCellIcon, this);
-      }
-    }
-  }
-
-  protected onSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellView: IconCellView): void {
-    // hook
-  }
-
-  protected didSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellView: IconCellView): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetCellIcon !== void 0) {
-        observer.controllerDidSetCellIcon(newCellIcon, oldCellIcon, this);
-      }
-    }
-  }
-
-  /** @internal */
-  static override CellFastener = TraitViewFastener.define<IconCellController, IconCellTrait, IconCellView>({
-    extends: CellController.CellFastener,
+  @TraitViewRef<IconCellController, IconCellTrait, IconCellView>({
+    extends: true,
     traitType: IconCellTrait,
     observesTrait: true,
-    traitDidSetIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellTrait: IconCellTrait): void {
+    didAttachTrait(cellTrait: IconCellTrait): void {
+      this.owner.setIcon(cellTrait.icon.state);
+    },
+    willDetachTrait(cellTrait: IconCellTrait): void {
+      this.owner.setIcon(null);
+    },
+    traitDidSetIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
       this.owner.setIcon(newCellIcon);
     },
     viewType: IconCellView,
     observesView: true,
-    viewWillSetGraphics(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellView: IconCellView): void {
-      this.owner.willSetCellIcon(newCellIcon, oldCellIcon, cellView);
+    didAttachView(cellView: IconCellView): void {
+      const cellTrait = this.trait;
+      if (cellTrait !== null) {
+        this.owner.setIcon(cellTrait.icon.state);
+      }
     },
-    viewDidSetGraphics(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellView: IconCellView): void {
-      this.owner.onSetCellIcon(newCellIcon, oldCellIcon, cellView);
-      this.owner.didSetCellIcon(newCellIcon, oldCellIcon, cellView);
+    viewWillSetGraphics(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
+      this.owner.callObservers("controllerWillSetCellIcon", newCellIcon, oldCellIcon, this.owner);
     },
-  });
-
-  @TraitViewFastener<IconCellController, IconCellTrait, IconCellView>({
-    extends: IconCellController.CellFastener,
+    viewDidSetGraphics(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
+      this.owner.callObservers("controllerDidSetCellIcon", newCellIcon, oldCellIcon, this.owner);
+    },
   })
-  override readonly cell!: TraitViewFastener<this, IconCellTrait, IconCellView>;
+  override readonly cell!: TraitViewRef<this, IconCellTrait, IconCellView>;
 }

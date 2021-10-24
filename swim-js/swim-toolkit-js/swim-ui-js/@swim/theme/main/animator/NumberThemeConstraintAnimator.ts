@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ThemeConstraintAnimatorClass, ThemeConstraintAnimator} from "./ThemeConstraintAnimator";
+import {ThemeConstraintAnimatorFactory, ThemeConstraintAnimator} from "./ThemeConstraintAnimator";
 
 /** @internal */
 export const NumberThemeConstraintAnimator = (function (_super: typeof ThemeConstraintAnimator) {
-  const NumberThemeConstraintAnimator = _super.extend() as ThemeConstraintAnimatorClass<ThemeConstraintAnimator<any, number | null | undefined, number | string | null | undefined>>;
+  const NumberThemeConstraintAnimator = _super.extend("NumberThemeConstraintAnimator") as ThemeConstraintAnimatorFactory<ThemeConstraintAnimator<any, number | null | undefined, number | string | null | undefined>>;
 
   NumberThemeConstraintAnimator.prototype.toNumber = function (value: number | null): number {
     return typeof value === "number" ? value : 0;

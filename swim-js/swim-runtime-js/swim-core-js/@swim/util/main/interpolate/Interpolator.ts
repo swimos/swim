@@ -64,6 +64,7 @@ export const Interpolator = (function (_super: typeof Range) {
   };
 
   Interpolator.prototype = Object.create(_super.prototype);
+  Interpolator.prototype.constructor = Interpolator;
 
   Interpolator.prototype.map = function <Y, FY>(this: Interpolator<Y>, transform: (y: Y) => FY): Interpolator<FY> {
     return InterpolatorMap(this, transform);

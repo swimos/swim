@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {StyleConstraintAnimatorClass, StyleConstraintAnimator} from "./StyleConstraintAnimator";
+import {StyleConstraintAnimatorFactory, StyleConstraintAnimator} from "./StyleConstraintAnimator";
 
 /** @internal */
 export const NumberStyleConstraintAnimator = (function (_super: typeof StyleConstraintAnimator) {
-  const NumberStyleConstraintAnimator = _super.extend() as StyleConstraintAnimatorClass<StyleConstraintAnimator<any, number | undefined, string>>;
+  const NumberStyleConstraintAnimator = _super.extend("NumberStyleConstraintAnimator") as StyleConstraintAnimatorFactory<StyleConstraintAnimator<any, number | undefined, string>>;
 
   NumberStyleConstraintAnimator.prototype.toNumber = function (value: number): number {
     return typeof value === "number" ? value : 0;
