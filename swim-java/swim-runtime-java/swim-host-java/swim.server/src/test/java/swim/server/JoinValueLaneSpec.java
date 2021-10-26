@@ -61,7 +61,6 @@ public class JoinValueLaneSpec {
 
     final CountDownLatch joinDidReceive = new CountDownLatch(2);
     final CountDownLatch joinDidUpdate = new CountDownLatch(2);
-    final int[] didUpdate = {0};
 
     class JoinValueLinkController implements WillUpdateKey<String, String>,
         DidUpdateKey<String, String>, WillReceive, DidReceive, WillLink, DidLink,
@@ -76,8 +75,9 @@ public class JoinValueLaneSpec {
       @Override
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println("join link didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        didUpdate[0] += 1;
-        joinDidUpdate.countDown();
+        if ("".equals(oldValue) && ("x0".equals(newValue) || "y0".equals(newValue))) {
+          joinDidUpdate.countDown();
+        }
       }
 
       @Override
@@ -154,10 +154,10 @@ public class JoinValueLaneSpec {
           .laneUri("value")
           .open();
       final CountDownLatch valueDownlinkLatch = new CountDownLatch(4);
-      x.set("x0");
-      y.set("y0");
       x.didSet((newValue, oldValue) -> valueDownlinkLatch.countDown());
       y.didSet((newValue, oldValue) -> valueDownlinkLatch.countDown());
+      x.set("x0");
+      y.set("y0");
 
       valueDownlinkLatch.await(2, TimeUnit.SECONDS);
       final MapDownlink<String, String> join = plane.downlinkMap()
@@ -172,7 +172,7 @@ public class JoinValueLaneSpec {
       joinDidReceive.await(2, TimeUnit.SECONDS);
       joinDidUpdate.await(2, TimeUnit.SECONDS);
       assertEquals(joinDidReceive.getCount(), 0);
-      assertEquals(didUpdate[0], 2);
+      assertEquals(joinDidUpdate.getCount(), 0);
       assertEquals(join.size(), 2);
       assertEquals(join.get("x"), "x0");
       assertEquals(join.get("y"), "y0");
