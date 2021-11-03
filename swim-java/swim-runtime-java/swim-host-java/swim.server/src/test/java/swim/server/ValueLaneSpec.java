@@ -42,6 +42,7 @@ import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 import swim.recon.Recon;
 import swim.service.web.WebServiceDef;
+import swim.structure.Form;
 import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -250,6 +251,58 @@ public class ValueLaneSpec {
     }
   }
 
+  private static CountDownLatch willUplink;
+  private static CountDownLatch didUplink;
+  private static CountDownLatch willCommand;
+  private static CountDownLatch willSet;
+  private static CountDownLatch didSet;
+  private static CountDownLatch didCommand;
+
+  private static void resetLatches(){
+    willUplink = new CountDownLatch(2);
+    didUplink = new CountDownLatch(2);
+    willCommand = new CountDownLatch(2);
+    willSet = new CountDownLatch(2);
+    didSet = new CountDownLatch(2);
+    didCommand = new CountDownLatch(1);
+  }
+  
+  private static final String TEST_STRING = "Hello";
+
+  @Test
+  public void testValueLaneCallbacks() throws InterruptedException {
+    final Kernel kernel = ServerLoader.loadServerStack();
+    final TestValuePlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
+            .openPlane("test", TestValuePlane.class);
+
+    try {
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+      kernel.start();
+
+      resetLatches();
+
+      final ValueDownlink<String> valueLink = plane.downlinkValue()
+              .valueClass(String.class)
+              .hostUri("warp://localhost:53556")
+              .nodeUri("/valueLatched/hello")
+              .laneUri("value")
+              .open();
+      valueLink.set(TEST_STRING);
+
+      didCommand.await(2, TimeUnit.SECONDS);
+
+      //assertEquals(willUplink.getCount(), 1);
+      assertEquals(didUplink.getCount(), 1);
+      assertEquals(willCommand.getCount(), 1);
+      assertEquals(willSet.getCount(), 1);
+      assertEquals(didSet.getCount(), 1);
+      assertEquals(didCommand.getCount(), 0);
+
+    } finally {
+      kernel.stop();
+    }
+  }
+
   static class TestValueLaneAgent extends AbstractAgent {
 
     @SwimLane("value")
@@ -274,10 +327,55 @@ public class ValueLaneSpec {
 
   }
 
+  static class TestValueLaneLatchedAgent extends AbstractAgent {
+
+    @SwimLane("value")
+    ValueLane<String> value = valueLane()
+            .valueForm(Form.forString())
+            .willSet(newValue -> {
+              System.out.println(nodeUri() + " willSet: " + newValue);
+              assertEquals(willCommand.getCount(), 1);
+              assertEquals(newValue, TEST_STRING);
+              willSet.countDown();
+              return newValue;
+            })
+            .didSet((newValue, oldValue) -> {
+              System.out.println(nodeUri() + " didSet: " + oldValue + " -> " + newValue);
+              assertEquals(willSet.getCount(), 1);
+              assertEquals(newValue, TEST_STRING);
+              assertEquals(oldValue, "");
+              didSet.countDown();
+            })
+            .willCommand(body -> {
+              System.out.println(nodeUri() + " willCommand: " + body.stringValue());
+              assertEquals(didUplink.getCount(), 1);
+              assertEquals(body.stringValue(), TEST_STRING);
+              willCommand.countDown();
+            })
+            .didCommand(body -> {
+              System.out.println(nodeUri() + " didCommand: " + body.stringValue());
+              assertEquals(didSet.getCount(), 1);
+              assertEquals(body.stringValue(), TEST_STRING);
+              didCommand.countDown();
+            })
+            .willUplink(uplink -> {
+              System.out.println(nodeUri() + " willUplink");
+              willUplink.countDown();
+            })
+            .didUplink(uplink -> {
+              System.out.println(nodeUri() + " didUplink");
+              //assertEquals(willUplink.getCount(), 1);
+              didUplink.countDown();
+            });
+  }
+
   static class TestValuePlane extends AbstractPlane {
 
     @SwimRoute("/value/:name")
     AgentRoute<TestValueLaneAgent> valueRoute;
+
+    @SwimRoute("/valueLatched/:name")
+    AgentRoute<TestValueLaneLatchedAgent> latchedValueRoute;
 
   }
 

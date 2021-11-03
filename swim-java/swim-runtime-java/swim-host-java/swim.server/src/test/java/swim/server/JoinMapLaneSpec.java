@@ -179,13 +179,23 @@ public class JoinMapLaneSpec {
     }
   }
 
-  private static CountDownLatch laneWillDownlink = new CountDownLatch(2);
-  private static CountDownLatch laneDidDownlink = new CountDownLatch(2);
-  private static CountDownLatch laneWillUpdate = new CountDownLatch(4);
-  private static CountDownLatch laneDidUpdate0 = new CountDownLatch(2);
-  private static CountDownLatch laneDidUpdate1 = new CountDownLatch(2);
-  private static CountDownLatch laneWillRemove = new CountDownLatch(1);
-  private static CountDownLatch laneDidRemove = new CountDownLatch(1);
+  private final static CountDownLatch willDownlinkXs = new CountDownLatch(2);
+  private final static CountDownLatch didDownlinkXs = new CountDownLatch(1);
+  private final static CountDownLatch willDownlinkYs = new CountDownLatch(2);
+  private final static CountDownLatch didDownlinkYs = new CountDownLatch(1);
+
+  private final static CountDownLatch willUpdateInitialX0 = new CountDownLatch(2);
+  private final static CountDownLatch didUpdateInitialX0 = new CountDownLatch(1);
+  private final static CountDownLatch willUpdateInitialX1 = new CountDownLatch(2);
+  private final static CountDownLatch didUpdateInitialX1 = new CountDownLatch(1);
+
+  private final static CountDownLatch willUpdateX0 = new CountDownLatch(2);
+  private final static CountDownLatch didUpdateX0 = new CountDownLatch(1);
+  private final static CountDownLatch willUpdateX1 = new CountDownLatch(2);
+  private final static CountDownLatch didUpdateX1 = new CountDownLatch(1);
+
+  private final static CountDownLatch willRemoveX0 = new CountDownLatch(2);
+  private final static CountDownLatch didRemoveX0 = new CountDownLatch(1);
 
   @Test
   public void testJoinMapLaneCallback() throws InterruptedException {
@@ -203,10 +213,6 @@ public class JoinMapLaneSpec {
               .nodeUri("/map/xs")
               .laneUri("map")
               .open();
-      xs.didSync(() -> {
-        xs.put("x0", "a");
-        xs.put("x1", "b");
-      });
 
       final MapDownlink<String, String> join = plane.downlinkMap()
               .keyClass(String.class)
@@ -216,20 +222,35 @@ public class JoinMapLaneSpec {
               .laneUri("join")
               .open();
 
-      laneDidUpdate0.await(3, TimeUnit.SECONDS);
-      assertEquals(laneWillDownlink.getCount(), 0);
-      assertEquals(laneDidDownlink.getCount(), 0);
-      assertEquals(laneWillUpdate.getCount(), 2);
-      assertEquals(laneDidUpdate0.getCount(), 0);
+      didDownlinkXs.await(2,TimeUnit.SECONDS);
+      didDownlinkYs.await(2,TimeUnit.SECONDS);
+      assertEquals(willDownlinkXs.getCount(), 1);
+      assertEquals(didDownlinkXs.getCount(), 0);
+      assertEquals(willDownlinkYs.getCount(), 1);
+      assertEquals(didDownlinkYs.getCount(), 0);
+
+      xs.put("x0", "a");
+      xs.put("x1", "b");
+      didUpdateInitialX0.await(2, TimeUnit.SECONDS);
+      didUpdateInitialX1.await(2, TimeUnit.SECONDS);
+      assertEquals(willUpdateInitialX0.getCount(), 1);
+      assertEquals(didUpdateInitialX0.getCount(), 0);
+      assertEquals(willUpdateInitialX1.getCount(), 1);
+      assertEquals(didUpdateInitialX1.getCount(), 0);
 
       xs.put("x0", "aa");
       xs.put("x1", "bb");
+      didUpdateX0.await(2, TimeUnit.SECONDS);
+      didUpdateX1.await(2, TimeUnit.SECONDS);
+      assertEquals(willUpdateX0.getCount(), 1);
+      assertEquals(didUpdateX0.getCount(), 0);
+      assertEquals(willUpdateX1.getCount(), 1);
+      assertEquals(didUpdateX1.getCount(), 0);
 
-      laneDidUpdate1.await(3, TimeUnit.SECONDS);
-      assertEquals(laneWillDownlink.getCount(), 0);
-      assertEquals(laneDidDownlink.getCount(), 0);
-      assertEquals(laneWillUpdate.getCount(), 0);
-      assertEquals(laneDidUpdate1.getCount(), 0);
+      xs.remove("x0");
+      didRemoveX0.await(2, TimeUnit.SECONDS);
+      assertEquals(willRemoveX0.getCount(), 1);
+      assertEquals(didRemoveX0.getCount(), 0);
 
     } finally {
       kernel.stop();
@@ -302,51 +323,82 @@ public class JoinMapLaneSpec {
       @Override
       public MapDownlink<?, ?> willDownlink(String key, MapDownlink<?, ?> downlink) {
         System.out.println(nodeUri() + " willDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
-        laneWillDownlink.countDown();
+        if ("xs".equals(key)) {
+          willDownlinkXs.countDown();
+        }
+        if ("ys".equals(key)) {
+          willDownlinkYs.countDown();
+        }
         return downlink;
       }
 
       @Override
       public void didDownlink(String key, MapDownlink<?, ?> downlink) {
         System.out.println(nodeUri() + " didDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
-        laneDidDownlink.countDown();
+        if ("xs".equals(key)) {
+          assertEquals(willDownlinkXs.getCount(), 1);
+          didDownlinkXs.countDown();
+        }
+        if ("ys".equals(key)) {
+          assertEquals(willDownlinkYs.getCount(), 1);
+          didDownlinkYs.countDown();
+        }
       }
 
       @Override
       public String willUpdate(String key, String newValue) {
         System.out.println(nodeUri() + " willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
-        laneWillUpdate.countDown();
+        if ("x0".equals(key) && "a".equals(newValue)) {
+          willUpdateInitialX0.countDown();
+        }
+        if ("x1".equals(key) && "b".equals(newValue)) {
+          willUpdateInitialX1.countDown();
+        }
+        if ("x0".equals(key) && "aa".equals(newValue)) {
+          willUpdateX0.countDown();
+        }
+        if ("x1".equals(key) && "bb".equals(newValue)) {
+          willUpdateX1.countDown();
+        }
         return newValue;
       }
 
       @Override
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println(nodeUri() + " didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        if (key.equals("x0") && newValue.equals("a")) {
-          //assertEquals(oldValue, "");
-          laneDidUpdate0.countDown();
-        } else if (key.equals("x0") && newValue.equals("aa")) {
-          assertEquals(oldValue, "a");
-          laneDidUpdate1.countDown();
-        } else if (key.equals("x1") && newValue.equals("b")) {
-          assertEquals(oldValue, "");
-          laneDidUpdate0.countDown();
-        } else if (key.equals("x1") && newValue.equals("bb")) {
-          //assertEquals(oldValue, "b");
-          laneDidUpdate1.countDown();
+        if ("x0".equals(key) && "a".equals(newValue) && "".equals(oldValue)) {
+          assertEquals(willUpdateInitialX0.getCount(), 1);
+          didUpdateInitialX0.countDown();
+        }
+        if ("x1".equals(key) && "b".equals(newValue) && "".equals(oldValue)) {
+          assertEquals(willUpdateInitialX1.getCount(), 1);
+          didUpdateInitialX1.countDown();
+        }
+        if ("x0".equals(key) && "aa".equals(newValue) && "a".equals(oldValue)) {
+          assertEquals(willUpdateX0.getCount(), 1);
+          didUpdateX0.countDown();
+        }
+        if ("x1".equals(key) && "bb".equals(newValue) && "b".equals(oldValue)) {
+          assertEquals(willUpdateX1.getCount(),1);
+          didUpdateX1.countDown();
         }
       }
 
       @Override
       public void willRemove(String key) {
         System.out.println(nodeUri() + " willRemove key: " + Format.debug(key));
-        laneWillRemove.countDown();
+        if ("x0".equals(key)) {
+          willRemoveX0.countDown();
+        }
       }
 
       @Override
       public void didRemove(String key, String oldValue) {
         System.out.println(nodeUri() + " didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
-        laneDidRemove.countDown();
+        if ("x0".equals(key) && "aa".equals(oldValue)) {
+          assertEquals(willRemoveX0.getCount(), 1);
+          didRemoveX0.countDown();
+        }
       }
 
     }

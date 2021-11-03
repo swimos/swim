@@ -76,8 +76,10 @@ public class JoinValueLaneSpec {
       @Override
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println("join link didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        didUpdate[0] += 1;
-        joinDidUpdate.countDown();
+        if ("".equals(oldValue) && ("x0".equals(newValue) || "y0".equals(newValue))) {
+          didUpdate[0] += 1;
+          joinDidUpdate.countDown();
+        }
       }
 
       @Override
@@ -154,11 +156,10 @@ public class JoinValueLaneSpec {
           .laneUri("value")
           .open();
       final CountDownLatch valueDownlinkLatch = new CountDownLatch(4);
-      x.set("x0");
-      y.set("y0");
       x.didSet((newValue, oldValue) -> valueDownlinkLatch.countDown());
       y.didSet((newValue, oldValue) -> valueDownlinkLatch.countDown());
-
+      x.set("x0");
+      y.set("y0");
       valueDownlinkLatch.await(2, TimeUnit.SECONDS);
       final MapDownlink<String, String> join = plane.downlinkMap()
           .keyClass(String.class)
