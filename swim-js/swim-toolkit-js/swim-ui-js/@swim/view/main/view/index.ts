@@ -28,6 +28,10 @@ export {
 export {
   ViewObserver,
   ViewObserverCache,
+  ViewWillInsertChild,
+  ViewDidInsertChild,
+  ViewWillRemoveChild,
+  ViewDidRemoveChild,
   ViewWillResize,
   ViewDidResize,
   ViewWillScroll,

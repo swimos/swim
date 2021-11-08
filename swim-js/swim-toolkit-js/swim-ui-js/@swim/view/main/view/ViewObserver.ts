@@ -93,6 +93,10 @@ export interface ViewObserver<V extends View = View> extends HierarchyObserver<V
 
 /** @internal */
 export interface ViewObserverCache<V extends View> {
+  viewWillInsertChildObservers?: ReadonlyArray<ViewWillInsertChild<V>>;
+  viewDidInsertChildObservers?: ReadonlyArray<ViewDidInsertChild<V>>;
+  viewWillRemoveChildObservers?: ReadonlyArray<ViewWillRemoveChild<V>>;
+  viewDidRemoveChildObservers?: ReadonlyArray<ViewDidRemoveChild<V>>;
   viewWillResizeObservers?: ReadonlyArray<ViewWillResize<V>>;
   viewDidResizeObservers?: ReadonlyArray<ViewDidResize<V>>;
   viewWillScrollObservers?: ReadonlyArray<ViewWillScroll<V>>;
@@ -111,6 +115,26 @@ export interface ViewObserverCache<V extends View> {
   viewDidRasterizeObservers?: ReadonlyArray<ViewDidRasterize<V>>;
   viewWillCompositeObservers?: ReadonlyArray<ViewWillComposite<V>>;
   viewDidCompositeObservers?: ReadonlyArray<ViewDidComposite<V>>;
+}
+
+/** @internal */
+export interface ViewWillInsertChild<V extends View = View> {
+  viewWillInsertChild(child: View, target: View | null, view: V): void;
+}
+
+/** @internal */
+export interface ViewDidInsertChild<V extends View = View> {
+  viewDidInsertChild(child: View, target: View | null, view: V): void;
+}
+
+/** @internal */
+export interface ViewWillRemoveChild<V extends View = View> {
+  viewWillRemoveChild(child: View, view: V): void;
+}
+
+/** @internal */
+export interface ViewDidRemoveChild<V extends View = View> {
+  viewDidRemoveChild(child: View, view: V): void;
 }
 
 /** @internal */

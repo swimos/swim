@@ -74,6 +74,10 @@ import {Gesture} from "../gesture/Gesture";
 import {ViewContext} from "./ViewContext";
 import type {
   ViewObserver,
+  ViewWillInsertChild,
+  ViewDidInsertChild,
+  ViewWillRemoveChild,
+  ViewDidRemoveChild,
   ViewWillResize,
   ViewDidResize,
   ViewWillScroll,
@@ -261,10 +265,10 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   protected override willInsertChild(child: View, target: View | null): void {
     super.willInsertChild(child, target);
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillInsertChild !== void 0) {
+    const observers = this.observerCache.viewWillInsertChildObservers;
+    if (observers !== void 0) {
+      for (let i = 0, n = observers.length; i < n; i += 1) {
+        const observer = observers[i]!;
         observer.viewWillInsertChild(child, target, this);
       }
     }
@@ -276,10 +280,10 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   }
 
   protected override didInsertChild(child: View, target: View | null): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidInsertChild !== void 0) {
+    const observers = this.observerCache.viewDidInsertChildObservers;
+    if (observers !== void 0) {
+      for (let i = 0, n = observers.length; i < n; i += 1) {
+        const observer = observers[i]!;
         observer.viewDidInsertChild(child, target, this);
       }
     }
@@ -311,10 +315,10 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   protected override willRemoveChild(child: View): void {
     super.willRemoveChild(child);
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillRemoveChild !== void 0) {
+    const observers = this.observerCache.viewWillRemoveChildObservers;
+    if (observers !== void 0) {
+      for (let i = 0, n = observers.length; i < n; i += 1) {
+        const observer = observers[i]!;
         observer.viewWillRemoveChild(child, this);
       }
     }
@@ -326,10 +330,10 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   }
 
   protected override didRemoveChild(child: View): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidRemoveChild !== void 0) {
+    const observers = this.observerCache.viewDidRemoveChildObservers;
+    if (observers !== void 0) {
+      for (let i = 0, n = observers.length; i < n; i += 1) {
+        const observer = observers[i]!;
         observer.viewDidRemoveChild(child, this);
       }
     }
@@ -1513,6 +1517,18 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   protected override onObserve(observer: ObserverType<this>): void {
     super.onObserve(observer);
+    if (observer.viewWillInsertChild !== void 0) {
+      this.observerCache.viewWillInsertChildObservers = Arrays.inserted(observer as ViewWillInsertChild, this.observerCache.viewWillInsertChildObservers);
+    }
+    if (observer.viewDidInsertChild !== void 0) {
+      this.observerCache.viewDidInsertChildObservers = Arrays.inserted(observer as ViewDidInsertChild, this.observerCache.viewDidInsertChildObservers);
+    }
+    if (observer.viewWillRemoveChild !== void 0) {
+      this.observerCache.viewWillRemoveChildObservers = Arrays.inserted(observer as ViewWillRemoveChild, this.observerCache.viewWillRemoveChildObservers);
+    }
+    if (observer.viewDidRemoveChild !== void 0) {
+      this.observerCache.viewDidRemoveChildObservers = Arrays.inserted(observer as ViewDidRemoveChild, this.observerCache.viewDidRemoveChildObservers);
+    }
     if (observer.viewWillResize !== void 0) {
       this.observerCache.viewWillResizeObservers = Arrays.inserted(observer as ViewWillResize, this.observerCache.viewWillResizeObservers);
     }
@@ -1547,6 +1563,18 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   protected override onUnobserve(observer: ObserverType<this>): void {
     super.onUnobserve(observer);
+    if (observer.viewWillInsertChild !== void 0) {
+      this.observerCache.viewWillInsertChildObservers = Arrays.removed(observer as ViewWillInsertChild, this.observerCache.viewWillInsertChildObservers);
+    }
+    if (observer.viewDidInsertChild !== void 0) {
+      this.observerCache.viewDidInsertChildObservers = Arrays.removed(observer as ViewDidInsertChild, this.observerCache.viewDidInsertChildObservers);
+    }
+    if (observer.viewWillRemoveChild !== void 0) {
+      this.observerCache.viewWillRemoveChildObservers = Arrays.removed(observer as ViewWillRemoveChild, this.observerCache.viewWillRemoveChildObservers);
+    }
+    if (observer.viewDidRemoveChild !== void 0) {
+      this.observerCache.viewDidRemoveChildObservers = Arrays.removed(observer as ViewDidRemoveChild, this.observerCache.viewDidRemoveChildObservers);
+    }
     if (observer.viewWillResize !== void 0) {
       this.observerCache.viewWillResizeObservers = Arrays.removed(observer as ViewWillResize, this.observerCache.viewWillResizeObservers);
     }
