@@ -29,6 +29,8 @@ export class SpriteSheet {
     const canvas = document.createElement("canvas");
     canvas.width = canvasWidth * pixelRatio;
     canvas.height = canvasHeight * pixelRatio;
+    canvas.style.width = canvasWidth + "px";
+    canvas.style.height = canvasHeight + "px";
     const context = canvas.getContext("2d")!
     const renderer = new CanvasRenderer(context, Transform.identity(), pixelRatio);
 
@@ -131,7 +133,14 @@ export class SpriteSheet {
   releaseSprite(sprite: Sprite): void {
     // assert(sprite.sheet === this);
     // assert(this.freeSprites.indexOf(sprite) < 0);
+    this.clearSprite(sprite.rowIndex, sprite.colIndex);
     this.freeSprites.push(sprite);
+  }
+
+  /** @internal */
+  clearSprite(rowIndex: number, colIndex: number): void {
+    const renderer = this.getSpriteRenderer(rowIndex, colIndex);
+    renderer.context.clearRect(0, 0, this.spriteWidth, this.spriteHeight);
   }
 
   /** @internal */
@@ -153,8 +162,7 @@ export class SpriteSheet {
     const spriteHeight = this.spriteHeight * spritePixelRatio;
     const spriteX = rowIndex * spriteWidth;
     const spriteY = colIndex * spriteHeight;
-    //console.log("SpriteSheet.drawSprite spriteX: " + spriteX + "; spriteY: " + spriteY + "; spriteWidth: " + spriteWidth + "; spriteHeight: " + spriteHeight + "; frame: " + frame);
     context.drawImage(this.canvas, spriteX, spriteY, spriteWidth, spriteHeight,
-                      frame.x, frame.y, frame.width, frame.height);
+                      frame.x, frame.y, this.spriteWidth, this.spriteHeight);
   }
 }

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
+import type {Mutable, Dictionary, MutableDictionary} from "@swim/util";
 import type {GeoPoint, GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, AnyView, ViewFactory, View} from "@swim/view";
+import {ViewContextType, ViewFlags, AnyView, ViewCreator, View} from "@swim/view";
 import {GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoTree} from "./GeoTree";
@@ -152,9 +152,9 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  override getChild<V extends GeoView>(key: string, childBound: Class<V>): V | null;
-  override getChild(key: string, childBound?: Class<GeoView>): GeoView | null;
-  override getChild(key: string, childBound?: Class<GeoView>): GeoView | null {
+  override getChild<F extends abstract new (...args: any[]) => View>(key: string, childBound: F): InstanceType<F> | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): GeoView | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): GeoView | null {
     const childMap = this.childMap;
     if (childMap !== null) {
       const child = childMap[key];
@@ -165,7 +165,8 @@ export class GeoTreeView extends GeoView {
     return null;
   }
 
-  override setChild<V extends View>(key: string, newChild: V | ViewFactory<V> | null): View | null;
+  override setChild<V extends View>(key: string, newChild: V): View | null;
+  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null {
     if (newChild !== null) {
@@ -200,7 +201,8 @@ export class GeoTreeView extends GeoView {
     return oldChild;
   }
 
-  override appendChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
+  override appendChild<V extends View>(child: V, key?: string): V;
+  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyView, key?: string): View;
   override appendChild(child: AnyView, key?: string): View {
     child = View.fromAny(child);
@@ -225,7 +227,8 @@ export class GeoTreeView extends GeoView {
     return child;
   }
 
-  override prependChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
+  override prependChild<V extends View>(child: V, key?: string): V;
+  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyView, key?: string): View;
   override prependChild(child: AnyView, key?: string): View {
     child = View.fromAny(child);
@@ -250,7 +253,8 @@ export class GeoTreeView extends GeoView {
     return child;
   }
 
-  override insertChild<V extends View>(child: V | ViewFactory<V>, target: View | null, key?: string): V;
+  override insertChild<V extends View>(child: V, target: View | null, key?: string): V;
+  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyView, target: View | null, key?: string): View;
   override insertChild(child: AnyView, target: View | null, key?: string): View {
     if (target !== null && target.parent !== this) {

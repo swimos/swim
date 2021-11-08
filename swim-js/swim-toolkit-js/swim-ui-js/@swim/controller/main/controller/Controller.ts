@@ -49,6 +49,9 @@ export interface ControllerConstructor<C extends Controller = Controller, U = An
   new(): C;
 }
 
+export type ControllerCreator<F extends (abstract new (...args: any[]) => C) & Creatable<InstanceType<F>>, C extends Controller = Controller> =
+  (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
+
 export abstract class Controller extends Hierarchy implements Initable<ControllerInit> {
   constructor() {
     super();
@@ -158,19 +161,23 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
   abstract override forEachChild<T>(callback: (child: Controller) => T | void): T | undefined;
   abstract override forEachChild<T, S>(callback: (this: S, child: Controller) => T | void, thisArg: S): T | undefined;
 
-  abstract override getChild<C extends Controller>(key: string, childBound: Class<C>): C | null;
-  abstract override getChild(key: string, childBound?: Class<Controller>): Controller | null;
+  abstract override getChild<F extends abstract new (...args: any[]) => Controller>(key: string, childBound: F): InstanceType<F> | null;
+  abstract override getChild(key: string, childBound?: abstract new (...args: any[]) => Controller): Controller | null;
 
-  abstract override setChild<C extends Controller>(key: string, newChild: C | ControllerFactory<C> | null): Controller | null;
+  abstract override setChild<C extends Controller>(key: string, newChild: C): Controller | null;
+  abstract override setChild<F extends ControllerCreator<F>>(key: string, factory: F): Controller | null;
   abstract override setChild(key: string, newChild: AnyController | null): Controller | null;
 
-  abstract override appendChild<C extends Controller>(child: C | ControllerFactory<C>, key?: string): C;
+  abstract override appendChild<C extends Controller>(child: C, key?: string): C;
+  abstract override appendChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
   abstract override appendChild(child: AnyController, key?: string): Controller;
 
-  abstract override prependChild<C extends Controller>(child: C | ControllerFactory<C>, key?: string): C;
+  abstract override prependChild<C extends Controller>(child: C, key?: string): C;
+  abstract override prependChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
   abstract override prependChild(child: AnyController, key?: string): Controller;
 
-  abstract override insertChild<C extends Controller>(child: C | ControllerFactory<C>, target: Controller | null, key?: string): C;
+  abstract override insertChild<C extends Controller>(child: C, target: Controller | null, key?: string): C;
+  abstract override insertChild<F extends ControllerCreator<F>>(factory: F, target: Controller | null, key?: string): InstanceType<F>;
   abstract override insertChild(child: AnyController, target: Controller | null, key?: string): Controller;
 
   abstract override replaceChild<C extends Controller>(newChild: Controller, oldChild: C): C;

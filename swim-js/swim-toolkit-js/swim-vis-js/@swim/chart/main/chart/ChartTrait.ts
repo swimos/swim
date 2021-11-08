@@ -46,7 +46,7 @@ export class ChartTrait<X = unknown, Y = unknown> extends Trait {
       this.owner.callObservers("traitDidDetachGraph", graphTrait, this.owner);
     },
     detectModel(model: Model): GraphTrait<X, Y> | null {
-      return model.getTrait(GraphTrait);
+      return model.getTrait(GraphTrait) as GraphTrait<X, Y>;
     },
     detectTrait(trait: Trait): GraphTrait<X, Y> | null {
       return trait instanceof GraphTrait ? trait : null;

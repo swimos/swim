@@ -88,28 +88,28 @@ export class GeoIconView extends GeoLayerView implements IconView {
   @Animator<GeoIconView, number>({
     type: Number,
     state: 0.5,
-    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    updateFlags: View.NeedsProject | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
   })
   readonly xAlign!: Animator<this, number>;
 
   @Animator<GeoIconView, number>({
     type: Number,
     state: 0.5,
-    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    updateFlags: View.NeedsProject | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
   })
   readonly yAlign!: Animator<this, number>;
 
   @ThemeAnimator<GeoIconView, Length | null, AnyLength | null>({
     type: Length,
     state: null,
-    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    updateFlags: View.NeedsProject | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
   })
   readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   @ThemeAnimator<GeoIconView, Length | null, AnyLength | null>({
     type: Length,
     state: null,
-    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    updateFlags: View.NeedsProject | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
   })
   readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
@@ -203,7 +203,8 @@ export class GeoIconView extends GeoLayerView implements IconView {
     if (graphics !== null && frame.isDefined()) {
       const width = frame.width;
       const height = frame.height;
-      if (sprite !== null && (width < sprite.width || height < sprite.height)) {
+      if (sprite !== null && (sprite.width < width || sprite.height < height ||
+                             (width < sprite.width / 2 && height < sprite.height / 2))) {
         this.sprite = null;
         sprite.release();
         sprite = null;

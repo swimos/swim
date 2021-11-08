@@ -197,6 +197,6 @@ export class DataSetController<X = unknown, Y = unknown> extends GenericControll
       // hook
     },
   })
-  readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>>;
+  readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & DataSetControllerDataPointExt<X, Y>;
   static readonly dataPoints: MemberFastenerClass<DataSetController, "dataPoints">;
 }

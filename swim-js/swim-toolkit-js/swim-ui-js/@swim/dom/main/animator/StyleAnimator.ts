@@ -64,6 +64,8 @@ export interface StyleAnimator<O = unknown, T = unknown, U = never> extends Them
 
   get propertyValue(): T | undefined;
 
+  get computedValue(): T | undefined;
+
   /** @internal */
   readonly ownValue: T;
 
@@ -108,7 +110,7 @@ export const StyleAnimator = (function (_super: typeof ThemeAnimator) {
             value = value.toString();
           }
         }
-        if (typeof value === "string" && value !== "") {
+        if (typeof value === "string" && value.length !== 0) {
           try {
             propertyValue = this.parse(value);
           } catch (e) {
@@ -117,6 +119,35 @@ export const StyleAnimator = (function (_super: typeof ThemeAnimator) {
         }
       }
       return propertyValue;
+    },
+    configurable: true,
+  });
+
+  Object.defineProperty(StyleAnimator.prototype, "computedValue", {
+    get: function <T>(this: StyleAnimator<unknown, T>): T | undefined {
+      let computedValue: T | undefined;
+      const styleContext = this.owner;
+      let node: Node | undefined;
+      if (StyleContext.is(styleContext) && (node = styleContext.node, node instanceof Element)) {
+        const styles = getComputedStyle(node);
+        const propertyNames = this.propertyNames;
+        let propertyValue = "";
+        if (typeof propertyNames === "string") {
+          propertyValue = styles.getPropertyValue(propertyNames);
+        } else {
+          for (let i = 0, n = propertyNames.length; i < n && propertyValue.length === 0; i += 1) {
+            propertyValue = styles.getPropertyValue(propertyNames[i]!);
+          }
+        }
+        if (propertyValue.length !== 0) {
+          try {
+            computedValue = this.parse(propertyValue);
+          } catch (e) {
+            // swallow parse errors
+          }
+        }
+      }
+      return computedValue;
     },
     configurable: true,
   });

@@ -37,6 +37,7 @@ Feel.contrasted = new BrightnessFeel("contrasted");
 Feel.raised = new InterpolatedFeel("raised");
 Feel.covered = new InterpolatedFeel("covered");
 
+Feel.opaque = new InterpolatedFeel("opaque");
 Feel.floating = new InterpolatedFeel("floating");
 Feel.transparent = new InterpolatedFeel("transparent");
 Feel.translucent = new OpacityFeel("translucent");

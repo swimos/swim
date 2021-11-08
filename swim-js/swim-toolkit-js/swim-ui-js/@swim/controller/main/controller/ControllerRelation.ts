@@ -37,7 +37,7 @@ export interface ControllerRelationInit<C extends Controller = Controller> exten
   insertChild?(parent: Controller, child: C, target: Controller | null, key: string | undefined): void;
 
   detectController?(controller: Controller): C | null;
-  createController?(): C | null;
+  createController?(): C;
   fromAny?(value: AnyController<C>): C;
 }
 
@@ -102,7 +102,7 @@ export interface ControllerRelation<O = unknown, C extends Controller = Controll
 
   detectController(controller: Controller): C | null;
 
-  createController(): C | null;
+  createController(): C;
 
   /** @internal @protected */
   fromAny(value: AnyController<C>): C;
@@ -193,12 +193,21 @@ export const ControllerRelation = (function (_super: typeof Fastener) {
     return null;
   };
 
-  ControllerRelation.prototype.createController = function <C extends Controller>(this: ControllerRelation<unknown, C>): C | null {
+  ControllerRelation.prototype.createController = function <C extends Controller>(this: ControllerRelation<unknown, C>): C {
+    let controller: C | undefined;
     const type = this.type;
     if (type !== void 0) {
-      return type.create();
+      controller = type.create();
     }
-    return null;
+    if (controller === void 0 || controller === null) {
+      let message = "Unable to create ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "controller";
+      throw new Error(message);
+    }
+    return controller;
   };
 
   ControllerRelation.prototype.fromAny = function <C extends Controller>(this: ControllerRelation<unknown, C>, value: AnyController<C>): C {

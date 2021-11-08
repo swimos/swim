@@ -26,7 +26,7 @@ export type TraitViewControllerSetType<F extends TraitViewControllerSet<any, any
 export interface TraitViewControllerSetInit<T extends Trait = Trait, V extends View = View, C extends Controller = Controller> extends ControllerSetInit<C> {
   extends?: {prototype: TraitViewControllerSet<any, any, any, any>} | string | boolean | null;
   getTraitViewRef?(controller: C): TraitViewRef<any, T, V>;
-  createController?(trait?: T): C | null;
+  createController?(trait?: T): C;
   parentView?: View | null;
 }
 
@@ -58,13 +58,13 @@ export interface TraitViewControllerSet<O = unknown, T extends Trait = Trait, V 
 
   hasTrait(trait: T): boolean;
 
-  addTrait(trait: T, targetTrait?: Trait | null, key?: string): C | null;
+  addTrait(trait: T, targetTrait?: Trait | null, key?: string): C;
 
   removeTrait(trait: T): C | null;
 
   deleteTrait(trait: T): C | null;
 
-  createController(trait?: T): C | null;
+  createController(trait?: T): C;
 
   /** @internal @protected */
   get parentView(): View | null; // optional prototype property
@@ -96,7 +96,7 @@ export const TraitViewControllerSet = (function (_super: typeof ControllerSet) {
     return false;
   };
 
-  TraitViewControllerSet.prototype.addTrait = function <T extends Trait, V extends View, C extends Controller>(this: TraitViewControllerSet<unknown, T, V, C>, trait: T, targetTrait?: Trait | null, key?: string): C | null {
+  TraitViewControllerSet.prototype.addTrait = function <T extends Trait, V extends View, C extends Controller>(this: TraitViewControllerSet<unknown, T, V, C>, trait: T, targetTrait?: Trait | null, key?: string): C {
     let targetController: C | null = null;
     const controllers = this.controllers;
     for (const controllerId in controllers) {
@@ -109,18 +109,16 @@ export const TraitViewControllerSet = (function (_super: typeof ControllerSet) {
       }
     }
     const controller = this.createController(trait);
-    if (controller !== null) {
-      const traitViewRef = this.getTraitViewRef(controller);
-      traitViewRef.setTrait(trait, targetTrait, key);
-      this.addController(controller, targetController, key);
-      if (traitViewRef.view === null) {
-        const view = traitViewRef.createView();
-        let targetView: View | null = null;
-        if (targetController !== null) {
-          targetView = this.getTraitViewRef(targetController).view;
-        }
-        traitViewRef.insertView(this.parentView, view, targetView, key);
+    const traitViewRef = this.getTraitViewRef(controller);
+    traitViewRef.setTrait(trait, targetTrait, key);
+    this.addController(controller, targetController, key);
+    if (traitViewRef.view === null) {
+      const view = traitViewRef.createView();
+      let targetView: View | null = null;
+      if (targetController !== null) {
+        targetView = this.getTraitViewRef(targetController).view;
       }
+      traitViewRef.insertView(this.parentView, view, targetView, key);
     }
     return controller;
   };

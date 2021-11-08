@@ -23,6 +23,24 @@ export {
 } from "./TraitViewRef";
 
 export {
+  TraitControllerRefType,
+  TraitControllerRefInit,
+  TraitControllerRefDescriptor,
+  TraitControllerRefClass,
+  TraitControllerRefFactory,
+  TraitControllerRef,
+} from "./TraitControllerRef";
+
+export {
+  TraitControllerSetType,
+  TraitControllerSetInit,
+  TraitControllerSetDescriptor,
+  TraitControllerSetClass,
+  TraitControllerSetFactory,
+  TraitControllerSet,
+} from "./TraitControllerSet";
+
+export {
   TraitViewControllerRefType,
   TraitViewControllerRefInit,
   TraitViewControllerRefDescriptor,

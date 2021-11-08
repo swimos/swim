@@ -42,22 +42,22 @@ export class HeaderController extends GenericController {
   @TraitViewRef<HeaderController, HeaderTrait, HeaderView>({
     traitType: HeaderTrait,
     observesTrait: true,
-    willAttachTrait(headerTrait: HeaderTrait): void {
-      this.owner.callObservers("controllerWillAttachHeaderTrait", headerTrait, this.owner);
-    },
-    didAttachTrait(headerTrait: HeaderTrait): void {
+    initTrait(headerTrait: HeaderTrait): void {
       const colTraits = headerTrait.cols.traits;
       for (const traitId in colTraits) {
         const colTrait = colTraits[traitId]!;
         this.owner.cols.addTrait(colTrait);
       }
     },
-    willDetachTrait(headerTrait: HeaderTrait): void {
+    deinitTrait(headerTrait: HeaderTrait): void {
       const colTraits = headerTrait.cols.traits;
       for (const traitId in colTraits) {
         const colTrait = colTraits[traitId]!;
         this.owner.cols.deleteTrait(colTrait);
       }
+    },
+    willAttachTrait(headerTrait: HeaderTrait): void {
+      this.owner.callObservers("controllerWillAttachHeaderTrait", headerTrait, this.owner);
     },
     didDetachTrait(headerTrait: HeaderTrait): void {
       this.owner.callObservers("controllerDidDetachHeaderTrait", headerTrait, this.owner);
@@ -70,10 +70,7 @@ export class HeaderController extends GenericController {
     },
     viewType: HeaderView,
     observesView: true,
-    willAttachView(headerView: HeaderView): void {
-      this.owner.callObservers("controllerWillAttachHeaderView", headerView, this.owner);
-    },
-    didAttachView(headerView: HeaderView): void {
+    initView(headerView: HeaderView): void {
       const colControllers = this.owner.cols.controllers;
       for (const controllerId in colControllers) {
         const colController = colControllers[controllerId]!;
@@ -85,6 +82,9 @@ export class HeaderController extends GenericController {
           }
         }
       }
+    },
+    willAttachView(headerView: HeaderView): void {
+      this.owner.callObservers("controllerWillAttachHeaderView", headerView, this.owner);
     },
     didDetachView(headerView: HeaderView): void {
       this.owner.callObservers("controllerDidDetachHeaderView", headerView, this.owner);

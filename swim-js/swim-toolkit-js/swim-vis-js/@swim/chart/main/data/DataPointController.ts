@@ -274,7 +274,7 @@ export class DataPointController<X = unknown, Y = unknown> extends GenericContro
     viewDidDetachDataPointLabel(labelView: GraphicsView): void {
       this.owner.label.setView(null);
     },
-    createView(): DataPointView<X, Y> | null {
+    createView(): DataPointView<X, Y> {
       const dataPointView = new DataPointView<X, Y>();
       const dataPointTrait = this.trait;
       if (dataPointTrait !== null) {

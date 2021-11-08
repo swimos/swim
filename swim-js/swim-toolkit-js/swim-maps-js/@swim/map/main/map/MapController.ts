@@ -239,10 +239,14 @@ export abstract class MapController extends GenericController {
     controllerDidSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, layerController: GeoController): void {
       this.owner.callObservers("controllerDidSetLayerGeoBounds", newGeoBounds, oldGeoBounds, layerController, this.owner);
     },
-    createController(featureTrait?: GeoTrait): GeoController | null {
-      return featureTrait !== void 0 ? GeoController.fromTrait(featureTrait) : null;
+    createController(layerTrait?: GeoTrait): GeoController {
+      if (layerTrait !== void 0) {
+        return GeoController.fromTrait(layerTrait);
+      } else {
+        return TraitViewControllerSet.prototype.createController.call(this);
+      }
     },
   })
-  readonly layers!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController>;
+  readonly layers!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController> & MapControllerLayerExt;
   static readonly layers: MemberFastenerClass<MapController, "layers">;
 }

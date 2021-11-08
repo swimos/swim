@@ -21,7 +21,7 @@ export interface SelectionOptions {
   multi?: boolean;
 }
 
-export class SelectionService<M> extends Service<M> {
+export class SelectionService<M = unknown> extends Service<M> {
   constructor() {
     super();
     this.selections = [];

@@ -59,32 +59,30 @@ export class GaugeController extends GenericController {
   @TraitViewRef<GaugeController, GaugeTrait, GaugeView>({
     traitType: GaugeTrait,
     observesTrait: true,
-    willAttachTrait(gaugeTrait: GaugeTrait): void {
-      this.owner.callObservers("controllerWillAttachGaugeTrait", gaugeTrait, this.owner);
-    },
-    didAttachTrait(gaugeTrait: GaugeTrait): void {
-      const gaugeView = this.view;
-      if (gaugeView !== null) {
-        this.owner.setTitleView(gaugeTrait.title.state, gaugeTrait);
-      }
+    initTrait(gaugeTrait: GaugeTrait): void {
       const dialTraits = gaugeTrait.dials.traits;
       for (const traitId in dialTraits) {
         const dialTrait = dialTraits[traitId]!;
         this.owner.dials.addTrait(dialTrait);
       }
-    },
-    willDetachTrait(gaugeTrait: GaugeTrait): void {
-      const dialTraits = gaugeTrait.dials.traits;
-      for (const traitId in dialTraits) {
-        const dialTrait = dialTraits[traitId]!;
-        if (dialTrait !== null) {
-          this.owner.dials.deleteTrait(dialTrait);
-        }
+      const gaugeView = this.view;
+      if (gaugeView !== null) {
+        this.owner.setTitleView(gaugeTrait.title.state, gaugeTrait);
       }
+    },
+    deinitTrait(gaugeTrait: GaugeTrait): void {
       const gaugeView = this.view;
       if (gaugeView !== null) {
         this.owner.setTitleView(null, gaugeTrait);
       }
+      const dialTraits = gaugeTrait.dials.traits;
+      for (const traitId in dialTraits) {
+        const dialTrait = dialTraits[traitId]!;
+        this.owner.dials.deleteTrait(dialTrait);
+      }
+    },
+    willAttachTrait(gaugeTrait: GaugeTrait): void {
+      this.owner.callObservers("controllerWillAttachGaugeTrait", gaugeTrait, this.owner);
     },
     didDetachTrait(gaugeTrait: GaugeTrait): void {
       this.owner.callObservers("controllerDidDetachGaugeTrait", gaugeTrait, this.owner);
@@ -100,15 +98,7 @@ export class GaugeController extends GenericController {
     },
     viewType: GaugeView,
     observesView: true,
-    willAttachView(gaugeView: GaugeView): void {
-      this.owner.callObservers("controllerWillAttachGaugeView", gaugeView, this.owner);
-    },
-    didAttachView(gaugeView: GaugeView): void {
-      this.owner.title.setView(gaugeView.title.view);
-      const gaugeTrait = this.trait;
-      if (gaugeTrait !== null) {
-        this.owner.setTitleView(gaugeTrait.title.state, gaugeTrait);
-      }
+    initView(gaugeView: GaugeView): void {
       const dialControllers = this.owner.dials.controllers;
       for (const controllerId in dialControllers) {
         const dialController = dialControllers[controllerId]!;
@@ -117,9 +107,17 @@ export class GaugeController extends GenericController {
           dialController.dial.insertView(gaugeView);
         }
       }
+      this.owner.title.setView(gaugeView.title.view);
+      const gaugeTrait = this.trait;
+      if (gaugeTrait !== null) {
+        this.owner.setTitleView(gaugeTrait.title.state, gaugeTrait);
+      }
     },
-    willDetachView(gaugeView: GaugeView): void {
+    deinitView(gaugeView: GaugeView): void {
       this.owner.title.setView(null);
+    },
+    willAttachView(gaugeView: GaugeView): void {
+      this.owner.callObservers("controllerWillAttachGaugeView", gaugeView, this.owner);
     },
     didDetachView(gaugeView: GaugeView): void {
       this.owner.callObservers("controllerDidDetachGaugeView", gaugeView, this.owner);
@@ -269,6 +267,6 @@ export class GaugeController extends GenericController {
       // hook
     },
   })
-  readonly dials!: TraitViewControllerSet<this, DialTrait, DialView, DialController>;
+  readonly dials!: TraitViewControllerSet<this, DialTrait, DialView, DialController> & GaugeControllerDialExt;
   static readonly dials: MemberFastenerClass<GaugeController, "dials">;
 }

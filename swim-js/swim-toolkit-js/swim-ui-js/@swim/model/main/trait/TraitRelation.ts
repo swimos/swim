@@ -39,7 +39,7 @@ export interface TraitRelationInit<T extends Trait = Trait> extends FastenerInit
 
   detectModel?(model: Model): T | null;
   detectTrait?(trait: Trait): T | null;
-  createTrait?(): T | null;
+  createTrait?(): T;
   fromAny?(value: AnyTrait<T>): T;
 }
 
@@ -112,7 +112,7 @@ export interface TraitRelation<O = unknown, T extends Trait = Trait> extends Fas
 
   detectTrait(trait: Trait): T | null;
 
-  createTrait(): T | null;
+  createTrait(): T;
 
   /** @internal @protected */
   fromAny(value: AnyTrait<T>): T;
@@ -221,12 +221,21 @@ export const TraitRelation = (function (_super: typeof Fastener) {
     return null;
   };
 
-  TraitRelation.prototype.createTrait = function <T extends Trait>(this: TraitRelation<unknown, T>): T | null {
+  TraitRelation.prototype.createTrait = function <T extends Trait>(this: TraitRelation<unknown, T>): T {
+    let trait: T | undefined;
     const type = this.type;
     if (type !== void 0) {
       return type.create();
     }
-    return null;
+    if (trait === void 0 || trait === null) {
+      let message = "Unable to create ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "trait";
+      throw new Error(message);
+    }
+    return trait;
   };
 
   TraitRelation.prototype.fromAny = function <T extends Trait>(this: TraitRelation<unknown, T>, value: AnyTrait<T>): T {

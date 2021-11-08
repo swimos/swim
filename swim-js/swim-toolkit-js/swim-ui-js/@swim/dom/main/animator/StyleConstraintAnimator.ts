@@ -212,7 +212,7 @@ export const StyleConstraintAnimator = (function (_super: typeof StyleAnimator) 
 
   StyleConstraintAnimator.prototype.evaluateConstraintVariable = function <T>(this: StyleConstraintAnimator<unknown, T>): void {
     const constraintScope = this.owner;
-    if (ConstraintScope.is(constraintScope) && !this.constrained && this.constraining && !this.isDefined(this.value)) {
+    if (ConstraintScope.is(constraintScope) && !this.constrained && this.constraining) {
       const value = this.constraintValue;
       if (value !== void 0 && this.isDefined(value)) {
         constraintScope.setConstraintVariable(this, this.toNumber(value));

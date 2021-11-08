@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
-import {ModelContextType, ModelFlags, AnyModel, ModelFactory, Model} from "./Model";
+import type {Mutable, Dictionary, MutableDictionary} from "@swim/util";
+import {ModelContextType, ModelFlags, AnyModel, ModelCreator, Model} from "./Model";
 
 export class GenericModel extends Model {
   constructor() {
@@ -122,9 +122,9 @@ export class GenericModel extends Model {
     }
   }
 
-  override getChild<M extends Model>(key: string, childBound: Class<M>): M | null;
-  override getChild(key: string, childBound?: Class<Model>): Model | null;
-  override getChild(key: string, childBound?: Class<Model>): Model | null {
+  override getChild<F extends abstract new (...args: any[]) => Model>(key: string, childBound: F): InstanceType<F> | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => Model): Model | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => Model): Model | null {
     const childMap = this.childMap;
     if (childMap !== null) {
       const child = childMap[key];
@@ -135,7 +135,8 @@ export class GenericModel extends Model {
     return null;
   }
 
-  override setChild<M extends Model>(key: string, newChild: M | ModelFactory<M> | null): Model | null;
+  override setChild<M extends Model>(key: string, newChild: M): Model | null;
+  override setChild<F extends ModelCreator<F>>(key: string, factory: F): Model | null;
   override setChild(key: string, newChild: AnyModel | null): Model | null;
   override setChild(key: string, newChild: AnyModel | null): Model | null {
     if (newChild !== null) {
@@ -199,7 +200,8 @@ export class GenericModel extends Model {
     return oldChild;
   }
 
-  override appendChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
+  override appendChild<M extends Model>(child: M, key?: string): M;
+  override appendChild<F extends ModelCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyModel, key?: string): Model;
   override appendChild(child: AnyModel, key?: string): Model {
     child = Model.fromAny(child);
@@ -221,7 +223,8 @@ export class GenericModel extends Model {
     return child;
   }
 
-  override prependChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
+  override prependChild<M extends Model>(child: M, key?: string): M;
+  override prependChild<F extends ModelCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyModel, key?: string): Model;
   override prependChild(child: AnyModel, key?: string): Model {
     child = Model.fromAny(child);
@@ -245,7 +248,8 @@ export class GenericModel extends Model {
     return child;
   }
 
-  override insertChild<M extends Model>(child: M | ModelFactory<M>, target: Model | null, key?: string): M;
+  override insertChild<M extends Model>(child: M, target: Model | null, key?: string): M;
+  override insertChild<F extends ModelCreator<F>>(factory: F, target: Model | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyModel, target: Model | null, key?: string): Model;
   override insertChild(child: AnyModel, target: Model | null, key?: string): Model {
     if (target !== null && target.parent !== this) {

@@ -41,7 +41,7 @@ export class DataSetTrait<X = unknown, Y = unknown> extends Trait {
       this.owner.callObservers("traitDidDetachDataPoint", dataPointTrait, this.owner);
     },
     detectModel(model: Model): DataPointTrait<X, Y> | null {
-      return model.getTrait(DataPointTrait);
+      return model.getTrait(DataPointTrait) as DataPointTrait<X, Y>;
     },
   })
   readonly dataPoints!: TraitSet<this, DataPointTrait<X, Y>>;

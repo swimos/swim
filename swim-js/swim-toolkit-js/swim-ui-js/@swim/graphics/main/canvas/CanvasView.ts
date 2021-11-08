@@ -20,7 +20,7 @@ import {
   ViewContext,
   ViewFlags,
   AnyView,
-  ViewFactory,
+  ViewCreator,
   View,
   ViewWillRender,
   ViewDidRender,
@@ -176,9 +176,9 @@ export class CanvasView extends HtmlView {
     return result;
   }
 
-  override getChild<V extends View>(key: string, childBound: Class<V>): V | null;
-  override getChild(key: string, childBound?: Class<View>): View | null;
-  override getChild(key: string, childBound?: Class<View>): View | null {
+  override getChild<F extends abstract new (...args: any[]) => View>(key: string, childBound: F): InstanceType<F> | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null {
     const childMap = this.childMap;
     if (childMap !== null) {
       const child = childMap[key];
@@ -189,7 +189,8 @@ export class CanvasView extends HtmlView {
     return null;
   }
 
-  override setChild<V extends View>(key: string, newChild: V | ViewFactory<V> | null): View | null;
+  override setChild<V extends View>(key: string, newChild: V): View | null;
+  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyView | AnyNodeView | keyof HtmlViewTagMap | null): View | null;
   override setChild(key: string, newChild: AnyView | AnyNodeView | keyof HtmlViewTagMap | null): View | null {
     let newView: View | null;
@@ -282,7 +283,8 @@ export class CanvasView extends HtmlView {
     return oldView;
   }
 
-  override appendChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
+  override appendChild<V extends View>(child: V, key?: string): V;
+  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override appendChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
   override appendChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, key?: string): View;
   override appendChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, key?: string): View {
@@ -323,7 +325,8 @@ export class CanvasView extends HtmlView {
     return childView;
   }
 
-  override prependChild<V extends View>(child: V | ViewFactory<V>, key?: string): V;
+  override prependChild<V extends View>(child: V, key?: string): V;
+  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override prependChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
   override prependChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, key?: string): View;
   override prependChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, key?: string): View {
@@ -368,7 +371,8 @@ export class CanvasView extends HtmlView {
     return childView;
   }
 
-  override insertChild<V extends View>(child: V | ViewFactory<V>, target: View | Node | null, key?: string): V;
+  override insertChild<V extends View>(child: V, target: View | Node | null, key?: string): V;
+  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   override insertChild<K extends keyof HtmlViewTagMap>(tag: K, target: View | Node | null, key?: string): HtmlViewTagMap[K];
   override insertChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, target: View | Node | null, key?: string): View;
   override insertChild(child: AnyView | AnyNodeView | keyof HtmlViewTagMap, target: View | Node | null, key?: string): View {

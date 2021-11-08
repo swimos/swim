@@ -50,6 +50,10 @@ export class Sprite {
     return this.sheet.getSpriteRenderer(this.rowIndex, this.colIndex);
   }
 
+  clear(): void {
+    return this.sheet.clearSprite(this.rowIndex, this.colIndex);
+  }
+
   draw(context: CanvasContext, frame: R2Box): void {
     this.sheet.drawSprite(context, frame, this.rowIndex, this.colIndex);
   }

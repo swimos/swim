@@ -35,7 +35,7 @@ export abstract class GeoController extends GenericController {
 
   abstract readonly geo: TraitViewRef<this, GeoTrait, GeoView>;
 
-  static fromTrait(geoTrait: GeoTrait): GeoController | null {
+  static fromTrait(geoTrait: GeoTrait): GeoController {
     if (geoTrait instanceof GeoLayerTrait) {
       return new GeoLayerController();
     } else if (geoTrait instanceof GeoIconTrait) {
@@ -45,7 +45,7 @@ export abstract class GeoController extends GenericController {
     } else if (geoTrait instanceof GeoLineTrait) {
       return new GeoLineController();
     } else {
-      return null;
+      throw new Error("Can't create GeoController from " + geoTrait);
     }
   }
 }

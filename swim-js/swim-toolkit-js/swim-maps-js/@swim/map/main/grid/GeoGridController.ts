@@ -23,7 +23,7 @@ import type {GeoViewContext} from "../geo/GeoViewContext";
 import type {GeoView} from "../geo/GeoView";
 import type {GeoTrait} from "../geo/GeoTrait";
 import {GeoController} from "../geo/GeoController";
-import {GeoLayerController} from "../layer/GeoLayerController";
+import {GeoLayerControllerFeatureExt, GeoLayerController} from "../layer/GeoLayerController";
 import {GeoGridView} from "./GeoGridView";
 import {GeoGridTrait} from "./GeoGridTrait";
 import type {GeoGridControllerObserver} from "./GeoGridControllerObserver";
@@ -130,20 +130,20 @@ export class GeoGridController extends GeoLayerController {
       this.owner.autoCullGeoView(viewContext.geoViewport, geoView);
       this.owner.autoConsumeGeoView(viewContext.geoViewport, geoView);
     },
-    createView(): GeoGridView | null {
+    createView(): GeoGridView {
       return new GeoGridView(this.owner.geoTile);
     },
   })
   override readonly geo!: TraitViewRef<this, GeoGridTrait, GeoView>;
   static override readonly geo: MemberFastenerClass<GeoGridController, "geo">;
 
-  @TraitViewControllerSet<GeoGridController, GeoTrait, GeoView, GeoController>({
+  @TraitViewControllerSet<GeoGridController, GeoTrait, GeoView, GeoController, GeoLayerControllerFeatureExt>({
     extends: true,
     detectController(controller: Controller): GeoController | null {
       return controller instanceof GeoController && !(controller instanceof GeoGridController) ? controller : null;
     },
   })
-  override readonly features!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController>;
+  override readonly features!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController> & GeoLayerControllerFeatureExt;
   static override readonly features: MemberFastenerClass<GeoGridController, "features">;
 
   @TraitViewControllerSet<GeoGridController, GeoGridTrait, GeoView, GeoGridController, GeoGridControllerTileExt>({
@@ -210,10 +210,14 @@ export class GeoGridController extends GeoLayerController {
     detachTileView(tileView: GeoView, tileController: GeoGridController): void {
       tileView.remove();
     },
-    createController(tileTrait?: GeoGridTrait): GeoGridController | null {
-      return tileTrait !== void 0 ? new GeoGridController(tileTrait.geoTile) : null;
+    createController(tileTrait?: GeoGridTrait): GeoGridController {
+      if (tileTrait !== void 0) {
+        return new GeoGridController(tileTrait.geoTile);
+      } else {
+        return TraitViewControllerSet.prototype.createController.call(this);
+      }
     },
   })
-  readonly tiles!: TraitViewControllerSet<this, GeoGridTrait, GeoView, GeoGridController>;
+  readonly tiles!: TraitViewControllerSet<this, GeoGridTrait, GeoView, GeoGridController> & GeoGridControllerTileExt;
   static readonly tiles: MemberFastenerClass<GeoGridController, "tiles">;
 }

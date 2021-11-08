@@ -14,7 +14,7 @@
 
 import type {Mutable, Class, ObserverType} from "@swim/util";
 import type {FastenerOwner, Fastener} from "@swim/fastener";
-import type {AnyModel, ModelFactory, Model} from "./Model";
+import type {AnyModel, Model} from "./Model";
 import {ModelRelationInit, ModelRelationClass, ModelRelation} from "./ModelRelation";
 
 export type ModelRefType<F extends ModelRef<any, any>> =
@@ -60,13 +60,11 @@ export interface ModelRef<O = unknown, M extends Model = Model> extends ModelRel
 
   setModel(newModel: AnyModel<M> | null, targetModel?: Model | null, key?: string): M | null;
 
-  attachModel<M2 extends M>(model: M2 | ModelFactory<M2>, targetModel?: Model | null): M2;
-  attachModel(model: AnyModel<M>, targetModel?: Model | null): M;
-  attachModel(model?: AnyModel<M> | null, targetModel?: Model | null): M | null;
+  attachModel(model?: AnyModel<M>, targetModel?: Model | null): M;
 
   detachModel(): M | null;
 
-  insertModel(parentModel?: Model | null, newModel?: AnyModel<M> | null, targetModel?: Model | null, key?: string): M | null;
+  insertModel(parentModel?: Model | null, newModel?: AnyModel<M>, targetModel?: Model | null, key?: string): M;
 
   removeModel(): M | null;
 
@@ -157,7 +155,7 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
     return oldModel;
   };
 
-  ModelRef.prototype.attachModel = function <M extends Model>(this: ModelRef<unknown, M>, newModel?: AnyModel<M> | null, targetModel?: Model | null): M | null {
+  ModelRef.prototype.attachModel = function <M extends Model>(this: ModelRef<unknown, M>, newModel?: AnyModel<M>, targetModel?: Model | null): M {
     const oldModel = this.model;
     if (newModel !== void 0 && newModel !== null) {
       newModel = this.fromAny(newModel);
@@ -166,7 +164,7 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
     } else {
       newModel = oldModel;
     }
-    if (newModel !== null && newModel !== oldModel) {
+    if (newModel !== oldModel) {
       if (targetModel === void 0) {
         targetModel = null;
       }
@@ -198,7 +196,7 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
     return oldModel;
   };
 
-  ModelRef.prototype.insertModel = function <M extends Model>(this: ModelRef<unknown, M>, parentModel?: Model | null, newModel?: AnyModel<M> | null, targetModel?: Model | null, key?: string): M | null {
+  ModelRef.prototype.insertModel = function <M extends Model>(this: ModelRef<unknown, M>, parentModel?: Model | null, newModel?: AnyModel<M>, targetModel?: Model | null, key?: string): M {
     if (newModel !== void 0 && newModel !== null) {
       newModel = this.fromAny(newModel);
     } else {
@@ -209,35 +207,33 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
         newModel = oldModel;
       }
     }
-    if (newModel !== null) {
-      if (parentModel === void 0 || parentModel === null) {
-        parentModel = this.parentModel;
+    if (parentModel === void 0 || parentModel === null) {
+      parentModel = this.parentModel;
+    }
+    if (targetModel === void 0) {
+      targetModel = null;
+    }
+    if (key === void 0) {
+      key = this.key;
+    }
+    if (parentModel !== null && (newModel.parent !== parentModel || newModel.key !== key)) {
+      this.insertChild(parentModel, newModel, targetModel, key);
+    }
+    const oldModel = this.model;
+    if (newModel !== oldModel) {
+      if (oldModel !== null) {
+        this.willDetachModel(oldModel);
+        (this as Mutable<typeof this>).model = null;
+        this.onDetachModel(oldModel);
+        this.deinitModel(oldModel);
+        this.didDetachModel(oldModel);
+        oldModel.remove();
       }
-      if (targetModel === void 0) {
-        targetModel = null;
-      }
-      if (key === void 0) {
-        key = this.key;
-      }
-      if (parentModel !== null && (newModel.parent !== parentModel || newModel.key !== key)) {
-        this.insertChild(parentModel, newModel, targetModel, key);
-      }
-      const oldModel = this.model;
-      if (newModel !== oldModel) {
-        if (oldModel !== null) {
-          this.willDetachModel(oldModel);
-          (this as Mutable<typeof this>).model = null;
-          this.onDetachModel(oldModel);
-          this.deinitModel(oldModel);
-          this.didDetachModel(oldModel);
-          oldModel.remove();
-        }
-        this.willAttachModel(newModel, targetModel);
-        (this as Mutable<typeof this>).model = newModel;
-        this.onAttachModel(newModel, targetModel);
-        this.initModel(newModel);
-        this.didAttachModel(newModel, targetModel);
-      }
+      this.willAttachModel(newModel, targetModel);
+      (this as Mutable<typeof this>).model = newModel;
+      this.onAttachModel(newModel, targetModel);
+      this.initModel(newModel);
+      this.didAttachModel(newModel, targetModel);
     }
     return newModel;
   };

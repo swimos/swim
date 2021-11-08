@@ -88,7 +88,7 @@ export class TitleDeckBar extends DeckBar {
     return backIcon;
   }
 
-  createBackButton(): DeckButton | null {
+  createBackButton(): DeckButton {
     const backButton = DeckButton.create();
     backButton.backIcon.setView(this.createBackIcon());
     backButton.backIcon.insertView();
@@ -182,7 +182,7 @@ export class TitleDeckBar extends DeckBar {
     didAttachView(backButton: DeckButton): void {
       this.owner.initBackButton(backButton);
     },
-    createView(): DeckButton | null {
+    createView(): DeckButton {
       return this.owner.createBackButton();
     },
     deckButtonDidPopLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView, backButton: DeckButton): void {

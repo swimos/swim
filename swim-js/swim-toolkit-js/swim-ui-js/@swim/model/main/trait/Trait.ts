@@ -31,7 +31,7 @@ import {
 } from "@swim/util";
 import {FastenerContext, Fastener, Property, Provider} from "@swim/fastener";
 import {WarpRef, WarpService, WarpProvider, DownlinkFastener} from "@swim/client";
-import {ModelContextType, ModelFlags, AnyModel, ModelFactory, Model} from "../model/Model";
+import {ModelContextType, ModelFlags, AnyModel, ModelCreator, Model} from "../model/Model";
 import {ModelRelation} from "../model/ModelRelation";
 import type {TraitObserver} from "./TraitObserver";
 import {TraitRelation} from "./"; // forward import
@@ -61,6 +61,9 @@ export interface TraitClass<T extends Trait = Trait, U = AnyTrait<T>> extends Fu
 export interface TraitConstructor<T extends Trait = Trait, U = AnyTrait<T>> extends TraitClass<T, U> {
   new(): T;
 }
+
+export type TraitCreator<F extends (abstract new (...args: any[]) => T) & Creatable<InstanceType<F>>, T extends Trait = Trait> =
+  (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
 export abstract class Trait implements HashCode, Initable<TraitInit>, Observable, Consumable, FastenerContext {
   constructor() {
@@ -287,14 +290,15 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     return model !== null ? model.forEachChild(callback, thisArg) : void 0;
   }
 
-  getChild<M extends Model>(key: string, childBound: Class<M>): M | null;
-  getChild(key: string, childBound?: Class<Model>): Model | null;
-  getChild(key: string, childBound?: Class<Model>): Model | null {
+  getChild<F extends abstract new (...args: any[]) => Model>(key: string, childBound: F): InstanceType<F> | null;
+  getChild(key: string, childBound?: abstract new (...args: any[]) => Model): Model | null;
+  getChild(key: string, childBound?: abstract new (...args: any[]) => Model): Model | null {
     const model = this.model;
     return model !== null ? model.getChild(key, childBound) : null;
   }
 
-  setChild<M extends Model>(key: string, newChild: M | ModelFactory<M> | null): Model | null;
+  setChild<M extends Model>(key: string, newChild: M): Model | null;
+  setChild<F extends ModelCreator<F>>(key: string, factory: F): Model | null;
   setChild(key: string, newChild: AnyModel | null): Model | null;
   setChild(key: string, newChild: AnyModel | null): Model | null {
     const model = this.model;
@@ -305,7 +309,8 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  appendChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
+  appendChild<M extends Model>(child: M, key?: string): M;
+  appendChild<F extends ModelCreator<F>>(factory: F, key?: string): InstanceType<F>;
   appendChild(child: AnyModel, key?: string): Model;
   appendChild(child: AnyModel, key?: string): Model {
     const model = this.model;
@@ -316,7 +321,8 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  prependChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
+  prependChild<M extends Model>(child: M, key?: string): M;
+  prependChild<F extends ModelCreator<F>>(factory: F, key?: string): InstanceType<F>;
   prependChild(child: AnyModel, key?: string): Model;
   prependChild(child: AnyModel, key?: string): Model {
     const model = this.model;
@@ -327,7 +333,8 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  insertChild<M extends Model>(child: M | ModelFactory<M>, target: Model | null, key?: string): M;
+  insertChild<M extends Model>(child: M, target: Model | null, key?: string): M;
+  insertChild<F extends ModelCreator<F>>(factory: F, target: Model | null, key?: string): InstanceType<F>;
   insertChild(child: AnyModel, target: Model | null, key?: string): Model;
   insertChild(child: AnyModel, target: Model | null, key?: string): Model {
     const model = this.model;
@@ -424,12 +431,12 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  getSuper<M extends Model>(superBound: Class<M>): M | null {
+  getSuper<F extends abstract new (...args: any[]) => Model>(superBound: F): InstanceType<F> | null {
     const model = this.model;
     return model !== null ? model.getSuper(superBound) : null;
   }
 
-  getBase<M extends Model>(baseBound: Class<M>): M | null {
+  getBase<F extends abstract new (...args: any[]) => Model>(baseBound: F): InstanceType<F> | null {
     const model = this.model;
     return model !== null ? model.getBase(baseBound) : null;
   }
@@ -471,15 +478,16 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     return model !== null ? model.forEachTrait(callback, thisArg) : void 0;
   }
 
-  getTrait<T extends Trait>(key: string, traitBound: Class<T>): T | null;
-  getTrait(key: string, traitBound?: Class<Trait>): Trait | null;
-  getTrait<T extends Trait>(traitBound: Class<T>): T | null;
-  getTrait(key: string | Class<Trait>, traitBound?: Class<Trait>): Trait | null {
+  getTrait<F extends abstract new (...args: any[]) => Trait>(key: string, traitBound: F): InstanceType<F> | null;
+  getTrait(key: string, traitBound?: abstract new (...args: any[]) => Trait): Trait | null;
+  getTrait<F extends abstract new (...args: any[]) => Trait>(traitBound: F): InstanceType<F> | null;
+  getTrait(key: string | (abstract new (...args: any[]) => Trait), traitBound?: abstract new (...args: any[]) => Trait): Trait | null {
     const model = this.model;
     return model !== null ? model.getTrait(key as string, traitBound) : null;
   }
 
-  setTrait<T extends Trait>(key: string, newTrait: T | TraitFactory<T> | null): Trait | null;
+  setTrait<T extends Trait>(key: string, newTrait: T): Trait | null;
+  setTrait<F extends TraitCreator<F>>(key: string, factory: F): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null {
     const model = this.model;
@@ -490,7 +498,8 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  appendTrait<T extends Trait>(trait: T | TraitFactory<T>, key?: string): T;
+  appendTrait<T extends Trait>(trait: T, key?: string): T;
+  appendTrait<F extends TraitCreator<F>>(factory: F, key?: string): InstanceType<F>;
   appendTrait(trait: AnyTrait, key?: string): Trait;
   appendTrait(trait: AnyTrait, key?: string): Trait {
     const model = this.model;
@@ -501,7 +510,8 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  prependTrait<T extends Trait>(trait: T | TraitFactory<T>, key?: string): T;
+  prependTrait<T extends Trait>(trait: T, key?: string): T;
+  prependTrait<F extends TraitCreator<F>>(factory: F, key?: string): InstanceType<F>;
   prependTrait(trait: AnyTrait, key?: string): Trait;
   prependTrait(trait: AnyTrait, key?: string): Trait {
     const model = this.model;
@@ -512,7 +522,8 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  insertTrait<T extends Trait>(trait: T | TraitFactory<T>, target: Trait | null, key?: string): T;
+  insertTrait<T extends Trait>(trait: T, target: Trait | null, key?: string): T;
+  insertTrait<F extends TraitCreator<F>>(factory: F, target: Trait | null, key?: string): InstanceType<F>;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait {
     const model = this.model;
@@ -609,12 +620,12 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  getSuperTrait<T extends Trait>(superBounds: Class<T>): T | null {
+  getSuperTrait<F extends abstract new (...args: any[]) => Trait>(superBound: F): InstanceType<F> | null {
     const model = this.model;
-    return model !== null ? model.getSuperTrait(superBounds) : null;
+    return model !== null ? model.getSuperTrait(superBound) : null;
   }
 
-  getBaseTrait<T extends Trait>(baseBound: Class<T>): T | null {
+  getBaseTrait<F extends abstract new (...args: any[]) => Trait>(baseBound: F): InstanceType<F> | null {
     const model = this.model;
     return model !== null ? model.getBaseTrait(baseBound) : null;
   }
@@ -625,7 +636,7 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     observes: false,
     service: WarpService.global(),
   })
-  readonly warpProvider!: WarpService<this>;
+  readonly warpProvider!: WarpProvider<this>;
 
   @Property({
     type: Object,

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
+import type {Mutable, Dictionary, MutableDictionary} from "@swim/util";
 import {Hierarchy} from "./Hierarchy";
 
 export class GenericHierarchy extends Hierarchy {
@@ -147,9 +147,9 @@ export class GenericHierarchy extends Hierarchy {
     }
   }
 
-  override getChild<H extends Hierarchy>(key: string, childBound: Class<H>): H | null;
-  override getChild(key: string, childBound?: Class<Hierarchy>): Hierarchy | null;
-  override getChild(key: string, childBound?: Class<Hierarchy>): Hierarchy | null {
+  override getChild<F extends abstract new (...args: any[]) => Hierarchy>(key: string, childBound: F): InstanceType<F> | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => Hierarchy): Hierarchy | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => Hierarchy): Hierarchy | null {
     const childMap = this.childMap;
     if (childMap !== null) {
       const child = childMap[key];

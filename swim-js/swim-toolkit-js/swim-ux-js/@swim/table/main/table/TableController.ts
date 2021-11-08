@@ -100,10 +100,7 @@ export class TableController extends GenericController {
   @TraitViewRef<TableController, TableTrait, TableView>({
     traitType: TableTrait,
     observesTrait: true,
-    willAttachTrait(tableTrait: TableTrait): void {
-      this.owner.callObservers("controllerWillAttachTableTrait", tableTrait, this.owner);
-    },
-    didAttachTrait(tableTrait: TableTrait): void {
+    initTrait(tableTrait: TableTrait): void {
       const headerTrait = tableTrait.header.trait;
       if (headerTrait !== null) {
         this.owner.header.setTrait(headerTrait);
@@ -126,7 +123,7 @@ export class TableController extends GenericController {
         }
       }
     },
-    willDetachTrait(tableTrait: TableTrait): void {
+    deinitTrait(tableTrait: TableTrait): void {
       const rowTraits = tableTrait.rows.traits;
       for (const traitId in rowTraits) {
         const rowTrait = rowTraits[traitId]!;
@@ -141,6 +138,9 @@ export class TableController extends GenericController {
       if (headerTrait !== null) {
         this.owner.header.deleteTrait(headerTrait);
       }
+    },
+    willAttachTrait(tableTrait: TableTrait): void {
+      this.owner.callObservers("controllerWillAttachTableTrait", tableTrait, this.owner);
     },
     didDetachTrait(tableTrait: TableTrait): void {
       this.owner.callObservers("controllerDidDetachTableTrait", tableTrait, this.owner);
@@ -171,10 +171,7 @@ export class TableController extends GenericController {
     },
     viewType: TableView,
     observesView: true,
-    willAttachView(tableView: TableView): void {
-      this.owner.callObservers("controllerWillAttachTableView", tableView, this.owner);
-    },
-    didAttachView(tableView: TableView): void {
+    initView(tableView: TableView): void {
       const headerController = this.owner.header.controller;
       if (headerController !== null) {
         headerController.header.insertView(tableView);
@@ -197,6 +194,9 @@ export class TableController extends GenericController {
           this.owner.layoutTable(tableLayout, tableView);
         }
       }
+    },
+    willAttachView(tableView: TableView): void {
+      this.owner.callObservers("controllerWillAttachTableView", tableView, this.owner);
     },
     didDetachView(tableView: TableView): void {
       this.owner.callObservers("controllerDidDetachTableView", tableView, this.owner);

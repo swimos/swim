@@ -35,6 +35,7 @@ Mood.contrasted = MoodVector.of([Feel.contrasted, 1]);
 Mood.raised = MoodVector.of([Feel.raised, 1]);
 Mood.covered = MoodVector.of([Feel.covered, 1]);
 
+Mood.opaque = MoodVector.of([Feel.opaque, 1]);
 Mood.floating = MoodVector.of([Feel.floating, 1]);
 Mood.transparent = MoodVector.of([Feel.transparent, 1]);
 Mood.translucent = MoodVector.of([Feel.translucent, 1]);

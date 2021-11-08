@@ -144,6 +144,11 @@ const DarkCovered = FeelVector.of(
   [Look.backgroundColor, DarkCoveredColor],
 );
 
+const DarkOpaque = FeelVector.of(
+  [Look.backgroundColor, DarkBackgroundColor],
+  [Look.borderColor, DarkBorderColor],
+);
+
 const DarkFloating = FeelVector.of(
   [Look.shadow, BoxShadow.create(0, 2, 4, 0, Color.black(0.5))],
 );
@@ -195,7 +200,7 @@ const DarkHovering = FeelVector.of(
   [Look.statusColor, Color.black(1)],
   [Look.accentColor, Color.black(1)],
 
-  [Look.backgroundColor, Color.black(-1)],
+  [Look.backgroundColor, Color.black(-2)],
 );
 
 const DarkNavigating = FeelVector.of(
@@ -223,6 +228,7 @@ const DarkTheme = ThemeMatrix.forCols(
   [Feel.raised, DarkRaised],
   [Feel.covered, DarkCovered],
 
+  [Feel.opaque, DarkOpaque],
   [Feel.floating, DarkFloating],
   [Feel.transparent, DarkTransparent],
   [Feel.translucent, DarkTranslucent],

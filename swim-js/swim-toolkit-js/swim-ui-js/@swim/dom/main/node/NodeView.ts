@@ -22,6 +22,7 @@ import {
   ViewInit,
   ViewFactory,
   ViewClass,
+  ViewCreator,
   View,
   ModalService,
 } from "@swim/view";
@@ -219,9 +220,9 @@ export class NodeView extends View {
     }
   }
 
-  override getChild<V extends View>(key: string, childBound: Class<V>): V | null;
-  override getChild(key: string, childBound?: Class<View>): View | null;
-  override getChild(key: string, childBound?: Class<View>): View | null {
+  override getChild<F extends abstract new (...args: any[]) => View>(key: string, childBound: F): InstanceType<F> | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null {
     const childMap = this.childMap;
     if (childMap !== null) {
       const child = childMap[key];
@@ -232,7 +233,8 @@ export class NodeView extends View {
     return null;
   }
 
-  override setChild<V extends NodeView>(key: string, newChild: V | ViewFactory<V> | null): View | null;
+  override setChild<V extends NodeView>(key: string, newChild: V): View | null;
+  override setChild<F extends ViewCreator<F, NodeView>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyNodeView | null): View | null;
   override setChild(key: string, newChild: AnyNodeView | null): View | null {
     let newView: NodeView | null;
@@ -294,7 +296,8 @@ export class NodeView extends View {
     return oldView;
   }
 
-  override appendChild<V extends NodeView>(child: V | ViewFactory<V>, key?: string): V;
+  override appendChild<V extends NodeView>(child: V, key?: string): V;
+  override appendChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyNodeView, key?: string): NodeView;
   override appendChild(child: AnyNodeView, key?: string): NodeView {
     const childView = NodeView.fromAny(child);
@@ -317,7 +320,8 @@ export class NodeView extends View {
     return childView;
   }
 
-  override prependChild<V extends NodeView>(child: V | ViewFactory<V>, key?: string): V;
+  override prependChild<V extends NodeView>(child: V, key?: string): V;
+  override prependChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyNodeView, key?: string): NodeView;
   override prependChild(child: AnyNodeView, key?: string): NodeView {
     const childView = NodeView.fromAny(child);
@@ -349,7 +353,8 @@ export class NodeView extends View {
     return childView;
   }
 
-  override insertChild<V extends NodeView>(child: V | ViewFactory<V>, target: View | Node | null, key?: string): V;
+  override insertChild<V extends NodeView>(child: V, target: View | Node | null, key?: string): V;
+  override insertChild<F extends ViewCreator<F, NodeView>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyNodeView, target: View | Node | null, key?: string): NodeView;
   override insertChild(child: AnyNodeView, target: View | Node | null, key?: string): NodeView {
     let targetView: NodeView | null;
@@ -527,7 +532,7 @@ export class NodeView extends View {
     if (parentNode !== null) {
       const parentView = parentNode.view;
       if (parentView !== void 0) {
-        if ((this.flags & View.TraversingFlag) === 0) {
+        if (!this.traversing) {
           parentView.removeChild(this);
         } else {
           this.setFlags(this.flags | View.RemovingFlag);

@@ -144,6 +144,11 @@ const LightCovered = FeelVector.of(
   [Look.backgroundColor, LightCoveredColor],
 );
 
+const LightOpaque = FeelVector.of(
+  [Look.backgroundColor, LightBackgroundColor],
+  [Look.borderColor, LightBorderColor],
+);
+
 const LightFloating = FeelVector.of(
   [Look.shadow, BoxShadow.create(0, 2, 4, 0, Color.black(0.5))],
 );
@@ -223,6 +228,7 @@ const LightTheme = ThemeMatrix.forCols(
   [Feel.raised, LightRaised],
   [Feel.covered, LightCovered],
 
+  [Feel.opaque, LightOpaque],
   [Feel.floating, LightFloating],
   [Feel.transparent, LightTransparent],
   [Feel.translucent, LightTranslucent],

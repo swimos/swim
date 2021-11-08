@@ -22,6 +22,7 @@ export {
   ControllerFactory,
   ControllerClass,
   ControllerConstructor,
+  ControllerCreator,
   Controller,
 } from "./Controller";
 export {ControllerObserver} from "./ControllerObserver";

@@ -68,10 +68,22 @@ export class DrawerView extends HtmlView implements Modal {
   @ThemeConstraintAnimator({type: Length, state: Length.px(200)})
   readonly expandedWidth!: ThemeConstraintAnimator<this, Length, AnyLength>;
 
-  @ConstraintProperty({type: Length, state: null})
+  @ConstraintProperty<DrawerView, Length | null, AnyLength | null>({
+    type: Length,
+    state: null,
+    toNumber(value: Length | null): number {
+      return value !== null ? value.pxValue() : 0;
+    },
+  })
   readonly effectiveWidth!: ConstraintProperty<this, Length | null, AnyLength | null>;
 
-  @ConstraintProperty({type: Length, state: null})
+  @ConstraintProperty<DrawerView, Length | null, AnyLength | null>({
+    type: Length,
+    state: null,
+    toNumber(value: Length | null): number {
+      return value !== null ? value.pxValue() : 0;
+    },
+  })
   readonly effectiveHeight!: ConstraintProperty<this, Length | null, AnyLength | null>;
 
   isHorizontal(): boolean {

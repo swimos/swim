@@ -106,7 +106,7 @@ export const StyleRule = (function (_super: typeof CssRule) {
       } else {
         for (let i = 0, n = propertyNames.length; i < n; i += 1) {
           const value = style.get(propertyNames[i]!);
-          if (value !== "") {
+          if (value !== void 0) {
             return value;
           }
         }
@@ -119,7 +119,7 @@ export const StyleRule = (function (_super: typeof CssRule) {
       } else {
         for (let i = 0, n = propertyNames.length; i < n; i += 1) {
           const value = style.getPropertyValue(propertyNames[i]!);
-          if (value !== "") {
+          if (value.length !== 0) {
             return value;
           }
         }

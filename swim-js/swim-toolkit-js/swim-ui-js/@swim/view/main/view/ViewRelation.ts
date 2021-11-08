@@ -37,7 +37,7 @@ export interface ViewRelationInit<V extends View = View> extends FastenerInit {
   insertChild?(parent: View, child: V, targetView: View | null, key: string | undefined): void;
 
   detectView?(view: View): V | null;
-  createView?(): V | null;
+  createView?(): V;
   fromAny?(value: AnyView<V>): V;
 }
 
@@ -102,7 +102,7 @@ export interface ViewRelation<O = unknown, V extends View = View> extends Fasten
 
   detectView(view: View): V | null;
 
-  createView(): V | null;
+  createView(): V;
 
   /** @internal @protected */
   fromAny(value: AnyView<V>): V;
@@ -193,12 +193,21 @@ export const ViewRelation = (function (_super: typeof Fastener) {
     return null;
   };
 
-  ViewRelation.prototype.createView = function <V extends View>(this: ViewRelation<unknown, V>): V | null {
+  ViewRelation.prototype.createView = function <V extends View>(this: ViewRelation<unknown, V>): V {
+    let view: V | undefined;
     const type = this.type;
     if (type !== void 0) {
-      return type.create();
+      view = type.create();
     }
-    return null;
+    if (view === void 0 || view === null) {
+      let message = "Unable to create ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "view";
+      throw new Error(message);
+    }
+    return view;
   };
 
   ViewRelation.prototype.fromAny = function <V extends View>(this: ViewRelation<unknown, V>, value: AnyView<V>): V {

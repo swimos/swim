@@ -14,16 +14,16 @@
 
 import type {Class} from "@swim/util";
 import type {MemberFastenerClass} from "@swim/fastener";
-import {Model, TraitConstructor, Trait, TraitSet} from "@swim/model";
+import {Model, TraitCreator, Trait, TraitSet} from "@swim/model";
 import {CellTrait} from "../cell/CellTrait";
 import type {LeafTraitObserver} from "./LeafTraitObserver";
 
 export class LeafTrait extends Trait {
   override readonly observerType?: Class<LeafTraitObserver>;
 
+  getCell<F extends abstract new (...args: any[]) => CellTrait>(key: string, cellTraitClass: F): InstanceType<F> | null;
   getCell(key: string): CellTrait | null;
-  getCell<R extends CellTrait>(key: string, cellTraitClass: Class<R>): R | null;
-  getCell(key: string, cellTraitClass?: Class<CellTrait>): CellTrait | null {
+  getCell(key: string, cellTraitClass?: abstract new (...args: any[]) => CellTrait): CellTrait | null {
     if (cellTraitClass === void 0) {
       cellTraitClass = CellTrait;
     }
@@ -31,13 +31,13 @@ export class LeafTrait extends Trait {
     return cellTrait instanceof cellTraitClass ? cellTrait : null;
   }
 
-  getOrCreateCell<R extends CellTrait>(key: string, cellTraitConstructor: TraitConstructor<R>): R {
-    let cellTrait = this.getTrait(key) as R | null;
-    if (!(cellTrait instanceof cellTraitConstructor)) {
-      cellTrait = new cellTraitConstructor();
+  getOrCreateCell<F extends TraitCreator<F, CellTrait>>(key: string, cellTraitClass: F): InstanceType<F> {
+    let cellTrait = this.getTrait(key, cellTraitClass);
+    if (cellTrait === null) {
+      cellTrait = cellTraitClass.create();
       this.setTrait(key, cellTrait);
     }
-    return cellTrait;
+    return cellTrait!;
   }
 
   setCell(key: string, cellTrait: CellTrait): void {

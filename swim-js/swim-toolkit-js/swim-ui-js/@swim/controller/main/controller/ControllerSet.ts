@@ -14,7 +14,7 @@
 
 import type {Mutable, Class, ObserverType} from "@swim/util";
 import type {FastenerOwner} from "@swim/fastener";
-import type {AnyController, ControllerFactory, Controller} from "./Controller";
+import type {AnyController, Controller} from "./Controller";
 import {ControllerRelationInit, ControllerRelationClass, ControllerRelation} from "./ControllerRelation";
 
 export type ControllerSetType<F extends ControllerSet<any, any>> =
@@ -57,17 +57,13 @@ export interface ControllerSet<O = unknown, C extends Controller = Controller> e
 
   hasController(controller: C): boolean;
 
-  addController<C2 extends C>(controller: C2 | ControllerFactory<C2>, targetController?: Controller | null, key?: string): C2;
-  addController(controller: AnyController<C>, targetController?: Controller | null, key?: string): C;
-  addController(controller?: AnyController<C> | null, targetController?: Controller | null, key?: string): C | null;
+  addController(controller?: AnyController<C>, targetController?: Controller | null, key?: string): C;
 
-  attachController<C2 extends C>(controller: C2 | ControllerFactory<C2>, targetController?: Controller | null): C2;
-  attachController(controller: AnyController<C>, targetController?: Controller | null): C;
-  attachController(controller?: AnyController<C> | null, targetController?: Controller | null): C | null;
+  attachController(controller?: AnyController<C>, targetController?: Controller | null): C;
 
   detachController(controller: C): C | null;
 
-  insertController(parentController?: Controller | null, newController?: AnyController<C> | null, targetController?: Controller | null, key?: string): C | null;
+  insertController(parentController?: Controller | null, newController?: AnyController<C>, targetController?: Controller | null, key?: string): C;
 
   removeController(controller: C): C | null;
 
@@ -100,44 +96,42 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
     return this.controllers[controller.uid] !== void 0;
   };
 
-  ControllerSet.prototype.addController = function <C extends Controller>(this: ControllerSet<unknown, C>, newController?: AnyController<C> | null, targetController?: Controller | null, key?: string): C | null {
+  ControllerSet.prototype.addController = function <C extends Controller>(this: ControllerSet<unknown, C>, newController?: AnyController<C>, targetController?: Controller | null, key?: string): C {
     if (newController !== void 0 && newController !== null) {
       newController = this.fromAny(newController);
     } else {
       newController = this.createController();
     }
-    if (newController !== null) {
-      if (targetController === void 0) {
-        targetController = null;
+    if (targetController === void 0) {
+      targetController = null;
+    }
+    let parentController: Controller | null;
+    if (this.binds && (parentController = this.parentController, parentController !== null)) {
+      if (key === void 0) {
+        key = this.key(newController);
       }
-      let parentController: Controller | null;
-      if (this.binds && (parentController = this.parentController, parentController !== null)) {
-        if (key === void 0) {
-          key = this.key(newController);
-        }
-        this.insertChild(parentController, newController, targetController, key);
-      }
-      const controllers = this.controllers as {[id: number]: C | undefined};
-      if (controllers[newController.uid] === void 0) {
-        this.willAttachController(newController, targetController);
-        controllers[newController.uid] = newController;
-        (this as Mutable<typeof this>).controllerCount += 1;
-        this.onAttachController(newController, targetController);
-        this.initController(newController);
-        this.didAttachController(newController, targetController);
-      }
+      this.insertChild(parentController, newController, targetController, key);
+    }
+    const controllers = this.controllers as {[id: number]: C | undefined};
+    if (controllers[newController.uid] === void 0) {
+      this.willAttachController(newController, targetController);
+      controllers[newController.uid] = newController;
+      (this as Mutable<typeof this>).controllerCount += 1;
+      this.onAttachController(newController, targetController);
+      this.initController(newController);
+      this.didAttachController(newController, targetController);
     }
     return newController;
   };
 
-  ControllerSet.prototype.attachController = function <C extends Controller>(this: ControllerSet<unknown, C>, newController?: AnyController<C> | null, targetController?: Controller | null): C | null {
+  ControllerSet.prototype.attachController = function <C extends Controller>(this: ControllerSet<unknown, C>, newController?: AnyController<C>, targetController?: Controller | null): C {
     if (newController !== void 0 && newController !== null) {
       newController = this.fromAny(newController);
     } else {
       newController = this.createController();
     }
     const controllers = this.controllers as {[id: number]: C | undefined};
-    if (newController !== null && controllers[newController.uid] === void 0) {
+    if (controllers[newController.uid] === void 0) {
       if (targetController === void 0) {
         targetController = null;
       }
@@ -165,34 +159,32 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
     return null;
   };
 
-  ControllerSet.prototype.insertController = function <C extends Controller>(this: ControllerSet<unknown, C>, parentController?: Controller | null, newController?: AnyController<C> | null, targetController?: Controller | null, key?: string): C | null {
+  ControllerSet.prototype.insertController = function <C extends Controller>(this: ControllerSet<unknown, C>, parentController?: Controller | null, newController?: AnyController<C>, targetController?: Controller | null, key?: string): C {
     if (newController !== void 0 && newController !== null) {
       newController = this.fromAny(newController);
     } else {
       newController = this.createController();
     }
+    if (parentController === void 0 || parentController === null) {
+      parentController = this.parentController;
+    }
+    if (targetController === void 0) {
+      targetController = null;
+    }
+    if (key === void 0) {
+      key = this.key(newController);
+    }
+    if (parentController !== null && (newController.parent !== parentController || newController.key !== key)) {
+      this.insertChild(parentController, newController, targetController, key);
+    }
     const controllers = this.controllers as {[id: number]: C | undefined};
-    if (newController !== null) {
-      if (parentController === void 0 || parentController === null) {
-        parentController = this.parentController;
-      }
-      if (targetController === void 0) {
-        targetController = null;
-      }
-      if (key === void 0) {
-        key = this.key(newController);
-      }
-      if (parentController !== null && (newController.parent !== parentController || newController.key !== key)) {
-        this.insertChild(parentController, newController, targetController, key);
-      }
-      if (controllers[newController.uid] === void 0) {
-        this.willAttachController(newController, targetController);
-        controllers[newController.uid] = newController;
-        (this as Mutable<typeof this>).controllerCount += 1;
-        this.onAttachController(newController, targetController);
-        this.initController(newController);
-        this.didAttachController(newController, targetController);
-      }
+    if (controllers[newController.uid] === void 0) {
+      this.willAttachController(newController, targetController);
+      controllers[newController.uid] = newController;
+      (this as Mutable<typeof this>).controllerCount += 1;
+      this.onAttachController(newController, targetController);
+      this.initController(newController);
+      this.didAttachController(newController, targetController);
     }
     return newController;
   };

@@ -26,7 +26,7 @@ import {
   AnyColor,
   Color,
 } from "@swim/style";
-import {ViewFactory, View} from "@swim/view";
+import {ViewCreator, View} from "@swim/view";
 import {AttributeAnimator} from "../animator/AttributeAnimator";
 import {StyleAnimator} from "../animator/StyleAnimator";
 import type {
@@ -216,7 +216,8 @@ export class SvgView extends ElementView {
 
   override readonly node!: SVGElement;
 
-  override setChild<V extends NodeView>(key: string, newChild: V | ViewFactory<V> | null): View | null;
+  override setChild<V extends NodeView>(key: string, newChild: V): View | null;
+  override setChild<F extends ViewCreator<F, NodeView>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyNodeView | keyof SvgViewTagMap | null): View | null;
   override setChild(key: string, newChild: AnyNodeView | keyof SvgViewTagMap | null): View | null {
     if (typeof newChild === "string") {
@@ -225,7 +226,8 @@ export class SvgView extends ElementView {
     return super.setChild(key, newChild);
   }
 
-  override appendChild<V extends NodeView>(child: V | ViewFactory<V>, key?: string): V;
+  override appendChild<V extends NodeView>(child: V, key?: string): V;
+  override appendChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
   override appendChild<K extends keyof SvgViewTagMap>(tag: K, key?: string): SvgViewTagMap[K];
   override appendChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView;
   override appendChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView {
@@ -235,7 +237,8 @@ export class SvgView extends ElementView {
     return super.appendChild(child, key);
   }
 
-  override prependChild<V extends NodeView>(child: V | ViewFactory<V>, key?: string): V;
+  override prependChild<V extends NodeView>(child: V, key?: string): V;
+  override prependChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
   override prependChild<K extends keyof SvgViewTagMap>(tag: K, key?: string): SvgViewTagMap[K];
   override prependChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView;
   override prependChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView {
@@ -245,7 +248,8 @@ export class SvgView extends ElementView {
     return super.prependChild(child, key);
   }
 
-  override insertChild<V extends NodeView>(child: V | ViewFactory<V>, target: View | Node | null, key?: string): V;
+  override insertChild<V extends NodeView>(child: V, target: View | Node | null, key?: string): V;
+  override insertChild<F extends ViewCreator<F, NodeView>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   override insertChild<K extends keyof SvgViewTagMap>(tag: K, target: View | Node | null, key?: string): SvgViewTagMap[K];
   override insertChild(child: AnyNodeView | keyof SvgViewTagMap, target: View | Node | null, key?: string): NodeView;
   override insertChild(child: AnyNodeView | keyof SvgViewTagMap, target: View | Node | null, key?: string): NodeView {

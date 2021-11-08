@@ -118,6 +118,9 @@ export interface ViewConstructor<V extends View = View, U = AnyView<V>> extends 
   new(): V;
 }
 
+export type ViewCreator<F extends (abstract new (...args: any[]) => V) & Creatable<InstanceType<F>>, V extends View = View> =
+  (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
+
 export abstract class View extends Hierarchy implements Initable<ViewInit>, ConstraintScope, ConstraintContext, ThemeContext {
   constructor() {
     super();
@@ -230,19 +233,23 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   abstract override forEachChild<T>(callback: (child: View) => T | void): T | undefined;
   abstract override forEachChild<T, S>(callback: (this: S, child: View) => T | void, thisArg: S): T | undefined;
 
-  abstract override getChild<V extends View>(key: string, childBound: Class<V>): V | null;
-  abstract override getChild(key: string, childBound?: Class<View>): View | null;
+  abstract override getChild<F extends abstract new (...args: any[]) => View>(key: string, childBound: F): InstanceType<F> | null;
+  abstract override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null;
 
-  abstract override setChild<V extends View>(key: string, newChild: V | null): View | null;
+  abstract override setChild<V extends View>(key: string, newChild: V): View | null;
+  abstract override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
   abstract override setChild(key: string, newChild: AnyView | null): View | null;
 
   abstract override appendChild<V extends View>(child: V, key?: string): V;
+  abstract override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   abstract override appendChild(child: AnyView, key?: string): View;
 
   abstract override prependChild<V extends View>(child: V, key?: string): V;
+  abstract override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   abstract override prependChild(child: AnyView, key?: string): View;
 
   abstract override insertChild<V extends View>(child: V, target: View | null, key?: string): V;
+  abstract override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   abstract override insertChild(child: AnyView, target: View | null, key?: string): View;
 
   abstract override replaceChild<V extends View>(newChild: View, oldChild: V): V;

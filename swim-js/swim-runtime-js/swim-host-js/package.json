@@ -28,7 +28,7 @@
     "@typescript-eslint/eslint-plugin": "5",
     "@typescript-eslint/parser": "5",
     "eslint": "8",
-    "rollup": "2.58",
+    "rollup": "2.59",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",

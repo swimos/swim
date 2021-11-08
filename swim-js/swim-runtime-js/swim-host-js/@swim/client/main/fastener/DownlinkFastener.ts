@@ -223,6 +223,12 @@ export interface DownlinkFastener<O = unknown> extends Fastener<O>, Consumable {
 
   /** @internal @protected */
   get consumed(): boolean | undefined; // optional prototype property
+
+  /** @internal @override */
+  get lazy(): boolean; // prototype property
+
+  /** @internal @override */
+  get static(): string | boolean; // prototype property
 }
 
 export const DownlinkFastener = (function (_super: typeof Fastener) {
@@ -579,6 +585,20 @@ export const DownlinkFastener = (function (_super: typeof Fastener) {
     _super.prototype.onUnmount.call(this);
     this.unlink();
   };
+
+  Object.defineProperty(DownlinkFastener.prototype, "lazy", {
+    get: function (this: DownlinkFastener): boolean {
+      return false;
+    },
+    configurable: true,
+  });
+
+  Object.defineProperty(DownlinkFastener.prototype, "static", {
+    get: function (this: DownlinkFastener): string | boolean {
+      return true;
+    },
+    configurable: true,
+  });
 
   DownlinkFastener.construct = function <F extends DownlinkFastener<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
     fastener = _super.construct(fastenerClass, fastener, owner) as F;

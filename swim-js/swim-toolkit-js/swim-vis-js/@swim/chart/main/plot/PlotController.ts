@@ -34,7 +34,7 @@ export abstract class PlotController<X = unknown, Y = unknown> extends DataSetCo
 
   abstract readonly plot: TraitViewRef<this, PlotTrait<X, Y>, PlotView<X, Y>>;
 
-  static fromTrait<X, Y>(plotTrait: PlotTrait<X, Y>): PlotController<X, Y> | null {
+  static fromTrait<X, Y>(plotTrait: PlotTrait<X, Y>): PlotController<X, Y> {
     if (plotTrait instanceof BubblePlotTrait) {
       return new BubblePlotController<X, Y>();
     } else if (plotTrait instanceof LinePlotTrait) {
@@ -42,7 +42,7 @@ export abstract class PlotController<X = unknown, Y = unknown> extends DataSetCo
     } else if (plotTrait instanceof AreaPlotTrait) {
       return new AreaPlotController<X, Y>();
     } else {
-      return null;
+      throw new Error("Can't create PlotController from " + plotTrait);
     }
   }
 }

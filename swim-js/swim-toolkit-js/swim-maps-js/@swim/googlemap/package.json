@@ -10,9 +10,6 @@
   "main": "dist/main/swim-googlemap.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
-  "devDependencies": {
-    "@types/google.maps": "3.45"
-  },
   "dependencies": {
     "@swim/util": "4.0.0-dev.20210927.1",
     "@swim/codec": "4.0.0-dev.20210927.1",
@@ -37,6 +34,6 @@
     "@swim/graphics": "4.0.0-dev.20210927.1",
     "@swim/controller": "4.0.0-dev.20210927.1",
     "@swim/map": "4.0.0-dev.20210927.1",
-    "@types/google.maps": ">= 3.0"
+    "@types/google.maps": "3"
   }
 }

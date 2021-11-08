@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length} from "@swim/math";
+import {AnyLength, Length, PxLength} from "@swim/math";
 import {StyleConstraintAnimatorFactory, StyleConstraintAnimator} from "./StyleConstraintAnimator";
 
 /** @internal */
@@ -20,9 +20,15 @@ export const LengthStyleConstraintAnimator = (function (_super: typeof StyleCons
   const LengthStyleConstraintAnimator = _super.extend("LengthStyleConstraintAnimator") as StyleConstraintAnimatorFactory<StyleConstraintAnimator<any, Length | null, AnyLength | null>>;
 
   LengthStyleConstraintAnimator.prototype.toNumber = function (value: Length): number {
-    try {
-      return value.pxValue();
-    } catch (swallow) {
+    if (!(value instanceof PxLength)) {
+      const computedValue = this.computedValue;
+      if (computedValue !== void 0 && computedValue !== null) {
+        value = computedValue;
+      }
+    }
+    if (value instanceof PxLength) {
+      return value.value;
+    } else {
       return 0;
     }
   };

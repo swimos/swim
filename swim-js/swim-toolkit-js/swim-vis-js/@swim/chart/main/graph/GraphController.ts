@@ -52,22 +52,22 @@ export class GraphController<X = unknown, Y = unknown> extends GenericController
   @TraitViewRef<GraphController<X, Y>, GraphTrait<X, Y>, GraphView<X, Y>>({
     traitType: GraphTrait,
     observesTrait: true,
-    willAttachTrait(graphTrait: GraphTrait<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachGraphTrait", graphTrait, this.owner);
-    },
-    didAttachTrait(graphTrait: GraphTrait<X, Y>): void {
+    initTrait(graphTrait: GraphTrait<X, Y>): void {
       const plotTraits = graphTrait.plots.traits;
       for (const traitId in plotTraits) {
         const plotTrait = plotTraits[traitId]!;
         this.owner.plots.addTrait(plotTrait);
       }
     },
-    willDetachTrait(graphTrait: GraphTrait<X, Y>): void {
+    deinitTrait(graphTrait: GraphTrait<X, Y>): void {
       const plotTraits = graphTrait.plots.traits;
       for (const traitId in plotTraits) {
         const plotTrait = plotTraits[traitId]!;
         this.owner.plots.deleteTrait(plotTrait);
       }
+    },
+    willAttachTrait(graphTrait: GraphTrait<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachGraphTrait", graphTrait, this.owner);
     },
     didDetachTrait(graphTrait: GraphTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachGraphTrait", graphTrait, this.owner);
@@ -79,10 +79,7 @@ export class GraphController<X = unknown, Y = unknown> extends GenericController
       this.owner.plots.deleteTrait(plotTrait);
     },
     viewType: GraphView,
-    willAttachView(newGraphView: GraphView<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachGraphView", newGraphView, this.owner);
-    },
-    didAttachView(graphView: GraphView<X, Y>): void {
+    initView(graphView: GraphView<X, Y>): void {
       const plotControllers = this.owner.plots.controllers;
       for (const controllerId in plotControllers) {
         const plotController = plotControllers[controllerId]!;
@@ -91,6 +88,9 @@ export class GraphController<X = unknown, Y = unknown> extends GenericController
           plotController.plot.insertView(graphView);
         }
       }
+    },
+    willAttachView(newGraphView: GraphView<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachGraphView", newGraphView, this.owner);
     },
     didDetachView(newGraphView: GraphView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachGraphView", newGraphView, this.owner);
@@ -108,9 +108,6 @@ export class GraphController<X = unknown, Y = unknown> extends GenericController
     },
     getTraitViewRef(plotController: PlotController<X, Y>): TraitViewRef<unknown, PlotTrait<X, Y>, PlotView<X, Y>> {
       return plotController.plot;
-    },
-    createController(plotTrait?: PlotTrait<X, Y>): PlotController<X, Y> | null {
-      return plotTrait !== void 0 ? PlotController.fromTrait(plotTrait) : null;
     },
     willAttachController(plotController: PlotController<X, Y>): void {
       this.owner.callObservers("controllerWillAttachPlot", plotController, this.owner);
@@ -263,6 +260,13 @@ export class GraphController<X = unknown, Y = unknown> extends GenericController
     },
     detachDataPointLabelView(dataPointLabelView: GraphicsView, dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>): void {
       // hook
+    },
+    createController(plotTrait?: PlotTrait<X, Y>): PlotController<X, Y> {
+      if (plotTrait !== void 0) {
+        return PlotController.fromTrait(plotTrait);
+      } else {
+        return TraitViewControllerSet.prototype.createController.call(this);
+      }
     },
   })
   readonly plots!: TraitViewControllerSet<this, PlotTrait<X, Y>, PlotView<X, Y>, PlotController<X, Y>>;

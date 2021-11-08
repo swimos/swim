@@ -17,8 +17,16 @@ import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {Look, ThemeAnimator, ExpansionThemeAnimator, ThemeConstraintAnimator} from "@swim/theme";
-import {PositionGestureInput, ViewContextType, ViewContext, ViewFlags, View, ViewRef} from "@swim/view";
-import {HtmlViewClass, HtmlView} from "@swim/dom";
+import {
+  PositionGestureInput,
+  ViewContextType,
+  ViewContext,
+  ViewFlags,
+  ViewCreator,
+  View,
+  ViewRef,
+} from "@swim/view";
+import {HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import type {CellView} from "../cell/CellView";
 import {LeafView} from "../leaf/LeafView";
@@ -71,14 +79,14 @@ export class RowView extends HtmlView {
   @Property({type: Boolean, inherits: true, state: true})
   readonly glows!: Property<this, boolean>;
 
+  getCell<F extends abstract new (...args: any[]) => CellView>(key: string, cellViewClass: F): InstanceType<F> | null;
   getCell(key: string): CellView | null;
-  getCell<V extends CellView>(key: string, cellViewClass: Class<V>): V | null;
-  getCell(key: string, cellViewClass?: Class<CellView>): CellView | null {
+  getCell(key: string, cellViewClass?: abstract new (...args: any[]) => CellView): CellView | null {
     const leafView = this.leaf.view;
     return leafView !== null ? leafView.getCell(key, cellViewClass!) : null;
   }
 
-  getOrCreateCell<V extends CellView>(key: string, cellViewClass: HtmlViewClass<V>): V {
+  getOrCreateCell<F extends ViewCreator<F, CellView>>(key: string, cellViewClass: F): InstanceType<F> {
     const leafView = this.leaf.insertView();
     if (leafView === null) {
       throw new Error("no leaf view");

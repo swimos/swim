@@ -161,10 +161,14 @@ export class GeoLayerController extends GeoController {
     controllerDidSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, featureController: GeoController): void {
       this.owner.callObservers("controllerDidSetFeatureGeoBounds", newGeoBounds, oldGeoBounds, featureController, this.owner);
     },
-    createController(featureTrait?: GeoTrait): GeoController | null {
-      return featureTrait !== void 0 ? GeoController.fromTrait(featureTrait) : null;
+    createController(featureTrait?: GeoTrait): GeoController {
+      if (featureTrait !== void 0) {
+        return GeoController.fromTrait(featureTrait);
+      } else {
+        return TraitViewControllerSet.prototype.createController.call(this);
+      }
     },
   })
-  readonly features!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController>;
+  readonly features!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController> & GeoLayerControllerFeatureExt;
   static readonly features: MemberFastenerClass<GeoLayerController, "features">;
 }

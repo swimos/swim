@@ -207,7 +207,7 @@ export class GaugeView extends LayerView {
       // hook
     },
   })
-  readonly dials!: ViewSet<this, DialView>;
+  readonly dials!: ViewSet<this, DialView> & GaugeViewDialExt;
   static readonly dials: MemberFastenerClass<GaugeView, "dials">;
 
   protected override onLayout(viewContext: ViewContextType<this>): void {

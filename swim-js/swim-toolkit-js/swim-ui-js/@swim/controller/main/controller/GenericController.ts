@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
-import {ControllerContextType, ControllerFlags, AnyController, ControllerFactory, Controller} from "./Controller";
+import type {Mutable, Dictionary, MutableDictionary} from "@swim/util";
+import {ControllerContextType, ControllerFlags, AnyController, ControllerCreator, Controller} from "./Controller";
 
 export class GenericController extends Controller {
   constructor() {
@@ -122,9 +122,9 @@ export class GenericController extends Controller {
     }
   }
 
-  override getChild<C extends Controller>(key: string, childBound: Class<C>): C | null;
-  override getChild(key: string, childBound?: Class<Controller>): Controller | null;
-  override getChild(key: string, childBound?: Class<Controller>): Controller | null {
+  override getChild<F extends abstract new (...args: any[]) => Controller>(key: string, childBound: F): InstanceType<F> | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => Controller): Controller | null;
+  override getChild(key: string, childBound?: abstract new (...args: any[]) => Controller): Controller | null {
     const childMap = this.childMap;
     if (childMap !== null) {
       const child = childMap[key];
@@ -135,7 +135,8 @@ export class GenericController extends Controller {
     return null;
   }
 
-  override setChild<C extends Controller>(key: string, newChild: C | ControllerFactory<C> | null): Controller | null;
+  override setChild<C extends Controller>(key: string, newChild: C): Controller | null;
+  override setChild<F extends ControllerCreator<F>>(key: string, factory: F): Controller | null;
   override setChild(key: string, newChild: AnyController | null): Controller | null;
   override setChild(key: string, newChild: AnyController | null): Controller | null {
     if (newChild !== null) {
@@ -199,7 +200,8 @@ export class GenericController extends Controller {
     return oldChild;
   }
 
-  override appendChild<C extends Controller>(child: C | ControllerFactory<C>, key?: string): C;
+  override appendChild<C extends Controller>(child: C, key?: string): C;
+  override appendChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyController, key?: string): Controller;
   override appendChild(child: AnyController, key?: string): Controller {
     child = Controller.fromAny(child);
@@ -221,7 +223,8 @@ export class GenericController extends Controller {
     return child;
   }
 
-  override prependChild<C extends Controller>(child: C | ControllerFactory<C>, key?: string): C;
+  override prependChild<C extends Controller>(child: C, key?: string): C;
+  override prependChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyController, key?: string): Controller;
   override prependChild(child: AnyController, key?: string): Controller {
     child = Controller.fromAny(child);
@@ -245,7 +248,8 @@ export class GenericController extends Controller {
     return child;
   }
 
-  override insertChild<C extends Controller>(child: C | ControllerFactory<C>, target: Controller | null, key?: string): C;
+  override insertChild<C extends Controller>(child: C, target: Controller | null, key?: string): C;
+  override insertChild<F extends ControllerCreator<F>>(factory: F, target: Controller | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyController, target: Controller | null, key?: string): Controller;
   override insertChild(child: AnyController, target: Controller | null, key?: string): Controller {
     if (target !== null && target.parent !== this) {

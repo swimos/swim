@@ -35,7 +35,7 @@ import {SelectionProvider} from "../selection/SelectionProvider";
 import {ModelContext} from "./ModelContext";
 import type {ModelObserver} from "./ModelObserver";
 import {ModelRelation} from "./"; // forward import
-import {AnyTrait, TraitFactory, Trait} from "../"; // forward import
+import {AnyTrait, TraitCreator, Trait} from "../"; // forward import
 import {TraitRelation} from "../"; // forward import
 
 export type ModelContextType<M extends Model> =
@@ -63,6 +63,9 @@ export interface ModelClass<M extends Model = Model, U = AnyModel<M>> extends Fu
 export interface ModelConstructor<M extends Model = Model, U = AnyModel<M>> extends ModelClass<M, U> {
   new(): M;
 }
+
+export type ModelCreator<F extends (abstract new (...args: any[]) => M) & Creatable<InstanceType<F>>, M extends Model = Model> =
+  (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
 export abstract class Model extends Hierarchy implements Initable<ModelInit>, Consumable {
   constructor() {
@@ -201,19 +204,23 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
   abstract override forEachChild<T>(callback: (child: Model) => T | void): T | undefined;
   abstract override forEachChild<T, S>(callback: (this: S, child: Model) => T | void, thisArg: S): T | undefined;
 
-  abstract override getChild<M extends Model>(key: string, childBound: Class<M>): M | null;
-  abstract override getChild(key: string, childBound?: Class<Model>): Model | null;
+  abstract override getChild<F extends abstract new (...args: any[]) => Model>(key: string, childBound: F): InstanceType<F> | null;
+  abstract override getChild(key: string, childBound?: abstract new (...args: any[]) => Model): Model | null;
 
-  abstract override setChild<M extends Model>(key: string, newChild: M | ModelFactory<M> | null): Model | null;
+  abstract override setChild<M extends Model>(key: string, newChild: M): Model | null;
+  abstract override setChild<F extends ModelCreator<F>>(key: string, factory: F): Model | null;
   abstract override setChild(key: string, newChild: AnyModel | null): Model | null;
 
-  abstract override appendChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
+  abstract override appendChild<M extends Model>(child: M, key?: string): M;
+  abstract override appendChild<F extends ModelCreator<F>>(factory: F, key?: string): InstanceType<F>;
   abstract override appendChild(child: AnyModel, key?: string): Model;
 
-  abstract override prependChild<M extends Model>(child: M | ModelFactory<M>, key?: string): M;
+  abstract override prependChild<M extends Model>(child: M, key?: string): M;
+  abstract override prependChild<F extends ModelCreator<F>>(factory: F, key?: string): InstanceType<F>;
   abstract override prependChild(child: AnyModel, key?: string): Model;
 
-  abstract override insertChild<M extends Model>(child: M | ModelFactory<M>, target: Model | null, key?: string): M;
+  abstract override insertChild<M extends Model>(child: M, target: Model | null, key?: string): M;
+  abstract override insertChild<F extends ModelCreator<F>>(factory: F, target: Model | null, key?: string): InstanceType<F>;
   abstract override insertChild(child: AnyModel, target: Model | null, key?: string): Model;
 
   abstract override replaceChild<M extends Model>(newChild: Model, oldChild: M): M;
@@ -424,10 +431,10 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     }
   }
 
-  getTrait<T extends Trait>(key: string, traitBound: Class<T>): T | null;
-  getTrait(key: string, traitBound?: Class<Trait>): Trait | null;
-  getTrait<T extends Trait>(traitBound: Class<T>): T | null;
-  getTrait(key: string | Class<Trait>, traitBound?: Class<Trait>): Trait | null {
+  getTrait<F extends abstract new (...args: any[]) => Trait>(key: string, traitBound: F): InstanceType<F> | null;
+  getTrait(key: string, traitBound?: abstract new (...args: any[]) => Trait): Trait | null;
+  getTrait<F extends abstract new (...args: any[]) => Trait>(traitBound: F): InstanceType<F> | null;
+  getTrait(key: string | (abstract new (...args: any[]) => Trait), traitBound?: abstract new (...args: any[]) => Trait): Trait | null {
     if (typeof key === "string") {
       const traitMap = this.traitMap;
       if (traitMap !== null) {
@@ -448,7 +455,8 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     return null;
   }
 
-  setTrait<T extends Trait>(key: string, newTrait: T | TraitFactory<T> | null): Trait | null;
+  setTrait<T extends Trait>(key: string, newTrait: T): Trait | null;
+  setTrait<F extends TraitCreator<F>>(key: string, factory: F): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null {
     if (newTrait !== null) {
@@ -510,7 +518,8 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     return oldTrait;
   }
 
-  appendTrait<T extends Trait>(trait: T | TraitFactory<T>, key?: string): T;
+  appendTrait<T extends Trait>(trait: T, key?: string): T;
+  appendTrait<F extends TraitCreator<F>>(factory: F, key?: string): InstanceType<F>;
   appendTrait(trait: AnyTrait, key?: string): Trait;
   appendTrait(trait: AnyTrait, key?: string): Trait {
     trait = Trait.fromAny(trait);
@@ -531,7 +540,8 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     return trait;
   }
 
-  prependTrait<T extends Trait>(trait: T | TraitFactory<T>, key?: string): T;
+  prependTrait<T extends Trait>(trait: T, key?: string): T;
+  prependTrait<F extends TraitCreator<F>>(factory: F, key?: string): InstanceType<F>;
   prependTrait(trait: AnyTrait, key?: string): Trait;
   prependTrait(trait: AnyTrait, key?: string): Trait {
     trait = Trait.fromAny(trait);
@@ -554,7 +564,8 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     return trait;
   }
 
-  insertTrait<T extends Trait>(trait: T | TraitFactory<T>, target: Trait | null, key?: string): T;
+  insertTrait<T extends Trait>(trait: T, target: Trait | null, key?: string): T;
+  insertTrait<F extends TraitCreator<F>>(factory: F, target: Trait | null, key?: string): InstanceType<F>;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait {
     if (target !== null && target.model !== this) {
@@ -748,7 +759,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     }
   }
 
-  getSuperTrait<T extends Trait>(superBound: Class<T>): T | null {
+  getSuperTrait<F extends abstract new (...args: any[]) => Trait>(superBound: F): InstanceType<F> | null {
     const parent = this.parent;
     if (parent === null) {
       return null;
@@ -762,7 +773,7 @@ export abstract class Model extends Hierarchy implements Initable<ModelInit>, Co
     }
   }
 
-  getBaseTrait<T extends Trait>(baseBound: Class<T>): T | null {
+  getBaseTrait<F extends abstract new (...args: any[]) => Trait>(baseBound: F): InstanceType<F> | null {
     const parent = this.parent;
     if (parent === null) {
       return null;

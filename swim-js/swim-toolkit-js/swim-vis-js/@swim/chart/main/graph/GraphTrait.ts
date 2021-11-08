@@ -41,7 +41,7 @@ export class GraphTrait<X = unknown, Y = unknown> extends Trait {
       this.owner.callObservers("traitDidDetachPlot", plotTrait, this.owner);
     },
     detectModel(model: Model): PlotTrait<X, Y> | null {
-      return model.getTrait(PlotTrait);
+      return model.getTrait(PlotTrait) as PlotTrait<X, Y>;
     },
   })
   readonly plots!: TraitSet<this, PlotTrait<X, Y>>;

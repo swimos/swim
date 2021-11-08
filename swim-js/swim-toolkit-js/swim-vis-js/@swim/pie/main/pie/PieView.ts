@@ -203,7 +203,7 @@ export class PieView extends LayerView {
       // hook
     },
   })
-  readonly slices!: ViewSet<this, SliceView>;
+  readonly slices!: ViewSet<this, SliceView> & PieViewSliceExt;
   static readonly slices: MemberFastenerClass<PieView, "slices">;
 
   protected override onLayout(viewContext: ViewContextType<this>): void {

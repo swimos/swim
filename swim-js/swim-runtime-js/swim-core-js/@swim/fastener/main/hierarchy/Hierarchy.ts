@@ -126,8 +126,8 @@ export abstract class Hierarchy implements HashCode, Family, Observable, Fastene
   abstract forEachChild<T>(callback: (child: Hierarchy) => T | void): T | undefined;
   abstract forEachChild<T, S>(callback: (this: S, child: Hierarchy) => T | void, thisArg: S): T | undefined;
 
-  abstract getChild<H extends Hierarchy>(key: string, childBound: Class<H>): H | null;
-  abstract getChild(key: string, childBound?: Class<Hierarchy>): Hierarchy | null;
+  abstract getChild<F extends abstract new (...args: any[]) => Hierarchy>(key: string, childBound: F): InstanceType<F> | null;
+  abstract getChild(key: string, childBound?: abstract new (...args: any[]) => Hierarchy): Hierarchy | null;
 
   abstract setChild(key: string, newChild: Hierarchy | null): Hierarchy | null;
 
@@ -192,18 +192,18 @@ export abstract class Hierarchy implements HashCode, Family, Observable, Fastene
     }
   }
 
-  getSuper<H>(superBound: Class<H>): H | null {
+  getSuper<F extends abstract new (...args: any[]) => Hierarchy>(superBound: F): InstanceType<F> | null {
     const parent = this.parent;
     if (parent === null) {
       return null;
     } else if (parent instanceof superBound) {
-      return parent;
+      return parent as InstanceType<F>;
     } else {
-      return parent.getSuper(superBound);
+      return (parent as Hierarchy).getSuper(superBound);
     }
   }
 
-  getBase<H>(baseBound: Class<H>): H | null {
+  getBase<F extends abstract new (...args: any[]) => Hierarchy>(baseBound: F): InstanceType<F> | null {
     const parent = this.parent;
     if (parent === null) {
       return null;
@@ -212,7 +212,7 @@ export abstract class Hierarchy implements HashCode, Family, Observable, Fastene
       if (base !== null) {
         return base;
       } else {
-        return parent instanceof baseBound ? parent : null;
+        return parent instanceof baseBound ? parent as InstanceType<F> : null;
       }
     }
   }

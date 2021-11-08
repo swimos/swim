@@ -30,17 +30,13 @@ import type {AreaPlotControllerObserver} from "./AreaPlotControllerObserver";
 export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotController<X, Y> {
   override readonly observerType?: Class<AreaPlotControllerObserver<X, Y>>;
 
-  protected detectDataSet(plotTrait: AreaPlotTrait<X, Y>): DataSetTrait<X, Y> | null {
-    return plotTrait.getTrait(DataSetTrait);
-  }
-
   @TraitViewControllerSet<AreaPlotController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>, DataSetControllerDataPointExt<X, Y>>({
     extends: true,
     get parentView(): AreaPlotView<X, Y> | null {
       return this.owner.plot.view;
     },
   })
-  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>>;
+  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & DataSetControllerDataPointExt<X, Y>;
   static override readonly dataPoints: MemberFastenerClass<AreaPlotController, "dataPoints">;
 
   protected setPlotFill(fill: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
@@ -89,10 +85,13 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
   @TraitViewRef<AreaPlotController<X, Y>, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>({
     traitType: AreaPlotTrait,
     observesTrait: true,
-    willAttachTrait(plotTrait: AreaPlotTrait<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachPlotTrait", plotTrait, this.owner);
-    },
-    didAttachTrait(plotTrait: AreaPlotTrait<X, Y>): void {
+    initTrait(plotTrait: AreaPlotTrait<X, Y>): void {
+      if (this.owner.dataSet.trait === null) {
+        const dataSetTrait = plotTrait.getTrait(DataSetTrait) as DataSetTrait<X, Y>;
+        if (dataSetTrait !== null) {
+          this.owner.dataSet.setTrait(dataSetTrait);
+        }
+      }
       const plotView = this.view;
       if (plotView !== null) {
         const fill = plotTrait.fill.state;
@@ -100,12 +99,9 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
           this.owner.setPlotFill(fill);
         }
       }
-      if (this.owner.dataSet.trait === null) {
-        const dataSetTrait = this.owner.detectDataSet(plotTrait);
-        if (dataSetTrait !== null) {
-          this.owner.dataSet.setTrait(dataSetTrait);
-        }
-      }
+    },
+    willAttachTrait(plotTrait: AreaPlotTrait<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotTrait", plotTrait, this.owner);
     },
     didDetachTrait(plotTrait: AreaPlotTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotTrait", plotTrait, this.owner);
@@ -115,10 +111,12 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     },
     viewType: AreaPlotView,
     observesView: true,
-    willAttachView(plotVIew: AreaPlotView<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachPlotView", plotVIew, this.owner);
-    },
-    didAttachView(plotView: AreaPlotView<X, Y>): void {
+    initView(plotView: AreaPlotView<X, Y>): void {
+      const dataPointControllers = this.owner.dataPoints.controllers;
+      for (const controllerId in dataPointControllers) {
+        const dataPointController = dataPointControllers[controllerId]!;
+        dataPointController.dataPoint.insertView(plotView);
+      }
       const plotTrait = this.trait;
       if (plotTrait !== null) {
         const fill = plotTrait.fill.state;
@@ -126,11 +124,9 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
           this.owner.setPlotFill(fill);
         }
       }
-      const dataPointControllers = this.owner.dataPoints.controllers;
-      for (const controllerId in dataPointControllers) {
-        const dataPointController = dataPointControllers[controllerId]!;
-        dataPointController.dataPoint.insertView(plotView);
-      }
+    },
+    willAttachView(plotVIew: AreaPlotView<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotView", plotVIew, this.owner);
     },
     didDetachView(plotVIew: AreaPlotView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotView", plotVIew, this.owner);

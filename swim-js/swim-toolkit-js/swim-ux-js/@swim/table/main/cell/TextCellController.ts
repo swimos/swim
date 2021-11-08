@@ -29,10 +29,10 @@ export class TextCellController extends CellController {
     extends: true,
     traitType: TextCellTrait,
     observesTrait: true,
-    didAttachTrait(cellTrait: TextCellTrait): void {
+    initTrait(cellTrait: TextCellTrait): void {
       this.owner.setContentView(cellTrait.content.state, cellTrait);
     },
-    willDetachTrait(cellTrait: TextCellTrait): void {
+    deinitTrait(cellTrait: TextCellTrait): void {
       this.owner.setContentView(null, cellTrait);
     },
     traitDidSetContent(newContent: TextCellContent | null, oldContent: TextCellContent | null, cellTrait: TextCellTrait): void {
@@ -40,14 +40,14 @@ export class TextCellController extends CellController {
     },
     viewType: TextCellView,
     observesView: true,
-    didAttachView(cellView: TextCellView): void {
+    initView(cellView: TextCellView): void {
       this.owner.content.setView(cellView.content.view);
       const cellTrait = this.trait;
       if (cellTrait !== null) {
         this.owner.setContentView(cellTrait.content.state, cellTrait);
       }
     },
-    willDetachView(cellView: TextCellView): void {
+    deinitView(cellView: TextCellView): void {
       this.owner.content.setView(null);
     },
     viewWillAttachContent(contentView: HtmlView): void {

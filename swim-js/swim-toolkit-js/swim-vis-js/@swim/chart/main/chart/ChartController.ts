@@ -14,7 +14,6 @@
 
 import type {Class} from "@swim/util";
 import type {MemberFastenerClass} from "@swim/fastener";
-import type {Trait} from "@swim/model";
 import type {View} from "@swim/view";
 import {Controller, TraitViewRef, TraitViewControllerRef} from "@swim/controller";
 import type {GraphView} from "../graph/GraphView";
@@ -45,10 +44,7 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
   @TraitViewRef<ChartController<X, Y>, ChartTrait<X, Y>, ChartView<X, Y>>({
     traitType: ChartTrait,
     observesTrait: true,
-    willAttachTrait(newChartTrait: ChartTrait<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachChartTrait", newChartTrait, this.owner);
-    },
-    didAttachTrait(chartTrait: ChartTrait<X, Y>): void {
+    initTrait(chartTrait: ChartTrait<X, Y>): void {
       this.owner.graph.setTrait(chartTrait.graph.trait);
       const topAxisTrait = chartTrait.topAxis.trait;
       if (topAxisTrait !== null) {
@@ -67,7 +63,7 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
         this.owner.leftAxis.setTrait(leftAxisTrait);
       }
     },
-    willDetachTrait(chartTrait: ChartTrait<X, Y>): void {
+    deinitTrait(chartTrait: ChartTrait<X, Y>): void {
       const leftAxisTrait = chartTrait.leftAxis.trait;
       if (leftAxisTrait !== null) {
         this.owner.leftAxis.deleteTrait(leftAxisTrait);
@@ -85,6 +81,9 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
         this.owner.topAxis.deleteTrait(topAxisTrait);
       }
       this.owner.graph.setTrait(null);
+    },
+    willAttachTrait(newChartTrait: ChartTrait<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachChartTrait", newChartTrait, this.owner);
     },
     didDetachTrait(newChartTrait: ChartTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachChartTrait", newChartTrait, this.owner);
@@ -114,10 +113,7 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
       this.owner.leftAxis.setTrait(null);
     },
     viewType: ChartView,
-    willAttachView(chartView: ChartView<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachChartView", chartView, this.owner);
-    },
-    didAttachView(chartView: ChartView<X, Y>): void {
+    initView(chartView: ChartView<X, Y>): void {
       const topAxisController = this.owner.topAxis.controller;
       if (topAxisController !== null) {
         topAxisController.axis.insertView(chartView);
@@ -138,6 +134,9 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
         this.owner.graph.insertView(chartView);
       }
     },
+    willAttachView(chartView: ChartView<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachChartView", chartView, this.owner);
+    },
     didDetachView(chartView: ChartView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachChartView", chartView, this.owner);
     },
@@ -147,22 +146,22 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
 
   @TraitViewRef<ChartController<X, Y>, GraphTrait<X, Y>, GraphView<X, Y>>({
     extends: true,
-    didAttachTrait(graphTrait: GraphTrait<X, Y>, targetTrait: Trait | null): void {
+    initTrait(graphTrait: GraphTrait<X, Y>): void {
+      GraphController.graph.prototype.initTrait.call(this, graphTrait as GraphTrait);
       const chartView = this.owner.chart.view;
       if (chartView !== null) {
         this.insertView(chartView);
       }
-      GraphController.graph.prototype.didAttachTrait.call(this, graphTrait as GraphTrait, targetTrait);
     },
-    didAttachView(graphView: GraphView<X, Y>, targetView: View | null): void {
+    initView(graphView: GraphView<X, Y>): void {
+      GraphController.graph.prototype.initView.call(this, graphView as GraphView);
       const chartView = this.owner.chart.view;
       if (chartView !== null) {
         this.insertView(chartView);
       }
-      GraphController.graph.prototype.didAttachView.call(this, graphView as GraphView, targetView);
     },
-    willDetachView(graphView: GraphView<X, Y>): void {
-      GraphController.graph.prototype.willDetachView.call(this, graphView as GraphView);
+    deinitView(graphView: GraphView<X, Y>): void {
+      GraphController.graph.prototype.deinitView.call(this, graphView as GraphView);
       graphView.remove();
     },
   })

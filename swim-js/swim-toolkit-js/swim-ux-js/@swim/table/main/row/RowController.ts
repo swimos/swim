@@ -37,10 +37,7 @@ export class RowController extends LeafController {
   @TraitViewRef<RowController, RowTrait, RowView>({
     traitType: RowTrait,
     observesTrait: true,
-    willAttachTrait(rowTrait: RowTrait): void {
-      this.owner.callObservers("controllerWillAttachRowTrait", rowTrait, this.owner);
-    },
-    didAttachTrait(rowTrait: RowTrait): void {
+    initTrait(rowTrait: RowTrait): void {
       if (this.owner.leaf.trait === null) {
         this.owner.leaf.setTrait(rowTrait);
       }
@@ -49,7 +46,7 @@ export class RowController extends LeafController {
         this.owner.tree.setTrait(treeTrait);
       }
     },
-    willDetachTrait(rowTrait: RowTrait): void {
+    deinitTrait(rowTrait: RowTrait): void {
       const treeTrait = rowTrait.tree.trait;
       if (treeTrait !== null) {
         this.owner.tree.deleteTrait(treeTrait);
@@ -57,6 +54,9 @@ export class RowController extends LeafController {
       if (this.owner.leaf.trait === rowTrait) {
         this.owner.leaf.setTrait(null);
       }
+    },
+    willAttachTrait(rowTrait: RowTrait): void {
+      this.owner.callObservers("controllerWillAttachRowTrait", rowTrait, this.owner);
     },
     didDetachTrait(rowTrait: RowTrait): void {
       this.owner.callObservers("controllerDidDetachRowTrait", rowTrait, this.owner);
@@ -69,13 +69,7 @@ export class RowController extends LeafController {
     },
     viewType: RowView,
     observesView: true,
-    willAttachView(rowView: RowView): void {
-      this.owner.callObservers("controllerWillAttachRowView", rowView, this.owner);
-    },
-    didDetachView(rowView: RowView): void {
-      this.owner.callObservers("controllerDidDetachRowView", rowView, this.owner);
-    },
-    didAttachView(rowView: RowView): void {
+    initView(rowView: RowView): void {
       if (this.owner.leaf.view === null) {
         const leafView = rowView.leaf.insertView();
         this.owner.leaf.setView(leafView);
@@ -84,6 +78,12 @@ export class RowController extends LeafController {
       if (treeController !== null) {
         treeController.table.insertView(rowView);
       }
+    },
+    willAttachView(rowView: RowView): void {
+      this.owner.callObservers("controllerWillAttachRowView", rowView, this.owner);
+    },
+    didDetachView(rowView: RowView): void {
+      this.owner.callObservers("controllerDidDetachRowView", rowView, this.owner);
     },
     viewWillExpand(rowView: RowView): void {
       this.owner.callObservers("controllerWillExpandRowView", rowView, this.owner);
@@ -117,10 +117,7 @@ export class RowController extends LeafController {
     getTraitViewRef(treeController: TableController): TraitViewRef<unknown, TableTrait, TableView> {
       return treeController.table;
     },
-    willAttachController(treeController: TableController): void {
-      this.owner.callObservers("controllerWillAttachTree", treeController, this.owner);
-    },
-    didAttachController(treeController: TableController): void {
+    initController(treeController: TableController): void {
       const treeTrait = treeController.table.trait;
       if (treeTrait !== null) {
         this.attachTreeTrait(treeTrait, treeController);
@@ -137,7 +134,7 @@ export class RowController extends LeafController {
         }
       }
     },
-    willDetachController(treeController: TableController): void {
+    deinitController(treeController: TableController): void {
       const treeTrait = treeController.table.trait;
       if (treeTrait !== null) {
         this.detachTreeTrait(treeTrait, treeController);
@@ -146,6 +143,9 @@ export class RowController extends LeafController {
       if (treeView !== null) {
         this.detachTreeView(treeView, treeController);
       }
+    },
+    willAttachController(treeController: TableController): void {
+      this.owner.callObservers("controllerWillAttachTree", treeController, this.owner);
     },
     didDetachController(treeController: TableController): void {
       this.owner.callObservers("controllerDidDetachTree", treeController, this.owner);
@@ -181,7 +181,7 @@ export class RowController extends LeafController {
     detectController(controller: Controller): TableController | null {
       return controller instanceof TableController ? controller : null;
     },
-    createController(): TableController | null {
+    createController(): TableController {
       return TableController.create();
     },
   })

@@ -14,9 +14,9 @@
 
 import type {Class, ObserverType} from "@swim/util";
 import type {MemberFastenerClass} from "@swim/fastener";
-import type {TraitConstructor, Trait} from "@swim/model";
-import type {PositionGestureInput} from "@swim/view";
-import type {HtmlViewClass, HtmlView} from "@swim/dom";
+import type {TraitCreator, Trait} from "@swim/model";
+import type {PositionGestureInput, ViewCreator} from "@swim/view";
+import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
 import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {CellView} from "../cell/CellView";
@@ -45,25 +45,25 @@ export class LeafController extends GenericController {
   @TraitViewRef<LeafController, LeafTrait, LeafView>({
     traitType: LeafTrait,
     observesTrait: true,
-    willAttachTrait(leafTrait: LeafTrait): void {
-      this.owner.callObservers("controllerWillAttachLeafTrait", leafTrait, this.owner);
-    },
-    didDetachTrait(leafTrait: LeafTrait): void {
-      this.owner.callObservers("controllerDidDetachLeafTrait", leafTrait, this.owner);
-    },
-    didAttachTrait(leafTrait: LeafTrait): void {
+    initTrait(leafTrait: LeafTrait): void {
       const cellTraits = leafTrait.cells.traits;
       for (const traitId in cellTraits) {
         const cellTrait = cellTraits[traitId]!;
         this.owner.cells.addTrait(cellTrait);
       }
     },
-    willDetachTrait(leafTrait: LeafTrait): void {
+    deinitTrait(leafTrait: LeafTrait): void {
       const cellTraits = leafTrait.cells.traits;
       for (const traitId in cellTraits) {
         const cellTrait = cellTraits[traitId]!;
         this.owner.cells.deleteTrait(cellTrait);
       }
+    },
+    willAttachTrait(leafTrait: LeafTrait): void {
+      this.owner.callObservers("controllerWillAttachLeafTrait", leafTrait, this.owner);
+    },
+    didDetachTrait(leafTrait: LeafTrait): void {
+      this.owner.callObservers("controllerDidDetachLeafTrait", leafTrait, this.owner);
     },
     traitWillAttachCell(cellTrait: CellTrait, targetTrait: Trait | null): void {
       this.owner.cells.addTrait(cellTrait, targetTrait);
@@ -73,10 +73,7 @@ export class LeafController extends GenericController {
     },
     viewType: LeafView,
     observesView: true,
-    willAttachView(leafView: LeafView): void {
-      this.owner.callObservers("controllerWillAttachLeafView", leafView, this.owner);
-    },
-    didAttachView(leafView: LeafView): void {
+    initView(leafView: LeafView): void {
       const cellControllers = this.owner.cells.controllers;
       for (const controllerId in cellControllers) {
         const cellController = cellControllers[controllerId]!;
@@ -88,6 +85,9 @@ export class LeafController extends GenericController {
           }
         }
       }
+    },
+    willAttachView(leafView: LeafView): void {
+      this.owner.callObservers("controllerWillAttachLeafView", leafView, this.owner);
     },
     didDetachView(leafView: LeafView): void {
       this.owner.callObservers("controllerDidDetachLeafView", leafView, this.owner);
@@ -120,19 +120,19 @@ export class LeafController extends GenericController {
   readonly leaf!: TraitViewRef<this, LeafTrait, LeafView>;
   static readonly leaf: MemberFastenerClass<LeafController, "leaf">;
 
+  getCellTrait<F extends abstract new (...args: any[]) => CellTrait>(key: string, cellTraitClass: F): InstanceType<F> | null;
   getCellTrait(key: string): CellTrait | null;
-  getCellTrait<R extends CellTrait>(key: string, cellTraitClass: Class<R>): R | null;
-  getCellTrait(key: string, cellTraitClass?: Class<CellTrait>): CellTrait | null {
+  getCellTrait(key: string, cellTraitClass?: abstract new (...args: any[]) => CellTrait): CellTrait | null {
     const leafTrait = this.leaf.trait;
     return leafTrait !== null ? leafTrait.getCell(key, cellTraitClass!) : null;
   }
 
-  getOrCreateCellTrait<R extends CellTrait>(key: string, cellTraitConstructor: TraitConstructor<R>): R {
+  getOrCreateCellTrait<F extends TraitCreator<F, CellTrait>>(key: string, cellTraitClass: F): InstanceType<F> {
     const leafTrait = this.leaf.trait;
     if (leafTrait === null) {
       throw new Error("no leaf trait");
     }
-    return leafTrait.getOrCreateCell(key, cellTraitConstructor);
+    return leafTrait.getOrCreateCell(key, cellTraitClass);
   }
 
   setCellTrait(key: string, cellTrait: CellTrait): void {
@@ -143,14 +143,14 @@ export class LeafController extends GenericController {
     leafTrait.setCell(key, cellTrait);
   }
 
+  getCellView<F extends abstract new (...args: any[]) => CellView>(key: string, cellViewClass: F): InstanceType<F> | null;
   getCellView(key: string): CellView | null;
-  getCellView<V extends CellView>(key: string, cellViewClass: Class<V>): V | null;
-  getCellView(key: string, cellViewClass?: Class<CellView>): CellView | null {
+  getCellView(key: string, cellViewClass?: abstract new (...args: any[]) => CellView): CellView | null {
     const leafView = this.leaf.view;
     return leafView !== null ? leafView.getCell(key, cellViewClass!) : null;
   }
 
-  getOrCreateCellView<V extends CellView>(key: string, cellViewClass: HtmlViewClass<V>): V {
+  getOrCreateCellView<F extends ViewCreator<F, CellView>>(key: string, cellViewClass: F): InstanceType<F> {
     let leafView = this.leaf.view;
     if (leafView === null) {
       leafView = this.leaf.createView();
@@ -275,8 +275,12 @@ export class LeafController extends GenericController {
     controllerDidSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController): void {
       this.owner.callObservers("controllerDidSetCellIcon", newCellIcon, oldCellIcon, cellController, this.owner);
     },
-    createController(cellTrait: CellTrait): CellController | null {
-      return CellController.fromTrait(cellTrait);
+    createController(cellTrait?: CellTrait): CellController {
+      if (cellTrait !== void 0) {
+        return CellController.fromTrait(cellTrait);
+      } else {
+        return TraitViewControllerSet.prototype.createController.call(this);
+      }
     },
   })
   readonly cells!: TraitViewControllerSet<this, CellTrait, CellView, CellController>;

@@ -31,17 +31,13 @@ import type {BubblePlotControllerObserver} from "./BubblePlotControllerObserver"
 export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotController<X, Y> {
   override readonly observerType?: Class<BubblePlotControllerObserver<X, Y>>;
 
-  protected detectDataSet(plotTrait: BubblePlotTrait<X, Y>): DataSetTrait<X, Y> | null {
-    return plotTrait.getTrait(DataSetTrait);
-  }
-
   @TraitViewControllerSet<BubblePlotController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>, DataSetControllerDataPointExt<X, Y>>({
     extends: true,
     get parentView(): BubblePlotView<X, Y> | null {
       return this.owner.plot.view;
     },
   })
-  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>>;
+  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & DataSetControllerDataPointExt<X, Y>;
   static override readonly dataPoints: MemberFastenerClass<BubblePlotController, "dataPoints">;
 
   protected setPlotRadius(radius: Length | null, timing?: AnyTiming | boolean): void {
@@ -81,21 +77,21 @@ export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotC
   @TraitViewRef<BubblePlotController<X, Y>, BubblePlotTrait<X, Y>, BubblePlotView<X, Y>>({
     traitType: BubblePlotTrait,
     observesTrait: true,
-    willAttachTrait(plotTrait: BubblePlotTrait<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachPlotTrait", plotTrait, this.owner);
-    },
-    didAttachTrait(plotTrait: BubblePlotTrait<X, Y>): void {
+    initTrait(plotTrait: BubblePlotTrait<X, Y>): void {
+      if (this.owner.dataSet.trait === null) {
+        const dataSetTrait = plotTrait.getTrait(DataSetTrait) as DataSetTrait<X, Y>;
+        if (dataSetTrait !== null) {
+          this.owner.dataSet.setTrait(dataSetTrait);
+        }
+      }
       const plotView = this.view;
       if (plotView !== null) {
         this.owner.setPlotRadius(plotTrait.radius.state);
         this.owner.setPlotFill(plotTrait.fill.state);
       }
-      if (this.owner.dataSet.trait === null) {
-        const dataSetTrait = this.owner.detectDataSet(plotTrait);
-        if (dataSetTrait !== null) {
-          this.owner.dataSet.setTrait(dataSetTrait);
-        }
-      }
+    },
+    willAttachTrait(plotTrait: BubblePlotTrait<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotTrait", plotTrait, this.owner);
     },
     didDetachTrait(plotTrait: BubblePlotTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotTrait", plotTrait, this.owner);
@@ -108,20 +104,20 @@ export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotC
     },
     viewType: BubblePlotView,
     observesView: true,
-    willAttachView(plotView: BubblePlotView<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachPlotView", plotView, this.owner);
-    },
-    didAttachView(plotView: BubblePlotView<X, Y>): void {
-      const plotTrait = this.trait;
-      if (plotTrait !== null) {
-        this.owner.setPlotRadius(plotTrait.radius.state);
-        this.owner.setPlotFill(plotTrait.fill.state);
-      }
+    initView(plotView: BubblePlotView<X, Y>): void {
       const dataPointControllers = this.owner.dataPoints.controllers;
       for (const controllerId in dataPointControllers) {
         const dataPointController = dataPointControllers[controllerId]!;
         dataPointController.dataPoint.insertView(plotView);
       }
+      const plotTrait = this.trait;
+      if (plotTrait !== null) {
+        this.owner.setPlotRadius(plotTrait.radius.state);
+        this.owner.setPlotFill(plotTrait.fill.state);
+      }
+    },
+    willAttachView(plotView: BubblePlotView<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotView", plotView, this.owner);
     },
     didDetachView(plotView: BubblePlotView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotView", plotView, this.owner);

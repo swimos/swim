@@ -22,6 +22,7 @@ export {
   ViewFactory,
   ViewClass,
   ViewConstructor,
+  ViewCreator,
   View,
 } from "./View";
 export {

@@ -31,17 +31,13 @@ import type {LinePlotControllerObserver} from "./LinePlotControllerObserver";
 export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotController<X, Y> {
   override readonly observerType?: Class<LinePlotControllerObserver<X, Y>>;
 
-  protected detectDataSet(plotTrait: LinePlotTrait<X, Y>): DataSetTrait<X, Y> | null {
-    return plotTrait.getTrait(DataSetTrait);
-  }
-
   @TraitViewControllerSet<LinePlotController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>, DataSetControllerDataPointExt<X, Y>>({
     extends: true,
     get parentView(): LinePlotView<X, Y> | null {
       return this.owner.plot.view;
     },
   })
-  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>>;
+  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & DataSetControllerDataPointExt<X, Y>;
   static override readonly dataPoints: MemberFastenerClass<LinePlotController, "dataPoints">;
 
   protected setPlotStroke(stroke: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
@@ -81,10 +77,13 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
   @TraitViewRef<LinePlotController<X, Y>, LinePlotTrait<X, Y>, LinePlotView<X, Y>>({
     traitType: LinePlotTrait,
     observesTrait: true,
-    willAttachTrait(plotTrait: LinePlotTrait<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachPlotTrait", plotTrait, this.owner);
-    },
-    didAttachTrait(plotTrait: LinePlotTrait<X, Y>): void {
+    initTrait(plotTrait: LinePlotTrait<X, Y>): void {
+      if (this.owner.dataSet.trait === null) {
+        const dataSetTrait = plotTrait.getTrait(DataSetTrait) as DataSetTrait<X, Y>;
+        if (dataSetTrait !== null) {
+          this.owner.dataSet.setTrait(dataSetTrait);
+        }
+      }
       const plotView = this.view;
       if (plotView !== null) {
         const stroke = plotTrait.stroke.state;
@@ -96,12 +95,9 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
           this.owner.setPlotStrokeWidth(strokeWidth);
         }
       }
-      if (this.owner.dataSet.trait === null) {
-        const dataSetTrait = this.owner.detectDataSet(plotTrait);
-        if (dataSetTrait !== null) {
-          this.owner.dataSet.setTrait(dataSetTrait);
-        }
-      }
+    },
+    willAttachTrait(plotTrait: LinePlotTrait<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotTrait", plotTrait, this.owner);
     },
     didDetachTrait(plotTrait: LinePlotTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotTrait", plotTrait, this.owner);
@@ -114,10 +110,12 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     },
     viewType: LinePlotView,
     observesView: true,
-    willAttachView(plotView: LinePlotView<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachPlotView", plotView, this.owner);
-    },
-    didAttachView(plotView: LinePlotView<X, Y>): void {
+    initView(plotView: LinePlotView<X, Y>): void {
+      const dataPointControllers = this.owner.dataPoints.controllers;
+      for (const controllerId in dataPointControllers) {
+        const dataPointController = dataPointControllers[controllerId]!;
+        dataPointController.dataPoint.insertView(plotView);
+      }
       const plotTrait = this.trait;
       if (plotTrait !== null) {
         const stroke = plotTrait.stroke.state;
@@ -129,11 +127,9 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
           this.owner.setPlotStrokeWidth(strokeWidth);
         }
       }
-      const dataPointControllers = this.owner.dataPoints.controllers;
-      for (const controllerId in dataPointControllers) {
-        const dataPointController = dataPointControllers[controllerId]!;
-        dataPointController.dataPoint.insertView(plotView);
-      }
+    },
+    willAttachView(plotView: LinePlotView<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotView", plotView, this.owner);
     },
     didDetachView(plotView: LinePlotView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotView", plotView, this.owner);

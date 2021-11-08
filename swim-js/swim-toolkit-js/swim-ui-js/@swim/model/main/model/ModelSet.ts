@@ -14,7 +14,7 @@
 
 import type {Mutable, Class, ObserverType} from "@swim/util";
 import type {FastenerOwner} from "@swim/fastener";
-import type {AnyModel, ModelFactory, Model} from "./Model";
+import type {AnyModel, Model} from "./Model";
 import {ModelRelationInit, ModelRelationClass, ModelRelation} from "./ModelRelation";
 
 export type ModelSetType<F extends ModelSet<any, any>> =
@@ -57,17 +57,13 @@ export interface ModelSet<O = unknown, M extends Model = Model> extends ModelRel
 
   hasModel(model: M): boolean;
 
-  addModel<M2 extends M>(model: M2 | ModelFactory<M2>, targetModel?: Model | null, key?: string): M2;
-  addModel(model: AnyModel<M>, targetModel?: Model | null, key?: string): M;
-  addModel(model?: AnyModel<M> | null, targetModel?: Model | null, key?: string): M | null;
+  addModel(model?: AnyModel<M>, targetModel?: Model | null, key?: string): M;
 
-  attachModel<M2 extends M>(model: M2 | ModelFactory<M2>, targetModel?: Model | null): M2;
-  attachModel(model: AnyModel<M>, targetModel?: Model | null): M;
-  attachModel(model?: AnyModel<M> | null, targetModel?: Model | null): M | null;
+  attachModel(model?: AnyModel<M>, targetModel?: Model | null): M;
 
   detachModel(model: M): M | null;
 
-  insertModel(parentModel?: Model | null, newModel?: AnyModel<M> | null, targetModel?: Model | null, key?: string): M | null;
+  insertModel(parentModel?: Model | null, newModel?: AnyModel<M>, targetModel?: Model | null, key?: string): M;
 
   removeModel(model: M): M | null;
 
@@ -100,44 +96,42 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     return this.models[model.uid] !== void 0;
   };
 
-  ModelSet.prototype.addModel = function <M extends Model>(this: ModelSet<unknown, M>, newModel?: AnyModel<M> | null, targetModel?: Model | null, key?: string): M | null {
+  ModelSet.prototype.addModel = function <M extends Model>(this: ModelSet<unknown, M>, newModel?: AnyModel<M>, targetModel?: Model | null, key?: string): M {
     if (newModel !== void 0 && newModel !== null) {
       newModel = this.fromAny(newModel);
     } else {
       newModel = this.createModel();
     }
-    if (newModel !== null) {
-      if (targetModel === void 0) {
-        targetModel = null;
+    if (targetModel === void 0) {
+      targetModel = null;
+    }
+    let parentModel: Model | null;
+    if (this.binds && (parentModel = this.parentModel, parentModel !== null)) {
+      if (key === void 0) {
+        key = this.key(newModel);
       }
-      let parentModel: Model | null;
-      if (this.binds && (parentModel = this.parentModel, parentModel !== null)) {
-        if (key === void 0) {
-          key = this.key(newModel);
-        }
-        this.insertChild(parentModel, newModel, targetModel, key);
-      }
-      const models = this.models as {[id: number]: M | undefined};
-      if (models[newModel.uid] === void 0) {
-        this.willAttachModel(newModel, targetModel);
-        models[newModel.uid] = newModel;
-        (this as Mutable<typeof this>).modelCount += 1;
-        this.onAttachModel(newModel, targetModel);
-        this.initModel(newModel);
-        this.didAttachModel(newModel, targetModel);
-      }
+      this.insertChild(parentModel, newModel, targetModel, key);
+    }
+    const models = this.models as {[id: number]: M | undefined};
+    if (models[newModel.uid] === void 0) {
+      this.willAttachModel(newModel, targetModel);
+      models[newModel.uid] = newModel;
+      (this as Mutable<typeof this>).modelCount += 1;
+      this.onAttachModel(newModel, targetModel);
+      this.initModel(newModel);
+      this.didAttachModel(newModel, targetModel);
     }
     return newModel;
   };
 
-  ModelSet.prototype.attachModel = function <M extends Model>(this: ModelSet<unknown, M>, newModel?: AnyModel<M> | null, targetModel?: Model | null): M | null {
+  ModelSet.prototype.attachModel = function <M extends Model>(this: ModelSet<unknown, M>, newModel?: AnyModel<M>, targetModel?: Model | null): M {
     if (newModel !== void 0 && newModel !== null) {
       newModel = this.fromAny(newModel);
     } else {
       newModel = this.createModel();
     }
     const models = this.models as {[id: number]: M | undefined};
-    if (newModel !== null && models[newModel.uid] === void 0) {
+    if (models[newModel.uid] === void 0) {
       if (targetModel === void 0) {
         targetModel = null;
       }
@@ -165,34 +159,32 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     return null;
   };
 
-  ModelSet.prototype.insertModel = function <M extends Model>(this: ModelSet<unknown, M>, parentModel?: Model | null, newModel?: AnyModel<M> | null, targetModel?: Model | null, key?: string): M | null {
+  ModelSet.prototype.insertModel = function <M extends Model>(this: ModelSet<unknown, M>, parentModel?: Model | null, newModel?: AnyModel<M>, targetModel?: Model | null, key?: string): M {
     if (newModel !== void 0 && newModel !== null) {
       newModel = this.fromAny(newModel);
     } else {
       newModel = this.createModel();
     }
+    if (parentModel === void 0 || parentModel === null) {
+      parentModel = this.parentModel;
+    }
+    if (targetModel === void 0) {
+      targetModel = null;
+    }
+    if (key === void 0) {
+      key = this.key(newModel);
+    }
+    if (parentModel !== null && (newModel.parent !== parentModel || newModel.key !== key)) {
+      this.insertChild(parentModel, newModel, targetModel, key);
+    }
     const models = this.models as {[id: number]: M | undefined};
-    if (newModel !== null) {
-      if (parentModel === void 0 || parentModel === null) {
-        parentModel = this.parentModel;
-      }
-      if (targetModel === void 0) {
-        targetModel = null;
-      }
-      if (key === void 0) {
-        key = this.key(newModel);
-      }
-      if (parentModel !== null && (newModel.parent !== parentModel || newModel.key !== key)) {
-        this.insertChild(parentModel, newModel, targetModel, key);
-      }
-      if (models[newModel.uid] === void 0) {
-        this.willAttachModel(newModel, targetModel);
-        models[newModel.uid] = newModel;
-        (this as Mutable<typeof this>).modelCount += 1;
-        this.onAttachModel(newModel, targetModel);
-        this.initModel(newModel);
-        this.didAttachModel(newModel, targetModel);
-      }
+    if (models[newModel.uid] === void 0) {
+      this.willAttachModel(newModel, targetModel);
+      models[newModel.uid] = newModel;
+      (this as Mutable<typeof this>).modelCount += 1;
+      this.onAttachModel(newModel, targetModel);
+      this.initModel(newModel);
+      this.didAttachModel(newModel, targetModel);
     }
     return newModel;
   };

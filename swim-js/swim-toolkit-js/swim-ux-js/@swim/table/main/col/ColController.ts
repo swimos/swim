@@ -28,20 +28,20 @@ export class ColController extends GenericController {
   @TraitViewRef<ColController, ColTrait, ColView>({
     traitType: ColTrait,
     observesTrait: true,
-    willAttachTrait(colTrait: ColTrait): void {
-      this.owner.callObservers("controllerWillAttachColTrait", colTrait, this.owner);
-    },
-    didAttachTrait(colTrait: ColTrait): void {
+    initTrait(colTrait: ColTrait): void {
       const colView = this.view;
       if (colView !== null) {
         this.owner.setLabelView(colTrait.label.state, colTrait);
       }
     },
-    willDetachTrait(colTrait: ColTrait): void {
+    deinitTrait(colTrait: ColTrait): void {
       const colView = this.view;
       if (colView !== null) {
         this.owner.setLabelView(null, colTrait);
       }
+    },
+    willAttachTrait(colTrait: ColTrait): void {
+      this.owner.callObservers("controllerWillAttachColTrait", colTrait, this.owner);
     },
     didDetachTrait(colTrait: ColTrait): void {
       this.owner.callObservers("controllerDidDetachColTrait", colTrait, this.owner);
@@ -57,18 +57,18 @@ export class ColController extends GenericController {
     },
     viewType: ColView,
     observesView: true,
-    willAttachView(colView: ColView): void {
-      this.owner.callObservers("controllerWillAttachColView", colView, this.owner);
-    },
-    didAttachView(colView: ColView): void {
+    initView(colView: ColView): void {
       this.owner.label.setView(colView.label.view);
       const colTrait = this.trait;
       if (colTrait !== null) {
         this.owner.setLabelView(colTrait.label.state, colTrait);
       }
     },
-    willDetachView(colView: ColView): void {
+    deinitView(colView: ColView): void {
       this.owner.label.setView(null);
+    },
+    willAttachView(colView: ColView): void {
+      this.owner.callObservers("controllerWillAttachColView", colView, this.owner);
     },
     didDetachView(colView: ColView): void {
       this.owner.callObservers("controllerDidDetachColView", colView, this.owner);

@@ -21,6 +21,7 @@ export {
   TraitFactory,
   TraitClass,
   TraitConstructor,
+  TraitCreator,
   Trait,
 } from "./Trait";
 export {TraitObserver} from "./TraitObserver";

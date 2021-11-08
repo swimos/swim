@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import type {Graphics} from "@swim/graphics";
 import {TraitViewRef} from "@swim/controller";
 import {CellController} from "./CellController";
@@ -34,10 +35,10 @@ export class IconCellController extends CellController {
     extends: true,
     traitType: IconCellTrait,
     observesTrait: true,
-    didAttachTrait(cellTrait: IconCellTrait): void {
+    initTrait(cellTrait: IconCellTrait): void {
       this.owner.setIcon(cellTrait.icon.state);
     },
-    willDetachTrait(cellTrait: IconCellTrait): void {
+    deinitTrait(cellTrait: IconCellTrait): void {
       this.owner.setIcon(null);
     },
     traitDidSetIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
@@ -45,7 +46,7 @@ export class IconCellController extends CellController {
     },
     viewType: IconCellView,
     observesView: true,
-    didAttachView(cellView: IconCellView): void {
+    initView(cellView: IconCellView): void {
       const cellTrait = this.trait;
       if (cellTrait !== null) {
         this.owner.setIcon(cellTrait.icon.state);
@@ -59,4 +60,5 @@ export class IconCellController extends CellController {
     },
   })
   override readonly cell!: TraitViewRef<this, IconCellTrait, IconCellView>;
+  static readonly cell: MemberFastenerClass<IconCellController, "cell">;
 }

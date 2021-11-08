@@ -15,6 +15,7 @@
 import type {Class, ObserverType} from "@swim/util";
 import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
 import {AnyModel, ModelFactory, Model} from "./Model";
+import {Trait} from "../"; // forward import
 
 export type ModelRelationType<F extends ModelRelation<any, any>> =
   F extends ModelRelation<any, infer M> ? M : never;
@@ -37,7 +38,7 @@ export interface ModelRelationInit<M extends Model = Model> extends FastenerInit
   insertChild?(parent: Model, child: M, target: Model | null, key: string | undefined): void;
 
   detectModel?(model: Model): M | null;
-  createModel?(): M | null;
+  createModel?(): M;
   fromAny?(value: AnyModel<M>): M;
 }
 
@@ -102,7 +103,7 @@ export interface ModelRelation<O = unknown, M extends Model = Model> extends Fas
 
   detectModel(model: Model): M | null;
 
-  createModel(): M | null;
+  createModel(): M;
 
   /** @internal @protected */
   fromAny(value: AnyModel<M>): M;
@@ -172,7 +173,13 @@ export const ModelRelation = (function (_super: typeof Fastener) {
   Object.defineProperty(ModelRelation.prototype, "parentModel", {
     get(this: ModelRelation): Model | null {
       const owner = this.owner;
-      return owner instanceof Model ? owner : null;
+      if (owner instanceof Model) {
+        return owner;
+      } else if (owner instanceof Trait) {
+        return owner.model;
+      } else {
+        return null;
+      }
     },
     configurable: true,
   });
@@ -193,12 +200,21 @@ export const ModelRelation = (function (_super: typeof Fastener) {
     return null;
   };
 
-  ModelRelation.prototype.createModel = function <M extends Model>(this: ModelRelation<unknown, M>): M | null {
+  ModelRelation.prototype.createModel = function <M extends Model>(this: ModelRelation<unknown, M>): M {
+    let model: M | undefined;
     const type = this.type;
     if (type !== void 0) {
-      return type.create();
+      model = type.create();
     }
-    return null;
+    if (model === void 0 || model === null) {
+      let message = "Unable to create ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "model";
+      throw new Error(message);
+    }
+    return model;
   };
 
   ModelRelation.prototype.fromAny = function <M extends Model>(this: ModelRelation<unknown, M>, value: AnyModel<M>): M {

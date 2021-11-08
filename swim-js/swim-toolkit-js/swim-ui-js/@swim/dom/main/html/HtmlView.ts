@@ -16,7 +16,7 @@ import {Class, AnyTiming, Timing, Creatable, InitType} from "@swim/util";
 import {Affinity, MemberAnimatorInit} from "@swim/fastener";
 import {Transform} from "@swim/math";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewFlags, ViewFactory, View} from "@swim/view";
+import {ViewFlags, ViewCreator, View} from "@swim/view";
 import {AttributeAnimator} from "../animator/AttributeAnimator";
 import {StyleMapInit, StyleMap} from "../css/StyleMap";
 import type {ViewNodeType, AnyNodeView, NodeView} from "../node/NodeView";
@@ -194,7 +194,8 @@ export class HtmlView extends ElementView {
 
   override readonly node!: HTMLElement;
 
-  override setChild<V extends NodeView>(key: string, newChild: V | ViewFactory<V> | null): View | null;
+  override setChild<V extends NodeView>(key: string, newChild: V): View | null;
+  override setChild<F extends ViewCreator<F, NodeView>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyNodeView | keyof HtmlViewTagMap | null): View | null;
   override setChild(key: string, newChild: AnyNodeView | keyof HtmlViewTagMap | null): View | null {
     if (typeof newChild === "string") {
@@ -203,7 +204,8 @@ export class HtmlView extends ElementView {
     return super.setChild(key, newChild);
   }
 
-  override appendChild<V extends NodeView>(child: V | ViewFactory<V>, key?: string): V;
+  override appendChild<V extends NodeView>(child: V, key?: string): V;
+  override appendChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
   override appendChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
   override appendChild(child: AnyNodeView | keyof HtmlViewTagMap, key?: string): NodeView;
   override appendChild(child: AnyNodeView | keyof HtmlViewTagMap, key?: string): NodeView {
@@ -213,7 +215,8 @@ export class HtmlView extends ElementView {
     return super.appendChild(child, key);
   }
 
-  override prependChild<V extends NodeView>(child: V | ViewFactory<V>, key?: string): V;
+  override prependChild<V extends NodeView>(child: V, key?: string): V;
+  override prependChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
   override prependChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
   override prependChild(child: AnyNodeView | keyof HtmlViewTagMap, key?: string): NodeView;
   override prependChild(child: AnyNodeView | keyof HtmlViewTagMap, key?: string): NodeView {
@@ -223,7 +226,8 @@ export class HtmlView extends ElementView {
     return super.prependChild(child, key);
   }
 
-  override insertChild<V extends NodeView>(child: V | ViewFactory<V>, target: View | Node | null, key?: string): V;
+  override insertChild<V extends NodeView>(child: V, target: View | Node | null, key?: string): V;
+  override insertChild<F extends ViewCreator<F, NodeView>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   override insertChild<K extends keyof HtmlViewTagMap>(tag: K, target: View | Node | null, key?: string): HtmlViewTagMap[K];
   override insertChild(child: AnyNodeView | keyof HtmlViewTagMap, target: View | Node | null, key?: string): NodeView;
   override insertChild(child: AnyNodeView | keyof HtmlViewTagMap, target: View | Node | null, key?: string): NodeView {

@@ -29,10 +29,11 @@ import {
   PositionGesture,
   ViewContextType,
   ViewFlags,
+  ViewCreator,
   View,
   ViewSet,
 } from "@swim/view";
-import {ViewNode, HtmlViewClass, HtmlView} from "@swim/dom";
+import {ViewNode, HtmlView} from "@swim/dom";
 import {ButtonGlow} from "@swim/button";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {CellView} from "../cell/CellView";
@@ -130,9 +131,9 @@ export class LeafView extends HtmlView {
   })
   readonly highlight!: FocusThemeAnimator<this>;
 
+  getCell<F extends abstract new (...args: any[]) => CellView>(key: string, cellViewClass: F): InstanceType<F> | null;
   getCell(key: string): CellView | null;
-  getCell<V extends CellView>(key: string, cellViewClass: Class<V>): V | null;
-  getCell(key: string, cellViewClass?: Class<CellView>): CellView | null {
+  getCell(key: string, cellViewClass?: abstract new (...args: any[]) => CellView): CellView | null {
     if (cellViewClass === void 0) {
       cellViewClass = CellView;
     }
@@ -140,13 +141,13 @@ export class LeafView extends HtmlView {
     return cellView instanceof cellViewClass ? cellView : null;
   }
 
-  getOrCreateCell<V extends CellView>(key: string, cellViewClass: HtmlViewClass<V>): V {
-    let cellView = this.getChild(key) as V | null;
-    if (!(cellView instanceof cellViewClass)) {
+  getOrCreateCell<F extends ViewCreator<F, CellView>>(key: string, cellViewClass: F): InstanceType<F> {
+    let cellView = this.getChild(key, cellViewClass);
+    if (cellView === null) {
       cellView = cellViewClass.create();
       this.setChild(key, cellView);
     }
-    return cellView;
+    return cellView!;
   }
 
   setCell(key: string, cellView: CellView): void {

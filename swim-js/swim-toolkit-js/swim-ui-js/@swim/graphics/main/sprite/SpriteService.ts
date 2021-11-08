@@ -68,7 +68,7 @@ export class SpriteService {
 
   /** @internal */
   getFreeSlab(sizeClass: number): SpriteSheet | null {
-    sizeClass = Math.min(this.minSizeClass, sizeClass);
+    sizeClass = Math.max(this.minSizeClass, sizeClass);
     if (sizeClass <= this.maxSizeClass) {
       const index = sizeClass - this.minSizeClass;
       const slabs = this.slabs as Array<SpriteSheet | null>;

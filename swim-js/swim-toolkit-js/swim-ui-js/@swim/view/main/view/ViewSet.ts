@@ -14,7 +14,7 @@
 
 import type {Mutable, Class, ObserverType} from "@swim/util";
 import type {FastenerOwner} from "@swim/fastener";
-import type {AnyView, ViewFactory, View} from "./View";
+import type {AnyView, View} from "./View";
 import {ViewRelationInit, ViewRelationClass, ViewRelation} from "./ViewRelation";
 
 export type ViewSetType<F extends ViewSet<any, any>> =
@@ -57,17 +57,13 @@ export interface ViewSet<O = unknown, V extends View = View> extends ViewRelatio
 
   hasView(view: V): boolean;
 
-  addView<V2 extends V>(view: V2 | ViewFactory<V2>, targetView?: View | null, key?: string): V2;
-  addView(view: AnyView<V>, targetView?: View | null, key?: string): V;
-  addView(view?: AnyView<V> | null, targetView?: View | null, key?: string): V | null;
+  addView(view?: AnyView<V>, targetView?: View | null, key?: string): V;
 
-  attachView<V2 extends V>(view: V2 | ViewFactory<V2>, targetView?: View | null): V2;
-  attachView(view: AnyView<V>, targetView?: View | null): V;
-  attachView(view?: AnyView<V> | null, targetView?: View | null): V | null;
+  attachView(view?: AnyView<V>, targetView?: View | null): V;
 
   detachView(view: V): V | null;
 
-  insertView(parentView?: View | null, newView?: AnyView<V> | null, targetView?: View | null, key?: string): V | null;
+  insertView(parentView?: View | null, newView?: AnyView<V>, targetView?: View | null, key?: string): V;
 
   removeView(view: V): V | null;
 
@@ -100,44 +96,42 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
     return this.views[view.uid] !== void 0;
   };
 
-  ViewSet.prototype.addView = function <V extends View>(this: ViewSet<unknown, V>, newView?: AnyView<V> | null, targetView?: View | null, key?: string): V | null {
+  ViewSet.prototype.addView = function <V extends View>(this: ViewSet<unknown, V>, newView?: AnyView<V>, targetView?: View | null, key?: string): V {
     if (newView !== void 0 && newView !== null) {
       newView = this.fromAny(newView);
     } else {
       newView = this.createView();
     }
-    if (newView !== null) {
-      if (targetView === void 0) {
-        targetView = null;
+    if (targetView === void 0) {
+      targetView = null;
+    }
+    let parentView: View | null;
+    if (this.binds && (parentView = this.parentView, parentView !== null)) {
+      if (key === void 0) {
+        key = this.key(newView);
       }
-      let parentView: View | null;
-      if (this.binds && (parentView = this.parentView, parentView !== null)) {
-        if (key === void 0) {
-          key = this.key(newView);
-        }
-        this.insertChild(parentView, newView, targetView, key);
-      }
-      const views = this.views as {[id: number]: V | undefined};
-      if (views[newView.uid] === void 0) {
-        this.willAttachView(newView, targetView);
-        views[newView.uid] = newView;
-        (this as Mutable<typeof this>).viewCount += 1;
-        this.onAttachView(newView, targetView);
-        this.initView(newView);
-        this.didAttachView(newView, targetView);
-      }
+      this.insertChild(parentView, newView, targetView, key);
+    }
+    const views = this.views as {[id: number]: V | undefined};
+    if (views[newView.uid] === void 0) {
+      this.willAttachView(newView, targetView);
+      views[newView.uid] = newView;
+      (this as Mutable<typeof this>).viewCount += 1;
+      this.onAttachView(newView, targetView);
+      this.initView(newView);
+      this.didAttachView(newView, targetView);
     }
     return newView;
   };
 
-  ViewSet.prototype.attachView = function <V extends View>(this: ViewSet<unknown, V>, newView?: AnyView<V> | null, targetView?: View | null): V | null {
+  ViewSet.prototype.attachView = function <V extends View>(this: ViewSet<unknown, V>, newView?: AnyView<V>, targetView?: View | null): V {
     if (newView !== void 0 && newView !== null) {
       newView = this.fromAny(newView);
     } else {
       newView = this.createView();
     }
     const views = this.views as {[id: number]: V | undefined};
-    if (newView !== null && views[newView.uid] === void 0) {
+    if (views[newView.uid] === void 0) {
       if (targetView === void 0) {
         targetView = null;
       }
@@ -165,34 +159,32 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
     return null;
   };
 
-  ViewSet.prototype.insertView = function <V extends View>(this: ViewSet<unknown, V>, parentView?: View | null, newView?: AnyView<V> | null, targetView?: View | null, key?: string): V | null {
+  ViewSet.prototype.insertView = function <V extends View>(this: ViewSet<unknown, V>, parentView?: View | null, newView?: AnyView<V>, targetView?: View | null, key?: string): V {
     if (newView !== void 0 && newView !== null) {
       newView = this.fromAny(newView);
     } else {
       newView = this.createView();
     }
+    if (parentView === void 0 || parentView === null) {
+      parentView = this.parentView;
+    }
+    if (targetView === void 0) {
+      targetView = null;
+    }
+    if (key === void 0) {
+      key = this.key(newView);
+    }
+    if (parentView !== null && (newView.parent !== parentView || newView.key !== key)) {
+      this.insertChild(parentView, newView, targetView, key);
+    }
     const views = this.views as {[id: number]: V | undefined};
-    if (newView !== null) {
-      if (parentView === void 0 || parentView === null) {
-        parentView = this.parentView;
-      }
-      if (targetView === void 0) {
-        targetView = null;
-      }
-      if (key === void 0) {
-        key = this.key(newView);
-      }
-      if (parentView !== null && (newView.parent !== parentView || newView.key !== key)) {
-        this.insertChild(parentView, newView, targetView, key);
-      }
-      if (views[newView.uid] === void 0) {
-        this.willAttachView(newView, targetView);
-        views[newView.uid] = newView;
-        (this as Mutable<typeof this>).viewCount += 1;
-        this.onAttachView(newView, targetView);
-        this.initView(newView);
-        this.didAttachView(newView, targetView);
-      }
+    if (views[newView.uid] === void 0) {
+      this.willAttachView(newView, targetView);
+      views[newView.uid] = newView;
+      (this as Mutable<typeof this>).viewCount += 1;
+      this.onAttachView(newView, targetView);
+      this.initView(newView);
+      this.didAttachView(newView, targetView);
     }
     return newView;
   };
