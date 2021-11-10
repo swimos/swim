@@ -100,7 +100,10 @@ export class TableController extends GenericController {
   @TraitViewRef<TableController, TableTrait, TableView>({
     traitType: TableTrait,
     observesTrait: true,
-    initTrait(tableTrait: TableTrait): void {
+    willAttachTrait(tableTrait: TableTrait): void {
+      this.owner.callObservers("controllerWillAttachTableTrait", tableTrait, this.owner);
+    },
+    didAttachTrait(tableTrait: TableTrait): void {
       const headerTrait = tableTrait.header.trait;
       if (headerTrait !== null) {
         this.owner.header.setTrait(headerTrait);
@@ -108,12 +111,12 @@ export class TableController extends GenericController {
       const colTraits = tableTrait.cols.traits;
       for (const traitId in colTraits) {
         const colTrait = colTraits[traitId]!;
-        this.owner.cols.addTrait(colTrait, null, colTrait.key);
+        this.owner.cols.addTraitController(colTrait, null, colTrait.key);
       }
       const rowTraits = tableTrait.rows.traits;
       for (const traitId in rowTraits) {
         const rowTrait = rowTraits[traitId]!;
-        this.owner.rows.addTrait(rowTrait);
+        this.owner.rows.addTraitController(rowTrait);
       }
       const tableView = this.view;
       if (tableView !== null) {
@@ -123,24 +126,21 @@ export class TableController extends GenericController {
         }
       }
     },
-    deinitTrait(tableTrait: TableTrait): void {
+    willDetachTrait(tableTrait: TableTrait): void {
       const rowTraits = tableTrait.rows.traits;
       for (const traitId in rowTraits) {
         const rowTrait = rowTraits[traitId]!;
-        this.owner.rows.deleteTrait(rowTrait);
+        this.owner.rows.deleteTraitController(rowTrait);
       }
       const colTraits = tableTrait.cols.traits;
       for (const traitId in colTraits) {
         const colTrait = colTraits[traitId]!;
-        this.owner.cols.deleteTrait(colTrait);
+        this.owner.cols.deleteTraitController(colTrait);
       }
       const headerTrait = tableTrait.header.trait;
       if (headerTrait !== null) {
         this.owner.header.deleteTrait(headerTrait);
       }
-    },
-    willAttachTrait(tableTrait: TableTrait): void {
-      this.owner.callObservers("controllerWillAttachTableTrait", tableTrait, this.owner);
     },
     didDetachTrait(tableTrait: TableTrait): void {
       this.owner.callObservers("controllerDidDetachTableTrait", tableTrait, this.owner);
@@ -158,16 +158,16 @@ export class TableController extends GenericController {
       this.owner.header.deleteTrait(headerTrait);
     },
     traitWillAttachCol(colTrait: ColTrait, targetTrait: Trait): void {
-      this.owner.cols.addTrait(colTrait, targetTrait, colTrait.key);
+      this.owner.cols.addTraitController(colTrait, targetTrait, colTrait.key);
     },
     traitDidDetachCol(colTrait: ColTrait): void {
-      this.owner.cols.deleteTrait(colTrait);
+      this.owner.cols.deleteTraitController(colTrait);
     },
     traitWillAttachRow(rowTrait: RowTrait, targetTrait: Trait): void {
-      this.owner.rows.addTrait(rowTrait, targetTrait);
+      this.owner.rows.addTraitController(rowTrait, targetTrait);
     },
     traitDidDetachRow(rowTrait: RowTrait): void {
-      this.owner.rows.deleteTrait(rowTrait);
+      this.owner.rows.deleteTraitController(rowTrait);
     },
     viewType: TableView,
     observesView: true,

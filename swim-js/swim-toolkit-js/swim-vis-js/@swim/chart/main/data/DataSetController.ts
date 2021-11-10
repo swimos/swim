@@ -48,24 +48,24 @@ export class DataSetController<X = unknown, Y = unknown> extends GenericControll
       const dataPointTraits = dataSetTrait.dataPoints.traits;
       for (const traitId in dataPointTraits) {
         const dataPointTrait = dataPointTraits[traitId]!;
-        this.owner.dataPoints.addTrait(dataPointTrait);
+        this.owner.dataPoints.addTraitController(dataPointTrait);
       }
     },
     willDetachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
       const dataPointTraits = dataSetTrait.dataPoints.traits;
       for (const traitId in dataPointTraits) {
         const dataPointTrait = dataPointTraits[traitId]!;
-        this.owner.dataPoints.deleteTrait(dataPointTrait);
+        this.owner.dataPoints.deleteTraitController(dataPointTrait);
       }
     },
     didDetachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachDataSetTrait", dataSetTrait, this.owner);
     },
     traitWillAttachDataPoint(dataPointTrait: DataPointTrait<X, Y>, targetTrait: Trait): void {
-      this.owner.dataPoints.addTrait(dataPointTrait, targetTrait);
+      this.owner.dataPoints.addTraitController(dataPointTrait, targetTrait);
     },
     traitDidDetachDataPoint(dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.dataPoints.deleteTrait(dataPointTrait);
+      this.owner.dataPoints.deleteTraitController(dataPointTrait);
     },
   })
   readonly dataSet!: TraitRef<this, DataSetTrait<X, Y>>;

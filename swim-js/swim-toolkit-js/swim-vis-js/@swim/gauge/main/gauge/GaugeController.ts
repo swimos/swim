@@ -59,18 +59,21 @@ export class GaugeController extends GenericController {
   @TraitViewRef<GaugeController, GaugeTrait, GaugeView>({
     traitType: GaugeTrait,
     observesTrait: true,
-    initTrait(gaugeTrait: GaugeTrait): void {
+    willAttachTrait(gaugeTrait: GaugeTrait): void {
+      this.owner.callObservers("controllerWillAttachGaugeTrait", gaugeTrait, this.owner);
+    },
+    didAttachTrait(gaugeTrait: GaugeTrait): void {
       const dialTraits = gaugeTrait.dials.traits;
       for (const traitId in dialTraits) {
         const dialTrait = dialTraits[traitId]!;
-        this.owner.dials.addTrait(dialTrait);
+        this.owner.dials.addTraitController(dialTrait);
       }
       const gaugeView = this.view;
       if (gaugeView !== null) {
         this.owner.setTitleView(gaugeTrait.title.state, gaugeTrait);
       }
     },
-    deinitTrait(gaugeTrait: GaugeTrait): void {
+    willDetachTrait(gaugeTrait: GaugeTrait): void {
       const gaugeView = this.view;
       if (gaugeView !== null) {
         this.owner.setTitleView(null, gaugeTrait);
@@ -78,11 +81,8 @@ export class GaugeController extends GenericController {
       const dialTraits = gaugeTrait.dials.traits;
       for (const traitId in dialTraits) {
         const dialTrait = dialTraits[traitId]!;
-        this.owner.dials.deleteTrait(dialTrait);
+        this.owner.dials.deleteTraitController(dialTrait);
       }
-    },
-    willAttachTrait(gaugeTrait: GaugeTrait): void {
-      this.owner.callObservers("controllerWillAttachGaugeTrait", gaugeTrait, this.owner);
     },
     didDetachTrait(gaugeTrait: GaugeTrait): void {
       this.owner.callObservers("controllerDidDetachGaugeTrait", gaugeTrait, this.owner);
@@ -91,10 +91,10 @@ export class GaugeController extends GenericController {
       this.owner.setTitleView(newTitle, gaugeTrait);
     },
     traitWillAttachDial(dialTrait: DialTrait, targetTrait: Trait): void {
-      this.owner.dials.addTrait(dialTrait, targetTrait);
+      this.owner.dials.addTraitController(dialTrait, targetTrait);
     },
     traitDidDetachDial(dialTrait: DialTrait): void {
-      this.owner.dials.deleteTrait(dialTrait);
+      this.owner.dials.deleteTraitController(dialTrait);
     },
     viewType: GaugeView,
     observesView: true,

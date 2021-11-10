@@ -59,30 +59,30 @@ export class PieController extends GenericController {
   @TraitViewRef<PieController, PieTrait, PieView>({
     traitType: PieTrait,
     observesTrait: true,
-    initTrait(pieTrait: PieTrait): void {
-      const sliceTraits = pieTrait.slices.traits;
-      for (const traitId in sliceTraits) {
-        const sliceTrait = sliceTraits[traitId]!;
-        this.owner.slices.addTrait(sliceTrait);
-      }
-      const pieView = this.view;
-      if (pieView !== null) {
-        this.owner.setTitleView(pieTrait.title.state, pieTrait);
-      }
-    },
-    deinitTrait(pieTrait: PieTrait): void {
-      const pieView = this.view;
-      if (pieView !== null) {
-        this.owner.setTitleView(pieTrait.title.state, pieTrait);
-      }
-      const sliceTraits = pieTrait.slices.traits;
-      for (const traitId in sliceTraits) {
-        const sliceTrait = sliceTraits[traitId]!;
-        this.owner.slices.deleteTrait(sliceTrait);
-      }
-    },
     willAttachTrait(pieTrait: PieTrait): void {
       this.owner.callObservers("controllerWillAttachPieTrait", pieTrait, this.owner);
+    },
+    didAttachTrait(pieTrait: PieTrait): void {
+      const sliceTraits = pieTrait.slices.traits;
+      for (const traitId in sliceTraits) {
+        const sliceTrait = sliceTraits[traitId]!;
+        this.owner.slices.addTraitController(sliceTrait);
+      }
+      const pieView = this.view;
+      if (pieView !== null) {
+        this.owner.setTitleView(pieTrait.title.state, pieTrait);
+      }
+    },
+    willDetachTrait(pieTrait: PieTrait): void {
+      const pieView = this.view;
+      if (pieView !== null) {
+        this.owner.setTitleView(pieTrait.title.state, pieTrait);
+      }
+      const sliceTraits = pieTrait.slices.traits;
+      for (const traitId in sliceTraits) {
+        const sliceTrait = sliceTraits[traitId]!;
+        this.owner.slices.deleteTraitController(sliceTrait);
+      }
     },
     didDetachTrait(pieTrait: PieTrait): void {
       this.owner.callObservers("controllerDidDetachPieTrait", pieTrait, this.owner);
@@ -91,10 +91,10 @@ export class PieController extends GenericController {
       this.owner.setTitleView(newTitle, pieTrait);
     },
     traitWillAttachSlice(sliceTrait: SliceTrait, targetTrait: Trait): void {
-      this.owner.slices.addTrait(sliceTrait);
+      this.owner.slices.addTraitController(sliceTrait);
     },
     traitDidDetachSlice(sliceTrait: SliceTrait): void {
-      this.owner.slices.deleteTrait(sliceTrait);
+      this.owner.slices.deleteTraitController(sliceTrait);
     },
     viewType: PieView,
     observesView: true,

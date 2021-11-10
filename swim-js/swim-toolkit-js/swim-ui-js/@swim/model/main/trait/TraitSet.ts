@@ -52,11 +52,11 @@ export interface TraitSet<O = unknown, T extends Trait = Trait> extends TraitRel
   get familyType(): Class<TraitSet<any, any>> | null;
 
   /** @internal */
-  readonly traits: {readonly [id: number]: T | undefined};
+  readonly traits: {readonly [traitId: number]: T | undefined};
 
   readonly traitCount: number;
 
-  hasTrait(trait: T): boolean;
+  hasTrait(trait: Trait): boolean;
 
   addTrait(trait?: AnyTrait<T>, targetTrait?: Trait | null, key?: string): T;
 
@@ -102,7 +102,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
     configurable: true,
   });
 
-  TraitSet.prototype.hasTrait = function <T extends Trait>(this: TraitSet<unknown, T>, trait: T): boolean {
+  TraitSet.prototype.hasTrait = function (this: TraitSet, trait: Trait): boolean {
     return this.traits[trait.uid] !== void 0;
   };
 
@@ -122,7 +122,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
       }
       this.insertChild(model, newTrait, targetTrait, key);
     }
-    const traits = this.traits as {[id: number]: T | undefined};
+    const traits = this.traits as {[traitId: number]: T | undefined};
     if (traits[newTrait.uid] === void 0) {
       this.willAttachTrait(newTrait, targetTrait);
       traits[newTrait.uid] = newTrait;
@@ -140,7 +140,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
     } else {
       newTrait = this.createTrait();
     }
-    const traits = this.traits as {[id: number]: T | undefined};
+    const traits = this.traits as {[traitId: number]: T | undefined};
     if (traits[newTrait.uid] === void 0) {
       if (targetTrait === void 0) {
         targetTrait = null;
@@ -156,7 +156,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
   };
 
   TraitSet.prototype.detachTrait = function <T extends Trait>(this: TraitSet<unknown, T>, oldTrait: T): T | null {
-    const traits = this.traits as {[id: number]: T | undefined};
+    const traits = this.traits as {[traitId: number]: T | undefined};
     if (traits[oldTrait.uid] !== void 0) {
       this.willDetachTrait(oldTrait);
       (this as Mutable<typeof this>).traitCount -= 1;
@@ -187,7 +187,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
     if (model !== null && (newTrait.model !== model || newTrait.key !== key)) {
       this.insertChild(model, newTrait, targetTrait, key);
     }
-    const traits = this.traits as {[id: number]: T | undefined};
+    const traits = this.traits as {[traitId: number]: T | undefined};
     if (traits[newTrait.uid] === void 0) {
       this.willAttachTrait(newTrait, targetTrait);
       traits[newTrait.uid] = newTrait;
@@ -218,7 +218,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
   TraitSet.prototype.bindModel = function <T extends Trait>(this: TraitSet<unknown, T>, model: Model, targetModel: Model | null): void {
     if (this.binds) {
       const newTrait = this.detectModel(model);
-      const traits = this.traits as {[id: number]: T | undefined};
+      const traits = this.traits as {[traitId: number]: T | undefined};
       if (newTrait !== null && traits[newTrait.uid] === void 0) {
         this.willAttachTrait(newTrait, null);
         traits[newTrait.uid] = newTrait;
@@ -233,7 +233,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
   TraitSet.prototype.unbindModel = function <T extends Trait>(this: TraitSet<unknown, T>, model: Model): void {
     if (this.binds) {
       const oldTrait = this.detectModel(model);
-      const traits = this.traits as {[id: number]: T | undefined};
+      const traits = this.traits as {[traitId: number]: T | undefined};
       if (oldTrait !== null && traits[oldTrait.uid] !== void 0) {
         this.willDetachTrait(oldTrait);
         (this as Mutable<typeof this>).traitCount -= 1;
@@ -252,7 +252,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
   TraitSet.prototype.bindTrait = function <T extends Trait>(this: TraitSet<unknown, T>, trait: Trait, targetTrait: Trait | null): void {
     if (this.binds) {
       const newTrait = this.detectTrait(trait);
-      const traits = this.traits as {[id: number]: T | undefined};
+      const traits = this.traits as {[traitId: number]: T | undefined};
       if (newTrait !== null && traits[newTrait.uid] === void 0) {
         this.willAttachTrait(newTrait, targetTrait);
         traits[newTrait.uid] = newTrait;
@@ -267,7 +267,7 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
   TraitSet.prototype.unbindTrait = function <T extends Trait>(this: TraitSet<unknown, T>, trait: Trait): void {
     if (this.binds) {
       const oldTrait = this.detectTrait(trait);
-      const traits = this.traits as {[id: number]: T | undefined};
+      const traits = this.traits as {[traitId: number]: T | undefined};
       if (oldTrait !== null && traits[oldTrait.uid] !== void 0) {
         this.willDetachTrait(oldTrait);
         (this as Mutable<typeof this>).traitCount -= 1;

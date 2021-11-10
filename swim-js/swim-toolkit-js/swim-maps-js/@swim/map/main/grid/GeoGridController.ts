@@ -89,7 +89,7 @@ export class GeoGridController extends GeoLayerController {
       const tileTraits = geoTrait.tiles.traits;
       for (const traitId in tileTraits) {
         const tileTrait = tileTraits[traitId]!;
-        this.owner.tiles.addTrait(tileTrait);
+        this.owner.tiles.addTraitController(tileTrait);
       }
       const geoView = this.view;
       if (geoView !== null && !geoView.culled) {
@@ -103,14 +103,14 @@ export class GeoGridController extends GeoLayerController {
       const tileTraits = geoTrait.tiles.traits;
       for (const traitId in tileTraits) {
         const tileTrait = tileTraits[traitId]!;
-        this.owner.tiles.deleteTrait(tileTrait);
+        this.owner.tiles.deleteTraitController(tileTrait);
       }
     },
     traitWillAttachTile(tileTrait: GeoGridTrait, targetTrait: Trait): void {
-      this.owner.tiles.addTrait(tileTrait, targetTrait);
+      this.owner.tiles.addTraitController(tileTrait, targetTrait);
     },
     traitDidDetachTile(tileTrait: GeoGridTrait): void {
-      this.owner.tiles.deleteTrait(tileTrait);
+      this.owner.tiles.deleteTraitController(tileTrait);
     },
     viewType: GeoGridView,
     observesView: true,

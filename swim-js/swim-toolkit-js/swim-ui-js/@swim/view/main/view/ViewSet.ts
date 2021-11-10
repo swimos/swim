@@ -51,11 +51,11 @@ export interface ViewSet<O = unknown, V extends View = View> extends ViewRelatio
   get familyType(): Class<ViewSet<any, any>> | null;
 
   /** @internal */
-  readonly views: {readonly [id: number]: V | undefined};
+  readonly views: {readonly [viewId: number]: V | undefined};
 
   readonly viewCount: number;
 
-  hasView(view: V): boolean;
+  hasView(view: View): boolean;
 
   addView(view?: AnyView<V>, targetView?: View | null, key?: string): V;
 
@@ -92,7 +92,7 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
     configurable: true,
   });
 
-  ViewSet.prototype.hasView = function <V extends View>(this: ViewSet<unknown, V>, view: V): boolean {
+  ViewSet.prototype.hasView = function (this: ViewSet, view: View): boolean {
     return this.views[view.uid] !== void 0;
   };
 
@@ -112,7 +112,7 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
       }
       this.insertChild(parentView, newView, targetView, key);
     }
-    const views = this.views as {[id: number]: V | undefined};
+    const views = this.views as {[viewId: number]: V | undefined};
     if (views[newView.uid] === void 0) {
       this.willAttachView(newView, targetView);
       views[newView.uid] = newView;
@@ -130,7 +130,7 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
     } else {
       newView = this.createView();
     }
-    const views = this.views as {[id: number]: V | undefined};
+    const views = this.views as {[viewId: number]: V | undefined};
     if (views[newView.uid] === void 0) {
       if (targetView === void 0) {
         targetView = null;
@@ -146,7 +146,7 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
   };
 
   ViewSet.prototype.detachView = function <V extends View>(this: ViewSet<unknown, V>, oldView: V): V | null {
-    const views = this.views as {[id: number]: V | undefined};
+    const views = this.views as {[viewId: number]: V | undefined};
     if (views[oldView.uid] !== void 0) {
       this.willDetachView(oldView);
       (this as Mutable<typeof this>).viewCount -= 1;
@@ -177,7 +177,7 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
     if (parentView !== null && (newView.parent !== parentView || newView.key !== key)) {
       this.insertChild(parentView, newView, targetView, key);
     }
-    const views = this.views as {[id: number]: V | undefined};
+    const views = this.views as {[viewId: number]: V | undefined};
     if (views[newView.uid] === void 0) {
       this.willAttachView(newView, targetView);
       views[newView.uid] = newView;
@@ -208,7 +208,7 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
   ViewSet.prototype.bindView = function <V extends View>(this: ViewSet<unknown, V>, view: View, targetView: View | null): void {
     if (this.binds) {
       const newView = this.detectView(view);
-      const views = this.views as {[id: number]: V | undefined};
+      const views = this.views as {[viewId: number]: V | undefined};
       if (newView !== null && views[newView.uid] === void 0) {
         this.willAttachView(newView, targetView);
         views[newView.uid] = newView;
@@ -223,7 +223,7 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
   ViewSet.prototype.unbindView = function <V extends View>(this: ViewSet<unknown, V>, view: View): void {
     if (this.binds) {
       const oldView = this.detectView(view);
-      const views = this.views as {[id: number]: V | undefined};
+      const views = this.views as {[viewId: number]: V | undefined};
       if (oldView !== null && views[oldView.uid] !== void 0) {
         this.willDetachView(oldView);
         (this as Mutable<typeof this>).viewCount -= 1;

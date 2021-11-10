@@ -51,11 +51,11 @@ export interface ModelSet<O = unknown, M extends Model = Model> extends ModelRel
   get familyType(): Class<ModelSet<any, any>> | null;
 
   /** @internal */
-  readonly models: {readonly [id: number]: M | undefined};
+  readonly models: {readonly [modelId: number]: M | undefined};
 
   readonly modelCount: number;
 
-  hasModel(model: M): boolean;
+  hasModel(model: Model): boolean;
 
   addModel(model?: AnyModel<M>, targetModel?: Model | null, key?: string): M;
 
@@ -92,7 +92,7 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     configurable: true,
   });
 
-  ModelSet.prototype.hasModel = function <M extends Model>(this: ModelSet<unknown, M>, model: M): boolean {
+  ModelSet.prototype.hasModel = function (this: ModelSet, model: Model): boolean {
     return this.models[model.uid] !== void 0;
   };
 
@@ -112,7 +112,7 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
       }
       this.insertChild(parentModel, newModel, targetModel, key);
     }
-    const models = this.models as {[id: number]: M | undefined};
+    const models = this.models as {[modelId: number]: M | undefined};
     if (models[newModel.uid] === void 0) {
       this.willAttachModel(newModel, targetModel);
       models[newModel.uid] = newModel;
@@ -130,7 +130,7 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     } else {
       newModel = this.createModel();
     }
-    const models = this.models as {[id: number]: M | undefined};
+    const models = this.models as {[modelId: number]: M | undefined};
     if (models[newModel.uid] === void 0) {
       if (targetModel === void 0) {
         targetModel = null;
@@ -146,7 +146,7 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
   };
 
   ModelSet.prototype.detachModel = function <M extends Model>(this: ModelSet<unknown, M>, oldModel: M): M | null {
-    const models = this.models as {[id: number]: M | undefined};
+    const models = this.models as {[modelId: number]: M | undefined};
     if (models[oldModel.uid] !== void 0) {
       this.willDetachModel(oldModel);
       (this as Mutable<typeof this>).modelCount -= 1;
@@ -177,7 +177,7 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     if (parentModel !== null && (newModel.parent !== parentModel || newModel.key !== key)) {
       this.insertChild(parentModel, newModel, targetModel, key);
     }
-    const models = this.models as {[id: number]: M | undefined};
+    const models = this.models as {[modelId: number]: M | undefined};
     if (models[newModel.uid] === void 0) {
       this.willAttachModel(newModel, targetModel);
       models[newModel.uid] = newModel;
@@ -208,7 +208,7 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
   ModelSet.prototype.bindModel = function <M extends Model>(this: ModelSet<unknown, M>, model: Model, targetModel: Model | null): void {
     if (this.binds) {
       const newModel = this.detectModel(model);
-      const models = this.models as {[id: number]: M | undefined};
+      const models = this.models as {[modelId: number]: M | undefined};
       if (newModel !== null && models[newModel.uid] === void 0) {
         this.willAttachModel(newModel, targetModel);
         models[newModel.uid] = newModel;
@@ -223,7 +223,7 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
   ModelSet.prototype.unbindModel = function <M extends Model>(this: ModelSet<unknown, M>, model: Model): void {
     if (this.binds) {
       const oldModel = this.detectModel(model);
-      const models = this.models as {[id: number]: M | undefined};
+      const models = this.models as {[modelId: number]: M | undefined};
       if (oldModel !== null && models[oldModel.uid] !== void 0) {
         this.willDetachModel(oldModel);
         (this as Mutable<typeof this>).modelCount -= 1;

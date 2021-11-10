@@ -51,11 +51,11 @@ export interface ControllerSet<O = unknown, C extends Controller = Controller> e
   get familyType(): Class<ControllerSet<any, any>> | null;
 
   /** @internal */
-  readonly controllers: {readonly [id: number]: C | undefined};
+  readonly controllers: {readonly [controllerId: number]: C | undefined};
 
   readonly controllerCount: number;
 
-  hasController(controller: C): boolean;
+  hasController(controller: Controller): boolean;
 
   addController(controller?: AnyController<C>, targetController?: Controller | null, key?: string): C;
 
@@ -92,7 +92,7 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
     configurable: true,
   });
 
-  ControllerSet.prototype.hasController = function <C extends Controller>(this: ControllerSet<unknown, C>, controller: C): boolean {
+  ControllerSet.prototype.hasController = function (this: ControllerSet, controller: Controller): boolean {
     return this.controllers[controller.uid] !== void 0;
   };
 
@@ -112,7 +112,7 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
       }
       this.insertChild(parentController, newController, targetController, key);
     }
-    const controllers = this.controllers as {[id: number]: C | undefined};
+    const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
     if (controllers[newController.uid] === void 0) {
       this.willAttachController(newController, targetController);
       controllers[newController.uid] = newController;
@@ -130,7 +130,7 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
     } else {
       newController = this.createController();
     }
-    const controllers = this.controllers as {[id: number]: C | undefined};
+    const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
     if (controllers[newController.uid] === void 0) {
       if (targetController === void 0) {
         targetController = null;
@@ -146,7 +146,7 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
   };
 
   ControllerSet.prototype.detachController = function <C extends Controller>(this: ControllerSet<unknown, C>, oldController: C): C | null {
-    const controllers = this.controllers as {[id: number]: C | undefined};
+    const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
     if (controllers[oldController.uid] !== void 0) {
       this.willDetachController(oldController);
       (this as Mutable<typeof this>).controllerCount -= 1;
@@ -177,7 +177,7 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
     if (parentController !== null && (newController.parent !== parentController || newController.key !== key)) {
       this.insertChild(parentController, newController, targetController, key);
     }
-    const controllers = this.controllers as {[id: number]: C | undefined};
+    const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
     if (controllers[newController.uid] === void 0) {
       this.willAttachController(newController, targetController);
       controllers[newController.uid] = newController;
@@ -208,7 +208,7 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
   ControllerSet.prototype.bindController = function <C extends Controller>(this: ControllerSet<unknown, C>, controller: Controller, targetController: Controller | null): void {
     if (this.binds) {
       const newController = this.detectController(controller);
-      const controllers = this.controllers as {[id: number]: C | undefined};
+      const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
       if (newController !== null && controllers[newController.uid] === void 0) {
         this.willAttachController(newController, targetController);
         controllers[newController.uid] = newController;
@@ -223,7 +223,7 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
   ControllerSet.prototype.unbindController = function <C extends Controller>(this: ControllerSet<unknown, C>, controller: Controller): void {
     if (this.binds) {
       const oldController = this.detectController(controller);
-      const controllers = this.controllers as {[id: number]: C | undefined};
+      const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
       if (oldController !== null && controllers[oldController.uid] !== void 0) {
         this.willDetachController(oldController);
         (this as Mutable<typeof this>).controllerCount -= 1;

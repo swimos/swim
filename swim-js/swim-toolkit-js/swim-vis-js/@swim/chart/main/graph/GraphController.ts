@@ -52,31 +52,31 @@ export class GraphController<X = unknown, Y = unknown> extends GenericController
   @TraitViewRef<GraphController<X, Y>, GraphTrait<X, Y>, GraphView<X, Y>>({
     traitType: GraphTrait,
     observesTrait: true,
-    initTrait(graphTrait: GraphTrait<X, Y>): void {
-      const plotTraits = graphTrait.plots.traits;
-      for (const traitId in plotTraits) {
-        const plotTrait = plotTraits[traitId]!;
-        this.owner.plots.addTrait(plotTrait);
-      }
-    },
-    deinitTrait(graphTrait: GraphTrait<X, Y>): void {
-      const plotTraits = graphTrait.plots.traits;
-      for (const traitId in plotTraits) {
-        const plotTrait = plotTraits[traitId]!;
-        this.owner.plots.deleteTrait(plotTrait);
-      }
-    },
     willAttachTrait(graphTrait: GraphTrait<X, Y>): void {
       this.owner.callObservers("controllerWillAttachGraphTrait", graphTrait, this.owner);
+    },
+    didAttachTrait(graphTrait: GraphTrait<X, Y>): void {
+      const plotTraits = graphTrait.plots.traits;
+      for (const traitId in plotTraits) {
+        const plotTrait = plotTraits[traitId]!;
+        this.owner.plots.addTraitController(plotTrait);
+      }
+    },
+    willDetachTrait(graphTrait: GraphTrait<X, Y>): void {
+      const plotTraits = graphTrait.plots.traits;
+      for (const traitId in plotTraits) {
+        const plotTrait = plotTraits[traitId]!;
+        this.owner.plots.deleteTraitController(plotTrait);
+      }
     },
     didDetachTrait(graphTrait: GraphTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachGraphTrait", graphTrait, this.owner);
     },
     traitWillAttachPlot(plotTrait: PlotTrait<X, Y>, targetTrait: Trait): void {
-      this.owner.plots.addTrait(plotTrait, targetTrait);
+      this.owner.plots.addTraitController(plotTrait, targetTrait);
     },
     traitDidDetachPlot(plotTrait: PlotTrait<X, Y>): void {
-      this.owner.plots.deleteTrait(plotTrait);
+      this.owner.plots.deleteTraitController(plotTrait);
     },
     viewType: GraphView,
     initView(graphView: GraphView<X, Y>): void {
