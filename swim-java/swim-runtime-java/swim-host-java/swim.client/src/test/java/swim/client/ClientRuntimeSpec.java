@@ -15,6 +15,7 @@
 package swim.client;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
@@ -27,12 +28,12 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.structure.Value;
+import static org.testng.Assert.assertEquals;
 
 public class ClientRuntimeSpec {
 
   @Test
   public void testLink() throws InterruptedException {
-    final ClientRuntime client = new ClientRuntime();
     final CountDownLatch didSync = new CountDownLatch(1);
     class IntersectionsController implements OnEvent<Value>, WillLink, DidLink,
         WillSync, DidSync, WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
@@ -90,16 +91,25 @@ public class ClientRuntimeSpec {
 
     }
 
+    ClientRuntime client = new ClientRuntime();
     try {
-      client.start();
-      client.downlink()
-            .hostUri("warp://traffic.swim.services")
-            .nodeUri("city/PaloAlto_CA_US")
-            .laneUri("intersections")
-            .keepSynced(true)
-            .observe(new IntersectionsController())
-            .open();
-      didSync.await();
+      int retry = 0;
+      do {
+        retry++;
+
+        client = new ClientRuntime();
+        client.start();
+        client.downlink()
+                .hostUri("warp://traffic.swim.services")
+                .nodeUri("city/PaloAlto_CA_US")
+                .laneUri("intersections")
+                .keepSynced(true)
+                .observe(new IntersectionsController())
+                .open();
+        didSync.await(10, TimeUnit.SECONDS);
+        client.stop();
+      } while (didSync.getCount() != 0 && retry < 3);
+      assertEquals(didSync.getCount(), 0);
     } finally {
       client.stop();
     }
