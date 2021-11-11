@@ -175,13 +175,6 @@ export class PathContext implements DrawingContext {
               + ",0"
               + ",1"
               + "," + (cw ? "1" : "0")
-              + "," + Format.decimal(cx - dx, this.precision)
-              + "," + Format.decimal(cy - dy, this.precision);
-      this.d += "A" + Format.decimal(r, this.precision)
-              + "," + Format.decimal(r, this.precision)
-              + ",0"
-              + ",1"
-              + "," + (cw ? "1" : "0")
               + "," + Format.decimal(x0, this.precision)
               + "," + Format.decimal(y0, this.precision);
       this.x1 = x0;
@@ -215,24 +208,19 @@ export class PathContext implements DrawingContext {
     this.y1 = y;
   }
 
-  ellipse(cx: number, cy: number, rx: number, ry: number, phi: number, a0: number, a1: number, ccw?: boolean): void {
-    let da = a1 - a0;
-    if (ccw === true && da > 0) {
-      da -= 2 * Math.PI;
-    } else if (ccw === false && da < 0) {
-      da += 2 * Math.PI;
-    }
+  ellipse(cx: number, cy: number, rx: number, ry: number, phi: number, a0: number, a1: number, ccw: boolean = false): void {
     const cosPhi = Math.cos(phi);
     const sinPhi = Math.sin(phi);
     const cosA1 = Math.cos(a1);
     const sinA1 = Math.sin(a1);
     const x1 = cosPhi * rx * cosA1 - sinPhi * ry * sinA1 + cx;
     const y1 = sinPhi * rx * cosA1 + cosPhi * ry * sinA1 + cy;
+    const da = a1 - a0;
     const large = Math.abs(da) > Math.PI;
-    const sweep = da > 0;
+    const sweep = !ccw;
     this.d += "A" + Format.decimal(rx, this.precision)
             + "," + Format.decimal(ry, this.precision)
-            + "," + Format.decimal(phi, this.anglePrecision);
+            + "," + Format.decimal(phi, this.anglePrecision)
             + "," + (large ? "1" : "0")
             + "," + (sweep ? "1" : "0")
             + "," + Format.decimal(x1, this.precision)

@@ -136,8 +136,8 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
   }
 
   override draw(context: DrawingContext, frame: R2Box): void {
-    this.path.transformDraw(context, Transform.scale(frame.width, frame.height)
-                                              .translate(frame.x, frame.y));
+    const transform = Transform.scale(frame.width, frame.height).translate(frame.x, frame.y);
+    this.path.transformDraw(context, transform);
   }
 
   protected copy(path: R2Path, fillRule: PaintingFillRule, fillColor: Color | null,

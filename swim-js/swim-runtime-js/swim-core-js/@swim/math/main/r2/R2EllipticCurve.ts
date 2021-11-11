@@ -128,21 +128,32 @@ export class R2EllipticCurve extends R2Curve implements Debug {
   }
 
   override transform(f: R2Function): R2EllipticCurve {
+    const cx = f.transformX(this.cx, this.cy);
+    const cy = f.transformY(this.cx, this.cy);
+    const rx = f.transformX(this.cx + this.rx, this.cy + this.ry) - cx;
+    const ry = f.transformY(this.cx + this.rx, this.cy + this.ry) - cy;
     const a0 = this.a0;
-    const a1 = a0 + this.da;
+    const da = this.da;
+    const a1 = a0 + da;
     const a0x = Math.cos(a0);
     const a0y = Math.sin(a0);
     const a1x = Math.cos(a1);
     const a1y = Math.sin(a1);
-    const b0x = f.transformX(a0x, a0y);
-    const b0y = f.transformY(a0x, a0y);
-    const b1x = f.transformX(a1x, a1y);
-    const b1y = f.transformY(a1x, a1y);
+    const b0x = f.transformX(this.cx + a0x, this.cy - a0y) - cx;
+    const b0y = f.transformY(this.cx + a0x, this.cy - a0y) - cy;
+    const b1x = f.transformX(this.cx + a1x, this.cy - a1y) - cx;
+    const b1y = f.transformY(this.cx + a1x, this.cy - a1y) - cy;
     const b0 = Math.atan2(b0y, b0x);
-    const b1 = Math.atan2(b1y, b1x);
-    return new R2EllipticCurve(f.transformX(this.cx, this.cy), f.transformY(this.cx, this.cy),
-                               f.transformX(this.rx, this.ry), f.transformY(this.rx, this.ry),
-                               this.phi, b0, b1 - b0);
+    let b1 = Math.atan2(b1y, b1x);
+    if (Math.abs(da) > Math.PI) {
+      if (b1 > 0) {
+        b1 = -2 * Math.PI + b1;
+      } else if (b1 < 0) {
+        b1 = 2 * Math.PI - b1
+      }
+    }
+    const db = b1 - b0;
+    return new R2EllipticCurve(cx, cy, rx, ry, this.phi, b0, db);
   }
 
   override drawMove(context: R2CurveContext): void {
@@ -161,21 +172,32 @@ export class R2EllipticCurve extends R2Curve implements Debug {
   }
 
   override transformDrawRest(context: R2CurveContext, f: R2Function): void {
+    const cx = f.transformX(this.cx, this.cy);
+    const cy = f.transformY(this.cx, this.cy);
+    const rx = f.transformX(this.cx + this.rx, this.cy + this.ry) - cx;
+    const ry = f.transformY(this.cx + this.rx, this.cy + this.ry) - cy;
     const a0 = this.a0;
-    const a1 = a0 + this.da;
+    const da = this.da;
+    const a1 = a0 + da;
     const a0x = Math.cos(a0);
     const a0y = Math.sin(a0);
     const a1x = Math.cos(a1);
     const a1y = Math.sin(a1);
-    const b0x = f.transformX(a0x, a0y);
-    const b0y = f.transformY(a0x, a0y);
-    const b1x = f.transformX(a1x, a1y);
-    const b1y = f.transformY(a1x, a1y);
+    const b0x = f.transformX(this.cx + a0x, this.cy - a0y) - cx;
+    const b0y = f.transformY(this.cx + a0x, this.cy - a0y) - cy;
+    const b1x = f.transformX(this.cx + a1x, this.cy - a1y) - cx;
+    const b1y = f.transformY(this.cx + a1x, this.cy - a1y) - cy;
     const b0 = Math.atan2(b0y, b0x);
-    const b1 = Math.atan2(b1y, b1x);
-    context.ellipse(f.transformX(this.cx, this.cy), f.transformY(this.cx, this.cy),
-                    f.transformX(this.rx, this.ry), f.transformY(this.rx, this.ry),
-                    this.phi, b0, b1, b1 - b0 < 0);
+    let b1 = Math.atan2(b1y, b1x);
+    if (Math.abs(da) > Math.PI) {
+      if (b1 > 0) {
+        b1 = -2 * Math.PI + b1;
+      } else if (b1 < 0) {
+        b1 = 2 * Math.PI - b1
+      }
+    }
+    const ccw = b1 < b0;
+    context.ellipse(cx, cy, rx, ry, this.phi, b0, b1, ccw);
   }
 
   override writeMove<T>(output: Output<T>): Output<T> {
@@ -304,10 +326,10 @@ export class R2EllipticCurve extends R2Curve implements Debug {
     }
     const a0 = angle(1, 0, (x0p - cxp) / rx, (y0p - cyp) / ry);
     let da = angle((x0p - cxp) / rx, (y0p - cyp) / ry, (-x0p - cxp) / rx, (-y0p - cyp) / ry) % (2 * Math.PI);
-    if (!sweep && da > 0) {
-      da -= 2 * Math.PI;
-    } else if (sweep && da < 0) {
+    if (sweep && da < 0) {
       da += 2 * Math.PI;
+    } else if (!sweep && da > 0) {
+      da -= 2 * Math.PI;
     }
 
     return new R2EllipticCurve(cx, cy, rx, ry, phi, a0, da);

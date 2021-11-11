@@ -25,24 +25,24 @@ import {R2Spline} from "./R2Spline";
 
 /** @internal */
 export class R2SplineParser extends Parser<R2Spline> {
-  private readonly x0Parser: Parser<number> | undefined;
-  private readonly y0Parser: Parser<number> | undefined;
   private readonly xParser: Parser<number> | undefined;
   private readonly yParser: Parser<number> | undefined;
+  private readonly x0Parser: Parser<number> | undefined;
+  private readonly y0Parser: Parser<number> | undefined;
   private readonly curveParser: Parser<R2Curve> | undefined;
   private readonly curves: R2Curve[] | undefined;
   private readonly command: number | undefined;
   private readonly step: number | undefined;
 
-  constructor(x0Parser?: Parser<number>, y0Parser?: Parser<number>,
-              xParser?: Parser<number>, yParser?: Parser<number>,
+  constructor(xParser?: Parser<number>, yParser?: Parser<number>,
+              x0Parser?: Parser<number>, y0Parser?: Parser<number>,
               curveParser?: Parser<R2Curve>, curves?: R2Curve[],
               command?: number, step?: number) {
     super();
-    this.x0Parser = x0Parser;
-    this.y0Parser = y0Parser;
     this.xParser = xParser;
     this.yParser = yParser;
+    this.x0Parser = x0Parser;
+    this.y0Parser = y0Parser;
     this.curveParser = curveParser;
     this.curves = curves;
     this.command = command;
@@ -50,14 +50,14 @@ export class R2SplineParser extends Parser<R2Spline> {
   }
 
   override feed(input: Input): Parser<R2Spline> {
-    return R2SplineParser.parse(input, this.x0Parser, this.y0Parser,
-                                this.xParser, this.yParser,
+    return R2SplineParser.parse(input, this.xParser, this.yParser,
+                                this.x0Parser, this.y0Parser,
                                 this.curveParser, this.curves,
                                 this.command, this.step);
   }
 
-  static parse(input: Input, x0Parser?: Parser<number>, y0Parser?: Parser<number>,
-               xParser?: Parser<number>, yParser?: Parser<number>,
+  static parse(input: Input, xParser?: Parser<number>, yParser?: Parser<number>,
+               x0Parser?: Parser<number>, y0Parser?: Parser<number>,
                curveParser?: Parser<R2Curve>, curves?: R2Curve[],
                command?: number, step: number = 1): Parser<R2Spline> {
     let c = 0;
@@ -90,6 +90,9 @@ export class R2SplineParser extends Parser<R2Spline> {
       }
       if (x0Parser !== void 0) {
         if (x0Parser.isDone()) {
+          if (command === 109/*'m'*/ && xParser !== void 0) {
+            x0Parser = Parser.done(xParser.bind() + x0Parser.bind());
+          }
           xParser = x0Parser;
           step = 3;
         } else if (x0Parser.isError()) {
@@ -123,6 +126,9 @@ export class R2SplineParser extends Parser<R2Spline> {
       }
       if (y0Parser !== void 0) {
         if (y0Parser.isDone()) {
+          if (command === 109/*'m'*/ && yParser !== void 0) {
+            y0Parser = Parser.done(yParser.bind() + y0Parser.bind());
+          }
           yParser = y0Parser;
           step = 5;
         } else if (y0Parser.isError()) {
@@ -353,7 +359,7 @@ export class R2SplineParser extends Parser<R2Spline> {
       }
       break;
     } while (true);
-    return new R2SplineParser(x0Parser, y0Parser, xParser, yParser,
+    return new R2SplineParser(xParser, yParser, x0Parser, y0Parser,
                               curveParser, curves, command, step);
   }
 }

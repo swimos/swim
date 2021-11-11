@@ -46,9 +46,19 @@ export class R2PathParser extends Parser<R2Path> {
           if (input.isCont()) {
             switch (c) {
               case 77/*'M'*/:
-              case 109/*'m'*/:
                 splineParser = R2SplineParser.parse(input);
                 break;
+              case 109/*'m'*/: {
+                let xParser: Parser<number> | undefined;
+                let yParser: Parser<number> | undefined;
+                if (splines !== void 0 && splines.length !== 0) {
+                  const spline = splines[splines.length - 1]!;
+                  xParser = Parser.done(spline.interpolateX(1));
+                  yParser = Parser.done(spline.interpolateY(1));
+                }
+                splineParser = R2SplineParser.parse(input, xParser, yParser);
+                break;
+              }
               case 110/*'n'*/:
                 step = 2;
                 break;

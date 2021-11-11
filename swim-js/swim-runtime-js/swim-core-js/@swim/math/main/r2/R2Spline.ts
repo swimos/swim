@@ -74,8 +74,8 @@ export class R2Spline extends R2Curve implements Debug {
     const n = curves.length;
     if (n > 0) {
       const l = 1 / n;
-      const k = Math.min(Math.max(0, Math.floor(u / l)), n);
-      const v = u * n - k * l;
+      const k = Math.min(Math.max(0, Math.floor(u / l)), n - 1);
+      const v = n * (u - k * l);
       return curves[k]!.interpolateX(v);
     } else {
       return NaN;
@@ -87,8 +87,8 @@ export class R2Spline extends R2Curve implements Debug {
     const n = curves.length;
     if (n > 0) {
       const l = 1 / n;
-      const k = Math.min(Math.max(0, Math.floor(u / l)), n);
-      const v = u * n - k * l;
+      const k = Math.min(Math.max(0, Math.floor(u / l)), n - 1);
+      const v = n * (u - k * l);
       return curves[k]!.interpolateY(v);
     } else {
       return NaN;
@@ -100,8 +100,8 @@ export class R2Spline extends R2Curve implements Debug {
     const n = curves.length;
     if (n > 0) {
       const l = 1 / n;
-      const k = Math.min(Math.max(0, Math.floor(u / l)), n);
-      const v = u * n - k * l;
+      const k = Math.min(Math.max(0, Math.floor(u / l)), n - 1);
+      const v = n * (u - k * l);
       return curves[k]!.interpolate(v);
     } else {
       return new R2Point(NaN, NaN);
@@ -123,8 +123,8 @@ export class R2Spline extends R2Curve implements Debug {
     const n = curves.length;
     if (n > 0) {
       const l = 1 / n;
-      const k = Math.min(Math.max(0, Math.floor(u / l)), n);
-      const v = u * n - k * l;
+      const k = Math.min(Math.max(0, Math.floor(u / l)), n - 1);
+      const v = n * (u - k * l);
       const [c0, c1] = curves[k]!.split(v);
       const curves0 = new Array<R2Curve>(k + 1);
       const curves1 = new Array<R2Curve>(n - k);
@@ -147,8 +147,8 @@ export class R2Spline extends R2Curve implements Debug {
     const n = oldCurves.length;
     if (n > 0) {
       const l = 1 / n;
-      const k = Math.min(Math.max(0, Math.floor(u / l)), n);
-      const v = u * n - k * l;
+      const k = Math.min(Math.max(0, Math.floor(u / l)), n - 1);
+      const v = n * (u - k * l);
       const [c0, c1] = oldCurves[k]!.split(v);
       const newCurves = new Array<R2Curve>(n + 1);
       for (let i = 0; i < k; i += 1) {
