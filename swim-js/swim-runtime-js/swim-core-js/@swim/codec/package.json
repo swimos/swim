@@ -10,6 +10,7 @@
   "main": "dist/main/swim-codec.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
+  "typedocMain": "main/index.ts",
   "keywords": [
     "codec",
     "decoder",

@@ -2,30 +2,6 @@
   "extends": "../../../tsconfig-main",
   "compilerOptions": {
     "outDir": "../lib/main",
-    "paths": {
-      "@swim/util": ["../../../../../swim-runtime-js/swim-core-js/@swim/util/main"],
-      "@swim/codec": ["../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"],
-      "@swim/fastener": ["../../../../../swim-runtime-js/swim-core-js/@swim/fastener/main"],
-      "@swim/constraint": ["../../../../../swim-runtime-js/swim-core-js/@swim/constraint/main"],
-      "@swim/structure": ["../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"],
-      "@swim/math": ["../../../../../swim-runtime-js/swim-core-js/@swim/math/main"],
-      "@swim/time": ["../../../../../swim-runtime-js/swim-core-js/@swim/time/main"],
-      "@swim/style": ["../../style/main"],
-      "@swim/theme": ["../../theme/main"],
-      "@swim/view": ["../../view/main"]
-    },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
-  },
-  "references": [
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/util/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/fastener/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/constraint/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/math/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/time/main"},
-    {"path": "../../style/main"},
-    {"path": "../../theme/main"},
-    {"path": "../../view/main"}
-  ]
+  }
 }

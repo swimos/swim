@@ -23,8 +23,6 @@ import * as terser from "terser";
 import {Severity} from "@swim/util";
 import {Tag, Mark, Span, OutputSettings, OutputStyle, Diagnostic, Unicode} from "@swim/codec";
 import type {Project} from "./Project";
-import {DocTarget} from "./DocTarget";
-import {DocTheme} from "./DocTheme";
 
 export interface TargetConfig {
   id: string;
@@ -214,33 +212,6 @@ export class Target {
     return targets;
   }
 
-  protected injectProjectReferences(oldRefs: ReadonlyArray<ts.ProjectReference> = [],
-                                    compilerOptions?: ts.CompilerOptions): ts.ProjectReference[] {
-    const newRefs: ts.ProjectReference[] = [];
-    let targets: Target[] = [];
-    for (let i = 0; i < this.peerDeps.length; i += 1) {
-      targets = this.peerDeps[i]!.transitiveTargets(targets);
-    }
-    for (let i = 0; i < this.deps.length; i += 1) {
-      targets = this.deps[i]!.transitiveTargets(targets);
-    }
-    for (let i = 0; i < targets.length; i += 1) {
-      const target = targets[i]!;
-      newRefs.push({path: target.baseDir});
-      if (target.id === "main" && compilerOptions !== void 0) {
-        compilerOptions.paths = compilerOptions.paths || {};
-        if (!compilerOptions.paths[target.project.name]) {
-          compilerOptions.paths[target.project.name] = [target.baseDir];
-        }
-      }
-    }
-    return newRefs;
-  }
-
-  protected injectCompilerOptions(compilerOptions: ts.CompilerOptions): void {
-    // hook
-  }
-
   protected canCompile(): boolean {
     let targets = [] as Target[];
     for (let i = 0; i < this.deps.length; i += 1) {
@@ -267,16 +238,9 @@ export class Target {
       output = OutputStyle.reset(output);
       console.log(output.bind());
 
-      const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
-      const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
-      const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
-      this.injectCompilerOptions(commandLine.options);
-
-      const rootNames = projectReferences.map(ref => ref.path);
-      rootNames.push(this.baseDir);
       const solutionBuilderHost = ts.createSolutionBuilderHost(ts.sys, this.createProgram as ts.CreateProgram<ts.EmitAndSemanticDiagnosticsBuilderProgram>,
                                                                this.onCompileError, this.onCompileUpdate);
-      const solutionBuilder = ts.createSolutionBuilder(solutionBuilderHost, rootNames, {incremental: true});
+      const solutionBuilder = ts.createSolutionBuilder(solutionBuilderHost, [this.baseDir], {incremental: true});
 
       this.compileStart = Date.now();
       solutionBuilder.build(this.baseDir);
@@ -310,16 +274,9 @@ export class Target {
     output = OutputStyle.reset(output);
     console.log(output.bind());
 
-    const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
-    const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
-    const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
-    this.injectCompilerOptions(commandLine.options);
-
-    const rootNames = projectReferences.map(ref => ref.path);
-    rootNames.push(this.baseDir);
     const solutionBuilderHost = ts.createSolutionBuilderWithWatchHost(ts.sys, this.createProgram as ts.CreateProgram<ts.EmitAndSemanticDiagnosticsBuilderProgram>,
                                                                       this.onCompileError, this.onCompileUpdate, this.onCompileResult);
-    const solutionBuilder = ts.createSolutionBuilderWithWatch(solutionBuilderHost, rootNames, {incremental: true});
+    const solutionBuilder = ts.createSolutionBuilderWithWatch(solutionBuilderHost, [this.baseDir], {incremental: true});
 
     this.watching = true;
     this.compileStart = Date.now();
@@ -332,7 +289,6 @@ export class Target {
                         oldProgram?: ts.EmitAndSemanticDiagnosticsBuilderProgram,
                         configFileParsingDiagnostics?: ReadonlyArray<ts.Diagnostic>,
                         projectReferences?: ReadonlyArray<ts.ProjectReference>): ts.EmitAndSemanticDiagnosticsBuilderProgram {
-    projectReferences = this.injectProjectReferences(projectReferences, options);
     const program = ts.createEmitAndSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram,
                                                                       configFileParsingDiagnostics, projectReferences);
     this.program = program.getProgram();
@@ -914,19 +870,6 @@ export class Target {
     }
   }
 
-  protected getRootFileNames(): ReadonlyArray<string> {
-    const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
-    const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
-    const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
-    const program = ts.createProgram({
-      rootNames: commandLine.fileNames,
-      options: commandLine.options,
-      projectReferences: projectReferences,
-      configFileParsingDiagnostics: commandLine.errors,
-    });
-    return program.getRootFileNames();
-  }
-
   doc(): Promise<unknown> {
     let output = Unicode.stringOutput(OutputSettings.styled());
     output = OutputStyle.greenBold(output);
@@ -940,61 +883,35 @@ export class Target {
 
     const outDir = Path.join(this.project.baseDir, "doc", "/");
 
-    const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
-    const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
-    this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
-    delete commandLine.options.declaration;
-    delete commandLine.options.declarationMap;
-    delete commandLine.options.incremental;
-    delete commandLine.options.removeComments;
-    delete commandLine.options.sourceMap;
-    delete commandLine.options.tsBuildInfoFile;
-    delete commandLine.options.configFilePath;
-
     const docOptions = {} as typedoc.TypeDocOptions;
     docOptions.name = this.project.title || this.project.name;
-    docOptions.readme = "none";
-    docOptions.tsconfig = configPath!;
     if (this.project.build.gaID !== void 0) {
       docOptions.gaID = this.project.build.gaID;
     }
+    docOptions.excludeInternal = true;
     docOptions.excludePrivate = true;
+    if (this.project.framework) {
+      docOptions.entryPointStrategy = "packages";
+    }
     docOptions.entryPoints = [];
 
-    const fileNames: string[] = [];
-    const transitiveTargets = this.transitiveTargets();
-    for (let i = 0; i < transitiveTargets.length; i += 1) {
-      const target = transitiveTargets[i]!;
-      const targetFileNames = target.getRootFileNames();
-      for (let j = 0; j < targetFileNames.length; j += 1) {
-        const fileName = targetFileNames[j]!;
-        fileNames.push(fileName);
-      }
-    }
-
     const frameworkTargets = this.frameworkTargets();
-    for (let i = 0; i < frameworkTargets.length; i += 1) {
-      docOptions.entryPoints.push(Path.resolve(frameworkTargets[i]!.baseDir, "index.ts"));
+    if (this.project.framework) {
+      for (let i = 0; i < frameworkTargets.length; i += 1) {
+        docOptions.entryPoints.push(frameworkTargets[i]!.project.baseDir);
+      }
+    } else {
+      for (let i = 0; i < frameworkTargets.length; i += 1) {
+        docOptions.entryPoints.push(Path.resolve(frameworkTargets[i]!.baseDir, "index.ts"));
+      }
     }
 
     const doc = new typedoc.Application();
     doc.bootstrap(docOptions);
-    doc.options.setCompilerOptions(fileNames, commandLine.options, commandLine.projectReferences);
-
-    const rootTargets = this.rootTargets();
-    const docTarget = doc.converter.getComponent("doc-target") as DocTarget | undefined;
-    if (docTarget instanceof DocTarget) {
-      docTarget.rootTargets = rootTargets;
-      docTarget.frameworkTargets = frameworkTargets;
-    }
 
     const t0 = Date.now();
     const project = doc.convert();
     if (project !== void 0) {
-      const themeDir = Path.join(typedoc.Renderer.getThemeDirectory(), "default");
-      const theme = new DocTheme(doc.renderer, themeDir, rootTargets, docTarget!.targetReflections);
-      doc.renderer.theme = theme;
-
       return doc.generateDocs(project, outDir)
         .then(() => {
           const dt = Date.now() - t0;

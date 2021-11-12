@@ -10,6 +10,7 @@
   "main": "dist/main/swim-fastener.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
+  "typedocMain": "main/index.ts",
   "dependencies": {
     "@swim/util": "4.0.0-dev.20210927.1"
   }

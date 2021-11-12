@@ -2,22 +2,6 @@
   "extends": "../../../tsconfig-main",
   "compilerOptions": {
     "outDir": "../lib/cli",
-    "paths": {
-      "@swim/util": ["../../util/main"],
-      "@swim/codec": ["../../codec/main"],
-      "@swim/args": ["../../args/main"],
-      "@swim/structure": ["../../structure/main"],
-      "@swim/recon": ["../../recon/main"],
-      "@swim/macro": ["../../macro/main"]
-    },
     "tsBuildInfoFile": "../lib/cli/.tsbuildinfo"
-  },
-  "references": [
-    {"path": "../../util/main"},
-    {"path": "../../codec/main"},
-    {"path": "../../args/main"},
-    {"path": "../../structure/main"},
-    {"path": "../../recon/main"},
-    {"path": "../../macro/main"}
-  ]
+  }
 }

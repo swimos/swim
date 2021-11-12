@@ -2,38 +2,6 @@
   "extends": "../../../tsconfig-main",
   "compilerOptions": {
     "outDir": "../lib/main",
-    "paths": {
-      "@swim/util": ["../../../../../swim-runtime-js/swim-core-js/@swim/util/main"],
-      "@swim/codec": ["../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"],
-      "@swim/fastener": ["../../../../../swim-runtime-js/swim-core-js/@swim/fastener/main"],
-      "@swim/collections": ["../../../../../swim-runtime-js/swim-core-js/@swim/collections/main"],
-      "@swim/constraint": ["../../../../../swim-runtime-js/swim-core-js/@swim/constraint/main"],
-      "@swim/structure": ["../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"],
-      "@swim/streamlet": ["../../../../../swim-runtime-js/swim-core-js/@swim/streamlet/main"],
-      "@swim/dataflow": ["../../../../../swim-runtime-js/swim-core-js/@swim/dataflow/main"],
-      "@swim/recon": ["../../../../../swim-runtime-js/swim-core-js/@swim/recon/main"],
-      "@swim/uri": ["../../../../../swim-runtime-js/swim-core-js/@swim/uri/main"],
-      "@swim/math": ["../../../../../swim-runtime-js/swim-core-js/@swim/math/main"],
-      "@swim/time": ["../../../../../swim-runtime-js/swim-core-js/@swim/time/main"],
-      "@swim/warp": ["../../../../../swim-runtime-js/swim-host-js/@swim/warp/main"],
-      "@swim/client": ["../../../../../swim-runtime-js/swim-host-js/@swim/client/main"],
-      "@swim/model": ["../../model/main"],
-      "@swim/style": ["../../style/main"],
-      "@swim/theme": ["../../theme/main"],
-      "@swim/view": ["../../view/main"],
-      "@swim/dom": ["../../dom/main"],
-      "@swim/graphics": ["../../graphics/main"],
-      "@swim/controller": ["../../controller/main"]
-    },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
-  },
-  "references": [
-    {"path": "../../model/main"},
-    {"path": "../../style/main"},
-    {"path": "../../theme/main"},
-    {"path": "../../view/main"},
-    {"path": "../../dom/main"},
-    {"path": "../../graphics/main"},
-    {"path": "../../controller/main"}
-  ]
+  }
 }

@@ -9,5 +9,6 @@
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-util.js",
   "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts"
+  "types": "lib/main/index.d.ts",
+  "typedocMain": "main/index.ts"
 }

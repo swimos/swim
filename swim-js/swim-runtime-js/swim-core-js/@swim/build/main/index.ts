@@ -27,9 +27,6 @@ export {
   Target,
 } from "./Target";
 
-export {DocTarget} from "./DocTarget";
-export {DocTheme} from "./DocTheme";
-
 export {cli} from "./cli";
 
 import {cli} from "./cli";

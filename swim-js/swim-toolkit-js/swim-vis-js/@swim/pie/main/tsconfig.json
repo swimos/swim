@@ -2,52 +2,6 @@
   "extends": "../../../tsconfig-main",
   "compilerOptions": {
     "outDir": "../lib/main",
-    "paths": {
-      "@swim/util": ["../../../../../swim-runtime-js/swim-core-js/@swim/util/main"],
-      "@swim/codec": ["../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"],
-      "@swim/fastener": ["../../../../../swim-runtime-js/swim-core-js/@swim/fastener/main"],
-      "@swim/collections": ["../../../../../swim-runtime-js/swim-core-js/@swim/collections/main"],
-      "@swim/constraint": ["../../../../../swim-runtime-js/swim-core-js/@swim/constraint/main"],
-      "@swim/structure": ["../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"],
-      "@swim/streamlet": ["../../../../../swim-runtime-js/swim-core-js/@swim/streamlet/main"],
-      "@swim/dataflow": ["../../../../../swim-runtime-js/swim-core-js/@swim/dataflow/main"],
-      "@swim/recon": ["../../../../../swim-runtime-js/swim-core-js/@swim/recon/main"],
-      "@swim/uri": ["../../../../../swim-runtime-js/swim-core-js/@swim/uri/main"],
-      "@swim/math": ["../../../../../swim-runtime-js/swim-core-js/@swim/math/main"],
-      "@swim/time": ["../../../../../swim-runtime-js/swim-core-js/@swim/time/main"],
-      "@swim/warp": ["../../../../../swim-runtime-js/swim-host-js/@swim/warp/main"],
-      "@swim/client": ["../../../../../swim-runtime-js/swim-host-js/@swim/client/main"],
-      "@swim/model": ["../../../../swim-ui-js/@swim/model/main"],
-      "@swim/style": ["../../../../swim-ui-js/@swim/style/main"],
-      "@swim/theme": ["../../../../swim-ui-js/@swim/theme/main"],
-      "@swim/view": ["../../../../swim-ui-js/@swim/view/main"],
-      "@swim/dom": ["../../../../swim-ui-js/@swim/dom/main"],
-      "@swim/graphics": ["../../../../swim-ui-js/@swim/graphics/main"],
-      "@swim/controller": ["../../../../swim-ui-js/@swim/controller/main"]
-    },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
-  },
-  "references": [
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/util/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/fastener/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/collections/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/constraint/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/streamlet/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/dataflow/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/recon/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/uri/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/math/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/time/main"},
-    {"path": "../../../../../swim-runtime-js/swim-host-js/@swim/warp/main"},
-    {"path": "../../../../../swim-runtime-js/swim-host-js/@swim/client/main"},
-    {"path": "../../../../swim-ui-js/@swim/model/main"},
-    {"path": "../../../../swim-ui-js/@swim/style/main"},
-    {"path": "../../../../swim-ui-js/@swim/theme/main"},
-    {"path": "../../../../swim-ui-js/@swim/view/main"},
-    {"path": "../../../../swim-ui-js/@swim/dom/main"},
-    {"path": "../../../../swim-ui-js/@swim/graphics/main"},
-    {"path": "../../../../swim-ui-js/@swim/controller/main"}
-  ]
+  }
 }

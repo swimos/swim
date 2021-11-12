@@ -1,15 +1,8 @@
 {
   "extends": "../../../tsconfig-main",
+  "include": ["**/*"],
   "compilerOptions": {
     "outDir": "../lib/main",
-    "paths": {
-      "@swim/util": ["../../util/main"],
-      "@swim/codec": ["../../codec/main"]
-    },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
-  },
-  "references": [
-    {"path": "../../util/main"},
-    {"path": "../../codec/main"}
-  ]
+  }
 }

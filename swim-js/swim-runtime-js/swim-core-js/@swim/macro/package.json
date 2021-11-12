@@ -10,6 +10,7 @@
   "main": "dist/main/swim-macro.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
+  "typedocMain": "main/index.ts",
   "devDependencies": {
     "@types/prismjs": "1",
     "prismjs": "1.25"

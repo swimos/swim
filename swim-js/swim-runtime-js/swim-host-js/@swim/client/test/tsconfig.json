@@ -1,25 +1,9 @@
 {
   "extends": "../../../tsconfig-test",
+  "include": ["**/*"],
   "compilerOptions": {
     "lib": ["DOM", "ES5", "ES2015.Promise", "ScriptHost"],
     "outDir": "../lib/test",
-    "paths": {
-      "@swim/util": ["../../../../swim-core-js/@swim/util/main"],
-      "@swim/codec": ["../../../../swim-core-js/@swim/codec/main"],
-      "@swim/fastener": ["../../../../swim-core-js/@swim/fastener/main"],
-      "@swim/unit": ["../../../../swim-core-js/@swim/unit/main"],
-      "@swim/collections": ["../../../../swim-core-js/@swim/collections/main"],
-      "@swim/structure": ["../../../../swim-core-js/@swim/structure/main"],
-      "@swim/streamlet": ["../../../../swim-core-js/@swim/streamlet/main"],
-      "@swim/dataflow": ["../../../../swim-core-js/@swim/dataflow/main"],
-      "@swim/recon": ["../../../../swim-core-js/@swim/recon/main"],
-      "@swim/uri": ["../../../../swim-core-js/@swim/uri/main"],
-      "@swim/warp": ["../../warp/main"],
-      "@swim/client": ["../../client/main"]
-    }
-  },
-  "references": [
-    {"path": "../../warp/main"},
-    {"path": "../../client/main"}
-  ]
+    "tsBuildInfoFile": "../lib/test/.tsbuildinfo"
+  }
 }

@@ -8,6 +8,9 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "private": true,
+  "workspaces": [
+    "./@swim/*"
+  ],
   "devDependencies": {
     "@rollup/plugin-node-resolve": "13",
     "@types/eslint": "7",
@@ -17,15 +20,21 @@
     "@typescript-eslint/parser": "5",
     "eslint": "8",
     "prismjs": "1.25",
-    "rollup": "2.59",
+    "rollup": "2.60",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",
-    "typedoc": "0.21",
+    "typedoc": "0.22",
     "typescript": "4.4"
   },
   "scripts": {
-    "postinstall": "cd ./@swim/build && npm run compile && npm run bundle",
+    "postinstall": "npm run bootstrap",
+    "bootstrap": "npm run compileUtil && npm run compileCodec && npm run compileArgs && npm run compileBuild && npm run bundleBuild",
+    "compileUtil": "cd @swim/util && tsc -p main",
+    "compileCodec": "cd @swim/codec && tsc -p main",
+    "compileArgs": "cd @swim/args && tsc -p main",
+    "compileBuild": "cd @swim/build && tsc -p main",
+    "bundleBuild": "cd @swim/build && rollup -c",
     "build": "./bin/build.js",
     "compile": "./bin/build.js compile",
     "test": "./bin/build.js compile --test",

@@ -2,7 +2,6 @@
   "compilerOptions": {
     "allowUmdGlobalAccess": true,
     "alwaysStrict": true,
-    "composite": true,
     "declaration": true,
     "declarationMap": false,
     "experimentalDecorators": true,
@@ -15,7 +14,6 @@
     "noEmitHelpers": true,
     "noEmitOnError": true,
     "noImplicitAny": true,
-    "noImplicitOverride": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
