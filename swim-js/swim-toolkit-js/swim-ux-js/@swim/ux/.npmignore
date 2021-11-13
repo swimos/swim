@@ -4,5 +4,5 @@ dist/test
 doc/
 lib/test
 rollup.config.js
-test/
+src/test/
 tsconfig.json

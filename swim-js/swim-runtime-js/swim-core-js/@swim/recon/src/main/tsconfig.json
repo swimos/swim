@@ -1,0 +1,8 @@
+{
+  "extends": "../../../../tsconfig-main",
+  "include": ["**/*"],
+  "compilerOptions": {
+    "outDir": "../../lib/main",
+    "tsBuildInfoFile": "../../lib/main/.tsbuildinfo"
+  }
+}

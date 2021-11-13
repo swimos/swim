@@ -1,0 +1,10 @@
+{
+  "extends": "../../../../tsconfig-main",
+  "include": ["**/*"],
+  "compilerOptions": {
+    "lib": ["DOM", "ES6", "ES2015.Promise", "ScriptHost"],
+    "outDir": "../../lib/main",
+    "target": "ES6",
+    "tsBuildInfoFile": "../../lib/main/.tsbuildinfo"
+  }
+}

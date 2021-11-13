@@ -1,8 +1,0 @@
-{
-  "extends": "../../../tsconfig-test",
-  "include": ["**/*"],
-  "compilerOptions": {
-    "outDir": "../lib/test",
-    "tsBuildInfoFile": "../lib/test/.tsbuildinfo"
-  }
-}

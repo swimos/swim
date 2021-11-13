@@ -2,6 +2,6 @@
   "files": [],
   "include": [],
   "references": [
-    {"path": "./main"}
+    {"path": "./src/main"}
   ]
 }

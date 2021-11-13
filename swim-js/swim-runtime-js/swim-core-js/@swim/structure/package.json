@@ -10,7 +10,7 @@
   "main": "dist/main/swim-structure.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
-  "typedocMain": "main/index.ts",
+  "typedocMain": "src/main/index.ts",
   "keywords": [
     "attributes",
     "data",

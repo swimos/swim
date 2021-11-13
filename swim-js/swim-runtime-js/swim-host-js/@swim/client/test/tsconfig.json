@@ -1,9 +1,0 @@
-{
-  "extends": "../../../tsconfig-test",
-  "include": ["**/*"],
-  "compilerOptions": {
-    "lib": ["DOM", "ES5", "ES2015.Promise", "ScriptHost"],
-    "outDir": "../lib/test",
-    "tsBuildInfoFile": "../lib/test/.tsbuildinfo"
-  }
-}
