@@ -17,19 +17,24 @@ import type {FastenerOwner, Fastener} from "@swim/fastener";
 import type {AnyModel, Model} from "./Model";
 import {ModelRelationInit, ModelRelationClass, ModelRelation} from "./ModelRelation";
 
+/** @internal */
 export type ModelRefType<F extends ModelRef<any, any>> =
   F extends ModelRef<any, infer M> ? M : never;
 
+/** @public */
 export interface ModelRefInit<M extends Model = Model> extends ModelRelationInit<M> {
   extends?: {prototype: ModelRef<any, any>} | string | boolean | null;
   key?: string | boolean;
 }
 
+/** @public */
 export type ModelRefDescriptor<O = unknown, M extends Model = Model, I = {}> = ThisType<ModelRef<O, M> & I> & ModelRefInit<M> & Partial<I>;
 
+/** @public */
 export interface ModelRefClass<F extends ModelRef<any, any> = ModelRef<any, any>> extends ModelRelationClass<F> {
 }
 
+/** @public */
 export interface ModelRefFactory<F extends ModelRef<any, any> = ModelRef<any, any>> extends ModelRefClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ModelRefFactory<F> & I;
 
@@ -44,6 +49,7 @@ export interface ModelRefFactory<F extends ModelRef<any, any> = ModelRef<any, an
   <O, M extends Model = Model, I = {}>(descriptor: {observes: boolean} & ModelRefDescriptor<O, M, I & ObserverType<M>>): PropertyDecorator;
 }
 
+/** @public */
 export interface ModelRef<O = unknown, M extends Model = Model> extends ModelRelation<O, M> {
   (): M | null;
   (model: AnyModel<M> | null, targetModel?: Model | null, key?: string): O;
@@ -83,6 +89,7 @@ export interface ModelRef<O = unknown, M extends Model = Model> extends ModelRel
   get key(): string | undefined; // optional prototype field
 }
 
+/** @public */
 export const ModelRef = (function (_super: typeof ModelRelation) {
   const ModelRef: ModelRefFactory = _super.extend("ModelRef");
 

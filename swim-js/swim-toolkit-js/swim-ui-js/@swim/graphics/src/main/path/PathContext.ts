@@ -16,6 +16,7 @@ import type {Mutable} from "@swim/util";
 import {Format} from "@swim/codec";
 import type {DrawingContext} from "../drawing/DrawingContext";
 
+/** @public */
 export class PathContext implements DrawingContext {
   constructor() {
     this.precision = -1;

@@ -21,7 +21,7 @@ import {OutputError} from "../"; // forward import
 import {Format} from "../"; // forward import
 
 /**
- * Non-blocking token stream writer.  `Output` enables incremental,
+ * Non-blocking token stream writer. `Output` enables incremental,
  * interruptible writing of network protocols and data formats.
  *
  * ### Output tokens
@@ -31,42 +31,43 @@ import {Format} from "../"; // forward import
  *
  * ### Output states
  * An `Output` writer is always in one of three states: _cont_​inue, _full_,
- * or _done_.  The _cont_ state indicates that the stream is ready to write a
+ * or _done_. The _cont_ state indicates that the stream is ready to write a
  * single token; the _full_ state indicates that the stream is unable to write
  * additional tokens at this time, but that the stream may logically resume at
  * some point in the future; and the _done_ state indicates that the stream has
- * terminated, and that [[bind]] will return the output result.  [[isCont]]
+ * terminated, and that [[bind]] will return the output result. [[isCont]]
  * returns `true` when in the _cont_ state; [[isFull]] returns `true` when in
  * the _full_ state; and [[isDone]] returns `true` when in the _done_ state.
  *
  * ### Output results
  * An `Output` writer yields a value of type `T`, obtained via the [[bind]]
  * method, representing some implementation defined result of writing the
- * output.  For example, an `Output<string>` implementation may–but is not
+ * output. For example, an `Output<string>` implementation may–but is not
  * required to–yield a `string` containing all code points written to the
  * output.
  *
  * ### Non-blocking behavior
- * `Output` writers never block.  An `Output` writer that would otherwise block
+ * `Output` writers never block. An `Output` writer that would otherwise block
  * writing additional output instead enters the _full_ state, signaling the
  * output generator to back off producing the output, but to remain prepared to
- * produce additional output in the future.  An `Output` writer enters the
+ * produce additional output in the future. An `Output` writer enters the
  * _done_ state when it encounters the final end of its output, signaling to
  * the output generator to stop producing.
  *
  * ### Output settings
  * An output generator may alter the tokens it produces based on its `Output`
- * writer's [[settings]].  Uses include pretty printing and styling generated
- * output.  [[OutputSettings]] subclasses can provide additional parameters
+ * writer's [[settings]]. Uses include pretty printing and styling generated
+ * output. [[OutputSettings]] subclasses can provide additional parameters
  * understood by specialized output producers.
  *
  * ### Cloning
  * An `Output` writer may be [[clone cloned]] to branch the token stream in an
- * implementation specified manner.  Not all `Output` implementations support
+ * implementation specified manner. Not all `Output` implementations support
  * cloning.
  *
  * @see [[OutputSettings]]
  * @see [[Writer]]
+ * @public
  */
 export abstract class Output<T = unknown> implements Builder<number, T> {
   /**
@@ -77,7 +78,7 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
 
   /**
    * Returns `true` when an immediate `write` will fail, but writes may succeed
-   * at some point in the future.  i.e. this `Output` is in the _full_ state.
+   * at some point in the future, i.e. this `Output` is in the _full_ state.
    */
   abstract isFull(): boolean;
 
@@ -112,16 +113,16 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
    * Writes a single `token` to the stream, if this `Output` is in the
    * _cont_ state.
    *
-   * @return `this`
+   * @returns `this`
    * @throws [[OutputException]] if this `Output` is not in the _cont_ state.
    */
   abstract write(token: number): Output<T>;
 
   /**
-   * Writes the code points of the given `string`.  Assumes this is a Unicode
+   * Writes the code points of the given `string`. Assumes this is a Unicode
    * `Output` writer with sufficient capacity.
    *
-   * @return `this`
+   * @returns `this`
    * @throws [[OutputException]] if this `Output` exits the _cont_ state before
    *         the full `string` has been written.
    */
@@ -132,7 +133,7 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
    * of the `settings`' [[OutputSettings.lineSeparator line separator].
    * Assumes this is a Unicode `Output` writer with sufficient capacity.
    *
-   * @return `this`
+   * @returns `this`
    * @throws [[OutputException]] if this `Output` exits the _cont_ state before
    *         the full `string` and line separator has been written.
    */
@@ -145,10 +146,10 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
 
   /**
    * Writes the code points of the human-readable [[Display]] string of the
-   * given `object`.  Assumes this is a Unicode `Output` writer with sufficient
+   * given `object`. Assumes this is a Unicode `Output` writer with sufficient
    * capacity.
    *
-   * @return the continuation of the `output`.
+   * @returns the continuation of the `output`.
    * @throws [[OutputException]] if this `Output` exits the _cont_ state before
    *         the full display string has been written.
    */
@@ -158,10 +159,10 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
 
   /**
    * Writes the code points of the developer-readable [[Debug]] string of the
-   * given `object`.  Assumes this is a Unicode `Output` writer with sufficient
+   * given `object`. Assumes this is a Unicode `Output` writer with sufficient
    * capacity.
    *
-   * @return the continuation of the `output`.
+   * @returns the continuation of the `output`.
    * @throws [[OutputException]] if this `Output` exits the _cont_ state before
    *         the full debug string has been written.
    */
@@ -192,7 +193,7 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
   /**
    * Updates the `settings` associated with this `Output`.
    *
-   * @return `this`
+   * @returns `this`
    */
   abstract withSettings(settings: AnyOutputSettings): Output<T>;
 

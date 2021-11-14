@@ -18,6 +18,7 @@ import {KeyEffect} from "@swim/streamlet";
 import {DownlinkRecord} from "./DownlinkRecord";
 import type {MapDownlinkObserver, MapDownlink} from "./MapDownlink";
 
+/** @public */
 export class MapDownlinkRecord extends DownlinkRecord implements MapDownlinkObserver<Value, Value, AnyValue, AnyValue> {
   constructor(downlink: MapDownlink<Value, Value, AnyValue, AnyValue>) {
     super();

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Strings} from "@swim/util";
 import {Output, WriterException, Writer, Utf8, Base16} from "@swim/codec";
 
 /** @internal */
@@ -35,7 +36,7 @@ export class MarkupTextWriter extends Writer {
 
   static sizeOf(text: string): number {
     let size = 0;
-    for (let i = 0, n = text.length; i < n; i = text.offsetByCodePoints(i, 1)) {
+    for (let i = 0, n = text.length; i < n; i = Strings.offsetByCodePoints(text, i, 1)) {
       let c = text.codePointAt(i);
       if (c === void 0) {
         c = text.charCodeAt(i);
@@ -63,7 +64,7 @@ export class MarkupTextWriter extends Writer {
           if (c === void 0) {
             c = text.charCodeAt(index);
           }
-          index = text.offsetByCodePoints(index, 1);
+          index = Strings.offsetByCodePoints(text, index, 1);
           if (c === 36/*'$'*/ || c === 64/*'@'*/ || c === 91/*'['*/ || c === 92/*'\\'*/
               || c === 93/*']'*/ || c === 123/*'{'*/ || c === 125/*'}'*/) {
             output = output.write(92/*'\\'*/);

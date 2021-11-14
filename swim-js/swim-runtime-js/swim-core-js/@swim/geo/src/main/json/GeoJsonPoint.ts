@@ -16,11 +16,13 @@ import {GeoPoint} from "../GeoPoint";
 import type {GeoJsonPosition} from "./GeoJsonPosition";
 import type {GeoJsonGeometryObject} from "./GeoJsonGeometry";
 
+/** @public */
 export interface GeoJsonPoint extends GeoJsonGeometryObject {
   readonly type: "Point";
   coordinates: GeoJsonPosition;
 }
 
+/** @public */
 export const GeoJsonPoint = (function () {
   const GeoJsonPoint = {} as {
     is(value: unknown): value is GeoJsonPoint;

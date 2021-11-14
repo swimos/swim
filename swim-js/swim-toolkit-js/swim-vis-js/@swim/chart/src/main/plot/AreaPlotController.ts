@@ -27,6 +27,7 @@ import {AreaPlotTrait} from "./AreaPlotTrait";
 import {SeriesPlotController} from "./SeriesPlotController";
 import type {AreaPlotControllerObserver} from "./AreaPlotControllerObserver";
 
+/** @public */
 export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotController<X, Y> {
   override readonly observerType?: Class<AreaPlotControllerObserver<X, Y>>;
 
@@ -125,11 +126,11 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
         }
       }
     },
-    willAttachView(plotVIew: AreaPlotView<X, Y>): void {
-      this.owner.callObservers("controllerWillAttachPlotView", plotVIew, this.owner);
+    willAttachView(plotView: AreaPlotView<X, Y>): void {
+      this.owner.callObservers("controllerWillAttachPlotView", plotView, this.owner);
     },
-    didDetachView(plotVIew: AreaPlotView<X, Y>): void {
-      this.owner.callObservers("controllerDidDetachPlotView", plotVIew, this.owner);
+    didDetachView(plotView: AreaPlotView<X, Y>): void {
+      this.owner.callObservers("controllerDidDetachPlotView", plotView, this.owner);
     },
     viewWillSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
       this.owner.willSetPlotFill(newFill, oldFill, plotView);

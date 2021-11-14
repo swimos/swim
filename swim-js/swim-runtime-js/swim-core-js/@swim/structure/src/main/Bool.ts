@@ -17,8 +17,10 @@ import type {Output} from "@swim/codec";
 import {AnyItem, Item} from "./Item";
 import {AnyValue, Value} from "./Value";
 
+/** @public */
 export type AnyBool = Bool | boolean;
 
+/** @public */
 export class Bool extends Value {
   private constructor(value: boolean) {
     super();

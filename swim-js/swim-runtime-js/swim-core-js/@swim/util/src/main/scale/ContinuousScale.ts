@@ -17,6 +17,7 @@ import type {Domain} from "../mapping/Domain";
 import type {Range} from "../mapping/Range";
 import {Scale} from "./Scale";
 
+/** @public */
 export interface ContinuousScale<X, Y> extends Scale<X, Y> {
   readonly inverse: Mapping<Y, X>;
 
@@ -40,6 +41,7 @@ export interface ContinuousScale<X, Y> extends Scale<X, Y> {
   toString(): string;
 }
 
+/** @public */
 export const ContinuousScale = (function (_super: typeof Scale) {
   const ContinuousScale = function (): never {
     throw new Error();

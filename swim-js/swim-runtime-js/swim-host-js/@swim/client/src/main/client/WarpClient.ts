@@ -39,10 +39,12 @@ import type {
   WarpObserver,
 } from "../ref/WarpObserver";
 
+/** @public */
 export interface WarpClientOptions extends HostOptions {
   keepOnline?: boolean;
 }
 
+/** @public */
 export class WarpClient implements HostContext, RefContext, WarpRef {
   constructor(options: WarpClientOptions = {}) {
     if (options.keepOnline === void 0) {

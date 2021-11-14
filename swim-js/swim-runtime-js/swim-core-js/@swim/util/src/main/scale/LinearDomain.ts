@@ -19,6 +19,7 @@ import type {Interpolator} from "../interpolate/Interpolator";
 import {LinearDomainInterpolator} from "../"; // forward import
 import {LinearRange} from "../"; // forward import
 
+/** @public */
 export interface LinearDomain extends Domain<number>, Interpolate<LinearDomain> {
   readonly 0: number;
 
@@ -38,6 +39,7 @@ export interface LinearDomain extends Domain<number>, Interpolate<LinearDomain> 
   toString(): string;
 }
 
+/** @public */
 export const LinearDomain = (function (_super: typeof Domain) {
   const LinearDomain = function (x0: number, x1: number): LinearDomain {
     const domain = function (x: number): number {

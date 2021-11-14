@@ -15,6 +15,7 @@
 import type {HierarchyObserver} from "@swim/fastener";
 import type {ControllerContextType, Controller} from "./Controller";
 
+/** @public */
 export interface ControllerObserver<C extends Controller = Controller> extends HierarchyObserver<C> {
   controllerWillAttachParent?(parent: Controller, controller: C): void;
 

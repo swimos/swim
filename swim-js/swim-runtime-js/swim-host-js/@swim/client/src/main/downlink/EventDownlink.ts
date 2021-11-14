@@ -20,12 +20,15 @@ import type {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {EventDownlinkModel} from "./EventDownlinkModel";
 
+/** @public */
 export interface EventDownlinkObserver extends DownlinkObserver {
 }
 
+/** @public */
 export interface EventDownlinkInit extends EventDownlinkObserver, DownlinkInit {
 }
 
+/** @public */
 export class EventDownlink extends Downlink {
   /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: EventDownlinkInit,
@@ -45,6 +48,7 @@ export class EventDownlink extends Downlink {
     return "event";
   }
 
+  /** @internal */
   protected override copy(context: DownlinkContext, owner: DownlinkOwner | null,
                           hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
                           body: Value, flags: number, observers: ReadonlyArray<EventDownlinkObserver>): EventDownlink {
@@ -89,6 +93,7 @@ export class EventDownlink extends Downlink {
     return this;
   }
 }
+/** @public */
 export interface EventDownlink {
   hostUri(): Uri;
   hostUri(hostUri: AnyUri): EventDownlink;

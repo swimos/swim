@@ -16,6 +16,7 @@ import {Item, Slot, Value, Record} from "@swim/structure";
 import type {ProcessorContext} from "../processor/ProcessorContext";
 import {Directive} from "./Directive";
 
+/** @public */
 export class TemplateDirective extends Directive {
   override evaluate(model: Item, params: Value, context: ProcessorContext): Item {
     params = context.evaluate(params);

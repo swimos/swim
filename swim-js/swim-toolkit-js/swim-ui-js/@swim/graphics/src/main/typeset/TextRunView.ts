@@ -23,12 +23,15 @@ import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import type {TypesetViewInit, TypesetView} from "./TypesetView";
 import {TextRun} from "./TextRun";
 
+/** @public */
 export type AnyTextRunView = TextRunView | TextRun | TextRunViewInit | string;
 
+/** @public */
 export interface TextRunViewInit extends TypesetViewInit {
   text?: string;
 }
 
+/** @public */
 export class TextRunView extends LayerView implements TypesetView {
   @ThemeAnimator({type: String, state: "", updateFlags: View.NeedsRender})
   readonly text!: ThemeAnimator<this, string>;

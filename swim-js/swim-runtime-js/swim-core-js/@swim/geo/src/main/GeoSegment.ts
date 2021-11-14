@@ -21,8 +21,10 @@ import {GeoPoint} from "./GeoPoint";
 import {GeoCurve} from "./GeoCurve";
 import {GeoSegmentInterpolator} from "./"; // forward import
 
+/** @public */
 export type AnyGeoSegment = GeoSegment | GeoSegmentInit;
 
+/** @public */
 export interface GeoSegmentInit {
   lng0: number;
   lat0: number;
@@ -30,6 +32,7 @@ export interface GeoSegmentInit {
   lat1: number;
 }
 
+/** @public */
 export class GeoSegment extends GeoCurve implements Interpolate<GeoSegment>, HashCode, Debug {
   constructor(lng0: number, lat0: number, lng1: number, lat1: number) {
     super();

@@ -30,6 +30,7 @@
     "@swim/dom": "4.0.0-dev.20210927.1",
     "@swim/graphics": "4.0.0-dev.20210927.1",
 
+    "@microsoft/api-extractor": "7.18",
     "@rollup/plugin-node-resolve": "13",
     "@types/arcgis-js-api": "4.21",
     "@types/eslint": "7",

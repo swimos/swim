@@ -17,6 +17,7 @@ import {AnyDateTime, DateTime} from "../DateTime";
 import {TimeDomainInterpolator} from "./"; // forward import
 import {TimeRange} from "./"; // forward import
 
+/** @public */
 export interface TimeDomain extends Domain<DateTime>, Interpolate<TimeDomain> {
   readonly 0: DateTime;
 
@@ -36,6 +37,7 @@ export interface TimeDomain extends Domain<DateTime>, Interpolate<TimeDomain> {
   toString(): string;
 }
 
+/** @public */
 export const TimeDomain = (function (_super: typeof Domain) {
   const TimeDomain = function (x0: DateTime, x1: DateTime): TimeDomain {
     const domain = function (t: DateTime): number {

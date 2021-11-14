@@ -16,8 +16,10 @@ import {HashCode, Compare, Lazy, Strings, HashGenCacheMap} from "@swim/util";
 import type {Output, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
+/** @public */
 export type AnyUriScheme = UriScheme | string;
 
+/** @public */
 export class UriScheme implements HashCode, Compare, Debug, Display {
   /** @internal */
   constructor(name: string) {

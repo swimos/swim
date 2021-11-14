@@ -4,7 +4,6 @@
   "references": [
     {"path": "./@swim/warp"},
     {"path": "./@swim/client"},
-    {"path": "./@swim/cli"},
     {"path": "./@swim/host"}
   ]
 }

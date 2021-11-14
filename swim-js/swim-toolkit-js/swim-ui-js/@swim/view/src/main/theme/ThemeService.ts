@@ -19,6 +19,7 @@ import {Viewport} from "../viewport/Viewport";
 import type {ThemeServiceObserver} from "./ThemeServiceObserver";
 import {View} from "../"; // forward import
 
+/** @public */
 export class ThemeService<V extends View = View> extends Service<V> {
   constructor() {
     super();

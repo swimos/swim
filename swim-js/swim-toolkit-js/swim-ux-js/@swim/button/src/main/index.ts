@@ -34,6 +34,9 @@ export {ButtonItem} from "./ButtonItem";
 export {ButtonStack} from "./ButtonStack";
 export {ButtonStackObserver} from "./ButtonStackObserver";
 
-export {IconButton} from "./IconButton";
+export {
+  IconButtonInit,
+  IconButton,
+} from "./IconButton";
 
 export {DisclosureButton} from "./DisclosureButton";

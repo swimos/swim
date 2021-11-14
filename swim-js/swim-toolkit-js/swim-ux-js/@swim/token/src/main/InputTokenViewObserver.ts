@@ -16,6 +16,7 @@ import type {HtmlView} from "@swim/dom";
 import type {TokenViewObserver} from "./TokenViewObserver";
 import type {InputTokenView} from "./InputTokenView";
 
+/** @public */
 export interface InputTokenViewObserver<V extends InputTokenView = InputTokenView> extends TokenViewObserver<V> {
   tokenDidUpdateInput?(inputView: HtmlView, view: V): void;
 

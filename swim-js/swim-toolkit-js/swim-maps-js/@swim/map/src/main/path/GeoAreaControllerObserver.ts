@@ -20,6 +20,7 @@ import type {GeoAreaTrait} from "./GeoAreaTrait";
 import type {GeoPathControllerObserver} from "./GeoPathControllerObserver";
 import type {GeoAreaController} from "./GeoAreaController";
 
+/** @public */
 export interface GeoAreaControllerObserver<C extends GeoAreaController = GeoAreaController> extends GeoPathControllerObserver<C> {
   controllerWillAttachGeoTrait?(geoTrait: GeoAreaTrait, controller: C): void;
 

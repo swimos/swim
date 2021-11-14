@@ -17,10 +17,12 @@ import type {SelectionServiceObserver} from "./SelectionServiceObserver";
 import type {Model} from "../model/Model";
 import {SelectableTrait} from "../"; // forward import
 
+/** @public */
 export interface SelectionOptions {
   multi?: boolean;
 }
 
+/** @public */
 export class SelectionService<M = unknown> extends Service<M> {
   constructor() {
     super();

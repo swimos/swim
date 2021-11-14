@@ -22,6 +22,7 @@ import {GraphicsIconView} from "../"; // forward import
 import {SvgIconView} from "../"; // forward import
 import {HtmlIconView} from "../"; // forward import
 
+/** @public */
 export interface IconViewInit extends ViewInit {
   xAlign?: number;
   yAlign?: number;
@@ -31,6 +32,7 @@ export interface IconViewInit extends ViewInit {
   graphics?: Graphics;
 }
 
+/** @public */
 export interface IconView extends View {
   readonly xAlign: Animator<this, number>;
 
@@ -45,6 +47,7 @@ export interface IconView extends View {
   readonly graphics: ThemeAnimator<this, Graphics | null>;
 }
 
+/** @public */
 export const IconView = (function () {
   const IconView = {} as {
     is(object: unknown): object is IconView;

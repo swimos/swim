@@ -32,6 +32,7 @@ import {FocusThemeAnimatorInit, FocusThemeAnimator} from "./"; // forward import
 import {PresenceThemeAnimatorInit, PresenceThemeAnimator} from "./"; // forward import
 import {ExpansionThemeAnimatorInit, ExpansionThemeAnimator} from "./"; // forward import
 
+/** @public */
 export interface ThemeAnimatorInit<T = unknown, U = T> extends AnimatorInit<T, U> {
   extends?: {prototype: ThemeAnimator<any, any>} | string | boolean | null;
   look?: Look<T>;
@@ -40,11 +41,14 @@ export interface ThemeAnimatorInit<T = unknown, U = T> extends AnimatorInit<T, U
   didSetLook?(newLook: Look<T> | null, oldLook: Look<T> | null, timing: Timing | boolean): void;
 }
 
+/** @public */
 export type ThemeAnimatorDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<ThemeAnimator<O, T, U> & I> & ThemeAnimatorInit<T, U> & Partial<I>;
 
+/** @public */
 export interface ThemeAnimatorClass<A extends ThemeAnimator<any, any> = ThemeAnimator<any, any>> extends AnimatorClass<A> {
 }
 
+/** @public */
 export interface ThemeAnimatorFactory<A extends ThemeAnimator<any, any> = ThemeAnimator<any, any>> extends ThemeAnimatorClass<A> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ThemeAnimatorFactory<A> & I;
 
@@ -69,6 +73,7 @@ export interface ThemeAnimatorFactory<A extends ThemeAnimator<any, any> = ThemeA
   <O, T, U = T, I = {}>(descriptor: ThemeAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface ThemeAnimator<O = unknown, T = unknown, U = T> extends Animator<O, T, U> {
   /** @protected @override */
   onSetAffinity(newAffinity: Affinity, oldAffinity: Affinity): void;
@@ -112,6 +117,7 @@ export interface ThemeAnimator<O = unknown, T = unknown, U = T> extends Animator
   onMount(): void;
 }
 
+/** @public */
 export const ThemeAnimator = (function (_super: typeof Animator) {
   const ThemeAnimator: ThemeAnimatorFactory = _super.extend("ThemeAnimator");
 

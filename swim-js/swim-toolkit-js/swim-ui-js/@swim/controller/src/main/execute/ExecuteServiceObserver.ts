@@ -16,5 +16,6 @@ import type {ServiceObserver} from "@swim/util";
 import type {ExecuteService} from "./ExecuteService";
 import type {Controller} from "../controller/Controller";
 
+/** @public */
 export interface ExecuteServiceObserver<C extends Controller = Controller, S extends ExecuteService<C> = ExecuteService<C>> extends ServiceObserver<C, S> {
 }

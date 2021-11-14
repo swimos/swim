@@ -16,6 +16,7 @@ import type {Transform} from "@swim/math";
 import {GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {DrawingContext} from "./DrawingContext";
 
+/** @public */
 export abstract class DrawingRenderer extends GraphicsRenderer {
   abstract readonly context: DrawingContext;
 

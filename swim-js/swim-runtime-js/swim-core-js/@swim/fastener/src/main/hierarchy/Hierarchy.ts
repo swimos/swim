@@ -27,8 +27,10 @@ import {FastenerContext} from "../fastener/FastenerContext";
 import type {Fastener} from "../fastener/Fastener";
 import type {HierarchyObserver} from "./HierarchyObserver";
 
+/** @beta */
 export type HierarchyFlags = number;
 
+/** @beta */
 export abstract class Hierarchy implements HashCode, Family, Observable, FastenerContext {
   constructor() {
     this.uid = (this.constructor as typeof Hierarchy).uid();

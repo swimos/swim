@@ -19,6 +19,7 @@ import {HtmlViewInit, HtmlView} from "@swim/dom";
 import {CellView} from "./CellView";
 import type {TextCellViewObserver} from "./TextCellViewObserver";
 
+/** @public */
 export class TextCellView extends CellView {
   protected override initCell(): void {
     super.initCell();

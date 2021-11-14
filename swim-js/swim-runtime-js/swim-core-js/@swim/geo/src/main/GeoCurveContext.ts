@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export interface GeoCurveContext {
   moveTo(lng: number, lat: number): void;
 

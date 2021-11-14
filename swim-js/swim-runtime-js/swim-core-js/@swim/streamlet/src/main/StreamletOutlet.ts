@@ -20,6 +20,7 @@ import {AbstractOutlet} from "./AbstractOutlet";
  * An `Outlet` that decoheres a parameterized `Streamlet` whenever the
  * `Outlet` decoheres, and which gets its state from the parameterized
  * `Streamlet`.
+ * @public
  */
 export class StreamletOutlet<O> extends AbstractOutlet<O> {
   constructor(streamlet: Streamlet<unknown, O>) {

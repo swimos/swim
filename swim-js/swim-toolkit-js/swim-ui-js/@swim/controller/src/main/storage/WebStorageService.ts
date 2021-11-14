@@ -16,6 +16,7 @@ import {Lazy} from "@swim/util";
 import {StorageService} from "./StorageService";
 import type {Controller} from "../controller/Controller";
 
+/** @public */
 export class WebStorageService<C extends Controller = Controller> extends StorageService<C> {
   constructor(storage: Storage) {
     super();

@@ -17,6 +17,7 @@ import type {DataPointView} from "../data/DataPointView";
 import type {ScaledXYViewObserver} from "../scaled/ScaledXYViewObserver";
 import type {PlotView} from "./PlotView";
 
+/** @public */
 export interface PlotViewObserver<X = unknown, Y = unknown, V extends PlotView<X, Y> = PlotView<X, Y>> extends ScaledXYViewObserver<X, Y, V> {
   viewWillAttachDataPoint?(dataPointView: DataPointView<X, Y>, targetView: View | null, view: V): void;
 

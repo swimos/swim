@@ -32,6 +32,7 @@ import {StyleAnimatorInit, StyleAnimatorClass, StyleAnimator} from "./StyleAnima
 import {NumberStyleConstraintAnimator} from "./"; // forward import
 import {LengthStyleConstraintAnimator} from "./"; // forward import
 
+/** @public */
 export interface StyleConstraintAnimatorInit<T = unknown, U = never> extends StyleAnimatorInit<T, U> {
   extends?: {prototype: StyleConstraintAnimator<any, any>} | string | boolean | null;
   constrain?: boolean;
@@ -46,8 +47,10 @@ export interface StyleConstraintAnimatorInit<T = unknown, U = never> extends Sty
   toNumber?(value: T): number;
 }
 
+/** @public */
 export type StyleConstraintAnimatorDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<StyleConstraintAnimator<O, T, U> & I> & StyleConstraintAnimatorInit<T, U> & Partial<I>;
 
+/** @public */
 export interface StyleConstraintAnimatorClass<A extends StyleConstraintAnimator<any, any> = StyleConstraintAnimator<any, any, any>> extends StyleAnimatorClass<A> {
   /** @internal */
   readonly ConstrainedFlag: FastenerFlags;
@@ -60,6 +63,7 @@ export interface StyleConstraintAnimatorClass<A extends StyleConstraintAnimator<
   readonly FlagMask: FastenerFlags;
 }
 
+/** @public */
 export interface StyleConstraintAnimatorFactory<A extends StyleConstraintAnimator<any, any> = StyleConstraintAnimator<any, any, any>> extends StyleConstraintAnimatorClass<A> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): StyleConstraintAnimatorFactory<A> & I;
 
@@ -75,6 +79,7 @@ export interface StyleConstraintAnimatorFactory<A extends StyleConstraintAnimato
   <O, T, U = never, I = {}>(descriptor: StyleConstraintAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface StyleConstraintAnimator<O = unknown, T = unknown, U = never> extends StyleAnimator<O, T, U>, ConstraintVariable {
   /** @internal @override */
   readonly id: number;
@@ -191,6 +196,7 @@ export interface StyleConstraintAnimator<O = unknown, T = unknown, U = never> ex
   readonly constraintValue?: T;
 }
 
+/** @public */
 export const StyleConstraintAnimator = (function (_super: typeof StyleAnimator) {
   const StyleConstraintAnimator: StyleConstraintAnimatorFactory = _super.extend("StyleConstraintAnimator");
 

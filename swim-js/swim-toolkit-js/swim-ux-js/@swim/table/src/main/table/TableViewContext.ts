@@ -15,6 +15,7 @@
 import type {R2Box} from "@swim/math";
 import type {ViewContext} from "@swim/view";
 
+/** @public */
 export interface TableViewContext extends ViewContext {
   /**
    * The current client viewport rectangle, translated into view coordinates.

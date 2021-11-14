@@ -25,7 +25,7 @@ import {PieView} from "./PieView";
 import {PieTitle, PieTrait} from "./PieTrait";
 import type {PieControllerObserver} from "./PieControllerObserver";
 
-/** @internal */
+/** @public */
 export interface PieControllerSliceExt {
   attachSliceTrait(sliceTrait: SliceTrait, sliceController: SliceController): void;
   detachSliceTrait(sliceTrait: SliceTrait, sliceController: SliceController): void;
@@ -37,6 +37,7 @@ export interface PieControllerSliceExt {
   detachSliceLegendView(legendView: GraphicsView, sliceController: SliceController): void;
 }
 
+/** @public */
 export class PieController extends GenericController {
   override readonly observerType?: Class<PieControllerObserver>;
 

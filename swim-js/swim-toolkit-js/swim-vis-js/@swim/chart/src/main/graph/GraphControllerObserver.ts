@@ -25,6 +25,7 @@ import type {GraphView} from "./GraphView";
 import type {GraphTrait} from "./GraphTrait";
 import type {GraphController} from "./GraphController";
 
+/** @public */
 export interface GraphControllerObserver<X = unknown, Y = unknown, C extends GraphController<X, Y> = GraphController<X, Y>> extends ControllerObserver<C> {
   controllerWillAttachGraphTrait?(graphTrait: GraphTrait<X, Y> | null, controller: C): void;
 

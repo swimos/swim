@@ -14,9 +14,11 @@
 
 import type {Class} from "./Class";
 
+/** @public */
 export type FamilyType<F> =
   F extends {readonly familyType?: Class<infer C> | null} ? C : never;
 
+/** @public */
 export interface Family {
   readonly familyType?: Class<unknown> | null;
 }

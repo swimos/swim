@@ -20,18 +20,23 @@ import type {MapDownlinkObserver, MapDownlink} from "../downlink/MapDownlink";
 import type {WarpRef} from "../ref/WarpRef";
 import {DownlinkFastenerInit, DownlinkFastenerClass, DownlinkFastener} from "./DownlinkFastener";
 
+/** @internal */
 export type MapDownlinkFastenerKeyType<F extends MapDownlinkFastener<any, any, any>> =
   F extends MapDownlinkFastener<any, infer K, any, any, any> ? K : never;
 
+/** @internal */
 export type MapDownlinkFastenerKeyInitType<F extends MapDownlinkFastener<any, any, any>> =
   F extends MapDownlinkFastener<any, infer K, infer KU, any, any> ? K | KU : never;
 
+/** @internal */
 export type MapDownlinkFastenerValueType<F extends MapDownlinkFastener<any, any, any>> =
   F extends MapDownlinkFastener<any, any, any, infer V, any> ? V : never;
 
+/** @internal */
 export type MapDownlinkFastenerValueInitType<F extends MapDownlinkFastener<any, any, any>> =
   F extends MapDownlinkFastener<any, any, any, infer V, infer VU> ? V | VU : never;
 
+/** @beta */
 export interface MapDownlinkFastenerInit<K = unknown, V = unknown, KU = K, VU = V> extends DownlinkFastenerInit, MapDownlinkObserver<K, V, KU, VU> {
   extends?: {prototype: MapDownlinkFastener<any, any, any>} | string | boolean | null;
   keyForm?: Form<K, KU>;
@@ -40,11 +45,14 @@ export interface MapDownlinkFastenerInit<K = unknown, V = unknown, KU = K, VU = 
   initDownlink?(downlink: MapDownlink<K, V, KU, VU>): MapDownlink<K, V, KU, VU>;
 }
 
+/** @beta */
 export type MapDownlinkFastenerDescriptor<O = unknown, K = unknown, V = unknown, KU = K, VU = V, I = {}> = ThisType<MapDownlinkFastener<O, K, V, KU, VU> & I> & MapDownlinkFastenerInit<K, V, KU, VU> & Partial<I>;
 
+/** @beta */
 export interface MapDownlinkFastenerClass<F extends MapDownlinkFastener<any, any, any> = MapDownlinkFastener<any, any, any>> extends DownlinkFastenerClass<F> {
 }
 
+/** @beta */
 export interface MapDownlinkFastenerFactory<F extends MapDownlinkFastener<any, any, any> = MapDownlinkFastener<any, any, any>> extends MapDownlinkFastenerClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): MapDownlinkFastenerFactory<F> & I;
 
@@ -67,6 +75,7 @@ export interface MapDownlinkFastenerFactory<F extends MapDownlinkFastener<any, a
   <O, K, V, KU = K, VU = V, I = {}>(descriptor: {keyForm: Form<K, KU>, valueForm: Form<V, VU>} & MapDownlinkFastenerDescriptor<O, K, V, KU, VU, I>): PropertyDecorator;
 }
 
+/** @beta */
 export interface MapDownlinkFastener<O = unknown, K = unknown, V = unknown, KU = K, VU = V> extends DownlinkFastener<O> {
   (key: K | KU): V | undefined;
   (key: K | KU, value: V | VU): O;
@@ -139,7 +148,7 @@ export interface MapDownlinkFastener<O = unknown, K = unknown, V = unknown, KU =
   /** @override */
   readonly downlink: MapDownlink<K, V, KU, VU> | null;
 
-  /** @interna @override */
+  /** @internal @override */
   createDownlink(warp: WarpRef): MapDownlink<K, V, KU, VU>;
 
   /** @internal @override */
@@ -149,6 +158,7 @@ export interface MapDownlinkFastener<O = unknown, K = unknown, V = unknown, KU =
   initDownlink?(downlink: MapDownlink<K, V, KU, VU>): MapDownlink<K, V, KU, VU>;
 }
 
+/** @beta */
 export const MapDownlinkFastener = (function (_super: typeof DownlinkFastener) {
   const MapDownlinkFastener: MapDownlinkFastenerFactory = _super.extend("MapDownlinkFastener");
 

@@ -19,6 +19,7 @@ import type {RowView} from "../row/RowView";
 import type {HeaderView} from "../header/HeaderView";
 import type {TableView} from "./TableView";
 
+/** @public */
 export interface TableViewObserver<V extends TableView = TableView> extends HtmlViewObserver<V> {
   viewWillAttachHeader?(headerView: HeaderView, view: V): void;
 

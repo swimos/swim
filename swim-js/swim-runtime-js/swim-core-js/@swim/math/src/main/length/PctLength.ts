@@ -16,6 +16,7 @@ import {Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {LengthUnits, LengthBasis, Length} from "./Length";
 
+/** @public */
 export class PctLength extends Length {
   constructor(value: number) {
     super();

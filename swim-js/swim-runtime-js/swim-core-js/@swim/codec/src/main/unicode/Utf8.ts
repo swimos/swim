@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Strings} from "@swim/util";
 import type {Output} from "../output/Output";
 import {Unicode} from "./Unicode";
 import type {UtfErrorMode} from "./UtfErrorMode";
@@ -20,16 +21,17 @@ import {Utf8EncodedOutput} from "./Utf8EncodedOutput";
 
 /**
  * UTF-8 [[Input]]/[[Output]] factory.
+ * @public
  */
 export const Utf8 = (function () {
   const Utf8 = {} as {
     /**
      * Returns the number of bytes in the UTF-8 encoding of the Unicode code
      * point `c`, handling invalid code unit sequences according to the
-     * `errorMode` policy.  Returns the size of the
+     * `errorMode` policy. Returns the size of the
      * [[UtfErrorMode.replacementChar]] for surrogates and invalid code points,
      * if [[UtfErrorMode.isReplacement]] is `true`; otherwise returns `0` for
-     * surrogates and invalid code points.  Uses the two byte modified UTF-8
+     * surrogates and invalid code points. Uses the two byte modified UTF-8
      * encoding of the NUL character (`U+0000`), if [[UtfErrorMode.isNonZero]]
      * is `true`.
      */
@@ -72,7 +74,7 @@ export const Utf8 = (function () {
     /**
      * Returns a new `Output` that accepts UTF-8 code unit sequences, and writes
      * decoded Unicode code points to a growable `string`, handling invalid code
-     * unit sequences according to the [[UtfErrorMode.fatal]] policy.  The
+     * unit sequences according to the [[UtfErrorMode.fatal]] policy. The
      * returned `Output` accepts an unbounded number of UTF-8 code units,
      * remaining permanently in the _cont_ state, and [[Output.bind binds]] a
      * `string` containing all decoded code points.
@@ -106,7 +108,7 @@ export const Utf8 = (function () {
       }
     } else if (typeof u === "string") {
       let size = 0;
-      for (let i = 0, n = u.length; i < n; i = u.offsetByCodePoints(i, 1)) {
+      for (let i = 0, n = u.length; i < n; i = Strings.offsetByCodePoints(u, i, 1)) {
         size += Utf8.sizeOf(u.charCodeAt(i), errorMode);
       }
       return size;

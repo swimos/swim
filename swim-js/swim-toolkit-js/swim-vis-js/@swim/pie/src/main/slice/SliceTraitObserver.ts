@@ -17,6 +17,7 @@ import type {Color} from "@swim/style";
 import type {Look} from "@swim/theme";
 import type {SliceLabel, SliceLegend, SliceTrait} from "./SliceTrait";
 
+/** @public */
 export interface SliceTraitObserver<R extends SliceTrait = SliceTrait> extends TraitObserver<R> {
   traitWillSetSliceValue?(newValue: number, oldValue: number, trait: R): void;
 

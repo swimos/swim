@@ -18,6 +18,7 @@ import {AxisView} from "./AxisView";
 import {AxisTrait} from "./AxisTrait";
 import type {AxisControllerObserver} from "./AxisControllerObserver";
 
+/** @public */
 export abstract class AxisController<D = unknown> extends GenericController {
   override readonly observerType?: Class<AxisControllerObserver<D>>;
 

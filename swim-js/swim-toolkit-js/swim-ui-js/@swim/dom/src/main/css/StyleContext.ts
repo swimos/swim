@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
+/** @public */
 export interface StyleContext {
   readonly node?: Node;
 
@@ -20,10 +23,9 @@ export interface StyleContext {
   setStyle(propertyName: string, value: unknown, priority?: string): this;
 }
 
-/** @internal */
+/** @public */
 export const StyleContext = (function () {
   const StyleContext = {} as {
-    /** @internal */
     is(object: unknown): object is StyleContext;
   };
 

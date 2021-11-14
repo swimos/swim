@@ -18,6 +18,7 @@ import {Arrays} from "../values/Arrays";
 import type {ObserverType, Observable} from "../observable/Observable";
 import type {ServiceObserver} from "./ServiceObserver";
 
+/** @public */
 export class Service<R> implements Observable {
   constructor() {
     this.roots = Arrays.empty;

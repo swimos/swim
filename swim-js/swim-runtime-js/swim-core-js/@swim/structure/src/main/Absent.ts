@@ -21,8 +21,10 @@ import {AnyValue, Value} from "./Value";
 import {Record} from "./Record";
 import type {AnyText} from "./Text";
 
+/** @public */
 export type AnyAbsent = Absent | undefined;
 
+/** @public */
 export class Absent extends Value {
   /** @internal */
   private constructor() {

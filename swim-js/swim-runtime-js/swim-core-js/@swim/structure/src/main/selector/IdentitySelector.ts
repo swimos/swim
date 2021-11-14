@@ -25,6 +25,7 @@ import {GetItemSelector} from "../"; // forward import
 import {FilterSelector} from "../"; // forward import
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class IdentitySelector extends Selector {
   override get then(): Selector {
     return this;

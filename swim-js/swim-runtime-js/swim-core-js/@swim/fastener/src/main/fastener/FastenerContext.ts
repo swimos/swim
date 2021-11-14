@@ -15,6 +15,7 @@
 import type {Class} from "@swim/util";
 import type {FastenerDescriptor, FastenerClass, FastenerFactory, Fastener} from "./Fastener";
 
+/** @public */
 export interface FastenerContextClass {
   /** @internal */
   fastenerClassMap?: {[fastenerName: string]: FastenerClass | undefined};
@@ -22,6 +23,7 @@ export interface FastenerContextClass {
   fastenerClassInitMap?: {[fastenerName: string]: FastenerClass | undefined};
 }
 
+/** @public */
 export interface FastenerContext {
   hasFastener(fastenerName: string, fastenerBound?: Class<Fastener> | null): boolean;
 
@@ -41,6 +43,7 @@ export interface FastenerContext {
   requireUpdate?(updateFlags: number): void;
 }
 
+/** @public */
 export const FastenerContext = (function () {
   const FastenerContext = {} as {
     getLazyFastener<F extends Fastener<any>>(fastenerContext: FastenerContext, fastenerName: string, fastenerBound: Class<F>): F | null;

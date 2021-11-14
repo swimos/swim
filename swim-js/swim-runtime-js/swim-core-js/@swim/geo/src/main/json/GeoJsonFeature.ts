@@ -16,8 +16,10 @@ import type {GeoShape} from "../GeoShape";
 import type {GeoJsonObject} from "./GeoJson";
 import {GeoJsonGeometry} from "./GeoJsonGeometry";
 
+/** @public */
 export type GeoJsonProperties = {[name: string]: unknown};
 
+/** @public */
 export interface GeoJsonFeature<G extends GeoJsonGeometry = GeoJsonGeometry, P = GeoJsonProperties> extends GeoJsonObject {
   type: "Feature";
   geometry: G | null;
@@ -25,6 +27,7 @@ export interface GeoJsonFeature<G extends GeoJsonGeometry = GeoJsonGeometry, P =
   id?: string | number;
 }
 
+/** @public */
 export const GeoJsonFeature = (function () {
   const GeoJsonFeature = {} as {
     is(value: unknown): value is GeoJsonFeature;

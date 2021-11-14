@@ -16,6 +16,7 @@ import type {HtmlView} from "@swim/dom";
 import type {CellViewObserver} from "./CellViewObserver";
 import type {TextCellView} from "./TextCellView";
 
+/** @public */
 export interface TextCellViewObserver<V extends TextCellView = TextCellView> extends CellViewObserver<V> {
   viewWillAttachContent?(contentView: HtmlView, view: V): void;
 

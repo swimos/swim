@@ -16,6 +16,7 @@ import type {ServiceObserver} from "@swim/util";
 import type {SelectionOptions, SelectionService} from "./SelectionService";
 import type {Model} from "../model/Model";
 
+/** @public */
 export interface SelectionServiceObserver<M = unknown, S extends SelectionService<M> = SelectionService<M>> extends ServiceObserver<M, S> {
   serviceWillSelect?(model: Model, index: number, options: SelectionOptions | null, service: S): void;
 

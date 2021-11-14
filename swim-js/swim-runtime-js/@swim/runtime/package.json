@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-runtime.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-runtime.js",
+  "module": "./dist/swim-runtime.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-runtime.mjs",
+      "require": "./dist/swim-runtime.js",
+      "types": "./dist/swim-runtime.d.ts"
+    }
+  },
+  "types": "./dist/swim-runtime.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "dependencies": {
     "@swim/core": "4.0.0-dev.20210927.1",
     "@swim/host": "4.0.0-dev.20210927.1"

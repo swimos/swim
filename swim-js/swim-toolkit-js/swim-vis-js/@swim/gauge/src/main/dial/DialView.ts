@@ -31,10 +31,13 @@ import {
 } from "@swim/graphics";
 import type {DialViewObserver} from "./DialViewObserver";
 
+/** @public */
 export type DialViewArrangement = "auto" | "manual";
 
+/** @public */
 export type AnyDialView = DialView | DialViewInit;
 
+/** @public */
 export interface DialViewInit extends GraphicsViewInit {
   value?: number;
   limit?: number;
@@ -60,6 +63,7 @@ export interface DialViewInit extends GraphicsViewInit {
   legend?: GraphicsView | string;
 }
 
+/** @public */
 export class DialView extends LayerView {
   override readonly observerType?: Class<DialViewObserver>;
 

@@ -29,11 +29,14 @@ import {HtmlViewInit, HtmlView, SvgView} from "@swim/dom";
 import {Graphics, PathContext, PathRenderer} from "@swim/graphics";
 import type {TokenViewObserver} from "./TokenViewObserver";
 
+/** @public */
 export type TokenViewState = "collapsed" | "expanding" | "expanded" | "collapsing";
 
+/** @public */
 export interface TokenViewInit extends HtmlViewInit {
 }
 
+/** @public */
 export class TokenView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

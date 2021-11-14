@@ -24,6 +24,7 @@ import type {Constraint} from "./Constraint";
 import {ConstraintScope} from "./"; // forward import
 import type {ConstraintSolver} from "./ConstraintSolver";
 
+/** @public */
 export interface ConstraintAnimatorInit<T = unknown, U = T> extends AnimatorInit<T, U> {
   extends?: {prototype: ConstraintAnimator<any, any>} | string | boolean | null;
   constrain?: boolean;
@@ -37,8 +38,10 @@ export interface ConstraintAnimatorInit<T = unknown, U = T> extends AnimatorInit
   toNumber?(value: T): number;
 }
 
+/** @public */
 export type ConstraintAnimatorDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<ConstraintAnimator<O, T, U> & I> & ConstraintAnimatorInit<T, U> & Partial<I>;
 
+/** @public */
 export interface ConstraintAnimatorClass<A extends ConstraintAnimator<any, any> = ConstraintAnimator<any, any>> extends AnimatorClass<A> {
   /** @internal */
   readonly ConstrainedFlag: FastenerFlags;
@@ -51,6 +54,7 @@ export interface ConstraintAnimatorClass<A extends ConstraintAnimator<any, any> 
   readonly FlagMask: FastenerFlags;
 }
 
+/** @public */
 export interface ConstraintAnimatorFactory<A extends ConstraintAnimator<any, any> = ConstraintAnimator<any, any>> extends ConstraintAnimatorClass<A> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ConstraintAnimatorFactory<A> & I;
 
@@ -65,6 +69,7 @@ export interface ConstraintAnimatorFactory<A extends ConstraintAnimator<any, any
   <O, T, U = T, I = {}>(descriptor: ConstraintAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface ConstraintAnimator<O = unknown, T = unknown, U = T> extends Animator<O, T, U>, ConstraintVariable {
   /** @internal @override */
   readonly id: number;
@@ -178,6 +183,7 @@ export interface ConstraintAnimator<O = unknown, T = unknown, U = T> extends Ani
   toNumber(value: T): number;
 }
 
+/** @public */
 export const ConstraintAnimator = (function (_super: typeof Animator) {
   const ConstraintAnimator: ConstraintAnimatorFactory = _super.extend("ConstraintAnimator");
 

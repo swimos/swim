@@ -20,7 +20,8 @@ import {Strings} from "../values/Strings";
 import {Constructors} from "../values/Constructors";
 
 /**
- * Level of importance.  Used for log levels and diagnostic classifications.
+ * Level of importance. Used for log levels and diagnostic classifications.
+ * @public
  */
 export class Severity implements HashCode, Compare {
   private constructor(level: number, label: string) {
@@ -30,7 +31,7 @@ export class Severity implements HashCode, Compare {
 
   /**
    * The integer level of importance of this `Severity`, with higher  levels
-   * signifying greater importance.  An integer between `0` and `7`, inclusive.
+   * signifying greater importance. An integer between `0` and `7`, inclusive.
    * One of `TRACE_LEVEL`, `DEBUG_LEVEL`, `INFO_LEVEL`, `NOTE_LEVEL`,
    * `WARNING_LEVEL`, `ERROR_LEVEL`, `ALERT_LEVEL`, `FATAL_LEVEL`.
    */

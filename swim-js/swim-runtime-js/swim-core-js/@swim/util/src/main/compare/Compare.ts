@@ -14,10 +14,11 @@
 
 /**
  * Type that implements a universal partial order.
+ * @public
  */
 export interface Compare {
   /**
-   * Returns the relative order of `this` with respect to `that`.  Returns `-1`
+   * Returns the relative order of `this` with respect to `that`. Returns `-1`
    * if `this` orders before `that`; returns `1` if `this` orders after `that`;
    * returns `0` if `this` and `that` are equivalent; and returns `NaN` if
    * `this` is not comparable to `that`.
@@ -25,6 +26,7 @@ export interface Compare {
   compareTo(that: unknown): number;
 }
 
+/** @public */
 export const Compare = (function () {
   const Compare = function (x: unknown, y: unknown): number {
     if (x === void 0) {

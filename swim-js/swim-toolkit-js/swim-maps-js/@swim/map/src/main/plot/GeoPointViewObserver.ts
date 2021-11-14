@@ -17,6 +17,7 @@ import type {GraphicsView} from "@swim/graphics";
 import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {GeoPointView} from "./GeoPointView";
 
+/** @public */
 export interface GeoPointViewObserver<V extends GeoPointView = GeoPointView> extends GeoViewObserver<V> {
   viewWillSetGeoPoint?(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint, view: V): void;
 

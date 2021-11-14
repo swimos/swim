@@ -23,6 +23,7 @@ import type {InvokeOperator} from "../operator/InvokeOperator";
 import {Func} from "./Func";
 import {Interpreter} from "../"; // forward import
 
+/** @public */
 export class LambdaFunc extends Func {
   constructor(bindings: Value, template: Value) {
     super();

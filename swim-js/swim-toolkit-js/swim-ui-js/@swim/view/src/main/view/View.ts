@@ -58,7 +58,7 @@ import {
   ThemeContext,
   ThemeAnimator,
 } from "@swim/theme";
-import type {ViewIdiom} from "../viewport/ViewIdiom";
+import type {ViewportIdiom} from "../viewport/ViewportIdiom";
 import type {Viewport} from "../viewport/Viewport";
 import {ViewportService} from "../viewport/ViewportService";
 import {ViewportProvider} from "../viewport/ViewportProvider";
@@ -92,13 +92,17 @@ import type {
 } from "./ViewObserver";
 import {ViewRelation} from "./"; // forward import
 
+/** @public */
 export type ViewContextType<V extends View> =
   V extends {readonly contextType?: Class<infer T>} ? T : never;
 
+/** @public */
 export type ViewFlags = HierarchyFlags;
 
+/** @public */
 export type AnyView<V extends View = View> = V | ViewFactory<V> | InitType<V>;
 
+/** @public */
 export interface ViewInit {
   type?: Creatable<View>;
   key?: string;
@@ -110,21 +114,26 @@ export interface ViewInit {
   themeModifier?: MoodMatrix;
 }
 
+/** @public */
 export interface ViewFactory<V extends View = View, U = AnyView<V>> extends Creatable<V>, FromAny<V, U> {
   fromInit(init: InitType<V>): V;
 }
 
+/** @public */
 export interface ViewClass<V extends View = View, U = AnyView<V>> extends Function, ViewFactory<V, U> {
   readonly prototype: V;
 }
 
+/** @public */
 export interface ViewConstructor<V extends View = View, U = AnyView<V>> extends ViewClass<V, U> {
   new(): V;
 }
 
+/** @public */
 export type ViewCreator<F extends (abstract new (...args: any[]) => V) & Creatable<InstanceType<F>>, V extends View = View> =
   (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
+/** @public */
 export abstract class View extends Hierarchy implements Initable<ViewInit>, ConstraintScope, ConstraintContext, ThemeContext {
   constructor() {
     super();
@@ -1438,8 +1447,8 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     }
   }
 
-  get viewIdiom(): ViewIdiom {
-    return this.viewContext.viewIdiom;
+  get viewportIdiom(): ViewportIdiom {
+    return this.viewContext.viewportIdiom;
   }
 
   get viewport(): Viewport {

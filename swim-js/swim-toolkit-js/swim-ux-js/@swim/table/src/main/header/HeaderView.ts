@@ -23,6 +23,7 @@ import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {ColView} from "../col/ColView";
 import type {HeaderViewObserver} from "./HeaderViewObserver";
 
+/** @public */
 export class HeaderView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

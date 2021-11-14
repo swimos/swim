@@ -14,6 +14,7 @@
 
 import type {Map} from "./Map";
 
+/** @public */
 export interface OrderedMap<K = unknown, V = unknown> extends Map<K, V> {
   getEntry(index: number): [K, V] | undefined;
 

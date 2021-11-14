@@ -12,12 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export type FilterFieldsFunction<K, V> = (key: K, value: V) => boolean;
 
+/** @public */
 export type MapValueFunction<I, O> = (value: I) => O;
 
+/** @public */
 export type MapFieldValuesFunction<K, VI, VO> = (key: K, value: VI) => VO;
 
+/** @public */
 export type WatchValueFunction<I> = (value: I) => void;
 
+/** @public */
 export type WatchFieldsFunction<K, V> = (key: K, value: V) => void;

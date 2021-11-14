@@ -15,6 +15,7 @@
 import type {GraphicsRenderer} from "@swim/graphics";
 import type {GeoViewContext} from "../geo/GeoViewContext";
 
+/** @public */
 export interface GeoRasterViewContext extends GeoViewContext {
   readonly compositor: GraphicsRenderer | null;
 }

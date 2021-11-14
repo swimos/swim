@@ -21,6 +21,7 @@ import {Record} from "../Record";
 import {Selector} from "./Selector";
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class GetSelector extends Selector {
   constructor(key: Value, then: Selector) {
     super();

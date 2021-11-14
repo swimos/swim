@@ -16,6 +16,7 @@ import type {GeoPoint} from "@swim/geo";
 import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {GeoRasterView} from "./GeoRasterView";
 
+/** @public */
 export interface GeoRasterViewObserver<V extends GeoRasterView = GeoRasterView> extends GeoViewObserver<V> {
   viewWillSetGeoAnchor?(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null, view: V): void;
 

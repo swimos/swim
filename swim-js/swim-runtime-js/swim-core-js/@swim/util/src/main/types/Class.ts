@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export type ClassType<C> =
   C extends {readonly prototype: infer T} ? T : never;
 
+/** @public */
 export interface Class<T> extends Function {
   readonly prototype: T;
 }

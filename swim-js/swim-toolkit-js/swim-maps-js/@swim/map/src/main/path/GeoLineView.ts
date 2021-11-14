@@ -30,10 +30,12 @@ import {
 import {GeoPathViewInit, GeoPathView} from "./GeoPathView";
 import type {GeoLineViewObserver} from "./GeoLineViewObserver";
 
+/** @public */
 export interface GeoLineViewInit extends GeoPathViewInit, StrokeViewInit {
   hitWidth?: number;
 }
 
+/** @public */
 export class GeoLineView extends GeoPathView implements StrokeView {
   override readonly observerType?: Class<GeoLineViewObserver>;
 

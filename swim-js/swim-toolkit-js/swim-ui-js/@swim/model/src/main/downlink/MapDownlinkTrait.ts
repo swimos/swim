@@ -16,6 +16,7 @@ import type {AnyValue, Value} from "@swim/structure";
 import {MapDownlinkFastener} from "@swim/client";
 import {DownlinkTrait} from "./DownlinkTrait";
 
+/** @beta */
 export abstract class MapDownlinkTrait extends DownlinkTrait {
   protected downlinkDidUpdate(key: Value, newValue: Value, oldValue: Value): void {
     // hook

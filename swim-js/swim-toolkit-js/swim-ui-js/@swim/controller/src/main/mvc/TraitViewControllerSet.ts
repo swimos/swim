@@ -20,9 +20,11 @@ import type {Controller} from "../controller/Controller";
 import {ControllerSetInit, ControllerSetClass, ControllerSet} from "../controller/ControllerSet";
 import type {TraitViewRef} from "./TraitViewRef";
 
+/** @internal */
 export type TraitViewControllerSetType<F extends TraitViewControllerSet<any, any, any, any>> =
   F extends TraitViewControllerSet<any, any, any, infer C> ? C : never;
 
+/** @public */
 export interface TraitViewControllerSetInit<T extends Trait = Trait, V extends View = View, C extends Controller = Controller> extends ControllerSetInit<C> {
   extends?: {prototype: TraitViewControllerSet<any, any, any, any>} | string | boolean | null;
   getTraitViewRef?(controller: C): TraitViewRef<any, T, V>;
@@ -34,11 +36,14 @@ export interface TraitViewControllerSetInit<T extends Trait = Trait, V extends V
   parentView?: View | null;
 }
 
+/** @public */
 export type TraitViewControllerSetDescriptor<O = unknown, T extends Trait = Trait, V extends View = View, C extends Controller = Controller, I = {}> = ThisType<TraitViewControllerSet<O, T, V, C> & I> & TraitViewControllerSetInit<T, V, C> & Partial<I>;
 
+/** @public */
 export interface TraitViewControllerSetClass<F extends TraitViewControllerSet<any, any, any, any> = TraitViewControllerSet<any, any, any, any>> extends ControllerSetClass<F> {
 }
 
+/** @public */
 export interface TraitViewControllerSetFactory<F extends TraitViewControllerSet<any, any, any, any> = TraitViewControllerSet<any, any, any, any>> extends TraitViewControllerSetClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitViewControllerSetFactory<F> & I;
 
@@ -53,6 +58,7 @@ export interface TraitViewControllerSetFactory<F extends TraitViewControllerSet<
   <O, T extends Trait = Trait, V extends View = View, C extends Controller = Controller, I = {}>(descriptor: {observes: boolean} & TraitViewControllerSetDescriptor<O, T, V, C, I & ObserverType<C>>): PropertyDecorator;
 }
 
+/** @public */
 export interface TraitViewControllerSet<O = unknown, T extends Trait = Trait, V extends View = View, C extends Controller = Controller> extends ControllerSet<O, C> {
   /** @internal */
   readonly traitControllers: {readonly [traitId: number]: C | undefined};
@@ -108,6 +114,7 @@ export interface TraitViewControllerSet<O = unknown, T extends Trait = Trait, V 
   get parentView(): View | null; // optional prototype property
 }
 
+/** @public */
 export const TraitViewControllerSet = (function (_super: typeof ControllerSet) {
   const TraitViewControllerSet: TraitViewControllerSetFactory = _super.extend("TraitViewControllerSet");
 

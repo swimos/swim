@@ -27,8 +27,10 @@ import type {FillViewInit, FillView} from "./FillView";
 import type {StrokeViewInit, StrokeView} from "./StrokeView";
 import {Rect} from "./Rect";
 
+/** @public */
 export type AnyRectView = RectView | Rect | RectViewInit;
 
+/** @public */
 export interface RectViewInit extends FillViewInit, StrokeViewInit {
   x?: AnyLength;
   y?: AnyLength;
@@ -36,6 +38,7 @@ export interface RectViewInit extends FillViewInit, StrokeViewInit {
   height?: AnyLength;
 }
 
+/** @public */
 export class RectView extends LayerView implements FillView, StrokeView {
   @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
   readonly x!: ThemeAnimator<this, Length, AnyLength>;

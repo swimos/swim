@@ -23,6 +23,7 @@ import {DialView} from "./DialView";
 import {DialLabel, DialLegend, DialTrait} from "./DialTrait";
 import type {DialControllerObserver} from "./DialControllerObserver";
 
+/** @public */
 export class DialController extends GenericController {
   override readonly observerType?: Class<DialControllerObserver>;
 

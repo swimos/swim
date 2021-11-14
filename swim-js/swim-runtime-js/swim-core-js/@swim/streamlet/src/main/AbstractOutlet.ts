@@ -17,6 +17,7 @@ import type {Inlet} from "./Inlet";
 import type {Outlet} from "./Outlet";
 import {OutletCombinators} from "./OutletCombinators";
 
+/** @public */
 export abstract class AbstractOutlet<O> implements Outlet<O> {
   constructor() {
     this.outputs = Arrays.empty;
@@ -116,6 +117,7 @@ export abstract class AbstractOutlet<O> implements Outlet<O> {
     // hook
   }
 }
+/** @public */
 export interface AbstractOutlet<O> extends OutletCombinators<O> {
 }
 OutletCombinators.define(AbstractOutlet.prototype);

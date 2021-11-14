@@ -23,6 +23,7 @@ import {SliceView} from "./SliceView";
 import {SliceLabel, SliceLegend, SliceTrait} from "./SliceTrait";
 import type {SliceControllerObserver} from "./SliceControllerObserver";
 
+/** @public */
 export class SliceController extends GenericController {
   override readonly observerType?: Class<SliceControllerObserver>;
 

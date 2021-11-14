@@ -1,14 +1,60 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
-const script = "swim-macro";
-const namespace = "swim";
+function dynamicImportToRequire(importId) {
+  return {
+    name: "dynamic-import-to-require",
+    resolveDynamicImport(specifier) {
+      if (importId === specifier || Array.isArray(importId) && importId.includes(specifier)) {
+        return false;
+      }
+      return null;
+    },
+    renderDynamicImport({format, moduleId, targetModuleId}) {
+      if (importId === targetModuleId || Array.isArray(importId) && importId.includes(targetModuleId)) {
+        return {
+          left: "((function () { if (typeof require === \"function\") { try { return Promise.resolve(require(",
+          right: ")); } catch (e) { } } return Promise.reject(void 0); })())",
+        };
+      }
+      return null;
+    }
+  };
+}
 
-const main = {
+const mainEsm = {
   input: "./lib/main/index.js",
   output: {
-    file: `./dist/main/${script}.js`,
-    name: namespace,
+    file: "./dist/swim-macro.mjs",
+    format: "esm",
+    sourcemap: true,
+  },
+  external: [
+    "@swim/util",
+    "@swim/codec",
+    "@swim/args",
+    "@swim/structure",
+    "@swim/recon",
+    "fs",
+    "path",
+    "prismjs",
+    "tslib",
+  ],
+  plugins: [
+    nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
+    sourcemaps(),
+  ],
+  onwarn(warning, warn) {
+    if (warning.code === "CIRCULAR_DEPENDENCY") return;
+    warn(warning);
+  },
+};
+
+const mainUmd = {
+  input: "./lib/main/index.js",
+  output: {
+    file: "./dist/swim-macro.js",
+    name: "swim",
     format: "umd",
     globals: {
       "@swim/util": "swim",
@@ -19,7 +65,7 @@ const main = {
       "prismjs": "Prism",
     },
     sourcemap: true,
-    interop: false,
+    interop: "esModule",
     extend: true,
   },
   external: [
@@ -29,9 +75,11 @@ const main = {
     "@swim/structure",
     "@swim/recon",
     "fs",
+    "path",
     "prismjs",
   ],
   plugins: [
+    dynamicImportToRequire(["fs", "path", "prismjs"]),
     nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
     sourcemaps(),
   ],
@@ -41,23 +89,27 @@ const main = {
   },
 };
 
-const cli = {
+const cliCjs = {
   input: "./lib/cli/index.js",
   output: {
-    file: `./dist/cli/${script}.js`,
-    name: namespace,
-    format: "umd",
-    globals: {
-      "prismjs": "Prism",
-    },
+    file: "./dist/swim-macro-cli.cjs",
+    format: "cjs",
     sourcemap: true,
-    interop: false,
-    extend: true,
+    interop: "esModule",
     banner: "#!/usr/bin/env node",
   },
   external: [
+    "@swim/util",
+    "@swim/codec",
+    "@swim/args",
+    "@swim/unit",
+    "@swim/structure",
+    "@swim/recon",
+    "@swim/macro",
     "fs",
+    "path",
     "prismjs",
+    "tslib",
   ],
   plugins: [
     nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
@@ -69,22 +121,25 @@ const cli = {
   },
 };
 
-const test = {
+const testCjs = {
   input: "./lib/test/index.js",
   output: {
-    file: `./dist/test/${script}-test.js`,
-    name: `${namespace}.test`,
-    format: "umd",
-    globals: {
-      "prismjs": "Prism",
-    },
+    file: './dist/swim-macro-test.cjs',
+    format: "cjs",
     sourcemap: true,
-    interop: false,
-    extend: true,
   },
   external: [
+    "@swim/util",
+    "@swim/codec",
+    "@swim/args",
+    "@swim/unit",
+    "@swim/structure",
+    "@swim/recon",
+    "@swim/macro",
     "fs",
+    "path",
     "prismjs",
+    "tslib",
   ],
   plugins: [
     nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
@@ -96,8 +151,8 @@ const test = {
   },
 };
 
-const targets = [main, cli, test];
-targets.main = main;
-targets.cli = cli;
-targets.test = test;
+const targets = [mainEsm, mainUmd, cliCjs, testCjs];
+targets.main = [mainEsm, mainUmd];
+targets.cli = cliCjs;
+targets.test = testCjs;
 export default targets;

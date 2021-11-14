@@ -18,6 +18,7 @@ import {Outlet, MapOutlet, StreamletScope} from "@swim/streamlet";
 import type {MapValueFunction, MapFieldValuesFunction} from "@swim/streamlet";
 import type {WatchValueFunction, WatchFieldsFunction} from "@swim/streamlet";
 
+/** @public */
 export interface RecordOutlet extends Outlet<Record>, MapOutlet<Value, Value, Record>, StreamletScope<Value> {
   outlet(key: Value | string): Outlet<Value>;
 
@@ -33,6 +34,7 @@ export interface RecordOutlet extends Outlet<Record>, MapOutlet<Value, Value, Re
   watch(func: WatchFieldsFunction<Value, Value>): this;
 }
 
+/** @public */
 export const RecordOutlet = (function () {
   const RecordOutlet = {} as {
     is(object: unknown): object is RecordOutlet;

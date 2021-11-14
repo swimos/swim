@@ -16,8 +16,10 @@ import {Equals, Equivalent} from "@swim/util"
 import {Debug, Format, Output} from "@swim/codec";
 import {AnyLength, Length} from "@swim/math";
 
+/** @public */
 export type AnyDeckPost = DeckPost | DeckPostInit;
 
+/** @public */
 export interface DeckPostInit {
   key?: string;
   grow?: number;
@@ -28,6 +30,7 @@ export interface DeckPostInit {
   right?: AnyLength | null;
 }
 
+/** @public */
 export class DeckPost implements Equals, Equivalent, Debug {
   constructor(key: string, grow: number, shrink: number, basis: Length,
               width: Length | null, left: Length | null, right: Length | null) {

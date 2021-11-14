@@ -22,8 +22,9 @@ import type {DownlinkRecord} from "./DownlinkRecord";
 import {MapDownlinkRecord} from "./MapDownlinkRecord";
 import {DownlinkReifier} from "./DownlinkReifier";
 import type {WarpRef} from "../ref/WarpRef";
-import {client} from ".."; // forward import
+import {client} from "../"; // forward import
 
+/** @public */
 export class DownlinkStreamlet extends AbstractRecordStreamlet {
   constructor(warp: WarpRef | null = null, scope?: StreamletScope<Value> | null) {
     super(scope);
@@ -175,6 +176,7 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
   }
 
   private static _reifier?: DownlinkReifier;
+  /** @beta */
   static reifier(warp?: WarpRef): Reifier {
     if (warp === void 0) {
       if (DownlinkStreamlet._reifier === void 0) {

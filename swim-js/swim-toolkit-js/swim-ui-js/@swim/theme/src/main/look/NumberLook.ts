@@ -15,6 +15,7 @@
 import {Interpolator, NumberInterpolator} from "@swim/util";
 import {Look} from "./Look";
 
+/** @internal */
 export class NumberLook extends Look<number> {
   override combine(combination: number | undefined, value: number, weight: number): number {
     if (combination !== void 0) {

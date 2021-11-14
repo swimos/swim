@@ -27,9 +27,11 @@ import {IconViewInit, IconView} from "./IconView";
 import {IconGraphicsAnimator} from "./IconGraphicsAnimator";
 import {SvgIconView} from "./SvgIconView";
 
+/** @public */
 export interface HtmlIconViewInit extends HtmlViewInit, IconViewInit {
 }
 
+/** @public */
 export class HtmlIconView extends HtmlView implements IconView {
   constructor(node: HTMLElement) {
     super(node);

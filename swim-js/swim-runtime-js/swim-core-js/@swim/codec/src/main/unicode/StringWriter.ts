@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Strings} from "@swim/util";
 import type {Output} from "../output/Output";
 import {WriterException} from "../writer/WriterException";
 import {Writer} from "../writer/Writer";
@@ -48,7 +49,7 @@ export class StringWriter extends Writer<unknown, unknown> {
         c = input.charCodeAt(index);
       }
       output = output.write(c);
-      index = input.offsetByCodePoints(index, 1);
+      index = Strings.offsetByCodePoints(input, index, 1);
     }
     if (index === length) {
       return Writer.done(value);

@@ -1,26 +1,61 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
-const script = "swim-runtime";
-const namespace = "swim";
+function dynamicImportToRequire(importId) {
+  return {
+    name: "dynamic-import-to-require",
+    resolveDynamicImport(specifier) {
+      if (importId === specifier || Array.isArray(importId) && importId.includes(specifier)) {
+        return false;
+      }
+      return null;
+    },
+    renderDynamicImport({format, moduleId, targetModuleId}) {
+      if (importId === targetModuleId || Array.isArray(importId) && importId.includes(targetModuleId)) {
+        return {
+          left: "((function () { if (typeof require === \"function\") { try { return Promise.resolve(require(",
+          right: ")); } catch (e) { } } return Promise.reject(void 0); })())",
+        };
+      }
+      return null;
+    }
+  };
+}
 
-const main = {
+function elideDynamicImport(importId) {
+  return {
+    name: "dynamic-import-to-require",
+    resolveDynamicImport(specifier) {
+      if (importId === specifier || Array.isArray(importId) && importId.includes(specifier)) {
+        return false;
+      }
+      return null;
+    },
+    renderDynamicImport({format, moduleId, targetModuleId}) {
+      if (importId === targetModuleId || Array.isArray(importId) && importId.includes(targetModuleId)) {
+        return {
+          left: "((function (specifier) { return Promise.reject(void 0); })(",
+          right: "))",
+        };
+      }
+      return null;
+    }
+  };
+}
+
+const mainEsm = {
   input: "./lib/main/index.js",
   output: {
-    file: `./dist/main/${script}.js`,
-    name: namespace,
-    format: "umd",
-    globals: {
-      ws: "ws",
-    },
+    file: "./dist/swim-runtime.mjs",
+    format: "esm",
     sourcemap: true,
-    interop: false,
-    extend: true,
   },
   external: [
+    "tslib",
     "ws",
   ],
   plugins: [
+    elideDynamicImport(["os", "ws"]),
     nodeResolve({moduleDirectories: ["../../swim-host-js",
                                      "../../swim-core-js",
                                      "node_modules"]}),
@@ -32,6 +67,29 @@ const main = {
   },
 };
 
-const targets = [main];
-targets.main = main;
+const mainUmd = {
+  input: "./lib/main/index.js",
+  output: {
+    file: "./dist/swim-runtime.js",
+    name: "swim",
+    format: "umd",
+    sourcemap: true,
+    interop: "esModule",
+    extend: true,
+  },
+  plugins: [
+    dynamicImportToRequire(["os", "ws"]),
+    nodeResolve({moduleDirectories: ["../../swim-host-js",
+                                     "../../swim-core-js",
+                                     "node_modules"]}),
+    sourcemaps(),
+  ],
+  onwarn(warning, warn) {
+    if (warning.code === "CIRCULAR_DEPENDENCY") return;
+    warn(warning);
+  },
+};
+
+const targets = [mainEsm, mainUmd];
+targets.main = [mainEsm, mainUmd];
 export default targets;

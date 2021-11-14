@@ -28,6 +28,7 @@ import {LinePlotTrait} from "./LinePlotTrait";
 import {SeriesPlotController} from "./SeriesPlotController";
 import type {LinePlotControllerObserver} from "./LinePlotControllerObserver";
 
+/** @public */
 export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotController<X, Y> {
   override readonly observerType?: Class<LinePlotControllerObserver<X, Y>>;
 

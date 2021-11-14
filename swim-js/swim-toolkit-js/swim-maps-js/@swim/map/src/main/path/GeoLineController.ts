@@ -24,6 +24,7 @@ import {GeoLineTrait} from "./GeoLineTrait";
 import {GeoPathController} from "./GeoPathController";
 import type {GeoLineControllerObserver} from "./GeoLineControllerObserver";
 
+/** @public */
 export class GeoLineController extends GeoPathController {
   override readonly observerType?: Class<GeoLineControllerObserver>;
 

@@ -20,16 +20,22 @@ import {Format} from "../format/Format";
 /**
  * Either an [[InputSettings]] instance, or an [[InputSettingsInit]] object
  * initializer.
+ * @public
  */
 export type AnyInputSettings = InputSettings | InputSettingsInit;
 
+/**
+ * [[InputSettings]] object initializer.
+ * @public
+ */
 export interface InputSettingsInit {
   isStripped?: boolean;
 }
 
 /**
- * [[Input]] consumption parameters.  `InputSettings` provide contextual
+ * [[Input]] consumption parameters. `InputSettings` provide contextual
  * configuration parameters to input consumers, such as [[Parser Parsers]].
+ * @public
  */
 export class InputSettings implements HashCode, Debug {
   protected constructor(stripped: boolean) {

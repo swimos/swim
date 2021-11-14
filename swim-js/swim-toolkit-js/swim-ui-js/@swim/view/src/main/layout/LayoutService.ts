@@ -17,6 +17,7 @@ import {ConstraintVariable, Constraint, ConstraintContext, ConstraintSolver} fro
 import type {LayoutServiceObserver} from "./LayoutServiceObserver";
 import type {View} from "../view/View";
 
+/** @public */
 export class LayoutService<V extends View = View> extends Service<V> implements ConstraintContext {
   constructor() {
     super();

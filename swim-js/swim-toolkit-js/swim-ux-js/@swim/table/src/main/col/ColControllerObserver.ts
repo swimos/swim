@@ -19,6 +19,7 @@ import type {ColView} from "./ColView";
 import type {ColTrait} from "./ColTrait";
 import type {ColController} from "./ColController";
 
+/** @public */
 export interface ColControllerObserver<C extends ColController = ColController> extends ControllerObserver<C> {
   controllerWillAttachColView?(colView: ColView, controller: C): void;
 

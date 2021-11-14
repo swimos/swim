@@ -15,6 +15,7 @@
 import type {Item, Value} from "@swim/structure";
 import type {ProcessorContext} from "../processor/ProcessorContext";
 
+/** @public */
 export abstract class Directive {
   abstract evaluate(model: Item, params: Value, context: ProcessorContext): Item;
 }

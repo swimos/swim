@@ -24,6 +24,7 @@ import type {WorldMapViewport} from "./WorldMapViewport";
 import {EquirectangularMapViewport} from "./EquirectangularMapViewport";
 import type {WorldMapViewObserver} from "./WorldMapViewObserver";
 
+/** @public */
 export class WorldMapView extends MapView {
   constructor(geoViewport: WorldMapViewport) {
     super();

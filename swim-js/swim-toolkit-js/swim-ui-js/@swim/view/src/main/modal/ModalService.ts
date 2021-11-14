@@ -17,6 +17,7 @@ import type {ModalOptions, Modal} from "./Modal";
 import type {ModalServiceObserver} from "./ModalServiceObserver";
 import type {View} from "../view/View";
 
+/** @public */
 export class ModalService<V extends View = View> extends Service<V> {
   constructor() {
     super();

@@ -15,6 +15,7 @@
 import {Item, Value} from "@swim/structure";
 import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 
+/** @internal */
 export abstract class UnaryOutlet extends AbstractOutlet<Value> {
   constructor() {
     super();

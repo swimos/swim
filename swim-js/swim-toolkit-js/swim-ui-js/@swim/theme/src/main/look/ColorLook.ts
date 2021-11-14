@@ -16,6 +16,7 @@ import type {Interpolator} from "@swim/util";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "./Look";
 
+/** @internal */
 export class ColorLook extends Look<Color, AnyColor> {
   override combine(combination: Color | undefined, value: Color, weight?: number): Color {
     if (combination !== void 0) {

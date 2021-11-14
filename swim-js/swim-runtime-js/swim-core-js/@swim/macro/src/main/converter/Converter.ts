@@ -15,6 +15,7 @@
 import type {Output} from "@swim/codec";
 import type {Item} from "@swim/structure";
 
+/** @public */
 export abstract class Converter {
   abstract convert<O>(output: Output<O>, model: Item): O;
 }

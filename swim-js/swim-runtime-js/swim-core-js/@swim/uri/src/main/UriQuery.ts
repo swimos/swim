@@ -19,8 +19,10 @@ import {UriQueryParam} from "./"; // forward import
 import {UriQueryUndefined} from "./"; // forward import
 import {UriQueryBuilder} from "./"; // forward import
 
+/** @public */
 export type AnyUriQuery = UriQuery | {[key: string]: string} | string;
 
+/** @public */
 export abstract class UriQuery implements HashCode, Compare, Debug, Display {
   abstract isDefined(): boolean;
 

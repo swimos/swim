@@ -20,6 +20,7 @@ import {AbstractInlet} from "./AbstractInlet";
  * An `Inlet` that decoheres a parameterized `Streamlet` whenever the `Inlet`
  * decoheres, and that recoheres the parameterized `Streamlet` whenever the
  * `Inlet` recoheres.
+ * @public
  */
 export class StreamletInlet<I> extends AbstractInlet<I> {
   constructor(streamlet: Streamlet<I, unknown>) {

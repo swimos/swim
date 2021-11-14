@@ -25,10 +25,13 @@ import {AnyTickView, TickView} from "../tick/TickView";
 import {TickGenerator} from "../tick/TickGenerator";
 import type {AxisViewObserver} from "./AxisViewObserver";
 
+/** @public */
 export type AxisOrientation = "top" | "right" | "bottom" | "left";
 
+/** @public */
 export type AnyAxisView<D = unknown> = AxisView<D> | AxisViewInit<D>;
 
+/** @public */
 export interface AxisViewInit<D = unknown> extends GraphicsViewInit {
   scale?: ContinuousScale<D, number> | string;
   ticks?: AnyTickView<D>[];
@@ -52,6 +55,7 @@ export interface AxisViewInit<D = unknown> extends GraphicsViewInit {
   textColor?: AnyColor;
 }
 
+/** @public */
 export abstract class AxisView<D = unknown> extends GraphicsView {
   constructor() {
     super();

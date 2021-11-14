@@ -17,6 +17,7 @@ import type {GraphView} from "../graph/GraphView";
 import type {AxisView} from "../axis/AxisView";
 import type {ChartView} from "./ChartView";
 
+/** @public */
 export interface ChartViewObserver<X = unknown, Y = unknown, V extends ChartView<X, Y> = ChartView<X, Y>> extends ScaledViewObserver<X, Y, V> {
   viewWillAttachGraph?(graphView: GraphView<X, Y>, view: V): void;
 

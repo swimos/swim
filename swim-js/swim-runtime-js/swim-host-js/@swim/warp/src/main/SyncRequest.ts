@@ -16,6 +16,7 @@ import {AnyValue, Value} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import {LinkAddressed} from "./LinkAddressed";
 
+/** @public */
 export class SyncRequest extends LinkAddressed<SyncRequest> {
   constructor(node: Uri, lane: Uri, prio: number, rate: number, body: Value) {
     super(node, lane, prio, rate, body);

@@ -15,6 +15,7 @@
 import type {GraphicsView, GraphicsViewObserver} from "@swim/graphics";
 import type {TickView} from "./TickView";
 
+/** @public */
 export interface TickViewObserver<D = unknown, V extends TickView<D> = TickView<D>> extends GraphicsViewObserver<V> {
   viewWillAttachTickLabel?(labelView: GraphicsView, view: V): void;
 

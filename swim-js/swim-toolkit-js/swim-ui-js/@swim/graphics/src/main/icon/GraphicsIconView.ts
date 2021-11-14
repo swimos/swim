@@ -29,9 +29,11 @@ import {FilledIcon} from "./FilledIcon";
 import {IconViewInit, IconView} from "./IconView";
 import {IconGraphicsAnimator} from "./IconGraphicsAnimator";
 
+/** @public */
 export interface GraphicsIconViewInit extends GraphicsViewInit, IconViewInit {
 }
 
+/** @public */
 export class GraphicsIconView extends LayerView implements IconView {
   @Animator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
   readonly xAlign!: Animator<this, number>;

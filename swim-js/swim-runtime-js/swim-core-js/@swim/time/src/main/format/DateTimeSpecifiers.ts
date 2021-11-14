@@ -15,6 +15,7 @@
 import {DateTimeLocale} from "./DateTimeLocale";
 import {DateTimeFormat} from "../"; // forward import
 
+/** @public */
 export interface DateTimeSpecifiers {
   [symbol: string]: DateTimeFormat | undefined;
   Y: DateTimeFormat;
@@ -32,6 +33,7 @@ export interface DateTimeSpecifiers {
   L: DateTimeFormat;
 }
 
+/** @public */
 export const DateTimeSpecifiers = (function () {
   const DateTimeSpecifiers = {} as {
     standard(locale?: DateTimeLocale): DateTimeSpecifiers;

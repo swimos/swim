@@ -25,6 +25,7 @@ import {AnyDateTime, DateTime} from "../DateTime";
 import {TimeDomain} from "./TimeDomain";
 import {TimeScaleInterpolator} from "./"; // forward import
 
+/** @public */
 export interface TimeScale extends ContinuousScale<DateTime, number>, Interpolate<TimeScale> {
   readonly domain: TimeDomain;
 
@@ -55,6 +56,7 @@ export interface TimeScale extends ContinuousScale<DateTime, number>, Interpolat
   toString(): string;
 }
 
+/** @public */
 export const TimeScale = (function (_super: typeof ContinuousScale) {
   const TimeScale = function (domain: TimeDomain, range: LinearRange): TimeScale {
     const scale = function (x: DateTime): number {

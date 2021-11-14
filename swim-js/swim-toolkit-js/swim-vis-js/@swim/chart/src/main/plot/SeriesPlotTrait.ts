@@ -16,6 +16,7 @@ import type {Class} from "@swim/util";
 import {PlotTrait} from "./PlotTrait";
 import type {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
 
+/** @public */
 export class SeriesPlotTrait<X = unknown, Y = unknown> extends PlotTrait<X, Y> {
   override readonly observerType?: Class<SeriesPlotTraitObserver<X, Y>>;
 }

@@ -18,8 +18,10 @@ import {AnyItem, Item} from "./Item";
 import {AnyValue, Value} from "./Value";
 import {NumInterpolator} from "./"; // forward import
 
+/** @public */
 export type AnyNum = Num | number;
 
+/** @public */
 export class Num extends Value {
   private constructor(value: number, flags?: number ) {
     super();

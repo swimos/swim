@@ -30,6 +30,7 @@ import type {
   WarpObserver,
 } from "./WarpObserver";
 
+/** @public */
 export interface WarpRef {
   downlink(init?: EventDownlinkInit): EventDownlink;
 

@@ -26,6 +26,7 @@ import {BubblePlotController} from "../"; // forward import
 import {LinePlotController} from "../"; // forward import
 import {AreaPlotController} from "../"; // forward import
 
+/** @public */
 export abstract class PlotController<X = unknown, Y = unknown> extends DataSetController<X, Y> {
   override readonly observerType?: Class<PlotControllerObserver<X, Y>>;
 

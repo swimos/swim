@@ -18,6 +18,7 @@ import {Model, TraitConstructor, TraitClass, Trait, TraitSet} from "@swim/model"
 import {ColTrait} from "../col/ColTrait";
 import type {HeaderTraitObserver} from "./HeaderTraitObserver";
 
+/** @public */
 export class HeaderTrait extends Trait {
   override readonly observerType?: Class<HeaderTraitObserver>;
 

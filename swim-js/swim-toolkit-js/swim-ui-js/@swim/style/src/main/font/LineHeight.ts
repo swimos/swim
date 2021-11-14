@@ -15,10 +15,13 @@
 import type {Value} from "@swim/structure";
 import {AnyLength, Length} from "@swim/math";
 
+/** @public */
 export type AnyLineHeight = AnyLength | LineHeight;
 
+/** @public */
 export type LineHeight = Length | "normal";
 
+/** @public */
 export const LineHeight = (function () {
   const LineHeight = {} as {
     fromAny(height: AnyLineHeight): LineHeight;

@@ -14,6 +14,7 @@
 
 /**
  * Type that implements a universal equality relation.
+ * @public
  */
 export interface Equals {
   /**
@@ -22,6 +23,7 @@ export interface Equals {
   equals(that: unknown): boolean;
 }
 
+/** @public */
 export const Equals = (function () {
   const Equals = function (x: unknown, y: unknown): boolean {
     if (x === y) {

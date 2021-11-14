@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export class InterpreterException extends Error {
   constructor(message?: string) {
     super(message);

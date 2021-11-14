@@ -22,6 +22,7 @@ import {TouchPositionGesture} from "./"; // forward import
 import {PointerPositionGesture} from "./"; // forward import
 import type {View} from "../view/View";
 
+/** @public */
 export interface PositionGestureInit<V extends View = View> extends GestureInit<V> {
   extends?: {prototype: PositionGesture<any, any>} | string | boolean | null;
 
@@ -59,11 +60,14 @@ export interface PositionGestureInit<V extends View = View> extends GestureInit<
   didLongPress?(input: PositionGestureInput): void;
 }
 
+/** @public */
 export type PositionGestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<PositionGesture<O, V> & I> & PositionGestureInit<V> & Partial<I>;
 
+/** @public */
 export interface PositionGestureClass<G extends PositionGesture<any, any> = PositionGesture<any, any>> extends GestureClass<G> {
 }
 
+/** @public */
 export interface PositionGestureFactory<G extends PositionGesture<any, any> = PositionGesture<any, any>> extends PositionGestureClass<G> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): PositionGestureFactory<G> & I;
 
@@ -76,6 +80,7 @@ export interface PositionGestureFactory<G extends PositionGesture<any, any> = Po
   <O, V extends View = View, I = {}>(descriptor: PositionGestureDescriptor<O, V, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface PositionGesture<O = unknown, V extends View = View> extends Gesture<O, V> {
   /** @internal @protected @override */
   attachEvents(view: V): void;
@@ -268,6 +273,7 @@ export interface PositionGesture<O = unknown, V extends View = View> extends Ges
   didLongPress(input: PositionGestureInput): void;
 }
 
+/** @public */
 export const PositionGesture = (function (_super: typeof Gesture) {
   const PositionGesture: PositionGestureFactory = _super.extend("PositionGesture");
 

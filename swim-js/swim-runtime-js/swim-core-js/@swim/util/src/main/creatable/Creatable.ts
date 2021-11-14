@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export type CreateType<C> =
   C extends {create(...args: any[]): infer T} ? T : never;
 
+/** @public */
 export interface Creatable<T> {
   create(): T;
 }
 
-/** @internal */
+/** @public */
 export const Creatable = (function () {
   const Creatable = {} as {
-    /** @internal */
     is<T>(object: unknown): object is Creatable<T>;
   };
 

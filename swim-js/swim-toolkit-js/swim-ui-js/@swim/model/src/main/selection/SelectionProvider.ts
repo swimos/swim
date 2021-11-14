@@ -16,6 +16,7 @@ import {ProviderClass, Provider} from "@swim/fastener";
 import {SelectionOptions, SelectionService} from "./SelectionService";
 import type {Model} from "../model/Model";
 
+/** @public */
 export interface SelectionProvider<M, S extends SelectionService<M> | null | undefined = SelectionService<M>> extends Provider<M, S> {
   get selections(): ReadonlyArray<Model>;
 
@@ -28,6 +29,7 @@ export interface SelectionProvider<M, S extends SelectionService<M> | null | und
   createService(): S;
 }
 
+/** @public */
 export const SelectionProvider = (function (_super: typeof Provider) {
   const SelectionProvider = _super.extend("SelectionProvider") as ProviderClass<SelectionProvider<any, any>>;
 

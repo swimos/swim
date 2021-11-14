@@ -17,6 +17,7 @@ import {AssertException} from "@swim/util";
 /**
  * Exception that aborts a running test, but doesn't halt the evaluation of
  * additional tests.
+ * @public
  */
 export class TestException extends AssertException {
   constructor(message?: string) {

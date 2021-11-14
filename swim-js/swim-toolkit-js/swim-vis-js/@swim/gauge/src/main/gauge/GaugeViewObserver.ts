@@ -17,6 +17,7 @@ import type {GraphicsView} from "@swim/graphics";
 import type {DialView} from "../dial/DialView";
 import type {GaugeView} from "./GaugeView";
 
+/** @public */
 export interface GaugeViewObserver<V extends GaugeView = GaugeView> extends ViewObserver<V> {
   viewWillAttachGaugeTitle?(titleView: GraphicsView, view: V): void;
 

@@ -18,6 +18,7 @@ import type {GeoViewport} from "../geo/GeoViewport";
 import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {MapView} from "./MapView";
 
+/** @public */
 export interface MapViewObserver<V extends MapView = MapView> extends GeoViewObserver<V> {
   viewWillSetGeoViewport?(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, view: V): void;
 

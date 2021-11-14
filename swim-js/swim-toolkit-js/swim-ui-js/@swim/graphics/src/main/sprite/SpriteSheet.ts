@@ -17,6 +17,7 @@ import {Sprite} from "./Sprite";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../"; // forward import
 
+/** @public */
 export class SpriteSheet {
   constructor(spriteWidth: number, spriteHeight: number,
               canvasWidth: number, canvasHeight: number, pixelRatio: number) {

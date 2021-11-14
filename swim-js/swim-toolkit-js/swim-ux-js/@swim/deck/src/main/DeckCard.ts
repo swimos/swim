@@ -15,9 +15,10 @@
 import type {Timing} from "@swim/util";
 import {Affinity, Property} from "@swim/fastener";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewEdgeInsets, ViewRef} from "@swim/view";
+import {ViewportInsets, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 
+/** @public */
 export class DeckCard extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
@@ -40,7 +41,7 @@ export class DeckCard extends HtmlView {
   }
 
   @Property({type: Object, inherits: true, state: null})
-  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: Property<this, ViewportInsets | null>;
 
   @Property({type: String})
   readonly cardTitle!: Property<this, string | undefined>;

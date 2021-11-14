@@ -20,8 +20,10 @@ import {UriHostIPv4} from "./" // forward import
 import {UriHostIPv6} from "./" // forward import
 import {UriHostUndefined} from "./" // forward import
 
+/** @public */
 export type AnyUriHost = UriHost | string;
 
+/** @public */
 export abstract class UriHost implements HashCode, Compare, Debug, Display {
   protected constructor() {
     // stub

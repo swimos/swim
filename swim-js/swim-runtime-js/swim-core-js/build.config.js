@@ -62,6 +62,10 @@ const core = [
         id: "main",
         deps: ["util", "codec", "args"],
       },
+      {
+        id: "cli",
+        deps: ["util", "codec", "args", "build"],
+      },
     ],
   },
   {

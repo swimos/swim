@@ -18,6 +18,7 @@ import {ViewNode, SvgView} from "@swim/dom";
 import {PathContext} from "../path/PathContext";
 import type {PaintingFillRule, PaintingContext} from "../painting/PaintingContext";
 
+/** @public */
 export class SvgContext implements PaintingContext {
   constructor(view: SvgView) {
     this.view = view;

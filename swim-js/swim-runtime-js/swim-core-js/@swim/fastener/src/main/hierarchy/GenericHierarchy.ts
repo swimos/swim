@@ -15,6 +15,7 @@
 import type {Mutable, Dictionary, MutableDictionary} from "@swim/util";
 import {Hierarchy} from "./Hierarchy";
 
+/** @beta */
 export class GenericHierarchy extends Hierarchy {
   constructor() {
     super();

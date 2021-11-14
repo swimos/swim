@@ -24,6 +24,7 @@
     "@swim/recon": "4.0.0-dev.20210927.1",
     "@swim/uri": "4.0.0-dev.20210927.1",
 
+    "@microsoft/api-extractor": "7.18",
     "@rollup/plugin-node-resolve": "13",
     "@types/eslint": "7",
     "@types/node": "16",

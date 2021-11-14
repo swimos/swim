@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig-test",
+  "extends": "../../../../config/tsconfig-test",
   "compilerOptions": {
     "outDir": "../../lib/test",
     "tsBuildInfoFile": "../../lib/test/.tsbuildinfo"

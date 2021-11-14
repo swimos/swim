@@ -14,6 +14,7 @@
 
 /**
  * Environment in which a `Streamlet` executes.
+ * @public
  */
 export interface StreamletContext {
   log(message?: unknown, ...optionalParams: unknown[]): void;

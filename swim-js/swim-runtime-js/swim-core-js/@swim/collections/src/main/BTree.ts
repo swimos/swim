@@ -16,9 +16,14 @@ import type {Cursor, ReducedMap} from "@swim/util";
 import {BTreeContext} from "./BTreeContext";
 import {BTreePage} from "./"; // forward import
 
+/** @public */
 export class BTree<K = unknown, V = unknown, U = never> extends BTreeContext<K, V> implements ReducedMap<K, V, U> {
+  /** @internal */
   root: BTreePage<K, V, U>;
 
+  constructor();
+  /** @internal */
+  constructor(root: BTreePage<K, V, U>);
   constructor(root?: BTreePage<K, V, U>) {
     super();
     if (root === void 0) {
@@ -276,6 +281,7 @@ export class BTree<K = unknown, V = unknown, U = never> extends BTreeContext<K, 
     return this.copy(this.root);
   }
 
+  /** @internal */
   protected copy(root: BTreePage<K, V, U>): BTree<K, V, U> {
     const tree = new BTree(root);
     if (tree.compare !== this.compare) {

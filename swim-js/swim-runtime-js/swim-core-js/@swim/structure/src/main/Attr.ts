@@ -32,6 +32,7 @@ import {DivideOperator} from "./"; // forward import
 import {ModuloOperator} from "./"; // forward import
 import {AnyInterpreter, Interpreter} from "./"; // forward import
 
+/** @public */
 export class Attr extends Field {
   constructor(key: Text, value: Value, flags?: number) {
     super();

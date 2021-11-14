@@ -17,6 +17,7 @@ import type {Color} from "@swim/style";
 import type {GeoPathViewObserver} from "./GeoPathViewObserver";
 import type {GeoLineView} from "./GeoLineView";
 
+/** @public */
 export interface GeoLineViewObserver<V extends GeoLineView = GeoLineView> extends GeoPathViewObserver<V> {
   viewWillSetStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;
 

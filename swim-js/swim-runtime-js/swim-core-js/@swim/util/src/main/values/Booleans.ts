@@ -14,13 +14,14 @@
 
 /**
  * Utilities for comparing and hashing booleans.
+ * @public
  */
 export const Booleans = (function () {
   const Booleans = {} as {
     /**
-     * Returns the relative order of `x` with respect to `y`.  Returns `-1` if
+     * Returns the relative order of `x` with respect to `y`. Returns `-1` if
      * `x` is `true` and `y` is `false`; returns `1` if `x` is `false` and `y`
-     * is `true`; and returns `0` if `x` and `y` are equal booleans.  If either
+     * is `true`; and returns `0` if `x` and `y` are equal booleans. If either
      * `x` or `y` is `null` or `undefined`, then booleans order before `null`,
      * and `null` orders before `undefined`.
      */

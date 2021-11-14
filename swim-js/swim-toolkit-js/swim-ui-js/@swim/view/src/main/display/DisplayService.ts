@@ -17,6 +17,7 @@ import type {DisplayServiceObserver} from "./DisplayServiceObserver";
 import type {ViewContext} from "../view/ViewContext";
 import {ViewFlags, View} from "../"; // forward import
 
+/** @public */
 export class DisplayService<V extends View = View> extends Service<V> {
   constructor() {
     super();

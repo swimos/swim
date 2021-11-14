@@ -22,6 +22,7 @@ import {Graphics, Icon, FilledIcon, IconGraphicsAnimator, SvgIconView} from "@sw
 import {CellView} from "./CellView";
 import type {IconCellViewObserver} from "./IconCellViewObserver";
 
+/** @public */
 export class IconCellView extends CellView {
   constructor(node: HTMLElement) {
     super(node);

@@ -15,9 +15,11 @@
 import type {Class} from "../types/Class";
 import type {Consumer} from "./Consumer";
 
+/** @public */
 export type ConsumerType<O> =
   O extends {readonly consumerType?: Class<infer T>} ? T : never;
 
+/** @public */
 export interface Consumable {
   readonly consumerType?: Class<Consumer>;
 
@@ -26,10 +28,9 @@ export interface Consumable {
   unconsume(consumer: ConsumerType<this>): void;
 }
 
-/** @internal */
+/** @public */
 export const Consumable = (function () {
   const Consumable = {} as {
-    /** @internal */
     is(object: unknown): object is Consumable;
   };
 

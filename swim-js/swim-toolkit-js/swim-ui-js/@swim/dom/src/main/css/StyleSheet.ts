@@ -27,6 +27,7 @@ import {Look, Feel, Mood, MoodVector, ThemeMatrix, ThemeContext} from "@swim/the
 import type {CssContext} from "./CssContext";
 import {CssRule} from "./CssRule";
 
+/** @public */
 export interface StyleSheetInit extends FastenerInit {
   extends?: {prototype: StyleSheet<any>} | string | boolean | null;
   css?: string | (() => string | undefined);
@@ -35,11 +36,14 @@ export interface StyleSheetInit extends FastenerInit {
   initStylesheet?(stylesheet: CSSStyleSheet): void;
 }
 
+/** @public */
 export type StyleSheetDescriptor<O = unknown, I = {}> = ThisType<StyleSheet<O> & I> & StyleSheetInit & Partial<I>;
 
+/** @public */
 export interface StyleSheetClass<F extends StyleSheet<any> = StyleSheet<any>> extends FastenerClass<F> {
 }
 
+/** @public */
 export interface StyleSheetFactory<F extends StyleSheet<any> = StyleSheet<any>> extends StyleSheetClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): StyleSheetFactory<F> & I;
 
@@ -50,6 +54,7 @@ export interface StyleSheetFactory<F extends StyleSheet<any> = StyleSheet<any>> 
   <O, I = {}>(descriptor: StyleSheetDescriptor<O, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface StyleSheet<O = unknown> extends Fastener<O>, FastenerContext, ConstraintScope, ThemeContext, CssContext {
   /** @override */
   get familyType(): Class<StyleSheet<any>> | null;
@@ -166,6 +171,7 @@ export interface StyleSheet<O = unknown> extends Fastener<O>, FastenerContext, C
   initCss?(): string | undefined;
 }
 
+/** @public */
 export const StyleSheet = (function (_super: typeof Fastener) {
   const StyleSheet: StyleSheetFactory = _super.extend("StyleSheet");
 

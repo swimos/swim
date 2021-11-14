@@ -14,6 +14,7 @@
 
 import {GestureInputType, GestureInput} from "./GestureInput";
 
+/** @public */
 export class PositionGestureInput extends GestureInput {
   hovering: boolean;
   pressing: boolean;

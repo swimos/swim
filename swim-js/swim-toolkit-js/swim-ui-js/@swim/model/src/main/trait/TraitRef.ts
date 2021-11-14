@@ -18,19 +18,24 @@ import type {Model} from "../model/Model";
 import type {AnyTrait, Trait} from "./Trait";
 import {TraitRelationInit, TraitRelationClass, TraitRelation} from "./TraitRelation";
 
+/** @internal */
 export type TraitRefType<F extends TraitRef<any, any>> =
   F extends TraitRef<any, infer T> ? T : never;
 
+/** @public */
 export interface TraitRefInit<T extends Trait = Trait> extends TraitRelationInit<T> {
   extends?: {prototype: TraitRef<any, any>} | string | boolean | null;
   key?: string | boolean;
 }
 
+/** @public */
 export type TraitRefDescriptor<O = unknown, T extends Trait = Trait, I = {}> = ThisType<TraitRef<O, T> & I> & TraitRefInit<T> & Partial<I>;
 
+/** @public */
 export interface TraitRefClass<F extends TraitRef<any, any> = TraitRef<any, any>> extends TraitRelationClass<F> {
 }
 
+/** @public */
 export interface TraitRefFactory<F extends TraitRef<any, any> = TraitRef<any, any>> extends TraitRefClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitRefFactory<F> & I;
 
@@ -45,6 +50,7 @@ export interface TraitRefFactory<F extends TraitRef<any, any> = TraitRef<any, an
   <O, T extends Trait = Trait, I = {}>(descriptor: {observes: boolean} & TraitRefDescriptor<O, T, I & ObserverType<T>>): PropertyDecorator;
 }
 
+/** @public */
 export interface TraitRef<O = unknown, T extends Trait = Trait> extends TraitRelation<O, T> {
   (): T | null;
   (trait: AnyTrait<T> | null, targetTrait?: Trait | null, key?: string): O;
@@ -93,6 +99,7 @@ export interface TraitRef<O = unknown, T extends Trait = Trait> extends TraitRel
   get key(): string | undefined; // optional prototype field
 }
 
+/** @public */
 export const TraitRef = (function (_super: typeof TraitRelation) {
   const TraitRef: TraitRefFactory = _super.extend("TraitRef");
 

@@ -15,17 +15,18 @@
 import type {Output} from "../output/Output";
 
 /**
- * Type that can output a developer readable debug string.  `Debug`
+ * Type that can output a developer readable debug string. `Debug`
  * implementations may use [[Output.settings]] to tailor the format of their
- * debug strings.  For example, debug strings may be stylized when
+ * debug strings. For example, debug strings may be stylized when
  * [[OutputSettings.isStyled]] returns `true`.
+ * @public
  */
 export interface Debug {
   /**
    * Writes a developer readable, debug-formatted string representation of this
    * object to `output`.
    *
-   * @return the continuation of the `output`.
+   * @returns the continuation of the `output`.
    * @throws [[OutputException]] if the `output` exits the _cont_ state before
    *         the full debug string has been written.
    */

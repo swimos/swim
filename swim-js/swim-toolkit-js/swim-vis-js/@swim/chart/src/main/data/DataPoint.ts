@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export type DataPointCategory = "flat" | "increasing" | "decreasing" | "maxima" | "minima";
 
+/** @public */
 export type DataPointLabelPlacement = "auto" | "above" | "middle" | "below";

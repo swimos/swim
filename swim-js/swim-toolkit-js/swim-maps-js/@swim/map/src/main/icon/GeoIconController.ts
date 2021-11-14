@@ -23,6 +23,7 @@ import {GeoIconView} from "./GeoIconView";
 import {GeoIconTrait} from "./GeoIconTrait";
 import type {GeoIconControllerObserver} from "./GeoIconControllerObserver";
 
+/** @public */
 export class GeoIconController extends GeoController {
   override readonly observerType?: Class<GeoIconControllerObserver>;
 

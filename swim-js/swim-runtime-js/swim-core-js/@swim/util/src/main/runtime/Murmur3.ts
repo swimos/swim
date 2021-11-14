@@ -13,10 +13,12 @@
 // limitations under the License.
 
 import {ByteOrder} from "./ByteOrder";
+import {Strings} from "../"; // forward import
 
 /**
  * 32-bit [MurmurHash](https://en.wikipedia.org/wiki/MurmurHash) algorithm,
  * version 3.
+ * @public
  */
 export const Murmur3 = (function () {
   const Murmur3 = {} as {
@@ -204,7 +206,7 @@ export const Murmur3 = (function () {
         if (k === 0) { code = Murmur3.mix(code, word); word = 0; k = 32; }
         utf8Length += 3;
       }
-      i = string.offsetByCodePoints(i, 1);
+      i = Strings.offsetByCodePoints(string, i, 1);
     }
     if (k !== 32) {
       word = ((word & 0xffff) * 0xcc9e2d51) + (((word >>> 16) * 0xcc9e2d51 & 0xffff) << 16) & 0xffffffff;
@@ -277,7 +279,7 @@ export const Murmur3 = (function () {
         if (k === 32) { code = Murmur3.mix(code, word); word = 0; k = 0; }
         utf8Length += 3;
       }
-      i = string.offsetByCodePoints(i, 1);
+      i = Strings.offsetByCodePoints(string, i, 1);
     }
     if (k !== 32) {
       word = ((word & 0xffff) * 0xcc9e2d51) + (((word >>> 16) * 0xcc9e2d51 & 0xffff) << 16) & 0xffffffff;

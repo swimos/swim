@@ -17,6 +17,7 @@ import {Mapping} from "../mapping/Mapping";
 import type {Interpolator} from "../interpolate/Interpolator";
 import type {Timing} from "./Timing";
 
+/** @public */
 export interface Tweening<Y> extends Mapping<number, Y> {
   readonly domain: Timing;
 
@@ -31,6 +32,7 @@ export interface Tweening<Y> extends Mapping<number, Y> {
   toString(): string;
 }
 
+/** @public */
 export const Tweening = (function (_super: typeof Mapping) {
   const Tweening = function <Y>(domain: Timing, range: Interpolator<Y>): Tweening<Y> {
     const tweening = function (u: number): Y {

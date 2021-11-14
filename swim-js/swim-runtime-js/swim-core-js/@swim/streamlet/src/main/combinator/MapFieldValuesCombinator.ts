@@ -15,6 +15,7 @@
 import type {MapFieldValuesFunction} from "../function";
 import {MapFieldValuesOperator} from "./MapFieldValuesOperator";
 
+/** @public */
 export class MapFieldValuesCombinator<K, VI, VO, I> extends MapFieldValuesOperator<K, VI, VO, I> {
   constructor(func: MapFieldValuesFunction<K, VI, VO> ) {
     super();

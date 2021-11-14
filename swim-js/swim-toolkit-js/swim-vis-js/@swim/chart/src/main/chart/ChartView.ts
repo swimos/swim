@@ -27,8 +27,10 @@ import {RightAxisView} from "../axis/RightAxisView";
 import {BottomAxisView} from "../axis/BottomAxisView";
 import {LeftAxisView} from "../axis/LeftAxisView";
 
+/** @public */
 export type AnyChartView<X = unknown, Y = unknown> = ChartView<X, Y> | ChartViewInit<X, Y>;
 
+/** @public */
 export interface ChartViewInit<X = unknown, Y = unknown> extends ScaledViewInit<X, Y> {
   graph?: AnyGraphView<X, Y>;
 
@@ -59,6 +61,7 @@ export interface ChartViewInit<X = unknown, Y = unknown> extends ScaledViewInit<
   textColor?: AnyColor;
 }
 
+/** @public */
 export class ChartView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
   override readonly observerType?: Class<ChartViewObserver<X, Y>>;
 

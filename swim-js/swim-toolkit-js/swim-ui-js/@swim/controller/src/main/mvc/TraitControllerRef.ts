@@ -18,20 +18,25 @@ import type {Trait, TraitRef} from "@swim/model";
 import type {Controller} from "../controller/Controller";
 import {ControllerRefInit, ControllerRefClass, ControllerRef} from "../controller/ControllerRef";
 
+/** @internal */
 export type TraitControllerRefType<F extends TraitControllerRef<any, any, any>> =
   F extends TraitControllerRef<any, any, infer C> ? C : never;
 
+/** @public */
 export interface TraitControllerRefInit<T extends Trait, C extends Controller = Controller> extends ControllerRefInit<C> {
   extends?: {prototype: TraitControllerRef<any, any, any>} | string | boolean | null;
   getTraitRef?(controller: C): TraitRef<any, T>;
   createController?(trait?: T): C;
 }
 
+/** @public */
 export type TraitControllerRefDescriptor<O = unknown, T extends Trait = Trait, C extends Controller = Controller, I = {}> = ThisType<TraitControllerRef<O, T, C> & I> & TraitControllerRefInit<T, C> & Partial<I>;
 
+/** @public */
 export interface TraitControllerRefClass<F extends TraitControllerRef<any, any, any> = TraitControllerRef<any, any, any>> extends ControllerRefClass<F> {
 }
 
+/** @public */
 export interface TraitControllerRefFactory<F extends TraitControllerRef<any, any, any> = TraitControllerRef<any, any, any>> extends TraitControllerRefClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitControllerRefFactory<F> & I;
 
@@ -46,6 +51,7 @@ export interface TraitControllerRefFactory<F extends TraitControllerRef<any, any
   <O, T extends Trait = Trait, C extends Controller = Controller, I = {}>(descriptor: {observes: boolean} & TraitControllerRefDescriptor<O, T, C, I & ObserverType<C>>): PropertyDecorator;
 }
 
+/** @public */
 export interface TraitControllerRef<O = unknown, T extends Trait = Trait, C extends Controller = Controller> extends ControllerRef<O, C> {
   /** @override */
   get familyType(): Class<TraitControllerRef<any, any, any>> | null;
@@ -64,6 +70,7 @@ export interface TraitControllerRef<O = unknown, T extends Trait = Trait, C exte
   createController(trait?: T): C;
 }
 
+/** @public */
 export const TraitControllerRef = (function (_super: typeof ControllerRef) {
   const TraitControllerRef: TraitControllerRefFactory = _super.extend("TraitControllerRef");
 

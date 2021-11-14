@@ -15,8 +15,10 @@
 import type {Mutable} from "../types/Mutable";
 import {Timing} from "./Timing";
 
+/** @public */
 export type AnyEasing = Easing | EasingType;
 
+/** @public */
 export type EasingType = "linear" | "quad-in" | "quad-out" | "quad-in-out"
                        | "cubic-in" | "cubic-out" | "cubic-in-out"
                        | "quart-in" | "quart-out" | "quart-in-out"
@@ -26,6 +28,7 @@ export type EasingType = "linear" | "quad-in" | "quad-out" | "quad-in-out"
                        | "elastic-in" | "elastic-out" | "elastic-in-out"
                        | "bounce-in" | "bounce-out" | "bounce-in-out";
 
+/** @public */
 export interface Easing extends Timing {
   readonly type: string;
 
@@ -44,6 +47,7 @@ export interface Easing extends Timing {
   toString(): string;
 }
 
+/** @public */
 export const Easing = (function (_super: typeof Timing) {
   const Easing = function (type: string): Easing {
     switch (type) {

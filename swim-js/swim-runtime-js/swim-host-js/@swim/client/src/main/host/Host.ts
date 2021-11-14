@@ -17,6 +17,7 @@ import type {AnyValue, Value} from "@swim/structure";
 import type {Envelope} from "@swim/warp";
 import type {HostDownlink} from "./HostDownlink";
 
+/** @public */
 export interface HostOptions {
   credentials?: Value;
   unlinkDelay?: number;
@@ -25,10 +26,11 @@ export interface HostOptions {
   sendBufferSize?: number;
 }
 
-/** @internal */
+/** @public */
 export abstract class Host {
   abstract readonly hostUri: Uri;
 
+  /** @internal */
   abstract readonly unlinkDelay: number;
 
   abstract isConnected(): boolean;
@@ -37,25 +39,34 @@ export abstract class Host {
 
   abstract readonly session: Value;
 
+  /** @internal */
   abstract resolve(relative: AnyUri): Uri;
 
+  /** @internal */
   abstract unresolve(absolute: AnyUri): Uri;
 
   abstract authenticate(credentials: AnyValue): void;
 
+  /** @internal */
   abstract openDownlink(downlink: HostDownlink): void;
 
+  /** @internal */
   abstract unlinkDownlink(downlink: HostDownlink): void;
 
+  /** @internal */
   abstract closeDownlink(downlink: HostDownlink): void;
 
   abstract command(nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void;
 
+  /** @internal */
   abstract open(): void;
 
+  /** @internal */
   abstract close(): void;
 
+  /** @internal */
   abstract closeUp(): void;
 
+  /** @internal */
   abstract push(envelope: Envelope): void;
 }

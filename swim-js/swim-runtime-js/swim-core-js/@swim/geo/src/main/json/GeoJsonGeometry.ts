@@ -22,6 +22,7 @@ import {GeoJsonPolygon} from "./"; // forward import
 import {GeoJsonMultiPolygon} from "./"; // forward import
 import {GeoJsonGeometryCollection} from "./"; // forward import
 
+/** @public */
 export type GeoJsonGeometryType = "Point"
                                 | "MultiPoint"
                                 | "LineString"
@@ -30,10 +31,12 @@ export type GeoJsonGeometryType = "Point"
                                 | "MultiPolygon"
                                 | "GeometryCollection";
 
+/** @public */
 export interface GeoJsonGeometryObject extends GeoJsonObject {
   type: GeoJsonGeometryType;
 }
 
+/** @public */
 export type GeoJsonGeometry = GeoJsonPoint
                             | GeoJsonMultiPoint
                             | GeoJsonLineString
@@ -42,6 +45,7 @@ export type GeoJsonGeometry = GeoJsonPoint
                             | GeoJsonMultiPolygon
                             | GeoJsonGeometryCollection;
 
+/** @public */
 export const GeoJsonGeometry = (function () {
   const GeoJsonGeometry = {} as {
     is(value: unknown): value is GeoJsonGeometry;

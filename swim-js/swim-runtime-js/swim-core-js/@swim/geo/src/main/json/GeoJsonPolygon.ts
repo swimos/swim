@@ -19,11 +19,13 @@ import {GeoPath} from "../GeoPath";
 import type {GeoJsonPosition} from "./GeoJsonPosition";
 import type {GeoJsonGeometryObject} from "./GeoJsonGeometry";
 
+/** @public */
 export interface GeoJsonPolygon extends GeoJsonGeometryObject {
   readonly type: "Polygon";
   coordinates: GeoJsonPosition[][];
 }
 
+/** @public */
 export const GeoJsonPolygon = (function () {
   const GeoJsonPolygon = {} as {
     is(value: unknown): value is GeoJsonPolygon;

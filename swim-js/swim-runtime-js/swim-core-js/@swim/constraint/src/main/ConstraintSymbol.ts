@@ -17,7 +17,7 @@ import {ConstraintId} from "./ConstraintId";
 import type {Constraint} from "./Constraint";
 import type {ConstraintSolver} from "./ConstraintSolver";
 
-/** @internal */
+/** @public */
 export interface ConstraintSymbol extends ConstraintId {
   /** @internal */
   isExternal(): boolean;
@@ -38,9 +38,10 @@ export interface ConstraintSymbol extends ConstraintId {
   updateConstraintSolution(value: number): void;
 }
 
-/** @internal */
+/** @public */
 export const ConstraintSymbol = {} as {
-  readonly invalid: ConstraintInvalid; // defined by ConstraintInvalid
+  /** @internal */
+  readonly invalid: ConstraintSymbol; // defined by ConstraintInvalid
 };
 
 /** @internal */

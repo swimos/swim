@@ -26,9 +26,3 @@ export {
   TargetConfig,
   Target,
 } from "./Target";
-
-export {cli} from "./cli";
-
-import {cli} from "./cli";
-
-cli.parse().run();

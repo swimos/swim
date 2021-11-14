@@ -15,5 +15,6 @@
 import type {ElementViewObserver} from "../element/ElementViewObserver";
 import type {HtmlView} from "./HtmlView";
 
+/** @public */
 export interface HtmlViewObserver<V extends HtmlView = HtmlView> extends ElementViewObserver<V> {
 }

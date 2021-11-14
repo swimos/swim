@@ -39,6 +39,7 @@ import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {CellView} from "../cell/CellView";
 import type {LeafViewObserver} from "./LeafViewObserver";
 
+/** @public */
 export class LeafView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

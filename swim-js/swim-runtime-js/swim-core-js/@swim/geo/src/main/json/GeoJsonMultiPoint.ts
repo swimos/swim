@@ -17,11 +17,13 @@ import {GeoGroup} from "../GeoGroup";
 import type {GeoJsonPosition} from "./GeoJsonPosition";
 import type {GeoJsonGeometryObject} from "./GeoJsonGeometry";
 
+/** @public */
 export interface GeoJsonMultiPoint extends GeoJsonGeometryObject {
   readonly type: "MultiPoint";
   coordinates: GeoJsonPosition[];
 }
 
+/** @public */
 export const GeoJsonMultiPoint = (function () {
   const GeoJsonMultiPoint = {} as {
     is(value: unknown): value is GeoJsonMultiPoint;

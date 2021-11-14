@@ -17,6 +17,7 @@ import {ExecuteService} from "./ExecuteService";
 import type {ControllerContext} from "../controller/ControllerContext";
 import type {ControllerFlags, Controller} from "../controller/Controller";
 
+/** @public */
 export interface ExecuteProvider<C extends Controller, S extends ExecuteService<C> | null | undefined = ExecuteService<C>> extends Provider<C, S> {
   get controllerContext(): ControllerContext;
 
@@ -27,6 +28,7 @@ export interface ExecuteProvider<C extends Controller, S extends ExecuteService<
   createService(): S;
 }
 
+/** @public */
 export const ExecuteProvider = (function (_super: typeof Provider) {
   const ExecuteProvider = _super.extend("ExecuteProvider") as ProviderClass<ExecuteProvider<any, any>>;
 

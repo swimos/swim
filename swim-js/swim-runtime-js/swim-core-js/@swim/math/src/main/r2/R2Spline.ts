@@ -31,6 +31,7 @@ import {R2SplineBuilder} from "../"; // forward import
 import {R2SplineParser} from "../"; // forward import
 import {R2Box} from "../"; // forward import
 
+/** @public */
 export class R2Spline extends R2Curve implements Debug {
   constructor(curves: ReadonlyArray<R2Curve>, closed: boolean) {
     super();

@@ -17,6 +17,7 @@ import type {ModalOptions, Modal} from "./Modal";
 import type {ModalService} from "./ModalService";
 import type {View} from "../view/View";
 
+/** @public */
 export interface ModalServiceObserver<V extends View = View, S extends ModalService<V> = ModalService<V>> extends ServiceObserver<V, S> {
   serviceWillPresentModal?(modal: Modal, options: ModalOptions, service: S): void;
 

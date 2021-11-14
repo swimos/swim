@@ -14,6 +14,7 @@
 
 import {Diagnostic} from "@swim/codec";
 
+/** @public */
 export class UriException extends Error {
   constructor(message?: Diagnostic | string) {
     super(message instanceof Diagnostic ? message.message : message);

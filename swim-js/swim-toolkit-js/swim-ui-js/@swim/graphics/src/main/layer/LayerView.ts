@@ -17,6 +17,7 @@ import type {R2Box} from "@swim/math";
 import {ViewContextType, ViewFlags, AnyView, ViewCreator, View} from "@swim/view";
 import {GraphicsView} from "../graphics/GraphicsView";
 
+/** @public */
 export class LayerView extends GraphicsView {
   constructor() {
     super();

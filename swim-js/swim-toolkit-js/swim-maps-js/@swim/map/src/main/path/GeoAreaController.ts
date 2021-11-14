@@ -24,6 +24,7 @@ import {GeoAreaTrait} from "./GeoAreaTrait";
 import {GeoPathController} from "./GeoPathController";
 import type {GeoAreaControllerObserver} from "./GeoAreaControllerObserver";
 
+/** @public */
 export class GeoAreaController extends GeoPathController {
   override readonly observerType?: Class<GeoAreaControllerObserver>;
 

@@ -21,6 +21,7 @@ import {ReconStructureWriter} from "./"; // forward import
 
 /**
  * Factory for constructing Recon parsers and writers.
+ * @public
  */
 export const Recon = (function () {
   const Recon = {} as {

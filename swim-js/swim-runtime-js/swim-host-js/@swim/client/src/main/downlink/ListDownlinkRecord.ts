@@ -17,6 +17,7 @@ import {AnyItem, Item, AnyValue, Value, Record, AnyText, AnyNum, Num} from "@swi
 import {DownlinkRecord} from "./DownlinkRecord";
 import type {ListDownlink} from "./ListDownlink";
 
+/** @public */
 export class ListDownlinkRecord extends DownlinkRecord {
   constructor(downlink: ListDownlink<Value, AnyValue>) {
     super();

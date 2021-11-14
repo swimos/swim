@@ -22,6 +22,7 @@ import {ColView} from "./ColView";
 import {ColLabel, ColTrait} from "./ColTrait";
 import type {ColControllerObserver} from "./ColControllerObserver";
 
+/** @public */
 export class ColController extends GenericController {
   override readonly observerType?: Class<ColControllerObserver>;
 

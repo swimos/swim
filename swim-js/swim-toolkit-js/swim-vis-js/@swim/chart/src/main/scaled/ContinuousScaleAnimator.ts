@@ -17,6 +17,7 @@ import {Affinity, AnimatorFactory, Animator} from "@swim/fastener"
 import type {View} from "@swim/view";
 import {ScaledView} from "../"; // forward import
 
+/** @public */
 export interface ContinuousScaleAnimator<O extends View = View, X = unknown, Y = unknown, T extends ContinuousScale<X, Y> | null | undefined = ContinuousScale<X, Y> | null, U extends string = string> extends Animator<O, T, U> {
   setScale(domain: Domain<X> | string, range: Range<Y>, timing?: AnyTiming | boolean | null): void;
   setScale(xMin: X, xMax: X, yMin: Y, yMax: Y, timing?: AnyTiming | boolean | null): void;
@@ -40,6 +41,7 @@ export interface ContinuousScaleAnimator<O extends View = View, X = unknown, Y =
   fromAny(value: T | U): T;
 }
 
+/** @public */
 export const ContinuousScaleAnimator = (function (_super: typeof Animator) {
   const ContinuousScaleAnimator = _super.extend("ContinuousScaleAnimator") as AnimatorFactory<ContinuousScaleAnimator<any, any, any, any, any>>;
 

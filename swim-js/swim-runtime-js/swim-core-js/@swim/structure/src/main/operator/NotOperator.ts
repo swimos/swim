@@ -18,6 +18,7 @@ import type {Item} from "../Item";
 import {UnaryOperator} from "./UnaryOperator";
 import {AnyInterpreter, Interpreter} from "../interpreter/Interpreter";
 
+/** @public */
 export class NotOperator extends UnaryOperator {
   constructor(operand: Item) {
     super(operand);

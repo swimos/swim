@@ -17,6 +17,7 @@ import type {Output} from "@swim/codec";
 import {LengthException} from "./LengthException";
 import {LengthUnits, LengthBasis, Length} from "./Length";
 
+/** @public */
 export class UnitlessLength extends Length {
   constructor(value: number) {
     super();

@@ -17,10 +17,11 @@ import {SpecClass, Spec} from "./Spec";
 import type {Report} from "./Report";
 
 /**
- * Test unit factory function registration descriptor.  A `SpecUnit` associates
+ * Test unit factory function registration descriptor. A `SpecUnit` associates
  * a [[UnitFunc test unit factory function]] with [[UnitOptions unit options]].
  * The [[run]] method manages the asynchronous execution of the test unit in
  * the context of a particular parent `Spec` instance.
+ * @internal
  */
 export class SpecUnit {
   constructor(name: string, func: UnitFunc, options: UnitOptions) {
@@ -71,7 +72,7 @@ export class SpecUnit {
   /**
    * Generates a set of child specs by evaluating the underlying test unit
    * factory function as a method on the given `spec`, and asynchronously
-   * executes each instantiated test spec in turn.  Returns a `Promise` that
+   * executes each instantiated test spec in turn. Returns a `Promise` that
    * completes with the generated child test specs.
    */
   run(report: Report, spec: Spec): Promise<Spec[] | Spec | undefined> {

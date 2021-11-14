@@ -15,5 +15,6 @@
 import type {Outlet} from "./Outlet";
 import type {MapInlet} from "./MapInlet";
 
+/** @public */
 export interface MapInletOutlet<K, V, I, O> extends MapInlet<K, V, I>, Outlet<O> {
 }

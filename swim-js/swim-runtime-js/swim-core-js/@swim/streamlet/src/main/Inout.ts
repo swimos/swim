@@ -15,8 +15,11 @@
 import type {InoutletOptions} from "./Inoutlet";
 import {StreamletPrototype, AbstractStreamlet} from "./AbstractStreamlet";
 
+/** @public */
 export function Inout(name: string): PropertyDecorator;
+/** @public */
 export function Inout(options: InoutletOptions): PropertyDecorator;
+/** @public */
 export function Inout(target: unknown, key: string): void;
 export function Inout(target: unknown, key?: string): PropertyDecorator | void {
   if (arguments.length === 1) {

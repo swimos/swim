@@ -22,8 +22,10 @@ import {UriPathEmpty} from "./"; // forward import
 import {UriPathBuilder} from "./"; // forward import
 import {UriPathForm} from "./"; // forward import
 
+/** @public */
 export type AnyUriPath = UriPath | string[] | string;
 
+/** @public */
 export abstract class UriPath implements HashCode, Compare, Debug, Display {
   /** @internal */
   protected constructor() {

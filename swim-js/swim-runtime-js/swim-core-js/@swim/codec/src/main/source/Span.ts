@@ -21,6 +21,7 @@ import {Format} from "../"; // forward import
 /**
  * Description of a source range, identified by a closed interval between start
  * and end [[Mark marks]].
+ * @public
  */
 export class Span extends Tag {
   /** @internal */

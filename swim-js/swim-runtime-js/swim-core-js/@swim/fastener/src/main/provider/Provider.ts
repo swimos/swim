@@ -16,12 +16,15 @@ import {Mutable, Class, Observable, ObserverType, Service} from "@swim/util";
 import {Affinity} from "../fastener/Affinity";
 import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "../fastener/Fastener";
 
+/** @internal */
 export type MemberProviderService<O, K extends keyof O> =
   O[K] extends Provider<any, infer S> ? S : never;
 
+/** @internal */
 export type ProviderService<P extends Provider<any, any>> =
   P extends Provider<any, infer S> ? S : never;
 
+/** @public */
 export interface ProviderInit<S = unknown> extends FastenerInit {
   extends?: {prototype: Provider<any, any>} | string | boolean | null;
   type?: unknown;
@@ -41,11 +44,14 @@ export interface ProviderInit<S = unknown> extends FastenerInit {
   createService?(): S;
 }
 
+/** @public */
 export type ProviderDescriptor<O = unknown, S = unknown, I = {}> = ThisType<Provider<O, S> & I> & ProviderInit<S> & Partial<I>;
 
+/** @public */
 export interface ProviderClass<P extends Provider<any, any> = Provider<any, any>> extends FastenerClass<P> {
 }
 
+/** @public */
 export interface ProviderFactory<P extends Provider<any, any> = Provider<any, any>> extends ProviderClass<P> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ProviderFactory<P> & I;
 
@@ -60,6 +66,7 @@ export interface ProviderFactory<P extends Provider<any, any> = Provider<any, an
   <O, S extends Observable, I = {}>(descriptor: {observes: boolean} & ProviderDescriptor<O, S, I & ObserverType<S>>): PropertyDecorator;
 }
 
+/** @public */
 export interface Provider<O = unknown, S = unknown> extends Fastener<O> {
   (): S;
 
@@ -136,6 +143,7 @@ export interface Provider<O = unknown, S = unknown> extends Fastener<O> {
   get observes(): boolean | undefined; // optional prototype field
 }
 
+/** @public */
 export const Provider = (function (_super: typeof Fastener) {
   const Provider: ProviderFactory = _super.extend("Provider");
 

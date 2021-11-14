@@ -37,9 +37,3 @@ export * from "./typeset";
 export * from "./icon";
 
 export * from "./webgl";
-
-declare global {
-  interface Document {
-    createTouchList?(...touches: Touch[]): TouchList;
-  }
-}

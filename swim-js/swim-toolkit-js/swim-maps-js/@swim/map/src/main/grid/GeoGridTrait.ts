@@ -20,6 +20,7 @@ import {GeoTrait} from "../geo/GeoTrait";
 import {GeoLayerTrait} from "../layer/GeoLayerTrait";
 import type {GeoGridTraitObserver} from "./GeoGridTraitObserver";
 
+/** @public */
 export class GeoGridTrait extends GeoLayerTrait {
   constructor(geoTile: GeoTile) {
     super();

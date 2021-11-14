@@ -28,6 +28,7 @@ import {
 } from "@swim/streamlet";
 import {RecordStreamlet} from "./RecordStreamlet";
 
+/** @public */
 export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends Value = I> extends RecordStreamlet<I, O> implements GenericStreamlet<I, O> {
   constructor(scope: StreamletScope<O> | null = null) {
     super();

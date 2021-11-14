@@ -16,6 +16,7 @@ import type {EsriViewObserver} from "./EsriViewObserver";
 import type {EsriSceneViewport} from "./EsriSceneViewport";
 import type {EsriSceneView} from "./EsriSceneView";
 
+/** @public */
 export interface EsriSceneViewObserver<V extends EsriSceneView = EsriSceneView> extends EsriViewObserver<V> {
   viewWillSetGeoViewport?(newGeoViewport: EsriSceneViewport, oldGeoViewport: EsriSceneViewport, view: V): void;
 

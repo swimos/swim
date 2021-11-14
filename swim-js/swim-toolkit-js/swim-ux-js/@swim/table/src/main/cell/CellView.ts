@@ -18,6 +18,7 @@ import type {PositionGestureInput} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {CellViewObserver} from "./CellViewObserver";
 
+/** @public */
 export class CellView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

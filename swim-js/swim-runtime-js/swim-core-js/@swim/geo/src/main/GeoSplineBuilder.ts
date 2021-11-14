@@ -17,6 +17,7 @@ import {GeoSegment} from "./GeoSegment";
 import type {GeoSplineContext} from "./GeoSplineContext";
 import {GeoSpline} from "./GeoSpline";
 
+/** @public */
 export class GeoSplineBuilder implements GeoSplineContext {
   /** @internal */
   curves: GeoCurve[];

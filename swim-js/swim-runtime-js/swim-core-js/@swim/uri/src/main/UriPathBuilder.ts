@@ -15,6 +15,7 @@
 import type {Builder} from "@swim/util";
 import {AnyUriPath, UriPath} from "./UriPath";
 
+/** @public */
 export class UriPathBuilder implements Builder<string, UriPath> {
   /** @internal */
   first: UriPath;

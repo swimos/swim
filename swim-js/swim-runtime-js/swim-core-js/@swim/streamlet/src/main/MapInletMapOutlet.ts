@@ -15,5 +15,6 @@
 import type {MapInlet} from "./MapInlet";
 import type {MapOutlet} from "./MapOutlet";
 
+/** @public */
 export interface MapInletMapOutlet<KI, KO, VI, VO, I, O> extends MapInlet<KI, VI, I>, MapOutlet<KO, VO, O> {
 }

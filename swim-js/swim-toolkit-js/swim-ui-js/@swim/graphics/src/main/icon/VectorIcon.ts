@@ -25,6 +25,7 @@ import {PaintingRenderer} from "../painting/PaintingRenderer";
 import {FilledIcon} from "./FilledIcon";
 import {VectorIconInterpolator} from "../"; // forward import
 
+/** @public */
 export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, Equals, Equivalent, Debug {
   constructor(path: R2Path, fillRule: PaintingFillRule, fillColor: Color | null,
               fillLook: Look<Color> | null, moodModifier: MoodMatrix | null) {

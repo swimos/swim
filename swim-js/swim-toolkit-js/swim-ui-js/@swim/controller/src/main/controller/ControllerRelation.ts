@@ -16,9 +16,11 @@ import type {Class, ObserverType} from "@swim/util";
 import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
 import {AnyController, ControllerFactory, Controller} from "./Controller";
 
+/** @internal */
 export type ControllerRelationType<F extends ControllerRelation<any, any>> =
   F extends ControllerRelation<any, infer C> ? C : never;
 
+/** @public */
 export interface ControllerRelationInit<C extends Controller = Controller> extends FastenerInit {
   extends?: {prototype: ControllerRelation<any, any>} | string | boolean | null;
   type?: ControllerFactory<C>;
@@ -41,11 +43,14 @@ export interface ControllerRelationInit<C extends Controller = Controller> exten
   fromAny?(value: AnyController<C>): C;
 }
 
+/** @public */
 export type ControllerRelationDescriptor<O = unknown, C extends Controller = Controller, I = {}> = ThisType<ControllerRelation<O, C> & I> & ControllerRelationInit<C> & Partial<I>;
 
+/** @public */
 export interface ControllerRelationClass<F extends ControllerRelation<any, any> = ControllerRelation<any, any>> extends FastenerClass<F> {
 }
 
+/** @public */
 export interface ControllerRelationFactory<F extends ControllerRelation<any, any> = ControllerRelation<any, any>> extends ControllerRelationClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ControllerRelationFactory<F> & I;
 
@@ -60,6 +65,7 @@ export interface ControllerRelationFactory<F extends ControllerRelation<any, any
   <O, C extends Controller = Controller, I = {}>(descriptor: {observes: boolean} & ControllerRelationDescriptor<O, C, I & ObserverType<C>>): PropertyDecorator;
 }
 
+/** @public */
 export interface ControllerRelation<O = unknown, C extends Controller = Controller> extends Fastener<O> {
   /** @override */
   get familyType(): Class<ControllerRelation<any, any>> | null;
@@ -123,6 +129,7 @@ export interface ControllerRelation<O = unknown, C extends Controller = Controll
   get static(): string | boolean; // prototype property
 }
 
+/** @public */
 export const ControllerRelation = (function (_super: typeof Fastener) {
   const ControllerRelation: ControllerRelationFactory = _super.extend("ControllerRelation");
 

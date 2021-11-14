@@ -17,6 +17,7 @@ import {Item, Attr, Value, Record, Text} from "@swim/structure";
 import type {ProcessorContext} from "../processor/ProcessorContext";
 import {Directive} from "./Directive";
 
+/** @public */
 export class HighlightDirective extends Directive {
   constructor(prism: typeof import("prismjs")) {
     super();

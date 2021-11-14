@@ -23,6 +23,7 @@ import {ColTrait} from "../col/ColTrait";
 import {HeaderTrait} from "../header/HeaderTrait";
 import type {TableTraitObserver} from "./TableTraitObserver";
 
+/** @public */
 export class TableTrait extends Trait {
   override readonly observerType?: Class<TableTraitObserver>;
 

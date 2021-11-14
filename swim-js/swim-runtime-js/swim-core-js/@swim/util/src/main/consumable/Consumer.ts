@@ -14,5 +14,6 @@
 
 import type {Consumable} from "./Consumable";
 
+/** @public */
 export interface Consumer<O extends Consumable = Consumable> {
 }

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Lazy, Mutable, Murmur3, Numbers, Constructors, Interpolator} from "@swim/util";
 import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import {Item, Value, Record} from "@swim/structure";
@@ -21,6 +23,7 @@ import {IdentityTransform} from "./IdentityTransform";
 import {AffineTransformInterpolator} from "../"; // forward import
 import {AffineTransformParser} from "../"; // forward import
 
+/** @public */
 export class AffineTransform extends Transform {
   constructor(x0: number, y0: number, x1: number, y1: number, tx: number, ty: number) {
     super();

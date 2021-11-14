@@ -18,6 +18,7 @@ import type {KeyEffect} from "./KeyEffect";
 import type {MapInlet} from "./MapInlet";
 import {MapOutlet} from "./MapOutlet";
 
+/** @public */
 export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   constructor() {
     this.input = null;

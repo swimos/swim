@@ -46,8 +46,10 @@ import {WebGLRenderer} from "../webgl/WebGLRenderer";
 import {CanvasRenderer} from "./CanvasRenderer";
 import type {CanvasViewObserver} from "./CanvasViewObserver";
 
+/** @internal */
 export type CanvasFlags = number;
 
+/** @public */
 export interface CanvasViewInit extends HtmlViewInit {
   renderer?: AnyGraphicsRenderer;
   clickEventsEnabled?: boolean;
@@ -57,6 +59,7 @@ export interface CanvasViewInit extends HtmlViewInit {
   touchEventsEnabled?: boolean;
 }
 
+/** @public */
 export class CanvasView extends HtmlView {
   constructor(node: HTMLCanvasElement) {
     super(node);
@@ -940,10 +943,10 @@ export class CanvasView extends HtmlView {
   }
 
   /** @internal */
-  readonly canvasFlags: number;
+  readonly canvasFlags: CanvasFlags;
 
   /** @internal */
-  setCanvasFlags(canvasFlags: number): void {
+  setCanvasFlags(canvasFlags: CanvasFlags): void {
     (this as Mutable<this>).canvasFlags = canvasFlags;
   }
 
@@ -2009,4 +2012,10 @@ export class CanvasView extends HtmlView {
                                           | CanvasView.TouchEventsFlag;
 
   static override readonly UncullFlags: ViewFlags = HtmlView.UncullFlags | View.NeedsRender | View.NeedsComposite;
+}
+
+declare global {
+  interface Document {
+    createTouchList?(...touches: Touch[]): TouchList;
+  }
 }

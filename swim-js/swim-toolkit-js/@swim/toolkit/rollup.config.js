@@ -1,14 +1,78 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
-const script = "swim-toolkit";
-const namespace = "swim";
-
-const main = {
+const mainEsm = {
   input: "./lib/main/index.js",
   output: {
-    file: `./dist/main/${script}.js`,
-    name: namespace,
+    file: "./dist/swim-toolkit.mjs",
+    format: "esm",
+    globals: {
+      "leaflet": "L",
+      "mapbox-gl": "mapboxgl",
+    },
+    paths: {
+      "@swim/util": "@swim/runtime",
+      "@swim/codec": "@swim/runtime",
+      "@swim/fastener": "@swim/runtime",
+      "@swim/collections": "@swim/runtime",
+      "@swim/constraint": "@swim/runtime",
+      "@swim/structure": "@swim/runtime",
+      "@swim/streamlet": "@swim/runtime",
+      "@swim/dataflow": "@swim/runtime",
+      "@swim/recon": "@swim/runtime",
+      "@swim/uri": "@swim/runtime",
+      "@swim/math": "@swim/runtime",
+      "@swim/geo": "@swim/runtime",
+      "@swim/time": "@swim/runtime",
+      "@swim/core": "@swim/runtime",
+      "@swim/warp": "@swim/runtime",
+      "@swim/client": "@swim/runtime",
+      "@swim/host": "@swim/runtime",
+    },
+    sourcemap: true,
+  },
+  external: [
+    "@swim/util",
+    "@swim/codec",
+    "@swim/fastener",
+    "@swim/collections",
+    "@swim/constraint",
+    "@swim/structure",
+    "@swim/streamlet",
+    "@swim/dataflow",
+    "@swim/recon",
+    "@swim/uri",
+    "@swim/math",
+    "@swim/geo",
+    "@swim/time",
+    "@swim/core",
+    "@swim/warp",
+    "@swim/client",
+    "@swim/host",
+    "@swim/runtime",
+    "leaflet",
+    "mapbox-gl",
+    "tslib",
+  ],
+  plugins: [
+    nodeResolve({moduleDirectories: ["../../swim-ui-js",
+                                     "../../swim-ux-js",
+                                     "../../swim-vis-js",
+                                     "../../swim-maps-js",
+                                     "node_modules"]}),
+    sourcemaps(),
+  ],
+  onwarn(warning, warn) {
+    if (warning.code === "CIRCULAR_DEPENDENCY") return;
+    warn(warning);
+  },
+};
+
+const mainUmd = {
+  input: "./lib/main/index.js",
+  output: {
+    file: "./dist/swim-toolkit.js",
+    name: "swim",
     format: "umd",
     globals: {
       "@swim/util": "swim",
@@ -24,13 +88,35 @@ const main = {
       "@swim/math": "swim",
       "@swim/geo": "swim",
       "@swim/time": "swim",
+      "@swim/core": "swim",
       "@swim/warp": "swim",
       "@swim/client": "swim",
+      "@swim/host": "swim",
+      "@swim/runtime": "swim",
       "leaflet": "L",
       "mapbox-gl": "mapboxgl",
     },
+    paths: {
+      "@swim/util": "@swim/runtime",
+      "@swim/codec": "@swim/runtime",
+      "@swim/fastener": "@swim/runtime",
+      "@swim/collections": "@swim/runtime",
+      "@swim/constraint": "@swim/runtime",
+      "@swim/structure": "@swim/runtime",
+      "@swim/streamlet": "@swim/runtime",
+      "@swim/dataflow": "@swim/runtime",
+      "@swim/recon": "@swim/runtime",
+      "@swim/uri": "@swim/runtime",
+      "@swim/math": "@swim/runtime",
+      "@swim/geo": "@swim/runtime",
+      "@swim/time": "@swim/runtime",
+      "@swim/core": "@swim/runtime",
+      "@swim/warp": "@swim/runtime",
+      "@swim/client": "@swim/runtime",
+      "@swim/host": "@swim/runtime",
+    },
     sourcemap: true,
-    interop: false,
+    interop: "esModule",
     extend: true,
   },
   external: [
@@ -47,8 +133,11 @@ const main = {
     "@swim/math",
     "@swim/geo",
     "@swim/time",
+    "@swim/core",
     "@swim/warp",
     "@swim/client",
+    "@swim/host",
+    "@swim/runtime",
     "leaflet",
     "mapbox-gl",
   ],
@@ -66,6 +155,6 @@ const main = {
   },
 };
 
-const targets = [main];
-targets.main = main;
+const targets = [mainEsm, mainUmd];
+targets.main = [mainEsm, mainUmd];
 export default targets;

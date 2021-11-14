@@ -18,9 +18,11 @@ import {Property} from "@swim/fastener";
 import {PositionGestureInput, PositionGesture} from "@swim/view";
 import {ButtonGlow} from "./ButtonGlow";
 
+/** @public */
 export interface ButtonMembraneInit extends HtmlViewInit {
 }
 
+/** @public */
 export class ButtonMembrane extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

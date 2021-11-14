@@ -21,19 +21,32 @@ import type {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {ListDownlinkModel} from "./ListDownlinkModel";
 
+/** @public */
 export type ListDownlinkWillUpdate<V, VU = never> = (index: number, newValue: V, downlink: ListDownlink<V, VU>) => V | void;
+/** @public */
 export type ListDownlinkDidUpdate<V, VU = never> = (index: number, newValue: V, oldValue: V, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkWillMove<V, VU = never> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkDidMove<V, VU = never> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkWillRemove<V, VU = never> = (index: number, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkDidRemove<V, VU = never> = (index: number, oldValue: V, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkWillDrop<V, VU = never> = (lower: number, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkDidDrop<V, VU = never> = (lower: number, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkWillTake<V, VU = never> = (upper: number, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkDidTake<V, VU = never> = (upper: number, downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkWillClear<V, VU = never> = (downlink: ListDownlink<V, VU>) => void;
+/** @public */
 export type ListDownlinkDidClear<V, VU = never> = (downlink: ListDownlink<V, VU>) => void;
 
+/** @public */
 export interface ListDownlinkObserver<V, VU = never> extends DownlinkObserver {
   willUpdate?: ListDownlinkWillUpdate<V, VU>;
   didUpdate?: ListDownlinkDidUpdate<V, VU>;
@@ -49,10 +62,12 @@ export interface ListDownlinkObserver<V, VU = never> extends DownlinkObserver {
   didClear?: ListDownlinkDidClear<V, VU>;
 }
 
+/** @public */
 export interface ListDownlinkInit<V, VU = never> extends ListDownlinkObserver<V, VU>, DownlinkInit {
   valueForm?: Form<V, VU>;
 }
 
+/** @public */
 export class ListDownlink<V, VU = never> extends Downlink {
   /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: ListDownlinkInit<V, VU>,
@@ -97,6 +112,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     return "list";
   }
 
+  /** @internal */
   protected override copy<V, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
                                  hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
                                  body: Value, flags: number, observers: ReadonlyArray<ListDownlinkObserver<V, VU>>,
@@ -521,6 +537,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     return this;
   }
 }
+/** @public */
 export interface ListDownlink<V, VU> {
   hostUri(): Uri;
   hostUri(hostUri: AnyUri): ListDownlink<V, VU>;

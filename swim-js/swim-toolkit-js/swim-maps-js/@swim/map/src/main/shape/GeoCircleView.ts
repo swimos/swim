@@ -35,8 +35,10 @@ import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoCircleViewObserver} from "./GeoCircleViewObserver";
 
+/** @public */
 export type AnyGeoCircleView = GeoCircleView | GeoCircleViewInit;
 
+/** @public */
 export interface GeoCircleViewInit extends GeoViewInit, FillViewInit, StrokeViewInit {
   geoCenter?: AnyGeoPoint;
   viewCenter?: AnyR2Point;
@@ -44,6 +46,7 @@ export interface GeoCircleViewInit extends GeoViewInit, FillViewInit, StrokeView
   hitRadius?: number;
 }
 
+/** @public */
 export class GeoCircleView extends GeoLayerView implements FillView, StrokeView {
   constructor() {
     super();

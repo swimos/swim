@@ -20,6 +20,7 @@ import type {StreamletScope} from "./StreamletScope";
 /**
  * Stateful node in a dataflow graph that uses the state of its [[Inlet
  * inlets]] to compute the state of its [[Outlet Outlets]].
+ * @public
  */
 export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
   /**
@@ -51,7 +52,7 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
 
   /**
    * Connects the `Inlet` of this `Streamlet`, identified by the given `key` to
-   * the `input` from which the `Inlet` should acquire its state.  Delegates to
+   * the `input` from which the `Inlet` should acquire its state. Delegates to
    * [[Inlet.bindInput]] on the identified `Inlet`.
    *
    * @throws `Error` if this `Streamlet` has no `Inlet` with the given `key`.
@@ -60,7 +61,7 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
 
   /**
    * Disconnects the `Inlet` of this `Streamlet`, identified by the given
-   * `key`, from its [[Inlet.input input]] `Outlet`, if connected.  Delegates
+   * `key`, from its [[Inlet.input input]] `Outlet`, if connected. Delegates
    * to [[Inlet.unbindInput]] on the identified `Inlet`.
    *
    * @throws `Error` if this `Streamlet` has no `Inlet` with the given `key`.
@@ -75,14 +76,14 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
 
   /**
    * Disconnects all `Inlet`s dominated by this `Streamlet` in the dataflow
-   * dependency graph.  Used to recursively clean up chains of combinators
+   * dependency graph. Used to recursively clean up chains of combinators
    * terminating at this `Streamlet`.
    */
   disconnectInputs(): void;
 
   /**
    * Disconnects all `Inlets`s dominated by this `Streamlet` in the dataflow
-   * graph.  Used to recursively clean up chains of combinators originating
+   * graph. Used to recursively clean up chains of combinators originating
    * from this `Streamlet`.
    */
   disconnectOutputs(): void;
@@ -90,8 +91,8 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
   /**
    * Marks this `Streamlet`—and all of its outlets—as having decoherent state.
    * Decohering a `Streamlet` will recursively decohere all streamlets that
-   * transitively depend on the state of this `Streamlet`.  Decohering a
-   * `Streamlet` does not cause its state to be recomputed.  A subsequent
+   * transitively depend on the state of this `Streamlet`. Decohering a
+   * `Streamlet` does not cause its state to be recomputed. A subsequent
    * [[recohere]] call will eventually make the state of the `Streamlet`
    * coherent again.
    */
@@ -99,18 +100,18 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
 
   /**
    * Updates the state of this `Streamlet` to make it consistent with the
-   * target `version`.  The `Streamlet` only needs to update if its current
-   * `version` differs from the target `version`.  To update its state, the
+   * target `version`. The `Streamlet` only needs to update if its current
+   * `version` differs from the target `version`. To update its state, the
    * `Streamlet` first invokes [[Inlet.recohereOutput]] on each of its inlets,
-   * to ensure that its input states are coherent.  It then recomputes its own
-   * state in an implementation defined manner.  Finally, it invokes
+   * to ensure that its input states are coherent. It then recomputes its own
+   * state in an implementation defined manner. Finally, it invokes
    * [[Outlet.recohereInput]] on its outlets, causing all transitively
    * dependent streamlets to make their own states coherent again.
    */
   recohere(version: number): void;
 }
 
-/** @internal */
+/** @public */
 export const Streamlet = (function () {
   const Streamlet = {} as {
     is<I, O>(object: unknown): object is Streamlet<I, O>;

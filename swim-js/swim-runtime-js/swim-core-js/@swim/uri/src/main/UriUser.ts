@@ -16,13 +16,16 @@ import {HashCode, Lazy, Strings} from "@swim/util";
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
+/** @public */
 export type AnyUriUser = UriUser | UriUserInit | string;
 
+/** @public */
 export interface UriUserInit {
   username?: string;
   password?: string;
 }
 
+/** @public */
 export class UriUser implements HashCode, Debug, Display {
   /** @internal */
   constructor(username: string | undefined, password: string | undefined) {

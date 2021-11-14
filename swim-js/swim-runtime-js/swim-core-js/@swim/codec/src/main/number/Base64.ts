@@ -25,6 +25,7 @@ import {Base64Writer} from "../"; // forward import
 
 /**
  * Base-64 (7-bit ASCII) encoding [[Parser]]/[[Writer]] factory.
+ * @public
  */
 export abstract class Base64 {
   /**
@@ -84,7 +85,7 @@ export abstract class Base64 {
    * Decodes the base-64 digits `c1`, `c2`, `c3`, and `c4`, and writes the 8 to
    * 24 bit quantity they represent to the given `output`.
    *
-   * @return the continuation of the `output`.
+   * @returns the continuation of the `output`.
    */
   writeQuantum<T>(output: Output<T>, c1: number, c2: number, c3: number, c4: number): Output<T> {
     const x = this.decodeDigit(c1);
@@ -129,7 +130,7 @@ export abstract class Base64 {
   /**
    * Parses the base-64 (7-bit ASCII) encoded `input`, and writes the decoded
    * bytes to a growable array, returning a `Parser` continuation that knows
-   * how to parse any additional input.  The returned `Parser` [[Parser.bind
+   * how to parse any additional input. The returned `Parser` [[Parser.bind
    * binds]] a `Uint8Array` array containing all parsed base-64 data.
    */
   parseUint8Array(input: Input): Parser<Uint8Array> {

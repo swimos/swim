@@ -19,6 +19,7 @@ import {SelectionProvider} from "../selection/SelectionProvider";
 import {Trait} from "../trait/Trait";
 import type {SelectableTraitObserver} from "./SelectableTraitObserver";
 
+/** @public */
 export class SelectableTrait extends Trait {
   constructor() {
     super();

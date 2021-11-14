@@ -15,5 +15,6 @@
 import type {TraitObserver} from "@swim/model";
 import type {CellTrait} from "./CellTrait";
 
+/** @public */
 export interface CellTraitObserver<T extends CellTrait = CellTrait> extends TraitObserver<T> {
 }

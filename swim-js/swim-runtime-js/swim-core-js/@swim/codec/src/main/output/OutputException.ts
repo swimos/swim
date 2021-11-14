@@ -14,6 +14,7 @@
 
 /**
  * Thrown when writing invalid [[Output]].
+ * @public
  */
 export class OutputException extends Error {
   constructor(message?: string) {

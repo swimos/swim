@@ -17,6 +17,7 @@ import type {PlotView} from "./PlotView";
 import type {PlotTrait} from "./PlotTrait";
 import type {PlotController} from "./PlotController";
 
+/** @public */
 export interface PlotControllerObserver<X = unknown, Y = unknown, C extends PlotController<X, Y> = PlotController<X, Y>> extends DataSetControllerObserver<X, Y, C> {
   controllerWillAttachPlotTrait?(plotTrait: PlotTrait<X, Y>, controller: C): void;
 

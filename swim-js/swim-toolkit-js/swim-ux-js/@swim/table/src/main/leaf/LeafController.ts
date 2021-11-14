@@ -29,7 +29,7 @@ import {LeafView} from "./LeafView";
 import {LeafTrait} from "./LeafTrait";
 import type {LeafControllerObserver} from "./LeafControllerObserver";
 
-/** @internal */
+/** @public */
 export interface LeafControllerCellExt {
   attachCellTrait(cellTrait: CellTrait, cellController: CellController): void;
   detachCellTrait(cellTrait: CellTrait, cellController: CellController): void;
@@ -39,6 +39,7 @@ export interface LeafControllerCellExt {
   detachCellContentView(cellContentView: HtmlView, cellController: CellController): void;
 }
 
+/** @public */
 export class LeafController extends GenericController {
   override readonly observerType?: Class<LeafControllerObserver>;
 

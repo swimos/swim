@@ -20,12 +20,15 @@ import type {ListDownlinkObserver, ListDownlink} from "../downlink/ListDownlink"
 import type {WarpRef} from "../ref/WarpRef";
 import {DownlinkFastenerInit, DownlinkFastenerClass, DownlinkFastener} from "./DownlinkFastener";
 
+/** @internal */
 export type ListDownlinkFastenerType<F extends ListDownlinkFastener<any, any>> =
   F extends ListDownlinkFastener<any, infer V, any> ? V : never;
 
+/** @internal */
 export type ListDownlinkFastenerInitType<F extends ListDownlinkFastener<any, any>> =
   F extends ListDownlinkFastener<any, infer V, infer VU> ? V | VU : never;
 
+/** @beta */
 export interface ListDownlinkFastenerInit<V = unknown, VU = V> extends DownlinkFastenerInit, ListDownlinkObserver<V, VU> {
   extends?: {prototype: ListDownlinkFastener<any, any>} | string | boolean | null;
   valueForm?: Form<V, VU>;
@@ -33,11 +36,14 @@ export interface ListDownlinkFastenerInit<V = unknown, VU = V> extends DownlinkF
   initDownlink?(downlink: ListDownlink<V, VU>): ListDownlink<V, VU>;
 }
 
+/** @beta */
 export type ListDownlinkFastenerDescriptor<O = unknown, V = unknown, VU = V, I = {}> = ThisType<ListDownlinkFastener<O, V, VU> & I> & ListDownlinkFastenerInit<V, VU> & Partial<I>;
 
+/** @beta */
 export interface ListDownlinkFastenerClass<F extends ListDownlinkFastener<any, any> = ListDownlinkFastener<any, any>> extends DownlinkFastenerClass<F> {
 }
 
+/** @beta */
 export interface ListDownlinkFastenerFactory<F extends ListDownlinkFastener<any, any> = ListDownlinkFastener<any, any>> extends ListDownlinkFastenerClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ListDownlinkFastenerFactory<F> & I;
 
@@ -52,6 +58,7 @@ export interface ListDownlinkFastenerFactory<F extends ListDownlinkFastener<any,
   <O, V, VU = V, I = {}>(descriptor: {valueForm: Form<V, VU>} & ListDownlinkFastenerDescriptor<O, V, VU, I>): PropertyDecorator;
 }
 
+/** @beta */
 export interface ListDownlinkFastener<O = unknown, V = unknown, VU = V> extends DownlinkFastener<O> {
   (index: number): V | undefined;
   (index: number, newObject: V | VU): O;
@@ -102,7 +109,7 @@ export interface ListDownlinkFastener<O = unknown, V = unknown, VU = V> extends 
   /** @override */
   readonly downlink: ListDownlink<V, VU> | null;
 
-  /** @interna @override */
+  /** @internal @override */
   createDownlink(warp: WarpRef): ListDownlink<V, VU>;
 
   /** @internal @override */
@@ -112,6 +119,7 @@ export interface ListDownlinkFastener<O = unknown, V = unknown, VU = V> extends 
   initDownlink?(downlink: ListDownlink<V, VU>): ListDownlink<V, VU>;
 }
 
+/** @beta */
 export const ListDownlinkFastener = (function (_super: typeof DownlinkFastener) {
   const ListDownlinkFastener: ListDownlinkFastenerFactory = _super.extend("ListDownlinkFastener");
 

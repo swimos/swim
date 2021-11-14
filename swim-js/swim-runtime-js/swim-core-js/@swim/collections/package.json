@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-collections.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-collections.js",
+  "module": "./dist/swim-collections.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-collections.mjs",
+      "require": "./dist/swim-collections.js",
+      "types": "./dist/swim-collections.d.ts"
+    }
+  },
+  "types": "./dist/swim-collections.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "keywords": [
     "collections",
     "immutable",

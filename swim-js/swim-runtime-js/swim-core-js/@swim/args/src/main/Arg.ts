@@ -15,14 +15,17 @@
 import {Mutable, Murmur3, HashCode, Booleans, Strings, Constructors} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 
+/** @public */
 export type AnyArg = Arg | ArgInit | string;
 
+/** @public */
 export interface ArgInit {
   readonly name: string;
   readonly value?: string;
   readonly optional?: boolean;
 }
 
+/** @public */
 export class Arg implements HashCode, Debug {
   constructor(name: string, value: string | undefined, optional: boolean) {
     this.name = name;

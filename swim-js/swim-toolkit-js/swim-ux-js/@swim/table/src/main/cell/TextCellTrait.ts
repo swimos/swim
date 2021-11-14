@@ -18,9 +18,12 @@ import type {HtmlView} from "@swim/dom";
 import {CellTrait} from "./CellTrait";
 import type {TextCellTraitObserver} from "./TextCellTraitObserver";
 
+/** @public */
 export type TextCellContent = TextCellContentFunction | string;
+/** @public */
 export type TextCellContentFunction = (cellTrait: TextCellTrait) => HtmlView | string | null;
 
+/** @public */
 export class TextCellTrait extends CellTrait {
   override readonly observerType?: Class<TextCellTraitObserver>;
 

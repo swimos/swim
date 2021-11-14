@@ -23,6 +23,7 @@ import {Text} from "../Text";
 import {Selector} from "./Selector";
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class KeysSelector extends Selector {
   constructor(then: Selector) {
     super();

@@ -16,6 +16,7 @@ import type {Graphics} from "@swim/graphics";
 import type {CellTraitObserver} from "./CellTraitObserver";
 import type {IconCellTrait} from "./IconCellTrait";
 
+/** @public */
 export interface IconCellTraitObserver<T extends IconCellTrait = IconCellTrait> extends CellTraitObserver<T> {
   traitWillSetIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, trait: T): void;
 

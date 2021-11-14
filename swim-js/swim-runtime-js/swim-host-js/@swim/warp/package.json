@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-warp.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-warp.js",
+  "module": "./dist/swim-warp.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-warp.mjs",
+      "require": "./dist/swim-warp.js",
+      "types": "./dist/swim-warp.d.ts"
+    }
+  },
+  "types": "./dist/swim-warp.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "keywords": [
     "protocol",
     "recon",

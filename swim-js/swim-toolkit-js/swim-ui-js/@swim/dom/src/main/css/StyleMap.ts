@@ -62,6 +62,7 @@ import type {StyleContext} from "./StyleContext";
 import {StyleAnimator} from "../animator/StyleAnimator";
 import {StyleConstraintAnimator} from "../animator/StyleConstraintAnimator";
 
+/** @public */
 export interface StyleMapInit {
   alignContent?: MemberAnimatorInit<StyleMap, "alignContent">;
   alignItems?: MemberAnimatorInit<StyleMap, "alignItems">;
@@ -162,6 +163,7 @@ export interface StyleMapInit {
   zIndex?: MemberAnimatorInit<StyleMap, "zIndex">;
 }
 
+/** @public */
 export interface StyleMap extends StyleContext {
   readonly alignContent: StyleAnimator<this, AlignContent | undefined>;
 
@@ -367,7 +369,7 @@ export interface StyleMap extends StyleContext {
   readonly zIndex: StyleAnimator<this, number | undefined>;
 }
 
-/** @internal */
+/** @public */
 export const StyleMap = (function () {
   const StyleMap = {} as {
     /** @internal */

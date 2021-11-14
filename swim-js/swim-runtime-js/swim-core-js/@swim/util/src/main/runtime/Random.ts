@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export const Random = (function () {
   const Random = {} as {
     fillBytes(array: Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array): void;

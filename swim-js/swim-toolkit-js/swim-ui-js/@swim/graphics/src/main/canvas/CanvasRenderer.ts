@@ -17,6 +17,7 @@ import type {Transform} from "@swim/math";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {CanvasContext} from "./CanvasContext";
 
+/** @public */
 export class CanvasRenderer extends PaintingRenderer {
   constructor(context: CanvasContext, transform: Transform, pixelRatio: number) {
     super();

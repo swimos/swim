@@ -18,8 +18,10 @@ import {Item} from "./Item";
 import {Value} from "./Value";
 import {Record} from "./Record";
 
+/** @public */
 export type AnyExtant = Extant | null;
 
+/** @public */
 export class Extant extends Value {
   /** @internal */
   private constructor() {

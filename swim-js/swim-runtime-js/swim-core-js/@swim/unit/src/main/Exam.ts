@@ -24,9 +24,11 @@ import type {Report} from "./Report";
  * - "passing": the `Exam` has only valid proof points.
  * - "failing": the `Exam` has invalid proof points.
  * - "pending": the `Exam` has tentative proof points.
+ * @public
  */
 export type ExamStatus = "passing" | "failing" | "pending";
 
+/** @public */
 export class Exam implements Assert {
   constructor(report: Report, spec: Spec, name: string, options: TestOptions) {
     this.report = report;

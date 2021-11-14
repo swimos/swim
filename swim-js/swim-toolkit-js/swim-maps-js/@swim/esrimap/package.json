@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-esrimap.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-esrimap.js",
+  "module": "./dist/swim-esrimap.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-esrimap.mjs",
+      "require": "./dist/swim-esrimap.js",
+      "types": "./dist/swim-esrimap.d.ts"
+    }
+  },
+  "types": "./dist/swim-esrimap.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "devDependencies": {
     "@types/arcgis-js-api": "4.21"
   },

@@ -21,6 +21,7 @@ import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import type {TickView} from "../tick/TickView";
 import {AxisOrientation, AxisView} from "./AxisView";
 
+/** @public */
 export class LeftAxisView<Y = unknown> extends AxisView<Y> {
   override get orientation(): AxisOrientation {
     return "left";

@@ -23,6 +23,7 @@ import {BottomAxisTrait} from "../axis/BottomAxisTrait";
 import {LeftAxisTrait} from "../axis/LeftAxisTrait";
 import type {ChartTraitObserver} from "./ChartTraitObserver";
 
+/** @public */
 export class ChartTrait<X = unknown, Y = unknown> extends Trait {
   override readonly observerType?: Class<ChartTraitObserver<X, Y>>;
 

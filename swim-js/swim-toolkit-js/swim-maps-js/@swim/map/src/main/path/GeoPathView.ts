@@ -22,10 +22,12 @@ import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPathViewObserver} from "./GeoPathViewObserver";
 
+/** @public */
 export interface GeoPathViewInit extends GeoViewInit {
   geoPath?: GeoPath;
 }
 
+/** @public */
 export class GeoPathView extends GeoLayerView {
   constructor() {
     super();

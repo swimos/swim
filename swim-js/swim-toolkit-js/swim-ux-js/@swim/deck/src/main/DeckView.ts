@@ -16,12 +16,13 @@ import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
 import {Affinity, FastenerOwner, Property} from "@swim/fastener";
 import {Length} from "@swim/math";
 import {Look, Mood, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewContext, View, ViewEdgeInsets, ViewRefFactory, ViewRef} from "@swim/view";
+import {ViewportInsets, ViewContextType, ViewContext, View, ViewRefFactory, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {DeckBar} from "./DeckBar";
 import {DeckCard} from "./DeckCard";
 import type {DeckViewObserver} from "./DeckViewObserver";
 
+/** @public */
 export class DeckView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
@@ -49,8 +50,9 @@ export class DeckView extends HtmlView {
   readonly outAlign!: Property<this, number>;
 
   @Property({type: Object, inherits: true, state: null, updateFlags: View.NeedsResize})
-  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: Property<this, ViewportInsets | null>;
 
+  /** @internal */
   readonly bar!: DeckViewBar<this, DeckBar>; // defined by DeckViewBar
 
   /** @internal */

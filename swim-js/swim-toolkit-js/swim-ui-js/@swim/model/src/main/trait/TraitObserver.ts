@@ -16,6 +16,7 @@ import type {Observer} from "@swim/util";
 import type {Model} from "../model/Model";
 import type {TraitModelType, TraitContextType, Trait} from "./Trait";
 
+/** @public */
 export interface TraitObserver<R extends Trait = Trait> extends Observer<R> {
   traitWillAttachModel?(model: TraitModelType<R>, trait: R): void;
 

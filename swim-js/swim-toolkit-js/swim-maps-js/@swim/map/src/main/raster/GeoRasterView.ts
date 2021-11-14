@@ -34,6 +34,7 @@ import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoRasterViewContext} from "./GeoRasterViewContext";
 import type {GeoRasterViewObserver} from "./GeoRasterViewObserver";
 
+/** @public */
 export interface GeoRasterViewInit extends GeoViewInit {
   geoAnchor?: AnyGeoPoint;
   viewAnchor?: AnyR2Point;
@@ -45,6 +46,7 @@ export interface GeoRasterViewInit extends GeoViewInit {
   compositeOperation?: CanvasCompositeOperation;
 }
 
+/** @public */
 export class GeoRasterView extends GeoLayerView {
   constructor() {
     super();

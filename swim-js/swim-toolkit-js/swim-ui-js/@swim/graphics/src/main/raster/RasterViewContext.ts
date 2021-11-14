@@ -15,6 +15,7 @@
 import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 
+/** @public */
 export interface RasterViewContext extends GraphicsViewContext {
   readonly compositor: GraphicsRenderer | null;
 }

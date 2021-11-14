@@ -33,10 +33,12 @@ import {
 import {GeoPathViewInit, GeoPathView} from "./GeoPathView";
 import type {GeoAreaViewObserver} from "./GeoAreaViewObserver";
 
+/** @public */
 export interface GeoAreaViewInit extends GeoPathViewInit, FillViewInit, StrokeViewInit {
   clipViewport?: true;
 }
 
+/** @public */
 export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   override readonly observerType?: Class<GeoAreaViewObserver>;
 

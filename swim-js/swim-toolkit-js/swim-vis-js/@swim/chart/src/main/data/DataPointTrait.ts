@@ -21,9 +21,12 @@ import {Look} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import type {DataPointTraitObserver} from "./DataPointTraitObserver";
 
+/** @public */
 export type DataPointLabel<X = unknown, Y = unknown> = DataPointLabelFunction<X, Y> | string;
+/** @public */
 export type DataPointLabelFunction<X, Y> = (dataPointTrait: DataPointTrait<X, Y>) => GraphicsView | string | null;
 
+/** @public */
 export class DataPointTrait<X = unknown, Y = unknown> extends Trait {
   constructor(x: X, y: Y) {
     super();

@@ -17,6 +17,7 @@ import type {HierarchyObserver} from "@swim/fastener";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {ViewContextType, View} from "./View";
 
+/** @public */
 export interface ViewObserver<V extends View = View> extends HierarchyObserver<V> {
   viewWillAttachParent?(parent: View, view: V): void;
 

@@ -15,6 +15,7 @@
 import type {HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {DeckButton} from "./DeckButton";
 
+/** @public */
 export interface DeckButtonObserver<V extends DeckButton = DeckButton> extends HtmlViewObserver<V> {
   deckButtonWillPushLabel?(newLabelView: HtmlView, oldLabelView: HtmlView | null, view: V): void;
 

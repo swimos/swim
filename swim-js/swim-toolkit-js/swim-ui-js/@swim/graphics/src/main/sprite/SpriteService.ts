@@ -16,6 +16,7 @@ import {Lazy} from "@swim/util";
 import type {Sprite} from "./Sprite";
 import {SpriteSheet} from "./SpriteSheet";
 
+/** @public */
 export class SpriteService {
   constructor(canvasWidth?: number, canvasHeight?: number, pixelRatio?: number,
               minSizeClass?: number, maxSizeClass?: number) {

@@ -20,21 +20,28 @@ import {LinearGradientInterpolator} from "../"; // forward import
 import {LinearGradientAngleParser} from "../"; // forward import
 import {LinearGradientParser} from "../"; // forward import
 
+/** @public */
 export type AnyLinearGradient = LinearGradient | LinearGradientInit | string;
 
+/** @public */
 export type AnyLinearGradientAngle = LinearGradientAngle | number;
 
+/** @public */
 export type LinearGradientAngle = Angle | LinearGradientSide | LinearGradientCorner;
 
+/** @public */
 export type LinearGradientCorner = [LinearGradientSide, LinearGradientSide];
 
+/** @public */
 export type LinearGradientSide = "left" | "right" | "top" | "bottom";
 
+/** @public */
 export interface LinearGradientInit {
   angle: AnyLinearGradientAngle;
   stops: AnyColorStop[];
 }
 
+/** @public */
 export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equivalent {
   constructor(angle: LinearGradientAngle, stops: ReadonlyArray<ColorStop>) {
     this.angle = angle;

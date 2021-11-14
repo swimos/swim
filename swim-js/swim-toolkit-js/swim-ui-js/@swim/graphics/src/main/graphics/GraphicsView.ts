@@ -40,6 +40,7 @@ import type {GraphicsViewObserver} from "./GraphicsViewObserver";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasView} from "../"; // forward import
 
+/** @public */
 export interface GraphicsViewEventMap {
   "auxclick": MouseEvent;
   "click": MouseEvent;
@@ -67,10 +68,12 @@ export interface GraphicsViewEventMap {
   "wheel": WheelEvent;
 }
 
+/** @public */
 export interface GraphicsViewInit extends ViewInit {
   hidden?: boolean;
 }
 
+/** @public */
 export abstract class GraphicsView extends View {
   constructor() {
     super();
@@ -520,7 +523,7 @@ export abstract class GraphicsView extends View {
 
   /**
    * Sets the view-coordinate bounding box in which this view should layout
-   * and render graphics.  Should only be invoked by the view's parent view.
+   * and render graphics. Should only be invoked by the view's parent view.
    */
   setViewFrame(viewFrame: R2Box | null): void {
     (this as Mutable<this>).ownViewFrame = viewFrame;
@@ -541,7 +544,7 @@ export abstract class GraphicsView extends View {
 
   /**
    * The self-defined view-coordinate bounding box surrounding all graphics
-   * this view could possibly render.  Views with view bounds that don't
+   * this view could possibly render. Views with view bounds that don't
    * overlap their view frames may be culled from rendering and hit testing.
    */
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
@@ -773,7 +776,7 @@ export abstract class GraphicsView extends View {
 
   /**
    * Invokes event handlers registered with this `View` before propagating the
-   * `event` up the view hierarchy.  Returns a `View`, without invoking any
+   * `event` up the view hierarchy. Returns a `View`, without invoking any
    * registered event handlers, on which `dispatchEvent` should be called to
    * continue event propagation.
    * @internal

@@ -24,6 +24,7 @@ import {GeoView} from "../geo/GeoView";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import type {GeoRippleViewObserver} from "./GeoRippleViewObserver";
 
+/** @public */
 export interface GeoRippleOptions {
   source?: GeoView | null;
   center?: AnyGeoPoint | null;
@@ -34,6 +35,7 @@ export interface GeoRippleOptions {
   timing?: AnyTiming | number | boolean;
 }
 
+/** @public */
 export class GeoRippleView extends GeoLayerView implements StrokeView {
   constructor() {
     super();

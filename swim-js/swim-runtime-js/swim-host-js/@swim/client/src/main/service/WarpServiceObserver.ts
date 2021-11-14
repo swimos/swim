@@ -15,5 +15,6 @@
 import type {ServiceObserver} from "@swim/util";
 import type {WarpService} from "./WarpService";
 
+/** @public */
 export interface WarpServiceObserver<O, S extends WarpService<O> = WarpService<O>> extends ServiceObserver<O, S> {
 }

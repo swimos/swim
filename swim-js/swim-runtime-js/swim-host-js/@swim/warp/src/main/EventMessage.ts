@@ -16,6 +16,7 @@ import {AnyValue, Value} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import {LaneAddressed} from "./LaneAddressed";
 
+/** @public */
 export class EventMessage extends LaneAddressed<EventMessage> {
   constructor(node: Uri, lane: Uri, body: Value) {
     super(node, lane, body);

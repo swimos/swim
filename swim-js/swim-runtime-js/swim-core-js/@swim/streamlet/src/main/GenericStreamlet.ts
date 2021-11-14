@@ -16,6 +16,7 @@ import type {Inlet} from "./Inlet";
 import type {Outlet} from "./Outlet";
 import type {Streamlet} from "./Streamlet";
 
+/** @public */
 export interface GenericStreamlet<I = unknown, O = I> extends Streamlet<I, O> {
   getOutput(outlet: Outlet<O>): O | undefined;
 

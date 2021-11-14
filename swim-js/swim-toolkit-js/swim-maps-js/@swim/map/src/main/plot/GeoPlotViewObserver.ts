@@ -15,5 +15,6 @@
 import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {GeoPlotView} from "./GeoPlotView";
 
+/** @public */
 export interface GeoPlotViewObserver<V extends GeoPlotView = GeoPlotView> extends GeoViewObserver<V> {
 }

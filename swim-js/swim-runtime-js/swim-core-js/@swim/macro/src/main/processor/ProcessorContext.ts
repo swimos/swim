@@ -17,6 +17,7 @@ import type {Processor} from "./Processor";
 import type {Directive} from "../directive/Directive";
 import type {Converter} from "../converter/Converter";
 
+/** @public */
 export class ProcessorContext {
   constructor(processor: Processor, interpreter: Interpreter,
               directives: {readonly [name: string]: Directive | undefined} = {},

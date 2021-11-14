@@ -30,6 +30,7 @@ import {ReconConverter} from "../"; // forward import
 import {HtmlConverter} from "../"; // forward import
 import {CssConverter} from "../"; // forward import
 
+/** @public */
 export class Processor {
   constructor() {
     this.directives = {};
@@ -49,19 +50,9 @@ export class Processor {
     this.addDirective("if", new IfDirective());
     this.addDirective("each", new EachDirective());
 
-    let prism: typeof import("prismjs") | undefined;
-    if (typeof window !== "undefined") {
-      prism = window.Prism;
-    }
-    if (prism === void 0 && typeof require === "function") {
-      try {
-        prism = require("prismjs");
-      } catch (e) {
-        // swallow
-      }
-    }
-    if (prism !== void 0) {
-      this.addDirective("highlight", new HighlightDirective(prism));
+    const Prism = Processor.Prism;
+    if (Prism !== null) {
+      this.addDirective("highlight", new HighlightDirective(Prism));
     }
   }
 
@@ -128,9 +119,9 @@ export class Processor {
   }
 
   includeFile(path: string, type?: string): Item {
-    const fs = require("fs") as typeof import("fs");
-    if (fs.existsSync(path)) {
-      const content = fs.readFileSync(path).toString();
+    const FS = Processor.FS;
+    if (FS !== null && FS.existsSync(path)) {
+      const content = FS.readFileSync(path).toString();
       if (type === void 0) {
         const dotIndex = path.lastIndexOf(".");
         if (dotIndex >= 0) {
@@ -164,10 +155,38 @@ export class Processor {
   }
 
   exportFile(path: string, output: string): void {
-    const FS = require("fs") as typeof import("fs");
-    const Path = require("path") as typeof import("path");
-    const directory = Path.dirname(path);
-    FS.mkdirSync(directory, {recursive: true});
-    FS.writeFileSync(path, output);
+    const FS = Processor.FS;
+    const Path = Processor.Path;
+    if (FS !== null && Path !== null) {
+      const directory = Path.dirname(path);
+      FS.mkdirSync(directory, {recursive: true});
+      FS.writeFileSync(path, output);
+    }
   }
+
+  /** @internal */
+  static Prism: typeof import("prismjs") | null = null;
+  /** @internal */
+  static FS: typeof import("fs") | null = null;
+  /** @internal */
+  static Path: typeof import("path") | null = null;
 }
+if (typeof window !== "undefined" && window.Prism !== void 0) {
+  Processor.Prism = window.Prism;
+} else {
+  import("prismjs").then((prism: typeof import("prismjs")): void => {
+    Processor.Prism = prism;
+  }, (reason: unknown): void => {
+    // nop
+  });
+}
+import("fs").then((fs: typeof import("fs")): void => {
+  Processor.FS = fs;
+}, (reason: unknown): void => {
+  // nop
+});
+import("path").then((path: typeof import("path")): void => {
+  Processor.Path = path;
+}, (reason: unknown): void => {
+  // nop
+});

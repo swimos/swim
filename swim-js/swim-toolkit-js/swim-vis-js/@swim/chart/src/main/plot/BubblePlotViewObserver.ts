@@ -17,6 +17,7 @@ import type {Color} from "@swim/style";
 import type {ScatterPlotViewObserver} from "./ScatterPlotViewObserver";
 import type {BubblePlotView} from "./BubblePlotView";
 
+/** @public */
 export interface BubblePlotViewObserver<X = unknown, Y = unknown, V extends BubblePlotView<X, Y> = BubblePlotView<X, Y>> extends ScatterPlotViewObserver<X, Y, V> {
   viewWillSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
 

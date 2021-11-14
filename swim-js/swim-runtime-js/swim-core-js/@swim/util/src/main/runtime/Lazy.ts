@@ -14,6 +14,7 @@
 
 /**
  * Decorator that memoizes the computed value of a getter or nullary method.
+ * @public
  */
 export const Lazy: MethodDecorator = function <T>(target: Object, propertyKey: string | symbol,
                                                   descriptor: TypedPropertyDescriptor<T>): void {

@@ -46,8 +46,10 @@ import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoArcViewObserver} from "./GeoArcViewObserver";
 
+/** @public */
 export type AnyGeoArcView = GeoArcView | GeoArcViewInit;
 
+/** @public */
 export interface GeoArcViewInit extends GeoViewInit, FillViewInit, StrokeViewInit {
   geoCenter?: AnyGeoPoint;
   viewCenter?: R2Point;
@@ -60,6 +62,7 @@ export interface GeoArcViewInit extends GeoViewInit, FillViewInit, StrokeViewIni
   cornerRadius?: AnyLength;
 }
 
+/** @public */
 export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   constructor() {
     super();

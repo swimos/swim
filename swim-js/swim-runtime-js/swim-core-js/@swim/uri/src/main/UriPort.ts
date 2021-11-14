@@ -16,8 +16,10 @@ import {HashCode, Lazy, Compare, Strings, HashGenCacheMap} from "@swim/util";
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
+/** @public */
 export type AnyUriPort = UriPort | number | string;
 
+/** @public */
 export class UriPort implements HashCode, Compare, Debug, Display {
   /** @internal */
   constructor(portNumber: number) {

@@ -31,6 +31,7 @@ import {
 import {RecordOutlet} from "./RecordOutlet";
 import {RecordStreamlet} from "./"; // forward import
 
+/** @public */
 export abstract class AbstractRecordOutlet extends Record implements RecordOutlet {
   constructor() {
     super();
@@ -320,6 +321,7 @@ Object.defineProperty(AbstractRecordOutlet.prototype, "streamletScope", {
   },
   configurable: true,
 });
+/** @public */
 export interface AbstractRecordOutlet extends MapOutletCombinators<Value, Value, Record> {
 }
 MapOutletCombinators.define(AbstractRecordOutlet.prototype);

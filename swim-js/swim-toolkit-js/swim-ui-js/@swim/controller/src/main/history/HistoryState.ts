@@ -23,6 +23,7 @@ export interface MutableHistoryState {
   ephemeral: {[key: string]: string | undefined};
 }
 
+/** @public */
 export interface HistoryStateInit {
   fragment?: string;
 
@@ -31,6 +32,7 @@ export interface HistoryStateInit {
   ephemeral?: {[key: string]: string | undefined};
 }
 
+/** @public */
 export interface HistoryState {
   readonly fragment: string | undefined;
 
@@ -39,20 +41,28 @@ export interface HistoryState {
   readonly ephemeral: {readonly [key: string]: string | undefined};
 }
 
+/** @public */
 export const HistoryState = (function () {
   const HistoryState = {} as {
+    /** @internal */
     empty(): HistoryState;
 
+    /** @internal */
     current(): MutableHistoryState;
 
+    /** @internal */
     updated(delta: HistoryStateInit, state?: MutableHistoryState): MutableHistoryState;
 
+    /** @internal */
     cloned(state: HistoryState): MutableHistoryState;
 
+    /** @internal */
     fromUri(uri: AnyUri): HistoryState;
 
+    /** @internal */
     fromUriFragment(fragment: AnyUriFragment): HistoryState;
 
+    /** @internal */
     toUri(state: HistoryState): Uri;
   };
 

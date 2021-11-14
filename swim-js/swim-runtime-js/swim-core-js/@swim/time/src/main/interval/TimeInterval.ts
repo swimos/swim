@@ -24,6 +24,7 @@ import {MinuteInterval} from "../"; // forward import
 import {SecondInterval} from "../"; // forward import
 import {MillisecondInterval} from "../"; // forward import
 
+/** @public */
 export abstract class TimeInterval {
   abstract offset(d: AnyDateTime, k?: number): DateTime;
 
@@ -147,6 +148,7 @@ export abstract class TimeInterval {
   static readonly MillisPerHour: number = 60 * TimeInterval.MillisPerMinute;
 }
 
+/** @public */
 export abstract class UnitTimeInterval extends TimeInterval {
   abstract every(k: number): TimeInterval;
 }

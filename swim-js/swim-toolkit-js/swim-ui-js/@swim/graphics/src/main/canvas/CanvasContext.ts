@@ -14,6 +14,7 @@
 
 import type {PaintingContext} from "../painting/PaintingContext";
 
+/** @public */
 export type CanvasCompositeOperation = "source-over"
                                      | "source-in"
                                      | "source-out"
@@ -41,6 +42,7 @@ export type CanvasCompositeOperation = "source-over"
                                      | "color"
                                      | "luminosity";
 
+/** @public */
 export interface CanvasContext extends PaintingContext {
   save(): void;
   restore(): void;

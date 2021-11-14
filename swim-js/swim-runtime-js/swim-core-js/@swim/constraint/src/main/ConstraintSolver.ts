@@ -37,6 +37,7 @@ export interface ConstraintVariableBinding {
   state: number;
 }
 
+/** @public */
 export class ConstraintSolver implements ConstraintScope {
   constructor() {
     this.constraints = new ConstraintMap();

@@ -19,6 +19,7 @@ import {Look, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {HtmlView, SvgView} from "@swim/dom";
 
+/** @public */
 export class DisclosureButton extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

@@ -16,6 +16,7 @@ import type {View} from "@swim/view";
 import type {HtmlViewObserver} from "@swim/dom";
 import type {PopoverPlacement, PopoverView} from "./PopoverView";
 
+/** @public */
 export interface PopoverViewObserver<V extends PopoverView = PopoverView> extends HtmlViewObserver<V> {
   popoverWillAttachSource?(sourceView: View, view: V): void;
 

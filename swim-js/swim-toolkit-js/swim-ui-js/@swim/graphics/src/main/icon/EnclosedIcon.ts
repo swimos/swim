@@ -24,6 +24,7 @@ import {PaintingRenderer} from "../painting/PaintingRenderer";
 import {Icon} from "./Icon";
 import {EnclosedIconInterpolator} from "../"; // forward import
 
+/** @public */
 export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equals, Equivalent, Debug {
   constructor(outer: Icon | null, inner: Icon | null, innerScale: number, moodModifier: MoodMatrix | null,
               outerMoodModifier: MoodMatrix | null, innerMoodModifier: MoodMatrix | null) {

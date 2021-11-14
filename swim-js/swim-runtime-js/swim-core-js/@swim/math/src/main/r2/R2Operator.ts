@@ -14,6 +14,7 @@
 
 import type {R2Function} from "./R2Function";
 
+/** @public */
 export interface R2Operator extends R2Function {
   inverse(): R2Operator;
 }

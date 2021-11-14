@@ -13,19 +13,21 @@
 // limitations under the License.
 
 import {R2Box} from "@swim/math";
-import type {ViewIdiom} from "../viewport/ViewIdiom";
+import type {ViewportIdiom} from "../viewport/ViewportIdiom";
 import {Viewport} from "../viewport/Viewport";
 
+/** @public */
 export interface ViewContext {
   readonly updateTime: number;
 
-  readonly viewIdiom: ViewIdiom;
+  readonly viewportIdiom: ViewportIdiom;
 
   readonly viewport: Viewport;
 
   readonly viewFrame: R2Box;
 }
 
+/** @public */
 export const ViewContext = (function () {
   const ViewContext = {} as {
     current: ViewContext | null;
@@ -39,7 +41,7 @@ export const ViewContext = (function () {
     const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
     return {
       updateTime: performance.now(),
-      viewIdiom: "unspecified",
+      viewportIdiom: "unspecified",
       viewport: viewport,
       viewFrame: viewFrame,
     };

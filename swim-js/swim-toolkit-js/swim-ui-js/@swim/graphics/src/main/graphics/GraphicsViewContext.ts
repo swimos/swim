@@ -15,6 +15,7 @@
 import type {GraphicsRenderer} from "./GraphicsRenderer";
 import type {ViewContext} from "@swim/view";
 
+/** @public */
 export interface GraphicsViewContext extends ViewContext {
   readonly renderer: GraphicsRenderer | null;
 }

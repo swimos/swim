@@ -28,43 +28,44 @@ import {InputError} from "../"; // forward import
  * ### Input tokens
  * Input tokens are modeled as primitive numbers, commonly representing Unicode
  * code points, or raw octets; each `Input` implementation specifies the
- * semantic type of its tokens.  The [[head]]  method peeks at the lookahead
+ * semantic type of its tokens. The [[head]]  method peeks at the lookahead
  * token, without consuming it, and the [[step]] method advances the input to
  * the next token.
  *
  * ### Input states
  * An `Input` reader is always in one of three states: _cont_​inue, _empty_, or
- * _done_.  The _cont_ state indicates that a lookahead token is immediately
+ * _done_. The _cont_ state indicates that a lookahead token is immediately
  * available; the _empty_ state indicates that no additional tokens are
  * available at this time, but that the stream may logically resume at some
  * point in the future; and the _done_ state indicates that the stream has
- * terminated.  [[isCont]] returns `true` when in the _cont_ state; [[isEmpty]]
+ * terminated. [[isCont]] returns `true` when in the _cont_ state; [[isEmpty]]
  * returns `true` when in the _empty_ state; and [[isDone]] returns `true` when
  * in the _done_ state.
  *
  * ### Non-blocking behavior
- * `Input` readers never block.  An `Input` reader that would otherwise block
+ * `Input` readers never block. An `Input` reader that would otherwise block
  * awaiting additional input instead enters the _empty_ state, signaling the
  * input consumer to back off processing the input, but to remain prepared to
- * process additional input in the future.  An `Input` reader enters the _done_
+ * process additional input in the future. An `Input` reader enters the _done_
  * state when it encounters the final end of its input, signaling the input
- * consumer to stop processing.  [[Input.empty]] returns an `Input` reader in
- * the _empty_ state.  [[Input.done]] returns an `Input` reader in the _done_
+ * consumer to stop processing. [[Input.empty]] returns an `Input` reader in
+ * the _empty_ state. [[Input.done]] returns an `Input` reader in the _done_
  * state.
  *
  * ### Position tracking
  * The logical position of the lookahead token is made available via the
  * [[mark]] method, with optimized callouts for the byte [[offset]], one-based
- * [[line]] number, and one-based [[column]] in the current line.  The [[id]]
+ * [[line]] number, and one-based [[column]] in the current line. The [[id]]
  * method returns a diagnostic identifier for the token stream.
  *
  * ### Cloning
  * An `Input` reader may be [[clone cloned]] to provide an indepently mutable
- * position into a shared token stream.  Not all `Input` implementations
+ * position into a shared token stream. Not all `Input` implementations
  * support cloning.
  *
  * @see [[InputSettings]]
  * @see [[Parser]]
+ * @public
  */
 export abstract class Input {
   /**
@@ -75,14 +76,14 @@ export abstract class Input {
 
   /**
    * Returns `true` when no lookahead token is currently available, but
-   * additional input may be available at some point in the future.  i.e. this
+   * additional input may be available at some point in the future, i.e. this
    * `Input` is in the _empty_ state.
    */
   abstract isEmpty(): boolean;
 
   /**
    * Returns `true` when no lookahead token is currently available, and no
-   * additional input will ever become available.  i.e. this `Input` is in
+   * additional input will ever become available, i.e. this `Input` is in
    * the _done_ state.
    */
   abstract isDone(): boolean;
@@ -124,7 +125,7 @@ export abstract class Input {
   abstract step(): Input;
 
   /**
-   * Sets the position of this `Input` to the given `mark`.  Rewinds to the
+   * Sets the position of this `Input` to the given `mark`. Rewinds to the
    * start of this `Input`, if `mark` is `undefined`.
    *
    * @throws [[InputException]] if this `Input` does not support seeking,
@@ -149,7 +150,7 @@ export abstract class Input {
 
   /**
    * Returns an `Input` equivalent to this `Input`, but logically identified
-   * by the given–possibly `undefined`–`id`.  The caller's reference to this
+   * by the given–possibly `undefined`–`id`. The caller's reference to this
    * `Input` should be replaced by the returned `Input`.
    */
   abstract withId(id: string | undefined): Input;
@@ -162,8 +163,8 @@ export abstract class Input {
 
   /**
    * Returns an `Input` equivalent to this `Input`, but logically positioned
-   * at the given `mark`.  The physical position in the input stream is not
-   * modified.  The caller's reference to this `Input` should be replaced by
+   * at the given `mark`. The physical position in the input stream is not
+   * modified. The caller's reference to this `Input` should be replaced by
    * the returned `Input`.
    */
   abstract withMark(mark: Mark): Input;

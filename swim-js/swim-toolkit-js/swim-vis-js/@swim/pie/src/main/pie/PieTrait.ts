@@ -19,9 +19,12 @@ import type {GraphicsView} from "@swim/graphics";
 import {SliceTrait} from "../slice/SliceTrait";
 import type {PieTraitObserver} from "./PieTraitObserver";
 
+/** @public */
 export type PieTitle = PieTitleFunction | string;
+/** @public */
 export type PieTitleFunction = (pieTrait: PieTrait) => GraphicsView | string | null;
 
+/** @public */
 export class PieTrait extends Trait {
   override readonly observerType?: Class<PieTraitObserver>;
 

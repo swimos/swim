@@ -22,6 +22,7 @@ import {TextCellView} from "./TextCellView";
 import {TextCellContent, TextCellTrait} from "./TextCellTrait";
 import type {TextCellControllerObserver} from "./TextCellControllerObserver";
 
+/** @public */
 export class TextCellController extends CellController {
   override readonly observerType?: Class<TextCellControllerObserver>;
 

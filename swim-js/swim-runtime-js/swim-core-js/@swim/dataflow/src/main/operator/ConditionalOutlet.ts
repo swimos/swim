@@ -15,6 +15,7 @@
 import {Value} from "@swim/structure";
 import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 
+/** @internal */
 export class ConditionalOutlet extends AbstractOutlet<Value> {
   constructor() {
     super();

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
+import {Mutable, Strings} from "@swim/util";
 import {Mark} from "../source/Mark";
 import {InputException} from "../input/InputException";
 import {AnyInputSettings, InputSettings} from "../input/InputSettings";
@@ -88,7 +88,7 @@ export class StringInput extends Input {
     const index = this.index;
     if (index < string.length) {
       const c = string.codePointAt(index);
-      (this as Mutable<this>).index = string.offsetByCodePoints(index, 1);
+      (this as Mutable<this>).index = Strings.offsetByCodePoints(string, index, 1);
       (this as Mutable<this>).offset += this.index - index;
       if (c === 10/*'\n'*/) {
         (this as Mutable<this>).line += 1;

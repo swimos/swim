@@ -17,6 +17,7 @@ import type {DeckCard} from "./DeckCard";
 import {DeckView} from "./DeckView";
 import {TitleDeckBar} from "./TitleDeckBar";
 
+/** @public */
 export class TitleDeckView extends DeckView {
   constructor(node: HTMLElement) {
     super(node);
@@ -68,5 +69,4 @@ export class TitleDeckView extends DeckView {
     }
     super.didPressBackButton(event);
   }
-
 }

@@ -18,6 +18,7 @@ import type {Look} from "@swim/theme";
 import type {GeoPathTraitObserver} from "./GeoPathTraitObserver";
 import type {GeoLineTrait} from "./GeoLineTrait";
 
+/** @public */
 export interface GeoLineTraitObserver<R extends GeoLineTrait = GeoLineTrait> extends GeoPathTraitObserver<R> {
   traitWillSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
 

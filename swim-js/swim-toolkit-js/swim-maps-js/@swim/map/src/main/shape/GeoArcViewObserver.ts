@@ -16,6 +16,7 @@ import type {GeoPoint} from "@swim/geo";
 import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {GeoArcView} from "./GeoArcView";
 
+/** @public */
 export interface GeoArcViewObserver<V extends GeoArcView = GeoArcView> extends GeoViewObserver<V> {
   viewWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
 

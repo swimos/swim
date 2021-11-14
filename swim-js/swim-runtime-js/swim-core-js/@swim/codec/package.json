@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-codec.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-codec.js",
+  "module": "./dist/swim-codec.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-codec.mjs",
+      "require": "./dist/swim-codec.js",
+      "types": "./dist/swim-codec.d.ts"
+    }
+  },
+  "types": "./dist/swim-codec.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "keywords": [
     "codec",
     "decoder",

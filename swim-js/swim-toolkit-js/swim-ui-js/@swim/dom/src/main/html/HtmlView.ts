@@ -32,17 +32,21 @@ import type {HtmlViewObserver} from "./HtmlViewObserver";
 import {StyleView} from "./"; // forward import
 import {SvgView} from "../"; // forward import
 
+/** @public */
 export interface ViewHtml extends HTMLElement {
   view?: HtmlView;
 }
 
+/** @public */
 export type AnyHtmlView<V extends HtmlView = HtmlView> = AnyElementView<V> | keyof HtmlViewTagMap;
 
+/** @public */
 export interface HtmlViewInit extends ElementViewInit {
   attributes?: HtmlViewAttributesInit;
   style?: HtmlViewStyleInit;
 }
 
+/** @public */
 export interface HtmlViewAttributesInit {
   autocomplete?: MemberAnimatorInit<HtmlView, "autocomplete">;
   checked?: MemberAnimatorInit<HtmlView, "checked">;
@@ -56,9 +60,11 @@ export interface HtmlViewAttributesInit {
   value?: MemberAnimatorInit<HtmlView, "value">;
 }
 
+/** @public */
 export interface HtmlViewStyleInit extends StyleMapInit {
 }
 
+/** @public */
 export interface HtmlViewTagMap {
   a: HtmlView;
   abbr: HtmlView;
@@ -174,17 +180,21 @@ export interface HtmlViewTagMap {
   wbr: HtmlView;
 }
 
+/** @public */
 export interface HtmlViewFactory<V extends HtmlView = HtmlView, U = AnyHtmlView<V>> extends ElementViewFactory<V, U> {
 }
 
+/** @public */
 export interface HtmlViewClass<V extends HtmlView = HtmlView, U = AnyHtmlView<V>> extends ElementViewClass<V, U>, HtmlViewFactory<V, U> {
   readonly tag: string;
 }
 
+/** @public */
 export interface HtmlViewConstructor<V extends HtmlView = HtmlView, U = AnyHtmlView<V>> extends ElementViewConstructor<V, U>, HtmlViewClass<V, U> {
   readonly tag: string;
 }
 
+/** @public */
 export class HtmlView extends ElementView {
   constructor(node: HTMLElement) {
     super(node);
@@ -504,6 +514,7 @@ export class HtmlView extends ElementView {
     }
   }
 }
+/** @public */
 export interface HtmlView extends StyleMap {
   applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void;
   requireUpdate(updateFlags: ViewFlags, immediate?: boolean): void;

@@ -17,6 +17,7 @@ import type {Item} from "@swim/structure";
 import {Recon} from "@swim/recon";
 import {Converter} from "./Converter";
 
+/** @public */
 export class ReconConverter extends Converter {
   override convert<O>(output: Output<O>, model: Item): O {
     const writer = Recon.writeBlock(output, model);

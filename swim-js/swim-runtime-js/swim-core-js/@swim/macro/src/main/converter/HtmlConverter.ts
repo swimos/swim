@@ -16,6 +16,7 @@ import {Output, OutputException} from "@swim/codec";
 import {Item, Attr, Slot, Value, Record} from "@swim/structure";
 import {Converter} from "./Converter";
 
+/** @public */
 export class HtmlConverter extends Converter {
   override convert<O>(output: Output<O>, model: Item): O {
     if (model instanceof Record) {

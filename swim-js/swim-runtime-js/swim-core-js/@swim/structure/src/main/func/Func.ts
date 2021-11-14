@@ -18,6 +18,7 @@ import {Expression} from "../Expression";
 import type {InvokeOperator} from "../operator/InvokeOperator";
 import type {Interpreter} from "../interpreter/Interpreter";
 
+/** @public */
 export abstract class Func extends Expression {
   /** @internal */
   constructor() {

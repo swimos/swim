@@ -17,6 +17,7 @@ import type {HtmlViewObserver} from "@swim/dom";
 import type {CellView} from "../cell/CellView";
 import type {LeafView} from "./LeafView";
 
+/** @public */
 export interface LeafViewObserver<V extends LeafView = LeafView> extends HtmlViewObserver<V> {
   viewWillAttachCell?(cellView: CellView, targetView: View | null, view: V): void;
 

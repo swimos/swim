@@ -15,6 +15,7 @@
 import type {ModelContextType, Model} from "./Model";
 import type {Trait} from "../trait/Trait";
 
+/** @public */
 export interface ModelObserver<M extends Model = Model> {
   modelWillAttachParent?(parent: Model, model: M): void;
 

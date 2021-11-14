@@ -14,6 +14,7 @@
 
 import type {ThemeMatrix} from "./ThemeMatrix";
 
+/** @public */
 export const Theme = {} as {
   dark: ThemeMatrix, // defined by DarkTheme
   light: ThemeMatrix, // defined by LightTheme

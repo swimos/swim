@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export type AnyGraphicsRenderer = GraphicsRenderer | GraphicsRendererType;
 
+/** @public */
 export type GraphicsRendererType = "canvas" | "webgl";
 
+/** @public */
 export abstract class GraphicsRenderer {
 }

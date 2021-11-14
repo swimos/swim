@@ -15,7 +15,7 @@
 import type {Mutable} from "@swim/util";
 import type {ConstraintId} from "./ConstraintId";
 
-/** @internal */
+/** @public */
 export class ConstraintMap<K extends ConstraintId, V> {
   constructor(index?: {[id: number]: number | undefined}, array?: Array<[K, V]>) {
     this.index = index !== void 0 ? index : {};

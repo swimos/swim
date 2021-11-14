@@ -15,13 +15,17 @@
 import type {Uri} from "@swim/uri";
 import type {DownlinkModel} from "./DownlinkModel";
 
-/** @internal */
+/** @public */
 export interface DownlinkContext {
+  /** @internal */
   getDownlink(hostUri: Uri, nodeUri: Uri, laneUri: Uri): DownlinkModel | undefined;
  
+  /** @internal */
   openDownlink(downlink: DownlinkModel): void;
  
+  /** @internal */
   unlinkDownlink(downlink: DownlinkModel): void;
  
+  /** @internal */
   closeDownlink(downlink: DownlinkModel): void;
 }

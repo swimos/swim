@@ -45,6 +45,7 @@ export interface DateStringFactory {
   cont(locale: DateTimeLocale, date: DateTimeInit, output: Output, input: Input): Parser<DateTimeInit>;
 }
 
+/** @public */
 export abstract class DateTimeFormat {
   withLocale(locale: DateTimeLocale): DateTimeFormat {
     return this;
@@ -93,71 +94,71 @@ export abstract class DateTimeFormat {
   abstract parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit>;
 
   @Lazy
-  static get year(): YearFormat {
+  static get year(): DateTimeFormat {
     return new YearFormat();
   }
 
   @Lazy
-  static get monthOfYear(): MonthOfYearFormat {
+  static get monthOfYear(): DateTimeFormat {
     return new MonthOfYearFormat();
   }
 
   @Lazy
-  static get month(): MonthFormat {
+  static get month(): DateTimeFormat {
     return new MonthFormat(DateTimeLocale.standard());
   }
 
   @Lazy
-  static get shortMonth(): ShortMonthFormat {
+  static get shortMonth(): DateTimeFormat {
     return new ShortMonthFormat(DateTimeLocale.standard());
   }
 
   @Lazy
-  static get dayOfMonth(): DayOfMonthFormat {
+  static get dayOfMonth(): DateTimeFormat {
     return new DayOfMonthFormat();
   }
 
   @Lazy
-  static get weekday(): WeekdayFormat {
+  static get weekday(): DateTimeFormat {
     return new WeekdayFormat(DateTimeLocale.standard());
   }
 
   @Lazy
-  static get shortWeekday(): ShortWeekdayFormat {
+  static get shortWeekday(): DateTimeFormat {
     return new ShortWeekdayFormat(DateTimeLocale.standard());
   }
 
   @Lazy
-  static get hour24(): Hour24Format {
+  static get hour24(): DateTimeFormat {
     return new Hour24Format();
   }
 
   @Lazy
-  static get hour12(): Hour12Format {
+  static get hour12(): DateTimeFormat {
     return new Hour12Format();
   }
 
   @Lazy
-  static get period(): PeriodFormat {
+  static get period(): DateTimeFormat {
     return new PeriodFormat(DateTimeLocale.standard());
   }
 
   @Lazy
-  static get minute(): MinuteFormat {
+  static get minute(): DateTimeFormat {
     return new MinuteFormat();
   }
 
   @Lazy
-  static get second(): SecondFormat {
+  static get second(): DateTimeFormat {
     return new SecondFormat();
   }
 
   @Lazy
-  static get millisecond(): YearFormat {
+  static get millisecond(): DateTimeFormat {
     return new MillisecondFormat();
   }
 
-  static pattern(pattern: string, specifiers?: DateTimeSpecifiers | DateTimeLocale): PatternFormat {
+  static pattern(pattern: string, specifiers?: DateTimeSpecifiers | DateTimeLocale): DateTimeFormat {
     if (specifiers === void 0 || specifiers instanceof DateTimeLocale) {
       specifiers = DateTimeSpecifiers.standard(specifiers);
     }

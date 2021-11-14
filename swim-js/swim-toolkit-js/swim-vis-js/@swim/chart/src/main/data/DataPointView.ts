@@ -30,8 +30,10 @@ import {
 import type {DataPointCategory, DataPointLabelPlacement} from "./DataPoint";
 import type {DataPointViewObserver} from "./DataPointViewObserver";
 
+/** @public */
 export type AnyDataPointView<X = unknown, Y = unknown> = DataPointView<X, Y> | DataPointViewInit<X, Y>;
 
+/** @public */
 export interface DataPointViewInit<X = unknown, Y = unknown> extends GraphicsViewInit {
   x: X;
   y: Y;
@@ -52,6 +54,7 @@ export interface DataPointViewInit<X = unknown, Y = unknown> extends GraphicsVie
   label?: GraphicsView | string;
 }
 
+/** @public */
 export class DataPointView<X = unknown, Y = unknown> extends LayerView {
   constructor() {
     super();

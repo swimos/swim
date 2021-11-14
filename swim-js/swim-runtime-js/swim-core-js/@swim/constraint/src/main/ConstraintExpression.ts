@@ -19,8 +19,10 @@ import {ConstraintTerm} from "./"; // forward import
 import {ConstraintProduct} from "./"; // forward import
 import {ConstraintConstant} from "./"; // forward import
 
+/** @public */
 export type AnyConstraintExpression = ConstraintExpression | number;
 
+/** @public */
 export interface ConstraintExpression {
   readonly terms: ConstraintMap<ConstraintVariable, number>;
 
@@ -39,6 +41,7 @@ export interface ConstraintExpression {
   divide(scalar: number): ConstraintExpression;
 }
 
+/** @public */
 export const ConstraintExpression = (function () {
   const ConstraintExpression = {} as {
     fromAny(value: AnyConstraintExpression): ConstraintExpression;

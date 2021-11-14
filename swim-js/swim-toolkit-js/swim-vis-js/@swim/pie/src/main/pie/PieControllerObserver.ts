@@ -21,6 +21,7 @@ import type {PieView} from "./PieView";
 import type {PieTrait} from "./PieTrait";
 import type {PieController} from "./PieController";
 
+/** @public */
 export interface PieControllerObserver<C extends PieController = PieController> extends ControllerObserver<C> {
   controllerWillAttachPieTrait?(pieTrait: PieTrait, controller: C): void;
 

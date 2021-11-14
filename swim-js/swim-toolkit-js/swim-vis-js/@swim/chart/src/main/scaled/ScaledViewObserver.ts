@@ -19,6 +19,7 @@ import type {ScaledXView} from "./ScaledXView";
 import type {ScaledYView} from "./ScaledYView";
 import type {ScaledView} from "./ScaledView";
 
+/** @public */
 export interface ScaledViewObserver<X = unknown, Y = unknown, V extends ScaledView<X, Y> = ScaledView<X, Y>> extends GraphicsViewObserver<V>, ScaledXYViewObserver<X, Y, V> {
   viewWillAttachScaled?(scaledView: ScaledXView<X> | ScaledYView<Y>, targetView: View | null, view: V): void;
 

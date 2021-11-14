@@ -17,6 +17,7 @@ import {Item, Value, Text} from "@swim/structure";
 import type {ProcessorContext} from "../processor/ProcessorContext";
 import {Directive} from "./Directive";
 
+/** @public */
 export class ExportDirective extends Directive {
   override evaluate(model: Item, params: Value, context: ProcessorContext): Item {
     params = context.evaluate(params);

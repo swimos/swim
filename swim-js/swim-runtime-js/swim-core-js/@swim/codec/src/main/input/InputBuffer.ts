@@ -22,6 +22,7 @@ import {InputBufferError} from "../"; // forward import
 
 /**
  * Non-blocking token stream buffer.
+ * @public
  */
 export abstract class InputBuffer extends Input {
   abstract override asPart(part: boolean): InputBuffer;

@@ -16,5 +16,6 @@ import type {ServiceObserver} from "@swim/util";
 import type {RefreshService} from "./RefreshService";
 import type {Model} from "../model/Model";
 
+/** @public */
 export interface RefreshServiceObserver<M extends Model = Model, S extends RefreshService<M> = RefreshService<M>> extends ServiceObserver<M, S> {
 }

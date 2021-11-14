@@ -29,6 +29,7 @@ import {StringWriter} from "./StringWriter";
  * The `Unicode.stringOutput(...)` function returns an `Output` that writes
  * Unicode code points to an internal buffer, and [[Output.bind binds]] a
  * `string` containing all written code points.
+ * @public
  */
 export const Unicode = (function () {
   const Unicode = {} as {
@@ -36,7 +37,7 @@ export const Unicode = (function () {
 
     /**
      * Returns a new `Output` that appends Unicode code points to the given
-     * `string`, using the given output `settings`.  The returned `Output`
+     * `string`, using the given output `settings`. The returned `Output`
      * accepts an unbounded number of code points, remaining permanently in the
      * _cont_ state, and [[Output.bind binds]] a `string` containing the given
      * `string`, and all appended code points.
@@ -45,7 +46,7 @@ export const Unicode = (function () {
 
     /**
      * Returns a new `Output` that buffers Unicode code points, using the given
-     * output `settings`.  The returned `Output` accepts an unbounded number of
+     * output `settings`. The returned `Output` accepts an unbounded number of
      * code points, remaining permanently in the _cont_ state, and [[Output.bind
      * binds]] a `string` containing all written code points.
      */

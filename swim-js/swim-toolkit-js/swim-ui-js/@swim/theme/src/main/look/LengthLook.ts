@@ -16,6 +16,7 @@ import type {Interpolator} from "@swim/util";
 import {AnyLength, Length, LengthInterpolator} from "@swim/math";
 import {Look} from "./Look";
 
+/** @internal */
 export class LengthLook extends Look<Length, AnyLength> {
   override combine(combination: Length | undefined, value: Length, weight?: number): Length {
     if (combination !== void 0) {

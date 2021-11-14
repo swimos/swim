@@ -19,11 +19,12 @@ import type {Display} from "../format/Display";
 import type {Debug} from "../format/Debug";
 
 /**
- * Description of a source location.  Tags are used to annotate input sources,
- * particularly for [[Diagnostic diagnostic]] purposes.  A [[Mark]] tag
- * annotates a source position.  A [[Span]] tag annotate a source range.
+ * Description of a source location. Tags are used to annotate input sources,
+ * particularly for [[Diagnostic diagnostic]] purposes. A [[Mark]] tag
+ * annotates a source position. A [[Span]] tag annotate a source range.
  *
  * @see [[Diagnostic]]
+ * @public
  */
 export abstract class Tag implements HashCode, Display, Debug {
   /**

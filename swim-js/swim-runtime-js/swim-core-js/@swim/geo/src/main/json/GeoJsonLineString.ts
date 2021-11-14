@@ -18,11 +18,13 @@ import {GeoSpline} from "../GeoSpline";
 import type {GeoJsonPosition} from "./GeoJsonPosition";
 import type {GeoJsonGeometryObject} from "./GeoJsonGeometry";
 
+/** @public */
 export interface GeoJsonLineString extends GeoJsonGeometryObject {
   readonly type: "LineString";
   coordinates: GeoJsonPosition[];
 }
 
+/** @public */
 export const GeoJsonLineString = (function () {
   const GeoJsonLineString = {} as {
     is(value: unknown): value is GeoJsonLineString;

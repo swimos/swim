@@ -15,6 +15,7 @@
 import type {MapOutlet} from "./MapOutlet";
 import {AbstractOutlet} from "./AbstractOutlet";
 
+/** @public */
 export class KeyOutlet<K, V> extends AbstractOutlet<V> {
   constructor(input: MapOutlet<K, V, unknown>, key: K) {
     super();

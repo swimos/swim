@@ -30,8 +30,10 @@ import {R2Segment} from "./R2Segment";
 import {R2BoxInterpolator} from "../"; // forward import
 import {R2Circle} from "./R2Circle";
 
+/** @public */
 export type AnyR2Box = R2Box | R2BoxInit;
 
+/** @public */
 export interface R2BoxInit {
   xMin: number;
   yMin: number;
@@ -39,6 +41,7 @@ export interface R2BoxInit {
   yMax: number;
 }
 
+/** @public */
 export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equivalent, Debug {
   constructor(xMin: number, yMin: number, xMax: number, yMax: number) {
     super();

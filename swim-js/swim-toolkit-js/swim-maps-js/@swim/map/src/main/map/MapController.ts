@@ -29,7 +29,7 @@ import {MapView} from "./MapView";
 import {MapTrait} from "./MapTrait";
 import type {MapControllerObserver} from "./MapControllerObserver";
 
-/** @internal */
+/** @public */
 export interface MapControllerLayerExt {
   attachLayerTrait(layerTrait: GeoTrait, layerController: GeoController): void;
   detachLayerTrait(layerTrait: GeoTrait, layerController: GeoController): void;
@@ -37,6 +37,7 @@ export interface MapControllerLayerExt {
   detachLayerView(layerView: GeoView, layerController: GeoController): void;
 }
 
+/** @public */
 export abstract class MapController extends GenericController {
   override readonly observerType?: Class<MapControllerObserver>;
 

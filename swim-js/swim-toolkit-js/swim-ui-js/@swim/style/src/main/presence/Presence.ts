@@ -25,13 +25,16 @@ import {
 import {Output, Debug, Format} from "@swim/codec";
 import {PresenceInterpolator} from "./PresenceInterpolator";
 
+/** @public */
 export type AnyPresence = Presence | PresenceInit;
 
+/** @public */
 export interface PresenceInit {
   readonly phase: number;
   readonly direction: number;
 }
 
+/** @public */
 export class Presence implements Interpolate<Presence>, HashCode, Equivalent, Debug {
   constructor(phase: number, direction: number) {
     this.phase = phase;

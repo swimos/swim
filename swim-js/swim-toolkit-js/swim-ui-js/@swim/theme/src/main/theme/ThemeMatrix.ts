@@ -21,6 +21,7 @@ import {AnyFeelVector, FeelVectorUpdates, FeelVector} from "../feel/FeelVector";
 import {MoodVector} from "../mood/MoodVector";
 import type {MoodMatrix} from "../mood/MoodMatrix";
 
+/** @public */
 export class ThemeMatrix implements Equals, Debug {
   constructor(rowArray: ReadonlyArray<[Look<unknown>, LookVector<unknown>]>,
               rowIndex: {readonly [name: string]: number | undefined},

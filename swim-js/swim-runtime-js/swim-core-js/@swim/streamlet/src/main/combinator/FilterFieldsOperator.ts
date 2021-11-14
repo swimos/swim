@@ -17,6 +17,7 @@ import {BTree} from "@swim/collections";
 import {KeyEffect} from "../KeyEffect";
 import {AbstractMapInletMapOutlet} from "../AbstractMapInletMapOutlet";
 
+/** @public */
 export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapOutlet<K, K, V, V, I, Map<K, V>> {
   override has(key: K): boolean {
     const input = this.input;

@@ -16,6 +16,7 @@ import type {GeoBox} from "@swim/geo";
 import type {GraphicsViewObserver} from "@swim/graphics";
 import type {GeoView} from "./GeoView";
 
+/** @public */
 export interface GeoViewObserver<V extends GeoView = GeoView> extends GraphicsViewObserver<V> {
   viewWillSetGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, view: V): void;
 

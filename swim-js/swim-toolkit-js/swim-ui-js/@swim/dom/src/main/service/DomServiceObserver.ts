@@ -16,5 +16,6 @@ import type {ServiceObserver} from "@swim/util";
 import type {NodeView} from "../node/NodeView";
 import type {DomService} from "./DomService";
 
+/** @public */
 export interface DomServiceObserver<V extends NodeView = NodeView, S extends DomService<V> = DomService<V>> extends ServiceObserver<V, S> {
 }

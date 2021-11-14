@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-build.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-build.cjs",
+  "module": "./dist/swim-build.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-build.mjs",
+      "require": "./dist/swim-build.cjs",
+      "types": "./dist/swim-build.d.ts"
+    }
+  },
+  "types": "./dist/swim-build.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "devDependencies": {
     "@rollup/plugin-node-resolve": "13",
     "@types/eslint": "7",
@@ -35,6 +43,6 @@
     "bundle": "rollup -c"
   },
   "bin": {
-    "swim-build": "./dist/main/swim-build.js"
+    "swim-build": "./dist/swim-build-cli.cjs"
   }
 }

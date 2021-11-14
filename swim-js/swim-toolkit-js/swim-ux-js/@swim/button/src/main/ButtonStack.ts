@@ -32,6 +32,7 @@ import {FloatingButton} from "./FloatingButton";
 import {ButtonItem} from "./ButtonItem";
 import type {ButtonStackObserver} from "./ButtonStackObserver";
 
+/** @public */
 export class ButtonStack extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);

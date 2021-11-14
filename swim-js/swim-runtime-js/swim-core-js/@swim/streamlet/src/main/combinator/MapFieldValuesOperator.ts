@@ -16,6 +16,7 @@ import {Iterator, Cursor, Map} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AbstractMapInoutlet} from "../AbstractMapInoutlet";
 
+/** @public */
 export abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapInoutlet<K, VI, VO, I, Map<K, VO>> {
   override has(key: K): boolean {
     const input = this.input;

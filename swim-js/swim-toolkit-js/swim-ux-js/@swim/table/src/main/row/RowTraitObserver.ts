@@ -16,6 +16,7 @@ import type {LeafTraitObserver} from "../leaf/LeafTraitObserver";
 import type {RowTrait} from "./RowTrait";
 import type {TableTrait} from "../table/TableTrait";
 
+/** @public */
 export interface RowTraitObserver<T extends RowTrait = RowTrait> extends LeafTraitObserver<T> {
   traitWillAttachTree?(treeTrait: TableTrait, trait: T): void;
 

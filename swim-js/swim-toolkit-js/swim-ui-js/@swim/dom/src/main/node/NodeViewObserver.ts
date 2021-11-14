@@ -15,5 +15,6 @@
 import type {ViewObserver} from "@swim/view";
 import type {NodeView} from "./NodeView";
 
+/** @public */
 export interface NodeViewObserver<V extends NodeView = NodeView> extends ViewObserver<V> {
 }

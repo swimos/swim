@@ -30,6 +30,7 @@ export interface InterpolatorMap<Y, FY> extends Interpolator<FY> {
   equals(that: unknown): boolean;
 }
 
+/** @internal */
 export const InterpolatorMap = (function (_super: typeof Interpolator) {
   const InterpolatorMap = function <Y, FY>(interpolator: Interpolator<Y>,
                                            transform: (y: Y) => FY): InterpolatorMap<Y, FY> {

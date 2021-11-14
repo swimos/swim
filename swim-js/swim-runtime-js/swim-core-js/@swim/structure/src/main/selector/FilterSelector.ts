@@ -18,6 +18,7 @@ import {AnyItem, Item} from "../Item";
 import {Selector} from "./Selector";
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class FilterSelector extends Selector {
   constructor(predicate: Selector, then: Selector) {
     super();

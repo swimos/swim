@@ -36,8 +36,10 @@ import type {HtmlView} from "@swim/dom";
 import {Graphics, HtmlIconView} from "@swim/graphics";
 import {ButtonMembrane} from "./ButtonMembrane";
 
+/** @public */
 export type FloatingButtonType = "regular" | "mini";
 
+/** @public */
 export class FloatingButton extends ButtonMembrane {
   constructor(node: HTMLElement) {
     super(node);

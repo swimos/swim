@@ -18,6 +18,7 @@ import type {TextCellView} from "./TextCellView";
 import type {TextCellTrait} from "./TextCellTrait";
 import type {TextCellController} from "./TextCellController";
 
+/** @public */
 export interface TextCellControllerObserver<C extends TextCellController = TextCellController> extends CellControllerObserver<C> {
   controllerWillAttachCellTrait?(cellTrait: TextCellTrait, controller: C): void;
 

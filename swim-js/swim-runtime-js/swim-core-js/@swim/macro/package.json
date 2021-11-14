@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-macro.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-macro.js",
+  "module": "./dist/swim-macro.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-macro.mjs",
+      "require": "./dist/swim-macro.js",
+      "types": "./dist/swim-macro.d.ts"
+    }
+  },
+  "types": "./dist/swim-macro.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "devDependencies": {
     "@types/prismjs": "1",
     "prismjs": "1.25"
@@ -23,6 +31,6 @@
     "@swim/recon": "4.0.0-dev.20210927.1"
   },
   "bin": {
-    "swim-macro": "./dist/cli/swim-macro.js"
+    "swim-macro": "./dist/swim-macro-cli.cjs"
   }
 }

@@ -68,4 +68,8 @@ export {ConstraintContext} from "./ConstraintContext";
 
 export {ConstraintRow} from "./ConstraintRow";
 
-export {ConstraintSolver} from "./ConstraintSolver";
+export {
+  ConstraintTag,
+  ConstraintVariableBinding,
+  ConstraintSolver,
+} from "./ConstraintSolver";

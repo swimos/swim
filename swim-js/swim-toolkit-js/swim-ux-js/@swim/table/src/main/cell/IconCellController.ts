@@ -21,6 +21,7 @@ import {IconCellView} from "./IconCellView";
 import {IconCellTrait} from "./IconCellTrait";
 import type {IconCellControllerObserver} from "./IconCellControllerObserver";
 
+/** @public */
 export class IconCellController extends CellController {
   override readonly observerType?: Class<IconCellControllerObserver>;
 

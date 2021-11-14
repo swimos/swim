@@ -16,6 +16,7 @@ import type {Output} from "@swim/codec";
 import {Item, Attr, Slot, Value, Record, Text, Num} from "@swim/structure";
 import {Converter} from "./Converter";
 
+/** @public */
 export class CssConverter extends Converter {
   override convert<O>(output: Output<O>, model: Item): O {
     if (model instanceof Record) {

@@ -21,6 +21,7 @@ import type {GaugeView} from "./GaugeView";
 import type {GaugeTrait} from "./GaugeTrait";
 import type {GaugeController} from "./GaugeController";
 
+/** @public */
 export interface GaugeControllerObserver<C extends GaugeController = GaugeController> extends ControllerObserver<C> {
   controllerWillAttachGaugeTrait?(gaugeTrait: GaugeTrait, controller: C): void;
 

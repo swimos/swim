@@ -15,6 +15,7 @@
 import {Value, Record, Func, Interpreter} from "@swim/structure";
 import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 
+/** @internal */
 export class InvokeOutlet extends AbstractOutlet<Value> {
   constructor(scope: Record) {
     super();

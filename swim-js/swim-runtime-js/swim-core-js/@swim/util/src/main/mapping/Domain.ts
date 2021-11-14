@@ -19,8 +19,10 @@ import {Range} from "../"; // forward import
 import {LinearDomain} from "../"; // forward import
 import type {LinearRange} from "../scale/LinearRange";
 
+/** @public */
 export type AnyDomain<X> = Domain<X> | readonly [X, X];
 
+/** @public */
 export interface Domain<X> extends Mapping<X, number> {
   readonly 0: X;
 
@@ -41,6 +43,7 @@ export interface Domain<X> extends Mapping<X, number> {
   toString(): string;
 }
 
+/** @public */
 export const Domain = (function (_super: typeof Mapping) {
   const Domain = function <X>(x0: X, x1: X): Domain<X> {
     const domain = function (x: X): number {

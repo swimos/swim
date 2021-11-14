@@ -18,6 +18,7 @@ import type {Look, ThemeAnimator} from "@swim/theme";
 import {HtmlView} from "@swim/dom";
 import {AnyDeckPost, DeckPost} from "./DeckPost";
 
+/** @public */
 export abstract class DeckSlot extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

@@ -17,6 +17,7 @@ import type {KeyEffect} from "./KeyEffect";
 
 /**
  * Input connector into a `Streamlet` for a key-value map state.
+ * @public
  */
 export interface MapInlet<K, V, I> extends Inlet<I> {
   /**
@@ -29,18 +30,18 @@ export interface MapInlet<K, V, I> extends Inlet<I> {
 
   /**
    * Updates the state of an individual `key` in this `MapInlet` to make it
-   * consistent with the target `version`.  The `MapInlet` only needs to update
-   * if the current `version` differs from the target `version`.  To update the
+   * consistent with the target `version`. The `MapInlet` only needs to update
+   * if the current `version` differs from the target `version`. To update the
    * state of a key, the `MapInlet` first invokes [[MapOutlet.recohereInputKey]]
    * on its [[input]], if its input is a `MapOutlet`, or it invokes
-   * [[Outlet.recohereInput]], if its input is not a `MapOutlet`.  Then,
+   * [[Outlet.recohereInput]], if its input is not a `MapOutlet`. Then,
    * if all decoherent keys have been recohered, the `MapInlet` invokes
    * [[Streamlet.recohere]] on its attached streamlet.
    */
   recohereOutputKey(key: K, version: number): void;
 }
 
-/** @internal */
+/** @public */
 export const MapInlet = (function () {
   const MapInlet = {} as {
     is<K, V, I>(object: unknown): object is MapInlet<K, V, I>;

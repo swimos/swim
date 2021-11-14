@@ -3,7 +3,67 @@
 The Swim Client library implements a streaming API client for linking to lanes
 of stateful Web Agents using the multiplxed WARP streaming protocol.
 
-## Overview
+Command line tool for linking to Web Agent lanes over the WARP protocol.
+
+## Installation
+
+```sh
+npm install -g swim-client
+```
+
+## Command Line
+
+```sh
+$ swim-client help
+Usage: swim-client <command>
+
+Commands:
+  link                  stream changes to a lane of a remote node
+  sync                  stream the current state and changes to a lane of a remote node
+  get                   fetch the current state of a lane of a remote node
+  reflect               stream introspection metadata
+  help
+```
+
+```sh
+$ swim-client sync help
+Usage: swim-client sync [options] <command>
+
+Options:
+  -h, --host <hostUri>  remote host to link
+  -n, --node <nodeUri>  remote node to link
+  -l, --lane <laneUri>  lane to link
+  -f, --format <json|recon> event output format
+
+Commands:
+  help
+```
+
+```sh
+$ swim-client reflect help
+Usage: swim-client reflect [options] <command>
+
+Options:
+  -e, --edge <edgeUri>  endpoint to introspect
+  -m, --mesh <meshUri>? introspect default or specified mesh
+  -p, --part <partKey>? introspect default or specified partition
+  -h, --host <hostUri>? introspect default or specified host
+  -n, --node <nodeUri>  introspect specified node
+  -l, --lane <laneUri>  introspect specified lane
+  -k, --link            introspect link behavior
+  -r, --router          introspect router behavior
+      --data            introspect data behavior
+      --system          introspect system behavior
+      --process         introspect process behavior
+  -s, --stats           stream introspection statistics
+  -f, --format <json|recon> event output format
+
+Commands:
+  log                   stream log events
+  help
+```
+
+## API
 
 ### WarpRef
 

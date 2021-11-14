@@ -20,6 +20,7 @@ import {GeoTrait} from "../geo/GeoTrait";
 import {AnyGeoPerspective, GeoPerspective} from "../geo/GeoPerspective";
 import type {MapTraitObserver} from "./MapTraitObserver";
 
+/** @public */
 export class MapTrait extends GeoTrait {
   override readonly observerType?: Class<MapTraitObserver>;
 

@@ -19,6 +19,7 @@ import {LeafTrait} from "../leaf/LeafTrait";
 import type {RowTraitObserver} from "./RowTraitObserver";
 import {TableTrait} from "../"; // forward import
 
+/** @public */
 export class RowTrait extends LeafTrait {
   override readonly observerType?: Class<RowTraitObserver>;
 

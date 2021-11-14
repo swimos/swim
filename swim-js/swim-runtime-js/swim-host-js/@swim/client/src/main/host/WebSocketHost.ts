@@ -19,9 +19,10 @@ import type {HostContext} from "./HostContext";
 import type {HostOptions} from "./Host";
 import {RemoteHost} from "./RemoteHost";
 
-/** @internal */
+/** @public */
 export type WebSocketConstructor = {new(url: string, protocols?: string | string[]): WebSocket};
 
+/** @public */
 export interface WebSocketHostOptions extends HostOptions {
   protocols?: string | string[];
   WebSocket?: WebSocketConstructor;
@@ -39,18 +40,6 @@ export class WebSocketHost extends RemoteHost {
   /** @internal */
   readonly socket: WebSocket | null;
 
-  get WebSocket(): WebSocketConstructor | null {
-    if (this.options.WebSocket !== void 0) {
-      return this.options.WebSocket;
-    } else if (typeof WebSocket !== "undefined") {
-      return WebSocket;
-    } else if (typeof require === "function") {
-      return require("ws") as WebSocketConstructor;
-    } else {
-      return null;
-    }
-  }
-
   override isConnected(): boolean {
     return this.socket !== null && this.socket.readyState === this.socket.OPEN;
   }
@@ -59,9 +48,16 @@ export class WebSocketHost extends RemoteHost {
     this.clearReconnect();
     let socket = this.socket;
     if (socket === null) {
-      const WebSocket = this.WebSocket;
-      if (WebSocket === null) {
-        throw new Error("WebSocket undefined");
+      //const WebSocket = this.WebSocket;
+      let WebSocketConstructor: WebSocketConstructor;
+      if (this.options.WebSocket !== void 0) {
+        WebSocketConstructor = this.options.WebSocket;
+      } else if (typeof WebSocket !== "undefined") {
+        WebSocketConstructor = WebSocket;
+      } else if (WebSocketHost.WebSocket !== null) {
+        WebSocketConstructor = WebSocketHost.WebSocket;
+      } else {
+        throw new Error("Missing WebSocket implementation");
       }
       let hostUri = this.hostUri;
       const schemeName = hostUri.schemeName;
@@ -71,9 +67,9 @@ export class WebSocketHost extends RemoteHost {
         hostUri = hostUri.withSchemeName("wss");
       }
       if (this.options.protocols !== void 0) {
-        socket = new WebSocket(hostUri.toString(), this.options.protocols);
+        socket = new WebSocketConstructor(hostUri.toString(), this.options.protocols);
       } else {
-        socket = new WebSocket(hostUri.toString());
+        socket = new WebSocketConstructor(hostUri.toString());
       }
       (this as Mutable<this>).socket = socket;
       socket.onopen = this.onWebSocketOpen.bind(this);
@@ -172,4 +168,12 @@ export class WebSocketHost extends RemoteHost {
       }
     }
   }
+
+  /** @internal */
+  static WebSocket: WebSocketConstructor | null = null;
 }
+import("ws").then((ws: typeof import("ws")): void => {
+  WebSocketHost.WebSocket = ws.WebSocket as unknown as WebSocketConstructor;
+}, (reason: unknown): void => {
+  // nop
+});

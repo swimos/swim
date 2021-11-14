@@ -26,6 +26,7 @@ import type {
 import {Look, Feel, MoodVector, ThemeMatrix, ThemeContext} from "@swim/theme";
 import {CssContext} from "./CssContext";
 
+/** @public */
 export interface CssRuleInit extends FastenerInit {
   extends?: {prototype: CssRule<any>} | string | boolean | null;
   css?: string | (() => string);
@@ -33,11 +34,14 @@ export interface CssRuleInit extends FastenerInit {
   initRule?(rule: CSSRule): void;
 }
 
+/** @public */
 export type CssRuleDescriptor<O = unknown, I = {}> = ThisType<CssRule<O> & I> & CssRuleInit & Partial<I>;
 
+/** @public */
 export interface CssRuleClass<F extends CssRule<any> = CssRule<any>> extends FastenerClass<F> {
 }
 
+/** @public */
 export interface CssRuleFactory<F extends CssRule<any> = CssRule<any>> extends CssRuleClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): CssRuleFactory<F> & I;
 
@@ -48,6 +52,7 @@ export interface CssRuleFactory<F extends CssRule<any> = CssRule<any>> extends C
   <O, I = {}>(descriptor: CssRuleDescriptor<O, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface CssRule<O = unknown> extends Fastener<O>, FastenerContext, ConstraintScope, ThemeContext {
   /** @override */
   get familyType(): Class<CssRule<any>> | null;
@@ -155,6 +160,7 @@ export interface CssRule<O = unknown> extends Fastener<O>, FastenerContext, Cons
   initCss?(): string;
 }
 
+/** @public */
 export const CssRule = (function (_super: typeof Fastener) {
   const CssRule: CssRuleFactory = _super.extend("CssRule");
 

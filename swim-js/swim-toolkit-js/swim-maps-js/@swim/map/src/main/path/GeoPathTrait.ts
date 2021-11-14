@@ -18,6 +18,7 @@ import {AnyGeoPath, GeoPath, GeoBox} from "@swim/geo";
 import {GeoTrait} from "../geo/GeoTrait";
 import type {GeoPathTraitObserver} from "./GeoPathTraitObserver";
 
+/** @public */
 export abstract class GeoPathTrait extends GeoTrait {
   override readonly observerType?: Class<GeoPathTraitObserver>;
 

@@ -16,15 +16,16 @@ import {Murmur3} from "../runtime/Murmur3";
 
 /**
  * Utilities for comparing and hashing constructors.
+ * @public
  */
 export const Constructors = (function () {
   const Constructors = {} as {
     /**
-     * Returns the relative order of `x` with respect to `y`.  Returns `-1` if
+     * Returns the relative order of `x` with respect to `y`. Returns `-1` if
      * the hash code of constructor `x` is less than the hash code of constructor
      * `y`; returns `1` if the hash code of constructor `x` is greater than the
      * hash code of constructor `y`; and returns `0` if `x` and `y` are identical
-     * constructors.  If either `x` or `y` is `null` or `undefined`, then
+     * constructors. If either `x` or `y` is `null` or `undefined`, then
      * constructors order before `null`, and `null` orders before `undefined`.
      */
     compare(x: Function | null | undefined, y: Function | null | undefined): number;

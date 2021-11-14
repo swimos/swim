@@ -27,6 +27,7 @@ import {GeoAreaController} from "../"; // forward import
 import {GeoIconTrait} from "../"; // forward import
 import {GeoIconController} from "../"; // forward import
 
+/** @public */
 export abstract class GeoController extends GenericController {
   override readonly observerType?: Class<GeoControllerObserver>;
 

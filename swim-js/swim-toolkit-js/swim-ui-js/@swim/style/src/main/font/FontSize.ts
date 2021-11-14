@@ -15,8 +15,10 @@
 import type {Value} from "@swim/structure";
 import {AnyLength, Length} from "@swim/math";
 
+/** @public */
 export type AnyFontSize = AnyLength | FontSize;
 
+/** @public */
 export type FontSize = Length
                      | "large"
                      | "larger"
@@ -28,6 +30,7 @@ export type FontSize = Length
                      | "xx-large"
                      | "xx-small";
 
+/** @public */
 export const FontSize = (function () {
   const FontSize = {} as {
     fromAny(size: AnyFontSize): FontSize;

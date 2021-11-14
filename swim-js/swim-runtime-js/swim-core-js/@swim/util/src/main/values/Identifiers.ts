@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Strings} from "./Strings";
+
 /**
  * Utilities for working with ECMAScript identifiers.
+ * @public
  */
 export const Identifiers = (function () {
   const Identifiers = {} as {
@@ -72,9 +75,9 @@ export const Identifiers = (function () {
     if (n !== 0) {
       let c = identifier.codePointAt(0);
       if (c !== void 0 && Identifiers.isStartChar(c)) {
-        let i = identifier.offsetByCodePoints(0, 1);
+        let i = Strings.offsetByCodePoints(identifier, 0, 1);
         while (i < n && (c = identifier.codePointAt(0), c !== void 0 && Identifiers.isPartChar(c))) {
-          i = identifier.offsetByCodePoints(i, 1);
+          i = Strings.offsetByCodePoints(identifier, i, 1);
         }
         return i === n && !Identifiers.isReserved(identifier);
       }

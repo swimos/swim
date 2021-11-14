@@ -18,6 +18,7 @@ import type {GeoView} from "./GeoView";
 import type {GeoTrait} from "./GeoTrait";
 import type {GeoController} from "./GeoController";
 
+/** @public */
 export interface GeoControllerObserver<C extends GeoController = GeoController> extends ControllerObserver<C> {
   controllerWillAttachGeoTrait?(geoTrait: GeoTrait, controller: C): void;
 

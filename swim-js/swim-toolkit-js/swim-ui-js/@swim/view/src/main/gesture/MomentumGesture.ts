@@ -24,6 +24,7 @@ import {PointerMomentumGesture} from "./"; // forward import
 import type {ViewContext} from "../view/ViewContext";
 import {View} from "../"; // forward import
 
+/** @public */
 export interface MomentumGestureInit<V extends View = View> extends PositionGestureInit<V> {
   extends?: {prototype: MomentumGesture<any, any>} | string | boolean | null;
 
@@ -86,8 +87,10 @@ export interface MomentumGestureInit<V extends View = View> extends PositionGest
   didCoast?(): void;
 }
 
+/** @public */
 export type MomentumGestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<MomentumGesture<O, V> & I> & MomentumGestureInit<V> & Partial<I>;
 
+/** @public */
 export interface MomentumGestureClass<G extends MomentumGesture<any, any> = MomentumGesture<any, any>> extends PositionGestureClass<G> {
   /** @internal */
   readonly Hysteresis: number;
@@ -97,6 +100,7 @@ export interface MomentumGestureClass<G extends MomentumGesture<any, any> = Mome
   readonly VelocityMax: number;
 }
 
+/** @public */
 export interface MomentumGestureFactory<G extends MomentumGesture<any, any> = MomentumGesture<any, any>> extends MomentumGestureClass<G> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): MomentumGestureFactory<G> & I;
 
@@ -109,6 +113,7 @@ export interface MomentumGestureFactory<G extends MomentumGesture<any, any> = Mo
   <O, V extends View = View, I = {}>(descriptor: MomentumGestureDescriptor<O, V, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface MomentumGesture<O = unknown, V extends View = View> extends PositionGesture<O, V> {
   /** @internal @override */
   readonly inputs: {readonly [inputId: string]: MomentumGestureInput | undefined};
@@ -261,6 +266,7 @@ export interface MomentumGesture<O = unknown, V extends View = View> extends Pos
   integrate(t: number): void;
 }
 
+/** @public */
 export const MomentumGesture = (function (_super: typeof PositionGesture) {
   const MomentumGesture: MomentumGestureFactory = _super.extend("MomentumGesture");
 

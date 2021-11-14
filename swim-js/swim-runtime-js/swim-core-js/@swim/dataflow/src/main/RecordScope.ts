@@ -16,6 +16,7 @@ import {AnyItem, Value, Record} from "@swim/structure";
 import type {StreamletScope} from "@swim/streamlet";
 import {RecordModel} from "./RecordModel";
 
+/** @public */
 export class RecordScope extends RecordModel {
   constructor(scope: StreamletScope<Value> | null, state?: Record) {
     super(state);

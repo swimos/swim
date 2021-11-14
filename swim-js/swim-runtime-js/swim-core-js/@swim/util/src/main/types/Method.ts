@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @beta */
 export type Methods<O> =
   {[K in keyof O as O[K] extends (...args: any) => any ? K : never]: O[K]};
 
+/** @beta */
 export type MethodParameters<O, K extends keyof Methods<O>> =
   Methods<O>[K] extends (...args: infer P) => any ? P : never;
 
+/** @beta */
 export type MethodReturnType<O, K extends keyof Methods<O>> =
   Methods<O>[K] extends (...args: any) => infer R ? R : never;

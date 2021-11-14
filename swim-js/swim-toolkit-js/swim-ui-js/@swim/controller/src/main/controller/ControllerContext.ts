@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export interface ControllerContext {
   readonly updateTime: number;
 }
 
+/** @public */
 export const ControllerContext = (function () {
   const ControllerContext = {} as {
     current: ControllerContext | null;

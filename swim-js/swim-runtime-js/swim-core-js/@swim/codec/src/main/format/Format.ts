@@ -20,6 +20,7 @@ import {Unicode} from "../unicode/Unicode";
 
 /**
  * utility functions for formatting values.
+ * @public
  */
 export const Format = (function () {
   const Format = {} as {
@@ -30,7 +31,7 @@ export const Format = (function () {
 
     /**
      * Returns the human-readable [[Display]] string for the givem `object`,
-     * output using the given `settings`.  Delegates to [[Display.displa]],
+     * output using the given `settings`. Delegates to [[Display.displa]],
      * if `object` implements `Display`; otherwise returns the result of
      * `Object.toString`.
      */
@@ -38,7 +39,7 @@ export const Format = (function () {
 
     /**
      * Returns the developer-readable [[Debug]] string for the givem `object`,
-     * output using the given `settings`.  Delegates to [[Debug.debug]], if
+     * output using the given `settings`. Delegates to [[Debug.debug]], if
      * `object` implements `Debug`; returns a JavaScript string literal, if
      * `object` is a `string`, and returns a JavaScript number literal, if
      * `object` is a `number`; otherwise returns the result of `Object.toString`.
@@ -47,11 +48,11 @@ export const Format = (function () {
 
     /**
      * Writes the code points of the human-readable [[Display]] string for the
-     * given `object` to `output`.  Assumes `output` is a Unicode `Output` writer
-     * with sufficient capacity.  Delegates to [[Display.display]], if `object`
+     * given `object` to `output`. Assumes `output` is a Unicode `Output` writer
+     * with sufficient capacity. Delegates to [[Display.display]], if `object`
      * implements `Display`; otherwise writes the result of `Object.toString`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      * @throws [[OutputException]] if the `output` exits the _cont_ state before
      *         the full display string has been written.
      */
@@ -59,13 +60,13 @@ export const Format = (function () {
 
     /**
      * Writes the code points of the developer-readable [[Debug]] string for the
-     * given `object` to `output`.  Assumes `output` is a Unicode `Output` writer
-     * with sufficient capacity.  Delegates to [[Debug.debug]], if `object`
+     * given `object` to `output`. Assumes `output` is a Unicode `Output` writer
+     * with sufficient capacity. Delegates to [[Debug.debug]], if `object`
      * implements `Debug`; writes a JavaScript string literal, if `object` is a
      * `string`, and writes a JavaScript number literal, if `object` is a
      * `number`; otherwise writes the result of `Object.toString`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      * @throws [[OutputException]] if the `output` exits the _cont_ state before
      *         the full debug string has been written.
      */
@@ -75,7 +76,7 @@ export const Format = (function () {
      * Writes the code points of the numeric string for the given `value`
      * to `output`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     displayNumber<T>(output: Output<T>, value: number): Output<T>;
 
@@ -83,7 +84,7 @@ export const Format = (function () {
      * Writes the code points of the JavaScript numeric literal for the given
      * `value` to `output`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     debugNumber<T>(output: Output<T>, value: number): Output<T>;
 
@@ -91,7 +92,7 @@ export const Format = (function () {
      * Writes the code points of the JavaScript character literal for the given
      * `character` to `output`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     debugChar<T>(output: Output<T>, character: number): Output<T>;
 
@@ -99,7 +100,7 @@ export const Format = (function () {
      * Writes the code points of the JavaScript string literal for the given
      * `string` to `output`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     debugString<T>(output: Output<T>, string: string): Output<T>;
 
@@ -126,26 +127,18 @@ export const Format = (function () {
   };
 
   Object.defineProperty(Format, "lineSeparator", {
-    get(): string {
-      let lineSeparator: string | undefined;
-      if (typeof global !== "undefined" && typeof global.require === "function") {
-        const os = global.require("os");
-        if (typeof os === "object" && os !== null) {
-          lineSeparator = os.EOL;
-        }
-      }
-      if (lineSeparator === void 0) {
-        lineSeparator = "\n";
-      }
-      Object.defineProperty(Format, "lineSeparator", {
-        value: lineSeparator,
-        enumerable: true,
-        configurable: true,
-      })
-      return lineSeparator;
-    },
+    value: "\n",
     enumerable: true,
     configurable: true,
+  });
+  import("os").then((os: typeof import("os")): void => {
+    Object.defineProperty(Format, "lineSeparator", {
+      value: os.EOL,
+      enumerable: true,
+      configurable: true,
+    });
+  }, (reason: unknown): void => {
+    // nop
   });
 
   Format.display = function (object: unknown, settings?: AnyOutputSettings): string {

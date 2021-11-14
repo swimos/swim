@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export type Dictionary<T> = {readonly [key: string]: T | undefined};
 
+/** @public */
 export type MutableDictionary<T> = {[key: string]: T | undefined};

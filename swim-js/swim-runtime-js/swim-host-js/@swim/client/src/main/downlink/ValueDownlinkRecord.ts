@@ -17,6 +17,7 @@ import {AnyItem, Item, Field, AnyValue, Value, Record, AnyText, AnyNum} from "@s
 import {DownlinkRecord} from "./DownlinkRecord";
 import type {ValueDownlinkObserver, ValueDownlink} from "./ValueDownlink";
 
+/** @public */
 export class ValueDownlinkRecord extends DownlinkRecord implements ValueDownlinkObserver<Value, AnyValue> {
   constructor(downlink: ValueDownlink<Value, AnyValue>) {
     super();

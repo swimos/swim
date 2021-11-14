@@ -17,19 +17,24 @@ import type {FastenerOwner, Fastener} from "@swim/fastener";
 import type {AnyController, Controller} from "./Controller";
 import {ControllerRelationInit, ControllerRelationClass, ControllerRelation} from "./ControllerRelation";
 
+/** @internal */
 export type ControllerRefType<F extends ControllerRef<any, any>> =
   F extends ControllerRef<any, infer C> ? C : never;
 
+/** @public */
 export interface ControllerRefInit<C extends Controller = Controller> extends ControllerRelationInit<C> {
   extends?: {prototype: ControllerRef<any, any>} | string | boolean | null;
   key?: string | boolean;
 }
 
+/** @public */
 export type ControllerRefDescriptor<O = unknown, C extends Controller = Controller, I = {}> = ThisType<ControllerRef<O, C> & I> & ControllerRefInit<C> & Partial<I>;
 
+/** @public */
 export interface ControllerRefClass<F extends ControllerRef<any, any> = ControllerRef<any, any>> extends ControllerRelationClass<F> {
 }
 
+/** @public */
 export interface ControllerRefFactory<F extends ControllerRef<any, any> = ControllerRef<any, any>> extends ControllerRefClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ControllerRefFactory<F> & I;
 
@@ -44,6 +49,7 @@ export interface ControllerRefFactory<F extends ControllerRef<any, any> = Contro
   <O, C extends Controller = Controller, I = {}>(descriptor: {observes: boolean} & ControllerRefDescriptor<O, C, I & ObserverType<C>>): PropertyDecorator;
 }
 
+/** @public */
 export interface ControllerRef<O = unknown, C extends Controller = Controller> extends ControllerRelation<O, C> {
   (): C | null;
   (controller: AnyController<C> | null, targetController?: Controller | null, key?: string): O;
@@ -83,6 +89,7 @@ export interface ControllerRef<O = unknown, C extends Controller = Controller> e
   get key(): string | undefined; // optional prototype field
 }
 
+/** @public */
 export const ControllerRef = (function (_super: typeof ControllerRelation) {
   const ControllerRef: ControllerRefFactory = _super.extend("ControllerRef");
 

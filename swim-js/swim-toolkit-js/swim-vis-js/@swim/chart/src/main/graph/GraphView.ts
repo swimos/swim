@@ -16,14 +16,16 @@ import type {Class} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import type {ViewContextType} from "@swim/view";
+import {ViewContextType, View} from "@swim/view";
 import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {ScaledViewInit, ScaledView} from "../scaled/ScaledView";
-import {AnyPlotView, PlotView} from "../plot/PlotView";
+import type {AnyPlotView, PlotView} from "../plot/PlotView";
 import type {GraphViewObserver} from "./GraphViewObserver";
 
+/** @public */
 export type AnyGraphView<X = unknown, Y = unknown> = GraphView<X, Y> | GraphViewInit<X, Y>;
 
+/** @public */
 export interface GraphViewInit<X = unknown, Y = unknown> extends ScaledViewInit<X, Y> {
   plots?: AnyPlotView<X, Y>[];
 
@@ -31,6 +33,7 @@ export interface GraphViewInit<X = unknown, Y = unknown> extends ScaledViewInit<
   textColor?: AnyColor;
 }
 
+/** @public */
 export class GraphView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
   override readonly observerType?: Class<GraphViewObserver<X, Y>>;
 
@@ -44,7 +47,7 @@ export class GraphView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
     if (key === void 0 && typeof plot === "object" && plot !== null) {
       key = plot.key;
     }
-    plot = PlotView.fromAny(plot);
+    plot = View.fromAny(plot) as PlotView<X, Y>;
     this.appendChild(plot);
   }
 

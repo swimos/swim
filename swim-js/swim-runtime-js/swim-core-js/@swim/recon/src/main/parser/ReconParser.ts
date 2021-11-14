@@ -45,6 +45,7 @@ import {SelectorParser} from "./SelectorParser";
 
 /**
  * Factory for constructing Recon parsers and parse trees.
+ * @public
  */
 export abstract class ReconParser<I, V> {
   abstract isDistinct(value: V): boolean;

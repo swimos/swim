@@ -1,14 +1,86 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
-const script = "swim-maps";
-const namespace = "swim";
-
-const main = {
+const mainEsm = {
   input: "./lib/main/index.js",
   output: {
-    file: `./dist/main/${script}.js`,
-    name: namespace,
+    file: "./dist/swim-maps.mjs",
+    format: "esm",
+    globals: {
+      "leaflet": "L",
+      "mapbox-gl": "mapboxgl",
+    },
+    paths: {
+      "@swim/util": "@swim/core",
+      "@swim/codec": "@swim/core",
+      "@swim/fastener": "@swim/core",
+      "@swim/collections": "@swim/core",
+      "@swim/constraint": "@swim/core",
+      "@swim/structure": "@swim/core",
+      "@swim/streamlet": "@swim/core",
+      "@swim/dataflow": "@swim/core",
+      "@swim/recon": "@swim/core",
+      "@swim/uri": "@swim/core",
+      "@swim/math": "@swim/core",
+      "@swim/geo": "@swim/core",
+      "@swim/time": "@swim/core",
+      "@swim/warp": "@swim/host",
+      "@swim/client": "@swim/host",
+      "@swim/model": "@swim/ui",
+      "@swim/style": "@swim/ui",
+      "@swim/theme": "@swim/ui",
+      "@swim/view": "@swim/ui",
+      "@swim/dom": "@swim/ui",
+      "@swim/graphics": "@swim/ui",
+      "@swim/controller": "@swim/ui",
+    },
+    sourcemap: true,
+  },
+  external: [
+    "@swim/util",
+    "@swim/codec",
+    "@swim/fastener",
+    "@swim/collections",
+    "@swim/constraint",
+    "@swim/structure",
+    "@swim/streamlet",
+    "@swim/dataflow",
+    "@swim/recon",
+    "@swim/uri",
+    "@swim/math",
+    "@swim/geo",
+    "@swim/time",
+    "@swim/core",
+    "@swim/warp",
+    "@swim/client",
+    "@swim/host",
+    "@swim/model",
+    "@swim/style",
+    "@swim/theme",
+    "@swim/view",
+    "@swim/dom",
+    "@swim/graphics",
+    "@swim/controller",
+    "@swim/ui",
+    "leaflet",
+    "mapbox-gl",
+    "tslib",
+  ],
+  plugins: [
+    nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
+    sourcemaps(),
+  ],
+  onwarn(warning, warn) {
+    if (warning.code === "CIRCULAR_DEPENDENCY") return;
+    warn(warning);
+  },
+};
+
+const mainUmd = {
+  input: "./lib/main/index.js",
+  output: {
+    file: "./dist/swim-maps.js",
+    name: "swim",
     format: "umd",
     globals: {
       "@swim/util": "swim",
@@ -24,8 +96,10 @@ const main = {
       "@swim/math": "swim",
       "@swim/geo": "swim",
       "@swim/time": "swim",
+      "@swim/core": "swim",
       "@swim/warp": "swim",
       "@swim/client": "swim",
+      "@swim/host": "swim",
       "@swim/model": "swim",
       "@swim/style": "swim",
       "@swim/theme": "swim",
@@ -33,11 +107,36 @@ const main = {
       "@swim/dom": "swim",
       "@swim/graphics": "swim",
       "@swim/controller": "swim",
+      "@swim/ui": "swim",
       "leaflet": "L",
       "mapbox-gl": "mapboxgl",
     },
+    paths: {
+      "@swim/util": "@swim/core",
+      "@swim/codec": "@swim/core",
+      "@swim/fastener": "@swim/core",
+      "@swim/collections": "@swim/core",
+      "@swim/constraint": "@swim/core",
+      "@swim/structure": "@swim/core",
+      "@swim/streamlet": "@swim/core",
+      "@swim/dataflow": "@swim/core",
+      "@swim/recon": "@swim/core",
+      "@swim/uri": "@swim/core",
+      "@swim/math": "@swim/core",
+      "@swim/geo": "@swim/core",
+      "@swim/time": "@swim/core",
+      "@swim/warp": "@swim/host",
+      "@swim/client": "@swim/host",
+      "@swim/model": "@swim/ui",
+      "@swim/style": "@swim/ui",
+      "@swim/theme": "@swim/ui",
+      "@swim/view": "@swim/ui",
+      "@swim/dom": "@swim/ui",
+      "@swim/graphics": "@swim/ui",
+      "@swim/controller": "@swim/ui",
+    },
     sourcemap: true,
-    interop: false,
+    interop: "esModule",
     extend: true,
   },
   external: [
@@ -54,8 +153,10 @@ const main = {
     "@swim/math",
     "@swim/geo",
     "@swim/time",
+    "@swim/core",
     "@swim/warp",
     "@swim/client",
+    "@swim/host",
     "@swim/model",
     "@swim/style",
     "@swim/theme",
@@ -63,6 +164,7 @@ const main = {
     "@swim/dom",
     "@swim/graphics",
     "@swim/controller",
+    "@swim/ui",
     "leaflet",
     "mapbox-gl",
   ],
@@ -76,6 +178,6 @@ const main = {
   },
 };
 
-const targets = [main];
-targets.main = main;
+const targets = [mainEsm, mainUmd];
+targets.main = [mainEsm, mainUmd];
 export default targets;

@@ -32,6 +32,7 @@ import {ThemeAnimatorInit, ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnima
 import {NumberThemeConstraintAnimator} from "./"; // forward import
 import {LengthThemeConstraintAnimator} from "./"; // forward import
 
+/** @public */
 export interface ThemeConstraintAnimatorInit<T = unknown, U = T> extends ThemeAnimatorInit<T, U> {
   extends?: {prototype: ThemeConstraintAnimator<any, any>} | string | boolean | null;
   constrain?: boolean;
@@ -45,8 +46,10 @@ export interface ThemeConstraintAnimatorInit<T = unknown, U = T> extends ThemeAn
   toNumber?(value: T): number;
 }
 
+/** @public */
 export type ThemeConstraintAnimatorDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<ThemeConstraintAnimator<O, T, U> & I> & ThemeConstraintAnimatorInit<T, U> & Partial<I>;
 
+/** @public */
 export interface ThemeConstraintAnimatorClass<A extends ThemeConstraintAnimator<any, any> = ThemeConstraintAnimator<any, any>> extends ThemeAnimatorClass<A> {
   /** @internal */
   readonly ConstrainedFlag: FastenerFlags;
@@ -59,6 +62,7 @@ export interface ThemeConstraintAnimatorClass<A extends ThemeConstraintAnimator<
   readonly FlagMask: FastenerFlags;
 }
 
+/** @public */
 export interface ThemeConstraintAnimatorFactory<A extends ThemeConstraintAnimator<any, any> = ThemeConstraintAnimator<any, any>> extends ThemeConstraintAnimatorClass<A> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ThemeConstraintAnimatorFactory<A> & I;
 
@@ -74,6 +78,7 @@ export interface ThemeConstraintAnimatorFactory<A extends ThemeConstraintAnimato
   <O, T, U = T, I = {}>(descriptor: ThemeConstraintAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface ThemeConstraintAnimator<O = unknown, T = unknown, U = T> extends ThemeAnimator<O, T, U>, ConstraintVariable {
   /** @internal @override */
   readonly id: number;
@@ -187,6 +192,7 @@ export interface ThemeConstraintAnimator<O = unknown, T = unknown, U = T> extend
   toNumber(value: T): number;
 }
 
+/** @public */
 export const ThemeConstraintAnimator = (function (_super: typeof ThemeAnimator) {
   const ThemeConstraintAnimator: ThemeConstraintAnimatorFactory = _super.extend("ThemeConstraintAnimator");
 

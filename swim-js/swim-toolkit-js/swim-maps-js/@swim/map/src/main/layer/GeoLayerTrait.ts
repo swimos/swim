@@ -19,6 +19,7 @@ import {Model, Trait, TraitSet} from "@swim/model";
 import {GeoTrait} from "../geo/GeoTrait";
 import type {GeoLayerTraitObserver} from "./GeoLayerTraitObserver";
 
+/** @public */
 export class GeoLayerTrait extends GeoTrait {
   constructor() {
     super();

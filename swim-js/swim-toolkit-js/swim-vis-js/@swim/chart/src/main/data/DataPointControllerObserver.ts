@@ -20,6 +20,7 @@ import type {DataPointView} from "./DataPointView";
 import type {DataPointTrait} from "./DataPointTrait";
 import type {DataPointController} from "./DataPointController";
 
+/** @public */
 export interface DataPointControllerObserver<X = unknown, Y = unknown, C extends DataPointController<X, Y> = DataPointController<X, Y>> extends ControllerObserver<C> {
   controllerWillAttachDataPointTrait?(dataPointTrait: DataPointTrait<X, Y>, controller: C): void;
 

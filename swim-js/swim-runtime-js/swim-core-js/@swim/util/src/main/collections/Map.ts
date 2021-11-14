@@ -14,6 +14,7 @@
 
 import type {Iterator} from "./Iterator";
 
+/** @public */
 export interface Map<K = unknown, V = unknown> {
   readonly size: number;
 

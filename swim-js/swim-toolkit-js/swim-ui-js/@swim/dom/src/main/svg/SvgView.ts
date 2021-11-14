@@ -50,17 +50,21 @@ import {
 } from "../element/ElementView";
 import type {SvgViewObserver} from "./SvgViewObserver";
 
+/** @public */
 export interface ViewSvg extends SVGElement {
   view?: SvgView;
 }
 
+/** @public */
 export type AnySvgView<V extends SvgView = SvgView> = AnyElementView<V> | keyof SvgViewTagMap;
 
+/** @public */
 export interface SvgViewInit extends ElementViewInit {
   attributes?: SvgViewAttributesInit;
   style?: SvgViewStyleInit;
 }
 
+/** @public */
 export interface SvgViewAttributesInit {
   alignmentBaseline?: MemberAnimatorInit<SvgView, "alignmentBaseline">;
   clipPath?: MemberAnimatorInit<SvgView, "clipPath">;
@@ -109,6 +113,7 @@ export interface SvgViewAttributesInit {
   y2?: MemberAnimatorInit<SvgView, "y2">;
 }
 
+/** @public */
 export interface SvgViewStyleInit {
   cssTransform?: MemberAnimatorInit<SvgView, "cssTransform">;
   filter?: MemberAnimatorInit<SvgView, "filter">;
@@ -122,6 +127,7 @@ export interface SvgViewStyleInit {
   touchAction?: MemberAnimatorInit<SvgView, "touchAction">;
 }
 
+/** @public */
 export interface SvgViewTagMap {
   a: SvgView;
   animate: SvgView;
@@ -194,19 +200,23 @@ export interface SvgViewTagMap {
   view: SvgView;
 }
 
+/** @public */
 export interface SvgViewFactory<V extends SvgView = SvgView, U = AnySvgView<V>> extends ElementViewFactory<V, U> {
 }
 
+/** @public */
 export interface SvgViewClass<V extends SvgView = SvgView, U = AnySvgView<V>> extends ElementViewClass<V, U>, SvgViewFactory<V, U> {
   readonly tag: string;
   readonly namespace: string;
 }
 
+/** @public */
 export interface SvgViewConstructor<V extends SvgView = SvgView, U = AnySvgView<V>> extends ElementViewConstructor<V, U>, SvgViewClass<V, U> {
   readonly tag: string;
   readonly namespace: string;
 }
 
+/** @public */
 export class SvgView extends ElementView {
   constructor(node: SVGElement) {
     super(node);

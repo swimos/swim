@@ -26,9 +26,9 @@ import {
   ThemeConstraintAnimator,
 } from "@swim/theme";
 import {
+  ViewportInsets,
   ViewContextType,
   View,
-  ViewEdgeInsets,
   ModalOptions,
   ModalState,
   Modal,
@@ -36,14 +36,17 @@ import {
 import {HtmlViewInit, HtmlView} from "@swim/dom";
 import type {DrawerViewObserver} from "./DrawerViewObserver";
 
+/** @public */
 export type DrawerPlacement = "top" | "right" | "bottom" | "left";
 
+/** @public */
 export interface DrawerViewInit extends HtmlViewInit {
   placement?: DrawerPlacement;
   collapsedWidth?: AnyLength;
   expandedWidth?: AnyLength;
 }
 
+/** @public */
 export class DrawerView extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);
@@ -266,14 +269,14 @@ export class DrawerView extends HtmlView implements Modal {
   readonly stretch!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;
 
   @Property({type: Object, inherits: true, state: null})
-  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: Property<this, ViewportInsets | null>;
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.display.setState(!this.slide.dismissed ? "flex" : "none", Affinity.Intrinsic);
     this.layoutDrawer(viewContext);
 
-    if (viewContext.viewIdiom === "mobile") {
+    if (viewContext.viewportIdiom === "mobile") {
       this.boxShadow.setState(this.getLookOr(Look.shadow, Mood.floating, null), Affinity.Intrinsic);
     } else {
       this.boxShadow.setState(this.getLookOr(Look.shadow, null), Affinity.Intrinsic);
@@ -528,7 +531,7 @@ export class DrawerView extends HtmlView implements Modal {
     } else {
       timing = Timing.fromAny(timing);
     }
-    if (this.viewIdiom === "mobile" || this.isHorizontal()) {
+    if (this.viewportIdiom === "mobile" || this.isHorizontal()) {
       if (this.slide.presented) {
         this.slide.dismiss(timing);
       } else {

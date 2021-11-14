@@ -18,6 +18,7 @@ import {TraitModelType, Trait, TraitRef} from "@swim/model";
 import {DataSetTrait} from "../data/DataSetTrait";
 import type {PlotTraitObserver} from "./PlotTraitObserver";
 
+/** @public */
 export class PlotTrait<X = unknown, Y = unknown> extends Trait {
   override readonly observerType?: Class<PlotTraitObserver<X, Y>>;
 

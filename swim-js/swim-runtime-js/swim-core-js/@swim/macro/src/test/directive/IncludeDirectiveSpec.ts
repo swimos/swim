@@ -20,7 +20,7 @@ export class IncludeDirectiveSpec extends Spec {
   @Test
   processIncludeDirectives(exam: Exam): void {
     const processor = new Processor();
-    const model = Recon.parse("a: 1, b: @include('test/foo.recon'), c: $title, @include('test/bar.recon')");
+    const model = Recon.parse("a: 1, b: @include('src/test/foo.recon'), c: $title, @include('src/test/bar.recon')");
     const params = Recon.parse("title: 3");
     const result = processor.evaluate(model, params);
     exam.equal(result, Recon.parse("{a:1,b:@foo,c:3,@bar}"));

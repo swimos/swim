@@ -18,14 +18,15 @@ import type {AreaPlotTrait} from "./AreaPlotTrait";
 import type {SeriesPlotControllerObserver} from "./SeriesPlotControllerObserver";
 import type {AreaPlotController} from "./AreaPlotController";
 
+/** @public */
 export interface AreaPlotControllerObserver<X = unknown, Y = unknown, C extends AreaPlotController<X, Y> = AreaPlotController<X, Y>> extends SeriesPlotControllerObserver<X, Y, C> {
   controllerWillAttachPlotTrait?(plotTrait: AreaPlotTrait<X, Y>, controller: C): void;
 
   controllerDidDetachPlotTrait?(plotTrait: AreaPlotTrait<X, Y>, controller: C): void;
 
-  controllerWillAttachPlotView?(plotVIew: AreaPlotView<X, Y>, controller: C): void;
+  controllerWillAttachPlotView?(plotView: AreaPlotView<X, Y>, controller: C): void;
 
-  controllerDidDetachPlotView?(plotVIew: AreaPlotView<X, Y>, controller: C): void;
+  controllerDidDetachPlotView?(plotView: AreaPlotView<X, Y>, controller: C): void;
 
   controllerWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, controller: C): void;
 

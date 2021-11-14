@@ -18,6 +18,7 @@ import {Model, TraitCreator, Trait, TraitSet} from "@swim/model";
 import {CellTrait} from "../cell/CellTrait";
 import type {LeafTraitObserver} from "./LeafTraitObserver";
 
+/** @public */
 export class LeafTrait extends Trait {
   override readonly observerType?: Class<LeafTraitObserver>;
 

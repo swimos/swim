@@ -15,6 +15,7 @@
 import type {HtmlViewObserver} from "@swim/dom";
 import type {TokenView} from "./TokenView";
 
+/** @public */
 export interface TokenViewObserver<V extends TokenView = TokenView> extends HtmlViewObserver<V> {
   tokenWillExpand?(view: V): void;
 

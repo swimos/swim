@@ -21,10 +21,12 @@ import {GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoTree} from "./GeoTree";
 
+/** @public */
 export interface GeoTreeViewInit extends GeoViewInit {
   geoTreeColor?: AnyColor;
 }
 
+/** @public */
 export class GeoTreeView extends GeoView {
   constructor(geoFrame?: GeoBox, depth?: number, maxDepth?: number, density?: number) {
     super();

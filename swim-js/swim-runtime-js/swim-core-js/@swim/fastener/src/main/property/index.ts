@@ -22,6 +22,7 @@ export {
   PropertyInit,
   PropertyDescriptor,
   PropertyClass,
+  PropertyFactory,
   Property,
 } from "./Property";
 

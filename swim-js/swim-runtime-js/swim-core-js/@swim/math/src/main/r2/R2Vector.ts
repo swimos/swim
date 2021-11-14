@@ -25,13 +25,16 @@ import {
 import {Debug, Format, Output} from "@swim/codec";
 import {R2VectorInterpolator} from "../"; // forward import
 
+/** @public */
 export type AnyR2Vector = R2Vector | R2VectorInit;
 
+/** @public */
 export interface R2VectorInit {
   x: number;
   y: number;
 }
 
+/** @public */
 export class R2Vector implements Interpolate<R2Vector>, HashCode, Equivalent, Debug {
   constructor(x: number, y: number) {
     this.x = x;

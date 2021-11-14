@@ -19,6 +19,7 @@ import {MapView} from "@swim/map";
 import {EsriViewport} from "./EsriViewport";
 import type {EsriViewObserver} from "./EsriViewObserver";
 
+/** @public */
 export abstract class EsriView extends MapView {
   constructor() {
     super();

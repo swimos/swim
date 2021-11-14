@@ -19,6 +19,7 @@ import type {GeoProjection} from "./GeoProjection";
 import {AnyGeoShape, GeoShape} from "./GeoShape";
 import {GeoBox} from "./GeoBox";
 
+/** @public */
 export class GeoGroup<S extends GeoShape = GeoShape> extends GeoShape implements Equals, Equivalent, Debug {
   constructor(shapes: ReadonlyArray<S>) {
     super();

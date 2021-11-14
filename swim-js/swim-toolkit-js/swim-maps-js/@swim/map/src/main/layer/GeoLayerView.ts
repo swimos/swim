@@ -19,6 +19,7 @@ import {ViewContextType, ViewFlags, AnyView, ViewCreator, View} from "@swim/view
 import {GraphicsView} from "@swim/graphics";
 import {GeoView} from "../geo/GeoView";
 
+/** @public */
 export class GeoLayerView extends GeoView {
   constructor() {
     super();

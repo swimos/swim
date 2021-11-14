@@ -26,9 +26,9 @@ import {WriterSequence} from "../"; // forward import
  * data formats, without intermediate buffering.
  *
  * ### Output tokens
- * A `Writer` writes tokens to an `Output` writer.  Output tokens are modeled
+ * A `Writer` writes tokens to an `Output` writer. Output tokens are modeled
  * as primitive numbers, commonly representing Unicode code points, or raw
- * octets.  Each `Writer` implementation specifies the semantic type of output
+ * octets. Each `Writer` implementation specifies the semantic type of output
  * tokens it produces.
  *
  * ### Writer states
@@ -48,37 +48,39 @@ import {WriterSequence} from "../"; // forward import
  * ### Pulling output
  * The [[pull]] method incrementally writes as much `Output` as it can, before
  * returning another `Writer` that represents the continuation of how to write
- * additional `Output`.  The `Output` passed to `pull` is only guaranteed to be
+ * additional `Output`. The `Output` passed to `pull` is only guaranteed to be
  * valid for the duration of the method call; references to the provided
  * `Output` instance must not be stored.
  *
  * ### Writer results
  * A `Writer` produces a written result of type `O`, obtained via the [[bind]]
- * method.  `bind` is only guaranteed to return a result when in the _done_
+ * method. `bind` is only guaranteed to return a result when in the _done_
  * state; though `bind` may optionally make available partial results in other
- * states.  A failed `Writer` provides a write error via the [[trap]] method.
+ * states. A failed `Writer` provides a write error via the [[trap]] method.
  * `trap` is only guaranteed to return an error when in the _error_ state.
  *
  * ### Continuations
  * A `Writer` instance represents a continuation of how to write remaining
- * `Output`.  Rather than writing a complete output in one go, a `Writer` takes
+ * `Output`. Rather than writing a complete output in one go, a `Writer` takes
  * an `Output` chunk and returns another `Writer` instance that knows how to
- * write subsequent `Output` chunks.  This enables non-blocking, incremental
+ * write subsequent `Output` chunks. This enables non-blocking, incremental
  * writing that can be interrupted whenever an `Output` writer runs out of
- * space.  A `Writer` terminates by returning a continuation in either the
- * _done_ state, or the _error_ state.  [[Writer.done]] returns a `Writer` in
- * the _done_ state.  [[Writer.error]] returns a `Writer` in the _error_ state.
+ * space. A `Writer` terminates by returning a continuation in either the
+ * _done_ state, or the _error_ state. [[Writer.done]] returns a `Writer` in
+ * the _done_ state. [[Writer.error]] returns a `Writer` in the _error_ state.
  *
  * ### Forking
  * The [[fork]] method passes an out-of-band condition to a `Writer`, yielding
  * a `Writer` continuation whose behavior may be altered by the given condition.
  * For example, a console `Writer` might support a `fork` condition that changes
- * the color and style of printed text.  The types of conditions accepted by
+ * the color and style of printed text. The types of conditions accepted by
  * `fork`, and their intended semantics, are implementation defined.
+ *
+ * @public
  */
 export abstract class Writer<I = unknown, O = unknown> {
   /**
-   * Returns `true` when [[pull]] is able to produce `Output`.  i.e. this
+   * Returns `true` when [[pull]] is able to produce `Output`, i.e. this
    * `Writer` is in the _cont_ state.
    */
   isCont(): boolean {
@@ -87,7 +89,7 @@ export abstract class Writer<I = unknown, O = unknown> {
 
   /**
    * Returns `true` when writing has terminated successfully, and [[bind]] will
-   * return the written result.  i.e. this `Writer` is in the _done_ state.
+   * return the written result, i.e. this `Writer` is in the _done_ state.
    */
   isDone(): boolean {
     return false;
@@ -95,7 +97,7 @@ export abstract class Writer<I = unknown, O = unknown> {
 
   /**
    * Returns `true` when writing has terminated in failure, and [[trap]] will
-   * return the write error.  i.e. this `Writer` is in the _error_ state.
+   * return the write error, i.e. this `Writer` is in the _error_ state.
    */
   isError(): boolean {
     return false;
@@ -115,9 +117,9 @@ export abstract class Writer<I = unknown, O = unknown> {
   /**
    * Incrementally writes as much `output` as possible, and returns another
    * `Writer` that represents the continuation of how to write additional
-   * `Output`.  If `output` enters the _done_ state, `pull` _must_ return a
+   * `Output`. If `output` enters the _done_ state, `pull` _must_ return a
    * terminated `Writer`, i.e. a `Writer` in the _done_ state, or in the
-   * _error_ state.  The given `output` is only guaranteed to be valid for the
+   * _error_ state. The given `output` is only guaranteed to be valid for the
    * duration of the method call; references to `output` must not be stored.
    */
   abstract pull(output: Output): Writer<I, O>;
@@ -131,7 +133,7 @@ export abstract class Writer<I = unknown, O = unknown> {
   }
 
   /**
-   * Returns the written result.  Only guaranteed to return a result when in
+   * Returns the written result. Only guaranteed to return a result when in
    * the _done_ state.
    *
    * @throws `Error` if this `Writer` is not in the _done_ state.
@@ -141,7 +143,7 @@ export abstract class Writer<I = unknown, O = unknown> {
   }
 
   /**
-   * Returns the write error.  Only guaranteed to return an error when in the
+   * Returns the write error. Only guaranteed to return an error when in the
    * _error_ state.
    *
    * @throws `Error` if this `Writer` is not in the _error_ state.
@@ -151,7 +153,7 @@ export abstract class Writer<I = unknown, O = unknown> {
   }
 
   /**
-   * Casts a done `Writer` to a different input type.  A `Writer` in the _done_
+   * Casts a done `Writer` to a different input type. A `Writer` in the _done_
    * state can have any input type.
    *
    * @throws `WriterException` if this `Writer` is not in the _done_ state.
@@ -161,7 +163,7 @@ export abstract class Writer<I = unknown, O = unknown> {
   }
 
   /**
-   * Casts an errored `Writer` to different input and output types.  A `Writer`
+   * Casts an errored `Writer` to different input and output types. A `Writer`
    * in the _error_ state can have any input type, and any output type.
    *
    * @throws `WriterException` if this `Writer` is not in the _error_ state.

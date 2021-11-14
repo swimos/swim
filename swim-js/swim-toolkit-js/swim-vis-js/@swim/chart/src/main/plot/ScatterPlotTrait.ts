@@ -16,6 +16,7 @@ import type {Class} from "@swim/util";
 import {PlotTrait} from "./PlotTrait";
 import type {ScatterPlotTraitObserver} from "./ScatterPlotTraitObserver";
 
+/** @public */
 export class ScatterPlotTrait<X = unknown, Y = unknown> extends PlotTrait<X, Y> {
   override readonly observerType?: Class<ScatterPlotTraitObserver<X, Y>>;
 }

@@ -30,7 +30,7 @@ import {ChartView} from "./ChartView";
 import {ChartTrait} from "./ChartTrait";
 import type {ChartControllerObserver} from "./ChartControllerObserver";
 
-/** @internal */
+/** @public */
 export interface ChartControllerAxisExt<D = unknown> {
   attachAxisTrait(axisTrait: AxisTrait<D>): void;
   detachAxisTrait(axisTrait: AxisTrait<D>): void;
@@ -38,6 +38,7 @@ export interface ChartControllerAxisExt<D = unknown> {
   detachAxisView(axisView: AxisView<D>): void;
 }
 
+/** @public */
 export class ChartController<X = unknown, Y = unknown> extends GraphController<X, Y> {
   override readonly observerType?: Class<ChartControllerObserver<X, Y>>;
 

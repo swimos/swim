@@ -17,10 +17,12 @@ import type {AnyUri} from "@swim/uri";
 import type {DownlinkContext} from "../downlink/DownlinkContext";
 import type {BaseRef} from "./BaseRef";
 
-/** @internal */
+/** @public */
 export interface RefContext extends DownlinkContext {
+  /** @internal */
   openRef(ref: BaseRef): void;
 
+  /** @internal */
   closeRef(ref: BaseRef): void;
 
   authenticate(hostUri: AnyUri, credentials: AnyValue): void;

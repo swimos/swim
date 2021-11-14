@@ -30,8 +30,10 @@ import {
 import {StyleAnimator, HtmlViewInit, HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {PopoverViewObserver} from "./PopoverViewObserver";
 
+/** @public */
 export type PopoverPlacement = "none" | "above" | "below" | "over" | "top" | "bottom" | "right" | "left";
 
+/** @public */
 export interface PopoverViewInit extends HtmlViewInit {
   source?: View;
   placement?: PopoverPlacement[];
@@ -40,6 +42,7 @@ export interface PopoverViewInit extends HtmlViewInit {
   arrowHeight?: AnyLength;
 }
 
+/** @public */
 export class PopoverView extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);

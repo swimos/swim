@@ -33,8 +33,10 @@ import {R2PathBuilder} from "../"; // forward import
 import {R2PathParser} from "../"; // forward import
 import {R2Box} from "../"; // forward import
 
+/** @public */
 export type AnyR2Path = R2Path | string;
 
+/** @public */
 export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
   constructor(splines: ReadonlyArray<R2Spline>) {
     super();

@@ -19,6 +19,7 @@ import {Look} from "@swim/theme";
 import type {ModalService, ModalServiceObserver} from "@swim/view";
 import {StyleAnimator, HtmlView} from "@swim/dom";
 
+/** @public */
 export class ScrimView extends HtmlView implements ModalServiceObserver {
   constructor(node: HTMLElement) {
     super(node);

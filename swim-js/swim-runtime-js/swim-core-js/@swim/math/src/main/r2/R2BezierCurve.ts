@@ -15,6 +15,7 @@
 import type {R2Function} from "./R2Function";
 import {R2Curve} from "./R2Curve";
 
+/** @public */
 export abstract class R2BezierCurve extends R2Curve {
   abstract override transform(f: R2Function): R2BezierCurve;
 }

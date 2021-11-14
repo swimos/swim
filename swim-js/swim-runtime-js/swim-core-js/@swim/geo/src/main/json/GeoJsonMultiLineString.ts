@@ -19,11 +19,13 @@ import {GeoGroup} from "../GeoGroup";
 import type {GeoJsonPosition} from "./GeoJsonPosition";
 import type {GeoJsonGeometryObject} from "./GeoJsonGeometry";
 
+/** @public */
 export interface GeoJsonMultiLineString extends GeoJsonGeometryObject {
   readonly type: "MultiLineString";
   coordinates: GeoJsonPosition[][];
 }
 
+/** @public */
 export const GeoJsonMultiLineString = (function () {
   const GeoJsonMultiLineString = {} as {
     is(value: unknown): value is GeoJsonMultiLineString;

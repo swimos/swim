@@ -16,12 +16,18 @@ import type {Value} from "@swim/structure";
 import type {Host} from "../host/Host";
 import type {WarpRef} from "./WarpRef";
 
+/** @public */
 export type WarpDidConnect = (host: Host, warp: WarpRef) => void;
+/** @public */
 export type WarpDidAuthenticate = (body: Value, host: Host, warp: WarpRef) => void;
+/** @public */
 export type WarpDidDeauthenticate = (body: Value, host: Host, warp: WarpRef) => void;
+/** @public */
 export type WarpDidDisconnect = (host: Host, warp: WarpRef) => void;
+/** @public */
 export type WarpDidFail = (error: unknown, host: Host, warp: WarpRef) => void;
 
+/** @public */
 export interface WarpObserver {
   didConnect?: WarpDidConnect;
   didAuthenticate?: WarpDidAuthenticate;

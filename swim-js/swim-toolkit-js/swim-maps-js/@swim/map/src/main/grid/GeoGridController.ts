@@ -28,7 +28,7 @@ import {GeoGridView} from "./GeoGridView";
 import {GeoGridTrait} from "./GeoGridTrait";
 import type {GeoGridControllerObserver} from "./GeoGridControllerObserver";
 
-/** @internal */
+/** @public */
 export interface GeoGridControllerTileExt {
   attachTileTrait(tileTrait: GeoGridTrait, tileController: GeoGridController): void;
   detachTileTrait(tileTrait: GeoGridTrait, tileController: GeoGridController): void;
@@ -36,6 +36,7 @@ export interface GeoGridControllerTileExt {
   detachTileView(tileView: GeoView, tileController: GeoGridController): void;
 }
 
+/** @public */
 export class GeoGridController extends GeoLayerController {
   constructor(geoTile: GeoTile) {
     super();

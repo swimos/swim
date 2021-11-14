@@ -18,6 +18,7 @@ import type {DialView} from "./DialView";
 import type {DialTrait} from "./DialTrait";
 import type {DialController} from "./DialController";
 
+/** @public */
 export interface DialControllerObserver<C extends DialController = DialController> extends ControllerObserver<C> {
   controllerWillAttachDialTrait?(dialTrait: DialTrait, controller: C): void;
 

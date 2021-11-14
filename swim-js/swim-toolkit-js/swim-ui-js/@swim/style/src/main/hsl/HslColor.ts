@@ -20,8 +20,10 @@ import {AnyColor, Color} from "../color/Color";
 import {RgbColor} from "../rgb/RgbColor";
 import {HslColorInterpolator} from "../"; // forward import
 
+/** @public */
 export type AnyHslColor = HslColor | HslColorInit | string;
 
+/** @public */
 export interface HslColorInit {
   readonly h: AnyAngle;
   readonly s: number;
@@ -29,6 +31,7 @@ export interface HslColorInit {
   readonly a?: number;
 }
 
+/** @public */
 export class HslColor extends Color {
   constructor(h: number, s: number, l: number, a: number = 1) {
     super();

@@ -15,6 +15,7 @@
 import {GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {WebGLContext} from "./WebGLContext";
 
+/** @public */
 export class WebGLRenderer extends GraphicsRenderer {
   constructor(context: WebGLContext, pixelRatio?: number) {
     super();

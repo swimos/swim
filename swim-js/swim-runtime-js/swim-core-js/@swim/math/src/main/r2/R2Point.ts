@@ -28,15 +28,19 @@ import {AnyR2Vector, R2Vector} from "./R2Vector";
 import {AnyR2Shape, R2Shape} from "./R2Shape";
 import {R2PointInterpolator} from "../"; // forward import
 
+/** @public */
 export type AnyR2Point = R2Point | R2PointInit | R2PointTuple;
 
+/** @public */
 export interface R2PointInit {
   x: number;
   y: number;
 }
 
+/** @public */
 export type R2PointTuple = [number, number];
 
+/** @public */
 export class R2Point extends R2Shape implements Interpolate<R2Point>, HashCode, Equivalent, Debug {
   constructor(x: number, y: number) {
     super();

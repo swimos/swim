@@ -26,6 +26,7 @@ import {Base16IntegerWriter} from "../"; // forward import
 
 /**
  * Base-16 (hexadecimal) encoding [[Parser]]/[[Writer]] factory.
+ * @public
  */
 export class Base16 {
   constructor(alphabet: string) {
@@ -134,7 +135,7 @@ export class Base16 {
    * Decodes the base-16 digits `c1` and `c2`, and writes the 8-bit  quantity
    * they represent to the given `output`.
    *
-   * @return the continuation of the `output`.
+   * @returns the continuation of the `output`.
    */
   static writeQuantum<T>(output: Output<T>, c1: number, c2: number): Output<T> {
     const x = Base16.decodeDigit(c1);
@@ -163,7 +164,7 @@ export class Base16 {
   /**
    * Parses the base-16 (hexadecimal) encoded `input`, and writes the decoded
    * bytes to a growable array, returning a `Parser` continuation that knows
-   * how to parse any additional input.  The returned `Parser` [[Parser.bind
+   * how to parse any additional input. The returned `Parser` [[Parser.bind
    * binds]] a `Uint8Array` array containing all parsed base-16 data.
    */
   static parseUint8Array(input: Input): Parser<Uint8Array> {

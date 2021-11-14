@@ -23,6 +23,7 @@ import {SvgIconView} from "@swim/graphics";
 import {DeckSlot} from "./DeckSlot";
 import type {DeckButtonObserver} from "./DeckButtonObserver";
 
+/** @public */
 export class DeckButton extends DeckSlot {
   constructor(node: HTMLElement) {
     super(node);
@@ -53,13 +54,16 @@ export class DeckButton extends DeckSlot {
     return Look.accentColor;
   }
 
+  /** @internal */
   readonly closeIcon!: DeckButtonCloseIcon<this, SvgIconView>; // defined by DeckButtonCloseIcon
 
+  /** @internal */
   readonly backIcon!: DeckButtonBackIcon<this, SvgIconView>; // defined by DeckButtonBackIcon
 
   /** @internal */
   labelCount: number;
 
+  /** @internal */
   label: DeckButtonLabel<this, HtmlView> | null;
 
   protected createLabel(value: string): HtmlView {

@@ -30,8 +30,10 @@ import {DateTimeInterpolator} from "./"; // forward import
 import {DateTimeForm} from "./"; // forward import
 import {DateTimeFormat} from "./"; // forward import
 
+/** @public */
 export type AnyDateTime = DateTime | DateTimeInit | Date | string | number;
 
+/** @public */
 export interface DateTimeInit {
   year?: number;
   month?: number;
@@ -43,6 +45,7 @@ export interface DateTimeInit {
   zone?: AnyTimeZone;
 }
 
+/** @public */
 export class DateTime implements Interpolate<DateTime>, HashCode, Equivalent, Compare, Display {
   constructor(time: number, zone: TimeZone = TimeZone.utc) {
     this.time = time;

@@ -24,6 +24,7 @@ import {AnyGeoPerspective, MapView} from "@swim/map";
 import {GoogleMapViewport} from "./GoogleMapViewport";
 import type {GoogleMapViewObserver} from "./GoogleMapViewObserver";
 
+/** @public */
 export class GoogleMapView extends MapView {
   constructor(map: google.maps.Map) {
     super();

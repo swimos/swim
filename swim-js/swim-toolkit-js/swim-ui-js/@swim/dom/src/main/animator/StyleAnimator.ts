@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Mutable, FromAny} from "@swim/util";
 import {Affinity, FastenerOwner} from "@swim/fastener";
 import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
@@ -26,6 +28,7 @@ import {TransformStyleAnimator} from "./"; // forward import
 import {BoxShadowStyleAnimator} from "./"; // forward import
 import {StyleContext} from "../"; // forward import
 
+/** @public */
 export interface StyleAnimatorInit<T = unknown, U = never> extends ThemeAnimatorInit<T, U> {
   extends?: {prototype: StyleAnimator<any, any>} | string | boolean | null;
   propertyNames: string | ReadonlyArray<string>;
@@ -34,11 +37,14 @@ export interface StyleAnimatorInit<T = unknown, U = never> extends ThemeAnimator
   fromCssValue?(value: CSSStyleValue): T;
 }
 
+/** @public */
 export type StyleAnimatorDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<StyleAnimator<O, T, U> & I> & StyleAnimatorInit<T, U> & Partial<I>;
 
+/** @public */
 export interface StyleAnimatorClass<A extends StyleAnimator<any, any> = StyleAnimator<any, any, any>> extends ThemeAnimatorClass<A> {
 }
 
+/** @public */
 export interface StyleAnimatorFactory<A extends StyleAnimator<any, any> = StyleAnimator<any, any, any>> extends StyleAnimatorClass<A> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): StyleAnimatorFactory<A> & I;
 
@@ -59,6 +65,7 @@ export interface StyleAnimatorFactory<A extends StyleAnimator<any, any> = StyleA
   <O, T, U = never, I = {}>(descriptor: StyleAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface StyleAnimator<O = unknown, T = unknown, U = never> extends ThemeAnimator<O, T, U> {
   get propertyNames(): string | ReadonlyArray<string>; // prototype property
 
@@ -84,6 +91,7 @@ export interface StyleAnimator<O = unknown, T = unknown, U = never> extends Them
   fromCssValue(value: CSSStyleValue): T;
 }
 
+/** @public */
 export const StyleAnimator = (function (_super: typeof ThemeAnimator) {
   const StyleAnimator: StyleAnimatorFactory = _super.extend("StyleAnimator");
 

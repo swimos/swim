@@ -35,13 +35,16 @@ import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoIconViewObserver} from "./GeoIconViewObserver";
 
+/** @public */
 export type AnyGeoIconView = GeoIconView | GeoIconViewInit;
 
+/** @public */
 export interface GeoIconViewInit extends GeoViewInit, IconViewInit {
   geoCenter?: AnyGeoPoint;
   viewCenter?: AnyR2Point;
 }
 
+/** @public */
 export class GeoIconView extends GeoLayerView implements IconView {
   constructor() {
     super();

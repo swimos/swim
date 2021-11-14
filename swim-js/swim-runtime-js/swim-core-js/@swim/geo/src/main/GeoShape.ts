@@ -20,8 +20,10 @@ import {GeoSegmentInit, GeoSegment} from "./"; // forward import
 import {GeoBoxInit, GeoBox} from "./"; // forward import
 import {GeoTileInit, GeoTileTuple, GeoTile} from "./"; // forward import
 
+/** @public */
 export type AnyGeoShape = GeoShape | GeoPointInit | GeoPointTuple | GeoSegmentInit | GeoTileInit | GeoTileTuple | GeoBoxInit;
 
+/** @public */
 export abstract class GeoShape implements Equals {
   abstract readonly lngMin: number;
 

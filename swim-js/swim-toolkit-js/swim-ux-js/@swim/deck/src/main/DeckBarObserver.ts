@@ -15,6 +15,7 @@
 import type {HtmlViewObserver} from "@swim/dom";
 import type {DeckBar} from "./DeckBar";
 
+/** @public */
 export interface DeckBarObserver<V extends DeckBar = DeckBar> extends HtmlViewObserver<V> {
   deckBarDidPressBackButton?(event: Event | null, view: V): void;
 

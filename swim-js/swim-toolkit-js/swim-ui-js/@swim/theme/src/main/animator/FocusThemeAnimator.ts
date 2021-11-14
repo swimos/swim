@@ -19,6 +19,7 @@ import {Look} from "../look/Look";
 import {ThemeContext} from "../theme/ThemeContext";
 import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
+/** @public */
 export interface FocusThemeAnimatorInit {
   willFocus?(): void;
   didFocus?(): void;
@@ -26,6 +27,7 @@ export interface FocusThemeAnimatorInit {
   didUnfocus?(): void;
 }
 
+/** @public */
 export interface FocusThemeAnimator<O, T extends Focus | null | undefined = Focus, U extends AnyFocus | null | undefined = AnyFocus> extends ThemeAnimator<O, T, U> {
   get phase(): number | undefined;
 
@@ -80,6 +82,7 @@ export interface FocusThemeAnimator<O, T extends Focus | null | undefined = Focu
   fromAny(value: T | U): T
 }
 
+/** @public */
 export const FocusThemeAnimator = (function (_super: typeof ThemeAnimator) {
   const FocusThemeAnimator = _super.extend("FocusThemeAnimator") as ThemeAnimatorFactory<FocusThemeAnimator<any, Focus | null | undefined, AnyFocus | null | undefined>>;
 

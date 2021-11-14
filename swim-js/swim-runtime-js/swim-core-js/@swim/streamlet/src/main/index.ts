@@ -70,6 +70,7 @@ export * from "./combinator";
 export {
   InletDescriptor,
   OutletDescriptor,
+  InoutletDescriptor,
   StreamletPrototype,
   AbstractStreamlet,
 } from "./AbstractStreamlet";

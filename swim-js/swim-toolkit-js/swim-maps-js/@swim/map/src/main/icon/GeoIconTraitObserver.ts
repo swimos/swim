@@ -17,6 +17,7 @@ import type {Graphics, IconLayout} from "@swim/graphics";
 import type {GeoTraitObserver} from "../geo/GeoTraitObserver";
 import type {GeoIconTrait} from "./GeoIconTrait";
 
+/** @public */
 export interface GeoIconTraitObserver<R extends GeoIconTrait = GeoIconTrait> extends GeoTraitObserver<R> {
   traitWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, trait: R): void;
 

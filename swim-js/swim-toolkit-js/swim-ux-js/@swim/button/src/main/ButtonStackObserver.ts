@@ -15,6 +15,7 @@
 import type {HtmlViewObserver} from "@swim/dom";
 import type {ButtonStack} from "./ButtonStack";
 
+/** @public */
 export interface ButtonStackObserver<V extends ButtonStack = ButtonStack> extends HtmlViewObserver<V> {
   buttonStackWillExpand?(view: V): void;
 

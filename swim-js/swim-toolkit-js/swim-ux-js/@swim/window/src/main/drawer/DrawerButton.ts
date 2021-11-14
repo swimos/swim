@@ -17,6 +17,7 @@ import {Graphics, VectorIcon} from "@swim/graphics";
 import {IconButton} from "@swim/button";
 import type {DrawerView} from "./DrawerView";
 
+/** @public */
 export class DrawerButton extends IconButton {
   constructor(node: HTMLElement) {
     super(node);

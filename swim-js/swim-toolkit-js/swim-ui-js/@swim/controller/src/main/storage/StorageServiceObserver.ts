@@ -16,6 +16,7 @@ import type {ServiceObserver} from "@swim/util";
 import type {StorageService} from "./StorageService";
 import type {Controller} from "../controller/Controller";
 
+/** @public */
 export interface StorageServiceObserver<C extends Controller = Controller, S extends StorageService<C> = StorageService<C>> extends ServiceObserver<C, S> {
   serviceWillStore?(key: string, newValue: string | undefined, oldValue: string | undefined, service: S): void;
 

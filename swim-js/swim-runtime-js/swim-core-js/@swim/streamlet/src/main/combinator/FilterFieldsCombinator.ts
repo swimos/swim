@@ -15,6 +15,7 @@
 import type {FilterFieldsFunction} from "../function";
 import {FilterFieldsOperator} from "./FilterFieldsOperator";
 
+/** @public */
 export class FilterFieldsCombinator<K, V, I> extends FilterFieldsOperator<K, V, I> {
   constructor(func: FilterFieldsFunction<K, V>) {
     super();

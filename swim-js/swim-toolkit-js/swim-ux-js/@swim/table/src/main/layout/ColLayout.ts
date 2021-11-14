@@ -18,8 +18,10 @@ import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 
+/** @public */
 export type AnyColLayout = ColLayout | ColLayoutInit;
 
+/** @public */
 export interface ColLayoutInit {
   key?: string;
   grow?: number;
@@ -34,6 +36,7 @@ export interface ColLayoutInit {
   hidden?: boolean;
 }
 
+/** @public */
 export class ColLayout implements Equals, Equivalent, Debug {
   constructor(key: string, grow: number, shrink: number, basis: Length,
               optional: boolean, persistent: boolean, textColor: Look<Color> | Color | null,

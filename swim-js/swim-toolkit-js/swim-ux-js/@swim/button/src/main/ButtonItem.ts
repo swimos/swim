@@ -21,6 +21,7 @@ import {HtmlView} from "@swim/dom";
 import type {HtmlIconView} from "@swim/graphics";
 import {FloatingButton} from "./FloatingButton";
 
+/** @public */
 export class ButtonItem extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

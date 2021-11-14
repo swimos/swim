@@ -25,6 +25,7 @@ import {PointerScaleGesture} from "./"; // forward import
 import type {ViewContext} from "../view/ViewContext";
 import {View} from "../"; // forward import
 
+/** @public */
 export interface ScaleGestureInit<V extends View = View, X = unknown, Y = unknown> extends MomentumGestureInit<V> {
   extends?: {prototype: ScaleGesture<any, any, any, any>} | string | boolean | null;
 
@@ -87,8 +88,10 @@ export interface ScaleGestureInit<V extends View = View, X = unknown, Y = unknow
   didEndCoast?(input: ScaleGestureInput<X, Y>, event: Event | null): void;
 }
 
+/** @public */
 export type ScaleGestureDescriptor<O = unknown, V extends View = View, X = unknown, Y = unknown, I = {}> = ThisType<ScaleGesture<O, V, X, Y> & I> & ScaleGestureInit<V, X, Y> & Partial<I>;
 
+/** @public */
 export interface ScaleGestureClass<G extends ScaleGesture<any, any, any, any> = ScaleGesture<any, any, any, any>> extends MomentumGestureClass<G> {
   /** @internal */
   readonly DistanceMin: number;
@@ -106,6 +109,7 @@ export interface ScaleGestureClass<G extends ScaleGesture<any, any, any, any> = 
   readonly FlagMask: FastenerFlags;
 }
 
+/** @public */
 export interface ScaleGestureFactory<G extends ScaleGesture<any, any, any, any> = ScaleGesture<any, any, any, any>> extends ScaleGestureClass<G> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ScaleGestureFactory<G> & I;
 
@@ -118,6 +122,7 @@ export interface ScaleGestureFactory<G extends ScaleGesture<any, any, any, any> 
   <O, V extends View = View, X = unknown, Y = unknown, I = {}>(descriptor: ScaleGestureDescriptor<O, V, X, Y, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface ScaleGesture<O = unknown, V extends View = View, X = unknown, Y = unknown> extends MomentumGesture<O, V> {
   /** @internal @override */
   readonly inputs: {readonly [inputId: string]: ScaleGestureInput<X, Y> | undefined};
@@ -260,6 +265,7 @@ export interface ScaleGesture<O = unknown, V extends View = View, X = unknown, Y
   get observes(): boolean;
 }
 
+/** @public */
 export const ScaleGesture = (function (_super: typeof MomentumGesture) {
   const ScaleGesture: ScaleGestureFactory = _super.extend("ScaleGesture");
 

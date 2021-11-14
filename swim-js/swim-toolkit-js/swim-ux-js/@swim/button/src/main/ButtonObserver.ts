@@ -14,6 +14,7 @@
 
 import type {View, ViewObserver} from "@swim/view";
 
+/** @public */
 export interface ButtonObserver<V extends View = View> extends ViewObserver<V> {
   buttonDidPress?(view: V): void;
 }

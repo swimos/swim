@@ -14,6 +14,7 @@
 
 import {ReduceFieldsOperator} from "./ReduceFieldsOperator";
 
+/** @public */
 export class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, V, I, O> {
   constructor(identity: O, accumulator: (result: O, element: V) => O,
               combiner: (result: O, result2: O) => O) {

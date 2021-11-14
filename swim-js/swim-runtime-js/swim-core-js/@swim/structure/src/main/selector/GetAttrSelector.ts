@@ -22,6 +22,7 @@ import type {Text} from "../Text";
 import {Selector} from "./Selector";
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class GetAttrSelector extends Selector {
   constructor(key: Text, then: Selector) {
     super();

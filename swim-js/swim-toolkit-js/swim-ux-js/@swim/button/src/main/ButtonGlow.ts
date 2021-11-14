@@ -18,8 +18,10 @@ import {AnyLength, Length} from "@swim/math";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
 import {StyleAnimator, StyleConstraintAnimator, HtmlView} from "@swim/dom";
 
+/** @public */
 export type ButtonGlowState = "ready" | "glowing" | "pulsing" | "fading";
 
+/** @public */
 export class ButtonGlow extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

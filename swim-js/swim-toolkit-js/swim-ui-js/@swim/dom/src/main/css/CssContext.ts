@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export interface CssContext {
+  /** @internal */
   getRule(index: number): CSSRule | null;
 
+  /** @internal */
   insertRule(cssText: string, index?: number): number;
 
+  /** @internal */
   removeRule(index: number): void;
 }
 
-/** @internal */
+/** @public */
 export const CssContext = (function () {
   const CssContext = {} as {
-    /** @internal */
     is(object: unknown): object is CssContext;
   };
 

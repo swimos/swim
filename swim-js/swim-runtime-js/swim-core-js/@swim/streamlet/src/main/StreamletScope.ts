@@ -15,6 +15,7 @@
 import type {Outlet} from "./Outlet";
 import type {StreamletContext} from "./StreamletContext";
 
+/** @public */
 export interface StreamletScope<O> {
   /**
    * The lexically scoped parent of this `StreamletScope`, or `null` if this
@@ -33,7 +34,7 @@ export interface StreamletScope<O> {
   outlet(key: string): Outlet<O> | null;
 }
 
-/** @internal */
+/** @public */
 export const StreamletScope = (function () {
   const StreamletScope = {} as {
     is<O>(object: unknown): object is StreamletScope<O>;

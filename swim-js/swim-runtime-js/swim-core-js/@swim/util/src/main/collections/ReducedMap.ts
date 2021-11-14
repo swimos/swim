@@ -17,6 +17,7 @@ import type {OrderedMap} from "./OrderedMap";
 /**
  * An [[OrderedMap]] that memoizes partial combinations of sub-elements to
  * support efficient, incremental reduction of continuously mutating datasets.
+ * @public
  */
 export interface ReducedMap<K, V, U> extends OrderedMap<K, V> {
   /**

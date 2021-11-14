@@ -29,14 +29,17 @@ import {R2Segment} from "./R2Segment";
 import {R2Box} from "./R2Box";
 import {R2CircleInterpolator} from "../"; // forward import
 
+/** @public */
 export type AnyR2Circle = R2Circle | R2CircleInit;
 
+/** @public */
 export interface R2CircleInit {
   cx: number;
   cy: number;
   r: number;
 }
 
+/** @public */
 export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode, Equivalent, Debug {
   constructor(cx: number, cy: number, r: number) {
     super();

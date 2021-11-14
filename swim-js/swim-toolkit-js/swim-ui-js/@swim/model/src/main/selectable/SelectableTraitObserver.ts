@@ -16,6 +16,7 @@ import type {SelectionOptions} from "../selection/SelectionService";
 import type {TraitObserver} from "../trait/TraitObserver";
 import type {SelectableTrait} from "./SelectableTrait";
 
+/** @public */
 export interface SelectableTraitObserver<R extends SelectableTrait = SelectableTrait> extends TraitObserver<R> {
   traitWillSelect?(options: SelectionOptions | null, trait: R): void;
 

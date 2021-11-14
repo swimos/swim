@@ -19,11 +19,13 @@ import type {ScaledYView} from "./ScaledYView";
 import type {ScaledXYViewObserver} from "./ScaledXYViewObserver";
 import {ScaledView} from "../"; // forward import
 
+/** @public */
 export interface ScaledXYView<X = unknown, Y = unknown> extends GraphicsView, ScaledXView<X>, ScaledYView<Y> {
   /** @override */
   readonly observerType?: Class<ScaledXYViewObserver<X, Y>>;
 }
 
+/** @public */
 export const ScaledXYView = (function () {
   const ScaledXYView = {} as {
     is<X, Y>(object: unknown): object is ScaledXYView<X, Y>;

@@ -17,8 +17,10 @@ import {Debug, Format, Output} from "@swim/codec";
 import type {Value, Form} from "@swim/structure";
 import {TimeZoneForm} from "./"; // forward import
 
+/** @public */
 export type AnyTimeZone = TimeZone | string | number;
 
+/** @public */
 export class TimeZone implements HashCode, Debug {
   /** @internal */
   private constructor(name: string | undefined, offset: number) {

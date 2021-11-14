@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-uri.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-uri.js",
+  "module": "./dist/swim-uri.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-uri.mjs",
+      "require": "./dist/swim-uri.js",
+      "types": "./dist/swim-uri.d.ts"
+    }
+  },
+  "types": "./dist/swim-uri.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "keywords": [
     "parser",
     "swim",

@@ -19,6 +19,7 @@ import {Look} from "../look/Look";
 import {ThemeContext} from "../theme/ThemeContext";
 import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
+/** @public */
 export interface ExpansionThemeAnimatorInit {
   willExpand?(): void;
   didExpand?(): void;
@@ -26,6 +27,7 @@ export interface ExpansionThemeAnimatorInit {
   didCollapse?(): void;
 }
 
+/** @public */
 export interface ExpansionThemeAnimator<O, T extends Expansion | null | undefined = Expansion, U extends AnyExpansion | null | undefined = AnyExpansion> extends ThemeAnimator<O, T, U> {
   get phase(): number | undefined;
 
@@ -82,6 +84,7 @@ export interface ExpansionThemeAnimator<O, T extends Expansion | null | undefine
   fromAny(value: T | U): T
 }
 
+/** @public */
 export const ExpansionThemeAnimator = (function (_super: typeof ThemeAnimator) {
   const ExpansionThemeAnimator = _super.extend("ExpansionThemeAnimator") as ThemeAnimatorFactory<ExpansionThemeAnimator<any, Expansion | null | undefined, AnyExpansion | null | undefined>>;
 

@@ -15,7 +15,7 @@
 import {Values} from "@swim/util";
 import type {BTreePage} from "./BTreePage";
 
-/** @internal */
+/** @public */
 export abstract class BTreeContext<K, V> {
   pageSplitSize: number = 32;
 
@@ -23,10 +23,12 @@ export abstract class BTreeContext<K, V> {
     return Values.compare(x, y);
   }
 
+  /** @internal */
   pageShouldSplit(page: BTreePage<K, V, unknown>): boolean {
     return page.arity > this.pageSplitSize;
   }
 
+  /** @internal */
   pageShouldMerge(page: BTreePage<K, V, unknown>): boolean {
     return page.arity < this.pageSplitSize >>> 1;
   }

@@ -18,6 +18,7 @@ import {MemoizeValueCombinator} from "./"; // forward import
 import {MapValueCombinator} from "./"; // forward import
 import {WatchValueCombinator} from "./"; // forward import
 
+/** @public */
 export interface OutletCombinators<O> {
   memoize(): Outlet<O>;
 
@@ -26,6 +27,7 @@ export interface OutletCombinators<O> {
   watch(func: WatchValueFunction<O>): this;
 }
 
+/** @public */
 export const OutletCombinators = (function () {
   const OutletCombinators = {} as {
     define<O>(prototype: OutletCombinators<O>): void;

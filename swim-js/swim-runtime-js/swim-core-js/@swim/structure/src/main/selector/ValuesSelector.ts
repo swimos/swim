@@ -20,6 +20,7 @@ import {Record} from "../Record";
 import {Selector} from "./Selector";
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class ValuesSelector extends Selector {
   constructor(then: Selector) {
     super();

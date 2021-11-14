@@ -17,19 +17,24 @@ import type {FastenerOwner} from "@swim/fastener";
 import type {AnyController, Controller} from "./Controller";
 import {ControllerRelationInit, ControllerRelationClass, ControllerRelation} from "./ControllerRelation";
 
+/** @internal */
 export type ControllerSetType<F extends ControllerSet<any, any>> =
   F extends ControllerSet<any, infer C> ? C : never;
 
+/** @public */
 export interface ControllerSetInit<C extends Controller = Controller> extends ControllerRelationInit<C> {
   extends?: {prototype: ControllerSet<any, any>} | string | boolean | null;
   key?(controller: C): string | undefined;
 }
 
+/** @public */
 export type ControllerSetDescriptor<O = unknown, C extends Controller = Controller, I = {}> = ThisType<ControllerSet<O, C> & I> & ControllerSetInit<C> & Partial<I>;
 
+/** @public */
 export interface ControllerSetClass<F extends ControllerSet<any, any> = ControllerSet<any, any>> extends ControllerRelationClass<F> {
 }
 
+/** @public */
 export interface ControllerSetFactory<F extends ControllerSet<any, any> = ControllerSet<any, any>> extends ControllerSetClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ControllerSetFactory<F> & I;
 
@@ -44,6 +49,7 @@ export interface ControllerSetFactory<F extends ControllerSet<any, any> = Contro
   <O, C extends Controller = Controller, I = {}>(descriptor: {observes: boolean} & ControllerSetDescriptor<O, C, I & ObserverType<C>>): PropertyDecorator;
 }
 
+/** @public */
 export interface ControllerSet<O = unknown, C extends Controller = Controller> extends ControllerRelation<O, C> {
   (newController: AnyController<C>): O;
 
@@ -82,6 +88,7 @@ export interface ControllerSet<O = unknown, C extends Controller = Controller> e
   key(controller: C): string | undefined;
 }
 
+/** @public */
 export const ControllerSet = (function (_super: typeof ControllerRelation) {
   const ControllerSet: ControllerSetFactory = _super.extend("ControllerSet");
 

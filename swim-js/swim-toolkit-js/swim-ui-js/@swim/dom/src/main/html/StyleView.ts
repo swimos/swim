@@ -19,9 +19,11 @@ import {StyleSheet} from "../css/StyleSheet";
 import {HtmlViewInit, HtmlView} from "../html/HtmlView";
 import type {StyleViewObserver} from "./StyleViewObserver";
 
+/** @public */
 export interface StyleViewInit extends HtmlViewInit {
 }
 
+/** @public */
 export class StyleView extends HtmlView implements StyleContext {
   constructor(node: HTMLStyleElement) {
     super(node);

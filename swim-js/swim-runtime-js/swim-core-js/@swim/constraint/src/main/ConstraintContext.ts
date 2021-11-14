@@ -15,6 +15,7 @@
 import type {ConstraintVariable} from "./ConstraintVariable";
 import type {Constraint} from "./Constraint";
 
+/** @beta */
 export interface ConstraintContext {
   activateConstraint(constraint: Constraint): void;
 

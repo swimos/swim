@@ -16,14 +16,16 @@ import {Values} from "../values/Values";
 
 /**
  * A hashed generational cache map discards the least recently used value
- * with the worst hit rate per hash bucket.  HashGenCacheMap is a concurrent
- * and lock-free LRFU cache, with O(1) access time.
+ * with the worst hit rate per hash bucket. HashGenCacheMap is an LRFU cache
+ * with O(1) access time.
  *
  * Maintaining four "generations" of cached values per hash bucket, the cache
  * discards from the younger generations based on least recent usage, and
  * promotes younger generations to older generations based on most frequent
- * usage.  Cache misses count as negative usage of the older generations,
+ * usage. Cache misses count as negative usage of the older generations,
  * biasing the cache against least recently used values with poor hit rates.
+ *
+ * @public
  */
 export class HashGenCacheMap<K, V> {
   /** @internal */

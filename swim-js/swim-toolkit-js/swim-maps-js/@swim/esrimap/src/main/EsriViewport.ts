@@ -19,6 +19,7 @@ import type {AnyR2Point, R2Point} from "@swim/math";
 import type {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import type {GeoViewport} from "@swim/map";
 
+/** @public */
 export abstract class EsriViewport implements GeoViewport, Equals {
   constructor(map: __esri.View, geoFrame: GeoBox, geoCenter: GeoPoint,
               zoom: number, heading: number, tilt: number) {

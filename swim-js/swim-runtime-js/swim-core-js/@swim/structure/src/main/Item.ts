@@ -28,6 +28,7 @@ import {MathModule} from "./"; // forward import
 import type {AnyInterpreter} from "./interpreter/Interpreter";
 import type {Form} from "./form/Form";
 
+/** @public */
 export type AnyItem = Item
                     | {readonly $key: AnyValue, readonly $value: AnyValue}
                     | {readonly [key: string]: AnyValue}
@@ -39,6 +40,7 @@ export type AnyItem = Item
                     | null
                     | undefined;
 
+/** @public */
 export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, Compare, Debug, Display {
   /** @internal */
   constructor() {
@@ -68,14 +70,14 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
   abstract isConstant(): boolean;
 
   /**
-   * Returns the key component of this `Item`, if this `Item is a [[Field]];
+   * Returns the key component of this `Item`, if this `Item` is a [[Field]];
    * otherwise returns [[Absent]] if this `Item` is a `Value`.
    */
   abstract readonly key: Value;
 
   /**
    * Returns the value component of this `Item`, if this `Item` is a [[Field]];
-   * otherwise returns `this` if this `Item is a `Value`.
+   * otherwise returns `this` if this `Item` is a `Value`.
    */
   abstract toValue(): Value;
 
@@ -86,7 +88,7 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
    * `Record` whose first member is not an `Attr`.
    *
    * Used to concisely get the name of the discriminating attribute of a
-   * structure.  The `tag` can be used to discern the nominal type of a
+   * structure. The `tag` can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
   abstract readonly tag: string | undefined;
@@ -97,7 +99,7 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
    * returns `this` if this `Item` is a non-`Record` `Value`, or returns
    * the value component if this `Item` is a `Field`.
    *
-   * Used to concisely get the scalar value of an attributed structure.  An
+   * Used to concisely get the scalar value of an attributed structure. An
    * attributed structure is a `Record` with one or more attributes that modify
    * one or more other members.
    */
@@ -110,7 +112,7 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
    * a `Field`; otherwise returns `this` if this `Item` is a `Record` with more
    * than one member, or if this `Item` is a non-`Record` `Value`.
    *
-   * Used to convert a unary `Record` into its member `Value`.  Facilitates
+   * Used to convert a unary `Record` into its member `Value`. Facilitates
    * writing code that treats a unary `Record` equivalently to a bare `Value`.
    */
   abstract flattened(): Value;
@@ -119,7 +121,7 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
    * Returns `this` if this `Item` is a [[Record]]; returns a `Record`
    * containing just this `Item`, if this `Item` is [[Item.isDistinct
    * distinct]]; otherwise returns an empty `Record` if this `Item` is
-   * [[Extant]] or [[Absent]].  Facilitates writing code that treats a bare
+   * [[Extant]] or [[Absent]]. Facilitates writing code that treats a bare
    * `Value` equivalently to a unary `Record`.
    */
   abstract unflattened(): Record;
@@ -133,7 +135,7 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
    * whose `key` does not equal the `tag`.
    *
    * Used to conditionally get the value of the head `Attr` of a structure, if
-   * and only if the key string of the head `Attr` is equal to the `tag`.  Can
+   * and only if the key string of the head `Attr` is equal to the `tag`. Can
    * be used to check if a structure might conform to a nominal type named
    * `tag`, while simultaneously getting the value of the `tag` attribute.
    */
@@ -166,7 +168,7 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
 
   /**
    * Returns the [[Record.flattened flattened]] [[Item.tail tail]] of this
-   * `Item`.  Used to recursively deconstruct a structure, terminating with its
+   * `Item`. Used to recursively deconstruct a structure, terminating with its
    * last `Value`, rather than a unary `Record` containing its last value, if
    * the structure ends with a `Value` member.
    */
@@ -473,8 +475,8 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
   }
 
   /**
-   * Returns the heterogeneous sort order of this `Item`.  Used to impose a
-   * total order on the set of all items.  When comparing two items of
+   * Returns the heterogeneous sort order of this `Item`. Used to impose a
+   * total order on the set of all items. When comparing two items of
    * different types, the items order according to their `typeOrder`.
    */
   abstract readonly typeOrder: number;

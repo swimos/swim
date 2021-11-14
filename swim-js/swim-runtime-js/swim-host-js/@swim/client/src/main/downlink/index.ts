@@ -18,6 +18,18 @@ export {DownlinkContext} from "./DownlinkContext";
 export {DownlinkModel} from "./DownlinkModel";
 export {
   DownlinkType,
+  DownlinkOnEvent,
+  DownlinkOnCommand,
+  DownlinkWillLink,
+  DownlinkDidLink,
+  DownlinkWillSync,
+  DownlinkDidSync,
+  DownlinkWillUnlink,
+  DownlinkDidUnlink,
+  DownlinkDidConnect,
+  DownlinkDidDisconnect,
+  DownlinkDidClose,
+  DownlinkDidFail,
   DownlinkObserver,
   DownlinkInit,
   DownlinkFlags,
@@ -33,6 +45,18 @@ export {
 
 export {ListDownlinkModel} from "./ListDownlinkModel";
 export {
+  ListDownlinkWillUpdate,
+  ListDownlinkDidUpdate,
+  ListDownlinkWillMove,
+  ListDownlinkDidMove,
+  ListDownlinkWillRemove,
+  ListDownlinkDidRemove,
+  ListDownlinkWillDrop,
+  ListDownlinkDidDrop,
+  ListDownlinkWillTake,
+  ListDownlinkDidTake,
+  ListDownlinkWillClear,
+  ListDownlinkDidClear,
   ListDownlinkObserver,
   ListDownlinkInit,
   ListDownlink,
@@ -40,6 +64,16 @@ export {
 
 export {MapDownlinkModel} from "./MapDownlinkModel";
 export {
+  MapDownlinkWillUpdate,
+  MapDownlinkDidUpdate,
+  MapDownlinkWillRemove,
+  MapDownlinkDidRemove,
+  MapDownlinkWillDrop,
+  MapDownlinkDidDrop,
+  MapDownlinkWillTake,
+  MapDownlinkDidTake,
+  MapDownlinkWillClear,
+  MapDownlinkDidClear,
   MapDownlinkObserver,
   MapDownlinkInit,
   MapDownlink,
@@ -47,6 +81,8 @@ export {
 
 export {ValueDownlinkModel} from "./ValueDownlinkModel";
 export {
+  ValueDownlinkWillSet,
+  VaueDownlinkDidSet,
   ValueDownlinkObserver,
   ValueDownlinkInit,
   ValueDownlink,

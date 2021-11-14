@@ -19,6 +19,7 @@ import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import type {GeoViewport} from "@swim/map";
 
+/** @public */
 export class GoogleMapViewport implements GeoViewport, Equals {
   constructor(projection: google.maps.MapCanvasProjection | null, geoFrame: GeoBox,
               geoCenter: GeoPoint, zoom: number, heading: number, tilt: number) {

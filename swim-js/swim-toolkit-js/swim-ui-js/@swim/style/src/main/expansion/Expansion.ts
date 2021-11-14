@@ -25,13 +25,16 @@ import {
 import {Output, Debug, Format} from "@swim/codec";
 import {ExpansionInterpolator} from "./ExpansionInterpolator";
 
+/** @public */
 export type AnyExpansion = Expansion | ExpansionInit;
 
+/** @public */
 export interface ExpansionInit {
   readonly phase: number;
   readonly direction: number;
 }
 
+/** @public */
 export class Expansion implements Interpolate<Expansion>, HashCode, Equivalent, Debug {
   constructor(phase: number, direction: number) {
     this.phase = phase;

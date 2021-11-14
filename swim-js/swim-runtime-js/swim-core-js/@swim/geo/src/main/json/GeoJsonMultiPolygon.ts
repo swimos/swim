@@ -20,11 +20,13 @@ import {GeoGroup} from "../GeoGroup";
 import type {GeoJsonPosition} from "./GeoJsonPosition";
 import type {GeoJsonGeometryObject} from "./GeoJsonGeometry";
 
+/** @public */
 export interface GeoJsonMultiPolygon extends GeoJsonGeometryObject {
   readonly type: "MultiPolygon";
   coordinates: GeoJsonPosition[][][];
 }
 
+/** @public */
 export const GeoJsonMultiPolygon = (function () {
   const GeoJsonMultiPolygon = {} as {
     is(value: unknown): value is GeoJsonMultiPolygon;

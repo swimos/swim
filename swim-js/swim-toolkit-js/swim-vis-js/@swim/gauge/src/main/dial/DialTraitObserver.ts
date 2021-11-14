@@ -17,6 +17,7 @@ import type {Color} from "@swim/style";
 import type {Look} from "@swim/theme";
 import type {DialLabel, DialLegend, DialTrait} from "./DialTrait";
 
+/** @public */
 export interface DialTraitObserver<R extends DialTrait = DialTrait> extends TraitObserver<R> {
   traitWillSetDialValue?(newValue: number, oldValue: number, trait: R): void;
 

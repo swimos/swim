@@ -21,6 +21,7 @@ import {AbstractInoutlet} from "./AbstractInoutlet";
  * `Inoutlet` decoheres, that recoheres the parameterized `Streamlet`
  * whenever the `Inoutlet` recoheres, and which gets its state from the
  * parameterized `Streamlet`.
+ * @public
  */
 export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
   constructor(streamlet: Streamlet<I, O>) {

@@ -17,6 +17,7 @@ import type {ProcessorContext} from "../processor/ProcessorContext";
 import {Directive} from "./Directive";
 import {ExpandDirective} from "./ExpandDirective";
 
+/** @public */
 export class DefineDirective extends Directive {
   override evaluate(model: Item, params: Value, context: ProcessorContext): Item {
     const name = params.stringValue();

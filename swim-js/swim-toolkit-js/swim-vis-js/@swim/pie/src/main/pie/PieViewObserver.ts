@@ -17,6 +17,7 @@ import type {GraphicsView} from "@swim/graphics";
 import type {SliceView} from "../slice/SliceView";
 import type {PieView} from "./PieView";
 
+/** @public */
 export interface PieViewObserver<V extends PieView = PieView> extends ViewObserver<V> {
   viewWillAttachPieTitle?(titleView: GraphicsView, view: V): void;
 

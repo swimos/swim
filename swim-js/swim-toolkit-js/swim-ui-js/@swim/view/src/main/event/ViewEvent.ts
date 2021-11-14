@@ -14,11 +14,13 @@
 
 import type {View} from "../view/View";
 
+/** @public */
 export interface ViewEventInit extends EventInit {
   targetView?: View;
   relatedTargetView?: View | null;
 }
 
+/** @public */
 export interface ViewEvent extends Event {
   targetView?: View;
   relatedTargetView?: View | null;

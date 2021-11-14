@@ -14,10 +14,12 @@
 
 import type {MoodVector} from "./MoodVector";
 
+/** @public */
 export interface Mood {
   readonly name: string;
 }
 
+/** @public */
 export const Mood = {} as {
   ambient: MoodVector; // defined by moods
   default: MoodVector; // defined by moods

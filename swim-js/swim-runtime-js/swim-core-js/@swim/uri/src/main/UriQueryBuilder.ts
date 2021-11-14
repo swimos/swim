@@ -15,6 +15,7 @@
 import type {PairBuilder} from "@swim/util";
 import {AnyUriQuery, UriQuery} from "./UriQuery";
 
+/** @public */
 export class UriQueryBuilder implements PairBuilder<string | undefined, string, UriQuery> {
   /** @internal */
   first: UriQuery;

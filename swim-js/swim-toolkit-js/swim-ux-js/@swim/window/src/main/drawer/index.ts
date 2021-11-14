@@ -14,6 +14,7 @@
 
 export {
   DrawerPlacement,
+  DrawerViewInit,
   DrawerView,
 } from "./DrawerView";
 export {DrawerViewObserver} from "./DrawerViewObserver";

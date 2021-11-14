@@ -23,6 +23,7 @@ import type {LeafView} from "./LeafView";
 import type {LeafTrait} from "./LeafTrait";
 import type {LeafController} from "./LeafController";
 
+/** @public */
 export interface LeafControllerObserver<C extends LeafController = LeafController> extends ControllerObserver<C> {
   controllerWillAttachLeafTrait?(leafTrait: LeafTrait, controller: C): void;
 

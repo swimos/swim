@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export type InitType<I> =
   I extends {init(init: infer T): any} ? T : never;
 
+/** @public */
 export interface Initable<T> {
   init(init: T): void;
 }
 
-/** @internal */
+/** @public */
 export const Initable = (function () {
   const Initable = {} as {
-    /** @internal */
     is<T>(object: unknown): object is Initable<T>;
   };
 

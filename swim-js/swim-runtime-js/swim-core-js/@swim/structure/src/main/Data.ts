@@ -18,8 +18,10 @@ import {Item} from "./Item";
 import {Value} from "./Value";
 import {DataOutput} from "./"; // forward import
 
+/** @public */
 export type AnyData = Data | Uint8Array;
 
+/** @public */
 export class Data extends Value {
   constructor(array: Uint8Array | null, size: number, flags: number) {
     super();

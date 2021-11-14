@@ -17,6 +17,7 @@ import type {HtmlViewObserver} from "@swim/dom";
 import type {ColView} from "../col/ColView";
 import type {HeaderView} from "./HeaderView";
 
+/** @public */
 export interface HeaderViewObserver<V extends HeaderView = HeaderView> extends HtmlViewObserver<V> {
   viewWillAttachCol?(colView: ColView, targetView: View | null, view: V): void;
 

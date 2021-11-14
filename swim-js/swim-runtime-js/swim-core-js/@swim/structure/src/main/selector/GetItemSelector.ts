@@ -20,6 +20,7 @@ import type {Num} from "../Num";
 import {Selector} from "./Selector";
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class GetItemSelector extends Selector {
   constructor(index: Num, then: Selector) {
     super();

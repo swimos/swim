@@ -17,6 +17,7 @@ import type {Item} from "../Item";
 import {Operator} from "./Operator";
 import {UnaryOperatorInterpolator} from "../"; // forward import
 
+/** @public */
 export abstract class UnaryOperator extends Operator {
   constructor(operand: Item) {
     super();

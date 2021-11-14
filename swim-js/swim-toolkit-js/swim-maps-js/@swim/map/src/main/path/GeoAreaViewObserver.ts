@@ -17,6 +17,7 @@ import type {Color} from "@swim/style";
 import type {GeoPathViewObserver} from "./GeoPathViewObserver";
 import type {GeoAreaView} from "./GeoAreaView";
 
+/** @public */
 export interface GeoAreaViewObserver<V extends GeoAreaView = GeoAreaView> extends GeoPathViewObserver<V> {
   viewWillSetFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
 

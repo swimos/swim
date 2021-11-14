@@ -14,8 +14,10 @@
 
 import type {DrawingContext} from "../drawing/DrawingContext";
 
+/** @public */
 export type PaintingFillRule = "nonzero" | "evenodd";
 
+/** @public */
 export interface PaintingContext extends DrawingContext {
   fillStyle: string | CanvasGradient | CanvasPattern;
   strokeStyle: string | CanvasGradient | CanvasPattern;

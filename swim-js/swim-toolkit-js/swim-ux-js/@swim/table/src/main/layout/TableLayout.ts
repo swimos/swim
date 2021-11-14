@@ -17,8 +17,10 @@ import {Debug, Format, Output} from "@swim/codec";
 import {AnyLength, Length} from "@swim/math";
 import {AnyColLayout, ColLayout} from "./ColLayout";
 
+/** @public */
 export type AnyTableLayout = TableLayout | TableLayoutInit;
 
+/** @public */
 export interface TableLayoutInit {
   width?: AnyLength | null;
   left?: AnyLength | null;
@@ -27,6 +29,7 @@ export interface TableLayoutInit {
   cols: AnyColLayout[];
 }
 
+/** @public */
 export class TableLayout implements Equals, Equivalent, Debug {
   constructor(width: Length | null, left: Length | null, right: Length | null,
               colSpacing: Length | null, cols: ReadonlyArray<ColLayout>) {

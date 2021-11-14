@@ -23,10 +23,13 @@ import {AnyGeoSpline, GeoSplinePoints, GeoSpline} from "./GeoSpline";
 import {GeoPathBuilder} from "./"; // forward import
 import {GeoBox} from "./"; // forward import
 
+/** @public */
 export type AnyGeoPath = GeoPath | GeoPathSplines | AnyGeoSpline;
 
+/** @public */
 export type GeoPathSplines = ReadonlyArray<AnyGeoSpline>;
 
+/** @public */
 export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
   constructor(splines: ReadonlyArray<GeoSpline>) {
     super();

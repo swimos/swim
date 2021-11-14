@@ -28,7 +28,7 @@ import {GraphView} from "./GraphView";
 import {GraphTrait} from "./GraphTrait";
 import type {GraphControllerObserver} from "./GraphControllerObserver";
 
-/** @internal */
+/** @public */
 export interface GraphControllerPlotExt<X = unknown, Y = unknown> {
   attachPlotTrait(plotTrait: PlotTrait<X, Y>, plotController: PlotController<X, Y>): void;
   detachPlotTrait(plotTrait: PlotTrait<X, Y>, plotController: PlotController<X, Y>): void;
@@ -46,6 +46,7 @@ export interface GraphControllerPlotExt<X = unknown, Y = unknown> {
   detachDataPointLabelView(dataPointLabelView: GraphicsView, dataPointController: DataPointController<X, Y>, plotController: PlotController<X, Y>): void;
 }
 
+/** @public */
 export class GraphController<X = unknown, Y = unknown> extends GenericController {
   override readonly observerType?: Class<GraphControllerObserver<X, Y>>;
 

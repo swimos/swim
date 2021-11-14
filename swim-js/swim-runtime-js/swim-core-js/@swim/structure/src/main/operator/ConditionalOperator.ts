@@ -19,6 +19,7 @@ import {Operator} from "./Operator";
 import {ConditionalOperatorInterpolator} from "../"; // forward import
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class ConditionalOperator extends Operator {
   constructor(ifTerm: Item, thenTerm: Item, elseTerm: Item) {
     super();

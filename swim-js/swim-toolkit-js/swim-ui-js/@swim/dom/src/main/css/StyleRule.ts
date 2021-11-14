@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Mutable, AnyTiming, Timing} from "@swim/util";
 import type {FastenerOwner} from "@swim/fastener";
 import {ToStyleString, ToCssValue} from "@swim/style";
@@ -20,6 +22,7 @@ import {StyleMapInit, StyleMap} from "./StyleMap";
 import {CssContext} from "./CssContext";
 import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";
 
+/** @public */
 export interface StyleRuleInit extends CssRuleInit {
   extends?: {prototype: StyleRule<any>} | string | boolean | null;
   style?: StyleMapInit;
@@ -30,11 +33,14 @@ export interface StyleRuleInit extends CssRuleInit {
   initRule?(rule: CSSStyleRule): void;
 }
 
+/** @public */
 export type StyleRuleDescriptor<O = unknown, I = {}> = ThisType<StyleRule<O> & I> & StyleRuleInit & Partial<I>;
 
+/** @public */
 export interface StyleRuleClass<F extends StyleRule<any> = StyleRule<any>> extends CssRuleClass<F> {
 }
 
+/** @public */
 export interface StyleRuleFactory<F extends StyleRule<any> = StyleRule<any>> extends StyleRuleClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): StyleRuleFactory<F> & I;
 
@@ -45,6 +51,7 @@ export interface StyleRuleFactory<F extends StyleRule<any> = StyleRule<any>> ext
   <O, I = {}>(descriptor: StyleRuleDescriptor<O, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface StyleRule<O = unknown> extends CssRule<O>, StyleMap {
   (property: string): unknown;
   (property: string, value: unknown): O;
@@ -84,6 +91,7 @@ export interface StyleRule<O = unknown> extends CssRule<O>, StyleMap {
   initCss?(): string;
 }
 
+/** @public */
 export const StyleRule = (function (_super: typeof CssRule) {
   const StyleRule: StyleRuleFactory = _super.extend("StyleRule");
 

@@ -21,24 +21,31 @@ import {StringAnimator} from "./"; // forward import
 import {NumberAnimator} from "./"; // forward import
 import {BooleanAnimator} from "./"; // forward import
 
+/** @internal */
 export type MemberAnimatorState<O, K extends keyof O> =
   O[K] extends Animator<any, infer T> ? T : never;
 
+/** @internal */
 export type MemberAnimatorStateInit<O, K extends keyof O> =
   O[K] extends Animator<any, any, infer U> ? U : never;
 
+/** @internal */
 export type MemberAnimatorInit<O, K extends keyof O> =
   O[K] extends Animator<any, infer T, infer U> ? T | U : never;
 
+/** @internal */
 export type MemberAnimatorInitMap<O> =
   {-readonly [K in keyof O as O[K] extends Property<any, any> ? K : never]?: MemberAnimatorInit<O, K>};
 
+/** @internal */
 export type AnimatorState<A extends Animator<any, any>> =
   A extends Animator<any, infer T, any> ? T : never;
 
+/** @internal */
 export type AnimatorStateInit<A extends Animator<any, any>> =
   A extends Animator<any, infer T, infer U> ? T | U : never;
 
+/** @public */
 export interface AnimatorInit<T = unknown, U = never> extends PropertyInit<T, U> {
   extends?: {prototype: Animator<any, any>} | string | boolean | null;
 
@@ -55,8 +62,10 @@ export interface AnimatorInit<T = unknown, U = never> extends PropertyInit<T, U>
   didInterrupt?(value: T): void;
 }
 
+/** @public */
 export type AnimatorDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<Animator<O, T, U> & I> & AnimatorInit<T, U> & Partial<I>;
 
+/** @public */
 export interface AnimatorClass<A extends Animator<any, any> = Animator<any, any>> extends PropertyClass<A> {
   /** @internal */
   readonly TweeningFlag: FastenerFlags;
@@ -71,6 +80,7 @@ export interface AnimatorClass<A extends Animator<any, any> = Animator<any, any>
   readonly FlagMask: FastenerFlags;
 }
 
+/** @public */
 export interface AnimatorFactory<A extends Animator<any, any> = Animator<any, any>> extends AnimatorClass<A> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): AnimatorFactory<A> & I;
 
@@ -88,6 +98,7 @@ export interface AnimatorFactory<A extends Animator<any, any> = Animator<any, an
 
 }
 
+/** @public */
 export interface Animator<O = unknown, T = unknown, U = T> extends Property<O, T, U> {
   (): T;
   (newState: T | U, timingOrAffinity: Affinity | AnyTiming | boolean | null | undefined): O;
@@ -186,6 +197,7 @@ export interface Animator<O = unknown, T = unknown, U = T> extends Property<O, T
   onUnmount(): void;
 }
 
+/** @public */
 export const Animator = (function (_super: typeof Property) {
   const Animator: AnimatorFactory = _super.extend("Animator");
 

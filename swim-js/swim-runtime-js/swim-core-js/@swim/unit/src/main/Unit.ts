@@ -17,7 +17,7 @@ import {SpecUnit} from "./SpecUnit";
 
 /**
  * Unit test factory function that returns a child [[Spec]], or a list of child
- * specs to run.  Returns `undefined` if no child specs should be run.
+ * specs to run. Returns `undefined` if no child specs should be run.
  *
  * ### Examples
  *
@@ -34,13 +34,16 @@ import {SpecUnit} from "./SpecUnit";
  *   }
  * }
  * ```
+ *
+ * @public
  */
 export type UnitFunc = () => Spec[] | Spec | undefined;
 
 /**
- * [[UnitFunc Unit test factory function]] registration options.  `UnitOptions`
+ * [[UnitFunc Unit test factory function]] registration options. `UnitOptions`
  * are passed to the [[Unit]] method decorator factory to modify the
  * registration of unit test factory functions with the enclosing [[Spec]].
+ * @public
  */
 export interface UnitOptions {
   /**
@@ -79,6 +82,8 @@ export interface UnitOptions {
  *   }
  * }
  * ```
+ *
+ * @public
  */
 export function Unit(options: UnitOptions): MethodDecorator;
 
@@ -103,11 +108,14 @@ export function Unit(options: UnitOptions): MethodDecorator;
  *   }
  * }
  * ```
+ *
+ * @public
  */
 export function Unit(target: Object, propertyKey: string, descriptor: PropertyDescriptor): void;
 
 /**
  * Class decorator that initializes a `Spec` subclass.
+ * @public
  */
 export function Unit(constructor: Function): void;
 

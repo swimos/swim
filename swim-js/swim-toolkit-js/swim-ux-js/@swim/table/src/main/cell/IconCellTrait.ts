@@ -18,6 +18,7 @@ import type {Graphics} from "@swim/graphics";
 import {CellTrait} from "./CellTrait";
 import type {IconCellTraitObserver} from "./IconCellTraitObserver";
 
+/** @public */
 export class IconCellTrait extends CellTrait {
   override readonly observerType?: Class<IconCellTraitObserver>;
 

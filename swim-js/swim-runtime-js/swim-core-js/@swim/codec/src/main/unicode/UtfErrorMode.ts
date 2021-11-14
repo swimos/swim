@@ -21,6 +21,7 @@ import {UtfErrorModeReplacement} from "../"; // forward import
 
 /**
  * Unicode transformation format error handling mode.
+ * @public
  */
 export abstract class UtfErrorMode implements HashCode, Debug {
   /**

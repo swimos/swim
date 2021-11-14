@@ -19,6 +19,7 @@ import type {Graphics} from "../graphics/Graphics";
 import type {DrawingContext} from "../drawing/DrawingContext";
 import type {PaintingContext} from "../painting/PaintingContext";
 
+/** @public */
 export abstract class Icon implements Graphics {
   abstract readonly moodModifier: MoodMatrix | null;
 

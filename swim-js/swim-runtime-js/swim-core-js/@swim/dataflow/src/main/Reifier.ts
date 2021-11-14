@@ -14,6 +14,7 @@
 
 import type {Item} from "@swim/structure";
 
+/** @beta */
 export abstract class Reifier {
   abstract reify(item: Item): Item;
 

@@ -26,10 +26,12 @@ import {AnyText, Text} from "./"; // forward import
 import type {AnyNum} from "./Num";
 import {AnyInterpreter, Interpreter} from "./"; // forward import
 
+/** @public */
 export type AnyRecord = Record
                       | {readonly [key: string]: AnyValue}
                       | ReadonlyArray<AnyItem>;
 
+/** @public */
 export abstract class Record extends Value implements Builder<Item, Record> {
   /** @internal */
   constructor() {
@@ -96,7 +98,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * member is not an `Attr`.
    *
    * Used to concisely get the name of the discriminating attribute of a
-   * structure.  The `tag` can be used to discern the nominal type of a
+   * structure. The `tag` can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
   override get tag(): string | undefined {
@@ -111,7 +113,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * Returns the [[Record.flattened flattened]] members of this `Record` after
    * all attributes have been removed.
    *
-   * Used to concisely get the scalar value of an attributed structure.  An
+   * Used to concisely get the scalar value of an attributed structure. An
    * attributed structure is a `Record` with one or more attributes that modify
    * one or more other members.
    */
@@ -151,7 +153,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * is empty; otherwise returns `this` if this `Record` has more than one
    * member.
    *
-   * Used to convert a unary `Record` into its member `Value`.  Facilitates
+   * Used to convert a unary `Record` into its member `Value`. Facilitates
    * writing code that treats a unary `Record` equivalently to a bare `Value`.
    */
   override flattened(): Value {
@@ -184,7 +186,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * equal the `tag`.
    *
    * Used to conditionally get the value of the head `Attr` of a structure, if
-   * and only if the key string of the head `Attr` is equal to the `tag`.  Can
+   * and only if the key string of the head `Attr` is equal to the `tag`. Can
    * be used to check if a structure might conform to a nominal type named
    * `tag`, while simultaneously getting the value of the `tag` attribute.
    */
@@ -199,7 +201,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
 
   /**
    * Returns the [[Record.unflattened unflattened]] [[Record.header header]] of
-   * this `Record`.  The `headers` of the `tag` attribute of a structure are
+   * this `Record`. The `headers` of the `tag` attribute of a structure are
    * like the attributes of an XML element tag; through unlike an XML element,
    * `tag` attribute headers are not limited to string keys and values.
    */
@@ -243,7 +245,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
 
   /**
    * Returns the [[Record.flattened flattened]] [[Record.tail tail]] of this
-   * `Record`.  Used to recursively deconstruct a structure, terminating
+   * `Record`. Used to recursively deconstruct a structure, terminating
    * with its last `Value`, rather than a unary `Record` containing its last
    * value, if the structure ends with a `Value` member.
    */
@@ -415,9 +417,8 @@ export abstract class Record extends Value implements Builder<Item, Record> {
 
   /**
    * Replaces the member of this `Record` at the given `index` with a new
-   * `item`, returning {@code this} {@code Record}, if the {@code index} is
-   * greater than or equal to zero, and less than the [[Record.length length]]
-   * of this {@code Record}.
+   * `item`, returning `this` `Record`, if the `index` is greater than or
+   * equal to zero, and less than the [[Record.length length]] of this `Record`.
    *
    * @throws `Error` if this is an immutable `Record`.
    * @throws `RangeError` if the `index` is out of bounds.

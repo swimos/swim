@@ -15,6 +15,7 @@
 import type {GestureInputType} from "./GestureInput";
 import {MomentumGestureInput} from "./MomentumGestureInput";
 
+/** @public */
 export class ScaleGestureInput<X = unknown, Y = unknown> extends MomentumGestureInput {
   xCoord: X | undefined;
   yCoord: Y | undefined;

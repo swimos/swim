@@ -16,6 +16,7 @@ import type {Interpolator} from "@swim/util";
 import {AnyFont, Font, FontInterpolator} from "@swim/style";
 import {Look} from "./Look";
 
+/** @internal */
 export class FontLook extends Look<Font, AnyFont> {
   override combine(combination: Font | undefined, value: Font, weight?: number): Font {
     if (weight === void 0 || weight !== 0) {

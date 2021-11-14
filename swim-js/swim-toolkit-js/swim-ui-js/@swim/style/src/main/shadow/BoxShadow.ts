@@ -21,8 +21,10 @@ import {BoxShadowInterpolator} from "../"; // forward import
 import {BoxShadowForm} from "../"; // forward import
 import {BoxShadowParser} from "../"; // forward import
 
+/** @public */
 export type AnyBoxShadow = BoxShadow | BoxShadowInit | string | ReadonlyArray<AnyBoxShadow>;
 
+/** @public */
 export interface BoxShadowInit {
   inset?: boolean;
   offsetX?: AnyLength;
@@ -32,6 +34,7 @@ export interface BoxShadowInit {
   color?: AnyColor;
 }
 
+/** @public */
 export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
   constructor(inset: boolean, offsetX: Length, offsetY: Length, blurRadius: Length,
               spreadRadius: Length, color: Color, next: BoxShadow | null) {

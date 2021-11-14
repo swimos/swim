@@ -49,6 +49,7 @@ import {
 } from "@swim/structure";
 import {ReconParser} from "./ReconParser";
 
+/** @public */
 export class ReconStructureParser extends ReconParser<Item, Value> {
   override isDistinct(value: Value): boolean {
     return value.isDistinct();

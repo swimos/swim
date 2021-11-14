@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export interface FromAny<T, U = never> {
   fromAny(value: T | U): T;
 }
 
+/** @public */
 export const FromAny = (function () {
   const FromAny = {} as {
     /**

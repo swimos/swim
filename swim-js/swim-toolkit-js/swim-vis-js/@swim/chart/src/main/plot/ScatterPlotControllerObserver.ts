@@ -17,12 +17,13 @@ import type {ScatterPlotView} from "./ScatterPlotView";
 import type {ScatterPlotTrait} from "./ScatterPlotTrait";
 import type {ScatterPlotController} from "./ScatterPlotController";
 
+/** @public */
 export interface ScatterPlotControllerObserver<X = unknown, Y = unknown, C extends ScatterPlotController<X, Y> = ScatterPlotController<X, Y>> extends PlotControllerObserver<X, Y, C> {
   controllerWillAttachPlotTrait?(plotTrait: ScatterPlotTrait<X, Y>, controller: C): void;
 
   controllerDidDetachPlotTrait?(plotTrait: ScatterPlotTrait<X, Y>, controller: C): void;
 
-  controllerWillAttachPlotView?(plotVIew: ScatterPlotView<X, Y>, controller: C): void;
+  controllerWillAttachPlotView?(plotView: ScatterPlotView<X, Y>, controller: C): void;
 
-  controllerDidDetachPlotView?(plotVIew: ScatterPlotView<X, Y>, controller: C): void;
+  controllerDidDetachPlotView?(plotView: ScatterPlotView<X, Y>, controller: C): void;
 }

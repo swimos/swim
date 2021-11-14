@@ -19,19 +19,23 @@ import {GeoJsonGeometry} from "./"; // forward import
 import {GeoJsonFeature} from "./"; // forward import
 import {GeoJsonFeatureCollection} from "./"; // forward import
 
+/** @public */
 export type GeoJsonType = GeoJsonGeometryType
                         | "Feature"
                         | "FeatureCollection";
 
+/** @public */
 export interface GeoJsonObject {
   type: GeoJsonType;
   bbox?: GeoJsonBbox;
 }
 
+/** @public */
 export type GeoJson = GeoJsonGeometry
                     | GeoJsonFeature
                     | GeoJsonFeatureCollection;
 
+/** @public */
 export const GeoJson = (function () {
   const GeoJson = {} as {
     is(value: unknown): value is GeoJson;

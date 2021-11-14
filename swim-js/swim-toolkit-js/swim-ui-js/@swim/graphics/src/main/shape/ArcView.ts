@@ -28,11 +28,14 @@ import type {FillViewInit, FillView} from "./FillView";
 import type {StrokeViewInit, StrokeView} from "./StrokeView";
 import {ArcInit, Arc} from "./Arc";
 
+/** @public */
 export type AnyArcView = ArcView | Arc | ArcViewInit;
 
+/** @public */
 export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 }
 
+/** @public */
 export class ArcView extends LayerView implements FillView, StrokeView {
   @Animator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
   readonly xAlign!: Animator<this, number>;

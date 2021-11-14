@@ -18,6 +18,7 @@ import type {GeoProjection} from "./GeoProjection";
 import {GeoShape} from "./GeoShape";
 import type {GeoPoint} from "./GeoPoint";
 
+/** @public */
 export abstract class GeoCurve extends GeoShape implements Equals, Equivalent {
   abstract interpolateLng(u: number): number;
 

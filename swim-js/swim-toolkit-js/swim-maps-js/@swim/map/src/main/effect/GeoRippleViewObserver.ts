@@ -16,6 +16,7 @@ import type {GeoPoint} from "@swim/geo";
 import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {GeoRippleView} from "./GeoRippleView";
 
+/** @public */
 export interface GeoRippleViewObserver<V extends GeoRippleView = GeoRippleView> extends GeoViewObserver<V> {
   viewWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
 

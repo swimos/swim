@@ -17,12 +17,15 @@ import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fasten
 import {Model, AnyTrait, TraitFactory, Trait} from "@swim/model";
 import {AnyView, ViewFactory, View} from "@swim/view";
 
+/** @internal */
 export type TraitViewRefTraitType<F extends TraitViewRef<any, any, any>> =
   F extends TraitViewRef<any, infer T, any> ? T : never;
 
+/** @internal */
 export type TraitViewRefViewType<F extends TraitViewRef<any, any, any>> =
   F extends TraitViewRef<any, any, infer V> ? V : never;
 
+/** @public */
 export interface TraitViewRefInit<T extends Trait = Trait, V extends View = View> extends FastenerInit {
   extends?: {prototype: TraitViewRef<any, any, any>} | string | boolean | null;
 
@@ -59,11 +62,14 @@ export interface TraitViewRefInit<T extends Trait = Trait, V extends View = View
   fromAnyView?(value: AnyView<V>): V;
 }
 
+/** @public */
 export type TraitViewRefDescriptor<O = unknown, T extends Trait = Trait, V extends View = View, I = {}> = ThisType<TraitViewRef<O, T, V> & I> & TraitViewRefInit<T, V> & Partial<I>;
 
+/** @public */
 export interface TraitViewRefClass<F extends TraitViewRef<any, any, any> = TraitViewRef<any, any, any>> extends FastenerClass<F> {
 }
 
+/** @public */
 export interface TraitViewRefFactory<F extends TraitViewRef<any, any, any> = TraitViewRef<any, any, any>> extends TraitViewRefClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitViewRefFactory<F> & I;
 
@@ -86,6 +92,7 @@ export interface TraitViewRefFactory<F extends TraitViewRef<any, any, any> = Tra
   <O, T extends Trait = Trait, V extends View = View, I = {}>(descriptor: {observesTrait: boolean, observesView: boolean} & TraitViewRefDescriptor<O, T, V, I & ObserverType<T> & ObserverType<V>>): PropertyDecorator;
 }
 
+/** @public */
 export interface TraitViewRef<O = unknown, T extends Trait = Trait, V extends View = View> extends Fastener<O> {
   /** @override */
   get familyType(): Class<TraitViewRef<any, any, any>> | null;
@@ -255,6 +262,7 @@ export interface TraitViewRef<O = unknown, T extends Trait = Trait, V extends Vi
   get static(): string | boolean; // prototype property
 }
 
+/** @public */
 export const TraitViewRef = (function (_super: typeof Fastener) {
   const TraitViewRef: TraitViewRefFactory = _super.extend("TraitViewRef");
 

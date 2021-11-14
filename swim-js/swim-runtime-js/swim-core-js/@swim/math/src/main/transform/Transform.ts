@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Lazy, HashCode, Equivalent, Interpolate, Interpolator} from "@swim/util";
 import {Output, Parser, Debug, Diagnostic, Unicode} from "@swim/codec";
 import type {Value, Form} from "@swim/structure";
@@ -32,8 +34,10 @@ import {AffineTransformInterpolator} from "../"; // forward import
 import {TransformList} from "../"; // forward import
 import {TransformListParser} from "../"; // forward import
 
+/** @public */
 export type AnyTransform = Transform | string;
 
+/** @public */
 export abstract class Transform implements R2Operator, Interpolate<Transform>, HashCode, Equivalent, Debug {
   abstract transform(that: Transform): Transform;
   abstract transform(x: number, y: number): R2Point;

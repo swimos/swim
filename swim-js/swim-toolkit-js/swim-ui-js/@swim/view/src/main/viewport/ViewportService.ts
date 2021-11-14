@@ -14,12 +14,13 @@
 
 import {Mutable, Class, Lazy, ObserverType, Service} from "@swim/util";
 import {R2Box} from "@swim/math";
-import type {ViewIdiom} from "./ViewIdiom";
+import type {ViewportIdiom} from "./ViewportIdiom";
 import {Viewport} from "./Viewport";
 import type {ViewportServiceObserver} from "./ViewportServiceObserver";
 import {ViewContext} from "../view/ViewContext";
 import {View} from "../"; // forward import
 
+/** @public */
 export class ViewportService<V extends View = View> extends Service<V> {
   constructor() {
     super();
@@ -43,12 +44,12 @@ export class ViewportService<V extends View = View> extends Service<V> {
     return this.viewContext.viewport;
   }
 
-  get viewIdiom(): ViewIdiom {
-    return this.viewContext.viewIdiom;
+  get viewportIdiom(): ViewportIdiom {
+    return this.viewContext.viewportIdiom;
   }
 
   /** @internal */
-  detectViewIdiom(viewport: Viewport): ViewIdiom | undefined {
+  detectViewportIdiom(viewport: Viewport): ViewportIdiom | undefined {
     if (viewport.width < 960 || viewport.height < 480) {
       return "mobile";
     } else {
@@ -57,60 +58,60 @@ export class ViewportService<V extends View = View> extends Service<V> {
   }
 
   /** @internal */
-  updateViewIdiom(viewport: Viewport): void {
-    let viewIdiom: ViewIdiom | undefined;
+  updateViewportIdiom(viewport: Viewport): void {
+    let viewportIdiom: ViewportIdiom | undefined;
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.detectViewIdiom !== void 0) {
-        viewIdiom = observer.detectViewIdiom(viewport, this) as ViewIdiom | undefined;
-        if (viewIdiom !== void 0) {
+      if (observer.detectViewportIdiom !== void 0) {
+        viewportIdiom = observer.detectViewportIdiom(viewport, this) as ViewportIdiom | undefined;
+        if (viewportIdiom !== void 0) {
           break;
         }
       }
     }
-    if (viewIdiom === void 0) {
-      viewIdiom = this.detectViewIdiom(viewport);
+    if (viewportIdiom === void 0) {
+      viewportIdiom = this.detectViewportIdiom(viewport);
     }
-    if (viewIdiom !== void 0) {
-      this.setViewIdiom(viewIdiom);
+    if (viewportIdiom !== void 0) {
+      this.setViewportIdiom(viewportIdiom);
     }
   }
 
-  setViewIdiom(newViewIdiom: ViewIdiom): void {
+  setViewportIdiom(newViewportIdiom: ViewportIdiom): void {
     const viewContext = this.viewContext;
-    const oldViewIdiom = viewContext.viewIdiom;
-    if (oldViewIdiom !== newViewIdiom) {
-      this.willSetViewIdiom(newViewIdiom, oldViewIdiom);
-      (viewContext as Mutable<ViewContext>).viewIdiom = newViewIdiom;
-      this.onSetViewIdiom(newViewIdiom, oldViewIdiom);
-      this.didSetViewIdiom(newViewIdiom, oldViewIdiom);
+    const oldViewportIdiom = viewContext.viewportIdiom;
+    if (oldViewportIdiom !== newViewportIdiom) {
+      this.willSetViewportIdiom(newViewportIdiom, oldViewportIdiom);
+      (viewContext as Mutable<ViewContext>).viewportIdiom = newViewportIdiom;
+      this.onSetViewportIdiom(newViewportIdiom, oldViewportIdiom);
+      this.didSetViewportIdiom(newViewportIdiom, oldViewportIdiom);
     }
   }
 
-  protected willSetViewIdiom(newViewIdiom: ViewIdiom, oldViewIdiom: ViewIdiom): void {
+  protected willSetViewportIdiom(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceWillSetViewIdiom !== void 0) {
-        observer.serviceWillSetViewIdiom(newViewIdiom, oldViewIdiom, this);
+      if (observer.serviceWillSetViewportIdiom !== void 0) {
+        observer.serviceWillSetViewportIdiom(newViewportIdiom, oldViewportIdiom, this);
       }
     }
   }
 
-  protected onSetViewIdiom(newViewIdiom: ViewIdiom, oldViewIdiom: ViewIdiom): void {
+  protected onSetViewportIdiom(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom): void {
     const roots = this.roots;
     for (let i = 0, n = roots.length; i < n; i += 1) {
       roots[i]!.requireUpdate(View.NeedsLayout);
     }
   }
 
-  protected didSetViewIdiom(newViewIdiom: ViewIdiom, oldViewIdiom: ViewIdiom): void {
+  protected didSetViewportIdiom(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceDidSetViewIdiom !== void 0) {
-        observer.serviceDidSetViewIdiom(newViewIdiom, oldViewIdiom, this);
+      if (observer.serviceDidSetViewportIdiom !== void 0) {
+        observer.serviceDidSetViewportIdiom(newViewportIdiom, oldViewportIdiom, this);
       }
     }
   }
@@ -142,14 +143,14 @@ export class ViewportService<V extends View = View> extends Service<V> {
   protected override onObserve(observer: ObserverType<this>): void {
     super.onObserve(observer);
     if (this.attached) {
-      this.updateViewIdiom(this.viewport);
+      this.updateViewportIdiom(this.viewport);
     }
   }
 
   protected override onAttach(): void {
     super.onAttach();
     this.attachEvents();
-    this.updateViewIdiom(this.viewport);
+    this.updateViewportIdiom(this.viewport);
   }
 
   protected override onDetach(): void {
@@ -193,7 +194,7 @@ export class ViewportService<V extends View = View> extends Service<V> {
     const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
     (this.viewContext as Mutable<ViewContext>).viewport = viewport;
     (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
-    this.updateViewIdiom(viewport);
+    this.updateViewportIdiom(viewport);
 
     const roots = this.roots;
     for (let i = 0, n = roots.length; i < n; i += 1) {
@@ -224,7 +225,7 @@ export class ViewportService<V extends View = View> extends Service<V> {
     const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
     (this.viewContext as Mutable<ViewContext>).viewport = viewport;
     (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
-    this.updateViewIdiom(viewport);
+    this.updateViewportIdiom(viewport);
 
     const roots = this.roots;
     for (let i = 0, n = roots.length; i < n; i += 1) {
@@ -256,7 +257,7 @@ export class ViewportService<V extends View = View> extends Service<V> {
     (this.viewContext as Mutable<ViewContext>).viewport = viewport;
     (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
     this.willReorient(viewport.orientation);
-    this.updateViewIdiom(viewport);
+    this.updateViewportIdiom(viewport);
     this.onReorient(viewport.orientation);
     this.didReorient(viewport.orientation);
 

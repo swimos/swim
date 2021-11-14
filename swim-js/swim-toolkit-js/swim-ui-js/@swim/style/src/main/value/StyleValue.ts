@@ -26,6 +26,7 @@ import {AnyBoxShadow, BoxShadowInit, BoxShadow} from "../shadow/BoxShadow";
 import {StyleValueForm} from "../"; // forward import
 import {StyleValueParser} from "../"; // forward import
 
+/** @public */
 export type AnyStyleValue = AnyDateTime
                           | AnyAngle
                           | AnyLength
@@ -38,6 +39,7 @@ export type AnyStyleValue = AnyDateTime
                           | number
                           | boolean;
 
+/** @public */
 export type StyleValue = DateTime
                        | Angle
                        | Length
@@ -50,6 +52,7 @@ export type StyleValue = DateTime
                        | number
                        | boolean;
 
+/** @public */
 export const StyleValue = (function () {
   const StyleValue = {} as {
     fromAny(value: AnyStyleValue): StyleValue;

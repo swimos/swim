@@ -21,6 +21,7 @@ import type {Func} from "./Func";
 import {BridgeFunc} from "./BridgeFunc";
 import {Interpreter} from "../"; // forward import
 
+/** @public */
 export const MathModule = (function () {
   const MathModule = {} as {
     readonly max: Func;

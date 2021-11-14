@@ -18,6 +18,7 @@ import type {Feel} from "../feel/Feel";
 import type {Mood} from "./Mood";
 import {AnyMoodVector, MoodVectorUpdates, MoodVector} from "./MoodVector";
 
+/** @public */
 export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements Equals, Debug {
   constructor(rowArray: ReadonlyArray<[M, MoodVector<N>]>,
               rowIndex: {readonly [name: string]: number | undefined},

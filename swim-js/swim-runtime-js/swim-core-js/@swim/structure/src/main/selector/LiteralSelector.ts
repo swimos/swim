@@ -18,6 +18,7 @@ import {Item} from "../Item";
 import {Selector} from "./Selector";
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class LiteralSelector extends Selector {
   constructor(item: Item, then: Selector) {
     super();

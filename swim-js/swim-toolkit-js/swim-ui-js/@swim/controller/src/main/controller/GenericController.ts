@@ -15,6 +15,7 @@
 import type {Mutable, Dictionary, MutableDictionary} from "@swim/util";
 import {ControllerContextType, ControllerFlags, AnyController, ControllerCreator, Controller} from "./Controller";
 
+/** @public */
 export class GenericController extends Controller {
   constructor() {
     super();

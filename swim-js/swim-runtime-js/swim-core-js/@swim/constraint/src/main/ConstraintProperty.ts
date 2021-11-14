@@ -24,6 +24,7 @@ import type {Constraint} from "./Constraint";
 import {ConstraintScope} from "./"; // forward import
 import type {ConstraintSolver} from "./ConstraintSolver";
 
+/** @public */
 export interface ConstraintPropertyInit<T = unknown, U = T> extends PropertyInit<T, U> {
   extends?: {prototype: ConstraintProperty<any, any>} | string | boolean | null;
   constrain?: boolean;
@@ -37,8 +38,10 @@ export interface ConstraintPropertyInit<T = unknown, U = T> extends PropertyInit
   toNumber?(value: T): number;
 }
 
+/** @public */
 export type ConstraintPropertyDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<ConstraintProperty<O, T, U> & I> & ConstraintPropertyInit<T, U> & Partial<I>;
 
+/** @public */
 export interface ConstraintPropertyClass<P extends ConstraintProperty<any, any> = ConstraintProperty<any, any>> extends PropertyClass<P> {
   /** @internal */
   readonly ConstrainedFlag: FastenerFlags;
@@ -51,6 +54,7 @@ export interface ConstraintPropertyClass<P extends ConstraintProperty<any, any> 
   readonly FlagMask: FastenerFlags;
 }
 
+/** @public */
 export interface ConstraintPropertyFactory<P extends ConstraintProperty<any, any> = ConstraintProperty<any, any>> extends ConstraintPropertyClass<P> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ConstraintPropertyFactory<P> & I;
 
@@ -65,6 +69,7 @@ export interface ConstraintPropertyFactory<P extends ConstraintProperty<any, any
   <O, T, U = T, I = {}>(descriptor: ConstraintPropertyDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface ConstraintProperty<O = unknown, T = unknown, U = T> extends Property<O, T, U>, ConstraintVariable {
   /** @internal @override */
   readonly id: number;
@@ -178,6 +183,7 @@ export interface ConstraintProperty<O = unknown, T = unknown, U = T> extends Pro
   toNumber(value: T): number;
 }
 
+/** @public */
 export const ConstraintProperty = (function (_super: typeof Property) {
   const ConstraintProperty: ConstraintPropertyFactory = _super.extend("ConstraintProperty");
 

@@ -19,6 +19,7 @@ import {AnyConstraintStrength, ConstraintStrength} from "./ConstraintStrength";
 import {Constraint} from "./Constraint";
 import type {ConstraintScope} from "./ConstraintScope";
 
+/** @beta */
 export class ConstraintGroup {
   constructor(scope: ConstraintScope) {
     this.scope = scope;

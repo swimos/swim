@@ -19,6 +19,7 @@ import {Look} from "../look/Look";
 import {ThemeContext} from "../theme/ThemeContext";
 import {ThemeAnimatorFactory, ThemeAnimator} from "./ThemeAnimator";
 
+/** @public */
 export interface PresenceThemeAnimatorInit {
   willPresent?(): void;
   didPresent?(): void;
@@ -26,6 +27,7 @@ export interface PresenceThemeAnimatorInit {
   didDismiss?(): void;
 }
 
+/** @public */
 export interface PresenceThemeAnimator<O, T extends Presence | null | undefined = Presence, U extends AnyPresence | null | undefined = AnyPresence> extends ThemeAnimator<O, T, U> {
   get phase(): number | undefined;
 
@@ -82,6 +84,7 @@ export interface PresenceThemeAnimator<O, T extends Presence | null | undefined 
   fromAny(value: T | U): T
 }
 
+/** @public */
 export const PresenceThemeAnimator = (function (_super: typeof ThemeAnimator) {
   const PresenceThemeAnimator = _super.extend("PresenceThemeAnimator") as ThemeAnimatorFactory<PresenceThemeAnimator<any, Presence | null | undefined, AnyPresence | null | undefined>>;
 

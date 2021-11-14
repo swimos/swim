@@ -16,6 +16,7 @@ import type {PositionGestureInput} from "@swim/view";
 import type {HtmlViewObserver} from "@swim/dom";
 import type {CellView} from "./CellView";
 
+/** @public */
 export interface CellViewObserver<V extends CellView = CellView> extends HtmlViewObserver<V> {
   viewDidPress?(input: PositionGestureInput, event: Event | null, view: V): void;
 

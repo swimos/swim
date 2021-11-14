@@ -36,35 +36,45 @@ import {ModelRelation} from "../model/ModelRelation";
 import type {TraitObserver} from "./TraitObserver";
 import {TraitRelation} from "./"; // forward import
 
+/** @public */
 export type TraitModelType<T extends Trait> = T extends {readonly model: infer M | null} ? M : never;
 
+/** @public */
 export type TraitContextType<T extends Trait> = ModelContextType<TraitModelType<T>>;
 
+/** @public */
 export type TraitFlags = number;
 
+/** @public */
 export type AnyTrait<T extends Trait = Trait> = T | TraitFactory<T> | InitType<T>;
 
+/** @public */
 export interface TraitInit {
   type?: Creatable<Trait>;
   key?: string;
   traits?: AnyTrait[];
 }
 
+/** @public */
 export interface TraitFactory<T extends Trait = Trait, U = AnyTrait<T>> extends Creatable<T>, FromAny<T, U> {
   fromInit(init: InitType<T>): T;
 }
 
+/** @public */
 export interface TraitClass<T extends Trait = Trait, U = AnyTrait<T>> extends Function, TraitFactory<T, U> {
   readonly prototype: T;
 }
 
+/** @public */
 export interface TraitConstructor<T extends Trait = Trait, U = AnyTrait<T>> extends TraitClass<T, U> {
   new(): T;
 }
 
+/** @public */
 export type TraitCreator<F extends (abstract new (...args: any[]) => T) & Creatable<InstanceType<F>>, T extends Trait = Trait> =
   (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
+/** @public */
 export abstract class Trait implements HashCode, Initable<TraitInit>, Observable, Consumable, FastenerContext {
   constructor() {
     this.uid = (this.constructor as typeof Trait).uid();

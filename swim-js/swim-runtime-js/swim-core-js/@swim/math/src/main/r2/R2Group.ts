@@ -18,6 +18,7 @@ import type {R2Function} from "./R2Function";
 import {AnyR2Shape, R2Shape} from "./R2Shape";
 import {R2Box} from "./R2Box";
 
+/** @public */
 export class R2Group<S extends R2Shape = R2Shape> extends R2Shape implements Equals, Equivalent, Debug {
   constructor(shapes: ReadonlyArray<S>) {
     super();

@@ -18,6 +18,7 @@ import {KeyEffect} from "../KeyEffect";
 import type {MapOutlet} from "../MapOutlet";
 import {AbstractMapInoutlet} from "../AbstractMapInoutlet";
 
+/** @public */
 export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V, IO, IO> {
   constructor() {
     super();

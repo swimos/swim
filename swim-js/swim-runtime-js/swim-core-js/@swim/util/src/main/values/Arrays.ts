@@ -17,6 +17,7 @@ import {Values} from "./Values";
 
 /**
  * Utilities for immutably updating, comparing, and hashing arrays.
+ * @public
  */
 export const Arrays = (function () {
   const Arrays = {} as {
@@ -49,11 +50,11 @@ export const Arrays = (function () {
     equivalent(x: ArrayLike<unknown> | null | undefined, y: ArrayLike<unknown> | null | undefined, epsilon?: number): boolean;
 
     /**
-     * Returns the relative order of `x` with respect to `y`.  Returns `-1` if
+     * Returns the relative order of `x` with respect to `y`. Returns `-1` if
      * the elements of array `x` order lexicographically before the elements of
      * array `y`; returns `1` if the elements of array `x` order lexicographically
      * after the elements of array `y`; and returns `0` if `x` and `y` are equal
-     * arrays.  If either `x` or `y` is `null` or `undefined`, then arrays order
+     * arrays. If either `x` or `y` is `null` or `undefined`, then arrays order
      * before `null`, and `null` orders before `undefined`.
      */
     compare(x: ArrayLike<unknown> | null | undefined, y: ArrayLike<unknown> | null | undefined): number;

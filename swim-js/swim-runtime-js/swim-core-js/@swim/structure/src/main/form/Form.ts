@@ -27,12 +27,13 @@ import {ValueForm} from "../"; // forward import
 /**
  * Transformation between a structurally typed [Item] and a nominally typed
  * JavaScript object.
+ * @public
  */
 export abstract class Form<T, U = never> {
   /**
    * Returns the key of the tag attribute that distinguishes structures of this
    * `Form`; returns `undefined` if this `Form` has no distinguishing tag
-   * attribute.  Used to accelerate distrcrimination of polymorphic structural
+   * attribute. Used to accelerate distrcrimination of polymorphic structural
    * types with nominal type hints.
    */
   declare readonly tag: string | undefined; // getter defined below to work around useDefineForClassFields lunacy
@@ -50,7 +51,7 @@ export abstract class Form<T, U = never> {
   }
 
   /**
-   * Returns a default–possibly `undefined`–value of type `T`.  Used as the
+   * Returns a default–possibly `undefined`–value of type `T`. Used as the
    * fallback return value when [Item.coerce coercing] an invalid structural
    * value.
    */

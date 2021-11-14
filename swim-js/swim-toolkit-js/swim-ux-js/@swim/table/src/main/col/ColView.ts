@@ -19,6 +19,7 @@ import {AnyView, ViewRef} from "@swim/view";
 import {HtmlViewInit, HtmlView} from "@swim/dom";
 import type {ColViewObserver} from "./ColViewObserver";
 
+/** @public */
 export class ColView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

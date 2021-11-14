@@ -7,10 +7,21 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-dom.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-dom.js",
+  "module": "./dist/swim-dom.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-dom.mjs",
+      "require": "./dist/swim-dom.js",
+      "types": "./dist/swim-dom.d.ts"
+    }
+  },
+  "types": "./dist/swim-dom.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
+  "devDependencies": {
+    "@types/w3c-css-typed-object-model-level-1": "20180410"
+  },
   "dependencies": {
     "@swim/util": "4.0.0-dev.20210927.1",
     "@swim/codec": "4.0.0-dev.20210927.1",
@@ -21,6 +32,7 @@
     "@swim/time": "4.0.0-dev.20210927.1",
     "@swim/style": "4.0.0-dev.20210927.1",
     "@swim/theme": "4.0.0-dev.20210927.1",
-    "@swim/view": "4.0.0-dev.20210927.1"
+    "@swim/view": "4.0.0-dev.20210927.1",
+    "@types/w3c-css-typed-object-model-level-1": ">= 20180410"
   }
 }

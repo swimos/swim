@@ -18,20 +18,19 @@ import {AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
 import {View} from "@swim/view";
 import type {GraphicsView, CanvasContext, CanvasRenderer, FillViewInit, FillView} from "@swim/graphics";
-import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
+import {SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
 import type {AreaPlotViewObserver} from "./AreaPlotViewObserver";
 
+/** @public */
 export type AnyAreaPlotView<X = unknown, Y = unknown> = AreaPlotView<X, Y> | AreaPlotViewInit<X, Y>;
 
+/** @public */
 export interface AreaPlotViewInit<X = unknown, Y = unknown> extends SeriesPlotViewInit<X, Y>, FillViewInit {
 }
 
+/** @public */
 export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y> implements FillView {
   override readonly observerType?: Class<AreaPlotViewObserver<X, Y>>;
-
-  override get plotType(): SeriesPlotType {
-    return "area";
-  }
 
   @ThemeAnimator<AreaPlotView<X, Y>, Color | null, AnyColor | null>({
     type: Color,

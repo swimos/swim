@@ -15,6 +15,7 @@
 import type {ViewObserver} from "@swim/view";
 import type {GraphicsView} from "./GraphicsView";
 
+/** @public */
 export interface GraphicsViewObserver<V extends GraphicsView = GraphicsView> extends ViewObserver<V> {
   viewWillSetHidden?(hidden: boolean, view: V): void;
 

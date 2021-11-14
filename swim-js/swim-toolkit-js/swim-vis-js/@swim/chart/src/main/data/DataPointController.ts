@@ -24,6 +24,7 @@ import {DataPointView} from "./DataPointView";
 import {DataPointLabel, DataPointTrait} from "./DataPointTrait";
 import type {DataPointControllerObserver} from "./DataPointControllerObserver";
 
+/** @public */
 export class DataPointController<X = unknown, Y = unknown> extends GenericController {
   override readonly observerType?: Class<DataPointControllerObserver<X, Y>>;
 

@@ -42,6 +42,7 @@ import {DivideOperator} from "./"; // forward import
 import {ModuloOperator} from "./"; // forward import
 import {LambdaFunc} from "./"; // forward import
 
+/** @public */
 export type AnyValue = Value
                      | {readonly [key: string]: AnyValue}
                      | ReadonlyArray<AnyItem>
@@ -52,6 +53,7 @@ export type AnyValue = Value
                      | null
                      | undefined;
 
+/** @public */
 export abstract class Value extends Item {
   /** @internal */
   constructor() {
@@ -102,7 +104,7 @@ export abstract class Value extends Item {
    * is a `Record` whose first member is not an `Attr`.
    *
    * Used to concisely get the name of the discriminating attribute of a
-   * structure.  The `tag` can be used to discern the nominal type of a
+   * structure. The `tag` can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
   override get tag(): string | undefined {
@@ -114,7 +116,7 @@ export abstract class Value extends Item {
    * all attributes have been removed, if this `Value` is a [[Record]];
    * otherwise returns `this` if this `Value` is not a `Record`.
    *
-   * Used to concisely get the scalar value of an attributed structure.  An
+   * Used to concisely get the scalar value of an attributed structure. An
    * attributed structure is a `Record` with one or more attributes that modify
    * one or more other members.
    */
@@ -129,7 +131,7 @@ export abstract class Value extends Item {
    * `Value` is a `Record` with more than one member, or if this `Value` is a
    * not a `Record`.
    *
-   * Used to convert a unary `Record` into its member `Value`.  Facilitates
+   * Used to convert a unary `Record` into its member `Value`. Facilitates
    * writing code that treats a unary `Record` equivalently to a bare `Value`.
    */
   override flattened(): Value {
@@ -140,7 +142,7 @@ export abstract class Value extends Item {
    * Returns `this` if this `Value` is a [[Record]]; returns a `Record`
    * containing just this `Value`, if this `Value` is [[Value.isDistinct
    * distinct]]; otherwise returns an empty `Record` if this `Value` is
-   * [[Extant]] or [[Absent]].  Facilitates writing code that treats a bare
+   * [[Extant]] or [[Absent]]. Facilitates writing code that treats a bare
    * `Value` equivalently to a unary `Record`.
    */
   override unflattened(): Record {
@@ -156,7 +158,7 @@ export abstract class Value extends Item {
    * whose `key` does not equal the `tag`.
    *
    * Used to conditionally get the value of the head `Attr` of a structure, if
-   * and only if the key string of the head `Attr` is equal to the `tag`.  Can
+   * and only if the key string of the head `Attr` is equal to the `tag`. Can
    * be used to check if a structure might conform to a nominal type named
    * `tag`, while simultaneously getting the value of the `tag` attribute.
    */
@@ -198,7 +200,7 @@ export abstract class Value extends Item {
 
   /**
    * Returns the [[Record.flattened flattened]] [[Value.tail tail]] of this
-   * `Value`.  Used to recursively deconstruct a structure, terminating with
+   * `Value`. Used to recursively deconstruct a structure, terminating with
    * its last `Value`, rather than a unary `Record` containing its last value,
    * if the structure ends with a `Value` member.
    */

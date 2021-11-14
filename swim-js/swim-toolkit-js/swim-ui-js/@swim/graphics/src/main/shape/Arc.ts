@@ -21,8 +21,10 @@ import type {DrawingContext} from "../drawing/DrawingContext";
 import {PathContext} from "../path/PathContext";
 import {PathRenderer} from "../path/PathRenderer";
 
+/** @public */
 export type AnyArc = Arc | ArcInit;
 
+/** @public */
 export interface ArcInit {
   center?: R2Point;
   innerRadius?: AnyLength;
@@ -34,6 +36,7 @@ export interface ArcInit {
   cornerRadius?: AnyLength;
 }
 
+/** @public */
 export class Arc implements Graphics, Equals, Debug {
   constructor(center: R2Point, innerRadius: Length, outerRadius: Length, startAngle: Angle,
               sweepAngle: Angle, padAngle: Angle, padRadius: Length | null, cornerRadius: Length) {

@@ -20,6 +20,7 @@ import type {ChartView} from "./ChartView";
 import type {ChartTrait} from "./ChartTrait";
 import type {ChartController} from "./ChartController";
 
+/** @public */
 export interface ChartControllerObserver<X = unknown, Y = unknown, C extends ChartController<X, Y> = ChartController<X, Y>> extends GraphControllerObserver<X, Y, C> {
   controllerWillAttachChartTrait?(chartTrait: ChartTrait<X, Y>, controller: C): void;
 

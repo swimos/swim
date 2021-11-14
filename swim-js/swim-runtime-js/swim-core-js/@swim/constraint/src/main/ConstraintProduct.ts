@@ -18,7 +18,7 @@ import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpress
 import type {ConstraintTerm} from "./ConstraintTerm";
 import type {ConstraintVariable} from "./ConstraintVariable";
 
-/** @internal */
+/** @public */
 export class ConstraintProduct implements ConstraintTerm, Debug {
   constructor(coefficient: number, variable: ConstraintVariable) {
     this.coefficient = coefficient;

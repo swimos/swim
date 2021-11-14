@@ -15,6 +15,7 @@
 import type {WarpRef} from "../ref/WarpRef";
 import type {WarpService} from "../service/WarpService";
 
+/** @beta */
 export interface DownlinkFastenerContext {
   readonly warpProvider: {
     readonly service: WarpService<any>;

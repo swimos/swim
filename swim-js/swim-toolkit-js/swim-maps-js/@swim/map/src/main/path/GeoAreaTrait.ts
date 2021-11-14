@@ -20,6 +20,7 @@ import {Look} from "@swim/theme";
 import {GeoPathTrait} from "./GeoPathTrait";
 import type {GeoAreaTraitObserver} from "./GeoAreaTraitObserver";
 
+/** @public */
 export abstract class GeoAreaTrait extends GeoPathTrait {
   override readonly observerType?: Class<GeoAreaTraitObserver>;
 

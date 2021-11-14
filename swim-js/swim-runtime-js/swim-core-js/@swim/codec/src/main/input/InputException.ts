@@ -14,6 +14,7 @@
 
 /**
  * Thrown when reading invalid [[Input]].
+ * @public
  */
 export class InputException extends Error {
   constructor(message?: string) {

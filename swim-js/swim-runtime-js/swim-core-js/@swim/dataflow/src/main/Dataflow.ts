@@ -79,6 +79,7 @@ import {NegativeOutlet} from "./operator/NegativeOutlet";
 import {PositiveOutlet} from "./operator/PositiveOutlet";
 import {InvokeOutlet} from "./operator/InvokeOutlet";
 
+/** @public */
 export const Dataflow = (function () {
   const Dataflow = {} as {
     /**

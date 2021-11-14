@@ -18,6 +18,7 @@ import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {EsriViewport} from "./EsriViewport";
 
+/** @public */
 export class EsriSceneViewport extends EsriViewport {
   constructor(map: __esri.SceneView, geoFrame: GeoBox, geoCenter: GeoPoint,
               zoom: number, heading: number, tilt: number) {

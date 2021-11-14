@@ -16,6 +16,7 @@ import type {Graphics} from "@swim/graphics";
 import type {CellViewObserver} from "./CellViewObserver";
 import type {IconCellView} from "./IconCellView";
 
+/** @public */
 export interface IconCellViewObserver<V extends IconCellView = IconCellView> extends CellViewObserver<V> {
   viewWillSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, view: V): void;
 

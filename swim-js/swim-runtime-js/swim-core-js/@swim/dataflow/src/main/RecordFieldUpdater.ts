@@ -16,6 +16,7 @@ import type {Value, Record} from "@swim/structure";
 import {KeyEffect, AbstractInlet} from "@swim/streamlet";
 import {RecordOutlet} from "./RecordOutlet";
 
+/** @internal */
 export class RecordFieldUpdater extends AbstractInlet<Value> {
   constructor(record: Record, key: Value) {
     super();

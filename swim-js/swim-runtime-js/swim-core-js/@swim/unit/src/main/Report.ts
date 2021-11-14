@@ -18,6 +18,7 @@ import type {Exam} from "./Exam";
 
 /**
  * Unit test result aggregator.
+ * @public
  */
 export class Report {
   /**

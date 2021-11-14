@@ -38,13 +38,17 @@ import {ModelRelation} from "./"; // forward import
 import {AnyTrait, TraitCreator, Trait} from "../"; // forward import
 import {TraitRelation} from "../"; // forward import
 
+/** @public */
 export type ModelContextType<M extends Model> =
   M extends {readonly contextType?: Class<infer T>} ? T : never;
 
+/** @public */
 export type ModelFlags = HierarchyFlags;
 
+/** @public */
 export type AnyModel<M extends Model = Model> = M | ModelFactory<M> | InitType<M>;
 
+/** @public */
 export interface ModelInit {
   type?: Creatable<Model>;
   key?: string;
@@ -52,21 +56,26 @@ export interface ModelInit {
   children?: AnyModel[];
 }
 
+/** @public */
 export interface ModelFactory<M extends Model = Model, U = AnyModel<M>> extends Creatable<M>, FromAny<M, U> {
   fromInit(init: InitType<M>): M;
 }
 
+/** @public */
 export interface ModelClass<M extends Model = Model, U = AnyModel<M>> extends Function, ModelFactory<M, U> {
   readonly prototype: M;
 }
 
+/** @public */
 export interface ModelConstructor<M extends Model = Model, U = AnyModel<M>> extends ModelClass<M, U> {
   new(): M;
 }
 
+/** @public */
 export type ModelCreator<F extends (abstract new (...args: any[]) => M) & Creatable<InstanceType<F>>, M extends Model = Model> =
   (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
+/** @public */
 export abstract class Model extends Hierarchy implements Initable<ModelInit>, Consumable {
   constructor() {
     super();

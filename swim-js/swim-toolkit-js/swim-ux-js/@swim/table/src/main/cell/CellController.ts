@@ -23,6 +23,7 @@ import type {CellControllerObserver} from "./CellControllerObserver";
 import {TextCellController} from "../"; // forward import
 import {IconCellController} from "../"; // forward import
 
+/** @public */
 export class CellController extends GenericController {
   override readonly observerType?: Class<CellControllerObserver>;
 

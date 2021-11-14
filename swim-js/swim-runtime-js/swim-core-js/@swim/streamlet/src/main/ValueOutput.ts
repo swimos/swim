@@ -15,6 +15,7 @@
 import type {Mutable} from "@swim/util";
 import {AbstractInlet} from "./AbstractInlet";
 
+/** @public */
 export class ValueOutput<I> extends AbstractInlet<I> {
   constructor(state?: I) {
     super();

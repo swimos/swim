@@ -15,13 +15,16 @@
 import type {AnyTiming} from "@swim/util";
 import type {View} from "../view/View";
 
+/** @public */
 export interface ModalOptions {
   modal?: boolean | number;
   multi?: boolean;
 }
 
+/** @public */
 export type ModalState = "hidden" | "showing" | "shown" | "hiding";
 
+/** @public */
 export interface Modal {
   readonly modalView: View | null;
 
@@ -34,6 +37,7 @@ export interface Modal {
   hideModal(timing?: AnyTiming | boolean): void;
 }
 
+/** @public */
 export const Modal = (function () {
   const Modal = {} as {
     is(object: unknown): object is Modal;

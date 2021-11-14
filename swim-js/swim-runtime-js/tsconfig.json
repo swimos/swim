@@ -21,7 +21,6 @@
 
     {"path": "./swim-host-js/@swim/warp"},
     {"path": "./swim-host-js/@swim/client"},
-    {"path": "./swim-host-js/@swim/cli"},
     {"path": "./swim-host-js/@swim/host"},
 
     {"path": "./@swim/runtime"}

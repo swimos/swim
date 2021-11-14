@@ -16,6 +16,7 @@ import type {ViewObserverCache} from "@swim/view";
 import type {NodeViewObserver} from "../node/NodeViewObserver";
 import type {ElementView} from "./ElementView";
 
+/** @public */
 export interface ElementViewObserver<V extends ElementView = ElementView> extends NodeViewObserver<V> {
   viewWillSetAttribute?(name: string, value: unknown, view: V): void;
 

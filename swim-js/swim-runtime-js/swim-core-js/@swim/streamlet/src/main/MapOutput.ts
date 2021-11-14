@@ -17,6 +17,7 @@ import {BTree} from "@swim/collections";
 import {KeyEffect} from "./KeyEffect";
 import {AbstractMapInlet} from "./AbstractMapInlet";
 
+/** @public */
 export class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
   constructor() {
     super();

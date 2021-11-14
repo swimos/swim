@@ -18,6 +18,7 @@ import type {Look} from "@swim/theme";
 import type {GeoPathTraitObserver} from "./GeoPathTraitObserver";
 import type {GeoAreaTrait} from "./GeoAreaTrait";
 
+/** @public */
 export interface GeoAreaTraitObserver<R extends GeoAreaTrait = GeoAreaTrait> extends GeoPathTraitObserver<R> {
   traitWillSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
 

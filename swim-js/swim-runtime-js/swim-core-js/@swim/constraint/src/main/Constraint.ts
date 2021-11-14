@@ -19,6 +19,7 @@ import type {ConstraintRelation} from "./ConstraintRelation";
 import {ConstraintStrength} from "./ConstraintStrength";
 import type {ConstraintScope} from "./ConstraintScope";
 
+/** @public */
 export class Constraint implements ConstraintId, Debug {
   constructor(scope: ConstraintScope, expression: ConstraintExpression,
               relation: ConstraintRelation, strength: ConstraintStrength) {

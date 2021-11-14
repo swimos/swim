@@ -24,8 +24,8 @@ import {
   ThemeConstraintAnimator,
 } from "@swim/theme";
 import {
+  ViewportInsets,
   PositionGestureInput,
-  ViewEdgeInsets,
   ViewContextType,
   ViewContext,
   ViewFlags,
@@ -41,6 +41,7 @@ import {HeaderView} from "../header/HeaderView";
 import type {TableViewContext} from "./TableViewContext";
 import type {TableViewObserver} from "./TableViewObserver";
 
+/** @public */
 export class TableView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
@@ -63,7 +64,7 @@ export class TableView extends HtmlView {
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
   @Property({type: Object, inherits: true, state: null, updateFlags: View.NeedsLayout})
-  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: Property<this, ViewportInsets | null>;
 
   @Property<TableView, number>({
     type: Number,

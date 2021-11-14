@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Mutable, Murmur3, Constructors, Interpolator} from "@swim/util";
 import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import {Item, Value, Record} from "@swim/structure";
@@ -23,6 +25,7 @@ import {TranslateTransformInterpolator} from "../"; // forward import
 import {TranslateTransformParser} from "../"; // forward import
 import {AffineTransform} from "../"; // forward import
 
+/** @public */
 export class TranslateTransform extends Transform {
   constructor(x: Length, y: Length) {
     super();

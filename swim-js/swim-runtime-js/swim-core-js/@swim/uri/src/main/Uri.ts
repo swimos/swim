@@ -29,8 +29,10 @@ import {AnyUriFragment, UriFragment} from "./"; // forward import
 import {UriForm} from "./"; // forward import
 import {UriParser} from "./"; // forward import
 
+/** @public */
 export type AnyUri = Uri | UriInit | string;
 
+/** @public */
 export interface UriInit extends UriAuthorityInit {
   scheme?: AnyUriScheme;
   authority?: AnyUriAuthority;
@@ -39,6 +41,7 @@ export interface UriInit extends UriAuthorityInit {
   fragment?: AnyUriFragment;
 }
 
+/** @public */
 export class Uri implements HashCode, Compare, Debug, Display {
   /** @internal */
   constructor(scheme: UriScheme, authority: UriAuthority, path: UriPath,

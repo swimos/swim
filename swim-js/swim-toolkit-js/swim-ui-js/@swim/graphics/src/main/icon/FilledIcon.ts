@@ -16,6 +16,7 @@ import type {Color} from "@swim/style";
 import type {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import {Icon} from "./Icon";
 
+/** @public */
 export abstract class FilledIcon extends Icon {
   abstract readonly fillColor: Color | null;
 

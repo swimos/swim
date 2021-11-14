@@ -23,7 +23,7 @@ import type {TableView} from "../table/TableView";
 import type {TableTrait} from "../table/TableTrait";
 import {TableController} from "../"; // forward import
 
-/** @internal */
+/** @public */
 export interface RowControllerTreeExt {
   attachTreeTrait(treeTrait: TableTrait, treeController: TableController): void;
   detachTreeTrait(treeTrait: TableTrait, treeController: TableController): void;
@@ -31,6 +31,7 @@ export interface RowControllerTreeExt {
   detachTreeView(treeView: TableView, treeController: TableController): void;
 }
 
+/** @public */
 export class RowController extends LeafController {
   override readonly observerType?: Class<RowControllerObserver>;
 

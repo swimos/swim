@@ -22,6 +22,7 @@ import {NumberInterpolator} from "../"; // forward import
 import {ArrayInterpolator} from "../"; // forward import
 import {InterpolatorInterpolator} from "../"; // forward import
 
+/** @public */
 export interface Interpolator<Y = unknown> extends Range<Y>, Interpolate<Interpolator<Y>> {
   readonly 0: Y;
 
@@ -39,6 +40,7 @@ export interface Interpolator<Y = unknown> extends Range<Y>, Interpolate<Interpo
   toString(): string;
 }
 
+/** @public */
 export const Interpolator = (function (_super: typeof Range) {
   const Interpolator = function (y0: unknown, y1: unknown): Interpolator {
     let interpolator: Interpolator | null;

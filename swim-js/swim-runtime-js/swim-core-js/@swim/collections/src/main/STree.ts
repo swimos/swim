@@ -16,9 +16,14 @@ import type {Cursor} from "@swim/util";
 import {STreeContext} from "./STreeContext";
 import {STreePage} from "./"; // forward import
 
+/** @public */
 export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
+  /** @internal */
   root: STreePage<V, I>;
 
+  constructor();
+  /** @internal */
+  constructor(root: STreePage<V, I>);
   constructor(root?: STreePage<V, I>) {
     super();
     if (root === void 0) {
@@ -243,6 +248,7 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
     return this.copy(this.root);
   }
 
+  /** @internal */
   protected copy(root: STreePage<V, I>): STree<V, I> {
     const tree = new STree(root);
     if (tree.identify !== this.identify) {

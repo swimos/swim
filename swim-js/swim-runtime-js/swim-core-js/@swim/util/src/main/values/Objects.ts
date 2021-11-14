@@ -18,6 +18,7 @@ import {Values} from "./Values";
 
 /**
  * Utilities for comparing and hashing structural objects.
+ * @public
  */
 export const Objects = (function () {
   const Objects = {} as {
@@ -35,11 +36,11 @@ export const Objects = (function () {
     equivalent(x: object | null | undefined, y: object | null | undefined, epsilon?: number): boolean;
 
     /**
-     * Returns the relative order of `x` with respect to `y`.  Returns `-1` if
+     * Returns the relative order of `x` with respect to `y`. Returns `-1` if
      * the entries of object `x` order lexicographically before the entries of
      * object `y`; returns `1` if the entries of object `x` order
      * lexicographically after the entries of object `y`; and returns `0` if `x`
-     * and `y` are equal objects.  If either `x` or `y` is `null` or `undefined`,
+     * and `y` are equal objects. If either `x` or `y` is `null` or `undefined`,
      * then objects order before `null`, and `null` orders before `undefined`.
      */
     compare(x: object | null | undefined, y: object | null | undefined): number;

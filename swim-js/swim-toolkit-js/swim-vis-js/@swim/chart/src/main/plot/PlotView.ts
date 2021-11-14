@@ -15,23 +15,16 @@
 import type {Class, Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
 import type {Animator} from "@swim/fastener";
 import type {AnyFont, AnyColor} from "@swim/style";
-import {GraphicsViewInit, GraphicsView} from "@swim/graphics";
+import type {GraphicsViewInit, GraphicsView} from "@swim/graphics";
 import type {AnyDataPointView} from "../data/DataPointView";
 import type {ScaledXYView} from "../scaled/ScaledXYView";
 import type {PlotViewObserver} from "./PlotViewObserver";
-import {ScatterPlotView} from "../"; // forward import
-import {SeriesPlotView} from "../"; // forward import
-import {BubblePlotViewInit, BubblePlotView} from "../"; // forward import
-import {LinePlotViewInit, LinePlotView} from "../"; // forward import
-import {AreaPlotViewInit, AreaPlotView} from "../"; // forward import
 
-export type PlotType = "bubble" | "line" | "area";
+/** @public */
+export type AnyPlotView<X = unknown, Y = unknown> = PlotView<X, Y> | PlotViewInit<X, Y>;
 
-export type AnyPlotView<X = unknown, Y = unknown> = PlotView<X, Y> | PlotViewInit<X, Y> | PlotType;
-
+/** @public */
 export interface PlotViewInit<X = unknown, Y = unknown> extends GraphicsViewInit {
-  plotType?: PlotType;
-
   xScale?: ContinuousScale<X, number>;
   yScale?: ContinuousScale<Y, number>;
 
@@ -41,16 +34,16 @@ export interface PlotViewInit<X = unknown, Y = unknown> extends GraphicsViewInit
   textColor?: AnyColor;
 }
 
+/** @public */
 export interface PlotViewDataPointExt<X = unknown, Y = unknown> {
   attachDataPointLabelView(labelView: GraphicsView): void;
   detachDataPointLabelView(labelView: GraphicsView): void;
 }
 
+/** @public */
 export interface PlotView<X = unknown, Y = unknown> extends GraphicsView, ScaledXYView<X, Y> {
   /** @override */
   readonly observerType?: Class<PlotViewObserver<X, Y>>;
-
-  plotType: PlotType;
 
   readonly xScale: Animator<this, ContinuousScale<X, number> | null, string>;
 
@@ -80,61 +73,3 @@ export interface PlotView<X = unknown, Y = unknown> extends GraphicsView, Scaled
 
   readonly yDataRange: Range<number> | null;
 }
-
-export const PlotView = (function () {
-  const PlotView = {} as {
-    is<X, Y>(object: unknown): object is PlotView<X, Y>;
-
-    fromType<X, Y>(type: PlotType): PlotView<X, Y>;
-
-    fromInit<X, Y>(init: PlotViewInit<X, Y>): PlotView<X, Y>;
-
-    fromAny<X, Y>(value: AnyPlotView<X, Y>): PlotView<X, Y>;
-  };
-
-  PlotView.is = function <X, Y>(object: unknown): object is PlotView<X, Y> {
-    if (typeof object === "object" && object !== null) {
-      const view = object as PlotView<X, Y>;
-      return view instanceof ScatterPlotView
-          || view instanceof SeriesPlotView
-          || view instanceof GraphicsView && "plotType" in view;
-    }
-    return false;
-  };
-
-  PlotView.fromType = function <X, Y>(type: PlotType): PlotView<X, Y> {
-    if (type === "bubble") {
-      return new BubblePlotView();
-    } else if (type === "line") {
-      return new LinePlotView();
-    } else if (type === "area") {
-      return new AreaPlotView();
-    }
-    throw new TypeError("" + type);
-  };
-
-  PlotView.fromInit = function <X, Y>(init: PlotViewInit<X, Y>): PlotView<X, Y> {
-    const type = init.plotType;
-    if (type === "bubble") {
-      return BubblePlotView.fromInit(init as BubblePlotViewInit) as PlotView<X, Y>;
-    } else if (type === "line") {
-      return LinePlotView.fromInit(init as LinePlotViewInit) as PlotView<X, Y>;
-    } else if (type === "area") {
-      return AreaPlotView.fromInit(init as AreaPlotViewInit) as PlotView<X, Y>;
-    }
-    throw new TypeError("" + init);
-  };
-
-  PlotView.fromAny = function <X, Y>(value: AnyPlotView<X, Y>): PlotView<X, Y> {
-    if (this.is<X, Y>(value)) {
-      return value;
-    } else if (typeof value === "string") {
-      return this.fromType(value);
-    } else if (typeof value === "object" && value !== null) {
-      return this.fromInit(value);
-    }
-    throw new TypeError("" + value);
-  };
-
-  return PlotView;
-})();

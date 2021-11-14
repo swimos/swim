@@ -18,8 +18,10 @@ import {R2SegmentInit, R2Segment} from "../"; // forward import
 import {R2BoxInit, R2Box} from "../"; // forward import
 import {R2CircleInit, R2Circle} from "../"; // forward import
 
+/** @public */
 export type AnyR2Shape = R2Shape | R2PointInit | R2PointTuple | R2SegmentInit | R2BoxInit | R2CircleInit;
 
+/** @public */
 export abstract class R2Shape {
   abstract readonly xMin: number;
 

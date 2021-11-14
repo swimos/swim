@@ -27,11 +27,13 @@ import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import {CanvasView} from "../canvas/CanvasView";
 import type {RasterViewContext} from "./RasterViewContext";
 
+/** @public */
 export interface RasterViewInit extends GraphicsViewInit {
   opacity?: number;
   compositeOperation?: CanvasCompositeOperation;
 }
 
+/** @public */
 export class RasterView extends LayerView {
   constructor() {
     super();

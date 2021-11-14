@@ -13,11 +13,7 @@
 // limitations under the License.
 
 export * from "@swim/button";
-
 export * from "@swim/token";
-
 export * from "@swim/table";
-
 export * from "@swim/window";
-
 export * from "@swim/deck";

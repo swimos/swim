@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Creatable, Dictionary, MutableDictionary} from "@swim/util";
+import {Provider} from "@swim/fastener";
 import {R2Box, Transform} from "@swim/math";
 import {
   ViewContextType,
@@ -26,35 +27,44 @@ import {
   View,
   ModalService,
 } from "@swim/view";
+import {DomService} from "../service/DomService";
+import {DomProvider} from "../service/DomProvider";
 import type {NodeViewObserver} from "./NodeViewObserver";
-import type {DomProvider} from "../service/DomProvider";
 import {TextView} from "../"; // forward import
 import {ViewElement, ElementView} from "../"; // forward import
 
+/** @public */
 export type ViewNodeType<V extends NodeView> =
   V extends {readonly node: infer N} ? N : never;
 
+/** @public */
 export interface ViewNode extends Node {
   view?: NodeView;
 }
 
+/** @public */
 export type AnyNodeView<V extends NodeView = NodeView> = AnyView<V> | ViewNodeType<V>;
 
+/** @public */
 export interface NodeViewInit extends ViewInit {
   text?: string;
 }
 
+/** @public */
 export interface NodeViewFactory<V extends NodeView = NodeView, U = AnyNodeView<V>> extends ViewFactory<V, U> {
   fromNode(node: ViewNodeType<V>): V
 }
 
+/** @public */
 export interface NodeViewClass<V extends NodeView = NodeView, U = AnyNodeView<V>> extends ViewClass<V, U>, NodeViewFactory<V, U> {
 }
 
+/** @public */
 export interface NodeViewConstructor<V extends NodeView = NodeView, U = AnyNodeView<V>> extends NodeViewClass<V, U> {
   new(node: ViewNodeType<V>): V;
 }
 
+/** @public */
 export class NodeView extends View {
   constructor(node: Node) {
     super();
@@ -819,7 +829,13 @@ export class NodeView extends View {
     }
   }
 
-  declare readonly domProvider: DomProvider<this>; // defined by DomProvider
+  @Provider({
+    extends: DomProvider,
+    type: DomService,
+    observes: false,
+    service: DomService.global(),
+  })
+  declare readonly domProvider: DomProvider<this>;
 
   text(): string | undefined;
   text(value: string | null | undefined): this;

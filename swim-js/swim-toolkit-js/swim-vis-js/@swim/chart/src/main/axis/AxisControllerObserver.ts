@@ -17,6 +17,7 @@ import type {AxisView} from "./AxisView";
 import type {AxisTrait} from "./AxisTrait";
 import type {AxisController} from "./AxisController";
 
+/** @public */
 export interface AxisControllerObserver<D = unknown, C extends AxisController<D> = AxisController<D>> extends ControllerObserver<C> {
   controllerWillAttachAxisTrait?(axisTrait: AxisTrait<D>, controller: C): void;
 

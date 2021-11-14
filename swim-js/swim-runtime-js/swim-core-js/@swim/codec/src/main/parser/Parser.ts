@@ -24,7 +24,7 @@ import {ParserError} from "../"; // forward import
  * data formats, without intermediate buffering.
  *
  * ### Input tokens
- * A `Parser` reads tokens from an `Input` reader.  Input tokens are modeled as
+ * A `Parser` reads tokens from an `Input` reader. Input tokens are modeled as
  * primitive numbers, commonly representing Unicode code points, or raw octets.
  * Each `Parser` implementation specifies the semantic type of input tokens it
  * consumes.
@@ -40,47 +40,47 @@ import {ParserError} from "../"; // forward import
  * ### Feeding input
  * The [[feed]] method incrementally parses as much `Input` as it can, before
  * returning another `Parser` that represents the continuation of how to parse
- * additional `Input`.  The `Input` passed to `feed` is only guaranteed to be
+ * additional `Input`. The `Input` passed to `feed` is only guaranteed to be
  * valid for the duration of the method call; references to the provided `Input`
  * instance must not be stored.
  *
  * ### Parser results
  * A `Parser` produces a parsed result of type `O`, obtained via the [[bind]]
- * method.  `bind` is only guaranteed to return a result when in the _done_
+ * method. `bind` is only guaranteed to return a result when in the _done_
  * state; though `bind` may optionally make available partial results in other
- * states.  A failed `Parser` provides a parse error via the [[trap]] method.
+ * states. A failed `Parser` provides a parse error via the [[trap]] method.
  * `trap` is only guaranteed to return an error when in the _error_ state.
  *
  * ### Continuations
  * A `Parser` instance represents a continuation of how to parse remaining
- * `Input`.  Rather than parsing a complete input in one go, a `Parser` takes
+ * `Input`. Rather than parsing a complete input in one go, a `Parser` takes
  * an `Input` chunk and returns another `Parser` instance that knows how to
- * parse subsequent `Input` chunks.  This enables non-blocking, incremental
+ * parse subsequent `Input` chunks. This enables non-blocking, incremental
  * parsing that can be interrupted whenever an `Input` reader runs out of
- * immediately available data.  A `Parser` terminates by returning a
+ * immediately available data. A `Parser` terminates by returning a
  * continuation in either the _done_ state, or the _error_ state.
- * [[Parser.done]] returns a `Parser` in the _done_ state.  [[Parser.error]]
+ * [[Parser.done]] returns a `Parser` in the _done_ state. [[Parser.error]]
  * returns a `Parser` in the _error_ state.
  *
  * ### Iteratees
- * `Parser` is an [Iteratee](https://en.wikipedia.org/wiki/Iteratee).  Though
+ * `Parser` is an [Iteratee](https://en.wikipedia.org/wiki/Iteratee). Though
  * unlike strictly functional iteratees, a `Parser` statefully iterates over
  * its `Input`, rather than allocating an object for each incremental input
- * continutaion.  This internal mutability minimizes garbage collector memory
+ * continutaion. This internal mutability minimizes garbage collector memory
  * pressure, without violating the functional Iteratee abstraction, provided
  * that `feed` logically takes exclusive ownership of its `Input` when invoked,
  * and logically returns ownership of the `Input` in a state that's consistent
  * with the returned `Parser` continuation.
  *
  * ### Immutability
- * A `Parser` should be immutable.  Specifically, an invocation of `feed`
+ * A `Parser` should be immutable. Specifically, an invocation of `feed`
  * should not alter the behavior of future calls to `feed` on the same `Parser`
- * instance.  A `Parser` should only mutate its internal state if it's essential
+ * instance. A `Parser` should only mutate its internal state if it's essential
  * to do so, such as for critical path performance reasons.
  *
  * ### Backtracking
  * `feed` can internally [[Input.clone clone]] its `Input`, if it might need to
- * backtrack.  Keep in mind that, because `Input` is only valid for the duration
+ * backtrack. Keep in mind that, because `Input` is only valid for the duration
  * of a call to `feed`, input must be internally buffered if it needs to be
  * preserved between `feed` invocations.
  *
@@ -89,12 +89,14 @@ import {ParserError} from "../"; // forward import
  * a `Parser` continuation whose behavior may be altered by the given condition.
  * For example, an HTML `Parser` might `fork` an inner text parser to directly
  * parse an embedded micro format out of an HTML element, based on some
- * out-of-band schema information.  The types of conditions accepted by `fork`,
+ * out-of-band schema information. The types of conditions accepted by `fork`,
  * and their intended semantics, are implementation defined.
+ *
+ * @public
  */
 export abstract class Parser<O> {
   /**
-   * Returns `true` when [[feed]] is able to consume `Input`.  i.e. this
+   * Returns `true` when [[feed]] is able to consume `Input`, i.e. this
    * `Parser` is in the _cont_ state.
    */
   isCont(): boolean {
@@ -103,7 +105,7 @@ export abstract class Parser<O> {
 
   /**
    * Returns `true` when parsing has terminated successfully, and [[bind]] will
-   * return the parsed result.  i.e. this `Parser` is in the _done_ state.
+   * return the parsed result, i.e. this `Parser` is in the _done_ state.
    */
   isDone(): boolean {
     return false;
@@ -111,7 +113,7 @@ export abstract class Parser<O> {
 
   /**
    * Returns `true` when parsing has terminated in failure, and [[trap]] will
-   * return the parse error.  i.e. this `Parser` is in the _error_ state.
+   * return the parse error, i.e. this `Parser` is in the _error_ state.
    */
   isError(): boolean {
     return false;
@@ -120,9 +122,9 @@ export abstract class Parser<O> {
   /**
    * Incrementally parses as much `input` as possible, and returns another
    * `Parser` that represents the continuation of how to parse additional
-   * `Input`.  If `input` enters the _done_ state, `feed` _must_ return a
+   * `Input`. If `input` enters the _done_ state, `feed` _must_ return a
    * terminated `Parser`, i.e. a `Parser` in the _done_ state, or in the
-   * _error_ state.  The given `input` is only guaranteed to be valid for the
+   * _error_ state. The given `input` is only guaranteed to be valid for the
    * duration of the method call; references to `input` must not be stored.
    */
   abstract feed(input: Input): Parser<O>;
@@ -136,17 +138,17 @@ export abstract class Parser<O> {
   }
 
   /**
-   * Returns the parsed result.  Only guaranteed to return a result when in the
+   * Returns the parsed result. Only guaranteed to return a result when in the
    * _done_ state.
    *
-   * @throws `Error` if this `Parser is not in the _done_ state.
+   * @throws `Error` if this `Parser` is not in the _done_ state.
    */
   bind(): O {
     throw new ParserException();
   }
 
   /**
-   * Returns the parse error.  Only guaranteed to return an error when in the
+   * Returns the parse error. Only guaranteed to return an error when in the
    * _error_ state.
    *
    * @throws `Error` if this `Parser` is not in the _error_ state.
@@ -156,7 +158,7 @@ export abstract class Parser<O> {
   }
 
   /**
-   * Casts an errored `Parser` to a different output type.  A `Parser` in the
+   * Casts an errored `Parser` to a different output type. A `Parser` in the
    * _error_ state can have any output type.
    *
    * @throws `ParserException` if this `Parser` is not in the _error_ state.

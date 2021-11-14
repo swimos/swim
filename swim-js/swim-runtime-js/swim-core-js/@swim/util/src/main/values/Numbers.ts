@@ -16,6 +16,7 @@ import {Equivalent} from "../compare/Equivalent";
 
 /**
  * Utilities for comparing and hashing numbers.
+ * @public
  */
 export const Numbers = (function () {
   const Numbers = {} as {
@@ -33,10 +34,10 @@ export const Numbers = (function () {
     equivalent(x: number | null | undefined, y: number | null | undefined, epsilon?: number): boolean;
 
     /**
-     * Returns the relative order of `x` with respect to `y`.  Returns `-1` if
+     * Returns the relative order of `x` with respect to `y`. Returns `-1` if
      * the number `x` less than the number `y`; returns `1` if the number `x` is
      * greater than the number `y`; and returns `0` if `x` and `y` are equal
-     * numbers, or if both are `NaN`.  If either `x` or `y` is `NaN`, `null`,
+     * numbers, or if both are `NaN`. If either `x` or `y` is `NaN`, `null`,
      * or `undefined`, then numbers order before `NaN`, `NaN` orders before
      * `null`, and `null` orders before `undefined`.
      */

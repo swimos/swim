@@ -18,6 +18,7 @@ import type {CellView} from "./CellView";
 import type {CellTrait} from "./CellTrait";
 import type {CellController} from "./CellController";
 
+/** @public */
 export interface CellControllerObserver<C extends CellController = CellController> extends ControllerObserver<C> {
   controllerWillAttachCellTrait?(cellTrait: CellTrait, controller: C): void;
 

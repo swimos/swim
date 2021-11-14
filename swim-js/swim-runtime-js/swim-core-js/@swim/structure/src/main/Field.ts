@@ -22,10 +22,12 @@ import {Record} from "./"; // forward import
 import {AnyText, Text} from "./"; // forward import
 import type {AnyNum} from "./Num";
 
+/** @public */
 export type AnyField = Field
                      | {readonly $key: AnyValue, readonly $value: AnyValue}
                      | {[key: string]: AnyValue};
 
+/** @public */
 export abstract class Field extends Item {
   /** @internal */
   constructor() {

@@ -17,6 +17,7 @@ import {R2SplineBuilder} from "./R2SplineBuilder";
 import type {R2PathContext} from "./R2PathContext";
 import {R2Path} from "./R2Path";
 
+/** @public */
 export class R2PathBuilder implements R2PathContext {
   /** @internal */
   splines: R2Spline[];

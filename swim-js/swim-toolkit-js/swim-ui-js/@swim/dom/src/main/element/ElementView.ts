@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Class, Arrays, Creatable, ObserverType} from "@swim/util";
 import {Affinity} from "@swim/fastener";
 import {R2Box} from "@swim/math";
@@ -40,29 +42,36 @@ import {DomService} from "../"; // forward import
 import {HtmlView} from "../"; // forward import
 import {SvgView} from "../"; // forward import
 
+/** @public */
 export interface ViewElement extends Element, ElementCSSInlineStyle {
   view?: ElementView;
 }
 
+/** @public */
 export type AnyElementView<V extends ElementView = ElementView> = AnyNodeView<V>;
 
+/** @public */
 export interface ElementViewInit extends NodeViewInit {
   id?: string;
   classList?: string[];
 }
 
+/** @public */
 export interface ElementViewFactory<V extends ElementView = ElementView, U = AnyElementView<V>> extends NodeViewFactory<V, U> {
   fromTag(tag: string): V;
 }
 
+/** @public */
 export interface ElementViewClass<V extends ElementView = ElementView, U = AnyElementView<V>> extends NodeViewClass<V, U>, ElementViewFactory<V, U> {
   readonly tag?: string;
   readonly namespace?: string;
 }
 
+/** @public */
 export interface ElementViewConstructor<V extends ElementView = ElementView, U = AnyElementView<V>> extends NodeViewConstructor<V, U>, ElementViewClass<V, U> {
 }
 
+/** @public */
 export class ElementView extends NodeView implements StyleContext {
   constructor(node: Element) {
     super(node);

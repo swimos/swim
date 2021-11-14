@@ -26,7 +26,7 @@ import {HeaderView} from "./HeaderView";
 import {HeaderTrait} from "./HeaderTrait";
 import type {HeaderControllerObserver} from "./HeaderControllerObserver";
 
-/** @internal */
+/** @public */
 export type HeaderControllerColExt = {
   attachColTrait(colTrait: ColTrait, colController: ColController): void;
   detachColTrait(colTrait: ColTrait, colController: ColController): void;
@@ -36,6 +36,7 @@ export type HeaderControllerColExt = {
   detachColLabelView(colLabelView: HtmlView, colController: ColController): void;
 };
 
+/** @public */
 export class HeaderController extends GenericController {
   override readonly observerType?: Class<HeaderControllerObserver>;
 

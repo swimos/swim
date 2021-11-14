@@ -20,6 +20,7 @@ import type {MapOutlet} from "./MapOutlet";
 import type {MapValueFunction, MapFieldValuesFunction} from "./function";
 import type {WatchValueFunction, WatchFieldsFunction} from "./function";
 
+/** @public */
 export interface MapInoutlet<K, VI, VO, I, O> extends Inoutlet<I, O>, MapInlet<K, VI, I>, MapOutlet<K, VO, O> {
   /**
    * Returns the current state of this `Outlet`.

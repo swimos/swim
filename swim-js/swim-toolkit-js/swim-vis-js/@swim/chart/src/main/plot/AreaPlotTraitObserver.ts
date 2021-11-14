@@ -17,6 +17,7 @@ import type {Look} from "@swim/theme";
 import type {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
 import type {AreaPlotTrait} from "./AreaPlotTrait";
 
+/** @public */
 export interface AreaPlotTraitObserver<X = unknown, Y = unknown, R extends AreaPlotTrait<X, Y> = AreaPlotTrait<X, Y>> extends SeriesPlotTraitObserver<X, Y, R> {
   traitWillSetPlotFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
 

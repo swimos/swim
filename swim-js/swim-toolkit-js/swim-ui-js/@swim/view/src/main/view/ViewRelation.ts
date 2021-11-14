@@ -16,9 +16,11 @@ import type {Class, ObserverType} from "@swim/util";
 import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
 import {AnyView, ViewFactory, View} from "./View";
 
+/** @internal */
 export type ViewRelationType<F extends ViewRelation<any, any>> =
   F extends ViewRelation<any, infer V> ? V : never;
 
+/** @public */
 export interface ViewRelationInit<V extends View = View> extends FastenerInit {
   extends?: {prototype: ViewRelation<any, any>} | string | boolean | null;
   type?: ViewFactory<V>;
@@ -41,11 +43,14 @@ export interface ViewRelationInit<V extends View = View> extends FastenerInit {
   fromAny?(value: AnyView<V>): V;
 }
 
+/** @public */
 export type ViewRelationDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<ViewRelation<O, V> & I> & ViewRelationInit<V> & Partial<I>;
 
+/** @public */
 export interface ViewRelationClass<F extends ViewRelation<any, any> = ViewRelation<any, any>> extends FastenerClass<F> {
 }
 
+/** @public */
 export interface ViewRelationFactory<F extends ViewRelation<any, any> = ViewRelation<any, any>> extends ViewRelationClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ViewRelationFactory<F> & I;
 
@@ -60,6 +65,7 @@ export interface ViewRelationFactory<F extends ViewRelation<any, any> = ViewRela
   <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & ViewRelationDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
 }
 
+/** @public */
 export interface ViewRelation<O = unknown, V extends View = View> extends Fastener<O> {
   /** @override */
   get familyType(): Class<ViewRelation<any, any>> | null;
@@ -123,6 +129,7 @@ export interface ViewRelation<O = unknown, V extends View = View> extends Fasten
   get static(): string | boolean; // prototype property
 }
 
+/** @public */
 export const ViewRelation = (function (_super: typeof Fastener) {
   const ViewRelation: ViewRelationFactory = _super.extend("ViewRelation");
 

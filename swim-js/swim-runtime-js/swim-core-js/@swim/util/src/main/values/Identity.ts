@@ -14,11 +14,12 @@
 
 /**
  * Utilities for comparing and hashing object identities.
+ * @public
  */
 export const Identity = (function () {
   const Identity = {} as {
     /**
-     * Returns the relative order of `x` with respect to `y`.  Returns `-1` if
+     * Returns the relative order of `x` with respect to `y`. Returns `-1` if
      * the hash code of object `x` is less than the hash code of object `y`;
      * returns `1` if the hash code of object `x` is greater than the hash code
      * of object `y`; and returns `0` if `x` and `y` are identical objects.

@@ -16,6 +16,7 @@ import type {Interpolator} from "./Interpolator";
 
 /**
  * Type that can be [[Interpolator interpolated]] to values of type `T`.
+ * @public
  */
 export interface Interpolate<T = unknown> {
   /**
@@ -26,6 +27,7 @@ export interface Interpolate<T = unknown> {
   interpolateTo(that: unknown): Interpolator<T> | null;
 }
 
+/** @public */
 export const Interpolate = (function () {
   const Interpolate = function (x: unknown, y: unknown): Interpolator | null {
     if (x !== void 0 && x !== null && typeof (x as Interpolate).interpolateTo === "function") {

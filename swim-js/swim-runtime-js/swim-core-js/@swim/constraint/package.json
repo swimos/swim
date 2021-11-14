@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-constraint.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-constraint.js",
+  "module": "./dist/swim-constraint.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-constraint.mjs",
+      "require": "./dist/swim-constraint.js",
+      "types": "./dist/swim-constraint.d.ts"
+    }
+  },
+  "types": "./dist/swim-constraint.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "dependencies": {
     "@swim/util": "4.0.0-dev.20210927.1",
     "@swim/codec": "4.0.0-dev.20210927.1",

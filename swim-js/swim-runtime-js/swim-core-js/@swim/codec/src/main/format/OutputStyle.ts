@@ -16,6 +16,7 @@ import type {Output} from "../output/Output";
 
 /**
  * Stylized text output utility functions.
+ * @public
  */
 export const OutputStyle = (function () {
   const OutputStyle = {} as {
@@ -23,7 +24,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII reset escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     reset<T>(output: Output<T>): Output<T>
 
@@ -31,7 +32,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold (increased intensity) escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     bold<T>(output: Output<T>): Output<T>;
 
@@ -39,7 +40,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII faint (decreased intensity) escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     faint<T>(output: Output<T>): Output<T>;
 
@@ -47,7 +48,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII black foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     black<T>(output: Output<T>): Output<T>;
 
@@ -55,7 +56,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII red foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     red<T>(output: Output<T>): Output<T>;
 
@@ -63,7 +64,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII green foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     green<T>(output: Output<T>): Output<T>;
 
@@ -71,7 +72,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII yellow foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     yellow<T>(output: Output<T>): Output<T>;
 
@@ -79,7 +80,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII blue foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     blue<T>(output: Output<T>): Output<T>;
 
@@ -87,7 +88,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII magenta foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     magenta<T>(output: Output<T>): Output<T>;
 
@@ -95,7 +96,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII cyan foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     cyan<T>(output: Output<T>): Output<T>;
 
@@ -103,7 +104,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII gray foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     gray<T>(output: Output<T>): Output<T>;
 
@@ -111,7 +112,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold black foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     blackBold<T>(output: Output<T>): Output<T>;
 
@@ -119,7 +120,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold red foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     redBold<T>(output: Output<T>): Output<T>;
 
@@ -127,7 +128,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold green foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     greenBold<T>(output: Output<T>): Output<T>;
 
@@ -135,7 +136,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold yellow foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     yellowBold<T>(output: Output<T>): Output<T>;
 
@@ -143,7 +144,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold blue foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     blueBold<T>(output: Output<T>): Output<T>;
 
@@ -151,7 +152,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold magenta foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     magentaBold<T>(output: Output<T>): Output<T>;
 
@@ -159,7 +160,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold cyan foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     cyanBold<T>(output: Output<T>): Output<T>;
 
@@ -167,7 +168,7 @@ export const OutputStyle = (function () {
      * Writes the ASCII bold gray foreground color escape code to `output`,
      * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
      *
-     * @return the continuation of the `output`.
+     * @returns the continuation of the `output`.
      */
     grayBold<T>(output: Output<T>): Output<T>;
   };

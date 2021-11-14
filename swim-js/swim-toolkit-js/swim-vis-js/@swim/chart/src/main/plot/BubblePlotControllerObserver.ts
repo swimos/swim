@@ -19,6 +19,7 @@ import type {BubblePlotTrait} from "./BubblePlotTrait";
 import type {ScatterPlotControllerObserver} from "./ScatterPlotControllerObserver";
 import type {BubblePlotController} from "./BubblePlotController";
 
+/** @public */
 export interface BubblePlotControllerObserver<X = unknown, Y = unknown, C extends BubblePlotController<X, Y> = BubblePlotController<X, Y>> extends ScatterPlotControllerObserver<X, Y, C> {
   controllerWillAttachPlotTrait?(plotTrait: BubblePlotTrait<X, Y>, controller: C): void;
 

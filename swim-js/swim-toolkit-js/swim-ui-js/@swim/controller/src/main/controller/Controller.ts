@@ -24,34 +24,43 @@ import {ControllerContext} from "./ControllerContext";
 import type {ControllerObserver} from "./ControllerObserver";
 import {ControllerRelation} from "./"; // forward import
 
+/** @public */
 export type ControllerContextType<C extends Controller> =
   C extends {readonly contextType?: Class<infer T>} ? T : never;
 
+/** @public */
 export type ControllerFlags = HierarchyFlags;
 
+/** @public */
 export type AnyController<C extends Controller = Controller> = C | ControllerFactory<C> | InitType<C>;
 
+/** @public */
 export interface ControllerInit {
   type?: Creatable<Controller>;
   key?: string;
   children?: AnyController[];
 }
 
+/** @public */
 export interface ControllerFactory<C extends Controller = Controller, U = AnyController<C>> extends Creatable<C>, FromAny<C, U> {
   fromInit(init: InitType<C>): C;
 }
 
+/** @public */
 export interface ControllerClass<C extends Controller = Controller, U = AnyController<C>> extends Function, ControllerFactory<C, U> {
   readonly prototype: C;
 }
 
+/** @public */
 export interface ControllerConstructor<C extends Controller = Controller, U = AnyController<C>> extends ControllerClass<C, U> {
   new(): C;
 }
 
+/** @public */
 export type ControllerCreator<F extends (abstract new (...args: any[]) => C) & Creatable<InstanceType<F>>, C extends Controller = Controller> =
   (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
+/** @public */
 export abstract class Controller extends Hierarchy implements Initable<ControllerInit> {
   constructor() {
     super();

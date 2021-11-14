@@ -15,6 +15,7 @@
 import type {AnyR2Point, R2Point} from "@swim/math";
 import type {AnyGeoPoint, GeoPoint} from "./GeoPoint";
 
+/** @public */
 export interface GeoProjection {
   project(lnglat: AnyGeoPoint): R2Point;
   project(lng: number, lat: number): R2Point;
@@ -23,7 +24,7 @@ export interface GeoProjection {
   unproject(x: number, y: number): GeoPoint;
 }
 
-/** @internal */
+/** @public */
 export const GeoProjection = (function () {
   const GeoProjection = {} as {
     is(object: unknown): object is GeoProjection;

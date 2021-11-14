@@ -15,7 +15,7 @@
 import {Arrays, Values} from "@swim/util";
 import {Input, ParserException, Parser, Unicode, Utf8, Binary} from "@swim/codec";
 import {TestException, TestOptions, Spec, Proof, Report, Exam} from "@swim/unit";
-import {Item, Value} from "@swim/structure";
+import type {Item, Value} from "@swim/structure";
 import {Recon} from "@swim/recon";
 
 export class ReconExam extends Exam {
@@ -86,7 +86,7 @@ export class ReconExam extends Exam {
 
   parseFails(recon: string): void {
     this.throws(function () {
-      Value.parseRecon(recon);
+      Recon.parse(recon);
     }, ParserException);
   }
 

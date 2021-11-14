@@ -17,9 +17,11 @@ import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fasten
 import {AnyModel, ModelFactory, Model} from "./Model";
 import {Trait} from "../"; // forward import
 
+/** @internal */
 export type ModelRelationType<F extends ModelRelation<any, any>> =
   F extends ModelRelation<any, infer M> ? M : never;
 
+/** @public */
 export interface ModelRelationInit<M extends Model = Model> extends FastenerInit {
   extends?: {prototype: ModelRelation<any, any>} | string | boolean | null;
   type?: ModelFactory<M>;
@@ -42,11 +44,14 @@ export interface ModelRelationInit<M extends Model = Model> extends FastenerInit
   fromAny?(value: AnyModel<M>): M;
 }
 
+/** @public */
 export type ModelRelationDescriptor<O = unknown, M extends Model = Model, I = {}> = ThisType<ModelRelation<O, M> & I> & ModelRelationInit<M> & Partial<I>;
 
+/** @public */
 export interface ModelRelationClass<F extends ModelRelation<any, any> = ModelRelation<any, any>> extends FastenerClass<F> {
 }
 
+/** @public */
 export interface ModelRelationFactory<F extends ModelRelation<any, any> = ModelRelation<any, any>> extends ModelRelationClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ModelRelationFactory<F> & I;
 
@@ -61,6 +66,7 @@ export interface ModelRelationFactory<F extends ModelRelation<any, any> = ModelR
   <O, M extends Model = Model, I = {}>(descriptor: {observes: boolean} & ModelRelationDescriptor<O, M, I & ObserverType<M>>): PropertyDecorator;
 }
 
+/** @public */
 export interface ModelRelation<O = unknown, M extends Model = Model> extends Fastener<O> {
   /** @override */
   get familyType(): Class<ModelRelation<any, any>> | null;
@@ -124,6 +130,7 @@ export interface ModelRelation<O = unknown, M extends Model = Model> extends Fas
   get static(): string | boolean; // prototype property
 }
 
+/** @public */
 export const ModelRelation = (function (_super: typeof Fastener) {
   const ModelRelation: ModelRelationFactory = _super.extend("ModelRelation");
 

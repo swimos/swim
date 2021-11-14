@@ -17,9 +17,11 @@ import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fasten
 import {Model} from "../model/Model";
 import {AnyTrait, TraitFactory, Trait} from "./Trait";
 
+/** @internal */
 export type TraitRelationType<F extends TraitRelation<any, any>> =
   F extends TraitRelation<any, infer T> ? T : never;
 
+/** @public */
 export interface TraitRelationInit<T extends Trait = Trait> extends FastenerInit {
   extends?: {prototype: TraitRelation<any, any>} | string | boolean | null;
   type?: TraitFactory<T>;
@@ -43,11 +45,14 @@ export interface TraitRelationInit<T extends Trait = Trait> extends FastenerInit
   fromAny?(value: AnyTrait<T>): T;
 }
 
+/** @public */
 export type TraitRelationDescriptor<O = unknown, T extends Trait = Trait, I = {}> = ThisType<TraitRelation<O, T> & I> & TraitRelationInit<T> & Partial<I>;
 
+/** @public */
 export interface TraitRelationClass<F extends TraitRelation<any, any> = TraitRelation<any, any>> extends FastenerClass<F> {
 }
 
+/** @public */
 export interface TraitRelationFactory<F extends TraitRelation<any, any> = TraitRelation<any, any>> extends TraitRelationClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitRelationFactory<F> & I;
 
@@ -62,6 +67,7 @@ export interface TraitRelationFactory<F extends TraitRelation<any, any> = TraitR
   <O, T extends Trait = Trait, I = {}>(descriptor: {observes: boolean} & TraitRelationDescriptor<O, T, I & ObserverType<T>>): PropertyDecorator;
 }
 
+/** @public */
 export interface TraitRelation<O = unknown, T extends Trait = Trait> extends Fastener<O> {
   /** @override */
   get familyType(): Class<TraitRelation<any, any>> | null;
@@ -133,6 +139,7 @@ export interface TraitRelation<O = unknown, T extends Trait = Trait> extends Fas
   get static(): string | boolean; // prototype property
 }
 
+/** @public */
 export const TraitRelation = (function (_super: typeof Fastener) {
   const TraitRelation: TraitRelationFactory = _super.extend("TraitRelation");
 

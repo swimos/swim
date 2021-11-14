@@ -15,11 +15,12 @@
 import {Class, Lazy, Service} from "@swim/util";
 import type {ViewNode, NodeView} from "../node/NodeView";
 import type {TextView} from "../text/TextView";
-import {ViewElement, ElementView} from "../element/ElementView";
-import {HtmlView} from "../html/HtmlView";
-import {SvgView} from "../svg/SvgView";
+import {ViewElement, ElementView} from "../"; // forward import
+import {HtmlView} from "../"; // forward import
+import {SvgView} from "../"; // forward import
 import type {DomServiceObserver} from "./DomServiceObserver";
 
+/** @public */
 export class DomService<V extends NodeView = NodeView> extends Service<V> {
   /** @override */
   override readonly observerType?: Class<DomServiceObserver<V>>;

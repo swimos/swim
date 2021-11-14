@@ -21,6 +21,7 @@ import {Format} from "../"; // forward import
 /**
  * Description of a source position, identified by byte offset, line, and
  * column number, with an optional note.
+ * @public
  */
 export class Mark extends Tag {
   /** @internal */

@@ -17,6 +17,7 @@ import type {Equals} from "./Equals";
 /**
  * Type that is convertible to a hash value consistent with its universal
  * equality relation.
+ * @public
  */
 export interface HashCode extends Equals {
   /**
@@ -25,6 +26,7 @@ export interface HashCode extends Equals {
   hashCode(): number;
 }
 
+/** @public */
 export const HashCode = (function () {
   const HashCode = function (x: HashCode | null | undefined): number {
     if (x === void 0) {

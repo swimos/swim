@@ -24,14 +24,14 @@ import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import type {PlotViewInit, PlotViewDataPointExt, PlotView} from "./PlotView";
 import type {ScatterPlotViewObserver} from "./ScatterPlotViewObserver";
 
-export type ScatterPlotType = "bubble";
+/** @public */
+export type AnyScatterPlotView<X = unknown, Y = unknown> = ScatterPlotView<X, Y> | ScatterPlotViewInit<X, Y>;
 
-export type AnyScatterPlotView<X = unknown, Y = unknown> = ScatterPlotView<X, Y> | ScatterPlotViewInit<X, Y> | ScatterPlotType;
-
+/** @public */
 export interface ScatterPlotViewInit<X = unknown, Y = unknown> extends PlotViewInit<X, Y> {
-  plotType?: ScatterPlotType;
 }
 
+/** @public */
 export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerView implements PlotView<X, Y> {
   constructor() {
     super();
@@ -42,8 +42,6 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
   }
 
   override readonly observerType?: Class<ScatterPlotViewObserver<X, Y>>;
-
-  abstract readonly plotType: ScatterPlotType;
 
   @ThemeAnimator({type: Font, state: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;

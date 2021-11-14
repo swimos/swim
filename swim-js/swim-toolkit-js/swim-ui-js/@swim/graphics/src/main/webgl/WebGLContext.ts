@@ -14,5 +14,6 @@
 
 import type {GraphicsContext} from "../graphics/GraphicsContext";
 
+/** @public */
 export interface WebGLContext extends GraphicsContext, WebGLRenderingContext {
 }

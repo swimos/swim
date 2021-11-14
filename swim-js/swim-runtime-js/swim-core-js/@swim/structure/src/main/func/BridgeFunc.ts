@@ -17,6 +17,7 @@ import type {Output} from "@swim/codec";
 import {Item} from "../Item";
 import {Func} from "./Func";
 
+/** @public */
 export abstract class BridgeFunc extends Func {
   override get typeOrder(): number {
     return 51;

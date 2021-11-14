@@ -17,6 +17,7 @@ import {RefreshService} from "./RefreshService";
 import type {ModelContext} from "../model/ModelContext";
 import type {ModelFlags, Model} from "../model/Model";
 
+/** @public */
 export interface RefreshProvider<M extends Model, S extends RefreshService<M> | null | undefined = RefreshService<M>> extends Provider<M, S> {
   get modelContext(): ModelContext;
 
@@ -27,6 +28,7 @@ export interface RefreshProvider<M extends Model, S extends RefreshService<M> | 
   createService(): S;
 }
 
+/** @public */
 export const RefreshProvider = (function (_super: typeof Provider) {
   const RefreshProvider = _super.extend("RefreshProvider") as ProviderClass<RefreshProvider<any, any>>;
 

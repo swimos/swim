@@ -16,6 +16,7 @@ import {Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {AngleUnits, Angle} from "./Angle";
 
+/** @public */
 export class TurnAngle extends Angle {
   constructor(value: number) {
     super();

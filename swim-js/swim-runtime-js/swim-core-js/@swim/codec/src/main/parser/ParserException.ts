@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Thrown when a [[Parser]] parses invalid syntax.
- */
 import {Diagnostic} from "../source/Diagnostic";
 
+/**
+ * Thrown when a [[Parser]] parses invalid syntax.
+ * @public
+ */
 export class ParserException extends Error {
   constructor(message?: Diagnostic | string) {
     super(message instanceof Diagnostic ? message.message : message);

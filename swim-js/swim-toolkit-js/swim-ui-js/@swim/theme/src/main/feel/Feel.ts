@@ -16,6 +16,7 @@ import type {Mood} from "../mood/Mood";
 import type {Look} from "../look/Look";
 import {FeelVector} from "./FeelVector";
 
+/** @public */
 export abstract class Feel implements Mood {
   constructor(name: string) {
     this.name = name;

@@ -18,16 +18,19 @@ import {Output, Format, Debug} from "@swim/codec";
 /**
  * Either an [[InterpreterSettings]] instance, or an [[InterpreterSettingsInit]]
  * object initializer.
+ * @public
  */
 export type AnyInterpreterSettings = InterpreterSettings | InterpreterSettingsInit;
 
 /**
  * [[InterpreterSettings]] object initializer.
+ * @public
  */
 export interface InterpreterSettingsInit {
   maxScopeDepth?: number;
 }
 
+/** @public */
 export class InterpreterSettings implements Debug, HashCode {
   constructor(maxScopeDepth: number) {
     Object.defineProperty(this, "maxScopeDepth", {

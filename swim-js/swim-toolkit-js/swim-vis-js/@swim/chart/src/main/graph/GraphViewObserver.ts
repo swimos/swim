@@ -15,5 +15,6 @@
 import type {ScaledViewObserver} from "../scaled/ScaledViewObserver";
 import type {GraphView} from "./GraphView";
 
+/** @public */
 export interface GraphViewObserver<X = unknown, Y = unknown, V extends GraphView<X, Y> = GraphView<X, Y>> extends ScaledViewObserver<X, Y, V> {
 }

@@ -18,19 +18,24 @@ import type {Model} from "../model/Model";
 import type {AnyTrait, Trait} from "./Trait";
 import {TraitRelationInit, TraitRelationClass, TraitRelation} from "./TraitRelation";
 
+/** @internal */
 export type TraitSetType<F extends TraitSet<any, any>> =
   F extends TraitSet<any, infer T> ? T : never;
 
+/** @public */
 export interface TraitSetInit<T extends Trait = Trait> extends TraitRelationInit<T> {
   extends?: {prototype: TraitSet<any, any>} | string | boolean | null;
   key?(trait: T): string | undefined;
 }
 
+/** @public */
 export type TraitSetDescriptor<O = unknown, T extends Trait = Trait, I = {}> = ThisType<TraitSet<O, T> & I> & TraitSetInit<T> & Partial<I>;
 
+/** @public */
 export interface TraitSetClass<F extends TraitSet<any, any> = TraitSet<any, any>> extends TraitRelationClass<F> {
 }
 
+/** @public */
 export interface TraitSetFactory<F extends TraitSet<any, any> = TraitSet<any, any>> extends TraitSetClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitSetFactory<F> & I;
 
@@ -45,6 +50,7 @@ export interface TraitSetFactory<F extends TraitSet<any, any> = TraitSet<any, an
   <O, T extends Trait = Trait, I = {}>(descriptor: {observes: boolean} & TraitSetDescriptor<O, T, I & ObserverType<T>>): PropertyDecorator;
 }
 
+/** @public */
 export interface TraitSet<O = unknown, T extends Trait = Trait> extends TraitRelation<O, T> {
   (newTrait: AnyTrait<T>): O;
 
@@ -92,6 +98,7 @@ export interface TraitSet<O = unknown, T extends Trait = Trait> extends TraitRel
   key(trait: T): string | undefined;
 }
 
+/** @public */
 export const TraitSet = (function (_super: typeof TraitRelation) {
   const TraitSet: TraitSetFactory = _super.extend("TraitSet");
 

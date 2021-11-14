@@ -19,9 +19,12 @@ import type {GraphicsView} from "@swim/graphics";
 import {DialTrait} from "../dial/DialTrait";
 import type {GaugeTraitObserver} from "./GaugeTraitObserver";
 
+/** @public */
 export type GaugeTitle = GaugeTitleFunction | string;
+/** @public */
 export type GaugeTitleFunction = (gaugeTrait: GaugeTrait) => GraphicsView | string | null;
 
+/** @public */
 export class GaugeTrait extends Trait {
   override readonly observerType?: Class<GaugeTraitObserver>;
 

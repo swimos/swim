@@ -22,10 +22,13 @@ import {RgbColorInit, RgbColor} from "../"; // forward import
 import {RgbColorInterpolator} from "../"; // forward import
 import {HslColorInit, HslColor} from "../"; // forward import
 
+/** @public */
 export type AnyColor = Color | ColorInit | string;
 
+/** @public */
 export type ColorInit = RgbColorInit | HslColorInit;
 
+/** @public */
 export abstract class Color implements Interpolate<Color>, HashCode, Equivalent, Debug {
   abstract isDefined(): boolean;
 

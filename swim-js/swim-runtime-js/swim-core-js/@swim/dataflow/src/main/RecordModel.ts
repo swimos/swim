@@ -23,6 +23,7 @@ import {RecordScope} from "./"; // forward import
 import {Reifier} from "./"; // forward import
 import {Dataflow} from "./"; // forward import
 
+/** @public */
 export class RecordModel extends AbstractRecordOutlet {
   constructor(state?: Record) {
     super();
@@ -395,6 +396,7 @@ export class RecordModel extends AbstractRecordOutlet {
     }
   }
 
+  /** @beta */
   reify(reifier: Reifier | null = Reifier.system()): void {
     this.forEach(function (oldItem: Item, index: number): void {
       const newItem = this.reifyItem(oldItem, reifier);
@@ -404,6 +406,7 @@ export class RecordModel extends AbstractRecordOutlet {
     }, this);
   }
 
+  /** @beta */
   reifyItem(item: Item, reifier: Reifier | null): Item {
     if (reifier !== null) {
       item = reifier.reify(item);

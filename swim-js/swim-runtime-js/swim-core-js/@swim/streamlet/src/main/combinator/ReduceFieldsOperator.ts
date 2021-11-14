@@ -16,6 +16,7 @@ import {BTree} from "@swim/collections";
 import {KeyEffect} from "../KeyEffect";
 import {AbstractMapInletOutlet} from "../AbstractMapInletOutlet";
 
+/** @public */
 export abstract class ReduceFieldsOperator<K, V, I, O> extends AbstractMapInletOutlet<K, V, I, O> {
   constructor() {
     super();

@@ -21,17 +21,21 @@ import type {EventDownlink} from "../downlink/EventDownlink";
 import type {WarpRef} from "../ref/WarpRef";
 import {DownlinkFastenerInit, DownlinkFastenerClass, DownlinkFastener} from "./DownlinkFastener";
 
+/** @beta */
 export interface EventDownlinkFastenerInit extends DownlinkFastenerInit, DownlinkObserver {
   extends?: {prototype: EventDownlinkFastener<any>} | string | boolean | null;
 
   initDownlink?(downlink: EventDownlink): EventDownlink;
 }
 
+/** @beta */
 export type EventDownlinkFastenerDescriptor<O = unknown, I = {}> = ThisType<EventDownlinkFastener<O> & I> & EventDownlinkFastenerInit & Partial<I>;
 
+/** @beta */
 export interface EventDownlinkFastenerClass<F extends EventDownlinkFastener<any> = EventDownlinkFastener<any>> extends DownlinkFastenerClass<F> {
 }
 
+/** @beta */
 export interface EventDownlinkFastenerFactory<F extends EventDownlinkFastener<any> = EventDownlinkFastener<any>> extends EventDownlinkFastenerClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): EventDownlinkFastenerFactory<F> & I;
 
@@ -42,11 +46,12 @@ export interface EventDownlinkFastenerFactory<F extends EventDownlinkFastener<an
   <O, I = {}>(descriptor: EventDownlinkFastenerDescriptor<O, I>): PropertyDecorator;
 }
 
+/** @beta */
 export interface EventDownlinkFastener<O = unknown> extends DownlinkFastener<O> {
   /** @override */
   readonly downlink: EventDownlink | null;
 
-  /** @interna @override */
+  /** @internal @override */
   createDownlink(warp: WarpRef): EventDownlink;
 
   /** @internal @override */
@@ -56,6 +61,7 @@ export interface EventDownlinkFastener<O = unknown> extends DownlinkFastener<O> 
   initDownlink?(downlink: EventDownlink): EventDownlink;
 }
 
+/** @beta */
 export const EventDownlinkFastener = (function (_super: typeof DownlinkFastener) {
   const EventDownlinkFastener: EventDownlinkFastenerFactory = _super.extend("EventDownlinkFastener");
 

@@ -17,6 +17,7 @@ import type {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import type {GeoViewport} from "../geo/GeoViewport";
 
+/** @public */
 export abstract class WorldMapViewport implements GeoViewport, Equals {
   get geoFrame(): GeoBox {
     return GeoBox.globe();

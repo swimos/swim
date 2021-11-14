@@ -15,8 +15,11 @@
 import type {OutletOptions} from "./Outlet";
 import {StreamletPrototype, AbstractStreamlet} from "./AbstractStreamlet";
 
+/** @public */
 export function Out(name: string): PropertyDecorator;
+/** @public */
 export function Out(options: OutletOptions): PropertyDecorator;
+/** @public */
 export function Out(target: unknown, key: string): void;
 export function Out(target: unknown, key?: string): PropertyDecorator | void {
   if (arguments.length === 1) {

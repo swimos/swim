@@ -15,6 +15,7 @@
 import type {HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {DeckSlider} from "./DeckSlider";
 
+/** @public */
 export interface DeckSliderObserver<V extends DeckSlider = DeckSlider> extends HtmlViewObserver<V> {
   deckSliderWillPushItem?(newItemView: HtmlView, oldItemView: HtmlView | null, view: V): void;
 

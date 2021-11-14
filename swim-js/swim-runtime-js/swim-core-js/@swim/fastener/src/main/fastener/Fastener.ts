@@ -16,20 +16,26 @@ import {Mutable, Class, Family, Identifiers} from "@swim/util";
 import {Affinity} from "./Affinity";
 import {FastenerContextClass, FastenerContext} from "./FastenerContext";
 
+/** @internal */
 export type MemberFasteners<O, F extends Fastener<any> = Fastener<any>> =
   {[K in keyof O as O[K] extends F ? K : never]: O[K]};
 
+/** @internal */
 export type MemberFastener<O, K extends keyof MemberFasteners<O, F>, F extends Fastener<any> = Fastener<any>> =
   MemberFasteners<O, F>[K] extends F ? MemberFasteners<O, F>[K] : never;
 
+/** @internal */
 export type MemberFastenerClass<O, K extends keyof MemberFasteners<O, F>, F extends Fastener<any> = Fastener<any>> =
   MemberFasteners<O, F>[K] extends F ? FastenerClass<MemberFasteners<O, F>[K]> : never;
 
+/** @public */
 export type FastenerOwner<F> =
   F extends Fastener<infer O> ? O : never;
 
+/** @public */
 export type FastenerFlags = number;
 
+/** @public */
 export interface FastenerInit {
   name?: string;
   lazy?: boolean;
@@ -62,8 +68,10 @@ export interface FastenerInit {
   didUnmount?(): void;
 }
 
+/** @public */
 export type FastenerDescriptor<O = unknown, I = {}> = ThisType<Fastener<O> & I> & FastenerInit & Partial<I>;
 
+/** @public */
 export interface FastenerClass<F extends Fastener<any> = Fastener<any>> extends Function {
   /** @internal */
   prototype: F;
@@ -90,6 +98,7 @@ export interface FastenerClass<F extends Fastener<any> = Fastener<any>> extends 
   readonly FlagMask: FastenerFlags;
 }
 
+/** @public */
 export interface FastenerFactory<F extends Fastener<any> = Fastener<any>> extends FastenerClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): FastenerFactory<F> & I;
 
@@ -100,6 +109,7 @@ export interface FastenerFactory<F extends Fastener<any> = Fastener<any>> extend
   <O, I = {}>(descriptor: FastenerDescriptor<O, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface Fastener<O = unknown> extends Family {
   readonly owner: O;
 
@@ -261,6 +271,7 @@ export interface Fastener<O = unknown> extends Family {
   get static(): string | boolean; // prototype property
 }
 
+/** @public */
 export const Fastener = (function (_super: typeof Object) {
   const Fastener = function (descriptor: FastenerDescriptor): PropertyDecorator {
     return FastenerContext.decorator(Fastener, descriptor);

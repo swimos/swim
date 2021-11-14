@@ -14,6 +14,7 @@
 
 import type {R2CurveContext} from "./R2CurveContext";
 
+/** @public */
 export interface R2SplineContext extends R2CurveContext {
   rect(x: number, y: number, w: number, h: number): void;
 

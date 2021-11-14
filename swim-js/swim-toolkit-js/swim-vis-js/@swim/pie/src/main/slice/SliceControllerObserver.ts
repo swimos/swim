@@ -18,6 +18,7 @@ import type {SliceView} from "./SliceView";
 import type {SliceTrait} from "./SliceTrait";
 import type {SliceController} from "./SliceController";
 
+/** @public */
 export interface SliceControllerObserver<C extends SliceController = SliceController> extends ControllerObserver<C> {
   controllerWillAttachSliceTrait?(sliceTrait: SliceTrait, controller: C): void;
 

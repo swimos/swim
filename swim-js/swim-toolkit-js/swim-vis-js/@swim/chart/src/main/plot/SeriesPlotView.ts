@@ -26,17 +26,18 @@ import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import type {PlotViewInit, PlotViewDataPointExt, PlotView} from "./PlotView";
 import type {SeriesPlotViewObserver} from "./SeriesPlotViewObserver";
 
+/** @public */
 export type SeriesPlotHitMode = "domain" | "plot" | "data" | "none";
 
-export type SeriesPlotType = "line" | "area";
+/** @public */
+export type AnySeriesPlotView<X = unknown, Y = unknown> = SeriesPlotView<X, Y> | SeriesPlotViewInit<X, Y>;
 
-export type AnySeriesPlotView<X = unknown, Y = unknown> = SeriesPlotView<X, Y> | SeriesPlotViewInit<X, Y> | SeriesPlotType;
-
+/** @public */
 export interface SeriesPlotViewInit<X = unknown, Y = unknown> extends PlotViewInit<X, Y> {
-  plotType?: SeriesPlotType;
   hitMode?: SeriesPlotHitMode;
 }
 
+/** @public */
 export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsView implements PlotView<X, Y> {
   constructor() {
     super();
@@ -49,8 +50,6 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   }
 
   override readonly observerType?: Class<SeriesPlotViewObserver<X, Y>>;
-
-  abstract readonly plotType: SeriesPlotType;
 
   @ThemeAnimator({type: Font, state: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;

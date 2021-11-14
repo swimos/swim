@@ -16,11 +16,13 @@ import type {GeoShape} from "../GeoShape";
 import {GeoGroup} from "../GeoGroup";
 import {GeoJsonGeometryObject, GeoJsonGeometry} from "./GeoJsonGeometry";
 
+/** @public */
 export interface GeoJsonGeometryCollection extends GeoJsonGeometryObject {
   readonly type: "GeometryCollection";
   geometries: GeoJsonGeometry[];
 }
 
+/** @public */
 export const GeoJsonGeometryCollection = (function () {
   const GeoJsonGeometryCollection = {} as {
     is(value: unknown): value is GeoJsonGeometryCollection;

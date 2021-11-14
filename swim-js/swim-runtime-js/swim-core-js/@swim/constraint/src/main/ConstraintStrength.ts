@@ -14,19 +14,23 @@
 
 import type {Mutable} from "@swim/util";
 
+/** @public */
 export type AnyConstraintStrength = ConstraintStrength | ConstraintStrengthInit;
 
+/** @public */
 export type ConstraintStrengthInit = "required" | "strong" | "medium" | "weak";
 
+/** @public */
 export type ConstraintStrength = number;
 
+/** @public */
 export const ConstraintStrength = (function () {
   const ConstraintStrength = {} as {
-    readonly Required: number;
-    readonly Strong: number;
-    readonly Medium: number;
-    readonly Weak: number;
-    readonly Unbound: number;
+    readonly Required: ConstraintStrength;
+    readonly Strong: ConstraintStrength;
+    readonly Medium: ConstraintStrength;
+    readonly Weak: ConstraintStrength;
+    readonly Unbound: ConstraintStrength;
 
     clip(strength: ConstraintStrength): ConstraintStrength;
 

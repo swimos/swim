@@ -18,17 +18,21 @@ import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {CssContext} from "./CssContext";
 import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";
 
+/** @public */
 export interface MediaRuleInit extends CssRuleInit {
   extends?: {prototype: MediaRule<any>} | string | boolean | null;
 
   initRule?(rule: CSSMediaRule): void;
 }
 
+/** @public */
 export type MediaRuleDescriptor<O = unknown, I = {}> = ThisType<MediaRule<O> & I> & MediaRuleInit & Partial<I>;
 
+/** @public */
 export interface MediaRuleClass<F extends MediaRule<any> = MediaRule<any>> extends CssRuleClass<F> {
 }
 
+/** @public */
 export interface MediaRuleFactory<F extends MediaRule<any> = MediaRule<any>> extends MediaRuleClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): MediaRuleFactory<F> & I;
 
@@ -39,6 +43,7 @@ export interface MediaRuleFactory<F extends MediaRule<any> = MediaRule<any>> ext
   <O, I = {}>(descriptor: MediaRuleDescriptor<O, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface MediaRule<O = unknown> extends CssRule<O>, CssContext {
   /** @override */
   readonly rule: CSSMediaRule;
@@ -65,6 +70,7 @@ export interface MediaRule<O = unknown> extends CssRule<O>, CssContext {
   initCss?(): string;
 }
 
+/** @public */
 export const MediaRule = (function (_super: typeof CssRule) {
   const MediaRule: MediaRuleFactory = _super.extend("MediaRule");
 

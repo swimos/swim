@@ -22,9 +22,11 @@ import type {GeoViewport} from "./GeoViewport";
 import type {GeoViewContext} from "./GeoViewContext";
 import type {GeoViewObserver} from "./GeoViewObserver";
 
+/** @public */
 export interface GeoViewInit extends GraphicsViewInit {
 }
 
+/** @public */
 export abstract class GeoView extends GraphicsView {
   override readonly observerType?: Class<GeoViewObserver>;
 
@@ -245,7 +247,7 @@ export abstract class GeoView extends GraphicsView {
 
   /**
    * The self-defined geo-coordinate bounding box surrounding all geometry this
-   * view could possibly render.  Views with geo bounds that don't overlap
+   * view could possibly render. Views with geo bounds that don't overlap
    * their map frames may be culled from rendering and hit testing.
    */
   declare readonly geoBounds: GeoBox; // getter defined below to work around useDefineForClassFields lunacy

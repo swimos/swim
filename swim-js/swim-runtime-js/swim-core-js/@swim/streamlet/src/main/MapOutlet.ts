@@ -22,6 +22,7 @@ import type {WatchValueFunction, WatchFieldsFunction} from "./function";
 
 /**
  * Output connector from a [[Streamlet]] for a key-value map state.
+ * @public
  */
 export interface MapOutlet<K, V, O> extends Outlet<O>, MapOutletCombinators<K, V, O> {
   /**
@@ -61,10 +62,10 @@ export interface MapOutlet<K, V, O> extends Outlet<O>, MapOutletCombinators<K, V
 
   /**
    * Updates the state of an individual `key` in this `MapOutlet` to make it
-   * consistent with the target `version`.  The `MapOutlet` only needs to
+   * consistent with the target `version`. The `MapOutlet` only needs to
    * update if its current `version` differs from the target `version`.
    * To update the state of a key, the `MapOutlet` first invokes
-   * [[Streamlet.recohere]] on its attached streamlets.  Then, for each
+   * [[Streamlet.recohere]] on its attached streamlets. Then, for each
    * dependent output, it invokes [[MapInlet.recohereOutputKey]], if the
    * dependent output is a [[MapInlet]], or it invokes [[Inlet.recohere]],
    * if the dependent output is not a `MapInlet`.
@@ -84,7 +85,7 @@ export interface MapOutlet<K, V, O> extends Outlet<O>, MapOutletCombinators<K, V
   watch(func: WatchFieldsFunction<K, V>): this;
 }
 
-/** @internal */
+/** @public */
 export const MapOutlet = (function () {
   const MapOutlet = {} as {
     is<K, V, I>(object: unknown): object is MapOutlet<K, V, I>;

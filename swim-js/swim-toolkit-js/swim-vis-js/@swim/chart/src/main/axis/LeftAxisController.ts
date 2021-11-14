@@ -17,6 +17,7 @@ import {LeftAxisTrait} from "./LeftAxisTrait";
 import {LeftAxisView} from "./LeftAxisView";
 import {AxisController} from "./AxisController";
 
+/** @public */
 export class LeftAxisController<Y = unknown> extends AxisController<Y> {
   @TraitViewRef<LeftAxisController<Y>, LeftAxisTrait<Y>, LeftAxisView<Y>>({
     extends: true,

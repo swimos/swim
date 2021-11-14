@@ -19,6 +19,7 @@ import {ViewRef, PositionGestureInput} from "@swim/view";
 import {DisclosureButton} from "@swim/button";
 import {CellView} from "./CellView";
 
+/** @public */
 export class DisclosureCellView extends CellView {
   protected override initCell(): void {
     super.initCell();

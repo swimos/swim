@@ -16,26 +16,34 @@ import {Values} from "../values/Values";
 
 /**
  * A hashed generational cache set discards the least recently used value
- * with the worst hit rate per hash bucket.  HashGenCacheSet is a concurrent
- * and lock-free LRFU cache, with O(1) access time.
+ * with the worst hit rate per hash bucket. HashGenCacheSet is a LRFU cache
+ * with O(1) access time.
  *
  * Maintaining four "generations" of cached values per hash bucket, the cache
  * discards from the younger generations based on least recent usage, and
  * promotes younger generations to older generations based on most frequent
- * usage.  Cache misses count as negative usage of the older generations,
+ * usage. Cache misses count as negative usage of the older generations,
  * biasing the cache against least recently used values with poor hit rates.
  *
  * The cache soft references the older generations, and weak references the
  * younger generations; the garbage collector can reclaim the entire cache,
  * but will preferentially wipe the younger cache generations before the older
  * cache generations.
+ *
+ * @public
  */
 export class HashGenCacheSet<T> {
+  /** @internal */
   readonly buckets: Array<HashGenCacheSetBucket<T> | undefined>;
+  /** @internal */
   gen4Hits: number;
+  /** @internal */
   gen3Hits: number;
+  /** @internal */
   gen2Hits: number;
+  /** @internal */
   gen1Hits: number;
+  /** @internal */
   misses: number;
 
   constructor(size: number) {

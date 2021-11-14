@@ -14,11 +14,12 @@
 
 /**
  * Utilities for comparing and hashing functions.
+ * @public
  */
 export const Functions = (function () {
   const Functions = {} as {
     /**
-     * Returns the relative order of `x` with respect to `y`.  Returns `-1` if
+     * Returns the relative order of `x` with respect to `y`. Returns `-1` if
      * the hash code of function `x` is less than the hash code of function `y`;
      * returns `1` if the hash code of function `x` is greater than the hash code
      * of function `y`; and returns `0` if `x` and `y` are identical functions.

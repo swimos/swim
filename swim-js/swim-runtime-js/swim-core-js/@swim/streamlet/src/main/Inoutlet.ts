@@ -15,24 +15,27 @@
 import type {Inlet} from "./Inlet";
 import type {Outlet} from "./Outlet";
 
+/** @public */
 export type InoutletType = "value" | "map";
 
+/** @public */
 export interface InoutletOptions {
   name?: string;
   type?: InoutletType;
 }
 
+/** @public */
 export interface Inoutlet<I = unknown, O = I> extends Inlet<I>, Outlet<O> {
   /**
    * Disconnects all `Inlet`s dominated by this `Inoutlet` in the dataflow
-   * dependency graph.  Used to recursively clean up chains of combinators
+   * dependency graph. Used to recursively clean up chains of combinators
    * passing through this `Inoutlet`.
    */
   disconnectInputs(): void;
 
   /**
    * Disconnects all `Inlets`s dominated by this `Inoutlet` in the dataflow
-   * graph.  Used to recursively clean up chains of combinators passing through
+   * graph. Used to recursively clean up chains of combinators passing through
    * this `Inoutlet`.
    */
   disconnectOutputs(): void;

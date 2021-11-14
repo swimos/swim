@@ -17,6 +17,7 @@ import type {GraphTrait} from "../graph/GraphTrait";
 import type {AxisTrait} from "../axis/AxisTrait";
 import type {ChartTrait} from "./ChartTrait";
 
+/** @public */
 export interface ChartTraitObserver<X = unknown, Y = unknown, R extends ChartTrait<X, Y> = ChartTrait<X, Y>> extends TraitObserver<R> {
   traitWillAttachGraph?(graphTrait: GraphTrait<X, Y>, trait: R): void;
 

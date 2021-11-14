@@ -19,6 +19,7 @@ import {AssertException} from "./AssertException";
  * Callable assertion function.
  *
  * @throws [[AssertException]] if the assertion fails.
+ * @public
  */
 export interface AssertFunction {
   (condition: unknown, message?: string): void;
@@ -26,6 +27,7 @@ export interface AssertFunction {
 
 /**
  * Type that implements common assertion functions.
+ * @public
  */
 export interface Assert {
   /**
@@ -170,10 +172,11 @@ export interface Assert {
 }
 
 /**
- * General `Assert` implementation.  When called as a function, asserts that
+ * General `Assert` implementation. When called as a function, asserts that
  * `condition` is truthy.
  *
  * @throws [[AssertException]] with `message` if `condition` is falsy.
+ * @public
  */
 export const assert = (function () {
   const assert = function (condition: unknown, message?: string): void {

@@ -22,6 +22,7 @@ import {HtmlView} from "@swim/dom";
 import {DeckSlot} from "./DeckSlot";
 import type {DeckSliderObserver} from "./DeckSliderObserver";
 
+/** @public */
 export class DeckSlider extends DeckSlot {
   constructor(node: HTMLElement) {
     super(node);
@@ -50,6 +51,7 @@ export class DeckSlider extends DeckSlot {
   /** @internal */
   itemCount: number;
 
+  /** @internal */
   item: DeckSliderItem<this, HtmlView> | null;
 
   protected createItem(value: string): HtmlView {

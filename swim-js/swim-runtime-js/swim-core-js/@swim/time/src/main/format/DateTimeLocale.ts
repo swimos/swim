@@ -14,6 +14,7 @@
 
 import {Lazy} from "@swim/util";
 
+/** @public */
 export class DateTimeLocale {
   readonly periods: ReadonlyArray<string>;
   readonly weekdays: ReadonlyArray<string>;

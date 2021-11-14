@@ -21,6 +21,7 @@ import {InvokeOperatorInterpolator} from "../"; // forward import
 import {Func} from "../"; // forward import
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export class InvokeOperator extends Operator {
   constructor(func: Value, args: Value) {
     super();

@@ -18,6 +18,7 @@ import {Item} from "../Item";
 import {BinaryOperator} from "./BinaryOperator";
 import {AnyInterpreter, Interpreter} from "../interpreter/Interpreter";
 
+/** @public */
 export class BitwiseXorOperator extends BinaryOperator {
   constructor(operand1: Item, operand2: Item) {
     super(operand1, operand2);

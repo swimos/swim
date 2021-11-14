@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export interface ToAttributeString {
   toAttributeString(): string;
 }
 
+/** @public */
 export function ToAttributeString(value: unknown): string {
   if (typeof value === "object" && value !== null) {
     if (typeof (value as ToAttributeString).toAttributeString === "function") {

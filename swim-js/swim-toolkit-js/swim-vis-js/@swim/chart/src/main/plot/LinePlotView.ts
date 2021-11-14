@@ -20,21 +20,20 @@ import {Look, ThemeAnimator} from "@swim/theme";
 import {View, ViewRef} from "@swim/view";
 import type {GraphicsView, CanvasContext, CanvasRenderer, StrokeViewInit, StrokeView} from "@swim/graphics";
 import type {DataPointView} from "../data/DataPointView";
-import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
+import {SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
 import type {LinePlotViewObserver} from "./LinePlotViewObserver";
 
+/** @public */
 export type AnyLinePlotView<X = unknown, Y = unknown> = LinePlotView<X, Y> | LinePlotViewInit<X, Y>;
 
+/** @public */
 export interface LinePlotViewInit<X = unknown, Y = unknown> extends SeriesPlotViewInit<X, Y>, StrokeViewInit {
   hitWidth?: number;
 }
 
+/** @public */
 export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y> implements StrokeView {
   override readonly observerType?: Class<LinePlotViewObserver<X, Y>>;
-
-  override get plotType(): SeriesPlotType {
-    return "line";
-  }
 
   @ThemeAnimator<LinePlotView<X, Y>, Color | null, AnyColor | null>({
     type: Color,

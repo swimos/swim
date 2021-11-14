@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Strings} from "@swim/util";
 import {Unicode, Base16} from "@swim/codec";
 import {Item, Value} from "@swim/structure";
 
+/** @public */
 export type GenericFamily = "serif"
                           | "sans-serif"
                           | "cursive"
@@ -25,8 +27,10 @@ export type GenericFamily = "serif"
                           | "math"
                           | "fangsong";
 
+/** @public */
 export type FontFamily = string | GenericFamily;
 
+/** @public */
 export const FontFamily = (function () {
   const FontFamily = {} as {
     fromValue(value: Value): FontFamily | FontFamily[] | null;
@@ -58,7 +62,7 @@ export const FontFamily = (function () {
     let isIdent: boolean;
     if (n > 0) {
       isIdent = Unicode.isAlpha(family.charCodeAt(0));
-      for (let i = family.offsetByCodePoints(0, 1); isIdent && i < n; i = family.offsetByCodePoints(i, 1)) {
+      for (let i = Strings.offsetByCodePoints(family, 0, 1); isIdent && i < n; i = Strings.offsetByCodePoints(family, i, 1)) {
         const c = family.charCodeAt(i);
         isIdent = Unicode.isAlpha(c) || c === 45/*'-'*/;
       }
@@ -70,7 +74,7 @@ export const FontFamily = (function () {
     } else {
       let output = Unicode.stringOutput();
       output = output.write(34/*'"'*/);
-      for (let i = 0; i < n; i = family.offsetByCodePoints(i, 1)) {
+      for (let i = 0; i < n; i = Strings.offsetByCodePoints(family, i, 1)) {
         const c = family.charCodeAt(i);
         if (c === 10/*'\n'*/ || c === 34/*'"'*/ || c === 39/*'\''*/) {
           output = output.write(92/*'\\'*/).write(c);

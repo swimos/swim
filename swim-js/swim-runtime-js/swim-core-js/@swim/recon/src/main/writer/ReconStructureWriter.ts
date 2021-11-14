@@ -50,6 +50,7 @@ import {
 } from "@swim/structure";
 import {ReconWriter} from "./ReconWriter";
 
+/** @public */
 export class ReconStructureWriter extends ReconWriter<Item, Value> {
   override isField(item: Item): boolean {
     return item instanceof Field;

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Lazy, HashCode, Equivalent, Compare, Interpolate, Interpolator} from "@swim/util";
 import {Output, Parser, Debug, Diagnostic, Unicode} from "@swim/codec";
 import {Attr, Value, Text, Form} from "@swim/structure";
@@ -25,16 +27,20 @@ import {LengthInterpolator} from "../"; // forward import
 import {LengthForm} from "../"; // forward import
 import {LengthParser} from "../"; // forward import
 
+/** @public */
 export type LengthUnits = "px" | "em" | "rem" | "%" | "";
 
+/** @public */
 export interface LengthBasis {
   emUnit?: Node | number;
   remUnit?: number;
   pctUnit?: number;
 }
 
+/** @public */
 export type AnyLength = Length | string | number;
 
+/** @public */
 export abstract class Length implements Interpolate<Length>, HashCode, Equivalent, Compare, Debug {
   isDefined(): boolean {
     return isFinite(this.value);

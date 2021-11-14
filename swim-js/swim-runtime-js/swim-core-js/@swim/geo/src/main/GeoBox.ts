@@ -31,8 +31,10 @@ import {GeoSegment} from "./GeoSegment";
 import {GeoTile} from "./GeoTile";
 import {GeoBoxInterpolator} from "./"; // forward import
 
+/** @public */
 export type AnyGeoBox = GeoBox | GeoBoxInit;
 
+/** @public */
 export interface GeoBoxInit {
   lngMin: number;
   latMin: number;
@@ -40,6 +42,7 @@ export interface GeoBoxInit {
   latMax: number;
 }
 
+/** @public */
 export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, Equivalent, Debug {
   constructor(lngMin: number, latMin: number, lngMax: number, latMax: number) {
     super();

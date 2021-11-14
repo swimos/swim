@@ -13,24 +13,26 @@
 // limitations under the License.
 
 import {ProviderClass, Provider} from "@swim/fastener";
-import type {ViewIdiom} from "./ViewIdiom";
+import type {ViewportIdiom} from "./ViewportIdiom";
 import type {Viewport} from "./Viewport";
 import {ViewportService} from "./ViewportService";
 import type {ViewContext} from "../view/ViewContext";
 import type {View} from "../view/View";
 
+/** @public */
 export interface ViewportProvider<V extends View, S extends ViewportService<V> | null | undefined = ViewportService<V>> extends Provider<V, S> {
   get viewContext(): ViewContext;
 
   get viewport(): Viewport;
 
-  get viewIdiom(): ViewIdiom;
+  get viewportIdiom(): ViewportIdiom;
 
-  setViewIdiom(viewIdiom: ViewIdiom): void;
+  setViewportIdiom(viewportIdiom: ViewportIdiom): void;
 
   createService(): S;
 }
 
+/** @public */
 export const ViewportProvider = (function (_super: typeof Provider) {
   const ViewportProvider = _super.extend("ViewportProvider") as ProviderClass<ViewportProvider<any, any>>;
 
@@ -56,23 +58,23 @@ export const ViewportProvider = (function (_super: typeof Provider) {
     configurable: true,
   });
 
-  Object.defineProperty(ViewportProvider.prototype, "viewIdiom", {
-    get<V extends View, S extends ViewportService<V> | null | undefined>(this: ViewportProvider<V, S>): ViewIdiom {
+  Object.defineProperty(ViewportProvider.prototype, "viewportIdiom", {
+    get<V extends View, S extends ViewportService<V> | null | undefined>(this: ViewportProvider<V, S>): ViewportIdiom {
       let service: ViewportService<V> | null | undefined = this.service;
       if (service === void 0 || service === null) {
         service = ViewportService.global();
       }
-      return service.viewIdiom;
+      return service.viewportIdiom;
     },
     configurable: true,
   });
 
-  ViewportProvider.prototype.setViewIdiom = function <V extends View, S extends ViewportService<V> | null | undefined>(this: ViewportProvider<V, S>, viewIdiom: ViewIdiom): void {
+  ViewportProvider.prototype.setViewportIdiom = function <V extends View, S extends ViewportService<V> | null | undefined>(this: ViewportProvider<V, S>, viewportIdiom: ViewportIdiom): void {
     let service: ViewportService<V> | null | undefined = this.service;
     if (service === void 0 || service === null) {
       service = ViewportService.global();
     }
-    service.setViewIdiom(viewIdiom);
+    service.setViewportIdiom(viewportIdiom);
   }
 
   ViewportProvider.prototype.createService = function <V extends View, S extends ViewportService<V> | null | undefined>(this: ViewportProvider<V, S>): S {

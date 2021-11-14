@@ -24,13 +24,14 @@ import {ByteOutputUint8Array} from "./ByteOutputUint8Array";
  * The `Binary.outputBuffer(...)` function returns an `Output` that writes
  * bytes to a growable array, and [[Output.bind binds]] a `Uint8Array`
  * containing all written bytes.
+ * @public
  */
 export const Binary = (function () {
   const Binary = {} as {
     /**
      * Returns a new `Output` that appends bytes to a growable array,
      * pre-allocated with space for `initialCapacity` bytes, if `initialCapacity`
-     * is defined, using the given `settings`, if `settings` is defined.  The
+     * is defined, using the given `settings`, if `settings` is defined. The
      * returned `Output` accepts an unbounded number of bytes, remaining
      * permanently in the _cont_ state, and can [[Output.bind bind]] a
      * `Uint8Array` with the current output state at any time.
@@ -39,7 +40,7 @@ export const Binary = (function () {
 
     /**
      * Returns a new `Output` that appends bytes to a growable array, using the
-     * given `settings`.  The returned `Output` accepts an unbounded number of
+     * given `settings`. The returned `Output` accepts an unbounded number of
      * bytes, remaining permanently in the _cont_ state, and can [[Output.bind
      * bind]] a `Uint8Array` array with the current output state at any time.
      */

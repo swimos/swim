@@ -16,6 +16,7 @@ import type {ViewObserver} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
 import type {SliceView} from "./SliceView";
 
+/** @public */
 export interface SliceViewObserver<V extends SliceView = SliceView> extends ViewObserver<V> {
   viewWillSetSliceValue?(newValue: number, oldValue: number, view: V): void;
 

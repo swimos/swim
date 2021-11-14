@@ -34,8 +34,10 @@ import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import {AnyGeoPointView, GeoPointView} from "./GeoPointView";
 import type {GeoPlotViewObserver} from "./GeoPlotViewObserver";
 
+/** @public */
 export type AnyGeoPlotView = GeoPlotView | GeoPlotViewInit;
 
+/** @public */
 export interface GeoPlotViewInit extends GeoViewInit, StrokeViewInit {
   points?: ReadonlyArray<AnyGeoPointView>;
 
@@ -45,6 +47,7 @@ export interface GeoPlotViewInit extends GeoViewInit, StrokeViewInit {
   textColor?: AnyColor;
 }
 
+/** @public */
 export class GeoPlotView extends GeoLayerView implements StrokeView {
   constructor() {
     super();

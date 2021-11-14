@@ -17,10 +17,13 @@ import {Output, Debug, Format, Unicode} from "@swim/codec";
 import {AnyOpt, Opt} from "./Opt";
 import {AnyArg, Arg} from "./Arg";
 
+/** @public */
 export type ExecCmd = (this: Cmd, opts: {[name: string]: string | undefined}, args: string[]) => void;
 
+/** @public */
 export type AnyCmd = Cmd | CmdInit | string;
 
+/** @public */
 export interface CmdInit {
   id?: string;
   name: string;
@@ -31,6 +34,7 @@ export interface CmdInit {
   exec?: ExecCmd | null;
 }
 
+/** @public */
 export class Cmd implements Equals, Debug {
   constructor(id: string, name: string, desc: string | undefined, opts: Opt[],
               args: Arg[], cmds: Cmd[], exec: ExecCmd | null, base: Cmd | null) {

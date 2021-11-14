@@ -19,8 +19,10 @@ import {AnyColor, Color} from "../color/Color";
 import {RgbColorInterpolator} from "../"; // forward import
 import {HslColor} from "../"; // forward import
 
+/** @public */
 export type AnyRgbColor = RgbColor | RgbColorInit | string;
 
+/** @public */
 export interface RgbColorInit {
   readonly r: number;
   readonly g: number;
@@ -28,6 +30,7 @@ export interface RgbColorInit {
   readonly a?: number;
 }
 
+/** @public */
 export class RgbColor extends Color {
   constructor(r: number, g: number, b: number, a: number = 1) {
     super();

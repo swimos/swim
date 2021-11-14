@@ -16,6 +16,7 @@ import type {Trait, TraitObserver} from "@swim/model";
 import type {DialTrait} from "../dial/DialTrait";
 import type {GaugeTitle, GaugeTrait} from "./GaugeTrait";
 
+/** @public */
 export interface GaugeTraitObserver<R extends GaugeTrait = GaugeTrait> extends TraitObserver<R> {
   traitWillSetGaugeTitle?(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, trait: R): void;
 

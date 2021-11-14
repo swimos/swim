@@ -34,6 +34,7 @@ import {FilterSelector} from "../"; // forward import
 import {LiteralSelector} from "../"; // forward import
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
+/** @public */
 export abstract class Selector extends Expression {
   /** @internal */
   constructor() {

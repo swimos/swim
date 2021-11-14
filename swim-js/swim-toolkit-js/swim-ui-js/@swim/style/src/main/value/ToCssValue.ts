@@ -12,25 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {ToStyleString} from "./ToStyleString";
 
+/** @public */
 export interface ToCssValue {
   toCssValue(): CSSStyleValue | null;
 }
 
-export let ToCssValue: (value: unknown) => CSSStyleValue | null;
+/** @public */
+export const ToCssValue = (function () {
+  let ToCssValue: (value: unknown) => CSSStyleValue | null;
 
-if (typeof CSSStyleValue !== "undefined") { // CSS Typed OM support
-  ToCssValue = function (value: unknown): CSSStyleValue | null {
-    if (typeof value === "object" && value !== null &&
-        typeof (value as ToCssValue).toCssValue === "function") {
-      return (value as ToCssValue).toCssValue();
-    } else if (typeof value === "number") {
-      return new CSSUnitValue(value, "number");
-    } else {
-      return null;
-    }
-  };
-} else {
-  ToCssValue = ToStyleString;
-}
+  if (typeof CSSStyleValue !== "undefined") { // CSS Typed OM support
+    ToCssValue = function (value: unknown): CSSStyleValue | null {
+      if (typeof value === "object" && value !== null &&
+          typeof (value as ToCssValue).toCssValue === "function") {
+        return (value as ToCssValue).toCssValue();
+      } else if (typeof value === "number") {
+        return new CSSUnitValue(value, "number");
+      } else {
+        return null;
+      }
+    };
+  } else {
+    ToCssValue = ToStyleString;
+  }
+
+  return ToCssValue;
+})();

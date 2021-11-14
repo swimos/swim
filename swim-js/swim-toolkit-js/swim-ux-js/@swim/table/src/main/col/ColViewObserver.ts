@@ -15,6 +15,7 @@
 import type {HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {ColView} from "./ColView";
 
+/** @public */
 export interface ColViewObserver<V extends ColView = ColView> extends HtmlViewObserver<V> {
   viewWillAttachLabel?(labelView: HtmlView, view: V): void;
 

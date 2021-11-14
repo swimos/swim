@@ -19,6 +19,7 @@ import {AbstractInlet} from "./AbstractInlet";
  * An `Inlet` that decoheres a parameterized `Outlet` whenever the `Inlet`
  * decoheres, and that recoheres the parameterized `Outlet` whenever the
  * `Inlet` recoheres.
+ * @public
  */
 export class OutletInlet<I> extends AbstractInlet<I> {
   constructor(outlet: Outlet<unknown>) {

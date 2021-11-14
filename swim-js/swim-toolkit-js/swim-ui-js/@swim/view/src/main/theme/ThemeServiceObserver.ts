@@ -17,6 +17,7 @@ import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {ThemeService} from "./ThemeService";
 import type {View} from "../view/View";
 
+/** @public */
 export interface ThemeServiceObserver<V extends View = View, S extends ThemeService<V> = ThemeService<V>> extends ServiceObserver<V, S> {
   serviceWillApplyTheme?(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, service: S): void;
 

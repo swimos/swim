@@ -18,6 +18,7 @@ import {GraphicsView} from "@swim/graphics";
 import type {ScaledXViewObserver} from "./ScaledXViewObserver";
 import {ScaledView} from "../"; // forward import
 
+/** @public */
 export interface ScaledXView<X = unknown> extends GraphicsView {
   /** @override */
   readonly observerType?: Class<ScaledXViewObserver<X>>;
@@ -37,6 +38,7 @@ export interface ScaledXView<X = unknown> extends GraphicsView {
   readonly xDataRange: Range<number> | null;
 }
 
+/** @public */
 export const ScaledXView = (function () {
   const ScaledXView = {} as {
     is<X>(object: unknown): object is ScaledXView<X>;

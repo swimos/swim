@@ -15,19 +15,25 @@
 import type {Value} from "@swim/structure";
 import type {Host} from "./Host";
 
-/** @internal */
+/** @public */
 export interface HostContext {
   isOnline(): boolean;
  
+  /** @internal */
   hostDidConnect(host: Host): void;
  
+  /** @internal */
   hostDidAuthenticate(body: Value, host: Host): void;
  
+  /** @internal */
   hostDidDeauthenticate(body: Value, host: Host): void;
  
+  /** @internal */
   hostDidDisconnect(host: Host): void;
  
+  /** @internal */
   hostDidFail(error: unknown, host: Host): void;
  
+  /** @internal */
   closeHost(host: Host): void;
 }

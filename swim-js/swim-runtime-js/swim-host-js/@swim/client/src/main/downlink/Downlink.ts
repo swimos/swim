@@ -29,21 +29,35 @@ import type {DownlinkOwner} from "./DownlinkOwner";
 import type {DownlinkContext} from "./DownlinkContext";
 import type {DownlinkModel} from "./DownlinkModel";
 
+/** @public */
 export type DownlinkType = "event" | "list" | "map" | "value";
 
+/** @public */
 export type DownlinkOnEvent = (body: Value, downlink: Downlink) => void;
+/** @public */
 export type DownlinkOnCommand = (body: Value, downlink: Downlink) => void;
+/** @public */
 export type DownlinkWillLink = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkDidLink = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkWillSync = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkDidSync = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkWillUnlink = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkDidUnlink = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkDidConnect = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkDidDisconnect = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkDidClose = (downlink: Downlink) => void;
+/** @public */
 export type DownlinkDidFail = (error: unknown, downlink: Downlink) => void;
 
+/** @public */
 export interface DownlinkObserver {
   onEvent?: DownlinkOnEvent;
   onCommand?: DownlinkOnCommand;
@@ -59,6 +73,7 @@ export interface DownlinkObserver {
   didFail?: DownlinkDidFail;
 }
 
+/** @public */
 export interface DownlinkInit extends DownlinkObserver {
   hostUri?: AnyUri;
   nodeUri?: AnyUri;
@@ -76,7 +91,9 @@ export const enum DownlinkFlags {
   KeepLinkedSynced = KeepLinked | KeepSynced,
 }
 
+/** @public */
 export abstract class Downlink {
+  /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: DownlinkInit,
               hostUri: Uri = Uri.empty(), nodeUri: Uri = Uri.empty(), laneUri: Uri = Uri.empty(),
               prio: number = 0, rate: number = 0, body: Value = Value.absent(),
@@ -158,6 +175,7 @@ export abstract class Downlink {
 
   abstract readonly type: DownlinkType;
 
+  /** @internal */
   protected abstract copy(context: DownlinkContext, owner: DownlinkOwner | null,
                           hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
                           body: Value, flags: number, observers: ReadonlyArray<DownlinkObserver>): Downlink;

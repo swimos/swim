@@ -17,6 +17,7 @@ import type {WarpClient} from "../client/WarpClient";
 import {client} from "../client/global";
 import type {WarpServiceObserver} from "./WarpServiceObserver";
 
+/** @public */
 export class WarpService<O> extends Service<O> {
   constructor(client: WarpClient) {
     super();

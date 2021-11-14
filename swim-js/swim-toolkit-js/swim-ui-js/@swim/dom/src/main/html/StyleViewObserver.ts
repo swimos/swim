@@ -15,5 +15,6 @@
 import type {HtmlViewObserver} from "../html/HtmlViewObserver";
 import type {StyleView} from "./StyleView";
 
+/** @public */
 export interface StyleViewObserver<V extends StyleView = StyleView> extends HtmlViewObserver<V> {
 }

@@ -16,6 +16,7 @@ import type {HtmlViewObserver} from "@swim/dom";
 import type {DeckCard} from "./DeckCard";
 import type {DeckView} from "./DeckView";
 
+/** @public */
 export interface DeckViewObserver<V extends DeckView = DeckView> extends HtmlViewObserver<V> {
   deckWillPushCard?(newCardView: DeckCard, oldCardView: DeckCard | null, view: V): void;
 

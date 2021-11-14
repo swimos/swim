@@ -26,6 +26,7 @@ import {Base10} from "../number/Base10";
 
 /**
  * Informational message attached to an input location.
+ * @public
  */
 export class Diagnostic implements Display {
   constructor(input: Input, tag: Tag, severity: Severity, message: string | undefined,

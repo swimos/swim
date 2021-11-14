@@ -33,8 +33,10 @@ import {
 } from "@swim/graphics";
 import type {SliceViewObserver} from "./SliceViewObserver";
 
+/** @public */
 export type AnySliceView = SliceView | SliceViewInit;
 
+/** @public */
 export interface SliceViewInit extends GraphicsViewInit {
   value?: number;
   total?: number;
@@ -59,6 +61,7 @@ export interface SliceViewInit extends GraphicsViewInit {
   legend?: GraphicsView | string;
 }
 
+/** @public */
 export class SliceView extends LayerView {
   override readonly observerType?: Class<SliceViewObserver>;
 

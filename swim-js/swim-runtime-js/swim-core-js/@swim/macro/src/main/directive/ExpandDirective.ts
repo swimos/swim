@@ -16,6 +16,7 @@ import {Item, Slot, Value, Record} from "@swim/structure";
 import type {ProcessorContext} from "../processor/ProcessorContext";
 import {Directive} from "./Directive";
 
+/** @public */
 export class ExpandDirective extends Directive {
   constructor(template: Item) {
     super();

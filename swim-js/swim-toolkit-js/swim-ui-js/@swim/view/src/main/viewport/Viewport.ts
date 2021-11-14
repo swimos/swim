@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {ViewEdgeInsets} from "./ViewEdgeInsets";
-import type {ViewColorScheme} from "./ViewColorScheme";
-import type {VisualViewport} from "./VisualViewport";
+import type {ViewportColorScheme} from "./ViewportColorScheme";
+import type {ViewportInsets} from "./ViewportInsets";
+import type {ViewportArea} from "./ViewportArea";
 
+/** @public */
 export interface Viewport {
   readonly width: number;
   readonly height: number;
-  readonly visual: VisualViewport;
-  readonly safeArea: ViewEdgeInsets;
+  readonly visual: ViewportArea;
+  readonly safeArea: ViewportInsets;
   readonly orientation: OrientationType;
-  readonly colorScheme: ViewColorScheme;
+  readonly colorScheme: ViewportColorScheme;
 }
 
+/** @public */
 export const Viewport = (function () {
   const Viewport = {} as {
     detect(): Viewport;
@@ -72,7 +74,7 @@ export const Viewport = (function () {
       visualPageTop = window.visualViewport.pageTop;
       visualScale = window.visualViewport.scale;
     }
-    const visual: VisualViewport = {
+    const visual: ViewportArea = {
       width: visualWidth,
       height: visualHeight,
       offsetLeft: visualOffsetLeft,
@@ -91,7 +93,7 @@ export const Viewport = (function () {
     document.body.removeChild(div);
     document.documentElement.style.width = documentWidth;
     document.documentElement.style.height = documentHeight;
-    const safeArea: ViewEdgeInsets = {insetTop, insetRight, insetBottom, insetLeft};
+    const safeArea: ViewportInsets = {insetTop, insetRight, insetBottom, insetLeft};
     let orientation: OrientationType | undefined =
         (screen as any).msOrientation ||
         (screen as any).mozOrientation ||
@@ -105,7 +107,7 @@ export const Viewport = (function () {
         default: orientation = "landscape-primary";
       }
     }
-    let colorScheme: ViewColorScheme;
+    let colorScheme: ViewportColorScheme;
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       colorScheme = "dark";
     } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {

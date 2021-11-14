@@ -21,17 +21,11 @@ const host = [
         deps: ["warp"],
       },
       {
-        id: "test",
+        id: "cli",
         deps: ["warp", "client"],
       },
-    ],
-  },
-  {
-    id: "cli",
-    name: "@swim/cli",
-    targets: [
       {
-        id: "main",
+        id: "test",
         deps: ["warp", "client"],
       },
     ],

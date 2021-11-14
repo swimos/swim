@@ -25,7 +25,7 @@ import {DataPointController} from "./DataPointController";
 import {DataSetTrait} from "./DataSetTrait";
 import type {DataSetControllerObserver} from "./DataSetControllerObserver";
 
-/** @internal */
+/** @public */
 export interface DataSetControllerDataPointExt<X = unknown, Y = unknown> {
   attachDataPointTrait(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>): void;
   detachDataPointTrait(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>): void;
@@ -35,6 +35,7 @@ export interface DataSetControllerDataPointExt<X = unknown, Y = unknown> {
   detachDataPointLabelView(labelView: GraphicsView, dataPointController: DataPointController<X, Y>): void;
 }
 
+/** @public */
 export class DataSetController<X = unknown, Y = unknown> extends GenericController {
   override readonly observerType?: Class<DataSetControllerObserver<X, Y>>;
 

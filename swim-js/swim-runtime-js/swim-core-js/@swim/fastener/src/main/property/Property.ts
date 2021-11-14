@@ -20,24 +20,31 @@ import {StringProperty} from "./"; // forward import
 import {NumberProperty} from "./"; // forward import
 import {BooleanProperty} from "./"; // forward import
 
+/** @internal */
 export type MemberPropertyState<O, K extends keyof O> =
   O[K] extends Property<any, infer T> ? T : never;
 
+/** @internal */
 export type MemberPropertyStateInit<O, K extends keyof O> =
   O[K] extends Property<any, any, infer U> ? U : never;
 
+/** @internal */
 export type MemberPropertyInit<O, K extends keyof O> =
   O[K] extends Property<any, infer T, infer U> ? T | U : never;
 
+/** @internal */
 export type MemberPropertyInitMap<O> =
   {-readonly [K in keyof O as O[K] extends Property ? K : never]?: MemberPropertyInit<O, K>};
 
+/** @internal */
 export type PropertyState<P extends Property<any, any>> =
   P extends Property<any, infer T> ? T : never;
 
+/** @internal */
 export type PropertyStateInit<P extends Property<any, any>> =
   P extends Property<any, infer T, infer U> ? T | U : never;
 
+/** @public */
 export interface PropertyInit<T = unknown, U = T> extends FastenerInit {
   extends?: {prototype: Property<any, any>} | string | boolean | null;
   type?: unknown;
@@ -64,11 +71,14 @@ export interface PropertyInit<T = unknown, U = T> extends FastenerInit {
   fromAny?(value: T | U): T;
 }
 
+/** @public */
 export type PropertyDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<Property<O, T, U> & I> & PropertyInit<T, U> & Partial<I>;
 
+/** @public */
 export interface PropertyClass<P extends Property<any, any> = Property<any, any>> extends FastenerClass<P> {
 }
 
+/** @public */
 export interface PropertyFactory<P extends Property<any, any> = Property<any, any>> extends PropertyClass<P> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): PropertyFactory<P> & I;
 
@@ -85,6 +95,7 @@ export interface PropertyFactory<P extends Property<any, any> = Property<any, an
   <O, T, U = T, I = {}>(descriptor: PropertyDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface Property<O = unknown, T = unknown, U = T> extends Fastener<O> {
   (): T;
   (state: T | U, affinity?: Affinity): O;
@@ -190,6 +201,7 @@ export interface Property<O = unknown, T = unknown, U = T> extends Fastener<O> {
   fromAny(value: T | U): T;
 }
 
+/** @public */
 export const Property = (function (_super: typeof Fastener) {
   const Property: PropertyFactory = _super.extend("Property");
 

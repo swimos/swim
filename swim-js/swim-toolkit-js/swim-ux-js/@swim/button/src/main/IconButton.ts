@@ -38,9 +38,11 @@ import {
 import type {ButtonObserver} from "./ButtonObserver";
 import {ButtonMembraneInit, ButtonMembrane} from "./ButtonMembrane";
 
+/** @public */
 export interface IconButtonInit extends ButtonMembraneInit, IconViewInit {
 }
 
+/** @public */
 export class IconButton extends ButtonMembrane implements IconView {
   constructor(node: HTMLElement) {
     super(node);

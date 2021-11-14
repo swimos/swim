@@ -17,8 +17,10 @@ import {Debug, Format, Output} from "@swim/codec";
 import {AnyLength, Length} from "@swim/math";
 import {AnyDeckPost, DeckPost} from "./DeckPost";
 
+/** @public */
 export type AnyDeckRail = DeckRail | DeckRailInit;
 
+/** @public */
 export interface DeckRailInit {
   width?: AnyLength | null;
   left?: AnyLength | null;
@@ -27,6 +29,7 @@ export interface DeckRailInit {
   posts?: AnyDeckPost[];
 }
 
+/** @public */
 export class DeckRail implements Equals, Equivalent, Debug {
   constructor(width: Length | null, left: Length | null, right: Length | null,
               spacing: Length | null, posts: ReadonlyArray<DeckPost>) {

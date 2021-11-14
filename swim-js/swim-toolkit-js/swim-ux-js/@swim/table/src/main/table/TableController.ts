@@ -46,7 +46,7 @@ import {TableView} from "./TableView";
 import {TableTrait} from "./TableTrait";
 import type {TableControllerObserver} from "./TableControllerObserver";
 
-/** @internal */
+/** @public */
 export interface TableControllerHeaderExt {
   attachHeaderTrait(headerTrait: HeaderTrait, headerController: HeaderController): void;
   detachHeaderTrait(headerTrait: HeaderTrait, headerController: HeaderController): void;
@@ -54,7 +54,7 @@ export interface TableControllerHeaderExt {
   detachHeaderView(headerView: HeaderView, headerController: HeaderController): void;
 }
 
-/** @internal */
+/** @public */
 export interface TableControllerColExt {
   attachColTrait(colTrait: ColTrait, colController: ColController): void;
   detachColTrait(colTrait: ColTrait, colController: ColController): void;
@@ -64,7 +64,7 @@ export interface TableControllerColExt {
   detachColLabelView(colLabelView: HtmlView, colController: ColController): void;
 }
 
-/** @internal */
+/** @public */
 export interface TableControllerRowExt {
   attachRowTrait(rowTrait: RowTrait, rowController: RowController): void;
   detachRowTrait(rowTrait: RowTrait, rowController: RowController): void;
@@ -90,6 +90,7 @@ export interface TableControllerRowExt {
   detachTreeView(treeView: TableView, treeController: TableController, rowController: RowController): void;
 }
 
+/** @public */
 export class TableController extends GenericController {
   override readonly observerType?: Class<TableControllerObserver>;
 

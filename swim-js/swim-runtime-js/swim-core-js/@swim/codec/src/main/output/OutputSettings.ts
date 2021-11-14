@@ -20,11 +20,13 @@ import {Format} from "../format/Format";
 /**
  * Either an [[OutputSettings]] instance, or an [[OutputSettingsInit]] object
  * initializer.
+ * @public
  */
 export type AnyOutputSettings = OutputSettings | OutputSettingsInit;
 
 /**
  * [[OutputSettings]] object initializer.
+ * @public
  */
 export interface OutputSettingsInit {
   lineSeparator?: string;
@@ -34,11 +36,12 @@ export interface OutputSettingsInit {
 }
 
 /**
- * [[Output]] production parameters.  `OutputSettings` provide contextual
+ * [[Output]] production parameters. `OutputSettings` provide contextual
  * configuration parameters to output producers, such as [[Writer Writers]].
  * Uses include enabling pretty printing and styling generated output.
  * Subclasses can provide additional parameters understood by specialized
  * output producers.
+ * @public
  */
 export class OutputSettings implements Debug, HashCode {
   protected constructor(lineSeparator: string, pretty: boolean,

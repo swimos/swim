@@ -20,6 +20,7 @@ import type {DownlinkObserver, Downlink} from "../downlink/Downlink";
 import type {WarpRef} from "../ref/WarpRef";
 import type {DownlinkFastenerContext} from "./DownlinkFastenerContext";
 
+/** @beta */
 export interface DownlinkFastenerInit extends FastenerInit, DownlinkObserver {
   extends?: {prototype: DownlinkFastener<any>} | string | boolean | null;
   consumed?: boolean;
@@ -43,8 +44,10 @@ export interface DownlinkFastenerInit extends FastenerInit, DownlinkObserver {
   initDownlink?(downlink: Downlink): Downlink;
 }
 
+/** @beta */
 export type DownlinkFastenerDescriptor<O = unknown, I = {}> = ThisType<DownlinkFastener<O> & I> & DownlinkFastenerInit & Partial<I>;
 
+/** @beta */
 export interface DownlinkFastenerClass<F extends DownlinkFastener<any> = DownlinkFastener<any>> extends FastenerClass<F> {
   /** @internal */
   readonly ConsumingFlag: FastenerFlags;
@@ -59,6 +62,7 @@ export interface DownlinkFastenerClass<F extends DownlinkFastener<any> = Downlin
   readonly FlagMask: FastenerFlags;
 }
 
+/** @beta */
 export interface DownlinkFastenerFactory<F extends DownlinkFastener<any> = DownlinkFastener<any>> extends DownlinkFastenerClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): DownlinkFastenerFactory<F> & I;
 
@@ -69,6 +73,7 @@ export interface DownlinkFastenerFactory<F extends DownlinkFastener<any> = Downl
   <O, I = {}>(descriptor: DownlinkFastenerDescriptor<O, I>): PropertyDecorator;
 }
 
+/** @beta */
 export interface DownlinkFastener<O = unknown> extends Fastener<O>, Consumable {
   /** @override */
   get familyType(): Class<DownlinkFastener<any>> | null;
@@ -132,7 +137,7 @@ export interface DownlinkFastener<O = unknown> extends Fastener<O>, Consumable {
   /** @internal */
   relink(): void;
 
-  /** @internal @abstract*/
+  /** @internal @abstract */
   createDownlink(warp: WarpRef): Downlink;
 
   /** @internal */
@@ -231,6 +236,7 @@ export interface DownlinkFastener<O = unknown> extends Fastener<O>, Consumable {
   get static(): string | boolean; // prototype property
 }
 
+/** @beta */
 export const DownlinkFastener = (function (_super: typeof Fastener) {
   const DownlinkFastener: DownlinkFastenerFactory = _super.extend("DownlinkFastener");
 

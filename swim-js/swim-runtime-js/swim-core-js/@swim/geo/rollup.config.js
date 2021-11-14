@@ -1,14 +1,35 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
-const script = "swim-geo";
-const namespace = "swim";
-
-const main = {
+const mainEsm = {
   input: "./lib/main/index.js",
   output: {
-    file: `./dist/main/${script}.js`,
-    name: namespace,
+    file: "./dist/swim-geo.mjs",
+    format: "esm",
+    sourcemap: true,
+  },
+  external: [
+    "@swim/util",
+    "@swim/codec",
+    "@swim/structure",
+    "@swim/math",
+    "tslib",
+  ],
+  plugins: [
+    nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
+    sourcemaps(),
+  ],
+  onwarn(warning, warn) {
+    if (warning.code === "CIRCULAR_DEPENDENCY") return;
+    warn(warning);
+  },
+};
+
+const mainUmd = {
+  input: "./lib/main/index.js",
+  output: {
+    file: "./dist/swim-geo.js",
+    name: "swim",
     format: "umd",
     globals: {
       "@swim/util": "swim",
@@ -17,7 +38,7 @@ const main = {
       "@swim/math": "swim",
     },
     sourcemap: true,
-    interop: false,
+    interop: "esModule",
     extend: true,
   },
   external: [
@@ -36,16 +57,23 @@ const main = {
   },
 };
 
-const test = {
+const testEsm = {
   input: "./lib/test/index.js",
   output: {
-    file: `./dist/test/${script}-test.js`,
-    name: `${namespace}.test`,
-    format: "umd",
+    file: "./dist/swim-geo-test.mjs",
+    format: "esm",
     sourcemap: true,
-    interop: false,
-    extend: true,
   },
+  external: [
+    "@swim/util",
+    "@swim/codec",
+    "@swim/args",
+    "@swim/unit",
+    "@swim/structure",
+    "@swim/math",
+    "@swim/geo",
+    "tslib",
+  ],
   plugins: [
     nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
     sourcemaps(),
@@ -56,7 +84,7 @@ const test = {
   },
 };
 
-const targets = [main, test];
-targets.main = main;
-targets.test = test;
+const targets = [mainEsm, mainUmd, testEsm];
+targets.main = [mainEsm, mainUmd];
+targets.test = testEsm;
 export default targets;

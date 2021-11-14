@@ -19,6 +19,7 @@ import {OutputSettings, OutputStyle, Unicode} from "@swim/codec";
 import {ProjectConfig, Project} from "./Project";
 import type {Target} from "./Target";
 
+/** @internal */
 export interface BuildConfig {
   version?: string;
   projects: ProjectConfig[];
@@ -28,6 +29,7 @@ export interface BuildConfig {
   gaID?: string;
 }
 
+/** @internal */
 export class Build {
   readonly baseDir: string;
   readonly version: string | undefined;
@@ -76,17 +78,17 @@ export class Build {
     }
   }
 
-  initBundle(i: number = 0): Promise<unknown> {
+  initBundles(i: number = 0): Promise<unknown> {
     if (i < this.projectList.length) {
       const project = this.projectList[i]!;
-      return project.initBundle().then(this.initBundle.bind(this, i + 1));
+      return project.initBundles().then(this.initBundles.bind(this, i + 1));
     } else {
       return Promise.resolve(void 0);
     }
   }
 
   init(): Promise<Build> {
-    return this.initBundle().then(() => {
+    return this.initBundles().then(() => {
       return this;
     });
   }
@@ -385,54 +387,50 @@ export class Build {
   }
 
   static importScript(scriptFile: string): Promise<unknown> {
-    return rollup
-      .rollup({
-        input: scriptFile,
-        external: function (id: string): boolean {
-          return id[0] !== "." && !Path.isAbsolute(id) || id.slice(-5, id.length) === ".json";
-        },
-        onwarn(warning: rollup.RollupWarning, warn?: any): void {
-          if (warning.code === "MIXED_EXPORTS") {
-            return; // suppress
-          }
-          warn(warning);
-        },
-      })
-      .then((build: rollup.RollupBuild): Promise<rollup.RollupOutput> => {
-        return build.generate({
-          format: "cjs",
-          exports: "default",
-        });
-      })
-      .then((bundle: rollup.RollupOutput): Promise<unknown> => {
-        // temporarily override require to inject config script
-        const defaultLoader = require.extensions[".js"];
-        require.extensions[".js"] = function (module: NodeModule, fileName: string): void {
-          if (fileName === scriptFile) {
-            (module as { _compile?: any })._compile(bundle.output[0].code, fileName);
-          } else {
-            defaultLoader(module, fileName);
-          }
-        };
-
-        delete require.cache[scriptFile];
-        const config = require(scriptFile);
-        require.extensions[".js"] = defaultLoader;
-        return config;
+    return rollup.rollup({
+      input: scriptFile,
+      external: function (id: string): boolean {
+        return id[0] !== "." && !Path.isAbsolute(id) || id.slice(-5, id.length) === ".json";
+      },
+      onwarn(warning: rollup.RollupWarning, warn?: any): void {
+        if (warning.code === "MIXED_EXPORTS") {
+          return; // suppress
+        }
+        warn(warning);
+      },
+    }).then((build: rollup.RollupBuild): Promise<rollup.RollupOutput> => {
+      return build.generate({
+        format: "cjs",
+        exports: "default",
       });
+    }).then((bundle: rollup.RollupOutput): Promise<unknown> => {
+      // temporarily override require to inject config script
+      const defaultLoader = require.extensions[".js"];
+      require.extensions[".js"] = function (module: NodeModule, fileName: string): void {
+        if (fileName === scriptFile) {
+          (module as { _compile?: any })._compile(bundle.output[0].code, fileName);
+        } else {
+          defaultLoader(module, fileName);
+        }
+      };
+
+      delete require.cache[scriptFile];
+      const config = require(scriptFile);
+      require.extensions[".js"] = defaultLoader;
+      return config;
+    });
   }
 
   static load(configFile: string, devel?: boolean, tests?: string): Promise<Build> {
     configFile = Path.resolve(process.cwd(), configFile);
-    return Build.importScript(configFile)
-      .then((config: any): Promise<Build> => {
-        if (devel !== void 0) {
-          config.devel = devel;
-        }
-        if (tests !== void 0) {
-          config.tests = tests;
-        }
-        return new Build(config).init();
-      });
+    return Build.importScript(configFile).then((config: any): Promise<Build> => {
+      if (devel !== void 0) {
+        config.devel = devel;
+      }
+      if (tests !== void 0) {
+        config.tests = tests;
+      }
+      return new Build(config).init();
+    });
   }
 }

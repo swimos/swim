@@ -21,9 +21,11 @@ import {StyleRule, StyleSheet, HtmlView, StyleView} from "@swim/dom";
 import {TokenViewInit, TokenView} from "./TokenView";
 import type {InputTokenViewObserver} from "./InputTokenViewObserver";
 
+/** @public */
 export interface InputTokenViewInit extends TokenViewInit {
 }
 
+/** @public */
 export class InputTokenView extends TokenView {
   constructor(node: HTMLElement) {
     super(node);

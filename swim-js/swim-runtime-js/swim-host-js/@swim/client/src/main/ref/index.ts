@@ -20,4 +20,11 @@ export {NodeRef} from "./NodeRef";
 export {LaneRef} from "./LaneRef";
 
 export {WarpRef} from "./WarpRef";
-export {WarpObserver} from "./WarpObserver";
+export {
+  WarpDidConnect,
+  WarpDidAuthenticate,
+  WarpDidDeauthenticate,
+  WarpDidDisconnect,
+  WarpDidFail,
+  WarpObserver,
+} from "./WarpObserver";

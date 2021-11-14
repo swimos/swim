@@ -25,6 +25,7 @@ import {PaintingRenderer} from "../painting/PaintingRenderer";
 import {FilledIcon} from "./FilledIcon";
 import {PolygonIconInterpolator} from "../"; // forward import
 
+/** @public */
 export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>, Equals, Equivalent, Debug {
   constructor(sides: number, rotation: Angle, fillColor: Color | null,
               fillLook: Look<Color> | null, moodModifier: MoodMatrix | null) {

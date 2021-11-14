@@ -28,17 +28,21 @@ import type {GeoProjection} from "./GeoProjection";
 import {AnyGeoShape, GeoShape} from "./GeoShape";
 import {GeoPointInterpolator} from "./"; // forward import
 
+/** @public */
 export type AnyGeoPoint = GeoPoint | GeoPointInit | GeoPointTuple;
 
+/** @public */
 export interface GeoPointInit {
   lng: number;
   lat: number;
 }
 
+/** @public */
 export type GeoPointTuple = [number, number];
 
 /**
  * A geographic point represented by a WGS84 longitude and latitude.
+ * @public
  */
 export class GeoPoint extends GeoShape implements Interpolate<GeoPoint>, HashCode, Equivalent, Debug {
   constructor(lng: number, lat: number) {

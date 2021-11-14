@@ -18,6 +18,7 @@ import type {GeoTrait} from "../geo/GeoTrait";
 import type {GeoTraitObserver} from "../geo/GeoTraitObserver";
 import type {MapTrait} from "./MapTrait";
 
+/** @public */
 export interface MapTraitObserver<R extends MapTrait = MapTrait> extends GeoTraitObserver<R> {
   traitWillSetGeoPerspective?(newGeoPerspective: GeoPerspective | null, oldGeoPerspective: GeoPerspective | null, trait: R): void;
 

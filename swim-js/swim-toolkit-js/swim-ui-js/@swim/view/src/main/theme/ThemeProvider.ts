@@ -17,6 +17,7 @@ import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ThemeService} from "./ThemeService";
 import type {View} from "../view/View";
 
+/** @public */
 export interface ThemeProvider<V extends View, S extends ThemeService<V> | null | undefined = ThemeService<V>> extends Provider<V, S> {
   get mood(): MoodVector;
 
@@ -29,6 +30,7 @@ export interface ThemeProvider<V extends View, S extends ThemeService<V> | null 
   createService(): S;
 }
 
+/** @public */
 export const ThemeProvider = (function (_super: typeof Provider) {
   const ThemeProvider = _super.extend("ThemeProvider") as ProviderClass<ThemeProvider<any, any>>;
 

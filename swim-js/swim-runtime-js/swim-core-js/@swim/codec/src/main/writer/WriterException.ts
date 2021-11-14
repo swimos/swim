@@ -14,6 +14,7 @@
 
 /**
  * Thrown when a [[Writer]] attempts to write invalid syntax.
+ * @public
  */
 export class WriterException extends Error {
   constructor(message?: string) {

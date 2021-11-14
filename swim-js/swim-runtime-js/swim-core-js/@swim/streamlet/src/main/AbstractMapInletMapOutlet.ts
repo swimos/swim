@@ -23,6 +23,7 @@ import {MapOutletCombinators} from "./MapOutletCombinators";
 import {KeyOutlet} from "./KeyOutlet";
 import type {MapInletMapOutlet} from "./MapInletMapOutlet";
 
+/** @public */
 export abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements MapInletMapOutlet<KI, KO, VI, VO, I, O> {
   constructor() {
     this.input = null;
@@ -349,6 +350,7 @@ export abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
     // hook
   }
 }
+/** @public */
 export interface AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> extends MapOutletCombinators<KO, VO, O> {
 }
 MapOutletCombinators.define(AbstractMapInletMapOutlet.prototype);

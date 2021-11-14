@@ -17,6 +17,7 @@ import {GeoSplineBuilder} from "./GeoSplineBuilder";
 import type {GeoPathContext} from "./GeoPathContext";
 import {GeoPath} from "./GeoPath";
 
+/** @public */
 export class GeoPathBuilder implements GeoPathContext {
   /** @internal */
   splines: GeoSpline[];

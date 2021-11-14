@@ -16,6 +16,7 @@ import {ProviderClass, Provider} from "@swim/fastener";
 import {StorageService} from "./StorageService";
 import type {Controller} from "../controller/Controller";
 
+/** @public */
 export interface StorageProvider<C extends Controller, S extends StorageService<C> | null | undefined = StorageService<C>> extends Provider<C, S> {
   get(key: string): string | undefined;
 
@@ -26,6 +27,7 @@ export interface StorageProvider<C extends Controller, S extends StorageService<
   createService(): S;
 }
 
+/** @public */
 export const StorageProvider = (function (_super: typeof Provider) {
   const StorageProvider = _super.extend("StorageProvider") as ProviderClass<StorageProvider<any, any>>;
 

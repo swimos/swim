@@ -14,9 +14,11 @@
 
 /**
  * Endianness of multi-byte words.
+ * @public
  */
 export type ByteOrder = "BE" | "LE";
 
+/** @public */
 export const ByteOrder = (function () {
   const ByteOrder = {} as {
     /**

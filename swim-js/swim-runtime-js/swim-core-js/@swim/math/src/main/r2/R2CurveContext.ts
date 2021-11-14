@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export interface R2CurveContext {
   moveTo(x: number, y: number): void;
 

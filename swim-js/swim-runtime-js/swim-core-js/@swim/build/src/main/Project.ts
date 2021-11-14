@@ -20,6 +20,7 @@ import {OutputSettings, OutputStyle, Unicode} from "@swim/codec";
 import {Build} from "./Build";
 import {TargetConfig, Target} from "./Target";
 
+/** @internal */
 export interface ProjectConfig {
   id: string;
   name: string;
@@ -34,6 +35,7 @@ export interface ProjectConfig {
   compilerOptions?: ts.CompilerOptions;
 }
 
+/** @internal */
 export class Project {
   readonly build: Build;
 
@@ -82,7 +84,7 @@ export class Project {
 
     this.devel = !!config.devel;
     this.tests = config.tests;
-    this.cleanDirs = config.cleanDirs || ["dist", "doc", "lib"];
+    this.cleanDirs = config.cleanDirs || ["dist", "lib"];
 
     this.compilerOptions = config.compilerOptions || this.build.compilerOptions;
     this.bundleConfig = {};
@@ -113,21 +115,20 @@ export class Project {
     }
   }
 
-  initBundle(): Promise<unknown> {
+  initBundles(): Promise<unknown> {
     const bundleConfigPath = Path.join(this.baseDir, "rollup.config.js");
     if (FS.existsSync(bundleConfigPath)) {
-      return Build.importScript(bundleConfigPath)
-        .then((bundleConfig: any): void => {
-          for (let i = 0; i < this.targetList.length; i += 1) {
-            const target = this.targetList[i]!;
-            const targetBundleConfig = bundleConfig[target.id];
-            if (targetBundleConfig !== void 0) {
-              target.initBundle(targetBundleConfig);
-            }
+      return Build.importScript(bundleConfigPath).then((bundleConfig: any): void => {
+        for (let i = 0; i < this.targetList.length; i += 1) {
+          const target = this.targetList[i]!;
+          const targetBundleConfig = bundleConfig[target.id];
+          if (targetBundleConfig !== void 0) {
+            target.initBundles(targetBundleConfig);
           }
-          this.bundleConfig = bundleConfig;
-          return void 0;
-        });
+        }
+        this.bundleConfig = bundleConfig;
+        return void 0;
+      });
     } else {
       return Promise.resolve(void 0);
     }

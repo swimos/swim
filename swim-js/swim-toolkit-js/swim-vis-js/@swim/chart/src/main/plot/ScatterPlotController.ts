@@ -19,6 +19,7 @@ import type {ScatterPlotView} from "./ScatterPlotView";
 import type {ScatterPlotTrait} from "./ScatterPlotTrait";
 import type {ScatterPlotControllerObserver} from "./ScatterPlotControllerObserver";
 
+/** @public */
 export abstract class ScatterPlotController<X = unknown, Y = unknown> extends PlotController<X, Y> {
   override readonly observerType?: Class<ScatterPlotControllerObserver<X, Y>>;
 

@@ -25,6 +25,7 @@ import {AnyGeoPerspective, MapView} from "@swim/map";
 import {LeafletViewport} from "./LeafletViewport";
 import type {LeafletViewObserver} from "./LeafletViewObserver";
 
+/** @public */
 export class LeafletView extends MapView {
   constructor(map: L.Map) {
     super();

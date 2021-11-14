@@ -17,17 +17,20 @@ import type {AnyColor, Color} from "@swim/style";
 import type {ThemeAnimator} from "@swim/theme";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 
+/** @public */
 export interface StrokeViewInit extends GraphicsViewInit {
   stroke?: AnyColor;
   strokeWidth?: AnyLength;
 }
 
+/** @public */
 export interface StrokeView extends GraphicsView {
   readonly stroke: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   readonly strokeWidth: ThemeAnimator<this, Length | null, AnyLength | null>;
 }
 
+/** @public */
 export const StrokeView = (function () {
   const StrokeView = {} as {
     init(view: StrokeView, init: StrokeViewInit): void;

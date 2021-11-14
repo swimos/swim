@@ -14,5 +14,6 @@
 
 import type {R2SplineContext} from "./R2SplineContext";
 
+/** @public */
 export interface R2PathContext extends R2SplineContext {
 }

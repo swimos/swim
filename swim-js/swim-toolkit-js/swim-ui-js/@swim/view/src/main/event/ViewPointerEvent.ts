@@ -14,8 +14,10 @@
 
 import type {ViewEventInit, ViewEvent} from "./ViewEvent";
 
+/** @public */
 export interface ViewPointerEventInit extends PointerEventInit, ViewEventInit {
 }
 
+/** @public */
 export interface ViewPointerEvent extends PointerEvent, ViewEvent {
 }

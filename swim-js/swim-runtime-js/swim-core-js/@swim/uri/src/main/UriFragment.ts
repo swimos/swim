@@ -16,8 +16,10 @@ import {Lazy, HashCode, Compare, Mutable, Strings, HashGenCacheMap} from "@swim/
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
+/** @public */
 export type AnyUriFragment = UriFragment | string;
 
+/** @public */
 export class UriFragment implements HashCode, Compare, Debug, Display {
   /** @internal */
   constructor(identifier: string | undefined) {

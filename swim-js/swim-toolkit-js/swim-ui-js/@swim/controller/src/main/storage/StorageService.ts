@@ -18,6 +18,7 @@ import {WebStorageService} from "../"; // forward import
 import {EphemeralStorageService} from "../"; // forward import
 import {Controller} from "../"; // forward import
 
+/** @public */
 export abstract class StorageService<C extends Controller = Controller> extends Service<C> {
   override readonly observerType?: Class<StorageServiceObserver<C>>;
 

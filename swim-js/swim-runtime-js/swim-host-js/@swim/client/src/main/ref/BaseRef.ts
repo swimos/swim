@@ -36,6 +36,7 @@ import type {
   WarpObserver,
 } from "./WarpObserver";
 
+/** @public */
 export abstract class BaseRef implements DownlinkOwner, WarpRef {
   constructor(context: RefContext) {
     this.context = context;

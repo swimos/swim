@@ -25,6 +25,7 @@ import {AnyGeoPerspective, MapView} from "@swim/map";
 import {MapboxViewport} from "./MapboxViewport";
 import type {MapboxViewObserver} from "./MapboxViewObserver";
 
+/** @public */
 export class MapboxView extends MapView {
   constructor(map: mapboxgl.Map) {
     super();

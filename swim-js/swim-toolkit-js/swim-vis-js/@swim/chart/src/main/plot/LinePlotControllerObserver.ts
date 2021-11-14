@@ -19,6 +19,7 @@ import type {LinePlotTrait} from "./LinePlotTrait";
 import type {SeriesPlotControllerObserver} from "./SeriesPlotControllerObserver";
 import type {LinePlotController} from "./LinePlotController";
 
+/** @public */
 export interface LinePlotControllerObserver<X = unknown, Y = unknown, C extends LinePlotController<X, Y> = LinePlotController<X, Y>> extends SeriesPlotControllerObserver<X, Y, C> {
   controllerWillAttachPlotTrait?(plotTrait: LinePlotTrait<X, Y>, controller: C): void;
 

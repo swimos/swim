@@ -17,19 +17,24 @@ import type {FastenerOwner} from "@swim/fastener";
 import type {AnyView, View} from "./View";
 import {ViewRelationInit, ViewRelationClass, ViewRelation} from "./ViewRelation";
 
+/** @internal */
 export type ViewSetType<F extends ViewSet<any, any>> =
   F extends ViewSet<any, infer V> ? V : never;
 
+/** @public */
 export interface ViewSetInit<V extends View = View> extends ViewRelationInit<V> {
   extends?: {prototype: ViewSet<any, any>} | string | boolean | null;
   key?(view: V): string | undefined;
 }
 
+/** @public */
 export type ViewSetDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<ViewSet<O, V> & I> & ViewSetInit<V> & Partial<I>;
 
+/** @public */
 export interface ViewSetClass<F extends ViewSet<any, any> = ViewSet<any, any>> extends ViewRelationClass<F> {
 }
 
+/** @public */
 export interface ViewSetFactory<F extends ViewSet<any, any> = ViewSet<any, any>> extends ViewSetClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ViewSetFactory<F> & I;
 
@@ -44,6 +49,7 @@ export interface ViewSetFactory<F extends ViewSet<any, any> = ViewSet<any, any>>
   <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & ViewSetDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
 }
 
+/** @public */
 export interface ViewSet<O = unknown, V extends View = View> extends ViewRelation<O, V> {
   (newView: AnyView<V>): O;
 
@@ -82,6 +88,7 @@ export interface ViewSet<O = unknown, V extends View = View> extends ViewRelatio
   key(view: V): string | undefined;
 }
 
+/** @public */
 export const ViewSet = (function (_super: typeof ViewRelation) {
   const ViewSet: ViewSetFactory = _super.extend("ViewSet");
 

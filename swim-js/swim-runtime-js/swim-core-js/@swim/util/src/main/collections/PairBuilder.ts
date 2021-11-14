@@ -15,6 +15,7 @@
 /**
  * Type that accumulates pairs of input values, and binds an output result of
  * type `O`.
+ * @public
  */
 export interface PairBuilder<K, V, O> {
   /**

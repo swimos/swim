@@ -16,6 +16,7 @@ import type {Mutable} from "@swim/util";
 import type {Inlet} from "./Inlet";
 import type {Outlet} from "./Outlet";
 
+/** @public */
 export abstract class AbstractInlet<I> implements Inlet<I> {
   constructor() {
     this.input = null;

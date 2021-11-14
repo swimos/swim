@@ -24,6 +24,7 @@ import {R2QuadraticCurve} from "../"; // forward import
 import {R2CubicCurve} from "../"; // forward import
 import {R2EllipticCurve} from "../"; // forward import
 
+/** @public */
 export abstract class R2Curve extends R2Shape implements Equals, Equivalent {
   abstract interpolateX(u: number): number;
 

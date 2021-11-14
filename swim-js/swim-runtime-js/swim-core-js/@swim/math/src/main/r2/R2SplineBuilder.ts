@@ -20,6 +20,7 @@ import {R2EllipticCurve} from "./R2EllipticCurve";
 import type {R2SplineContext} from "./R2SplineContext";
 import {R2Spline} from "./R2Spline";
 
+/** @public */
 export class R2SplineBuilder implements R2SplineContext {
   /** @internal */
   curves: R2Curve[];

@@ -21,18 +21,23 @@ import type {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {ValueDownlinkModel} from "./ValueDownlinkModel";
 
+/** @public */
 export type ValueDownlinkWillSet<V, VU = never> = (newValue: V, downlink: ValueDownlink<V, VU>) => V | void;
+/** @public */
 export type VaueDownlinkDidSet<V, VU = never> = (newValue: V, oldValue: V, downlink: ValueDownlink<V, VU>) => void;
 
+/** @public */
 export interface ValueDownlinkObserver<V, VU = never> extends DownlinkObserver {
   willSet?: ValueDownlinkWillSet<V, VU>;
   didSet?: VaueDownlinkDidSet<V, VU>;
 }
 
+/** @public */
 export interface ValueDownlinkInit<V, VU = never> extends ValueDownlinkObserver<V, VU>, DownlinkInit {
   valueForm?: Form<V, VU>;
 }
 
+/** @public */
 export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, Outlet<V> {
   /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: ValueDownlinkInit<V, VU>,
@@ -70,6 +75,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     return "value";
   }
 
+  /** @internal */
   protected override copy<V, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
                                  hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
                                  body: Value, flags: number, observers: ReadonlyArray<ValueDownlinkObserver<V, VU>>,
@@ -360,6 +366,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     // hook
   }
 }
+/** @public */
 export interface ValueDownlink<V, VU> {
   hostUri(): Uri;
   hostUri(hostUri: AnyUri): ValueDownlink<V, VU>;
@@ -385,6 +392,7 @@ export interface ValueDownlink<V, VU> {
   keepSynced(): boolean;
   keepSynced(keepSynced: boolean): ValueDownlink<V, VU>;
 }
+/** @public */
 export interface ValueDownlink<V, VU> extends OutletCombinators<V> {
 }
 OutletCombinators.define(ValueDownlink.prototype);

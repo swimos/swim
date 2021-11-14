@@ -49,10 +49,10 @@ export class MockServer {
   readonly httpServer: http.Server | null;
 
   /** @internal */
-  readonly wsServer: ws.Server | null;
+  readonly wsServer: ws.WebSocketServer | null;
 
   /** @internal */
-  readonly socket: ws | null;
+  readonly socket: ws.WebSocket | null;
 
   resolve(relative: AnyUri): Uri {
     relative = Uri.fromAny(relative);
@@ -82,7 +82,7 @@ export class MockServer {
         (this as Mutable<this>).httpServer = httpServer;
         httpServer.listen(this.hostUri.portNumber, (): void => {
           try {
-            const wsServer = new ws.Server({port: void 0, server: httpServer});
+            const wsServer = new ws.WebSocketServer({port: void 0, server: httpServer});
             (this as Mutable<this>).wsServer = wsServer;
             wsServer.on("connection", this.onOpen);
             callback(this, this.client, resolve, reject);
@@ -131,14 +131,14 @@ export class MockServer {
     }
   }
 
-  onOpen(socket: ws): void {
+  onOpen(socket: ws.WebSocket): void {
     socket.onmessage = this.onMessage;
     socket.onclose = this.onClose;
     socket.onerror = this.onError;
     (this as Mutable<this>).socket = socket;
   }
 
-  onMessage(message: { data: ws.Data; type: string; target: ws }): void {
+  onMessage(message: { data: ws.Data; type: string; target: ws.WebSocket }): void {
     const data = message.data;
     if (typeof data === "string") {
       const envelope = Envelope.parseRecon(data);

@@ -18,9 +18,11 @@ import type {Trait, TraitRef} from "@swim/model";
 import type {Controller} from "../controller/Controller";
 import {ControllerSetInit, ControllerSetClass, ControllerSet} from "../controller/ControllerSet";
 
+/** @internal */
 export type TraitControllerSetType<F extends TraitControllerSet<any, any, any>> =
   F extends TraitControllerSet<any, any, infer C> ? C : never;
 
+/** @public */
 export interface TraitControllerSetInit<T extends Trait = Trait, C extends Controller = Controller> extends ControllerSetInit<C> {
   extends?: {prototype: TraitControllerSet<any, any, any>} | string | boolean | null;
   getTraitRef?(controller: C): TraitRef<any, T>;
@@ -31,11 +33,14 @@ export interface TraitControllerSetInit<T extends Trait = Trait, C extends Contr
   createController?(trait?: T): C;
 }
 
+/** @public */
 export type TraitControllerSetDescriptor<O = unknown, T extends Trait = Trait, C extends Controller = Controller, I = {}> = ThisType<TraitControllerSet<O, T, C> & I> & TraitControllerSetInit<T, C> & Partial<I>;
 
+/** @public */
 export interface TraitControllerSetClass<F extends TraitControllerSet<any, any, any> = TraitControllerSet<any, any, any>> extends ControllerSetClass<F> {
 }
 
+/** @public */
 export interface TraitControllerSetFactory<F extends TraitControllerSet<any, any, any> = TraitControllerSet<any, any, any>> extends TraitControllerSetClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitControllerSetFactory<F> & I;
 
@@ -50,6 +55,7 @@ export interface TraitControllerSetFactory<F extends TraitControllerSet<any, any
   <O, T extends Trait = Trait, C extends Controller = Controller, I = {}>(descriptor: {observes: boolean} & TraitControllerSetDescriptor<O, T, C, I & ObserverType<C>>): PropertyDecorator;
 }
 
+/** @public */
 export interface TraitControllerSet<O = unknown, T extends Trait = Trait, C extends Controller = Controller> extends ControllerSet<O, C> {
   /** @internal */
   readonly traitControllers: {readonly [traitId: number]: C | undefined};
@@ -102,6 +108,7 @@ export interface TraitControllerSet<O = unknown, T extends Trait = Trait, C exte
   createController(trait?: T): C;
 }
 
+/** @public */
 export const TraitControllerSet = (function (_super: typeof ControllerSet) {
   const TraitControllerSet: TraitControllerSetFactory = _super.extend("TraitControllerSet");
 

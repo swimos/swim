@@ -16,6 +16,7 @@ import type {Trait, TraitObserver} from "@swim/model";
 import type {CellTrait} from "../cell/CellTrait";
 import type {LeafTrait} from "./LeafTrait";
 
+/** @public */
 export interface LeafTraitObserver<T extends LeafTrait = LeafTrait> extends TraitObserver<T> {
   traitWillAttachCell?(cellTrait: CellTrait, targetTrait: Trait | null, trait: T): void;
 

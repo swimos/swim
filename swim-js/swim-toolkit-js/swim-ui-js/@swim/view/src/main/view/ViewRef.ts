@@ -29,19 +29,24 @@ import {
 import type {AnyView, View} from "./View";
 import {ViewRelationInit, ViewRelationClass, ViewRelation} from "./ViewRelation";
 
+/** @internal */
 export type ViewRefType<F extends ViewRef<any, any>> =
   F extends ViewRef<any, infer V> ? V : never;
 
+/** @public */
 export interface ViewRefInit<V extends View = View> extends ViewRelationInit<V> {
   extends?: {prototype: ViewRef<any, any>} | string | boolean | null;
   key?: string | boolean;
 }
 
+/** @public */
 export type ViewRefDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<ViewRef<O, V> & I> & ViewRefInit<V> & Partial<I>;
 
+/** @public */
 export interface ViewRefClass<F extends ViewRef<any, any> = ViewRef<any, any>> extends ViewRelationClass<F> {
 }
 
+/** @public */
 export interface ViewRefFactory<F extends ViewRef<any, any> = ViewRef<any, any>> extends ViewRefClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): ViewRefFactory<F> & I;
 
@@ -56,6 +61,7 @@ export interface ViewRefFactory<F extends ViewRef<any, any> = ViewRef<any, any>>
   <O, V extends View = View, I = {}>(descriptor: {observes: boolean} & ViewRefDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
 }
 
+/** @public */
 export interface ViewRef<O = unknown, V extends View = View> extends ViewRelation<O, V>, ConstraintScope, ConstraintContext {
   (): V | null;
   (view: AnyView<V> | null, targetView?: View | null, key?: string): O;
@@ -151,6 +157,7 @@ export interface ViewRef<O = unknown, V extends View = View> extends ViewRelatio
   get key(): string | undefined; // optional prototype field
 }
 
+/** @public */
 export const ViewRef = (function (_super: typeof ViewRelation) {
   const ViewRef: ViewRefFactory = _super.extend("ViewRef");
 

@@ -26,6 +26,7 @@ import {EsriView} from "./EsriView";
 import {EsriMapViewport} from "./EsriMapViewport";
 import type {EsriMapViewObserver} from "./EsriMapViewObserver";
 
+/** @public */
 export class EsriMapView extends EsriView {
   constructor(map: __esri.MapView) {
     super();

@@ -19,9 +19,12 @@ import type {HtmlView} from "@swim/dom";
 import {AnyColLayout, ColLayout} from "../layout/ColLayout";
 import type {ColTraitObserver} from "./ColTraitObserver";
 
+/** @public */
 export type ColLabel = ColLabelFunction | string;
+/** @public */
 export type ColLabelFunction = (colTrait: ColTrait) => HtmlView | string | null;
 
+/** @public */
 export class ColTrait extends Trait {
   override readonly observerType?: Class<ColTraitObserver>;
 

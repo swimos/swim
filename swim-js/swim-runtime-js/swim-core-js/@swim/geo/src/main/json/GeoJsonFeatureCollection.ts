@@ -17,11 +17,13 @@ import type {GeoJsonObject} from "./GeoJson";
 import type {GeoJsonGeometry} from "./GeoJsonGeometry";
 import {GeoJsonProperties, GeoJsonFeature} from "./GeoJsonFeature";
 
+/** @public */
 export interface GeoJsonFeatureCollection<G extends GeoJsonGeometry = GeoJsonGeometry, P = GeoJsonProperties> extends GeoJsonObject {
   type: "FeatureCollection";
   features: GeoJsonFeature<G, P>[];
 }
 
+/** @public */
 export const GeoJsonFeatureCollection = (function () {
   const GeoJsonFeatureCollection = {} as {
     is(value: unknown): value is GeoJsonFeatureCollection;

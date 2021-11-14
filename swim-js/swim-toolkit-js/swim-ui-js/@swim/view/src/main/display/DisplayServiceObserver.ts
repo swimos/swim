@@ -16,5 +16,6 @@ import type {ServiceObserver} from "@swim/util";
 import type {DisplayService} from "./DisplayService";
 import type {View} from "../view/View";
 
+/** @public */
 export interface DisplayServiceObserver<V extends View = View, S extends DisplayService<V> = DisplayService<V>> extends ServiceObserver<V, S> {
 }

@@ -19,8 +19,10 @@ import {AnyValue, Value} from "./Value";
 import {Num} from "./"; // forward import
 import {TextOutput} from "./"; // forward import
 
+/** @public */
 export type AnyText = Text | string;
 
+/** @public */
 export class Text extends Value {
   private constructor(value: string) {
     super();

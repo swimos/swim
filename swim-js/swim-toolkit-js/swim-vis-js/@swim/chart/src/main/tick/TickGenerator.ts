@@ -57,6 +57,7 @@ const MONTHDAY_FORMAT = DateTimeFormat.pattern("%b %d");
 const MONTH_FORMAT = DateTimeFormat.pattern("%B");
 const YEAR_FORMAT = DateTimeFormat.pattern("%Y");
 
+/** @public */
 export abstract class TickGenerator<D> {
   abstract count(): number;
   abstract count(n: number): this;
@@ -102,6 +103,7 @@ export abstract class TickGenerator<D> {
   }
 }
 
+/** @public */
 export class NumberTickGenerator extends TickGenerator<number> {
   /** @internal */
   protected x0: number;
@@ -198,6 +200,7 @@ export class NumberTickGenerator extends TickGenerator<number> {
   }
 }
 
+/** @public */
 export class TimeTickGenerator extends TickGenerator<DateTime> {
   /** @internal */
   protected t0: number;

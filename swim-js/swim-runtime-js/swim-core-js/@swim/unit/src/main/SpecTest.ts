@@ -20,10 +20,11 @@ import type {Report} from "./Report";
 import {Exam} from "./Exam";
 
 /**
- * Test function registration descriptor.  A `SpecTest` associates a [[TestFunc
- * test function]] with [[TestOptions test options]].  The [[run]] method
+ * Test function registration descriptor. A `SpecTest` associates a [[TestFunc
+ * test function]] with [[TestOptions test options]]. The [[run]] method
  * manages the–possibly asynchronous–evaluation of the test function in the
  * context of a particular `Spec` instance.
+ * @internal
  */
 export class SpecTest {
   constructor(name: string, func: TestFunc, options: TestOptions) {
@@ -59,9 +60,9 @@ export class SpecTest {
 
   /**
    * Lifecycle callback invoked after the–possibly asynchronous–completion of
-   * each evaluation of the test function.  The `result` of a synchronous test
+   * each evaluation of the test function. The `result` of a synchronous test
    * is the return value of the test function, if the test passed, or the
-   * thrown exception, if the test failed.  The `result` of an asynchronous
+   * thrown exception, if the test failed. The `result` of an asynchronous
    * test is the fulfilled value, or the rejected reason, of the `Promise`
    * returned by the test function.
    */
@@ -74,7 +75,7 @@ export class SpecTest {
 
   /**
    * Evaluates the underlying test function as a method on the given
-   * `spec`, generating the given `report`.  Returns a `Promise` that
+   * `spec`, generating the given `report`. Returns a `Promise` that
    * completes with the `Exam` result, regardless of the success or failure
    * of the underlying test function.
    */

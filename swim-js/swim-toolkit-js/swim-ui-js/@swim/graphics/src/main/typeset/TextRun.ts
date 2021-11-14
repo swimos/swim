@@ -21,8 +21,10 @@ import type {Graphics} from "../graphics/Graphics";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
 
+/** @public */
 export type AnyTextRun = TextRun | TextRunInit | string;
 
+/** @public */
 export interface TextRunInit {
   text: string;
   font?: AnyFont;
@@ -32,6 +34,7 @@ export interface TextRunInit {
   textColor?: AnyColor;
 }
 
+/** @public */
 export class TextRun implements Graphics, Equals, Debug {
   constructor(text: string, font: Font | null, textAlign: CanvasTextAlign | null,
               textBaseline: CanvasTextBaseline | null, textOrigin: R2Point | null,

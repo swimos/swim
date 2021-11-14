@@ -16,6 +16,7 @@ import type {Interpolator} from "@swim/util";
 import {AnyBoxShadow, BoxShadow, BoxShadowInterpolator} from "@swim/style";
 import {Look} from "./Look";
 
+/** @internal */
 export class ShadowLook extends Look<BoxShadow, AnyBoxShadow> {
   override combine(combination: BoxShadow | undefined, value: BoxShadow, weight?: number): BoxShadow {
     if (weight === void 0 || weight !== 0) {

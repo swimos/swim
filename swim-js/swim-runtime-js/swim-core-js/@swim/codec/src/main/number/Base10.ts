@@ -23,6 +23,7 @@ import {Base10IntegerWriter} from "../"; // forward import
 
 /**
  * Base-10 (decimal) encoding [[Parser]]/[[Writer]] factory.
+ * @public
  */
 export const Base10 = (function () {
   const Base10 = {} as {

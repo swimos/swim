@@ -19,8 +19,10 @@ import {AnyItem, Item} from "../Item";
 import type {Operator} from "../operator/Operator";
 import type {Selector} from "../selector/Selector";
 
+/** @public */
 export type AnyInterpreter = Interpreter | AnyItem;
 
+/** @public */
 export class Interpreter {
   constructor(settings?: InterpreterSettings, scopeStack?: Item[] | null, scopeDepth?: number) {
     this.settings = settings !== void 0 ? settings : InterpreterSettings.standard();

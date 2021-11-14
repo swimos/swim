@@ -15,6 +15,7 @@
 import type {HtmlViewObserver} from "@swim/dom";
 import type {DrawerPlacement, DrawerView} from "./DrawerView";
 
+/** @public */
 export interface DrawerViewObserver<V extends DrawerView = DrawerView> extends HtmlViewObserver<V> {
   viewWillSetPlacement?(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement, view: V): void;
 

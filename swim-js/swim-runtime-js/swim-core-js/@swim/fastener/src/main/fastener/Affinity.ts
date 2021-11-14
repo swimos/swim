@@ -14,8 +14,10 @@
 
 import type {Mutable} from "@swim/util";
 
+/** @public */
 export type Affinity = number;
 
+/** @public */
 export const Affinity = (function () {
   const Affinity = {} as {
     readonly Transient: Affinity;

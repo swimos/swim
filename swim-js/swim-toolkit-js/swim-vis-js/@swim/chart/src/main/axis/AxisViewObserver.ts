@@ -16,6 +16,7 @@ import type {GraphicsView, GraphicsViewObserver} from "@swim/graphics";
 import type {TickView} from "../tick/TickView";
 import type {AxisView} from "./AxisView";
 
+/** @public */
 export interface AxisViewObserver<D = unknown, V extends AxisView<D> = AxisView<D>> extends GraphicsViewObserver<V> {
   createTickLabel?(tickValue: D, tickView: TickView<D>, view: V): GraphicsView | string | null;
 

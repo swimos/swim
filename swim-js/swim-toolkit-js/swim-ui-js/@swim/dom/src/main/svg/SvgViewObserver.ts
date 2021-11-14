@@ -15,5 +15,6 @@
 import type {ElementViewObserver} from "../element/ElementViewObserver";
 import type {SvgView} from "./SvgView";
 
+/** @public */
 export interface SvgViewObserver<V extends SvgView = SvgView> extends ElementViewObserver<V> {
 }

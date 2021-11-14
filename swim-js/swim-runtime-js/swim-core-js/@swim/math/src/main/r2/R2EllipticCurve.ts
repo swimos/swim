@@ -20,6 +20,7 @@ import {R2Point} from "./R2Point";
 import type {R2CurveContext} from "./R2CurveContext";
 import {R2Curve} from "./R2Curve";
 
+/** @public */
 export class R2EllipticCurve extends R2Curve implements Debug {
   constructor(cx: number, cy: number, rx: number, ry: number,
               phi: number, a0: number, da: number) {

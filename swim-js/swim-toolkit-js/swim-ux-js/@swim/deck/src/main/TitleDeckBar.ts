@@ -26,6 +26,7 @@ import {DeckSlider, DeckSliderItem} from "./DeckSlider";
 import {DeckButton} from "./DeckButton";
 import {DeckBar} from "./DeckBar";
 
+/** @public */
 export class TitleDeckBar extends DeckBar {
   constructor(node: HTMLElement) {
     super(node);

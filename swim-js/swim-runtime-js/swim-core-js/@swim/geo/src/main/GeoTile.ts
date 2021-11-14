@@ -21,16 +21,20 @@ import {GeoPoint} from "./GeoPoint";
 import {GeoBox} from "./GeoBox";
 import {GeoSegment} from "./GeoSegment";
 
+/** @public */
 export type AnyGeoTile = GeoTile | GeoTileInit | GeoTileTuple;
 
+/** @public */
 export interface GeoTileInit {
   x: number;
   y: number;
   z: number;
 }
 
+/** @public */
 export type GeoTileTuple = [number, number, number];
 
+/** @public */
 export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
   constructor(x: number, y: number, z: number) {
     super();

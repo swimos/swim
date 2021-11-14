@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Cursor} from "@swim/util";
+import {Strings, Cursor} from "@swim/util";
 import {Output, Writer, Unicode, Base10, Base16} from "@swim/codec";
 import {Recon} from "../Recon";
 import {AttrWriter} from "./AttrWriter";
@@ -40,6 +40,7 @@ import {FilterSelectorWriter} from "./FilterSelectorWriter";
 
 /**
  * Factory for constructing Recon writers.
+ * @public
  */
 export abstract class ReconWriter<I, V> {
   abstract isField(item: I): boolean;
@@ -234,7 +235,7 @@ export abstract class ReconWriter<I, V> {
     if (n === 0 || (c = value.codePointAt(0), c !== void 0 && !Recon.isIdentStartChar(c))) {
       return false;
     }
-    for (let i = value.offsetByCodePoints(0, 1); i < n; i = value.offsetByCodePoints(i, 1)) {
+    for (let i = Strings.offsetByCodePoints(value, 0, 1); i < n; i = Strings.offsetByCodePoints(value, i, 1)) {
       c = value.codePointAt(i);
       if (c === void 0 || !Recon.isIdentChar(c)) {
         return false;

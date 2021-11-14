@@ -17,19 +17,24 @@ import {View} from "@swim/view";
 import {AnyNodeView, NodeViewInit, NodeViewConstructor, NodeView} from "../node/NodeView";
 import type {TextViewObserver} from "./TextViewObserver";
 
+/** @public */
 export interface ViewText extends Text {
   view?: TextView;
 }
 
+/** @public */
 export type AnyTextView<V extends TextView = TextView> = AnyNodeView<V> | string;
 
+/** @public */
 export interface TextViewInit extends NodeViewInit {
 }
 
+/** @public */
 export interface TextViewConstructor<V extends TextView = TextView, U = AnyTextView<V>> extends NodeViewConstructor<V, U> {
   new(node: Text): V;
 }
 
+/** @public */
 export class TextView extends NodeView {
   constructor(node: Text) {
     super(node);

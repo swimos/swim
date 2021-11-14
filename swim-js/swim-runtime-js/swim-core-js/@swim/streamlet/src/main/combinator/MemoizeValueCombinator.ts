@@ -16,6 +16,7 @@ import type {Mutable} from "@swim/util";
 import type {Outlet} from "../Outlet";
 import {AbstractInoutlet} from "../AbstractInoutlet";
 
+/** @public */
 export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
   constructor() {
     super();

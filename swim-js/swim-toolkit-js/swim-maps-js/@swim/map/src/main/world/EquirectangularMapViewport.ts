@@ -16,6 +16,7 @@ import {AnyR2Point, R2PointInit, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPointInit, GeoPoint} from "@swim/geo";
 import {WorldMapViewport} from "./WorldMapViewport";
 
+/** @public */
 export class EquirectangularMapViewport extends WorldMapViewport {
   constructor(viewFrame: R2Box) {
     super();

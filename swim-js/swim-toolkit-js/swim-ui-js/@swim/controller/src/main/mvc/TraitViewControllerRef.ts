@@ -20,9 +20,11 @@ import type {Controller} from "../controller/Controller";
 import {ControllerRefInit, ControllerRefClass, ControllerRef} from "../controller/ControllerRef";
 import type {TraitViewRef} from "./TraitViewRef";
 
+/** @internal */
 export type TraitViewControllerRefType<F extends TraitViewControllerRef<any, any, any, any>> =
   F extends TraitViewControllerRef<any, any, any, infer C> ? C : never;
 
+/** @public */
 export interface TraitViewControllerRefInit<T extends Trait, V extends View, C extends Controller = Controller> extends ControllerRefInit<C> {
   extends?: {prototype: TraitViewControllerRef<any, any, any, any>} | string | boolean | null;
   getTraitViewRef?(controller: C): TraitViewRef<any, T, V>;
@@ -30,11 +32,14 @@ export interface TraitViewControllerRefInit<T extends Trait, V extends View, C e
   parentView?: View | null;
 }
 
+/** @public */
 export type TraitViewControllerRefDescriptor<O = unknown, T extends Trait = Trait, V extends View = View, C extends Controller = Controller, I = {}> = ThisType<TraitViewControllerRef<O, T, V, C> & I> & TraitViewControllerRefInit<T, V, C> & Partial<I>;
 
+/** @public */
 export interface TraitViewControllerRefClass<F extends TraitViewControllerRef<any, any, any, any> = TraitViewControllerRef<any, any, any, any>> extends ControllerRefClass<F> {
 }
 
+/** @public */
 export interface TraitViewControllerRefFactory<F extends TraitViewControllerRef<any, any, any, any> = TraitViewControllerRef<any, any, any, any>> extends TraitViewControllerRefClass<F> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitViewControllerRefFactory<F> & I;
 
@@ -49,6 +54,7 @@ export interface TraitViewControllerRefFactory<F extends TraitViewControllerRef<
   <O, T extends Trait = Trait, V extends View = View, C extends Controller = Controller, I = {}>(descriptor: {observes: boolean} & TraitViewControllerRefDescriptor<O, T, V, C, I & ObserverType<C>>): PropertyDecorator;
 }
 
+/** @public */
 export interface TraitViewControllerRef<O = unknown, T extends Trait = Trait, V extends View = View, C extends Controller = Controller> extends ControllerRef<O, C> {
   /** @override */
   get familyType(): Class<TraitViewControllerRef<any, any, any, any>> | null;
@@ -72,6 +78,7 @@ export interface TraitViewControllerRef<O = unknown, T extends Trait = Trait, V 
   get parentView(): View | null; // optional prototype property
 }
 
+/** @public */
 export const TraitViewControllerRef = (function (_super: typeof ControllerRef) {
   const TraitViewControllerRef: TraitViewControllerRefFactory = _super.extend("TraitViewControllerRef");
 

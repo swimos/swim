@@ -24,6 +24,7 @@ import type {MapView} from "./MapView";
 import type {MapTrait} from "./MapTrait";
 import type {MapController} from "./MapController";
 
+/** @public */
 export interface MapControllerObserver<C extends MapController = MapController> extends ControllerObserver<C> {
   controllerWillAttachMapTrait?(mapTrait: MapTrait, controller: C): void;
 

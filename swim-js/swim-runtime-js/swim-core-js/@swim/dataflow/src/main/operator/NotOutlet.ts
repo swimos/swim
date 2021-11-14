@@ -15,6 +15,7 @@
 import type {Item, Value} from "@swim/structure";
 import {UnaryOutlet} from "./UnaryOutlet";
 
+/** @internal */
 export class NotOutlet extends UnaryOutlet {
   protected override evaluate(argument: Value): Item {
     return argument.not();

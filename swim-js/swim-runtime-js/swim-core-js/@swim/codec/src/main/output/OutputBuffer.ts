@@ -21,6 +21,7 @@ import {OutputBufferError} from "../"; // forward import
 
 /**
  * Non-blocking token stream buffer.
+ * @public
  */
 export abstract class OutputBuffer<T = unknown> extends Output<T> {
   abstract override asPart(part: boolean): OutputBuffer<T>;

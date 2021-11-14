@@ -17,6 +17,7 @@ import type {MemberFastenerClass} from "@swim/fastener";
 import {Trait} from "../trait/Trait";
 import {TraitRef} from "../trait/TraitRef";
 
+/** @beta */
 export abstract class DownlinkTrait extends Trait {
   @TraitRef<DownlinkTrait, Trait>({
     type: Trait,

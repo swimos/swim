@@ -15,6 +15,7 @@
 /**
  * Type that accumulates input values of type `I`, and binds an output result
  * of type `O`.
+ * @public
  */
 export interface Builder<I, O> {
   /**

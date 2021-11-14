@@ -1,21 +1,40 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
-const script = "swim-args";
-const namespace = "swim";
-
-const main = {
+const mainEsm = {
   input: "./lib/main/index.js",
   output: {
-    file: `./dist/main/${script}.js`,
-    name: namespace,
+    file: "./dist/swim-args.mjs",
+    format: "esm",
+    sourcemap: true,
+  },
+  external: [
+    "@swim/util",
+    "@swim/codec",
+    "tslib",
+  ],
+  plugins: [
+    nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
+    sourcemaps(),
+  ],
+  onwarn(warning, warn) {
+    if (warning.code === "CIRCULAR_DEPENDENCY") return;
+    warn(warning);
+  },
+};
+
+const mainUmd = {
+  input: "./lib/main/index.js",
+  output: {
+    file: "./dist/swim-args.js",
+    name: "swim",
     format: "umd",
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
     },
     sourcemap: true,
-    interop: false,
+    interop: "esModule",
     extend: true,
   },
   external: [
@@ -32,16 +51,20 @@ const main = {
   },
 };
 
-const test = {
+const testEsm = {
   input: "./lib/test/index.js",
   output: {
-    file: `./dist/test/${script}-test.js`,
-    name: `${namespace}.test`,
-    format: "umd",
+    file: "./dist/swim-args-test.mjs",
+    format: "esm",
     sourcemap: true,
-    interop: false,
-    extend: true,
   },
+  external: [
+    "@swim/util",
+    "@swim/codec",
+    "@swim/args",
+    "@swim/unit",
+    "tslib",
+  ],
   plugins: [
     nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
     sourcemaps(),
@@ -52,7 +75,7 @@ const test = {
   },
 };
 
-const targets = [main, test];
-targets.main = main;
-targets.test = test;
+const targets = [mainEsm, mainUmd];
+targets.main = [mainEsm, mainUmd];
+targets.test = testEsm;
 export default targets;

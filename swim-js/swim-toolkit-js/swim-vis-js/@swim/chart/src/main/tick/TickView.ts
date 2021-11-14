@@ -41,10 +41,13 @@ export const enum TickState {
   Leaving,
 }
 
+/** @public */
 export type TickOrientation = "top" | "right" | "bottom" | "left";
 
+/** @public */
 export type AnyTickView<D = unknown> = TickView<D> | TickViewInit<D>;
 
+/** @public */
 export interface TickViewInit<D = unknown> extends GraphicsViewInit {
   value: D;
   orientation?: TickOrientation;
@@ -63,6 +66,7 @@ export interface TickViewInit<D = unknown> extends GraphicsViewInit {
   label?: GraphicsView | string | null;
 }
 
+/** @public */
 export abstract class TickView<D = unknown> extends LayerView {
   constructor(value: D) {
     super();

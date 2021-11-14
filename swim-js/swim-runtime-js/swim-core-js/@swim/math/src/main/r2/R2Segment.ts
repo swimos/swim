@@ -21,8 +21,10 @@ import type {R2CurveContext} from "./R2CurveContext";
 import {R2BezierCurve} from "./R2BezierCurve";
 import {R2SegmentInterpolator} from "../"; // forward import
 
+/** @public */
 export type AnyR2Segment = R2Segment | R2SegmentInit;
 
+/** @public */
 export interface R2SegmentInit {
   x0: number;
   y0: number;
@@ -30,6 +32,7 @@ export interface R2SegmentInit {
   y1: number;
 }
 
+/** @public */
 export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, HashCode, Debug {
   constructor(x0: number, y0: number, x1: number, y1: number) {
     super();

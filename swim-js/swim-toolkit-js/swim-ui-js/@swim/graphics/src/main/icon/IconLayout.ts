@@ -14,8 +14,10 @@
 
 import {AnyLength, Length} from "@swim/math";
 
+/** @public */
 export type AnyIconLayout = IconLayout | IconLayoutInit;
 
+/** @public */
 export interface IconLayoutInit {
   iconWidth: AnyLength;
   iconHeight: AnyLength;
@@ -23,6 +25,7 @@ export interface IconLayoutInit {
   yAlign?: number;
 }
 
+/** @public */
 export interface IconLayout {
   readonly iconWidth: Length;
   readonly iconHeight: Length;
@@ -30,6 +33,7 @@ export interface IconLayout {
   readonly yAlign: number | undefined;
 }
 
+/** @public */
 export const IconLayout = (function () {
   const IconLayout = {} as {
     fromAny(value: AnyIconLayout): IconLayout;

@@ -16,6 +16,7 @@ import {Transform} from "@swim/math";
 import {DrawingRenderer} from "../drawing/DrawingRenderer";
 import type {PathContext} from "./PathContext";
 
+/** @public */
 export class PathRenderer extends DrawingRenderer {
   constructor(context: PathContext) {
     super();

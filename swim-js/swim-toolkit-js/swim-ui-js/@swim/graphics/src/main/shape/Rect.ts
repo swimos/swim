@@ -21,8 +21,10 @@ import type {DrawingContext} from "../drawing/DrawingContext";
 import {PathContext} from "../path/PathContext";
 import {PathRenderer} from "../path/PathRenderer";
 
+/** @public */
 export type AnyRect = Rect | RectInit;
 
+/** @public */
 export interface RectInit {
   x: AnyLength;
   y: AnyLength;
@@ -30,6 +32,7 @@ export interface RectInit {
   height: AnyLength;
 }
 
+/** @public */
 export class Rect implements Graphics, Equals, Debug {
   constructor(x: Length, y: Length, width: Length, height: Length) {
     this.x = x;

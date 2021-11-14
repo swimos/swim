@@ -20,6 +20,7 @@ import {AbstractMapInlet} from "./AbstractMapInlet";
  * A `MapInlet` that decoheres a parameterized `Outlet` whenever the
  * `MapInlet` decoheres, and that recoheres the parameterized `Outlet`
  * whenever the `MapInlet` recoheres.
+ * @public
  */
 export class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
   constructor(outlet: Outlet<unknown>) {

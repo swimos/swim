@@ -18,6 +18,7 @@ import type {IconCellView} from "./IconCellView";
 import type {IconCellTrait} from "./IconCellTrait";
 import type {IconCellController} from "./IconCellController";
 
+/** @public */
 export interface IconCellControllerObserver<C extends IconCellController = IconCellController> extends CellControllerObserver<C> {
   controllerWillAttachCellTrait?(cellTrait: IconCellTrait, controller: C): void;
 

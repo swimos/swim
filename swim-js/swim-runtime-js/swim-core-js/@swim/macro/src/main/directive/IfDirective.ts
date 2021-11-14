@@ -16,6 +16,7 @@ import {Item, Attr, Value, Record} from "@swim/structure";
 import type {ProcessorContext} from "../processor/ProcessorContext";
 import {Directive} from "./Directive";
 
+/** @public */
 export class IfDirective extends Directive {
   override evaluate(model: Item, params: Value, context: ProcessorContext): Item {
     if (model instanceof Record) {

@@ -14,6 +14,7 @@
 
 /**
  * Exception thrown when an [[Assert]] fails.
+ * @public
  */
 export class AssertException extends Error {
   constructor(message?: string) {

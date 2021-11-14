@@ -25,6 +25,7 @@ import {PaintingRenderer} from "../painting/PaintingRenderer";
 import {FilledIcon} from "./FilledIcon";
 import {CircleIconInterpolator} from "../"; // forward import
 
+/** @public */
 export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, Equals, Equivalent, Debug {
   constructor(fillColor: Color | null, fillLook: Look<Color> | null, moodModifier: MoodMatrix | null) {
     super();

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 export {
-  PlotType,
   AnyPlotView,
   PlotViewInit,
   PlotViewDataPointExt,
@@ -22,7 +21,6 @@ export {
 export {PlotViewObserver} from "./PlotViewObserver";
 
 export {
-  ScatterPlotType,
   AnyScatterPlotView,
   ScatterPlotViewInit,
   ScatterPlotView,
@@ -31,7 +29,6 @@ export {ScatterPlotViewObserver} from "./ScatterPlotViewObserver";
 
 export {
   SeriesPlotHitMode,
-  SeriesPlotType,
   AnySeriesPlotView,
   SeriesPlotViewInit,
   SeriesPlotView,

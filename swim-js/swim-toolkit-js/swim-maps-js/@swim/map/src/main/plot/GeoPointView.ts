@@ -32,10 +32,13 @@ import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPointViewObserver} from "./GeoPointViewObserver";
 
+/** @public */
 export type GeoPointLabelPlacement = "auto" | "top" | "right" | "bottom" | "left";
 
+/** @public */
 export type AnyGeoPointView = GeoPointView | GeoPointViewInit | GeoPoint | GeoPointInit | GeoPointTuple;
 
+/** @public */
 export interface GeoPointViewInit extends GeoViewInit {
   lng?: number;
   lat?: number;
@@ -58,6 +61,7 @@ export interface GeoPointViewInit extends GeoViewInit {
   label?: GraphicsView | string;
 }
 
+/** @public */
 export class GeoPointView extends GeoLayerView {
   override readonly observerType?: Class<GeoPointViewObserver>;
 

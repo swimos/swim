@@ -18,6 +18,7 @@ import {Item} from "../Item";
 import {UnaryOperator} from "./UnaryOperator";
 import {AnyInterpreter, Interpreter} from "../interpreter/Interpreter";
 
+/** @public */
 export class PositiveOperator extends UnaryOperator {
   constructor(operand: Item) {
     super(operand);

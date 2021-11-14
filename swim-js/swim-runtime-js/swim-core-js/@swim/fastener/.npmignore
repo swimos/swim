@@ -1,9 +1,10 @@
 .gitignore
 .npmignore
 .tsbuildinfo
-dist/test
+api-extractor.json
+dist/*-test.*
 doc/
-lib/test
+lib/
 rollup.config.js
-src/test/
+src/
 tsconfig.json

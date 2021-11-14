@@ -67,6 +67,10 @@ const core = [
         id: "main",
         deps: ["util", "codec", "args"],
       },
+      {
+        id: "cli",
+        deps: ["util", "codec", "args", "build"],
+      },
     ],
   },
   {
@@ -290,19 +294,12 @@ const host = [
         deps: ["util", "codec", "fastener", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
       },
       {
-        id: "test",
+        id: "cli",
         deps: ["util", "codec", "fastener", "unit", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
-    ],
-  },
-  {
-    id: "cli",
-    name: "@swim/cli",
-    path: "swim-host-js/@swim/cli",
-    targets: [
       {
-        id: "main",
-        deps: ["util", "codec", "fastener", "args", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        id: "test",
+        deps: ["util", "codec", "fastener", "unit", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },

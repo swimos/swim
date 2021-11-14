@@ -15,5 +15,6 @@
 import type {NodeViewObserver} from "../node/NodeViewObserver";
 import type {TextView} from "./TextView";
 
+/** @public */
 export interface TextViewObserver<V extends TextView = TextView> extends NodeViewObserver<V> {
 }

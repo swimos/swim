@@ -26,6 +26,7 @@ import {EsriView} from "./EsriView";
 import {EsriSceneViewport} from "./EsriSceneViewport";
 import type {EsriSceneViewObserver} from "./EsriSceneViewObserver";
 
+/** @public */
 export class EsriSceneView extends EsriView {
   constructor(map: __esri.SceneView) {
     super();

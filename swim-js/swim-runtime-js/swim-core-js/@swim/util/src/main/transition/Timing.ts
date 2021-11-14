@@ -19,8 +19,10 @@ import {Interpolator} from "../interpolate/Interpolator";
 import {AnyEasing, Easing} from "../"; // forward import
 import {Tweening} from "../"; // forward import
 
+/** @public */
 export type AnyTiming = Timing | TimingInit;
 
+/** @public */
 export interface TimingInit {
   easing?: AnyEasing;
   t0?: number;
@@ -28,6 +30,7 @@ export interface TimingInit {
   dt?: number;
 }
 
+/** @public */
 export interface Timing extends Domain<number> {
   readonly 0: number;
 
@@ -55,6 +58,7 @@ export interface Timing extends Domain<number> {
   toString(): string;
 }
 
+/** @public */
 export const Timing = (function (_super: typeof Domain) {
   const Timing = function (easing: Easing, t0: number, t1: number): Timing {
     const timing = function (t: number): number {

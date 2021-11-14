@@ -15,6 +15,7 @@
 import type {GraphicsViewContext} from "@swim/graphics";
 import type {GeoViewport} from "./GeoViewport";
 
+/** @public */
 export interface GeoViewContext extends GraphicsViewContext {
   readonly geoViewport: GeoViewport;
 }

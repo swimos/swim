@@ -16,6 +16,7 @@ import {Arrays} from "@swim/util";
 import {GeoPoint, GeoBox} from "@swim/geo";
 import type {GeoView} from "../geo/GeoView";
 
+/** @public */
 export class GeoTree {
   constructor(depth: number, maxDepth: number, density: number,
               geoFrame: GeoBox, geoBounds: GeoBox, geoCenter: GeoPoint,

@@ -15,6 +15,7 @@
 import type {CellTraitObserver} from "./CellTraitObserver";
 import type {TextCellContent, TextCellTrait} from "./TextCellTrait";
 
+/** @public */
 export interface TextCellTraitObserver<T extends TextCellTrait = TextCellTrait> extends CellTraitObserver<T> {
   traitWillSetContent?(newContent: TextCellContent | null, oldContent: TextCellContent | null, trait: T): void;
 

@@ -17,6 +17,7 @@ import type {HistoryStateInit, HistoryState} from "./HistoryState";
 import {HistoryService} from "./HistoryService";
 import type {Controller} from "../controller/Controller";
 
+/** @public */
 export interface HistoryProvider<C extends Controller, S extends HistoryService<C> | null | undefined = HistoryService<C>> extends Provider<C, S> {
   get historyState(): HistoryState;
 
@@ -27,6 +28,7 @@ export interface HistoryProvider<C extends Controller, S extends HistoryService<
   createService(): S;
 }
 
+/** @public */
 export const HistoryProvider = (function (_super: typeof Provider) {
   const HistoryProvider = _super.extend("HistoryProvider") as ProviderClass<HistoryProvider<any, any>>;
 

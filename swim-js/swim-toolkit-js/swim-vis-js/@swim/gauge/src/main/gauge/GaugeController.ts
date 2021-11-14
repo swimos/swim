@@ -25,7 +25,7 @@ import {GaugeView} from "./GaugeView";
 import {GaugeTitle, GaugeTrait} from "./GaugeTrait";
 import type {GaugeControllerObserver} from "./GaugeControllerObserver";
 
-/** @internal */
+/** @public */
 export interface GaugeControllerDialExt {
   attachDialTrait(dialTrait: DialTrait, dialController: DialController): void;
   detachDialTrait(dialTrait: DialTrait, dialController: DialController): void;
@@ -37,6 +37,7 @@ export interface GaugeControllerDialExt {
   detachDialLegendView(legendView: GraphicsView, dialController: DialController): void;
 }
 
+/** @public */
 export class GaugeController extends GenericController {
   override readonly observerType?: Class<GaugeControllerObserver>;
 

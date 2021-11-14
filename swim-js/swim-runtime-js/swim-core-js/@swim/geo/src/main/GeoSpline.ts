@@ -23,10 +23,13 @@ import {GeoSegment} from "./GeoSegment";
 import {GeoSplineBuilder} from "./"; // forward import
 import {GeoBox} from "./"; // forward import
 
+/** @public */
 export type AnyGeoSpline = GeoSpline | GeoSplinePoints;
 
+/** @public */
 export type GeoSplinePoints = ReadonlyArray<AnyGeoPoint>;
 
+/** @public */
 export class GeoSpline extends GeoCurve implements Debug {
   constructor(curves: ReadonlyArray<GeoCurve>, closed: boolean) {
     super();

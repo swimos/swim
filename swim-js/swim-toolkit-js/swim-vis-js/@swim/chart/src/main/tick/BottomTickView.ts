@@ -17,6 +17,7 @@ import {R2Point, R2Box} from "@swim/math";
 import {GraphicsView, PaintingContext, TypesetView} from "@swim/graphics";
 import {TickOrientation, TickView} from "./TickView";
 
+/** @public */
 export class BottomTickView<X = unknown> extends TickView<X> {
   constructor(value: X) {
     super(value);

@@ -16,6 +16,7 @@ import {Transform} from "@swim/math";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {SvgContext} from "./SvgContext";
 
+/** @public */
 export class SvgRenderer extends PaintingRenderer {
   constructor(context: SvgContext) {
     super();

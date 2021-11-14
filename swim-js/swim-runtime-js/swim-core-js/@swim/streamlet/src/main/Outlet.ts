@@ -17,21 +17,25 @@ import type {Inlet} from "./Inlet";
 import type {OutletCombinators} from "./OutletCombinators";
 import type {MapValueFunction, WatchValueFunction} from "./function";
 
+/** @public */
 export type OutletType = "value" | "map";
 
+/** @public */
 export interface OutletOptions {
   name?: string;
   type?: OutletType;
 }
 
 /**
- * Output connector from a [[Streamlet]].  An `Outlet` represents a sink to
+ * Output connector from a [[Streamlet]]. An `Outlet` represents a sink to
  * which a `Streamlet` provides state.
  *
  * An `Outlet` has a one-to-many relationship with a set of output sinks.
  * An output sink of an `Outlet` is an `Inlet` of some other `Streamlet`.
  * The [[bindOutput]] method "plugs" an `Inlet` into the `Outlet`.
  * The [[unbindOutput]] method "unplugs" an `Inlet` from the `Outlet`.
+ *
+ * @public
  */
 export interface Outlet<O = unknown> extends OutletCombinators<O> {
   /**
@@ -47,7 +51,7 @@ export interface Outlet<O = unknown> extends OutletCombinators<O> {
 
   /**
    * Adds an `output` to the set of `Inlet`s that depend on the state of this
-   * `Outlet`.  The `output` will be decohered when the state of this
+   * `Outlet`. The `output` will be decohered when the state of this
    * `Outlet` is decohered, and recohered when this `Outlet` is recohered.
    */
   bindOutput(output: Inlet<O>): void;
@@ -67,14 +71,14 @@ export interface Outlet<O = unknown> extends OutletCombinators<O> {
 
   /**
    * Disconnects all `Outlet`s dominated by this `Outlet` in the dataflow
-   * graph.  Used to recursively clean up chains of combinators originating
+   * graph. Used to recursively clean up chains of combinators originating
    * from this `Inlet`.
    */
   disconnectOutputs(): void;
 
   /**
    * Disconnects all `Inlet`s dominated by this `Outlet` in the dataflow
-   * dependency graph.  Used to recursively clean up chains of combinators
+   * dependency graph. Used to recursively clean up chains of combinators
    * passing through this `Outlet`.
    */
   disconnectInputs(): void;
@@ -87,8 +91,8 @@ export interface Outlet<O = unknown> extends OutletCombinators<O> {
 
   /**
    * Updates the state of this `Outlet` to make it consistent with the target
-   * `version`.  The `Outlet` only needs to update if its current `version`
-   * differs from the target `version`.  To update its state, the `Outlet`
+   * `version`. The `Outlet` only needs to update if its current `version`
+   * differs from the target `version`. To update its state, the `Outlet`
    * first invokes [[Streamlet.recohere]] on the `Streamlet` to which
    * it's attached. It then invokes [[Inlet.recohereOutput]] on each of its
    * dependent [[outputIterator outputs]].
@@ -102,7 +106,7 @@ export interface Outlet<O = unknown> extends OutletCombinators<O> {
   watch(func: WatchValueFunction<O>): this;
 }
 
-/** @internal */
+/** @public */
 export const Outlet = (function () {
   const Outlet = {} as {
     is<O>(object: unknown): object is Outlet<O>;

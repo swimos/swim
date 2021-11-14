@@ -22,21 +22,21 @@ import type {LineHeight} from "./LineHeight";
 import type {FontFamily} from "./FontFamily";
 import {Font} from "./Font";
 
-/** @intenal */
+/** @internal */
 export interface FontInterpolator extends Interpolator<Font> {
-  /** @intenal */
+  /** @internal */
   readonly styleInterpolator: Interpolator<FontStyle | undefined>;
-  /** @intenal */
+  /** @internal */
   readonly variantInterpolator: Interpolator<FontVariant | undefined>;
-  /** @intenal */
+  /** @internal */
   readonly weightInterpolator: Interpolator<FontWeight | undefined>;
-  /** @intenal */
+  /** @internal */
   readonly stretchInterpolator: Interpolator<FontStretch | undefined>;
-  /** @intenal */
+  /** @internal */
   readonly sizeInterpolator: Interpolator<FontSize | null>;
-  /** @intenal */
+  /** @internal */
   readonly heightInterpolator: Interpolator<LineHeight | null>;
-  /** @intenal */
+  /** @internal */
   readonly familyInterpolator: Interpolator<FontFamily | ReadonlyArray<FontFamily>>;
 
   get 0(): Font;
@@ -46,7 +46,7 @@ export interface FontInterpolator extends Interpolator<Font> {
   equals(that: unknown): boolean;
 }
 
-/** @intenal */
+/** @internal */
 export const FontInterpolator = (function (_super: typeof Interpolator) {
   const FontInterpolator = function (f0: Font, f1: Font): FontInterpolator {
     const interpolator = function (u: number): Font {

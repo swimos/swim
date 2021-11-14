@@ -17,12 +17,16 @@ import {Debug, Format, Output} from "@swim/codec";
 import type {Look} from "../look/Look";
 import {FeelVectorInterpolator} from "../"; // forward import
 
+/** @public */
 export type AnyFeelVector = FeelVector | FeelVectorArray;
 
+/** @public */
 export type FeelVectorArray = ReadonlyArray<[Look<unknown>, unknown]>;
 
+/** @public */
 export type FeelVectorUpdates = ReadonlyArray<[Look<unknown>, unknown | undefined]>;
 
+/** @public */
 export class FeelVector implements Interpolate<FeelVector>, Equals, Debug {
   constructor(array: ReadonlyArray<[Look<unknown>, unknown]>,
               index: {readonly [name: string]: number | undefined}) {

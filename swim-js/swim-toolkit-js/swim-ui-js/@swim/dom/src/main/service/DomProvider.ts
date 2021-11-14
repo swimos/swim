@@ -13,13 +13,15 @@
 // limitations under the License.
 
 import {ProviderClass, Provider} from "@swim/fastener";
-import {NodeView} from "../node/NodeView";
 import {DomService} from "./DomService";
+import type {NodeView} from "../node/NodeView";
 
+/** @public */
 export interface DomProvider<V extends NodeView, S extends DomService<V> | null | undefined = DomService<V>> extends Provider<V, S> {
   createService(): S;
 }
 
+/** @public */
 export const DomProvider = (function (_super: typeof Provider) {
   const DomProvider = _super.extend("DomProvider") as ProviderClass<DomProvider<any, any>>;
 
@@ -29,10 +31,3 @@ export const DomProvider = (function (_super: typeof Provider) {
 
   return DomProvider;
 })(Provider);
-
-Provider({
-  extends: DomProvider,
-  type: DomService,
-  observes: false,
-  service: DomService.global(),
-})(NodeView.prototype, "domProvider");

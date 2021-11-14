@@ -20,6 +20,7 @@ import {Look} from "@swim/theme";
 import {ScatterPlotTrait} from "./ScatterPlotTrait";
 import type {BubblePlotTraitObserver} from "./BubblePlotTraitObserver";
 
+/** @public */
 export class BubblePlotTrait<X = unknown, Y = unknown> extends ScatterPlotTrait<X, Y> {
   override readonly observerType?: Class<BubblePlotTraitObserver<X, Y>>;
 

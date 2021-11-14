@@ -14,8 +14,10 @@
 
 import {AnyGeoPoint, GeoPoint, AnyGeoBox, GeoBox} from "@swim/geo";
 
+/** @public */
 export type AnyGeoPerspective = GeoPerspective | GeoPerspectiveInit;
 
+/** @public */
 export interface GeoPerspectiveInit {
   geoFrame?: AnyGeoBox | null;
   geoCenter?: AnyGeoPoint | null;
@@ -24,6 +26,7 @@ export interface GeoPerspectiveInit {
   tilt?: number;
 }
 
+/** @public */
 export interface GeoPerspective {
   readonly geoFrame: GeoBox | null;
 
@@ -36,6 +39,7 @@ export interface GeoPerspective {
   readonly tilt: number | undefined;
 }
 
+/** @public */
 export const GeoPerspective = (function () {
   const GeoPerspective = {} as {
     fromAny(value: AnyGeoPerspective): GeoPerspective;

@@ -22,8 +22,10 @@ import {GraphicsViewInit, GraphicsView, LayerView, TypesetView, TextRunView} fro
 import {AnySliceView, SliceView} from "../slice/SliceView";
 import type {PieViewObserver} from "./PieViewObserver";
 
+/** @public */
 export type AnyPieView = PieView | PieViewInit;
 
+/** @public */
 export interface PieViewInit extends GraphicsViewInit {
   limit?: number;
   center?: AnyR2Point;
@@ -47,7 +49,7 @@ export interface PieViewInit extends GraphicsViewInit {
   slices?: AnySliceView[];
 }
 
-/** @internal */
+/** @public */
 export interface PieViewSliceExt {
   attachLabelView(labelView: GraphicsView): void;
   detachLabelView(labelView: GraphicsView): void;
@@ -55,6 +57,7 @@ export interface PieViewSliceExt {
   detachLegendView(legendView: GraphicsView): void;
 }
 
+/** @public */
 export class PieView extends LayerView {
   override readonly observerType?: Class<PieViewObserver>;
 

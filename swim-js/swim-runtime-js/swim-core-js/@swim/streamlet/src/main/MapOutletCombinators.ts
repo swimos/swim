@@ -27,6 +27,7 @@ import {ReduceFieldsCombinator} from "./"; // forward import
 import {WatchValueCombinator} from "./"; // forward import
 import {WatchFieldsCombinator} from "./"; // forward import
 
+/** @public */
 export interface MapOutletCombinators<K, V, O> extends OutletCombinators<O> {
   memoize(): MapOutlet<K, V, O>;
 
@@ -41,6 +42,7 @@ export interface MapOutletCombinators<K, V, O> extends OutletCombinators<O> {
   watch(func: WatchFieldsFunction<K, V>): this;
 }
 
+/** @public */
 export const MapOutletCombinators = (function () {
   const MapOutletCombinators = {} as {
     define<K, V, O>(prototype: MapOutletCombinators<K, V, O>): void;

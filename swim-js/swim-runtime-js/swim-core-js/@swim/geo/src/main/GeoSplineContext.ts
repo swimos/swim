@@ -14,6 +14,7 @@
 
 import type {GeoCurveContext} from "./GeoCurveContext";
 
+/** @public */
 export interface GeoSplineContext extends GeoCurveContext {
   closePath(): void;
 }

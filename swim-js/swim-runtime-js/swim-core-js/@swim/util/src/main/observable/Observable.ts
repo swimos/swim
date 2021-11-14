@@ -15,9 +15,11 @@
 import type {Class} from "../types/Class";
 import type {Observer} from "./Observer";
 
+/** @public */
 export type ObserverType<O> =
   O extends {readonly observerType?: Class<infer T>} ? T : never;
 
+/** @public */
 export interface Observable {
   readonly observerType?: Class<Observer>;
 
@@ -26,10 +28,9 @@ export interface Observable {
   unobserve(observer: ObserverType<this>): void;
 }
 
-/** @internal */
+/** @public */
 export const Observable = (function () {
   const Observable = {} as {
-    /** @internal */
     is(object: unknown): object is Observable;
   };
 

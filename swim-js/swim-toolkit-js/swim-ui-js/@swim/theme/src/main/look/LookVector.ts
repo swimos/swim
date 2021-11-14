@@ -16,12 +16,16 @@ import {Equals, Lazy, Arrays} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
 import type {Feel} from "../feel/Feel";
 
+/** @public */
 export type AnyLookVector<T> = LookVector<T> | LookVectorArray<T>;
 
+/** @public */
 export type LookVectorArray<T> = ReadonlyArray<[Feel, T]>;
 
+/** @public */
 export type LookVectorUpdates<T> = ReadonlyArray<[Feel, T | undefined]>;
 
+/** @public */
 export class LookVector<T> implements Equals, Debug {
   constructor(array: ReadonlyArray<[Feel, T]>,
               index: {readonly [name: string]: number | undefined}) {

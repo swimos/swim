@@ -17,14 +17,18 @@ import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fasten
 import {GestureInputType, GestureInput} from "./GestureInput";
 import {View} from "../"; // forward import
 
+/** @internal */
 export type MemberGestureView<O, K extends keyof O> =
   O[K] extends Gesture<any, infer V> ? V : never;
 
+/** @internal */
 export type GestureView<G extends Gesture<any, any>> =
   G extends Gesture<any, infer V> ? V : never;
 
+/** @public */
 export type GestureMethod = "auto" | "pointer" | "touch" | "mouse";
 
+/** @public */
 export interface GestureInit<V extends View = View> extends FastenerInit {
   extends?: {prototype: Gesture<any, any>} | string | boolean | null;
   method?: GestureMethod;
@@ -42,11 +46,14 @@ export interface GestureInit<V extends View = View> extends FastenerInit {
   detectView?(view: View): V | null;
 }
 
+/** @public */
 export type GestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<Gesture<O, V> & I> & GestureInit<V> & Partial<I>;
 
+/** @public */
 export interface GestureClass<G extends Gesture<any, any> = Gesture<any, any>> extends FastenerClass<G> {
 }
 
+/** @public */
 export interface GestureFactory<G extends Gesture<any, any> = Gesture<any, any>> extends GestureClass<G> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): GestureFactory<G> & I;
 
@@ -59,6 +66,7 @@ export interface GestureFactory<G extends Gesture<any, any> = Gesture<any, any>>
   <O, V extends View = View, I = {}>(descriptor: GestureDescriptor<O, V, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface Gesture<O = unknown, V extends View = View> extends Fastener<O> {
   (): V | null;
   (view: V | null, targetView?: View | null): O;
@@ -150,6 +158,7 @@ export interface Gesture<O = unknown, V extends View = View> extends Fastener<O>
   get static(): string | boolean; // prototype property
 }
 
+/** @public */
 export const Gesture = (function (_super: typeof Fastener) {
   const Gesture: GestureFactory = _super.extend("Gesture");
 

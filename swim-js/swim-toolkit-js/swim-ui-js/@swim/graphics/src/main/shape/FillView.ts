@@ -16,14 +16,17 @@ import type {AnyColor, Color} from "@swim/style";
 import type {ThemeAnimator} from "@swim/theme";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 
+/** @public */
 export interface FillViewInit extends GraphicsViewInit {
   fill?: AnyColor;
 }
 
+/** @public */
 export interface FillView extends GraphicsView {
   readonly fill: ThemeAnimator<this, Color | null, AnyColor | null>;
 }
 
+/** @public */
 export const FillView = (function () {
   const FillView = {} as {
     init(view: FillView, init: FillViewInit): void;

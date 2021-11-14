@@ -16,6 +16,7 @@ import type {Trait, TraitObserver} from "@swim/model";
 import type {SliceTrait} from "../slice/SliceTrait";
 import type {PieTitle, PieTrait} from "./PieTrait";
 
+/** @public */
 export interface PieTraitObserver<R extends PieTrait = PieTrait> extends TraitObserver<R> {
   traitWillSetPieTitle?(newTitle: PieTitle | null, oldTitle: PieTitle | null, trait: R): void;
 

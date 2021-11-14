@@ -7,10 +7,18 @@
   "copyright": "2015-2021 Swim Inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-streamlet.js",
-  "module": "lib/main/index.js",
-  "types": "lib/main/index.d.ts",
-  "typedocMain": "src/main/index.ts",
+  "main": "./dist/swim-streamlet.js",
+  "module": "./dist/swim-streamlet.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-streamlet.mjs",
+      "require": "./dist/swim-streamlet.js",
+      "types": "./dist/swim-streamlet.d.ts"
+    }
+  },
+  "types": "./dist/swim-streamlet.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
   "dependencies": {
     "@swim/util": "4.0.0-dev.20210927.1",
     "@swim/collections": "4.0.0-dev.20210927.1"

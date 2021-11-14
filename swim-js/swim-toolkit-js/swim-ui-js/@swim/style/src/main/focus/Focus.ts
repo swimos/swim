@@ -25,13 +25,16 @@ import {
 import {Output, Debug, Format} from "@swim/codec";
 import {FocusInterpolator} from "./FocusInterpolator";
 
+/** @public */
 export type AnyFocus = Focus | FocusInit;
 
+/** @public */
 export interface FocusInit {
   readonly phase: number;
   readonly direction: number;
 }
 
+/** @public */
 export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
   constructor(phase: number, direction: number) {
     this.phase = phase;

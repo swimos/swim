@@ -70,6 +70,7 @@ export interface StreamletPrototype {
   inoutlets?: {[name: string]: InoutletDescriptor | undefined};
 }
 
+/** @public */
 export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericStreamlet<I, O> {
   constructor(scope: StreamletScope<O> | null = null) {
     this.streamletScope = scope;

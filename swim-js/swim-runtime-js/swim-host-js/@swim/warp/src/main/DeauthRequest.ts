@@ -15,6 +15,7 @@
 import {AnyValue, Value} from "@swim/structure";
 import {HostAddressed} from "./HostAddressed";
 
+/** @public */
 export class DeauthRequest extends HostAddressed<DeauthRequest> {
   constructor(body: Value) {
     super(body);

@@ -1,0 +1,23 @@
+{
+  "extends": "../../config/api-extractor-main.json",
+  "mainEntryPointFilePath": "./lib/main/index.d.ts",
+  "bundledPackages": [
+    "@swim/button",
+    "@swim/token",
+    "@swim/table",
+    "@swim/window",
+    "@swim/deck"
+  ],
+  "compiler": {
+    "tsconfigFilePath": "./src/main/tsconfig.json"
+  },
+  "apiReport": {
+    "reportFileName": "swim-ux.api.md"
+  },
+  "docModel": {
+    "apiJsonFilePath": "./doc/swim-ux.api.json"
+  },
+  "dtsRollup": {
+    "untrimmedFilePath": "./dist/swim-ux.d.ts"
+  }
+}

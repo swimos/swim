@@ -18,6 +18,7 @@ import type {ProcessorContext} from "../processor/ProcessorContext";
 import type {Converter} from "../converter/Converter";
 import {Directive} from "./Directive";
 
+/** @public */
 export class ConvertDirective extends Directive {
   override evaluate(model: Item, params: Value, context: ProcessorContext): Item {
     const converterName = params.stringValue();

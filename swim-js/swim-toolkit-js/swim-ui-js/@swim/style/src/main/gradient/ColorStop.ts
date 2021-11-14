@@ -20,16 +20,20 @@ import {ColorStopInterpolator} from "../"; // forward import
 import {ColorStopParser} from "../"; // forward import
 import {ColorStopListParser} from "../"; // forward import
 
+/** @public */
 export type AnyColorStop = ColorStop | ColorStopInit | ColorStopTuple | string;
 
+/** @public */
 export interface ColorStopInit {
   color: AnyColor;
   stop?: AnyLength;
   hint?: AnyLength;
 }
 
+/** @public */
 export type ColorStopTuple = [AnyColor, AnyLength | null];
 
+/** @public */
 export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
   constructor(color: Color, stop: Length | null, hint: Length | null) {
     this.color = color;

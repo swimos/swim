@@ -26,8 +26,10 @@ import {FontInterpolator} from "../"; // forward import
 import {FontForm} from "../"; // forward import
 import {FontParser} from "../"; // forward import
 
+/** @public */
 export type AnyFont = Font | FontInit | string;
 
+/** @public */
 export interface FontInit {
   style?: FontStyle;
   variant?: FontVariant;
@@ -38,6 +40,7 @@ export interface FontInit {
   family: FontFamily | FontFamily[];
 }
 
+/** @public */
 export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
   constructor(style: FontStyle | undefined, variant: FontVariant | undefined,
               weight: FontWeight | undefined, stretch: FontStretch | undefined,

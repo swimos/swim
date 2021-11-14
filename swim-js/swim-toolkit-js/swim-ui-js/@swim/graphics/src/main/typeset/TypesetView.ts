@@ -17,6 +17,7 @@ import type {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import type {ThemeAnimator} from "@swim/theme";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 
+/** @public */
 export interface TypesetViewInit extends GraphicsViewInit {
   font?: AnyFont;
   textAlign?: CanvasTextAlign;
@@ -25,6 +26,7 @@ export interface TypesetViewInit extends GraphicsViewInit {
   textColor?: AnyColor;
 }
 
+/** @public */
 export interface TypesetView extends GraphicsView {
   readonly font: ThemeAnimator<this, Font | null, AnyFont | null>;
 
@@ -37,6 +39,7 @@ export interface TypesetView extends GraphicsView {
   readonly textColor: ThemeAnimator<this, Color | null, AnyColor | null>;
 }
 
+/** @public */
 export const TypesetView = (function () {
   const TypesetView = {} as {
     init(view: TypesetView, init: TypesetViewInit): void;

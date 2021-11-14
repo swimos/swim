@@ -20,12 +20,17 @@ import {Look} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import type {DialTraitObserver} from "./DialTraitObserver";
 
+/** @public */
 export type DialLabel = DialLabelFunction | string;
+/** @public */
 export type DialLabelFunction = (dialTrait: DialTrait | null) => GraphicsView | string | null;
 
+/** @public */
 export type DialLegend = DialLegendFunction | string;
+/** @public */
 export type DialLegendFunction = (dialTrait: DialTrait | null) => GraphicsView | string | null;
 
+/** @public */
 export class DialTrait extends Trait {
   override readonly observerType?: Class<DialTraitObserver>;
 

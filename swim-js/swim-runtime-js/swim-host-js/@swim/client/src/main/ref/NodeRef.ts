@@ -23,6 +23,7 @@ import {BaseRef} from "./BaseRef";
 import {HostRef} from "./HostRef";
 import {LaneRef} from "./LaneRef";
 
+/** @public */
 export class NodeRef extends BaseRef {
   constructor(context: RefContext, hostUri: Uri, nodeUri: Uri) {
     super(context);

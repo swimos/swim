@@ -50,8 +50,8 @@ export class R2PathParserSpec extends Spec {
   parseMultipleDegenerateClosedPaths(exam: Exam): void {
     exam.equal(R2Path.parse("M1,-2ZM-3,5Z"), R2Path.of(R2Spline.closed(R2Curve.linear(1, -2, 1, -2)), R2Spline.closed(R2Curve.linear(-3, 5, -3, 5))));
     exam.equal(R2Path.parse("M 1 -2 Z M -3 5 Z"), R2Path.of(R2Spline.closed(R2Curve.linear(1, -2, 1, -2)), R2Spline.closed(R2Curve.linear(-3, 5, -3, 5))));
-    exam.equal(R2Path.parse("m1,-2zm-3,5z"), R2Path.of(R2Spline.closed(R2Curve.linear(1, -2, 1, -2)), R2Spline.closed(R2Curve.linear(-3, 5, -3, 5))));
-    exam.equal(R2Path.parse("m 1 -2 z m -3 5 z"), R2Path.of(R2Spline.closed(R2Curve.linear(1, -2, 1, -2)), R2Spline.closed(R2Curve.linear(-3, 5, -3, 5))));
+    exam.equal(R2Path.parse("m1,-2zm-4,7z"), R2Path.of(R2Spline.closed(R2Curve.linear(1, -2, 1, -2)), R2Spline.closed(R2Curve.linear(-3, 5, -3, 5))));
+    exam.equal(R2Path.parse("m 1 -2 z m -4 7 z"), R2Path.of(R2Spline.closed(R2Curve.linear(1, -2, 1, -2)), R2Spline.closed(R2Curve.linear(-3, 5, -3, 5))));
   }
 
   @Test

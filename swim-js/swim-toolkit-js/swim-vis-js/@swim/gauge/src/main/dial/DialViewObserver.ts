@@ -16,6 +16,7 @@ import type {ViewObserver} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
 import type {DialView} from "./DialView";
 
+/** @public */
 export interface DialViewObserver<V extends DialView = DialView> extends ViewObserver<V> {
   viewWillSetDialValue?(newValue: number, oldValue: number, view: V): void;
 

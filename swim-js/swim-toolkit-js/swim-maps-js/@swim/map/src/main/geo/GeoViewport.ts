@@ -15,6 +15,7 @@
 import {GeoProjection, GeoPoint, GeoBox} from "@swim/geo";
 import {GeoPerspective} from "./GeoPerspective";
 
+/** @public */
 export interface GeoViewport extends GeoProjection, GeoPerspective {
   readonly geoFrame: GeoBox;
 
@@ -27,6 +28,7 @@ export interface GeoViewport extends GeoProjection, GeoPerspective {
   readonly tilt: number;
 }
 
+/** @public */
 export const GeoViewport = (function () {
   const GeoViewport = {} as {
     is(object: unknown): object is GeoViewport;

@@ -25,6 +25,7 @@ import {ColorAttributeAnimator} from "./"; // forward import
 import {TransformAttributeAnimator} from "./"; // forward import
 import {ElementView} from "../"; // forward import
 
+/** @public */
 export interface AttributeAnimatorInit<T = unknown, U = never> extends ThemeAnimatorInit<T, U> {
   extends?: {prototype: AttributeAnimator<any, any>} | string | boolean | null;
   attributeName: string;
@@ -32,11 +33,14 @@ export interface AttributeAnimatorInit<T = unknown, U = never> extends ThemeAnim
   parse?(value: string): T;
 }
 
+/** @public */
 export type AttributeAnimatorDescriptor<O = unknown, T = unknown, U = never, I = {}> = ThisType<AttributeAnimator<O, T, U> & I> & AttributeAnimatorInit<T, U> & Partial<I>;
 
+/** @public */
 export interface AttributeAnimatorClass<A extends AttributeAnimator<any, any> = AttributeAnimator<any, any, any>> extends ThemeAnimatorClass<A> {
 }
 
+/** @public */
 export interface AttributeAnimatorFactory<A extends AttributeAnimator<any, any> = AttributeAnimator<any, any, any>> extends AttributeAnimatorClass<A> {
   extend<I = {}>(className: string, classMembers?: Partial<I> | null): AttributeAnimatorFactory<A> & I;
 
@@ -56,6 +60,7 @@ export interface AttributeAnimatorFactory<A extends AttributeAnimator<any, any> 
   <O, T, U = never, I = {}>(descriptor: AttributeAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
+/** @public */
 export interface AttributeAnimator<O = unknown, T = unknown, U = never> extends ThemeAnimator<O, T, U> {
   get attributeName(): string;
 
@@ -73,6 +78,7 @@ export interface AttributeAnimator<O = unknown, T = unknown, U = never> extends 
   parse(value: string): T;
 }
 
+/** @public */
 export const AttributeAnimator = (function (_super: typeof ThemeAnimator) {
   const AttributeAnimator: AttributeAnimatorFactory = _super.extend("AttributeAnimator");
 

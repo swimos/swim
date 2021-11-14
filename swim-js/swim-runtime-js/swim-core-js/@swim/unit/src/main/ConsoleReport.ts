@@ -20,6 +20,7 @@ import type {Exam} from "./Exam";
 
 /**
  * Unit test `Report` that prints its results to the console.
+ * @public
  */
 export class ConsoleReport extends Report {
   /** @internal */

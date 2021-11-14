@@ -16,6 +16,7 @@ import type {TraitObserver} from "@swim/model";
 import type {DataSetTrait} from "../data/DataSetTrait";
 import type {PlotTrait} from "./PlotTrait";
 
+/** @public */
 export interface PlotTraitObserver<X = unknown, Y = unknown, R extends PlotTrait<X, Y> = PlotTrait<X, Y>> extends TraitObserver<R> {
   traitWillAttachDataSet?(dataSetTrait: DataSetTrait<X, Y>, trait: R): void;
 

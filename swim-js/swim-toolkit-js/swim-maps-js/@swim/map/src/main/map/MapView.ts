@@ -23,6 +23,7 @@ import type {GeoViewport} from "../geo/GeoViewport";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import type {MapViewObserver} from "./MapViewObserver";
 
+/** @public */
 export abstract class MapView extends GeoLayerView {
   override readonly observerType?: Class<MapViewObserver>;
 

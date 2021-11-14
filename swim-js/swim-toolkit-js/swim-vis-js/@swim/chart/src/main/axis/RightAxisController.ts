@@ -17,6 +17,7 @@ import {RightAxisTrait} from "./RightAxisTrait";
 import {RightAxisView} from "./RightAxisView";
 import {AxisController} from "./AxisController";
 
+/** @public */
 export class RightAxisController<Y = unknown> extends AxisController<Y> {
   @TraitViewRef<RightAxisController<Y>, RightAxisTrait<Y>, RightAxisView<Y>>({
     extends: true,

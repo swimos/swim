@@ -15,6 +15,7 @@
 import type {WatchFieldsFunction} from "../function";
 import {WatchFieldsOperator} from "./WatchFieldsOperator";
 
+/** @public */
 export class WatchFieldsCombinator<K, V, O> extends WatchFieldsOperator<K, V, O> {
   constructor(func: WatchFieldsFunction<K, V>) {
     super();

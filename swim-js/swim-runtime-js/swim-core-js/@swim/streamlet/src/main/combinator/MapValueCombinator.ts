@@ -15,6 +15,7 @@
 import type {MapValueFunction} from "../function";
 import {MapValueOperator} from "./MapValueOperator";
 
+/** @public */
 export class MapValueCombinator<I, O> extends MapValueOperator<I, O> {
   constructor(func: MapValueFunction<I, O>) {
     super();

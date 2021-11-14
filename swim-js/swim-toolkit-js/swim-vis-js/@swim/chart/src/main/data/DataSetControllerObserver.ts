@@ -22,6 +22,7 @@ import type {DataPointController} from "./DataPointController";
 import type {DataSetTrait} from "./DataSetTrait";
 import type {DataSetController} from "./DataSetController";
 
+/** @public */
 export interface DataSetControllerObserver<X = unknown, Y = unknown, C extends DataSetController<X, Y> = DataSetController<X, Y>> extends ControllerObserver<C> {
   controllerWillAttachDataSetTrait?(dataSetTrait: DataSetTrait<X, Y>, controller: C): void;
 

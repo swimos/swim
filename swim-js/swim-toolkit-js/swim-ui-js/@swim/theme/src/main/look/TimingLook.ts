@@ -15,6 +15,7 @@
 import {AnyTiming, Timing, Interpolator} from "@swim/util";
 import {Look} from "./Look";
 
+/** @internal */
 export class TimingLook extends Look<Timing, AnyTiming> {
   override combine(combination: Timing | undefined, value: Timing, weight: number): Timing {
     if (weight === void 0 || weight !== 0) {

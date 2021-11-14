@@ -22,6 +22,7 @@ import type {MapOutlet} from "./MapOutlet";
 import {MapOutletCombinators} from "./MapOutletCombinators";
 import {KeyOutlet} from "./KeyOutlet";
 
+/** @public */
 export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
   constructor() {
     this.effects = new BTree();
@@ -239,6 +240,7 @@ export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
     // hook
   }
 }
+/** @public */
 export interface AbstractMapOutlet<K, V, O> extends MapOutletCombinators<K, V, O> {
 }
 MapOutletCombinators.define(AbstractMapOutlet.prototype);

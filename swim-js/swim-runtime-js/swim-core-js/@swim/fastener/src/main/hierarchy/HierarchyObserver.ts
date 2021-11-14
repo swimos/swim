@@ -15,5 +15,6 @@
 import type {Observer} from "@swim/util";
 import type {Hierarchy} from "./Hierarchy"
 
+/** @beta */
 export interface HierarchyObserver<H extends Hierarchy = Hierarchy> extends Observer<H> {
 }

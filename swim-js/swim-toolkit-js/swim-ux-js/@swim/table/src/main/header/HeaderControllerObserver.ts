@@ -22,6 +22,7 @@ import type {HeaderView} from "./HeaderView";
 import type {HeaderTrait} from "./HeaderTrait";
 import type {HeaderController} from "./HeaderController";
 
+/** @public */
 export interface HeaderControllerObserver<C extends HeaderController = HeaderController> extends ControllerObserver<C> {
   controllerWillAttachHeaderTrait?(headerTrait: HeaderTrait, controller: C): void;
 

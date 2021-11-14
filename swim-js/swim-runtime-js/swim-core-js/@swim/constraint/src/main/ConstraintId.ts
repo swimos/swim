@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/** @public */
 export interface ConstraintId {
   /** @internal */
   readonly id: number;
 }
 
-/** @internal */
+/** @public */
 export const ConstraintId = (function () {
   const ConstraintId = {} as {
     /** @internal */

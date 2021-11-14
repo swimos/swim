@@ -18,6 +18,7 @@ import type {Outlet} from "./Outlet";
 import {OutletCombinators} from "./OutletCombinators";
 import type {Inoutlet} from "./Inoutlet";
 
+/** @public */
 export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
   constructor() {
     this.input = null;
@@ -165,6 +166,7 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
     // stub
   }
 }
+/** @public */
 export interface AbstractInoutlet<I, O> extends OutletCombinators<O> {
 }
 OutletCombinators.define(AbstractInoutlet.prototype);

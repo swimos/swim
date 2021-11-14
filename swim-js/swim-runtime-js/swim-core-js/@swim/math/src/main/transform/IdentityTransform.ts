@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Constructors, Interpolator, IdentityInterpolator} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {Value, Record} from "@swim/structure";
@@ -19,6 +21,7 @@ import {R2Point} from "../r2/R2Point";
 import {Transform} from "./Transform";
 import {AffineTransform} from "../"; // forward import
 
+/** @public */
 export class IdentityTransform extends Transform {
   override transform(that: Transform): Transform;
   override transform(x: number, y: number): R2Point;

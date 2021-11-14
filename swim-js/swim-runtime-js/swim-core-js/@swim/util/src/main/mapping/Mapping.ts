@@ -18,6 +18,7 @@ import type {Equivalent} from "../compare/Equivalent";
 import type {Domain} from "./Domain";
 import type {Range} from "./Range";
  
+/** @public */
 export interface Mapping<X, Y> extends Equals, Equivalent {
   (x: X): Y;
 
@@ -34,6 +35,7 @@ export interface Mapping<X, Y> extends Equals, Equivalent {
   toString(): string;
 }
 
+/** @public */
 export const Mapping = (function (_super: typeof Function) {
   const Mapping = function <X, Y>(domain: Domain<X>, range: Range<Y>): Mapping<X, Y> {
     const mapping = function (x: X): Y {

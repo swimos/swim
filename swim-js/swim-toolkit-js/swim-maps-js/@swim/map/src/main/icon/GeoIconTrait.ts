@@ -19,6 +19,7 @@ import {Graphics, AnyIconLayout, IconLayout} from "@swim/graphics";
 import {GeoTrait} from "../geo/GeoTrait";
 import type {GeoIconTraitObserver} from "./GeoIconTraitObserver";
 
+/** @public */
 export class GeoIconTrait extends GeoTrait {
   override readonly observerType?: Class<GeoIconTraitObserver>;
 

@@ -16,6 +16,7 @@ import type {MapViewObserver} from "@swim/map";
 import type {MapboxViewport} from "./MapboxViewport";
 import type {MapboxView} from "./MapboxView";
 
+/** @public */
 export interface MapboxViewObserver<V extends MapboxView = MapboxView> extends MapViewObserver<V> {
   viewWillSetGeoViewport?(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void;
 

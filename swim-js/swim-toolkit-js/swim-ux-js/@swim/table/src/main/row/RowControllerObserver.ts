@@ -20,6 +20,7 @@ import type {TableView} from "../table/TableView";
 import type {TableTrait} from "../table/TableTrait";
 import type {TableController} from "../table/TableController";
 
+/** @public */
 export interface RowControllerObserver<C extends RowController = RowController> extends LeafControllerObserver<C> {
   controllerWillAttachRowTrait?(rowTrait: RowTrait, controller: C): void;
 

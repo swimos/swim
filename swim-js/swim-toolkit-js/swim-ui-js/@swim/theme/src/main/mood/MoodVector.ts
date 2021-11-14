@@ -17,12 +17,16 @@ import {Debug, Format, Output} from "@swim/codec";
 import type {Feel} from "../feel/Feel";
 import type {Mood} from "./Mood";
 
+/** @public */
 export type AnyMoodVector<M extends Mood = Feel> = MoodVector<M> | MoodVectorArray<M>;
 
+/** @public */
 export type MoodVectorArray<M extends Mood = Feel> = ReadonlyArray<[M, number]>;
 
+/** @public */
 export type MoodVectorUpdates<M extends Mood = Feel> = ReadonlyArray<[M, number | undefined]>;
 
+/** @public */
 export class MoodVector<M extends Mood = Feel> implements Equals, Debug {
   constructor(array: ReadonlyArray<[M, number]>,
               index: {readonly [name: string]: number | undefined}) {

@@ -23,8 +23,9 @@ import {Arrays} from "./Arrays";
 import {Objects} from "./Objects";
 
 /**
- * Utilities for comparing and hashing structural values.  A structural value
+ * Utilities for comparing and hashing structural values. A structural value
  * is typed by object structure, rather than by name.
+ * @public
  */
 export const Values = (function () {
   const Values = {} as {

@@ -16,6 +16,7 @@ import type {ConstraintSymbol} from "./ConstraintSymbol";
 import type {ConstraintTerm} from "./ConstraintTerm";
 import type {ConstraintStrength} from "./ConstraintStrength";
 
+/** @public */
 export interface ConstraintVariable extends ConstraintSymbol, ConstraintTerm {
   readonly name: string;
 

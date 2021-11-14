@@ -19,6 +19,7 @@ import {Look} from "@swim/theme";
 import {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {AreaPlotTraitObserver} from "./AreaPlotTraitObserver";
 
+/** @public */
 export class AreaPlotTrait<X = unknown, Y = unknown> extends SeriesPlotTrait<X, Y> {
   override readonly observerType?: Class<AreaPlotTraitObserver<X, Y>>;
 

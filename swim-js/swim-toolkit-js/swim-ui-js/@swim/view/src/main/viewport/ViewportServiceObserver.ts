@@ -13,17 +13,18 @@
 // limitations under the License.
 
 import type {ServiceObserver} from "@swim/util";
-import type {ViewIdiom} from "./ViewIdiom";
+import type {ViewportIdiom} from "./ViewportIdiom";
 import type {Viewport} from "./Viewport";
 import type {ViewportService} from "./ViewportService";
 import type {View} from "../view/View";
 
+/** @public */
 export interface ViewportServiceObserver<V extends View = View, S extends ViewportService<V> = ViewportService<V>> extends ServiceObserver<V, S> {
-  detectViewIdiom?(viewport: Viewport, service: S): void | ViewIdiom;
+  detectViewportIdiom?(viewport: Viewport, service: S): void | ViewportIdiom;
 
-  serviceWillSetViewIdiom?(newViewIdiom: ViewIdiom, oldViewIdiom: ViewIdiom, service: S): void;
+  serviceWillSetViewportIdiom?(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom, service: S): void;
 
-  serviceDidSetViewIdiom?(newViewIdiom: ViewIdiom, oldViewIdiom: ViewIdiom, service: S): void;
+  serviceDidSetViewportIdiom?(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom, service: S): void;
 
   serviceWillReorient?(orientation: OrientationType, service: S): void;
 

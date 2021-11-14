@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Strings} from "@swim/util";
 import {Output, WriterException, Writer, Utf8} from "@swim/codec";
 import {Recon} from "../Recon";
 
@@ -47,7 +48,7 @@ export class IdentWriter extends Writer {
       }
       if (Recon.isIdentStartChar(c)) {
         output = output.write(c);
-        index = ident.offsetByCodePoints(0, 1);
+        index = Strings.offsetByCodePoints(ident, 0, 1);
       }
     }
     while (index < length && output.isCont()) {
@@ -57,7 +58,7 @@ export class IdentWriter extends Writer {
       }
       if (Recon.isIdentChar(c)) {
         output = output.write(c);
-        index = ident.offsetByCodePoints(index, 1);
+        index = Strings.offsetByCodePoints(ident, index, 1);
       } else {
         return Writer.error(new WriterException("invalid identifier"));
       }

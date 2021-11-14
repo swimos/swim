@@ -15,6 +15,7 @@
 import type {HtmlViewObserver} from "@swim/dom";
 import type {CanvasView} from "./CanvasView";
 
+/** @public */
 export interface CanvasViewObserver<V extends CanvasView = CanvasView> extends HtmlViewObserver<V> {
   viewWillSetHidden?(hidden: boolean, view: V): void;
 

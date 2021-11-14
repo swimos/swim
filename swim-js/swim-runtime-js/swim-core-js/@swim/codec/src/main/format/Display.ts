@@ -15,17 +15,18 @@
 import type {Output} from "../output/Output";
 
 /**
- * Type that can output a human readable display string.  `Display`
+ * Type that can output a human readable display string. `Display`
  * implementations may use [[Output.settings]] to tailor the format of their
- * display strings.  For example, display strings may be stylized when
+ * display strings. For example, display strings may be stylized when
  * [[OutputSettings.isStyled]] returns `true`.
+ * @public
  */
 export interface Display {
   /**
    * Writes a human readable, display-formatted string representation of this
    * object to `output`.
    *
-   * @return the continuation of the `output`.
+   * @returns the continuation of the `output`.
    * @throws [[OutputException]] if the `output` exits the _cont_ state before
    *         the full display string has been written.
    */

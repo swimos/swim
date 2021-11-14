@@ -38,6 +38,7 @@ import {BitwiseNotOperator} from "./"; // forward import
 import {NegativeOperator} from "./"; // forward import
 import {PositiveOperator} from "./"; // forward import
 
+/** @public */
 export abstract class Expression extends Value {
   /** @internal */
   constructor() {

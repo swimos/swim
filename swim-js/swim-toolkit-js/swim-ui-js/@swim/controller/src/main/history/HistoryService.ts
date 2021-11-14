@@ -18,6 +18,7 @@ import {HistoryStateInit, HistoryState} from "./HistoryState";
 import type {HistoryServiceObserver} from "./HistoryServiceObserver";
 import {Controller} from "../"; // forward import
 
+/** @public */
 export class HistoryService<C extends Controller = Controller> extends Service<C> {
   constructor() {
     super();

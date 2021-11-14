@@ -20,12 +20,17 @@ import {Look} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import type {SliceTraitObserver} from "./SliceTraitObserver";
 
+/** @public */
 export type SliceLabel = SliceLabelFunction | string;
+/** @public */
 export type SliceLabelFunction = (sliceTrait: SliceTrait | null) => GraphicsView | string | null;
 
+/** @public */
 export type SliceLegend = SliceLegendFunction | string;
+/** @public */
 export type SliceLegendFunction = (sliceTrait: SliceTrait | null) => GraphicsView | string | null;
 
+/** @public */
 export class SliceTrait extends Trait {
   override readonly observerType?: Class<SliceTraitObserver>;
 

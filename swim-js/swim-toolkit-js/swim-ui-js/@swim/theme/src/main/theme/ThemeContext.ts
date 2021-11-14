@@ -16,6 +16,7 @@ import type {Look} from "../look/Look";
 import type {Feel} from "../feel/Feel";
 import type {MoodVector} from "../mood/MoodVector";
 
+/** @public */
 export interface ThemeContext {
   getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined;
 
@@ -23,10 +24,9 @@ export interface ThemeContext {
   getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
 }
 
-/** @internal */
+/** @public */
 export const ThemeContext = (function () {
   const ThemeContext = {} as {
-    /** @internal */
     is(object: unknown): object is ThemeContext;
   };
 

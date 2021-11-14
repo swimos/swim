@@ -15,7 +15,7 @@
 import {Random, Values} from "@swim/util";
 import type {STreePage} from "./STreePage";
 
-/** @internal */
+/** @public */
 export abstract class STreeContext<V, I> {
   pageSplitSize: number = 32;
 
@@ -29,10 +29,12 @@ export abstract class STreeContext<V, I> {
     return Values.compare(x, y);
   }
 
+  /** @internal */
   pageShouldSplit(page: STreePage<V, I>): boolean {
     return page.arity > this.pageSplitSize;
   }
 
+  /** @internal */
   pageShouldMerge(page: STreePage<V, I>): boolean {
     return page.arity < this.pageSplitSize >>> 1;
   }

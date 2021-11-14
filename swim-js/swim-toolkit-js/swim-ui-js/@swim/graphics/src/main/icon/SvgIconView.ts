@@ -28,9 +28,11 @@ import {FilledIcon} from "./FilledIcon";
 import {IconViewInit, IconView} from "./IconView";
 import {IconGraphicsAnimator} from "./IconGraphicsAnimator";
 
+/** @public */
 export interface SvgIconViewInit extends SvgViewInit, IconViewInit {
 }
 
+/** @public */
 export class SvgIconView extends SvgView implements IconView {
   constructor(node: SVGElement) {
     super(node);

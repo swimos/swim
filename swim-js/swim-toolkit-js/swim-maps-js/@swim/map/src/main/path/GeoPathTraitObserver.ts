@@ -16,6 +16,7 @@ import type {GeoPath} from "@swim/geo";
 import type {GeoTraitObserver} from "../geo/GeoTraitObserver";
 import type {GeoPathTrait} from "./GeoPathTrait";
 
+/** @public */
 export interface GeoPathTraitObserver<R extends GeoPathTrait = GeoPathTrait> extends GeoTraitObserver<R> {
   traitWillSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, trait: R): void;
 

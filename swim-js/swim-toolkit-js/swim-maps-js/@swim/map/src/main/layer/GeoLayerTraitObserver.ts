@@ -16,6 +16,7 @@ import type {GeoTrait} from "../geo/GeoTrait";
 import type {GeoTraitObserver} from "../geo/GeoTraitObserver";
 import type {GeoLayerTrait} from "./GeoLayerTrait";
 
+/** @public */
 export interface GeoLayerTraitObserver<R extends GeoLayerTrait = GeoLayerTrait> extends GeoTraitObserver<R> {
   traitWillAttachFeature?(featureTrait: GeoTrait, trait: R): void;
 

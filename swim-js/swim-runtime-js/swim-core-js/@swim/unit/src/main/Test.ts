@@ -18,7 +18,7 @@ import type {Exam} from "./Exam";
 
 /**
  * Test evaluation function, invoked with an [[Exam]] instance to proove a unit
- * test case.  Returns `void` if the test executes synchronously.  Returns a
+ * test case. Returns `void` if the test executes synchronously. Returns a
  * `Promise` if the test case executes asynchronously.
  *
  * ### Examples
@@ -43,13 +43,15 @@ import type {Exam} from "./Exam";
  * ```
  *
  * @throws [TestException] if the an `exam` assertion fails.
+ * @public
  */
 export type TestFunc = (exam: Exam) => Promise<unknown> | unknown | void;
 
 /**
- * [[TestFunc test function]] registration options.  `TestOptions` are passed
+ * [[TestFunc test function]] registration options. `TestOptions` are passed
  * to the [[Test]] method decorator factory to modify the registration of
  * test functions with the enclosing [[Spec]].
+ * @public
  */
 export interface TestOptions {
   /**
@@ -72,6 +74,8 @@ export interface TestOptions {
  *   }
  * }
  * ```
+ *
+ * @public
  */
 export function Test(options: TestOptions): MethodDecorator;
 
@@ -89,6 +93,8 @@ export function Test(options: TestOptions): MethodDecorator;
  *   }
  * }
  * ```
+ *
+ * @public
  */
 export function Test(target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor): void;
 

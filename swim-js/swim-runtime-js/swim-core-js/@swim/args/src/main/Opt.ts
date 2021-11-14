@@ -16,8 +16,10 @@ import {Mutable, Equals, Arrays} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import {AnyArg, Arg} from "./Arg";
 
+/** @public */
 export type AnyOpt = Opt | OptInit | string;
 
+/** @public */
 export interface OptInit {
   name: string;
   flag?: string;
@@ -25,6 +27,7 @@ export interface OptInit {
   args?: AnyArg[];
 }
 
+/** @public */
 export class Opt implements Equals, Debug {
   constructor(name: string, flag: string | undefined, desc: string | undefined,
               args: ReadonlyArray<Arg>, defs: number) {

@@ -17,6 +17,7 @@ import {BottomAxisTrait} from "./BottomAxisTrait";
 import {BottomAxisView} from "./BottomAxisView";
 import {AxisController} from "./AxisController";
 
+/** @public */
 export class BottomAxisController<X = unknown> extends AxisController<X> {
   @TraitViewRef<BottomAxisController<X>, BottomAxisTrait<X>, BottomAxisView<X>>({
     extends: true,

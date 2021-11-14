@@ -21,6 +21,7 @@ import {LinearRange} from "./LinearRange";
 import {ContinuousScale} from "./ContinuousScale";
 import {LinearScaleInterpolator} from "./"; // forward import
 
+/** @public */
 export interface LinearScale extends ContinuousScale<number, number>, Interpolate<LinearScale> {
   readonly domain: LinearDomain;
 
@@ -51,6 +52,7 @@ export interface LinearScale extends ContinuousScale<number, number>, Interpolat
   toString(): string;
 }
 
+/** @public */
 export const LinearScale = (function (_super: typeof ContinuousScale) {
   const LinearScale = function (domain: LinearDomain, range: LinearRange): LinearScale {
     const scale = function (x: number): number {

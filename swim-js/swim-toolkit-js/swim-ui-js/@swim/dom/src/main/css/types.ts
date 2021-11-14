@@ -15,6 +15,7 @@
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
 
+/** @public */
 export type AlignContent = "baseline"
                          | "center"
                          | "end"
@@ -32,6 +33,7 @@ export type AlignContent = "baseline"
                          | "stretch"
                          | "unsafe center";
 
+/** @public */
 export type AlignItems = "baseline"
                        | "center"
                        | "end"
@@ -49,6 +51,7 @@ export type AlignItems = "baseline"
                        | "stretch"
                        | "unsafe center";
 
+/** @public */
 export type AlignSelf = "auto"
                       | "baseline"
                       | "center"
@@ -67,6 +70,7 @@ export type AlignSelf = "auto"
                       | "stretch"
                       | "unsafe center";
 
+/** @public */
 export type AlignmentBaseline = "after-edge"
                               | "alphabetic"
                               | "auto"
@@ -81,19 +85,23 @@ export type AlignmentBaseline = "after-edge"
                               | "text-after-edge"
                               | "text-before-edge";
 
+/** @public */
 export type Appearance = "button"
                        | "checkbox"
                        | "none"
                        | "scrollbarbutton-up";
 
+/** @public */
 export type BackgroundClip = "border-box"
                            | "padding-box"
                            | "content-box"
                            | "text";
 
+/** @public */
 export type BorderCollapse = "collapse"
                            | "separate";
 
+/** @public */
 export type BorderStyle = "dashed"
                         | "dotted"
                         | "double"
@@ -105,14 +113,17 @@ export type BorderStyle = "dashed"
                         | "ridge"
                         | "solid";
 
+/** @public */
 export type BorderWidth = Length
                         | "medium"
                         | "thick"
                         | "thin";
 
+/** @public */
 export type BoxSizing = "border-box"
                       | "content-box";
 
+/** @public */
 export type CssCursor = "alias"
                       | "all-scroll"
                       | "auto"
@@ -150,6 +161,7 @@ export type CssCursor = "alias"
                       | "zoom-in"
                       | "zoom-out";
 
+/** @public */
 export type CssDisplay = "block"
                        | "contents"
                        | "flex"
@@ -179,6 +191,7 @@ export type CssDisplay = "block"
                        | "table-row"
                        | "table-row-group";
 
+/** @public */
 export type FlexBasis = Length
                       | "auto"
                       | "content"
@@ -187,23 +200,28 @@ export type FlexBasis = Length
                       | "max-content"
                       | "min-content";
 
+/** @public */
 export type FlexDirection = "column"
                           | "column-reverse"
                           | "row"
                           | "row-reverse";
 
+/** @public */
 export type FlexWrap = "nowrap"
                      | "wrap"
                      | "wrap-reverse";
 
+/** @public */
 export type FillRule = "nonzero"
                      | "evenodd"
                      | "inherit";
 
+/** @public */
 export type Height = Length
                    | string
                    | "auto";
 
+/** @public */
 export type JustifyContent = "baseline"
                            | "center"
                            | "end"
@@ -221,6 +239,7 @@ export type JustifyContent = "baseline"
                            | "stretch"
                            | "unsafe center";
 
+/** @public */
 export type MaxHeight = Length
                       | string
                       | "fill-available"
@@ -229,6 +248,7 @@ export type MaxHeight = Length
                       | "min-content"
                       | "none";
 
+/** @public */
 export type MaxWidth = Length
                      | string
                      | "fill-available"
@@ -237,6 +257,7 @@ export type MaxWidth = Length
                      | "min-content"
                      | "none";
 
+/** @public */
 export type MinHeight = Length
                       | string
                       | "fill-available"
@@ -244,6 +265,7 @@ export type MinHeight = Length
                       | "max-content"
                       | "min-content";
 
+/** @public */
 export type MinWidth = Length
                      | string
                      | "fill-available"
@@ -251,19 +273,23 @@ export type MinWidth = Length
                      | "max-content"
                      | "min-content";
 
+/** @public */
 export type Overflow = "auto"
                      | "hidden"
                      | "scroll"
                      | "visible";
 
+/** @public */
 export type OverscrollBehavior = "auto" | "contain" | "none";
 
+/** @public */
 export type Paint = Color
                   | "none"
                   | "context-fill"
                   | "context-stroke"
                   | "currentColor";
 
+/** @public */
 export type PointerEvents = "all"
                           | "auto"
                           | "fill"
@@ -275,6 +301,7 @@ export type PointerEvents = "all"
                           | "visiblePainted"
                           | "visibleStroke";
 
+/** @public */
 export type SvgPointerEvents = "all"
                              | "auto"
                              | "bounding-box"
@@ -287,16 +314,20 @@ export type SvgPointerEvents = "all"
                              | "visiblePainted"
                              | "visibleStroke";
 
+/** @public */
 export type Position = "absolute"
                      | "fixed"
                      | "relative"
                      | "static"
                      | "sticky";
 
+/** @public */
 export type StrokeLinecap = "butt" | "round" | "square";
 
+/** @public */
 export type StrokeLinejoin = "arcs" | "bevel" | "miter" | "miter-clip" | "round";
 
+/** @public */
 export type TextAlign = "center"
                       | "end"
                       | "justify"
@@ -306,23 +337,27 @@ export type TextAlign = "center"
                       | "right"
                       | "start";
 
+/** @public */
 export type TextAnchor = "end"
                        | "inherit"
                        | "middle"
                        | "start";
 
+/** @public */
 export type TextDecorationStyle = "dashed"
                                 | "dotted"
                                 | "double"
                                 | "solid"
                                 | "wavy";
 
+/** @public */
 export type TextTransform = "capitalize"
                           | "full-width"
                           | "lowercase"
                           | "none"
                           | "uppercase";
 
+/** @public */
 export type TouchAction = "auto"
                         | "manipulation"
                         | "none"
@@ -358,12 +393,14 @@ export type TouchAction = "auto"
                         | "pan-y pinch-zoom"
                         | "pinch-zoom";
 
+/** @public */
 export type UserSelect = "all"
                        | "auto"
                        | "contain"
                        | "none"
                        | "text";
 
+/** @public */
 export type VerticalAlign = Length
                           | "baseline"
                           | "sub"
@@ -374,16 +411,19 @@ export type VerticalAlign = Length
                           | "top"
                           | "bottom";
 
+/** @public */
 export type Visibility = "collapse"
                        | "hidden"
                        | "visible";
 
+/** @public */
 export type WhiteSpace = "normal"
                        | "nowrap"
                        | "pre"
                        | "pre-line"
                        | "pre-wrap";
 
+/** @public */
 export type Width = Length
                   | string
                   | "auto"

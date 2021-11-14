@@ -16,12 +16,13 @@ import type {Class, Timing} from "@swim/util";
 import {Affinity, Property} from "@swim/fastener";
 import {AnyLength, Length} from "@swim/math";
 import {Look, Feel, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewEdgeInsets} from "@swim/view";
+import {ViewportInsets, ViewContextType, ViewFlags, View} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {AnyDeckRail, DeckRail} from "./DeckRail";
 import {DeckSlot} from "./DeckSlot";
 import type {DeckBarObserver} from "./DeckBarObserver";
 
+/** @public */
 export class DeckBar extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
@@ -61,7 +62,7 @@ export class DeckBar extends HtmlView {
   readonly itemSpacing!: Property<this, Length | null, AnyLength | null>;
 
   @Property({type: Object, inherits: true, state: null, updateFlags: View.NeedsResize})
-  readonly edgeInsets!: Property<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: Property<this, ViewportInsets | null>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);

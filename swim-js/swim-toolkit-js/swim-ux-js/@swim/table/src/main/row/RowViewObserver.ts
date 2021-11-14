@@ -18,6 +18,7 @@ import type {LeafView} from "../leaf/LeafView";
 import type {RowView} from "./RowView";
 import type {TableView} from "../table/TableView";
 
+/** @public */
 export interface RowViewObserver<V extends RowView = RowView> extends HtmlViewObserver<V> {
   viewWillAttachLeaf?(leafView: LeafView, view: V): void;
 

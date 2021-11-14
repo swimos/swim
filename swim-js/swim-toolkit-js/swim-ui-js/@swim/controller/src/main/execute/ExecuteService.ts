@@ -17,6 +17,7 @@ import type {ExecuteServiceObserver} from "./ExecuteServiceObserver";
 import {ControllerContext} from "../controller/ControllerContext";
 import {ControllerFlags, Controller} from "../"; // forward import
 
+/** @public */
 export class ExecuteService<C extends Controller = Controller> extends Service<C> {
   constructor() {
     super();

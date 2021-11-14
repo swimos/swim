@@ -16,6 +16,7 @@ import type {TraitObserver} from "@swim/model";
 import type {ColLayout} from "../layout/ColLayout";
 import type {ColLabel, ColTrait} from "./ColTrait";
 
+/** @public */
 export interface ColTraitObserver<T extends ColTrait = ColTrait> extends TraitObserver<T> {
   traitWillSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, trait: T): void;
 

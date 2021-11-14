@@ -17,7 +17,7 @@ import {ConstraintMap} from "./ConstraintMap";
 import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpression";
 import type {ConstraintVariable} from "./ConstraintVariable";
 
-/** @internal */
+/** @public */
 export class ConstraintSum implements ConstraintExpression, Debug {
   constructor(terms: ConstraintMap<ConstraintVariable, number>, constant: number) {
     this.terms = terms;

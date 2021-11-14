@@ -15,6 +15,7 @@
 import type {GestureInputType} from "./GestureInput";
 import {PositionGestureInput} from "./PositionGestureInput";
 
+/** @public */
 export class MomentumGestureInput extends PositionGestureInput {
   vx: number;
   vy: number;

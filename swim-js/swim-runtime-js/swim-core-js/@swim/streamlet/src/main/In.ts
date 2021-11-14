@@ -15,8 +15,11 @@
 import type {InletOptions} from "./Inlet";
 import {StreamletPrototype, AbstractStreamlet} from "./AbstractStreamlet";
 
+/** @public */
 export function In(name: string): PropertyDecorator;
+/** @public */
 export function In(options: InletOptions): PropertyDecorator;
+/** @public */
 export function In(target: unknown, key: string): void;
 export function In(target: unknown, key?: string): PropertyDecorator | void {
   if (arguments.length === 1) {

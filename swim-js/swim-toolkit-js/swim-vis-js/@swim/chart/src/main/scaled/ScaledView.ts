@@ -42,6 +42,7 @@ import type {ScaledViewObserver} from "./ScaledViewObserver";
 /** @internal */
 export type ScaledFlags = number;
 
+/** @public */
 export interface ScaledViewInit<X = unknown, Y = unknown> extends GraphicsViewInit {
   xScale?: ContinuousScale<X, number>;
   yScale?: ContinuousScale<Y, number>;
@@ -74,6 +75,7 @@ export interface ScaledViewInit<X = unknown, Y = unknown> extends GraphicsViewIn
   reboundTransition?: AnyTiming | boolean;
 }
 
+/** @public */
 export abstract class ScaledView<X = unknown, Y = unknown> extends LayerView implements ScaledXYView<X, Y> {
   constructor() {
     super();
@@ -806,7 +808,7 @@ export abstract class ScaledView<X = unknown, Y = unknown> extends LayerView imp
   }
 
   /**
-   * Updates own scale ranges to project onto view frame.  Infers own scales
+   * Updates own scale ranges to project onto view frame. Infers own scales
    * from child view data domains if inherited x/y scales are undefined.
    */
   protected resizeScales(): void {

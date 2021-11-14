@@ -15,6 +15,7 @@
 import type {Observer} from "../observable/Observer";
 import type {Service} from "./Service";
 
+/** @public */
 export interface ServiceObserver<R, S extends Service<R> = Service<R>> extends Observer<S> {
   serviceWillAttachRoot?(root: R, service: S): void;
 

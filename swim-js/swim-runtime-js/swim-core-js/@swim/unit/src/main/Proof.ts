@@ -16,6 +16,7 @@ import {OutputSettings, Output, OutputStyle, Format, Display} from "@swim/codec"
 
 /**
  * Evidence for or against the validity of a test assertion.
+ * @public
  */
 export abstract class Proof implements Display {
   /**
@@ -45,7 +46,7 @@ export abstract class Proof implements Display {
    * Returns generic `Proof` for the validity of an `operator`, with an
    * optional `message` detailing the circumstances of the assertion.
    */
-  static valid(operator: string, message?: string): ProofValid {
+  static valid(operator: string, message?: string): Proof {
     return new ProofValid(operator, message);
   }
 
@@ -53,7 +54,7 @@ export abstract class Proof implements Display {
    * Returns generic `Proof` against the validity of an `operator`, with an
    * optional `message` detailing the circumstances of the assertion.
    */
-  static invalid(operator: string, message?: string): ProofInvalid {
+  static invalid(operator: string, message?: string): Proof {
     return new ProofInvalid(operator, message);
   }
 
@@ -62,7 +63,7 @@ export abstract class Proof implements Display {
    * assertion, citing contradictory left- and right-hand side operands, along
    * with an optional `message` detailing the circumstances of the assertion.
    */
-  static refuted(lhs: unknown, operator: string, rhs: unknown, message?: string): ProofRefuted {
+  static refuted(lhs: unknown, operator: string, rhs: unknown, message?: string): Proof {
     return new ProofRefuted(lhs, operator, rhs, message);
   }
 
@@ -71,7 +72,7 @@ export abstract class Proof implements Display {
    * that was thrown while evaluating the assertion, along with an optional
    * `message` detailing the circumstances of the assertion.
    */
-  static error(error: unknown, message?: string): ProofError {
+  static error(error: unknown, message?: string): Proof {
     return new ProofError(error, message);
   }
 
@@ -80,13 +81,14 @@ export abstract class Proof implements Display {
    * yet been implemented, along with an optional `message` detailing the
    * circumstances of the assertion.
    */
-  static pending(message?: string): ProofPending {
+  static pending(message?: string): Proof {
     return new ProofPending(message);
   }
 }
 
 /**
  * Generic `Proof` for the validity of an assertion.
+ * @internal
  */
 export class ProofValid extends Proof {
   constructor(operator: string, message: string | undefined) {
@@ -122,6 +124,7 @@ export class ProofValid extends Proof {
 
 /**
  * Generic `Proof` against the validity of an assertion.
+ * @internal
  */
 export class ProofInvalid extends Proof {
   constructor(operator: string, message: string | undefined) {
@@ -157,6 +160,7 @@ export class ProofInvalid extends Proof {
 
 /**
  * Specific `Proof` against the validity of a binary operator assertion.
+ * @internal
  */
 export class ProofRefuted extends Proof {
   constructor(lhs: unknown, operator: string, rhs: unknown, message: string | undefined) {
@@ -210,6 +214,7 @@ export class ProofRefuted extends Proof {
 
 /**
  * `Proof` against the validity of an assertion due to an exception.
+ * @internal
  */
 export class ProofError extends Proof {
   constructor(error: unknown, message: string | undefined) {
@@ -251,6 +256,7 @@ export class ProofError extends Proof {
 /**
  * Tentative `Proof` for the validity of an assertion that hasn't yet been
  * implemented.
+ * @internal
  */
 export class ProofPending extends Proof {
   constructor(message: string | undefined) {

@@ -37,6 +37,7 @@ import {BitwiseNotOperator} from "../"; // forward import
 import {NegativeOperator} from "../"; // forward import
 import {PositiveOperator} from "../"; // forward import
 
+/** @public */
 export abstract class Operator extends Expression {
   /** @internal */
   constructor() {

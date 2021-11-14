@@ -19,6 +19,7 @@ import {AnyR2Point, R2Point, Transform, TranslateTransform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import type {GeoViewport} from "@swim/map";
 
+/** @public */
 export class LeafletViewport implements GeoViewport, Equals {
   constructor(map: L.Map, geoFrame: GeoBox, geoCenter: GeoPoint, viewOrigin: R2Point,
               zoom: number, heading: number, tilt: number) {

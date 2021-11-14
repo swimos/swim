@@ -17,6 +17,7 @@ import type {RefreshServiceObserver} from "./RefreshServiceObserver";
 import {ModelContext} from "../model/ModelContext";
 import {ModelFlags, Model} from "../"; // forward import
 
+/** @public */
 export class RefreshService<M extends Model = Model> extends Service<M> {
   constructor() {
     super();

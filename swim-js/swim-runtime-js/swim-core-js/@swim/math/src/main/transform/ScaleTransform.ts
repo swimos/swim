@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="w3c-css-typed-object-model-level-1"/>
+
 import {Mutable, Murmur3, Numbers, Constructors, Interpolator} from "@swim/util";
 import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import {Item, Value, Record} from "@swim/structure";
@@ -22,6 +24,7 @@ import {ScaleTransformInterpolator} from "../"; // forward import
 import {ScaleTransformParser} from "../"; // forward import
 import {AffineTransform} from "../"; // forward import
 
+/** @public */
 export class ScaleTransform extends Transform {
   constructor(x: number, y: number) {
     super();

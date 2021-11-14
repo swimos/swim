@@ -22,17 +22,28 @@ import type {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {MapDownlinkModel} from "./MapDownlinkModel";
 
+/** @public */
 export type MapDownlinkWillUpdate<K, V, KU = never, VU = never> = (key: K, newValue: V, downlink: MapDownlink<K, V, KU, VU>) => V | void;
+/** @public */
 export type MapDownlinkDidUpdate<K, V, KU = never, VU = never> = (key: K, newValue: V, oldValue: V, downlink: MapDownlink<K, V, KU, VU>) => void;
+/** @public */
 export type MapDownlinkWillRemove<K, V, KU = never, VU = never> = (key: K, downlink: MapDownlink<K, V, KU, VU>) => void;
+/** @public */
 export type MapDownlinkDidRemove<K, V, KU = never, VU = never> = (key: K, oldValue: V, downlink: MapDownlink<K, V, KU, VU>) => void;
+/** @public */
 export type MapDownlinkWillDrop<K, V, KU = never, VU = never> = (lower: number, downlink: MapDownlink<K, V, KU, VU>) => void;
+/** @public */
 export type MapDownlinkDidDrop<K, V, KU = never, VU = never> = (lower: number, downlink: MapDownlink<K, V, KU, VU>) => void;
+/** @public */
 export type MapDownlinkWillTake<K, V, KU = never, VU = never> = (upper: number, downlink: MapDownlink<K, V, KU, VU>) => void;
+/** @public */
 export type MapDownlinkDidTake<K, V, KU = never, VU = never> = (upper: number, downlink: MapDownlink<K, V, KU, VU>) => void;
+/** @public */
 export type MapDownlinkWillClear<K, V, KU = never, VU = never> = (downlink: MapDownlink<K, V, KU, VU>) => void;
+/** @public */
 export type MapDownlinkDidClear<K, V, KU = never, VU = never> = (downlink: MapDownlink<K, V, KU, VU>) => void;
 
+/** @public */
 export interface MapDownlinkObserver<K, V, KU = never, VU = never> extends DownlinkObserver {
   willUpdate?: MapDownlinkWillUpdate<K, V, KU, VU>;
   didUpdate?: MapDownlinkDidUpdate<K, V, KU, VU>;
@@ -46,11 +57,13 @@ export interface MapDownlinkObserver<K, V, KU = never, VU = never> extends Downl
   didClear?: MapDownlinkDidClear<K, V, KU, VU>;
 }
 
+/** @public */
 export interface MapDownlinkInit<K, V, KU = never, VU = never> extends MapDownlinkObserver<K, V, KU, VU>, DownlinkInit {
   keyForm?: Form<K, KU>;
   valueForm?: Form<V, VU>;
 }
 
+/** @public */
 export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implements OrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V, KU, VU>> {
   /** @internal */
   constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: MapDownlinkInit<K, V, KU, VU>,
@@ -103,6 +116,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     return "map";
   }
 
+  /** @internal */
   protected override copy<K, V, KU, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
                                         hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
                                         body: Value, flags: number, observers: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>>,
@@ -912,6 +926,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     // hook
   }
 }
+/** @public */
 export interface MapDownlink<K, V, KU, VU> {
   hostUri(): Uri;
   hostUri(hostUri: AnyUri): MapDownlink<K, V, KU, VU>;
@@ -937,6 +952,7 @@ export interface MapDownlink<K, V, KU, VU> {
   keepSynced(): boolean;
   keepSynced(keepSynced: boolean): MapDownlink<K, V, KU, VU>;
 }
+/** @public */
 export interface MapDownlink<K, V, KU, VU> extends MapOutletCombinators<K, V, MapDownlink<K, V, KU, VU>> {
 }
 MapOutletCombinators.define(MapDownlink.prototype);

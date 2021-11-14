@@ -15,6 +15,7 @@
 import type {R2PathContext} from "@swim/math";
 import type {GraphicsContext} from "../graphics/GraphicsContext";
 
+/** @public */
 export interface DrawingContext extends GraphicsContext, R2PathContext {
   moveTo(x: number, y: number): void;
 

@@ -34,6 +34,7 @@ import type {RowViewObserver} from "./RowViewObserver";
 import type {TableViewContext} from "../table/TableViewContext";
 import {TableView} from "../"; // forward reference
 
+/** @public */
 export class RowView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);

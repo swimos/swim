@@ -14,5 +14,6 @@
 
 import type {GeoSplineContext} from "./GeoSplineContext";
 
+/** @public */
 export interface GeoPathContext extends GeoSplineContext {
 }

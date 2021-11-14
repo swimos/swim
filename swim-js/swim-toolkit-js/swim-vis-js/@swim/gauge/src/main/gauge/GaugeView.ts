@@ -22,8 +22,10 @@ import {GraphicsViewInit, GraphicsView, LayerView, TypesetView, TextRunView} fro
 import {AnyDialView, DialView} from "../dial/DialView";
 import type {GaugeViewObserver} from "./GaugeViewObserver";
 
+/** @public */
 export type AnyGaugeView = GaugeView | GaugeViewInit;
 
+/** @public */
 export interface GaugeViewInit extends GraphicsViewInit {
   limit?: number;
   center?: AnyR2Point;
@@ -48,7 +50,7 @@ export interface GaugeViewInit extends GraphicsViewInit {
   dials?: AnyDialView[];
 }
 
-/** @internal */
+/** @public */
 export interface GaugeViewDialExt {
   attachLabelView(labelView: GraphicsView): void;
   detachLabelView(labelView: GraphicsView): void;
@@ -56,6 +58,7 @@ export interface GaugeViewDialExt {
   detachLegendView(legendView: GraphicsView): void;
 }
 
+/** @public */
 export class GaugeView extends LayerView {
   override readonly observerType?: Class<GaugeViewObserver>;
 

@@ -18,6 +18,7 @@ import {CursorEmpty} from "../"; // forward import
 import {CursorUnary} from "../"; // forward import
 import {CursorArray} from "../"; // forward import
 
+/** @public */
 export abstract class Cursor<T> implements Iterator<T> {
   abstract isEmpty(): boolean;
 

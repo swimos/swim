@@ -15,6 +15,7 @@
 import {HashGenCacheMap} from "@swim/util";
 import {AnyUri, Uri} from "./Uri";
 
+/** @public */
 export class UriCache {
   constructor(base: Uri, size: number = 32) {
     this.base = base;

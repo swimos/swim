@@ -36,6 +36,7 @@ import {UriPathParser} from "../"; // forward import
 import {UriQueryParser} from "../"; // forward import
 import {UriFragmentParser} from "../"; // forward import
 
+/** @public */
 export class UriParser {
   absolute(scheme?: UriScheme, authority?: UriAuthority, path?: UriPath,
            query?: UriQuery, fragment?: UriFragment): Uri {

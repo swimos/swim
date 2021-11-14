@@ -19,6 +19,7 @@ import type {ConstraintRelation} from "./ConstraintRelation";
 import type {AnyConstraintStrength} from "./ConstraintStrength";
 import type {Constraint} from "./Constraint";
 
+/** @public */
 export interface ConstraintScope {
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
              rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint;
@@ -40,10 +41,9 @@ export interface ConstraintScope {
   setConstraintVariable(variable: ConstraintVariable, state: number): void;
 }
 
-/** @internal */
+/** @public */
 export const ConstraintScope = (function () {
   const ConstraintScope = {} as {
-    /** @internal */
     is(object: unknown): object is ConstraintScope;
   };
 

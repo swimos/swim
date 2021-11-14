@@ -36,6 +36,7 @@ import type {TableView} from "./TableView";
 import type {TableTrait} from "./TableTrait";
 import type {TableController} from "./TableController";
 
+/** @public */
 export interface TableControllerObserver<C extends TableController = TableController> extends ControllerObserver<C> {
   controllerWillAttachTableTrait?(tableTrait: TableTrait, controller: C): void;
 

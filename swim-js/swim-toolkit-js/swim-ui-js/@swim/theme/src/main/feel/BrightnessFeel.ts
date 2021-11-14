@@ -16,6 +16,7 @@ import {Color} from "@swim/style";
 import type {Look} from "../look/Look";
 import {Feel} from "../feel/Feel";
 
+/** @public */
 export class BrightnessFeel extends Feel {
   override combine<T>(look: Look<T, any>, combination: T | undefined,
                       value: T, weight?: number): T {

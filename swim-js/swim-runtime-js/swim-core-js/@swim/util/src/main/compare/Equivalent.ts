@@ -16,6 +16,7 @@ import type {Mutable} from "../types/Mutable";
 
 /**
  * Type that implements a universal equivalence relation.
+ * @public
  */
 export interface Equivalent {
   /**
@@ -25,6 +26,7 @@ export interface Equivalent {
   equivalentTo(that: unknown, epsilon?: number): boolean;
 }
 
+/** @public */
 export const Equivalent = (function () {
   const Equivalent = function (x:unknown, y: unknown, epsilon?: number): boolean {
     if (x === y) {

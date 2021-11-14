@@ -1,0 +1,16 @@
+{
+  "extends": "../../config/api-extractor-main.json",
+  "mainEntryPointFilePath": "./lib/main/index.d.ts",
+  "compiler": {
+    "tsconfigFilePath": "./src/main/tsconfig.json"
+  },
+  "apiReport": {
+    "reportFileName": "swim-client.api.md"
+  },
+  "docModel": {
+    "apiJsonFilePath": "./doc/swim-client.api.json"
+  },
+  "dtsRollup": {
+    "untrimmedFilePath": "./dist/swim-client.d.ts"
+  }
+}

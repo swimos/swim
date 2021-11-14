@@ -21,18 +21,21 @@ import type {Report} from "./Report";
 import {ConsoleReport} from "./ConsoleReport";
 import {Exam} from "./Exam";
 
-/** @internal */
+/** @public */
 export interface SpecClass {
+  /** @internal */
   tests?: SpecTest[];
+  /** @internal */
   units?: SpecUnit[];
 }
 
 /**
- * Specification for testing a unit of code functionality.  A `Spec` evaluates
- * [[TestFunc test functions]], registered with [[Test @Test]] method
- * decorators.  A `Spec` also executes child specs, instantiated by [[UnitSpec
- * unit factory functions]] that are registered with [[Unit @Unit]] method
+ * Specification for testing a unit of code functionality. A `Spec` evaluates
+ * [[TestFunc test functions]], registered with [[Test `@Test`]] method
+ * decorators. A `Spec` also executes child specs, instantiated by [[UnitSpec
+ * unit factory functions]] that are registered with [[Unit `@Unit`]] method
  * decorators.
+ * @public
  */
 export class Spec {
   constructor() {
@@ -47,7 +50,7 @@ export class Spec {
   readonly name: string;
 
   /**
-   * Sets the name of this `Spec`, and returns `this`.  If `name` is `undefined`,
+   * Sets the name of this `Spec`, and returns `this`. If `name` is `undefined`,
    * sets this spec's name to the name of its constructor function.
    */
   withName(name: string | undefined): this {
@@ -70,7 +73,7 @@ export class Spec {
   /**
    * Evaluates all [[TestFunc test functions]] registered with this `Spec`,
    * then executes any child specs returned by [[UnitFunc unit factory
-   * functions]] registered with this `Spec`.  Returns a `Promise` that
+   * functions]] registered with this `Spec`. Returns a `Promise` that
    * completes with the test report.
    */
   run(report?: Report): Promise<Report> {
@@ -79,7 +82,7 @@ export class Spec {
 
   /**
    * Returns a new [[Exam]] to be passed to the [[TestFunc test function]] with
-   * the given `name`.  `Spec` subclasses can override `createExam` to return a
+   * the given `name`. `Spec` subclasses can override `createExam` to return a
    * custome `Exam` subclass with added functionality.
    */
   createExam(report: Report, name: string, options: TestOptions): Exam {
@@ -196,9 +199,9 @@ export class Spec {
   /**
    * Evaluates all [[TestFunc test functions]] registered with a `spec`,
    * then executes any child specs returned by [[UnitFunc unit factory
-   * functions]] registered with this `Spec`.  Returns a `Promise` that
-   * completes with the test report.  Instantiates `spec` from the given
-   * `specClass`, if `spec` is undefined.  Uses the constructor function of
+   * functions]] registered with this `Spec`. Returns a `Promise` that
+   * completes with the test report. Instantiates `spec` from the given
+   * `specClass`, if `spec` is undefined. Uses the constructor function of
    * the `Spec` class on which `run` is invoked, if `specClass` is undefined.
    * Creates a new `ConsoleReport` if `report` is undefined.
    */

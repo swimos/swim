@@ -30,6 +30,7 @@ import {AuthedResponse} from "./"; // forward import
 import {DeauthRequest} from "./"; // forward import
 import {DeauthedResponse} from "./"; // forward import
 
+/** @public */
 export abstract class Envelope implements HashCode, Debug {
   get tag(): string {
     return (this.constructor as unknown as {readonly tag: string}).tag;

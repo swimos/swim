@@ -18,12 +18,14 @@ import * as Path from "path";
 import * as ts from "typescript";
 import {ESLint, Linter, Rule} from "eslint";
 import * as rollup from "rollup";
+import * as apiExtractor from "@microsoft/api-extractor";
 import * as typedoc from "typedoc";
 import * as terser from "terser";
 import {Severity} from "@swim/util";
 import {Tag, Mark, Span, OutputSettings, OutputStyle, Diagnostic, Unicode} from "@swim/codec";
 import type {Project} from "./Project";
 
+/** @internal */
 export interface TargetConfig {
   id: string;
   path?: string;
@@ -33,6 +35,7 @@ export interface TargetConfig {
   preamble?: string;
 }
 
+/** @internal */
 export class Target {
   readonly project: Project;
 
@@ -56,6 +59,7 @@ export class Target {
   failed: boolean;
   retest: boolean;
   redoc: boolean;
+  reapi: boolean;
 
   compileStart: number;
   bundleTimer: number;
@@ -83,6 +87,7 @@ export class Target {
     this.failed = false;
     this.retest = false;
     this.redoc = false;
+    this.reapi = false;
 
     this.compileStart = 0;
     this.createProgram = this.createProgram.bind(this);
@@ -91,7 +96,7 @@ export class Target {
     this.onCompileError = this.onCompileError.bind(this);
 
     this.bundleTimer = 0;
-    this.bundle = this.bundle.bind(this);
+    this.bundleRest = this.bundleRest.bind(this);
     this.onBundleWarning = this.onBundleWarning.bind(this);
     this.onBundleError = this.onBundleError.bind(this);
   }
@@ -136,18 +141,41 @@ export class Target {
     }
   }
 
-  initBundle(bundleConfig: rollup.RollupOptions): void {
+  initBundles(bundleConfigs: rollup.RollupOptions | rollup.RollupOptions[]): void {
+    if (!Array.isArray(bundleConfigs)) {
+      this.initBundleOutputs(bundleConfigs);
+    } else {
+      for (let i = 0; i < bundleConfigs.length; i += 1) {
+        this.initBundleOutputs(bundleConfigs[i]!);
+      }
+    }
+  }
+
+  initBundleOutputs(bundleConfig: rollup.RollupOptions): void {
     if (typeof bundleConfig.input === "string") {
       bundleConfig.input = Path.resolve(this.project.baseDir, bundleConfig.input);
     }
-    const bundleOutput = bundleConfig.output as rollup.OutputOptions;
-    if (bundleOutput !== void 0 && typeof bundleOutput.file === "string") {
+    const bundleOutput = bundleConfig.output;
+    if (bundleOutput !== void 0) {
+      if (!Array.isArray(bundleOutput)) {
+        this.initBundleOutput(bundleOutput);
+      } else {
+        for (let i = 0; i < bundleOutput.length; i += 1) {
+          this.initBundleOutput(bundleOutput[i]!);
+        }
+      }
+    }
+  }
+
+  initBundleOutput(bundleOutput: rollup.OutputOptions): void {
+    if (typeof bundleOutput.file === "string") {
       bundleOutput.file = Path.resolve(this.project.baseDir, bundleOutput.file);
       if (this.preamble === void 0) {
         if (typeof bundleOutput.banner === "string") {
           this.preamble = bundleOutput.banner;
         } else {
-          this.preamble = "// " + Path.basename(bundleOutput.file, ".js") + "-" + this.project.package.version;
+          const bundleName = Path.basename(bundleOutput.file, Path.extname(bundleOutput.file));
+          this.preamble = "// " + bundleName + "-" + this.project.package.version;
           if (typeof this.project.package.copyright === "string") {
             this.preamble += "; copyright " + this.project.package.copyright;
           }
@@ -245,20 +273,15 @@ export class Target {
       this.compileStart = Date.now();
       solutionBuilder.build(this.baseDir);
 
-      return this.lint()
-        .then((): Promise<unknown> => {
-          this.emittedSourceFiles.length = 0;
-          if (!this.failed) {
-            this.onCompileSuccess();
-            if (this.selected) {
-              return this.bundle();
-            }
-          } else {
-            this.onCompileFailure();
-          }
-          this.program = null;
-          return Promise.resolve(void 0);
-        });
+      return this.lint().then((): Promise<unknown> => {
+        if (!this.failed) {
+          this.onCompileSuccess();
+          return this.bundleRest();
+        } else {
+          this.onCompileFailure();
+        }
+        return Promise.resolve(void 0);
+      });
     }
     return Promise.resolve(void 0);
   }
@@ -332,18 +355,14 @@ export class Target {
         console.log(output.bind());
       } else if (status.code === 6194) {
         // complete
-        this.lint()
-          .then(() => {
-            this.emittedSourceFiles.length = 0;
-            if (!this.failed) {
-              this.onCompileSuccess();
-              if (this.selected) {
-                this.throttleBundle();
-              }
-            } else {
-              this.onCompileFailure();
-            }
-          });
+        this.lint().then(() => {
+          if (!this.failed) {
+            this.onCompileSuccess();
+            this.throttleBundle();
+          } else {
+            this.onCompileFailure();
+          }
+        });
       } else {
         this.onCompileError(status);
       }
@@ -402,6 +421,10 @@ export class Target {
   }
 
   protected onCompileSuccess(): void {
+    if (this.id === "main" && (this.selected && this.reapi === true || this.emittedSourceFiles.length !== 0)) {
+      this.apiExtractor();
+    }
+
     const dt = Date.now() - this.compileStart;
     this.compileStart = 0;
     let output = Unicode.stringOutput(OutputSettings.styled());
@@ -421,6 +444,8 @@ export class Target {
 
   protected onCompileFailure(): void {
     this.compileStart = 0;
+    this.emittedSourceFiles.length = 0;
+    this.program = null;
     let output = Unicode.stringOutput(OutputSettings.styled());
     output = OutputStyle.redBold(output);
     output = output.write("failed to compile");
@@ -431,6 +456,56 @@ export class Target {
     output = OutputStyle.reset(output);
     console.log(output.bind());
     console.log();
+  }
+
+  apiExtractor(): void {
+    const extractorConfigPath = Path.join(this.project.baseDir, "api-extractor.json");
+    const extractorConfig = apiExtractor.ExtractorConfig.loadFileAndPrepare(extractorConfigPath);
+
+    if (extractorConfig.apiReportEnabled) {
+      Target.mkdir(Path.dirname(extractorConfig.reportFilePath));
+    }
+
+    apiExtractor.Extractor.invoke(extractorConfig, {
+      localBuild: true,
+      showDiagnostics: false,
+      messageCallback: this.onApiExtractorDiagnostic.bind(this),
+    });
+  }
+
+  protected onApiExtractorDiagnostic(message: apiExtractor.ExtractorMessage): void {
+    message.handled = true;
+    const diagnostic = this.apiExtractorDiagnostic(message);
+    if (diagnostic !== null) {
+      if (diagnostic.severity.level >= Severity.ERROR_LEVEL) {
+        this.failed = true;
+      }
+      console.log(diagnostic.toString(OutputSettings.styled()));
+    }
+  }
+
+  protected apiExtractorDiagnostic(message: apiExtractor.ExtractorMessage): Diagnostic | null {
+    const sourceFilePath = message.sourceFilePath;
+    const sourceFileLine = message.sourceFileLine;
+    const sourceFileColumn = message.sourceFileColumn;
+    if (sourceFilePath !== void 0 && sourceFileLine !== void 0 && sourceFileColumn !== void 0) {
+      const tag = Mark.at(0, sourceFileLine, sourceFileColumn, message.text);
+
+      let severity: Severity;
+      switch (message.logLevel) {
+        case apiExtractor.ExtractorLogLevel.Error: severity = Severity.error(); break;
+        case apiExtractor.ExtractorLogLevel.Warning: severity = Severity.warning(); break;
+        case apiExtractor.ExtractorLogLevel.Info: severity = Severity.info(); break;
+        case apiExtractor.ExtractorLogLevel.Verbose: severity = Severity.debug(); break;
+        case apiExtractor.ExtractorLogLevel.None:
+        default: return null;
+      }
+
+      const source = FS.readFileSync(sourceFilePath, "utf8")
+      const input = Unicode.stringInput(source).withId(sourceFilePath);
+      return new Diagnostic(input, tag, severity, message.messageId, void 0, null);
+    }
+    return null;
   }
 
   protected createLinter(): ESLint {
@@ -455,13 +530,11 @@ export class Target {
   protected lintSourceFiles(linter: ESLint, sourceFiles: ReadonlyArray<ts.SourceFile>, index: number): Promise<unknown> {
     if (index < sourceFiles.length) {
       const sourceFile = sourceFiles[index]!;
-      return linter.lintText(sourceFile.text, {filePath: sourceFile.fileName})
-        .then((results: ESLint.LintResult[]): void => {
-          for (let i = 0; i < results.length; i += 1) {
-            this.onLintResult(results[i]!);
-          }
-        })
-        .then(this.lintSourceFiles.bind(this, linter, sourceFiles, index + 1));
+      return linter.lintText(sourceFile.text, {filePath: sourceFile.fileName}).then((results: ESLint.LintResult[]): void => {
+        for (let i = 0; i < results.length; i += 1) {
+          this.onLintResult(results[i]!);
+        }
+      }).then(this.lintSourceFiles.bind(this, linter, sourceFiles, index + 1));
     } else {
       return Promise.resolve(void 0);
     }
@@ -577,10 +650,34 @@ export class Target {
   protected throttleBundle(): void {
     this.cancelBundle();
     if (this.bundleTimer === 0) {
-      this.bundleTimer = setTimeout(this.bundle, 1000) as any;
+      this.bundleTimer = setTimeout(this.bundleRest, 1000) as any;
     } else if (this.bundleTimer === -1) {
       this.bundleTimer = -2;
     }
+  }
+
+  bundleRest(): Promise<unknown> {
+    let action: Promise<unknown>;
+    if (this.selected || this.emittedSourceFiles.length !== 0) {
+      action = this.bundle();
+    } else {
+      action = Promise.resolve(void 0);
+    }
+    if (this.retest) {
+      action = action.then((): Promise<unknown> => {
+        return this.test();
+      });
+    }
+    if (this.redoc) {
+      action = action.then((): Promise<unknown> => {
+        return this.doc();
+      });
+    }
+    action = action.finally((): void => {
+      this.emittedSourceFiles.length = 0;
+      this.program = null;
+    });
+    return action;
   }
 
   bundle(): Promise<unknown> {
@@ -597,121 +694,186 @@ export class Target {
     output = OutputStyle.reset(output);
     console.log(output.bind());
 
-    const bundleConfig = this.project.bundleConfig[this.id] as rollup.RollupOptions | undefined;
-    if (bundleConfig !== void 0) {
+    const bundleConfigs = this.project.bundleConfig[this.id] as rollup.RollupOptions | rollup.RollupOptions | undefined;
+    if (bundleConfigs !== void 0) {
       const t0 = Date.now();
       const cwd = process.cwd();
       process.chdir(this.project.baseDir);
-      return rollup.rollup(bundleConfig)
-        .then((build: rollup.RollupBuild): Promise<rollup.RollupOutput> => {
-          process.chdir(cwd);
-          if (this.watching) {
-            bundleConfig.cache = build.cache;
-          }
-          return build.generate(bundleConfig.output as rollup.OutputOptions);
-        })
-        .then((bundle: rollup.RollupOutput): Promise<rollup.RollupOutput> => {
-          const bundleOutput = bundleConfig.output as rollup.OutputOptions;
-          bundle.output[0].fileName = bundleOutput.file!;
-          return this.minify(bundle, bundleOutput);
-        })
-        .then((bundle: rollup.RollupOutput): rollup.RollupOutput => {
-          this.writeBundle(bundle, bundleConfig.output as rollup.OutputOptions);
+      return this.generateBundles(bundleConfigs).then((result: unknown): unknown => {
+        const dt = Date.now() - t0;
+        let output = Unicode.stringOutput(OutputSettings.styled());
+        output = OutputStyle.greenBold(output);
+        output = output.write("bundled");
+        output = OutputStyle.reset(output);
+        output = output.write(" ");
+        output = OutputStyle.yellow(output);
+        output = output.write(this.uid);
+        output = OutputStyle.reset(output);
+        output = output.write(" in ");
+        output = output.debug(dt);
+        output = output.write("ms");
+        console.log(output.bind());
 
-          const dt = Date.now() - t0;
-          let output = Unicode.stringOutput(OutputSettings.styled());
-          output = OutputStyle.greenBold(output);
-          output = output.write("bundled");
-          output = OutputStyle.reset(output);
-          output = output.write(" ");
-          output = OutputStyle.yellow(output);
-          output = output.write(this.uid);
-          output = OutputStyle.reset(output);
-          output = output.write(" in ");
-          output = output.debug(dt);
-          output = output.write("ms");
-          console.log(output.bind());
-
-          this.onBundleSuccess();
-          return bundle;
-        })
-        .then((bundle: rollup.RollupOutput): Promise<rollup.RollupOutput> | rollup.RollupOutput => {
-          if (this.retest) {
-            return new Promise((resolve, reject): void => {
-              this.test().then((): void => {
-                resolve(bundle);
-              }, reject);
-            });
-          } else {
-            return bundle;
-          }
-        })
-        .then((bundle: rollup.RollupOutput): Promise<rollup.RollupOutput> | rollup.RollupOutput => {
-          if (this.redoc) {
-            return new Promise((resolve, reject): void => {
-              this.doc().then((): void => {
-                resolve(bundle);
-              }, reject);
-            });
-          } else {
-            return bundle;
-          }
-        })
-        .catch(this.onBundleError);
+        this.onBundleSuccess();
+        return result;
+      })
+      .catch(this.onBundleError)
+      .finally(() => {
+        process.chdir(cwd);
+      });
     } else {
       return Promise.resolve(void 0);
     }
   }
 
-  minify(bundle: rollup.RollupOutput, options: rollup.OutputOptions): Promise<rollup.RollupOutput> {
-    if (!this.project.devel) {
-      const inputChunk = bundle.output[0] as rollup.OutputChunk;
-      const outputDir = Path.dirname(inputChunk.fileName);
-      const scriptName = Path.basename(inputChunk.fileName, ".js") + ".min.js";
-      const scriptPath = Path.resolve(outputDir, scriptName);
-      const terserOptions: any = {
-        output: {
-          comments: false,
-        },
-      };
-      if (!options.banner) {
-        terserOptions.output.preamble = this.preamble;
+  generateBundles(bundleConfigs: rollup.RollupOptions | rollup.RollupOptions[], bundleIndex: number = 0): Promise<unknown> {
+    if (bundleConfigs !== void 0) {
+      if (!Array.isArray(bundleConfigs)) {
+        return this.generateBundle(bundleConfigs);
+      } else if (bundleIndex < bundleConfigs.length) {
+        let bundleNext: Promise<unknown> = this.generateBundle(bundleConfigs[bundleIndex]!);
+        if (bundleIndex + 1 < bundleConfigs.length) {
+          bundleNext = bundleNext.then(this.generateBundles.bind(this, bundleConfigs, bundleIndex + 1));
+        }
+        return bundleNext;
       }
-      if (options.sourcemap) {
-        const sourceMappingURL = scriptName + ".map";
-        terserOptions.sourceMap = {
-          content: inputChunk.map,
-          filename: scriptPath,
-          url: sourceMappingURL,
-        };
-      }
-      return terser.minify(inputChunk.code, terserOptions)
-        .then((output: terser.MinifyOutput): rollup.RollupOutput => {
-          const outputChunk: rollup.OutputChunk = {
-            type: "chunk",
-            fileName: scriptPath,
-            code: output.code!,
-            map: output.map as unknown as rollup.SourceMap,
-            name: inputChunk.name,
-            facadeModuleId: inputChunk.facadeModuleId,
-            modules: inputChunk.modules,
-            imports: inputChunk.imports,
-            importedBindings: inputChunk.importedBindings,
-            dynamicImports: inputChunk.dynamicImports,
-            exports: inputChunk.exports,
-            referencedFiles: inputChunk.referencedFiles,
-            isEntry: inputChunk.isEntry,
-            isDynamicEntry: inputChunk.isDynamicEntry,
-            isImplicitEntry: inputChunk.isImplicitEntry,
-            implicitlyLoadedBefore: inputChunk.implicitlyLoadedBefore,
-          };
-          bundle.output.push(outputChunk);
-          return bundle;
-        })
-        .catch(this.onMinifyError);
-    } else {
-      return Promise.resolve(bundle);
     }
+    return Promise.resolve(void 0);
+  }
+
+  generateBundle(bundleConfig: rollup.RollupOptions): Promise<rollup.RollupOutput> {
+    return rollup.rollup(bundleConfig).then((build: rollup.RollupBuild): Promise<rollup.RollupOutput> => {
+      if (this.watching) {
+        bundleConfig.cache = build.cache;
+      }
+      return this.generateBundleOutputs(build, bundleConfig);
+    });
+  }
+
+  generateBundleOutputs(build: rollup.RollupBuild, bundleConfig: rollup.RollupOptions, outputIndex: number = 0): Promise<rollup.RollupOutput> {
+    const bundleOutput = bundleConfig.output;
+    if (bundleOutput !== void 0) {
+      if (!Array.isArray(bundleOutput)) {
+        return this.generateBundleOutput(build, bundleOutput);
+      } else if (outputIndex < bundleOutput.length) {
+        let bundleNext = this.generateBundleOutput(build, bundleOutput[outputIndex]!);
+        if (outputIndex + 1 < bundleOutput.length) {
+          bundleNext = bundleNext.then(this.generateBundleOutputs.bind(this, build, bundleConfig, outputIndex + 1));
+        }
+        return bundleNext;
+      }
+    }
+    throw new Error("no bundles");
+  }
+
+  generateBundleOutput(build: rollup.RollupBuild, bundleOutput: rollup.OutputOptions): Promise<rollup.RollupOutput> {
+    return build.generate(bundleOutput).then((bundle: rollup.RollupOutput): Promise<rollup.RollupOutput> => {
+      bundle.output[0].fileName = bundleOutput.file!;
+      return this.simplify(bundle, bundleOutput);
+    }).then((bundle: rollup.RollupOutput): rollup.RollupOutput => {
+      this.writeBundle(bundle, bundleOutput);
+      return bundle;
+    });
+  }
+
+  simplify(bundle: rollup.RollupOutput, options: rollup.OutputOptions): Promise<rollup.RollupOutput> {
+    const inputChunk = bundle.output[0] as rollup.OutputChunk;
+    const outputDir = Path.dirname(inputChunk.fileName);
+    const scriptName = Path.basename(inputChunk.fileName);
+    const scriptPath = Path.resolve(outputDir, scriptName);
+    const terserOptions: terser.MinifyOptions = {
+      compress: false,
+      mangle: false,
+      output: {
+        beautify: true,
+        comments: false,
+        indent_level: 2,
+      },
+    };
+    (terserOptions.output as any).keep_numbers = true;
+    if (!options.banner) {
+      terserOptions.output!.preamble = this.preamble;
+    }
+    if (options.sourcemap) {
+      const sourceMappingURL = scriptName + ".map";
+      terserOptions.sourceMap = {
+        content: inputChunk.map,
+        filename: scriptPath,
+        url: sourceMappingURL,
+      };
+    }
+    return terser.minify(inputChunk.code, terserOptions).then((output: terser.MinifyOutput): Promise<rollup.RollupOutput> => {
+      const outputChunk: rollup.OutputChunk = {
+        type: "chunk",
+        fileName: scriptPath,
+        code: output.code!,
+        map: output.map as unknown as rollup.SourceMap,
+        name: inputChunk.name,
+        facadeModuleId: inputChunk.facadeModuleId,
+        modules: inputChunk.modules,
+        imports: inputChunk.imports,
+        importedBindings: inputChunk.importedBindings,
+        dynamicImports: inputChunk.dynamicImports,
+        exports: inputChunk.exports,
+        referencedFiles: inputChunk.referencedFiles,
+        isEntry: inputChunk.isEntry,
+        isDynamicEntry: inputChunk.isDynamicEntry,
+        isImplicitEntry: inputChunk.isImplicitEntry,
+        implicitlyLoadedBefore: inputChunk.implicitlyLoadedBefore,
+      };
+      bundle.output.push(outputChunk);
+      if (this.project.devel || this.id === "test") {
+        return Promise.resolve(bundle);
+      } else {
+        return this.minify(bundle, options);
+      }
+    }).catch(this.onMinifyError);
+  }
+
+  minify(bundle: rollup.RollupOutput, options: rollup.OutputOptions): Promise<rollup.RollupOutput> {
+    const inputChunk = bundle.output[0] as rollup.OutputChunk;
+    const outputDir = Path.dirname(inputChunk.fileName);
+    const scriptExt = Path.extname(inputChunk.fileName);
+    const scriptName = Path.basename(inputChunk.fileName, scriptExt) + ".min" + scriptExt;
+    const scriptPath = Path.resolve(outputDir, scriptName);
+    const terserOptions: terser.MinifyOptions = {
+      output: {
+        comments: false,
+      },
+    };
+    if (!options.banner) {
+      terserOptions.output!.preamble = this.preamble;
+    }
+    if (options.sourcemap) {
+      const sourceMappingURL = scriptName + ".map";
+      terserOptions.sourceMap = {
+        content: inputChunk.map,
+        filename: scriptPath,
+        url: sourceMappingURL,
+      };
+    }
+    return terser.minify(inputChunk.code, terserOptions).then((output: terser.MinifyOutput): rollup.RollupOutput => {
+      const outputChunk: rollup.OutputChunk = {
+        type: "chunk",
+        fileName: scriptPath,
+        code: output.code!,
+        map: output.map as unknown as rollup.SourceMap,
+        name: inputChunk.name,
+        facadeModuleId: inputChunk.facadeModuleId,
+        modules: inputChunk.modules,
+        imports: inputChunk.imports,
+        importedBindings: inputChunk.importedBindings,
+        dynamicImports: inputChunk.dynamicImports,
+        exports: inputChunk.exports,
+        referencedFiles: inputChunk.referencedFiles,
+        isEntry: inputChunk.isEntry,
+        isDynamicEntry: inputChunk.isDynamicEntry,
+        isImplicitEntry: inputChunk.isImplicitEntry,
+        implicitlyLoadedBefore: inputChunk.implicitlyLoadedBefore,
+      };
+      bundle.output.push(outputChunk);
+      return bundle;
+    }).catch(this.onMinifyError);
   }
 
   protected onMinifyError(error: Error): Promise<any> {
@@ -777,18 +939,13 @@ export class Target {
   }
 
   protected writeBundle(bundle: rollup.RollupOutput, options: rollup.OutputOptions): void {
-    for (let i = 0; i < bundle.output.length; i += 1) {
+    for (let i = 1; i < bundle.output.length; i += 1) {
       const chunk = bundle.output[i] as rollup.OutputChunk;
       const scriptPath = chunk.fileName!;
       const sourceMappingPath = scriptPath + ".map";
 
       Target.mkdir(Path.dirname(scriptPath));
-      let code = chunk.code;
-      if (options.sourcemap && i === 0) {
-        const sourceMappingURL = Path.basename(sourceMappingPath);
-        code += "//# sourceMappingURL=" + sourceMappingURL;
-      }
-      FS.writeFileSync(scriptPath, code, "utf8");
+      FS.writeFileSync(scriptPath, chunk.code, "utf8");
 
       if (options.sourcemap) {
         FS.writeFileSync(sourceMappingPath, chunk.map!.toString(), "utf8");
@@ -881,29 +1038,34 @@ export class Target {
     output = OutputStyle.reset(output);
     console.log(output.bind());
 
-    const outDir = Path.join(this.project.baseDir, "doc", "/");
+    const outDir = Path.join(this.project.baseDir, "lib", "doc");
 
     const docOptions = {} as typedoc.TypeDocOptions;
     docOptions.name = this.project.title || this.project.name;
+    let readmeFile: string;
+    if (this.project.readme !== void 0) {
+      readmeFile = Path.resolve(this.project.baseDir, this.project.readme);
+    } else {
+      readmeFile = Path.resolve(this.project.baseDir, "README.md");
+    }
+    if (FS.existsSync(readmeFile)) {
+      docOptions.readme = readmeFile;
+    }
     if (this.project.build.gaID !== void 0) {
       docOptions.gaID = this.project.build.gaID;
     }
     docOptions.excludeInternal = true;
     docOptions.excludePrivate = true;
-    if (this.project.framework) {
-      docOptions.entryPointStrategy = "packages";
-    }
+    docOptions.entryPointStrategy = "packages";
     docOptions.entryPoints = [];
 
-    const frameworkTargets = this.frameworkTargets();
     if (this.project.framework) {
+      const frameworkTargets = this.frameworkTargets();
       for (let i = 0; i < frameworkTargets.length; i += 1) {
         docOptions.entryPoints.push(frameworkTargets[i]!.project.baseDir);
       }
     } else {
-      for (let i = 0; i < frameworkTargets.length; i += 1) {
-        docOptions.entryPoints.push(Path.resolve(frameworkTargets[i]!.baseDir, "index.ts"));
-      }
+      docOptions.entryPoints.push(this.project.baseDir);
     }
 
     const doc = new typedoc.Application();
@@ -912,24 +1074,22 @@ export class Target {
     const t0 = Date.now();
     const project = doc.convert();
     if (project !== void 0) {
-      return doc.generateDocs(project, outDir)
-        .then(() => {
-          const dt = Date.now() - t0;
-          output = Unicode.stringOutput(OutputSettings.styled());
-          output = OutputStyle.greenBold(output);
-          output = output.write("documented");
-          output = OutputStyle.reset(output);
-          output = output.write(" ");
-          output = OutputStyle.yellow(output);
-          output = output.write(this.uid);
-          output = OutputStyle.reset(output);
-          output = output.write(" in ");
-          output = output.debug(dt);
-          output = output.write("ms");
-          console.log(output.bind());
-          console.log();
-        })
-        .catch(this.onDocError);
+      return doc.generateDocs(project, outDir).then(() => {
+        const dt = Date.now() - t0;
+        output = Unicode.stringOutput(OutputSettings.styled());
+        output = OutputStyle.greenBold(output);
+        output = output.write("documented");
+        output = OutputStyle.reset(output);
+        output = output.write(" ");
+        output = OutputStyle.yellow(output);
+        output = output.write(this.uid);
+        output = OutputStyle.reset(output);
+        output = output.write(" in ");
+        output = output.debug(dt);
+        output = output.write("ms");
+        console.log(output.bind());
+        console.log();
+      }).catch(this.onDocError);
     } else {
       let output = Unicode.stringOutput(OutputSettings.styled());
       output = OutputStyle.redBold(output);

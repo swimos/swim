@@ -28,6 +28,7 @@ import {BubblePlotTrait} from "./BubblePlotTrait";
 import {ScatterPlotController} from "./ScatterPlotController";
 import type {BubblePlotControllerObserver} from "./BubblePlotControllerObserver";
 
+/** @public */
 export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotController<X, Y> {
   override readonly observerType?: Class<BubblePlotControllerObserver<X, Y>>;
 

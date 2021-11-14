@@ -18,21 +18,20 @@ import {AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
 import {View} from "@swim/view";
 import type {CanvasContext, FillViewInit, FillView, StrokeViewInit, StrokeView} from "@swim/graphics";
-import {ScatterPlotType, ScatterPlotViewInit, ScatterPlotView} from "./ScatterPlotView";
+import {ScatterPlotViewInit, ScatterPlotView} from "./ScatterPlotView";
 import type {BubblePlotViewObserver} from "./BubblePlotViewObserver";
 
+/** @public */
 export type AnyBubblePlotView<X = unknown, Y = unknown> = BubblePlotView<X, Y> | BubblePlotViewInit<X, Y>;
 
+/** @public */
 export interface BubblePlotViewInit<X = unknown, Y = unknown> extends ScatterPlotViewInit<X, Y>, FillViewInit, StrokeViewInit {
   radius?: AnyLength;
 }
 
+/** @public */
 export class BubblePlotView<X = unknown, Y = unknown> extends ScatterPlotView<X, Y> implements FillView, StrokeView {
   override readonly observerType?: Class<BubblePlotViewObserver<X, Y>>;
-
-  override get plotType(): ScatterPlotType {
-    return "bubble";
-  }
 
   @ThemeAnimator<BubblePlotView<X, Y>, Length | null, AnyLength | null>({
     type: Length,

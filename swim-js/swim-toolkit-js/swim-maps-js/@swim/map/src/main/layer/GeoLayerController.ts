@@ -24,7 +24,7 @@ import {GeoTreeView} from "../tree/GeoTreeView";
 import {GeoLayerTrait} from "./GeoLayerTrait";
 import type {GeoLayerControllerObserver} from "./GeoLayerControllerObserver";
 
-/** @internal */
+/** @public */
 export interface GeoLayerControllerFeatureExt {
   attachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void;
   detachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void;
@@ -32,6 +32,7 @@ export interface GeoLayerControllerFeatureExt {
   detachFeatureView(featureView: GeoView, featureController: GeoController): void;
 }
 
+/** @public */
 export class GeoLayerController extends GeoController {
   override readonly observerType?: Class<GeoLayerControllerObserver>;
 

@@ -17,6 +17,7 @@ import {TopAxisTrait} from "./TopAxisTrait";
 import {TopAxisView} from "./TopAxisView";
 import {AxisController} from "./AxisController";
 
+/** @public */
 export class TopAxisController<X = unknown> extends AxisController<X> {
   @TraitViewRef<TopAxisController<X>, TopAxisTrait<X>, TopAxisView<X>>({
     extends: true,

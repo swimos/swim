@@ -15,6 +15,7 @@
 import type {R2Box} from "@swim/math";
 import type {GraphicsRenderer} from "./GraphicsRenderer";
 
+/** @public */
 export interface Graphics {
   render(renderer: GraphicsRenderer, frame: R2Box): void;
 }

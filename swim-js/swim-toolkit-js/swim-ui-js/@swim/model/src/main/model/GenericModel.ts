@@ -15,6 +15,7 @@
 import type {Mutable, Dictionary, MutableDictionary} from "@swim/util";
 import {ModelContextType, ModelFlags, AnyModel, ModelCreator, Model} from "./Model";
 
+/** @public */
 export class GenericModel extends Model {
   constructor() {
     super();

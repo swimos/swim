@@ -18,12 +18,14 @@ import {Item, Attr, AnyValue, Value, Record} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import {Envelope} from "./Envelope";
 
+/** @public */
 export interface LinkAddressedConstructor<E extends LinkAddressed<E>> {
   new(node: Uri, lane: Uri, prio: number, rate: number, body: Value): E;
 
   readonly tag: string;
 }
 
+/** @public */
 export abstract class LinkAddressed<E extends LinkAddressed<E>> extends Envelope {
   constructor(node: Uri, lane: Uri, prio: number, rate: number, body: Value) {
     super();

@@ -15,5 +15,6 @@
 import type {PlotViewObserver} from "./PlotViewObserver";
 import type {ScatterPlotView} from "./ScatterPlotView";
 
+/** @public */
 export interface ScatterPlotViewObserver<X = unknown, Y = unknown, V extends ScatterPlotView<X, Y> = ScatterPlotView<X, Y>> extends PlotViewObserver<X, Y, V> {
 }

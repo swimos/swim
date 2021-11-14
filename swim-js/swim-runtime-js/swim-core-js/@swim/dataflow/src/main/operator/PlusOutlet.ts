@@ -15,6 +15,7 @@
 import type {Item, Value} from "@swim/structure";
 import {BinaryOutlet} from "./BinaryOutlet";
 
+/** @internal */
 export class PlusOutlet extends BinaryOutlet {
   protected override evaluate(argument1: Value, argument2: Value): Item {
     return argument1.plus(argument2);

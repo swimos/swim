@@ -19,6 +19,7 @@ import type {GeoPathView} from "./GeoPathView";
 import type {GeoPathTrait} from "./GeoPathTrait";
 import type {GeoPathControllerObserver} from "./GeoPathControllerObserver";
 
+/** @public */
 export abstract class GeoPathController extends GeoController {
   override readonly observerType?: Class<GeoPathControllerObserver>;
 

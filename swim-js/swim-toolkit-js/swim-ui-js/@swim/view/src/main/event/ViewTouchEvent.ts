@@ -15,18 +15,22 @@
 import type {ViewEventInit, ViewEvent} from "./ViewEvent";
 import type {View} from "../view/View";
 
+/** @public */
 export interface ViewTouchInit extends TouchInit {
   targetView?: View;
 }
 
+/** @public */
 export interface ViewTouch extends Touch {
   targetView?: View;
 }
 
+/** @public */
 export interface ViewTouchEventInit extends TouchEventInit, ViewEventInit {
   targetViewTouches?: TouchList;
 }
 
+/** @public */
 export interface ViewTouchEvent extends TouchEvent, ViewEvent {
   targetViewTouches?: TouchList;
 }

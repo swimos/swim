@@ -19,14 +19,17 @@ import {AnyUriUser, UriUserInit, UriUser} from "./"; // forward import
 import {AnyUriHost, UriHost} from "./"; // forward import
 import {AnyUriPort, UriPort} from "./"; // forward import
 
+/** @public */
 export type AnyUriAuthority = UriAuthority | UriAuthorityInit | string;
 
+/** @public */
 export interface UriAuthorityInit extends UriUserInit {
   user?: AnyUriUser;
   host?: AnyUriHost;
   port?: AnyUriPort;
 }
 
+/** @public */
 export class UriAuthority implements HashCode, Compare, Debug, Display {
   /** @internal */
   constructor(user: UriUser, host: UriHost, port: UriPort) {

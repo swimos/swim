@@ -16,6 +16,7 @@ import type {MapViewObserver} from "@swim/map";
 import type {EsriViewport} from "./EsriViewport";
 import type {EsriView} from "./EsriView";
 
+/** @public */
 export interface EsriViewObserver<V extends EsriView = EsriView> extends MapViewObserver<V> {
   viewWillSetGeoViewport?(newGeoViewport: EsriViewport, oldGeoViewport: EsriViewport, view: V): void;
 
