@@ -34,7 +34,7 @@ const mainUmd = {
       "@swim/codec": "swim",
     },
     sourcemap: true,
-    interop: false,
+    interop: "esModule",
     extend: true,
   },
   external: [

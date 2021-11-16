@@ -49,7 +49,7 @@
     "test": "./bin/build.js compile --test",
     "doc": "./bin/build.js doc",
     "watch": "./bin/build.js watch",
-    "clean": "./bin/build.js clean && cd ../swim-runtime-js/swim-core-js/@swim/build && npm run compile && npm run bundle",
+    "clean": "./bin/build.js clean && npm run bootstrap",
     "help": "./bin/build.js help"
   }
 }
