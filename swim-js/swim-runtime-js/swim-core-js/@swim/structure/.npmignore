@@ -8,3 +8,4 @@ lib/
 rollup.config.js
 src/
 tsconfig.json
+tsdoc.json
