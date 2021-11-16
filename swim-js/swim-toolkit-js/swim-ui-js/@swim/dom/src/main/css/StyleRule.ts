@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="w3c-css-typed-object-model-level-1"/>
-
 import {Mutable, AnyTiming, Timing} from "@swim/util";
 import type {FastenerOwner} from "@swim/fastener";
 import {ToStyleString, ToCssValue} from "@swim/style";

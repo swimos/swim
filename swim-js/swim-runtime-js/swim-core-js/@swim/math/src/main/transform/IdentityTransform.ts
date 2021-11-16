@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="w3c-css-typed-object-model-level-1"/>
-
 import {Constructors, Interpolator, IdentityInterpolator} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {Value, Record} from "@swim/structure";

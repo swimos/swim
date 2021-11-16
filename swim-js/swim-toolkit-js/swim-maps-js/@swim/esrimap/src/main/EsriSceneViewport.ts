@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="arcgis-js-api"/>
-
 import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {EsriViewport} from "./EsriViewport";

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="arcgis-js-api"/>
-
 import type {Equals} from "@swim/util";
 import type {AnyR2Point, R2Point} from "@swim/math";
 import type {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
@@ -69,7 +67,7 @@ export abstract class EsriViewport implements GeoViewport, Equals {
   /** @internal */
   static init(): void {
     if (EsriViewport.webMercatorUtils === void 0) {
-      (window.require as any)(["esri/geometry/support/webMercatorUtils"], function (webMercatorUtils: __esri.webMercatorUtils): void {
+      (window as any).require(["esri/geometry/support/webMercatorUtils"], function (webMercatorUtils: __esri.webMercatorUtils): void {
         EsriViewport.webMercatorUtils = webMercatorUtils;
       });
     }

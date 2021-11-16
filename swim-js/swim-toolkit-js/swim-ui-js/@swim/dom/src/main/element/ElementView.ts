@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="w3c-css-typed-object-model-level-1"/>
-
 import {Class, Arrays, Creatable, ObserverType} from "@swim/util";
 import {Affinity} from "@swim/fastener";
 import {R2Box} from "@swim/math";

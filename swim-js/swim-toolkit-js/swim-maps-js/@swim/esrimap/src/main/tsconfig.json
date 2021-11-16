@@ -4,6 +4,6 @@
   "compilerOptions": {
     "outDir": "../../lib/main",
     "tsBuildInfoFile": "../../lib/main/.tsbuildinfo",
-    "types": ["node", "arcgis-js-api"]
+    "types": ["arcgis-js-api"]
   }
 }

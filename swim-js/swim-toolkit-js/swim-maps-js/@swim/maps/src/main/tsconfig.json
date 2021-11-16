@@ -4,6 +4,6 @@
   "compilerOptions": {
     "outDir": "../../lib/main",
     "tsBuildInfoFile": "../../lib/main/.tsbuildinfo",
-    "types": ["mapbox-gl", "leaflet", "google.maps", "arcgis-js-api"]
+    "types": ["leaflet"]
   }
 }

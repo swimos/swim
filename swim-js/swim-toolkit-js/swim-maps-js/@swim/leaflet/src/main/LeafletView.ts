@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="leaflet"/>
-
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
 import {Affinity, MemberFastenerClass} from "@swim/fastener";
 import {GeoPoint} from "@swim/geo";

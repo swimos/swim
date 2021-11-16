@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="google.maps"/>
-
 import {Mutable, Class, Lazy, Equivalent, AnyTiming} from "@swim/util";
 import type {MemberFastenerClass} from "@swim/fastener";
 import {GeoPoint} from "@swim/geo";
