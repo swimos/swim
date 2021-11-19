@@ -60,8 +60,6 @@ public class MapLaneSpec {
   private static CountDownLatch laneWillClear = new CountDownLatch(DEF_LATCH_COUNT);
   private static CountDownLatch laneDidClear = new CountDownLatch(DEF_LATCH_COUNT);
 
-  private static CountDownLatch linkDidSync = new CountDownLatch(DEF_LATCH_COUNT);
-
   private static OrderedMap<String, String> mapLaneCopy;
   private static OrderedMap<String, String> mapLane1Copy;
 
@@ -73,7 +71,9 @@ public class MapLaneSpec {
 
     laneWillUpdate = new CountDownLatch(3);
     laneDidUpdate = new CountDownLatch(2);
-    linkDidSync = new CountDownLatch(1);
+
+    CountDownLatch linkDidSync = new CountDownLatch(1);
+    CountDownLatch linkDidUpdate = new CountDownLatch(4);
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
@@ -83,9 +83,11 @@ public class MapLaneSpec {
           .hostUri("warp://localhost:53556")
           .nodeUri("/map/words")
           .laneUri("map")
-          .didSync(() -> linkDidSync.countDown())
+          .didSync(linkDidSync::countDown)
+          .didUpdate((key, newVal, oldVal) -> linkDidUpdate.countDown())
           .open();
       linkDidSync.await(1, TimeUnit.SECONDS);
+
       mapLink.put("a", "indefinite article");
       mapLink.put("the", "definite article");
       laneDidUpdate.await(1, TimeUnit.SECONDS);
@@ -94,10 +96,12 @@ public class MapLaneSpec {
       assertEquals(mapLaneCopy.size(), 2);
       assertEquals(mapLaneCopy.get("a"), "indefinite article");
       assertEquals(mapLaneCopy.get("the"), "definite article");
-
       assertEquals(mapLane1Copy.size(), 2);
       assertEquals(mapLane1Copy.get("a"), "indefinite article");
       assertEquals(mapLane1Copy.get("the"), "definite article");
+
+      linkDidUpdate.await(1, TimeUnit.SECONDS);
+
       laneDidUpdate = new CountDownLatch(1);
       mapLink.put("a", "article");
       laneDidUpdate.await(1, TimeUnit.SECONDS);
@@ -106,7 +110,6 @@ public class MapLaneSpec {
       assertEquals(mapLaneCopy.size(), 2);
       assertEquals(mapLaneCopy.get("a"), "article");
       assertEquals(mapLaneCopy.get("the"), "definite article");
-
       assertEquals(mapLane1Copy.size(), 2);
       assertEquals(mapLane1Copy.get("a"), "article");
       assertEquals(mapLane1Copy.get("the"), "definite article");
