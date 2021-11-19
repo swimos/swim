@@ -214,7 +214,7 @@ public class JoinMapLaneSpec {
               .laneUri("map")
               .open();
 
-      final MapDownlink<String, String> join = plane.downlinkMap()
+      plane.downlinkMap()
               .keyClass(String.class)
               .valueClass(String.class)
               .hostUri("warp://localhost:53556/")
@@ -233,18 +233,14 @@ public class JoinMapLaneSpec {
       xs.put("x1", "b");
       didUpdateInitialX0.await(2, TimeUnit.SECONDS);
       didUpdateInitialX1.await(2, TimeUnit.SECONDS);
-      assertEquals(willUpdateInitialX0.getCount(), 1);
       assertEquals(didUpdateInitialX0.getCount(), 0);
-      assertEquals(willUpdateInitialX1.getCount(), 1);
       assertEquals(didUpdateInitialX1.getCount(), 0);
 
       xs.put("x0", "aa");
       xs.put("x1", "bb");
       didUpdateX0.await(2, TimeUnit.SECONDS);
       didUpdateX1.await(2, TimeUnit.SECONDS);
-      assertEquals(willUpdateX0.getCount(), 1);
       assertEquals(didUpdateX0.getCount(), 0);
-      assertEquals(willUpdateX1.getCount(), 1);
       assertEquals(didUpdateX1.getCount(), 0);
 
       xs.remove("x0");
@@ -367,19 +363,15 @@ public class JoinMapLaneSpec {
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println(nodeUri() + " didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
         if ("x0".equals(key) && "a".equals(newValue) && "".equals(oldValue)) {
-          assertEquals(willUpdateInitialX0.getCount(), 1);
           didUpdateInitialX0.countDown();
         }
         if ("x1".equals(key) && "b".equals(newValue) && "".equals(oldValue)) {
-          assertEquals(willUpdateInitialX1.getCount(), 1);
           didUpdateInitialX1.countDown();
         }
         if ("x0".equals(key) && "aa".equals(newValue) && "a".equals(oldValue)) {
-          assertEquals(willUpdateX0.getCount(), 1);
           didUpdateX0.countDown();
         }
         if ("x1".equals(key) && "bb".equals(newValue) && "b".equals(oldValue)) {
-          assertEquals(willUpdateX1.getCount(),1);
           didUpdateX1.countDown();
         }
       }
