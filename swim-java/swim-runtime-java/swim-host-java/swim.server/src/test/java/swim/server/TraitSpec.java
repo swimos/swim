@@ -174,6 +174,7 @@ public class TraitSpec {
     final CountDownLatch infoDidReceive = new CountDownLatch(1);
     final CountDownLatch infoDidSet = new CountDownLatch(1);
     final CountDownLatch valueDidSet = new CountDownLatch(1);
+    final CountDownLatch didSync = new CountDownLatch(1);
     class InfoLinkController implements WillSet<String>, DidSet<String>,
         WillReceive, DidReceive, WillLink, DidLink, WillSync, DidSync,
         WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
@@ -225,6 +226,7 @@ public class TraitSpec {
       @Override
       public void didSync() {
         System.out.println("link didSync");
+        didSync.countDown();
       }
 
       @Override
@@ -264,6 +266,7 @@ public class TraitSpec {
           .laneUri("info")
           .observe(new InfoLinkController())
           .open();
+      didSync.await(2, TimeUnit.SECONDS);
       infoLink.set(testValue);
       valueDidSet.await(1, TimeUnit.SECONDS);
       infoDidReceive.await(1, TimeUnit.SECONDS);
