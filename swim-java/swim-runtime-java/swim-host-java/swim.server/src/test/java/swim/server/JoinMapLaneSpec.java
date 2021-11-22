@@ -179,23 +179,23 @@ public class JoinMapLaneSpec {
     }
   }
 
-  private final static CountDownLatch willDownlinkXs = new CountDownLatch(2);
-  private final static CountDownLatch didDownlinkXs = new CountDownLatch(1);
-  private final static CountDownLatch willDownlinkYs = new CountDownLatch(2);
-  private final static CountDownLatch didDownlinkYs = new CountDownLatch(1);
+  private static CountDownLatch willDownlinkXs = new CountDownLatch(2);
+  private static CountDownLatch didDownlinkXs = new CountDownLatch(1);
+  private static CountDownLatch willDownlinkYs = new CountDownLatch(2);
+  private static CountDownLatch didDownlinkYs = new CountDownLatch(1);
 
-  private final static CountDownLatch willUpdateInitialX0 = new CountDownLatch(2);
-  private final static CountDownLatch didUpdateInitialX0 = new CountDownLatch(1);
-  private final static CountDownLatch willUpdateInitialX1 = new CountDownLatch(2);
-  private final static CountDownLatch didUpdateInitialX1 = new CountDownLatch(1);
+  private static CountDownLatch willUpdateInitialX0 = new CountDownLatch(2);
+  private static CountDownLatch didUpdateInitialX0 = new CountDownLatch(1);
+  private static CountDownLatch willUpdateInitialX1 = new CountDownLatch(2);
+  private static CountDownLatch didUpdateInitialX1 = new CountDownLatch(1);
 
-  private final static CountDownLatch willUpdateX0 = new CountDownLatch(2);
-  private final static CountDownLatch didUpdateX0 = new CountDownLatch(1);
-  private final static CountDownLatch willUpdateX1 = new CountDownLatch(2);
-  private final static CountDownLatch didUpdateX1 = new CountDownLatch(1);
+  private static CountDownLatch willUpdateX0 = new CountDownLatch(2);
+  private static CountDownLatch didUpdateX0 = new CountDownLatch(1);
+  private static CountDownLatch willUpdateX1 = new CountDownLatch(2);
+  private static CountDownLatch didUpdateX1 = new CountDownLatch(1);
 
-  private final static CountDownLatch willRemoveX0 = new CountDownLatch(2);
-  private final static CountDownLatch didRemoveX0 = new CountDownLatch(1);
+  private static CountDownLatch willRemoveX0 = new CountDownLatch(2);
+  private static CountDownLatch didRemoveX0 = new CountDownLatch(1);
 
   @Test
   public void testJoinMapLaneCallback() throws InterruptedException {
@@ -222,8 +222,8 @@ public class JoinMapLaneSpec {
               .laneUri("join")
               .open();
 
-      didDownlinkXs.await(2,TimeUnit.SECONDS);
-      didDownlinkYs.await(2,TimeUnit.SECONDS);
+      didDownlinkXs.await(2, TimeUnit.SECONDS);
+      didDownlinkYs.await(2, TimeUnit.SECONDS);
       assertEquals(willDownlinkXs.getCount(), 1);
       assertEquals(didDownlinkXs.getCount(), 0);
       assertEquals(willDownlinkYs.getCount(), 1);

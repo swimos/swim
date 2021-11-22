@@ -72,8 +72,8 @@ public class MapLaneSpec {
     laneWillUpdate = new CountDownLatch(3);
     laneDidUpdate = new CountDownLatch(2);
 
-    CountDownLatch linkDidSync = new CountDownLatch(1);
-    CountDownLatch linkDidUpdate = new CountDownLatch(4);
+    final CountDownLatch linkDidSync = new CountDownLatch(1);
+    final CountDownLatch linkDidUpdate = new CountDownLatch(4);
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();

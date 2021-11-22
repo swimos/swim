@@ -258,7 +258,7 @@ public class ValueLaneSpec {
   private static CountDownLatch didSet;
   private static CountDownLatch didCommand;
 
-  private static void resetLatches(){
+  private static void resetLatches() {
     willUplink = new CountDownLatch(2);
     didUplink = new CountDownLatch(2);
     willCommand = new CountDownLatch(2);
