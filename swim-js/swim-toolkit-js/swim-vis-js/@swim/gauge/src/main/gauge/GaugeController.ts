@@ -57,6 +57,13 @@ export class GaugeController extends GenericController {
     }
   }
 
+  protected setLimit(limit: number): void {
+    const gaugeView = this.gauge.view;
+    if (gaugeView !== null) {
+      gaugeView.limit.setState(limit);
+    }
+  }
+
   @TraitViewRef<GaugeController, GaugeTrait, GaugeView>({
     traitType: GaugeTrait,
     observesTrait: true,
@@ -72,12 +79,14 @@ export class GaugeController extends GenericController {
       const gaugeView = this.view;
       if (gaugeView !== null) {
         this.owner.setTitleView(gaugeTrait.title.state, gaugeTrait);
+        this.owner.setLimit(gaugeTrait.limit.state);
       }
     },
     willDetachTrait(gaugeTrait: GaugeTrait): void {
       const gaugeView = this.view;
       if (gaugeView !== null) {
         this.owner.setTitleView(null, gaugeTrait);
+        this.owner.setLimit(0);
       }
       const dialTraits = gaugeTrait.dials.traits;
       for (const traitId in dialTraits) {
@@ -90,6 +99,9 @@ export class GaugeController extends GenericController {
     },
     traitDidSetGaugeTitle(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, gaugeTrait: GaugeTrait): void {
       this.owner.setTitleView(newTitle, gaugeTrait);
+    },
+    traitDidSetGaugeLimit(newLimit: number, oldLimit: number, gaugeTrait: GaugeTrait): void {
+      this.owner.setLimit(newLimit);
     },
     traitWillAttachDial(dialTrait: DialTrait, targetTrait: Trait): void {
       this.owner.dials.addTraitController(dialTrait, targetTrait);
@@ -112,6 +124,7 @@ export class GaugeController extends GenericController {
       const gaugeTrait = this.trait;
       if (gaugeTrait !== null) {
         this.owner.setTitleView(gaugeTrait.title.state, gaugeTrait);
+        this.owner.setLimit(gaugeTrait.limit.state);
       }
     },
     deinitView(gaugeView: GaugeView): void {

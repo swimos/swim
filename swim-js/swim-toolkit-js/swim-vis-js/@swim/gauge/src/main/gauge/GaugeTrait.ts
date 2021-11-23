@@ -40,6 +40,18 @@ export class GaugeTrait extends Trait {
   readonly title!: Property<this, GaugeTitle | null>;
   static readonly title: MemberFastenerClass<GaugeTrait, "title">;
 
+  @Property<GaugeTrait, number>({
+    state: 0,
+    willSetState(newLimit: number, oldLimit: number): void {
+      this.owner.callObservers("traitWillSetGaugeLimit", newLimit, oldLimit, this.owner);
+    },
+    didSetState(newLimit: number, oldLimit: number): void {
+      this.owner.callObservers("traitDidSetGaugeLimit", newLimit, oldLimit, this.owner);
+    },
+  })
+  readonly limit!: Property<this, number>;
+  static readonly limit: MemberFastenerClass<GaugeTrait, "limit">;
+
   @TraitSet<GaugeTrait, DialTrait>({
     type: DialTrait,
     binds: true,

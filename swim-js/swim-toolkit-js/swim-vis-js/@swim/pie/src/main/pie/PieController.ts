@@ -262,6 +262,6 @@ export class PieController extends GenericController {
       // hook
     },
   })
-  readonly slices!: TraitViewControllerSet<this, SliceTrait, SliceView, SliceController>;
+  readonly slices!: TraitViewControllerSet<this, SliceTrait, SliceView, SliceController> & PieControllerSliceExt;
   static readonly slices: MemberFastenerClass<PieController, "slices">;
 }

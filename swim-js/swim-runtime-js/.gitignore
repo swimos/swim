@@ -7,8 +7,6 @@
 
 # Ignore folders
 node_modules
-dist
-lib
 
 # Ignore files
 .tsbuildinfo
