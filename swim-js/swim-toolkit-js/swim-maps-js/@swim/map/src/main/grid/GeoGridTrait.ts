@@ -46,6 +46,7 @@ export class GeoGridTrait extends GeoLayerTrait {
     },
   })
   override readonly features!: TraitSet<this, GeoTrait>;
+  static override readonly features: MemberFastenerClass<GeoGridTrait, "features">;
 
   @TraitSet<GeoGridTrait, GeoGridTrait>({
     type: GeoGridTrait,

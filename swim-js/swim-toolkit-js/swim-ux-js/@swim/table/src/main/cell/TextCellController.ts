@@ -59,7 +59,7 @@ export class TextCellController extends CellController {
     },
   })
   override readonly cell!: TraitViewRef<this, TextCellTrait, TextCellView>;
-  static readonly cell: MemberFastenerClass<TextCellController, "cell">;
+  static override readonly cell: MemberFastenerClass<TextCellController, "cell">;
 
   protected createContentView(content: TextCellContent, cellTrait: TextCellTrait): HtmlView | string | null {
     if (typeof content === "function") {

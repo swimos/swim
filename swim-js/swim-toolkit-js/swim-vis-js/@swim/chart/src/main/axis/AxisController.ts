@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
+import type {MemberFastenerClass} from "@swim/fastener";
 import {GenericController, TraitViewRef} from "@swim/controller";
 import {AxisView} from "./AxisView";
 import {AxisTrait} from "./AxisTrait";
@@ -39,4 +40,5 @@ export abstract class AxisController<D = unknown> extends GenericController {
     },
   })
   readonly axis!: TraitViewRef<this, AxisTrait<D>, AxisView<D>>;
+  static readonly axis: MemberFastenerClass<AxisController, "axis">;
 }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/fastener";
 import type {Length} from "@swim/math";
 import type {GeoPath} from "@swim/geo";
 import type {Color} from "@swim/style";
@@ -151,4 +151,5 @@ export class GeoLineController extends GeoPathController {
     },
   })
   readonly geo!: TraitViewRef<this, GeoLineTrait, GeoLineView>;
+  static readonly geo: MemberFastenerClass<GeoLineController, "geo">;
 }

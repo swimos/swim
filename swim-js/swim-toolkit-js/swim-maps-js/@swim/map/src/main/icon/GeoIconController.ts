@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/fastener";
 import type {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import type {Graphics, IconLayout} from "@swim/graphics";
@@ -135,4 +135,5 @@ export class GeoIconController extends GeoController {
     },
   })
   readonly geo!: TraitViewRef<this, GeoIconTrait, GeoIconView>;
+  static readonly geo: MemberFastenerClass<GeoIconController, "geo">;
 }

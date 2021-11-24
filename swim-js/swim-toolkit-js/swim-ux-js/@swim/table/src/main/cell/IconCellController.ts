@@ -61,5 +61,5 @@ export class IconCellController extends CellController {
     },
   })
   override readonly cell!: TraitViewRef<this, IconCellTrait, IconCellView>;
-  static readonly cell: MemberFastenerClass<IconCellController, "cell">;
+  static override readonly cell: MemberFastenerClass<IconCellController, "cell">;
 }

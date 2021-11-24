@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {MemberFastenerClass} from "@swim/fastener";
 import {TraitViewRef} from "@swim/controller";
 import {TopAxisTrait} from "./TopAxisTrait";
 import {TopAxisView} from "./TopAxisView";
@@ -25,4 +26,5 @@ export class TopAxisController<X = unknown> extends AxisController<X> {
     viewType: TopAxisView,
   })
   override readonly axis!: TraitViewRef<this, TopAxisTrait<X>, TopAxisView<X>>;
+  static override readonly axis: MemberFastenerClass<TopAxisController, "axis">;
 }
