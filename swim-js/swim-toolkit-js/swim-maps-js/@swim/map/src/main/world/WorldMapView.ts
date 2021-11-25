@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, AnyTiming} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {R2Box} from "@swim/math";
 import {ViewContextType, ViewFlags, View, ViewRef} from "@swim/view";
 import type {HtmlView} from "@swim/dom";

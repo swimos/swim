@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Property} from "@swim/fastener";
+import {Property} from "@swim/component";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {Graphics, AnyIconLayout, IconLayout} from "@swim/graphics";
 import {GeoTrait} from "../geo/GeoTrait";

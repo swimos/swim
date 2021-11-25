@@ -13,14 +13,13 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Property} from "@swim/fastener";
+import {Property} from "@swim/component";
 import {R2Box, Transform} from "@swim/math";
 import {ThemeConstraintAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import type {AnyGraphicsRenderer, GraphicsRendererType, GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
-import {LayerView} from "../layer/LayerView";
 import {WebGLRenderer} from "../webgl/WebGLRenderer";
 import type {CanvasCompositeOperation} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
@@ -34,7 +33,7 @@ export interface RasterViewInit extends GraphicsViewInit {
 }
 
 /** @public */
-export class RasterView extends LayerView {
+export class RasterView extends GraphicsView {
   constructor() {
     super();
     this.canvas = this.createCanvas();
@@ -147,12 +146,6 @@ export class RasterView extends LayerView {
     super.didComposite(viewContext);
   }
 
-  protected override onSetHidden(hidden: boolean): void {
-    if (!hidden) {
-      this.requireUpdate(View.NeedsRender | View.NeedsComposite);
-    }
-  }
-
   override extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
     const rasterViewContext = Object.create(viewContext);
     rasterViewContext.compositor = viewContext.renderer;
@@ -254,8 +247,9 @@ export class RasterView extends LayerView {
     }
   }
 
-  static override readonly MountFlags: ViewFlags = LayerView.MountFlags | View.NeedsRender | View.NeedsComposite;
-  static override readonly UncullFlags: ViewFlags = LayerView.UncullFlags | View.NeedsRender | View.NeedsComposite;
+  static override readonly MountFlags: ViewFlags = GraphicsView.MountFlags | View.NeedsComposite;
+  static override readonly UncullFlags: ViewFlags = GraphicsView.UncullFlags | View.NeedsComposite;
+  static override readonly UnhideFlags: ViewFlags = GraphicsView.UnhideFlags | View.NeedsComposite;
 }
 Object.defineProperty(RasterView.prototype, "viewBounds", {
   get(this: RasterView): R2Box {

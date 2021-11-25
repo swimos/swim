@@ -12,4 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {LayerView} from "./LayerView";
+export {
+  ComponentFlags,
+  Component,
+} from "./Component";
+export {ComponentObserver} from "./ComponentObserver";

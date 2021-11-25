@@ -13,14 +13,14 @@
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const mapView = new swim.WorldMapView.create();
+const mapView = swim.WorldMapView.create();
 mapView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 
 function addGeoShapes(shapes, mapView) {
   for (let i = 0; i < shapes.length; i += 1) {
     const shape = shapes[i];
     if (shape instanceof swim.GeoGroup) {
-      const layerView = mapView.appendChild(swim.GeoLayerView);
+      const layerView = mapView.appendChild(swim.GeoView);
       addGeoShapes(shape.shapes, layerView)
     } else if (shape instanceof swim.GeoPath) {
       const shapeView = mapView.appendChild(swim.GeoAreaView)

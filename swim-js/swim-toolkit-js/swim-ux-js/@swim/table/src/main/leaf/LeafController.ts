@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import type {Class, ObserverType} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import type {TraitCreator, Trait} from "@swim/model";
 import type {PositionGestureInput, ViewCreator} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
-import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {CellView} from "../cell/CellView";
 import {TextCellView} from "../cell/TextCellView";
 import type {CellTrait} from "../cell/CellTrait";
@@ -40,7 +40,7 @@ export interface LeafControllerCellExt {
 }
 
 /** @public */
-export class LeafController extends GenericController {
+export class LeafController extends Controller {
   override readonly observerType?: Class<LeafControllerObserver>;
 
   @TraitViewRef<LeafController, LeafTrait, LeafView>({

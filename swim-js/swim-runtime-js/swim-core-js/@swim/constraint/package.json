@@ -22,6 +22,6 @@
   "dependencies": {
     "@swim/util": "4.0.0-dev.20210927.1",
     "@swim/codec": "4.0.0-dev.20210927.1",
-    "@swim/fastener": "4.0.0-dev.20210927.1"
+    "@swim/component": "4.0.0-dev.20210927.1"
   }
 }

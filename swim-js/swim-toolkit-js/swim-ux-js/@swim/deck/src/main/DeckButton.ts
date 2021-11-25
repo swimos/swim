@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, FastenerOwner, Property} from "@swim/fastener";
+import {Affinity, FastenerOwner, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
@@ -226,7 +226,7 @@ export interface DeckButtonCloseIcon<O extends DeckButton = DeckButton, V extend
   didAttachView(iconView: V): void;
 
   /** @override */
-  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, child: V, target: View | number | null, key: string | undefined): void;
 
   viewDidLayout(viewContext: ViewContext, iconView: V): void;
 
@@ -244,8 +244,8 @@ export const DeckButtonCloseIcon = (function (_super: typeof ViewRef) {
     this.initIcon(iconView);
   };
 
-  DeckButtonCloseIcon.prototype.insertChild = function (this: DeckButtonCloseIcon, parent: View, childView: SvgIconView, targetView: View | null, key: string | undefined): void {
-    parent.prependChild(childView, key);
+  DeckButtonCloseIcon.prototype.insertChild = function (this: DeckButtonCloseIcon, parent: View, child: SvgIconView, target: View | number | null, key: string | undefined): void {
+    parent.prependChild(child, key);
   };
 
   DeckButtonCloseIcon.prototype.viewDidLayout = function (this: DeckButtonCloseIcon, viewContext: ViewContext, iconView: SvgIconView): void {
@@ -297,7 +297,7 @@ export interface DeckButtonBackIcon<O extends DeckButton = DeckButton, V extends
   didAttachView(iconView: V): void;
 
   /** @override */
-  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, child: V, target: View | number | null, key: string | undefined): void;
 
   viewDidLayout(viewContext: ViewContext, iconView: V): void;
 
@@ -315,8 +315,8 @@ export const DeckButtonBackIcon = (function (_super: typeof ViewRef) {
     this.initIcon(iconView);
   };
 
-  DeckButtonBackIcon.prototype.insertChild = function (this: DeckButtonBackIcon, parent: View, childView: SvgIconView, targetView: View | null, key: string | undefined): void {
-    parent.prependChild(childView, key);
+  DeckButtonBackIcon.prototype.insertChild = function (this: DeckButtonBackIcon, parent: View, child: SvgIconView, target: View | number | null, key: string | undefined): void {
+    parent.prependChild(child, key);
   };
 
   DeckButtonBackIcon.prototype.viewDidLayout = function (this: DeckButtonBackIcon, viewContext: ViewContext, iconView: SvgIconView): void {
@@ -421,7 +421,7 @@ export interface DeckButtonLabel<O extends DeckButton = DeckButton, V extends Ht
   didAttachView(labelView: V): void;
 
   /** @override */
-  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, child: V, target: View | number | null, key: string | undefined): void;
 
   /** @protected */
   viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, labelView: V): void;
@@ -442,10 +442,10 @@ export const DeckButtonLabel = (function (_super: typeof ViewRef) {
     this.initLabel(labelView);
   };
 
-  DeckButtonLabel.prototype.insertChild = function (this: DeckButtonLabel, parent: View, childView: HtmlView, targetView: View | null, key: string | undefined): void {
+  DeckButtonLabel.prototype.insertChild = function (this: DeckButtonLabel, parent: View, child: HtmlView, target: View | number | null, key: string | undefined): void {
     const targetKey = "label" + (this.labelIndex + 1);
-    targetView = parent.getChild(targetKey);
-    parent.insertChild(childView, targetView, key);
+    target = parent.getChild(targetKey);
+    parent.insertChild(child, target, key);
   };
 
   DeckButtonLabel.prototype.viewDidApplyTheme = function (this: DeckButtonLabel, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, labelView: HtmlView): void {

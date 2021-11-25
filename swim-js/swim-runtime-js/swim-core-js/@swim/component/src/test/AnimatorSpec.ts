@@ -14,7 +14,7 @@
 
 import {Easing} from "@swim/util";
 import {Spec, Test, Exam} from "@swim/unit";
-import {Affinity, Animator, GenericHierarchy} from "@swim/fastener";
+import {Affinity, Animator, Component} from "@swim/component";
 
 export class AnimatorSpec extends Spec {
   @Test
@@ -50,33 +50,33 @@ export class AnimatorSpec extends Spec {
 
   @Test
   testAnimatorDecorator(exam: Exam): void {
-    class TestHierarchy extends GenericHierarchy {
+    class TestComponent extends Component {
       @Animator({type: Number, state: 0})
       readonly foo!: Animator<this, number>;
     }
-    const hierarchy = new TestHierarchy();
-    hierarchy.mount();
+    const component = new TestComponent();
+    component.mount();
 
-    exam.equal(hierarchy.foo.name, "foo");
-    exam.equal(hierarchy.foo.state, 0);
-    exam.equal(hierarchy.foo.value, 0);
+    exam.equal(component.foo.name, "foo");
+    exam.equal(component.foo.state, 0);
+    exam.equal(component.foo.value, 0);
 
-    hierarchy.foo.setState(1);
-    exam.equal(hierarchy.foo.state, 1);
-    exam.equal(hierarchy.foo.value, 1);
+    component.foo.setState(1);
+    exam.equal(component.foo.state, 1);
+    exam.equal(component.foo.value, 1);
 
-    exam.identical(hierarchy.foo(0.5), hierarchy, "accessor set");
-    exam.equal(hierarchy.foo(), 0.5, "accessor get");
+    exam.identical(component.foo(0.5), component, "accessor set");
+    exam.equal(component.foo(), 0.5, "accessor get");
   }
 
   @Test
   testAnimatorInheritance(exam: Exam): void {
-    class TestHierarchy extends GenericHierarchy {
+    class TestComponent extends Component {
       @Animator({type: Number, state: 0, inherits: true})
       readonly foo!: Animator<this, number>;
     }
-    const parent = new TestHierarchy();
-    const child = new TestHierarchy();
+    const parent = new TestComponent();
+    const child = new TestComponent();
     parent.appendChild(child);
     parent.mount();
 
@@ -168,12 +168,12 @@ export class AnimatorSpec extends Spec {
 
   @Test
   testAnimatorTweeningInheritance(exam: Exam): void {
-    class TestHierarchy extends GenericHierarchy {
+    class TestComponent extends Component {
       @Animator({type: Number, state: 0, inherits: true})
       readonly foo!: Animator<this, number>;
     }
-    const parent = new TestHierarchy();
-    const child = new TestHierarchy();
+    const parent = new TestComponent();
+    const child = new TestComponent();
     parent.appendChild(child);
     parent.mount();
 

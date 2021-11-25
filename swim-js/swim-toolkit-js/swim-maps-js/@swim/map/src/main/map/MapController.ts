@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {MemberFastenerClass, Property} from "@swim/fastener";
+import {MemberFastenerClass, Property} from "@swim/component";
 import type {GeoBox} from "@swim/geo";
 import type {Trait} from "@swim/model";
 import {ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {CanvasView} from "@swim/graphics";
-import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {GeoPerspective} from "../geo/GeoPerspective";
 import type {GeoViewport} from "../geo/GeoViewport";
 import type {GeoView} from "../geo/GeoView";
@@ -38,7 +38,7 @@ export interface MapControllerLayerExt {
 }
 
 /** @public */
-export abstract class MapController extends GenericController {
+export abstract class MapController extends Controller {
   override readonly observerType?: Class<MapControllerObserver>;
 
   protected abstract createMapView(containerView: HtmlView): MapView;

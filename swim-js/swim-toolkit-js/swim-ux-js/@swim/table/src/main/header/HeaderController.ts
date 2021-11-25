@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import type {TraitConstructor, TraitClass, Trait} from "@swim/model";
 import type {View} from "@swim/view";
 import type {HtmlViewClass, HtmlView} from "@swim/dom";
-import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {ColLayout} from "../layout/ColLayout";
 import type {ColView} from "../col/ColView";
 import type {ColTrait} from "../col/ColTrait";
@@ -37,7 +37,7 @@ export type HeaderControllerColExt = {
 };
 
 /** @public */
-export class HeaderController extends GenericController {
+export class HeaderController extends Controller {
   override readonly observerType?: Class<HeaderControllerObserver>;
 
   @TraitViewRef<HeaderController, HeaderTrait, HeaderView>({

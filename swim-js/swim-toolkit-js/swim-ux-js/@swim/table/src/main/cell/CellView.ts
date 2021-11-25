@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity} from "@swim/component";
 import type {PositionGestureInput} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {CellViewObserver} from "./CellViewObserver";

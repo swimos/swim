@@ -66,7 +66,7 @@ export class RefreshService<M extends Model = Model> extends Service<M> {
       deltaUpdateFlags |= Model.NeedsRefresh;
     }
     this.setFlags(this.flags | deltaUpdateFlags);
-    if (immediate && (this.flags & Model.TraversingFlag) === 0 && this.updateDelay <= RefreshService.MaxAnalyzeInterval) {
+    if (immediate && (this.flags & (Model.AnalyzingFlag | Model.RefreshingFlag)) === 0 && this.updateDelay <= RefreshService.MaxAnalyzeInterval) {
       this.runImmediatePass();
     } else {
       this.scheduleUpdate();
@@ -115,7 +115,7 @@ export class RefreshService<M extends Model = Model> extends Service<M> {
   }
 
   protected runAnalyzePass(immediate: boolean = false): void {
-    this.setFlags(this.flags & ~Model.AnalyzeMask | (Model.TraversingFlag | Model.AnalyzingFlag));
+    this.setFlags(this.flags & ~Model.AnalyzeMask | Model.AnalyzingFlag);
     try {
       const t0 = performance.now();
       const roots = this.roots;
@@ -147,7 +147,7 @@ export class RefreshService<M extends Model = Model> extends Service<M> {
         this.scheduleAnalyzePass(analyzeDelay);
       }
     } finally {
-      this.setFlags(this.flags & ~(Model.TraversingFlag | Model.AnalyzingFlag));
+      this.setFlags(this.flags & ~Model.AnalyzingFlag);
     }
   }
 
@@ -168,7 +168,7 @@ export class RefreshService<M extends Model = Model> extends Service<M> {
   }
 
   protected runRefreshPass(immediate: boolean = false): void {
-    this.setFlags(this.flags & ~Model.RefreshMask | (Model.TraversingFlag | Model.RefreshingFlag));
+    this.setFlags(this.flags & ~Model.RefreshMask | Model.RefreshingFlag);
     try {
       const time = performance.now();
       const modelContext = this.modelContext;
@@ -193,7 +193,7 @@ export class RefreshService<M extends Model = Model> extends Service<M> {
         this.scheduleRefreshPass(RefreshService.MaxRefreshInterval);
       }
     } finally {
-      this.setFlags(this.flags & ~(Model.TraversingFlag | Model.RefreshingFlag));
+      this.setFlags(this.flags & ~Model.RefreshingFlag);
     }
   }
 

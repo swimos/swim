@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, FromAny, Creatable, InitType, Initable} from "@swim/util";
-import {Fastener, Provider, HierarchyFlags, Hierarchy} from "@swim/fastener";
+import {Class, Comparator, Dictionary, FromAny, Creatable, InitType, Initable} from "@swim/util";
+import {Fastener, Provider, ComponentFlags, Component} from "@swim/component";
 import {ExecuteService} from "../execute/ExecuteService";
 import {ExecuteProvider} from "../execute/ExecuteProvider";
 import {HistoryService} from "../history/HistoryService";
@@ -29,13 +29,15 @@ export type ControllerContextType<C extends Controller> =
   C extends {readonly contextType?: Class<infer T>} ? T : never;
 
 /** @public */
-export type ControllerFlags = HierarchyFlags;
+export type ControllerFlags = ComponentFlags;
 
 /** @public */
 export type AnyController<C extends Controller = Controller> = C | ControllerFactory<C> | InitType<C>;
 
 /** @public */
 export interface ControllerInit {
+  /** @internal */
+  uid?: never, // force type ambiguity between Controller and ControllerInit
   type?: Creatable<Controller>;
   key?: string;
   children?: AnyController[];
@@ -61,39 +63,12 @@ export type ControllerCreator<F extends (abstract new (...args: any[]) => C) & C
   (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
 /** @public */
-export abstract class Controller extends Hierarchy implements Initable<ControllerInit> {
-  constructor() {
-    super();
-    this.parent = null;
-  }
-
+export class Controller extends Component implements Initable<ControllerInit> {
   override readonly familyType?: Class<Controller>;
 
   override readonly observerType?: Class<ControllerObserver>;
 
   readonly contextType?: Class<ControllerContext>;
-
-  /** @internal */
-  override readonly flags!: ControllerFlags;
-
-  /** @internal */
-  override setFlags(flags: ControllerFlags): void {
-    (this as Mutable<this>).flags = flags;
-  }
-
-  override readonly parent: Controller | null;
-
-  /** @internal */
-  override attachParent(parent: Controller): void {
-    // assert(this.parent === null);
-    this.willAttachParent(parent);
-    (this as Mutable<this>).parent = parent;
-    if (parent.mounted) {
-      this.cascadeMount();
-    }
-    this.onAttachParent(parent);
-    this.didAttachParent(parent);
-  }
 
   protected override willAttachParent(parent: Controller): void {
     const observers = this.observers;
@@ -117,18 +92,6 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
         observer.controllerDidAttachParent(parent, this);
       }
     }
-  }
-
-  /** @internal */
-  override detachParent(parent: Controller): void {
-    // assert(this.parent === parent);
-    this.willDetachParent(parent);
-    if (this.mounted) {
-      this.cascadeUnmount();
-    }
-    this.onDetachParent(parent);
-    (this as Mutable<this>).parent = null;
-    this.didDetachParent(parent);
   }
 
   protected override willDetachParent(parent: Controller): void {
@@ -155,45 +118,45 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
     }
   }
 
-  abstract override readonly childCount: number;
+  override setChild<C extends Controller>(key: string, newChild: C): Controller | null;
+  override setChild<F extends ControllerCreator<F>>(key: string, factory: F): Controller | null;
+  override setChild(key: string, newChild: AnyController | null): Controller | null;
+  override setChild(key: string, newChild: AnyController | null): Controller | null {
+    if (newChild !== null) {
+      newChild = Controller.fromAny(newChild);
+    }
+    return super.setChild(key, newChild) as Controller | null;
+  }
 
-  abstract override readonly children: ReadonlyArray<Controller>;
+  override appendChild<C extends Controller>(child: C, key?: string): C;
+  override appendChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild(child: AnyController, key?: string): Controller;
+  override appendChild(child: AnyController, key?: string): Controller {
+    child = Controller.fromAny(child);
+    return super.appendChild(child, key);
+  }
 
-  abstract override firstChild(): Controller | null;
+  override prependChild<C extends Controller>(child: C, key?: string): C;
+  override prependChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild(child: AnyController, key?: string): Controller;
+  override prependChild(child: AnyController, key?: string): Controller {
+    child = Controller.fromAny(child);
+    return super.prependChild(child, key);
+  }
 
-  abstract override lastChild(): Controller | null;
+  override insertChild<C extends Controller>(child: C, target: Controller | null, key?: string): C;
+  override insertChild<F extends ControllerCreator<F>>(factory: F, target: Controller | null, key?: string): InstanceType<F>;
+  override insertChild(child: AnyController, target: Controller | null, key?: string): Controller;
+  override insertChild(child: AnyController, target: Controller | null, key?: string): Controller {
+    child = Controller.fromAny(child);
+    return super.insertChild(child, target, key);
+  }
 
-  abstract override nextChild(target: Controller): Controller | null;
-
-  abstract override previousChild(target: Controller): Controller | null;
-
-  abstract override forEachChild<T>(callback: (child: Controller) => T | void): T | undefined;
-  abstract override forEachChild<T, S>(callback: (this: S, child: Controller) => T | void, thisArg: S): T | undefined;
-
-  abstract override getChild<F extends abstract new (...args: any[]) => Controller>(key: string, childBound: F): InstanceType<F> | null;
-  abstract override getChild(key: string, childBound?: abstract new (...args: any[]) => Controller): Controller | null;
-
-  abstract override setChild<C extends Controller>(key: string, newChild: C): Controller | null;
-  abstract override setChild<F extends ControllerCreator<F>>(key: string, factory: F): Controller | null;
-  abstract override setChild(key: string, newChild: AnyController | null): Controller | null;
-
-  abstract override appendChild<C extends Controller>(child: C, key?: string): C;
-  abstract override appendChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
-  abstract override appendChild(child: AnyController, key?: string): Controller;
-
-  abstract override prependChild<C extends Controller>(child: C, key?: string): C;
-  abstract override prependChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
-  abstract override prependChild(child: AnyController, key?: string): Controller;
-
-  abstract override insertChild<C extends Controller>(child: C, target: Controller | null, key?: string): C;
-  abstract override insertChild<F extends ControllerCreator<F>>(factory: F, target: Controller | null, key?: string): InstanceType<F>;
-  abstract override insertChild(child: AnyController, target: Controller | null, key?: string): Controller;
-
-  abstract override replaceChild<C extends Controller>(newChild: Controller, oldChild: C): C;
-  abstract override replaceChild<C extends Controller>(newChild: AnyController, oldChild: C): C;
-
-  override get insertChildFlags(): ControllerFlags {
-    return (this.constructor as typeof Controller).InsertChildFlags;
+  override replaceChild<C extends Controller>(newChild: Controller, oldChild: C): C;
+  override replaceChild<C extends Controller>(newChild: AnyController, oldChild: C): C;
+  override replaceChild(newChild: AnyController, oldChild: Controller): Controller {
+    newChild = Controller.fromAny(newChild);
+    return super.replaceChild(newChild, oldChild);
   }
 
   protected override willInsertChild(child: Controller, target: Controller | null): void {
@@ -239,13 +202,6 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
     }
   }
 
-  abstract override removeChild(key: string): Controller | null;
-  abstract override removeChild<C extends Controller>(child: C): C;
-
-  override get removeChildFlags(): ControllerFlags {
-    return (this.constructor as typeof Controller).RemoveChildFlags;
-  }
-
   protected override willRemoveChild(child: Controller): void {
     super.willRemoveChild(child);
     const observers = this.observers;
@@ -271,17 +227,6 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
       }
     }
     super.didRemoveChild(child);
-  }
-
-  override get mountFlags(): ControllerFlags {
-    return (this.constructor as typeof Controller).MountFlags;
-  }
-
-  mount(): void {
-    if (!this.mounted && this.parent === null) {
-      this.cascadeMount();
-      this.cascadeInsert();
-    }
   }
 
   protected override willMount(): void {
@@ -398,7 +343,7 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
       compileFlags = this.needsCompile(compileFlags, controllerContext);
       if ((compileFlags & Controller.CompileMask) !== 0) {
         let cascadeFlags = compileFlags;
-        this.setFlags(this.flags & ~Controller.NeedsCompile | (Controller.TraversingFlag | Controller.CompilingFlag | Controller.ContextualFlag));
+        this.setFlags(this.flags & ~Controller.NeedsCompile | (Controller.CompilingFlag | Controller.ContextualFlag));
         this.willCompile(cascadeFlags, controllerContext);
         if (((this.flags | compileFlags) & Controller.NeedsResolve) !== 0) {
           cascadeFlags |= Controller.NeedsResolve;
@@ -445,7 +390,7 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
         this.didCompile(cascadeFlags, controllerContext);
       }
     } finally {
-      this.setFlags(this.flags & ~(Controller.TraversingFlag | Controller.CompilingFlag | Controller.ContextualFlag));
+      this.setFlags(this.flags & ~(Controller.CompilingFlag | Controller.ContextualFlag));
       ControllerContext.current = outerControllerContext;
     }
   }
@@ -537,15 +482,15 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
   protected compileChildren(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>,
                             compileChild: (this: this, child: Controller, compileFlags: ControllerFlags,
                                            controllerContext: ControllerContextType<this>) => void): void {
-    type self = this;
-    function compileNext(this: self, child: Controller): void {
+    let child = this.firstChild;
+    while (child !== null) {
+      const next = child.nextSibling;
       compileChild.call(this, child, compileFlags, controllerContext);
-      if ((child.flags & Controller.RemovingFlag) !== 0) {
-        child.setFlags(child.flags & ~Controller.RemovingFlag);
-        this.removeChild(child);
+      if (next !== null && next.parent !== this) {
+        throw new Error("inconsistent compile pass");
       }
+      child = next;
     }
-    this.forEachChild(compileNext, this);
   }
 
   protected compileChild(child: Controller, compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
@@ -570,7 +515,7 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
       executeFlags = this.needsExecute(executeFlags, controllerContext);
       if ((executeFlags & Controller.ExecuteMask) !== 0) {
         let cascadeFlags = executeFlags;
-        this.setFlags(this.flags & ~Controller.NeedsExecute | (Controller.TraversingFlag | Controller.ExecutingFlag | Controller.ContextualFlag));
+        this.setFlags(this.flags & ~Controller.NeedsExecute | (Controller.ExecutingFlag | Controller.ContextualFlag));
         this.willExecute(cascadeFlags, controllerContext);
         if (((this.flags | executeFlags) & Controller.NeedsRevise) !== 0) {
           cascadeFlags |= Controller.NeedsRevise;
@@ -606,7 +551,7 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
         this.didExecute(cascadeFlags, controllerContext);
       }
     } finally {
-      this.setFlags(this.flags & ~(Controller.TraversingFlag | Controller.ExecutingFlag | Controller.ContextualFlag));
+      this.setFlags(this.flags & ~(Controller.ExecutingFlag | Controller.ContextualFlag));
       ControllerContext.current = outerControllerContext;
     }
   }
@@ -674,15 +619,15 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
   protected executeChildren(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>,
                             executeChild: (this: this, child: Controller, executeFlags: ControllerFlags,
                                            controllerContext: ControllerContextType<this>) => void): void {
-    type self = this;
-    function executeNext(this: self, child: Controller): void {
+    let child = this.firstChild;
+    while (child !== null) {
+      const next = child.nextSibling;
       executeChild.call(this, child, executeFlags, controllerContext);
-      if ((child.flags & Controller.RemovingFlag) !== 0) {
-        child.setFlags(child.flags & ~Controller.RemovingFlag);
-        this.removeChild(child);
+      if (next !== null && next.parent !== this) {
+        throw new Error("inconsistent execute pass");
       }
+      child = next;
     }
-    this.forEachChild(executeNext, this);
   }
 
   /** @internal */
@@ -697,9 +642,12 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
 
   protected bindFastener(fastener: Fastener): void {
     if (fastener instanceof ControllerRelation && fastener.binds) {
-      this.forEachChild(function (child: Controller): void {
-        fastener.bindController(child, null);
-      }, this);
+      let child = this.firstChild;
+      while (child !== null) {
+        const next = child.nextSibling;
+        fastener.bindController(child, next);
+        child = next !== null && next.parent === this ? next : null;
+      }
     }
   }
 
@@ -836,41 +784,38 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
   })();
 
   /** @internal */
-  static override readonly MountedFlag: ControllerFlags = Hierarchy.MountedFlag;
+  static override readonly MountedFlag: ControllerFlags = Component.MountedFlag;
   /** @internal */
-  static override readonly RemovingFlag: ControllerFlags = Hierarchy.RemovingFlag;
+  static override readonly RemovingFlag: ControllerFlags = Component.RemovingFlag;
   /** @internal */
-  static override readonly TraversingFlag: ControllerFlags = Hierarchy.TraversingFlag;
+  static readonly CompilingFlag: ControllerFlags = 1 << (Component.FlagShift + 0);
   /** @internal */
-  static readonly CompilingFlag: ControllerFlags = 1 << (Hierarchy.FlagShift + 0);
+  static readonly ExecutingFlag: ControllerFlags = 1 << (Component.FlagShift + 1);
   /** @internal */
-  static readonly ExecutingFlag: ControllerFlags = 1 << (Hierarchy.FlagShift + 1);
-  /** @internal */
-  static readonly ContextualFlag: ControllerFlags = 1 << (Hierarchy.FlagShift + 2);
+  static readonly ContextualFlag: ControllerFlags = 1 << (Component.FlagShift + 2);
   /** @internal */
   static readonly UpdatingMask: ControllerFlags = Controller.CompilingFlag
                                                 | Controller.ExecutingFlag;
   /** @internal */
   static readonly StatusMask: ControllerFlags = Controller.MountedFlag
                                               | Controller.RemovingFlag
-                                              | Controller.TraversingFlag
                                               | Controller.CompilingFlag
                                               | Controller.ExecutingFlag
                                               | Controller.ContextualFlag;
 
-  static readonly NeedsCompile: ControllerFlags = 1 << (Hierarchy.FlagShift + 3);
-  static readonly NeedsResolve: ControllerFlags = 1 << (Hierarchy.FlagShift + 4);
-  static readonly NeedsGenerate: ControllerFlags = 1 << (Hierarchy.FlagShift + 5);
-  static readonly NeedsAssemble: ControllerFlags = 1 << (Hierarchy.FlagShift + 6);
+  static readonly NeedsCompile: ControllerFlags = 1 << (Component.FlagShift + 3);
+  static readonly NeedsResolve: ControllerFlags = 1 << (Component.FlagShift + 4);
+  static readonly NeedsGenerate: ControllerFlags = 1 << (Component.FlagShift + 5);
+  static readonly NeedsAssemble: ControllerFlags = 1 << (Component.FlagShift + 6);
   /** @internal */
   static readonly CompileMask: ControllerFlags = Controller.NeedsCompile
                                                | Controller.NeedsResolve
                                                | Controller.NeedsGenerate
                                                | Controller.NeedsAssemble;
 
-  static readonly NeedsExecute: ControllerFlags = 1 << (Hierarchy.FlagShift + 7);
-  static readonly NeedsRevise: ControllerFlags = 1 << (Hierarchy.FlagShift + 8);
-  static readonly NeedsCompute: ControllerFlags = 1 << (Hierarchy.FlagShift + 9);
+  static readonly NeedsExecute: ControllerFlags = 1 << (Component.FlagShift + 7);
+  static readonly NeedsRevise: ControllerFlags = 1 << (Component.FlagShift + 8);
+  static readonly NeedsCompute: ControllerFlags = 1 << (Component.FlagShift + 9);
   /** @internal */
   static readonly ExecuteMask: ControllerFlags = Controller.NeedsExecute
                                                | Controller.NeedsRevise
@@ -881,11 +826,93 @@ export abstract class Controller extends Hierarchy implements Initable<Controlle
                                               | Controller.ExecuteMask;
 
   /** @internal */
-  static override readonly FlagShift: number = Hierarchy.FlagShift + 10;
+  static override readonly FlagShift: number = Component.FlagShift + 10;
   /** @internal */
   static override readonly FlagMask: ControllerFlags = (1 << Controller.FlagShift) - 1;
 
   static override readonly MountFlags: ControllerFlags = 0;
   static override readonly InsertChildFlags: ControllerFlags = 0;
   static override readonly RemoveChildFlags: ControllerFlags = 0;
+}
+
+/** @public */
+export interface Controller extends Component, Initable<ControllerInit> {
+  /** @internal @override */
+  readonly flags: ControllerFlags;
+
+  /** @internal @override */
+  setFlags(flags: ControllerFlags): void;
+
+  /** @override */
+  readonly parent: Controller | null;
+
+  /** @internal @override */
+  attachParent(parent: Controller, nextSibling: Controller | null): void;
+
+  /** @internal @override */
+  detachParent(parent: Controller): void;
+
+  /** @override */
+  readonly nextSibling: Controller | null;
+
+  /** @internal @override */
+  setNextSibling(nextSibling: Controller | null): void;
+
+  /** @override */
+  readonly previousSibling: Controller | null;
+
+  /** @internal @override */
+  setPreviousSibling(previousSibling: Controller | null): void;
+
+  /** @override */
+  readonly firstChild: Controller | null;
+
+  /** @internal @override */
+  setFirstChild(firstChild: Controller | null): void;
+
+  /** @override */
+  readonly lastChild: Controller | null;
+
+  /** @internal @override */
+  setLastChild(lastChild: Controller | null): void;
+
+  /** @override */
+  forEachChild<T>(callback: (child: Controller) => T | void): T | undefined;
+  /** @override */
+  forEachChild<T, S>(callback: (this: S, child: Controller) => T | void, thisArg: S): T | undefined;
+
+  /** @internal @override */
+  readonly childMap: Dictionary<Controller> | null;
+
+  /** @override */
+  getChild<F extends abstract new (...args: any[]) => Controller>(key: string, childBound: F): InstanceType<F> | null;
+  /** @override */
+  getChild(key: string, childBound?: abstract new (...args: any[]) => Controller): Controller | null;
+
+  /** @override */
+  get insertChildFlags(): ControllerFlags;
+
+  /** @override */
+  removeChild<C extends Controller>(child: C): C;
+  /** @override */
+  removeChild(key: string | Controller): Controller | null;
+
+  /** @override */
+  get removeChildFlags(): ControllerFlags;
+
+  /** @override */
+  sortChildren(comparator: Comparator<Controller>): void;
+
+  /** @override */
+  getSuper<F extends abstract new (...args: any[]) => Controller>(superBound: F): InstanceType<F> | null;
+  /** @override */
+  getSuper(superBound: abstract new (...args: any[]) => Controller): Controller | null;
+
+  /** @override */
+  getBase<F extends abstract new (...args: any[]) => Controller>(baseBound: F): InstanceType<F> | null;
+  /** @override */
+  getBase(baseBound: abstract new (...args: any[]) => Controller): Controller | null;
+
+  /** @override */
+  get mountFlags(): ControllerFlags;
 }

@@ -4,9 +4,9 @@
   "references": [
     {"path": "./@swim/util"},
     {"path": "./@swim/codec"},
-    {"path": "./@swim/fastener"},
     {"path": "./@swim/args"},
     {"path": "./@swim/unit"},
+    {"path": "./@swim/component"},
     {"path": "./@swim/collections"},
     {"path": "./@swim/constraint"},
     {"path": "./@swim/structure"},

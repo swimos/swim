@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing, Easing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Animator} from "@swim/component";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
@@ -21,7 +21,6 @@ import {Look, Mood, ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View, ViewRef} from "@swim/view";
 import {StrokeView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import {GeoView} from "../geo/GeoView";
-import {GeoLayerView} from "../layer/GeoLayerView";
 import type {GeoRippleViewObserver} from "./GeoRippleViewObserver";
 
 /** @public */
@@ -36,7 +35,7 @@ export interface GeoRippleOptions {
 }
 
 /** @public */
-export class GeoRippleView extends GeoLayerView implements StrokeView {
+export class GeoRippleView extends GeoView implements StrokeView {
   constructor() {
     super();
     Object.defineProperty(this, "viewBounds", {
@@ -140,7 +139,7 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderRipple(renderer.context, viewContext.viewFrame);
     }
   }
@@ -258,7 +257,7 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
   }
 
   static ripple(sourceView: GeoView, options?: GeoRippleOptions): GeoRippleView | null {
-    if (!document.hidden && !sourceView.isHidden() && !sourceView.culled &&
+    if (!document.hidden && !sourceView.hidden && !sourceView.culled &&
         sourceView.geoBounds.intersects(sourceView.geoViewport.geoFrame)) {
       const rippleView = GeoRippleView.create();
       rippleView.source.setView(sourceView);

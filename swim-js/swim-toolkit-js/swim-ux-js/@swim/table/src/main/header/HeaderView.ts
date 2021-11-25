@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {Look, ThemeAnimator, ExpansionThemeAnimator, ThemeConstraintAnimator} from "@swim/theme";
@@ -93,8 +93,8 @@ export class HeaderView extends HtmlView {
       colView.width.setState(0, Affinity.Intrinsic);
       colView.height.setState(this.owner.height.state, Affinity.Intrinsic);
     },
-    willAttachView(colView: ColView, targetView: View | null): void {
-      this.owner.callObservers("viewWillAttachCol", colView, targetView, this.owner);
+    willAttachView(colView: ColView, target: View | null): void {
+      this.owner.callObservers("viewWillAttachCol", colView, target, this.owner);
     },
     didDetachView(colView: ColView): void {
       this.owner.callObservers("viewDidDetachCol", colView, this.owner);
@@ -116,7 +116,7 @@ export class HeaderView extends HtmlView {
   }
 
   protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                     displayChild: (this: this, child: View, displayFlags: ViewFlags,
                                                     viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
       this.layoutChildViews(displayFlags, viewContext, displayChild);
@@ -126,39 +126,39 @@ export class HeaderView extends HtmlView {
   }
 
   protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                             displayChild: (this: this, child: View, displayFlags: ViewFlags,
                                             viewContext: ViewContextType<this>) => void): void {
     const layout = this.layout.state;
     const height = this.height.state;
     const stretch = this.stretch.getPhaseOr(1);
     type self = this;
-    function layoutChildView(this: self, childView: View, displayFlags: ViewFlags,
+    function layoutChildView(this: self, child: View, displayFlags: ViewFlags,
                              viewContext: ViewContextType<self>): void {
-      if (childView instanceof ColView) {
-        const key = childView.key;
+      if (child instanceof ColView) {
+        const key = child.key;
         const col = layout !== null && key !== void 0 ? layout.getCol(key) : null;
         if (col !== null) {
-          childView.display.setState(!col.hidden ? "flex" : "none", Affinity.Intrinsic);
-          childView.left.setState(col.left, Affinity.Intrinsic);
-          childView.width.setState(col.width, Affinity.Intrinsic);
-          childView.height.setState(height, Affinity.Intrinsic);
+          child.display.setState(!col.hidden ? "flex" : "none", Affinity.Intrinsic);
+          child.left.setState(col.left, Affinity.Intrinsic);
+          child.width.setState(col.width, Affinity.Intrinsic);
+          child.height.setState(height, Affinity.Intrinsic);
           const textColor = col.textColor;
           if (textColor instanceof Look) {
-            childView.color.setLook(textColor, Affinity.Intrinsic);
+            child.color.setLook(textColor, Affinity.Intrinsic);
           } else {
-            childView.color.setState(textColor, Affinity.Intrinsic);
+            child.color.setState(textColor, Affinity.Intrinsic);
           }
           if (!col.persistent) {
-            childView.opacity.setState(stretch, Affinity.Intrinsic);
+            child.opacity.setState(stretch, Affinity.Intrinsic);
           }
         } else {
-          childView.display.setState("none", Affinity.Intrinsic);
-          childView.left.setState(null, Affinity.Intrinsic);
-          childView.width.setState(null, Affinity.Intrinsic);
-          childView.height.setState(null, Affinity.Intrinsic);
+          child.display.setState("none", Affinity.Intrinsic);
+          child.left.setState(null, Affinity.Intrinsic);
+          child.width.setState(null, Affinity.Intrinsic);
+          child.height.setState(null, Affinity.Intrinsic);
         }
       }
-      displayChild.call(this, childView, displayFlags, viewContext);
+      displayChild.call(this, child, displayFlags, viewContext);
     }
     super.displayChildren(displayFlags, viewContext, layoutChildView);
   }

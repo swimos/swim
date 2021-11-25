@@ -12,10 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  HierarchyFlags,
-  Hierarchy,
-} from "./Hierarchy";
-export {HierarchyObserver} from "./HierarchyObserver";
+import {Spec, Unit} from "@swim/unit";
+import {FastenerSpec} from "./FastenerSpec";
+import {PropertySpec} from "./PropertySpec";
+import {AnimatorSpec} from "./AnimatorSpec";
+import {ProviderSpec} from "./ProviderSpec";
 
-export {GenericHierarchy} from "./GenericHierarchy";
+@Unit
+export class ComponentSuite extends Spec {
+  @Unit
+  fastenerSpec(): Spec {
+    return new FastenerSpec();
+  }
+
+  @Unit
+  propertySpec(): Spec {
+    return new PropertySpec();
+  }
+
+  @Unit
+  animatorSpec(): Spec {
+    return new AnimatorSpec();
+  }
+
+  @Unit
+  providerSpec(): Spec {
+    return new ProviderSpec();
+  }
+}

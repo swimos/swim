@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {TraitViewRef} from "@swim/controller";
 import {TopAxisTrait} from "./TopAxisTrait";
 import {TopAxisView} from "./TopAxisView";

@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {Easing} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity} from "@swim/component";
 import {Spec, Test, Exam} from "@swim/unit";
 import {Color} from "@swim/style";
 import {Look, Mood, Theme, ThemeAnimator} from "@swim/theme";
-import {TestThemeHierarchy} from "./TestThemeHierarchy";
+import {TestThemeComponent} from "./TestThemeComponent";
 
 export class ThemeAnimatorSpec extends Spec {
   @Test
@@ -55,23 +55,23 @@ export class ThemeAnimatorSpec extends Spec {
 
   @Test
   testThemeAnimatorDecorator(exam: Exam): void {
-    class TestHierarchy extends TestThemeHierarchy {
+    class TestComponent extends TestThemeComponent {
       @ThemeAnimator({type: Number, state: 0})
       readonly foo!: ThemeAnimator<this, number>;
     }
-    const hierarchy = new TestHierarchy();
-    hierarchy.mount();
+    const component = new TestComponent();
+    component.mount();
 
-    exam.equal(hierarchy.foo.name, "foo");
-    exam.equal(hierarchy.foo.state, 0);
-    exam.equal(hierarchy.foo.value, 0);
+    exam.equal(component.foo.name, "foo");
+    exam.equal(component.foo.state, 0);
+    exam.equal(component.foo.value, 0);
 
-    hierarchy.foo.setState(1);
-    exam.equal(hierarchy.foo.state, 1);
-    exam.equal(hierarchy.foo.value, 1);
+    component.foo.setState(1);
+    exam.equal(component.foo.state, 1);
+    exam.equal(component.foo.value, 1);
 
-    exam.identical(hierarchy.foo(0.5), hierarchy, "accessor set");
-    exam.equal(hierarchy.foo(), 0.5, "accessor get");
+    exam.identical(component.foo(0.5), component, "accessor set");
+    exam.equal(component.foo(), 0.5, "accessor get");
   }
 
   @Test
@@ -80,24 +80,24 @@ export class ThemeAnimatorSpec extends Spec {
     const mood = Mood.default;
     const color = theme.get(Look.color, mood)!;
 
-    class TestHierarchy extends TestThemeHierarchy {
+    class TestComponent extends TestThemeComponent {
       @ThemeAnimator({type: Color, state: null})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
-    const hierarchy = new TestHierarchy();
-    hierarchy.theme.setState(theme);
-    hierarchy.mood.setState(mood);
-    hierarchy.mount();
+    const component = new TestComponent();
+    component.theme.setState(theme);
+    component.mood.setState(mood);
+    component.mount();
 
-    exam.equal(hierarchy.foo.name, "foo");
-    exam.equal(hierarchy.foo.look, null);
-    exam.equal(hierarchy.foo.state, null);
-    exam.equal(hierarchy.foo.value, null);
+    exam.equal(component.foo.name, "foo");
+    exam.equal(component.foo.look, null);
+    exam.equal(component.foo.state, null);
+    exam.equal(component.foo.value, null);
 
-    hierarchy.foo.setLook(Look.color);
-    exam.equal(hierarchy.foo.look, Look.color);
-    exam.equal(hierarchy.foo.state, color);
-    exam.equal(hierarchy.foo.value, color);
+    component.foo.setLook(Look.color);
+    exam.equal(component.foo.look, Look.color);
+    exam.equal(component.foo.state, color);
+    exam.equal(component.foo.value, color);
   }
 
   @Test
@@ -107,14 +107,14 @@ export class ThemeAnimatorSpec extends Spec {
     const color = theme.get(Look.color, mood)!;
     const backgroundColor = theme.get(Look.backgroundColor, mood)!;
 
-    class TestHierarchy extends TestThemeHierarchy {
+    class TestComponent extends TestThemeComponent {
       @ThemeAnimator({type: Color, state: null, inherits: true})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
-    const parent = new TestHierarchy();
+    const parent = new TestComponent();
     parent.theme.setState(theme);
     parent.mood.setState(mood);
-    const child = new TestHierarchy();
+    const child = new TestComponent();
     parent.appendChild(child);
     parent.mount();
 
@@ -191,43 +191,43 @@ export class ThemeAnimatorSpec extends Spec {
     const backgroundColor = theme.get(Look.backgroundColor, mood)!;
     const colorInterpolator = color.interpolateTo(backgroundColor);
 
-    class TestHierarchy extends TestThemeHierarchy {
+    class TestComponent extends TestThemeComponent {
       @ThemeAnimator({type: Color, look: Look.color})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
-    const hierarchy = new TestHierarchy();
-    hierarchy.theme.setState(theme);
-    hierarchy.mood.setState(mood);
-    hierarchy.mount();
+    const component = new TestComponent();
+    component.theme.setState(theme);
+    component.mood.setState(mood);
+    component.mount();
 
-    exam.equal(hierarchy.foo.look, Look.color);
-    exam.equal(hierarchy.foo.state, color);
-    exam.equal(hierarchy.foo.value, color);
-    exam.false(hierarchy.foo.tweening);
+    exam.equal(component.foo.look, Look.color);
+    exam.equal(component.foo.state, color);
+    exam.equal(component.foo.value, color);
+    exam.false(component.foo.tweening);
 
-    hierarchy.foo.setLook(Look.backgroundColor, Easing.linear.withDuration(1000));
-    exam.equal(hierarchy.foo.look, Look.backgroundColor);
-    exam.equal(hierarchy.foo.state, backgroundColor);
-    exam.equal(hierarchy.foo.value, color);
-    exam.true(hierarchy.foo.tweening);
+    component.foo.setLook(Look.backgroundColor, Easing.linear.withDuration(1000));
+    exam.equal(component.foo.look, Look.backgroundColor);
+    exam.equal(component.foo.state, backgroundColor);
+    exam.equal(component.foo.value, color);
+    exam.true(component.foo.tweening);
 
-    hierarchy.recohereFasteners(0);
-    exam.equal(hierarchy.foo.look, Look.backgroundColor);
-    exam.equal(hierarchy.foo.state, backgroundColor);
-    exam.equal(hierarchy.foo.value, color);
-    exam.true(hierarchy.foo.tweening);
+    component.recohereFasteners(0);
+    exam.equal(component.foo.look, Look.backgroundColor);
+    exam.equal(component.foo.state, backgroundColor);
+    exam.equal(component.foo.value, color);
+    exam.true(component.foo.tweening);
 
-    hierarchy.recohereFasteners(500);
-    exam.equal(hierarchy.foo.look, Look.backgroundColor);
-    exam.equal(hierarchy.foo.state, backgroundColor);
-    exam.equal(hierarchy.foo.value, colorInterpolator(0.5));
-    exam.true(hierarchy.foo.tweening);
+    component.recohereFasteners(500);
+    exam.equal(component.foo.look, Look.backgroundColor);
+    exam.equal(component.foo.state, backgroundColor);
+    exam.equal(component.foo.value, colorInterpolator(0.5));
+    exam.true(component.foo.tweening);
 
-    hierarchy.recohereFasteners(1000);
-    exam.equal(hierarchy.foo.look, Look.backgroundColor);
-    exam.equal(hierarchy.foo.state, backgroundColor);
-    exam.equal(hierarchy.foo.value, backgroundColor);
-    exam.false(hierarchy.foo.tweening);
+    component.recohereFasteners(1000);
+    exam.equal(component.foo.look, Look.backgroundColor);
+    exam.equal(component.foo.state, backgroundColor);
+    exam.equal(component.foo.value, backgroundColor);
+    exam.false(component.foo.tweening);
   }
 
   @Test
@@ -238,14 +238,14 @@ export class ThemeAnimatorSpec extends Spec {
     const backgroundColor = theme.get(Look.backgroundColor, mood)!;
     const colorInterpolator = color.interpolateTo(backgroundColor);
 
-    class TestHierarchy extends TestThemeHierarchy {
+    class TestComponent extends TestThemeComponent {
       @ThemeAnimator({type: Color, look: Look.color, inherits: true})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
-    const parent = new TestHierarchy();
+    const parent = new TestComponent();
     parent.theme.setState(theme);
     parent.mood.setState(mood);
-    const child = new TestHierarchy();
+    const child = new TestComponent();
     parent.appendChild(child);
     parent.mount();
 

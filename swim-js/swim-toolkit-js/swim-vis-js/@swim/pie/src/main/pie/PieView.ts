@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import type {Class, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
 import {ViewContextType, AnyView, View, ViewRef, ViewSet} from "@swim/view";
-import {GraphicsViewInit, GraphicsView, LayerView, TypesetView, TextRunView} from "@swim/graphics";
+import {GraphicsViewInit, GraphicsView, TypesetView, TextRunView} from "@swim/graphics";
 import {AnySliceView, SliceView} from "../slice/SliceView";
 import type {PieViewObserver} from "./PieViewObserver";
 
@@ -58,7 +58,7 @@ export interface PieViewSliceExt {
 }
 
 /** @public */
-export class PieView extends LayerView {
+export class PieView extends GraphicsView {
   override readonly observerType?: Class<PieViewObserver>;
 
   @Animator({type: Number, state: 0, updateFlags: View.NeedsLayout})

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {GeoLayerView} from "./GeoLayerView";
-
 export {GeoLayerTrait} from "./GeoLayerTrait";
 export {GeoLayerTraitObserver} from "./GeoLayerTraitObserver";
 

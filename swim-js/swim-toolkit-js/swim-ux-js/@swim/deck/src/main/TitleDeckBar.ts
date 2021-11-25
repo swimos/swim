@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Lazy, AnyTiming} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity} from "@swim/component";
 import {Length} from "@swim/math";
 import {Look} from "@swim/theme";
 import {ViewContextType, ViewRef} from "@swim/view";

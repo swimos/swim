@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Creatable, InitType} from "@swim/util";
-import type {MemberAnimatorInit} from "@swim/fastener";
+import type {MemberAnimatorInit} from "@swim/component";
 import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
 import {
   FontStyle,
@@ -26,7 +26,7 @@ import {
   AnyColor,
   Color,
 } from "@swim/style";
-import {ViewCreator, View} from "@swim/view";
+import {AnyView, ViewCreator, View} from "@swim/view";
 import {AttributeAnimator} from "../animator/AttributeAnimator";
 import {StyleAnimator} from "../animator/StyleAnimator";
 import type {
@@ -39,7 +39,7 @@ import type {
   TextAnchor,
   TouchAction,
 } from "../css/types";
-import type {ViewNodeType, AnyNodeView, NodeView} from "../node/NodeView";
+import type {ViewNodeType} from "../node/NodeView";
 import {
   AnyElementView,
   ElementViewInit,
@@ -226,52 +226,52 @@ export class SvgView extends ElementView {
 
   override readonly node!: SVGElement;
 
-  override setChild<V extends NodeView>(key: string, newChild: V): View | null;
-  override setChild<F extends ViewCreator<F, NodeView>>(key: string, factory: F): View | null;
-  override setChild(key: string, newChild: AnyNodeView | keyof SvgViewTagMap | null): View | null;
-  override setChild(key: string, newChild: AnyNodeView | keyof SvgViewTagMap | null): View | null {
+  override setChild<V extends View>(key: string, newChild: V): View | null;
+  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
+  override setChild(key: string, newChild: AnyView | Node | keyof SvgViewTagMap | null): View | null;
+  override setChild(key: string, newChild: AnyView | Node | keyof SvgViewTagMap | null): View | null {
     if (typeof newChild === "string") {
       newChild = SvgView.fromTag(newChild);
     }
     return super.setChild(key, newChild);
   }
 
-  override appendChild<V extends NodeView>(child: V, key?: string): V;
-  override appendChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild<V extends View>(child: V, key?: string): V;
+  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override appendChild<K extends keyof SvgViewTagMap>(tag: K, key?: string): SvgViewTagMap[K];
-  override appendChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView;
-  override appendChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView {
+  override appendChild(child: AnyView | Node | keyof SvgViewTagMap, key?: string): View;
+  override appendChild(child: AnyView | Node | keyof SvgViewTagMap, key?: string): View {
     if (typeof child === "string") {
       child = SvgView.fromTag(child);
     }
     return super.appendChild(child, key);
   }
 
-  override prependChild<V extends NodeView>(child: V, key?: string): V;
-  override prependChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild<V extends View>(child: V, key?: string): V;
+  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override prependChild<K extends keyof SvgViewTagMap>(tag: K, key?: string): SvgViewTagMap[K];
-  override prependChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView;
-  override prependChild(child: AnyNodeView | keyof SvgViewTagMap, key?: string): NodeView {
+  override prependChild(child: AnyView | Node | keyof SvgViewTagMap, key?: string): View;
+  override prependChild(child: AnyView | Node | keyof SvgViewTagMap, key?: string): View {
     if (typeof child === "string") {
       child = SvgView.fromTag(child);
     }
     return super.prependChild(child, key);
   }
 
-  override insertChild<V extends NodeView>(child: V, target: View | Node | null, key?: string): V;
-  override insertChild<F extends ViewCreator<F, NodeView>>(factory: F, target: View | null, key?: string): InstanceType<F>;
+  override insertChild<V extends View>(child: V, target: View | Node | null, key?: string): V;
+  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | Node | null, key?: string): InstanceType<F>;
   override insertChild<K extends keyof SvgViewTagMap>(tag: K, target: View | Node | null, key?: string): SvgViewTagMap[K];
-  override insertChild(child: AnyNodeView | keyof SvgViewTagMap, target: View | Node | null, key?: string): NodeView;
-  override insertChild(child: AnyNodeView | keyof SvgViewTagMap, target: View | Node | null, key?: string): NodeView {
+  override insertChild(child: AnyView | Node | keyof SvgViewTagMap, target: View | Node | null, key?: string): View;
+  override insertChild(child: AnyView | Node | keyof SvgViewTagMap, target: View | Node | null, key?: string): View {
     if (typeof child === "string") {
       child = SvgView.fromTag(child);
     }
     return super.insertChild(child, target, key);
   }
 
-  override replaceChild<V extends NodeView>(newChild: NodeView, oldChild: V): V;
-  override replaceChild<V extends NodeView>(newChild: AnyNodeView | keyof SvgViewTagMap, oldChild: V): V;
-  override replaceChild(newChild: AnyNodeView | keyof SvgViewTagMap, oldChild: NodeView): NodeView {
+  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  override replaceChild<V extends View>(newChild: AnyView | Node | keyof SvgViewTagMap, oldChild: V): V;
+  override replaceChild(newChild: AnyView | Node | keyof SvgViewTagMap, oldChild: View): View {
     if (typeof newChild === "string") {
       newChild = SvgView.fromTag(newChild);
     }

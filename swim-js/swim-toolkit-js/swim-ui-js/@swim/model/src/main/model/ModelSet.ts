@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, ObserverType} from "@swim/util";
-import type {FastenerOwner} from "@swim/fastener";
+import type {FastenerOwner, FastenerFlags} from "@swim/component";
 import type {AnyModel, Model} from "./Model";
 import {ModelRelationInit, ModelRelationClass, ModelRelation} from "./ModelRelation";
 
@@ -25,6 +25,13 @@ export type ModelSetType<F extends ModelSet<any, any>> =
 export interface ModelSetInit<M extends Model = Model> extends ModelRelationInit<M> {
   extends?: {prototype: ModelSet<any, any>} | string | boolean | null;
   key?(model: M): string | undefined;
+  compare?(a: M, b: M): number;
+
+  sorted?: boolean;
+  willSort?(parent: Model | null): void;
+  didSort?(parent: Model | null): void;
+  sortChildren?(parent: Model): void;
+  compareChildren?(a: Model, b: Model): number;
 }
 
 /** @public */
@@ -32,6 +39,13 @@ export type ModelSetDescriptor<O = unknown, M extends Model = Model, I = {}> = T
 
 /** @public */
 export interface ModelSetClass<F extends ModelSet<any, any> = ModelSet<any, any>> extends ModelRelationClass<F> {
+  /** @internal */
+  readonly SortedFlag: FastenerFlags;
+
+  /** @internal @override */
+  readonly FlagShift: number;
+  /** @internal @override */
+  readonly FlagMask: FastenerFlags;
 }
 
 /** @public */
@@ -51,7 +65,7 @@ export interface ModelSetFactory<F extends ModelSet<any, any> = ModelSet<any, an
 
 /** @public */
 export interface ModelSet<O = unknown, M extends Model = Model> extends ModelRelation<O, M> {
-  (newModel: AnyModel<M>): O;
+  (model: AnyModel<M>): O;
 
   /** @override */
   get familyType(): Class<ModelSet<any, any>> | null;
@@ -63,20 +77,20 @@ export interface ModelSet<O = unknown, M extends Model = Model> extends ModelRel
 
   hasModel(model: Model): boolean;
 
-  addModel(model?: AnyModel<M>, targetModel?: Model | null, key?: string): M;
+  addModel(model?: AnyModel<M>, target?: Model | null, key?: string): M;
 
-  attachModel(model?: AnyModel<M>, targetModel?: Model | null): M;
+  attachModel(model?: AnyModel<M>, target?: Model | null): M;
 
   detachModel(model: M): M | null;
 
-  insertModel(parentModel?: Model | null, newModel?: AnyModel<M>, targetModel?: Model | null, key?: string): M;
+  insertModel(parent?: Model | null, model?: AnyModel<M>, target?: Model | null, key?: string): M;
 
   removeModel(model: M): M | null;
 
   deleteModel(model: M): M | null;
 
   /** @internal @override */
-  bindModel(model: Model, targetModel: Model | null): void;
+  bindModel(model: Model, target: Model | null): void;
 
   /** @internal @override */
   unbindModel(model: Model): void;
@@ -86,6 +100,31 @@ export interface ModelSet<O = unknown, M extends Model = Model> extends ModelRel
 
   /** @internal @protected */
   key(model: M): string | undefined;
+
+  get sorted(): boolean;
+
+  /** @internal */
+  initSorted(sorted: boolean): void;
+
+  sort(sorted?: boolean): this;
+
+  /** @protected */
+  willSort(parent: Model | null): void;
+
+  /** @protected */
+  onSort(parent: Model | null): void;
+
+  /** @protected */
+  didSort(parent: Model | null): void;
+
+  /** @internal @protected */
+  sortChildren(parent: Model): void;
+
+  /** @internal */
+  compareChildren(a: Model, b: Model): number;
+
+  /** @internal @protected */
+  compare(a: M, b: M): number;
 }
 
 /** @public */
@@ -103,35 +142,38 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     return this.models[model.uid] !== void 0;
   };
 
-  ModelSet.prototype.addModel = function <M extends Model>(this: ModelSet<unknown, M>, newModel?: AnyModel<M>, targetModel?: Model | null, key?: string): M {
+  ModelSet.prototype.addModel = function <M extends Model>(this: ModelSet<unknown, M>, newModel?: AnyModel<M>, target?: Model | null, key?: string): M {
     if (newModel !== void 0 && newModel !== null) {
       newModel = this.fromAny(newModel);
     } else {
       newModel = this.createModel();
     }
-    if (targetModel === void 0) {
-      targetModel = null;
+    if (target === void 0) {
+      target = null;
     }
-    let parentModel: Model | null;
-    if (this.binds && (parentModel = this.parentModel, parentModel !== null)) {
+    let parent: Model | null;
+    if (this.binds && (parent = this.parentModel, parent !== null)) {
       if (key === void 0) {
         key = this.key(newModel);
       }
-      this.insertChild(parentModel, newModel, targetModel, key);
+      this.insertChild(parent, newModel, target, key);
     }
     const models = this.models as {[modelId: number]: M | undefined};
     if (models[newModel.uid] === void 0) {
-      this.willAttachModel(newModel, targetModel);
+      if (typeof target === "number") {
+        target = null;
+      }
+      this.willAttachModel(newModel, target);
       models[newModel.uid] = newModel;
       (this as Mutable<typeof this>).modelCount += 1;
-      this.onAttachModel(newModel, targetModel);
+      this.onAttachModel(newModel, target);
       this.initModel(newModel);
-      this.didAttachModel(newModel, targetModel);
+      this.didAttachModel(newModel, target);
     }
     return newModel;
   };
 
-  ModelSet.prototype.attachModel = function <M extends Model>(this: ModelSet<unknown, M>, newModel?: AnyModel<M>, targetModel?: Model | null): M {
+  ModelSet.prototype.attachModel = function <M extends Model>(this: ModelSet<unknown, M>, newModel?: AnyModel<M>, target?: Model | null): M {
     if (newModel !== void 0 && newModel !== null) {
       newModel = this.fromAny(newModel);
     } else {
@@ -139,15 +181,15 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     }
     const models = this.models as {[modelId: number]: M | undefined};
     if (models[newModel.uid] === void 0) {
-      if (targetModel === void 0) {
-        targetModel = null;
+      if (target === void 0) {
+        target = null;
       }
-      this.willAttachModel(newModel, targetModel);
+      this.willAttachModel(newModel, target);
       models[newModel.uid] = newModel;
       (this as Mutable<typeof this>).modelCount += 1;
-      this.onAttachModel(newModel, targetModel);
+      this.onAttachModel(newModel, target);
       this.initModel(newModel);
-      this.didAttachModel(newModel, targetModel);
+      this.didAttachModel(newModel, target);
     }
     return newModel;
   };
@@ -166,32 +208,35 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     return null;
   };
 
-  ModelSet.prototype.insertModel = function <M extends Model>(this: ModelSet<unknown, M>, parentModel?: Model | null, newModel?: AnyModel<M>, targetModel?: Model | null, key?: string): M {
+  ModelSet.prototype.insertModel = function <M extends Model>(this: ModelSet<unknown, M>, parent?: Model | null, newModel?: AnyModel<M>, target?: Model | null, key?: string): M {
     if (newModel !== void 0 && newModel !== null) {
       newModel = this.fromAny(newModel);
     } else {
       newModel = this.createModel();
     }
-    if (parentModel === void 0 || parentModel === null) {
-      parentModel = this.parentModel;
+    if (parent === void 0 || parent === null) {
+      parent = this.parentModel;
     }
-    if (targetModel === void 0) {
-      targetModel = null;
+    if (target === void 0) {
+      target = null;
     }
     if (key === void 0) {
       key = this.key(newModel);
     }
-    if (parentModel !== null && (newModel.parent !== parentModel || newModel.key !== key)) {
-      this.insertChild(parentModel, newModel, targetModel, key);
+    if (parent !== null && (newModel.parent !== parent || newModel.key !== key)) {
+      this.insertChild(parent, newModel, target, key);
     }
     const models = this.models as {[modelId: number]: M | undefined};
     if (models[newModel.uid] === void 0) {
-      this.willAttachModel(newModel, targetModel);
+      if (typeof target === "number") {
+        target = null;
+      }
+      this.willAttachModel(newModel, target);
       models[newModel.uid] = newModel;
       (this as Mutable<typeof this>).modelCount += 1;
-      this.onAttachModel(newModel, targetModel);
+      this.onAttachModel(newModel, target);
       this.initModel(newModel);
-      this.didAttachModel(newModel, targetModel);
+      this.didAttachModel(newModel, target);
     }
     return newModel;
   };
@@ -212,17 +257,17 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     return oldModel;
   };
 
-  ModelSet.prototype.bindModel = function <M extends Model>(this: ModelSet<unknown, M>, model: Model, targetModel: Model | null): void {
+  ModelSet.prototype.bindModel = function <M extends Model>(this: ModelSet<unknown, M>, model: Model, target: Model | null): void {
     if (this.binds) {
       const newModel = this.detectModel(model);
       const models = this.models as {[modelId: number]: M | undefined};
       if (newModel !== null && models[newModel.uid] === void 0) {
-        this.willAttachModel(newModel, targetModel);
+        this.willAttachModel(newModel, target);
         models[newModel.uid] = newModel;
         (this as Mutable<typeof this>).modelCount += 1;
-        this.onAttachModel(newModel, targetModel);
+        this.onAttachModel(newModel, target);
         this.initModel(newModel);
-        this.didAttachModel(newModel, targetModel);
+        this.didAttachModel(newModel, target);
       }
     }
   };
@@ -253,6 +298,71 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     return void 0;
   };
 
+  Object.defineProperty(ModelSet.prototype, "sorted", {
+    get(this: ModelSet): boolean {
+      return (this.flags & ModelSet.SortedFlag) !== 0;
+    },
+    configurable: true,
+  });
+
+  ModelSet.prototype.initInherits = function (this: ModelSet, sorted: boolean): void {
+    if (sorted) {
+      (this as Mutable<typeof this>).flags = this.flags | ModelSet.SortedFlag;
+    } else {
+      (this as Mutable<typeof this>).flags = this.flags & ~ModelSet.SortedFlag;
+    }
+  };
+
+  ModelSet.prototype.sort = function (this: ModelSet, sorted?: boolean): typeof this {
+    if (sorted === void 0) {
+      sorted = true;
+    }
+    const flags = this.flags;
+    if (sorted && (flags & ModelSet.SortedFlag) === 0) {
+      const parent = this.parentModel;
+      this.willSort(parent);
+      this.setFlags(flags | ModelSet.SortedFlag);
+      this.onSort(parent);
+      this.didSort(parent);
+    } else if (!sorted && (flags & ModelSet.SortedFlag) !== 0) {
+      this.setFlags(flags & ~ModelSet.SortedFlag);
+    }
+    return this;
+  };
+
+  ModelSet.prototype.willSort = function (this: ModelSet, parent: Model | null): void {
+    // hook
+  };
+
+  ModelSet.prototype.onSort = function (this: ModelSet, parent: Model | null): void {
+    if (parent !== null) {
+      this.sortChildren(parent);
+    }
+  };
+
+  ModelSet.prototype.didSort = function (this: ModelSet, parent: Model | null): void {
+    // hook
+  };
+
+  ModelSet.prototype.sortChildren = function <M extends Model>(this: ModelSet<unknown, M>, parent: Model): void {
+    parent.sortChildren(this.compareChildren.bind(this));
+  };
+
+  ModelSet.prototype.compareChildren = function <M extends Model>(this: ModelSet<unknown, M>, a: Model, b: Model): number {
+    const models = this.models;
+    const x = models[a.uid];
+    const y = models[b.uid];
+    if (x !== void 0 && y !== void 0) {
+      return this.compare(x, y);
+    } else {
+      return x !== void 0 ? 1 : y !== void 0 ? -1 : 0;
+    }
+  };
+
+  ModelSet.prototype.compare = function <M extends Model>(this: ModelSet<unknown, M>, a: M, b: M): number {
+    return a.uid < b.uid ? -1 : a.uid > b.uid ? 1 : 0;
+  };
+
   ModelSet.construct = function <F extends ModelSet<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
     if (fastener === null) {
       fastener = function (newModel: AnyModel<ModelSetType<F>>): FastenerOwner<F> {
@@ -272,9 +382,11 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     let superClass = descriptor.extends as ModelSetFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
+    const sorted = descriptor.sorted;
     delete descriptor.extends;
     delete descriptor.affinity;
     delete descriptor.inherits;
+    delete descriptor.sorted;
 
     if (superClass === void 0 || superClass === null) {
       superClass = this;
@@ -290,11 +402,19 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
       if (inherits !== void 0) {
         fastener.initInherits(inherits);
       }
+      if (sorted !== void 0) {
+        fastener.initSorted(sorted);
+      }
       return fastener;
     };
 
     return fastenerClass;
   };
+
+  (ModelSet as Mutable<typeof ModelSet>).SortedFlag = 1 << (_super.FlagShift + 0);
+
+  (ModelSet as Mutable<typeof ModelSet>).FlagShift = _super.FlagShift + 1;
+  (ModelSet as Mutable<typeof ModelSet>).FlagMask = (1 << ModelSet.FlagShift) - 1;
 
   return ModelSet;
 })(ModelRelation);

@@ -14,7 +14,7 @@
   "devDependencies": {
     "@microsoft/api-extractor": "7.18",
     "@rollup/plugin-node-resolve": "13",
-    "@types/eslint": "7",
+    "@types/eslint": "8",
     "@types/node": "16",
     "@types/prismjs": "1",
     "@types/w3c-css-typed-object-model-level-1": "20180410",

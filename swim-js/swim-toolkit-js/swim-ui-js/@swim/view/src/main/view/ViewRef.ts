@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Arrays, ObserverType} from "@swim/util";
-import type {FastenerOwner, Fastener} from "@swim/fastener";
+import type {FastenerOwner, Fastener} from "@swim/component";
 import {
   AnyConstraintExpression,
   ConstraintExpression,
@@ -64,7 +64,7 @@ export interface ViewRefFactory<F extends ViewRef<any, any> = ViewRef<any, any>>
 /** @public */
 export interface ViewRef<O = unknown, V extends View = View> extends ViewRelation<O, V>, ConstraintScope, ConstraintContext {
   (): V | null;
-  (view: AnyView<V> | null, targetView?: View | null, key?: string): O;
+  (view: AnyView<V> | null, target?: View | null, key?: string): O;
 
   /** @override */
   get familyType(): Class<ViewRef<any, any>> | null;
@@ -76,20 +76,20 @@ export interface ViewRef<O = unknown, V extends View = View> extends ViewRelatio
 
   getView(): V;
 
-  setView(newView: AnyView<V> | null, targetView?: View | null, key?: string): V | null;
+  setView(view: AnyView<V> | null, target?: View | null, key?: string): V | null;
 
-  attachView(view?: AnyView<V>, targetView?: View | null): V;
+  attachView(view?: AnyView<V>, target?: View | null): V;
 
   detachView(): V | null;
 
-  insertView(parentView?: View | null, newView?: AnyView<V>, targetView?: View | null, key?: string): V;
+  insertView(parent?: View | null, view?: AnyView<V>, target?: View | null, key?: string): V;
 
   removeView(): V | null;
 
   deleteView(): V | null;
 
   /** @internal @override */
-  bindView(view: View, targetView: View | null): void;
+  bindView(view: View, target: View | null): void;
 
   /** @internal @override */
   unbindView(view: View): void;
@@ -185,20 +185,20 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
     return view;
   };
 
-  ViewRef.prototype.setView = function <V extends View>(this: ViewRef<unknown, V>, newView: AnyView<V> | null, targetView?: View | null, key?: string): V | null {
+  ViewRef.prototype.setView = function <V extends View>(this: ViewRef<unknown, V>, newView: AnyView<V> | null, target?: View | null, key?: string): V | null {
     if (newView !== null) {
       newView = this.fromAny(newView);
     }
     let oldView = this.view;
     if (oldView !== newView) {
-      if (targetView === void 0) {
-        targetView = null;
+      if (target === void 0) {
+        target = null;
       }
-      let parentView: View | null;
-      if (this.binds && (parentView = this.parentView, parentView !== null)) {
-        if (oldView !== null && oldView.parent === parentView) {
-          if (targetView === null) {
-            targetView = parentView.nextChild(oldView);
+      let parent: View | null;
+      if (this.binds && (parent = this.parentView, parent !== null)) {
+        if (oldView !== null && oldView.parent === parent) {
+          if (target === null) {
+            target = oldView.nextSibling;
           }
           oldView.remove();
         }
@@ -206,7 +206,7 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
           if (key === void 0) {
             key = this.key;
           }
-          this.insertChild(parentView, newView, targetView, key);
+          this.insertChild(parent, newView, target, key);
         }
         oldView = this.view;
       }
@@ -220,18 +220,21 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
           this.didDetachView(oldView);
         }
         if (newView !== null) {
-          this.willAttachView(newView, targetView);
+          if (typeof target === "number") {
+            target = null;
+          }
+          this.willAttachView(newView, target);
           (this as Mutable<typeof this>).view = newView;
-          this.onAttachView(newView, targetView);
+          this.onAttachView(newView, target);
           this.initView(newView);
-          this.didAttachView(newView, targetView);
+          this.didAttachView(newView, target);
         }
       }
     }
     return oldView;
   };
 
-  ViewRef.prototype.attachView = function <V extends View>(this: ViewRef<unknown, V>, newView?: AnyView<V>, targetView?: View | null): V {
+  ViewRef.prototype.attachView = function <V extends View>(this: ViewRef<unknown, V>, newView?: AnyView<V>, target?: View | null): V {
     const oldView = this.view;
     if (newView !== void 0 && newView !== null) {
       newView = this.fromAny(newView);
@@ -241,8 +244,8 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
       newView = oldView;
     }
     if (newView !== oldView) {
-      if (targetView === void 0) {
-        targetView = null;
+      if (target === void 0) {
+        target = null;
       }
       if (oldView !== null) {
         this.deactivateLayout();
@@ -252,11 +255,11 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
         this.deinitView(oldView);
         this.didDetachView(oldView);
       }
-      this.willAttachView(newView, targetView);
+      this.willAttachView(newView, target);
       (this as Mutable<typeof this>).view = newView;
-      this.onAttachView(newView, targetView);
+      this.onAttachView(newView, target);
       this.initView(newView);
-      this.didAttachView(newView, targetView);
+      this.didAttachView(newView, target);
     }
     return newView;
   };
@@ -274,7 +277,7 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
     return oldView;
   };
 
-  ViewRef.prototype.insertView = function <V extends View>(this: ViewRef<unknown, V>, parentView?: View | null, newView?: AnyView<V>, targetView?: View | null, key?: string): V {
+  ViewRef.prototype.insertView = function <V extends View>(this: ViewRef<unknown, V>, parent?: View | null, newView?: AnyView<V>, target?: View | null, key?: string): V {
     if (newView !== void 0 && newView !== null) {
       newView = this.fromAny(newView);
     } else {
@@ -285,17 +288,17 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
         newView = oldView;
       }
     }
-    if (parentView === void 0 || parentView === null) {
-      parentView = this.parentView;
+    if (parent === void 0 || parent === null) {
+      parent = this.parentView;
     }
-    if (targetView === void 0) {
-      targetView = null;
+    if (target === void 0) {
+      target = null;
     }
     if (key === void 0) {
       key = this.key;
     }
-    if (parentView !== null && (newView.parent !== parentView || newView.key !== key)) {
-      this.insertChild(parentView, newView, targetView, key);
+    if (parent !== null && (newView.parent !== parent || newView.key !== key)) {
+      this.insertChild(parent, newView, target, key);
     }
     const oldView = this.view;
     if (newView !== oldView) {
@@ -308,11 +311,14 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
         this.didDetachView(oldView);
         oldView.remove();
       }
-      this.willAttachView(newView, targetView);
+      if (typeof target === "number") {
+        target = null;
+      }
+      this.willAttachView(newView, target);
       (this as Mutable<typeof this>).view = newView;
-      this.onAttachView(newView, targetView);
+      this.onAttachView(newView, target);
       this.initView(newView);
-      this.didAttachView(newView, targetView);
+      this.didAttachView(newView, target);
     }
     return newView;
   };
@@ -333,15 +339,15 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
     return view;
   };
 
-  ViewRef.prototype.bindView = function <V extends View>(this: ViewRef<unknown, V>, view: View, targetView: View | null): void {
+  ViewRef.prototype.bindView = function <V extends View>(this: ViewRef<unknown, V>, view: View, target: View | null): void {
     if (this.binds && this.view === null) {
       const newView = this.detectView(view);
       if (newView !== null) {
-        this.willAttachView(newView, targetView);
+        this.willAttachView(newView, target);
         (this as Mutable<typeof this>).view = newView;
-        this.onAttachView(newView, targetView);
+        this.onAttachView(newView, target);
         this.initView(newView);
-        this.didAttachView(newView, targetView);
+        this.didAttachView(newView, target);
       }
     }
   };
@@ -504,11 +510,11 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
 
   ViewRef.construct = function <F extends ViewRef<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
     if (fastener === null) {
-      fastener = function (view?: AnyView<ViewRefType<F>> | null, targetView?: View | null, key?: string): ViewRefType<F> | null | FastenerOwner<F> {
+      fastener = function (view?: AnyView<ViewRefType<F>> | null, target?: View | null, key?: string): ViewRefType<F> | null | FastenerOwner<F> {
         if (view === void 0) {
           return fastener!.view;
         } else {
-          fastener!.setView(view, targetView, key);
+          fastener!.setView(view, target, key);
           return fastener!.owner;
         }
       } as F;

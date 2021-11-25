@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ProviderClass, Provider} from "@swim/fastener";
+import {ProviderClass, Provider} from "@swim/component";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ThemeService} from "./ThemeService";
 import type {View} from "../view/View";

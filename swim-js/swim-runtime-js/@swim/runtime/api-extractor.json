@@ -4,7 +4,7 @@
   "bundledPackages": [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
+    "@swim/component",
     "@swim/collections",
     "@swim/constraint",
     "@swim/structure",

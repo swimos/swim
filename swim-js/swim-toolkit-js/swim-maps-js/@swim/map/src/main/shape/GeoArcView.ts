@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, Animator} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/component";
 import {
   AnyLength,
   Length,
@@ -41,8 +41,7 @@ import {
   CanvasRenderer,
 } from "@swim/graphics";
 import {Arc} from "@swim/graphics";
-import type {GeoViewInit} from "../geo/GeoView";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoArcViewObserver} from "./GeoArcViewObserver";
 
@@ -63,7 +62,7 @@ export interface GeoArcViewInit extends GeoViewInit, FillViewInit, StrokeViewIni
 }
 
 /** @public */
-export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
+export class GeoArcView extends GeoView implements FillView, StrokeView {
   constructor() {
     super();
     Object.defineProperty(this, "viewBounds", {
@@ -195,7 +194,7 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderArc(renderer.context, viewContext.viewFrame);
     }
   }

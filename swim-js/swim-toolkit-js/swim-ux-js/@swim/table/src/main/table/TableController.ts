@@ -13,18 +13,12 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/component";
 import type {Trait} from "@swim/model";
 import type {View} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
-import {
-  Controller,
-  GenericController,
-  TraitViewRef,
-  TraitViewControllerRef,
-  TraitViewControllerSet,
-} from "@swim/controller";
+import {Controller, TraitViewRef, TraitViewControllerRef, TraitViewControllerSet} from "@swim/controller";
 import type {TableLayout} from "../layout/TableLayout";
 import type {ColLayout} from "../layout/ColLayout";
 import type {CellView} from "../cell/CellView";
@@ -91,7 +85,7 @@ export interface TableControllerRowExt {
 }
 
 /** @public */
-export class TableController extends GenericController {
+export class TableController extends Controller {
   override readonly observerType?: Class<TableControllerObserver>;
 
   protected layoutTable(tableLayout: TableLayout, tableView: TableView): void {

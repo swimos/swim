@@ -4,7 +4,7 @@ import sourcemaps from "rollup-plugin-sourcemaps";
 const mainEsm = {
   input: "./lib/main/index.js",
   output: {
-    file: "./dist/swim-fastener.mjs",
+    file: "./dist/swim-component.mjs",
     format: "esm",
     sourcemap: true,
   },
@@ -25,7 +25,7 @@ const mainEsm = {
 const mainUmd = {
   input: "./lib/main/index.js",
   output: {
-    file: "./dist/swim-fastener.js",
+    file: "./dist/swim-component.js",
     name: "swim",
     format: "umd",
     globals: {
@@ -51,14 +51,14 @@ const mainUmd = {
 const testEsm = {
   input: "./lib/test/index.js",
   output: {
-    file: "./dist/swim-fastener-test.mjs",
+    file: "./dist/swim-component-test.mjs",
     format: "esm",
     sourcemap: true,
   },
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
+    "@swim/component",
     "@swim/args",
     "@swim/unit",
     "tslib",

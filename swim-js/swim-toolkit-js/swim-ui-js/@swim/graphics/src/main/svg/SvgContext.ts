@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, Property} from "@swim/component";
 import {ViewNode, SvgView} from "@swim/dom";
 import {PathContext} from "../path/PathContext";
 import type {PaintingFillRule, PaintingContext} from "../painting/PaintingContext";

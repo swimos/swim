@@ -14,7 +14,7 @@
 
 import type {Class} from "@swim/util";
 import {AnyLength, Length, R2Box} from "@swim/math";
-import {Property} from "@swim/fastener";
+import {Property} from "@swim/component";
 import type {GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
@@ -108,7 +108,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderArea(renderer.context, viewContext.viewFrame);
     }
   }

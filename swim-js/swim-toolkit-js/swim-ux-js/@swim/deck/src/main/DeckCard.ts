@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, Property} from "@swim/component";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewportInsets, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, Initable, Timing} from "@swim/util";
-import {MemberFastenerClass, Animator} from "@swim/fastener";
+import {MemberFastenerClass, Animator} from "@swim/component";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
@@ -21,7 +21,6 @@ import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
-  LayerView,
   PaintingContext,
   PaintingRenderer,
   CanvasRenderer,
@@ -67,7 +66,7 @@ export interface TickViewInit<D = unknown> extends GraphicsViewInit {
 }
 
 /** @public */
-export abstract class TickView<D = unknown> extends LayerView {
+export abstract class TickView<D = unknown> extends GraphicsView {
   constructor(value: D) {
     super();
     this.value = value;
@@ -201,7 +200,7 @@ export abstract class TickView<D = unknown> extends LayerView {
 
   protected override onRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderTick(renderer.context, this.viewFrame);
     }
   }

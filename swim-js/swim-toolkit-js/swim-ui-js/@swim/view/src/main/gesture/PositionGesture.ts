@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, ObserverType} from "@swim/util";
-import type {FastenerOwner} from "@swim/fastener";
+import type {FastenerOwner} from "@swim/component";
 import type {GestureInputType} from "./GestureInput";
 import {GestureMethod, GestureInit, GestureClass, Gesture} from "./Gesture";
 import {PositionGestureInput} from "./PositionGestureInput";

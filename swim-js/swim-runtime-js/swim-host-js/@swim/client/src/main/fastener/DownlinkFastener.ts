@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Equals, Arrays, ConsumerType, Consumable, Consumer} from "@swim/util";
-import {FastenerOwner, FastenerFlags, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerFlags, FastenerInit, FastenerClass, Fastener} from "@swim/component";
 import {AnyValue, Value} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import type {DownlinkObserver, Downlink} from "../downlink/Downlink";

@@ -60,25 +60,25 @@ swim.TraitViewControllerSet({
   },
 })(ExampleGaugeController.prototype, "dials");
 
-const dial1Model = new swim.GenericModel();
+const dial1Model = new swim.Model();
 const dial1Trait = new swim.DialTrait()
   .value(Math.random())
   .legend("Dial 1");
 dial1Model.setTrait("dial", dial1Trait);
 
-const dial2Model = new swim.GenericModel();
+const dial2Model = new swim.Model();
 const dial2Trait = new swim.DialTrait()
   .value(Math.random())
   .legend("Dial 2");
 dial2Model.setTrait("dial", dial2Trait);
 
-const dial3Model = new swim.GenericModel();
+const dial3Model = new swim.Model();
 const dial3Trait = new swim.DialTrait()
   .value(Math.random())
   .legend("Dial 3");
 dial3Model.setTrait("dial", dial3Trait);
 
-const gaugeModel = new swim.GenericModel();
+const gaugeModel = new swim.Model();
 gaugeModel.mount();
 const gaugeTrait = new swim.GaugeTrait();
 gaugeModel.setTrait("gauge", gaugeTrait);

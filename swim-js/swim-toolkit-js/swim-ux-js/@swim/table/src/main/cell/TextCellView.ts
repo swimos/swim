@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/component";
 import {AnyView, ViewRef} from "@swim/view";
 import {HtmlViewInit, HtmlView} from "@swim/dom";
 import {CellView} from "./CellView";

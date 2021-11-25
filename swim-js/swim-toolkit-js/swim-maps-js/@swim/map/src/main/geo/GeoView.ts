@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Arrays, ObserverType} from "@swim/util";
+import type {Mutable, Class} from "@swim/util";
 import {GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewContext, ViewFlags, View, ViewWillProject, ViewDidProject} from "@swim/view";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {GraphicsViewInit, GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import type {GeoViewport} from "./GeoViewport";
 import type {GeoViewContext} from "./GeoViewContext";
@@ -27,139 +27,32 @@ export interface GeoViewInit extends GraphicsViewInit {
 }
 
 /** @public */
-export abstract class GeoView extends GraphicsView {
+export class GeoView extends GraphicsView {
+  constructor() {
+    super();
+    this.geoBounds = GeoBox.undefined();
+  }
+
   override readonly observerType?: Class<GeoViewObserver>;
 
   override readonly contextType?: Class<GeoViewContext>;
 
-  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
-    if ((this.flags & View.NeedsAnimate) === 0) {
-      processFlags &= ~View.NeedsAnimate;
-    }
-    return processFlags;
-  }
-
-  override cascadeProcess(processFlags: ViewFlags, baseViewContext: ViewContext): void {
-    const viewContext = this.extendViewContext(baseViewContext);
-    const outerViewContext = ViewContext.current;
-    try {
-      ViewContext.current = viewContext;
-      processFlags &= ~View.NeedsProcess;
-      processFlags |= this.flags & View.UpdateMask;
-      processFlags = this.needsProcess(processFlags, viewContext);
-      if ((processFlags & View.ProcessMask) !== 0) {
-        let cascadeFlags = processFlags;
-        this.setFlags(this.flags & ~View.NeedsProcess | (View.TraversingFlag | View.ProcessingFlag | View.ContextualFlag));
-        this.willProcess(cascadeFlags, viewContext);
-        if (((this.flags | processFlags) & View.NeedsResize) !== 0) {
-          cascadeFlags |= View.NeedsResize;
-          this.setFlags(this.flags & ~View.NeedsResize);
-          this.willResize(viewContext);
-        }
-        if (((this.flags | processFlags) & View.NeedsScroll) !== 0) {
-          cascadeFlags |= View.NeedsScroll;
-          this.setFlags(this.flags & ~View.NeedsScroll);
-          this.willScroll(viewContext);
-        }
-        if (((this.flags | processFlags) & View.NeedsChange) !== 0) {
-          cascadeFlags |= View.NeedsChange;
-          this.setFlags(this.flags & ~View.NeedsChange);
-          this.willChange(viewContext);
-        }
-        if (((this.flags | processFlags) & View.NeedsAnimate) !== 0) {
-          cascadeFlags |= View.NeedsAnimate;
-          this.setFlags(this.flags & ~View.NeedsAnimate);
-          this.willAnimate(viewContext);
-        }
-        if (((this.flags | processFlags) & View.NeedsLayout) !== 0) {
-          cascadeFlags |= View.NeedsLayout;
-          this.setFlags(this.flags & ~View.NeedsLayout);
-          this.willLayout(viewContext);
-        }
-        if (((this.flags | processFlags) & View.NeedsProject) !== 0) {
-          cascadeFlags |= View.NeedsProject;
-          this.setFlags(this.flags & ~View.NeedsProject);
-          this.willProject(viewContext);
-        }
-
-        this.onProcess(cascadeFlags, viewContext);
-        if ((cascadeFlags & View.NeedsResize) !== 0) {
-          this.onResize(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsScroll) !== 0) {
-          this.onScroll(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsChange) !== 0) {
-          this.onChange(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-          this.onAnimate(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsLayout) !== 0) {
-          this.onLayout(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsProject) !== 0) {
-          this.onProject(viewContext);
-        }
-
-        if ((cascadeFlags & View.ProcessMask) !== 0) {
-          this.setFlags(this.flags & ~View.ContextualFlag);
-          this.processChildren(cascadeFlags, viewContext, this.processChild);
-          this.setFlags(this.flags | View.ContextualFlag);
-        }
-
-        if ((cascadeFlags & View.NeedsProject) !== 0) {
-          this.didProject(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsLayout) !== 0) {
-          this.didLayout(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-          this.didAnimate(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsChange) !== 0) {
-          this.didChange(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsScroll) !== 0) {
-          this.didScroll(viewContext);
-        }
-        if ((cascadeFlags & View.NeedsResize) !== 0) {
-          this.didResize(viewContext);
-        }
-        this.didProcess(cascadeFlags, viewContext);
-      }
-    } finally {
-      this.setFlags(this.flags & ~(View.TraversingFlag | View.ProcessingFlag | View.ContextualFlag));
-      ViewContext.current = outerViewContext;
-    }
-  }
-
-  protected willProject(viewContext: ViewContextType<this>): void {
-    const observers = this.observerCache.viewWillProjectObservers;
-    if (observers !== void 0) {
-      for (let i = 0; i < observers.length; i += 1) {
-        const observer = observers[i]!;
-        observer.viewWillProject(viewContext, this);
-      }
-    }
-  }
-
-  protected onProject(viewContext: ViewContextType<this>): void {
-    // hook
-  }
-
-  protected didProject(viewContext: ViewContextType<this>): void {
-    const observers = this.observerCache.viewDidProjectObservers;
-    if (observers !== void 0) {
-      for (let i = 0; i < observers.length; i += 1) {
-        const observer = observers[i]!;
-        observer.viewDidProject(viewContext, this);
-      }
-    }
-  }
-
   @ThemeAnimator({type: Color, state: null, inherits: true})
   readonly geoBoundsColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
+
+  protected override didInsertChild(child: View, target: View | null): void {
+    if (child instanceof GeoView) {
+      this.onInsertChildGeoBounds(child, child.geoBounds);
+    }
+    super.didInsertChild(child, target);
+  }
+
+  protected override didRemoveChild(child: View): void {
+    if (child instanceof GeoView) {
+      this.onRemoveChildGeoBounds(child, child.geoBounds);
+    }
+    super.didRemoveChild(child);
+  }
 
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
@@ -171,7 +64,7 @@ export abstract class GeoView extends GraphicsView {
 
   protected renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled && !this.unbounded) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled && !this.unbounded) {
       this.renderGeoOutline(this.geoBounds, viewContext.geoViewport, renderer.context, outlineColor, outlineWidth);
     }
   }
@@ -203,22 +96,20 @@ export abstract class GeoView extends GraphicsView {
     }
   }
 
-  protected override onSetHidden(hidden: boolean): void {
+  protected override onHide(): void {
+    super.onHide();
     const parent = this.parent;
     if (parent instanceof GeoView) {
-      parent.onSetChildHidden(this, hidden);
-    }
-    if (!hidden) {
-      this.requireUpdate(View.NeedsProject);
+      parent.onHideChild(this);
     }
   }
 
-  onSetChildHidden(childView: GeoView, hidden: boolean): void {
-    // hook
-  }
-
-  onSetChildUnbounded(childView: GeoView, unbounded: boolean): void {
-    // hook
+  protected override onUnhide(): void {
+    super.onUnhide();
+    const parent = this.parent;
+    if (parent instanceof GeoView) {
+      parent.onUnhideChild(this);
+    }
   }
 
   protected override onSetUnbounded(unbounded: boolean): void {
@@ -250,10 +141,16 @@ export abstract class GeoView extends GraphicsView {
    * view could possibly render. Views with geo bounds that don't overlap
    * their map frames may be culled from rendering and hit testing.
    */
-  declare readonly geoBounds: GeoBox; // getter defined below to work around useDefineForClassFields lunacy
+  readonly geoBounds: GeoBox;
 
-  get ownGeoBounds(): GeoBox | null {
-    return null;
+  protected setGeoBounds(newGeoBounds: GeoBox): void {
+    const oldGeoBounds = this.geoBounds;
+    if (!oldGeoBounds.equals(newGeoBounds)) {
+      this.willSetGeoBounds(newGeoBounds, oldGeoBounds);
+      (this as Mutable<this>).geoBounds = newGeoBounds;
+      this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
+      this.didSetGeoBounds(newGeoBounds, oldGeoBounds);
+    }
   }
 
   willSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
@@ -285,16 +182,44 @@ export abstract class GeoView extends GraphicsView {
     }
   }
 
-  onSetChildGeoBounds(childView: GeoView, newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    // hook
+  protected updateGeoBounds(): void {
+    this.setGeoBounds(this.deriveGeoBounds());
+  }
+
+  protected onInsertChildGeoBounds(child: GeoView, newGeoBounds: GeoBox): void {
+    this.updateGeoBounds();
+  }
+
+  protected onRemoveChildGeoBounds(child: GeoView, oldGeoBounds: GeoBox): void {
+    this.updateGeoBounds();
+  }
+
+  protected onSetChildGeoBounds(child: GeoView, newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
+    this.updateGeoBounds();
+  }
+
+  protected onHideChild(child: GeoView): void {
+    this.updateGeoBounds();
+  }
+
+  protected onUnhideChild(child: GeoView): void {
+    this.updateGeoBounds();
+  }
+
+  protected onSetChildUnbounded(child: GeoView, unbounded: boolean): void {
+    this.updateGeoBounds();
+  }
+
+  get ownGeoBounds(): GeoBox | null {
+    return null;
   }
 
   deriveGeoBounds(): GeoBox {
     let geoBounds = this.ownGeoBounds;
-    type self = this;
-    function accumulateGeoBounds(this: self, childView: View): void {
-      if (childView instanceof GeoView && !childView.isHidden() && !childView.unbounded) {
-        const childGeoBounds = childView.geoBounds;
+    let child = this.firstChild;
+    while (child !== null) {
+      if (child instanceof GeoView && !child.hidden && !child.unbounded) {
+        const childGeoBounds = child.geoBounds;
         if (childGeoBounds.isDefined()) {
           if (geoBounds !== null) {
             geoBounds = geoBounds.union(childGeoBounds);
@@ -303,32 +228,12 @@ export abstract class GeoView extends GraphicsView {
           }
         }
       }
+      child = child.nextSibling;
     }
-    this.forEachChild(accumulateGeoBounds, this);
     if (geoBounds === null) {
       geoBounds = this.geoFrame;
     }
     return geoBounds;
-  }
-
-  protected override onObserve(observer: ObserverType<this>): void {
-    super.onObserve(observer);
-    if (observer.viewWillProject !== void 0) {
-      this.observerCache.viewWillProjectObservers = Arrays.inserted(observer as ViewWillProject, this.observerCache.viewWillProjectObservers);
-    }
-    if (observer.viewDidProject !== void 0) {
-      this.observerCache.viewDidProjectObservers = Arrays.inserted(observer as ViewDidProject, this.observerCache.viewDidProjectObservers);
-    }
-  }
-
-  protected override onUnobserve(observer: ObserverType<this>): void {
-    super.onUnobserve(observer);
-    if (observer.viewWillProject !== void 0) {
-      this.observerCache.viewWillProjectObservers = Arrays.removed(observer as ViewWillProject, this.observerCache.viewWillProjectObservers);
-    }
-    if (observer.viewDidProject !== void 0) {
-      this.observerCache.viewDidProjectObservers = Arrays.removed(observer as ViewDidProject, this.observerCache.viewDidProjectObservers);
-    }
   }
 
   override init(init: GeoViewInit): void {
@@ -338,9 +243,3 @@ export abstract class GeoView extends GraphicsView {
   static override readonly MountFlags: ViewFlags = GraphicsView.MountFlags | View.NeedsProject;
   static override readonly UncullFlags: ViewFlags = GraphicsView.UncullFlags | View.NeedsProject;
 }
-Object.defineProperty(GeoView.prototype, "geoBounds", {
-  get(this: GeoView): GeoBox {
-    return this.geoFrame;
-  },
-  configurable: true,
-});

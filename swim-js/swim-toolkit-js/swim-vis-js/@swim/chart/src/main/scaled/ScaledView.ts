@@ -29,10 +29,10 @@ import {
   ContinuousScale,
   LinearScale,
 } from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import {DateTime, TimeDomain, TimeScale} from "@swim/time";
 import {ScaleGestureInput, ScaleGesture, ViewContextType, ViewFlags, View, ViewSet} from "@swim/view";
-import {GraphicsViewInit, LayerView} from "@swim/graphics";
+import {GraphicsViewInit, GraphicsView} from "@swim/graphics";
 import {ScaledXView} from "./ScaledXView";
 import {ScaledYView} from "./ScaledYView";
 import type {ScaledXYView} from "./ScaledXYView";
@@ -76,7 +76,7 @@ export interface ScaledViewInit<X = unknown, Y = unknown> extends GraphicsViewIn
 }
 
 /** @public */
-export abstract class ScaledView<X = unknown, Y = unknown> extends LayerView implements ScaledXYView<X, Y> {
+export abstract class ScaledView<X = unknown, Y = unknown> extends GraphicsView implements ScaledXYView<X, Y> {
   constructor() {
     super();
     this.scaledFlags = 0;
@@ -1465,5 +1465,5 @@ export abstract class ScaledView<X = unknown, Y = unknown> extends LayerView imp
   /** @internal */
   static TimeZoomMax: number = 1;
 
-  static override readonly InsertChildFlags: ViewFlags = LayerView.InsertChildFlags | View.NeedsResize;
+  static override readonly InsertChildFlags: ViewFlags = GraphicsView.InsertChildFlags | View.NeedsResize;
 }

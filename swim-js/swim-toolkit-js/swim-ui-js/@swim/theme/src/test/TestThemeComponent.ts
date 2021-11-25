@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Property, GenericHierarchy} from "@swim/fastener";
+import {Property, Component} from "@swim/component";
 import {Look, Feel, MoodVector, ThemeMatrix, ThemeContext} from "@swim/theme";
 
-export class TestThemeHierarchy extends GenericHierarchy implements ThemeContext {
+export class TestThemeComponent extends Component implements ThemeContext {
   @Property({type: MoodVector, state: null, inherits: true})
   readonly mood!: Property<this, MoodVector | null>;
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Affinity} from "@swim/fastener";
+import {Affinity} from "@swim/component";
 import {R2Point, R2Box} from "@swim/math";
 import {GraphicsView, PaintingContext, TypesetView} from "@swim/graphics";
 import {TickOrientation, TickView} from "./TickView";

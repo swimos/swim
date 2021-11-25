@@ -13,18 +13,18 @@
 // limitations under the License.
 
 import type {Class, AnyTiming} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import type {GeoBox} from "@swim/geo";
 import {ViewContextType, ViewFlags, View, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {GraphicsViewContext, CanvasView} from "@swim/graphics";
 import type {AnyGeoPerspective} from "../geo/GeoPerspective";
 import type {GeoViewport} from "../geo/GeoViewport";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoView} from "../geo/GeoView";
 import type {MapViewObserver} from "./MapViewObserver";
 
 /** @public */
-export abstract class MapView extends GeoLayerView {
+export abstract class MapView extends GeoView {
   override readonly observerType?: Class<MapViewObserver>;
 
   abstract override get geoViewport(): GeoViewport;

@@ -29,21 +29,6 @@ const core = [
     ],
   },
   {
-    id: "fastener",
-    name: "@swim/fastener",
-    path: "swim-core-js/@swim/fastener",
-    targets: [
-      {
-        id: "main",
-        deps: ["util"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "fastener", "unit"],
-      },
-    ],
-  },
-  {
     id: "args",
     name: "@swim/args",
     path: "swim-core-js/@swim/args",
@@ -85,6 +70,21 @@ const core = [
     ],
   },
   {
+    id: "component",
+    name: "@swim/component",
+    path: "swim-core-js/@swim/component",
+    targets: [
+      {
+        id: "main",
+        deps: ["util"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "component"],
+      },
+    ],
+  },
+  {
     id: "collections",
     name: "@swim/collections",
     path: "swim-core-js/@swim/collections",
@@ -106,11 +106,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "fastener"],
+        deps: ["util", "codec", "component"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "fastener", "unit", "constraint"],
+        deps: ["util", "codec", "unit", "component", "constraint"],
       },
     ],
   },
@@ -262,7 +262,7 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
+        deps: ["util", "codec", "component", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
       },
     ],
   },
@@ -291,15 +291,15 @@ const host = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "fastener", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
+        deps: ["util", "codec", "component", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
       },
       {
         id: "cli",
-        deps: ["util", "codec", "fastener", "unit", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "component", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "fastener", "unit", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "unit", "component", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },

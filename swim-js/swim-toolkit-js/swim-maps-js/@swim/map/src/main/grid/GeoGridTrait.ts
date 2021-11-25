@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import type {GeoTile, GeoBox} from "@swim/geo";
-import {Model, GenericModel, Trait, TraitSet} from "@swim/model";
+import {Model, Trait, TraitSet} from "@swim/model";
 import {GeoTrait} from "../geo/GeoTrait";
 import {GeoLayerTrait} from "../layer/GeoLayerTrait";
 import type {GeoGridTraitObserver} from "./GeoGridTraitObserver";
@@ -74,7 +74,7 @@ export class GeoGridTrait extends GeoLayerTrait {
   protected createTileModel(geoTile: GeoTile): Model | null {
     const tileTrait = this.createTileTrait(geoTile);
     if (tileTrait !== null) {
-      const tileModel = new GenericModel();
+      const tileModel = new Model();
       tileModel.setTrait("tile", tileTrait);
       return tileModel;
     } else {

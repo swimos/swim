@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, FromAny, AnyTiming, Timing} from "@swim/util";
-import {Affinity, FastenerOwner, Property, AnimatorInit, AnimatorClass, Animator} from "@swim/fastener";
+import {Affinity, FastenerOwner, Property, AnimatorInit, AnimatorClass, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyTransform, Transform} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color, AnyFocus, Focus, AnyPresence, Presence, AnyExpansion, Expansion} from "@swim/style";
 import {Look} from "../look/Look";

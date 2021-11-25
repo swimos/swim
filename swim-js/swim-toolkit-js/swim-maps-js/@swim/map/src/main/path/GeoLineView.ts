@@ -14,7 +14,7 @@
 
 import type {Class} from "@swim/util";
 import {AnyLength, Length, R2Box} from "@swim/math";
-import {Property} from "@swim/fastener";
+import {Property} from "@swim/component";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
@@ -73,7 +73,7 @@ export class GeoLineView extends GeoPathView implements StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderLine(renderer.context, viewContext.viewFrame);
     }
   }

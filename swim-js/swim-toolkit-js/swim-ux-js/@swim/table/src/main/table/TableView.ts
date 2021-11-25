@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {
@@ -117,8 +117,8 @@ export class TableView extends HtmlView {
     didDetachView(headerView: HeaderView): void {
       this.owner.callObservers("viewDidDetachHeader", headerView, this.owner);
     },
-    insertChild(parent: View, childView: HeaderView, targetView: View | null, key: string | undefined): void {
-      parent.prependChild(childView, key);
+    insertChild(parent: View, child: HeaderView, target: View | number | null, key: string | undefined): void {
+      parent.prependChild(child, key);
     }
   })
   readonly header!: ViewRef<this, HeaderView>;
@@ -137,8 +137,8 @@ export class TableView extends HtmlView {
       rowView.width.setState(layout !== null ? layout.width : null, Affinity.Intrinsic);
       rowView.setCulled(true);
     },
-    willAttachView(rowView: RowView, targetView: View | null): void {
-      this.owner.callObservers("viewWillAttachRow", rowView, targetView, this.owner);
+    willAttachView(rowView: RowView, target: View | null): void {
+      this.owner.callObservers("viewWillAttachRow", rowView, target, this.owner);
     },
     didDetachView(rowView: RowView): void {
       this.owner.callObservers("viewDidDetachRow", rowView, this.owner);
@@ -267,16 +267,16 @@ export class TableView extends HtmlView {
   }
 
   protected processVisibleViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                processChild: (this: this, childView: View, processFlags: ViewFlags,
+                                processChild: (this: this, child: View, processFlags: ViewFlags,
                                                viewContext: ViewContextType<this>) => void): void {
     const visibleViews = this.visibleViews;
     let i = 0;
     while (i < visibleViews.length) {
-      const childView = visibleViews[i]!;
-      processChild.call(this, childView, processFlags, viewContext);
-      if ((childView.flags & View.RemovingFlag) !== 0) {
-        childView.setFlags(childView.flags & ~View.RemovingFlag);
-        this.removeChild(childView);
+      const child = visibleViews[i]!;
+      processChild.call(this, child, processFlags, viewContext);
+      if ((child.flags & View.RemovingFlag) !== 0) {
+        child.setFlags(child.flags & ~View.RemovingFlag);
+        this.removeChild(child);
         continue;
       }
       i += 1;
@@ -284,7 +284,7 @@ export class TableView extends HtmlView {
   }
 
   protected override processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     processChild: (this: this, childView: View, processFlags: ViewFlags,
+                                     processChild: (this: this, child: View, processFlags: ViewFlags,
                                                     viewContext: ViewContextType<this>) => void): void {
     if (!this.culled) {
       if ((processFlags & View.NeedsScroll) !== 0) {
@@ -296,7 +296,7 @@ export class TableView extends HtmlView {
   }
 
   protected scrollChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             processChild: (this: this, childView: View, processFlags: ViewFlags,
+                             processChild: (this: this, child: View, processFlags: ViewFlags,
                                             viewContext: ViewContextType<this>) => void): void {
     const visibleViews = this.visibleViews as View[];
     visibleViews.length = 0;
@@ -306,20 +306,20 @@ export class TableView extends HtmlView {
     (this as Mutable<this>).visibleFrame = visibleFrame;
 
     type self = this;
-    function scrollChildView(this: self, childView: View, processFlags: ViewFlags,
+    function scrollChildView(this: self, child: View, processFlags: ViewFlags,
                              viewContext: ViewContextType<self>): void {
       let isVisible: boolean;
-      if (childView instanceof HtmlView) {
-        const top = childView.top.state;
-        const height = childView.height.state;
+      if (child instanceof HtmlView) {
+        const top = child.top.state;
+        const height = child.height.state;
         if (top instanceof Length && height instanceof Length) {
           const yMin0 = visibleFrame.yMin;
           const yMax0 = visibleFrame.yMax;
           const yMin1 = top.pxValue();
           const yMax1 = yMin1 + height.pxValue();
           isVisible = yMin0 <= yMax1 && yMin1 <= yMax0;
-          childView.display.setState(isVisible ? "flex" : "none", Affinity.Intrinsic);
-          childView.setCulled(!isVisible);
+          child.display.setState(isVisible ? "flex" : "none", Affinity.Intrinsic);
+          child.setCulled(!isVisible);
         } else {
           isVisible = true;
         }
@@ -327,24 +327,24 @@ export class TableView extends HtmlView {
         isVisible = true;
       }
       if (isVisible) {
-        visibleViews.push(childView);
-        processChild.call(this, childView, processFlags, viewContext);
+        visibleViews.push(child);
+        processChild.call(this, child, processFlags, viewContext);
       }
     }
     super.processChildren(processFlags, viewContext, scrollChildView);
   }
 
   protected displayVisibleViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                displayChild: (this: this, child: View, displayFlags: ViewFlags,
                                                viewContext: ViewContextType<this>) => void): void {
     const visibleViews = this.visibleViews;
     let i = 0;
     while (i < visibleViews.length) {
-      const childView = visibleViews[i]!;
-      displayChild.call(this, childView, displayFlags, viewContext);
-      if ((childView.flags & View.RemovingFlag) !== 0) {
-        childView.setFlags(childView.flags & ~View.RemovingFlag);
-        this.removeChild(childView);
+      const child = visibleViews[i]!;
+      displayChild.call(this, child, displayFlags, viewContext);
+      if ((child.flags & View.RemovingFlag) !== 0) {
+        child.setFlags(child.flags & ~View.RemovingFlag);
+        this.removeChild(child);
         continue;
       }
       i += 1;
@@ -352,7 +352,7 @@ export class TableView extends HtmlView {
   }
 
   protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                                     displayChild: (this: this, child: View, displayFlags: ViewFlags,
                                                     viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
       this.layoutChildViews(displayFlags, viewContext, displayChild);
@@ -362,7 +362,7 @@ export class TableView extends HtmlView {
   }
 
   protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
+                             displayChild: (this: this, child: View, displayFlags: ViewFlags,
                                             viewContext: ViewContextType<this>) => void): void {
     this.resizeTable();
     const layout = this.layout.state;
@@ -383,22 +383,22 @@ export class TableView extends HtmlView {
     let rowIndex = 0;
 
     type self = this;
-    function layoutChildView(this: self, childView: View, displayFlags: ViewFlags,
+    function layoutChildView(this: self, child: View, displayFlags: ViewFlags,
                              viewContext: ViewContextType<self>): void {
-      if (childView instanceof RowView || childView instanceof HeaderView) {
+      if (child instanceof RowView || child instanceof HeaderView) {
         if (rowIndex !== 0) {
           yValue += rowSpacing * disclosingPhase;
           yState += rowSpacing;
         }
-        if (childView.top.hasAffinity(Affinity.Intrinsic)) {
-          childView.top.setInterpolatedValue(Length.px(yValue), Length.px(yState));
+        if (child.top.hasAffinity(Affinity.Intrinsic)) {
+          child.top.setInterpolatedValue(Length.px(yValue), Length.px(yState));
         }
-        childView.width.setState(width, Affinity.Intrinsic);
+        child.width.setState(width, Affinity.Intrinsic);
       }
       let isVisible: boolean;
-      if (childView instanceof HtmlView) {
-        const top = childView.top.state;
-        const height = childView.height.state;
+      if (child instanceof HtmlView) {
+        const top = child.top.state;
+        const height = child.height.state;
         if (top instanceof Length && height instanceof Length) {
           const yMin0 = visibleFrame.yMin;
           const yMax0 = visibleFrame.yMax;
@@ -408,19 +408,19 @@ export class TableView extends HtmlView {
         } else {
           isVisible = true;
         }
-        childView.display.setState(isVisible ? "flex" : "none", Affinity.Intrinsic);
-        childView.setCulled(!isVisible);
+        child.display.setState(isVisible ? "flex" : "none", Affinity.Intrinsic);
+        child.setCulled(!isVisible);
       } else {
         isVisible = true;
       }
       if (isVisible) {
-        visibleViews.push(childView);
+        visibleViews.push(child);
       }
-      displayChild.call(this, childView, displayFlags, viewContext);
-      if (childView instanceof RowView || childView instanceof HeaderView) {
-        let heightValue: Length | number | null = childView.height.value;
-        heightValue = heightValue instanceof Length ? heightValue.pxValue() : childView.node.offsetHeight;
-        let heightState: Length | number | null = childView.height.state;
+      displayChild.call(this, child, displayFlags, viewContext);
+      if (child instanceof RowView || child instanceof HeaderView) {
+        let heightValue: Length | number | null = child.height.value;
+        heightValue = heightValue instanceof Length ? heightValue.pxValue() : child.node.offsetHeight;
+        let heightState: Length | number | null = child.height.state;
         heightState = heightState instanceof Length ? heightState.pxValue() : heightValue;
         yValue += heightValue * disclosingPhase;
         yState += heightState;

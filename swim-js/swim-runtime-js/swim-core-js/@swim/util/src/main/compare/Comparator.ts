@@ -12,9 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Observer} from "@swim/util";
-import type {Hierarchy} from "./Hierarchy"
-
-/** @beta */
-export interface HierarchyObserver<H extends Hierarchy = Hierarchy> extends Observer<H> {
-}
+/** @public */
+export type Comparator<T> = (a: T, b: T) => number;

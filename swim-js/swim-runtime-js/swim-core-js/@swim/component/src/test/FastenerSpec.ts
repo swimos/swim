@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Spec, Test, Exam} from "@swim/unit";
-import {Affinity, Fastener, GenericHierarchy} from "@swim/fastener";
+import {Affinity, Fastener, Component} from "@swim/component";
 
 export class FastenerSpec extends Spec {
   @Test
@@ -31,24 +31,24 @@ export class FastenerSpec extends Spec {
 
   @Test
   testFastenerDecorator(exam: Exam): void {
-    class TestHierarchy extends GenericHierarchy {
+    class TestComponent extends Component {
       @Fastener({})
       readonly foo!: Fastener<this>;
     }
-    const hierarchy = new TestHierarchy();
-    hierarchy.mount();
+    const component = new TestComponent();
+    component.mount();
 
-    exam.equal(hierarchy.foo.name, "foo");
+    exam.equal(component.foo.name, "foo");
   }
 
   @Test
   testFastenerInheritance(exam: Exam): void {
-    class TestHierarchy extends GenericHierarchy {
+    class TestComponent extends Component {
       @Fastener({inherits: true, affinity: Affinity.Intrinsic})
       readonly foo!: Fastener<this>;
     }
-    const parent = new TestHierarchy();
-    const child = new TestHierarchy();
+    const parent = new TestComponent();
+    const child = new TestComponent();
     parent.appendChild(child);
     parent.mount();
 

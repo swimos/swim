@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Arrays, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length, AnyR2Box, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
@@ -198,13 +198,13 @@ export class PopoverView extends HtmlView implements Modal {
       if (timing !== false) {
         this.displayPhase.setState(1, timing);
       } else {
-        this.willShow();
-        this.didShow();
+        this.willShowPopover();
+        this.didShowPopover();
       }
     }
   }
 
-  protected willShow(): void {
+  protected willShowPopover(): void {
     this.setDisplayState(PopoverView.ShowingState);
 
     const observers = this.observers;
@@ -219,7 +219,7 @@ export class PopoverView extends HtmlView implements Modal {
     this.visibility.setState("visible", Affinity.Intrinsic);
   }
 
-  protected didShow(): void {
+  protected didShowPopover(): void {
     this.setDisplayState(PopoverView.ShownState);
 
     this.pointerEvents.setState("auto", Affinity.Intrinsic);
@@ -246,13 +246,13 @@ export class PopoverView extends HtmlView implements Modal {
       if (timing !== false) {
         this.displayPhase.setState(0, timing);
       } else {
-        this.willHide();
-        this.didHide();
+        this.willHidePopover();
+        this.didHidePopover();
       }
     }
   }
 
-  protected willHide(): void {
+  protected willHidePopover(): void {
     this.setDisplayState(PopoverView.HidingState);
 
     const observers = this.observers;
@@ -266,7 +266,7 @@ export class PopoverView extends HtmlView implements Modal {
     this.pointerEvents.setState("none", Affinity.Intrinsic);
   }
 
-  protected didHide(): void {
+  protected didHidePopover(): void {
     this.setDisplayState(PopoverView.HiddenState);
 
     this.visibility.setState("hidden", Affinity.Intrinsic);
@@ -353,13 +353,13 @@ export class PopoverView extends HtmlView implements Modal {
     super.onAnimate(viewContext);
     const displayState = this.displayState;
     if (displayState === PopoverView.ShowState) {
-      this.willShow();
+      this.willShowPopover();
     } else if (displayState === PopoverView.HideState) {
-      this.willHide();
+      this.willHidePopover();
     } else if (displayState === PopoverView.ShowingState && !this.displayPhase.tweening) {
-      this.didShow();
+      this.didShowPopover();
     } else if (displayState === PopoverView.HidingState && !this.displayPhase.tweening) {
-      this.didHide();
+      this.didHidePopover();
     }
     if (this.displayPhase.tweening) {
       this.applyDisplayPhase(this.displayPhase.value);

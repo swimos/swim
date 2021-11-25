@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Equivalent, AnyTiming, Timing} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import {View, ViewRef} from "@swim/view";
@@ -76,7 +76,7 @@ export class EsriMapView extends EsriView {
 
   protected onMapRender(): void {
     if (this.updateGeoViewport()) {
-      const immediate = !this.isHidden() && !this.culled;
+      const immediate = !this.hidden && !this.culled;
       this.requireUpdate(View.NeedsProject, immediate);
     }
   }

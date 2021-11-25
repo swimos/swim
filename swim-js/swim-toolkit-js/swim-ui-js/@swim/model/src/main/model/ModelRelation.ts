@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/component";
 import {AnyModel, ModelFactory, Model} from "./Model";
 import {Trait} from "../"; // forward import
 
@@ -29,8 +29,8 @@ export interface ModelRelationInit<M extends Model = Model> extends FastenerInit
   observes?: boolean;
 
   initModel?(model: M): void;
-  willAttachModel?(model: M, targetModel: Model | null): void;
-  didAttachModel?(model: M, targetModel: Model | null): void;
+  willAttachModel?(model: M, target: Model | null): void;
+  didAttachModel?(model: M, target: Model | null): void;
 
   deinitModel?(model: M): void;
   willDetachModel?(model: M): void;
@@ -75,13 +75,13 @@ export interface ModelRelation<O = unknown, M extends Model = Model> extends Fas
   initModel(model: M): void;
 
   /** @protected */
-  willAttachModel(model: M, targetModel: Model | null): void;
+  willAttachModel(model: M, target: Model | null): void;
 
   /** @protected */
-  onAttachModel(model: M, targetModel: Model | null): void;
+  onAttachModel(model: M, target: Model | null): void;
 
   /** @protected */
-  didAttachModel(model: M, targetModel: Model | null): void;
+  didAttachModel(model: M, target: Model | null): void;
 
   /** @protected */
   deinitModel(model: M): void;
@@ -102,7 +102,7 @@ export interface ModelRelation<O = unknown, M extends Model = Model> extends Fas
   insertChild(parent: Model, child: M, target: Model | null, key: string | undefined): void;
 
   /** @internal */
-  bindModel(model: Model, targetModel: Model | null): void;
+  bindModel(model: Model, target: Model | null): void;
 
   /** @internal */
   unbindModel(model: Model): void;
@@ -145,17 +145,17 @@ export const ModelRelation = (function (_super: typeof Fastener) {
     // hook
   };
 
-  ModelRelation.prototype.willAttachModel = function <M extends Model>(this: ModelRelation<unknown, M>, model: M, targetModel: Model | null): void {
+  ModelRelation.prototype.willAttachModel = function <M extends Model>(this: ModelRelation<unknown, M>, model: M, target: Model | null): void {
     // hook
   };
 
-  ModelRelation.prototype.onAttachModel = function <M extends Model>(this: ModelRelation<unknown, M>, model: M, targetModel: Model | null): void {
+  ModelRelation.prototype.onAttachModel = function <M extends Model>(this: ModelRelation<unknown, M>, model: M, target: Model | null): void {
     if (this.observes === true) {
       model.observe(this as ObserverType<M>);
     }
   };
 
-  ModelRelation.prototype.didAttachModel = function <M extends Model>(this: ModelRelation<unknown, M>, model: M, targetModel: Model | null): void {
+  ModelRelation.prototype.didAttachModel = function <M extends Model>(this: ModelRelation<unknown, M>, model: M, target: Model | null): void {
     // hook
   };
 
@@ -195,7 +195,7 @@ export const ModelRelation = (function (_super: typeof Fastener) {
     parent.insertChild(child, target, key);
   };
 
-  ModelRelation.prototype.bindModel = function <M extends Model>(this: ModelRelation<unknown, M>, model: Model, targetModel: Model | null): void {
+  ModelRelation.prototype.bindModel = function <M extends Model>(this: ModelRelation<unknown, M>, model: Model, target: Model | null): void {
     // hook
   };
 

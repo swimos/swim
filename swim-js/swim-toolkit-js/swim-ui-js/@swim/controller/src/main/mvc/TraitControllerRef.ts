@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, ObserverType} from "@swim/util";
-import type {FastenerOwner} from "@swim/fastener";
+import type {FastenerOwner} from "@swim/component";
 import type {Trait, TraitRef} from "@swim/model";
 import type {Controller} from "../controller/Controller";
 import {ControllerRefInit, ControllerRefClass, ControllerRef} from "../controller/ControllerRef";

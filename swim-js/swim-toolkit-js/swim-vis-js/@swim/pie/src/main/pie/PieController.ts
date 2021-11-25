@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {MemberFastenerClass, Property} from "@swim/fastener";
+import {MemberFastenerClass, Property} from "@swim/component";
 import type {Trait} from "@swim/model";
 import {ViewRef} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
-import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {SliceView} from "../slice/SliceView";
 import type {SliceTrait} from "../slice/SliceTrait";
 import {SliceController} from "../slice/SliceController";
@@ -38,7 +38,7 @@ export interface PieControllerSliceExt {
 }
 
 /** @public */
-export class PieController extends GenericController {
+export class PieController extends Controller {
   override readonly observerType?: Class<PieControllerObserver>;
 
   protected createTitleView(title: PieTitle, pieTrait: PieTrait): GraphicsView | string | null {

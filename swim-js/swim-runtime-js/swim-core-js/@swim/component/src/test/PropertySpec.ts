@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Spec, Test, Exam} from "@swim/unit";
-import {Affinity, Property, GenericHierarchy} from "@swim/fastener";
+import {Affinity, Property, Component} from "@swim/component";
 
 export class PropertySpec extends Spec {
   @Test
@@ -45,31 +45,31 @@ export class PropertySpec extends Spec {
 
   @Test
   testPropertyDecorator(exam: Exam): void {
-    class TestHierarchy extends GenericHierarchy {
+    class TestComponent extends Component {
       @Property({state: "bar"})
       readonly foo!: Property<this, string>;
     }
-    const hierarchy = new TestHierarchy();
-    hierarchy.mount();
+    const component = new TestComponent();
+    component.mount();
 
-    exam.equal(hierarchy.foo.name, "foo");
-    exam.equal(hierarchy.foo.state, "bar");
+    exam.equal(component.foo.name, "foo");
+    exam.equal(component.foo.state, "bar");
 
-    hierarchy.foo.setState("baz");
-    exam.equal(hierarchy.foo.state, "baz");
+    component.foo.setState("baz");
+    exam.equal(component.foo.state, "baz");
 
-    exam.identical(hierarchy.foo("qux"), hierarchy, "accessor set");
-    exam.equal(hierarchy.foo(), "qux", "accessor get");
+    exam.identical(component.foo("qux"), component, "accessor set");
+    exam.equal(component.foo(), "qux", "accessor get");
   }
 
   @Test
   testPropertyInheritance(exam: Exam): void {
-    class TestHierarchy extends GenericHierarchy {
+    class TestComponent extends Component {
       @Property({inherits: true})
       readonly foo!: Property<this, string | undefined>;
     }
-    const parent = new TestHierarchy();
-    const child = new TestHierarchy();
+    const parent = new TestComponent();
+    const child = new TestComponent();
     parent.appendChild(child);
     parent.mount();
 

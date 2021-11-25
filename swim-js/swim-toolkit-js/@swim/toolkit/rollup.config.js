@@ -13,7 +13,7 @@ const mainEsm = {
     paths: {
       "@swim/util": "@swim/runtime",
       "@swim/codec": "@swim/runtime",
-      "@swim/fastener": "@swim/runtime",
+      "@swim/component": "@swim/runtime",
       "@swim/collections": "@swim/runtime",
       "@swim/constraint": "@swim/runtime",
       "@swim/structure": "@swim/runtime",
@@ -34,7 +34,7 @@ const mainEsm = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
+    "@swim/component",
     "@swim/collections",
     "@swim/constraint",
     "@swim/structure",
@@ -77,7 +77,7 @@ const mainUmd = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
-      "@swim/fastener": "swim",
+      "@swim/component": "swim",
       "@swim/collections": "swim",
       "@swim/constraint": "swim",
       "@swim/structure": "swim",
@@ -99,7 +99,7 @@ const mainUmd = {
     paths: {
       "@swim/util": "@swim/runtime",
       "@swim/codec": "@swim/runtime",
-      "@swim/fastener": "@swim/runtime",
+      "@swim/component": "@swim/runtime",
       "@swim/collections": "@swim/runtime",
       "@swim/constraint": "@swim/runtime",
       "@swim/structure": "@swim/runtime",
@@ -122,7 +122,7 @@ const mainUmd = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
+    "@swim/component",
     "@swim/collections",
     "@swim/constraint",
     "@swim/structure",

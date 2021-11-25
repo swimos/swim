@@ -27,20 +27,6 @@ const core = [
     ],
   },
   {
-    id: "fastener",
-    name: "@swim/fastener",
-    targets: [
-      {
-        id: "main",
-        deps: ["util"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "fastener", "unit"],
-      },
-    ],
-  },
-  {
     id: "args",
     name: "@swim/args",
     targets: [
@@ -79,6 +65,20 @@ const core = [
     ],
   },
   {
+    id: "component",
+    name: "@swim/component",
+    targets: [
+      {
+        id: "main",
+        deps: ["util"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "component"],
+      },
+    ],
+  },
+  {
     id: "collections",
     name: "@swim/collections",
     targets: [
@@ -98,11 +98,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "fastener"],
+        deps: ["util", "codec", "component"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "fastener", "unit", "constraint"],
+        deps: ["util", "codec", "unit", "component", "constraint"],
       },
     ],
   },
@@ -244,7 +244,7 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "fastener", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
+        deps: ["util", "codec", "component", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
       },
     ],
   },

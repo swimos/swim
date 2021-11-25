@@ -13,17 +13,17 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
-import {TraitViewRef, GenericController} from "@swim/controller";
+import {Controller, TraitViewRef} from "@swim/controller";
 import type {ColLayout} from "../layout/ColLayout";
 import {ColView} from "./ColView";
 import {ColLabel, ColTrait} from "./ColTrait";
 import type {ColControllerObserver} from "./ColControllerObserver";
 
 /** @public */
-export class ColController extends GenericController {
+export class ColController extends Controller {
   override readonly observerType?: Class<ColControllerObserver>;
 
   @TraitViewRef<ColController, ColTrait, ColView>({

@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import {Mutable, Class, Equals, Values, Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
-import {Affinity, Property, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import {BTree} from "@swim/collections";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, AnyView, ViewCreator, View, ViewRef} from "@swim/view";
+import {ViewContextType, ViewFlags, AnyView, ViewCreator, View, ViewSet} from "@swim/view";
 import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import type {DataPointCategory} from "../data/DataPoint";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
@@ -41,12 +41,12 @@ export interface SeriesPlotViewInit<X = unknown, Y = unknown> extends PlotViewIn
 export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsView implements PlotView<X, Y> {
   constructor() {
     super();
-    this.dataPointRefs = new BTree();
     this.xDataDomain = null;
     this.yDataDomain = null;
     this.xDataRange = null;
     this.yDataRange = null;
     this.gradientStops = 0;
+    this.dataPointViews = new BTree();
   }
 
   override readonly observerType?: Class<SeriesPlotViewObserver<X, Y>>;
@@ -182,9 +182,9 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   }
 
   protected updateXDataDomain(dataPointView: DataPointView<X, Y>): void {
-    const dataPointRefs = this.dataPointRefs;
-    const xMin = dataPointRefs.firstKey();
-    const xMax = dataPointRefs.lastKey();
+    const dataPointViews = this.dataPointViews;
+    const xMin = dataPointViews.firstKey();
+    const xMax = dataPointViews.lastKey();
     let xDataDomain: Domain<X> | null;
     if (xMin !== void 0 && xMax !== void 0) {
       xDataDomain = Domain<X>(xMin, xMax);
@@ -282,63 +282,17 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
   /** @internal */
   readonly gradientStops: number;
 
-  insertDataPoint(dataPointView: AnyDataPointView<X, Y>, targetView: View | null = null): DataPointView<X, Y> {
-    dataPointView = DataPointView.fromAny(dataPointView as AnyDataPointView) as DataPointView<X, Y>;
-    dataPointView.remove();
-    const x = dataPointView.x.getState();
-    this.removeDataPoint(x);
-    const dataPointRef = this.createDataPointRef(dataPointView);
-    this.willInsertChild(dataPointView, null);
-    this.dataPointRefs.set(x, dataPointRef);
-    dataPointRef.setView(dataPointView, targetView);
-    dataPointView.attachParent(this);
-    this.onInsertChild(dataPointView, null);
-    this.didInsertChild(dataPointView, null);
-    dataPointView.cascadeInsert();
-    if (this.mounted) {
-      dataPointRef.mount();
-    }
-    return dataPointView;
-  }
-
-  insertDataPoints(...dataPointViews: AnyDataPointView<X, Y>[]): void {
-    for (let i = 0, n = dataPointViews.length; i < n; i += 1) {
-      this.insertDataPoint(dataPointViews[i]!);
-    }
-  }
-
-  removeDataPoint(x: X): void;
-  removeDataPoint(dataPointView: DataPointView<X, Y>): void;
-  removeDataPoint(x: X | DataPointView<X, Y>): void {
-    if (x instanceof DataPointView) {
-      x = x.x.getState();
-    }
-    const dataPointRef = this.dataPointRefs.get(x);
-    if (dataPointRef !== void 0) {
-      const dataPointView = dataPointRef.view!;
-      if (dataPointView.parent !== this) {
-        throw new Error("not a child view");
-      }
-      this.willRemoveChild(dataPointView);
-      dataPointView.detachParent(this);
-      this.dataPointRefs.delete(x);
-      this.onRemoveChild(dataPointView);
-      this.didRemoveChild(dataPointView);
-      dataPointView.setKey(void 0);
-      dataPointRef.setView(null);
-      if (this.mounted) {
-        dataPointRef.unmount();
-      }
-    }
-  }
-
-  /** @internal */
-  static DataPointRef = ViewRef.define<SeriesPlotView, DataPointView, PlotViewDataPointExt>("DataPointRef", {
+  @ViewSet<SeriesPlotView<X, Y>, DataPointView<X, Y>, PlotViewDataPointExt<X, Y>>({
+    type: DataPointView,
+    binds: true,
     observes: true,
-    willAttachView(dataPointView: DataPointView, targetView: View | null): void {
+    willAttachView(dataPointView: DataPointView<X, Y>, targetView: View | null): void {
       this.owner.callObservers("viewWillAttachDataPoint", dataPointView, targetView, this.owner);
     },
-    didAttachView(dataPointView: DataPointView): void {
+    didAttachView(dataPointView: DataPointView<X, Y>): void {
+      if (this.owner.dataPointViews.get(dataPointView.x.state!) === void 0) {
+        this.owner.dataPointViews.set(dataPointView.x.state!, dataPointView);
+      }
       this.owner.updateXDataDomain(dataPointView);
       this.owner.updateYDataDomain(dataPointView);
       const labelView = dataPointView.label.view;
@@ -346,7 +300,10 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
         this.attachDataPointLabelView(labelView);
       }
     },
-    willDetachView(dataPointView: DataPointView): void {
+    willDetachView(dataPointView: DataPointView<X, Y>): void {
+      if (this.owner.dataPointViews.get(dataPointView.x.state!) === dataPointView) {
+        this.owner.dataPointViews.delete(dataPointView.x.state!);
+      }
       const labelView = dataPointView.label.view;
       if (labelView !== null) {
         this.detachDataPointLabelView(labelView);
@@ -354,18 +311,18 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
       this.owner.updateXDataDomain(dataPointView);
       // yDataDomain will be recomputed next layout pass
     },
-    didDetachView(dataPointView: DataPointView): void {
+    didDetachView(dataPointView: DataPointView<X, Y>): void {
       this.owner.callObservers("viewDidDetachDataPoint", dataPointView, this.owner);
     },
-    viewDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView): void {
+    viewDidSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
       this.owner.updateXDataDomain(dataPointView);
       this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView): void {
+    viewDidSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
       this.owner.updateYDataDomain(dataPointView);
       this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView): void {
+    viewDidSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
       this.owner.updateYDataDomain(dataPointView);
       this.owner.requireUpdate(View.NeedsLayout);
     },
@@ -381,200 +338,88 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     detachDataPointLabelView(labelView: GraphicsView): void {
       // hook
     },
-  });
-
-  protected createDataPointRef(dataPointView: DataPointView<X, Y>): ViewRef<this, DataPointView<X, Y>> {
-    return SeriesPlotView.DataPointRef.create(this) as ViewRef<this, DataPointView<X, Y>>;
-  }
+  })
+  readonly dataPoints!: ViewSet<this, DataPointView<X, Y>>;
+  static readonly dataPoints: MemberFastenerClass<SeriesPlotView, "dataPoints">;
 
   /** @internal */
-  readonly dataPointRefs: BTree<X, ViewRef<this, DataPointView<X, Y>>>;
+  readonly dataPointViews: BTree<X, DataPointView<X, Y>>;
 
-  /** @internal */
-  getDataPointRef(x: X): ViewRef<this, DataPointView<X, Y>> | null {
-    const dataPointRef = this.dataPointRefs.get(x);
-    return dataPointRef !== void 0 ? dataPointRef : null;
+  getDataPoint(x: X): DataPointView<X, Y> | null {
+    const dataPoint = this.dataPointViews.get(x);
+    return dataPoint !== void 0 ? dataPoint : null;
   }
 
-  getDataPointView(x: X): DataPointView<X, Y> | null {
-    const dataPointRef = this.dataPointRefs.get(x);
-    return dataPointRef !== void 0 ? dataPointRef.view : null;
+  insertDataPoint(dataPointView: AnyDataPointView<X, Y>): DataPointView<X, Y> {
+    return this.insertChild(DataPointView.fromAny(dataPointView), null);
   }
 
-  /** @internal */
-  protected mountDataPointRefs(): void {
-    type self = this;
-    this.dataPointRefs.forEachValue(function (dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
-      dataPointRef.mount();
-    }, this);
-  }
-
-  /** @internal */
-  protected unmountDataPointRefs(): void {
-    type self = this;
-    this.dataPointRefs.forEachValue(function (dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
-      dataPointRef.unmount();
-    }, this);
-  }
-
-  override get childCount(): number {
-    return this.dataPointRefs.size;
-  }
-
-  override get children(): ReadonlyArray<View> {
-    const children: View[] = [];
-    type self = this;
-    this.dataPointRefs.forEachValue(function (dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
-      children.push(dataPointRef.view!);
-    }, this);
-    return children;
-  }
-
-  override firstChild(): View | null {
-    const dataPointRef = this.dataPointRefs.firstValue();
-    return dataPointRef !== void 0 ? dataPointRef.view! : null;
-  }
-
-  override lastChild(): View | null {
-    const dataPointRef = this.dataPointRefs.lastValue();
-    return dataPointRef !== void 0 ? dataPointRef.view! : null;
-  }
-
-  override nextChild(targetView: View): View | null {
-    if (targetView instanceof DataPointView) {
-      const dataPointRef = this.dataPointRefs.nextValue(targetView.x.getState());
-      if (dataPointRef !== void 0) {
-        return dataPointRef.view!;
-      }
+  insertDataPoints(...dataPointViews: AnyDataPointView<X, Y>[]): void {
+    for (let i = 0, n = dataPointViews.length; i < n; i += 1) {
+      this.insertDataPoint(dataPointViews[i]!);
     }
-    return null;
   }
 
-  override previousChild(targetView: View): View | null {
-    if (targetView instanceof DataPointView) {
-      const dataPointRef = this.dataPointRefs.previousValue(targetView.x.getState());
-      if (dataPointRef !== void 0) {
-        return dataPointRef.view!;
-      }
+  removeDataPoint(x: X): DataPointView<X, Y> | null {
+    const dataPointView = this.getDataPoint(x);
+    if (dataPointView !== null) {
+      this.removeChild(dataPointView);
     }
-    return null;
-  }
-
-  override forEachChild<T>(callback: (child: View) => T | void): T | undefined;
-  override forEachChild<T, S>(callback: (this: S, child: View) => T | void, thisArg: S): T | undefined;
-  override forEachChild<T, S>(callback: (this: S | undefined, child: View) => T | void, thisArg?: S): T | undefined {
-    type self = this;
-    return this.dataPointRefs.forEachValue(function (dataPointRef: ViewRef<self, DataPointView<X, Y>>): T | void {
-      const result = callback.call(thisArg, dataPointRef.view!);
-      if (result !== void 0) {
-        return result;
-      }
-    }, thisArg);
-  }
-
-  override getChild<F extends abstract new (...args: any[]) => View>(key: string, childBound: F): InstanceType<F> | null;
-  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null;
-  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null {
-    return null;
+    return dataPointView;
   }
 
   override setChild<V extends View>(key: string, newChild: V): View | null;
   override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null {
-    throw new Error("unsupported");
+    if (newChild !== null) {
+      newChild = View.fromAny(newChild);
+    }
+    if (newChild instanceof DataPointView) {
+      const target = this.dataPointViews.nextValue(newChild.x.state) ?? null;
+      const oldView = this.getChild(key);
+      super.insertChild(newChild, target, key);
+      return oldView;
+    } else {
+      return super.setChild(key, newChild) as View | null;
+    }
   }
 
   override appendChild<V extends View>(child: V, key?: string): V;
   override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyView, key?: string): View;
   override appendChild(child: AnyView, key?: string): View {
-    if (key !== void 0) {
-      throw new Error("unsupported");
-    }
     child = View.fromAny(child);
-    if (!(child instanceof DataPointView)) {
-      throw new TypeError("" + child);
+    if (child instanceof DataPointView) {
+      const target = this.dataPointViews.nextValue(child.x.state) ?? null;
+      return super.insertChild(child, target, key);
+    } else {
+      return super.appendChild(child, key);
     }
-    return this.insertDataPoint(child);
   }
 
   override prependChild<V extends View>(child: V, key?: string): V;
   override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyView, key?: string): View;
   override prependChild(child: AnyView, key?: string): View {
-    if (key !== void 0) {
-      throw new Error("unsupported");
-    }
     child = View.fromAny(child);
-    if (!(child instanceof DataPointView)) {
-      throw new TypeError("" + child);
+    if (child instanceof DataPointView) {
+      const target = this.dataPointViews.nextValue(child.x.state) ?? null;
+      return super.insertChild(child, target, key);
+    } else {
+      return super.prependChild(child, key);
     }
-    return this.insertDataPoint(child);
   }
 
   override insertChild<V extends View>(child: V, target: View | null, key?: string): V;
   override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyView, target: View | null, key?: string): View;
   override insertChild(child: AnyView, target: View | null, key?: string): View {
-    if (key !== void 0) {
-      throw new Error("unsupported");
-    }
     child = View.fromAny(child);
-    if (!(child instanceof DataPointView)) {
-      throw new TypeError("" + child);
+    if (child instanceof DataPointView && target === null) {
+      target = this.dataPointViews.nextValue(child.x.state) ?? null;
     }
-    return this.insertDataPoint(child);
-  }
-
-  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
-  override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
-  override replaceChild(newChild: AnyView, oldChild: View): View {
-    if (!(oldChild instanceof DataPointView)) {
-      throw new TypeError("" + oldChild);
-    }
-    if (oldChild.parent !== this) {
-      throw new TypeError("" + oldChild);
-    }
-    newChild = View.fromAny(newChild);
-    if (!(newChild instanceof DataPointView)) {
-      throw new TypeError("" + newChild);
-    }
-    if (newChild !== oldChild) {
-      this.removeDataPoint(oldChild.x.getState());
-      this.insertDataPoint(newChild);
-    }
-    return oldChild;
-  }
-
-  override removeChild(key: string): View | null;
-  override removeChild<V extends View>(child: V): V;
-  override removeChild(child: string | View): View | null {
-    if (typeof child === "string") {
-      throw new Error("unsupported");
-    }
-    if (!(child instanceof DataPointView)) {
-      throw new TypeError("" + child);
-    }
-    this.removeDataPoint(child.x.getState());
-    return child;
-  }
-
-  override removeChildren(): void {
-    type self = this;
-    this.dataPointRefs.forEach(function (x: X, dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
-      const child = dataPointRef.view!;
-      this.willRemoveChild(child);
-      child.detachParent(this);
-      this.dataPointRefs.delete(x);
-      this.onRemoveChild(child);
-      this.didRemoveChild(child);
-      child.setKey(void 0);
-      dataPointRef.setView(null);
-      if (this.mounted) {
-        dataPointRef.unmount();
-      }
-    }, this);
+    return super.insertChild(child, target, key);
   }
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
@@ -735,7 +580,7 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
 
   protected override didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof CanvasRenderer && !this.hidden && !this.culled) {
       this.renderPlot(renderer.context, this.viewFrame);
     }
     super.didRender(viewContext);
@@ -750,7 +595,8 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
       if (renderer instanceof CanvasRenderer) {
         let hit: GraphicsView | null;
         if (hitMode === "domain") {
-          hit = this.hitTestDomain(x, y, renderer);
+          const viewFrame = this.viewFrame;
+          hit = this.hitTestDomain(x - viewFrame.x, y - viewFrame.y, renderer);
         } else {
           hit = this.hitTestPlot(x, y, renderer);
         }
@@ -768,38 +614,26 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
     const xScale = this.xScale.value;
     if (xScale !== null) {
       const d = xScale.inverse(x);
-      const v0 = this.dataPointRefs.previousValue(d);
-      const v1 = this.dataPointRefs.nextValue(d);
-      const x0 = v0 !== void 0 ? v0.view!.x.value : void 0;
-      const x1 = v1 !== void 0 ? v1.view!.x.value : void 0;
+      const v0 = this.dataPointViews.previousValue(d);
+      const v1 = this.dataPointViews.nextValue(d);
+      const x0 = v0 !== void 0 ? v0.x.value : void 0;
+      const x1 = v1 !== void 0 ? v1.x.value : void 0;
       const dx0 = x0 !== void 0 ? +d - +x0 : NaN;
       const dx1 = x1 !== void 0 ? +x1 - +d : NaN;
       if (dx0 <= dx1) {
-        return v0!.view;
+        return v0!;
       } else if (dx0 > dx1) {
-        return v1!.view;
+        return v1!;
       } else if (v0 !== void 0) {
-        return v0!.view;
+        return v0;
       } else if (v1 !== void 0) {
-        return v1!.view;
+        return v1;
       }
     }
     return null;
   }
 
   protected abstract hitTestPlot(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null;
-
-  /** @internal */
-  protected override mountFasteners(): void {
-    super.mountFasteners();
-    this.mountDataPointRefs();
-  }
-
-  /** @internal */
-  protected override unmountFasteners(): void {
-    this.unmountDataPointRefs();
-    super.unmountFasteners();
-  }
 
   override init(init: SeriesPlotViewInit<X, Y>): void {
     super.init(init);
@@ -812,9 +646,7 @@ export abstract class SeriesPlotView<X = unknown, Y = unknown> extends GraphicsV
 
     const data = init.data;
     if (data !== void 0) {
-      for (let i = 0, n = data.length; i < n; i += 1) {
-        this.appendChild(DataPointView.fromAny(data[i]! as AnyDataPointView));
-      }
+      this.insertDataPoints(...data);
     }
 
     if (init.font !== void 0) {

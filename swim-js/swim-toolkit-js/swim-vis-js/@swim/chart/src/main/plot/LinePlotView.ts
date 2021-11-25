@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, Property} from "@swim/component";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {View, ViewRef} from "@swim/view";
+import {View} from "@swim/view";
 import type {GraphicsView, CanvasContext, CanvasRenderer, StrokeViewInit, StrokeView} from "@swim/graphics";
 import type {DataPointView} from "../data/DataPointView";
 import {SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
@@ -83,10 +83,10 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     let x0: number;
     let x1: number;
     let dx: number;
-    const dataPointRefs = this.dataPointRefs;
-    if (!dataPointRefs.isEmpty()) {
-      const p0 = dataPointRefs.firstValue()!.view!;
-      const p1 = dataPointRefs.lastValue()!.view!;
+    const dataPointViews = this.dataPointViews;
+    if (!dataPointViews.isEmpty()) {
+      const p0 = dataPointViews.firstValue()!;
+      const p1 = dataPointViews.lastValue()!;
       x0 = p0.xCoord;
       x1 = p1.xCoord;
       dx = x1 - x0;
@@ -101,9 +101,7 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
 
     context.beginPath();
     let i = 0;
-    type self = this;
-    dataPointRefs.forEach(function (x: X, dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
-      const p = dataPointRef.view!;
+    dataPointViews.forEach(function (x: X, p: DataPointView<X, Y>): void {
       const xCoord = p.xCoord;
       const yCoord = p.yCoord;
       if (i === 0) {
@@ -148,9 +146,7 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
 
     context.beginPath();
     let i = 0;
-    type self = this;
-    this.dataPointRefs.forEach(function (x: X, dataPointRef: ViewRef<self, DataPointView<X, Y>>): void {
-      const p = dataPointRef.view!;
+    this.dataPointViews.forEach(function (x: X, p: DataPointView<X, Y>): void {
       const xCoord = p.xCoord;
       const yCoord = p.yCoord;
       if (i === 0) {

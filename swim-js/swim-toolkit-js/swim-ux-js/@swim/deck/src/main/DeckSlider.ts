@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, FastenerOwner} from "@swim/fastener";
+import {Affinity, FastenerOwner} from "@swim/component";
 import {Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
@@ -219,7 +219,7 @@ export interface DeckSliderItem<O extends DeckSlider = DeckSlider, V extends Htm
   didAttachView(itemView: V): void;
 
   /** @override */
-  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, child: V, target: View | number | null, key: string | undefined): void;
 
   /** @protected */
   viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, itemView: V): void;
@@ -240,10 +240,10 @@ export const DeckSliderItem = (function (_super: typeof ViewRef) {
     this.initItem(itemView);
   };
 
-  DeckSliderItem.prototype.insertChild = function (this: DeckSliderItem, parent: View, childView: HtmlView, targetView: View | null, key: string | undefined): void {
+  DeckSliderItem.prototype.insertChild = function (this: DeckSliderItem, parent: View, child: HtmlView, target: View | number | null, key: string | undefined): void {
     const targetKey = "item" + (this.itemIndex + 1);
-    targetView = parent.getChild(targetKey);
-    parent.insertChild(childView, targetView, key);
+    target = parent.getChild(targetKey);
+    parent.insertChild(child, target, key);
   };
 
   DeckSliderItem.prototype.viewDidApplyTheme = function (this: DeckSliderItem, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, itemView: HtmlView): void {

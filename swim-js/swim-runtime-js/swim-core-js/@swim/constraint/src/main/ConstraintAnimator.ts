@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, FromAny} from "@swim/util";
-import {Affinity, FastenerOwner, FastenerFlags, AnimatorInit, AnimatorClass, Animator} from "@swim/fastener";
+import {Affinity, FastenerOwner, FastenerFlags, AnimatorInit, AnimatorClass, Animator} from "@swim/component";
 import {ConstraintId} from "./ConstraintId";
 import {ConstraintMap} from "./ConstraintMap";
 import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpression";

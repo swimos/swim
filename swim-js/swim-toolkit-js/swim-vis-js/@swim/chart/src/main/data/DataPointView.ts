@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, Initable, AnyTiming} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
@@ -21,7 +21,6 @@ import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
-  LayerView,
   CanvasContext,
   CanvasRenderer,
   TypesetView,
@@ -55,7 +54,7 @@ export interface DataPointViewInit<X = unknown, Y = unknown> extends GraphicsVie
 }
 
 /** @public */
-export class DataPointView<X = unknown, Y = unknown> extends LayerView {
+export class DataPointView<X = unknown, Y = unknown> extends GraphicsView {
   constructor() {
     super();
     this.xCoord = NaN;
@@ -329,5 +328,11 @@ export class DataPointView<X = unknown, Y = unknown> extends LayerView {
   override init(init: DataPointViewInit<X, Y>): void {
     super.init(init);
     this.setState(init);
+  }
+
+  static override fromAny<X, Y>(value: AnyDataPointView<X, Y>): DataPointView<X, Y>;
+  static override fromAny<S extends abstract new (...args: any[]) => InstanceType<S>>(this: S, value: AnyView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny<S extends abstract new (...args: any[]) => InstanceType<S>>(this: S, value: AnyView<InstanceType<S>>): InstanceType<S> {
+    return super.fromAny(value as any) as InstanceType<S>;
   }
 }

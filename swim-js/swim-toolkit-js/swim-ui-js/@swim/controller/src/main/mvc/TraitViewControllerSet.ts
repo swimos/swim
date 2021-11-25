@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, ObserverType} from "@swim/util";
-import type {FastenerOwner} from "@swim/fastener";
+import type {FastenerOwner} from "@swim/component";
 import type {Trait} from "@swim/model";
 import type {View} from "@swim/view";
 import type {Controller} from "../controller/Controller";
@@ -269,9 +269,11 @@ export const TraitViewControllerSet = (function (_super: typeof ControllerSet) {
     let superClass = descriptor.extends as TraitViewControllerSetFactory | null | undefined;
     const affinity = descriptor.affinity;
     const inherits = descriptor.inherits;
+    const sorted = descriptor.sorted;
     delete descriptor.extends;
     delete descriptor.affinity;
     delete descriptor.inherits;
+    delete descriptor.sorted;
 
     if (superClass === void 0 || superClass === null) {
       superClass = this;
@@ -286,6 +288,9 @@ export const TraitViewControllerSet = (function (_super: typeof ControllerSet) {
       }
       if (inherits !== void 0) {
         fastener.initInherits(inherits);
+      }
+      if (sorted !== void 0) {
+        fastener.initSorted(sorted);
       }
       return fastener;
     };

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/component";
 import {Model} from "../model/Model";
 import {AnyTrait, TraitFactory, Trait} from "./Trait";
 
@@ -29,8 +29,8 @@ export interface TraitRelationInit<T extends Trait = Trait> extends FastenerInit
   observes?: boolean;
 
   initTrait?(trait: T): void;
-  willAttachTrait?(trait: T, targetTrait: Trait | null): void;
-  didAttachTrait?(trait: T, targetTrait: Trait | null): void;
+  willAttachTrait?(trait: T, target: Trait | null): void;
+  didAttachTrait?(trait: T, target: Trait | null): void;
 
   deinitTrait?(trait: T): void;
   willDetachTrait?(trait: T): void;
@@ -76,13 +76,13 @@ export interface TraitRelation<O = unknown, T extends Trait = Trait> extends Fas
   initTrait(trait: T): void;
 
   /** @protected */
-  willAttachTrait(trait: T, targetTrait: Trait | null): void;
+  willAttachTrait(trait: T, target: Trait | null): void;
 
   /** @protected */
-  onAttachTrait(trait: T, targetTrait: Trait | null): void;
+  onAttachTrait(trait: T, target: Trait | null): void;
 
   /** @protected */
-  didAttachTrait(trait: T, targetTrait: Trait | null): void;
+  didAttachTrait(trait: T, target: Trait | null): void;
 
   /** @protected */
   deinitTrait(trait: T): void;
@@ -111,7 +111,7 @@ export interface TraitRelation<O = unknown, T extends Trait = Trait> extends Fas
   detectModel(model: Model): T | null;
 
   /** @internal */
-  bindTrait(trait: Trait, targetTrait: Trait | null): void;
+  bindTrait(trait: Trait, target: Trait | null): void;
 
   /** @internal */
   unbindTrait(trait: Trait): void;
@@ -154,17 +154,17 @@ export const TraitRelation = (function (_super: typeof Fastener) {
     // hook
   };
 
-  TraitRelation.prototype.willAttachTrait = function <T extends Trait>(this: TraitRelation<unknown, T>, trait: T, targetTrait: Trait | null): void {
+  TraitRelation.prototype.willAttachTrait = function <T extends Trait>(this: TraitRelation<unknown, T>, trait: T, target: Trait | null): void {
     // hook
   };
 
-  TraitRelation.prototype.onAttachTrait = function <T extends Trait>(this: TraitRelation<unknown, T>, trait: T, targetTrait: Trait | null): void {
+  TraitRelation.prototype.onAttachTrait = function <T extends Trait>(this: TraitRelation<unknown, T>, trait: T, target: Trait | null): void {
     if (this.observes === true) {
       trait.observe(this as ObserverType<T>);
     }
   };
 
-  TraitRelation.prototype.didAttachTrait = function <T extends Trait>(this: TraitRelation<unknown, T>, trait: T, targetTrait: Trait | null): void {
+  TraitRelation.prototype.didAttachTrait = function <T extends Trait>(this: TraitRelation<unknown, T>, trait: T, target: Trait | null): void {
     // hook
   };
 
@@ -216,7 +216,7 @@ export const TraitRelation = (function (_super: typeof Fastener) {
     return null;
   };
 
-  TraitRelation.prototype.bindTrait = function <T extends Trait>(this: TraitRelation<unknown, T>, trait: Trait, targetTrait: Trait | null): void {
+  TraitRelation.prototype.bindTrait = function <T extends Trait>(this: TraitRelation<unknown, T>, trait: Trait, target: Trait | null): void {
     // hook
   };
 

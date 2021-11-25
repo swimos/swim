@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, Animator} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/component";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {ThemeAnimator} from "@swim/theme";
@@ -28,8 +28,7 @@ import {
   WebGLRenderer,
 } from "@swim/graphics";
 import type {GeoViewContext} from "../geo/GeoViewContext";
-import type {GeoViewInit} from "../geo/GeoView";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoRasterViewContext} from "./GeoRasterViewContext";
 import type {GeoRasterViewObserver} from "./GeoRasterViewObserver";
@@ -47,7 +46,7 @@ export interface GeoRasterViewInit extends GeoViewInit {
 }
 
 /** @public */
-export class GeoRasterView extends GeoLayerView {
+export class GeoRasterView extends GeoView {
   constructor() {
     super();
     this.canvas = this.createCanvas();
@@ -243,12 +242,6 @@ export class GeoRasterView extends GeoLayerView {
     super.didComposite(viewContext);
   }
 
-  protected override onSetHidden(hidden: boolean): void {
-    if (!hidden) {
-      this.requireUpdate(View.NeedsRender | View.NeedsComposite);
-    }
-  }
-
   override extendViewContext(viewContext: GeoViewContext): ViewContextType<this> {
     const rasterViewContext = Object.create(viewContext);
     rasterViewContext.compositor = viewContext.renderer;
@@ -370,6 +363,7 @@ export class GeoRasterView extends GeoLayerView {
     }
   }
 
-  static override readonly MountFlags: ViewFlags = GeoLayerView.MountFlags | View.NeedsRender | View.NeedsComposite;
-  static override readonly UncullFlags: ViewFlags = GeoLayerView.UncullFlags | View.NeedsRender | View.NeedsComposite;
+  static override readonly MountFlags: ViewFlags = GeoView.MountFlags | View.NeedsComposite;
+  static override readonly UncullFlags: ViewFlags = GeoView.UncullFlags | View.NeedsComposite;
+  static override readonly UnhideFlags: ViewFlags = GeoView.UnhideFlags | View.NeedsComposite;
 }

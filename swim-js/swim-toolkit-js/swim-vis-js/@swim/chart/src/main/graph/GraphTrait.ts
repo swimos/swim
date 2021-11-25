@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {Model, Trait, TraitSet} from "@swim/model";
 import {PlotTrait} from "../plot/PlotTrait";
 import type {GraphTraitObserver} from "./GraphTraitObserver";

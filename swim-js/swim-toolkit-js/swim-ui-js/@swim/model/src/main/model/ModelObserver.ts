@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {ComponentObserver} from "@swim/component";
 import type {ModelContextType, Model} from "./Model";
 import type {Trait} from "../trait/Trait";
 
 /** @public */
-export interface ModelObserver<M extends Model = Model> {
+export interface ModelObserver<M extends Model = Model> extends ComponentObserver<M> {
   modelWillAttachParent?(parent: Model, model: M): void;
 
   modelDidAttachParent?(parent: Model, model: M): void;

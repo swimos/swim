@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Class, Equivalent, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
@@ -21,7 +21,6 @@ import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
-  LayerView,
   PaintingContext,
   PaintingRenderer,
   CanvasContext,
@@ -62,7 +61,7 @@ export interface SliceViewInit extends GraphicsViewInit {
 }
 
 /** @public */
-export class SliceView extends LayerView {
+export class SliceView extends GraphicsView {
   override readonly observerType?: Class<SliceViewObserver>;
 
   @Animator<SliceView, number>({
@@ -192,7 +191,7 @@ export class SliceView extends LayerView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderSlice(renderer.context, this.viewFrame);
     }
   }
@@ -232,7 +231,7 @@ export class SliceView extends LayerView {
     }
 
     const labelView = this.label.view;
-    if (labelView !== null && !labelView.isHidden()) {
+    if (labelView !== null && !labelView.hidden) {
       const labelRadius = this.labelRadius.getValue().pxValue(deltaRadius);
       const labelAngle = startAngle.value + sweepAngle.value / 2;
       const r = innerRadius.value + labelRadius;
@@ -247,7 +246,7 @@ export class SliceView extends LayerView {
     }
 
     const legendView = this.legend.view;
-    if (legendView !== null && !legendView.isHidden()) {
+    if (legendView !== null && !legendView.hidden) {
       const tickAlign = this.tickAlign.getValue();
       const tickAngle = startAngle.value + sweepAngle.value * tickAlign;
       const tickRadius = this.tickRadius.getValue().pxValue(size);

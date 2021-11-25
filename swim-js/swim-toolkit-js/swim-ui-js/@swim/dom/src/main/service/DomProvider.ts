@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ProviderClass, Provider} from "@swim/fastener";
+import {ProviderClass, Provider} from "@swim/component";
 import {DomService} from "./DomService";
 import type {NodeView} from "../node/NodeView";
 

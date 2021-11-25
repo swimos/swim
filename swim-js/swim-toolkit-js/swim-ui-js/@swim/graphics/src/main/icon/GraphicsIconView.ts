@@ -13,15 +13,14 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
-import {Affinity, Animator} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/component";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
 import type {Graphics} from "../graphics/Graphics";
-import type {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
-import {LayerView} from "../layer/LayerView";
+import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import {Icon} from "./Icon";
@@ -34,7 +33,7 @@ export interface GraphicsIconViewInit extends GraphicsViewInit, IconViewInit {
 }
 
 /** @public */
-export class GraphicsIconView extends LayerView implements IconView {
+export class GraphicsIconView extends GraphicsView implements IconView {
   @Animator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
   readonly xAlign!: Animator<this, number>;
 
@@ -80,7 +79,7 @@ export class GraphicsIconView extends LayerView implements IconView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderIcon(renderer, this.viewBounds);
     }
   }

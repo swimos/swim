@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, AnyTiming, Timing} from "@swim/util";
-import type {FastenerOwner} from "@swim/fastener";
+import type {FastenerOwner} from "@swim/component";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {CssContext} from "./CssContext";
 import {CssRuleInit, CssRuleClass, CssRule} from "./CssRule";

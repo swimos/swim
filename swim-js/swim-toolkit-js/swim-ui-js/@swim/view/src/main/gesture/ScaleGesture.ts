@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, ObserverType, AnyTiming, ContinuousScale} from "@swim/util";
-import type {FastenerOwner, FastenerFlags} from "@swim/fastener";
+import type {FastenerOwner, FastenerFlags} from "@swim/component";
 import type {R2Box} from "@swim/math";
 import type {GestureInputType} from "./GestureInput";
 import type {GestureMethod} from "./Gesture";

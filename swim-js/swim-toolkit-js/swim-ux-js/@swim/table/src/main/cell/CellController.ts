@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import type {PositionGestureInput} from "@swim/view";
-import {GenericController, TraitViewRef} from "@swim/controller";
+import {Controller, TraitViewRef} from "@swim/controller";
 import {CellView} from "./CellView";
 import {CellTrait} from "./CellTrait";
 import {TextCellTrait} from "./TextCellTrait";
@@ -25,7 +25,7 @@ import {TextCellController} from "../"; // forward import
 import {IconCellController} from "../"; // forward import
 
 /** @public */
-export class CellController extends GenericController {
+export class CellController extends Controller {
   override readonly observerType?: Class<CellControllerObserver>;
 
   @TraitViewRef<CellController, CellTrait, CellView>({

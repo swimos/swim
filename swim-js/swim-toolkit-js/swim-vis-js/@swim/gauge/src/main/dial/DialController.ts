@@ -13,18 +13,18 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import type {Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
 import {ViewRef} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
-import {GenericController, TraitViewRef} from "@swim/controller";
+import {Controller, TraitViewRef} from "@swim/controller";
 import {DialView} from "./DialView";
 import {DialLabel, DialLegend, DialTrait} from "./DialTrait";
 import type {DialControllerObserver} from "./DialControllerObserver";
 
 /** @public */
-export class DialController extends GenericController {
+export class DialController extends Controller {
   override readonly observerType?: Class<DialControllerObserver>;
 
   protected updateLabel(value: number, limit: number, dialTrait: DialTrait): void {

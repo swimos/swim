@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ProviderClass, Provider} from "@swim/fastener";
+import {ProviderClass, Provider} from "@swim/component";
 import {SelectionOptions, SelectionService} from "./SelectionService";
 import type {Model} from "../model/Model";
 

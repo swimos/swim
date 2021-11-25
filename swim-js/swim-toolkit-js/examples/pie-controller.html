@@ -59,25 +59,25 @@ swim.TraitViewControllerSet({
   },
 })(ExamplePieController.prototype, "slices");
 
-const slice1Model = new swim.GenericModel();
+const slice1Model = new swim.Model();
 const slice1Trait = new swim.SliceTrait()
   .value(1)
   .legend("Slice 1");
 slice1Model.setTrait("slice", slice1Trait);
 
-const slice2Model = new swim.GenericModel();
+const slice2Model = new swim.Model();
 const slice2Trait = new swim.SliceTrait()
   .value(1)
   .legend("Slice 2");
 slice2Model.setTrait("slice", slice2Trait);
 
-const slice3Model = new swim.GenericModel();
+const slice3Model = new swim.Model();
 const slice3Trait = new swim.SliceTrait()
   .value(1)
   .legend("Slice 3");
 slice3Model.setTrait("slice", slice3Trait);
 
-const pieModel = new swim.GenericModel();
+const pieModel = new swim.Model();
 pieModel.mount();
 const pieTrait = new swim.PieTrait();
 pieModel.setTrait("pie", pieTrait);

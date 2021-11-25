@@ -99,11 +99,11 @@ swim.MapDownlinkFastener({
   },
 })(ExampleTileTrait.prototype, "vehiclesDownlink")
 
-const layerModel = new swim.GenericModel();
+const layerModel = new swim.Model();
 const layerTrait = new ExampleTileTrait(swim.GeoTile.root());
 layerModel.setTrait("layer", layerTrait);
 
-const mapModel = new swim.GenericModel();
+const mapModel = new swim.Model();
 mapModel.warpRef.setState(swim.client.hostRef("warps://transit.swim.services"));
 mapModel.mount();
 const mapTrait = new swim.MapTrait();

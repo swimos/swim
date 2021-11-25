@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {FastenerContext, FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerContext, FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/component";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,
@@ -254,7 +254,6 @@ export const StyleSheet = (function (_super: typeof Fastener) {
       const fastener = fasteners[fastenerName]!;
       fastener.mount();
     }
-    FastenerContext.init(this);
   };
 
   StyleSheet.prototype.unmountFasteners = function (this: StyleSheet): void {
@@ -405,6 +404,7 @@ export const StyleSheet = (function (_super: typeof Fastener) {
     (sheet as Mutable<typeof sheet>).fasteners = null;
     (sheet as Mutable<typeof sheet>).decoherent = null;
     (sheet as Mutable<typeof sheet>).stylesheet = null as unknown as CSSStyleSheet;
+    FastenerContext.init(sheet);
     return sheet;
   };
 

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, Initable, AnyTiming} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
@@ -27,8 +27,7 @@ import {
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
-import type {GeoViewInit} from "../geo/GeoView";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPointViewObserver} from "./GeoPointViewObserver";
 
@@ -62,7 +61,7 @@ export interface GeoPointViewInit extends GeoViewInit {
 }
 
 /** @public */
-export class GeoPointView extends GeoLayerView {
+export class GeoPointView extends GeoView {
   override readonly observerType?: Class<GeoPointViewObserver>;
 
   @Animator<GeoPointView, GeoPoint, AnyGeoPoint>({

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
 import {ViewRef, PositionGestureInput} from "@swim/view";

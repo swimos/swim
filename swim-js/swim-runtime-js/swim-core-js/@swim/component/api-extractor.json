@@ -5,12 +5,12 @@
     "tsconfigFilePath": "./src/main/tsconfig.json"
   },
   "apiReport": {
-    "reportFileName": "swim-fastener.api.md"
+    "reportFileName": "swim-component.api.md"
   },
   "docModel": {
-    "apiJsonFilePath": "./doc/swim-fastener.api.json"
+    "apiJsonFilePath": "./doc/swim-component.api.json"
   },
   "dtsRollup": {
-    "untrimmedFilePath": "./dist/swim-fastener.d.ts"
+    "untrimmedFilePath": "./dist/swim-component.d.ts"
   }
 }

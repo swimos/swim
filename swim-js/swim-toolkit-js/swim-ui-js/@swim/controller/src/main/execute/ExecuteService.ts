@@ -66,7 +66,7 @@ export class ExecuteService<C extends Controller = Controller> extends Service<C
       deltaUpdateFlags |= Controller.NeedsExecute;
     }
     this.setFlags(this.flags | deltaUpdateFlags);
-    if (immediate && (this.flags & Controller.TraversingFlag) === 0 && this.updateDelay <= ExecuteService.MaxCompileInterval) {
+    if (immediate && (this.flags & (Controller.CompilingFlag | Controller.ExecutingFlag)) === 0 && this.updateDelay <= ExecuteService.MaxCompileInterval) {
       this.runImmediatePass();
     } else {
       this.scheduleUpdate();
@@ -115,7 +115,7 @@ export class ExecuteService<C extends Controller = Controller> extends Service<C
   }
 
   protected runCompilePass(immediate: boolean = false): void {
-    this.setFlags(this.flags & ~Controller.CompileMask | (Controller.TraversingFlag | Controller.CompilingFlag));
+    this.setFlags(this.flags & ~Controller.CompileMask | Controller.CompilingFlag);
     try {
       const t0 = performance.now();
       const roots = this.roots;
@@ -147,7 +147,7 @@ export class ExecuteService<C extends Controller = Controller> extends Service<C
         this.scheduleCompilePass(compileDelay);
       }
     } finally {
-      this.setFlags(this.flags & ~(Controller.TraversingFlag | Controller.CompilingFlag));
+      this.setFlags(this.flags & ~Controller.CompilingFlag);
     }
   }
 
@@ -168,7 +168,7 @@ export class ExecuteService<C extends Controller = Controller> extends Service<C
   }
 
   protected runExecutePass(immediate: boolean = false): void {
-    this.setFlags(this.flags & ~Controller.ExecuteMask | (Controller.TraversingFlag | Controller.ExecutingFlag));
+    this.setFlags(this.flags & ~Controller.ExecuteMask | Controller.ExecutingFlag);
     try {
       const time = performance.now();
       const controllerContext = this.controllerContext;
@@ -193,7 +193,7 @@ export class ExecuteService<C extends Controller = Controller> extends Service<C
         this.scheduleExecutePass(ExecuteService.MaxExecuteInterval);
       }
     } finally {
-      this.setFlags(this.flags & ~(Controller.TraversingFlag | Controller.ExecutingFlag));
+      this.setFlags(this.flags & ~Controller.ExecutingFlag);
     }
   }
 

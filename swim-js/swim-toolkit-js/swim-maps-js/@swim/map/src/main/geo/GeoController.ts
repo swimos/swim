@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Property} from "@swim/fastener";
-import {GenericController, TraitViewRef} from "@swim/controller";
+import {Property} from "@swim/component";
+import {Controller, TraitViewRef} from "@swim/controller";
 import type {GeoView} from "./GeoView";
 import type {GeoTrait} from "./GeoTrait";
 import type {GeoControllerObserver} from "./GeoControllerObserver";
@@ -28,7 +28,7 @@ import {GeoIconTrait} from "../"; // forward import
 import {GeoIconController} from "../"; // forward import
 
 /** @public */
-export abstract class GeoController extends GenericController {
+export abstract class GeoController extends Controller {
   override readonly observerType?: Class<GeoControllerObserver>;
 
   @Property({type: Timing, inherits: true})

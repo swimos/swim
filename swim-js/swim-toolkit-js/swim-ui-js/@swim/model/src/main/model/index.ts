@@ -27,8 +27,6 @@ export {
 } from "./Model";
 export {ModelObserver} from "./ModelObserver";
 
-export {GenericModel} from "./GenericModel";
-
 export {
   ModelRelationType,
   ModelRelationInit,

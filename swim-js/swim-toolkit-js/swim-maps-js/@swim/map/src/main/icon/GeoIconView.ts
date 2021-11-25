@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, Timing} from "@swim/util";
-import {Affinity, Animator} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/component";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
@@ -30,8 +30,7 @@ import {
   IconGraphicsAnimator,
   CanvasRenderer,
 } from "@swim/graphics";
-import type {GeoViewInit} from "../geo/GeoView";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoIconViewObserver} from "./GeoIconViewObserver";
 
@@ -45,7 +44,7 @@ export interface GeoIconViewInit extends GeoViewInit, IconViewInit {
 }
 
 /** @public */
-export class GeoIconView extends GeoLayerView implements IconView {
+export class GeoIconView extends GeoView implements IconView {
   constructor() {
     super();
     this.sprite = null;
@@ -195,7 +194,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   protected override onRasterize(viewContext: ViewContextType<this>): void {
     super.onRasterize(viewContext);
-    if (!this.isHidden() && !this.culled) {
+    if (!this.hidden && !this.culled) {
       this.rasterizeIcon(this.viewBounds);
     }
   }
@@ -232,7 +231,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   protected override onComposite(viewContext: ViewContextType<this>): void {
     super.onComposite(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof CanvasRenderer && !this.hidden && !this.culled) {
       this.compositeIcon(renderer, this.viewBounds);
     }
   }
@@ -342,6 +341,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
     }
   }
 
-  static override readonly MountFlags: ViewFlags = GeoLayerView.MountFlags | View.NeedsRasterize;
-  static override readonly UncullFlags: ViewFlags = GeoLayerView.UncullFlags | View.NeedsRasterize;
+  static override readonly MountFlags: ViewFlags = GeoView.MountFlags | View.NeedsRasterize;
+  static override readonly UncullFlags: ViewFlags = GeoView.UncullFlags | View.NeedsRasterize;
 }

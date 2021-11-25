@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Property} from "@swim/fastener";
+import {Property} from "@swim/component";
 import type {TraitViewRef} from "@swim/controller";
 import {DataSetController} from "../data/DataSetController";
 import type {PlotView} from "./PlotView";

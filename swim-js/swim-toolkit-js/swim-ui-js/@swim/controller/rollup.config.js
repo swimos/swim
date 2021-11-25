@@ -11,7 +11,7 @@ const mainEsm = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
+    "@swim/component",
     "@swim/collections",
     "@swim/constraint",
     "@swim/structure",
@@ -49,7 +49,7 @@ const mainUmd = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
-      "@swim/fastener": "swim",
+      "@swim/component": "swim",
       "@swim/collections": "swim",
       "@swim/constraint": "swim",
       "@swim/structure": "swim",
@@ -74,7 +74,7 @@ const mainUmd = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
+    "@swim/component",
     "@swim/collections",
     "@swim/constraint",
     "@swim/structure",

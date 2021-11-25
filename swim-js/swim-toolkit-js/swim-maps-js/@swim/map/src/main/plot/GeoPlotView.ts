@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, AnyTiming} from "@swim/util";
-import {Affinity, Property} from "@swim/fastener";
+import {Affinity, Property} from "@swim/component";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
@@ -28,8 +28,7 @@ import {
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
-import type {GeoViewInit} from "../geo/GeoView";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import {AnyGeoPointView, GeoPointView} from "./GeoPointView";
 import type {GeoPlotViewObserver} from "./GeoPlotViewObserver";
@@ -48,7 +47,7 @@ export interface GeoPlotViewInit extends GeoViewInit, StrokeViewInit {
 }
 
 /** @public */
-export class GeoPlotView extends GeoLayerView implements StrokeView {
+export class GeoPlotView extends GeoView implements StrokeView {
   constructor() {
     super();
     this.gradientStops = 0;
@@ -65,14 +64,15 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
   points(): ReadonlyArray<GeoPointView>;
   points(points: ReadonlyArray<AnyGeoPointView>, timing?: AnyTiming | boolean): this;
   points(points?: ReadonlyArray<AnyGeoPointView>, timing?: AnyTiming | boolean): ReadonlyArray<GeoPointView> | this {
-    const children = this.children;
+    let child: View | null;
     if (points === void 0) {
       const points: GeoPointView[] = [];
-      for (let i = 0; i < children.length; i += 1) {
-        const childView = children[i];
-        if (childView instanceof GeoPointView) {
-          points.push(childView);
+      child = this.firstChild;
+      while (child !== null) {
+        if (child instanceof GeoPointView) {
+          points.push(child);
         }
+        child = child.nextSibling;
       }
       return points;
     } else {
@@ -85,13 +85,12 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
       let latMid = 0;
       let invalid = false;
       let i = 0;
-      let j = 0;
-      while (i < children.length && j < points.length) {
-        const childView = children[i];
-        if (childView instanceof GeoPointView) {
-          const point = points[j]!;
-          childView.setState(point);
-          const {lng, lat} = childView.geoPoint.getValue();
+      child = this.firstChild;
+      while (child !== null && i < points.length) {
+        if (child instanceof GeoPointView) {
+          const point = points[i]!;
+          child.setState(point);
+          const {lng, lat} = child.geoPoint.getValue();
           lngMid += lng;
           latMid += lat;
           lngMin = Math.min(lngMin, lng);
@@ -99,12 +98,11 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
           lngMax = Math.max(lng, lngMax);
           latMax = Math.max(lat, latMax);
           invalid = invalid || !isFinite(lng) || !isFinite(lat);
-          j += 1;
+          i += 1;
         }
-        i += 1;
       }
-      while (j < points.length) {
-        const point = GeoPointView.fromAny(points[j]!);
+      while (i < points.length) {
+        const point = GeoPointView.fromAny(points[i]!);
         this.appendChild(point);
         const {lng, lat} = point.geoPoint.getValue();
         lngMid += lng;
@@ -115,19 +113,17 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
         latMax = Math.max(lat, latMax);
         invalid = invalid || !isFinite(lng) || !isFinite(lat);
         i += 1;
-        j += 1;
       }
-      while (i < children.length) {
-        const childView = children[i];
-        if (childView instanceof GeoPointView) {
-          this.removeChild(childView);
-        } else {
-          i += 1;
+      while (child !== null) {
+        const next = child.nextSibling;
+        if (child instanceof GeoPointView) {
+          this.removeChild(child);
         }
+        child = next;
       }
-      if (!invalid && j !== 0) {
-        lngMid /= j;
-        latMid /= j;
+      if (!invalid && i !== 0) {
+        lngMid /= i;
+        latMid /= i;
         this.geoCentroid.setState(new GeoPoint(lngMid, latMid), Affinity.Intrinsic);
         (this as Mutable<this>).geoBounds = new GeoBox(lngMin, latMin, lngMax, latMax);
       } else {
@@ -208,11 +204,10 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     let invalid = false;
     let gradientStops = 0;
     let pointCount = 0;
-    const children = this.children;
-    for (let i = 0; i < children.length; i += 1) {
-      const childView = children[i];
-      if (childView instanceof GeoPointView) {
-        const {lng, lat} = childView.geoPoint.getValue();
+    let child = this.firstChild;
+    while (child !== null) {
+      if (child instanceof GeoPointView) {
+        const {lng, lat} = child.geoPoint.getValue();
         lngMid += lng;
         latMid += lat;
         lngMin = Math.min(lngMin, lng);
@@ -220,7 +215,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
         lngMax = Math.max(lng, lngMax);
         latMax = Math.max(lat, latMax);
         invalid = invalid || !isFinite(lng) || !isFinite(lat);
-        const {x, y} = childView.viewPoint.getValue();
+        const {x, y} = child.viewPoint.getValue();
         xMin = Math.min(xMin, x);
         yMin = Math.min(yMin, y);
         xMax = Math.max(x, xMax);
@@ -228,11 +223,12 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
         xMid += x;
         yMid += y;
         invalid = invalid || !isFinite(x) || !isFinite(y);
-        if (childView.isGradientStop()) {
+        if (child.isGradientStop()) {
           gradientStops += 1;
         }
         pointCount += 1;
       }
+      child = child.nextSibling;
     }
     if (!invalid && pointCount !== 0) {
       lngMid /= pointCount;
@@ -264,7 +260,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       if (this.gradientStops !== 0 && renderer instanceof CanvasRenderer) {
         this.renderPlotGradient(renderer.context, viewContext.viewFrame);
       } else {
@@ -276,15 +272,13 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
   protected renderPlotStroke(context: PaintingContext, frame: R2Box): void {
     const stroke = this.stroke.value;
     if (stroke !== null) {
-      const children = this.children;
-      const childCount = children.length;
       let pointCount = 0;
 
       context.beginPath();
-      for (let i = 0; i < childCount; i += 1) {
-        const childView = children[i];
-        if (childView instanceof GeoPointView) {
-          const {x, y} = childView.viewPoint.getValue();
+      let child = this.firstChild;
+      while (child !== null) {
+        if (child instanceof GeoPointView) {
+          const {x, y} = child.viewPoint.getValue();
           if (pointCount === 0) {
             context.moveTo(x, y);
           } else {
@@ -292,6 +286,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
           }
           pointCount += 1;
         }
+        child = child.nextSibling;
       }
 
       if (pointCount !== 0) {
@@ -316,16 +311,14 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     const stroke = this.stroke.getValue();
     const size = Math.min(frame.width, frame.height);
     const strokeWidth = this.strokeWidth.getValue().pxValue(size);
-    const children = this.children;
-    const childCount = children.length;
 
     // save
     const contextLineWidth = context.lineWidth;
     const contextStrokeStyle = context.strokeStyle;
 
     let p0: GeoPointView | undefined;
-    for (let i = 0; i < childCount; i += 1) {
-      const p1 = children[i];
+    let p1 = this.firstChild;
+    while (p1 !== null) {
       if (p1 instanceof GeoPointView) {
         if (p0 !== void 0) {
           const x0 = p0.viewPoint.getValue().x;
@@ -357,6 +350,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
         }
         p0 = p1;
       }
+      p1 = p1.nextSibling;
     }
 
     // restore
@@ -388,22 +382,21 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
   }
 
   protected hitTestPlot(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
-    const children = this.children;
-    const childCount = children.length;
     let pointCount = 0;
 
     context.beginPath();
-    for (let i = 0; i < childCount; i += 1) {
-      const childView = this.children[i];
-      if (childView instanceof GeoPointView) {
-        const {x, y} = childView.viewPoint.getValue();
-        if (i === 0) {
+    let child = this.firstChild;
+    while (child !== null) {
+      if (child instanceof GeoPointView) {
+        const {x, y} = child.viewPoint.getValue();
+        if (pointCount === 0) {
           context.moveTo(x, y);
         } else {
           context.lineTo(x, y);
         }
         pointCount += 1;
       }
+      child = child.nextSibling;
     }
 
     if (pointCount !== 0) {

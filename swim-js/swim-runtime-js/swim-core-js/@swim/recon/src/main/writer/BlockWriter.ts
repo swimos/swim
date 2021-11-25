@@ -89,7 +89,7 @@ export class BlockWriter<I, V> extends Writer {
         if (inBraces) {
           size += 1; // '}'
           inBraces = false;
-        } else if (inBrackets) { // FIXME: case already covered?
+        } else if (inBrackets) { // Case already covered?
           size += 1; // ']'
           inBrackets = false;
         }

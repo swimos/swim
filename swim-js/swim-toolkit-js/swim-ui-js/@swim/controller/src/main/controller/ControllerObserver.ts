@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {HierarchyObserver} from "@swim/fastener";
+import type {ComponentObserver} from "@swim/component";
 import type {ControllerContextType, Controller} from "./Controller";
 
 /** @public */
-export interface ControllerObserver<C extends Controller = Controller> extends HierarchyObserver<C> {
+export interface ControllerObserver<C extends Controller = Controller> extends ComponentObserver<C> {
   controllerWillAttachParent?(parent: Controller, controller: C): void;
 
   controllerDidAttachParent?(parent: Controller, controller: C): void;

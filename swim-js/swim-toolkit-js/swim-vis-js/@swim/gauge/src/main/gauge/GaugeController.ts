@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {MemberFastenerClass, Property} from "@swim/fastener";
+import {MemberFastenerClass, Property} from "@swim/component";
 import type {Trait} from "@swim/model";
 import {ViewRef} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
-import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {DialView} from "../dial/DialView";
 import type {DialTrait} from "../dial/DialTrait";
 import {DialController} from "../dial/DialController";
@@ -38,7 +38,7 @@ export interface GaugeControllerDialExt {
 }
 
 /** @public */
-export class GaugeController extends GenericController {
+export class GaugeController extends Controller {
   override readonly observerType?: Class<GaugeControllerObserver>;
 
   protected createTitleView(title: GaugeTitle, gaugeTrait: GaugeTrait): GraphicsView | string | null {

@@ -21,7 +21,7 @@
   "sideEffects": true,
   "devDependencies": {
     "@rollup/plugin-node-resolve": "13",
-    "@types/eslint": "7",
+    "@types/eslint": "8",
     "@types/node": "16",
     "@typescript-eslint/eslint-plugin": "5",
     "@typescript-eslint/parser": "5",

@@ -11,7 +11,7 @@ const mainEsm = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
+    "@swim/component",
     "tslib",
   ],
   plugins: [
@@ -33,7 +33,7 @@ const mainUmd = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
-      "@swim/fastener": "swim",
+      "@swim/component": "swim",
     },
     sourcemap: true,
     interop: "esModule",
@@ -42,7 +42,7 @@ const mainUmd = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
+    "@swim/component",
   ],
   plugins: [
     nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
@@ -64,9 +64,9 @@ const testEsm = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/fastener",
     "@swim/args",
     "@swim/unit",
+    "@swim/component",
     "@swim/constraint",
     "tslib",
   ],

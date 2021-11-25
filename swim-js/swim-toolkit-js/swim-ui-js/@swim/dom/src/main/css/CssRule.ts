@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class, AnyTiming} from "@swim/util";
-import {FastenerContext, FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerContext, FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/component";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,
@@ -231,7 +231,6 @@ export const CssRule = (function (_super: typeof Fastener) {
       const fastener = fasteners[fastenerName]!;
       fastener.mount();
     }
-    FastenerContext.init(this);
   };
 
   CssRule.prototype.unmountFasteners = function (this: CssRule): void {
@@ -382,6 +381,7 @@ export const CssRule = (function (_super: typeof Fastener) {
     (rule as Mutable<typeof rule>).fasteners = null;
     (rule as Mutable<typeof rule>).decoherent = null;
     (rule as Mutable<typeof rule>).rule = null as unknown as CSSRule;
+    FastenerContext.init(rule);
     return rule;
   };
 

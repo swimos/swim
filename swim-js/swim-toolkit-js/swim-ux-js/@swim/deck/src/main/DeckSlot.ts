@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Color} from "@swim/style";
-import {Property} from "@swim/fastener";
+import {Property} from "@swim/component";
 import type {Look, ThemeAnimator} from "@swim/theme";
 import {HtmlView} from "@swim/dom";
 import {AnyDeckPost, DeckPost} from "./DeckPost";

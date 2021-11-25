@@ -60,7 +60,7 @@ swim.TraitViewControllerSet({
   },
 })(ExampleGraphController.prototype, "plots");
 
-const plot1Model = new swim.GenericModel();
+const plot1Model = new swim.Model();
 const plot1Trait = new swim.LinePlotTrait()
   .stroke(swim.Look.accentColor)
   .strokeWidth(4);
@@ -74,7 +74,7 @@ let n = cycles * samplesPerCycle
 while (i <= n) {
   const x = i * 2 * Math.PI / samplesPerCycle;
   const y = Math.sin(x) * x;
-  const dataPointModel = new swim.GenericModel();
+  const dataPointModel = new swim.Model();
   const dataPointTrait = new swim.DataPointTrait(x, y);
   dataPointModel.setTrait("dataPoint", dataPointTrait);
   plot1Model.appendChild(dataPointModel);
@@ -82,7 +82,7 @@ while (i <= n) {
 }
 plot1Model.setTrait("dataSet", dataSet1Trait);
 
-const graphModel = new swim.GenericModel();
+const graphModel = new swim.Model();
 graphModel.mount();
 const graphTrait = new swim.GraphTrait();
 graphModel.setTrait("graph", graphTrait);

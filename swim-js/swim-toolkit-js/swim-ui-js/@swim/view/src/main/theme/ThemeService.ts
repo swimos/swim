@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Lazy, AnyTiming, Timing, Service} from "@swim/util";
-import {Affinity} from "@swim/fastener";
+import {Affinity} from "@swim/component";
 import {Look, Mood, MoodVector, Theme, ThemeMatrix} from "@swim/theme";
 import {Viewport} from "../viewport/Viewport";
 import type {ThemeServiceObserver} from "./ThemeServiceObserver";

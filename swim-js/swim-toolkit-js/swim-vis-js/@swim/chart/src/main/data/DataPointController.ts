@@ -13,19 +13,19 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import type {AnyLength, Length} from "@swim/math";
 import type {AnyColor, Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
 import {ViewRef} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
-import {GenericController, TraitViewRef} from "@swim/controller";
+import {Controller, TraitViewRef} from "@swim/controller";
 import {DataPointView} from "./DataPointView";
 import {DataPointLabel, DataPointTrait} from "./DataPointTrait";
 import type {DataPointControllerObserver} from "./DataPointControllerObserver";
 
 /** @public */
-export class DataPointController<X = unknown, Y = unknown> extends GenericController {
+export class DataPointController<X = unknown, Y = unknown> extends Controller {
   override readonly observerType?: Class<DataPointControllerObserver<X, Y>>;
 
   protected updateLabel(x: X | undefined, y: Y | undefined, dataPointTrait: DataPointTrait<X, Y>): void {

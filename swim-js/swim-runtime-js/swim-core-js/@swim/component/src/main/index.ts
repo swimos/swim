@@ -20,4 +20,4 @@ export * from "./animator";
 
 export * from "./provider";
 
-export * from "./hierarchy";
+export * from "./component";

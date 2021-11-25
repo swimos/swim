@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, FastenerOwner, Property} from "@swim/fastener";
+import {Affinity, FastenerOwner, Property} from "@swim/component";
 import {Length} from "@swim/math";
 import {Look, Mood, ThemeAnimator} from "@swim/theme";
 import {ViewportInsets, ViewContextType, ViewContext, View, ViewRefFactory, ViewRef} from "@swim/view";
@@ -239,7 +239,7 @@ export interface DeckViewBar<O extends DeckView = DeckView, V extends DeckBar = 
   didAttachView(barView: V): void;
 
   /** @override */
-  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, child: V, target: View | number | null, key: string | undefined): void;
 
   viewDidResize(viewContext: ViewContext, barView: V): void;
 
@@ -261,8 +261,8 @@ export const DeckViewBar = (function (_super: typeof ViewRef) {
     this.initBar(barView);
   };
 
-  DeckViewBar.prototype.insertChild = function (this: DeckViewBar, parent: View, childView: DeckBar, targetView: View | null, key: string | undefined): void {
-    parent.prependChild(childView, key);
+  DeckViewBar.prototype.insertChild = function (this: DeckViewBar, parent: View, child: DeckBar, target: View | number | null, key: string | undefined): void {
+    parent.prependChild(child, key);
   };
 
   DeckViewBar.prototype.viewDidResize = function (this: DeckViewBar, viewContext: ViewContext, barView: DeckBar): void {
@@ -311,7 +311,7 @@ export interface DeckViewCard<O extends DeckView = DeckView, V extends DeckCard 
   didAttachView(cardView: V): void;
 
   /** @override */
-  insertChild(parent: View, childView: V, targetView: View | null, key: string | undefined): void;
+  insertChild(parent: View, child: V, target: View | number | null, key: string | undefined): void;
 
   viewDidResize(viewContext: ViewContext, cardView: V): void;
 
@@ -334,10 +334,10 @@ export const DeckViewCard = (function (_super: typeof ViewRef) {
     this.initCard(cardView);
   };
 
-  DeckViewCard.prototype.insertChild = function (this: DeckViewCard, parent: View, childView: DeckCard, targetView: View | null, key: string | undefined): void {
+  DeckViewCard.prototype.insertChild = function (this: DeckViewCard, parent: View, child: DeckCard, target: View | number | null, key: string | undefined): void {
     const targetKey = "card" + (this.cardIndex + 1);
-    targetView = parent.getChild(targetKey);
-    parent.insertChild(childView, targetView, key);
+    target = parent.getChild(targetKey);
+    parent.insertChild(child, target, key);
   };
 
   DeckViewCard.prototype.viewDidResize = function (this: DeckViewCard, viewContext: ViewContext, cardView: DeckCard): void {

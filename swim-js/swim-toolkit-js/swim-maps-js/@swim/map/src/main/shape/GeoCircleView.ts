@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, Property, Animator} from "@swim/fastener";
+import {Affinity, Property, Animator} from "@swim/component";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, R2Circle, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
@@ -30,8 +30,7 @@ import {
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
-import type {GeoViewInit} from "../geo/GeoView";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoCircleViewObserver} from "./GeoCircleViewObserver";
 
@@ -47,7 +46,7 @@ export interface GeoCircleViewInit extends GeoViewInit, FillViewInit, StrokeView
 }
 
 /** @public */
-export class GeoCircleView extends GeoLayerView implements FillView, StrokeView {
+export class GeoCircleView extends GeoView implements FillView, StrokeView {
   constructor() {
     super();
     Object.defineProperty(this, "viewBounds", {
@@ -142,7 +141,7 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderCircle(renderer.context, viewContext.viewFrame);
     }
   }

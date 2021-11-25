@@ -17,8 +17,7 @@ import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
-import type {GraphicsView} from "../graphics/GraphicsView";
-import {LayerView} from "../layer/LayerView";
+import {GraphicsView} from "../graphics/GraphicsView";
 import type {PaintingContext} from "../painting/PaintingContext";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {CanvasContext} from "../canvas/CanvasContext";
@@ -39,7 +38,7 @@ export interface RectViewInit extends FillViewInit, StrokeViewInit {
 }
 
 /** @public */
-export class RectView extends LayerView implements FillView, StrokeView {
+export class RectView extends GraphicsView implements FillView, StrokeView {
   @ThemeAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
   readonly x!: ThemeAnimator<this, Length, AnyLength>;
 
@@ -99,7 +98,7 @@ export class RectView extends LayerView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderRect(renderer.context, this.viewFrame);
     }
   }

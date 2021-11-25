@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/component";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import {View, ViewRef} from "@swim/view";
@@ -79,7 +79,7 @@ export class LeafletView extends MapView {
 
   protected onMapRender(): void {
     if (this.updateGeoViewport()) {
-      const immediate = !this.isHidden() && !this.culled;
+      const immediate = !this.hidden && !this.culled;
       this.requireUpdate(View.NeedsProject, immediate);
     }
   }

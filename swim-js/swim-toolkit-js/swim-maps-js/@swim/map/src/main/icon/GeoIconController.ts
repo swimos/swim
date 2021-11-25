@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/component";
 import type {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import type {Graphics, IconLayout} from "@swim/graphics";

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {ConsumerType} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {Trait} from "../trait/Trait";
 import {TraitRef} from "../trait/TraitRef";
 

@@ -50,7 +50,7 @@ swim.TraitViewControllerSet({
   },
 })(ExampleTableController.prototype, "rows");
 
-const tableModel = new swim.GenericModel();
+const tableModel = new swim.Model();
 tableModel.mount();
 const tableTrait = new swim.TableTrait();
 tableModel.setTrait("table", tableTrait);
@@ -65,7 +65,7 @@ const colBTrait = new swim.ColTrait()
 tableTrait.setTrait("b", colBTrait);
 
 function createRowModel(i) {
-  const rowModel = new swim.GenericModel();
+  const rowModel = new swim.Model();
   const rowTrait = new swim.RowTrait();
   rowModel.setTrait("row", rowTrait);
   rowTrait.getOrCreateCell("a", swim.TextCellTrait).content(i + "A");

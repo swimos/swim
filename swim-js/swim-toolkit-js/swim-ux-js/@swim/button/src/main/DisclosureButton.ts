@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Angle, Transform} from "@swim/math";
-import {Affinity} from "@swim/fastener";
+import {Affinity} from "@swim/component";
 import {AnyColor, Color, AnyExpansion, Expansion} from "@swim/style";
 import {Look, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, View} from "@swim/view";

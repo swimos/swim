@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Affinity} from "@swim/fastener";
+import {Affinity} from "@swim/component";
 import type {DeckCard} from "./DeckCard";
 import {DeckView} from "./DeckView";
 import {TitleDeckBar} from "./TitleDeckBar";

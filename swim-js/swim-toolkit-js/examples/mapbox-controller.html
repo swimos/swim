@@ -56,12 +56,12 @@ swim.TraitViewControllerSet({
 class ExampleLayerController extends swim.GeoLayerController {
 }
 
-const layerModel = new swim.GenericModel();
+const layerModel = new swim.Model();
 const layerTrait = new swim.GeoLayerTrait();
 layerModel.setTrait("layer", layerTrait);
 
 function addFeature(featureId, layerModel) {
-  const featureModel = new swim.GenericModel();
+  const featureModel = new swim.Model();
   const featureTrait = new swim.GeoIconTrait()
     .iconLayout({iconWidth: 16, iconHeight: 16})
     .graphics(swim.CircleIcon.create());
@@ -80,7 +80,7 @@ for (let featureId = 0; featureId < featureCount; featureId += 1) {
   addFeature(featureId, layerModel);
 }
 
-const mapModel = new swim.GenericModel();
+const mapModel = new swim.Model();
 mapModel.mount();
 const mapTrait = new swim.MapTrait();
 mapModel.setTrait("map", mapTrait);

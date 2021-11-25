@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Provider} from "@swim/fastener";
+import {Provider} from "@swim/component";
 import {SelectionOptions, SelectionService} from "../selection/SelectionService";
 import {SelectionProvider} from "../selection/SelectionProvider";
 import {Trait} from "../trait/Trait";

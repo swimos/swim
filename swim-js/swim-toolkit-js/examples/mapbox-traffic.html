@@ -37,7 +37,7 @@ const mapView = new swim.MapboxView(map);
 mapView.container.setView(bodyView);
 mapView.canvas.view.pointerEventsEnabled(true);
 
-const layerView = mapView.appendChild(swim.GeoTreeView);
+const layerView = mapView.appendChild(swim.GeoView);
 //layerView.geoBoundsColor("#008f11");
 //layerView.geoTreeColor("#008f11");
 
@@ -54,7 +54,7 @@ const intersectionsLink = host.downlinkMap()
       let intersectionLayerView = layerView.getChild(key);
       if (intersectionLayerView === null && lng !== 0 && lat !== 0 && isFinite(lng) && isFinite(lat)) {
         const intersectionId = value.get("id").stringValue();
-        intersectionLayerView = new swim.GeoLayerView();
+        intersectionLayerView = new swim.GeoView();
         const intersectionMarkerView = new swim.GeoCircleView()
             .geoCenter([lng, lat])
             .radius(5)

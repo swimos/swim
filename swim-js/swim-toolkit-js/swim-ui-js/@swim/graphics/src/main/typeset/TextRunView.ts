@@ -17,7 +17,7 @@ import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
-import {LayerView} from "../layer/LayerView";
+import {GraphicsView} from "../graphics/GraphicsView";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import type {TypesetViewInit, TypesetView} from "./TypesetView";
@@ -32,7 +32,7 @@ export interface TextRunViewInit extends TypesetViewInit {
 }
 
 /** @public */
-export class TextRunView extends LayerView implements TypesetView {
+export class TextRunView extends GraphicsView implements TypesetView {
   @ThemeAnimator({type: String, state: "", updateFlags: View.NeedsRender})
   readonly text!: ThemeAnimator<this, string>;
 
@@ -92,7 +92,7 @@ export class TextRunView extends LayerView implements TypesetView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof CanvasRenderer && !this.hidden && !this.culled) {
       this.renderText(renderer.context);
     }
   }

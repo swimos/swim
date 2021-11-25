@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ProviderClass, Provider} from "@swim/fastener";
+import {ProviderClass, Provider} from "@swim/component";
 import {DisplayService} from "./DisplayService";
 import type {ViewContext} from "../view/ViewContext";
 import type {ViewFlags, View} from "../view/View";

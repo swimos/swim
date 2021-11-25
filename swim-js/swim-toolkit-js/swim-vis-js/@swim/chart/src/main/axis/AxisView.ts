@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing, Easing, ContinuousScale} from "@swim/util";
-import {Property} from "@swim/fastener";
+import {Property} from "@swim/component";
 import {BTree} from "@swim/collections";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, AnyView, ViewCreator, View} from "@swim/view";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {GraphicsViewInit, GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import type {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import {AnyTickView, TickView} from "../tick/TickView";
@@ -76,33 +76,16 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     return tickView !== void 0 ? tickView : null;
   }
 
-  insertTick(tick: AnyTickView<D>): TickView<D> {
-    tick = TickView.fromAny(tick, this.orientation);
-    tick.remove();
-    this.willInsertChild(tick, null);
-    this.ticks.set(tick.value, tick);
-    tick.attachParent(this);
-    this.onInsertChild(tick, null);
-    this.didInsertChild(tick, null);
-    tick.cascadeInsert();
-    return tick;
+  insertTick(tickView: AnyTickView<D>): TickView<D> {
+    return this.insertChild(TickView.fromAny(tickView, this.orientation), null);
   }
 
   removeTick(value: D): TickView<D> | null {
-    const tick = this.ticks.get(value);
-    if (tick !== void 0) {
-      if (tick.parent !== this) {
-        throw new Error("not a child view");
-      }
-      this.willRemoveChild(tick);
-      tick.detachParent(this);
-      this.ticks.delete(value);
-      this.onRemoveChild(tick);
-      this.didRemoveChild(tick);
-      tick.setKey(void 0);
-      return tick;
+    const tickView = this.getTick(value);
+    if (tickView !== null) {
+      tickView.remove();
     }
-    return null;
+    return tickView;
   }
 
   @Property({type: TickGenerator, state: true})
@@ -156,153 +139,6 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
   @ThemeAnimator({type: Color, inherits: true, state: null, updateFlags: View.NeedsRender})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  override get childCount(): number {
-    return this.ticks.size;
-  }
-
-  override get children(): ReadonlyArray<View> {
-    const children: View[] = [];
-    this.ticks.forEachValue(function (child: TickView<D>): void {
-      children.push(child);
-    }, this);
-    return children;
-  }
-
-  override firstChild(): View | null {
-    const child = this.ticks.firstValue();
-    return child !== void 0 ? child : null;
-  }
-
-  override lastChild(): View | null {
-    const child = this.ticks.lastValue();
-    return child !== void 0 ? child : null;
-  }
-
-  override nextChild(targetView: View): View | null {
-    if (targetView instanceof TickView) {
-      const child = this.ticks.nextValue(targetView.value);
-      if (child !== void 0) {
-        return child;
-      }
-    }
-    return null;
-  }
-
-  override previousChild(targetView: View): View | null {
-    if (targetView instanceof TickView) {
-      const child = this.ticks.previousValue(targetView.value);
-      if (child !== void 0) {
-        return child;
-      }
-    }
-    return null;
-  }
-
-  override forEachChild<T>(callback: (child: View) => T | void): T | undefined;
-  override forEachChild<T, S>(callback: (this: S, child: View) => T | void, thisArg: S): T | undefined;
-  override forEachChild<T, S>(callback: (this: S | undefined, child: View) => T | void, thisArg?: S): T | undefined {
-    return this.ticks.forEachValue(callback, thisArg);
-  }
-
-  override getChild<F extends abstract new (...args: any[]) => View>(key: string, childBound: F): InstanceType<F> | null;
-  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null;
-  override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null {
-    return null;
-  }
-
-  override setChild<V extends View>(key: string, newChild: V): View | null;
-  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
-  override setChild(key: string, newChild: AnyView | null): View | null;
-  override setChild(key: string, newChild: AnyView | null): View | null {
-    throw new Error("unsupported");
-  }
-
-  override appendChild<V extends View>(child: V, key?: string): V;
-  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
-  override appendChild(child: AnyView, key?: string): View;
-  override appendChild(child: AnyView, key?: string): View {
-    if (key !== void 0) {
-      throw new Error("unsupported");
-    }
-    child = View.fromAny(child);
-    if (!(child instanceof TickView)) {
-      throw new TypeError("" + child);
-    }
-    return this.insertTick(child);
-  }
-
-  override prependChild<V extends View>(child: V, key?: string): V;
-  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
-  override prependChild(child: AnyView, key?: string): View;
-  override prependChild(child: AnyView, key?: string): View {
-    if (key !== void 0) {
-      throw new Error("unsupported");
-    }
-    child = View.fromAny(child);
-    if (!(child instanceof TickView)) {
-      throw new TypeError("" + child);
-    }
-    return this.insertTick(child);
-  }
-
-  override insertChild<V extends View>(child: V, target: View | null, key?: string): V;
-  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
-  override insertChild(child: AnyView, target: View | null, key?: string): View;
-  override insertChild(child: AnyView, target: View | null, key?: string): View {
-    if (key !== void 0) {
-      throw new Error("unsupported");
-    }
-    child = View.fromAny(child);
-    if (!(child instanceof TickView)) {
-      throw new TypeError("" + child);
-    }
-    return this.insertTick(child);
-  }
-
-  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
-  override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
-  override replaceChild(newChild: AnyView, oldChild: View): View {
-    if (!(oldChild instanceof TickView)) {
-      throw new TypeError("" + oldChild);
-    }
-    if (oldChild.parent !== this) {
-      throw new TypeError("" + oldChild);
-    }
-    newChild = View.fromAny(newChild);
-    if (!(newChild instanceof TickView)) {
-      throw new TypeError("" + newChild);
-    }
-    if (newChild !== oldChild) {
-      this.removeTick(oldChild.value);
-      this.insertTick(newChild);
-    }
-    return oldChild;
-  }
-
-  override removeChild(key: string): View | null;
-  override removeChild<V extends View>(child: V): V;
-  override removeChild(child: string | View): View | null {
-    if (typeof child === "string") {
-      throw new Error("unsupported");
-    }
-    if (!(child instanceof TickView)) {
-      throw new TypeError("" + child);
-    }
-    this.removeTick(child.value);
-    return child;
-  }
-
-  override removeChildren(): void {
-    this.ticks.forEach(function (key: D, child: TickView<D>): void {
-      this.willRemoveChild(child);
-      child.detachParent(this);
-      this.ticks.delete(key);
-      this.onRemoveChild(child);
-      this.didRemoveChild(child);
-      child.setKey(void 0);
-    }, this);
-  }
-
   protected updateTicks(): void {
     const scale = this.scale.value;
     let tickGenerator = this.tickGenerator.state;
@@ -340,7 +176,7 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
       } else {
         const newTick = this.createTickView(tickValue);
         if (newTick !== null) {
-          this.insertTick(newTick);
+          this.appendChild(newTick);
           newTick.opacity.setInterpolatedValue(0, 0);
           newTick.fadeIn(timing);
         }
@@ -402,6 +238,20 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     return tickLabel;
   }
 
+  protected override onInsertChild(child: View, target: View | null): void {
+    super.onInsertChild(child, target);
+    if (child instanceof TickView && this.ticks.get(child.value) !== child) {
+      this.ticks.set(child.value, child);
+    }
+  }
+
+  protected override onRemoveChild(child: View): void {
+    super.onRemoveChild(child);
+    if (child instanceof TickView && this.ticks.get(child.value) === child) {
+      this.ticks.delete(child.value);
+    }
+  }
+
   protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.flags & View.NeedsLayout) === 0) {
       displayFlags &= ~View.NeedsLayout;
@@ -448,7 +298,7 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     const ticks = init.ticks;
     if (ticks !== void 0) {
       for (let i = 0, n = ticks.length; i < n; i += 1) {
-        this.insertTick(ticks[i]!);
+        this.appendChild(TickView.fromAny(ticks[i]!));
       }
     }
     if (init.tickGenerator !== void 0) {

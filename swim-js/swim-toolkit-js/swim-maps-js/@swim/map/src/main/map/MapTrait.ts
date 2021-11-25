@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {MemberFastenerClass, Property} from "@swim/fastener";
+import {MemberFastenerClass, Property} from "@swim/component";
 import {GeoBox} from "@swim/geo";
 import {Model, Trait, TraitSet} from "@swim/model";
 import {GeoTrait} from "../geo/GeoTrait";

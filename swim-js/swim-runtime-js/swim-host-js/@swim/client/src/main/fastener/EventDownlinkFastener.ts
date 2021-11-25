@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable} from "@swim/util";
-import type {FastenerOwner} from "@swim/fastener";
+import type {FastenerOwner} from "@swim/component";
 import {Value} from "@swim/structure";
 import {Uri} from "@swim/uri";
 import type {DownlinkObserver} from "../downlink/Downlink";

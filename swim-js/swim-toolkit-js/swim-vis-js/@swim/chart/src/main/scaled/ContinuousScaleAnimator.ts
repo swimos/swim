@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
-import {Affinity, AnimatorFactory, Animator} from "@swim/fastener"
+import {Affinity, AnimatorFactory, Animator} from "@swim/component"
 import type {View} from "@swim/view";
 import {ScaledView} from "../"; // forward import
 

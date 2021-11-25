@@ -56,10 +56,10 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     let x0: number;
     let x1: number;
     let dx: number;
-    const dataPointRefs = this.dataPointRefs;
-    if (!dataPointRefs.isEmpty()) {
-      const p0 = dataPointRefs.firstValue()!.view!;
-      const p1 = dataPointRefs.lastValue()!.view!;
+    const dataPointViews = this.dataPointViews;
+    if (!dataPointViews.isEmpty()) {
+      const p0 = dataPointViews.firstValue()!;
+      const p1 = dataPointViews.lastValue()!;
       x0 = p0.xCoord;
       x1 = p1.xCoord;
       dx = x1 - x0;
@@ -81,10 +81,10 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
       dx = NaN;
     }
 
-    const cursor = dataPointRefs.values();
+    const cursor = dataPointViews.values();
     cursor.next();
     while (cursor.hasNext()) {
-      const p = cursor.next().value!.view!;
+      const p = cursor.next().value!;
       context.lineTo(p.xCoord, p.yCoord);
       if (gradient !== null && p.isGradientStop()) {
         let color = p.color.value || fill;
@@ -97,10 +97,10 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
       }
     }
     while (cursor.hasPrevious()) {
-      const p = cursor.previous().value!.view!;
+      const p = cursor.previous().value!;
       context.lineTo(p.xCoord, p.y2Coord!);
     }
-    if (!dataPointRefs.isEmpty()) {
+    if (!dataPointViews.isEmpty()) {
       context.closePath();
     }
 
@@ -116,23 +116,23 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
 
   protected hitTestPlot(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null {
     const context = renderer.context;
-    const dataPointRefs = this.dataPointRefs;
+    const dataPointViews = this.dataPointViews;
 
     context.beginPath();
-    const cursor = dataPointRefs.values();
+    const cursor = dataPointViews.values();
     if (cursor.hasNext()) {
-      const p = cursor.next().value!.view!;
+      const p = cursor.next().value!;
       context.moveTo(p.xCoord, p.yCoord);
     }
     while (cursor.hasNext()) {
-      const p = cursor.next().value!.view!;
+      const p = cursor.next().value!;
       context.lineTo(p.xCoord, p.yCoord);
     }
     while (cursor.hasPrevious()) {
-      const p = cursor.previous().value!.view!;
+      const p = cursor.previous().value!;
       context.lineTo(p.xCoord, p.y2Coord!);
     }
-    if (!dataPointRefs.isEmpty()) {
+    if (!dataPointViews.isEmpty()) {
       context.closePath();
     }
 

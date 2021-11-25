@@ -13,14 +13,14 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
-import {GenericController, TraitViewRef} from "@swim/controller";
+import type {MemberFastenerClass} from "@swim/component";
+import {Controller, TraitViewRef} from "@swim/controller";
 import {AxisView} from "./AxisView";
 import {AxisTrait} from "./AxisTrait";
 import type {AxisControllerObserver} from "./AxisControllerObserver";
 
 /** @public */
-export abstract class AxisController<D = unknown> extends GenericController {
+export abstract class AxisController<D = unknown> extends Controller {
   override readonly observerType?: Class<AxisControllerObserver<D>>;
 
   @TraitViewRef<AxisController<D>, AxisTrait<D>, AxisView<D>>({

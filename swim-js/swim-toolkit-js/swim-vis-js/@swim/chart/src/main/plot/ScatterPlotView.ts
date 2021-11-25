@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import {Mutable, Class, Equals, Values, Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewSet} from "@swim/view";
-import {GraphicsView, LayerView, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import type {PlotViewInit, PlotViewDataPointExt, PlotView} from "./PlotView";
@@ -32,7 +32,7 @@ export interface ScatterPlotViewInit<X = unknown, Y = unknown> extends PlotViewI
 }
 
 /** @public */
-export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerView implements PlotView<X, Y> {
+export abstract class ScatterPlotView<X = unknown, Y = unknown> extends GraphicsView implements PlotView<X, Y> {
   constructor() {
     super();
     this.xDataDomain = null;
@@ -436,7 +436,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends LayerVie
 
   protected override didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof CanvasRenderer && !this.hidden && !this.culled) {
       this.renderPlot(renderer.context, this.viewFrame);
     }
     super.didRender(viewContext);

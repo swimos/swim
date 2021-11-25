@@ -16,6 +16,8 @@ import {
   Mutable,
   Class,
   Arrays,
+  Comparator,
+  Dictionary,
   FromAny,
   AnyTiming,
   Timing,
@@ -31,9 +33,9 @@ import {
   Property,
   Animator,
   Provider,
-  HierarchyFlags,
-  Hierarchy,
-} from "@swim/fastener";
+  ComponentFlags,
+  Component,
+} from "@swim/component";
 import {
   AnyConstraintExpression,
   ConstraintExpression,
@@ -86,8 +88,16 @@ import type {
   ViewDidChange,
   ViewWillAnimate,
   ViewDidAnimate,
+  ViewWillProject,
+  ViewDidProject,
   ViewWillLayout,
   ViewDidLayout,
+  ViewWillRender,
+  ViewDidRender,
+  ViewWillRasterize,
+  ViewDidRasterize,
+  ViewWillComposite,
+  ViewDidComposite,
   ViewObserverCache,
 } from "./ViewObserver";
 import {ViewRelation} from "./"; // forward import
@@ -97,7 +107,7 @@ export type ViewContextType<V extends View> =
   V extends {readonly contextType?: Class<infer T>} ? T : never;
 
 /** @public */
-export type ViewFlags = HierarchyFlags;
+export type ViewFlags = ComponentFlags;
 
 /** @public */
 export type AnyView<V extends View = View> = V | ViewFactory<V> | InitType<V>;
@@ -134,7 +144,7 @@ export type ViewCreator<F extends (abstract new (...args: any[]) => V) & Creatab
   (abstract new (...args: any[]) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
 /** @public */
-export abstract class View extends Hierarchy implements Initable<ViewInit>, ConstraintScope, ConstraintContext, ThemeContext {
+export class View extends Component implements Initable<ViewInit>, ConstraintScope, ConstraintContext, ThemeContext {
   constructor() {
     super();
     this.observerCache = {};
@@ -149,19 +159,25 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   readonly contextType?: Class<ViewContext>;
 
   /** @internal */
-  override readonly flags!: ViewFlags;
-
-  /** @internal */
-  override setFlags(flags: ViewFlags): void {
-    (this as Mutable<this>).flags = flags;
-  }
-
-  abstract override readonly parent: View | null;
-
-  /** @internal */
-  override attachParent(parent: View): void {
+  override attachParent(parent: View, nextSibling: View | null): void {
     // assert(this.parent === null);
     this.willAttachParent(parent);
+    (this as Mutable<this>).parent = parent;
+    let previousSibling: View | null;
+    if (nextSibling !== null) {
+      previousSibling = nextSibling.previousSibling;
+      this.setNextSibling(nextSibling);
+      nextSibling.setPreviousSibling(this);
+    } else {
+      previousSibling = parent.lastChild;
+      parent.setLastChild(this);
+    }
+    if (previousSibling !== null) {
+      previousSibling.setNextSibling(this);
+      this.setPreviousSibling(previousSibling);
+    } else {
+      parent.setFirstChild(this);
+    }
     if (parent.mounted) {
       if (parent.culled) {
         this.cascadeCull();
@@ -196,17 +212,6 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     }
   }
 
-  /** @internal */
-  override detachParent(parent: View): void {
-    // assert(this.parent === parent);
-    this.willDetachParent(parent);
-    if (this.mounted) {
-      this.cascadeUnmount();
-    }
-    this.onDetachParent(parent);
-    this.didDetachParent(parent);
-  }
-
   protected override willDetachParent(parent: View): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
@@ -231,45 +236,45 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     }
   }
 
-  abstract override readonly childCount: number;
+  override setChild<V extends View>(key: string, newChild: V): View | null;
+  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
+  override setChild(key: string, newChild: AnyView | null): View | null;
+  override setChild(key: string, newChild: AnyView | null): View | null {
+    if (newChild !== null) {
+      newChild = View.fromAny(newChild);
+    }
+    return super.setChild(key, newChild) as View | null;
+  }
 
-  abstract override readonly children: ReadonlyArray<View>;
+  override appendChild<V extends View>(child: V, key?: string): V;
+  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild(child: AnyView, key?: string): View;
+  override appendChild(child: AnyView, key?: string): View {
+    child = View.fromAny(child);
+    return super.appendChild(child, key);
+  }
 
-  abstract override firstChild(): View | null;
+  override prependChild<V extends View>(child: V, key?: string): V;
+  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild(child: AnyView, key?: string): View;
+  override prependChild(child: AnyView, key?: string): View {
+    child = View.fromAny(child);
+    return super.prependChild(child, key);
+  }
 
-  abstract override lastChild(): View | null;
+  override insertChild<V extends View>(child: V, target: View | null, key?: string): V;
+  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
+  override insertChild(child: AnyView, target: View | null, key?: string): View;
+  override insertChild(child: AnyView, target: View | null, key?: string): View {
+    child = View.fromAny(child);
+    return super.insertChild(child, target, key);
+  }
 
-  abstract override nextChild(target: View): View | null;
-
-  abstract override previousChild(target: View): View | null;
-
-  abstract override forEachChild<T>(callback: (child: View) => T | void): T | undefined;
-  abstract override forEachChild<T, S>(callback: (this: S, child: View) => T | void, thisArg: S): T | undefined;
-
-  abstract override getChild<F extends abstract new (...args: any[]) => View>(key: string, childBound: F): InstanceType<F> | null;
-  abstract override getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null;
-
-  abstract override setChild<V extends View>(key: string, newChild: V): View | null;
-  abstract override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
-  abstract override setChild(key: string, newChild: AnyView | null): View | null;
-
-  abstract override appendChild<V extends View>(child: V, key?: string): V;
-  abstract override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
-  abstract override appendChild(child: AnyView, key?: string): View;
-
-  abstract override prependChild<V extends View>(child: V, key?: string): V;
-  abstract override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
-  abstract override prependChild(child: AnyView, key?: string): View;
-
-  abstract override insertChild<V extends View>(child: V, target: View | null, key?: string): V;
-  abstract override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
-  abstract override insertChild(child: AnyView, target: View | null, key?: string): View;
-
-  abstract override replaceChild<V extends View>(newChild: View, oldChild: V): V;
-  abstract override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
-
-  override get insertChildFlags(): ViewFlags {
-    return (this.constructor as typeof View).InsertChildFlags;
+  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
+  override replaceChild(newChild: AnyView, oldChild: View): View {
+    newChild = View.fromAny(newChild);
+    return super.replaceChild(newChild, oldChild);
   }
 
   protected override willInsertChild(child: View, target: View | null): void {
@@ -315,13 +320,6 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     }
   }
 
-  abstract override removeChild(key: string): View | null;
-  abstract override removeChild<V extends View>(child: V): V;
-
-  override get removeChildFlags(): ViewFlags {
-    return (this.constructor as typeof View).RemoveChildFlags;
-  }
-
   protected override willRemoveChild(child: View): void {
     super.willRemoveChild(child);
     const observers = this.observerCache.viewWillRemoveChildObservers;
@@ -349,8 +347,9 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     super.didRemoveChild(child);
   }
 
-  override get mountFlags(): ViewFlags {
-    return (this.constructor as typeof View).MountFlags;
+  /** @internal */
+  override mount(): void {
+    throw new Error();
   }
 
   protected override willMount(): void {
@@ -390,6 +389,11 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     super.didMount();
   }
 
+  /** @internal */
+  override unmount(): void {
+    throw new Error();
+  }
+
   protected override willUnmount(): void {
     super.willUnmount();
     const observers = this.observers;
@@ -420,30 +424,24 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   setCulled(culled: boolean): void {
     const flags = this.flags;
     if (culled && (flags & View.CulledFlag) === 0) {
-      this.setFlags(flags | View.CulledFlag);
       if ((flags & View.CullFlag) === 0) {
-        this.setFlags(this.flags | View.TraversingFlag);
-        try {
-          this.willCull();
-          this.onCull();
-          this.cullChildren();
-          this.didCull();
-        } finally {
-          this.setFlags(this.flags & ~View.TraversingFlag);
-        }
+        this.willCull();
+        this.setFlags(flags | View.CulledFlag);
+        this.onCull();
+        this.cullChildren();
+        this.didCull();
+      } else {
+        this.setFlags(flags | View.CulledFlag);
       }
     } else if (!culled && (flags & View.CulledFlag) !== 0) {
-      this.setFlags(flags & ~View.CulledFlag);
       if ((flags & View.CullFlag) === 0) {
-        this.setFlags(this.flags | View.TraversingFlag);
-        try {
-          this.willUncull();
-          this.uncullChildren();
-          this.onUncull();
-          this.didUncull();
-        } finally {
-          this.setFlags(this.flags & ~View.TraversingFlag);
-        }
+        this.willUncull();
+        this.setFlags(flags & ~View.CulledFlag);
+        this.uncullChildren();
+        this.onUncull();
+        this.didUncull();
+      } else {
+        this.setFlags(flags & ~View.CulledFlag);
       }
     }
   }
@@ -451,17 +449,14 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   /** @internal */
   cascadeCull(): void {
     if ((this.flags & View.CullFlag) === 0) {
-      this.setFlags(this.flags | View.CullFlag);
       if ((this.flags & View.CulledFlag) === 0) {
-        this.setFlags(this.flags | View.TraversingFlag);
-        try {
-          this.willCull();
-          this.onCull();
-          this.cullChildren();
-          this.didCull();
-        } finally {
-          this.setFlags(this.flags & ~View.TraversingFlag);
-        }
+        this.willCull();
+        this.setFlags(this.flags | View.CullFlag);
+        this.onCull();
+        this.cullChildren();
+        this.didCull();
+      } else {
+        this.setFlags(this.flags | View.CullFlag);
       }
     }
   }
@@ -492,31 +487,28 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   /** @internal */
   protected cullChildren(): void {
-    type self = this;
-    function cullChild(this: self, child: View): void {
+    let child = this.firstChild;
+    while (child !== null) {
+      const next = child.nextSibling;
       child.cascadeCull();
-      if ((child.flags & View.RemovingFlag) !== 0) {
-        child.setFlags(child.flags & ~View.RemovingFlag);
-        this.removeChild(child);
+      if (next !== null && next.parent !== this) {
+        throw new Error("inconsistent cull");
       }
+      child = next;
     }
-    this.forEachChild(cullChild, this);
   }
 
   /** @internal */
   cascadeUncull(): void {
     if ((this.flags & View.CullFlag) !== 0) {
-      this.setFlags(this.flags & ~View.CullFlag);
       if ((this.flags & View.CulledFlag) === 0) {
-        this.setFlags(this.flags | View.TraversingFlag);
-        try {
-          this.willUncull();
-          this.uncullChildren();
-          this.onUncull();
-          this.didUncull();
-        } finally {
-          this.setFlags(this.flags & ~View.TraversingFlag);
-        }
+        this.willUncull();
+        this.setFlags(this.flags & ~View.CullFlag);
+        this.uncullChildren();
+        this.onUncull();
+        this.didUncull();
+      } else {
+        this.setFlags(this.flags & ~View.CullFlag);
       }
     }
   }
@@ -563,15 +555,158 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   /** @internal */
   protected uncullChildren(): void {
-    type self = this;
-    function uncullChild(this: self, child: View): void {
+    let child = this.firstChild;
+    while (child !== null) {
+      const next = child.nextSibling;
       child.cascadeUncull();
-      if ((child.flags & View.RemovingFlag) !== 0) {
-        child.setFlags(child.flags & ~View.RemovingFlag);
-        this.removeChild(child);
+      if (next !== null && next.parent !== this) {
+        throw new Error("inconsistent uncull");
+      }
+      child = next;
+    }
+  }
+
+  /**
+   * Returns `true` if this view is ineligible for rendering and hit testing,
+   * and should be excluded from its parent's layout and hit bounds.
+   */
+  get hidden(): boolean {
+    return (this.flags & View.HiddenMask) !== 0;
+  }
+
+  /**
+   * Makes this view ineligible for rendering and hit testing, and excludes
+   * this view from its parent's layout and hit bounds, when `hidden` is `true`.
+   * Makes this view eligible for rendering and hit testing, and includes this
+   * view in its parent's layout and hit bounds, when `hidden` is `false`.
+   */
+  setHidden(hidden: boolean): void {
+    const flags = this.flags;
+    if (hidden && (flags & View.HiddenFlag) === 0) {
+      this.setFlags(flags | View.HiddenFlag);
+      if ((flags & View.HideFlag) === 0) {
+        this.willHide();
+        this.onHide();
+        this.hideChildren();
+        this.didHide();
+      }
+    } else if (!hidden && (flags & View.HiddenFlag) !== 0) {
+      this.setFlags(flags & ~View.HiddenFlag);
+      if ((flags & View.HideFlag) === 0) {
+        this.willUnhide();
+        this.unhideChildren();
+        this.onUnhide();
+        this.didUnhide();
       }
     }
-    this.forEachChild(uncullChild, this);
+  }
+
+  /** @internal */
+  cascadeHide(): void {
+    if ((this.flags & View.HideFlag) === 0) {
+      if ((this.flags & View.HiddenFlag) === 0) {
+        this.willHide();
+        this.setFlags(this.flags | View.HideFlag);
+        this.onHide();
+        this.hideChildren();
+        this.didHide();
+      } else {
+        this.setFlags(this.flags | View.HideFlag);
+      }
+    }
+  }
+
+  protected willHide(): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillHide !== void 0) {
+        observer.viewWillHide(this);
+      }
+    }
+  }
+
+  protected onHide(): void {
+    // hook
+  }
+
+  protected didHide(): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidHide !== void 0) {
+        observer.viewDidHide(this);
+      }
+    }
+  }
+
+  /** @internal */
+  protected hideChildren(): void {
+    let child = this.firstChild;
+    while (child !== null) {
+      const next = child.nextSibling;
+      child.cascadeHide();
+      if (next !== null && next.parent !== this) {
+        throw new Error("inconsistent hide");
+      }
+      child = next;
+    }
+  }
+
+  cascadeUnhide(): void {
+    if ((this.flags & View.HideFlag) !== 0) {
+      if ((this.flags & View.HiddenFlag) === 0) {
+        this.willUnhide();
+        this.setFlags(this.flags & ~View.HideFlag);
+        this.unhideChildren();
+        this.onUnhide();
+        this.didUnhide();
+      } else {
+        this.setFlags(this.flags & ~View.HideFlag);
+      }
+    }
+  }
+
+  get unhideFlags(): ViewFlags {
+    return (this.constructor as typeof View).UnhideFlags;
+  }
+
+  protected willUnhide(): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillUnhide !== void 0) {
+        observer.viewWillUnhide(this);
+      }
+    }
+  }
+
+  protected onUnhide(): void {
+    this.requestUpdate(this, this.flags & View.UpdateMask, false);
+    this.requireUpdate(this.uncullFlags);
+  }
+
+  protected didUnhide(): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidUnhide !== void 0) {
+        observer.viewDidUnhide(this);
+      }
+    }
+  }
+
+  /** @internal */
+  protected unhideChildren(): void {
+    let child = this.firstChild;
+    while (child !== null) {
+      const next = child.nextSibling;
+      child.cascadeUnhide();
+      if (next !== null && next.parent !== this) {
+        throw new Error("inconsistent unhide");
+      }
+      child = next;
+    }
   }
 
   get unbounded(): boolean {
@@ -682,7 +817,89 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     return processFlags;
   }
 
-  abstract cascadeProcess(processFlags: ViewFlags, viewContext: ViewContext): void;
+  cascadeProcess(processFlags: ViewFlags, baseViewContext: ViewContext): void {
+    const viewContext = this.extendViewContext(baseViewContext);
+    const outerViewContext = ViewContext.current;
+    try {
+      ViewContext.current = viewContext;
+      processFlags &= ~View.NeedsProcess;
+      processFlags |= this.flags & View.UpdateMask;
+      processFlags = this.needsProcess(processFlags, viewContext);
+      if ((processFlags & View.ProcessMask) !== 0) {
+        let cascadeFlags = processFlags;
+        this.setFlags(this.flags & ~View.NeedsProcess | (View.ProcessingFlag | View.ContextualFlag));
+        this.willProcess(cascadeFlags, viewContext);
+        if (((this.flags | processFlags) & View.NeedsResize) !== 0) {
+          cascadeFlags |= View.NeedsResize;
+          this.setFlags(this.flags & ~View.NeedsResize);
+          this.willResize(viewContext);
+        }
+        if (((this.flags | processFlags) & View.NeedsScroll) !== 0) {
+          cascadeFlags |= View.NeedsScroll;
+          this.setFlags(this.flags & ~View.NeedsScroll);
+          this.willScroll(viewContext);
+        }
+        if (((this.flags | processFlags) & View.NeedsChange) !== 0) {
+          cascadeFlags |= View.NeedsChange;
+          this.setFlags(this.flags & ~View.NeedsChange);
+          this.willChange(viewContext);
+        }
+        if (((this.flags | processFlags) & View.NeedsAnimate) !== 0) {
+          cascadeFlags |= View.NeedsAnimate;
+          this.setFlags(this.flags & ~View.NeedsAnimate);
+          this.willAnimate(viewContext);
+        }
+        if (((this.flags | processFlags) & View.NeedsProject) !== 0) {
+          cascadeFlags |= View.NeedsProject;
+          this.setFlags(this.flags & ~View.NeedsProject);
+          this.willProject(viewContext);
+        }
+
+        this.onProcess(cascadeFlags, viewContext);
+        if ((cascadeFlags & View.NeedsResize) !== 0) {
+          this.onResize(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsScroll) !== 0) {
+          this.onScroll(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsChange) !== 0) {
+          this.onChange(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsAnimate) !== 0) {
+          this.onAnimate(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsProject) !== 0) {
+          this.onProject(viewContext);
+        }
+
+        if ((cascadeFlags & View.ProcessMask) !== 0) {
+          this.setFlags(this.flags & ~View.ContextualFlag);
+          this.processChildren(cascadeFlags, viewContext, this.processChild);
+          this.setFlags(this.flags | View.ContextualFlag);
+        }
+
+        if ((cascadeFlags & View.NeedsProject) !== 0) {
+          this.didProject(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsAnimate) !== 0) {
+          this.didAnimate(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsChange) !== 0) {
+          this.didChange(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsScroll) !== 0) {
+          this.didScroll(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsResize) !== 0) {
+          this.didResize(viewContext);
+        }
+        this.didProcess(cascadeFlags, viewContext);
+      }
+    } finally {
+      this.setFlags(this.flags & ~(View.ProcessingFlag | View.ContextualFlag));
+      ViewContext.current = outerViewContext;
+    }
+  }
 
   protected willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     // hook
@@ -794,18 +1011,42 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     }
   }
 
+  protected willProject(viewContext: ViewContextType<this>): void {
+    const observers = this.observerCache.viewWillProjectObservers;
+    if (observers !== void 0) {
+      for (let i = 0; i < observers.length; i += 1) {
+        const observer = observers[i]!;
+        observer.viewWillProject(viewContext, this);
+      }
+    }
+  }
+
+  protected onProject(viewContext: ViewContextType<this>): void {
+    // hook
+  }
+
+  protected didProject(viewContext: ViewContextType<this>): void {
+    const observers = this.observerCache.viewDidProjectObservers;
+    if (observers !== void 0) {
+      for (let i = 0; i < observers.length; i += 1) {
+        const observer = observers[i]!;
+        observer.viewDidProject(viewContext, this);
+      }
+    }
+  }
+
   protected processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
                             processChild: (this: this, child: View, processFlags: ViewFlags,
                                            viewContext: ViewContextType<this>) => void): void {
-    type self = this;
-    function processNext(this: self, child: View): void {
+    let child = this.firstChild;
+    while (child !== null) {
+      const next = child.nextSibling;
       processChild.call(this, child, processFlags, viewContext);
-      if ((child.flags & View.RemovingFlag) !== 0) {
-        child.setFlags(child.flags & ~View.RemovingFlag);
-        this.removeChild(child);
+      if (next !== null && next.parent !== this) {
+        throw new Error("inconsistent process pass");
       }
+      child = next;
     }
-    this.forEachChild(processNext, this);
   }
 
   protected processChild(child: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
@@ -820,7 +1061,78 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     return displayFlags;
   }
 
-  abstract cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void;
+  cascadeDisplay(displayFlags: ViewFlags, baseViewContext: ViewContext): void {
+    const viewContext = this.extendViewContext(baseViewContext);
+    const outerViewContext = ViewContext.current;
+    try {
+      ViewContext.current = viewContext;
+      displayFlags &= ~View.NeedsDisplay;
+      displayFlags |= this.flags & View.UpdateMask;
+      displayFlags = this.needsDisplay(displayFlags, viewContext);
+      if ((displayFlags & View.DisplayMask) !== 0) {
+        let cascadeFlags = displayFlags;
+        this.setFlags(this.flags & ~View.NeedsDisplay | (View.DisplayingFlag | View.ContextualFlag));
+        this.willDisplay(cascadeFlags, viewContext);
+        if (((this.flags | displayFlags) & View.NeedsLayout) !== 0) {
+          cascadeFlags |= View.NeedsLayout;
+          this.setFlags(this.flags & ~View.NeedsLayout);
+          this.willLayout(viewContext);
+        }
+        if (((this.flags | displayFlags) & View.NeedsRender) !== 0) {
+          cascadeFlags |= View.NeedsRender;
+          this.setFlags(this.flags & ~View.NeedsRender);
+          this.willRender(viewContext);
+        }
+        if (((this.flags | displayFlags) & View.NeedsRasterize) !== 0) {
+          cascadeFlags |= View.NeedsRasterize;
+          this.setFlags(this.flags & ~View.NeedsRasterize);
+          this.willRasterize(viewContext);
+        }
+        if (((this.flags | displayFlags) & View.NeedsComposite) !== 0) {
+          cascadeFlags |= View.NeedsComposite;
+          this.setFlags(this.flags & ~View.NeedsComposite);
+          this.willComposite(viewContext);
+        }
+
+        this.onDisplay(cascadeFlags, viewContext);
+        if ((cascadeFlags & View.NeedsLayout) !== 0) {
+          this.onLayout(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsRender) !== 0) {
+          this.onRender(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsRasterize) !== 0) {
+          this.onRasterize(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsComposite) !== 0) {
+          this.onComposite(viewContext);
+        }
+
+        if ((cascadeFlags & View.DisplayMask) !== 0 && !this.hidden && !this.culled) {
+          this.setFlags(this.flags & ~View.ContextualFlag);
+          this.displayChildren(cascadeFlags, viewContext, this.displayChild);
+          this.setFlags(this.flags | View.ContextualFlag);
+        }
+
+        if ((cascadeFlags & View.NeedsComposite) !== 0) {
+          this.didComposite(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsRasterize) !== 0) {
+          this.didRasterize(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsRender) !== 0) {
+          this.didRender(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsLayout) !== 0) {
+          this.didLayout(viewContext);
+        }
+        this.didDisplay(cascadeFlags, viewContext);
+      }
+    } finally {
+      this.setFlags(this.flags & ~(View.DisplayingFlag | View.ContextualFlag));
+      ViewContext.current = outerViewContext;
+    }
+  }
 
   protected willDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     // hook
@@ -858,18 +1170,90 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     }
   }
 
+  protected willRender(viewContext: ViewContextType<this>): void {
+    const observers = this.observerCache.viewWillRenderObservers;
+    if (observers !== void 0) {
+      for (let i = 0; i < observers.length; i += 1) {
+        const observer = observers[i]!;
+        observer.viewWillRender(viewContext, this);
+      }
+    }
+  }
+
+  protected onRender(viewContext: ViewContextType<this>): void {
+    // hook
+  }
+
+  protected didRender(viewContext: ViewContextType<this>): void {
+    const observers = this.observerCache.viewDidRenderObservers;
+    if (observers !== void 0) {
+      for (let i = 0; i < observers.length; i += 1) {
+        const observer = observers[i]!;
+        observer.viewDidRender(viewContext, this);
+      }
+    }
+  }
+
+  protected willRasterize(viewContext: ViewContextType<this>): void {
+    const observers = this.observerCache.viewWillRasterizeObservers;
+    if (observers !== void 0) {
+      for (let i = 0; i < observers.length; i += 1) {
+        const observer = observers[i]!;
+        observer.viewWillRasterize(viewContext, this);
+      }
+    }
+  }
+
+  protected onRasterize(viewContext: ViewContextType<this>): void {
+    // hook
+  }
+
+  protected didRasterize(viewContext: ViewContextType<this>): void {
+    const observers = this.observerCache.viewDidRasterizeObservers;
+    if (observers !== void 0) {
+      for (let i = 0; i < observers.length; i += 1) {
+        const observer = observers[i]!;
+        observer.viewDidRasterize(viewContext, this);
+      }
+    }
+  }
+
+  protected willComposite(viewContext: ViewContextType<this>): void {
+    const observers = this.observerCache.viewWillCompositeObservers;
+    if (observers !== void 0) {
+      for (let i = 0; i < observers.length; i += 1) {
+        const observer = observers[i]!;
+        observer.viewWillComposite(viewContext, this);
+      }
+    }
+  }
+
+  protected onComposite(viewContext: ViewContextType<this>): void {
+    // hook
+  }
+
+  protected didComposite(viewContext: ViewContextType<this>): void {
+    const observers = this.observerCache.viewDidCompositeObservers;
+    if (observers !== void 0) {
+      for (let i = 0; i < observers.length; i += 1) {
+        const observer = observers[i]!;
+        observer.viewDidComposite(viewContext, this);
+      }
+    }
+  }
+
   protected displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
                             displayChild: (this: this, child: View, displayFlags: ViewFlags,
                                            viewContext: ViewContextType<this>) => void): void {
-    type self = this;
-    function displayNext(this: self, child: View): void {
+    let child = this.firstChild;
+    while (child !== null) {
+      const next = child.nextSibling;
       displayChild.call(this, child, displayFlags, viewContext);
-      if ((child.flags & View.RemovingFlag) !== 0) {
-        child.setFlags(child.flags & ~View.RemovingFlag);
-        this.removeChild(child);
+      if (next !== null && next.parent !== this) {
+        throw new Error("inconsistent display pass");
       }
+      child = next;
     }
-    this.forEachChild(displayNext, this);
   }
 
   protected displayChild(child: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
@@ -1137,9 +1521,12 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
 
   protected bindFastener(fastener: Fastener): void {
     if ((fastener instanceof ViewRelation || fastener instanceof Gesture) && fastener.binds) {
-      this.forEachChild(function (child: View): void {
-        fastener.bindView(child, null);
-      }, this);
+      let child = this.firstChild;
+      while (child !== null) {
+        const next = child.nextSibling;
+        fastener.bindView(child, next);
+        child = next !== null && next.parent === this ? next : null;
+      }
     }
   }
 
@@ -1459,7 +1846,9 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
    * Returns the transformation from the parent view coordinates to view
    * coordinates.
    */
-  abstract readonly parentTransform: Transform;
+  get parentTransform(): Transform {
+    return Transform.identity();
+  }
 
   /**
    * Returns the transformation from page coordinates to view coordinates.
@@ -1503,7 +1892,10 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     return clientTransform.transform(pageTransform);
   }
 
-  abstract readonly clientBounds: R2Box;
+  get clientBounds(): R2Box {
+    const viewport = this.viewport;
+    return new R2Box(0, 0, viewport.width, viewport.height);
+  }
 
   intersectsViewport(): boolean {
     const bounds = this.clientBounds;
@@ -1513,13 +1905,19 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
         && (bounds.left <= 0 && 0 < bounds.right || 0 <= bounds.left && bounds.left < viewportWidth);
   }
 
-  abstract dispatchEvent(event: Event): boolean;
+  dispatchEvent(event: Event): boolean {
+    return true; // nop
+  }
 
-  abstract on(type: string, listener: EventListenerOrEventListenerObject,
-              options?: AddEventListenerOptions | boolean): this;
+  on(type: string, listener: EventListenerOrEventListenerObject,
+     options?: AddEventListenerOptions | boolean): this {
+    return this; // nop
+  }
 
-  abstract off(type: string, listener: EventListenerOrEventListenerObject,
-               options?: EventListenerOptions | boolean): this;
+  off(type: string, listener: EventListenerOrEventListenerObject,
+      options?: EventListenerOptions | boolean): this {
+    return this; // nop
+  }
 
   /** @internal */
   readonly observerCache: ViewObserverCache<this>;
@@ -1562,11 +1960,35 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     if (observer.viewDidAnimate !== void 0) {
       this.observerCache.viewDidAnimateObservers = Arrays.inserted(observer as ViewDidAnimate, this.observerCache.viewDidAnimateObservers);
     }
+    if (observer.viewWillProject !== void 0) {
+      this.observerCache.viewWillProjectObservers = Arrays.inserted(observer as ViewWillProject, this.observerCache.viewWillProjectObservers);
+    }
+    if (observer.viewDidProject !== void 0) {
+      this.observerCache.viewDidProjectObservers = Arrays.inserted(observer as ViewDidProject, this.observerCache.viewDidProjectObservers);
+    }
     if (observer.viewWillLayout !== void 0) {
       this.observerCache.viewWillLayoutObservers = Arrays.inserted(observer as ViewWillLayout, this.observerCache.viewWillLayoutObservers);
     }
     if (observer.viewDidLayout !== void 0) {
       this.observerCache.viewDidLayoutObservers = Arrays.inserted(observer as ViewDidLayout, this.observerCache.viewDidLayoutObservers);
+    }
+    if (observer.viewWillRender !== void 0) {
+      this.observerCache.viewWillRenderObservers = Arrays.inserted(observer as ViewWillRender, this.observerCache.viewWillRenderObservers);
+    }
+    if (observer.viewDidRender !== void 0) {
+      this.observerCache.viewDidRenderObservers = Arrays.inserted(observer as ViewDidRender, this.observerCache.viewDidRenderObservers);
+    }
+    if (observer.viewWillRasterize !== void 0) {
+      this.observerCache.viewWillRasterizeObservers = Arrays.inserted(observer as ViewWillRasterize, this.observerCache.viewWillRasterizeObservers);
+    }
+    if (observer.viewDidRasterize !== void 0) {
+      this.observerCache.viewDidRasterizeObservers = Arrays.inserted(observer as ViewDidRasterize, this.observerCache.viewDidRasterizeObservers);
+    }
+    if (observer.viewWillComposite !== void 0) {
+      this.observerCache.viewWillCompositeObservers = Arrays.inserted(observer as ViewWillComposite, this.observerCache.viewWillCompositeObservers);
+    }
+    if (observer.viewDidComposite !== void 0) {
+      this.observerCache.viewDidCompositeObservers = Arrays.inserted(observer as ViewDidComposite, this.observerCache.viewDidCompositeObservers);
     }
   }
 
@@ -1608,11 +2030,35 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
     if (observer.viewDidAnimate !== void 0) {
       this.observerCache.viewDidAnimateObservers = Arrays.removed(observer as ViewDidAnimate, this.observerCache.viewDidAnimateObservers);
     }
+    if (observer.viewWillProject !== void 0) {
+      this.observerCache.viewWillProjectObservers = Arrays.removed(observer as ViewWillProject, this.observerCache.viewWillProjectObservers);
+    }
+    if (observer.viewDidProject !== void 0) {
+      this.observerCache.viewDidProjectObservers = Arrays.removed(observer as ViewDidProject, this.observerCache.viewDidProjectObservers);
+    }
     if (observer.viewWillLayout !== void 0) {
       this.observerCache.viewWillLayoutObservers = Arrays.removed(observer as ViewWillLayout, this.observerCache.viewWillLayoutObservers);
     }
     if (observer.viewDidLayout !== void 0) {
       this.observerCache.viewDidLayoutObservers = Arrays.removed(observer as ViewDidLayout, this.observerCache.viewDidLayoutObservers);
+    }
+    if (observer.viewWillRender !== void 0) {
+      this.observerCache.viewWillRenderObservers = Arrays.removed(observer as ViewWillRender, this.observerCache.viewWillRenderObservers);
+    }
+    if (observer.viewDidRender !== void 0) {
+      this.observerCache.viewDidRenderObservers = Arrays.removed(observer as ViewDidRender, this.observerCache.viewDidRenderObservers);
+    }
+    if (observer.viewWillRasterize !== void 0) {
+      this.observerCache.viewWillRasterizeObservers = Arrays.removed(observer as ViewWillRasterize, this.observerCache.viewWillRasterizeObservers);
+    }
+    if (observer.viewDidRasterize !== void 0) {
+      this.observerCache.viewDidRasterizeObservers = Arrays.removed(observer as ViewDidRasterize, this.observerCache.viewDidRasterizeObservers);
+    }
+    if (observer.viewWillComposite !== void 0) {
+      this.observerCache.viewWillCompositeObservers = Arrays.removed(observer as ViewWillComposite, this.observerCache.viewWillCompositeObservers);
+    }
+    if (observer.viewDidComposite !== void 0) {
+      this.observerCache.viewDidCompositeObservers = Arrays.removed(observer as ViewDidComposite, this.observerCache.viewDidCompositeObservers);
     }
   }
 
@@ -1675,29 +2121,27 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   })();
 
   /** @internal */
-  static override readonly MountedFlag: ViewFlags = Hierarchy.MountedFlag;
+  static override readonly MountedFlag: ViewFlags = Component.MountedFlag;
   /** @internal */
-  static override readonly RemovingFlag: ViewFlags = Hierarchy.RemovingFlag;
+  static override readonly RemovingFlag: ViewFlags = Component.RemovingFlag;
   /** @internal */
-  static override readonly TraversingFlag: ViewFlags = Hierarchy.TraversingFlag;
+  static readonly ProcessingFlag: ViewFlags = 1 << (Component.FlagShift + 0);
   /** @internal */
-  static readonly ProcessingFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 0);
+  static readonly DisplayingFlag: ViewFlags = 1 << (Component.FlagShift + 1);
   /** @internal */
-  static readonly DisplayingFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 1);
+  static readonly ContextualFlag: ViewFlags = 1 << (Component.FlagShift + 2);
   /** @internal */
-  static readonly ContextualFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 2);
+  static readonly CullFlag: ViewFlags = 1 << (Component.FlagShift + 3);
   /** @internal */
-  static readonly CullFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 3);
+  static readonly CulledFlag: ViewFlags = 1 << (Component.FlagShift + 4);
   /** @internal */
-  static readonly CulledFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 4);
+  static readonly HideFlag: ViewFlags = 1 << (Component.FlagShift + 5);
   /** @internal */
-  static readonly HideFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 5);
+  static readonly HiddenFlag: ViewFlags = 1 << (Component.FlagShift + 6);
   /** @internal */
-  static readonly HiddenFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 6);
+  static readonly UnboundedFlag: ViewFlags = 1 << (Component.FlagShift + 7);
   /** @internal */
-  static readonly UnboundedFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 7);
-  /** @internal */
-  static readonly IntangibleFlag: ViewFlags = 1 << (Hierarchy.FlagShift + 8);
+  static readonly IntangibleFlag: ViewFlags = 1 << (Component.FlagShift + 8);
   /** @internal */
   static readonly CulledMask: ViewFlags = View.CullFlag
                                         | View.CulledFlag;
@@ -1710,7 +2154,6 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
   /** @internal */
   static readonly StatusMask: ViewFlags = View.MountedFlag
                                         | View.RemovingFlag
-                                        | View.TraversingFlag
                                         | View.ProcessingFlag
                                         | View.DisplayingFlag
                                         | View.ContextualFlag
@@ -1720,12 +2163,12 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
                                         | View.UnboundedFlag
                                         | View.IntangibleFlag;
 
-  static readonly NeedsProcess: ViewFlags = 1 << (Hierarchy.FlagShift + 9);
-  static readonly NeedsResize: ViewFlags = 1 << (Hierarchy.FlagShift + 10);
-  static readonly NeedsScroll: ViewFlags = 1 << (Hierarchy.FlagShift + 11);
-  static readonly NeedsChange: ViewFlags = 1 << (Hierarchy.FlagShift + 12);
-  static readonly NeedsAnimate: ViewFlags = 1 << (Hierarchy.FlagShift + 13);
-  static readonly NeedsProject: ViewFlags = 1 << (Hierarchy.FlagShift + 14);
+  static readonly NeedsProcess: ViewFlags = 1 << (Component.FlagShift + 9);
+  static readonly NeedsResize: ViewFlags = 1 << (Component.FlagShift + 10);
+  static readonly NeedsScroll: ViewFlags = 1 << (Component.FlagShift + 11);
+  static readonly NeedsChange: ViewFlags = 1 << (Component.FlagShift + 12);
+  static readonly NeedsAnimate: ViewFlags = 1 << (Component.FlagShift + 13);
+  static readonly NeedsProject: ViewFlags = 1 << (Component.FlagShift + 14);
   /** @internal */
   static readonly ProcessMask: ViewFlags = View.NeedsProcess
                                          | View.NeedsResize
@@ -1734,11 +2177,11 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
                                          | View.NeedsAnimate
                                          | View.NeedsProject;
 
-  static readonly NeedsDisplay: ViewFlags = 1 << (Hierarchy.FlagShift + 15);
-  static readonly NeedsLayout: ViewFlags = 1 << (Hierarchy.FlagShift + 16);
-  static readonly NeedsRender: ViewFlags = 1 << (Hierarchy.FlagShift + 17);
-  static readonly NeedsRasterize: ViewFlags = 1 << (Hierarchy.FlagShift + 18);
-  static readonly NeedsComposite: ViewFlags = 1 << (Hierarchy.FlagShift + 19);
+  static readonly NeedsDisplay: ViewFlags = 1 << (Component.FlagShift + 15);
+  static readonly NeedsLayout: ViewFlags = 1 << (Component.FlagShift + 16);
+  static readonly NeedsRender: ViewFlags = 1 << (Component.FlagShift + 17);
+  static readonly NeedsRasterize: ViewFlags = 1 << (Component.FlagShift + 18);
+  static readonly NeedsComposite: ViewFlags = 1 << (Component.FlagShift + 19);
   /** @internal */
   static readonly DisplayMask: ViewFlags = View.NeedsDisplay
                                          | View.NeedsLayout
@@ -1751,12 +2194,92 @@ export abstract class View extends Hierarchy implements Initable<ViewInit>, Cons
                                         | View.DisplayMask;
 
   /** @internal */
-  static override readonly FlagShift: number = Hierarchy.FlagShift + 20;
+  static override readonly FlagShift: number = Component.FlagShift + 20;
   /** @internal */
   static override readonly FlagMask: ViewFlags = (1 << View.FlagShift) - 1;
 
-  static override readonly MountFlags: ViewFlags = Hierarchy.MountFlags | View.NeedsResize | View.NeedsChange | View.NeedsLayout;
+  static override readonly MountFlags: ViewFlags = Component.MountFlags | View.NeedsResize | View.NeedsChange | View.NeedsLayout;
   static readonly UncullFlags: ViewFlags = View.NeedsResize | View.NeedsChange | View.NeedsLayout;
-  static override readonly InsertChildFlags: ViewFlags = Hierarchy.InsertChildFlags | View.NeedsLayout;
-  static override readonly RemoveChildFlags: ViewFlags = Hierarchy.RemoveChildFlags | View.NeedsLayout;
+  static readonly UnhideFlags: ViewFlags = View.NeedsLayout;
+  static override readonly InsertChildFlags: ViewFlags = Component.InsertChildFlags | View.NeedsLayout;
+  static override readonly RemoveChildFlags: ViewFlags = Component.RemoveChildFlags | View.NeedsLayout;
+}
+
+/** @public */
+export interface View extends Component, Initable<ViewInit>, ConstraintScope, ConstraintContext, ThemeContext {
+  /** @internal @override */
+  readonly flags: ViewFlags;
+
+  /** @internal @override */
+  setFlags(flags: ViewFlags): void;
+
+  /** @override */
+  readonly parent: View | null;
+
+  /** @internal @override */
+  detachParent(parent: View): void;
+
+  /** @override */
+  readonly nextSibling: View | null;
+
+  /** @internal @override */
+  setNextSibling(nextSibling: View | null): void;
+
+  /** @override */
+  readonly previousSibling: View | null;
+
+  /** @internal @override */
+  setPreviousSibling(previousSibling: View | null): void;
+
+  /** @override */
+  readonly firstChild: View | null;
+
+  /** @internal @override */
+  setFirstChild(firstChild: View | null): void;
+
+  /** @override */
+  readonly lastChild: View | null;
+
+  /** @internal @override */
+  setLastChild(lastChild: View | null): void;
+
+  /** @override */
+  forEachChild<T>(callback: (child: View) => T | void): T | undefined;
+  /** @override */
+  forEachChild<T, S>(callback: (this: S, child: View) => T | void, thisArg: S): T | undefined;
+
+  /** @internal @override */
+  readonly childMap: Dictionary<View> | null;
+
+  /** @override */
+  getChild<F extends abstract new (...args: any[]) => View>(key: string, childBound: F): InstanceType<F> | null;
+  /** @override */
+  getChild(key: string, childBound?: abstract new (...args: any[]) => View): View | null;
+
+  /** @override */
+  get insertChildFlags(): ViewFlags;
+
+  /** @override */
+  removeChild<V extends View>(child: V): V;
+  /** @override */
+  removeChild(key: string | View): View | null;
+
+  /** @override */
+  get removeChildFlags(): ViewFlags;
+
+  /** @override */
+  sortChildren(comparator: Comparator<View>): void;
+
+  /** @override */
+  getSuper<F extends abstract new (...args: any[]) => View>(superBound: F): InstanceType<F> | null;
+  /** @override */
+  getSuper(superBound: abstract new (...args: any[]) => View): View | null;
+
+  /** @override */
+  getBase<F extends abstract new (...args: any[]) => View>(baseBound: F): InstanceType<F> | null;
+  /** @override */
+  getBase(baseBound: abstract new (...args: any[]) => View): View | null;
+
+  /** @override */
+  get mountFlags(): ViewFlags;
 }

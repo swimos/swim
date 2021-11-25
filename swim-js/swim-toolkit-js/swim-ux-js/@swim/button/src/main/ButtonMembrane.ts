@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {MemberFastenerClass} from "@swim/fastener";
+import {MemberFastenerClass, Property} from "@swim/component";
 import {HtmlViewInit, HtmlView} from "@swim/dom";
-import {Property} from "@swim/fastener";
 import {PositionGestureInput, PositionGesture} from "@swim/view";
 import {ButtonGlow} from "./ButtonGlow";
 

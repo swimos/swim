@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {FastenerSpec} from "./FastenerSpec";
-export {PropertySpec} from "./PropertySpec";
-export {AnimatorSpec} from "./AnimatorSpec";
-export {ProviderSpec} from "./ProviderSpec";
-export {FastenerSuite} from "./FastenerSuite";
+import type {Observer} from "@swim/util";
+import type {Component} from "./Component"
 
-import {FastenerSuite} from "./FastenerSuite";
-FastenerSuite.run();
+/** @beta */
+export interface ComponentObserver<C extends Component = Component> extends Observer<C> {
+}

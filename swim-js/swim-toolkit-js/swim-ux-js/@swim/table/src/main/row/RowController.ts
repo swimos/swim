@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {Controller, TraitViewRef, TraitViewControllerRef} from "@swim/controller";
 import {LeafController} from "../leaf/LeafController";
 import {RowView} from "./RowView";

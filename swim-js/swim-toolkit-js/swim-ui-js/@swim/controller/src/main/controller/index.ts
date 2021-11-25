@@ -27,8 +27,6 @@ export {
 } from "./Controller";
 export {ControllerObserver} from "./ControllerObserver";
 
-export {GenericController} from "./GenericController";
-
 export {
   ControllerRelationType,
   ControllerRelationInit,

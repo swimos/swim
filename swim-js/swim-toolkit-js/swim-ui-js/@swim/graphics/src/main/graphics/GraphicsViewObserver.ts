@@ -17,7 +17,4 @@ import type {GraphicsView} from "./GraphicsView";
 
 /** @public */
 export interface GraphicsViewObserver<V extends GraphicsView = GraphicsView> extends ViewObserver<V> {
-  viewWillSetHidden?(hidden: boolean, view: V): void;
-
-  viewDidSetHidden?(hidden: boolean, view: V): void;
 }

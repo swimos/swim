@@ -63,7 +63,7 @@ export class DisplayService<V extends View = View> extends Service<V> {
       deltaUpdateFlags |= View.NeedsDisplay;
     }
     this.setFlags(this.flags | deltaUpdateFlags);
-    if (immediate && (this.flags & View.TraversingFlag) === 0 && this.updateDelay <= DisplayService.MaxProcessInterval) {
+    if (immediate && (this.flags & (View.ProcessingFlag | View.DisplayingFlag)) === 0 && this.updateDelay <= DisplayService.MaxProcessInterval) {
       this.runImmediatePass();
     } else {
       this.scheduleUpdate();
@@ -112,7 +112,7 @@ export class DisplayService<V extends View = View> extends Service<V> {
   }
 
   protected runProcessPass(immediate: boolean = false): void {
-    this.setFlags(this.flags & ~View.ProcessMask | (View.TraversingFlag | View.ProcessingFlag));
+    this.setFlags(this.flags & ~View.ProcessMask | View.ProcessingFlag);
     try {
       const t0 = performance.now();
       const roots = this.roots;
@@ -144,7 +144,7 @@ export class DisplayService<V extends View = View> extends Service<V> {
         this.scheduleProcessPass(processDelay);
       }
     } finally {
-      this.setFlags(this.flags & ~(View.TraversingFlag | View.ProcessingFlag));
+      this.setFlags(this.flags & ~View.ProcessingFlag);
     }
   }
 
@@ -165,7 +165,7 @@ export class DisplayService<V extends View = View> extends Service<V> {
   }
 
   protected runDisplayPass(time?: number, immediate: boolean = false): void {
-    this.setFlags(this.flags & ~View.DisplayMask | (View.TraversingFlag | View.DisplayingFlag));
+    this.setFlags(this.flags & ~View.DisplayMask | View.DisplayingFlag);
     try {
       if (time === void 0) {
         time = performance.now();
@@ -192,7 +192,7 @@ export class DisplayService<V extends View = View> extends Service<V> {
         this.scheduleDisplayPass();
       }
     } finally {
-      this.setFlags(this.flags & ~(View.TraversingFlag | View.DisplayingFlag));
+      this.setFlags(this.flags & ~View.DisplayingFlag);
     }
   }
 

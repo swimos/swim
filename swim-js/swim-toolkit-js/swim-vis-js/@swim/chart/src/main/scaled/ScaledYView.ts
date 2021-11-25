@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
-import type {Animator} from "@swim/fastener";
+import type {Animator} from "@swim/component";
 import {GraphicsView} from "@swim/graphics";
 import type {ScaledYViewObserver} from "./ScaledYViewObserver";
 import {ScaledView} from "../"; // forward import

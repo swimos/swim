@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {Model, Trait, TraitRef, TraitSet} from "@swim/model";
 import type {ColLayout} from "../layout/ColLayout";

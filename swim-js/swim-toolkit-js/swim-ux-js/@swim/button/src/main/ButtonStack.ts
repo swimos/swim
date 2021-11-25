@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Lazy, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/fastener";
+import {Affinity, MemberFastenerClass} from "@swim/component";
 import {Length} from "@swim/math";
 import {Expansion} from "@swim/style";
 import {Look, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
@@ -154,9 +154,9 @@ export class ButtonStack extends HtmlView implements Modal {
     type: Number,
     didTransition(opacity: number | undefined): void {
       if (opacity === 1) {
-        this.owner.didShow();
+        this.owner.didShowStack();
       } else if (opacity === 0) {
-        this.owner.didHide();
+        this.owner.didHideStack();
       }
     },
   })
@@ -401,17 +401,17 @@ export class ButtonStack extends HtmlView implements Modal {
       } else {
         timing = Timing.fromAny(timing);
       }
-      this.willShow();
+      this.willShowStack();
       if (timing !== false) {
         this.opacity.setState(1, timing, Affinity.Intrinsic);
       } else {
         this.opacity.setState(1, Affinity.Intrinsic);
-        this.didShow();
+        this.didShowStack();
       }
     }
   }
 
-  protected willShow(): void {
+  protected willShowStack(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -423,7 +423,7 @@ export class ButtonStack extends HtmlView implements Modal {
     this.display("block");
   }
 
-  protected didShow(): void {
+  protected didShowStack(): void {
     this.requireUpdate(View.NeedsLayout);
 
     const observers = this.observers;
@@ -442,17 +442,17 @@ export class ButtonStack extends HtmlView implements Modal {
       } else {
         timing = Timing.fromAny(timing);
       }
-      this.willHide();
+      this.willHideStack();
       if (timing !== false) {
         this.opacity.setState(0, timing, Affinity.Intrinsic);
       } else {
         this.opacity.setState(0, Affinity.Intrinsic);
-        this.didHide();
+        this.didHideStack();
       }
     }
   }
 
-  protected willHide(): void {
+  protected willHideStack(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -462,7 +462,7 @@ export class ButtonStack extends HtmlView implements Modal {
     }
   }
 
-  protected didHide(): void {
+  protected didHideStack(): void {
     this.display("none");
     this.requireUpdate(View.NeedsLayout);
 

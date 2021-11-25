@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, Lazy, Equivalent, AnyTiming} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import {GeoPoint} from "@swim/geo";
 import {ViewContextType, ViewFlags, View, ViewRef} from "@swim/view";
 import {ViewHtml, HtmlView} from "@swim/dom";
@@ -115,7 +115,7 @@ export class GoogleMapView extends MapView {
 
   protected onMapDraw(): void {
     if (this.updateGeoViewport()) {
-      const immediate = !this.isHidden() && !this.culled;
+      const immediate = !this.hidden && !this.culled;
       this.requireUpdate(View.NeedsProject, immediate);
     }
   }

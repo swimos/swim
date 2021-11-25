@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
+import type {MemberFastenerClass} from "@swim/component";
 import type {Trait} from "@swim/model";
 import type {GraphicsView} from "@swim/graphics";
-import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {DataPointView} from "../data/DataPointView";
 import type {DataPointTrait} from "../data/DataPointTrait";
 import type {DataPointController} from "../data/DataPointController";
@@ -47,7 +47,7 @@ export interface GraphControllerPlotExt<X = unknown, Y = unknown> {
 }
 
 /** @public */
-export class GraphController<X = unknown, Y = unknown> extends GenericController {
+export class GraphController<X = unknown, Y = unknown> extends Controller {
   override readonly observerType?: Class<GraphControllerObserver<X, Y>>;
 
   @TraitViewRef<GraphController<X, Y>, GraphTrait<X, Y>, GraphView<X, Y>>({

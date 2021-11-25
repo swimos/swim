@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Class, Equivalent, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
@@ -21,7 +21,6 @@ import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
-  LayerView,
   CanvasContext,
   CanvasRenderer,
   FillView,
@@ -64,7 +63,7 @@ export interface DialViewInit extends GraphicsViewInit {
 }
 
 /** @public */
-export class DialView extends LayerView {
+export class DialView extends GraphicsView {
   override readonly observerType?: Class<DialViewObserver>;
 
   @Animator<DialView, number>({
@@ -207,7 +206,7 @@ export class DialView extends LayerView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof CanvasRenderer && !this.hidden && !this.culled) {
       const context = renderer.context;
       context.save();
       this.renderDial(context, this.viewFrame);
@@ -258,7 +257,7 @@ export class DialView extends LayerView {
     context.restore();
 
     const labelView = this.label.view;
-    if (labelView !== null && !labelView.isHidden()) {
+    if (labelView !== null && !labelView.hidden) {
       const r = (innerRadius.value + outerRadius.value) / 2;
       const rx = r * Math.cos(startAngle.value + Equivalent.Epsilon);
       const ry = r * Math.sin(startAngle.value + Equivalent.Epsilon);
@@ -290,7 +289,7 @@ export class DialView extends LayerView {
     }
 
     const legendView = this.legend.view;
-    if (legendView !== null && !legendView.isHidden()) {
+    if (legendView !== null && !legendView.hidden) {
       const tickAlign = this.tickAlign.getValue();
       const tickAngle = startAngle.value + sweepAngle.value * delta * tickAlign;
       const tickRadius = this.tickRadius.getValue().pxValue(size);

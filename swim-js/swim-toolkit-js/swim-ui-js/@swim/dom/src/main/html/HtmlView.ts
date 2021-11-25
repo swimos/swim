@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing, Creatable, InitType} from "@swim/util";
-import {Affinity, MemberAnimatorInit} from "@swim/fastener";
+import {Affinity, MemberAnimatorInit} from "@swim/component";
 import {Transform} from "@swim/math";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewFlags, ViewCreator, View} from "@swim/view";
+import {ViewFlags, AnyView, ViewCreator, View} from "@swim/view";
 import {AttributeAnimator} from "../animator/AttributeAnimator";
 import {StyleMapInit, StyleMap} from "../css/StyleMap";
-import type {ViewNodeType, AnyNodeView, NodeView} from "../node/NodeView";
+import type {ViewNodeType} from "../node/NodeView";
 import {
   AnyElementView,
   ElementViewInit,
@@ -204,52 +204,52 @@ export class HtmlView extends ElementView {
 
   override readonly node!: HTMLElement;
 
-  override setChild<V extends NodeView>(key: string, newChild: V): View | null;
-  override setChild<F extends ViewCreator<F, NodeView>>(key: string, factory: F): View | null;
-  override setChild(key: string, newChild: AnyNodeView | keyof HtmlViewTagMap | null): View | null;
-  override setChild(key: string, newChild: AnyNodeView | keyof HtmlViewTagMap | null): View | null {
+  override setChild<V extends View>(key: string, newChild: V): View | null;
+  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
+  override setChild(key: string, newChild: AnyView | Node | keyof HtmlViewTagMap | null): View | null;
+  override setChild(key: string, newChild: AnyView | Node | keyof HtmlViewTagMap | null): View | null {
     if (typeof newChild === "string") {
       newChild = HtmlView.fromTag(newChild);
     }
     return super.setChild(key, newChild);
   }
 
-  override appendChild<V extends NodeView>(child: V, key?: string): V;
-  override appendChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild<V extends View>(child: V, key?: string): V;
+  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override appendChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
-  override appendChild(child: AnyNodeView | keyof HtmlViewTagMap, key?: string): NodeView;
-  override appendChild(child: AnyNodeView | keyof HtmlViewTagMap, key?: string): NodeView {
+  override appendChild(child: AnyView | Node | keyof HtmlViewTagMap, key?: string): View;
+  override appendChild(child: AnyView | Node | keyof HtmlViewTagMap, key?: string): View {
     if (typeof child === "string") {
       child = HtmlView.fromTag(child);
     }
     return super.appendChild(child, key);
   }
 
-  override prependChild<V extends NodeView>(child: V, key?: string): V;
-  override prependChild<F extends ViewCreator<F, NodeView>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild<V extends View>(child: V, key?: string): V;
+  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
   override prependChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
-  override prependChild(child: AnyNodeView | keyof HtmlViewTagMap, key?: string): NodeView;
-  override prependChild(child: AnyNodeView | keyof HtmlViewTagMap, key?: string): NodeView {
+  override prependChild(child: AnyView | Node | keyof HtmlViewTagMap, key?: string): View;
+  override prependChild(child: AnyView | Node | keyof HtmlViewTagMap, key?: string): View {
     if (typeof child === "string") {
       child = HtmlView.fromTag(child);
     }
     return super.prependChild(child, key);
   }
 
-  override insertChild<V extends NodeView>(child: V, target: View | Node | null, key?: string): V;
-  override insertChild<F extends ViewCreator<F, NodeView>>(factory: F, target: View | null, key?: string): InstanceType<F>;
+  override insertChild<V extends View>(child: V, target: View | Node | null, key?: string): V;
+  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | Node | null, key?: string): InstanceType<F>;
   override insertChild<K extends keyof HtmlViewTagMap>(tag: K, target: View | Node | null, key?: string): HtmlViewTagMap[K];
-  override insertChild(child: AnyNodeView | keyof HtmlViewTagMap, target: View | Node | null, key?: string): NodeView;
-  override insertChild(child: AnyNodeView | keyof HtmlViewTagMap, target: View | Node | null, key?: string): NodeView {
+  override insertChild(child: AnyView | Node | keyof HtmlViewTagMap, target: View | Node | null, key?: string): View;
+  override insertChild(child: AnyView | Node | keyof HtmlViewTagMap, target: View | Node | null, key?: string): View {
     if (typeof child === "string") {
       child = HtmlView.fromTag(child);
     }
     return super.insertChild(child, target, key);
   }
 
-  override replaceChild<V extends NodeView>(newChild: NodeView, oldChild: V): V;
-  override replaceChild<V extends NodeView>(newChild: AnyNodeView | keyof HtmlViewTagMap, oldChild: V): V;
-  override replaceChild(newChild: AnyNodeView | keyof HtmlViewTagMap, oldChild: NodeView): NodeView {
+  override replaceChild<V extends View>(newChild: View, oldChild: V): V;
+  override replaceChild<V extends View>(newChild: AnyView | Node | keyof HtmlViewTagMap, oldChild: V): V;
+  override replaceChild(newChild: AnyView | Node | keyof HtmlViewTagMap, oldChild: View): View {
     if (typeof newChild === "string") {
       newChild = HtmlView.fromTag(newChild);
     }

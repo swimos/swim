@@ -13,12 +13,11 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, Animator} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/component";
 import {AnyR2Point, R2Point, R2Box, R2Path} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox, AnyGeoPath, GeoPath} from "@swim/geo";
 import type {ViewContextType} from "@swim/view";
-import type {GeoViewInit} from "../geo/GeoView";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPathViewObserver} from "./GeoPathViewObserver";
 
@@ -28,7 +27,7 @@ export interface GeoPathViewInit extends GeoViewInit {
 }
 
 /** @public */
-export class GeoPathView extends GeoLayerView {
+export class GeoPathView extends GeoView {
   constructor() {
     super();
     Object.defineProperty(this, "viewBounds", {

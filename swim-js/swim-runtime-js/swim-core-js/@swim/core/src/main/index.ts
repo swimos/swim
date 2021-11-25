@@ -14,7 +14,7 @@
 
 export * from "@swim/util";
 export * from "@swim/codec";
-export * from "@swim/fastener";
+export * from "@swim/component";
 export * from "@swim/collections";
 export * from "@swim/constraint";
 export * from "@swim/structure";

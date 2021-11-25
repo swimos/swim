@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/component";
 import {AnyView, ViewFactory, View} from "./View";
 
 /** @internal */
@@ -28,15 +28,15 @@ export interface ViewRelationInit<V extends View = View> extends FastenerInit {
   observes?: boolean;
 
   initView?(view: V): void;
-  willAttachView?(view: V, targetView: View | null): void;
-  didAttachView?(view: V, targetView: View | null): void;
+  willAttachView?(view: V, target: View | null): void;
+  didAttachView?(view: V, target: View | null): void;
 
   deinitView?(view: V): void;
   willDetachView?(view: V): void;
   didDetachView?(view: V): void;
 
   parentView?: View | null;
-  insertChild?(parent: View, child: V, targetView: View | null, key: string | undefined): void;
+  insertChild?(parent: View, child: V, target: View | null, key: string | undefined): void;
 
   detectView?(view: View): V | null;
   createView?(): V;
@@ -74,13 +74,13 @@ export interface ViewRelation<O = unknown, V extends View = View> extends Fasten
   initView(view: V): void;
 
   /** @protected */
-  willAttachView(view: V, targetView: View | null): void;
+  willAttachView(view: V, target: View | null): void;
 
   /** @protected */
-  onAttachView(view: V, targetView: View | null): void;
+  onAttachView(view: V, target: View | null): void;
 
   /** @protected */
-  didAttachView(view: V, targetView: View | null): void;
+  didAttachView(view: V, target: View | null): void;
 
   /** @protected */
   deinitView(view: V): void;
@@ -101,7 +101,7 @@ export interface ViewRelation<O = unknown, V extends View = View> extends Fasten
   insertChild(parent: View, child: V, target: View | null, key: string | undefined): void;
 
   /** @internal */
-  bindView(view: View, targetView: View | null): void;
+  bindView(view: View, target: View | null): void;
 
   /** @internal */
   unbindView(view: View): void;
@@ -144,17 +144,17 @@ export const ViewRelation = (function (_super: typeof Fastener) {
     // hook
   };
 
-  ViewRelation.prototype.willAttachView = function <V extends View>(this: ViewRelation<unknown, V>, view: V, targetView: View | null): void {
+  ViewRelation.prototype.willAttachView = function <V extends View>(this: ViewRelation<unknown, V>, view: V, target: View | null): void {
     // hook
   };
 
-  ViewRelation.prototype.onAttachView = function <V extends View>(this: ViewRelation<unknown, V>, view: V, targetView: View | null): void {
+  ViewRelation.prototype.onAttachView = function <V extends View>(this: ViewRelation<unknown, V>, view: V, target: View | null): void {
     if (this.observes === true) {
       view.observe(this as ObserverType<V>);
     }
   };
 
-  ViewRelation.prototype.didAttachView = function <V extends View>(this: ViewRelation<unknown, V>, view: V, targetView: View | null): void {
+  ViewRelation.prototype.didAttachView = function <V extends View>(this: ViewRelation<unknown, V>, view: V, target: View | null): void {
     // hook
   };
 
@@ -188,7 +188,7 @@ export const ViewRelation = (function (_super: typeof Fastener) {
     parent.insertChild(child, target, key);
   };
 
-  ViewRelation.prototype.bindView = function <V extends View>(this: ViewRelation<unknown, V>, view: View, targetView: View | null): void {
+  ViewRelation.prototype.bindView = function <V extends View>(this: ViewRelation<unknown, V>, view: View, target: View | null): void {
     // hook
   };
 

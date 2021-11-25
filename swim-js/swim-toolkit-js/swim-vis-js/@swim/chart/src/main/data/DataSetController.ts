@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import {Class, AnyTiming, Timing} from "@swim/util";
-import {MemberFastenerClass, Property} from "@swim/fastener";
+import {MemberFastenerClass, Property} from "@swim/component";
 import type {Length} from "@swim/math";
 import {Trait, TraitRef} from "@swim/model";
 import type {Color} from "@swim/style";
 import type {GraphicsView} from "@swim/graphics";
-import {GenericController, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
+import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {DataPointView} from "./DataPointView";
 import type {DataPointTrait} from "./DataPointTrait";
 import {DataPointController} from "./DataPointController";
@@ -36,7 +36,7 @@ export interface DataSetControllerDataPointExt<X = unknown, Y = unknown> {
 }
 
 /** @public */
-export class DataSetController<X = unknown, Y = unknown> extends GenericController {
+export class DataSetController<X = unknown, Y = unknown> extends Controller {
   override readonly observerType?: Class<DataSetControllerObserver<X, Y>>;
 
   @TraitRef<DataSetController<X, Y>, DataSetTrait<X, Y>>({

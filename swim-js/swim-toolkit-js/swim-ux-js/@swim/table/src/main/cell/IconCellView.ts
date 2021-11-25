@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, Timing} from "@swim/util";
-import {Affinity, Animator} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
@@ -95,10 +95,10 @@ export class IconCellView extends CellView {
   })
   readonly graphics!: ThemeAnimator<this, Graphics | null>;
 
-  protected override onInsertChild(childView: View, targetView: View | null): void {
-    super.onInsertChild(childView, targetView);
-    if (childView.key === "svg" && childView instanceof SvgIconView) {
-      this.onInsertSvg(childView);
+  protected override onInsertChild(child: View, target: View | null): void {
+    super.onInsertChild(child, target);
+    if (child.key === "svg" && child instanceof SvgIconView) {
+      this.onInsertSvg(child);
     }
   }
 

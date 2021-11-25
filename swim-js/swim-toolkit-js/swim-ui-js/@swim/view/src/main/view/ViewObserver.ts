@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/util";
-import type {HierarchyObserver} from "@swim/fastener";
+import type {ComponentObserver} from "@swim/component";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {ViewContextType, View} from "./View";
 
 /** @public */
-export interface ViewObserver<V extends View = View> extends HierarchyObserver<V> {
+export interface ViewObserver<V extends View = View> extends ComponentObserver<V> {
   viewWillAttachParent?(parent: View, view: V): void;
 
   viewDidAttachParent?(parent: View, view: V): void;
@@ -50,6 +50,14 @@ export interface ViewObserver<V extends View = View> extends HierarchyObserver<V
   viewWillUncull?(view: V): void;
 
   viewDidUncull?(view: V): void;
+
+  viewWillHide?(view: V): void;
+
+  viewDidHide?(view: V): void;
+
+  viewWillUnhide?(view: V): void;
+
+  viewDidUnhide?(view: V): void;
 
   viewWillResize?(viewContext: ViewContextType<V>, view: V): void;
 

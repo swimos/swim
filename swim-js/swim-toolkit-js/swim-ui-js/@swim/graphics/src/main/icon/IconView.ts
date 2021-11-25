@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Animator} from "@swim/fastener";
+import type {Animator} from "@swim/component";
 import type {AnyLength, Length} from "@swim/math";
 import type {AnyColor, Color} from "@swim/style";
 import type {ThemeAnimator} from "@swim/theme";

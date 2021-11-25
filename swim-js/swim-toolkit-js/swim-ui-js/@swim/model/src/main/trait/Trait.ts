@@ -17,6 +17,7 @@ import {
   Class,
   Arrays,
   HashCode,
+  Comparator,
   FromAny,
   Creatable,
   InitType,
@@ -29,7 +30,7 @@ import {
   Consumable,
   Consumer,
 } from "@swim/util";
-import {FastenerContext, Fastener, Property, Provider} from "@swim/fastener";
+import {FastenerContext, Fastener, Property, Provider} from "@swim/component";
 import {WarpRef, WarpService, WarpProvider, DownlinkFastener} from "@swim/client";
 import {ModelContextType, ModelFlags, AnyModel, ModelCreator, Model} from "../model/Model";
 import {ModelRelation} from "../model/ModelRelation";
@@ -50,6 +51,8 @@ export type AnyTrait<T extends Trait = Trait> = T | TraitFactory<T> | InitType<T
 
 /** @public */
 export interface TraitInit {
+  /** @internal */
+  uid?: never, // force type ambiguity between Trait and TraitInit
   type?: Creatable<Trait>;
   key?: string;
   traits?: AnyTrait[];
@@ -80,11 +83,15 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     this.uid = (this.constructor as typeof Trait).uid();
     this.key = void 0;
     this.flags = 0;
+    this.model = null;
+    this.nextTrait = null;
+    this.previousTrait = null;
     this.fasteners = null;
     this.decoherent = null;
     this.observers = Arrays.empty;
     this.consumers = Arrays.empty;
-    this.model = null;
+
+    FastenerContext.init(this);
   }
 
   readonly observerType?: Class<TraitObserver>;
@@ -112,10 +119,25 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   readonly model: Model | null;
 
   /** @internal */
-  attachModel(model: Model): void {
+  attachModel(model: Model, nextTrait: Trait | null): void {
     // assert(this.model === null);
     this.willAttachModel(model);
     (this as Mutable<this>).model = model;
+    let previousTrait: Trait | null;
+    if (nextTrait !== null) {
+      previousTrait = nextTrait.previousTrait;
+      this.setNextTrait(nextTrait);
+      nextTrait.setPreviousTrait(this);
+    } else {
+      previousTrait = model.lastTrait;
+      model.setLastTrait(this);
+    }
+    if (previousTrait !== null) {
+      previousTrait.setNextTrait(this);
+      this.setPreviousTrait(previousTrait);
+    } else {
+      model.setFirstTrait(this);
+    }
     if (model.mounted) {
       this.mountTrait();
     }
@@ -155,6 +177,20 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
       this.unmountTrait();
     }
     this.onDetachModel(model);
+    const nextTrait = this.nextTrait;
+    const previousTrait = this.previousTrait;
+    if (nextTrait !== null) {
+      this.setNextTrait(null);
+      nextTrait.setPreviousTrait(previousTrait);
+    } else {
+      model.setLastTrait(previousTrait);
+    }
+    if (previousTrait !== null) {
+      previousTrait.setNextTrait(nextTrait);
+      this.setPreviousTrait(null);
+    } else {
+      model.setFirstTrait(nextTrait);
+    }
     (this as Mutable<this>).model = null;
     this.didDetachModel(model);
   }
@@ -263,34 +299,24 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  get childCount(): number {
+  get nextSibling(): Model | null {
     const model = this.model;
-    return model !== null ? model.childCount : 0;
+    return model !== null ? model.nextSibling : null;
   }
 
-  get children(): ReadonlyArray<Model> {
+  get previousSibling(): Model | null {
     const model = this.model;
-    return model !== null ? model.children : [];
+    return model !== null ? model.previousSibling : null;
   }
 
-  firstChild(): Model | null {
+  get firstChild(): Model | null {
     const model = this.model;
-    return model !== null ? model.firstChild() : null;
+    return model !== null ? model.firstChild : null;
   }
 
-  lastChild(): Model | null {
+  get lastChild(): Model | null {
     const model = this.model;
-    return model !== null ? model.lastChild() : null;
-  }
-
-  nextChild(target: Model): Model | null {
-    const model = this.model;
-    return model !== null ? model.nextChild(target) : null;
-  }
-
-  previousChild(target: Model): Model | null {
-    const model = this.model;
-    return model !== null ? model.previousChild(target) : null;
+    return model !== null ? model.lastChild : null;
   }
 
   forEachChild<T>(callback: (child: Model) => T | void): T | undefined;
@@ -398,14 +424,14 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  removeChild(key: string): Model | null;
-  removeChild(child: Model): void;
-  removeChild(key: string | Model): Model | null | void {
+  removeChild<M extends Model>(child: M): M | null;
+  removeChild(key: string | Model): Model | null;
+  removeChild(key: string | Model): Model | null {
     const model = this.model;
-    if (typeof key === "string") {
-      return model !== null ? model.removeChild(key) : null;
-    } else if (model !== null) {
-      model.removeChild(key);
+    if (model !== null) {
+      return model.removeChild(key);
+    } else {
+      return null;
     }
   }
 
@@ -441,6 +467,20 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
+  removeChildren(): void {
+    const model = this.model;
+    if (model !== null) {
+      return model.removeChildren();
+    }
+  }
+
+  sortChildren(comparator: Comparator<Model>): void {
+    const model = this.model;
+    if (model !== null) {
+      return model.sortChildren(comparator);
+    }
+  }
+
   getSuper<F extends abstract new (...args: any[]) => Model>(superBound: F): InstanceType<F> | null {
     const model = this.model;
     return model !== null ? model.getSuper(superBound) : null;
@@ -451,34 +491,28 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     return model !== null ? model.getBase(baseBound) : null;
   }
 
-  get traitCount(): number {
-    const model = this.model;
-    return model !== null ? model.traitCount : 0;
+  readonly nextTrait: Trait | null;
+
+  /** @internal */
+  setNextTrait(nextTrait: Trait | null): void {
+    (this as Mutable<this>).nextTrait = nextTrait;
   }
 
-  get traits(): ReadonlyArray<Trait> {
-    const model = this.model;
-    return model !== null ? model.traits : [];
+  readonly previousTrait: Trait | null;
+
+  /** @internal */
+  setPreviousTrait(previousTrait: Trait | null): void {
+    (this as Mutable<this>).previousTrait = previousTrait;
   }
 
-  firstTrait(): Trait | null {
+  get firstTrait(): Trait | null {
     const model = this.model;
-    return model !== null ? model.firstTrait() : null;
+    return model !== null ? model.firstTrait : null;
   }
 
-  lastTrait(): Trait | null {
+  get lastTrait(): Trait | null {
     const model = this.model;
-    return model !== null ? model.lastTrait() : null;
-  }
-
-  nextTrait(target: Trait): Trait | null {
-    const model = this.model;
-    return model !== null ? model.nextTrait(target) : null;
-  }
-
-  previousTrait(target: Trait): Trait | null {
-    const model = this.model;
-    return model !== null ? model.previousTrait(target) : null;
+    return model !== null ? model.lastTrait : null;
   }
 
   forEachTrait<T>(callback: (trait: Trait) => T | void): T | undefined;
@@ -587,14 +621,14 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  removeTrait(key: string): Trait | null;
-  removeTrait(trait: Trait): void;
-  removeTrait(key: string | Trait): Trait | null | void {
+  removeTrait<T extends Trait>(trait: T): T | null;
+  removeTrait(key: string | Trait): Trait | null;
+  removeTrait(key: string | Trait): Trait | null {
     const model = this.model;
-    if (typeof key === "string") {
-      return model !== null ? model.removeTrait(key) : null;
-    } else if (model !== null) {
-      model.removeTrait(key);
+    if (model !== null) {
+      return model.removeTrait(key);
+    } else {
+      return null;
     }
   }
 
@@ -627,6 +661,13 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
       if (observer.traitDidRemoveTrait !== void 0) {
         observer.traitDidRemoveTrait(trait, this);
       }
+    }
+  }
+
+  sortTraits(comparator: Comparator<Trait>): void {
+    const model = this.model;
+    if (model !== null) {
+      model.sortTraits(comparator);
     }
   }
 
@@ -768,11 +809,6 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  get traversing(): boolean {
-    const model = this.model;
-    return model !== null && model.traversing;
-  }
-
   get updating(): boolean {
     const model = this.model;
     return model !== null && model.updating;
@@ -886,13 +922,12 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
 
   /** @protected */
   analyzeChildren(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>,
-                  analyzeChildModel: (this: TraitModelType<this>, child: Model, analyzeFlags: ModelFlags,
-                                      modelContext: TraitContextType<this>) => void,
+                  analyzeChild: (this: TraitModelType<this>, child: Model, analyzeFlags: ModelFlags,
+                                 modelContext: TraitContextType<this>) => void,
                   analyzeChildren: (this: TraitModelType<this>, analyzeFlags: ModelFlags, modelContext: TraitContextType<this>,
-                                    analyzeChildModel: (this: TraitModelType<this>, child: Model, analyzeFlags: ModelFlags,
-                                                        modelContext: TraitContextType<this>) => void) => void): void {
-    const model = this.model as TraitModelType<this>;
-    analyzeChildren.call(model, analyzeFlags, modelContext, analyzeChildModel);
+                                    analyzeChild: (this: TraitModelType<this>, child: Model, analyzeFlags: ModelFlags,
+                                                   modelContext: TraitContextType<this>) => void) => void): void {
+    analyzeChildren.call(this.model as TraitModelType<this>, analyzeFlags, modelContext, analyzeChild);
   }
 
   get refreshing(): boolean {
@@ -981,8 +1016,7 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
                   refreshChildren: (this: TraitModelType<this>, refreshFlags: ModelFlags, modelContext: TraitContextType<this>,
                                     refreshChild: (this: TraitModelType<this>, child: Model, refreshFlags: ModelFlags,
                                                         modelContext: TraitContextType<this>) => void) => void): void {
-    const model = this.model as TraitModelType<this>;
-    refreshChildren.call(model, refreshFlags, modelContext, refreshChild);
+    refreshChildren.call(this.model as TraitModelType<this>, refreshFlags, modelContext, refreshChild);
   }
 
   /** @internal */
@@ -1117,7 +1151,6 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
       const fastener = fasteners[fastenerName]!;
       fastener.mount();
     }
-    FastenerContext.init(this);
   }
 
   /** @internal */

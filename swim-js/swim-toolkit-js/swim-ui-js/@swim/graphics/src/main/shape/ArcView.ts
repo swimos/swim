@@ -13,13 +13,12 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/util";
-import {Affinity, Animator} from "@swim/fastener";
+import {Affinity, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
 import {ViewContextType, View} from "@swim/view";
-import type {GraphicsView} from "../graphics/GraphicsView";
-import {LayerView} from "../layer/LayerView";
+import {GraphicsView} from "../graphics/GraphicsView";
 import type {PaintingContext} from "../painting/PaintingContext";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {CanvasContext} from "../canvas/CanvasContext";
@@ -36,7 +35,7 @@ export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 }
 
 /** @public */
-export class ArcView extends LayerView implements FillView, StrokeView {
+export class ArcView extends GraphicsView implements FillView, StrokeView {
   @Animator({type: Number, state: 0.5, updateFlags: View.NeedsRender})
   readonly xAlign!: Animator<this, number>;
 
@@ -139,7 +138,7 @@ export class ArcView extends LayerView implements FillView, StrokeView {
   protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
-    if (renderer instanceof PaintingRenderer && !this.isHidden() && !this.culled) {
+    if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.layoutArc();
       this.renderArc(renderer.context, this.viewFrame);
     }

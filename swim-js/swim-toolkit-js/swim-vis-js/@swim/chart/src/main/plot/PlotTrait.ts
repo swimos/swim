@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/fastener";
-import {TraitModelType, Trait, TraitRef} from "@swim/model";
+import type {MemberFastenerClass} from "@swim/component";
+import {Model, Trait, TraitRef} from "@swim/model";
 import {DataSetTrait} from "../data/DataSetTrait";
 import type {PlotTraitObserver} from "./PlotTraitObserver";
 
@@ -24,6 +24,7 @@ export class PlotTrait<X = unknown, Y = unknown> extends Trait {
 
   @TraitRef<PlotTrait<X, Y>, DataSetTrait<X, Y>>({
     type: DataSetTrait,
+    binds: true,
     willAttachTrait(dataSetTrait: DataSetTrait<X, Y>, targetTrait: Trait | null): void {
       this.owner.callObservers("traitWillAttachDataSet", dataSetTrait, this.owner);
     },
@@ -40,51 +41,15 @@ export class PlotTrait<X = unknown, Y = unknown> extends Trait {
     didDetachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
       this.owner.callObservers("traitDidDetachDataSet", dataSetTrait, this.owner);
     },
+    detectModel(model: Model): DataSetTrait<X, Y> | null {
+      return null;
+    },
+    detectTrait(trait: Trait): DataSetTrait<X, Y> | null {
+      return trait instanceof DataSetTrait ? trait : null;
+    },
   })
   readonly dataSet!: TraitRef<this, DataSetTrait<X, Y>>;
   static readonly dataSet: MemberFastenerClass<PlotTrait, "dataSet">;
-
-  protected detectDataSetTrait(trait: Trait): DataSetTrait<X, Y> | null {
-    return trait instanceof DataSetTrait ? trait : null;
-  }
-
-  protected detectTraits(model: TraitModelType<this>): void {
-    if (this.dataSet.trait === null) {
-      const traits = model.traits;
-      for (let i = 0, n = traits.length; i < n; i += 1) {
-        const trait = traits[i]!;
-        const dataSetTrait = this.detectDataSetTrait(trait);
-        if (dataSetTrait !== null) {
-          this.dataSet.setTrait(dataSetTrait);
-        }
-      }
-    }
-  }
-
-  protected override onAttachModel(model: TraitModelType<this>): void {
-    super.onAttachModel(model);
-    this.detectTraits(model);
-  }
-
-  /** @protected */
-  override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
-    super.onInsertTrait(trait, targetTrait);
-    if (this.dataSet.trait === null) {
-      const dataSetTrait = this.detectDataSetTrait(trait);
-      if (dataSetTrait !== null) {
-        this.dataSet.setTrait(dataSetTrait, targetTrait);
-      }
-    }
-  }
-
-  /** @protected */
-  override onRemoveTrait(trait: Trait): void {
-    super.onRemoveTrait(trait);
-    const dataSetTrait = this.detectDataSetTrait(trait);
-    if (dataSetTrait !== null && this.dataSet.trait === dataSetTrait) {
-      this.dataSet.setTrait(null);
-    }
-  }
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/fastener";
+import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/component";
 import {AnyController, ControllerFactory, Controller} from "./Controller";
 
 /** @internal */
@@ -28,8 +28,8 @@ export interface ControllerRelationInit<C extends Controller = Controller> exten
   observes?: boolean;
 
   initController?(controller: C): void;
-  willAttachController?(controller: C, targetController: Controller | null): void;
-  didAttachController?(controller: C, targetController: Controller | null): void;
+  willAttachController?(controller: C, target: Controller | null): void;
+  didAttachController?(controller: C, target: Controller | null): void;
 
   deinitController?(controller: C): void;
   willDetachController?(controller: C): void;
@@ -74,13 +74,13 @@ export interface ControllerRelation<O = unknown, C extends Controller = Controll
   initController(controller: C): void;
 
   /** @protected */
-  willAttachController(controller: C, targetController: Controller | null): void;
+  willAttachController(controller: C, target: Controller | null): void;
 
   /** @protected */
-  onAttachController(controller: C, targetController: Controller | null): void;
+  onAttachController(controller: C, target: Controller | null): void;
 
   /** @protected */
-  didAttachController(controller: C, targetController: Controller | null): void;
+  didAttachController(controller: C, target: Controller | null): void;
 
   /** @protected */
   deinitController(controller: C): void;
@@ -101,7 +101,7 @@ export interface ControllerRelation<O = unknown, C extends Controller = Controll
   insertChild(parent: Controller, child: C, target: Controller | null, key: string | undefined): void;
 
   /** @internal */
-  bindController(controller: Controller, targetController: Controller | null): void;
+  bindController(controller: Controller, target: Controller | null): void;
 
   /** @internal */
   unbindController(controller: Controller): void;
@@ -144,17 +144,17 @@ export const ControllerRelation = (function (_super: typeof Fastener) {
     // hook
   };
 
-  ControllerRelation.prototype.willAttachController = function <C extends Controller>(this: ControllerRelation<unknown, C>, controller: C, targetController: Controller | null): void {
+  ControllerRelation.prototype.willAttachController = function <C extends Controller>(this: ControllerRelation<unknown, C>, controller: C, target: Controller | null): void {
     // hook
   };
 
-  ControllerRelation.prototype.onAttachController = function <C extends Controller>(this: ControllerRelation<unknown, C>, controller: C, targetController: Controller | null): void {
+  ControllerRelation.prototype.onAttachController = function <C extends Controller>(this: ControllerRelation<unknown, C>, controller: C, target: Controller | null): void {
     if (this.observes === true) {
       controller.observe(this as ObserverType<C>);
     }
   };
 
-  ControllerRelation.prototype.didAttachController = function <C extends Controller>(this: ControllerRelation<unknown, C>, controller: C, targetController: Controller | null): void {
+  ControllerRelation.prototype.didAttachController = function <C extends Controller>(this: ControllerRelation<unknown, C>, controller: C, target: Controller | null): void {
     // hook
   };
 
@@ -188,7 +188,7 @@ export const ControllerRelation = (function (_super: typeof Fastener) {
     parent.insertChild(child, target, key);
   };
 
-  ControllerRelation.prototype.bindController = function <C extends Controller>(this: ControllerRelation<unknown, C>, controller: Controller, targetController: Controller | null): void {
+  ControllerRelation.prototype.bindController = function <C extends Controller>(this: ControllerRelation<unknown, C>, controller: Controller, target: Controller | null): void {
     // hook
   };
 

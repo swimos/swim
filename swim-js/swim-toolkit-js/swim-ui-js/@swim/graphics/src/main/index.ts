@@ -16,8 +16,6 @@ export * from "./sprite";
 
 export * from "./graphics";
 
-export * from "./layer";
-
 export * from "./drawing";
 
 export * from "./path";

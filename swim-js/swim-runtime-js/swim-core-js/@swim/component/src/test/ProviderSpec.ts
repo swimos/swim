@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Spec, Test, Exam} from "@swim/unit";
-import {Provider, GenericHierarchy} from "@swim/fastener";
+import {Provider, Component} from "@swim/component";
 
 export class ProviderSpec extends Spec {
   @Test
@@ -27,23 +27,23 @@ export class ProviderSpec extends Spec {
 
   @Test
   testProviderDecorator(exam: Exam): void {
-    class TestHierarchy extends GenericHierarchy {
+    class TestComponent extends Component {
       @Provider({service: "bar"})
       readonly foo!: Provider<this, string>;
     }
-    const hierarchy = new TestHierarchy();
-    hierarchy.mount();
+    const component = new TestComponent();
+    component.mount();
 
-    exam.equal(hierarchy.foo.name, "foo");
-    exam.equal(hierarchy.foo.service, "bar");
-    exam.equal(hierarchy.foo(), "bar", "accessor");
+    exam.equal(component.foo.name, "foo");
+    exam.equal(component.foo.service, "bar");
+    exam.equal(component.foo(), "bar", "accessor");
   }
 
   @Test
   testProviderInheritance(exam: Exam): void {
     let id = 0;
-    class TestHierarchy extends GenericHierarchy {
-      @Provider<TestHierarchy, {id: number} | undefined>({
+    class TestComponent extends Component {
+      @Provider<TestComponent, {id: number} | undefined>({
         inherits: true,
         createService(): {id: number} | undefined {
           const service = {id};
@@ -53,8 +53,8 @@ export class ProviderSpec extends Spec {
       })
       readonly foo!: Provider<this, {id: number} | undefined>;
     }
-    const parent = new TestHierarchy();
-    const child = new TestHierarchy();
+    const parent = new TestComponent();
+    const child = new TestComponent();
     parent.appendChild(child);
     parent.mount();
 
@@ -68,8 +68,8 @@ export class ProviderSpec extends Spec {
   @Test
   testProviderOverride(exam: Exam): void {
     let id = 0;
-    class TestHierarchy extends GenericHierarchy {
-      @Provider<TestHierarchy, {id: number} | undefined>({
+    class TestComponent extends Component {
+      @Provider<TestComponent, {id: number} | undefined>({
         lazy: false,
         inherits: true,
         createService(): {id: number} | undefined {
@@ -80,8 +80,8 @@ export class ProviderSpec extends Spec {
       })
       readonly foo!: Provider<this, {id: number} | undefined>;
     }
-    const parent = new TestHierarchy();
-    const child = new TestHierarchy();
+    const parent = new TestComponent();
+    const child = new TestComponent();
     child.foo.setInherits(false);
     parent.appendChild(child);
     parent.mount();

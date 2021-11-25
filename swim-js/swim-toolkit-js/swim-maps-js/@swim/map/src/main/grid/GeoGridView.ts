@@ -13,24 +13,19 @@
 // limitations under the License.
 
 import type {GeoTile, GeoBox} from "@swim/geo";
-import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoView} from "../geo/GeoView";
 
 /** @public */
-export class GeoGridView extends GeoLayerView {
+export class GeoGridView extends GeoView {
   constructor(geoTile: GeoTile) {
     super();
     this.geoTile = geoTile;
-    Object.defineProperty(this, "geoBounds", {
-      value: geoTile.bounds,
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
+    this.geoBounds = geoTile.bounds;
   }
 
   readonly geoTile: GeoTile;
 
-  override readonly geoBounds!: GeoBox;
+  override readonly geoBounds: GeoBox;
 
   protected override setGeoBounds(newGeoBounds: GeoBox): void {
     // immutable

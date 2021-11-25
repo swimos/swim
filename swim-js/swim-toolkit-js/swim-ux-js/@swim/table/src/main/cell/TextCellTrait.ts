@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {Property} from "@swim/fastener";
+import {Property} from "@swim/component";
 import type {HtmlView} from "@swim/dom";
 import {CellTrait} from "./CellTrait";
 import type {TextCellTraitObserver} from "./TextCellTraitObserver";

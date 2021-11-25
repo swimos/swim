@@ -59,7 +59,7 @@ require([
         let intersectionLayerView = layerView.getChild(key);
         if (intersectionLayerView === null && lng !== 0 && lat !== 0 && isFinite(lng) && isFinite(lat)) {
           const intersectionId = value.get("id").stringValue();
-          intersectionLayerView = new swim.GeoLayerView();
+          intersectionLayerView = new swim.GeoView();
           const intersectionMarkerView = new swim.GeoCircleView()
               .geoCenter([lng, lat])
               .radius(5)

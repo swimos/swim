@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/fastener";
+import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import {Length, R2Box} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
@@ -243,10 +243,10 @@ export class TokenView extends HtmlView {
     didAttachView(headIconView: SvgView): void {
       this.owner.initHeadIcon(headIconView);
     },
-    insertChild(parent: View, childView: SvgView, targetView: View | null, key: string | undefined): void {
+    insertChild(parent: View, child: SvgView, target: View | number | null, key: string | undefined): void {
       const shapeView = this.owner.shape.view;
       if (shapeView !== null) {
-        shapeView.insertChild(childView, this.owner.body.view, key);
+        shapeView.insertChild(child, this.owner.body.view, key);
       }
     },
   })
@@ -417,10 +417,10 @@ export class TokenView extends HtmlView {
     didAttachView(footIconView: SvgView): void {
       this.owner.initFootIcon(footIconView);
     },
-    insertChild(parent: View, childView: SvgView, targetView: View | null, key: string | undefined): void {
+    insertChild(parent: View, child: SvgView, target: View | number | null, key: string | undefined): void {
       const shapeView = this.owner.shape.view;
       if (shapeView !== null) {
-        shapeView.appendChild(childView, key);
+        shapeView.appendChild(child, key);
       }
     },
   })

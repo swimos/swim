@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Equals, Values, AnyTiming} from "@swim/util";
-import type {MemberAnimatorInit} from "@swim/fastener";
+import type {MemberAnimatorInit} from "@swim/component";
 import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
 import {
   FontStyle,
