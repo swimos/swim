@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Table Controller</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body swim-theme style="display: flex; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
+    <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
+    <script src="../swim-ui/dist/swim-ui.js"></script>
+    <script src="../swim-ux/dist/swim-ux.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div")
+  .position("relative")
+  .flexGrow(1)
+  .margin(60)
+  .userSelect("none");
+
+class ExampleTableController extends swim.TableController {
+  createRowFastener(rowController) {
+    return ExampleTableController.RowFastener.create(this);
+  }
+}
+swim.TraitViewControllerSet({
+  extends: true,
+  controllerDidEnterLeafView(leafView, rowController) {
+    leafView.hover.focus(false);
+  },
+  controllerDidLeaveLeafView(leafView, rowController) {
+    leafView.hover.unfocus(false);
+  },
+  controllerDidPressLeafView(input, event, leafView, rowController) {
+    leafView.highlight.toggle();
+  },
+  attachCellView(cellView, cellController, rowController) {
+    swim.TableController.rows.prototype.attachCellView.call(this, cellView, cellController, rowController);
+    if (cellFastener.key === "a") {
+      cellView.color("#989898");
+    }
+  },
+})(ExampleTableController.prototype, "rows");
+
+const tableModel = new swim.Model();
+tableModel.mount();
+const tableTrait = new swim.TableTrait();
+tableModel.setTrait("table", tableTrait);
+tableTrait.header.insertTrait();
+const colATrait = new swim.ColTrait()
+  .layout({key: "a", grow: 2, textColor: swim.Look.mutedColor})
+  .label("A");
+tableTrait.setTrait("a", colATrait);
+const colBTrait = new swim.ColTrait()
+  .layout({key: "b", grow: 1})
+  .label("B");
+tableTrait.setTrait("b", colBTrait);
+
+function createRowModel(i) {
+  const rowModel = new swim.Model();
+  const rowTrait = new swim.RowTrait();
+  rowModel.setTrait("row", rowTrait);
+  rowTrait.getOrCreateCell("a", swim.TextCellTrait).content(i + "A");
+  rowTrait.getOrCreateCell("b", swim.TextCellTrait).content(i + "B");
+  return rowModel;
+}
+for (let i = 1; i <= 100; i += 1) {
+  tableModel.appendChild(createRowModel(i));
+}
+
+const tableController = new ExampleTableController();
+tableController.mount();
+tableController.table.insertView(containerView);
+tableController.table.setTrait(tableTrait);
+
+    </script>
+  </body>
+</html>

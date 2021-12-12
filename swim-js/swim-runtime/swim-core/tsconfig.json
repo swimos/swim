@@ -1,0 +1,25 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./swim-util"},
+    {"path": "./swim-codec"},
+    {"path": "./swim-component"},
+    {"path": "./swim-sys"},
+    {"path": "./swim-args"},
+    {"path": "./swim-unit"},
+    {"path": "./swim-build"},
+    {"path": "./swim-collections"},
+    {"path": "./swim-constraint"},
+    {"path": "./swim-structure"},
+    {"path": "./swim-streamlet"},
+    {"path": "./swim-dataflow"},
+    {"path": "./swim-recon"},
+    {"path": "./swim-macro"},
+    {"path": "./swim-uri"},
+    {"path": "./swim-math"},
+    {"path": "./swim-geo"},
+    {"path": "./swim-time"},
+    {"path": "./src/main"}
+  ]
+}

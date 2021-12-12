@@ -1,9 +1,0 @@
-{
-  "extends": "../../../../config/tsconfig-main",
-  "include": ["**/*"],
-  "compilerOptions": {
-    "outDir": "../../lib/main",
-    "tsBuildInfoFile": "../../lib/main/.tsbuildinfo",
-    "types": ["arcgis-js-api"]
-  }
-}

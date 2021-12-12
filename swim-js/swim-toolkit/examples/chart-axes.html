@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Chart Axes</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
+    <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
+    <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
+    <script src="../swim-ui/dist/swim-ui.js"></script>
+    <script src="../swim-vis/dist/swim-vis.js"></script>
+    <script>
+
+//setTimeout(function () {
+//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//}, 1000);
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+
+const canvasView = swim.CanvasView.create()
+    .wheelEventsEnabled(true)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
+
+const chartView = canvasView.appendChild(swim.ChartView)
+    .topAxis(true)
+    .rightAxis(true)
+    .bottomAxis(true)
+    .leftAxis(true)
+    .xDomain("time")
+    .yDomain("linear")
+    .xDomainBounds([false, false])
+    .yDomainBounds([false, false])
+    .xScaleGestures(true)
+    .yScaleGestures(true)
+    .fitAspectRatio(60*60*1000)
+    .preserveAspectRatio(true)
+    .font("12px sans-serif");
+
+chartView.graph.insertView();
+
+chartView.leftAxis.view.gridLineWidth(1);
+chartView.bottomAxis.view.gridLineWidth(1);
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>

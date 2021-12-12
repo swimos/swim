@@ -1,0 +1,14 @@
+.eslintrc
+.gitignore
+.gitrepo
+.npmignore
+CONTRIBUTING.md
+bin/
+dist/*-test.*
+doc/
+examples/
+lib/
+src/
+swim-*/
+tsconfig.json
+tsdoc.json

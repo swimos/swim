@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Traffic Map</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
+  </head>
+  <body swim-theme style="width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
+    <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
+    <script src="../swim-ui/dist/swim-ui.js"></script>
+    <script src="../swim-ux/dist/swim-ux.js"></script>
+    <script src="../swim-maps/dist/swim-maps.js"></script>
+    <script src="https://js.arcgis.com/4.22/"></script>
+    <script>
+
+const RED = swim.Color.parse("#a50f21");
+const YELLOW = swim.Color.parse("#fccf20");
+const GREEN = swim.Color.parse("#54e218");
+const INTERSECTION_COLOR = swim.Color.parse("#00a6ed");
+const RIPPLE_COLOR = swim.Color.parse("#efefef");
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+require([
+    "esri/Map",
+    "esri/views/MapView",
+    "esri/views/SceneView",
+  ], function(EsriMap, EsriMapView, EsriSceneView) {
+
+  const esriMap = new EsriMap({
+    basemap: "dark-gray-vector",
+  });
+  const esriMapView = new EsriMapView({
+    container: bodyView.node,
+    map: esriMap,
+    center: [-122.157139, 37.450809],
+    zoom: 14,
+    rotation: -160,
+  });
+  const mapView = new swim.EsriMapView(esriMapView);
+  mapView.container.setView(bodyView);
+  mapView.canvas.view.pointerEventsEnabled(true).touchAction("manipulation");
+
+  const layerView = mapView.appendChild(swim.GeoTreeView);
+  //layerView.geoBoundsColor("#008f11");
+  //layerView.geoTreeColor("#008f11");
+
+  const host = swim.hostRef("warps://traffic.swim.services");
+
+  const intersectionsLink = host.downlinkMap()
+      .nodeUri("/city/PaloAlto_CA_US")
+      .laneUri("intersections")
+      .didUpdate(function (key, value) {
+        key = key.stringValue();
+        const lng = value.get("lng").numberValue();
+        const lat = value.get("lat").numberValue();
+
+        let intersectionLayerView = layerView.getChild(key);
+        if (intersectionLayerView === null && lng !== 0 && lat !== 0 && isFinite(lng) && isFinite(lat)) {
+          const intersectionId = value.get("id").stringValue();
+          intersectionLayerView = new swim.GeoView();
+          const intersectionMarkerView = new swim.GeoCircleView()
+              .geoCenter([lng, lat])
+              .radius(5)
+              .fill(INTERSECTION_COLOR);
+          intersectionLayerView.setChild("marker", intersectionMarkerView);
+          layerView.setChild(key, intersectionLayerView);
+          linkIntersection(intersectionId, host.nodeRef(key), intersectionLayerView, intersectionMarkerView);
+        }
+      })
+      .open();
+
+  function linkIntersection(intersectionId, node, intersectionLayerView, intersectionMarkerView) {
+    let approaches = {};
+    let phases = {};
+    let detectors = {};
+    let intersectionPopover = null;
+    intersectionMarkerView.on("pointerup", function (event) {
+      if (!intersectionPopover) {
+        intersectionPopover = swim.PopoverView.create()
+            .width(240)
+            .height(360)
+            .borderRadius(5)
+            .backgroundColor(swim.Color.parse("#071013").alpha(0.9))
+            .backdropFilter("blur(2px)");
+        intersectionPopover.setSource(intersectionMarkerView);
+        intersectionPopover.hideModal();
+      }
+      bodyView.modalProvider.toggleModal(intersectionPopover, {multi: event.shiftKey});
+    });
+    intersectionMarkerView.on("click", function (event) {
+      event.stopPropagation();
+    });
+
+    const schematicLink = node.downlinkValue()
+        .laneUri("intersection/schematic")
+        .didSet(function (value) {
+          value.forEach(function (item) {
+            if (item.tag === "approach") {
+              const approachId = item.get("id").stringValue();
+              const approachKey = intersectionId + "-" + approachId;
+              let approachView = approaches[approachId];
+              if (approachView === undefined) {
+                const points = item.get("coords").toAny();
+                points.push(points[0]); // close path
+                const approachView = new swim.GeoAreaView()
+                  .geoPath(points)
+                  .fill(swim.Color.transparent())
+                  .stroke(swim.Color.transparent())
+                  .strokeWidth(3)
+                  .on("pointerenter", function (event) {
+                    updateApproach(approachView);
+                  })
+                  .on("pointerleave", function (event) {
+                    updateApproach(approachView);
+                  });
+                approaches[approachId] = approachView;
+                const phaseId = item.get("phase").stringValue();
+                if (phaseId) {
+                  const phaseApproaches = phases[phaseId] || [];
+                  phaseApproaches.push(approachView);
+                  phases[phaseId] = phaseApproaches;
+                }
+                const detectorId = item.get("detector").toAny();
+                if (detectorId) {
+                  const detectorApproaches = detectors[detectorId] || [];
+                  detectorApproaches.push(approachView);
+                  detectors[detectorId] = detectorApproaches;
+                }
+                intersectionLayerView.setChild(approachKey, approachView);
+              }
+            }
+          })
+        })
+        .open();
+
+    const phaseLink = node.downlinkMap()
+        .laneUri("phase/state")
+        .didUpdate(function (key, value) {
+          const phaseId = key.stringValue();
+          const phase = value.numberValue();
+          const phaseApproaches = phases[phaseId] || [];
+          for (let i = 0; i < phaseApproaches.length; i += 1) {
+            const approachView = phaseApproaches[i];
+            approachView.phase = phase;
+            updateApproach(approachView);
+          }
+        })
+        .open();
+
+    const detectorLink = node.downlinkMap()
+        .laneUri("detector/state")
+        .didUpdate(function (key, value) {
+          const detectorId = key.stringValue();
+          const occupied = value.numberValue() !== 0;
+          const detectorApproaches = detectors[detectorId] || [];
+          for (let i = 0; i < detectorApproaches.length; i += 1) {
+            const approachView = detectorApproaches[i];
+            approachView.occupied = occupied;
+            updateApproach(approachView);
+          }
+          if (occupied) {
+            intersectionMarkerView.ripple({
+              color: RIPPLE_COLOR,
+              opacity: 0.25,
+              timing: 2000,
+            });
+          }
+        })
+        .open();
+
+    function updateApproach(approachView) {
+      let phaseColor;
+      if (approachView.phase === 1) { // red
+        phaseColor = RED;
+      } else if (approachView.phase === 2) { // yellow
+        phaseColor = YELLOW;
+      } else if (approachView.phase === 3) { // green
+        phaseColor = GREEN;
+      } else {
+        phaseColor = swim.Color.transparent();
+      }
+      if (approachView.occupied === false) {
+        phaseColor = phaseColor.alpha(0.25);
+      }
+      const timing = swim.Easing.cubicOut.withDuration(250);
+      approachView.fill(phaseColor, timing);
+      if (approachView.isHovering()) {
+        approachView.stroke("#ffffff", timing);
+      } else {
+        approachView.stroke(swim.Color.transparent(), timing);
+      }
+    }
+  }
+
+});
+
+    </script>
+  </body>
+</html>

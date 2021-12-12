@@ -1,0 +1,34 @@
+{
+  "name": "@swim/util",
+  "version": "4.0.0-dev.20210927.1",
+  "description": "Interfaces for ordering, equality, hashing, type conversions, functional maps, interpolators, scales, iterators, builders, key-value maps, caches, and assertions",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-util",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim.inc",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "./dist/swim-util.js",
+  "module": "./dist/swim-util.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-util.mjs",
+      "require": "./dist/swim-util.js",
+      "types": "./dist/swim-util.d.ts"
+    }
+  },
+  "types": "./dist/swim-util.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": false,
+  "scripts": {
+    "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",
+    "main:bundle": "cd src/main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "test:compile": "tsc -b src/test",
+    "test:bundle": "cd src/test && rollup -c",
+    "test:build": "npm run test:compile && npm run test:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "test": "npx swim-unit -m dist/swim-util-test.mjs",
+    "clean": "rm -rf lib dist"
+  }
+}

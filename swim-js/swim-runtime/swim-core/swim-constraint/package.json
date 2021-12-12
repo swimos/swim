@@ -1,0 +1,39 @@
+{
+  "name": "@swim/constraint",
+  "version": "4.0.0-dev.20210927.1",
+  "description": "Incremental solver for systems of linear constraint equations",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-constraint",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim.inc",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "./dist/swim-constraint.js",
+  "module": "./dist/swim-constraint.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-constraint.mjs",
+      "require": "./dist/swim-constraint.js",
+      "types": "./dist/swim-constraint.d.ts"
+    }
+  },
+  "types": "./dist/swim-constraint.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20210927.1",
+    "@swim/codec": "4.0.0-dev.20210927.1",
+    "@swim/component": "4.0.0-dev.20210927.1"
+  },
+  "scripts": {
+    "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",
+    "main:bundle": "cd src/main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "test:compile": "tsc -b src/test",
+    "test:bundle": "cd src/test && rollup -c",
+    "test:build": "npm run test:compile && npm run test:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "test": "npx swim-unit -m dist/swim-constraint-test.mjs",
+    "clean": "rm -rf lib dist"
+  }
+}

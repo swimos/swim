@@ -1,0 +1,41 @@
+{
+  "name": "@swim/unit",
+  "version": "4.0.0-dev.20210927.1",
+  "description": "Specializable unit testing framework",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-unit",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim.inc",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "./dist/swim-unit.js",
+  "module": "./dist/swim-unit.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-unit.mjs",
+      "require": "./dist/swim-unit.js",
+      "types": "./dist/swim-unit.d.ts"
+    }
+  },
+  "types": "./dist/swim-unit.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20210927.1",
+    "@swim/codec": "4.0.0-dev.20210927.1"
+  },
+  "scripts": {
+    "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",
+    "main:bundle": "cd src/main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "cli:compile": "tsc -b src/cli",
+    "cli:bundle": "cd src/cli && rollup -c",
+    "cli:build": "npm run cli:compile && npm run cli:bundle",
+    "compile": "npm run main:compile && npm run cli:compile",
+    "build": "npm run main:build && npm run cli:build",
+    "cli": "node dist/swim-unit-cli.mjs",
+    "clean": "rm -rf lib dist"
+  },
+  "bin": {
+    "swim-unit": "./dist/swim-unit-cli.mjs"
+  }
+}

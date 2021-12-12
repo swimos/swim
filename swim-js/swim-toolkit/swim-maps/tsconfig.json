@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./swim-map"},
+    {"path": "./swim-mapbox"},
+    {"path": "./swim-leaflet"},
+    {"path": "./swim-googlemap"},
+    {"path": "./swim-esrimap"},
+    {"path": "./src/main"}
+  ]
+}

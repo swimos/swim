@@ -1,8 +1,0 @@
-{
-  "extends": "../../../../config/tsconfig-main",
-  "include": ["**/*"],
-  "compilerOptions": {
-    "outDir": "../../lib/cli",
-    "tsBuildInfoFile": "../../lib/cli/.tsbuildinfo"
-  }
-}

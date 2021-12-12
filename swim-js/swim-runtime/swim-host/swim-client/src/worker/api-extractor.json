@@ -1,0 +1,40 @@
+{
+  "projectFolder": "../..",
+  "mainEntryPointFilePath": "<projectFolder>/lib/worker/index.d.ts",
+  "compiler": {
+    "tsconfigFilePath": "<projectFolder>/src/worker/tsconfig.json"
+  },
+  "apiReport": {
+    "enabled": false,
+    "reportFolder": "<projectFolder>/lib",
+    "reportTempFolder": "<projectFolder>/lib/worker",
+    "reportFileName": "swim-<unscopedPackageName>-worker.api.md"
+  },
+  "docModel": {
+    "enabled": true,
+    "apiJsonFilePath": "<projectFolder>/lib/swim-<unscopedPackageName>-worker.api.json"
+  },
+  "dtsRollup": {
+    "enabled": true,
+    "untrimmedFilePath": "<projectFolder>/dist/swim-<unscopedPackageName>-worker.d.ts"
+  },
+  "tsdocMetadata": {
+    "enabled": false,
+  },
+  "messages": {
+    "extractorMessageReporting": {
+      "default": {
+        "logLevel": "warning",
+        "addToApiReportFile": false
+      },
+      "ae-incompatible-release-tags": {
+        "logLevel": "warning",
+        "addToApiReportFile": false
+      },
+      "ae-internal-missing-underscore": {
+        "logLevel": "none",
+        "addToApiReportFile": false
+      }
+    }
+  }
+}

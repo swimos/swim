@@ -1,0 +1,51 @@
+{
+  "name": "@swim/controller",
+  "version": "4.0.0-dev.20210927.1",
+  "description": "Componentized controller layer with application lifecycle and service management",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-toolkit/swim-ui/swim-controller",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim.inc",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "./dist/swim-controller.js",
+  "module": "./dist/swim-controller.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-controller.mjs",
+      "require": "./dist/swim-controller.js",
+      "types": "./dist/swim-controller.d.ts"
+    }
+  },
+  "types": "./dist/swim-controller.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20210927.1",
+    "@swim/codec": "4.0.0-dev.20210927.1",
+    "@swim/component": "4.0.0-dev.20210927.1",
+    "@swim/collections": "4.0.0-dev.20210927.1",
+    "@swim/constraint": "4.0.0-dev.20210927.1",
+    "@swim/structure": "4.0.0-dev.20210927.1",
+    "@swim/streamlet": "4.0.0-dev.20210927.1",
+    "@swim/dataflow": "4.0.0-dev.20210927.1",
+    "@swim/recon": "4.0.0-dev.20210927.1",
+    "@swim/uri": "4.0.0-dev.20210927.1",
+    "@swim/math": "4.0.0-dev.20210927.1",
+    "@swim/time": "4.0.0-dev.20210927.1",
+    "@swim/warp": "4.0.0-dev.20210927.1",
+    "@swim/client": "4.0.0-dev.20210927.1",
+    "@swim/model": "4.0.0-dev.20210927.1",
+    "@swim/style": "4.0.0-dev.20210927.1",
+    "@swim/theme": "4.0.0-dev.20210927.1",
+    "@swim/view": "4.0.0-dev.20210927.1",
+    "@swim/dom": "4.0.0-dev.20210927.1"
+  },
+  "scripts": {
+    "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",
+    "main:bundle": "cd src/main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "clean": "rm -rf lib dist"
+  }
+}

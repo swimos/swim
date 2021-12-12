@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Gauge</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
+    <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
+    <script src="../swim-ui/dist/swim-ui.js"></script>
+    <script src="../swim-vis/dist/swim-vis.js"></script>
+    <script>
+
+//setTimeout(function () {
+//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//}, 1000);
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+
+const canvasView = swim.CanvasView.create()
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
+
+const gaugeView = canvasView.appendChild(swim.GaugeView)
+    .font("14px sans-serif")
+    .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"));
+
+const dialView = gaugeView.appendChild(swim.DialView)
+    .value(0.33)
+    .legend("Legend")
+    .on("pointerenter", function (event) {
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+    })
+    .on("pointerleave", function (event) {
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+    });
+
+setInterval(function () {
+  const timing = swim.Easing.linear.withDuration(1000);
+  dialView.value(Math.random(), timing);
+}, 1000);
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>

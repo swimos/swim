@@ -1,0 +1,35 @@
+{
+  "name": "@swim/sys",
+  "version": "4.0.0-dev.20210927.1",
+  "description": "Host system integration components",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-sys",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim.inc",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "./dist/swim-sys.js",
+  "module": "./dist/swim-sys.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-sys.mjs",
+      "require": "./dist/swim-sys.cjs",
+      "types": "./dist/swim-sys.d.ts"
+    }
+  },
+  "types": "./dist/swim-sys.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20210927.1",
+    "@swim/codec": "4.0.0-dev.20210927.1",
+    "@swim/component": "4.0.0-dev.20210927.1"
+  },
+  "scripts": {
+    "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",
+    "main:bundle": "cd src/main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "clean": "rm -rf lib dist"
+  }
+}

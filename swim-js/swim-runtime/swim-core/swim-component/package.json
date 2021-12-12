@@ -1,0 +1,37 @@
+{
+  "name": "@swim/component",
+  "version": "4.0.0-dev.20210927.1",
+  "description": "Lifecycle managed object model and observable fastener model",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-component",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim.inc",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "./dist/swim-component.js",
+  "module": "./dist/swim-component.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-component.mjs",
+      "require": "./dist/swim-component.js",
+      "types": "./dist/swim-component.d.ts"
+    }
+  },
+  "types": "./dist/swim-component.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20210927.1"
+  },
+  "scripts": {
+    "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",
+    "main:bundle": "cd src/main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "test:compile": "tsc -b src/test",
+    "test:bundle": "cd src/test && rollup -c",
+    "test:build": "npm run test:compile && npm run test:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "test": "npx swim-unit -m dist/swim-component-test.mjs",
+    "clean": "rm -rf lib dist"
+  }
+}

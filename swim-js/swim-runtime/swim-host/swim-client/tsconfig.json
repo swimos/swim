@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./src/worker"},
+    {"path": "./src/webworker"},
+    {"path": "./src/main"},
+    {"path": "./src/cli"},
+    {"path": "./src/test"}
+  ]
+}

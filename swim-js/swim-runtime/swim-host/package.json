@@ -1,0 +1,83 @@
+{
+  "name": "@swim/host",
+  "version": "4.0.0-dev.20210927.1",
+  "description": "Multiplexed streaming WARP framework that runs in Node.js and web browsers",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-host",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim.inc",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "./dist/swim-host.js",
+  "module": "./dist/swim-host.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-host.mjs",
+      "require": "./dist/swim-host.js",
+      "types": "./dist/swim-host.d.ts"
+    }
+  },
+  "types": "./dist/swim-host.d.ts",
+  "typedocMain": "./src/main/index.ts",
+  "sideEffects": true,
+  "workspaces": [
+    "./swim-warp",
+    "./swim-client",
+    "."
+  ],
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20210927.1",
+    "@swim/codec": "4.0.0-dev.20210927.1",
+    "@swim/component": "4.0.0-dev.20210927.1",
+    "@swim/collections": "4.0.0-dev.20210927.1",
+    "@swim/structure": "4.0.0-dev.20210927.1",
+    "@swim/streamlet": "4.0.0-dev.20210927.1",
+    "@swim/dataflow": "4.0.0-dev.20210927.1",
+    "@swim/recon": "4.0.0-dev.20210927.1",
+    "@swim/uri": "4.0.0-dev.20210927.1",
+    "@swim/core": "4.0.0-dev.20210927.1",
+    "@swim/warp": "4.0.0-dev.20210927.1",
+    "@swim/client": "4.0.0-dev.20210927.1",
+    "ws": "8"
+  },
+  "devDependencies": {
+    "@swim/util": "4.0.0-dev.20210927.1",
+    "@swim/codec": "4.0.0-dev.20210927.1",
+    "@swim/component": "4.0.0-dev.20210927.1",
+    "@swim/sys": "4.0.0-dev.20210927.1",
+    "@swim/args": "4.0.0-dev.20210927.1",
+    "@swim/unit": "4.0.0-dev.20210927.1",
+    "@swim/build": "4.0.0-dev.20210927.1",
+    "@microsoft/api-extractor": "7.19",
+    "@rollup/plugin-node-resolve": "13",
+    "@types/eslint": "8",
+    "@types/node": "16",
+    "@types/ws": "8",
+    "@typescript-eslint/eslint-plugin": "5",
+    "@typescript-eslint/parser": "5",
+    "eslint": "8",
+    "rollup": "2.61",
+    "rollup-plugin-sourcemaps": "0.6",
+    "rollup-plugin-terser": "7",
+    "terser": "5",
+    "tslib": "2",
+    "typedoc": "0.22",
+    "typescript": "4.5",
+    "ws": "8"
+  },
+  "scripts": {
+    "all:main:compile": "npm run main:compile --workspaces --if-present",
+    "all:main:build": "npm run main:build --workspaces --if-present",
+    "all:test:compile": "npm run test:compile --workspaces --if-present",
+    "all:test:build": "npm run test:build --workspaces --if-present",
+    "all:compile": "npm run compile --workspaces --if-present",
+    "all:build": "npm run build --workspaces --if-present",
+    "all:test": "npm run test --workspaces --if-present",
+    "all:clean": "npm run clean --workspaces --if-present",
+    "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",
+    "main:bundle": "cd src/main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "clean": "rm -rf lib dist"
+  }
+}

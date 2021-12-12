@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Chart Ticks</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
+    <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
+    <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
+    <script src="../swim-ui/dist/swim-ui.js"></script>
+    <script src="../swim-vis/dist/swim-vis.js"></script>
+    <script>
+
+//setTimeout(function () {
+//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//}, 1000);
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+
+const canvasView = swim.CanvasView.create()
+    .wheelEventsEnabled(true)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
+
+const chartView = canvasView.appendChild(swim.ChartView)
+    .topAxis(true)
+    .rightAxis(true)
+    .bottomAxis(true)
+    .leftAxis(true)
+    //.xRangePadding([2, 2])
+    //.yRangePadding([2, 2])
+    .fitAspectRatio(1)
+    .domainTracking(true)
+    .xScaleGestures(true)
+    .font("12px sans-serif");
+
+const graphView = chartView.graph.insertView();
+
+chartView.topAxis.view
+    .tickGenerator(null)
+    .tickMarkWidth(0)
+    .tickMarkLength(0)
+    .borderWidth(0);
+chartView.topAxis.view.gridLineColor.setLook(swim.Look.mutedColor);
+chartView.rightAxis.view
+    .tickGenerator(null)
+    .tickMarkWidth(0)
+    .tickMarkLength(0)
+    .borderWidth(0);
+chartView.rightAxis.view.gridLineColor.setLook(swim.Look.mutedColor);
+
+const plotView = graphView.appendChild(swim.LinePlotView)
+    .hitMode("domain")
+    .strokeWidth(2)
+    .on("pointerover", function (event) {
+      const dataPoint = event.targetView;
+      const x = dataPoint.x.value;
+      chartView.topAxis.view.insertTick({
+        orientation: "top",
+        value: x,
+        tickLabel: x.toFixed(2),
+        gridLineWidth: 1,
+      });
+      const y = dataPoint.y.value;
+      chartView.rightAxis.view.insertTick({
+        orientation: "right",
+        value: y,
+        tickLabel: y.toFixed(2),
+        gridLineWidth: 1,
+      });
+    })
+    .on("pointerout", function (event) {
+      const dataPoint = event.targetView;
+      chartView.topAxis.view.removeTick(dataPoint.x.value);
+      chartView.rightAxis.view.removeTick(dataPoint.y.value);
+    });
+plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
+
+const cycles = 2;
+const samples = 100;
+for (let i = 0, n = cycles * samples; i <= n; i += 1) {
+  const x = i * 2 * Math.PI / samples;
+  const y = Math.sin(x);
+  const opacity = i === 0 ? 0.75 : i === n ? 0.25 : void 0;
+  plotView.insertDataPoint({x: x, y: y, opacity: opacity});
+}
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>
