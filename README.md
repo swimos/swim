@@ -49,9 +49,9 @@ Help keep SwimOS open and inclusive to all by reading and following our
 Licensed under the [Apache 2.0 License][license].
 
 [swimos]: https://www.swimos.org
-[backend]: https://www.swimos.org/backend
-[frontend]: https://www.swimos.org/frontend
-[runtime]: https://www.swimos.org/runtime
+[backend]: https://github.com/swimos/swim/tree/main/swim-java
+[frontend]: https://github.com/swimos/swim/tree/main/swim-js
+[runtime]: https://github.com/swimos/swim/tree/main/swim-java/swim-runtime-java
 [contributing]: CONTRIBUTING.md
 [conduct]: CODE_OF_CONDUCT.md
 [license]: LICENSE
