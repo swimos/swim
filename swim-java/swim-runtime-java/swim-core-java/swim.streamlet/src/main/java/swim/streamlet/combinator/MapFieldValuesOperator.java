@@ -22,6 +22,10 @@ import swim.util.Cursor;
 
 public abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapInoutlet<K, VI, VO, I, Map<K, VO>> {
 
+  public MapFieldValuesOperator() {
+    // nop
+  }
+
   @Override
   public boolean containsKey(K key) {
     if (this.input != null) {

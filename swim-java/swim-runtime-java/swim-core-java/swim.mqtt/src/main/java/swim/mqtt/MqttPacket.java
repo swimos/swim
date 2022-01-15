@@ -19,6 +19,10 @@ import swim.codec.OutputBuffer;
 
 public abstract class MqttPacket<T> {
 
+  MqttPacket() {
+    // sealed
+  }
+
   public abstract int packetType();
 
   public abstract int packetFlags();

@@ -19,6 +19,10 @@ import swim.uri.Uri;
 
 public abstract class Pulse {
 
+  public Pulse() {
+    // nop
+  }
+
   public abstract boolean isDefined();
 
   public abstract Value toValue();

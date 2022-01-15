@@ -36,6 +36,10 @@ import swim.ws.WsResponse;
 
 public abstract class WebRequest {
 
+  public WebRequest() {
+    // hook
+  }
+
   public abstract HttpRequest<?> httpRequest();
 
   public HttpMethod httpMethod() {

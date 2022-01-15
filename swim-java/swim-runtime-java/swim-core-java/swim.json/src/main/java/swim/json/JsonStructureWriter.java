@@ -33,6 +33,10 @@ import swim.structure.Value;
 
 public class JsonStructureWriter extends JsonWriter<Item, Value> {
 
+  public JsonStructureWriter() {
+    // nop
+  }
+
   @Override
   public Iterator<Item> items(Item item) {
     return item.iterator();

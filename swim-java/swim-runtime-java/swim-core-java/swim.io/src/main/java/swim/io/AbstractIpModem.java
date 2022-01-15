@@ -25,6 +25,10 @@ public abstract class AbstractIpModem<I, O> implements IpModem<I, O>, IpContext,
 
   protected IpModemContext<I, O> context;
 
+  public AbstractIpModem() {
+    // nop
+  }
+
   @Override
   public IpModemContext<I, O> ipModemContext() {
     return this.context;

@@ -31,6 +31,10 @@ public abstract class AbstractHttpRequester<T> implements HttpRequester<T>, IpCo
 
   protected HttpRequesterContext context;
 
+  public AbstractHttpRequester() {
+    // nop
+  }
+
   @Override
   public HttpRequesterContext httpRequesterContext() {
     return this.context;

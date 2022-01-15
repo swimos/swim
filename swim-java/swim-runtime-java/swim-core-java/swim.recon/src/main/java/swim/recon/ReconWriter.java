@@ -28,6 +28,10 @@ import swim.codec.Writer;
  */
 public abstract class ReconWriter<I, V> {
 
+  public ReconWriter() {
+    // nop
+  }
+
   public abstract boolean isField(I item);
 
   public abstract boolean isAttr(I item);

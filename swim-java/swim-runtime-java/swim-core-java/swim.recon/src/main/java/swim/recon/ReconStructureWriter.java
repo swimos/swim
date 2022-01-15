@@ -53,6 +53,10 @@ import swim.structure.selector.ValuesSelector;
 
 public class ReconStructureWriter extends ReconWriter<Item, Value> {
 
+  public ReconStructureWriter() {
+    // nop
+  }
+
   @Override
   public boolean isField(Item item) {
     return item instanceof Field;

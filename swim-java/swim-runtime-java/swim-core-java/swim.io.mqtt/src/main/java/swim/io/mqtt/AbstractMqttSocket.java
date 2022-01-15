@@ -30,6 +30,10 @@ public abstract class AbstractMqttSocket<I, O> implements MqttSocket<I, O>, IpCo
 
   protected MqttSocketContext<I, O> context;
 
+  public AbstractMqttSocket() {
+    // nop
+  }
+
   @Override
   public MqttSocketContext<I, O> mqttSocketContext() {
     return this.context;

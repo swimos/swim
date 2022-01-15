@@ -22,6 +22,10 @@ import swim.util.Cursor;
 
 public abstract class PageRef {
 
+  PageRef() {
+    // sealed
+  }
+
   public abstract PageContext pageContext();
 
   public StoreSettings settings() {

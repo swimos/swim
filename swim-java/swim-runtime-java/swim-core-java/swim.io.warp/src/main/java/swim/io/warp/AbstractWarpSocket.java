@@ -36,6 +36,10 @@ public abstract class AbstractWarpSocket implements WarpSocket, IpContext, FlowC
 
   protected WarpSocketContext context;
 
+  public AbstractWarpSocket() {
+    // nop
+  }
+
   @Override
   public WarpSocketContext warpSocketContext() {
     return this.context;

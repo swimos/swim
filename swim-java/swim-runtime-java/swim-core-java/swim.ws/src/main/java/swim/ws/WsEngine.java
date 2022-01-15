@@ -18,6 +18,10 @@ import swim.http.WebSocketExtension;
 
 public abstract class WsEngine {
 
+  WsEngine() {
+    // sealed
+  }
+
   public abstract WsDecoder decoder();
 
   public abstract WsEncoder encoder();

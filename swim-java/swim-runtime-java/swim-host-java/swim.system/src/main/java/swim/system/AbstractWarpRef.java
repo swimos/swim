@@ -41,6 +41,10 @@ import swim.warp.CommandMessage;
 
 public abstract class AbstractWarpRef implements WarpRef, CellContext {
 
+  public AbstractWarpRef() {
+    // nop
+  }
+
   @Override
   public HostRef hostRef(Uri hostUri) {
     return new HostScope(this, this.stage(), this.meshUri(), hostUri);

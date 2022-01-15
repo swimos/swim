@@ -21,6 +21,10 @@ import swim.codec.Unicode;
 
 public class UriParser {
 
+  public UriParser() {
+    // nop
+  }
+
   public Uri absolute(UriScheme scheme, UriAuthority authority, UriPath path,
                       UriQuery query, UriFragment fragment) {
     return Uri.create(scheme, authority, path, query, fragment);

@@ -21,6 +21,10 @@ import swim.util.Cursor;
 
 public abstract class STreePage extends Page {
 
+  STreePage() {
+    // sealed
+  }
+
   @Override
   public boolean isSTreePage() {
     return true;

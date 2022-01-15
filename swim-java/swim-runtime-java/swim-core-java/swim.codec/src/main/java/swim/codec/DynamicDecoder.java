@@ -19,6 +19,10 @@ package swim.codec;
  */
 public abstract class DynamicDecoder<O> extends Decoder<O> {
 
+  public DynamicDecoder() {
+    // nop
+  }
+
   /**
    * Current decoder continuation.
    */

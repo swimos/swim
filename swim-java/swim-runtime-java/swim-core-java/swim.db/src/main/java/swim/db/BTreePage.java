@@ -21,6 +21,10 @@ import swim.util.OrderedMapCursor;
 
 public abstract class BTreePage extends Page {
 
+  BTreePage() {
+    // sealed
+  }
+
   @Override
   public boolean isBTreePage() {
     return true;

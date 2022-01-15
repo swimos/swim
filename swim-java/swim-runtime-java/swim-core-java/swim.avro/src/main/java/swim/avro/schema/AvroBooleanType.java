@@ -16,6 +16,10 @@ package swim.avro.schema;
 
 public abstract class AvroBooleanType<T> extends AvroPrimitiveType<T> {
 
+  public AvroBooleanType() {
+    // nop
+  }
+
   public abstract T cast(boolean value);
 
 }

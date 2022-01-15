@@ -16,6 +16,10 @@ package swim.collections;
 
 public abstract class BTreeContext<K, V> {
 
+  public BTreeContext() {
+    // nop
+  }
+
   @SuppressWarnings("unchecked")
   protected int compareKey(Object x, Object y) {
     return ((Comparable<Object>) x).compareTo(y);

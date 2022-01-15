@@ -35,6 +35,10 @@ public abstract class AbstractWebSocket<I, O> implements WebSocket<I, O>, IpCont
 
   protected WebSocketContext<I, O> context;
 
+  public AbstractWebSocket() {
+    // nop
+  }
+
   @Override
   public WebSocketContext<I, O> webSocketContext() {
     return this.context;

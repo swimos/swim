@@ -18,6 +18,10 @@ import swim.protobuf.ProtobufWireType;
 
 public abstract class ProtobufVarintType<T> extends ProtobufPrimitiveType<T> {
 
+  public ProtobufVarintType() {
+    // nop
+  }
+
   @Override
   public final ProtobufWireType wireType() {
     return ProtobufWireType.VARINT;

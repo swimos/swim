@@ -19,6 +19,10 @@ package swim.codec;
  */
 public abstract class InputBuffer extends Input {
 
+  public InputBuffer() {
+    // nop
+  }
+
   @Override
   public abstract InputBuffer isPart(boolean isPart);
 

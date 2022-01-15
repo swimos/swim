@@ -19,6 +19,10 @@ package swim.concurrent;
  */
 public abstract class AbstractTask implements Task {
 
+  public AbstractTask() {
+    // nop
+  }
+
   /**
    * Context used to manage this {@code Task}; {@code null} if this {@code
    * Task} is not bound to an execution {@link Stage}.

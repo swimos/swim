@@ -19,6 +19,10 @@ import swim.streamlet.KeyEffect;
 
 public abstract class WatchFieldsOperator<K, V, O> extends AbstractMapInlet<K, V, O> {
 
+  public WatchFieldsOperator() {
+    // nop
+  }
+
   @Override
   protected void onRecohereOutputKey(K key, KeyEffect effect, int version) {
     if (effect == KeyEffect.UPDATE) {

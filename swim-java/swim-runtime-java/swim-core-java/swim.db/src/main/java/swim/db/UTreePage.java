@@ -19,6 +19,10 @@ import swim.util.Cursor;
 
 public abstract class UTreePage extends Page {
 
+  UTreePage() {
+    // sealed
+  }
+
   @Override
   public boolean isUTreePage() {
     return true;

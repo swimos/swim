@@ -19,6 +19,10 @@ import swim.avro.AvroNamespace;
 
 public abstract class AvroNamedType<T> extends AvroComplexType<T> {
 
+  AvroNamedType() {
+    // sealed
+  }
+
   public AvroNamespace namespace() {
     return this.fullName().namespace();
   }

@@ -20,6 +20,10 @@ import swim.collections.HashTrieMap;
 
 public abstract class AbstractHostType<T> implements HostType<T> {
 
+  public AbstractHostType() {
+    // nop
+  }
+
   @Override
   public String typeName() {
     return this.hostClass().getSimpleName();

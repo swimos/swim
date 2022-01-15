@@ -16,4 +16,8 @@ package swim.avro.schema;
 
 public abstract class AvroIntType<T> extends AvroVarintType<T> {
 
+  public AvroIntType() {
+    // nop
+  }
+
 }

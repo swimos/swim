@@ -27,6 +27,10 @@ import swim.util.Builder;
  */
 public abstract class ReconParser<I, V> {
 
+  public ReconParser() {
+    // nop
+  }
+
   public abstract boolean isDistinct(V value);
 
   public abstract I item(V value);

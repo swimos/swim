@@ -18,6 +18,10 @@ import swim.structure.Kind;
 
 public abstract class R3Shape implements Shape {
 
+  public R3Shape() {
+    // nop
+  }
+
   public abstract double xMin();
 
   public abstract double yMin();

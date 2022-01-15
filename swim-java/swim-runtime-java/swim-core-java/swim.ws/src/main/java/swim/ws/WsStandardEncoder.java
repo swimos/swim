@@ -16,4 +16,8 @@ package swim.ws;
 
 public abstract class WsStandardEncoder extends WsEncoder {
 
+  public WsStandardEncoder() {
+    // nop
+  }
+
 }

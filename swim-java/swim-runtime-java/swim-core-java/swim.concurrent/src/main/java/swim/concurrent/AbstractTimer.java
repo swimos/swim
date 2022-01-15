@@ -19,6 +19,10 @@ package swim.concurrent;
  */
 public abstract class AbstractTimer implements Timer {
 
+  public AbstractTimer() {
+    // nop
+  }
+
   /**
    * Context used to manage this {@code Timer}; {@code null} if this {@code
    * Timer} is not bound to a {@link Schedule}.

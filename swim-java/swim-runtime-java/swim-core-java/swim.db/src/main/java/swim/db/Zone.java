@@ -19,6 +19,10 @@ import swim.concurrent.Sync;
 
 public abstract class Zone {
 
+  public Zone() {
+    // nop
+  }
+
   public abstract int id();
 
   public abstract Germ germ();

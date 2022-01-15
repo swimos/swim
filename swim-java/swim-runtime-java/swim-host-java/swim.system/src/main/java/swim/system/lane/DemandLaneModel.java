@@ -23,6 +23,10 @@ import swim.system.warp.WarpLaneModel;
 
 public class DemandLaneModel extends WarpLaneModel<DemandLaneView<?>, DemandLaneUplink> {
 
+  public DemandLaneModel() {
+    // nop
+  }
+
   @Override
   public String laneType() {
     return "demand";

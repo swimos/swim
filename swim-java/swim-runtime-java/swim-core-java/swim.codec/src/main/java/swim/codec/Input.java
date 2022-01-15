@@ -73,6 +73,10 @@ package swim.codec;
  */
 public abstract class Input {
 
+  public Input() {
+    // nop
+  }
+
   /**
    * Returns {@code true} when a {@link #head() lookeahead} token is
    * immediately available. i.e. this {@code Input} is in the <em>cont</em>

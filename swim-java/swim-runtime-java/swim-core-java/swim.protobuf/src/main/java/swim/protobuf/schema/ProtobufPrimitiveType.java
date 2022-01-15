@@ -16,4 +16,8 @@ package swim.protobuf.schema;
 
 public abstract class ProtobufPrimitiveType<T> extends ProtobufType<T> {
 
+  ProtobufPrimitiveType() {
+    // sealed
+  }
+
 }

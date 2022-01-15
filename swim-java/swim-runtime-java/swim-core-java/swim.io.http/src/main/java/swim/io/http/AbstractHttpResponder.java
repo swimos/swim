@@ -31,6 +31,10 @@ public abstract class AbstractHttpResponder<T> implements HttpResponder<T>, IpCo
 
   protected HttpResponderContext context;
 
+  public AbstractHttpResponder() {
+    // nop
+  }
+
   @Override
   public HttpResponderContext httpResponderContext() {
     return this.context;

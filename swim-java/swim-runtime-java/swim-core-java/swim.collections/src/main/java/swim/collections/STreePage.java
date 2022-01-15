@@ -19,6 +19,10 @@ import swim.util.Cursor;
 
 public abstract class STreePage<T> {
 
+  STreePage() {
+    // sealed
+  }
+
   public abstract boolean isEmpty();
 
   public abstract int size();

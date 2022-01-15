@@ -23,6 +23,10 @@ public abstract class AbstractHttpService implements HttpService, FlowContext {
 
   protected HttpServiceContext context;
 
+  public AbstractHttpService() {
+    // nop
+  }
+
   @Override
   public HttpServiceContext httpServiceContext() {
     return this.context;

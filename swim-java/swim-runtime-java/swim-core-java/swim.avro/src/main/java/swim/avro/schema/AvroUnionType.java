@@ -16,6 +16,10 @@ package swim.avro.schema;
 
 public abstract class AvroUnionType<T> extends AvroComplexType<T> {
 
+  public AvroUnionType() {
+    // nop
+  }
+
   public abstract int variantCount();
 
   public abstract AvroType<? extends T> getVariant(int index);

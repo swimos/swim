@@ -18,6 +18,10 @@ import swim.protobuf.ProtobufWireType;
 
 public abstract class ProtobufMessageType<T, M> extends ProtobufComplexType<T> {
 
+  public ProtobufMessageType() {
+    // nop
+  }
+
   @Override
   public final ProtobufWireType wireType() {
     return ProtobufWireType.SIZED;

@@ -52,6 +52,10 @@ import swim.structure.operator.TimesOperator;
  */
 public abstract class Expression extends Value {
 
+  public Expression() {
+    // nop
+  }
+
   @Override
   public Item conditional(Item thenTerm, Item elseTerm) {
     return new ConditionalOperator(this, thenTerm, elseTerm);

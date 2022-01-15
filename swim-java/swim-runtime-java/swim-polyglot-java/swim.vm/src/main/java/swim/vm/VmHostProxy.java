@@ -18,6 +18,10 @@ import org.graalvm.polyglot.proxy.Proxy;
 
 public abstract class VmHostProxy<T> implements Proxy {
 
+  public VmHostProxy() {
+    // nop
+  }
+
   public abstract T unwrap();
 
 }

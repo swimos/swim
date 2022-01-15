@@ -21,6 +21,10 @@ import swim.util.Cursor;
 
 public abstract class Tree {
 
+  Tree() {
+    // sealed
+  }
+
   public abstract TreeType treeType();
 
   public abstract TreeContext treeContext();

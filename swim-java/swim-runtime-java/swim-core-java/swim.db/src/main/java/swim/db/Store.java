@@ -20,6 +20,10 @@ import swim.concurrent.Sync;
 
 public abstract class Store {
 
+  public Store() {
+    // nop
+  }
+
   public abstract StoreContext storeContext();
 
   public StoreSettings settings() {

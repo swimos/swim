@@ -18,6 +18,10 @@ import swim.protobuf.ProtobufWireType;
 
 public abstract class ProtobufType<T> {
 
+  ProtobufType() {
+    // sealed
+  }
+
   public abstract ProtobufWireType wireType();
 
 }

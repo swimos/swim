@@ -36,6 +36,10 @@ import swim.codec.InputBuffer;
 
 public class AvroDecoder {
 
+  public AvroDecoder() {
+    // nop
+  }
+
   public <T> Decoder<T> decodeType(InputBuffer input, AvroType<T> type) {
     if (type instanceof AvroPrimitiveType<?>) {
       return this.decodePrimitive(input, (AvroPrimitiveType<T>) type);

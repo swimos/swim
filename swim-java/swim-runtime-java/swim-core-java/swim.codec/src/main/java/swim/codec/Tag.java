@@ -23,6 +23,10 @@ package swim.codec;
  */
 public abstract class Tag implements Display, Debug {
 
+  Tag() {
+    // sealed
+  }
+
   /**
    * Returns the first source position covered by this {@code Tag}.
    */

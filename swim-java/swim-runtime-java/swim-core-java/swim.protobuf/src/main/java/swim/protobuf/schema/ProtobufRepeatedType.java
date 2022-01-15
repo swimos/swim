@@ -19,6 +19,10 @@ import swim.util.Builder;
 
 public abstract class ProtobufRepeatedType<I, T> extends ProtobufComplexType<T> {
 
+  public ProtobufRepeatedType() {
+    // nop
+  }
+
   @Override
   public final ProtobufWireType wireType() {
     return ProtobufWireType.SIZED;

@@ -18,6 +18,10 @@ import swim.structure.Kind;
 
 public abstract class Z3Shape implements Shape {
 
+  public Z3Shape() {
+    // nop
+  }
+
   public abstract long xMin();
 
   public abstract long yMin();

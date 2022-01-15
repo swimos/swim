@@ -18,6 +18,10 @@ import swim.streamlet.AbstractInoutlet;
 
 public abstract class MapValueOperator<I, O> extends AbstractInoutlet<I, O> {
 
+  public MapValueOperator() {
+    // nop
+  }
+
   @Override
   public O get() {
     if (this.input != null) {

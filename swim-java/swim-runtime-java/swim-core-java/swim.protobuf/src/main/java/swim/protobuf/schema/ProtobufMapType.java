@@ -18,6 +18,10 @@ import swim.util.Builder;
 
 public abstract class ProtobufMapType<K, V, E, M> extends ProtobufRepeatedType<E, M> {
 
+  public ProtobufMapType() {
+    // nop
+  }
+
   @Override
   public abstract ProtobufMapEntryType<? extends K, ? extends V, ? extends E> itemType();
 

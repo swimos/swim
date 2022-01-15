@@ -24,6 +24,10 @@ import swim.structure.Value;
 
 public abstract class KeyDef {
 
+  public KeyDef() {
+    // nop
+  }
+
   public abstract Key key();
 
   public abstract Value toValue();

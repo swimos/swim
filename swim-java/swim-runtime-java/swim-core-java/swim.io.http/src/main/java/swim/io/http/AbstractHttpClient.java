@@ -31,6 +31,10 @@ public abstract class AbstractHttpClient implements HttpClient, IpContext, FlowC
 
   protected HttpClientContext context;
 
+  public AbstractHttpClient() {
+    // nop
+  }
+
   @Override
   public HttpClientContext httpClientContext() {
     return this.context;

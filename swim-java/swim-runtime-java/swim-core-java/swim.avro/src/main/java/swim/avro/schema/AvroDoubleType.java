@@ -16,6 +16,10 @@ package swim.avro.schema;
 
 public abstract class AvroDoubleType<T> extends AvroPrimitiveType<T> {
 
+  public AvroDoubleType() {
+    // nop
+  }
+
   public abstract T cast(double value);
 
 }

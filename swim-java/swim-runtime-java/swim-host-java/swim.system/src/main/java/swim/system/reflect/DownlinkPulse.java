@@ -16,4 +16,8 @@ package swim.system.reflect;
 
 public abstract class DownlinkPulse extends LinkPulse {
 
+  public DownlinkPulse() {
+    // nop
+  }
+
 }

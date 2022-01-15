@@ -18,6 +18,10 @@ import swim.structure.Value;
 
 public abstract class LinkInfo {
 
+  public LinkInfo() {
+    // nop
+  }
+
   public abstract Value toValue();
 
 }

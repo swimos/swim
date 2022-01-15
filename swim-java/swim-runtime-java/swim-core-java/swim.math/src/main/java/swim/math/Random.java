@@ -16,6 +16,10 @@ package swim.math;
 
 public abstract class Random {
 
+  public Random() {
+    // nop
+  }
+
   public abstract byte nextByte();
 
   public abstract short nextShort();

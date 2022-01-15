@@ -18,6 +18,10 @@ import java.util.Comparator;
 
 public abstract class QTreeContext<K, S, V> implements Comparator<QTreeEntry<K, S, V>> {
 
+  public QTreeContext() {
+    // nop
+  }
+
   @Override
   public int compare(QTreeEntry<K, S, V> x, QTreeEntry<K, S, V> y) {
     return this.compareKey(x.key, y.key);

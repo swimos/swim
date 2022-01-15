@@ -30,6 +30,10 @@ public abstract class AbstractAuthenticator implements Authenticator, IpInterfac
 
   protected AuthenticatorContext context;
 
+  public AbstractAuthenticator() {
+    // nop
+  }
+
   @Override
   public AuthenticatorContext authenticatorContext() {
     return this.context;

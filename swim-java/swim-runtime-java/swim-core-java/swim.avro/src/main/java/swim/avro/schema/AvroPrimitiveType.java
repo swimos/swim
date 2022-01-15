@@ -16,4 +16,8 @@ package swim.avro.schema;
 
 public abstract class AvroPrimitiveType<T> extends AvroType<T> {
 
+  AvroPrimitiveType() {
+    // sealed
+  }
+
 }

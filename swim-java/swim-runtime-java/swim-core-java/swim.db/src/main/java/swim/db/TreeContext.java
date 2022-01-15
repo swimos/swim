@@ -18,6 +18,10 @@ import swim.structure.Value;
 
 public class TreeContext extends PageContext {
 
+  public TreeContext() {
+    // nop
+  }
+
   public TreeDelegate treeDelegate() {
     return null;
   }

@@ -19,6 +19,10 @@ import swim.codec.InputBuffer;
 
 public abstract class AvroFixedType<T> extends AvroNamedType<T> {
 
+  public AvroFixedType() {
+    // nop
+  }
+
   public abstract int size();
 
   public abstract Decoder<T> decodeFixed(InputBuffer input);

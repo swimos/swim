@@ -26,6 +26,10 @@ import swim.util.Murmur3;
 
 public final class IdentitySelector extends Selector {
 
+  private IdentitySelector() {
+    // singleton
+  }
+
   @Override
   public Selector then() {
     return this;

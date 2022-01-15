@@ -28,6 +28,10 @@ import swim.util.PairBuilder;
 
 public abstract class Record extends Value implements List<Item>, Builder<Item, Record>, PairBuilder<Value, Value, Record> {
 
+  public Record() {
+    // nop
+  }
+
   @Override
   public boolean isDefinite() {
     return !this.isEmpty();

@@ -40,6 +40,10 @@ import swim.structure.selector.ValuesSelector;
  */
 public abstract class Selector extends Expression {
 
+  public Selector() {
+    // nop
+  }
+
   @Override
   public boolean isConstant() {
     return false;

@@ -26,6 +26,10 @@ import swim.util.Builder;
  */
 public abstract class XmlParser<I, V> {
 
+  public XmlParser() {
+    // nop
+  }
+
   public abstract I item(V value);
 
   public abstract String name(String name);

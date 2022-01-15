@@ -20,6 +20,10 @@ import swim.structure.Value;
 
 public abstract class FieldForm<T> extends Form<T> {
 
+  FieldForm() {
+    // sealed
+  }
+
   public abstract java.lang.reflect.Field field();
 
   public abstract Value key();

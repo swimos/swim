@@ -22,6 +22,10 @@ import swim.system.WarpContext;
 
 public abstract class UplinkInfo extends LinkInfo {
 
+  public UplinkInfo() {
+    // nop
+  }
+
   public static UplinkInfo create(LinkContext linkContext) {
     if (linkContext instanceof WarpContext) {
       return WarpUplinkInfo.create((WarpContext) linkContext);

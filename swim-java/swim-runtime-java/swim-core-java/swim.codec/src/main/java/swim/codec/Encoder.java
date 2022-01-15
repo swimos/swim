@@ -73,6 +73,10 @@ package swim.codec;
  */
 public abstract class Encoder<I, O> {
 
+  public Encoder() {
+    // nop
+  }
+
   /**
    * Returns {@code true} when {@link #pull(OutputBuffer) pull} is able to
    * produce buffer data. i.e. this {@code Encoder} is in the <em>cont</em>

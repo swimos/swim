@@ -68,6 +68,10 @@ package swim.codec;
  */
 public abstract class Output<T> {
 
+  public Output() {
+    // nop
+  }
+
   /**
    * Returns {@code true} when the next {@link #write(int)} will succeed.
    * i.e. this {@code Output} is in the <em>cont</em> state.

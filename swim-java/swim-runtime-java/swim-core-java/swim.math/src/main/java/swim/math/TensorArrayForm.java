@@ -21,6 +21,10 @@ import swim.structure.Value;
 
 public abstract class TensorArrayForm<T, V> extends TensorForm<T> {
 
+  public TensorArrayForm() {
+    // nop
+  }
+
   public abstract TensorForm<V> next();
 
   public abstract T fromArray(Object... array);

@@ -23,6 +23,10 @@ import swim.structure.Kind;
 
 public abstract class PublicKeyDef extends KeyDef {
 
+  public PublicKeyDef() {
+    // nop
+  }
+
   public abstract PublicKey publicKey();
 
   public static PublicKeyDef from(PublicKey key) {

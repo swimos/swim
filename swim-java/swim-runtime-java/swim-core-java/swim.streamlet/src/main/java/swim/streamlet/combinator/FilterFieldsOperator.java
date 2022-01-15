@@ -23,6 +23,10 @@ import swim.util.Cursor;
 
 public abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapOutlet<K, K, V, V, I, Map<K, V>> {
 
+  public FilterFieldsOperator() {
+    // nop
+  }
+
   @Override
   public boolean containsKey(K key) {
     if (this.input != null) {

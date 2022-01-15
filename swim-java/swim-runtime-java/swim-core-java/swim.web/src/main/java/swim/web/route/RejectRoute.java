@@ -20,6 +20,10 @@ import swim.web.WebRoute;
 
 public final class RejectRoute implements WebRoute {
 
+  public RejectRoute() {
+    // nop
+  }
+
   @Override
   public WebResponse routeRequest(WebRequest request) {
     return request.reject();

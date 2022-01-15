@@ -20,6 +20,10 @@ import swim.codec.Writer;
 
 public abstract class HttpPart {
 
+  public HttpPart() {
+    // nop
+  }
+
   public abstract Writer<?, ?> httpWriter(HttpWriter http);
 
   public Writer<?, ?> httpWriter() {

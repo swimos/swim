@@ -51,6 +51,10 @@ import swim.util.Builder;
 
 public class ReconStructureParser extends ReconParser<Item, Value> {
 
+  public ReconStructureParser() {
+    // nop
+  }
+
   @Override
   public boolean isDistinct(Value value) {
     return value.isDistinct();

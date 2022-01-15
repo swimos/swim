@@ -18,6 +18,10 @@ import swim.avro.AvroName;
 
 public abstract class AvroRecordType<T, R> extends AvroNamedType<T> {
 
+  public AvroRecordType() {
+    // nop
+  }
+
   public abstract String doc();
 
   public abstract AvroRecordType<T, R> doc(String doc);

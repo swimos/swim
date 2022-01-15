@@ -29,6 +29,10 @@ import swim.warp.CommandMessage;
 
 public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends HttpUplinkModem> extends LaneModel<View, U> {
 
+  public HttpLaneModel() {
+    // nop
+  }
+
   @Override
   public String laneType() {
     return "http";

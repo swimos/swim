@@ -75,6 +75,10 @@ package swim.codec;
  */
 public abstract class Decoder<O> {
 
+  public Decoder() {
+    // nop
+  }
+
   /**
    * Returns {@code true} when {@link #feed(InputBuffer) feed} is able to
    * consume {@code InputBuffer} data. i.e. this {@code Decoder} is in the

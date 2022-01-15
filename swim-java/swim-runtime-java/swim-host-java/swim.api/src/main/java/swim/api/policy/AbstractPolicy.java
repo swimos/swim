@@ -32,6 +32,10 @@ import swim.warp.SyncRequest;
 
 public class AbstractPolicy implements Policy, PlanePolicy, AgentRoutePolicy, AgentPolicy, LanePolicy, UplinkPolicy, DownlinkPolicy {
 
+  public AbstractPolicy() {
+    // nop
+  }
+
   @Override
   public AgentRoutePolicy agentRoutePolicy(AgentRoute<?> agentRoute) {
     return this;

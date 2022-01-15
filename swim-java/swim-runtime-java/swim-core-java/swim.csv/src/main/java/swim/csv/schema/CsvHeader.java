@@ -18,6 +18,10 @@ import swim.util.Builder;
 
 public abstract class CsvHeader<T, R, C> {
 
+  public CsvHeader() {
+    // nop
+  }
+
   public abstract int colCount();
 
   public abstract CsvCol<? extends C> getCol(int index);

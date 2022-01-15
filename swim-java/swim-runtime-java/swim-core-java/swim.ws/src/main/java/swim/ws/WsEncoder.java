@@ -20,6 +20,10 @@ import swim.codec.OutputBuffer;
 
 public abstract class WsEncoder {
 
+  public WsEncoder() {
+    // nop
+  }
+
   public abstract boolean isMasked();
 
   public abstract void maskingKey(byte[] maskingKey);

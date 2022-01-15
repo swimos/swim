@@ -16,4 +16,8 @@ package swim.avro.schema;
 
 public abstract class AvroType<T> {
 
+  AvroType() {
+    // sealed
+  }
+
 }

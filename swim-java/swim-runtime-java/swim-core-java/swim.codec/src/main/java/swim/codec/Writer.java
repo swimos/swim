@@ -79,6 +79,10 @@ package swim.codec;
  */
 public abstract class Writer<I, O> extends Encoder<I, O> {
 
+  public Writer() {
+    // nop
+  }
+
   /**
    * Returns {@code true} when {@link #pull(Output) pull} is able to produce
    * {@code Output}. i.e. this {@code Writer} is in the <em>cont</em> state.

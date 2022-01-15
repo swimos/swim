@@ -20,6 +20,10 @@ import swim.structure.Value;
 
 public class PageContext {
 
+  public PageContext() {
+    // nop
+  }
+
   public StoreSettings settings() {
     return StoreSettings.standard();
   }

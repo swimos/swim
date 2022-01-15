@@ -21,6 +21,10 @@ import java.util.Collection;
  */
 public abstract class Bridge {
 
+  public Bridge() {
+    // nop
+  }
+
   public abstract HostRuntime hostRuntime();
 
   public abstract String guestLanguage();

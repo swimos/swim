@@ -18,6 +18,10 @@ import swim.structure.Form;
 
 public abstract class R2Form<T> extends Form<T> implements R2Boundary<T> {
 
+  public R2Form() {
+    // nop
+  }
+
   @Override
   public abstract double getXMin(T object);
 

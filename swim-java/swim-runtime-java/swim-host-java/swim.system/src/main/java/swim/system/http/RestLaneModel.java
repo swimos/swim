@@ -18,6 +18,10 @@ import swim.system.HttpBinding;
 
 public class RestLaneModel extends HttpLaneModel<RestLaneView<?>, RestLaneUplink> {
 
+  public RestLaneModel() {
+    // nop
+  }
+
   @Override
   protected RestLaneUplink createHttpUplink(HttpBinding link) {
     return new RestLaneUplink(this, link);

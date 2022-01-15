@@ -16,4 +16,8 @@ package swim.avro.schema;
 
 public abstract class AvroComplexType<T> extends AvroType<T> {
 
+  AvroComplexType() {
+    // sealed
+  }
+
 }

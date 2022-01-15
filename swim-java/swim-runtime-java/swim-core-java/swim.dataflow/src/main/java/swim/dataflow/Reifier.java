@@ -18,6 +18,10 @@ import swim.structure.Item;
 
 public abstract class Reifier {
 
+  public Reifier() {
+    // nop
+  }
+
   public abstract Item reify(Item item);
 
   public static Reifier system() {

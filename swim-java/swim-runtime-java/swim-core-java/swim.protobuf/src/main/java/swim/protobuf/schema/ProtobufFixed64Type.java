@@ -18,6 +18,10 @@ import swim.protobuf.ProtobufWireType;
 
 public abstract class ProtobufFixed64Type<T> extends ProtobufPrimitiveType<T> {
 
+  public ProtobufFixed64Type() {
+    // nop
+  }
+
   @Override
   public final ProtobufWireType wireType() {
     return ProtobufWireType.FIXED64;

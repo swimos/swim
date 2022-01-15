@@ -22,6 +22,10 @@ import swim.structure.Data;
 
 public class MqttDecoder {
 
+  public MqttDecoder() {
+    // nop
+  }
+
   public MqttConnectPacket connectPacket(int packetFlags, String protocolName, int protocolLevel,
                                          int connectFlags, int keepAlive, String clientId, String willTopic,
                                          Data willMessage, String username, Data password) {

@@ -19,6 +19,10 @@ import swim.system.warp.WarpLaneModel;
 
 public class SupplyLaneModel extends WarpLaneModel<SupplyLaneView<?>, SupplyLaneUplink> {
 
+  public SupplyLaneModel() {
+    // nop
+  }
+
   @Override
   public String laneType() {
     return "supply";

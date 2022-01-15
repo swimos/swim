@@ -26,6 +26,10 @@ import swim.util.Builder;
 
 public class XmlStructureParser extends XmlParser<Item, Value> {
 
+  public XmlStructureParser() {
+    // nop
+  }
+
   @Override
   public Item item(Value value) {
     return value;

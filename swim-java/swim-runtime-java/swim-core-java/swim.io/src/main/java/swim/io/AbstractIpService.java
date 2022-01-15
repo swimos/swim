@@ -20,6 +20,10 @@ public abstract class AbstractIpService implements IpService, FlowContext {
 
   protected IpServiceContext context;
 
+  public AbstractIpService() {
+    // nop
+  }
+
   @Override
   public IpServiceContext ipServiceContext() {
     return this.context;

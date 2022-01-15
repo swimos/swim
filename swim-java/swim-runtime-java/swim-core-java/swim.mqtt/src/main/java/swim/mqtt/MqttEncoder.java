@@ -20,6 +20,10 @@ import swim.structure.Data;
 
 public class MqttEncoder {
 
+  public MqttEncoder() {
+    // nop
+  }
+
   public Encoder<?, MqttConnectPacket> connectPacketEncoder(MqttConnectPacket packet) {
     return new MqttConnectPacketEncoder(this, packet);
   }

@@ -24,6 +24,10 @@ public abstract class AbstractAgentRoute<A extends Agent> implements AgentRoute<
 
   protected AgentRouteContext context;
 
+  public AbstractAgentRoute() {
+    // nop
+  }
+
   @Override
   public AgentRouteContext agentRouteContext() {
     return this.context;

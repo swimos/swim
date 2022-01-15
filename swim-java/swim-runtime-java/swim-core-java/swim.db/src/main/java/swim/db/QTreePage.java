@@ -25,6 +25,10 @@ import swim.util.Cursor;
 
 public abstract class QTreePage extends Page {
 
+  QTreePage() {
+    // sealed
+  }
+
   @Override
   public boolean isQTreePage() {
     return true;

@@ -22,6 +22,10 @@ import java.nio.channels.ReadableByteChannel;
  */
 public abstract class OutputBuffer<T> extends Output<T> {
 
+  public OutputBuffer() {
+    // nop
+  }
+
   public abstract OutputBuffer<T> isPart(boolean isPart);
 
   public abstract int index();

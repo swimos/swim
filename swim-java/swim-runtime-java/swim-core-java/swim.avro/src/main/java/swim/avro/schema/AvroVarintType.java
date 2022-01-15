@@ -16,6 +16,10 @@ package swim.avro.schema;
 
 public abstract class AvroVarintType<T> extends AvroPrimitiveType<T> {
 
+  public AvroVarintType() {
+    // nop
+  }
+
   public abstract T cast(long value);
 
 }

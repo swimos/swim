@@ -18,6 +18,10 @@ import swim.io.http.HttpResponder;
 
 public abstract class WebResponse {
 
+  public WebResponse() {
+    // hook
+  }
+
   public abstract boolean isAccepted();
 
   public abstract boolean isRejected();

@@ -25,6 +25,10 @@ import swim.structure.Value;
 
 public abstract class EcFieldDef {
 
+  EcFieldDef() {
+    // sealed
+  }
+
   public abstract ECField toECField();
 
   public abstract Value toValue();

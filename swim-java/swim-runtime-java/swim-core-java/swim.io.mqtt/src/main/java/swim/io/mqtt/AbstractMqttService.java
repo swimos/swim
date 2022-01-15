@@ -23,6 +23,10 @@ public abstract class AbstractMqttService implements MqttService, FlowContext {
 
   protected MqttServiceContext context;
 
+  public AbstractMqttService() {
+    // nop
+  }
+
   @Override
   public MqttServiceContext mqttServiceContext() {
     return this.context;

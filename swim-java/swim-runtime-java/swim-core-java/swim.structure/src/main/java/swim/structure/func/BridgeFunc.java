@@ -20,6 +20,10 @@ import swim.structure.Item;
 
 public abstract class BridgeFunc extends Func {
 
+  public BridgeFunc() {
+    // nop
+  }
+
   @Override
   public int typeOrder() {
     return 51;

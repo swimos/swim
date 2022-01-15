@@ -37,6 +37,10 @@ import swim.xml.Xml;
 
 public abstract class HttpMessage<T> extends HttpPart {
 
+  public HttpMessage() {
+    // nop
+  }
+
   public abstract HttpVersion version();
 
   public abstract FingerTrieSeq<HttpHeader> headers();

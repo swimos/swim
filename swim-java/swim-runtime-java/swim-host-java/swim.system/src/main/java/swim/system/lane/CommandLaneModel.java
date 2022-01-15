@@ -25,6 +25,10 @@ import swim.warp.CommandMessage;
 
 public class CommandLaneModel extends WarpLaneModel<CommandLaneView<?>, CommandLaneUplink> {
 
+  public CommandLaneModel() {
+    // nop
+  }
+
   @Override
   public String laneType() {
     return "command";

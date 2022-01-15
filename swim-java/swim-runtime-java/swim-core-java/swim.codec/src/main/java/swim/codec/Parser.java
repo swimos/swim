@@ -100,6 +100,10 @@ package swim.codec;
  */
 public abstract class Parser<O> extends Decoder<O> {
 
+  public Parser() {
+    // nop
+  }
+
   /**
    * Returns {@code true} when {@link #feed(Input) feed} is able to consume
    * {@code Input}. i.e. this {@code Parser} is in the <em>cont</em> state.

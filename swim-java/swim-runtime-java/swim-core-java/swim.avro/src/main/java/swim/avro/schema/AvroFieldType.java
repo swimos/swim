@@ -16,6 +16,10 @@ package swim.avro.schema;
 
 public abstract class AvroFieldType<V, R> {
 
+  public AvroFieldType() {
+    // nop
+  }
+
   public abstract String name();
 
   public abstract String doc();

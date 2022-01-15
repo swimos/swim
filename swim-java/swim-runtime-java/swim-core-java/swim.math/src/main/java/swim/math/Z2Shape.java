@@ -16,6 +16,10 @@ package swim.math;
 
 public abstract class Z2Shape implements Shape {
 
+  public Z2Shape() {
+    // nop
+  }
+
   public abstract long xMin();
 
   public abstract long yMin();

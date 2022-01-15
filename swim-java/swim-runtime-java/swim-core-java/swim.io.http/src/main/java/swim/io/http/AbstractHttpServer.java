@@ -31,6 +31,10 @@ public abstract class AbstractHttpServer implements HttpServer, IpContext, FlowC
 
   protected HttpServerContext context;
 
+  public AbstractHttpServer() {
+    // nop
+  }
+
   @Override
   public HttpServerContext httpServerContext() {
     return this.context;

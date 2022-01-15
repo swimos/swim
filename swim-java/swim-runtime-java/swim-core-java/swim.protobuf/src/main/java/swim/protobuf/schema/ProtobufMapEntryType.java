@@ -16,6 +16,10 @@ package swim.protobuf.schema;
 
 public abstract class ProtobufMapEntryType<K, V, E> extends ProtobufMessageType<E, E> {
 
+  public ProtobufMapEntryType() {
+    // nop
+  }
+
   public abstract ProtobufFieldType<? extends K, E> keyField();
 
   public abstract ProtobufFieldType<? extends V, E> valueField();

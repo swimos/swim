@@ -21,6 +21,10 @@ import swim.util.Cursor;
 
 public abstract class Page {
 
+  Page() {
+    // sealed
+  }
+
   public boolean isBTreePage() {
     return false;
   }

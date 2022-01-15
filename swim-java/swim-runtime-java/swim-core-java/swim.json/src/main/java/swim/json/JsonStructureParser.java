@@ -28,6 +28,10 @@ import swim.util.Builder;
 
 public class JsonStructureParser extends JsonParser<Item, Value> {
 
+  public JsonStructureParser() {
+    // nop
+  }
+
   @Override
   public Item item(Value value) {
     return value;

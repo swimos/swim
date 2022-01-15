@@ -16,6 +16,10 @@ package swim.protobuf.schema;
 
 public abstract class ProtobufFieldType<V, M> {
 
+  public ProtobufFieldType() {
+    // nop
+  }
+
   public abstract long fieldNumber();
 
   public abstract ProtobufType<? extends V> valueType();

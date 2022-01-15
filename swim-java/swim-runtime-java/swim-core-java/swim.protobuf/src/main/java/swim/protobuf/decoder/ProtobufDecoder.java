@@ -31,6 +31,10 @@ import swim.protobuf.schema.ProtobufZigZagType;
 
 public class ProtobufDecoder {
 
+  public ProtobufDecoder() {
+    // nop
+  }
+
   public <T> Decoder<T> decodeType(InputBuffer input, ProtobufType<T> type) {
     if (type instanceof ProtobufPrimitiveType<?>) {
       return this.decodePrimitive(input, (ProtobufPrimitiveType<T>) type);

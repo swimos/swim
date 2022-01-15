@@ -20,6 +20,10 @@ import swim.collections.HashTrieMap;
 
 public abstract class AbstractHostObjectType<T> extends AbstractHostType<T> implements HostObjectType<T> {
 
+  public AbstractHostObjectType() {
+    // nop
+  }
+
   @Override
   public abstract HostMember<? super T> getOwnMember(Bridge bridge, T self, String key);
 

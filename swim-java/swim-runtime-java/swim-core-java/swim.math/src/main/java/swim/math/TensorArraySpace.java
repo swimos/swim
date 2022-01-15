@@ -16,6 +16,10 @@ package swim.math;
 
 public abstract class TensorArraySpace<T, V, S> implements TensorSpace<T, S> {
 
+  public TensorArraySpace() {
+    // nop
+  }
+
   public abstract TensorSpace<V, S> next();
 
   public abstract T of(Object... array);

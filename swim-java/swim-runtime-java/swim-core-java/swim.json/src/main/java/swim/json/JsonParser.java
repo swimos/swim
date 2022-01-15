@@ -27,6 +27,10 @@ import swim.util.Builder;
  */
 public abstract class JsonParser<I, V> {
 
+  public JsonParser() {
+    // nop
+  }
+
   public abstract I item(V value);
 
   public abstract V value(I item);

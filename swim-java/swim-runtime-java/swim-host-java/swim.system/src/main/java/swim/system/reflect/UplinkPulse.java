@@ -16,4 +16,8 @@ package swim.system.reflect;
 
 public abstract class UplinkPulse extends LinkPulse {
 
+  public UplinkPulse() {
+    // nop
+  }
+
 }

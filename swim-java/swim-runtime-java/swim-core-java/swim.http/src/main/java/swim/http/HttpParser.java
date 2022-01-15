@@ -49,6 +49,10 @@ import swim.uri.Uri;
 
 public class HttpParser {
 
+  public HttpParser() {
+    // nop
+  }
+
   public <T> HttpRequest<T> request(HttpMethod method, Uri uri, HttpVersion version,
                                     FingerTrieSeq<HttpHeader> headers) {
     return HttpRequest.create(method, uri, version, headers);

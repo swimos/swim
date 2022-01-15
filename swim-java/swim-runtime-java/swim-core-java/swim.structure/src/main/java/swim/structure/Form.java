@@ -57,6 +57,10 @@ import swim.structure.form.ValueForm;
  */
 public abstract class Form<T> {
 
+  public Form() {
+    // nop
+  }
+
   /**
    * Returns the key of the tag attribute that distinguishes structures of this
    * {@code Form}; returns {@code null} if this {@code Form} has no

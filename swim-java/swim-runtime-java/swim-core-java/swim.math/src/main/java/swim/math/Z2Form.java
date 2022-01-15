@@ -18,6 +18,10 @@ import swim.structure.Form;
 
 public abstract class Z2Form<T> extends Form<T> implements Z2Boundary<T> {
 
+  public Z2Form() {
+    // nop
+  }
+
   @Override
   public abstract long getXMin(T object);
 

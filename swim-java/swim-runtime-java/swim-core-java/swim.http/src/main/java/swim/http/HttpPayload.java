@@ -20,6 +20,10 @@ import swim.collections.FingerTrieSeq;
 
 public abstract class HttpPayload<T> {
 
+  public HttpPayload() {
+    // nop
+  }
+
   public abstract boolean isDefined();
 
   public abstract T get();

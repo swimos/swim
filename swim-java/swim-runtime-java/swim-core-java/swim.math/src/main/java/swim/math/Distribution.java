@@ -16,6 +16,10 @@ package swim.math;
 
 public abstract class Distribution {
 
+  public Distribution() {
+    // nop
+  }
+
   public abstract double density(double x);
 
   public abstract double sample();

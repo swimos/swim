@@ -25,6 +25,10 @@ public abstract class AbstractIpSocket implements IpSocket, IpContext, FlowConte
 
   protected IpSocketContext context;
 
+  public AbstractIpSocket() {
+    // nop
+  }
+
   @Override
   public IpSocketContext ipSocketContext() {
     return this.context;

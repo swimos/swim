@@ -22,6 +22,10 @@ import swim.codec.Writer;
 
 public abstract class HttpHeader extends HttpPart implements Comparable<HttpHeader>, Debug {
 
+  public HttpHeader() {
+    // nop
+  }
+
   public boolean isBlank() {
     return false;
   }

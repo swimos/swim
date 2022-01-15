@@ -18,6 +18,10 @@ import swim.concurrent.Cont;
 
 public abstract class PageLoader implements AutoCloseable {
 
+  public PageLoader() {
+    // nop
+  }
+
   public abstract boolean isResident();
 
   public abstract void loadPageAsync(PageRef pageRef, Cont<Page> cont);

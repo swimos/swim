@@ -18,6 +18,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class STreeContext<T> {
 
+  public STreeContext() {
+    // nop
+  }
+
   @SuppressWarnings("unchecked")
   protected Object identify(T value) {
     final byte[] bytes = new byte[6];

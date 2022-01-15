@@ -22,6 +22,10 @@ import swim.structure.Value;
 
 public abstract class CsvStructureHeader extends CsvHeader<Record, Value, Item> {
 
+  CsvStructureHeader() {
+    // sealed
+  }
+
   @Override
   public abstract CsvStructureHeader col(int index, CsvCol<? extends Item> col);
 

@@ -23,6 +23,10 @@ import swim.structure.Data;
 
 public abstract class WsDecoder {
 
+  public WsDecoder() {
+    // nop
+  }
+
   public <T> WsFrame<T> fragmentFrame(WsOpcode frameType, Decoder<T> payloadDecoder) {
     return new WsFragmentFrame<T>(frameType, payloadDecoder);
   }

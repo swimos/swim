@@ -28,6 +28,10 @@ import swim.codec.Writer;
  */
 public abstract class JsonWriter<I, V> {
 
+  public JsonWriter() {
+    // nop
+  }
+
   public abstract Iterator<I> items(I item);
 
   public abstract I item(V value);

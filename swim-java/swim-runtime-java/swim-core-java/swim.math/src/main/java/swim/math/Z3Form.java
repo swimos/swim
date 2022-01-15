@@ -18,6 +18,10 @@ import swim.structure.Form;
 
 public abstract class Z3Form<T> extends Form<T> implements Z3Boundary<T> {
 
+  public Z3Form() {
+    // nop
+  }
+
   @Override
   public abstract long getXMin(T object);
 

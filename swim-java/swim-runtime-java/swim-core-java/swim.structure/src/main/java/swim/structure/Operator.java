@@ -20,6 +20,10 @@ package swim.structure;
  */
 public abstract class Operator extends Expression {
 
+  public Operator() {
+    // nop
+  }
+
   @Override
   public abstract Item evaluate(Interpreter interpreter);
 
