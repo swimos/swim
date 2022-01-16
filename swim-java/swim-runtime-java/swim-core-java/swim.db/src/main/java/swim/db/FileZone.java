@@ -215,6 +215,19 @@ public class FileZone extends Zone {
         if (chunk != null) {
           ByteBuffer buffer = chunk.toByteBuffer();
           this.write(channel, buffer, base);
+          if (commit.isForced()) {
+            // prevent header update from reordering before chunk write
+            channel.force(true);
+          }
+
+          final long actualSize = channel.size();
+          final long expectedSize = base + chunk.size();
+          if (actualSize != expectedSize) {
+            throw new StoreException("inconsistent size detected for file "
+                                   + this.file.getPath() + " after chunk write;"
+                                   + " expected length of " + expectedSize + " bytes,"
+                                   + " but found length of " + actualSize + " bytes");
+          }
 
           final Germ germ = chunk.germ();
           buffer = germ.toByteBuffer();
@@ -225,7 +238,7 @@ public class FileZone extends Zone {
             channel.force(true);
           }
 
-          this.size = Math.max(this.size + chunk.size(), channel.size());
+          this.size = actualSize;
         }
         return chunk;
       } finally {
