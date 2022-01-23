@@ -91,6 +91,7 @@ final class FileStoreCompactor extends AbstractTask {
 
           database.evacuate(post);
           database.commit(compacting.commit());
+          database.commit(compacting.commit()); // Sweep up any concurrently modified trees.
 
           final int deleteDelay = compacting.deleteDelay;
           if (deleteDelay > 0) {

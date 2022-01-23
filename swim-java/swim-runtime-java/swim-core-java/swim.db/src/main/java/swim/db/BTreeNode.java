@@ -22,6 +22,7 @@ import swim.structure.Num;
 import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.CombinerFunction;
 import swim.util.OrderedMapCursor;
 
@@ -882,6 +883,18 @@ public final class BTreeNode extends BTreePage {
       }
     }
     this.writePage(output);
+  }
+
+  @Override
+  public void toDiff(Builder<Page, ?> builder) {
+    final BTreePageRef[] childRefs = this.childRefs;
+    for (int i = 0, n = childRefs.length; i < n; i += 1) {
+      final BTreePageRef childRef = childRefs[i];
+      if (this.version == childRef.softVersion()) {
+        childRef.toDiff(builder);
+      }
+    }
+    builder.add(this);
   }
 
   @Override

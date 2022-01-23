@@ -56,7 +56,7 @@ public class STreeList implements KeyedList<Value> {
   }
 
   public final STree tree() {
-    return this.trunk.tree;
+    return (STree) Trunk.TREE.get(this.trunk);
   }
 
   public final TreeDelegate treeDelegate() {

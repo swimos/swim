@@ -17,6 +17,7 @@ package swim.db;
 import swim.codec.Output;
 import swim.concurrent.Cont;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.Cursor;
 
 public abstract class Page {
@@ -118,6 +119,8 @@ public abstract class Page {
   public abstract void writePage(Output<?> output);
 
   public abstract void writeDiff(Output<?> output);
+
+  public abstract void toDiff(Builder<Page, ?> builder);
 
   public abstract void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont);
 

@@ -15,10 +15,12 @@
 package swim.db;
 
 import swim.codec.Output;
+import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
 import swim.concurrent.Sync;
 import swim.structure.Slot;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
@@ -265,6 +267,18 @@ public final class QTree extends Tree {
   public void writeDiff(Output<?> output, long version) {
     if (version == this.rootRef.softVersion()) {
       this.rootRef.writeDiff(output);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public FingerTrieSeq<QTreePage> toDiff(long version) {
+    if (version == this.rootRef.softVersion()) {
+      final Builder<QTreePage, FingerTrieSeq<QTreePage>> builder = FingerTrieSeq.builder();
+      this.rootRef.toDiff((Builder<Page, ?>) (Builder<?, ?>) builder);
+      return builder.bind();
+    } else {
+      return FingerTrieSeq.empty();
     }
   }
 

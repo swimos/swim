@@ -24,6 +24,7 @@ import swim.structure.Num;
 import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
@@ -1351,6 +1352,18 @@ public final class QTreeNode extends QTreePage {
       }
     }
     this.writePage(output);
+  }
+
+  @Override
+  public void toDiff(Builder<Page, ?> builder) {
+    final QTreePageRef[] childRefs = this.childRefs;
+    for (int i = 0, n = childRefs.length; i < n; i += 1) {
+      final QTreePageRef childRef = childRefs[i];
+      if (this.version == childRef.softVersion()) {
+        childRef.toDiff(builder);
+      }
+    }
+    builder.add(this);
   }
 
   @Override

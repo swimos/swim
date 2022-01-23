@@ -42,7 +42,7 @@ public class UTreeValue {
   }
 
   public final UTree tree() {
-    return this.trunk.tree;
+    return (UTree) Trunk.TREE.get(this.trunk);
   }
 
   public final TreeDelegate treeDelegate() {

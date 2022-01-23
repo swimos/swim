@@ -21,6 +21,7 @@ import swim.recon.Recon;
 import swim.structure.Num;
 import swim.structure.Record;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.Cursor;
 
 public final class UTreeLeaf extends UTreePage {
@@ -32,7 +33,7 @@ public final class UTreeLeaf extends UTreePage {
   protected UTreeLeaf(UTreePageRef pageRef, long version, Value value) {
     this.pageRef = pageRef;
     this.version = version;
-    this.value = value;
+    this.value = value.commit();
   }
 
   @Override
@@ -176,6 +177,11 @@ public final class UTreeLeaf extends UTreePage {
   @Override
   public void writeDiff(Output<?> output) {
     this.writePage(output);
+  }
+
+  @Override
+  public void toDiff(Builder<Page, ?> builder) {
+    builder.add(this);
   }
 
   @Override

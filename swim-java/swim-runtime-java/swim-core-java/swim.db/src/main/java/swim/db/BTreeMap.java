@@ -52,7 +52,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   }
 
   public final BTree tree() {
-    return this.trunk.tree;
+    return (BTree) Trunk.TREE.get(this.trunk);
   }
 
   public final TreeDelegate treeDelegate() {

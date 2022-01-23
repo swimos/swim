@@ -50,7 +50,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   }
 
   public final QTree tree() {
-    return this.trunk.tree;
+    return (QTree) Trunk.TREE.get(this.trunk);
   }
 
   public final TreeDelegate treeDelegate() {

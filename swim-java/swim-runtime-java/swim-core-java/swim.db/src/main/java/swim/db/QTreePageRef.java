@@ -24,6 +24,7 @@ import swim.structure.Num;
 import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
@@ -353,6 +354,11 @@ public final class QTreePageRef extends PageRef {
   @Override
   public void writeDiff(Output<?> output) {
     this.page().writeDiff(output);
+  }
+
+  @Override
+  public void toDiff(Builder<Page, ?> builder) {
+    this.page().toDiff(builder);
   }
 
   @Override

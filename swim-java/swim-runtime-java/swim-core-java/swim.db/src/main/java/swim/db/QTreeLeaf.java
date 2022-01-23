@@ -23,6 +23,7 @@ import swim.structure.Num;
 import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
@@ -783,6 +784,11 @@ public final class QTreeLeaf extends QTreePage {
   @Override
   public void writeDiff(Output<?> output) {
     this.writePage(output);
+  }
+
+  @Override
+  public void toDiff(Builder<Page, ?> builder) {
+    builder.add(this);
   }
 
   @Override

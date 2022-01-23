@@ -14,7 +14,6 @@
 
 package swim.db;
 
-import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Map;
@@ -53,7 +52,7 @@ public class Database {
   volatile long treeSize;
   final Trunk<BTree> metaTrunk;
   final Trunk<BTree> seedTrunk;
-  volatile HashTrieMap<Value, WeakReference<Trunk<Tree>>> trunks;
+  volatile HashTrieMap<Value, Trunk<Tree>> trunks;
   volatile HashTrieMap<Value, Trunk<Tree>> sprouts;
   volatile int status;
 
@@ -134,7 +133,7 @@ public class Database {
   }
 
   public long treeCount() {
-    return this.seedTrunk.tree.span();
+    return Trunk.TREE.get(this.seedTrunk).span();
   }
 
   public int trunkCount() {
@@ -150,7 +149,7 @@ public class Database {
           if (Database.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             try {
               this.store.databaseWillOpen(this);
-              this.seedTrunk.tree.loadAsync(new DatabaseOpen(this, cont));
+              Trunk.TREE.get(this.seedTrunk).loadAsync(new DatabaseOpen(this, cont));
             } catch (Throwable cause) {
               Database.STATUS.set(this, Database.FAILED);
               synchronized (this) {
@@ -212,15 +211,13 @@ public class Database {
   @SuppressWarnings("unchecked")
   public <T extends Tree> Trunk<T> openTrunk(Value name, TreeType treeType, boolean isResident, boolean isTransient) {
     Trunk<T> newTrunk = null;
-    WeakReference<Trunk<Tree>> newTrunkRef = null;
     boolean created = false;
     do {
-      final HashTrieMap<Value, WeakReference<Trunk<Tree>>> oldTrunks = this.trunks;
-      final WeakReference<Trunk<Tree>> oldTrunkRef = oldTrunks.get(name);
-      final Trunk<Tree> oldTrunk = oldTrunkRef != null ? oldTrunkRef.get() : null;
+      final HashTrieMap<Value, Trunk<Tree>> oldTrunks = this.trunks;
+      final Trunk<Tree> oldTrunk = oldTrunks.get(name);
       if (oldTrunk == null) {
         if (newTrunk == null) {
-          final Seed seed = Seed.fromValue(this.seedTrunk.tree.get(name));
+          final Seed seed = Seed.fromValue(((BTree) Trunk.TREE.get(this.seedTrunk)).get(name));
           newTrunk = new Trunk<T>(this, name, null);
           if (seed != null) {
             newTrunk.tree = (T) seed.treeType().treeFromSeed(newTrunk, seed, isResident, isTransient);
@@ -231,9 +228,8 @@ public class Database {
           } else {
             return null;
           }
-          newTrunkRef = new WeakReference<Trunk<Tree>>((Trunk<Tree>) newTrunk);
         }
-        final HashTrieMap<Value, WeakReference<Trunk<Tree>>> newTrunks = oldTrunks.updated(name, newTrunkRef);
+        final HashTrieMap<Value, Trunk<Tree>> newTrunks = oldTrunks.updated(name, (Trunk<Tree>) newTrunk);
         if (Database.TRUNKS.compareAndSet(this, oldTrunks, newTrunks)) {
           if (created) {
             this.databaseDidCreateTrunk(newTrunk);
@@ -309,12 +305,11 @@ public class Database {
 
   public void closeTrunk(Value name) {
     do {
-      final HashTrieMap<Value, WeakReference<Trunk<Tree>>> oldTrunks = this.trunks;
-      final HashTrieMap<Value, WeakReference<Trunk<Tree>>> newTrunks = oldTrunks.removed(name);
+      final HashTrieMap<Value, Trunk<Tree>> oldTrunks = this.trunks;
+      final HashTrieMap<Value, Trunk<Tree>> newTrunks = oldTrunks.removed(name);
       if (oldTrunks != newTrunks) {
         if (Database.TRUNKS.compareAndSet(this, oldTrunks, newTrunks)) {
-          final WeakReference<Trunk<Tree>> oldTrunkRef = oldTrunks.get(name);
-          final Trunk<?> oldTrunk = oldTrunkRef.get();
+          final Trunk<Tree> oldTrunk = oldTrunks.get(name);
           if (oldTrunk != null) {
             this.databaseDidCloseTrunk(oldTrunk);
           }
@@ -329,21 +324,16 @@ public class Database {
   public void removeTree(Value name) {
     this.closeTrunk(name);
     do {
-      final HashTrieMap<Value, Trunk<Tree>> oldSprouts = this.sprouts;
+      final HashTrieMap<Value, Trunk<Tree>> oldSprouts = Database.SPROUTS.get(this);
       final HashTrieMap<Value, Trunk<Tree>> newSprouts = oldSprouts.removed(name);
-      if (oldSprouts != newSprouts) {
-        if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
-          break;
-        }
-      } else {
+      if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
         break;
       }
     } while (true);
     do {
       final long newVersion = this.version;
-      final int newPost = this.post;
-      final BTree oldSeedTree = this.seedTrunk.tree;
-      final BTree newSeedTree = oldSeedTree.removed(name, newVersion, newPost);
+      final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
+      final BTree newSeedTree = oldSeedTree.removed(name, newVersion, this.post);
       if (oldSeedTree != newSeedTree) {
         if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, newSeedTree)) {
           final Value seedValue = oldSeedTree.get(name);
@@ -418,21 +408,20 @@ public class Database {
     boolean quiescent;
     do {
       quiescent = true;
-
-      // Evacuate data trees
-      final Cursor<Map.Entry<Value, Value>> seedCursor = this.seedTrunk.tree.cursor();
+      final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
       while (seedCursor.hasNext()) {
         final Value name = seedCursor.next().getKey();
         do {
           final long version = this.version;
           final Trunk<Tree> trunk = this.openTrunk(name, null, false, false);
-          final Tree oldTree = trunk.tree;
+          final Tree oldTree = Trunk.TREE.get(trunk);
           final Tree newTree = oldTree.evacuated(post, version);
           if (oldTree != newTree) {
-            final int newPost = newTree.post();
             if (trunk.updateTree(oldTree, newTree, version)) {
-              if (newPost != 0 && newPost < post) {
+              final int treePost = newTree.post();
+              if (treePost != 0 && treePost < post) {
                 quiescent = false;
+              } else {
                 break;
               }
             }
@@ -441,42 +430,6 @@ public class Database {
           }
         } while (true);
       }
-
-      // Evacuate seed tree
-      do {
-        final long version = this.version;
-        final BTree oldSeedTree = this.seedTrunk.tree;
-        final BTree newSeedTree = oldSeedTree.evacuated(post, version);
-        if (oldSeedTree != newSeedTree) {
-          final int newPost = newSeedTree.post();
-          if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, newSeedTree)) {
-            if (newPost != 0 && newPost < post) {
-              quiescent = false;
-              break;
-            }
-          }
-        } else {
-          break;
-        }
-      } while (true);
-
-      // Evacuate meta tree
-      do {
-        final long version = this.version;
-        final BTree oldMetaTree = this.metaTrunk.tree;
-        final BTree newMetaTree = oldMetaTree.evacuated(post, version);
-        if (oldMetaTree != newMetaTree) {
-          final int newPost = newMetaTree.post();
-          if (Trunk.TREE.compareAndSet(this.metaTrunk, oldMetaTree, newMetaTree)) {
-            if (newPost != 0 && newPost < post) {
-              quiescent = false;
-              break;
-            }
-          }
-        } else {
-          break;
-        }
-      } while (true);
     } while (!quiescent);
   }
 
@@ -488,10 +441,39 @@ public class Database {
     Database.DIFF_SIZE.set(this, 0L);
     final long version = Database.VERSION.getAndIncrement(this);
     final long time = System.currentTimeMillis();
+    final int post = this.post;
+
+    if (post != 0 && this.store.isCompacting()) {
+      // Validate seed tree.
+      final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
+      while (seedCursor.hasNext()) {
+        final Map.Entry<Value, Value> seedEntry = seedCursor.next();
+        final Value seedKey = seedEntry.getKey();
+        final Value seedValue = seedEntry.getValue();
+        final Seed seed = Seed.fromValue(seedValue);
+        Trunk<Tree> trunk = new Trunk<Tree>(this, seedKey, null);
+        Tree tree = seed.treeType().treeFromSeed(trunk, seed, false, false);
+        trunk.tree = tree;
+        final int treePost = tree.rootRef().post();
+        if (treePost != 0 && treePost < post) {
+          trunk = this.openTrunk(seedKey, null, false, false);
+          tree = Trunk.TREE.get(trunk);
+          if (!tree.isTransient()) {
+            do {
+              final HashTrieMap<Value, Trunk<Tree>> oldSprouts = Database.SPROUTS.get(this);
+              final HashTrieMap<Value, Trunk<Tree>> newSprouts = oldSprouts.updated(trunk.name, trunk);
+              if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
+                break;
+              }
+            } while (true);
+          }
+        }
+      }
+    }
 
     HashTrieMap<Value, Trunk<Tree>> sprouts;
     do {
-      sprouts = this.sprouts;
+      sprouts = Database.SPROUTS.get(this);
     } while (!Database.SPROUTS.compareAndSet(this, sprouts, HashTrieMap.<Value, Trunk<Tree>>empty()));
     if (sprouts.isEmpty()) {
       return null;
@@ -505,13 +487,14 @@ public class Database {
     while (trunks.hasNext()) {
       final Trunk<Tree> trunk = trunks.next();
       do {
-        final Tree oldTree = trunk.tree;
-        final Tree newTree = oldTree.committed(zone, step, version, time);
+        final Tree oldTree = Trunk.TREE.get(trunk);
+        final Tree newTree = oldTree.evacuated(post, version)
+                                    .committed(zone, step, version, time);
         if (oldTree != newTree) {
           if (Trunk.TREE.compareAndSet(trunk, oldTree, newTree)) {
             do {
-              final BTree oldSeedTree = this.seedTrunk.tree;
-              final BTree newSeedTree = oldSeedTree.updated(trunk.name, newTree.seed().toValue(), version, this.post);
+              final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
+              final BTree newSeedTree = oldSeedTree.updated(trunk.name, newTree.seed().toValue(), version, post);
               if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, newSeedTree)) {
                 break;
               }
@@ -528,30 +511,32 @@ public class Database {
       } while (true);
     }
 
-    // Commit seed tree
+    // Evacuate and commit seed tree
     BTree seedTree;
     do {
-      final BTree oldSeedTree = this.seedTrunk.tree;
-      seedTree = oldSeedTree.committed(zone, step, version, time);
+      final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
+      seedTree = oldSeedTree.evacuated(post, version)
+                            .committed(zone, step, version, time);
       if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, seedTree)) {
-        step += seedTree.diffSize(version);
         break;
       }
     } while (true);
+    step += seedTree.diffSize(version);
 
-    // Commit meta tree
+    // Evacuate and commit meta tree
     BTree metaTree;
     do {
-      final BTree oldMetaTree = this.metaTrunk.tree;
-      metaTree = oldMetaTree.updated(Text.from("seed"), seedTree.rootRef().toValue(), version, this.post)
-                            .updated(Text.from("stem"), Num.from(this.stem), version, this.post)
-                            .updated(Text.from("time"), Num.from(time), version, this.post)
+      final BTree oldMetaTree = (BTree) Trunk.TREE.get(this.metaTrunk);
+      metaTree = oldMetaTree.updated(Text.from("seed"), seedTree.rootRef().toValue(), version, post)
+                            .updated(Text.from("stem"), Num.from(this.stem), version, post)
+                            .updated(Text.from("time"), Num.from(time), version, post)
+                            .evacuated(post, version)
                             .committed(zone, step, version, time);
       if (Trunk.TREE.compareAndSet(this.metaTrunk, oldMetaTree, metaTree)) {
-        step += metaTree.diffSize(version);
         break;
       }
     } while (true);
+    step += metaTree.diffSize(version);
 
     final FingerTrieSeq<Tree> commits = commitBuilder.bind();
     final int size = (int) (step - base);
@@ -599,13 +584,13 @@ public class Database {
   }
 
   public void uncommit(long version) {
-    final Cursor<Map.Entry<Value, Value>> seedCursor = this.seedTrunk.tree.cursor();
+    final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
     while (seedCursor.hasNext()) {
       final Value name = seedCursor.next().getKey();
       do {
         final long newVersion = this.version;
         final Trunk<Tree> trunk = this.openTrunk(name, null, false, false);
-        final Tree oldTree = trunk.tree;
+        final Tree oldTree = Trunk.TREE.get(trunk);
         final Tree newTree = oldTree.uncommitted(version);
         if (oldTree != newTree) {
           if (trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -619,7 +604,7 @@ public class Database {
   }
 
   public Iterator<MetaTree> trees() {
-    return new DatabaseTreeIterator(this.seedTrunk.tree.cursor());
+    return new DatabaseTreeIterator(((BTree) Trunk.TREE.get(this.seedTrunk)).cursor());
   }
 
   public Iterator<MetaLeaf> leafs() {
@@ -628,7 +613,7 @@ public class Database {
 
   void databaseDidOpen() {
     long treeSize = 0L;
-    final Cursor<Map.Entry<Value, Value>> seedCursor = this.seedTrunk.tree.cursor();
+    final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
     while (seedCursor.hasNext()) {
       final Value seedValue = seedCursor.next().getValue();
       final Value sizeValue = seedValue.get("root").head().toValue().get("area");
@@ -643,11 +628,11 @@ public class Database {
   }
 
   public void databaseDidCreateTrunk(Trunk<?> trunk) {
-    Database.TREE_SIZE.addAndGet(this, trunk.tree.treeSize());
+    Database.TREE_SIZE.addAndGet(this, Trunk.TREE.get(trunk).treeSize());
   }
 
   public void databaseDidOpenTrunk(Trunk<?> trunk) {
-    this.store.treeDidOpen(this, trunk.tree);
+    this.store.treeDidOpen(this, Trunk.TREE.get(trunk));
   }
 
   Commit databaseWillCommit(Commit commit) {
@@ -686,13 +671,9 @@ public class Database {
   public void databaseDidUpdateTrunk(Trunk<?> trunk, Tree newTree, Tree oldTree, long newVersion) {
     if (!newTree.isTransient()) {
       do {
-        final HashTrieMap<Value, Trunk<Tree>> oldSprouts = this.sprouts;
+        final HashTrieMap<Value, Trunk<Tree>> oldSprouts = Database.SPROUTS.get(this);
         final HashTrieMap<Value, Trunk<Tree>> newSprouts = oldSprouts.updated(trunk.name, (Trunk<Tree>) trunk);
-        if (oldSprouts != newSprouts) {
-          if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
-            break;
-          }
-        } else {
+        if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
           break;
         }
       } while (true);
@@ -706,7 +687,7 @@ public class Database {
   }
 
   public void databaseDidCloseTrunk(Trunk<?> trunk) {
-    this.store.treeDidClose(this, trunk.tree);
+    this.store.treeDidClose(this, Trunk.TREE.get(trunk));
   }
 
   static final int OPENING = 1 << 0;
@@ -732,8 +713,8 @@ public class Database {
       AtomicIntegerFieldUpdater.newUpdater(Database.class, "status");
 
   @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<Database, HashTrieMap<Value, WeakReference<Trunk<Tree>>>> TRUNKS =
-      AtomicReferenceFieldUpdater.newUpdater(Database.class, (Class<HashTrieMap<Value, WeakReference<Trunk<Tree>>>>) (Class<?>) HashTrieMap.class, "trunks");
+  static final AtomicReferenceFieldUpdater<Database, HashTrieMap<Value, Trunk<Tree>>> TRUNKS =
+      AtomicReferenceFieldUpdater.newUpdater(Database.class, (Class<HashTrieMap<Value, Trunk<Tree>>>) (Class<?>) HashTrieMap.class, "trunks");
 
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<Database, HashTrieMap<Value, Trunk<Tree>>> SPROUTS =
@@ -920,7 +901,7 @@ final class DatabaseLeafIterator implements Iterator<MetaLeaf> {
         final Value name = metaTree.name;
         final TreeType type = metaTree.type;
         this.trunk = this.database.openTrunk(name, type, false, false);
-        this.leafs = this.trunk.tree.cursor();
+        this.leafs = Trunk.TREE.get(this.trunk).cursor();
       } else {
         return false;
       }
@@ -934,7 +915,7 @@ final class DatabaseLeafIterator implements Iterator<MetaLeaf> {
         if (this.leafs.hasNext()) {
           final Item leaf = (Item) this.leafs.next();
           final Value name = this.trunk.name;
-          final TreeType type = this.trunk.tree.treeType();
+          final TreeType type = Trunk.TREE.get(this.trunk).treeType();
           final Value key = leaf.key();
           final Value value = leaf.toValue();
           return new MetaLeaf(name, type, key, value);
@@ -948,7 +929,7 @@ final class DatabaseLeafIterator implements Iterator<MetaLeaf> {
         final Value name = metaTree.name;
         final TreeType type = metaTree.type;
         this.trunk = this.database.openTrunk(name, type, false, false);
-        this.leafs = this.trunk.tree.cursor();
+        this.leafs = Trunk.TREE.get(this.trunk).cursor();
       } else {
         throw new NoSuchElementException();
       }

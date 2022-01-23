@@ -15,6 +15,7 @@
 package swim.db;
 
 import swim.codec.Output;
+import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
 import swim.structure.Value;
 import swim.util.Cursor;
@@ -82,6 +83,8 @@ public abstract class Tree {
   public abstract Tree uncommitted(long version);
 
   public abstract void writeDiff(Output<?> output, long version);
+
+  public abstract FingerTrieSeq<? extends Page> toDiff(long version);
 
   public abstract void loadAsync(Cont<Tree> cont);
 

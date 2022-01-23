@@ -555,7 +555,7 @@ public class StoreSettings implements Debug {
       try {
         deleteDelay = Integer.parseInt(System.getProperty("swim.db.delete.delay"));
       } catch (NumberFormatException e) {
-        deleteDelay = 45 * 1000;
+        deleteDelay = 15 * 1000;
       }
 
       int storeOpenTimeout;

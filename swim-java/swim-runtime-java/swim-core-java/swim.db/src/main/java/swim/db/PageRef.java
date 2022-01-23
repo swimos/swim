@@ -18,6 +18,7 @@ import swim.codec.Output;
 import swim.concurrent.Cont;
 import swim.recon.Recon;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.Cursor;
 
 public abstract class PageRef {
@@ -79,6 +80,8 @@ public abstract class PageRef {
   public abstract void writePage(Output<?> output);
 
   public abstract void writeDiff(Output<?> output);
+
+  public abstract void toDiff(Builder<Page, ?> builder);
 
   public abstract Page setPageValue(Value value, boolean isResident);
 
