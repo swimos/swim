@@ -268,7 +268,7 @@ public class FileZone extends Zone {
     do {
       k = channel.write(buffer, position);
       position += k;
-    } while (k >= 0 && buffer.hasRemaining());
+    } while (buffer.hasRemaining());
     if (buffer.hasRemaining()) {
       throw new StoreException("wrote incomplete chunk to " + this.file.getPath());
     }
