@@ -34,6 +34,9 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   final int length;
 
   FingerTrieSeq(Object[] prefix, FingerTrieSeq<Object[]> branch, Object[] suffix, int length) {
+    if (length < 0) {
+      throw new IllegalArgumentException("length overflow");
+    }
     this.prefix = prefix;
     this.branch = branch;
     this.suffix = suffix;
