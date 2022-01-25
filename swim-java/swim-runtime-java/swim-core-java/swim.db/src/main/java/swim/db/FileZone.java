@@ -189,6 +189,45 @@ public class FileZone extends Zone {
     return new RandomAccessFile(this.file, "rw").getChannel();
   }
 
+  Page loadPage(FileChannel channel, PageRef pageRef, TreeDelegate treeDelegate, boolean isResident) {
+    final long offset = pageRef.base();
+    final int size = pageRef.pageSize();
+    final ByteBuffer buffer = ByteBuffer.allocate(size);
+    long position = offset;
+    try {
+      int k = 0;
+      do {
+        k = channel.read(buffer, position);
+        position += k;
+      } while (k >= 0 && buffer.hasRemaining());
+    } catch (IOException cause) {
+      throw new StoreException("failed to read page from " + this.file.getPath()
+                             + ':' + offset + '-' + size, cause);
+    }
+    if (buffer.hasRemaining()) {
+      throw new StoreException("incomplete page read from " + this.file.getPath()
+                             + ':' + offset + '-' + position);
+    }
+    ((Buffer) buffer).flip();
+    try {
+      final Parser<Value> parser = Utf8.parseDecoded(Binary.inputBuffer(buffer),
+                                                     Recon.structureParser().blockParser());
+      final Value value = parser.bind();
+      final Page page = pageRef.setPageValue(value, isResident);
+      if (treeDelegate != null) {
+        treeDelegate.treeDidLoadPage(page);
+      }
+      return page;
+    } catch (Throwable cause) {
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException("failed to decode page from " + this.file.getPath()
+                               + ':' + offset + '-' + size, cause);
+      } else {
+        throw cause;
+      }
+    }
+  }
+
   void loadPageAsync(FileChannel channel, PageRef pageRef, TreeDelegate treeDelegate,
                      boolean isResident, Cont<Page> cont) {
     try {

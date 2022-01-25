@@ -41,6 +41,49 @@ final class FilePageLoader extends PageLoader {
   }
 
   @Override
+  public Page loadPage(PageRef pageRef) {
+    try {
+      final int zoneId = pageRef.zone();
+      final FileZone zone = this.store.openZone(zoneId);
+      return this.loadPage(zone, pageRef);
+    } catch (InterruptedException cause) {
+      throw new StoreException(cause);
+    }
+  }
+
+  Page loadPage(FileZone zone, PageRef pageRef) {
+    final Integer zoneId = zone.id;
+    FileChannel channel = null;
+    do {
+      final HashTrieMap<Integer, FileChannel> oldChannels = this.channels;
+      final FileChannel oldChannel = oldChannels.get(zoneId);
+      if (oldChannel == null) {
+        try {
+          channel = zone.openReadChannel();
+        } catch (IOException cause) {
+          throw new StoreException(cause);
+        }
+        final HashTrieMap<Integer, FileChannel> newChannels = oldChannels.updated(zoneId, channel);
+        if (FilePageLoader.CHANNELS.compareAndSet(this, oldChannels, newChannels)) {
+          break;
+        }
+      } else {
+        if (channel != null) {
+          // Lost open race
+          try {
+            channel.close();
+          } catch (IOException swallow) {
+            swallow.printStackTrace();
+          }
+        }
+        channel = oldChannel;
+        break;
+      }
+    } while (true);
+    return zone.loadPage(channel, pageRef, this.treeDelegate, this.isResident);
+  }
+
+  @Override
   public void loadPageAsync(PageRef pageRef, Cont<Page> cont) {
     try {
       final int zoneId = pageRef.zone();

@@ -24,6 +24,8 @@ public abstract class PageLoader implements AutoCloseable {
 
   public abstract boolean isResident();
 
+  public abstract Page loadPage(PageRef pageRef);
+
   public abstract void loadPageAsync(PageRef pageRef, Cont<Page> cont);
 
   @Override

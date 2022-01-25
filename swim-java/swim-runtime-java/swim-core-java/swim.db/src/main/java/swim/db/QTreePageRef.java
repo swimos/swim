@@ -167,11 +167,7 @@ public final class QTreePageRef extends PageRef {
       return (QTreePage) page;
     } else {
       try (PageLoader pageLoader = this.context.openPageLoader(false)) {
-        final Sync<Page> syncPage = new Sync<Page>();
-        pageLoader.loadPageAsync(this, syncPage);
-        return (QTreePage) syncPage.await(settings().pageLoadTimeout);
-      } catch (InterruptedException error) {
-        throw new StoreException(toDebugString(), error);
+        return (QTreePage) pageLoader.loadPage(this);
       } catch (Throwable error) {
         if (Cont.isNonFatal(error)) {
           throw new StoreException(toDebugString(), error);

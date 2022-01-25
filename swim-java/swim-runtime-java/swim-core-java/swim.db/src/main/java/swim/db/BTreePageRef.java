@@ -122,11 +122,7 @@ public final class BTreePageRef extends PageRef {
       return (BTreePage) page;
     } else {
       try (PageLoader pageLoader = this.context.openPageLoader(false)) {
-        final Sync<Page> syncPage = new Sync<Page>();
-        pageLoader.loadPageAsync(this, syncPage);
-        return (BTreePage) syncPage.await(settings().pageLoadTimeout);
-      } catch (InterruptedException error) {
-        throw new StoreException(this.toDebugString(), error);
+        return (BTreePage) pageLoader.loadPage(this);
       } catch (Throwable error) {
         if (Cont.isNonFatal(error)) {
           throw new StoreException(this.toDebugString(), error);

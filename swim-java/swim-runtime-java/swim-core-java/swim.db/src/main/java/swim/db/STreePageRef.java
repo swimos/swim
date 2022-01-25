@@ -123,11 +123,7 @@ public final class STreePageRef extends PageRef {
       return (STreePage) page;
     } else {
       try (PageLoader pageLoader = this.context.openPageLoader(false)) {
-        final Sync<Page> syncPage = new Sync<Page>();
-        pageLoader.loadPageAsync(this, syncPage);
-        return (STreePage) syncPage.await(this.settings().pageLoadTimeout);
-      } catch (InterruptedException error) {
-        throw new StoreException(this.toDebugString(), error);
+        return (STreePage) pageLoader.loadPage(this);
       } catch (Throwable error) {
         if (Cont.isNonFatal(error)) {
           throw new StoreException(this.toDebugString(), error);
