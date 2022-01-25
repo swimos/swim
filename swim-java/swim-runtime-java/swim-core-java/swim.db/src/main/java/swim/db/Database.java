@@ -400,32 +400,26 @@ public class Database {
   }
 
   public void evacuate(int post) {
-    boolean quiescent;
-    do {
-      quiescent = true;
-      final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
-      while (seedCursor.hasNext()) {
-        final Value name = seedCursor.next().getKey();
-        do {
-          final long version = this.version;
-          final Trunk<Tree> trunk = this.openTrunk(name, null, false, false);
-          final Tree oldTree = Trunk.TREE.get(trunk);
-          final Tree newTree = oldTree.evacuated(post, version);
-          if (oldTree != newTree) {
-            if (trunk.updateTree(oldTree, newTree, version)) {
-              final int treePost = newTree.post();
-              if (treePost != 0 && treePost < post) {
-                quiescent = false;
-              } else {
-                break;
-              }
+    final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
+    while (seedCursor.hasNext()) {
+      final Value name = seedCursor.next().getKey();
+      do {
+        final long version = this.version;
+        final Trunk<Tree> trunk = this.openTrunk(name, null, false, false);
+        final Tree oldTree = Trunk.TREE.get(trunk);
+        final Tree newTree = oldTree.evacuated(post, version);
+        if (oldTree != newTree) {
+          if (trunk.updateTree(oldTree, newTree, version)) {
+            final int treePost = newTree.post();
+            if (treePost == 0 || treePost >= post) {
+              break;
             }
-          } else {
-            break;
           }
-        } while (true);
-      }
-    } while (!quiescent);
+        } else {
+          break;
+        }
+      } while (true);
+    }
   }
 
   public void shiftZone() {
