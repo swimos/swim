@@ -368,7 +368,8 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
   @Override
   protected void willStart() {
     super.willStart();
-    this.openDownlinks();
+    // Don't open joined downlinks in agent start stack context.
+    this.stage().execute(new JoinValueLaneModelOpenDownlinks(this));
   }
 
   static final int RESIDENT = 1 << 0;
@@ -377,6 +378,23 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<JoinValueLaneModel, HashTrieMap<Value, JoinValueLaneDownlink<?>>> DOWNLINKS =
       AtomicReferenceFieldUpdater.newUpdater(JoinValueLaneModel.class, (Class<HashTrieMap<Value, JoinValueLaneDownlink<?>>>) (Class<?>) HashTrieMap.class, "downlinks");
+
+}
+
+final class JoinValueLaneModelOpenDownlinks implements Runnable {
+
+  final JoinValueLaneModel model;
+
+  JoinValueLaneModelOpenDownlinks(JoinValueLaneModel model) {
+    this.model = model;
+  }
+
+  @Override
+  public void run() {
+    if (this.model.isStarted()) {
+      this.model.openDownlinks();
+    }
+  }
 
 }
 
