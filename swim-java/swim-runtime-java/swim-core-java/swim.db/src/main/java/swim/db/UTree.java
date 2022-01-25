@@ -15,7 +15,6 @@
 package swim.db;
 
 import swim.codec.Output;
-import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
 import swim.concurrent.Sync;
 import swim.structure.Value;
@@ -191,15 +190,10 @@ public final class UTree extends Tree {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public FingerTrieSeq<UTreePage> toDiff(long version) {
+  public void buildDiff(long version, Builder<Page, ?> builder) {
     if (version == this.rootRef.softVersion()) {
-      final Builder<UTreePage, FingerTrieSeq<UTreePage>> builder = FingerTrieSeq.builder();
-      this.rootRef.toDiff((Builder<Page, ?>) (Builder<?, ?>) builder);
-      return builder.bind();
-    } else {
-      return FingerTrieSeq.empty();
+      this.rootRef.buildDiff(builder);
     }
   }
 

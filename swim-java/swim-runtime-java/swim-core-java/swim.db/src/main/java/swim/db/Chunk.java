@@ -17,7 +17,10 @@ package swim.db;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
-import java.nio.charset.Charset;
+import swim.codec.Binary;
+import swim.codec.Output;
+import swim.codec.OutputBuffer;
+import swim.codec.Utf8;
 import swim.collections.FingerTrieSeq;
 
 public class Chunk {
@@ -26,17 +29,19 @@ public class Chunk {
   final Commit commit;
   final int zone;
   final Germ germ;
+  final long size;
   final FingerTrieSeq<Tree> trees;
-  final ByteBuffer buffer;
+  final FingerTrieSeq<Page> pages;
 
-  public Chunk(Database database, Commit commit, int zone, Germ germ,
-               FingerTrieSeq<Tree> trees, ByteBuffer buffer) {
+  public Chunk(Database database, Commit commit, int zone, Germ germ, long size,
+               FingerTrieSeq<Tree> trees, FingerTrieSeq<Page> pages) {
     this.database = database;
     this.commit = commit;
     this.zone = zone;
     this.germ = germ;
+    this.size = size;
     this.trees = trees;
-    this.buffer = buffer;
+    this.pages = pages;
   }
 
   public Database database() {
@@ -55,31 +60,16 @@ public class Chunk {
     return this.germ;
   }
 
+  public long size() {
+    return this.size;
+  }
+
   public FingerTrieSeq<Tree> trees() {
     return this.trees;
   }
 
-  public ByteBuffer toByteBuffer() {
-    return this.buffer;
-  }
-
-  public long size() {
-    return this.buffer.capacity();
-  }
-
-  public void write(WritableByteChannel channel) {
-    final ByteBuffer buffer = this.buffer;
-    int k;
-    try {
-      do {
-        k = channel.write(buffer);
-      } while (k > 0 && buffer.hasRemaining());
-      if (buffer.hasRemaining()) {
-        throw new StoreException("wrote incomplete chunk");
-      }
-    } catch (IOException cause) {
-      throw new StoreException(cause);
-    }
+  public FingerTrieSeq<Page> pages() {
+    return this.pages;
   }
 
   public void soften() {
@@ -89,9 +79,30 @@ public class Chunk {
     }
   }
 
-  @Override
-  public String toString() {
-    return new String(this.buffer.array(), Charset.forName("UTF-8"));
+  public void write(WritableByteChannel channel) {
+    try {
+      final FingerTrieSeq<Page> pages = this.pages;
+      for (int i = 0; i < pages.size(); i += 1) {
+        final Page page = pages.get(i);
+        final int pageSize = page.pageSize();
+        final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[pageSize]);
+        final Output<ByteBuffer> encoder = Utf8.encodedOutput(output);
+        page.writePage(encoder);
+        final ByteBuffer pageBuffer = output.bind();
+        if (pageBuffer.remaining() != pageSize) {
+          throw new StoreException("serialized page size of " + pageBuffer.remaining() + " bytes "
+                                 + "does not match expected page size of " + pageSize + " bytes");
+        }
+        do {
+          channel.write(pageBuffer);
+        } while (pageBuffer.hasRemaining());
+        if (pageBuffer.hasRemaining()) {
+          throw new StoreException("wrote incomplete chunk");
+        }
+      }
+    } catch (IOException cause) {
+      throw new StoreException(cause);
+    }
   }
 
 }

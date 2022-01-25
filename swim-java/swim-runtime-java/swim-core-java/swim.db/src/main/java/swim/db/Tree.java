@@ -18,6 +18,7 @@ import swim.codec.Output;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
 import swim.structure.Value;
+import swim.util.Builder;
 import swim.util.Cursor;
 
 public abstract class Tree {
@@ -84,7 +85,13 @@ public abstract class Tree {
 
   public abstract void writeDiff(Output<?> output, long version);
 
-  public abstract FingerTrieSeq<? extends Page> toDiff(long version);
+  public abstract void buildDiff(long version, Builder<Page, ?> builder);
+
+  public FingerTrieSeq<Page> toDiff(long version) {
+    final Builder<Page, FingerTrieSeq<Page>> builder = FingerTrieSeq.builder();
+    this.buildDiff(version, builder);
+    return builder.bind();
+  }
 
   public abstract void loadAsync(Cont<Tree> cont);
 

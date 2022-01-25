@@ -180,7 +180,7 @@ public final class UTreeLeaf extends UTreePage {
   }
 
   @Override
-  public void toDiff(Builder<Page, ?> builder) {
+  public void buildDiff(Builder<Page, ?> builder) {
     builder.add(this);
   }
 

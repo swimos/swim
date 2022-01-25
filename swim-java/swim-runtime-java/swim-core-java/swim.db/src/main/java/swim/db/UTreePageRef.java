@@ -267,8 +267,8 @@ public final class UTreePageRef extends PageRef {
   }
 
   @Override
-  public void toDiff(Builder<Page, ?> builder) {
-    this.page().toDiff(builder);
+  public void buildDiff(Builder<Page, ?> builder) {
+    this.page().buildDiff(builder);
   }
 
   @Override

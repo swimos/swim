@@ -120,7 +120,7 @@ public abstract class Page {
 
   public abstract void writeDiff(Output<?> output);
 
-  public abstract void toDiff(Builder<Page, ?> builder);
+  public abstract void buildDiff(Builder<Page, ?> builder);
 
   public abstract void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont);
 

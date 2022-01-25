@@ -487,7 +487,7 @@ public final class BTreeLeaf extends BTreePage {
   }
 
   @Override
-  public void toDiff(Builder<Page, ?> builder) {
+  public void buildDiff(Builder<Page, ?> builder) {
     builder.add(this);
   }
 

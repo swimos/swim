@@ -787,7 +787,7 @@ public final class QTreeLeaf extends QTreePage {
   }
 
   @Override
-  public void toDiff(Builder<Page, ?> builder) {
+  public void buildDiff(Builder<Page, ?> builder) {
     builder.add(this);
   }
 

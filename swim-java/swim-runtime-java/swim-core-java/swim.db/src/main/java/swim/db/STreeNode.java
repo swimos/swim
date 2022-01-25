@@ -777,12 +777,12 @@ public final class STreeNode extends STreePage {
   }
 
   @Override
-  public void toDiff(Builder<Page, ?> builder) {
+  public void buildDiff(Builder<Page, ?> builder) {
     final STreePageRef[] childRefs = this.childRefs;
     for (int i = 0, n = childRefs.length; i < n; i += 1) {
       final STreePageRef childRef = childRefs[i];
       if (this.version == childRef.softVersion()) {
-        childRef.toDiff(builder);
+        childRef.buildDiff(builder);
       }
     }
     builder.add(this);

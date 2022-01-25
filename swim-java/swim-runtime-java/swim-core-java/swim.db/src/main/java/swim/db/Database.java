@@ -14,7 +14,6 @@
 
 package swim.db;
 
-import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -22,10 +21,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.codec.Binary;
-import swim.codec.Output;
-import swim.codec.OutputBuffer;
-import swim.codec.Utf8;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Cont;
@@ -480,6 +475,7 @@ public class Database {
     }
 
     final Builder<Tree, FingerTrieSeq<Tree>> commitBuilder = FingerTrieSeq.builder();
+    final Builder<Page, FingerTrieSeq<Page>> pageBuilder = FingerTrieSeq.builder();
     long step = base;
 
     // Commit data pages
@@ -500,6 +496,7 @@ public class Database {
               }
             } while (true);
             commitBuilder.add(newTree);
+            newTree.buildDiff(version, pageBuilder);
             Database.TREE_SIZE.addAndGet(this, newTree.treeSize() - oldTree.treeSize());
             newTree.treeContext().treeDidCommit(newTree, oldTree);
             step += newTree.diffSize(version);
@@ -521,6 +518,7 @@ public class Database {
         break;
       }
     } while (true);
+    seedTree.buildDiff(version, pageBuilder);
     step += seedTree.diffSize(version);
 
     // Evacuate and commit meta tree
@@ -536,51 +534,17 @@ public class Database {
         break;
       }
     } while (true);
+    metaTree.buildDiff(version, pageBuilder);
     step += metaTree.diffSize(version);
 
+    final long size = step - base;
     final FingerTrieSeq<Tree> commits = commitBuilder.bind();
-    final int size = (int) (step - base);
-    final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[size]);
-    final Output<ByteBuffer> encoder = Utf8.encodedOutput(output);
-    step = base;
-
-    // Write data pages
-    for (Tree tree : commits) {
-      tree.writeDiff(encoder, version);
-      step += tree.diffSize(version);
-      Database.assertStep(output, base, step);
-    }
-
-    // Write seed pages
-    seedTree.writeDiff(encoder, version);
-    step += seedTree.diffSize(version);
-    Database.assertStep(output, base, step);
-
-    // Write meta pages
-    metaTree.writeDiff(encoder, version);
-    step += metaTree.diffSize(version);
-    Database.assertStep(output, base, step);
-
-    if (output.index() != size) {
-      throw new StoreException();
-    }
+    final FingerTrieSeq<Page> pages = pageBuilder.bind();
 
     final Germ germ = new Germ(this.stem, version, this.germ.created(), time,
                                seedTree.rootRef().toValue());
     this.germ = germ;
-    return new Chunk(this, commit, zone, germ, commits, output.bind());
-  }
-
-  private static void assertStep(OutputBuffer<?> output, long base, long step) {
-    final int skew = output.index() - (int) (step - base);
-    if (skew != 0) {
-      final StoreException error = new StoreException("chunk offset skew: " + skew + "; base: " + base + "; step: " + step);
-      if (skew < 0) {
-        throw error;
-      } else {
-        error.printStackTrace();
-      }
-    }
+    return new Chunk(this, commit, zone, germ, size, commits, pages);
   }
 
   public void uncommit(long version) {

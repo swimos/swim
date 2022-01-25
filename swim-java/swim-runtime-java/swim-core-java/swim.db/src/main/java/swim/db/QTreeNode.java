@@ -1355,12 +1355,12 @@ public final class QTreeNode extends QTreePage {
   }
 
   @Override
-  public void toDiff(Builder<Page, ?> builder) {
+  public void buildDiff(Builder<Page, ?> builder) {
     final QTreePageRef[] childRefs = this.childRefs;
     for (int i = 0, n = childRefs.length; i < n; i += 1) {
       final QTreePageRef childRef = childRefs[i];
       if (this.version == childRef.softVersion()) {
-        childRef.toDiff(builder);
+        childRef.buildDiff(builder);
       }
     }
     builder.add(this);

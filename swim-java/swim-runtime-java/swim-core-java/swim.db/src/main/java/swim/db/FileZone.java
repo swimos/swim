@@ -27,8 +27,11 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.codec.Binary;
 import swim.codec.Input;
+import swim.codec.Output;
+import swim.codec.OutputBuffer;
 import swim.codec.Parser;
 import swim.codec.Utf8;
+import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.concurrent.Sync;
@@ -213,8 +216,24 @@ public class FileZone extends Zone {
         final long base = Math.max(this.size, Math.max(2 * Germ.BLOCK_SIZE, channel.size()));
         chunk = database.commitChunk(commit, this.id, base);
         if (chunk != null) {
-          ByteBuffer buffer = chunk.toByteBuffer();
-          this.write(channel, buffer, base);
+          long step = base;
+
+          final FingerTrieSeq<Page> pages = chunk.pages;
+          for (int i = 0; i < pages.size(); i += 1) {
+            final Page page = pages.get(i);
+            final int pageSize = page.pageSize();
+            final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[pageSize]);
+            final Output<ByteBuffer> encoder = Utf8.encodedOutput(output);
+            page.writePage(encoder);
+            final ByteBuffer pageBuffer = output.bind();
+            if (pageBuffer.remaining() != pageSize) {
+              throw new StoreException("serialized page size of " + pageBuffer.remaining() + " bytes "
+                                     + "does not match expected page size of " + pageSize + " bytes");
+            }
+            this.write(channel, pageBuffer, step);
+            step += pageSize;
+          }
+
           if (commit.isForced()) {
             // prevent header update from reordering before chunk write
             channel.force(true);
@@ -230,10 +249,10 @@ public class FileZone extends Zone {
           }
 
           final Germ germ = chunk.germ();
-          buffer = germ.toByteBuffer();
-          this.write(channel, buffer, 0L);
-          ((Buffer) buffer).flip();
-          this.write(channel, buffer, Germ.BLOCK_SIZE);
+          final ByteBuffer germBuffer = germ.toByteBuffer();
+          this.write(channel, germBuffer, 0L);
+          ((Buffer) germBuffer).flip();
+          this.write(channel, germBuffer, Germ.BLOCK_SIZE);
           if (commit.isForced()) {
             channel.force(true);
           }
@@ -264,10 +283,9 @@ public class FileZone extends Zone {
   }
 
   void write(FileChannel channel, ByteBuffer buffer, long position) throws IOException {
-    int k;
+    final long base = position;
     do {
-      k = channel.write(buffer, position);
-      position += k;
+      position += (long) channel.write(buffer, position);
     } while (buffer.hasRemaining());
     if (buffer.hasRemaining()) {
       throw new StoreException("wrote incomplete chunk to " + this.file.getPath());
