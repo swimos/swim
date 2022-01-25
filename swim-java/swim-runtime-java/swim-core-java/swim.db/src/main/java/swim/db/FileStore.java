@@ -515,12 +515,17 @@ final class FileStoreOpenZone implements Cont<Zone> {
         }
       } else {
         this.store.closeZone(fileZone.id);
-        // Move corrupted zone
         final File oldFile = fileZone.file;
         if (oldFile.exists()) {
-          final String newFileName = "~" + oldFile.getName() + "-" + System.currentTimeMillis();
-          final File newFile = new File(oldFile.getParent(), newFileName);
-          oldFile.renameTo(newFile);
+          if (oldFile.length() == 0) {
+            // Delete empty zone
+            oldFile.delete();
+          } else {
+            // Move corrupted zone
+            final String newFileName = "~" + oldFile.getName() + "-" + System.currentTimeMillis();
+            final File newFile = new File(oldFile.getParent(), newFileName);
+            oldFile.renameTo(newFile);
+          }
         }
         // Open previous zone
         final int previousZone = this.zoneFiles.lastKey();
