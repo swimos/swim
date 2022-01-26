@@ -42,10 +42,95 @@ public class FingerTrieSeqSpec {
 
   @Test
   public void testRemoved() {
-    assertEquals(FingerTrieSeq.of(1, 2, 3, 4).removed(0), FingerTrieSeq.of(2, 3, 4));
-    assertEquals(FingerTrieSeq.of(1, 2, 3, 4).removed(1), FingerTrieSeq.of(1, 3, 4));
-    assertEquals(FingerTrieSeq.of(1, 2, 3, 4).removed(2), FingerTrieSeq.of(1, 2, 4));
-    assertEquals(FingerTrieSeq.of(1, 2, 3, 4).removed(3), FingerTrieSeq.of(1, 2, 3));
+    for (int k = 0; k <= 12; k += 1) {
+      final int n = 1 << k;
+      this.testRemoved(n);
+    }
+  }
+
+  private void testRemoved(int n) {
+    System.out.println("Removing each element from FingerTrieSeq with " + n + " elements ...");
+    final Builder<Integer, FingerTrieSeq<Integer>> builder = FingerTrieSeq.builder();
+    for (int i = 0; i < n; i += 1) {
+      builder.add(i);
+    }
+    final FingerTrieSeq<Integer> xs = builder.bind();
+    assertFalse(xs.isEmpty());
+    assertEquals(xs.size(), n);
+    for (int i = 0; i < n; i += 1) {
+      final FingerTrieSeq<Integer> ys = xs.removed(i);
+      assertEquals(ys.size(), n - 1);
+      for (int j = 0; j < i; j += 1) {
+        assertEquals((int) ys.get(j), j);
+      }
+      for (int j = i; j < n - 1; j += 1) {
+        assertEquals((int) ys.get(j), j + 1);
+      }
+    }
+  }
+
+  @Test
+  public void testRemovedPrefixesBackwards() {
+    for (int k = 0; k <= 10; k += 1) {
+      final int n = 1 << k;
+      this.testRemovedPrefixesBackwards(n);
+    }
+  }
+
+  private void testRemovedPrefixesBackwards(int n) {
+    System.out.println("Removing backwards prefixes of FingerTrieSeq with " + n + " elements ...");
+    final Builder<Integer, FingerTrieSeq<Integer>> builder = FingerTrieSeq.builder();
+    for (int i = 0; i < n; i += 1) {
+      builder.add(i);
+    }
+    final FingerTrieSeq<Integer> xs = builder.bind();
+
+    for (int i = 0; i < n; i += 1) {
+      // Remove indexes from i down to 0
+      FingerTrieSeq<Integer> ys = xs;
+      for (int j = i; j >= 0; j -= 1) {
+        ys = ys.removed(j);
+        assertEquals(ys.size(), n - (i - j) - 1);
+        for (int k = 0; k < j; k += 1) {
+          assertEquals((int) ys.get(k), k);
+        }
+        for (int k = j; k < ys.size(); k += 1) {
+          assertEquals((int) ys.get(k), i - j + k + 1);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testRemovedSuffixesForwards() {
+    for (int k = 0; k <= 10; k += 1) {
+      final int n = 1 << k;
+      this.testRemovedSuffixesForwards(n);
+    }
+  }
+
+  private void testRemovedSuffixesForwards(int n) {
+    System.out.println("Removing forwards suffixes of FingerTrieSeq with " + n + " elements ...");
+    final Builder<Integer, FingerTrieSeq<Integer>> builder = FingerTrieSeq.builder();
+    for (int i = 0; i < n; i += 1) {
+      builder.add(i);
+    }
+    final FingerTrieSeq<Integer> xs = builder.bind();
+
+    for (int i = n - 1; i >= 0; i -= 1) {
+      // Remove indexes from i up to n - 1
+      FingerTrieSeq<Integer> ys = xs;
+      for (int j = i; j < n; j += 1) {
+        ys = ys.removed(i);
+        assertEquals(ys.size(), n - (j - i) - 1);
+        for (int k = 0; k < i; k += 1) {
+          assertEquals((int) ys.get(k), k);
+        }
+        for (int k = i; k < ys.size(); k += 1) {
+          assertEquals((int) ys.get(k), j - i + k + 1);
+        }
+      }
+    }
   }
 
   @Test

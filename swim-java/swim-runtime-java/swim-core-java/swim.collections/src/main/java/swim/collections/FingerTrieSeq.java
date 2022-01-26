@@ -37,6 +37,12 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
     if (length < 0) {
       throw new IllegalArgumentException("length overflow");
     }
+    if (prefix.length + (branch.length << 5) + suffix.length != length) {
+      throw new AssertionError("inconsistent length: " + length
+                           + "; prefix.length: " + prefix.length
+                           + "; branch.length: " + (branch.length << 5)
+                           + "; suffix.length: " + suffix.length);
+    }
     this.prefix = prefix;
     this.branch = branch;
     this.suffix = suffix;
@@ -86,6 +92,9 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   @SuppressWarnings("unchecked")
   @Override
   public T get(int index) {
+    if (index < 0 || index >= this.length) {
+      throw new IndexOutOfBoundsException(Integer.toString(index));
+    }
     final Object[] prefix = this.prefix;
     final int n = index - prefix.length;
     if (n < 0) {
@@ -406,7 +415,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
 
   public FingerTrieSeq<T> removed(int index) {
     if (index < 0 || index >= this.length) {
-      throw new IndexOutOfBoundsException(String.valueOf(index));
+      throw new IndexOutOfBoundsException(Integer.toString(index));
     }
     if (index == 0) {
       return this.drop(1);
