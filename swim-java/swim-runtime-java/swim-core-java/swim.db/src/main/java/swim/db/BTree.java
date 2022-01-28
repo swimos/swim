@@ -192,7 +192,7 @@ public final class BTree extends Tree {
     if (entry != null) {
       return entry.key();
     } else {
-      return Value.absent();
+      return null;
     }
   }
 
@@ -201,7 +201,7 @@ public final class BTree extends Tree {
     if (entry != null) {
       return entry.value();
     } else {
-      return Value.absent();
+      return null;
     }
   }
 
@@ -214,7 +214,7 @@ public final class BTree extends Tree {
     if (entry != null) {
       return entry.key();
     } else {
-      return Value.absent();
+      return null;
     }
   }
 
@@ -223,7 +223,7 @@ public final class BTree extends Tree {
     if (entry != null) {
       return entry.value();
     } else {
-      return Value.absent();
+      return null;
     }
   }
 

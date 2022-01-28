@@ -34,6 +34,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.Builder;
 import swim.util.Cursor;
+import swim.util.Murmur3;
 
 public class Database {
 
@@ -42,6 +43,7 @@ public class Database {
   volatile Germ germ;
   volatile int stem;
   volatile int post;
+  int stablePost;
   volatile long version;
   volatile long diffSize;
   volatile long treeSize;
@@ -49,11 +51,16 @@ public class Database {
   final Trunk<BTree> seedTrunk;
   volatile HashTrieMap<Value, Trunk<Tree>> trunks;
   volatile HashTrieMap<Value, Trunk<Tree>> sprouts;
+  Value commitKey;
+  Value evacuateKey;
+  int evacuationPass;
   volatile int status;
 
   Database(Store store, int stem, long version) {
     this.store = store;
     this.stem = stem;
+    this.post = store.oldestZoneId();
+    this.stablePost = this.post;
     this.version = version;
     this.metaTrunk = new Trunk<BTree>(this, Record.create(1).attr("meta"), null);
     this.metaTrunk.tree = new BTree(this.metaTrunk, 0, version, true, false);
@@ -70,6 +77,8 @@ public class Database {
     this.store = store;
     this.germ = germ;
     this.stem = germ.stem();
+    this.post = store.oldestZoneId();
+    this.stablePost = this.post;
     this.version = germ.version() + 1L;
     this.metaTrunk = new Trunk<BTree>(this, Record.create(1).attr("meta"), null);
     this.metaTrunk.tree = new BTree(this.metaTrunk, 0, this.version, true, false);
@@ -120,7 +129,7 @@ public class Database {
   }
 
   public long diffSize() {
-    return this.diffSize;
+    return Database.DIFF_SIZE.get(this);
   }
 
   public long treeSize() {
@@ -133,6 +142,10 @@ public class Database {
 
   public int trunkCount() {
     return this.trunks.size();
+  }
+
+  public boolean isCompacting() {
+    return this.evacuationPass != 0;
   }
 
   public void openAsync(Cont<Database> cont) {
@@ -298,26 +311,22 @@ public class Database {
     return new UTreeValue(this.openUTreeTrunk(Text.from(name), false, false));
   }
 
-  public void closeTrunk(Value name) {
+  public Trunk<Tree> closeTrunk(Value name) {
     do {
       final HashTrieMap<Value, Trunk<Tree>> oldTrunks = this.trunks;
       final HashTrieMap<Value, Trunk<Tree>> newTrunks = oldTrunks.removed(name);
-      if (oldTrunks != newTrunks) {
-        if (Database.TRUNKS.compareAndSet(this, oldTrunks, newTrunks)) {
-          final Trunk<Tree> oldTrunk = oldTrunks.get(name);
-          if (oldTrunk != null) {
-            this.databaseDidCloseTrunk(oldTrunk);
-          }
-          break;
+      if (Database.TRUNKS.compareAndSet(this, oldTrunks, newTrunks)) {
+        final Trunk<Tree> oldTrunk = oldTrunks.get(name);
+        if (oldTrunk != null) {
+          this.databaseDidCloseTrunk(oldTrunk);
         }
-      } else {
-        break;
+        return oldTrunk;
       }
     } while (true);
   }
 
   public void removeTree(Value name) {
-    this.closeTrunk(name);
+    final Trunk<Tree> oldTrunk = this.closeTrunk(name);
     do {
       final HashTrieMap<Value, Trunk<Tree>> oldSprouts = Database.SPROUTS.get(this);
       final HashTrieMap<Value, Trunk<Tree>> newSprouts = oldSprouts.removed(name);
@@ -325,6 +334,10 @@ public class Database {
         break;
       }
     } while (true);
+    if (oldTrunk != null) {
+      final int oldDiffSize = Trunk.DIFF_SIZE.getAndSet(oldTrunk, 0);
+      Database.DIFF_SIZE.addAndGet(this, -((long) oldDiffSize));
+    }
     do {
       final long newVersion = this.version;
       final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
@@ -345,7 +358,7 @@ public class Database {
 
   public void commitAsync(Commit commit) {
     try {
-      if (this.diffSize > 0L) {
+      if (Database.DIFF_SIZE.get(this) > 0L) {
         this.store.commitAsync(commit);
       } else {
         commit.bind(null);
@@ -360,7 +373,7 @@ public class Database {
   }
 
   public Chunk commit(Commit commit) throws InterruptedException {
-    if (this.diffSize > 0L) {
+    if (Database.DIFF_SIZE.get(this) > 0L) {
       final Sync<Chunk> syncChunk = new Sync<Chunk>();
       this.commitAsync(commit.andThen(syncChunk));
       return syncChunk.await(this.settings().databaseCommitTimeout);
@@ -369,134 +382,174 @@ public class Database {
     }
   }
 
-  public void compactAsync(Compact compact) {
-    try {
-      this.store.compactAsync(compact);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        compact.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public Store compact(Compact compact) throws InterruptedException {
-    final Sync<Store> syncStore = new Sync<Store>();
-    this.compactAsync(compact.andThen(syncStore));
-    return syncStore.await(this.settings().databaseCompactTimeout);
-  }
-
-  public void evacuateAsync(int post, Cont<Database> cont) {
-    try {
-      this.stage().execute(new DatabaseEvacuate(this, this.post, cont));
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public void evacuate(int post) {
-    final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
-    while (seedCursor.hasNext()) {
-      final Value name = seedCursor.next().getKey();
-      do {
-        final long version = this.version;
-        final Trunk<Tree> trunk = this.openTrunk(name, null, false, false);
-        final Tree oldTree = Trunk.TREE.get(trunk);
-        final Tree newTree = oldTree.evacuated(post, version);
-        if (oldTree != newTree) {
-          if (trunk.updateTree(oldTree, newTree, version)) {
-            final int treePost = newTree.post();
-            if (treePost == 0 || treePost >= post) {
-              break;
-            }
-          }
-        } else {
-          break;
-        }
-      } while (true);
-    }
-  }
-
   public void shiftZone() {
     this.store.shiftZone();
   }
 
   public Chunk commitChunk(Commit commit, int zone, long base) {
-    Database.DIFF_SIZE.set(this, 0L);
     final long version = Database.VERSION.getAndIncrement(this);
     final long time = System.currentTimeMillis();
-    final int post = this.post;
+    int post = this.post;
 
-    if (post != 0 && this.store.isCompacting()) {
-      // Validate seed tree.
-      final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
-      while (seedCursor.hasNext()) {
-        final Map.Entry<Value, Value> seedEntry = seedCursor.next();
-        final Value seedKey = seedEntry.getKey();
-        final Value seedValue = seedEntry.getValue();
-        final Seed seed = Seed.fromValue(seedValue);
-        Trunk<Tree> trunk = new Trunk<Tree>(this, seedKey, null);
-        Tree tree = seed.treeType().treeFromSeed(trunk, seed, false, false);
-        trunk.tree = tree;
-        final int treePost = tree.rootRef().post();
-        if (treePost != 0 && treePost < post) {
-          trunk = this.openTrunk(seedKey, null, false, false);
-          tree = Trunk.TREE.get(trunk);
-          if (!tree.isTransient()) {
-            do {
-              final HashTrieMap<Value, Trunk<Tree>> oldSprouts = Database.SPROUTS.get(this);
-              final HashTrieMap<Value, Trunk<Tree>> newSprouts = oldSprouts.updated(trunk.name, trunk);
-              if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
-                break;
-              }
-            } while (true);
-          }
-        }
-      }
-    }
-
-    HashTrieMap<Value, Trunk<Tree>> sprouts;
-    do {
-      sprouts = Database.SPROUTS.get(this);
-    } while (!Database.SPROUTS.compareAndSet(this, sprouts, HashTrieMap.<Value, Trunk<Tree>>empty()));
-    if (sprouts.isEmpty()) {
-      return null;
-    }
-
-    final Builder<Tree, FingerTrieSeq<Tree>> commitBuilder = FingerTrieSeq.builder();
+    final Builder<Tree, FingerTrieSeq<Tree>> treeBuilder = FingerTrieSeq.builder();
     final Builder<Page, FingerTrieSeq<Page>> pageBuilder = FingerTrieSeq.builder();
     long step = base;
 
+    if (this.evacuationPass == 0 && post < zone) {
+      final long treeSize = this.treeSize;
+      final long storeSize = this.store.size();
+      final double treeFill = (double) treeSize / (double) storeSize;
+      if (storeSize > this.settings().minCompactSize && treeFill < this.settings().minTreeFill) {
+        post = (this.stablePost + zone + 1) >> 1;
+        this.evacuateKey = null;
+        this.evacuationPass = 1;
+        this.post = post;
+        this.databaseWillCompact(post);
+        this.store.databaseWillCompact(this, post);
+      }
+    }
+
+    final Value startCommitKey = this.commitKey;
+    final int startCommitKeyHash = Murmur3.hash(startCommitKey);
+    boolean commitKeyRollover = false;
+
     // Commit data pages
-    final Iterator<Trunk<Tree>> trunks = sprouts.valueIterator();
-    while (trunks.hasNext()) {
-      final Trunk<Tree> trunk = trunks.next();
+    Value prevCommitKey = startCommitKey;
+    do {
+      Value nextCommitKey;
+      Trunk<Tree> nextTrunk = null;
+
+      // Get the next tree to commit
       do {
-        final Tree oldTree = Trunk.TREE.get(trunk);
-        final Tree newTree = oldTree.evacuated(post, version)
-                                    .committed(zone, step, version, time);
-        if (oldTree != newTree) {
-          if (Trunk.TREE.compareAndSet(trunk, oldTree, newTree)) {
+        final HashTrieMap<Value, Trunk<Tree>> oldSprouts = Database.SPROUTS.get(this);
+        nextCommitKey = oldSprouts.nextKey(prevCommitKey);
+        boolean rollover = commitKeyRollover;
+        if (nextCommitKey == null) {
+          rollover = true;
+          nextCommitKey = oldSprouts.nextKey(null);
+        }
+        if (nextCommitKey == null) {
+          // Nothing to commit
+          break;
+        } else if (rollover) {
+          final int nextKeyHash = Murmur3.hash(nextCommitKey);
+          if (HashTrieMap.compareKeyHashes(startCommitKeyHash, nextKeyHash) <= 0) {
+            // Cycled through all trees
+            break;
+          }
+        }
+        nextTrunk = oldSprouts.get(nextCommitKey);
+        final HashTrieMap<Value, Trunk<Tree>> newSprouts = oldSprouts.removed(nextCommitKey);
+        if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
+          this.commitKey = nextCommitKey;
+          prevCommitKey = nextCommitKey;
+          commitKeyRollover = rollover;
+          break;
+        }
+      } while (true);
+
+      // Commit the next tree
+      if (nextTrunk != null) {
+        do {
+          final Tree oldTree = Trunk.TREE.get(nextTrunk);
+          final Tree newTree = oldTree.evacuated(post, version)
+                                      .committed(zone, step, version, time);
+          if (Trunk.TREE.compareAndSet(nextTrunk, oldTree, newTree)) {
+            Database.DIFF_SIZE.addAndGet(this, -((long) Trunk.DIFF_SIZE.getAndSet(nextTrunk, 0)));
             do {
               final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
-              final BTree newSeedTree = oldSeedTree.updated(trunk.name, newTree.seed().toValue(), version, post);
+              final BTree newSeedTree = oldSeedTree.updated(nextTrunk.name, newTree.seed().toValue(), version, post);
               if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, newSeedTree)) {
                 break;
               }
             } while (true);
-            commitBuilder.add(newTree);
+            treeBuilder.add(newTree);
             newTree.buildDiff(version, pageBuilder);
             Database.TREE_SIZE.addAndGet(this, newTree.treeSize() - oldTree.treeSize());
             newTree.treeContext().treeDidCommit(newTree, oldTree);
             step += newTree.diffSize(version);
             break;
           }
-        } else {
+        } while (true);
+      } else {
+        break;
+      }
+
+      if ((step - base) > this.settings().maxCommitSize) {
+        break;
+      }
+      if (System.currentTimeMillis() - time > this.settings().maxCommitTime) {
+        break;
+      }
+    } while (true);
+
+    // Incrementally compact the store
+    if (this.evacuationPass != 0) {
+      final long startEvacuationBase = base;
+      final long startEvacuationTime = System.currentTimeMillis();
+      int evacuateCount = 0;
+      int visitCount = 0;
+
+      // Evacuate data pages
+      do {
+        final BTree seedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
+        final Value nextEvacuateKey = seedTree.nextKey(this.evacuateKey);
+        this.evacuateKey = nextEvacuateKey;
+        if (nextEvacuateKey == null) {
+          this.evacuationPass += 1;
+          if (this.evacuationPass <= 2) {
+            // Finished evacuation pass
+            evacuateCount = 0;
+            visitCount = 0;
+            break;
+          } else {
+            // Completed evacuation
+            this.stablePost = post;
+            this.evacuationPass = 0;
+            this.databaseDidCompact(post);
+            this.store.databaseDidCompact(this, post);
+            break;
+          }
+        }
+        visitCount += 1;
+        final Value seedValue = seedTree.get(nextEvacuateKey);
+        final Seed seed = Seed.fromValue(seedValue);
+        Trunk<Tree> trunk = new Trunk<Tree>(this, nextEvacuateKey, null);
+        Tree tree = seed.treeType().treeFromSeed(trunk, seed, false, false);
+        trunk.tree = tree;
+        final int treePost = tree.rootRef().post();
+        if (treePost != 0 && treePost < post) {
+          trunk = this.openTrunk(nextEvacuateKey, null, false, false);
+          tree = trunk.tree;
+          // Evacuate and commit the next tree
+          do {
+            final Tree oldTree = Trunk.TREE.get(trunk);
+            final Tree newTree = oldTree.evacuated(post, version)
+                                        .committed(zone, step, version, time);
+            if (Trunk.TREE.compareAndSet(trunk, oldTree, newTree)) {
+              Database.DIFF_SIZE.addAndGet(this, -((long) Trunk.DIFF_SIZE.getAndSet(trunk, 0)));
+              do {
+                final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
+                final BTree newSeedTree = oldSeedTree.updated(trunk.name, newTree.seed().toValue(), version, post);
+                if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, newSeedTree)) {
+                  break;
+                }
+              } while (true);
+              treeBuilder.add(newTree);
+              newTree.buildDiff(version, pageBuilder);
+              Database.TREE_SIZE.addAndGet(this, newTree.treeSize() - oldTree.treeSize());
+              newTree.treeContext().treeDidCommit(newTree, oldTree);
+              step += newTree.diffSize(version);
+              evacuateCount += 1;
+              break;
+            }
+          } while (true);
+        }
+
+        if ((step - startEvacuationBase) > this.settings().maxCompactSize) {
+          break;
+        }
+        if (System.currentTimeMillis() - startEvacuationTime > this.settings().maxCompactTime) {
           break;
         }
       } while (true);
@@ -509,11 +562,11 @@ public class Database {
       seedTree = oldSeedTree.evacuated(post, version)
                             .committed(zone, step, version, time);
       if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, seedTree)) {
+        seedTree.buildDiff(version, pageBuilder);
+        step += seedTree.diffSize(version);
         break;
       }
     } while (true);
-    seedTree.buildDiff(version, pageBuilder);
-    step += seedTree.diffSize(version);
 
     // Evacuate and commit meta tree
     BTree metaTree;
@@ -525,20 +578,20 @@ public class Database {
                             .evacuated(post, version)
                             .committed(zone, step, version, time);
       if (Trunk.TREE.compareAndSet(this.metaTrunk, oldMetaTree, metaTree)) {
+        metaTree.buildDiff(version, pageBuilder);
+        step += metaTree.diffSize(version);
         break;
       }
     } while (true);
-    metaTree.buildDiff(version, pageBuilder);
-    step += metaTree.diffSize(version);
 
     final long size = step - base;
-    final FingerTrieSeq<Tree> commits = commitBuilder.bind();
+    final FingerTrieSeq<Tree> trees = treeBuilder.bind();
     final FingerTrieSeq<Page> pages = pageBuilder.bind();
 
-    final Germ germ = new Germ(this.stem, version, this.germ.created(), time,
-                               seedTree.rootRef().toValue());
+    final Germ germ = new Germ(this.stem, version, this.germ.created(),
+                               time, seedTree.rootRef().toValue());
     this.germ = germ;
-    return new Chunk(this, commit, zone, germ, size, commits, pages);
+    return new Chunk(this, commit, post, zone, germ, size, trees, pages);
   }
 
   public void uncommit(long version) {
@@ -609,15 +662,15 @@ public class Database {
     this.store.databaseCommitDidFail(this, error);
   }
 
-  Compact databaseWillCompact(Compact compact) {
-    return this.store.databaseWillCompact(this, compact);
+  void databaseWillCompact(int post) {
+    this.store.databaseWillCompact(this, post);
   }
 
-  void databaseDidCompact(Compact compact) {
-    this.store.databaseDidCompact(this, compact);
+  void databaseDidCompact(int post) {
+    this.store.databaseDidCompact(this, post);
     final DatabaseDelegate delegate = this.delegate;
     if (delegate != null) {
-      delegate.databaseDidCompact(this, compact);
+      delegate.databaseDidCompact(this, post);
     }
   }
 
@@ -635,9 +688,11 @@ public class Database {
           break;
         }
       } while (true);
-      int deltaSize = newTree.diffSize(newVersion);
+      final int newDiffSize = newTree.diffSize(newVersion);
+      final int oldDiffSize = Trunk.DIFF_SIZE.getAndSet(trunk, newDiffSize);
+      long deltaSize = (long) newDiffSize;
       if (!oldTree.isTransient()) {
-        deltaSize -= oldTree.diffSize(newVersion);
+        deltaSize -= (long) oldDiffSize;
       }
       Database.DIFF_SIZE.addAndGet(this, deltaSize);
     }
@@ -773,34 +828,6 @@ final class DatabaseClose implements Cont<Chunk> {
   @Override
   public void trap(Throwable cause) {
     this.andThen.trap(cause);
-  }
-
-}
-
-final class DatabaseEvacuate implements Runnable {
-
-  final Database database;
-  final int post;
-  final Cont<Database> andThen;
-
-  DatabaseEvacuate(Database database, int post, Cont<Database> andThen) {
-    this.database = database;
-    this.post = post;
-    this.andThen = andThen;
-  }
-
-  @Override
-  public void run() {
-    try {
-      this.database.evacuate(this.post);
-      this.andThen.bind(this.database);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        this.andThen.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
   }
 
 }

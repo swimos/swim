@@ -79,6 +79,9 @@ final class FileStoreCommitter extends AbstractTask {
       if (chunk != null) {
         chunk.soften();
       }
+      if (database.stablePost != 0) {
+        store.deletePost(database.stablePost);
+      }
       committing.bind(chunk);
     } catch (InterruptedException cause) {
       try {

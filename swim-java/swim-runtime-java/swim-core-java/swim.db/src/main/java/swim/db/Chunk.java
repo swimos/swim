@@ -27,16 +27,18 @@ public class Chunk {
 
   final Database database;
   final Commit commit;
+  final int post;
   final int zone;
   final Germ germ;
   final long size;
   final FingerTrieSeq<Tree> trees;
   final FingerTrieSeq<Page> pages;
 
-  public Chunk(Database database, Commit commit, int zone, Germ germ, long size,
-               FingerTrieSeq<Tree> trees, FingerTrieSeq<Page> pages) {
+  public Chunk(Database database, Commit commit, int post, int zone, Germ germ,
+               long size, FingerTrieSeq<Tree> trees, FingerTrieSeq<Page> pages) {
     this.database = database;
     this.commit = commit;
+    this.post = post;
     this.zone = zone;
     this.germ = germ;
     this.size = size;
@@ -44,31 +46,35 @@ public class Chunk {
     this.pages = pages;
   }
 
-  public Database database() {
+  public final Database database() {
     return this.database;
   }
 
-  public Commit commit() {
+  public final Commit commit() {
     return this.commit;
   }
 
-  public int zone() {
+  public final int post() {
+    return this.post;
+  }
+
+  public final int zone() {
     return this.zone;
   }
 
-  public Germ germ() {
+  public final Germ germ() {
     return this.germ;
   }
 
-  public long size() {
+  public final long size() {
     return this.size;
   }
 
-  public FingerTrieSeq<Tree> trees() {
+  public final FingerTrieSeq<Tree> trees() {
     return this.trees;
   }
 
-  public FingerTrieSeq<Page> pages() {
+  public final FingerTrieSeq<Page> pages() {
     return this.pages;
   }
 

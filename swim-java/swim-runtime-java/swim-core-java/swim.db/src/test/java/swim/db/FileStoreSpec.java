@@ -417,57 +417,6 @@ public class FileStoreSpec {
   }
 
   @Test
-  public void testAutoCompact() throws InterruptedException {
-    final File storePath = new File(this.testOutputDir, "auto-compact.swimdb");
-    final Theater stage = new Theater();
-    final CountDownLatch didCompact = new CountDownLatch(1);
-    final StoreContext storeContext = new StoreContext(this.storeSettings) {
-      @Override
-      public boolean pageShouldSplit(Store store, Database database, Page page) {
-        return page.arity() > 3;
-      }
-
-      @Override
-      public boolean pageShouldMerge(Store store, Database database, Page page) {
-        return page.arity() < 2;
-      }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        if (chunk != null && !chunk.commit().isClosed()) {
-          autoCompact(store, database, settings().minTreeFill, 0L, Compact.forced(0));
-        }
-      }
-
-      @Override
-      public void databaseDidCompact(Store store, Database database, Compact compact) {
-        didCompact.countDown();
-      }
-    };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
-    try {
-      stage.start();
-      final Database database = store.openDatabase();
-      final Map<String, Long> map = database.openBTreeMap("test")
-                                            .keyForm(Form.forString())
-                                            .valueForm(Form.forLong());
-
-      for (int i = 0; i < 10; i += 1) {
-        for (int j = 0; j < 100; j += 1) {
-          map.put("t" + j, System.currentTimeMillis());
-        }
-        database.commit(Commit.forced());
-      }
-
-      didCompact.await();
-      store.close();
-      store.delete();
-    } finally {
-      stage.stop();
-    }
-  }
-
-  @Test
   public void benchmarkLargeWrites() throws InterruptedException {
     final File storePath = new File(this.testOutputDir, "large-writes.swimdb");
     final Theater stage = new Theater();

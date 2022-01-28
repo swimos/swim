@@ -28,9 +28,13 @@ public class StoreSettings implements Debug {
 
   protected final int pageSplitSize;
   protected final int pageCacheSize;
-  protected final int autoCommitInterval;
-  protected final long autoCommitSize;
+  protected final long minCommitSize;
+  protected final long maxCommitSize;
+  protected final long minCommitInterval;
+  protected final long maxCommitTime;
   protected final long minCompactSize;
+  protected final long maxCompactSize;
+  protected final long maxCompactTime;
   protected final long maxZoneSize;
   protected final double minZoneFill;
   protected final double minTreeFill;
@@ -47,19 +51,27 @@ public class StoreSettings implements Debug {
   protected final int pageLoadTimeout;
   protected final int treeLoadTimeout;
 
-  public StoreSettings(int pageSplitSize, int pageCacheSize, int autoCommitInterval,
-                       long autoCommitSize, long minCompactSize, long maxZoneSize,
-                       double minZoneFill, double minTreeFill, int maxRetries,
-                       int deleteDelay, int storeOpenTimeout, int storeCloseTimeout,
+  public StoreSettings(int pageSplitSize, int pageCacheSize,
+                       long minCommitSize, long maxCommitSize,
+                       long minCommitInterval, long maxCommitTime,
+                       long minCompactSize, long maxCompactSize,
+                       long maxCompactTime, long maxZoneSize,
+                       double minZoneFill, double minTreeFill,
+                       int maxRetries, int deleteDelay,
+                       int storeOpenTimeout, int storeCloseTimeout,
                        int zoneOpenTimeout, int zoneCloseTimeout,
                        int databaseOpenTimeout, int databaseCloseTimeout,
                        int databaseCommitTimeout, int databaseCompactTimeout,
                        int pageLoadTimeout, int treeLoadTimeout) {
     this.pageSplitSize = pageSplitSize;
     this.pageCacheSize = pageCacheSize;
-    this.autoCommitInterval = autoCommitInterval;
-    this.autoCommitSize = autoCommitSize;
+    this.minCommitSize = minCommitSize;
+    this.maxCommitSize = maxCommitSize;
+    this.minCommitInterval = minCommitInterval;
+    this.maxCommitTime = maxCommitTime;
     this.minCompactSize = minCompactSize;
+    this.maxCompactSize = maxCompactSize;
+    this.maxCompactTime = maxCompactTime;
     this.maxZoneSize = maxZoneSize;
     this.minZoneFill = minZoneFill;
     this.minTreeFill = minTreeFill;
@@ -86,10 +98,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings pageSplitSize(int pageSplitSize) {
-    return this.copy(pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -101,40 +117,71 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings pageCacheSize(int pageCacheSize) {
-    return this.copy(this.pageSplitSize, pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
                      this.pageLoadTimeout, this.treeLoadTimeout);
   }
 
-  public final int autoCommitInterval() {
-    return this.autoCommitInterval;
+  public final long minCommitSize() {
+    return this.minCommitSize;
   }
 
-  public StoreSettings autoCommitInterval(int autoCommitInterval) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+  public StoreSettings minCommitSize(long minCommitSize) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
                      this.pageLoadTimeout, this.treeLoadTimeout);
   }
 
-  public final long autoCommitSize() {
-    return this.autoCommitSize;
+  public final long maxCommitSize() {
+    return this.maxCommitSize;
   }
 
-  public StoreSettings autoCommitSize(long autoCommitSize) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+  public StoreSettings maxCommitSize(long maxCommitSize) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final long minCommitInterval() {
+    return this.minCommitInterval;
+  }
+
+  public StoreSettings minCommitInterval(long minCommitInterval) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -146,10 +193,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings minCompactSize(long minCompactSize) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -161,10 +212,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings maxZoneSize(long maxZoneSize) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -176,10 +231,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings minZoneFill(double minZoneFill) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -191,10 +250,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings minTreeFill(double minTreeFill) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -206,10 +269,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings maxRetries(int maxRetries) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -221,10 +288,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings deleteDelay(int deleteDelay) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -236,10 +307,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings storeOpenTimeout(int storeOpenTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -251,10 +326,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings storeCloseTimeout(int storeCloseTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -266,10 +345,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings zoneOpenTimeout(int zoneOpenTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -281,10 +364,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings zoneCloseTimeout(int zoneCloseTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -296,10 +383,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings databaseOpenTimeout(int databaseOpenTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -311,10 +402,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings databaseCloseTimeout(int databaseCloseTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -326,10 +421,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings databaseCommitTimeout(int databaseCommitTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      databaseCommitTimeout, this.databaseCompactTimeout,
@@ -341,10 +440,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings databaseCompactTimeout(int databaseCompactTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, databaseCompactTimeout,
@@ -356,10 +459,14 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings pageLoadTimeout(int pageLoadTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
@@ -371,28 +478,40 @@ public class StoreSettings implements Debug {
   }
 
   public StoreSettings treeLoadTimeout(int treeLoadTimeout) {
-    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-                     this.minZoneFill, this.minTreeFill, this.maxRetries,
-                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+    return this.copy(this.pageSplitSize, this.pageCacheSize,
+                     this.minCommitSize, this.maxCommitSize,
+                     this.minCommitInterval, this.maxCommitTime,
+                     this.minCompactSize, this.maxCompactSize,
+                     this.maxCompactTime, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill,
+                     this.maxRetries, this.deleteDelay,
+                     this.storeOpenTimeout, this.storeCloseTimeout,
                      this.zoneOpenTimeout, this.zoneCloseTimeout,
                      this.databaseOpenTimeout, this.databaseCloseTimeout,
                      this.databaseCommitTimeout, this.databaseCompactTimeout,
                      this.pageLoadTimeout, treeLoadTimeout);
   }
 
-  protected StoreSettings copy(int pageSplitSize, int pageCacheSize, int autoCommitInterval,
-                               long autoCommitSize, long minCompactSize, long maxZoneSize,
-                               double minZoneFill, double minTreeFill, int maxRetries,
-                               int deleteDelay, int storeOpenTimeout, int storeCloseTimeout,
+  protected StoreSettings copy(int pageSplitSize, int pageCacheSize,
+                               long minCommitSize, long maxCommitSize,
+                               long minCommitInterval, long maxCommitTime,
+                               long minCompactSize, long maxCompactSize,
+                               long maxCompactTime, long maxZoneSize,
+                               double minZoneFill, double minTreeFill,
+                               int maxRetries, int deleteDelay,
+                               int storeOpenTimeout, int storeCloseTimeout,
                                int zoneOpenTimeout, int zoneCloseTimeout,
                                int databaseOpenTimeout, int databaseCloseTimeout,
                                int databaseCommitTimeout, int databaseCompactTimeout,
                                int pageLoadTimeout, int treeLoadTimeout) {
-    return new StoreSettings(pageSplitSize, pageCacheSize, autoCommitInterval,
-                             autoCommitSize, minCompactSize, maxZoneSize,
-                             minZoneFill, minTreeFill, maxRetries,
-                             deleteDelay, storeOpenTimeout, storeCloseTimeout,
+    return new StoreSettings(pageSplitSize, pageCacheSize,
+                             minCommitSize, maxCommitSize,
+                             minCommitInterval, maxCommitTime,
+                             minCompactSize, maxCompactSize,
+                             maxCompactTime, maxZoneSize,
+                             minZoneFill, minTreeFill,
+                             maxRetries, deleteDelay,
+                             storeOpenTimeout, storeCloseTimeout,
                              zoneOpenTimeout, zoneCloseTimeout,
                              databaseOpenTimeout, databaseCloseTimeout,
                              databaseCommitTimeout, databaseCompactTimeout,
@@ -411,9 +530,13 @@ public class StoreSettings implements Debug {
       final StoreSettings that = (StoreSettings) other;
       return that.canEqual(this) && this.pageSplitSize == that.pageSplitSize
           && this.pageCacheSize == that.pageCacheSize
-          && this.autoCommitInterval == that.autoCommitInterval
-          && this.autoCommitSize == that.autoCommitSize
+          && this.minCommitSize == that.minCommitSize
+          && this.maxCommitSize == that.maxCommitSize
+          && this.minCommitInterval == that.minCommitInterval
+          && this.maxCommitTime == that.maxCommitTime
           && this.minCompactSize == that.minCompactSize
+          && this.maxCompactSize == that.maxCompactSize
+          && this.maxCompactTime == that.maxCompactTime
           && this.maxZoneSize == that.maxZoneSize
           && this.minZoneFill == that.minZoneFill
           && this.minTreeFill == that.minTreeFill
@@ -440,15 +563,19 @@ public class StoreSettings implements Debug {
     if (StoreSettings.hashSeed == 0) {
       StoreSettings.hashSeed = Murmur3.seed(StoreSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        StoreSettings.hashSeed, this.pageSplitSize), this.pageCacheSize), this.autoCommitInterval),
-        Murmur3.hash(this.autoCommitSize)), Murmur3.hash(this.minCompactSize)),
-        Murmur3.hash(this.maxZoneSize)), Murmur3.hash(this.minZoneFill)),
-        Murmur3.hash(this.minTreeFill)), this.maxRetries), this.deleteDelay),
-        this.storeOpenTimeout), this.storeCloseTimeout), this.zoneOpenTimeout),
-        this.zoneCloseTimeout), this.databaseOpenTimeout), this.databaseCloseTimeout),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(StoreSettings.hashSeed,
+        this.pageSplitSize), this.pageCacheSize),
+        Murmur3.hash(this.minCommitSize)), Murmur3.hash(this.maxCommitSize)),
+        Murmur3.hash(this.minCommitInterval)), Murmur3.hash(this.maxCommitTime)),
+        Murmur3.hash(this.minCompactSize)), Murmur3.hash(this.maxCompactSize)),
+        Murmur3.hash(this.maxCompactTime)), Murmur3.hash(this.maxZoneSize)),
+        Murmur3.hash(this.minZoneFill)), Murmur3.hash(this.minTreeFill)),
+        this.maxRetries), this.deleteDelay),
+        this.storeOpenTimeout), this.storeCloseTimeout),
+        this.zoneOpenTimeout), this.zoneCloseTimeout),
+        this.databaseOpenTimeout), this.databaseCloseTimeout),
         this.databaseCommitTimeout), this.databaseCompactTimeout),
         this.pageLoadTimeout), this.treeLoadTimeout));
   }
@@ -458,9 +585,13 @@ public class StoreSettings implements Debug {
     output = output.write("StoreSettings").write('.').write("standard").write('(').write(')')
                    .write('.').write("pageSplitSize").write('(').debug(this.pageSplitSize).write(')')
                    .write('.').write("pageCacheSize").write('(').debug(this.pageCacheSize).write(')')
-                   .write('.').write("autoCommitInterval").write('(').debug(this.autoCommitInterval).write(')')
-                   .write('.').write("autoCommitSize").write('(').debug(this.autoCommitSize).write(')')
+                   .write('.').write("minCommitSize").write('(').debug(this.minCommitSize).write(')')
+                   .write('.').write("maxCommitSize").write('(').debug(this.maxCommitSize).write(')')
+                   .write('.').write("minCommitInterval").write('(').debug(this.minCommitInterval).write(')')
+                   .write('.').write("maxCommitTime").write('(').debug(this.maxCommitTime).write(')')
                    .write('.').write("minCompactSize").write('(').debug(this.minCompactSize).write(')')
+                   .write('.').write("maxCompactSize").write('(').debug(this.maxCompactSize).write(')')
+                   .write('.').write("maxCompactTime").write('(').debug(this.maxCompactTime).write(')')
                    .write('.').write("maxZoneSize").write('(').debug(this.maxZoneSize).write(')')
                    .write('.').write("minZoneFill").write('(').debug(this.minZoneFill).write(')')
                    .write('.').write("minTreeFill").write('(').debug(this.minTreeFill).write(')')
@@ -502,25 +633,53 @@ public class StoreSettings implements Debug {
         pageCacheSize = 4096;
       }
 
-      int autoCommitInterval;
+      long minCommitSize;
       try {
-        autoCommitInterval = Integer.parseInt(System.getProperty("swim.db.auto.commit.interval"));
+        minCommitSize = Long.parseLong(System.getProperty("swim.db.min.commit.size"));
       } catch (NumberFormatException e) {
-        autoCommitInterval = 10 * 1000;
+        minCommitSize = 4 * 1024 * 1024;
       }
 
-      long autoCommitSize;
+      long maxCommitSize;
       try {
-        autoCommitSize = Long.parseLong(System.getProperty("swim.db.auto.commit.size"));
+        maxCommitSize = Long.parseLong(System.getProperty("swim.db.max.commit.size"));
       } catch (NumberFormatException e) {
-        autoCommitSize = 512 * 1024;
+        maxCommitSize = 16 * 1024 * 1024;
+      }
+
+      long minCommitInterval;
+      try {
+        minCommitInterval = Integer.parseInt(System.getProperty("swim.db.min.commit.interval"));
+      } catch (NumberFormatException e) {
+        minCommitInterval = 60 * 1000;
+      }
+
+      long maxCommitTime;
+      try {
+        maxCommitTime = Integer.parseInt(System.getProperty("swim.db.max.commit.time"));
+      } catch (NumberFormatException e) {
+        maxCommitTime = 5 * 1000;
       }
 
       long minCompactSize;
       try {
         minCompactSize = Long.parseLong(System.getProperty("swim.db.min.compact.size"));
       } catch (NumberFormatException e) {
-        minCompactSize = 1024 * 1024;
+        minCompactSize = 4 * 1024 * 1024;
+      }
+
+      long maxCompactSize;
+      try {
+        maxCompactSize = Long.parseLong(System.getProperty("swim.db.max.compact.size"));
+      } catch (NumberFormatException e) {
+        maxCompactSize = 16 * 1024 * 1024;
+      }
+
+      long maxCompactTime;
+      try {
+        maxCompactTime = Long.parseLong(System.getProperty("swim.db.max.compact.time"));
+      } catch (NumberFormatException e) {
+        maxCompactTime = 5 * 1000;
       }
 
       long maxZoneSize;
@@ -628,10 +787,14 @@ public class StoreSettings implements Debug {
         treeLoadTimeout = 30 * 1000;
       }
 
-      StoreSettings.standard = new StoreSettings(pageSplitSize, pageCacheSize, autoCommitInterval,
-                                                 autoCommitSize, minCompactSize, maxZoneSize,
-                                                 minZoneFill, minTreeFill, maxRetries,
-                                                 deleteDelay, storeOpenTimeout, storeCloseTimeout,
+      StoreSettings.standard = new StoreSettings(pageSplitSize, pageCacheSize,
+                                                 minCommitSize, maxCommitSize,
+                                                 minCommitInterval, maxCommitTime,
+                                                 minCompactSize, maxCompactSize,
+                                                 maxCompactTime, maxZoneSize,
+                                                 minZoneFill, minTreeFill,
+                                                 maxRetries, deleteDelay,
+                                                 storeOpenTimeout, storeCloseTimeout,
                                                  zoneOpenTimeout, zoneCloseTimeout,
                                                  databaseOpenTimeout, databaseCloseTimeout,
                                                  databaseCommitTimeout, databaseCompactTimeout,
@@ -673,7 +836,7 @@ final class StoreSettingsForm extends Form<StoreSettings> {
   public Item mold(StoreSettings settings) {
     if (settings != null) {
       final StoreSettings standard = StoreSettings.standard();
-      final Record record = Record.create(20).attr(this.tag());
+      final Record record = Record.create().attr(this.tag());
 
       if (settings.pageSplitSize != standard.pageSplitSize) {
         record.slot("pageSplitSize", settings.pageSplitSize);
@@ -681,14 +844,26 @@ final class StoreSettingsForm extends Form<StoreSettings> {
       if (settings.pageCacheSize != standard.pageCacheSize) {
         record.slot("pageCacheSize", settings.pageCacheSize);
       }
-      if (settings.autoCommitInterval != standard.autoCommitInterval) {
-        record.slot("autoCommitInterval", settings.autoCommitInterval);
+      if (settings.minCommitSize != standard.minCommitSize) {
+        record.slot("minCommitSize", settings.minCommitSize);
       }
-      if (settings.autoCommitSize != standard.autoCommitSize) {
-        record.slot("autoCommitSize", settings.autoCommitSize);
+      if (settings.maxCommitSize != standard.maxCommitSize) {
+        record.slot("maxCommitSize", settings.maxCommitSize);
+      }
+      if (settings.minCommitInterval != standard.minCommitInterval) {
+        record.slot("minCommitInterval", settings.minCommitInterval);
+      }
+      if (settings.maxCommitTime != standard.maxCommitTime) {
+        record.slot("maxCommitTime", settings.maxCommitTime);
       }
       if (settings.minCompactSize != standard.minCompactSize) {
         record.slot("minCompactSize", settings.minCompactSize);
+      }
+      if (settings.maxCompactSize != standard.maxCompactSize) {
+        record.slot("maxCompactSize", settings.maxCompactSize);
+      }
+      if (settings.maxCompactTime != standard.maxCompactTime) {
+        record.slot("maxCompactTime", settings.maxCompactTime);
       }
       if (settings.maxZoneSize != standard.maxZoneSize) {
         record.slot("maxZoneSize", settings.maxZoneSize);
@@ -753,9 +928,13 @@ final class StoreSettingsForm extends Form<StoreSettings> {
       final StoreSettings standard = StoreSettings.standard();
       final int pageSplitSize = value.get("pageSplitSize").intValue(standard.pageSplitSize);
       final int pageCacheSize = value.get("pageCacheSize").intValue(standard.pageCacheSize);
-      final int autoCommitInterval = value.get("autoCommitInterval").intValue(standard.autoCommitInterval);
-      final long autoCommitSize = value.get("autoCommitSize").longValue(standard.autoCommitSize);
+      final long minCommitSize = value.get("minCommitSize").longValue(standard.minCommitSize);
+      final long maxCommitSize = value.get("maxCommitSize").longValue(standard.maxCommitSize);
+      final long minCommitInterval = value.get("minCommitInterval").longValue(standard.minCommitInterval);
+      final long maxCommitTime = value.get("maxCommitTime").longValue(standard.maxCommitTime);
       final long minCompactSize = value.get("minCompactSize").longValue(standard.minCompactSize);
+      final long maxCompactSize = value.get("maxCompactSize").longValue(standard.maxCompactSize);
+      final long maxCompactTime = value.get("maxCompactTime").longValue(standard.maxCompactTime);
       final long maxZoneSize = value.get("maxZoneSize").longValue(standard.maxZoneSize);
       final double minZoneFill = value.get("minZoneFill").doubleValue(standard.minZoneFill);
       final double minTreeFill = value.get("minTreeFill").doubleValue(standard.minTreeFill);
@@ -771,10 +950,14 @@ final class StoreSettingsForm extends Form<StoreSettings> {
       final int databaseCompactTimeout = value.get("databaseCompactTimeout").intValue(standard.databaseCompactTimeout);
       final int pageLoadTimeout = value.get("pageLoadTimeout").intValue(standard.pageLoadTimeout);
       final int treeLoadTimeout = value.get("treeLoadTimeout").intValue(standard.treeLoadTimeout);
-      return new StoreSettings(pageSplitSize, pageCacheSize, autoCommitInterval,
-                               autoCommitSize, minCompactSize, maxZoneSize,
-                               minZoneFill, minTreeFill, maxRetries,
-                               deleteDelay, storeOpenTimeout, storeCloseTimeout,
+      return new StoreSettings(pageSplitSize, pageCacheSize,
+                               minCommitSize, maxCommitSize,
+                               minCommitInterval, maxCommitTime,
+                               minCompactSize, maxCompactSize,
+                               maxCompactTime, maxZoneSize,
+                               minZoneFill, minTreeFill,
+                               maxRetries, deleteDelay,
+                               storeOpenTimeout, storeCloseTimeout,
                                zoneOpenTimeout, zoneCloseTimeout,
                                databaseOpenTimeout, databaseCloseTimeout,
                                databaseCommitTimeout, databaseCompactTimeout,

@@ -125,7 +125,7 @@ public final class BTreeNode extends BTreePage {
     int high = knotKeys.length - 1;
     while (low <= high) {
       final int x = (low + high) >>> 1;
-      final int order = key.compareTo(knotKeys[x]);
+      final int order = key != null ? key.compareTo(knotKeys[x]) : -1;
       if (order > 0) {
         low = x + 1;
       } else if (order < 0) {

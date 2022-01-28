@@ -48,6 +48,10 @@ public abstract class Store {
 
   public abstract void close() throws InterruptedException;
 
+  public abstract int oldestZoneId();
+
+  public abstract int newestZoneId();
+
   public abstract Zone zone();
 
   public abstract Zone zone(int zoneId);
@@ -55,6 +59,8 @@ public abstract class Store {
   public abstract void openZoneAsync(int zoneId, Cont<Zone> cont);
 
   public abstract Zone openZone(int zoneId) throws InterruptedException;
+
+  public abstract void deletePost(int post);
 
   public abstract void openDatabaseAsync(Cont<Database> cont);
 
@@ -67,8 +73,6 @@ public abstract class Store {
   public abstract PageLoader openPageLoader(TreeDelegate treeDelegate, boolean isResident);
 
   public abstract void commitAsync(Commit commit);
-
-  public abstract void compactAsync(Compact compact);
 
   public abstract Zone shiftZone();
 
@@ -124,12 +128,12 @@ public abstract class Store {
     this.storeContext().databaseCommitDidFail(this, database, error);
   }
 
-  Compact databaseWillCompact(Database database, Compact compact) {
-    return this.storeContext().databaseWillCompact(this, database, compact);
+  void databaseWillCompact(Database database, int post) {
+    this.storeContext().databaseWillCompact(this, database, post);
   }
 
-  void databaseDidCompact(Database database, Compact compact) {
-    this.storeContext().databaseDidCompact(this, database, compact);
+  void databaseDidCompact(Database database, int post) {
+    this.storeContext().databaseDidCompact(this, database, post);
   }
 
   void databaseCompactDidFail(Database database, Throwable error) {

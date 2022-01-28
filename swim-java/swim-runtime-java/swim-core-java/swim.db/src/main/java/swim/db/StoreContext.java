@@ -39,35 +39,36 @@ public class StoreContext {
   }
 
   public void hitPage(Store store, Database database, Page page) {
-    // nop
+    // hook
   }
 
   public void treeDidOpen(Store store, Database database, Tree tree) {
-    // nop
+    // hook
   }
 
   public void treeDidClose(Store store, Database database, Tree tree) {
-    // nop
+    // hook
   }
 
   public void treeDidChange(Store store, Database database, Tree newTree, Tree oldTree) {
-    StoreContext.autoCommit(database, this.settings.autoCommitSize, this.settings.autoCommitInterval, Commit.forced());
+    StoreContext.autoCommit(database, this.settings.minCommitSize,
+                            this.settings.minCommitInterval, Commit.forced());
   }
 
   public void databaseWillOpen(Store store, Database database) {
-    // nop
+    // hook
   }
 
   public void databaseDidOpen(Store store, Database database) {
-    // nop
+    // hook
   }
 
   public void databaseWillClose(Store store, Database database) {
-    // nop
+    // hook
   }
 
   public void databaseDidClose(Store store, Database database) {
-    // nop
+    // hook
   }
 
   public Commit databaseWillCommit(Store store, Database database, Commit commit) {
@@ -75,22 +76,19 @@ public class StoreContext {
   }
 
   public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-    if (chunk != null && !chunk.commit().isClosed()) {
-      StoreContext.autoCompact(store, database, this.settings.minTreeFill, this.settings.minCompactSize,
-                               Compact.forced(this.settings.deleteDelay));
-    }
+    // hook
   }
 
   public void databaseCommitDidFail(Store store, Database database, Throwable error) {
     error.printStackTrace();
   }
 
-  public Compact databaseWillCompact(Store store, Database database, Compact compact) {
-    return StoreContext.autoCompactShifted(store, this.settings.minZoneFill, compact);
+  public void databaseWillCompact(Store store, Database database, int post) {
+    // hook
   }
 
-  public void databaseDidCompact(Store store, Database database, Compact compact) {
-    // nop
+  public void databaseDidCompact(Store store, Database database, int post) {
+    // hook
   }
 
   public void databaseCompactDidFail(Store store, Database database, Throwable error) {
@@ -98,17 +96,18 @@ public class StoreContext {
   }
 
   public void databaseDidShiftZone(Store store, Database database, Zone newZone) {
-    // nop
+    // hook
   }
 
   public void databaseDidDeleteZone(Store store, Database database, int zoneId) {
-    // nop
+    // hook
   }
 
-  public static boolean autoCommit(Database database, long autoCommitSize,
-                                   int autoCommitInterval, Commit commit) {
-    if (autoCommitInterval > 0 && (database.diffSize() > autoCommitSize
-        || System.currentTimeMillis() - database.germ().updated() > (long) autoCommitInterval)) {
+  public static boolean autoCommit(Database database, long minCommitSize,
+                                   long minCommitInterval, Commit commit) {
+    if (database.isCompacting()
+        || minCommitInterval > 0L && (database.diffSize() > minCommitSize
+        || System.currentTimeMillis() - database.germ().updated() > minCommitInterval)) {
       database.commitAsync(commit);
       return true;
     } else {
@@ -121,31 +120,6 @@ public class StoreContext {
       return commit.isShifted(true);
     } else {
       return commit;
-    }
-  }
-
-  public static boolean autoCompact(Store store, Database database, double minTreeFill,
-                                    long minCompactSize, Compact compact) {
-    if (!store.isCompacting()) {
-      final long treeSize = database.treeSize();
-      final long storeSize = store.size();
-      final double treeFill = (double) treeSize / (double) storeSize;
-      if (storeSize > minCompactSize && treeFill < minTreeFill) {
-        store.compactAsync(compact);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public static Compact autoCompactShifted(Store store, double minZoneFill, Compact compact) {
-    final long zoneSize = store.zone().size();
-    final long storeSize = store.size();
-    final double zoneFill = (double) zoneSize / (double) storeSize;
-    if (zoneSize > 0L && zoneFill > minZoneFill) {
-      return compact.isShifted(true);
-    } else {
-      return compact;
     }
   }
 

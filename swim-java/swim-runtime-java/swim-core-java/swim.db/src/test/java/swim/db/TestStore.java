@@ -80,6 +80,16 @@ public class TestStore extends Store {
   }
 
   @Override
+  public int oldestZoneId() {
+    return 1;
+  }
+
+  @Override
+  public int newestZoneId() {
+    return 1;
+  }
+
+  @Override
   public Zone zone() {
     return null;
   }
@@ -100,6 +110,11 @@ public class TestStore extends Store {
   }
 
   @Override
+  public void deletePost(int post) {
+    // nop
+  }
+
+  @Override
   public void openDatabaseAsync(Cont<Database> cont) {
     cont.trap(null);
   }
@@ -112,11 +127,6 @@ public class TestStore extends Store {
   @Override
   public void commitAsync(Commit commit) {
     commit.trap(null);
-  }
-
-  @Override
-  public void compactAsync(Compact compact) {
-    compact.trap(null);
   }
 
   @Override

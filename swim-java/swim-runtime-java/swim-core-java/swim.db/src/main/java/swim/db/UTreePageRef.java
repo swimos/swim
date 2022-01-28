@@ -18,7 +18,6 @@ import java.lang.ref.WeakReference;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.concurrent.Cont;
-import swim.concurrent.Sync;
 import swim.recon.Recon;
 import swim.structure.Num;
 import swim.structure.Record;

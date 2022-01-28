@@ -14,6 +14,7 @@
 
 package swim.db;
 
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.concurrent.Stage;
 import swim.structure.Value;
@@ -24,6 +25,7 @@ public class Trunk<T extends Tree> extends TreeContext {
   final Value name;
   volatile T tree;
   TreeDelegate treeDelegate;
+  volatile int diffSize;
 
   public Trunk(Database database, Value name, T tree) {
     this.database = database;
@@ -236,5 +238,9 @@ public class Trunk<T extends Tree> extends TreeContext {
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<Trunk<?>, Tree> TREE =
       AtomicReferenceFieldUpdater.newUpdater((Class<Trunk<?>>) (Class<?>) Trunk.class, Tree.class, "tree");
+
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<Trunk<?>> DIFF_SIZE =
+      AtomicIntegerFieldUpdater.newUpdater((Class<Trunk<?>>) (Class<?>) Trunk.class, "diffSize");
 
 }

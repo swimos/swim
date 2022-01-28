@@ -42,23 +42,23 @@ public class Germ {
     this.seedRefValue = seedRefValue.commit();
   }
 
-  public int stem() {
+  public final int stem() {
     return this.stem;
   }
 
-  public long version() {
+  public final long version() {
     return this.version;
   }
 
-  public long created() {
+  public final long created() {
     return this.created;
   }
 
-  public long updated() {
+  public final long updated() {
     return this.updated;
   }
 
-  public Value seedRefValue() {
+  public final Value seedRefValue() {
     return this.seedRefValue;
   }
 

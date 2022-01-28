@@ -204,7 +204,7 @@ public final class QTree extends Tree {
 
   @Override
   public int diffSize(long version) {
-    if (version <= this.rootRef.softVersion()) {
+    if (version == this.rootRef.softVersion()) {
       return this.rootRef.diffSize();
     } else {
       return 0;

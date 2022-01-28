@@ -38,7 +38,6 @@ public class FileStore extends Store {
   final Stage stage;
   final HashGenCacheSet<Page> pageCache;
   final FileStoreCommitter committer;
-  final FileStoreCompactor compactor;
   final Pattern zonePattern;
   final FilenameFilter zoneFilter;
   volatile HashTrieMap<Integer, FileZone> zones;
@@ -60,8 +59,6 @@ public class FileStore extends Store {
     this.pageCache = new HashGenCacheSet<Page>(context.settings.pageCacheSize);
     this.committer = new FileStoreCommitter(this);
     stage.task(this.committer);
-    this.compactor = new FileStoreCompactor(this);
-    stage.task(this.compactor);
     this.zonePattern = Pattern.compile(Pattern.quote(this.baseName) + "-([0-9]+)\\." + Pattern.quote(this.zoneFileExt));
     this.zoneFilter = new FileStoreZoneFilter(this.zonePattern);
     this.zones = HashTrieMap.empty();
@@ -142,6 +139,26 @@ public class FileStore extends Store {
   @Override
   public final boolean isCompacting() {
     return (this.status & FileStore.COMPACTING) != 0;
+  }
+
+  @Override
+  public int oldestZoneId() {
+    final TreeMap<Integer, File> zoneFiles = this.zoneFiles();
+    if (!zoneFiles.isEmpty()) {
+      return zoneFiles.firstKey();
+    } else {
+      return 1;
+    }
+  }
+
+  @Override
+  public int newestZoneId() {
+    final TreeMap<Integer, File> zoneFiles = this.zoneFiles();
+    if (!zoneFiles.isEmpty()) {
+      return zoneFiles.lastKey();
+    } else {
+      return 1;
+    }
   }
 
   @Override
@@ -338,6 +355,29 @@ public class FileStore extends Store {
   }
 
   @Override
+  public void deletePost(int post) {
+    try {
+      final Database database = this.openDatabase();
+      final TreeMap<Integer, File> zoneFiles = this.zoneFiles();
+      while (!zoneFiles.isEmpty()) {
+        final int oldestZone = zoneFiles.firstKey();
+        if (oldestZone < post) {
+          final boolean deleted = zoneFiles.get(oldestZone).delete();
+          zoneFiles.remove(oldestZone);
+          this.closeZone(oldestZone);
+          if (deleted) {
+            this.context.databaseDidDeleteZone(this, database, oldestZone);
+          }
+        } else {
+          break;
+        }
+      }
+    } catch (InterruptedException cause) {
+      throw new StoreException(cause);
+    }
+  }
+
+  @Override
   public void openDatabaseAsync(Cont<Database> cont) {
     try {
       this.openAsync(new FileStoreOpenDatabase(this, cont));
@@ -362,19 +402,6 @@ public class FileStore extends Store {
     } catch (Throwable cause) {
       if (Cont.isNonFatal(cause)) {
         commit.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  @Override
-  public void compactAsync(Compact compact) {
-    try {
-      this.compactor.compactAsync(compact);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        compact.trap(cause);
       } else {
         throw cause;
       }

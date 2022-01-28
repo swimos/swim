@@ -241,4 +241,24 @@ public class HashTrieMapSpec {
     assertEquals(limit, count, "map iteration size not same as expected");
   }
 
+  @Test
+  public void testNextKey() {
+    HashTrieMap<Integer, Integer> xs = HashTrieMap.empty();
+    xs = xs.updated(0, 0);
+    xs = xs.updated(1, 1);
+    assertEquals(xs.nextKey(null), (Object) 0);
+    assertEquals(xs.nextKey(0), (Object) 1);
+    assertEquals(xs.nextKey(1), null);
+  }
+
+  @Test
+  public void testNextValue() {
+    HashTrieMap<Integer, Integer> xs = HashTrieMap.empty();
+    xs = xs.updated(0, 0);
+    xs = xs.updated(1, 1);
+    assertEquals(xs.nextValue(null), (Object) 0);
+    assertEquals(xs.nextValue(0), (Object) 1);
+    assertEquals(xs.nextValue(1), null);
+  }
+
 }

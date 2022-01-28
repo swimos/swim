@@ -109,7 +109,7 @@ public final class BTreeLeaf extends BTreePage {
     int high = slots.length - 1;
     while (low <= high) {
       final int x = (low + high) >>> 1;
-      final int order = key.compareTo(slots[x].key());
+      final int order = key != null ? key.compareTo(slots[x].key()) : -1;
       if (order > 0) {
         low = x + 1;
       } else if (order < 0) {

@@ -231,27 +231,15 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
   }
 
   public Map.Entry<K, V> next(Object key) {
-    Map.Entry<K, V> next = this.next(key, Murmur3.hash(key), 0);
-    if (next == null) {
-      next = HashTrieMap.head(this);
-    }
-    return next;
+    return this.next(key, Murmur3.hash(key), 0);
   }
 
   public K nextKey(Object key) {
-    K next = this.nextKey(key, Murmur3.hash(key), 0);
-    if (next == null) {
-      next = HashTrieMap.headKey(this);
-    }
-    return next;
+    return this.nextKey(key, Murmur3.hash(key), 0);
   }
 
   public V nextValue(Object key) {
-    V next = this.nextValue(key, Murmur3.hash(key), 0);
-    if (next == null) {
-      next = HashTrieMap.headValue(this);
-    }
-    return next;
+    return this.nextValue(key, Murmur3.hash(key), 0);
   }
 
   @Override
@@ -859,6 +847,33 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
       trie = trie.updated(entry.getKey(), entry.getValue());
     }
     return trie;
+  }
+
+  public static int compareKeys(Object a, Object b) {
+    if (a != null && b != null) {
+      return HashTrieMap.compareKeyHashes(Murmur3.hash(a), Murmur3.hash(b));
+    } else if (b != null) {
+      return -1;
+    } else if (a != null) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  public static int compareKeyHashes(int aHash, int bHash) {
+    do {
+      final int aNext = aHash & 0x1F;
+      final int bNext = bHash & 0x1F;
+      if (aNext < bNext) {
+        return -1;
+      } else if (aNext > bNext) {
+        return 1;
+      }
+      aHash >>>= 5;
+      bHash >>>= 5;
+    } while (aHash != 0 && bHash != 0);
+    return 0;
   }
 
 }

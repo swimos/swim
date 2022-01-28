@@ -18,6 +18,6 @@ public interface DatabaseDelegate {
 
   void databaseDidCommit(Database database, Chunk chunk);
 
-  void databaseDidCompact(Database database, Compact compact);
+  void databaseDidCompact(Database database, int post);
 
 }
