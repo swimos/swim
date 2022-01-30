@@ -46,6 +46,7 @@ public class CommandLaneModel extends WarpLaneModel<CommandLaneView<?>, CommandL
 
   @Override
   public void onCommand(Push<CommandMessage> push) {
+    this.awaitStart();
     final CommandMessage message = push.message();
     new CommandLaneRelayCommand(this, null, message, push.cont()).run();
   }

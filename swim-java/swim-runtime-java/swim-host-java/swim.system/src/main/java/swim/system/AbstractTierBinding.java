@@ -337,9 +337,15 @@ public abstract class AbstractTierBinding extends AbstractWarpRef implements Tie
             break;
           case AbstractTierBinding.STARTING_STATE:
             this.didStart();
+            synchronized (this) {
+              this.notifyAll();
+            }
             break;
           case AbstractTierBinding.STOPPING_STATE:
             this.didStop();
+            synchronized (this) {
+              this.notifyAll();
+            }
             break;
           case AbstractTierBinding.UNLOADING_STATE:
             this.didUnload();
@@ -374,6 +380,23 @@ public abstract class AbstractTierBinding extends AbstractWarpRef implements Tie
             continue call;
           default:
             break call;
+        }
+      }
+    } while (true);
+  }
+
+  public void awaitStart() {
+    do {
+      synchronized (this) {
+        final int state = (AbstractTierBinding.STATUS.get(this) & AbstractTierBinding.STATE_MASK);
+        if (state == AbstractTierBinding.STARTED_STATE) {
+          break;
+        } else {
+          try {
+            this.wait(100);
+          } catch (InterruptedException e) {
+            break;
+          }
         }
       }
     } while (true);

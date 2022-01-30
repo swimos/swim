@@ -400,7 +400,7 @@ public class Database {
       final long storeSize = this.store.size();
       final double treeFill = (double) treeSize / (double) storeSize;
       if (storeSize > this.settings().minCompactSize && treeFill < this.settings().minTreeFill) {
-        post = (this.stablePost + zone + 1) >> 1;
+        post = zone;
         this.evacuateKey = null;
         this.evacuationPass = 1;
         this.post = post;
@@ -452,9 +452,10 @@ public class Database {
       if (nextTrunk != null) {
         do {
           final Tree oldTree = Trunk.TREE.get(nextTrunk);
-          final Tree newTree = oldTree.evacuated(post, version)
-                                      .committed(zone, step, version, time);
-          if (Trunk.TREE.compareAndSet(nextTrunk, oldTree, newTree)) {
+          final Tree newTree = oldTree.committed(zone, step, version, time);
+          if (oldTree == newTree) {
+            break;
+          } else if (Trunk.TREE.compareAndSet(nextTrunk, oldTree, newTree)) {
             Database.DIFF_SIZE.addAndGet(this, -((long) Trunk.DIFF_SIZE.getAndSet(nextTrunk, 0)));
             do {
               final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
@@ -487,8 +488,6 @@ public class Database {
     if (this.evacuationPass != 0) {
       final long startEvacuationBase = base;
       final long startEvacuationTime = System.currentTimeMillis();
-      int evacuateCount = 0;
-      int visitCount = 0;
 
       // Evacuate data pages
       do {
@@ -499,8 +498,6 @@ public class Database {
           this.evacuationPass += 1;
           if (this.evacuationPass <= 2) {
             // Finished evacuation pass
-            evacuateCount = 0;
-            visitCount = 0;
             break;
           } else {
             // Completed evacuation
@@ -511,7 +508,6 @@ public class Database {
             break;
           }
         }
-        visitCount += 1;
         final Value seedValue = seedTree.get(nextEvacuateKey);
         final Seed seed = Seed.fromValue(seedValue);
         Trunk<Tree> trunk = new Trunk<Tree>(this, nextEvacuateKey, null);
@@ -521,12 +517,26 @@ public class Database {
         if (treePost != 0 && treePost < post) {
           trunk = this.openTrunk(nextEvacuateKey, null, false, false);
           tree = trunk.tree;
-          // Evacuate and commit the next tree
+          // Evacuate next tree
           do {
             final Tree oldTree = Trunk.TREE.get(trunk);
-            final Tree newTree = oldTree.evacuated(post, version)
-                                        .committed(zone, step, version, time);
-            if (Trunk.TREE.compareAndSet(trunk, oldTree, newTree)) {
+            final Tree newTree = oldTree.evacuated(post, version);
+            if (oldTree == newTree) {
+              break;
+            } else if (Trunk.TREE.compareAndSet(trunk, oldTree, newTree)) {
+              final int newPost = newTree.post();
+              if (newPost == 0 || newPost >= post) {
+                break;
+              }
+            }
+          } while (true);
+          // Commit next tree
+          do {
+            final Tree oldTree = Trunk.TREE.get(trunk);
+            final Tree newTree = oldTree.committed(zone, step, version, time);
+            if (oldTree == newTree) {
+              break;
+            } else if (Trunk.TREE.compareAndSet(trunk, oldTree, newTree)) {
               Database.DIFF_SIZE.addAndGet(this, -((long) Trunk.DIFF_SIZE.getAndSet(trunk, 0)));
               do {
                 final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
@@ -540,7 +550,6 @@ public class Database {
               Database.TREE_SIZE.addAndGet(this, newTree.treeSize() - oldTree.treeSize());
               newTree.treeContext().treeDidCommit(newTree, oldTree);
               step += newTree.diffSize(version);
-              evacuateCount += 1;
               break;
             }
           } while (true);
@@ -555,29 +564,59 @@ public class Database {
       } while (true);
     }
 
-    // Evacuate and commit seed tree
+    // Evacuate seed tree
+    do {
+      final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
+      final BTree newSeedTree = oldSeedTree.evacuated(post, version);
+      if (oldSeedTree == newSeedTree) {
+        break;
+      } else if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, newSeedTree)) {
+        final int newPost = newSeedTree.post();
+        if (newPost == 0 || newPost >= post) {
+          break;
+        }
+      }
+    } while (true);
+
+    // Commit seed tree
     BTree seedTree;
     do {
       final BTree oldSeedTree = (BTree) Trunk.TREE.get(this.seedTrunk);
-      seedTree = oldSeedTree.evacuated(post, version)
-                            .committed(zone, step, version, time);
-      if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, seedTree)) {
+      seedTree = oldSeedTree.committed(zone, step, version, time);
+      if (oldSeedTree == seedTree) {
+        break;
+      } else if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, seedTree)) {
         seedTree.buildDiff(version, pageBuilder);
         step += seedTree.diffSize(version);
         break;
       }
     } while (true);
 
-    // Evacuate and commit meta tree
+    // Evacuate meta tree
+    do {
+      final BTree oldMetaTree = (BTree) Trunk.TREE.get(this.seedTrunk);
+      final BTree newMetaTree = oldMetaTree.evacuated(post, version);
+      if (oldMetaTree == newMetaTree) {
+        break;
+      } else if (Trunk.TREE.compareAndSet(this.seedTrunk, oldMetaTree, newMetaTree)) {
+        final int newPost = newMetaTree.post();
+        if (newPost == 0 || newPost >= post) {
+          break;
+        }
+      }
+    } while (true);
+
+    // Commit meta tree
     BTree metaTree;
     do {
       final BTree oldMetaTree = (BTree) Trunk.TREE.get(this.metaTrunk);
       metaTree = oldMetaTree.updated(Text.from("seed"), seedTree.rootRef().toValue(), version, post)
                             .updated(Text.from("stem"), Num.from(this.stem), version, post)
                             .updated(Text.from("time"), Num.from(time), version, post)
-                            .evacuated(post, version)
                             .committed(zone, step, version, time);
-      if (Trunk.TREE.compareAndSet(this.metaTrunk, oldMetaTree, metaTree)) {
+      if (oldMetaTree == metaTree) {
+        break;
+      } else if (Trunk.TREE.compareAndSet(this.metaTrunk, oldMetaTree, metaTree)) {
         metaTree.buildDiff(version, pageBuilder);
         step += metaTree.diffSize(version);
         break;

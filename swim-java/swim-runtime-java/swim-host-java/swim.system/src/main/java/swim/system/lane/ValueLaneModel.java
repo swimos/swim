@@ -60,6 +60,7 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
 
   @Override
   public void onCommand(Push<CommandMessage> push) {
+    this.awaitStart();
     final CommandMessage message = push.message();
     final Value value = message.body();
     new ValueLaneRelaySet(this, message, push.cont(), value).run();

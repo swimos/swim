@@ -72,6 +72,19 @@ public final class UTree extends Tree {
   }
 
   @Override
+  public UTreePage rootPage() {
+    try {
+      return this.rootRef.page();
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        throw new StoreException(this.seed.toString(), error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  @Override
   public Seed seed() {
     return this.seed;
   }
@@ -110,11 +123,11 @@ public final class UTree extends Tree {
   }
 
   public Value get() {
-    return this.rootRef.page().get();
+    return this.rootPage().get();
   }
 
   public UTree updated(Value newValue, long newVersion, int newPost) {
-    final UTreePage oldRoot = this.rootRef.page();
+    final UTreePage oldRoot = this.rootPage();
     final UTreePage newRoot = oldRoot.updated(newValue, newVersion)
                                      .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {

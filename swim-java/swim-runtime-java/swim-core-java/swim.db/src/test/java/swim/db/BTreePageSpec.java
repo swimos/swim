@@ -16,6 +16,8 @@ package swim.db;
 
 import org.testng.annotations.Test;
 import swim.structure.Num;
+import swim.structure.Slot;
+import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class BTreePageSpec {
@@ -155,6 +157,44 @@ public class BTreePageSpec {
     assertEquals(page.span(), k);
     for (int i = 0; i < k; i += 1) {
       assertEquals(page.get(Num.from(i)), Num.from(i));
+    }
+  }
+
+  @Test
+  public void testNextEntry() {
+    final PageContext pageContext = new PageContext() {
+      @Override
+      public boolean pageShouldSplit(Page page) {
+        return page.arity() >= 1024;
+      }
+
+      @Override
+      public boolean pageShouldMerge(Page page) {
+        return page.arity() < 512;
+      }
+    };
+    final int stem = 0;
+    long version = 0L;
+    BTreePage page = BTreePage.empty(pageContext, stem, version);
+    final int n = 1 << 18;
+    for (int i = 0; i < n; i += 1) {
+      if (i % 1024 == 0) {
+        version += 1L;
+      }
+      page = page.updated(Num.from(2 * i), Num.from(i), version).balanced(version);
+      assertEquals(page.getIndex(i).getValue(), Num.from(i));
+      if (i < 4096 || i == n - 1) {
+        Value key = null;
+        for (int j = 0; j <= i; j += 1) {
+          assertEquals(page.get(Num.from(2 * j)), Num.from(j));
+          final Slot entry = page.nextEntry(key);
+          key = entry.getKey();
+          assertEquals(key, Num.from(2 * j));
+          assertEquals(entry.getValue(), Num.from(j));
+          assertEquals(page.nextEntry(Num.from(2 * j - 1)), entry);
+        }
+        assertEquals(page.nextEntry(key), null);
+      }
     }
   }
 

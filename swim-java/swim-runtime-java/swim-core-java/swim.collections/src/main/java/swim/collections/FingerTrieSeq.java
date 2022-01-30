@@ -423,15 +423,13 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
       final int newLength = this.length - 1;
       if (index == newLength) {
         return this.take(index);
-      } else if (index > 0) {
+      } else {
         final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>(this.take(index));
         do {
           index += 1;
           builder.add(this.get(index));
         } while (index < newLength);
         return builder.bind();
-      } else {
-        return this;
       }
     }
   }
@@ -609,7 +607,7 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
   FingerTrieSeqBuilder(FingerTrieSeq<? extends T> trie) {
     if (trie.length > 32) {
       this.prefix = trie.prefix;
-      if (trie.length > 64) {
+      if (trie.branch.length > 0) {
         this.branch = new FingerTrieSeqBuilder<Object[]>(trie.branch);
       }
       this.buffer = trie.suffix;

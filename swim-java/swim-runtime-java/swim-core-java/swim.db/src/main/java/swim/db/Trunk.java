@@ -59,8 +59,14 @@ public class Trunk<T extends Tree> extends TreeContext {
 
   public boolean updateTree(T oldTree, T newTree, long newVersion) {
     if (this.database.version == newVersion && Trunk.TREE.compareAndSet(this, oldTree, newTree)) {
-      this.database.databaseDidUpdateTrunk(this, newTree, oldTree, newVersion);
-      return this.database.version == newVersion; // Re-check version after CAS.
+      final long currentVersion = this.database.version;
+      if (currentVersion == newVersion) { // Re-check version after CAS.
+        this.database.databaseDidUpdateTrunk(this, newTree, oldTree, newVersion);
+        return true;
+      } else {
+        // Try once to revert the change.
+        Trunk.TREE.compareAndSet(this, newTree, oldTree);
+      }
     }
     return false;
   }

@@ -74,6 +74,19 @@ public final class QTree extends Tree {
   }
 
   @Override
+  public QTreePage rootPage() {
+    try {
+      return this.rootRef.page();
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        throw new StoreException(this.seed.toString(), error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  @Override
   public Seed seed() {
     return this.seed;
   }
@@ -112,7 +125,7 @@ public final class QTree extends Tree {
   }
 
   public boolean containsKey(Value key, long x, long y) {
-    return this.rootRef.page().containsKey(key, x, y);
+    return this.rootPage().containsKey(key, x, y);
   }
 
   public boolean containsKey(Value key) {
@@ -136,7 +149,7 @@ public final class QTree extends Tree {
   }
 
   public Value get(Value key, long x, long y) {
-    return this.rootRef.page().get(key, x, y);
+    return this.rootPage().get(key, x, y);
   }
 
   public Value get(Value key) {
@@ -151,7 +164,7 @@ public final class QTree extends Tree {
   }
 
   public QTree updated(Value key, long x, long y, Value newValue, long newVersion, int newPost) {
-    final QTreePage oldRoot = this.rootRef.page();
+    final QTreePage oldRoot = this.rootPage();
     final QTreePage newRoot = oldRoot.updated(key, x, y, newValue, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);
@@ -165,7 +178,7 @@ public final class QTree extends Tree {
 
   public QTree moved(Value key, long oldX, long oldY, long newX, long newY,
                      Value newValue, long newVersion, int newPost) {
-    final QTreePage oldRoot = this.rootRef.page();
+    final QTreePage oldRoot = this.rootPage();
     final QTreePage newRoot = oldRoot.removed(key, oldX, oldY, newVersion)
                                      .balanced(newVersion)
                                      .updated(key, newX, newY, newValue, newVersion)
@@ -180,7 +193,7 @@ public final class QTree extends Tree {
   }
 
   public QTree removed(Value key, long x, long y, long newVersion, int newPost) {
-    final QTreePage oldRoot = this.rootRef.page();
+    final QTreePage oldRoot = this.rootPage();
     final QTreePage newRoot = oldRoot.removed(key, x, y, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);

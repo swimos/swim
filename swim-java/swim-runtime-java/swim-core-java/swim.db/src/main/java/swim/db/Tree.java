@@ -45,6 +45,8 @@ public abstract class Tree {
 
   public abstract PageRef rootRef();
 
+  public abstract Page rootPage();
+
   public abstract Seed seed();
 
   public int stem() {

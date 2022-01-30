@@ -65,6 +65,7 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
 
   @Override
   public void onCommand(Push<CommandMessage> push) {
+    this.awaitStart();
     final CommandMessage message = push.message();
     final Value payload = message.body();
     final String tag = payload.tag();

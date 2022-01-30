@@ -310,7 +310,16 @@ public final class QTreePageRef extends PageRef {
   @Override
   public QTreePageRef evacuated(int post, long version) {
     if (this.post != 0 && this.post < post) {
-      return this.page().evacuated(post, version).pageRef();
+      final QTreePage page = this.page();
+      try {
+        return page.evacuated(post, version).pageRef();
+      } catch (Throwable cause) {
+        if (Cont.isNonFatal(cause)) {
+          throw new StoreException(cause);
+        } else {
+          throw new StoreException(this.toDebugString(), cause);
+        }
+      }
     } else {
       return this;
     }

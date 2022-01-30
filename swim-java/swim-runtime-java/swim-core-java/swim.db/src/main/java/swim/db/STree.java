@@ -74,6 +74,19 @@ public final class STree extends Tree {
   }
 
   @Override
+  public STreePage rootPage() {
+    try {
+      return this.rootRef.page();
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        throw new StoreException(this.seed.toString(), error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  @Override
   public Seed seed() {
     return this.seed;
   }
@@ -112,19 +125,19 @@ public final class STree extends Tree {
   }
 
   public boolean contains(Value value) {
-    return this.rootRef.page().contains(value);
+    return this.rootPage().contains(value);
   }
 
   public Value get(long index) {
-    return this.rootRef.page().get(index);
+    return this.rootPage().get(index);
   }
 
   public Slot getEntry(long index) {
-    return this.rootRef.page().getEntry(index);
+    return this.rootPage().getEntry(index);
   }
 
   public STree updated(long index, Value newValue, long newVersion, int newPost) {
-    final STreePage oldRoot = this.rootRef.page();
+    final STreePage oldRoot = this.rootPage();
     final STreePage newRoot = oldRoot.updated(index, newValue, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);
@@ -137,7 +150,7 @@ public final class STree extends Tree {
   }
 
   public STree inserted(long index, Value key, Value newValue, long newVersion, int newPost) {
-    final STreePage oldRoot = this.rootRef.page();
+    final STreePage oldRoot = this.rootPage();
     final STreePage newRoot = oldRoot.inserted(index, key, newValue, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);
@@ -146,7 +159,7 @@ public final class STree extends Tree {
   }
 
   public STree appended(Value key, Value newValue, long newVersion, int newPost) {
-    final STreePage oldRoot = this.rootRef.page();
+    final STreePage oldRoot = this.rootPage();
     final STreePage newRoot = oldRoot.appended(key, newValue, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);
@@ -155,7 +168,7 @@ public final class STree extends Tree {
   }
 
   public STree prepended(Value key, Value newValue, long newVersion, int newPost) {
-    final STreePage oldRoot = this.rootRef.page();
+    final STreePage oldRoot = this.rootPage();
     final STreePage newRoot = oldRoot.prepended(key, newValue, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);
@@ -164,7 +177,7 @@ public final class STree extends Tree {
   }
 
   public STree removed(long index, long newVersion, int newPost) {
-    final STreePage oldRoot = this.rootRef.page();
+    final STreePage oldRoot = this.rootPage();
     final STreePage newRoot = oldRoot.removed(index, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);
@@ -173,7 +186,7 @@ public final class STree extends Tree {
   }
 
   public STree removed(Object object, long newVersion, int newPost) {
-    final STreePage oldRoot = this.rootRef.page();
+    final STreePage oldRoot = this.rootPage();
     final STreePage newRoot = oldRoot.removed(object, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);
@@ -232,15 +245,15 @@ public final class STree extends Tree {
   }
 
   public long indexOf(Object object) {
-    return this.rootRef.page().indexOf(object);
+    return this.rootPage().indexOf(object);
   }
 
   public long lastIndexOf(Object object) {
-    return this.rootRef.page().lastIndexOf(object);
+    return this.rootPage().lastIndexOf(object);
   }
 
   public long lookup(long start, Object key) {
-    final STreePage root = this.rootRef.page();
+    final STreePage root = this.rootPage();
     start = Math.min(Math.max(0L, start), root.span() - 1L);
     if (start > -1) { // when root.span() is 0
       long index = start;
@@ -256,7 +269,7 @@ public final class STree extends Tree {
   }
 
   public void copyToArray(Object[] array, int offset) {
-    this.rootRef.page().copyToArray(array, offset);
+    this.rootPage().copyToArray(array, offset);
   }
 
   @Override

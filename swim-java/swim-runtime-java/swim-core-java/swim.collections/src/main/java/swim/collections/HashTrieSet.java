@@ -141,11 +141,7 @@ public final class HashTrieSet<T> implements Set<T>, Debug {
   }
 
   public T next(Object elem) {
-    T next = this.next(elem, Murmur3.hash(elem), 0);
-    if (next == null) {
-      next = HashTrieSet.head(this);
-    }
-    return next;
+    return this.next(elem, Murmur3.hash(elem), 0);
   }
 
   @Override

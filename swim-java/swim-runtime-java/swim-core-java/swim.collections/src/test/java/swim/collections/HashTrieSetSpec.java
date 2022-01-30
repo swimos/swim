@@ -68,7 +68,7 @@ public class HashTrieSetSpec {
       assertEquals(xs.next(last), next);
       last = next;
     }
-    assertEquals(xs.next(last), xs.head());
+    assertNull(xs.next(last));
     assertEquals(sum, ((long) n * ((long) n + 1L) / 2L), "sum of first " + n + " integers");
   }
 
@@ -100,7 +100,7 @@ public class HashTrieSetSpec {
         assertEquals(xs.next(last), next);
         last = next;
       }
-      assertEquals(xs.next(last), xs.head());
+      assertNull(xs.next(last));
       final long expected = ((long) i * ((long) i + 1L) / 2L);
       assertEquals(sum, expected, "sum of first " + i + " of " + n + " integers");
       xs = xs.removed(HashedInteger.valueOf(i));
@@ -127,7 +127,7 @@ public class HashTrieSetSpec {
       assertEquals(xs.next(last), next);
       last = next;
     }
-    assertEquals(xs.next(last), xs.head());
+    assertNull(xs.next(last));
     assertEquals(sum, 15);
 
     xs = xs.removed(new HashedValue<Integer>(5, 1));
@@ -144,7 +144,7 @@ public class HashTrieSetSpec {
       assertEquals(xs.next(last), next);
       last = next;
     }
-    assertEquals(xs.next(last), xs.head());
+    assertNull(xs.next(last));
     assertEquals(sum, 10);
 
     xs = xs.removed(new HashedValue<Integer>(3, 1));
@@ -161,7 +161,7 @@ public class HashTrieSetSpec {
       assertEquals(xs.next(last), next);
       last = next;
     }
-    assertEquals(xs.next(last), xs.head());
+    assertNull(xs.next(last));
     assertEquals(sum, 7);
 
     xs = xs.removed(new HashedValue<Integer>(7, 1));

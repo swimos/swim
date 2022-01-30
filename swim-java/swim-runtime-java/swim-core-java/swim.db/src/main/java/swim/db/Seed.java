@@ -81,6 +81,11 @@ public class Seed {
                            .slot("root", this.rootRefValue);
   }
 
+  @Override
+  public String toString() {
+    return Recon.toString(this.toValue());
+  }
+
   public static Seed fromValue(Value value) {
     try {
       final String tag = value.tag();

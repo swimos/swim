@@ -74,6 +74,19 @@ public final class BTree extends Tree {
   }
 
   @Override
+  public BTreePage rootPage() {
+    try {
+      return this.rootRef.page();
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        throw new StoreException(this.seed.toString(), error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  @Override
   public Seed seed() {
     return this.seed;
   }
@@ -112,83 +125,83 @@ public final class BTree extends Tree {
   }
 
   public boolean containsKey(Value key) {
-    return this.rootRef.page().containsKey(key);
+    return this.rootPage().containsKey(key);
   }
 
   public boolean containsValue(Value value) {
-    return this.rootRef.page().containsValue(value);
+    return this.rootPage().containsValue(value);
   }
 
   public long indexOf(Value key) {
-    return this.rootRef.page().indexOf(key);
+    return this.rootPage().indexOf(key);
   }
 
   public Value get(Value key) {
-    return this.rootRef.page().get(key);
+    return this.rootPage().get(key);
   }
 
   public Slot getEntry(Value key) {
-    return this.rootRef.page().getEntry(key);
+    return this.rootPage().getEntry(key);
   }
 
   public Slot getIndex(long index) {
     if (0 <= index && index < this.rootRef.span()) {
-      return this.rootRef.page().getIndex(index);
+      return this.rootPage().getIndex(index);
     } else {
       return null;
     }
   }
 
   public Slot firstEntry(Value key) {
-    return this.rootRef.page().firstEntry(key);
+    return this.rootPage().firstEntry(key);
   }
 
   public Value firstKey() {
-    final Slot entry = this.rootRef.page().firstEntry();
+    final Slot entry = this.rootPage().firstEntry();
     if (entry != null) {
       return entry.key();
     } else {
-      return Value.absent();
+      return null;
     }
   }
 
   public Value firstValue() {
-    final Slot entry = this.rootRef.page().firstEntry();
+    final Slot entry = this.rootPage().firstEntry();
     if (entry != null) {
       return entry.value();
     } else {
-      return Value.absent();
+      return null;
     }
   }
 
   public Slot firstEntry() {
-    return this.rootRef.page().firstEntry();
+    return this.rootPage().firstEntry();
   }
 
   public Value lastKey() {
-    final Slot entry = this.rootRef.page().lastEntry();
+    final Slot entry = this.rootPage().lastEntry();
     if (entry != null) {
       return entry.key();
     } else {
-      return Value.absent();
+      return null;
     }
   }
 
   public Value lastValue() {
-    final Slot entry = this.rootRef.page().lastEntry();
+    final Slot entry = this.rootPage().lastEntry();
     if (entry != null) {
       return entry.value();
     } else {
-      return Value.absent();
+      return null;
     }
   }
 
   public Slot lastEntry() {
-    return this.rootRef.page().lastEntry();
+    return this.rootPage().lastEntry();
   }
 
   public Value nextKey(Value key) {
-    final Slot entry = this.rootRef.page().nextEntry(key);
+    final Slot entry = this.rootPage().nextEntry(key);
     if (entry != null) {
       return entry.key();
     } else {
@@ -197,7 +210,7 @@ public final class BTree extends Tree {
   }
 
   public Value nextValue(Value key) {
-    final Slot entry = this.rootRef.page().nextEntry(key);
+    final Slot entry = this.rootPage().nextEntry(key);
     if (entry != null) {
       return entry.value();
     } else {
@@ -206,11 +219,11 @@ public final class BTree extends Tree {
   }
 
   public Slot nextEntry(Value key) {
-    return this.rootRef.page().nextEntry(key);
+    return this.rootPage().nextEntry(key);
   }
 
   public Value previousKey(Value key) {
-    final Slot entry = this.rootRef.page().previousEntry(key);
+    final Slot entry = this.rootPage().previousEntry(key);
     if (entry != null) {
       return entry.key();
     } else {
@@ -219,7 +232,7 @@ public final class BTree extends Tree {
   }
 
   public Value previousValue(Value key) {
-    final Slot entry = this.rootRef.page().previousEntry(key);
+    final Slot entry = this.rootPage().previousEntry(key);
     if (entry != null) {
       return entry.value();
     } else {
@@ -228,11 +241,11 @@ public final class BTree extends Tree {
   }
 
   public Slot previousEntry(Value key) {
-    return this.rootRef.page().previousEntry(key);
+    return this.rootPage().previousEntry(key);
   }
 
   public BTree updated(Value key, Value newValue, long newVersion, int newPost) {
-    final BTreePage oldRoot = this.rootRef.page();
+    final BTreePage oldRoot = this.rootPage();
     final BTreePage newRoot = oldRoot.updated(key, newValue, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);
@@ -245,7 +258,7 @@ public final class BTree extends Tree {
   }
 
   public BTree removed(Value key, long newVersion, int newPost) {
-    final BTreePage oldRoot = this.rootRef.page();
+    final BTreePage oldRoot = this.rootPage();
     final BTreePage newRoot = oldRoot.removed(key, newVersion)
                                      .balanced(newVersion)
                                      .evacuated(newPost, newVersion);

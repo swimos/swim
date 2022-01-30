@@ -220,7 +220,16 @@ public final class UTreePageRef extends PageRef {
   @Override
   public UTreePageRef evacuated(int post, long version) {
     if (this.post != 0 && this.post < post) {
-      return this.page().evacuated(post, version).pageRef();
+      final UTreePage page = this.page();
+      try {
+        return page.evacuated(post, version).pageRef();
+      } catch (Throwable cause) {
+        if (Cont.isNonFatal(cause)) {
+          throw new StoreException(cause);
+        } else {
+          throw new StoreException(this.toDebugString(), cause);
+        }
+      }
     } else {
       return this;
     }

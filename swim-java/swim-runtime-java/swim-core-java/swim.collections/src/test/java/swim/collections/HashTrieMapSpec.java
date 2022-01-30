@@ -81,9 +81,9 @@ public class HashTrieMapSpec {
       assertEquals(xs.nextValue(lastKey), next.getValue());
       lastKey = next.getKey();
     }
-    assertEquals(xs.next(lastKey), xs.head());
-    assertEquals(xs.nextKey(lastKey), xs.headKey());
-    assertEquals(xs.nextValue(lastKey), xs.headValue());
+    assertNull(xs.next(lastKey));
+    assertNull(xs.nextKey(lastKey));
+    assertNull(xs.nextValue(lastKey));
     assertEquals(sum, ((long) n * ((long) n + 1L) / 2L), "sum of first " + n + " integers");
   }
 
@@ -118,9 +118,9 @@ public class HashTrieMapSpec {
         assertEquals(xs.nextValue(lastKey), next.getValue());
         lastKey = next.getKey();
       }
-      assertEquals(xs.next(lastKey), xs.head());
-      assertEquals(xs.nextKey(lastKey), xs.headKey());
-      assertEquals(xs.nextValue(lastKey), xs.headValue());
+      assertNull(xs.next(lastKey));
+      assertNull(xs.nextKey(lastKey));
+      assertNull(xs.nextValue(lastKey));
       final long expected = ((long) i * ((long) i + 1L) / 2L);
       assertEquals(sum, expected, "sum of first " + i + " of " + n + " integers");
       xs = xs.removed(HashedInteger.valueOf(-i));
@@ -154,9 +154,9 @@ public class HashTrieMapSpec {
       assertEquals(xs.nextValue(lastKey), next.getValue());
       lastKey = next.getKey();
     }
-    assertEquals(xs.next(lastKey), xs.head());
-    assertEquals(xs.nextKey(lastKey), xs.headKey());
-    assertEquals(xs.nextValue(lastKey), xs.headValue());
+    assertNull(xs.next(lastKey));
+    assertNull(xs.nextKey(lastKey));
+    assertNull(xs.nextValue(lastKey));
     assertEquals(sum, 15);
 
     xs = xs.removed(new HashedValue<Integer>(5, 1));
@@ -179,9 +179,9 @@ public class HashTrieMapSpec {
       assertEquals(xs.nextValue(lastKey), next.getValue());
       lastKey = next.getKey();
     }
-    assertEquals(xs.next(lastKey), xs.head());
-    assertEquals(xs.nextKey(lastKey), xs.headKey());
-    assertEquals(xs.nextValue(lastKey), xs.headValue());
+    assertNull(xs.next(lastKey));
+    assertNull(xs.nextKey(lastKey));
+    assertNull(xs.nextValue(lastKey));
     assertEquals(sum, 10);
 
     xs = xs.removed(new HashedValue<Integer>(3, 1));
@@ -204,9 +204,9 @@ public class HashTrieMapSpec {
       assertEquals(xs.nextValue(lastKey), next.getValue());
       lastKey = next.getKey();
     }
-    assertEquals(xs.next(lastKey), xs.head());
-    assertEquals(xs.nextKey(lastKey), xs.headKey());
-    assertEquals(xs.nextValue(lastKey), xs.headValue());
+    assertNull(xs.next(lastKey));
+    assertNull(xs.nextKey(lastKey));
+    assertNull(xs.nextValue(lastKey));
     assertEquals(sum, 7);
 
     xs = xs.removed(new HashedValue<Integer>(7, 1));
