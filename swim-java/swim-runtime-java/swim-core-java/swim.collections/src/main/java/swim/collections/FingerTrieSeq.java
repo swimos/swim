@@ -669,7 +669,7 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
     if (this.length == 0 && that.length != 0) {
       if (that.length > 32) {
         this.prefix = that.prefix;
-        if (that.length > 64) {
+        if (that.branch.length > 0) {
           this.branch = new FingerTrieSeqBuilder<Object[]>(that.branch);
         }
         this.buffer = that.suffix;
