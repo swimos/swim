@@ -958,20 +958,7 @@ public class STreeList implements KeyedList<Value> {
     this.clear();
   }
 
-  public void loadAsync(Cont<STreeList> cont) {
-    try {
-      final Cont<Tree> andThen = Cont.constant(cont, this);
-      this.tree().loadAsync(andThen);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public STreeList load() throws InterruptedException {
+  public STreeList load() {
     this.tree().load();
     return this;
   }

@@ -423,17 +423,8 @@ public final class STreeLeaf extends STreePage {
   }
 
   @Override
-  public void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont) {
-    try {
-      // Call continuation on fresh stack
-      this.pageRef.context.stage().execute(Cont.async(cont, this));
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
+  public STreePage loadTree(PageLoader pageLoader) {
+    return this;
   }
 
   @Override

@@ -53,6 +53,9 @@ public abstract class UTreePage extends Page {
   abstract void memoizeSize(UTreePageRef pageRef);
 
   @Override
+  public abstract UTreePage loadTree(PageLoader pageLoader);
+
+  @Override
   public abstract Cursor<Value> cursor();
 
   public static UTreePage empty(PageContext context, int stem, long version) {

@@ -96,6 +96,9 @@ public abstract class STreePage extends Page {
   abstract void memoizeSize(STreePageRef pageRef);
 
   @Override
+  public abstract STreePage loadTree(PageLoader pageLoader);
+
+  @Override
   public abstract Cursor<Slot> cursor();
 
   public abstract Cursor<Slot> depthCursor(int maxDepth);

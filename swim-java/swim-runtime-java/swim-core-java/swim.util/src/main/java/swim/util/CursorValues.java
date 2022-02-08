@@ -85,7 +85,7 @@ final class CursorValues<V> implements Cursor<V> {
   }
 
   @Override
-  public void load() throws InterruptedException {
+  public void load() {
     this.inner.load();
   }
 

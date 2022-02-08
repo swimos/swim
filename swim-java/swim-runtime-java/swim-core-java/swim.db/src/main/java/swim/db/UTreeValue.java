@@ -176,20 +176,7 @@ public class UTreeValue {
     this.clear();
   }
 
-  public void loadAsync(Cont<UTreeValue> cont) {
-    try {
-      final Cont<Tree> andThen = Cont.constant(cont, this);
-      this.tree().loadAsync(andThen);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public UTreeValue load() throws InterruptedException {
+  public UTreeValue load() {
     this.tree().load();
     return this;
   }

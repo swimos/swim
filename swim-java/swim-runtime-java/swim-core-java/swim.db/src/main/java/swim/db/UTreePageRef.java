@@ -296,62 +296,60 @@ public final class UTreePageRef extends PageRef {
   }
 
   @Override
-  public void loadPageAsync(boolean isResident, Cont<Page> cont) {
-    try {
-      Object page = this.page;
-      if (page instanceof WeakReference<?>) {
-        page = ((WeakReference<?>) page).get();
-      }
-      if (page instanceof UTreePage) {
-        // Call continuation on fresh stack
-        this.context.stage().execute(Cont.async(cont, (UTreePage) page));
-      } else {
-        final PageLoader pageLoader = this.context.openPageLoader(isResident);
-        pageLoader.loadPageAsync(this, new LoadPage(pageLoader, cont));
-      }
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(new StoreException(this.toDebugString(), cause));
-      } else {
-        throw cause;
+  public UTreePage loadPage(boolean isResident) {
+    Object page = this.page;
+    if (page instanceof WeakReference<?>) {
+      page = ((WeakReference<?>) page).get();
+    }
+    if (page instanceof UTreePage) {
+      this.context.hitPage((UTreePage) page);
+      return (UTreePage) page;
+    } else {
+      try (PageLoader pageLoader = this.context.openPageLoader(isResident)) {
+        return (UTreePage) pageLoader.loadPage(this);
+      } catch (Throwable error) {
+        if (Cont.isNonFatal(error)) {
+          throw new StoreException(this.toDebugString(), error);
+        } else {
+          throw error;
+        }
       }
     }
   }
 
   @Override
-  public void loadTreeAsync(boolean isResident, Cont<Page> cont) {
-    try {
-      final PageLoader pageLoader = this.context.openPageLoader(isResident);
-      this.loadTreeAsync(pageLoader, new LoadPage(pageLoader, cont));
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(new StoreException(this.toDebugString(), cause));
-      } else {
-        throw cause;
+  public UTreePage loadPage(PageLoader pageLoader) {
+    Object page = this.page;
+    if (page instanceof WeakReference<?>) {
+      page = ((WeakReference<?>) page).get();
+    }
+    if (page instanceof UTreePage) {
+      this.context.hitPage((UTreePage) page);
+      return (UTreePage) page;
+    } else {
+      try {
+        return (UTreePage) pageLoader.loadPage(this);
+      } catch (Throwable error) {
+        if (Cont.isNonFatal(error)) {
+          throw new StoreException(this.toDebugString(), error);
+        } else {
+          throw error;
+        }
       }
     }
   }
 
   @Override
-  public void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont) {
-    try {
-      Object page = this.page;
-      if (page instanceof WeakReference<?>) {
-        page = ((WeakReference<?>) page).get();
-      }
-      if (page instanceof UTreePage) {
-        final Cont<Page> andThen = Cont.constant(cont, (UTreePage) page);
-        ((UTreePage) page).loadTreeAsync(pageLoader, andThen);
-      } else {
-        pageLoader.loadPageAsync(this, new LoadTree(pageLoader, cont));
-      }
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(new StoreException(this.toDebugString(), cause));
-      } else {
-        throw cause;
-      }
+  public UTreePage loadTree(boolean isResident) {
+    try (PageLoader pageLoader =  this.context.openPageLoader(isResident)) {
+      return this.loadTree(pageLoader);
     }
+  }
+
+  @Override
+  public UTreePage loadTree(PageLoader pageLoader) {
+    final UTreePage page = this.loadPage(pageLoader);
+    return page.loadTree(pageLoader);
   }
 
   @Override

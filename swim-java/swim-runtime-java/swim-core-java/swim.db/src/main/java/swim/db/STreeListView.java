@@ -17,7 +17,6 @@ package swim.db;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
-import swim.concurrent.Cont;
 import swim.structure.Form;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -36,20 +35,7 @@ public class STreeListView implements List<Value> {
     return this.tree;
   }
 
-  public void loadAsync(Cont<STreeListView> cont) {
-    try {
-      final Cont<Tree> andThen = Cont.constant(cont, this);
-      this.tree.loadAsync(andThen);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public STreeListView load() throws InterruptedException {
+  public STreeListView load() {
     this.tree.load();
     return this;
   }

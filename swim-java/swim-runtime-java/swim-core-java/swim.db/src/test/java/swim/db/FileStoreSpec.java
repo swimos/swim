@@ -18,7 +18,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import org.testng.annotations.Test;
 import swim.concurrent.Theater;
 import swim.math.R2Point;
@@ -36,9 +35,7 @@ public class FileStoreSpec {
 
   final File testOutputDir = new File("build/test-output");
 
-  final StoreSettings storeSettings = StoreSettings.standard()
-                                                   .deleteDelay(0)
-                                                   .databaseCommitTimeout(10 * 1000);
+  final StoreSettings storeSettings = StoreSettings.standard().deleteDelay(0);
 
   @Test
   public void testOpenStore() throws InterruptedException {
@@ -112,13 +109,9 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        // Override auto commit and compact behavior.
-      }
     };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
+    final FileStore store = new FileStore(storeContext, storePath, stage);
+    store.open();
     try {
       stage.start();
       final Database database = store.openDatabase();
@@ -199,13 +192,9 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        // Override auto commit and compact behavior.
-      }
     };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
+    final FileStore store = new FileStore(storeContext, storePath, stage);
+    store.open();
     try {
       stage.start();
       final Database database = store.openDatabase();
@@ -266,13 +255,9 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        // Override auto commit and compact behavior.
-      }
     };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
+    final FileStore store = new FileStore(storeContext, storePath, stage);
+    store.open();
     try {
       stage.start();
       final Database database = store.openDatabase();
@@ -302,121 +287,6 @@ public class FileStoreSpec {
   }
 
   @Test
-  public void testAutoCommit() throws InterruptedException {
-    final File storePath = new File(this.testOutputDir, "auto-commit.swimdb");
-    final Theater stage = new Theater();
-    final CountDownLatch didCommit = new CountDownLatch(1);
-    final StoreContext storeContext = new StoreContext(this.storeSettings) {
-      @Override
-      public boolean pageShouldSplit(Store store, Database database, Page page) {
-        return page.arity() > 3;
-      }
-
-      @Override
-      public boolean pageShouldMerge(Store store, Database database, Page page) {
-        return page.arity() < 2;
-      }
-
-      @Override
-      public void treeDidChange(Store store, Database database, Tree newTree, Tree oldTree) {
-        if (database.diffSize() > 256) {
-          database.commitAsync(Commit.forced());
-        }
-      }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        didCommit.countDown();
-      }
-    };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
-    try {
-      stage.start();
-      final Database database = store.openDatabase();
-      final Map<String, Long> map = database.openBTreeMap("test")
-                                            .keyForm(Form.forString())
-                                            .valueForm(Form.forLong());
-
-      for (int i = 0; i < 128; i += 1) {
-        map.put("t" + i, System.currentTimeMillis());
-      }
-
-      didCommit.await();
-      store.close();
-      store.delete();
-    } finally {
-      stage.stop();
-    }
-  }
-
-  @Test
-  public void testAutoShiftZone() throws InterruptedException {
-    final File storePath = new File(this.testOutputDir, "auto-shift.swimdb");
-    final Theater stage = new Theater();
-    final CountDownLatch didShiftZone = new CountDownLatch(1);
-    final StoreContext storeContext = new StoreContext(this.storeSettings) {
-      @Override
-      public boolean pageShouldSplit(Store store, Database database, Page page) {
-        return page.arity() > 3;
-      }
-
-      @Override
-      public boolean pageShouldMerge(Store store, Database database, Page page) {
-        return page.arity() < 2;
-      }
-
-      @Override
-      public void treeDidChange(Store store, Database database, Tree newTree, Tree oldTree) {
-        if (database.diffSize() > 1024) {
-          database.commitAsync(Commit.forced());
-        }
-      }
-
-      @Override
-      public Commit databaseWillCommit(Store store, Database database, Commit commit) {
-        if (store.zone().size() > 16 * 1024) {
-          return commit.isShifted(true);
-        } else {
-          return commit;
-        }
-      }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        // Override auto commit and compact behavior.
-      }
-
-      @Override
-      public void databaseDidShiftZone(Store store, Database database, Zone newZone) {
-        didShiftZone.countDown();
-      }
-    };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
-    try {
-      stage.start();
-      final Database database = store.openDatabase();
-      final Map<String, Long> map = database.openBTreeMap("test")
-                                            .keyForm(Form.forString())
-                                            .valueForm(Form.forLong());
-
-      for (int i = 0; i < 400; i += 1) {
-        map.put("t" + i, System.currentTimeMillis());
-      }
-      database.commit(Commit.forced());
-      for (int i = 400; i < 800; i += 1) {
-        map.put("t" + i, System.currentTimeMillis());
-      }
-      database.commit(Commit.forced());
-
-      didShiftZone.await();
-      store.close();
-      store.delete();
-    } finally {
-      stage.stop();
-    }
-  }
-
-  @Test
   public void benchmarkLargeWrites() throws InterruptedException {
     final File storePath = new File(this.testOutputDir, "large-writes.swimdb");
     final Theater stage = new Theater();
@@ -425,13 +295,9 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        // Override auto commit and compact behavior.
-      }
     };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
+    final FileStore store = new FileStore(storeContext, storePath, stage);
+    store.open();
     final long duration = 5 * 1000L;
     try {
       stage.start();
@@ -478,13 +344,9 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        // Override auto commit and compact behavior.
-      }
     };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
+    final FileStore store = new FileStore(storeContext, storePath, stage);
+    store.open();
     final long duration = 5 * 1000L;
     try {
       stage.start();
@@ -531,13 +393,9 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        // Override auto commit and compact behavior.
-      }
     };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
+    final FileStore store = new FileStore(storeContext, storePath, stage);
+    store.open();
     final long duration = 5 * 1000L;
     try {
       stage.start();
@@ -577,13 +435,9 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
-
-      @Override
-      public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-        // Override auto commit and compact behavior.
-      }
     };
-    final FileStore store = new FileStore(storeContext, storePath, stage).open();
+    final FileStore store = new FileStore(storeContext, storePath, stage);
+    store.open();
     final long duration = 5 * 1000L;
     try {
       stage.start();

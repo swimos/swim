@@ -14,8 +14,6 @@
 
 package swim.store.db;
 
-import swim.api.store.StoreException;
-import swim.concurrent.MainStage;
 import swim.concurrent.Stage;
 import swim.db.FileStore;
 import swim.db.StoreContext;
@@ -86,16 +84,10 @@ public class DbStoreKernel extends KernelProxy {
 
     final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
     final Stage stage = kernel.createStage(storeAddress);
-    try {
-      final FileStore fileStore = new FileStore(storeContext, storePath, stage).open();
-      fileStore.openDatabase();
-      return new DbStore(fileStore, Value.absent());
-    } catch (InterruptedException cause) {
-      if (stage instanceof MainStage) {
-        ((MainStage) stage).stop();
-      }
-      throw new StoreException(cause);
-    }
+    final FileStore store = new FileStore(storeContext, storePath, stage);
+    store.open();
+    store.openDatabase();
+    return new DbStore(store, Value.absent());
   }
 
   private static final double KERNEL_PRIORITY = -0.75;

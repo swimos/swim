@@ -76,7 +76,7 @@ public interface Cursor<T> extends ListIterator<T> {
     throw new UnsupportedOperationException();
   }
 
-  default void load() throws InterruptedException {
+  default void load() {
     // hook
   }
 

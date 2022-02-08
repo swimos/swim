@@ -805,20 +805,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     this.clear();
   }
 
-  public void loadAsync(Cont<BTreeMap> cont) {
-    try {
-      final Cont<Tree> andThen = Cont.constant(cont, this);
-      this.tree().loadAsync(andThen);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public BTreeMap load() throws InterruptedException {
+  public BTreeMap load() {
     this.tree().load();
     return this;
   }

@@ -15,7 +15,6 @@
 package swim.db;
 
 import java.util.NoSuchElementException;
-import swim.concurrent.Sync;
 import swim.spatial.BitInterval;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -390,10 +389,8 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
   }
 
   @Override
-  public void load() throws InterruptedException {
-    final Sync<Page> syncPage = new Sync<Page>();
-    this.page.pageRef.loadTreeAsync(false, syncPage);
-    syncPage.await(this.page.pageRef.settings().pageLoadTimeout);
+  public void load() {
+    this.page.pageRef.loadTree(false);
   }
 
 }

@@ -14,9 +14,7 @@
 
 package swim.db;
 
-import swim.concurrent.Cont;
 import swim.concurrent.Stage;
-import swim.concurrent.Sync;
 
 public abstract class Store {
 
@@ -40,13 +38,9 @@ public abstract class Store {
 
   public abstract boolean isCompacting();
 
-  public abstract void openAsync(Cont<Store> cont);
+  public abstract boolean open();
 
-  public abstract Store open() throws InterruptedException;
-
-  public abstract void closeAsync(Cont<Store> cont);
-
-  public abstract void close() throws InterruptedException;
+  public abstract boolean close();
 
   public abstract int oldestZoneId();
 
@@ -56,19 +50,11 @@ public abstract class Store {
 
   public abstract Zone zone(int zoneId);
 
-  public abstract void openZoneAsync(int zoneId, Cont<Zone> cont);
-
-  public abstract Zone openZone(int zoneId) throws InterruptedException;
+  public abstract Zone openZone(int zoneId);
 
   public abstract void deletePost(int post);
 
-  public abstract void openDatabaseAsync(Cont<Database> cont);
-
-  public Database openDatabase() throws InterruptedException {
-    final Sync<Database> syncDatabase = new Sync<Database>();
-    this.openDatabaseAsync(syncDatabase);
-    return syncDatabase.await(this.settings().databaseOpenTimeout);
-  }
+  public abstract Database openDatabase();
 
   public abstract PageLoader openPageLoader(TreeDelegate treeDelegate, boolean isResident);
 

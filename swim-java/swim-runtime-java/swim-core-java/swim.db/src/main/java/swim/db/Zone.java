@@ -14,9 +14,6 @@
 
 package swim.db;
 
-import swim.concurrent.Cont;
-import swim.concurrent.Sync;
-
 public abstract class Zone {
 
   public Zone() {
@@ -31,19 +28,11 @@ public abstract class Zone {
 
   public abstract long size();
 
-  public abstract void openAsync(Cont<Zone> future);
+  public abstract boolean open();
 
-  public abstract Zone open() throws InterruptedException;
+  public abstract boolean close();
 
-  public abstract void close() throws InterruptedException;
-
-  public abstract void openDatabaseAsync(Cont<Database> future);
-
-  public Database openDatabase() throws InterruptedException {
-    final Sync<Database> syncDatabase = new Sync<Database>();
-    this.openDatabaseAsync(syncDatabase);
-    return syncDatabase.await(this.settings().databaseOpenTimeout);
-  }
+  public abstract Database openDatabase();
 
   public abstract Chunk commitAndWriteChunk(Commit commit);
 

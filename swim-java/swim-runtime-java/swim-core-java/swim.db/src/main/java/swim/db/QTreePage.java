@@ -166,6 +166,9 @@ public abstract class QTreePage extends Page {
   abstract void memoizeSize(QTreePageRef pageRef);
 
   @Override
+  public abstract QTreePage loadTree(PageLoader pageLoader);
+
+  @Override
   public Cursor<Slot> cursor() {
     return this.cursor(-1L, -1L);
   }

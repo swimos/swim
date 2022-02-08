@@ -14,7 +14,6 @@
 
 package swim.db;
 
-import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 
 public class TestStore extends Store {
@@ -60,23 +59,13 @@ public class TestStore extends Store {
   }
 
   @Override
-  public void openAsync(Cont<Store> cont) {
-    cont.trap(null);
+  public boolean open() {
+    return false;
   }
 
   @Override
-  public Store open() {
-    return this;
-  }
-
-  @Override
-  public void closeAsync(Cont<Store> cont) {
-    cont.trap(null);
-  }
-
-  @Override
-  public void close() {
-    // nop
+  public boolean close() {
+    return false;
   }
 
   @Override
@@ -100,11 +89,6 @@ public class TestStore extends Store {
   }
 
   @Override
-  public void openZoneAsync(int zoneId, Cont<Zone> cont) {
-    cont.trap(null);
-  }
-
-  @Override
   public Zone openZone(int zoneId) {
     return null;
   }
@@ -115,8 +99,8 @@ public class TestStore extends Store {
   }
 
   @Override
-  public void openDatabaseAsync(Cont<Database> cont) {
-    cont.trap(null);
+  public Database openDatabase() {
+    return null;
   }
 
   @Override

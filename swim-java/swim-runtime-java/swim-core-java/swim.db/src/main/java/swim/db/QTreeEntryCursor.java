@@ -103,7 +103,7 @@ final class QTreeEntryCursor<S> implements Cursor<SpatialMap.Entry<Value, S, Val
   }
 
   @Override
-  public void load() throws InterruptedException {
+  public void load() {
     this.inner.load();
   }
 

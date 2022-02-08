@@ -1367,22 +1367,12 @@ public final class QTreeNode extends QTreePage {
   }
 
   @Override
-  public void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont) {
-    try {
-      final QTreePageRef[] childRefs = this.childRefs;
-      if (childRefs.length > 0) {
-        childRefs[0].loadTreeAsync(pageLoader, new LoadSubtree(pageLoader, this, 1, cont));
-      } else {
-        // Call continuation on fresh stack
-        this.pageRef.context.stage().execute(Cont.async(cont, this));
-      }
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
+  public QTreePage loadTree(PageLoader pageLoader) {
+    final QTreePageRef[] childRefs = this.childRefs;
+    for (int i = 0, n = childRefs.length; i < n; i += 1) {
+      childRefs[i].loadTree(pageLoader);
     }
+    return this;
   }
 
   @Override

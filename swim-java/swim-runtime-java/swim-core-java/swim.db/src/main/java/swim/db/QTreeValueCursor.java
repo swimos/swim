@@ -87,7 +87,7 @@ final class QTreeValueCursor implements Cursor<Value> {
   }
 
   @Override
-  public void load() throws InterruptedException {
+  public void load() {
     this.inner.load();
   }
 

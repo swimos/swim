@@ -17,7 +17,6 @@ package swim.db;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -148,72 +147,366 @@ public class Database {
     return this.evacuationPass != 0;
   }
 
-  public void openAsync(Cont<Database> cont) {
-    try {
-      do {
-        final int oldStatus = this.status;
-        if ((oldStatus & (Database.OPENING | Database.OPENED | Database.FAILED)) == 0) {
-          final int newStatus = oldStatus | Database.OPENING;
-          if (Database.STATUS.compareAndSet(this, oldStatus, newStatus)) {
-            try {
-              this.store.databaseWillOpen(this);
-              Trunk.TREE.get(this.seedTrunk).loadAsync(new DatabaseOpen(this, cont));
-            } catch (Throwable cause) {
-              Database.STATUS.set(this, Database.FAILED);
-              synchronized (this) {
-                this.notifyAll();
+  public boolean open() {
+    // Load the current database status, without ordering constraints.
+    //int status = (int) Database.STATUS_VAR.getOpaque(this);
+    int status = Database.STATUS.get(this);
+    int state = status & Database.STATE_MASK;
+    // Track whether or not this operation causes the database to open.
+    boolean opened = false;
+    // Track opening interrupts and failures.
+    boolean interrupted = false;
+    StoreException error = null;
+    // Loop while the database has not been opened.
+    do {
+      if (state == Database.OPENED_STATE) {
+        // The database has already been opened;
+        // check if we're the thread that opened it.
+        if (opened) {
+          // Our thread caused the database to open.
+          try {
+            // Invoke database lifecycle callback.
+            this.didOpen();
+          } catch (Throwable cause) {
+            if (Cont.isNonFatal(cause)) {
+              if (error == null) {
+                // Capture non-fatal exceptions.
+                error = new StoreException("lifecycle callback failure", cause);
               }
+            } else {
+              // Rethrow fatal exceptions.
               throw cause;
             }
-            break;
+          }
+        }
+        // Because the initial status load was unordered, the database may
+        // technically have already been closed. We don't bother ordering
+        // our state check because all we can usefully guarantee is that
+        // the database was at some point opened.
+        break;
+      } else if (state == Database.OPENING_STATE) {
+        // The database is concurrently opening;
+        // check if we're not the thread opening the database.
+        if (!opened) {
+          // Another thread is opening the database;
+          // prepare to wait for the database to finish opening.
+          synchronized (this) {
+            // Loop while the database is transitioning.
+            do {
+              // Re-check database status before waiting, synchronizing with
+              // concurrent databases.
+              //status = (int) Database.STATUS_VAR.getAcquire(this);
+              status = Database.STATUS.get(this);
+              state = status & Database.STATE_MASK;
+              // Ensure the database is still transitioning before waiting.
+              if (state == Database.OPENING_STATE) {
+                try {
+                  this.wait(100);
+                } catch (InterruptedException e) {
+                  // Defer interrupt.
+                  interrupted = true;
+                }
+              } else {
+                // The database is no longer transitioning.
+                break;
+              }
+            } while (true);
           }
         } else {
-          if ((oldStatus & Database.OPENING) != 0) {
+          // We're responsible for opening the database.
+          try {
+            // Invoke database lifecycle callback.
+            this.onOpen();
+          } catch (Throwable cause) {
+            if (Cont.isNonFatal(cause)) {
+              if (error == null) {
+                // Capture non-fatal exceptions.
+                error = new StoreException("lifecycle callback failure", cause);
+              }
+            } else {
+              // Rethrow fatal exceptions.
+              throw cause;
+            }
+          } finally {
+            // Always finish openening the database.
             synchronized (this) {
-              ForkJoinPool.managedBlock(new DatabaseAwait(this));
+              do {
+                final int oldStatus = status;
+                final int newStatus = (oldStatus & ~Database.STATE_MASK) | Database.OPENED_STATE;
+                // Set the database state to opened, synchronizing with concurrent
+                // status loads; linearization point for database open completion.
+                //status = (int) Database.STATUS_VAR.compareAndExchangeAcquire(this, oldStatus, newStatus);
+                status = Database.STATUS.compareAndSet(this, oldStatus, newStatus) ? oldStatus : Database.STATUS.get(this);
+                state = status & Database.STATE_MASK;
+                // Check if we succeeded at transitioning into the opened state.
+                if (state == oldStatus) {
+                  // Notify waiters that opening is complete.
+                  this.notifyAll();
+                  break;
+                }
+              } while (true);
             }
           }
-          if ((this.status & Database.OPENED) != 0) {
-            cont.bind(this);
-          } else {
-            cont.trap(new StoreException("failed to open database"));
-          }
-          break;
         }
-      } while (true);
-    } catch (InterruptedException cause) {
-      cont.trap(cause);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
+        // Re-check database status.
+        continue;
+      } else if (state == Database.INITIAL_STATE) {
+        // The database has not yet been opened.
+        final int oldStatus = status;
+        final int newStatus = (oldStatus & ~Database.STATE_MASK) | Database.OPENING_STATE;
+        // Try to initiate database opening, synchronizing with concurrent databases;
+        // linearization point for database open.
+        //status = (int) Database.STATUS_VAR.compareAndExchangeAcquire(this, oldStatus, newStatus);
+        status = Database.STATUS.compareAndSet(this, oldStatus, newStatus) ? oldStatus : Database.STATUS.get(this);
+        state = status & Database.STATE_MASK;
+        // Check if we succeeded at transitioning into the opening state.
+        if (status == oldStatus) {
+          // This operation caused the opening of the database.
+          opened = true;
+          try {
+            // Invoke database lifecycle callback.
+            this.willOpen();
+          } catch (Throwable cause) {
+            if (Cont.isNonFatal(cause)) {
+              // Capture non-fatal exceptions.
+              error = new StoreException("lifecycle callback failure", cause);
+            } else {
+              // Rethrow fatal exceptions.
+              throw cause;
+            }
+          }
+          // Comtinue opening sequence.
+          continue;
+        } else {
+          // CAS failed; try again.
+          continue;
+        }
+      } else if (state == Database.CLOSING_STATE || state == Database.CLOSED_STATE) {
+        // The database is either currently closing, or has already been closed.
+        // Although not currently open, the contract that the database has been
+        // opened is met, so we're ready to return.
+        break;
       } else {
-        throw cause;
+        throw new AssertionError(Integer.toString(state)); // unreachable
       }
+    } while (true);
+    if (interrupted) {
+      // Resume interrupt.
+      Thread.currentThread().interrupt();
     }
+    if (error != null) {
+      // Close the database.
+      this.close();
+      // Rethrow the caught exception.
+      throw error;
+    }
+    // Return whether or not this operation caused the database to open.
+    return opened;
   }
 
-  public Database open() throws InterruptedException {
-    final Sync<Database> syncDatabase = new Sync<Database>();
-    this.openAsync(syncDatabase);
-    return syncDatabase.await(this.settings().databaseOpenTimeout);
+  /**
+   * Lifecycle callback invoked upon entering the opening state.
+   */
+  protected void willOpen() {
+    this.store.databaseWillOpen(this);
   }
 
-  public void closeAsync(Cont<Database> cont) {
-    try {
-      this.commitAsync(Commit.closed().andThen(new DatabaseClose(this, cont)));
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
+  /**
+   * Lifecycle callback invoked to actually open the database.
+   */
+  protected void onOpen() {
+    final BTree seedTree = ((BTree) Trunk.TREE.get(this.seedTrunk));
+    seedTree.load();
+    long treeSize = 0L;
+    final Cursor<Map.Entry<Value, Value>> seedCursor = seedTree.cursor();
+    while (seedCursor.hasNext()) {
+      final Value seedValue = seedCursor.next().getValue();
+      final Value sizeValue = seedValue.get("root").head().toValue().get("area");
+      treeSize += sizeValue.longValue(0L);
+    }
+    Database.TREE_SIZE.set(this, treeSize);
+  }
+
+  /**
+   * Lifecycle callback invoked upon entering the opened state.
+   */
+  protected void didOpen() {
+    this.store.databaseDidOpen(this);
+  }
+
+  public boolean close() {
+    // Load the current database status, without ordering constraints.
+    //int status = (int) Database.STATUS_VAR.getOpaque(this);
+    int status = Database.STATUS.get(this);
+    int state = status & Database.STATE_MASK;
+    // Track whether or not this operation causes the database to close.
+    boolean closed = false;
+    // Track closing interrupts and failures.
+    boolean interrupted = false;
+    StoreException error = null;
+    // Loop while the database has not been closed.
+    do {
+      if (state == Database.CLOSED_STATE) {
+        // The database has already been closed;
+        // check if we're the thread that closed it.
+        if (closed) {
+          // Our thread caused the database to close.
+          try {
+            // Invoke database lifecycle callback.
+            this.didClose();
+          } catch (Throwable cause) {
+            if (Cont.isNonFatal(cause)) {
+              if (error == null) {
+                // Capture non-fatal exceptions.
+                error = new StoreException("lifecycle callback failure", cause);
+              }
+            } else {
+              // Rethrow fatal exceptions.
+              throw cause;
+            }
+          }
+        }
+        // The initial status load was unordered, but that's ok because
+        // the transition to the closed state is final.
+        break;
+      } else if (state == Database.CLOSING_STATE
+              || state == Database.OPENING_STATE) {
+        // The database is concurrently closing or opening; capture which.
+        final int oldState = state;
+        // Check if we're not the thread closing the database.
+        if (!closed) {
+          // Prepare to wait for the database to finish transitioning.
+          synchronized (this) {
+            // Loop while the database is transitioning.
+            do {
+              // Re-check database status before waiting, synchronizing with
+              // concurrent databases.
+              //status = (int) Database.STATUS_VAR.getAcquire(this);
+              status = Database.STATUS.get(this);
+              state = status & Database.STATE_MASK;
+              // Ensure the database is still transitioning before waiting.
+              if (state == oldState) {
+                try {
+                  this.wait(100);
+                } catch (InterruptedException e) {
+                  // Defer interrupt.
+                  interrupted = true;
+                }
+              } else {
+                // The database is no longer transitioning.
+                break;
+              }
+            } while (true);
+          }
+        } else {
+          // We're responsible for closing the database.
+          try {
+            // Invoke database lifecycle callback.
+            this.onClose();
+          } catch (Throwable cause) {
+            if (Cont.isNonFatal(cause)) {
+              if (error == null) {
+                // Capture non-fatal exceptions.
+                error = new StoreException("lifecycle callback failure", cause);
+              }
+            } else {
+              // Rethrow fatal exceptions.
+              throw cause;
+            }
+          } finally {
+            // Always finish closing the database.
+            synchronized (this) {
+              do {
+                final int oldStatus = status;
+                final int newStatus = (oldStatus & ~Database.STATE_MASK) | Database.CLOSED_STATE;
+                // Set the database state to closed, synchronizing with concurrent
+                // status loads; linearization point for database close completion.
+                //status = (int) Database.STATUS_VAR.compareAndExchangeAcquire(this, oldStatus, newStatus);
+                status = Database.STATUS.compareAndSet(this, oldStatus, newStatus) ? oldStatus : Database.STATUS.get(this);
+                state = status & Database.STATE_MASK;
+                // Check if we succeeded at transitioning into the closed state.
+                if (state == oldStatus) {
+                  // Notify waiters that closing is complete.
+                  this.notifyAll();
+                  break;
+                }
+              } while (true);
+            }
+          }
+        }
+        // Re-check database status.
+        continue;
+      } else if (state == Database.OPENED_STATE) {
+        // The database is open, and has not yet been closed.
+        final int oldStatus = status;
+        final int newStatus = (oldStatus & ~Database.STATE_MASK) | Database.CLOSING_STATE;
+        // Try to initiate database closing, synchronizing with concurrent databases;
+        // linearization point for database close.
+        //status = (int) Database.STATUS_VAR.compareAndExchangeAcquire(this, oldStatus, newStatus);
+        status = Database.STATUS.compareAndSet(this, oldStatus, newStatus) ? oldStatus : Database.STATUS.get(this);
+        state = status & Database.STATE_MASK;
+        // Check if we succeeded at transitioning into the closing state.
+        if (status == oldStatus) {
+          // This operation caused the closing of the database.
+          closed = true;
+          try {
+            // Invoke database lifecycle callback.
+            this.willClose();
+          } catch (Throwable cause) {
+            if (Cont.isNonFatal(cause)) {
+              // Capture non-fatal exceptions.
+              error = new StoreException("lifecycle callback failure", cause);
+            } else {
+              // Rethrow fatal exceptions.
+              throw cause;
+            }
+          }
+          // Continue closing sequence.
+          continue;
+        } else {
+          // CAS failed; try again.
+          continue;
+        }
+      } else if (state == Database.INITIAL_STATE) {
+        // The database has not yet been started; to ensure an orderly
+        // sequence of lifecycle state changes, we must first open
+        // the database before we can close it.
+        this.open();
+        continue;
       } else {
-        throw cause;
+        throw new AssertionError(Integer.toString(state)); // unreachable
       }
+    } while (true);
+    if (interrupted) {
+      // Resume interrupt.
+      Thread.currentThread().interrupt();
     }
+    if (error != null) {
+      // Rethrow the caught exception.
+      throw error;
+    }
+    return closed;
   }
 
-  public void close() throws InterruptedException {
-    final Sync<Database> syncDatabase = new Sync<Database>();
-    this.closeAsync(syncDatabase);
-    syncDatabase.await(this.settings().databaseCloseTimeout);
+  /**
+   * Lifecycle callback invoked upon entering the closing state.
+   */
+  protected void willClose() {
+    // hook
+  }
+
+  /**
+   * Lifecycle callback invoked to actually close the database.
+   */
+  protected void onClose() {
+    // hook
+  }
+
+  /**
+   * Lifecycle callback invoked upon entering the closed state.
+   */
+  protected void didClose() {
+    this.store.databaseDidClose(this);
   }
 
   @SuppressWarnings("unchecked")
@@ -376,7 +669,7 @@ public class Database {
     if (Database.DIFF_SIZE.get(this) > 0L) {
       final Sync<Chunk> syncChunk = new Sync<Chunk>();
       this.commitAsync(commit.andThen(syncChunk));
-      return syncChunk.await(this.settings().databaseCommitTimeout);
+      return syncChunk.await();
     } else {
       return null;
     }
@@ -661,22 +954,6 @@ public class Database {
     return new DatabaseLeafIterator(this, this.trees());
   }
 
-  void databaseDidOpen() {
-    long treeSize = 0L;
-    final Cursor<Map.Entry<Value, Value>> seedCursor = ((BTree) Trunk.TREE.get(this.seedTrunk)).cursor();
-    while (seedCursor.hasNext()) {
-      final Value seedValue = seedCursor.next().getValue();
-      final Value sizeValue = seedValue.get("root").head().toValue().get("area");
-      treeSize += sizeValue.longValue(0L);
-    }
-    Database.TREE_SIZE.set(this, treeSize);
-    this.store.databaseDidOpen(this);
-  }
-
-  void databaseDidClose() {
-    this.store.databaseDidClose(this);
-  }
-
   public void databaseDidCreateTrunk(Trunk<?> trunk) {
     Database.TREE_SIZE.addAndGet(this, Trunk.TREE.get(trunk).treeSize());
   }
@@ -742,9 +1019,14 @@ public class Database {
     this.store.treeDidClose(this, Trunk.TREE.get(trunk));
   }
 
-  static final int OPENING = 1 << 0;
-  static final int OPENED = 1 << 1;
-  static final int FAILED = 1 << 2;
+  static final int INITIAL_STATE = 0;
+  static final int OPENING_STATE = 1;
+  static final int OPENED_STATE = 2;
+  static final int CLOSING_STATE = 3;
+  static final int CLOSED_STATE = 4;
+
+  static final int STATE_BITS = 3;
+  static final int STATE_MASK = (1 << STATE_BITS) - 1;
 
   static final AtomicIntegerFieldUpdater<Database> STEM =
       AtomicIntegerFieldUpdater.newUpdater(Database.class, "stem");
@@ -771,103 +1053,6 @@ public class Database {
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<Database, HashTrieMap<Value, Trunk<Tree>>> SPROUTS =
       AtomicReferenceFieldUpdater.newUpdater(Database.class, (Class<HashTrieMap<Value, Trunk<Tree>>>) (Class<?>) HashTrieMap.class, "sprouts");
-
-}
-
-final class DatabaseOpen implements Cont<Tree> {
-
-  final Database database;
-  final Cont<Database> andThen;
-
-  DatabaseOpen(Database database, Cont<Database> andThen) {
-    this.database = database;
-    this.andThen = andThen;
-  }
-
-  @Override
-  public void bind(Tree tree) {
-    try {
-      this.database.databaseDidOpen();
-      Database.STATUS.set(this.database, Database.OPENED);
-      this.andThen.bind(this.database);
-      synchronized (this.database) {
-        this.database.notifyAll();
-      }
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        this.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  @Override
-  public void trap(Throwable error) {
-    try {
-      Database.STATUS.set(this.database, Database.FAILED);
-      this.andThen.trap(error);
-    } finally {
-      synchronized (this.database) {
-        this.database.notifyAll();
-      }
-    }
-  }
-
-}
-
-final class DatabaseAwait implements ForkJoinPool.ManagedBlocker {
-
-  final Database database;
-
-  DatabaseAwait(Database database) {
-    this.database = database;
-  }
-
-  @Override
-  public boolean isReleasable() {
-    return (this.database.status & Database.OPENING) == 0;
-  }
-
-  @Override
-  public boolean block() throws InterruptedException {
-    if ((this.database.status & Database.OPENING) != 0) {
-      this.database.wait();
-    }
-    return (this.database.status & Database.OPENING) == 0;
-  }
-
-}
-
-final class DatabaseClose implements Cont<Chunk> {
-
-  final Database database;
-  final Cont<Database> andThen;
-
-  DatabaseClose(Database database, Cont<Database> andThen) {
-    this.database = database;
-    this.andThen = andThen;
-  }
-
-  @Override
-  public void bind(Chunk chunk) {
-    final Database database = this.database;
-    try {
-      database.databaseDidClose();
-      database.stage().call(this.andThen).bind(database);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        this.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  @Override
-  public void trap(Throwable cause) {
-    this.andThen.trap(cause);
-  }
 
 }
 

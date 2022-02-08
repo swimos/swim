@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.concurrent.Cont;
-import swim.concurrent.Sync;
 import swim.structure.Slot;
 import swim.structure.Value;
 import swim.util.Builder;
@@ -391,24 +390,9 @@ public final class BTree extends Tree {
   }
 
   @Override
-  public void loadAsync(Cont<Tree> cont) {
-    try {
-      final Cont<Page> andThen = Cont.constant(cont, this);
-      this.rootRef.loadTreeAsync(this.isResident, andThen);
-    } catch (Throwable error) {
-      if (Cont.isNonFatal(error)) {
-        cont.trap(new StoreException(this.rootRef.toDebugString(), error));
-      } else {
-        throw error;
-      }
-    }
-  }
-
-  @Override
-  public BTree load() throws InterruptedException {
-    final Sync<Tree> syncTree = new Sync<Tree>();
-    this.loadAsync(syncTree);
-    return (BTree) syncTree.await(settings().treeLoadTimeout);
+  public BTree load() {
+    this.rootRef.loadTree(this.isResident);
+    return this;
   }
 
   @Override

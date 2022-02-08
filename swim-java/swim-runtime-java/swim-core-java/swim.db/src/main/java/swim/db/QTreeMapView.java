@@ -14,7 +14,6 @@
 
 package swim.db;
 
-import swim.concurrent.Cont;
 import swim.math.Z2Form;
 import swim.spatial.BitInterval;
 import swim.spatial.SpatialMap;
@@ -41,20 +40,7 @@ public class QTreeMapView<S> implements SpatialMap<Value, S, Value> {
     return this.shapeForm;
   }
 
-  public void loadAsync(Cont<QTreeMapView<S>> cont) {
-    try {
-      final Cont<Tree> andThen = Cont.constant(cont, this);
-      this.tree.loadAsync(andThen);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public QTreeMapView<S> load() throws InterruptedException {
+  public QTreeMapView<S> load() {
     this.tree.load();
     return this;
   }

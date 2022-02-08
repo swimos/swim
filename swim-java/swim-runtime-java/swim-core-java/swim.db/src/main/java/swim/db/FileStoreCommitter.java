@@ -28,13 +28,7 @@ final class FileStoreCommitter extends AbstractTask {
   }
 
   void commitAsync(Commit commit) {
-    if ((this.store.status & FileStore.OPENED) == 0) {
-      try {
-        this.store.open();
-      } catch (InterruptedException cause) {
-        throw new StoreException(cause);
-      }
-    }
+    this.store.open();
     do {
       final Commit oldCommit = this.commit;
       final Commit newCommit = oldCommit != null ? oldCommit.merged(commit) : commit;
@@ -42,7 +36,7 @@ final class FileStoreCommitter extends AbstractTask {
         if (oldCommit == null) {
           do {
             final int oldStatus = this.store.status;
-            final int newStatus = oldStatus | FileStore.COMMITTING;
+            final int newStatus = oldStatus | FileStore.COMMITTING_FLAG;
             if (FileStore.STATUS.compareAndSet(this.store, oldStatus, newStatus)) {
               break;
             }
@@ -75,20 +69,14 @@ final class FileStoreCommitter extends AbstractTask {
       }
       final FileZone zone = store.zone;
       final Chunk chunk = zone.commitAndWriteChunk(committing);
-      database.databaseDidCommit(chunk);
       if (chunk != null) {
         chunk.soften();
       }
       if (database.stablePost != 0) {
         store.deletePost(database.stablePost);
       }
+      database.databaseDidCommit(chunk);
       committing.bind(chunk);
-    } catch (InterruptedException cause) {
-      try {
-        database.databaseCommitDidFail(cause);
-      } finally {
-        committing.trap(cause);
-      }
     } catch (Throwable cause) {
       if (Cont.isNonFatal(cause)) {
         try {
@@ -102,7 +90,7 @@ final class FileStoreCommitter extends AbstractTask {
     } finally {
       do {
         final int oldStatus = this.store.status;
-        final int newStatus = oldStatus & ~FileStore.COMMITTING;
+        final int newStatus = oldStatus & ~FileStore.COMMITTING_FLAG;
         if (FileStore.STATUS.compareAndSet(store, oldStatus, newStatus)) {
           break;
         }

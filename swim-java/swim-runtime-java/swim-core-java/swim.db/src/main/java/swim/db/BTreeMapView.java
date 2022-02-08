@@ -16,7 +16,6 @@ package swim.db;
 
 import java.util.Comparator;
 import java.util.Map;
-import swim.concurrent.Cont;
 import swim.structure.Form;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -37,20 +36,7 @@ public class BTreeMapView implements OrderedMap<Value, Value> {
     return this.tree;
   }
 
-  public void loadAsync(Cont<BTreeMapView> future) {
-    try {
-      final Cont<Tree> andThen = Cont.constant(future, this);
-      this.tree.loadAsync(andThen);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        future.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public BTreeMapView load() throws InterruptedException {
+  public BTreeMapView load() {
     this.tree.load();
     return this;
   }

@@ -15,7 +15,6 @@
 package swim.db;
 
 import swim.codec.Output;
-import swim.concurrent.Cont;
 import swim.structure.Value;
 import swim.util.Builder;
 import swim.util.Cursor;
@@ -122,7 +121,7 @@ public abstract class Page {
 
   public abstract void buildDiff(Builder<Page, ?> builder);
 
-  public abstract void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont);
+  public abstract Page loadTree(PageLoader pageLoader);
 
   public abstract void soften(long version);
 
@@ -145,47 +144,6 @@ public abstract class Page {
 
   public String toDebugString() {
     return this.pageRef().toDebugString();
-  }
-
-  static final class LoadSubtree implements Cont<Page> {
-
-    final PageLoader pageLoader;
-    final Page page;
-    final int index;
-    final Cont<Page> andThen;
-
-    LoadSubtree(PageLoader pageLoader, Page page, int index, Cont<Page> andThen) {
-      this.pageLoader = pageLoader;
-      this.page = page;
-      this.index = index;
-      this.andThen = andThen;
-    }
-
-    @Override
-    public void bind(Page previous) {
-      try {
-        final int i = this.index;
-        final int n = this.page.childCount();
-        if (i >= n) {
-          this.andThen.bind(this.page);
-        } else {
-          final Cont<Page> next = new LoadSubtree(this.pageLoader, this.page, i + 1, this.andThen);
-          this.page.getChildRef(i).loadTreeAsync(this.pageLoader, next);
-        }
-      } catch (Throwable cause) {
-        if (Cont.isNonFatal(cause)) {
-          this.trap(cause);
-        } else {
-          throw cause;
-        }
-      }
-    }
-
-    @Override
-    public void trap(Throwable cause) {
-      this.andThen.trap(cause);
-    }
-
   }
 
 }

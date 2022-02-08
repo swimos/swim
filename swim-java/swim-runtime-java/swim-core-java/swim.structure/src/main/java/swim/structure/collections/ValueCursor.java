@@ -137,7 +137,7 @@ public class ValueCursor<T> implements Cursor<T> {
     this.inner.remove();
   }
 
-  public void load() throws InterruptedException {
+  public void load() {
     this.inner.load();
   }
 

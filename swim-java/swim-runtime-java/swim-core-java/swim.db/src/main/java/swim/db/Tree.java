@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Cont;
 import swim.structure.Value;
 import swim.util.Builder;
 import swim.util.Cursor;
@@ -95,9 +94,7 @@ public abstract class Tree {
     return builder.bind();
   }
 
-  public abstract void loadAsync(Cont<Tree> cont);
-
-  public abstract Tree load() throws InterruptedException;
+  public abstract Tree load();
 
   public abstract void soften(long version);
 

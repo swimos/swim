@@ -492,17 +492,8 @@ public final class BTreeLeaf extends BTreePage {
   }
 
   @Override
-  public void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont) {
-    try {
-      // Call continuation on fresh stack
-      this.pageRef.context.stage().execute(Cont.async(cont, this));
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
+  public BTreePage loadTree(PageLoader pageLoader) {
+    return this;
   }
 
   @Override

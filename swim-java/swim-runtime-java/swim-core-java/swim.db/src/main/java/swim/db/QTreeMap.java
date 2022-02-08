@@ -508,20 +508,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     this.clear();
   }
 
-  public void loadAsync(Cont<QTreeMap<S>> cont) {
-    try {
-      final Cont<Tree> andThen = Cont.constant(cont, this);
-      this.tree().loadAsync(andThen);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  public QTreeMap<S> load() throws InterruptedException {
+  public QTreeMap<S> load() {
     this.tree().load();
     return this;
   }

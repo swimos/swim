@@ -140,7 +140,7 @@ public class ValueEntryCursor<K, V> implements Cursor<Map.Entry<K, V>> {
     this.inner.remove();
   }
 
-  public void load() throws InterruptedException {
+  public void load() {
     this.inner.load();
   }
 

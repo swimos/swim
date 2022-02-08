@@ -85,7 +85,7 @@ final class CursorKeys<K> implements Cursor<K> {
   }
 
   @Override
-  public void load() throws InterruptedException {
+  public void load() {
     this.inner.load();
   }
 

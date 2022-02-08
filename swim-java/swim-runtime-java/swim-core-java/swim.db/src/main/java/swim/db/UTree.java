@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.concurrent.Cont;
-import swim.concurrent.Sync;
 import swim.structure.Value;
 import swim.util.Builder;
 import swim.util.Cursor;
@@ -211,24 +210,9 @@ public final class UTree extends Tree {
   }
 
   @Override
-  public void loadAsync(Cont<Tree> cont) {
-    try {
-      final Cont<Page> andThen = Cont.constant(cont, this);
-      this.rootRef.loadTreeAsync(this.isResident, andThen);
-    } catch (Throwable error) {
-      if (Cont.isNonFatal(error)) {
-        cont.trap(new StoreException(this.rootRef.toDebugString(), error));
-      } else {
-        throw error;
-      }
-    }
-  }
-
-  @Override
-  public UTree load() throws InterruptedException {
-    final Sync<Tree> syncTree = new Sync<Tree>();
-    this.loadAsync(syncTree);
-    return (UTree) syncTree.await(settings().treeLoadTimeout);
+  public UTree load() {
+    this.rootRef.loadTree(this.isResident);
+    return this;
   }
 
   @Override

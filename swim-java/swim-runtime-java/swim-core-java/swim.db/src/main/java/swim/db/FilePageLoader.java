@@ -19,7 +19,6 @@ import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.collections.HashTrieMap;
-import swim.concurrent.Cont;
 
 final class FilePageLoader extends PageLoader {
 
@@ -42,13 +41,9 @@ final class FilePageLoader extends PageLoader {
 
   @Override
   public Page loadPage(PageRef pageRef) {
-    try {
-      final int zoneId = pageRef.zone();
-      final FileZone zone = this.store.openZone(zoneId);
-      return this.loadPage(zone, pageRef);
-    } catch (InterruptedException cause) {
-      throw new StoreException(cause);
-    }
+    final int zoneId = pageRef.zone();
+    final FileZone zone = this.store.openZone(zoneId);
+    return this.loadPage(zone, pageRef);
   }
 
   Page loadPage(FileZone zone, PageRef pageRef) {
@@ -84,58 +79,6 @@ final class FilePageLoader extends PageLoader {
   }
 
   @Override
-  public void loadPageAsync(PageRef pageRef, Cont<Page> cont) {
-    try {
-      final int zoneId = pageRef.zone();
-      this.store.openZoneAsync(zoneId, new LoadPage(this, pageRef, cont));
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  void loadPageAsync(FileZone zone, PageRef pageRef, Cont<Page> cont) {
-    try {
-      final Integer zoneId = zone.id;
-      FileChannel channel = null;
-      do {
-        final HashTrieMap<Integer, FileChannel> oldChannels = this.channels;
-        final FileChannel oldChannel = oldChannels.get(zoneId);
-        if (oldChannel == null) {
-          channel = zone.openReadChannel();
-          final HashTrieMap<Integer, FileChannel> newChannels = oldChannels.updated(zoneId, channel);
-          if (FilePageLoader.CHANNELS.compareAndSet(this, oldChannels, newChannels)) {
-            break;
-          }
-        } else {
-          if (channel != null) {
-            // Lost open race
-            try {
-              channel.close();
-            } catch (IOException swallow) {
-              swallow.printStackTrace();
-            }
-          }
-          channel = oldChannel;
-          break;
-        }
-      } while (true);
-      zone.loadPageAsync(channel, pageRef, this.treeDelegate, this.isResident, cont);
-    } catch (IOException cause) {
-      cont.trap(cause);
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        cont.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
-  }
-
-  @Override
   public void close() {
     do {
       final HashTrieMap<Integer, FileChannel> oldChannels = this.channels;
@@ -161,37 +104,5 @@ final class FilePageLoader extends PageLoader {
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<FilePageLoader, HashTrieMap<Integer, FileChannel>> CHANNELS =
       AtomicReferenceFieldUpdater.newUpdater(FilePageLoader.class, (Class<HashTrieMap<Integer, FileChannel>>) (Class<?>) HashTrieMap.class, "channels");
-
-  static final class LoadPage implements Cont<Zone> {
-
-    final FilePageLoader pageLoader;
-    final PageRef pageRef;
-    final Cont<Page> cont;
-
-    LoadPage(FilePageLoader pageLoader, PageRef pageRef, Cont<Page> cont) {
-      this.pageLoader = pageLoader;
-      this.pageRef = pageRef;
-      this.cont = cont;
-    }
-
-    @Override
-    public void bind(Zone zone) {
-      try {
-        this.pageLoader.loadPageAsync((FileZone) zone, this.pageRef, this.cont);
-      } catch (Throwable cause) {
-        if (Cont.isNonFatal(cause)) {
-          this.cont.trap(cause);
-        } else {
-          throw cause;
-        }
-      }
-    }
-
-    @Override
-    public void trap(Throwable error) {
-      this.cont.trap(error);
-    }
-
-  }
 
 }

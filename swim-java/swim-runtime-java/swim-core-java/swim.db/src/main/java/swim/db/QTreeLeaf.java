@@ -792,17 +792,8 @@ public final class QTreeLeaf extends QTreePage {
   }
 
   @Override
-  public void loadTreeAsync(PageLoader pageLoader, Cont<Page> future) {
-    try {
-      // Call continuation on fresh stack
-      this.pageRef.context.stage().execute(Cont.async(future, this));
-    } catch (Throwable cause) {
-      if (Cont.isNonFatal(cause)) {
-        future.trap(cause);
-      } else {
-        throw cause;
-      }
-    }
+  public QTreePage loadTree(PageLoader pageLoader) {
+    return this;
   }
 
   @Override

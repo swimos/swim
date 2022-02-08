@@ -15,7 +15,6 @@
 package swim.db;
 
 import swim.codec.Output;
-import swim.concurrent.Cont;
 import swim.recon.Recon;
 import swim.structure.Value;
 import swim.util.Builder;
@@ -85,11 +84,13 @@ public abstract class PageRef {
 
   public abstract Page setPageValue(Value value, boolean isResident);
 
-  public abstract void loadPageAsync(boolean isResident, Cont<Page> cont);
+  public abstract Page loadPage(boolean isResident);
 
-  public abstract void loadTreeAsync(boolean isResident, Cont<Page> cont);
+  public abstract Page loadPage(PageLoader pageLoader);
 
-  public abstract void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont);
+  public abstract Page loadTree(boolean isResident);
+
+  public abstract Page loadTree(PageLoader pageLoader);
 
   public abstract void soften(long version);
 
@@ -97,73 +98,6 @@ public abstract class PageRef {
 
   public String toDebugString() {
     return "stem: " + this.stem() + ", pageRef: " + Recon.toString(this.toValue());
-  }
-
-  static final class LoadPage implements Cont<Page> {
-
-    final PageLoader pageLoader;
-    final Cont<Page> cont;
-
-    LoadPage(PageLoader pageLoader, Cont<Page> cont) {
-      this.pageLoader = pageLoader;
-      this.cont = cont;
-    }
-
-    @Override
-    public void bind(Page page) {
-      try {
-        this.cont.bind(page);
-      } catch (Throwable cause) {
-        if (Cont.isNonFatal(cause)) {
-          this.cont.trap(cause);
-        } else {
-          throw cause;
-        }
-      } finally {
-        this.pageLoader.close();
-      }
-    }
-
-    @Override
-    public void trap(Throwable cause) {
-      try {
-        this.cont.trap(cause);
-      } finally {
-        this.pageLoader.close();
-      }
-    }
-
-  }
-
-  static final class LoadTree implements Cont<Page> {
-
-    final PageLoader pageLoader;
-    final Cont<Page> cont;
-
-    LoadTree(PageLoader pageLoader, Cont<Page> cont) {
-      this.pageLoader = pageLoader;
-      this.cont = cont;
-    }
-
-    @Override
-    public void bind(Page page) {
-      try {
-        final Cont<Page> andThen = Cont.constant(this.cont, page);
-        page.loadTreeAsync(this.pageLoader, andThen);
-      } catch (Throwable cause) {
-        if (Cont.isNonFatal(cause)) {
-          this.trap(cause);
-        } else {
-          throw cause;
-        }
-      }
-    }
-
-    @Override
-    public void trap(Throwable cause) {
-      this.cont.trap(cause);
-    }
-
   }
 
 }

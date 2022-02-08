@@ -20,7 +20,6 @@ import swim.api.data.ListData;
 import swim.api.data.MapData;
 import swim.api.data.SpatialData;
 import swim.api.data.ValueData;
-import swim.api.store.StoreException;
 import swim.concurrent.MainStage;
 import swim.concurrent.Stage;
 import swim.db.BTreeMap;
@@ -85,14 +84,10 @@ public class DbStore implements StoreBinding, StoreContext {
   @Override
   public void close() {
     if (!this.name.isDefined()) {
-      try {
-        this.store.close();
-        final Stage stage = this.store.stage();
-        if (stage instanceof MainStage) {
-          ((MainStage) stage).stop();
-        }
-      } catch (InterruptedException cause) {
-        throw new StoreException(cause);
+      this.store.close();
+      final Stage stage = this.store.stage();
+      if (stage instanceof MainStage) {
+        ((MainStage) stage).stop();
       }
     }
   }

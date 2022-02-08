@@ -100,6 +100,9 @@ public abstract class BTreePage extends Page {
   abstract void memoizeSize(BTreePageRef pageRef);
 
   @Override
+  public abstract BTreePage loadTree(PageLoader pageLoader);
+
+  @Override
   public abstract OrderedMapCursor<Value, Value> cursor();
 
   public abstract OrderedMapCursor<Value, Value> depthCursor(int maxDepth);
