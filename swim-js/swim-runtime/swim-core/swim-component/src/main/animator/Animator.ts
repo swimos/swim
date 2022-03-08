@@ -96,7 +96,6 @@ export interface AnimatorFactory<A extends Animator<any, any> = Animator<any, an
   <O, T, U = T>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & AnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T, U = T>(descriptor: AnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T, U = T, I = {}>(descriptor: {implements: unknown} & AnimatorDescriptor<O, T, U, I>): PropertyDecorator;
-
 }
 
 /** @public */

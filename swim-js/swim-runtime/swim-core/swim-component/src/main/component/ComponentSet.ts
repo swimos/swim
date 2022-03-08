@@ -160,9 +160,9 @@ export const ComponentSet = (function (_super: typeof ComponentRelation) {
     }
     const components = this.components as {[comtrollerId: number]: C | undefined};
     if (components[newComponent.uid] === void 0) {
-      this.willAttachComponent(newComponent, target);
       components[newComponent.uid] = newComponent;
       (this as Mutable<typeof this>).componentCount += 1;
+      this.willAttachComponent(newComponent, target);
       this.onAttachComponent(newComponent, target);
       this.initComponent(newComponent);
       this.didAttachComponent(newComponent, target);
@@ -181,9 +181,9 @@ export const ComponentSet = (function (_super: typeof ComponentRelation) {
       if (target === void 0) {
         target = null;
       }
-      this.willAttachComponent(newComponent, target);
       components[newComponent.uid] = newComponent;
       (this as Mutable<typeof this>).componentCount += 1;
+      this.willAttachComponent(newComponent, target);
       this.onAttachComponent(newComponent, target);
       this.initComponent(newComponent);
       this.didAttachComponent(newComponent, target);
@@ -194,9 +194,9 @@ export const ComponentSet = (function (_super: typeof ComponentRelation) {
   ComponentSet.prototype.detachComponent = function <C extends Component>(this: ComponentSet<unknown, C>, oldComponent: C): C | null {
     const components = this.components as {[comtrollerId: number]: C | undefined};
     if (components[oldComponent.uid] !== void 0) {
-      this.willDetachComponent(oldComponent);
       (this as Mutable<typeof this>).componentCount -= 1;
       delete components[oldComponent.uid];
+      this.willDetachComponent(oldComponent);
       this.onDetachComponent(oldComponent);
       this.deinitComponent(oldComponent);
       this.didDetachComponent(oldComponent);
@@ -225,9 +225,9 @@ export const ComponentSet = (function (_super: typeof ComponentRelation) {
     }
     const components = this.components as {[comtrollerId: number]: C | undefined};
     if (components[newComponent.uid] === void 0) {
-      this.willAttachComponent(newComponent, target);
       components[newComponent.uid] = newComponent;
       (this as Mutable<typeof this>).componentCount += 1;
+      this.willAttachComponent(newComponent, target);
       this.onAttachComponent(newComponent, target);
       this.initComponent(newComponent);
       this.didAttachComponent(newComponent, target);
@@ -256,9 +256,9 @@ export const ComponentSet = (function (_super: typeof ComponentRelation) {
       const newComponent = this.detectComponent(component);
       const components = this.components as {[comtrollerId: number]: C | undefined};
       if (newComponent !== null && components[newComponent.uid] === void 0) {
-        this.willAttachComponent(newComponent, target);
         components[newComponent.uid] = newComponent;
         (this as Mutable<typeof this>).componentCount += 1;
+        this.willAttachComponent(newComponent, target);
         this.onAttachComponent(newComponent, target);
         this.initComponent(newComponent);
         this.didAttachComponent(newComponent, target);
@@ -271,9 +271,9 @@ export const ComponentSet = (function (_super: typeof ComponentRelation) {
       const oldComponent = this.detectComponent(component);
       const components = this.components as {[comtrollerId: number]: C | undefined};
       if (oldComponent !== null && components[oldComponent.uid] !== void 0) {
-        this.willDetachComponent(oldComponent);
         (this as Mutable<typeof this>).componentCount -= 1;
         delete components[oldComponent.uid];
+        this.willDetachComponent(oldComponent);
         this.onDetachComponent(oldComponent);
         this.deinitComponent(oldComponent);
         this.didDetachComponent(oldComponent);
