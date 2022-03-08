@@ -29,7 +29,7 @@ library as a dependency of the project.
 #### Gradle
 
 ```groovy
-compile group: 'org.swimos', name: 'swim-runtime', version: '4.0.0-SNAPSHOT'
+compile group: 'org.swimos', name: 'swim-runtime', version: '4.0.0'
 ```
 
 #### Maven
@@ -38,7 +38,7 @@ compile group: 'org.swimos', name: 'swim-runtime', version: '4.0.0-SNAPSHOT'
 <dependency>
   <groupId>org.swimos</groupId>
   <artifactId>swim-runtime</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0</version>
 </dependency>
 ```
 

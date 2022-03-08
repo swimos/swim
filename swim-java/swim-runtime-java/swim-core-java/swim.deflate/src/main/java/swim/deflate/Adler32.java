@@ -1,6 +1,6 @@
 // Based on zlib-1.2.8
 // Copyright (c) 1995-2013 Jean-loup Gailly and Mark Adler
-// Copyright (c) 2015-2021 Swim Inc.
+// Copyright (c) 2015-2022 Swim.inc
 //
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
