@@ -4,7 +4,7 @@
   "description": "Recon-based macro engine",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-macro",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2021 Swim.inc",
+  "copyright": "2015-2022 Swim.inc",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "./dist/swim-macro.js",
