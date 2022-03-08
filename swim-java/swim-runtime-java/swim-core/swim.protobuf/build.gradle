@@ -1,0 +1,14 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Protocol Buffers (protobuf) codec that incrementally parses and writes swim-structure values'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.protobuf'
+ext.moduleName = 'swim.protobuf'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+}

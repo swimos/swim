@@ -1,0 +1,24 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'JavaScript kernel runtime'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-polyglot/swim.js'
+ext.moduleName = 'swim.js'
+
+dependencies {
+  implementation group: 'org.swimos', name: 'swim-json', version: project.version
+  api group: 'org.swimos', name: 'swim-kernel', version: project.version
+  implementation project(':swim-dynamic-java')
+  implementation project(':swim-dynamic-structure')
+  implementation project(':swim-dynamic-observable')
+  implementation project(':swim-dynamic-api')
+  api project(':swim-vm-js')
+
+  testImplementation group: 'org.swimos', name: 'swim-server', version: project.version
+}
+
+test {
+  systemProperty "project.dir", projectDir
+}

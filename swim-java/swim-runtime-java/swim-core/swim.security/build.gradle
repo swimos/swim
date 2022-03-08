@@ -1,0 +1,17 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Signing and encryption of swim-structure values using the JSON Web Key (JWK), JSON Web Signature (JWS), JSON Web Token (JWT), and OpenID standards.'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.security'
+ext.moduleName = 'swim.security'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-recon')
+  api project(':swim-json')
+  api project(':swim-collections')
+}

@@ -1,0 +1,17 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Swim JavaScript language integration'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-polyglot/swim.vm.js'
+ext.moduleName = 'swim.vm.js'
+
+dependencies {
+  implementation group: 'org.swimos', name: 'swim-json', version: project.version
+  api group: 'org.swimos', name: 'swim-uri', version: project.version
+  api project(':swim-vm')
+  implementation group: 'org.graalvm.js', name: 'js', version: property('graal.version')
+
+  testImplementation project(":swim-dynamic-structure")
+}

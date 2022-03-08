@@ -1,0 +1,49 @@
+plugins {
+  id 'SwimRuntimeFramework'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Swim Core Framework'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core'
+ext.moduleName = null
+
+dependencies {
+  api project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-collections')
+  api project(':swim-args')
+  api project(':swim-structure')
+  api project(':swim-recon')
+  api project(':swim-json')
+  api project(':swim-xml')
+  api project(':swim-csv')
+  api project(':swim-avro')
+  api project(':swim-protobuf')
+  api project(':swim-math')
+  api project(':swim-security')
+  api project(':swim-spatial')
+  api project(':swim-streamlet')
+  api project(':swim-dataflow')
+  api project(':swim-observable')
+  api project(':swim-uri')
+  api project(':swim-deflate')
+  api project(':swim-mqtt')
+  api project(':swim-http')
+  api project(':swim-http2')
+  api project(':swim-ws')
+  api project(':swim-warp')
+  api project(':swim-concurrent')
+  api project(':swim-db')
+  api project(':swim-io')
+  api project(':swim-io-mqtt')
+  api project(':swim-io-http')
+  api project(':swim-io-ws')
+  api project(':swim-io-warp')
+  api project(':swim-web')
+}
+
+javadoc {
+  title 'Swim Core Framework'
+  options.overview = "${projectDir}/overview.html"
+  options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
+}

@@ -1,0 +1,14 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Stateful, streaming component model for application componets that continuously consume input state from streaming inlets, and continuously produce output state on streaming outlets'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.streamlet'
+ext.moduleName = 'swim.streamlet'
+
+dependencies {
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-concurrent')
+}

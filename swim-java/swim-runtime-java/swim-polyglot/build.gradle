@@ -1,0 +1,28 @@
+plugins {
+  id 'SwimRuntimeFramework'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Swim Polyglot Framework'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-polyglot'
+ext.moduleName = null
+
+dependencies {
+  api project(':swim-dynamic')
+  api project(':swim-dynamic-java')
+  api project(':swim-dynamic-structure')
+  api project(':swim-dynamic-observable')
+  api project(':swim-dynamic-api')
+  api project(':swim-vm')
+  api project(':swim-vm-js')
+  api project(':swim-js')
+}
+
+javadoc {
+  title 'Swim Polyglot Framework'
+  options.overview = "${projectDir}/overview.html"
+  options.addStringOption('-module-source-path', [
+                          "${projectDir}/*/src/main/java",
+                          "${projectDir}/../swim-core/*/src/main/java",
+                          "${projectDir}/../swim-host/*/src/main/java"].join(':'))
+}

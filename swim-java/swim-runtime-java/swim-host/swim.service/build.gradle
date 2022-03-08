@@ -1,0 +1,12 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Swim network service runtime'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-host/swim.service'
+ext.moduleName = 'swim.service'
+
+dependencies {
+  api project(':swim-kernel')
+}

@@ -1,0 +1,15 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Collection interfaces that notify registered observers of precise state changes'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.observable'
+ext.moduleName = 'swim.observable'
+
+dependencies {
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-spatial')
+  api project(':swim-concurrent')
+}

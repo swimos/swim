@@ -1,0 +1,14 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'java.base dynamic language bindings'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-polyglot/swim.dynamic.java'
+ext.moduleName = 'swim.dynamic.java'
+
+dependencies {
+  api project(':swim-dynamic')
+
+  testImplementation project(":swim-vm-js")
+}

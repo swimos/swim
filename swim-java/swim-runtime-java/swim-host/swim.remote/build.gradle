@@ -1,0 +1,14 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Web Agent remote router'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-host/swim.remote'
+ext.moduleName = 'swim.remote'
+
+dependencies {
+  api group: 'org.swimos', name: 'swim-io-warp', version: project.version
+  api project(':swim-system')
+  api project(':swim-kernel')
+}

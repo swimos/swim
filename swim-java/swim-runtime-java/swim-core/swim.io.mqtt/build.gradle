@@ -1,0 +1,15 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'MQTT socket modem for concurrently transporting explicitly flow-controlled MQTT streams over a network without blocking or intermediate buffering'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.io.mqtt'
+ext.moduleName = 'swim.io.mqtt'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-mqtt')
+  api project(':swim-io')
+}

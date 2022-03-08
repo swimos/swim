@@ -1,0 +1,12 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Language binding interfaces'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-polyglot/swim.dynamic'
+ext.moduleName = 'swim.dynamic'
+
+dependencies {
+  implementation group: 'org.swimos', name: 'swim-collections', version: project.version
+}

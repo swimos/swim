@@ -1,0 +1,15 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Rich object model for working with Uniform Resource Identifiers, URI subcomponents, and URI patterns, including an efficient and safe codec for parsing and writing compliant URI strings'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.uri'
+ext.moduleName = 'swim.uri'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-collections')
+}

@@ -4,7 +4,7 @@ plugins {
 }
 
 description = 'Swim Runtime'
-ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime-java'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime'
 ext.moduleName = null
 
 dependencies {
@@ -87,9 +87,9 @@ javadoc {
                    "</script>\n";
 
   options.addStringOption('-module-source-path', [
-                          "${projectDir}/swim-core-java/*/src/main/java",
-                          "${projectDir}/swim-host-java/*/src/main/java",
-                          "${projectDir}/swim-polyglot-java/*/src/main/java"].join(':'))
+                          "${projectDir}/swim-core/*/src/main/java",
+                          "${projectDir}/swim-host/*/src/main/java",
+                          "${projectDir}/swim-polyglot/*/src/main/java"].join(':'))
 }
 
 subprojects {
