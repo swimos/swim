@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import type {MemberFastenerClass} from "@swim/component";
-import {AnyExpansion, Expansion} from "@swim/style";
-import {ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
+import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
 import {ViewRef, PositionGestureInput} from "@swim/view";
 import {DisclosureButton} from "@swim/button";
 import {CellView} from "./CellView";
@@ -27,8 +26,8 @@ export class DisclosureCellView extends CellView {
     this.button.insertView();
   }
 
-  @ThemeAnimator({type: Expansion, inherits: true})
-  readonly disclosure!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;
+  @ExpansionAnimator({type: Expansion, inherits: true})
+  readonly disclosure!: ExpansionAnimator<this, Expansion, AnyExpansion>;
 
   @ViewRef<DisclosureCellView, DisclosureButton>({
     key: true,
@@ -41,7 +40,7 @@ export class DisclosureCellView extends CellView {
   override didPress(input: PositionGestureInput, event: Event | null): void {
     input.preventDefault();
     const superDisclosure = this.disclosure.superFastener;
-    if (superDisclosure instanceof ExpansionThemeAnimator) {
+    if (superDisclosure instanceof ExpansionAnimator) {
       superDisclosure.toggle();
     }
     super.didPress(input, event);

@@ -30,6 +30,8 @@ export type AnyFocus = Focus | FocusInit;
 
 /** @public */
 export interface FocusInit {
+  /** @internal */
+  uid?: never; // force type ambiguity between Focus and FocusInit
   readonly phase: number;
   readonly direction: number;
 }
@@ -40,6 +42,9 @@ export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
     this.phase = phase;
     this.direction = direction;
   }
+
+  /** @internal */
+  uid?: unknown; // force type ambiguity between Focus and FocusInit
 
   readonly phase: number;
 

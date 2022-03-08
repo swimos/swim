@@ -148,6 +148,9 @@ export interface ScaleGesture<O = unknown, V extends View = View, X = unknown, Y
   /** @internal @override */
   clearInputs(): void;
 
+  /** @internal @override */
+  resetInput(input: ScaleGestureInput<X, Y>): void;
+
   distanceMin: number;
 
   get preserveAspectRatio(): boolean;

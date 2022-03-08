@@ -160,9 +160,9 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     }
     const models = this.models as {[modelId: number]: M | undefined};
     if (models[newModel.uid] === void 0) {
-      this.willAttachModel(newModel, target);
       models[newModel.uid] = newModel;
       (this as Mutable<typeof this>).modelCount += 1;
+      this.willAttachModel(newModel, target);
       this.onAttachModel(newModel, target);
       this.initModel(newModel);
       this.didAttachModel(newModel, target);
@@ -181,9 +181,9 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
       if (target === void 0) {
         target = null;
       }
-      this.willAttachModel(newModel, target);
       models[newModel.uid] = newModel;
       (this as Mutable<typeof this>).modelCount += 1;
+      this.willAttachModel(newModel, target);
       this.onAttachModel(newModel, target);
       this.initModel(newModel);
       this.didAttachModel(newModel, target);
@@ -194,9 +194,9 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
   ModelSet.prototype.detachModel = function <M extends Model>(this: ModelSet<unknown, M>, oldModel: M): M | null {
     const models = this.models as {[modelId: number]: M | undefined};
     if (models[oldModel.uid] !== void 0) {
-      this.willDetachModel(oldModel);
       (this as Mutable<typeof this>).modelCount -= 1;
       delete models[oldModel.uid];
+      this.willDetachModel(oldModel);
       this.onDetachModel(oldModel);
       this.deinitModel(oldModel);
       this.didDetachModel(oldModel);
@@ -225,9 +225,9 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
     }
     const models = this.models as {[modelId: number]: M | undefined};
     if (models[newModel.uid] === void 0) {
-      this.willAttachModel(newModel, target);
       models[newModel.uid] = newModel;
       (this as Mutable<typeof this>).modelCount += 1;
+      this.willAttachModel(newModel, target);
       this.onAttachModel(newModel, target);
       this.initModel(newModel);
       this.didAttachModel(newModel, target);
@@ -256,9 +256,9 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
       const newModel = this.detectModel(model);
       const models = this.models as {[modelId: number]: M | undefined};
       if (newModel !== null && models[newModel.uid] === void 0) {
-        this.willAttachModel(newModel, target);
         models[newModel.uid] = newModel;
         (this as Mutable<typeof this>).modelCount += 1;
+        this.willAttachModel(newModel, target);
         this.onAttachModel(newModel, target);
         this.initModel(newModel);
         this.didAttachModel(newModel, target);
@@ -271,9 +271,9 @@ export const ModelSet = (function (_super: typeof ModelRelation) {
       const oldModel = this.detectModel(model);
       const models = this.models as {[modelId: number]: M | undefined};
       if (oldModel !== null && models[oldModel.uid] !== void 0) {
-        this.willDetachModel(oldModel);
         (this as Mutable<typeof this>).modelCount -= 1;
         delete models[oldModel.uid];
+        this.willDetachModel(oldModel);
         this.onDetachModel(oldModel);
         this.deinitModel(oldModel);
         this.didDetachModel(oldModel);

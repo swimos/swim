@@ -110,7 +110,7 @@ export class DialView extends GraphicsView {
   @ThemeAnimator({type: Length, inherits: true, value: Length.pct(50), updateFlags: View.NeedsRender})
   readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, look: Look.subduedColor, updateFlags: View.NeedsRender})
+  @ThemeAnimator({type: Color, inherits: true, value: null, look: Look.etchColor, updateFlags: View.NeedsRender})
   readonly dialColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ThemeAnimator({type: Color, inherits: true, value: null, look: Look.accentColor, updateFlags: View.NeedsRender})
@@ -134,13 +134,13 @@ export class DialView extends GraphicsView {
   @ThemeAnimator({type: Length, inherits: true, value: Length.px(2), updateFlags: View.NeedsRender})
   readonly tickPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, look: Look.neutralColor, updateFlags: View.NeedsRender})
+  @ThemeAnimator({type: Color, inherits: true, value: null, look: Look.legendColor, updateFlags: View.NeedsRender})
   readonly tickColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ThemeAnimator({type: Font, inherits: true, updateFlags: View.NeedsRender})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, inherits: true, look: Look.mutedColor, updateFlags: View.NeedsRender})
+  @ThemeAnimator({type: Color, inherits: true, look: Look.legendColor, updateFlags: View.NeedsRender})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ViewRef<DialView, GraphicsView & Initable<GraphicsViewInit | string>>({

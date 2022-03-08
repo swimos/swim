@@ -15,16 +15,8 @@
 import {Mutable, AnyTiming, Timing} from "@swim/util";
 import {Affinity, MemberFastenerClass} from "@swim/component";
 import {Length, Angle, Transform} from "@swim/math";
-import {AnyExpansion, Expansion} from "@swim/style";
-import {
-  Look,
-  Feel,
-  Mood,
-  MoodVector,
-  ThemeMatrix,
-  ThemeAnimator,
-  ExpansionThemeAnimator,
-} from "@swim/theme";
+import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {Look, Feel, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {
   PositionGestureInput,
   PositionGesture,
@@ -220,8 +212,8 @@ export class FloatingButton extends ButtonMembrane {
     this.icon = newIconRef;
   }
 
-  @ThemeAnimator({type: Expansion, inherits: true})
-  readonly disclosure!: ExpansionThemeAnimator<this, Expansion | undefined, AnyExpansion | undefined>;
+  @ExpansionAnimator({type: Expansion, inherits: true})
+  readonly disclosure!: ExpansionAnimator<this, Expansion | undefined, AnyExpansion | undefined>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);

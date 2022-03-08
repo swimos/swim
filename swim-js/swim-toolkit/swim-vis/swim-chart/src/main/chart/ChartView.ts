@@ -77,7 +77,7 @@ export class ChartView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
   @ThemeAnimator({type: Length, value: Length.px(40)})
   readonly gutterLeft!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.neutralColor})
+  @ThemeAnimator({type: Color, value: null, look: Look.tickColor})
   readonly borderColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ThemeAnimator({type: Number, value: 1})
@@ -86,7 +86,7 @@ export class ChartView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
   @ThemeAnimator({type: Number, value: 6})
   readonly borderSerif!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.neutralColor})
+  @ThemeAnimator({type: Color, value: null, look: Look.tickColor})
   readonly tickMarkColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ThemeAnimator({type: Number, value: 1})
@@ -106,7 +106,7 @@ export class ChartView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
   })
   readonly tickTransition!: Property<this, Timing, AnyTiming>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.subduedColor})
+  @ThemeAnimator({type: Color, value: null, look: Look.gridColor})
   readonly gridLineColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ThemeAnimator({type: Number, value: 0})
@@ -115,7 +115,7 @@ export class ChartView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
   @ThemeAnimator({type: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.mutedColor})
+  @ThemeAnimator({type: Color, value: null, look: Look.tickColor})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   override xRange(): Range<number> | null {

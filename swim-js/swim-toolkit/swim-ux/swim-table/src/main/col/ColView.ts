@@ -52,7 +52,7 @@ export class ColView extends HtmlView {
       labelView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
       labelView.overflowX.setState("hidden", Affinity.Intrinsic);
       labelView.overflowY.setState("hidden", Affinity.Intrinsic);
-      labelView.color.setLook(Look.neutralColor, Affinity.Intrinsic);
+      labelView.color.setLook(Look.legendColor, Affinity.Intrinsic);
       if (value !== void 0) {
         labelView.text(value);
       }

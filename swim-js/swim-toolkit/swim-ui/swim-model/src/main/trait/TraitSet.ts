@@ -170,9 +170,9 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
     }
     const traits = this.traits as {[traitId: number]: T | undefined};
     if (traits[newTrait.uid] === void 0) {
-      this.willAttachTrait(newTrait, target);
       traits[newTrait.uid] = newTrait;
       (this as Mutable<typeof this>).traitCount += 1;
+      this.willAttachTrait(newTrait, target);
       this.onAttachTrait(newTrait, target);
       this.initTrait(newTrait);
       this.didAttachTrait(newTrait, target);
@@ -191,9 +191,9 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
       if (target === void 0) {
         target = null;
       }
-      this.willAttachTrait(newTrait, target);
       traits[newTrait.uid] = newTrait;
       (this as Mutable<typeof this>).traitCount += 1;
+      this.willAttachTrait(newTrait, target);
       this.onAttachTrait(newTrait, target);
       this.initTrait(newTrait);
       this.didAttachTrait(newTrait, target);
@@ -204,9 +204,9 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
   TraitSet.prototype.detachTrait = function <T extends Trait>(this: TraitSet<unknown, T>, oldTrait: T): T | null {
     const traits = this.traits as {[traitId: number]: T | undefined};
     if (traits[oldTrait.uid] !== void 0) {
-      this.willDetachTrait(oldTrait);
       (this as Mutable<typeof this>).traitCount -= 1;
       delete traits[oldTrait.uid];
+      this.willDetachTrait(oldTrait);
       this.onDetachTrait(oldTrait);
       this.deinitTrait(oldTrait);
       this.didDetachTrait(oldTrait);
@@ -235,9 +235,9 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
     }
     const traits = this.traits as {[traitId: number]: T | undefined};
     if (traits[newTrait.uid] === void 0) {
-      this.willAttachTrait(newTrait, target);
       traits[newTrait.uid] = newTrait;
       (this as Mutable<typeof this>).traitCount += 1;
+      this.willAttachTrait(newTrait, target);
       this.onAttachTrait(newTrait, target);
       this.initTrait(newTrait);
       this.didAttachTrait(newTrait, target);
@@ -266,9 +266,9 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
       const newTrait = this.detectModel(model);
       const traits = this.traits as {[traitId: number]: T | undefined};
       if (newTrait !== null && traits[newTrait.uid] === void 0) {
-        this.willAttachTrait(newTrait, null);
         traits[newTrait.uid] = newTrait;
         (this as Mutable<typeof this>).traitCount += 1;
+        this.willAttachTrait(newTrait, null);
         this.onAttachTrait(newTrait, null);
         this.initTrait(newTrait);
         this.didAttachTrait(newTrait, null);
@@ -281,9 +281,9 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
       const oldTrait = this.detectModel(model);
       const traits = this.traits as {[traitId: number]: T | undefined};
       if (oldTrait !== null && traits[oldTrait.uid] !== void 0) {
-        this.willDetachTrait(oldTrait);
         (this as Mutable<typeof this>).traitCount -= 1;
         delete traits[oldTrait.uid];
+        this.willDetachTrait(oldTrait);
         this.onDetachTrait(oldTrait);
         this.deinitTrait(oldTrait);
         this.didDetachTrait(oldTrait);
@@ -300,9 +300,9 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
       const newTrait = this.detectTrait(trait);
       const traits = this.traits as {[traitId: number]: T | undefined};
       if (newTrait !== null && traits[newTrait.uid] === void 0) {
-        this.willAttachTrait(newTrait, target);
         traits[newTrait.uid] = newTrait;
         (this as Mutable<typeof this>).traitCount += 1;
+        this.willAttachTrait(newTrait, target);
         this.onAttachTrait(newTrait, target);
         this.initTrait(newTrait);
         this.didAttachTrait(newTrait, target);
@@ -315,9 +315,9 @@ export const TraitSet = (function (_super: typeof TraitRelation) {
       const oldTrait = this.detectTrait(trait);
       const traits = this.traits as {[traitId: number]: T | undefined};
       if (oldTrait !== null && traits[oldTrait.uid] !== void 0) {
-        this.willDetachTrait(oldTrait);
         (this as Mutable<typeof this>).traitCount -= 1;
         delete traits[oldTrait.uid];
+        this.willDetachTrait(oldTrait);
         this.onDetachTrait(oldTrait);
         this.deinitTrait(oldTrait);
         this.didDetachTrait(oldTrait);

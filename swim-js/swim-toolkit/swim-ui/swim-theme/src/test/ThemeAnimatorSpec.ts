@@ -78,7 +78,7 @@ export class ThemeAnimatorSpec extends Spec {
   testThemeAnimatorLook(exam: Exam): void {
     const theme = Theme.dark;
     const mood = Mood.default;
-    const color = theme.get(Look.color, mood)!;
+    const color = theme.get(Look.textColor, mood)!;
 
     class TestComponent extends TestThemeComponent {
       @ThemeAnimator({type: Color, value: null})
@@ -94,8 +94,8 @@ export class ThemeAnimatorSpec extends Spec {
     exam.equal(component.foo.state, null);
     exam.equal(component.foo.value, null);
 
-    component.foo.setLook(Look.color);
-    exam.equal(component.foo.look, Look.color);
+    component.foo.setLook(Look.textColor);
+    exam.equal(component.foo.look, Look.textColor);
     exam.equal(component.foo.state, color);
     exam.equal(component.foo.value, color);
   }
@@ -104,7 +104,7 @@ export class ThemeAnimatorSpec extends Spec {
   testThemeAnimatorLookInheritance(exam: Exam): void {
     const theme = Theme.dark;
     const mood = Mood.default;
-    const color = theme.get(Look.color, mood)!;
+    const color = theme.get(Look.textColor, mood)!;
     const backgroundColor = theme.get(Look.backgroundColor, mood)!;
 
     class TestComponent extends TestThemeComponent {
@@ -132,8 +132,8 @@ export class ThemeAnimatorSpec extends Spec {
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
 
-    parent.foo.setLook(Look.color, false);
-    exam.equal(parent.foo.look, Look.color);
+    parent.foo.setLook(Look.textColor, false);
+    exam.equal(parent.foo.look, Look.textColor);
     exam.equal(parent.foo.state, color);
     exam.equal(parent.foo.value, color);
     exam.false(parent.foo.inherited);
@@ -147,7 +147,7 @@ export class ThemeAnimatorSpec extends Spec {
     exam.false(child.foo.tweening);
 
     child.recohereFasteners();
-    exam.equal(child.foo.look, Look.color);
+    exam.equal(child.foo.look, Look.textColor);
     exam.equal(child.foo.state, color);
     exam.equal(child.foo.value, color);
     exam.true(child.foo.inherited);
@@ -155,7 +155,7 @@ export class ThemeAnimatorSpec extends Spec {
     exam.false(child.foo.tweening);
 
     child.foo.setLook(Look.backgroundColor, false);
-    exam.equal(parent.foo.look, Look.color);
+    exam.equal(parent.foo.look, Look.textColor);
     exam.equal(parent.foo.state, color);
     exam.equal(parent.foo.value, color);
     exam.false(parent.foo.inherited);
@@ -169,13 +169,13 @@ export class ThemeAnimatorSpec extends Spec {
     exam.false(child.foo.tweening);
 
     child.foo.setAffinity(Affinity.Inherited);
-    exam.equal(parent.foo.look, Look.color);
+    exam.equal(parent.foo.look, Look.textColor);
     exam.equal(parent.foo.state, color);
     exam.equal(parent.foo.value, color);
     exam.false(parent.foo.inherited);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
-    exam.equal(child.foo.look, Look.color);
+    exam.equal(child.foo.look, Look.textColor);
     exam.equal(child.foo.state, color);
     exam.equal(child.foo.value, color);
     exam.true(child.foo.inherited);
@@ -187,12 +187,12 @@ export class ThemeAnimatorSpec extends Spec {
   testThemeAnimatorLookTweening(exam: Exam): void {
     const theme = Theme.dark;
     const mood = Mood.default;
-    const color = theme.get(Look.color, mood)!;
+    const color = theme.get(Look.textColor, mood)!;
     const backgroundColor = theme.get(Look.backgroundColor, mood)!;
     const colorInterpolator = color.interpolateTo(backgroundColor);
 
     class TestComponent extends TestThemeComponent {
-      @ThemeAnimator({type: Color, look: Look.color})
+      @ThemeAnimator({type: Color, look: Look.textColor})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
     const component = new TestComponent();
@@ -200,7 +200,7 @@ export class ThemeAnimatorSpec extends Spec {
     component.mood.setValue(mood);
     component.mount();
 
-    exam.equal(component.foo.look, Look.color);
+    exam.equal(component.foo.look, Look.textColor);
     exam.equal(component.foo.state, color);
     exam.equal(component.foo.value, color);
     exam.false(component.foo.tweening);
@@ -234,12 +234,12 @@ export class ThemeAnimatorSpec extends Spec {
   testThemeAnimatorLookTweeningInheritance(exam: Exam): void {
     const theme = Theme.dark;
     const mood = Mood.default;
-    const color = theme.get(Look.color, mood)!;
+    const color = theme.get(Look.textColor, mood)!;
     const backgroundColor = theme.get(Look.backgroundColor, mood)!;
     const colorInterpolator = color.interpolateTo(backgroundColor);
 
     class TestComponent extends TestThemeComponent {
-      @ThemeAnimator({type: Color, look: Look.color, inherits: true})
+      @ThemeAnimator({type: Color, look: Look.textColor, inherits: true})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
     const parent = new TestComponent();

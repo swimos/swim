@@ -34,7 +34,8 @@
     "@swim/view": "4.0.0-dev.20210927.1",
     "@swim/dom": "4.0.0-dev.20210927.1",
     "@swim/graphics": "4.0.0-dev.20210927.1",
-    "@swim/button": "4.0.0-dev.20210927.1"
+    "@swim/button": "4.0.0-dev.20210927.1",
+    "@swim/toolbar": "4.0.0-dev.20210927.1"
   },
   "scripts": {
     "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",

@@ -130,6 +130,12 @@ export interface Gesture<O = unknown, V extends View = View> extends Fastener<O>
   clearInputs(): void;
 
   /** @internal */
+  resetInput(input: GestureInput): void;
+
+  /** @internal */
+  resetInputs(): void;
+
+  /** @internal */
   bindView(view: View, target?: View | null): void;
 
   /** @internal */
@@ -279,6 +285,18 @@ export const Gesture = (function (_super: typeof Fastener) {
   Gesture.prototype.clearInputs = function (this: Gesture): void {
     (this as Mutable<typeof this>).inputs = {};
     (this as Mutable<typeof this>).inputCount = 0;
+  };
+
+  Gesture.prototype.resetInput = function (this: Gesture, input: GestureInput): void {
+    this.clearInput(input);
+  };
+
+  Gesture.prototype.resetInputs = function (this: Gesture): void {
+    const inputs = this.inputs as {[inputId: string]: GestureInput | undefined};
+    for (const inputId in inputs) {
+      const input = inputs[inputId]!;
+      this.resetInput(input);
+    }
   };
 
   Gesture.prototype.bindView = function <V extends View>(this: Gesture<unknown, V>, view: View, target?: View | null): void {

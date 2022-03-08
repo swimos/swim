@@ -22,18 +22,23 @@ import {TimingLook} from "../look/TimingLook";
 
 Look.font = new FontLook("font");
 
-Look.color = new ColorLook("color");
+Look.textColor = new ColorLook("textColor");
 Look.iconColor = new ColorLook("iconColor");
+Look.labelColor = new ColorLook("labelColor");
+Look.legendColor = new ColorLook("legendColor");
+Look.placeholderColor = new ColorLook("placeholderColor");
+Look.highlightColor = new ColorLook("highlightColor");
+
 Look.statusColor = new ColorLook("statusColor");
 Look.accentColor = new ColorLook("accentColor");
-Look.mutedColor = new ColorLook("mutedColor");
-Look.neutralColor = new ColorLook("neutralColor");
-Look.subduedColor = new ColorLook("subduedColor");
-Look.faintColor = new ColorLook("faintColor");
-Look.highlightColor = new ColorLook("highlightColor");
 
 Look.backgroundColor = new ColorLook("backgroundColor");
 Look.borderColor = new ColorLook("borderColor");
+
+Look.etchColor = new ColorLook("etchColor");
+Look.maskColor = new ColorLook("maskColor");
+Look.tickColor = new ColorLook("tickColor");
+Look.gridColor = new ColorLook("gridColor");
 
 Look.opacity = new NumberLook("opacity");
 Look.shadow = new ShadowLook("shadow");

@@ -15,8 +15,8 @@
 import {Mutable, Class, Lazy, AnyTiming, Timing} from "@swim/util";
 import {Affinity, MemberFastenerClass} from "@swim/component";
 import {Length} from "@swim/math";
-import {Expansion} from "@swim/style";
-import {Look, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
+import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {Look, ThemeAnimator} from "@swim/theme";
 import {
   ModalOptions,
   ModalState,
@@ -122,10 +122,13 @@ export class ButtonStack extends HtmlView implements Modal {
   readonly gesture!: PositionGesture<this, HtmlView>;
   static readonly gesture: MemberFastenerClass<ButtonStack, "gesture">;
 
-  @ThemeAnimator<ButtonStack, Expansion>({
+  @ExpansionAnimator<ButtonStack, Expansion, AnyExpansion>({
     type: Expansion,
     value: Expansion.collapsed(),
     updateFlags: View.NeedsLayout,
+    get transition(): Timing | null {
+      return this.owner.getLookOr(Look.timing, null);
+    },
     willExpand(): void {
       this.owner.willExpand();
       this.owner.onExpand();
@@ -141,7 +144,7 @@ export class ButtonStack extends HtmlView implements Modal {
       this.owner.didCollapse();
     },
   })
-  readonly disclosure!: ExpansionThemeAnimator<this>;
+  readonly disclosure!: ExpansionAnimator<this, Expansion, AnyExpansion>;
 
   @ThemeAnimator({type: Number, value: 28, updateFlags: View.NeedsLayout})
   readonly buttonSpacing!: ThemeAnimator<this, number>;

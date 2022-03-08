@@ -30,6 +30,8 @@ export type AnyExpansion = Expansion | ExpansionInit;
 
 /** @public */
 export interface ExpansionInit {
+  /** @internal */
+  uid?: never; // force type ambiguity between Expansion and ExpansionInit
   readonly phase: number;
   readonly direction: number;
 }
@@ -40,6 +42,9 @@ export class Expansion implements Interpolate<Expansion>, HashCode, Equivalent, 
     this.phase = phase;
     this.direction = direction;
   }
+
+  /** @internal */
+  uid?: unknown; // force type ambiguity between Expansion and ExpansionInit
 
   readonly phase: number;
 

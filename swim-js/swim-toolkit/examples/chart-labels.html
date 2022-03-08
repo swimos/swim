@@ -50,7 +50,7 @@ const plotView = graphView.appendChild(swim.LinePlotView)
       const dataPoint = event.targetView;
       dataPoint.label(null);
     });
-plotView.textColor.setLook(swim.Look.mutedColor);
+plotView.textColor.setLook(swim.Look.labelColor);
 plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 
 const cycles = 2;

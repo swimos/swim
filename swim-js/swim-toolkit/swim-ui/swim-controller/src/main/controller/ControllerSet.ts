@@ -160,9 +160,9 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
     }
     const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
     if (controllers[newController.uid] === void 0) {
-      this.willAttachController(newController, target);
       controllers[newController.uid] = newController;
       (this as Mutable<typeof this>).controllerCount += 1;
+      this.willAttachController(newController, target);
       this.onAttachController(newController, target);
       this.initController(newController);
       this.didAttachController(newController, target);
@@ -181,9 +181,9 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
       if (target === void 0) {
         target = null;
       }
-      this.willAttachController(newController, target);
       controllers[newController.uid] = newController;
       (this as Mutable<typeof this>).controllerCount += 1;
+      this.willAttachController(newController, target);
       this.onAttachController(newController, target);
       this.initController(newController);
       this.didAttachController(newController, target);
@@ -194,9 +194,9 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
   ControllerSet.prototype.detachController = function <C extends Controller>(this: ControllerSet<unknown, C>, oldController: C): C | null {
     const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
     if (controllers[oldController.uid] !== void 0) {
-      this.willDetachController(oldController);
       (this as Mutable<typeof this>).controllerCount -= 1;
       delete controllers[oldController.uid];
+      this.willDetachController(oldController);
       this.onDetachController(oldController);
       this.deinitController(oldController);
       this.didDetachController(oldController);
@@ -225,9 +225,9 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
     }
     const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
     if (controllers[newController.uid] === void 0) {
-      this.willAttachController(newController, target);
       controllers[newController.uid] = newController;
       (this as Mutable<typeof this>).controllerCount += 1;
+      this.willAttachController(newController, target);
       this.onAttachController(newController, target);
       this.initController(newController);
       this.didAttachController(newController, target);
@@ -256,9 +256,9 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
       const newController = this.detectController(controller);
       const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
       if (newController !== null && controllers[newController.uid] === void 0) {
-        this.willAttachController(newController, target);
         controllers[newController.uid] = newController;
         (this as Mutable<typeof this>).controllerCount += 1;
+        this.willAttachController(newController, target);
         this.onAttachController(newController, target);
         this.initController(newController);
         this.didAttachController(newController, target);
@@ -271,9 +271,9 @@ export const ControllerSet = (function (_super: typeof ControllerRelation) {
       const oldController = this.detectController(controller);
       const controllers = this.controllers as {[comtrollerId: number]: C | undefined};
       if (oldController !== null && controllers[oldController.uid] !== void 0) {
-        this.willDetachController(oldController);
         (this as Mutable<typeof this>).controllerCount -= 1;
         delete controllers[oldController.uid];
+        this.willDetachController(oldController);
         this.onDetachController(oldController);
         this.deinitController(oldController);
         this.didDetachController(oldController);

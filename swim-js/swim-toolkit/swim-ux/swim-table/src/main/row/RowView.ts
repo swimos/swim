@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class} from "@swim/util";
+import type {Mutable, Class, Timing} from "@swim/util";
 import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length, R2Box} from "@swim/math";
-import {AnyExpansion, Expansion} from "@swim/style";
-import {Look, ThemeAnimator, ExpansionThemeAnimator, ThemeConstraintAnimator} from "@swim/theme";
+import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {Look, ThemeConstraintAnimator} from "@swim/theme";
 import {
   PositionGestureInput,
   ViewContextType,
@@ -220,9 +220,12 @@ export class RowView extends HtmlView {
   readonly foot!: ViewRef<this, HtmlView>;
   static readonly foot: MemberFastenerClass<RowView, "foot">;
 
-  @ThemeAnimator<RowView, Expansion>({
+  @ExpansionAnimator<RowView, Expansion, AnyExpansion>({
     type: Expansion,
     value: Expansion.collapsed(),
+    get transition(): Timing | null {
+      return this.owner.getLookOr(Look.timing, null);
+    },
     willExpand(): void {
       this.owner.callObservers("viewWillExpand", this.owner);
       const treeView = this.owner.tree.view;
@@ -256,10 +259,10 @@ export class RowView extends HtmlView {
       }
     },
   })
-  readonly disclosure!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;
+  readonly disclosure!: ExpansionAnimator<this, Expansion, AnyExpansion>;
 
-  @ThemeAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
-  readonly disclosing!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ExpansionAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  readonly disclosing!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
   /** @internal */
   readonly visibleFrame!: R2Box;

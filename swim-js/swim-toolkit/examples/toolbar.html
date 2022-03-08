@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Toolbar</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body swim-theme style="display: flex;">
+    <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
+    <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
+    <script src="../swim-ui/dist/swim-ui.js"></script>
+    <script src="../swim-ux/dist/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const layout0 = swim.BarLayout.fromInit({
+  tools: [
+    {
+      key: "close",
+      shrink: 0,
+      basis: 48,
+      overlap: "title0",
+      overpad: 16,
+    },
+    {
+      key: "title0",
+      shrink: 0,
+      basis: 0,
+      align: 0,
+    },
+    {
+      key: "title1",
+      grow: 1,
+      basis: 0,
+      align: 0.5,
+    },
+    {
+      key: "menu",
+      shrink: 0,
+      basis: 48,
+    },
+  ],
+});
+
+const layout1 = swim.BarLayout.fromInit({
+  tools: [
+    {
+      key: "back",
+      shrink: 0,
+      basis: 48,
+      overlap: "title1",
+      overpad: 16,
+    },
+    {
+      key: "title1",
+      shrink: 0,
+      basis: 0,
+      align: 0,
+    },
+    {
+      key: "title2",
+      grow: 1,
+      basis: 0,
+      align: 0.5,
+    },
+    {
+      key: "menu",
+      shrink: 0,
+      basis: 48,
+    },
+  ],
+});
+
+const layout2 = swim.BarLayout.fromInit({
+  tools: [
+    {
+      key: "back",
+      shrink: 0,
+      basis: 48,
+      overlap: "title2",
+      overpad: 16,
+    },
+    {
+      key: "title2",
+      grow: 1,
+      basis: 0,
+      align: 0,
+    },
+    {
+      key: "menu",
+      shrink: 0,
+      basis: 48,
+    },
+  ],
+});
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const barView = swim.BarView.create().width("100%").barHeight(60);
+barView.layout.setState(layout0);
+
+const closeIcon = swim.VectorIcon.create(24, 24, "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12Z");
+const closeView = barView.appendChild(swim.ButtonToolView, "close").iconWidth(24).iconHeight(24).graphics(closeIcon);
+
+const backIcon = swim.VectorIcon.create(24, 24, "M17.77,3.77L16,2L6,12L16,22L17.77,20.23L9.54,12Z").withFillLook(swim.Look.accentColor);
+const backView = barView.appendChild(swim.ButtonToolView, "back").iconWidth(24).iconHeight(24).graphics(backIcon);
+
+const title0View = barView.appendChild(swim.TitleToolView, "title0").fontSize(16).content("Card 0");
+
+const title1View = barView.appendChild(swim.TitleToolView, "title1").fontSize(16).content("Card 1");
+
+const title2View = barView.appendChild(swim.TitleToolView, "title2").fontSize(16).content("Card 2");
+
+const menuIcon = swim.VectorIcon.create(24, 24, "M3,18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3Z");
+const menuView = barView.appendChild(swim.ButtonToolView, "menu").iconWidth(24).iconHeight(24).graphics(menuIcon);
+
+bodyView.appendChild(barView);
+
+const duration = 500;
+const pause = 500;
+const tween = swim.Easing.cubicOut.withDuration(duration);
+
+title0View.color.setLook(swim.Look.accentColor);
+function play() {
+  barView.layout.setState(layout1, tween);
+  title1View.color.setLook(swim.Look.accentColor, tween);
+  setTimeout(function () {
+    barView.layout.setState(layout2, tween);
+    title2View.color.setLook(swim.Look.accentColor, tween);
+    setTimeout(function () {
+      barView.layout.setState(layout1, tween);
+      title2View.color.setLook(swim.Look.textColor, tween);
+      setTimeout(function () {
+        barView.layout.setState(layout0, tween);
+        title1View.color.setLook(swim.Look.textColor, tween);
+        setTimeout(play, duration + 5 * pause);
+      }, duration + pause);
+    }, duration + pause);
+  }, duration + pause);
+}
+setTimeout(play, pause);
+
+    </script>
+  </body>
+</html>

@@ -26,13 +26,13 @@ export class ThemeMatrixSpec extends Spec {
 
   @Test
   testForCols(exam: Exam): void {
-    const matrix = ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.color, Color.black()])],
-                                       [Feel.selected, FeelVector.of([Look.color, Color.white()])]);
+    const matrix = ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.textColor, Color.black()])],
+                                       [Feel.selected, FeelVector.of([Look.textColor, Color.white()])]);
     exam.equal(matrix.rowCount, 1);
     exam.equal(matrix.colCount, 2);
-    exam.equal(matrix.getCol(Feel.default), FeelVector.of([Look.color, Color.black()]));
-    exam.equal(matrix.getCol(Feel.selected), FeelVector.of([Look.color, Color.white()]));
-    exam.equal(matrix.getRow(Look.color), LookVector.of([Feel.default, Color.black()],
+    exam.equal(matrix.getCol(Feel.default), FeelVector.of([Look.textColor, Color.black()]));
+    exam.equal(matrix.getCol(Feel.selected), FeelVector.of([Look.textColor, Color.white()]));
+    exam.equal(matrix.getRow(Look.textColor), LookVector.of([Feel.default, Color.black()],
                                                                [Feel.selected, Color.white()]));
   }
 
@@ -59,44 +59,44 @@ export class ThemeMatrixSpec extends Spec {
 
   @Test
   testTransformImplicitIdentityMatrix(exam: Exam): void {
-    const a = ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.color, Color.black()],
+    const a = ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.textColor, Color.black()],
                                                                [Look.accentColor, Color.rgb(0, 127, 0)])],
-                                  [Feel.selected, FeelVector.of([Look.color, Color.white()],
+                                  [Feel.selected, FeelVector.of([Look.textColor, Color.white()],
                                                                 [Look.accentColor, Color.rgb(0, 0, 127)])]);
     exam.equal(a.transform(MoodMatrix.empty()),
-               ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.color, Color.black()],
+               ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.textColor, Color.black()],
                                                                 [Look.accentColor, Color.rgb(0, 127, 0)])],
-                                   [Feel.selected, FeelVector.of([Look.color, Color.white()],
+                                   [Feel.selected, FeelVector.of([Look.textColor, Color.white()],
                                                                  [Look.accentColor, Color.rgb(0, 0, 127)])]));
   }
 
   @Test
   testTransformExplicitIdentityMatrix(exam: Exam): void {
-    const a = ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.color, Color.black()],
+    const a = ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.textColor, Color.black()],
                                                                [Look.accentColor, Color.rgb(0, 127, 0)])],
-                                  [Feel.selected, FeelVector.of([Look.color, Color.white()],
+                                  [Feel.selected, FeelVector.of([Look.textColor, Color.white()],
                                                                 [Look.accentColor, Color.rgb(0, 0, 127)])]);
     const x = MoodMatrix.forCols([Feel.default, MoodVector.of([Feel.default, 1], [Feel.selected, 0])],
                                  [Feel.selected, MoodVector.of([Feel.default, 0], [Feel.selected, 1])]);
     exam.equal(a.transform(x),
-               ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.color, Color.black()],
+               ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.textColor, Color.black()],
                                                                 [Look.accentColor, Color.rgb(0, 127, 0)])],
-                                   [Feel.selected, FeelVector.of([Look.color, Color.white()],
+                                   [Feel.selected, FeelVector.of([Look.textColor, Color.white()],
                                                                  [Look.accentColor, Color.rgb(0, 0, 127)])]));
   }
 
   @Test
   testTransformPermutationMatrix(exam: Exam): void {
-    const a = ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.color, Color.black()],
+    const a = ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.textColor, Color.black()],
                                                                [Look.accentColor, Color.rgb(0, 127, 0)])],
-                                  [Feel.selected, FeelVector.of([Look.color, Color.white()],
+                                  [Feel.selected, FeelVector.of([Look.textColor, Color.white()],
                                                                 [Look.accentColor, Color.rgb(0, 0, 127)])]);
     const x = MoodMatrix.forCols([Feel.default, MoodVector.of([Feel.default, 0], [Feel.selected, 1])],
                                  [Feel.selected, MoodVector.of([Feel.default, 1], [Feel.selected, 0])]);
     exam.equal(a.transform(x),
-               ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.color, Color.white()],
+               ThemeMatrix.forCols([Feel.default, FeelVector.of([Look.textColor, Color.white()],
                                                                 [Look.accentColor, Color.rgb(0, 0, 127)])],
-                                   [Feel.selected, FeelVector.of([Look.color, Color.black()],
+                                   [Feel.selected, FeelVector.of([Look.textColor, Color.black()],
                                                                  [Look.accentColor, Color.rgb(0, 127, 0)])]));
   }
 }

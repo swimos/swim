@@ -33,13 +33,14 @@ const dial0View = gaugeView.appendChild(swim.DialView, "dial0")
     .arrangement("manual")
     .innerRadius(swim.Length.pct(30))
     .outerRadius(swim.Length.pct(35));
-dial0View.dialColor.setLook(swim.Look.subduedColor);
+dial0View.dialColor.setLook(swim.Look.etchColor);
 
 const dial1View = gaugeView.appendChild(swim.DialView, "dial1")
     .arrangement("manual")
     .innerRadius(swim.Length.pct(35))
     .outerRadius(swim.Length.pct(40));
-dial1View.dialColor.setLook(swim.Look.faintColor);
+dial1View.modifyMood(swim.Feel.default, [[swim.Feel.contrasted, -0.6]]);
+dial1View.dialColor.setLook(swim.Look.etchColor);
 
 const ringView = gaugeView.appendChild(swim.DialView, "ring")
     .value(0.33)

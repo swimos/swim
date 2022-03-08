@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
+import type {Class, Timing} from "@swim/util";
 import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
-import {AnyFocus, Focus, AnyExpansion, Expansion} from "@swim/style";
 import {
-  Look,
-  Feel,
-  ThemeAnimator,
-  FocusThemeAnimator,
-  ExpansionThemeAnimator,
-  ThemeConstraintAnimator,
-} from "@swim/theme";
+  AnyFocus,
+  Focus,
+  FocusAnimator,
+  AnyExpansion,
+  Expansion,
+  ExpansionAnimator,
+} from "@swim/style";
+import {Look, Feel, ThemeConstraintAnimator} from "@swim/theme";
 import {
   PositionGestureInput,
   PositionGesture,
@@ -74,15 +74,18 @@ export class LeafView extends HtmlView {
   @ThemeConstraintAnimator({type: Length, inherits: true, value: null, updateFlags: View.NeedsLayout})
   readonly rowHeight!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
-  readonly stretch!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ExpansionAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  readonly stretch!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
   @Property({type: Boolean, inherits: true, value: false})
   readonly hovers!: Property<this, boolean>;
 
-  @ThemeAnimator<LeafView, Focus, AnyFocus>({
+  @FocusAnimator<LeafView, Focus, AnyFocus>({
     type: Focus,
     value: Focus.unfocused(),
+    get transition(): Timing | null {
+      return this.owner.getLookOr(Look.timing, null);
+    },
     didSetValue(newHover: Focus, oldHover: Focus): void {
       const highlightPhase = this.owner.highlight.getPhase();
       const hoverPhase = newHover.phase;
@@ -98,11 +101,14 @@ export class LeafView extends HtmlView {
       }
     },
   })
-  readonly hover!: FocusThemeAnimator<this>;
+  readonly hover!: FocusAnimator<this, Focus, AnyFocus>;
 
-  @ThemeAnimator<LeafView, Focus, AnyFocus>({
+  @FocusAnimator<LeafView, Focus, AnyFocus>({
     type: Focus,
     value: Focus.unfocused(),
+    get transition(): Timing | null {
+      return this.owner.getLookOr(Look.timing, null);
+    },
     willFocus(): void {
       this.owner.callObservers("viewWillHighlight", this.owner);
     },
@@ -130,7 +136,7 @@ export class LeafView extends HtmlView {
       }
     },
   })
-  readonly highlight!: FocusThemeAnimator<this>;
+  readonly highlight!: FocusAnimator<this, Focus, AnyFocus>;
 
   getCell<F extends abstract new (...args: any) => CellView>(key: string, cellViewClass: F): InstanceType<F> | null;
   getCell(key: string): CellView | null;

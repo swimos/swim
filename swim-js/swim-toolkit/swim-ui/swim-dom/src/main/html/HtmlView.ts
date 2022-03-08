@@ -318,7 +318,7 @@ export class HtmlView extends ElementView {
       this.fontFamily.setState(font.family, void 0, 0);
     }
     this.backgroundColor.setState(theme.getOr(Look.backgroundColor, Mood.ambient, null), timing, Affinity.Intrinsic);
-    this.color.setState(theme.getOr(Look.color, Mood.ambient, null), timing, Affinity.Intrinsic);
+    this.color.setState(theme.getOr(Look.textColor, Mood.ambient, null), timing, Affinity.Intrinsic);
   }
 
   /** @internal */

@@ -160,9 +160,9 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
     }
     const views = this.views as {[viewId: number]: V | undefined};
     if (views[newView.uid] === void 0) {
-      this.willAttachView(newView, target);
       views[newView.uid] = newView;
       (this as Mutable<typeof this>).viewCount += 1;
+      this.willAttachView(newView, target);
       this.onAttachView(newView, target);
       this.initView(newView);
       this.didAttachView(newView, target);
@@ -181,9 +181,9 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
       if (target === void 0) {
         target = null;
       }
-      this.willAttachView(newView, target);
       views[newView.uid] = newView;
       (this as Mutable<typeof this>).viewCount += 1;
+      this.willAttachView(newView, target);
       this.onAttachView(newView, target);
       this.initView(newView);
       this.didAttachView(newView, target);
@@ -194,9 +194,9 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
   ViewSet.prototype.detachView = function <V extends View>(this: ViewSet<unknown, V>, oldView: V): V | null {
     const views = this.views as {[viewId: number]: V | undefined};
     if (views[oldView.uid] !== void 0) {
-      this.willDetachView(oldView);
       (this as Mutable<typeof this>).viewCount -= 1;
       delete views[oldView.uid];
+      this.willDetachView(oldView);
       this.onDetachView(oldView);
       this.deinitView(oldView);
       this.didDetachView(oldView);
@@ -225,9 +225,9 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
     }
     const views = this.views as {[viewId: number]: V | undefined};
     if (views[newView.uid] === void 0) {
-      this.willAttachView(newView, target);
       views[newView.uid] = newView;
       (this as Mutable<typeof this>).viewCount += 1;
+      this.willAttachView(newView, target);
       this.onAttachView(newView, target);
       this.initView(newView);
       this.didAttachView(newView, target);
@@ -256,9 +256,9 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
       const newView = this.detectView(view);
       const views = this.views as {[viewId: number]: V | undefined};
       if (newView !== null && views[newView.uid] === void 0) {
-        this.willAttachView(newView, target);
         views[newView.uid] = newView;
         (this as Mutable<typeof this>).viewCount += 1;
+        this.willAttachView(newView, target);
         this.onAttachView(newView, target);
         this.initView(newView);
         this.didAttachView(newView, target);
@@ -271,9 +271,9 @@ export const ViewSet = (function (_super: typeof ViewRelation) {
       const oldView = this.detectView(view);
       const views = this.views as {[viewId: number]: V | undefined};
       if (oldView !== null && views[oldView.uid] !== void 0) {
-        this.willDetachView(oldView);
         (this as Mutable<typeof this>).viewCount -= 1;
         delete views[oldView.uid];
+        this.willDetachView(oldView);
         this.onDetachView(oldView);
         this.deinitView(oldView);
         this.didDetachView(oldView);

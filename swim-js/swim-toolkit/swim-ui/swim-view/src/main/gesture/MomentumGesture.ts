@@ -139,6 +139,9 @@ export interface MomentumGesture<O = unknown, V extends View = View> extends Pos
   /** @internal @override */
   clearInputs(): void;
 
+  /** @internal @override */
+  resetInput(input: MomentumGestureInput): void;
+
   hysteresis: number;
 
   acceleration: number;
@@ -294,6 +297,13 @@ export const MomentumGesture = (function (_super: typeof PositionGesture) {
   MomentumGesture.prototype.clearInputs = function (this: MomentumGesture): void {
     PositionGesture.prototype.clearInputs.call(this);
     (this as Mutable<typeof this>).coastCount = 0;
+  };
+
+  MomentumGesture.prototype.resetInput = function (this: MomentumGesture, input: MomentumGestureInput): void {
+    if (input.coasting) {
+      this.endCoast(input, null);
+    }
+    PositionGesture.prototype.resetInput.call(this, input);
   };
 
   MomentumGesture.prototype.viewWillAnimate = function (this: MomentumGesture, viewContext: ViewContext): void {

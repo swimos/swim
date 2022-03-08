@@ -23,15 +23,14 @@ function addGeoShapes(shapes, mapView) {
       const layerView = mapView.appendChild(swim.GeoView);
       addGeoShapes(shape.shapes, layerView)
     } else if (shape instanceof swim.GeoPath) {
-      const shapeView = mapView.appendChild(swim.GeoAreaView)
-        .geoPath(shape)
-        .fill("#28292a")
-        .on("pointerenter", function (event) {
-          shapeView.fill("#5a5a5a", shapeView.getLook(swim.Look.timing));
-        })
-        .on("pointerleave", function (event) {
-          shapeView.fill("#28292a", shapeView.getLook(swim.Look.timing));
-        });
+      const shapeView = mapView.appendChild(swim.GeoAreaView).geoPath(shape);
+      shapeView.fill.setLook(swim.Look.maskColor);
+      shapeView.on("pointerenter", function (event) {
+        shapeView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, 1]], shapeView.getLook(swim.Look.timing));
+      });
+      shapeView.on("pointerleave", function (event) {
+        shapeView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, void 0]], shapeView.getLook(swim.Look.timing));
+      });
     }
   }
 }
@@ -47,13 +46,15 @@ const dotView = mapView.appendChild(swim.GeoIconView)
   .iconWidth(10)
   .iconHeight(10)
   .iconColor("#66ffdd")
-  .graphics(swim.CircleIcon.create())
-  .on("pointerenter", function (event) {
-    dotView.iconColor("#32c5ff", dotView.getLook(swim.Look.timing));
-  })
-  .on("pointerleave", function (event) {
-    dotView.iconColor("#66ffdd", dotView.getLook(swim.Look.timing));
-  });
+  .graphics(swim.CircleIcon.create());
+dotView.iconColor.setLook(swim.Look.accentColor);
+dotView.modifyTheme(swim.Feel.default, [[swim.Feel.primary, 1]]);
+dotView.on("pointerenter", function (event) {
+  dotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], dotView.getLook(swim.Look.timing));
+});
+dotView.on("pointerleave", function (event) {
+  dotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], dotView.getLook(swim.Look.timing));
+});
 
 setInterval(function () {
   const lng = Math.random() * 360 - 180;

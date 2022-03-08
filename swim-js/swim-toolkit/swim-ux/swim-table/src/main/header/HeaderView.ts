@@ -15,8 +15,8 @@
 import type {Class} from "@swim/util";
 import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
-import {AnyExpansion, Expansion} from "@swim/style";
-import {Look, ThemeAnimator, ExpansionThemeAnimator, ThemeConstraintAnimator} from "@swim/theme";
+import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {Look, ThemeConstraintAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewSet} from "@swim/view";
 import {HtmlViewClass, HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
@@ -51,8 +51,8 @@ export class HeaderView extends HtmlView {
   @ThemeConstraintAnimator({type: Length, inherits: true, value: null, updateFlags: View.NeedsLayout})
   readonly rowHeight!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
-  readonly stretch!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ExpansionAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  readonly stretch!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
   getCol(key: string): ColView | null;
   getCol<V extends ColView>(key: string, colViewClass: Class<V>): V | null;

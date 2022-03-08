@@ -159,18 +159,23 @@ export abstract class Look<T, U = never> implements Mood {
 
   static font: Look<Font, AnyFont>; // defined by looks
 
-  static color: Look<Color, AnyColor>; // defined by looks
+  static textColor: Look<Color, AnyColor>; // defined by looks
   static iconColor: Look<Color, AnyColor>; // defined by looks
+  static labelColor: Look<Color, AnyColor>; // defined by looks
+  static legendColor: Look<Color, AnyColor>; // defined by looks
+  static placeholderColor: Look<Color, AnyColor>; // defined by looks
+  static highlightColor: Look<Color, AnyColor>; // defined by looks
+
   static statusColor: Look<Color, AnyColor>; // defined by looks
   static accentColor: Look<Color, AnyColor>; // defined by looks
-  static mutedColor: Look<Color, AnyColor>; // defined by looks
-  static neutralColor: Look<Color, AnyColor>; // defined by looks
-  static subduedColor: Look<Color, AnyColor>; // defined by looks
-  static faintColor: Look<Color, AnyColor>; // defined by looks
-  static highlightColor: Look<Color, AnyColor>; // defined by looks
 
   static backgroundColor: Look<Color, AnyColor>; // defined by looks
   static borderColor: Look<Color, AnyColor>; // defined by looks
+
+  static etchColor: Look<Color, AnyColor>; // defined by looks
+  static maskColor: Look<Color, AnyColor>; // defined by looks
+  static tickColor: Look<Color, AnyColor>; // defined by looks
+  static gridColor: Look<Color, AnyColor>; // defined by looks
 
   static opacity: Look<number>; // defined by looks
   static shadow: Look<BoxShadow, AnyBoxShadow>; // defined by looks

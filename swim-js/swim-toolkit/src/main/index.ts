@@ -22,6 +22,7 @@ export * from "@swim/controller";
 //export * from "@swim/ui";
 
 export * from "@swim/button";
+export * from "@swim/toolbar";
 export * from "@swim/token";
 export * from "@swim/table";
 export * from "@swim/window";

@@ -45,6 +45,7 @@
     "@swim/controller": "4.0.0-dev.20210927.1",
     "@swim/ui": "4.0.0-dev.20210927.1",
     "@swim/button": "4.0.0-dev.20210927.1",
+    "@swim/toolbar": "4.0.0-dev.20210927.1",
     "@swim/token": "4.0.0-dev.20210927.1",
     "@swim/table": "4.0.0-dev.20210927.1",
     "@swim/window": "4.0.0-dev.20210927.1",
@@ -75,6 +76,7 @@
   },
   "workspaces": [
     "./swim-button",
+    "./swim-toolbar",
     "./swim-token",
     "./swim-table",
     "./swim-window",

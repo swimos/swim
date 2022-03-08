@@ -15,14 +15,8 @@
 import type {Mutable, Class} from "@swim/util";
 import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length, R2Box} from "@swim/math";
-import {AnyExpansion, Expansion} from "@swim/style";
-import {
-  Look,
-  Feel,
-  ThemeAnimator,
-  ExpansionThemeAnimator,
-  ThemeConstraintAnimator,
-} from "@swim/theme";
+import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {Look, Feel, ThemeConstraintAnimator} from "@swim/theme";
 import {
   ViewportInsets,
   PositionGestureInput,
@@ -89,14 +83,14 @@ export class TableView extends HtmlView {
   @Property({type: Boolean, inherits: true, value: true})
   readonly glows!: Property<this, boolean>;
 
-  @ThemeAnimator({type: Expansion, inherits: true, value: null})
-  readonly disclosure!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ExpansionAnimator({type: Expansion, inherits: true, value: null})
+  readonly disclosure!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  @ThemeAnimator({type: Expansion, inherits: true, value: null})
-  readonly disclosing!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ExpansionAnimator({type: Expansion, inherits: true, value: null})
+  readonly disclosing!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  @ThemeAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
-  readonly stretch!: ExpansionThemeAnimator<this, Expansion | null, AnyExpansion | null>;
+  @ExpansionAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  readonly stretch!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
   @ViewRef<TableView, HeaderView>({
     key: true,

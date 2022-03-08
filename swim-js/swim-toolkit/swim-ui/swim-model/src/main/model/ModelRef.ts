@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Mutable, Proto, ObserverType} from "@swim/util";
-import type {FastenerOwner, Fastener} from "@swim/component";
+import {Affinity, FastenerOwner, Fastener} from "@swim/component";
 import type {AnyModel, Model} from "./Model";
 import {ModelRelationInit, ModelRelationClass, ModelRelation} from "./ModelRelation";
 
@@ -25,6 +25,16 @@ export type ModelRefType<F extends ModelRef<any, any>> =
 export interface ModelRefInit<M extends Model = Model> extends ModelRelationInit<M> {
   extends?: {prototype: ModelRef<any, any>} | string | boolean | null;
   key?: string | boolean;
+
+  willInherit?(superFastener: ModelRef<unknown, M>): void;
+  didInherit?(superFastener: ModelRef<unknown, M>): void;
+  willUninherit?(superFastener: ModelRef<unknown, M>): void;
+  didUninherit?(superFastener: ModelRef<unknown, M>): void;
+
+  willBindSuperFastener?(superFastener: ModelRef<unknown, M>): void;
+  didBindSuperFastener?(superFastener: ModelRef<unknown, M>): void;
+  willUnbindSuperFastener?(superFastener: ModelRef<unknown, M>): void;
+  didUnbindSuperFastener?(superFastener: ModelRef<unknown, M>): void;
 }
 
 /** @public */
@@ -57,8 +67,63 @@ export interface ModelRef<O = unknown, M extends Model = Model> extends ModelRel
   /** @override */
   get fastenerType(): Proto<ModelRef<any, any>>;
 
+  /** @internal @override */
+  setInherited(inherited: boolean, superFastener: ModelRef<unknown, M>): void;
+
   /** @protected @override */
-  onInherit(superFastener: Fastener): void;
+  willInherit(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  onInherit(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  didInherit(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  willUninherit(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  onUninherit(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  didUninherit(superFastener: ModelRef<unknown, M>): void;
+
+  /** @override */
+  readonly superFastener: ModelRef<unknown, M> | null;
+
+  /** @internal @override */
+  getSuperFastener(): ModelRef<unknown, M> | null;
+
+  /** @protected @override */
+  willBindSuperFastener(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  onBindSuperFastener(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  didBindSuperFastener(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  willUnbindSuperFastener(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  onUnbindSuperFastener(superFastener: ModelRef<unknown, M>): void;
+
+  /** @protected @override */
+  didUnbindSuperFastener(superFastener: ModelRef<unknown, M>): void;
+
+  /** @internal */
+  readonly subFasteners: ReadonlyArray<ModelRef<unknown, M>> | null;
+
+  /** @internal @override */
+  attachSubFastener(subFastener: ModelRef<unknown, M>): void;
+
+  /** @internal @override */
+  detachSubFastener(subFastener: ModelRef<unknown, M>): void;
+
+  get superModel(): M | null;
+
+  getSuperModel(): M;
 
   readonly model: M | null;
 
@@ -85,6 +150,15 @@ export interface ModelRef<O = unknown, M extends Model = Model> extends ModelRel
   /** @override */
   detectModel(model: Model): M | null;
 
+  /** @internal @protected */
+  decohereSubFasteners(): void;
+
+  /** @internal @protected */
+  decohereSubFastener(subFastener: ModelRef<unknown, M>): void;
+
+  /** @override */
+  recohere(t: number): void;
+
   /** @internal */
   get key(): string | undefined; // optional prototype field
 }
@@ -102,6 +176,56 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
 
   ModelRef.prototype.onInherit = function (this: ModelRef, superFastener: ModelRef): void {
     this.setModel(superFastener.model);
+  };
+
+  ModelRef.prototype.onBindSuperFastener = function <M extends Model>(this: ModelRef<unknown, M>, superFastener: ModelRef<unknown, M>): void {
+    (this as Mutable<typeof this>).superFastener = superFastener;
+    _super.prototype.onBindSuperFastener.call(this, superFastener);
+  };
+
+  ModelRef.prototype.onUnbindSuperFastener = function <M extends Model>(this: ModelRef<unknown, M>, superFastener: ModelRef<unknown, M>): void {
+    _super.prototype.onUnbindSuperFastener.call(this, superFastener);
+    (this as Mutable<typeof this>).superFastener = null;
+  };
+
+  ModelRef.prototype.attachSubFastener = function <M extends Model>(this: ModelRef<unknown, M>, subFastener: ModelRef<unknown, M>): void {
+    let subFasteners = this.subFasteners as ModelRef<unknown, M>[] | null;
+    if (subFasteners === null) {
+      subFasteners = [];
+      (this as Mutable<typeof this>).subFasteners = subFasteners;
+    }
+    subFasteners.push(subFastener);
+  };
+
+  ModelRef.prototype.detachSubFastener = function <M extends Model>(this: ModelRef<unknown, M>, subFastener: ModelRef<unknown, M>): void {
+    const subFasteners = this.subFasteners as ModelRef<unknown, M>[] | null;
+    if (subFasteners !== null) {
+      const index = subFasteners.indexOf(subFastener);
+      if (index >= 0) {
+        subFasteners.splice(index, 1);
+      }
+    }
+  };
+
+  Object.defineProperty(ModelRef.prototype, "superModel", {
+    get: function <M extends Model>(this: ModelRef<unknown, M>): M | null {
+      const superFastener = this.superFastener;
+      return superFastener !== null ? superFastener.model : null;
+    },
+    configurable: true,
+  });
+
+  ModelRef.prototype.getSuperModel = function <M extends Model>(this: ModelRef<unknown, M>): M {
+    const superModel = this.superModel;
+    if (superModel === void 0 || superModel === null) {
+      let message = superModel + " ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "super model";
+      throw new TypeError(message);
+    }
+    return superModel;
   };
 
   ModelRef.prototype.getModel = function <M extends Model>(this: ModelRef<unknown, M>): M {
@@ -144,19 +268,21 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
       }
       if (oldModel !== newModel) {
         if (oldModel !== null) {
-          this.willDetachModel(oldModel);
           (this as Mutable<typeof this>).model = null;
+          this.willDetachModel(oldModel);
           this.onDetachModel(oldModel);
           this.deinitModel(oldModel);
           this.didDetachModel(oldModel);
         }
         if (newModel !== null) {
-          this.willAttachModel(newModel, target);
           (this as Mutable<typeof this>).model = newModel;
+          this.willAttachModel(newModel, target);
           this.onAttachModel(newModel, target);
           this.initModel(newModel);
           this.didAttachModel(newModel, target);
         }
+        this.setCoherent(true);
+        this.decohereSubFasteners();
       }
     }
     return oldModel;
@@ -176,17 +302,19 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
         target = null;
       }
       if (oldModel !== null) {
-        this.willDetachModel(oldModel);
         (this as Mutable<typeof this>).model = null;
+        this.willDetachModel(oldModel);
         this.onDetachModel(oldModel);
         this.deinitModel(oldModel);
         this.didDetachModel(oldModel);
       }
-      this.willAttachModel(newModel, target);
       (this as Mutable<typeof this>).model = newModel;
+      this.willAttachModel(newModel, target);
       this.onAttachModel(newModel, target);
       this.initModel(newModel);
       this.didAttachModel(newModel, target);
+      this.setCoherent(true);
+      this.decohereSubFasteners();
     }
     return newModel;
   };
@@ -194,11 +322,13 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
   ModelRef.prototype.detachModel = function <M extends Model>(this: ModelRef<unknown, M>): M | null {
     const oldModel = this.model;
     if (oldModel !== null) {
-      this.willDetachModel(oldModel);
       (this as Mutable<typeof this>).model = null;
+      this.willDetachModel(oldModel);
       this.onDetachModel(oldModel);
       this.deinitModel(oldModel);
       this.didDetachModel(oldModel);
+      this.setCoherent(true);
+      this.decohereSubFasteners();
     }
     return oldModel;
   };
@@ -229,18 +359,20 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
     const oldModel = this.model;
     if (newModel !== oldModel) {
       if (oldModel !== null) {
-        this.willDetachModel(oldModel);
         (this as Mutable<typeof this>).model = null;
+        this.willDetachModel(oldModel);
         this.onDetachModel(oldModel);
         this.deinitModel(oldModel);
         this.didDetachModel(oldModel);
         oldModel.remove();
       }
-      this.willAttachModel(newModel, target);
       (this as Mutable<typeof this>).model = newModel;
+      this.willAttachModel(newModel, target);
       this.onAttachModel(newModel, target);
       this.initModel(newModel);
       this.didAttachModel(newModel, target);
+      this.setCoherent(true);
+      this.decohereSubFasteners();
     }
     return newModel;
   };
@@ -265,11 +397,13 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
     if (this.binds && this.model === null) {
       const newModel = this.detectModel(model);
       if (newModel !== null) {
-        this.willAttachModel(newModel, target);
         (this as Mutable<typeof this>).model = newModel;
+        this.willAttachModel(newModel, target);
         this.onAttachModel(newModel, target);
         this.initModel(newModel);
         this.didAttachModel(newModel, target);
+        this.setCoherent(true);
+        this.decohereSubFasteners();
       }
     }
   };
@@ -278,11 +412,13 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
     if (this.binds) {
       const oldModel = this.detectModel(model);
       if (oldModel !== null && this.model === oldModel) {
-        this.willDetachModel(oldModel);
         (this as Mutable<typeof this>).model = null;
+        this.willDetachModel(oldModel);
         this.onDetachModel(oldModel);
         this.deinitModel(oldModel);
         this.didDetachModel(oldModel);
+        this.setCoherent(true);
+        this.decohereSubFasteners();
       }
     }
   };
@@ -293,6 +429,31 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
       return model as M;
     }
     return null;
+  };
+
+  ModelRef.prototype.decohereSubFasteners = function (this: ModelRef): void {
+    const subFasteners = this.subFasteners;
+    for (let i = 0, n = subFasteners !== null ? subFasteners.length : 0; i < n; i += 1) {
+      this.decohereSubFastener(subFasteners![i]!);
+    }
+  };
+
+  ModelRef.prototype.decohereSubFastener = function (this: ModelRef, subFastener: ModelRef): void {
+    if ((subFastener.flags & Fastener.InheritedFlag) === 0 && Math.min(this.flags & Affinity.Mask, Affinity.Intrinsic) >= (subFastener.flags & Affinity.Mask)) {
+      subFastener.setInherited(true, this);
+    } else if ((subFastener.flags & Fastener.InheritedFlag) !== 0 && (subFastener.flags & Fastener.DecoherentFlag) === 0) {
+      subFastener.setCoherent(false);
+      subFastener.decohere();
+    }
+  };
+
+  ModelRef.prototype.recohere = function (this: ModelRef, t: number): void {
+    if ((this.flags & Fastener.InheritedFlag) !== 0) {
+      const superFastener = this.superFastener;
+      if (superFastener !== null) {
+        this.setModel(superFastener.model);
+      }
+    }
   };
 
   ModelRef.construct = function <F extends ModelRef<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
@@ -309,6 +470,13 @@ export const ModelRef = (function (_super: typeof ModelRelation) {
       Object.setPrototypeOf(fastener, fastenerClass.prototype);
     }
     fastener = _super.construct(fastenerClass, fastener, owner) as F;
+    Object.defineProperty(fastener, "superFastener", { // override getter
+      value: null,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+    (fastener as Mutable<typeof fastener>).subFasteners = null;
     (fastener as Mutable<typeof fastener>).model = null;
     return fastener;
   };

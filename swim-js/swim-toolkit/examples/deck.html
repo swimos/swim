@@ -38,33 +38,32 @@ if (navigator.standalone) {
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const deckView = swim.TitleDeckView.create().flexGrow(1);
+const deckView = swim.DeckView.create().flexGrow(1);
 
-const deckBar = deckView.bar.view;
+const barView = deckView.bar.insertView().barHeight(60);
 
-const backButton = deckBar.backButton.view;
-backButton.closeIcon.setView(deckBar.createCloseIcon());
-backButton.closeIcon.insertView();
-
-const card1 = swim.DeckCard.create();
-card1.cardTitle.setValue("Card 1");
-const header1 = card1.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 1")).cursor("pointer");
-header1.on("click", () => {
-  deckView.pushCard(card2);
+const card1View = swim.CardView.create();
+card1View.cardTitle.setView("Card 1");
+const header1View = card1View.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 1")).cursor("pointer");
+header1View.on("click", () => {
+  deckView.appendChild(card2View);
+  setTimeout(function () {
+    card2View.presence.dismiss();
+  }, 2000);
 });
 
-const card2 = swim.DeckCard.create();
-card2.cardTitle.setValue("Card 2");
-const header2 = card2.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 2")).cursor("pointer");
-header2.on("click", () => {
-  deckView.pushCard(card3);
+const card2View = swim.CardView.create();
+card2View.cardTitle.setView("Card 2");
+const header2View = card2View.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 2")).cursor("pointer");
+header2View.on("click", () => {
+  deckView.appendChild(card3View);
 });
 
-const card3 = swim.DeckCard.create();
-card3.cardTitle.setValue("Card 3");
-card3.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 3"));
+const card3View = swim.CardView.create();
+card3View.cardTitle.setView("Card 3");
+const header3View = card3View.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Card 3"));
 
-deckView.pushCard(card1);
+deckView.appendChild(card1View);
 
 bodyView.appendChild(deckView);
 

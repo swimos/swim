@@ -114,7 +114,7 @@ export class InputTokenView extends TokenView {
 
   /** @internal */
   get placeholderLook(): Look<Color> {
-    return Look.neutralColor;
+    return Look.placeholderColor;
   }
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {

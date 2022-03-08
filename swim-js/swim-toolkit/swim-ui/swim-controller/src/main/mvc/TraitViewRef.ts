@@ -106,9 +106,7 @@ export interface TraitViewRef<O = unknown, T extends Trait = Trait, V extends Vi
 
   setTrait(trait: AnyTrait<T> | null, target?: Trait | null, key?: string): T | null;
 
-  attachTrait<T2 extends T>(trait: T2 | TraitFactory<T2>, target?: Trait | null): T2;
-  attachTrait(trait: AnyTrait<T>, target?: Trait | null): T;
-  attachTrait(trait?: AnyTrait<T> | null, target?: Trait | null): T | null;
+  attachTrait(trait?: AnyTrait<T>, target?: Trait | null): T;
 
   detachTrait(): T | null;
 
@@ -136,7 +134,7 @@ export interface TraitViewRef<O = unknown, T extends Trait = Trait, V extends Vi
   /** @protected */
   didDetachTrait(trait: T): void;
 
-  insertTrait(model?: Model | null, trait?: AnyTrait<T> | null, target?: Trait | null, key?: string): T | null;
+  insertTrait(model?: Model | null, trait?: AnyTrait<T> | null, target?: Trait | null, key?: string): T;
 
   removeTrait(): T | null;
 
@@ -188,9 +186,7 @@ export interface TraitViewRef<O = unknown, T extends Trait = Trait, V extends Vi
 
   setView(view: AnyView<V> | null, target?: View | null, key?: string): V | null;
 
-  attachView<V2 extends V>(view: V2 | ViewFactory<V2>, target?: View | null): V2;
-  attachView(view: AnyView<V>, target?: View | null): V;
-  attachView(view?: AnyView<V> | null, target?: View | null): V | null;
+  attachView(view?: AnyView<V>, target?: View | null): V;
 
   detachView(): V | null;
 
@@ -218,7 +214,7 @@ export interface TraitViewRef<O = unknown, T extends Trait = Trait, V extends Vi
   /** @protected */
   didDetachView(view: V): void;
 
-  insertView(parent?: View | null, view?: AnyView<V> | null, target?: View | null, key?: string): V | null;
+  insertView(parent?: View | null, view?: AnyView<V> | null, target?: View | null, key?: string): V;
 
   removeView(): V | null;
 
@@ -318,15 +314,15 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
       }
       if (oldTrait !== newTrait) {
         if (oldTrait !== null) {
-          this.willDetachTrait(oldTrait);
           (this as Mutable<typeof this>).trait = null;
+          this.willDetachTrait(oldTrait);
           this.onDetachTrait(oldTrait);
           this.deinitTrait(oldTrait);
           this.didDetachTrait(oldTrait);
         }
         if (newTrait !== null) {
-          this.willAttachTrait(newTrait, target);
           (this as Mutable<typeof this>).trait = newTrait;
+          this.willAttachTrait(newTrait, target);
           this.onAttachTrait(newTrait, target);
           this.initTrait(newTrait);
           this.didAttachTrait(newTrait, target);
@@ -336,7 +332,7 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     return oldTrait;
   };
 
-  TraitViewRef.prototype.attachTrait = function <T extends Trait>(this: TraitViewRef<unknown, T, View>, newTrait?: AnyTrait<T> | null, target?: Trait | null): T | null {
+  TraitViewRef.prototype.attachTrait = function <T extends Trait>(this: TraitViewRef<unknown, T, View>, newTrait?: AnyTrait<T>, target?: Trait | null): T {
     const oldTrait = this.trait;
     if (newTrait !== void 0 && newTrait !== null) {
       newTrait = this.fromAnyTrait(newTrait);
@@ -350,14 +346,14 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
         target = null;
       }
       if (oldTrait !== null) {
-        this.willDetachTrait(oldTrait);
         (this as Mutable<typeof this>).trait = null;
+        this.willDetachTrait(oldTrait);
         this.onDetachTrait(oldTrait);
         this.deinitTrait(oldTrait);
         this.didDetachTrait(oldTrait);
       }
-      this.willAttachTrait(newTrait, target);
       (this as Mutable<typeof this>).trait = newTrait;
+      this.willAttachTrait(newTrait, target);
       this.onAttachTrait(newTrait, target);
       this.initTrait(newTrait);
       this.didAttachTrait(newTrait, target);
@@ -368,8 +364,8 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
   TraitViewRef.prototype.detachTrait = function <T extends Trait>(this: TraitViewRef<unknown, T, View>): T | null {
     const oldTrait = this.trait;
     if (oldTrait !== null) {
-      this.willDetachTrait(oldTrait);
       (this as Mutable<typeof this>).trait = null;
+      this.willDetachTrait(oldTrait);
       this.onDetachTrait(oldTrait);
       this.deinitTrait(oldTrait);
       this.didDetachTrait(oldTrait);
@@ -413,7 +409,7 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     // hook
   };
 
-  TraitViewRef.prototype.insertTrait = function <T extends Trait>(this: TraitViewRef<unknown, T, View>, model?: Model | null, newTrait?: AnyTrait<T> | null, target?: Trait | null, key?: string): T | null {
+  TraitViewRef.prototype.insertTrait = function <T extends Trait>(this: TraitViewRef<unknown, T, View>, model?: Model | null, newTrait?: AnyTrait<T> | null, target?: Trait | null, key?: string): T {
     if (newTrait !== void 0 && newTrait !== null) {
       newTrait = this.fromAnyTrait(newTrait);
     } else {
@@ -439,15 +435,15 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     const oldTrait = this.trait;
     if (newTrait !== oldTrait) {
       if (oldTrait !== null) {
-        this.willDetachTrait(oldTrait);
         (this as Mutable<typeof this>).trait = null;
+        this.willDetachTrait(oldTrait);
         this.onDetachTrait(oldTrait);
         this.deinitTrait(oldTrait);
         this.didDetachTrait(oldTrait);
         oldTrait.remove();
       }
-      this.willAttachTrait(newTrait, target);
       (this as Mutable<typeof this>).trait = newTrait;
+      this.willAttachTrait(newTrait, target);
       this.onAttachTrait(newTrait, target);
       this.initTrait(newTrait);
       this.didAttachTrait(newTrait, target);
@@ -493,8 +489,8 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     if (this.bindsTrait && this.trait === null) {
       const newTrait = this.detectModel(model);
       if (newTrait !== null) {
-        this.willAttachTrait(newTrait, null);
         (this as Mutable<typeof this>).trait = newTrait;
+        this.willAttachTrait(newTrait, null);
         this.onAttachTrait(newTrait, null);
         this.initTrait(newTrait);
         this.didAttachTrait(newTrait, null);
@@ -506,8 +502,8 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     if (this.bindsTrait) {
       const oldTrait = this.detectModel(model);
       if (oldTrait !== null && this.trait === oldTrait) {
-        this.willDetachTrait(oldTrait);
         (this as Mutable<typeof this>).trait = null;
+        this.willDetachTrait(oldTrait);
         this.onDetachTrait(oldTrait);
         this.deinitTrait(oldTrait);
         this.didDetachTrait(oldTrait);
@@ -523,8 +519,8 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     if (this.bindsTrait && this.trait === null) {
       const newTrait = this.detectTrait(trait);
       if (newTrait !== null) {
-        this.willAttachTrait(newTrait, target);
         (this as Mutable<typeof this>).trait = newTrait;
+        this.willAttachTrait(newTrait, target);
         this.onAttachTrait(newTrait, target);
         this.initTrait(newTrait);
         this.didAttachTrait(newTrait, target);
@@ -536,8 +532,8 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     if (this.bindsTrait) {
       const oldTrait = this.detectTrait(trait);
       if (oldTrait !== null && this.trait === oldTrait) {
-        this.willDetachTrait(oldTrait);
         (this as Mutable<typeof this>).trait = null;
+        this.willDetachTrait(oldTrait);
         this.onDetachTrait(oldTrait);
         this.deinitTrait(oldTrait);
         this.didDetachTrait(oldTrait);
@@ -619,15 +615,15 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
       }
       if (oldView !== newView) {
         if (oldView !== null) {
-          this.willDetachView(oldView);
           (this as Mutable<typeof this>).view = null;
+          this.willDetachView(oldView);
           this.onDetachView(oldView);
           this.deinitView(oldView);
           this.didDetachView(oldView);
         }
         if (newView !== null) {
-          this.willAttachView(newView, target);
           (this as Mutable<typeof this>).view = newView;
+          this.willAttachView(newView, target);
           this.onAttachView(newView, target);
           this.initView(newView);
           this.didAttachView(newView, target);
@@ -637,7 +633,7 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     return oldView;
   };
 
-  TraitViewRef.prototype.attachView = function <V extends View>(this: TraitViewRef<unknown, Trait, V>, newView?: AnyView<V> | null, target?: View | null): V | null {
+  TraitViewRef.prototype.attachView = function <V extends View>(this: TraitViewRef<unknown, Trait, V>, newView?: AnyView<V>, target?: View | null): V {
     const oldView = this.view;
     if (newView !== void 0 && newView !== null) {
       newView = this.fromAnyView(newView);
@@ -651,14 +647,14 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
         target = null;
       }
       if (oldView !== null) {
-        this.willDetachView(oldView);
         (this as Mutable<typeof this>).view = null;
+        this.willDetachView(oldView);
         this.onDetachView(oldView);
         this.deinitView(oldView);
         this.didDetachView(oldView);
       }
-      this.willAttachView(newView, target);
       (this as Mutable<typeof this>).view = newView;
+      this.willAttachView(newView, target);
       this.onAttachView(newView, target);
       this.initView(newView);
       this.didAttachView(newView, target);
@@ -669,8 +665,8 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
   TraitViewRef.prototype.detachView = function <V extends View>(this: TraitViewRef<unknown, Trait, V>): V | null {
     const oldView = this.view;
     if (oldView !== null) {
-      this.willDetachView(oldView);
       (this as Mutable<typeof this>).view = null;
+      this.willDetachView(oldView);
       this.onDetachView(oldView);
       this.deinitView(oldView);
       this.didDetachView(oldView);
@@ -714,7 +710,7 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     // hook
   };
 
-  TraitViewRef.prototype.insertView = function <V extends View>(this: TraitViewRef<unknown, Trait, V>, parent?: View | null, newView?: AnyView<V> | null, target?: View | null, key?: string): V | null {
+  TraitViewRef.prototype.insertView = function <V extends View>(this: TraitViewRef<unknown, Trait, V>, parent?: View | null, newView?: AnyView<V> | null, target?: View | null, key?: string): V {
     if (newView !== void 0 && newView !== null) {
       newView = this.fromAnyView(newView);
     } else {
@@ -740,15 +736,15 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     const oldView = this.view;
     if (newView !== oldView) {
       if (oldView !== null) {
-        this.willDetachView(oldView);
         (this as Mutable<typeof this>).view = null;
+        this.willDetachView(oldView);
         this.onDetachView(oldView);
         this.deinitView(oldView);
         this.didDetachView(oldView);
         oldView.remove();
       }
-      this.willAttachView(newView, target);
       (this as Mutable<typeof this>).view = newView;
+      this.willAttachView(newView, target);
       this.onAttachView(newView, target);
       this.initView(newView);
       this.didAttachView(newView, target);
@@ -788,8 +784,8 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     if (this.bindsView && this.view === null) {
       const newView = this.detectView(view);
       if (newView !== null) {
-        this.willAttachView(newView, target);
         (this as Mutable<typeof this>).view = newView;
+        this.willAttachView(newView, target);
         this.onAttachView(newView, target);
         this.initView(newView);
         this.didAttachView(newView, target);
@@ -801,8 +797,8 @@ export const TraitViewRef = (function (_super: typeof Fastener) {
     if (this.bindsView) {
       const oldView = this.detectView(view);
       if (oldView !== null && this.view === oldView) {
-        this.willDetachView(oldView);
         (this as Mutable<typeof this>).view = null;
+        this.willDetachView(oldView);
         this.onDetachView(oldView);
         this.deinitView(oldView);
         this.didDetachView(oldView);

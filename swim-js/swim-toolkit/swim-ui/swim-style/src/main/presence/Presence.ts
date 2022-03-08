@@ -30,6 +30,8 @@ export type AnyPresence = Presence | PresenceInit;
 
 /** @public */
 export interface PresenceInit {
+  /** @internal */
+  uid?: never; // force type ambiguity between Presence and PresenceInit
   readonly phase: number;
   readonly direction: number;
 }
@@ -40,6 +42,9 @@ export class Presence implements Interpolate<Presence>, HashCode, Equivalent, De
     this.phase = phase;
     this.direction = direction;
   }
+
+  /** @internal */
+  uid?: unknown; // force type ambiguity between Presence and PresenceInit
 
   readonly phase: number;
 

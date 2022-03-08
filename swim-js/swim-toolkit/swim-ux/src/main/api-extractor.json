@@ -3,6 +3,7 @@
   "mainEntryPointFilePath": "<projectFolder>/lib/main/index.d.ts",
   "bundledPackages": [
     "@swim/button",
+    "@swim/toolbar",
     "@swim/token",
     "@swim/table",
     "@swim/window",

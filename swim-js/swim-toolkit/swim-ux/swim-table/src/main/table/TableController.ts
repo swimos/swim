@@ -281,10 +281,10 @@ export class TableController extends Controller {
       this.owner.callObservers("controllerDidDetachHeaderView", headerView, this.owner);
     },
     attachHeaderView(headerView: HeaderView, headerController: HeaderController): void {
-      //const tableView = this.owner.table.view;
-      //if (tableView !== null && tableView.header.view === null) {
-      //  tableView.header.setView(headerView);
-      //}
+      const tableView = this.owner.table.view;
+      if (tableView !== null && tableView.header.view === null) {
+        tableView.header.setView(headerView);
+      }
     },
     detachHeaderView(headerView: HeaderView, headerController: HeaderController): void {
       headerView.remove();

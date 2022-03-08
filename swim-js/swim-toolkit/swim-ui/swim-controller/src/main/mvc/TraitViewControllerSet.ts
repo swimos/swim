@@ -178,9 +178,9 @@ export const TraitViewControllerSet = (function (_super: typeof ControllerSet) {
       if (targetTrait === void 0) {
         targetTrait = null;
       }
-      this.willAttachControllerTrait(traitController, trait, targetTrait);
       traitControllers[trait.uid] = traitController;
       (this as Mutable<typeof this>).controllerCount += 1;
+      this.willAttachControllerTrait(traitController, trait, targetTrait);
       this.onAttachControllerTrait(traitController, trait, targetTrait);
       this.initControllerTrait(traitController, trait);
       this.didAttachControllerTrait(traitController, trait, targetTrait);
@@ -192,9 +192,9 @@ export const TraitViewControllerSet = (function (_super: typeof ControllerSet) {
     const traitControllers = this.traitControllers as {[comtroltraitIdltraitIderId: number]: C | undefined};
     const traitController = traitControllers[trait.uid];
     if (traitController !== void 0) {
-      this.willDetachControllerTrait(traitController, trait);
       (this as Mutable<typeof this>).controllerCount -= 1;
       delete traitControllers[trait.uid];
+      this.willDetachControllerTrait(traitController, trait);
       this.onDetachControllerTrait(traitController, trait);
       this.deinitControllerTrait(traitController, trait);
       this.didDetachControllerTrait(traitController, trait);

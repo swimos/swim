@@ -12,6 +12,7 @@
     "@swim/ui",
 
     "@swim/button",
+    "@swim/toolbar",
     "@swim/token",
     "@swim/table",
     "@swim/window",

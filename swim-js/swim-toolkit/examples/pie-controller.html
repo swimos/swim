@@ -26,9 +26,6 @@ const canvasView = containerView.appendChild(swim.CanvasView)
     .touchAction("manipulation");
 
 class ExamplePieController extends swim.PieController {
-  createSliceFastener(sliceController) {
-    return ExamplePieController.SliceFastener.create(this);
-  }
 }
 swim.TraitViewRef({
   extends: true,

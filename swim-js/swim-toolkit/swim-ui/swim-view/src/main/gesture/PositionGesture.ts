@@ -124,6 +124,9 @@ export interface PositionGesture<O = unknown, V extends View = View> extends Ges
   /** @internal @override */
   clearInputs(): void;
 
+  /** @internal @override */
+  resetInput(input: PositionGestureInput): void;
+
   readonly hoverCount: number;
 
   get hovering(): boolean;
@@ -323,6 +326,16 @@ export const PositionGesture = (function (_super: typeof Gesture) {
     Gesture.prototype.clearInputs.call(this);
     (this as Mutable<typeof this>).hoverCount = 0;
     (this as Mutable<typeof this>).pressCount = 0;
+  };
+
+  PositionGesture.prototype.resetInput = function (this: PositionGesture, input: PositionGestureInput): void {
+    if (input.pressing) {
+      this.cancelPress(input, null);
+    }
+    if (input.hovering) {
+      this.endHover(input, null);
+    }
+    Gesture.prototype.resetInput.call(this, input);
   };
 
   Object.defineProperty(PositionGesture.prototype, "hovering", {

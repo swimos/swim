@@ -27,9 +27,6 @@ const canvasView = swim.CanvasView.create()
     .touchAction("manipulation");
 
 class ExampleGraphController extends swim.GraphController {
-  createPlotFastener(plotController) {
-    return ExampleGraphController.PlotFastener.create(this);
-  }
 }
 swim.TraitViewRef({
   extends: true,

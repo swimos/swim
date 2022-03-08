@@ -25,37 +25,37 @@ export class MoodMatrixSpec extends Spec {
 
   @Test
   testForCols(exam: Exam): void {
-    const matrix = MoodMatrix.forCols([Look.color, MoodVector.of([Feel.default, 0], [Feel.selected, 1])],
+    const matrix = MoodMatrix.forCols([Look.textColor, MoodVector.of([Feel.default, 0], [Feel.selected, 1])],
                                       [Look.accentColor, MoodVector.of([Feel.default, 1], [Feel.selected, 0])]);
     exam.equal(matrix.rowCount, 2);
     exam.equal(matrix.colCount, 2);
-    exam.equal(matrix.getCol(Look.color), MoodVector.of([Feel.default, 0], [Feel.selected, 1]));
+    exam.equal(matrix.getCol(Look.textColor), MoodVector.of([Feel.default, 0], [Feel.selected, 1]));
     exam.equal(matrix.getCol(Look.accentColor), MoodVector.of([Feel.default, 1], [Feel.selected, 0]));
-    exam.equal(matrix.getRow(Feel.default), MoodVector.of([Look.color, 0], [Look.accentColor, 1]));
-    exam.equal(matrix.getRow(Feel.selected), MoodVector.of([Look.color, 1], [Look.accentColor, 0]));
+    exam.equal(matrix.getRow(Feel.default), MoodVector.of([Look.textColor, 0], [Look.accentColor, 1]));
+    exam.equal(matrix.getRow(Feel.selected), MoodVector.of([Look.textColor, 1], [Look.accentColor, 0]));
   }
 
   @Test
   testInnerProduct(exam: Exam): void {
-    const matrix = MoodMatrix.forCols([Look.color, MoodVector.of([Feel.default, 0], [Feel.selected, 1])],
+    const matrix = MoodMatrix.forCols([Look.textColor, MoodVector.of([Feel.default, 0], [Feel.selected, 1])],
                                       [Look.accentColor, MoodVector.of([Feel.default, 1], [Feel.selected, 0])]);
-    exam.equal(matrix.dot(Feel.default, MoodVector.of([Look.color, 1], [Look.accentColor, 0])), 0);
-    exam.equal(matrix.dot(Feel.default, MoodVector.of([Look.color, 0], [Look.accentColor, 1])), 1);
-    exam.equal(matrix.dot(Feel.selected, MoodVector.of([Look.color, 1], [Look.accentColor, 0])), 1);
-    exam.equal(matrix.dot(Feel.selected, MoodVector.of([Look.color, 0], [Look.accentColor, 1])), 0);
-    exam.equal(matrix.dot(Feel.default, MoodVector.of([Look.color, 0.5], [Look.accentColor, 0.5])), 0.5);
-    exam.equal(matrix.dot(Feel.selected, MoodVector.of([Look.color, 0.5], [Look.accentColor, 0.5])), 0.5);
+    exam.equal(matrix.dot(Feel.default, MoodVector.of([Look.textColor, 1], [Look.accentColor, 0])), 0);
+    exam.equal(matrix.dot(Feel.default, MoodVector.of([Look.textColor, 0], [Look.accentColor, 1])), 1);
+    exam.equal(matrix.dot(Feel.selected, MoodVector.of([Look.textColor, 1], [Look.accentColor, 0])), 1);
+    exam.equal(matrix.dot(Feel.selected, MoodVector.of([Look.textColor, 0], [Look.accentColor, 1])), 0);
+    exam.equal(matrix.dot(Feel.default, MoodVector.of([Look.textColor, 0.5], [Look.accentColor, 0.5])), 0.5);
+    exam.equal(matrix.dot(Feel.selected, MoodVector.of([Look.textColor, 0.5], [Look.accentColor, 0.5])), 0.5);
   }
 
   @Test
   testTransformVector(exam: Exam): void {
-    const matrix = MoodMatrix.forCols([Look.color, MoodVector.of([Feel.default, 0], [Feel.selected, 1])],
+    const matrix = MoodMatrix.forCols([Look.textColor, MoodVector.of([Feel.default, 0], [Feel.selected, 1])],
                                       [Look.accentColor, MoodVector.of([Feel.default, 1], [Feel.selected, 0])]);
-    exam.equal(matrix.timesCol(MoodVector.of([Look.color, 1], [Look.accentColor, 0])),
+    exam.equal(matrix.timesCol(MoodVector.of([Look.textColor, 1], [Look.accentColor, 0])),
                MoodVector.of([Feel.default, 0], [Feel.selected, 1]));
-    exam.equal(matrix.timesCol(MoodVector.of([Look.color, 0], [Look.accentColor, 1])),
+    exam.equal(matrix.timesCol(MoodVector.of([Look.textColor, 0], [Look.accentColor, 1])),
                MoodVector.of([Feel.default, 1], [Feel.selected, 0]));
-    exam.equal(matrix.timesCol(MoodVector.of([Look.color, 0.5], [Look.accentColor, 0.5])),
+    exam.equal(matrix.timesCol(MoodVector.of([Look.textColor, 0.5], [Look.accentColor, 0.5])),
                MoodVector.of([Feel.default, 0.5], [Feel.selected, 0.5]));
   }
 
@@ -76,29 +76,29 @@ export class MoodMatrixSpec extends Spec {
 
   @Test
   testTransformImplicitIdentityMatrix(exam: Exam): void {
-    const a = MoodMatrix.forCols([Feel.default, MoodVector.of([Look.color, 0],
+    const a = MoodMatrix.forCols([Feel.default, MoodVector.of([Look.textColor, 0],
                                                               [Look.accentColor, 0.25])],
-                                 [Feel.selected, MoodVector.of([Look.color, 1],
+                                 [Feel.selected, MoodVector.of([Look.textColor, 1],
                                                                [Look.accentColor, 0.75])]);
     exam.equal(a.transform(MoodMatrix.empty()),
-               MoodMatrix.forCols([Feel.default, MoodVector.of([Look.color, 0],
+               MoodMatrix.forCols([Feel.default, MoodVector.of([Look.textColor, 0],
                                                                [Look.accentColor, 0.25])],
-                                  [Feel.selected, MoodVector.of([Look.color, 1],
+                                  [Feel.selected, MoodVector.of([Look.textColor, 1],
                                                                 [Look.accentColor, 0.75])]));
   }
 
   @Test
   testTransformExplicitIdentityMatrix(exam: Exam): void {
-    const a = MoodMatrix.forCols([Feel.default, MoodVector.of([Look.color, 0],
+    const a = MoodMatrix.forCols([Feel.default, MoodVector.of([Look.textColor, 0],
                                                               [Look.accentColor, 0.25])],
-                                 [Feel.selected, MoodVector.of([Look.color, 1],
+                                 [Feel.selected, MoodVector.of([Look.textColor, 1],
                                                                [Look.accentColor, 0.75])]);
     const x = MoodMatrix.forCols([Feel.default, MoodVector.of([Feel.default, 1], [Feel.selected, 0])],
                                  [Feel.selected, MoodVector.of([Feel.default, 0], [Feel.selected, 1])]);
     exam.equal(a.transform(x),
-               MoodMatrix.forCols([Feel.default, MoodVector.of([Look.color, 0],
+               MoodMatrix.forCols([Feel.default, MoodVector.of([Look.textColor, 0],
                                                                 [Look.accentColor, 0.25])],
-                                   [Feel.selected, MoodVector.of([Look.color, 1],
+                                   [Feel.selected, MoodVector.of([Look.textColor, 1],
                                                                  [Look.accentColor, 0.75])]));
   }
 }

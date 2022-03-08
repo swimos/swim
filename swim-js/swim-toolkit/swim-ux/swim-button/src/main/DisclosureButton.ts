@@ -14,8 +14,8 @@
 
 import {Angle, Transform} from "@swim/math";
 import {Affinity} from "@swim/component";
-import {AnyColor, Color, AnyExpansion, Expansion} from "@swim/style";
-import {Look, ThemeAnimator, ExpansionThemeAnimator} from "@swim/theme";
+import {AnyColor, Color, AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {Look, ThemeAnimator} from "@swim/theme";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {HtmlView, SvgView} from "@swim/dom";
 
@@ -53,10 +53,10 @@ export class DisclosureButton extends HtmlView {
     return icon.getChild("arrow") as SvgView;
   }
 
-  @ThemeAnimator({type: Expansion, inherits: true, updateFlags: View.NeedsLayout})
-  readonly disclosure!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;
+  @ExpansionAnimator({type: Expansion, inherits: true, updateFlags: View.NeedsLayout})
+  readonly disclosure!: ExpansionAnimator<this, Expansion, AnyExpansion>;
 
-  @ThemeAnimator({type: Color, inherits: true, look: Look.color, updateFlags: View.NeedsLayout})
+  @ThemeAnimator({type: Color, inherits: true, look: Look.textColor, updateFlags: View.NeedsLayout})
   readonly collapsedColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ThemeAnimator({type: Color, inherits: true, look: Look.accentColor, updateFlags: View.NeedsLayout})

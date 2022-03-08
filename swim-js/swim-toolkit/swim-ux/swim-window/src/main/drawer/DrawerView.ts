@@ -16,15 +16,15 @@ import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
 import {Affinity, Property} from "@swim/component";
 import {ConstraintProperty} from "@swim/constraint";
 import {AnyLength, Length} from "@swim/math";
-import {AnyPresence, Presence, AnyExpansion, Expansion} from "@swim/style";
 import {
-  Look,
-  Mood,
-  ThemeAnimator,
-  PresenceThemeAnimator,
-  ExpansionThemeAnimator,
-  ThemeConstraintAnimator,
-} from "@swim/theme";
+  AnyPresence,
+  Presence,
+  PresenceAnimator,
+  AnyExpansion,
+  Expansion,
+  ExpansionAnimator,
+} from "@swim/style";
+import {Look, Mood, ThemeConstraintAnimator} from "@swim/theme";
 import {
   ViewportInsets,
   ViewContextType,
@@ -180,10 +180,13 @@ export class DrawerView extends HtmlView implements Modal {
     }
   }
 
-  @ThemeAnimator<DrawerView, Presence, AnyPresence>({
+  @PresenceAnimator<DrawerView, Presence, AnyPresence>({
     type: Presence,
     value: Presence.presented(),
     updateFlags: View.NeedsLayout,
+    get transition(): Timing | null {
+      return this.owner.getLookOr(Look.timing, null);
+    },
     willPresent(): void {
       this.owner.willPresent();
     },
@@ -197,7 +200,7 @@ export class DrawerView extends HtmlView implements Modal {
       this.owner.didDismiss();
     },
   })
-  readonly slide!: PresenceThemeAnimator<this, Presence, AnyPresence>;
+  readonly slide!: PresenceAnimator<this, Presence, AnyPresence>;
 
   protected willExpand(): void {
     const modalService = this.modalProvider.service;
@@ -249,10 +252,13 @@ export class DrawerView extends HtmlView implements Modal {
     }
   }
 
-  @ThemeAnimator<DrawerView, Expansion, AnyExpansion>({
+  @ExpansionAnimator<DrawerView, Expansion, AnyExpansion>({
     type: Expansion,
     value: Expansion.expanded(),
     updateFlags: View.NeedsResize | View.NeedsLayout,
+    get transition(): Timing | null {
+      return this.owner.getLookOr(Look.timing, null);
+    },
     willExpand(): void {
       this.owner.willExpand();
     },
@@ -266,7 +272,7 @@ export class DrawerView extends HtmlView implements Modal {
       this.owner.didCollapse();
     },
   })
-  readonly stretch!: ExpansionThemeAnimator<this, Expansion, AnyExpansion>;
+  readonly stretch!: ExpansionAnimator<this, Expansion, AnyExpansion>;
 
   @Property({type: Object, inherits: true, value: null})
   readonly edgeInsets!: Property<this, ViewportInsets | null>;

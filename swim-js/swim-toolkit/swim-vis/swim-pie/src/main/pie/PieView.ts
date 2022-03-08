@@ -106,13 +106,13 @@ export class PieView extends GraphicsView {
   @ThemeAnimator({type: Length, value: Length.px(2)})
   readonly tickPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.neutralColor})
+  @ThemeAnimator({type: Color, value: null, look: Look.legendColor})
   readonly tickColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ThemeAnimator({type: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.mutedColor})
+  @ThemeAnimator({type: Color, value: null, look: Look.legendColor})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   @ViewRef<PieView, GraphicsView & Initable<GraphicsViewInit | string>>({

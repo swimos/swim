@@ -63,6 +63,7 @@
     "./swim-ui/swim-controller",
     "./swim-ui",
     "./swim-ux/swim-button",
+    "./swim-ux/swim-toolbar",
     "./swim-ux/swim-token",
     "./swim-ux/swim-table",
     "./swim-ux/swim-window",

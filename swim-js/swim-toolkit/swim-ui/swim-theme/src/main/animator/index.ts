@@ -37,21 +37,6 @@ export {ColorThemeAnimator} from "./ColorThemeAnimator";
 export {FontThemeAnimator} from "./FontThemeAnimator";
 
 export {
-  FocusThemeAnimatorInit,
-  FocusThemeAnimator,
-} from "./FocusThemeAnimator";
-
-export {
-  PresenceThemeAnimatorInit,
-  PresenceThemeAnimator,
-} from "./PresenceThemeAnimator";
-
-export {
-  ExpansionThemeAnimatorInit,
-  ExpansionThemeAnimator,
-} from "./ExpansionThemeAnimator";
-
-export {
   ThemeConstraintAnimatorInit,
   ThemeConstraintAnimatorDescriptor,
   ThemeConstraintAnimatorClass,

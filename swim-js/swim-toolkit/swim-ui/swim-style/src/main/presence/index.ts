@@ -18,3 +18,11 @@ export {
   Presence,
 } from "./Presence";
 export {PresenceInterpolator} from "./PresenceInterpolator";
+
+export {
+  PresenceAnimatorInit,
+  PresenceAnimatorDescriptor,
+  PresenceAnimatorClass,
+  PresenceAnimatorFactory,
+  PresenceAnimator,
+} from "./PresenceAnimator";

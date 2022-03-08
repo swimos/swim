@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Mutable, Proto, Arrays, ObserverType} from "@swim/util";
-import type {FastenerOwner, Fastener} from "@swim/component";
+import {Affinity, FastenerOwner, Fastener} from "@swim/component";
 import {
   AnyConstraintExpression,
   ConstraintExpression,
@@ -37,6 +37,16 @@ export type ViewRefType<F extends ViewRef<any, any>> =
 export interface ViewRefInit<V extends View = View> extends ViewRelationInit<V> {
   extends?: {prototype: ViewRef<any, any>} | string | boolean | null;
   key?: string | boolean;
+
+  willInherit?(superFastener: ViewRef<unknown, V>): void;
+  didInherit?(superFastener: ViewRef<unknown, V>): void;
+  willUninherit?(superFastener: ViewRef<unknown, V>): void;
+  didUninherit?(superFastener: ViewRef<unknown, V>): void;
+
+  willBindSuperFastener?(superFastener: ViewRef<unknown, V>): void;
+  didBindSuperFastener?(superFastener: ViewRef<unknown, V>): void;
+  willUnbindSuperFastener?(superFastener: ViewRef<unknown, V>): void;
+  didUnbindSuperFastener?(superFastener: ViewRef<unknown, V>): void;
 }
 
 /** @public */
@@ -69,8 +79,63 @@ export interface ViewRef<O = unknown, V extends View = View> extends ViewRelatio
   /** @override */
   get fastenerType(): Proto<ViewRef<any, any>>;
 
+  /** @internal @override */
+  setInherited(inherited: boolean, superFastener: ViewRef<unknown, V>): void;
+
   /** @protected @override */
-  onInherit(superFastener: Fastener): void;
+  willInherit(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  onInherit(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  didInherit(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  willUninherit(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  onUninherit(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  didUninherit(superFastener: ViewRef<unknown, V>): void;
+
+  /** @override */
+  readonly superFastener: ViewRef<unknown, V> | null;
+
+  /** @internal @override */
+  getSuperFastener(): ViewRef<unknown, V> | null;
+
+  /** @protected @override */
+  willBindSuperFastener(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  onBindSuperFastener(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  didBindSuperFastener(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  willUnbindSuperFastener(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  onUnbindSuperFastener(superFastener: ViewRef<unknown, V>): void;
+
+  /** @protected @override */
+  didUnbindSuperFastener(superFastener: ViewRef<unknown, V>): void;
+
+  /** @internal */
+  readonly subFasteners: ReadonlyArray<ViewRef<unknown, V>> | null;
+
+  /** @internal @override */
+  attachSubFastener(subFastener: ViewRef<unknown, V>): void;
+
+  /** @internal @override */
+  detachSubFastener(subFastener: ViewRef<unknown, V>): void;
+
+  get superView(): V | null;
+
+  getSuperView(): V;
 
   readonly view: V | null;
 
@@ -96,6 +161,15 @@ export interface ViewRef<O = unknown, V extends View = View> extends ViewRelatio
 
   /** @override */
   detectView(view: View): V | null;
+
+  /** @internal @protected */
+  decohereSubFasteners(): void;
+
+  /** @internal @protected */
+  decohereSubFastener(subFastener: ViewRef<unknown, V>): void;
+
+  /** @override */
+  recohere(t: number): void;
 
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation, rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint;
 
@@ -172,6 +246,56 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
     this.setView(superFastener.view);
   };
 
+  ViewRef.prototype.onBindSuperFastener = function <V extends View>(this: ViewRef<unknown, V>, superFastener: ViewRef<unknown, V>): void {
+    (this as Mutable<typeof this>).superFastener = superFastener;
+    _super.prototype.onBindSuperFastener.call(this, superFastener);
+  };
+
+  ViewRef.prototype.onUnbindSuperFastener = function <V extends View>(this: ViewRef<unknown, V>, superFastener: ViewRef<unknown, V>): void {
+    _super.prototype.onUnbindSuperFastener.call(this, superFastener);
+    (this as Mutable<typeof this>).superFastener = null;
+  };
+
+  ViewRef.prototype.attachSubFastener = function <V extends View>(this: ViewRef<unknown, V>, subFastener: ViewRef<unknown, V>): void {
+    let subFasteners = this.subFasteners as ViewRef<unknown, V>[] | null;
+    if (subFasteners === null) {
+      subFasteners = [];
+      (this as Mutable<typeof this>).subFasteners = subFasteners;
+    }
+    subFasteners.push(subFastener);
+  };
+
+  ViewRef.prototype.detachSubFastener = function <V extends View>(this: ViewRef<unknown, V>, subFastener: ViewRef<unknown, V>): void {
+    const subFasteners = this.subFasteners as ViewRef<unknown, V>[] | null;
+    if (subFasteners !== null) {
+      const index = subFasteners.indexOf(subFastener);
+      if (index >= 0) {
+        subFasteners.splice(index, 1);
+      }
+    }
+  };
+
+  Object.defineProperty(ViewRef.prototype, "superView", {
+    get: function <V extends View>(this: ViewRef<unknown, V>): V | null {
+      const superFastener = this.superFastener;
+      return superFastener !== null ? superFastener.view : null;
+    },
+    configurable: true,
+  });
+
+  ViewRef.prototype.getSuperView = function <V extends View>(this: ViewRef<unknown, V>): V {
+    const superView = this.superView;
+    if (superView === void 0 || superView === null) {
+      let message = superView + " ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "super view";
+      throw new TypeError(message);
+    }
+    return superView;
+  };
+
   ViewRef.prototype.getView = function <V extends View>(this: ViewRef<unknown, V>): V {
     const view = this.view;
     if (view === null) {
@@ -213,19 +337,21 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
       if (oldView !== newView) {
         if (oldView !== null) {
           this.deactivateLayout();
-          this.willDetachView(oldView);
           (this as Mutable<typeof this>).view = null;
+          this.willDetachView(oldView);
           this.onDetachView(oldView);
           this.deinitView(oldView);
           this.didDetachView(oldView);
         }
         if (newView !== null) {
-          this.willAttachView(newView, target);
           (this as Mutable<typeof this>).view = newView;
+          this.willAttachView(newView, target);
           this.onAttachView(newView, target);
           this.initView(newView);
           this.didAttachView(newView, target);
         }
+        this.setCoherent(true);
+        this.decohereSubFasteners();
       }
     }
     return oldView;
@@ -246,17 +372,19 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
       }
       if (oldView !== null) {
         this.deactivateLayout();
-        this.willDetachView(oldView);
         (this as Mutable<typeof this>).view = null;
+        this.willDetachView(oldView);
         this.onDetachView(oldView);
         this.deinitView(oldView);
         this.didDetachView(oldView);
       }
-      this.willAttachView(newView, target);
       (this as Mutable<typeof this>).view = newView;
+      this.willAttachView(newView, target);
       this.onAttachView(newView, target);
       this.initView(newView);
       this.didAttachView(newView, target);
+      this.setCoherent(true);
+      this.decohereSubFasteners();
     }
     return newView;
   };
@@ -265,11 +393,13 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
     const oldView = this.view;
     if (oldView !== null) {
       this.deactivateLayout();
-      this.willDetachView(oldView);
       (this as Mutable<typeof this>).view = null;
+      this.willDetachView(oldView);
       this.onDetachView(oldView);
       this.deinitView(oldView);
       this.didDetachView(oldView);
+      this.setCoherent(true);
+      this.decohereSubFasteners();
     }
     return oldView;
   };
@@ -301,18 +431,20 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
     if (newView !== oldView) {
       if (oldView !== null) {
         this.deactivateLayout();
-        this.willDetachView(oldView);
         (this as Mutable<typeof this>).view = null;
+        this.willDetachView(oldView);
         this.onDetachView(oldView);
         this.deinitView(oldView);
         this.didDetachView(oldView);
         oldView.remove();
       }
-      this.willAttachView(newView, target);
       (this as Mutable<typeof this>).view = newView;
+      this.willAttachView(newView, target);
       this.onAttachView(newView, target);
       this.initView(newView);
       this.didAttachView(newView, target);
+      this.setCoherent(true);
+      this.decohereSubFasteners();
     }
     return newView;
   };
@@ -337,11 +469,13 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
     if (this.binds && this.view === null) {
       const newView = this.detectView(view);
       if (newView !== null) {
-        this.willAttachView(newView, target);
         (this as Mutable<typeof this>).view = newView;
+        this.willAttachView(newView, target);
         this.onAttachView(newView, target);
         this.initView(newView);
         this.didAttachView(newView, target);
+        this.setCoherent(true);
+        this.decohereSubFasteners();
       }
     }
   };
@@ -351,11 +485,13 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
       const oldView = this.detectView(view);
       if (oldView !== null && this.view === oldView) {
         this.deactivateLayout();
-        this.willDetachView(oldView);
         (this as Mutable<typeof this>).view = null;
+        this.willDetachView(oldView);
         this.onDetachView(oldView);
         this.deinitView(oldView);
         this.didDetachView(oldView);
+        this.setCoherent(true);
+        this.decohereSubFasteners();
       }
     }
   };
@@ -366,6 +502,31 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
       return view as V;
     }
     return null;
+  };
+
+  ViewRef.prototype.decohereSubFasteners = function (this: ViewRef): void {
+    const subFasteners = this.subFasteners;
+    for (let i = 0, n = subFasteners !== null ? subFasteners.length : 0; i < n; i += 1) {
+      this.decohereSubFastener(subFasteners![i]!);
+    }
+  };
+
+  ViewRef.prototype.decohereSubFastener = function (this: ViewRef, subFastener: ViewRef): void {
+    if ((subFastener.flags & Fastener.InheritedFlag) === 0 && Math.min(this.flags & Affinity.Mask, Affinity.Intrinsic) >= (subFastener.flags & Affinity.Mask)) {
+      subFastener.setInherited(true, this);
+    } else if ((subFastener.flags & Fastener.InheritedFlag) !== 0 && (subFastener.flags & Fastener.DecoherentFlag) === 0) {
+      subFastener.setCoherent(false);
+      subFastener.decohere();
+    }
+  };
+
+  ViewRef.prototype.recohere = function (this: ViewRef, t: number): void {
+    if ((this.flags & Fastener.InheritedFlag) !== 0) {
+      const superFastener = this.superFastener;
+      if (superFastener !== null) {
+        this.setView(superFastener.view);
+      }
+    }
   };
 
   ViewRef.prototype.constraint = function (this: ViewRef<ConstraintScope & ConstraintContext, View>, lhs: AnyConstraintExpression, relation: ConstraintRelation, rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {
@@ -516,6 +677,13 @@ export const ViewRef = (function (_super: typeof ViewRelation) {
       Object.setPrototypeOf(fastener, fastenerClass.prototype);
     }
     fastener = _super.construct(fastenerClass, fastener, owner) as F;
+    Object.defineProperty(fastener, "superFastener", { // override getter
+      value: null,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+    (fastener as Mutable<typeof fastener>).subFasteners = null;
     (fastener as Mutable<typeof fastener>).view = null;
     (fastener as Mutable<typeof fastener>).constraints = Arrays.empty;
     (fastener as Mutable<typeof fastener>).constraintVariables = Arrays.empty;

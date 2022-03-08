@@ -15,7 +15,7 @@
 import {Mutable, FromAny, AnyTiming, Timing} from "@swim/util";
 import {Affinity, FastenerOwner, Property, AnimatorInit, AnimatorClass, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyTransform, Transform} from "@swim/math";
-import {AnyFont, Font, AnyColor, Color, AnyFocus, Focus, AnyPresence, Presence, AnyExpansion, Expansion} from "@swim/style";
+import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look} from "../look/Look";
 import type {MoodVector} from "../mood/MoodVector";
 import type {ThemeMatrix} from "../theme/ThemeMatrix";
@@ -28,9 +28,6 @@ import {LengthThemeAnimator} from "./"; // forward import
 import {TransformThemeAnimator} from "./"; // forward import
 import {ColorThemeAnimator} from "./"; // forward import
 import {FontThemeAnimator} from "./"; // forward import
-import {FocusThemeAnimatorInit, FocusThemeAnimator} from "./"; // forward import
-import {PresenceThemeAnimatorInit, PresenceThemeAnimator} from "./"; // forward import
-import {ExpansionThemeAnimatorInit, ExpansionThemeAnimator} from "./"; // forward import
 
 /** @public */
 export interface ThemeAnimatorInit<T = unknown, U = T> extends AnimatorInit<T, U> {
@@ -62,9 +59,6 @@ export interface ThemeAnimatorFactory<A extends ThemeAnimator<any, any> = ThemeA
   <O, T extends Transform | null | undefined = Transform | null | undefined, U extends AnyTransform | null | undefined = AnyTransform | null | undefined>(descriptor: {type: typeof Transform} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends Color | null | undefined = Color | null | undefined, U extends AnyColor | null | undefined = AnyColor | null | undefined>(descriptor: {type: typeof Color} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends Font | null | undefined = Font | null | undefined, U extends AnyFont | null | undefined = AnyFont | null | undefined>(descriptor: {type: typeof Font} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
-  <O, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = AnyFocus | null | undefined>(descriptor: {type: typeof Focus} & ThemeAnimatorDescriptor<O, T, U> & FocusThemeAnimatorInit): PropertyDecorator;
-  <O, T extends Presence | null | undefined = Presence | null | undefined, U extends AnyPresence | null | undefined = AnyPresence | null | undefined>(descriptor: {type: typeof Presence} & ThemeAnimatorDescriptor<O, T, U> & PresenceThemeAnimatorInit): PropertyDecorator;
-  <O, T extends Expansion | null | undefined = Expansion | null | undefined, U extends AnyExpansion | null | undefined = AnyExpansion | null | undefined>(descriptor: {type: typeof Expansion} & ThemeAnimatorDescriptor<O, T, U> & ExpansionThemeAnimatorInit): PropertyDecorator;
   <O, T extends string | undefined = string | undefined, U extends string | undefined = string | undefined>(descriptor: {type: typeof String} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
   <O, T extends boolean | undefined = boolean | undefined, U extends boolean | string | undefined = boolean | string | undefined>(descriptor: {type: typeof Boolean} & ThemeAnimatorDescriptor<O, T, U>): PropertyDecorator;
@@ -291,12 +285,6 @@ export const ThemeAnimator = (function (_super: typeof Animator) {
       return ColorThemeAnimator;
     } else if (type === Font) {
       return FontThemeAnimator;
-    } else if (type === Focus) {
-      return FocusThemeAnimator;
-    } else if (type === Presence) {
-      return PresenceThemeAnimator;
-    } else if (type === Expansion) {
-      return ExpansionThemeAnimator;
     }
     return null;
   };

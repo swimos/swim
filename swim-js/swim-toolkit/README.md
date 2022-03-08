@@ -79,7 +79,7 @@ by a comma-separated list of package names. For example, to build the `ui`
 package, run:
 
 ```sh
-npx swim-build compile -p ui
+npx swim-build -p ui
 ```
 
 #### Running tests

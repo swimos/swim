@@ -27,9 +27,6 @@ const containerView = bodyView.appendChild("div")
   .userSelect("none");
 
 class ExampleTableController extends swim.TableController {
-  createRowFastener(rowController) {
-    return ExampleTableController.RowFastener.create(this);
-  }
 }
 swim.TraitViewControllerSet({
   extends: true,
@@ -56,7 +53,7 @@ const tableTrait = new swim.TableTrait();
 tableModel.setTrait("table", tableTrait);
 tableTrait.header.insertTrait();
 const colATrait = new swim.ColTrait()
-  .layout({key: "a", grow: 2, textColor: swim.Look.mutedColor})
+  .layout({key: "a", grow: 2, textColor: swim.Look.labelColor})
   .label("A");
 tableTrait.setTrait("a", colATrait);
 const colBTrait = new swim.ColTrait()

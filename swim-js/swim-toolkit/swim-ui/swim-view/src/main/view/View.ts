@@ -972,8 +972,8 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   protected onChange(viewContext: ViewContextType<this>): void {
-    this.updateTheme();
     this.recohereFasteners(viewContext.updateTime);
+    this.updateTheme();
   }
 
   protected didChange(viewContext: ViewContextType<this>): void {
