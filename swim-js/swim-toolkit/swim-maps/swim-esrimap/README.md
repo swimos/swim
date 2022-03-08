@@ -2,4 +2,4 @@
 
 The Swim Esri Map library implements [Swim Map][map] overlays for ArcGIS maps.
 
-[map]: https://github.com/swimos/swim/tree/main/swim-js/swim-toolkit-js/swim-maps-js/@swim/map
+[map]: https://github.com/swimos/swim/tree/main/swim-js/swim-toolkit/swim-maps/@swim/map
