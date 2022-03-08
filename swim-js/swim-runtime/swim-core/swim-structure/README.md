@@ -247,5 +247,5 @@ which, if defined, can be used to optimize polymorphic `cast` operations.
 
 The Swim Structure library implements standard forms for builtin JavaScript types.
 
-[dataflow]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/dataflow
-[recon]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/recon
+[dataflow]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/dataflow
+[recon]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/recon

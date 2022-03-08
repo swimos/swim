@@ -896,5 +896,5 @@ The `unresolve` instance method returns the relative components of its URI
 argument, with respect to the cache's base URI, returning a cached instance
 of the unresolved URI when possible.
 
-[util]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/util
-[codec]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/codec
+[util]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/util
+[codec]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/codec

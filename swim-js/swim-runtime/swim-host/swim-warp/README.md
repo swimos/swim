@@ -186,4 +186,4 @@ A deauthed response is distinguished by a `@deauthed` attribute:
 @deauthed
 ```
 
-[recon]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/recon
+[recon]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/recon

@@ -496,5 +496,5 @@ InvokeOperator ::= Primary ('(' Block ')')*
 Primary ::= Literal | '(' BlockExpression (',' BlockExpression)* ')'
 ```
 
-[codec]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/codec
-[structure]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/structure
+[codec]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/codec
+[structure]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/structure

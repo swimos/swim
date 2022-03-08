@@ -18,5 +18,5 @@ The `Dataflow.compile` method can also be used to compile an arbitrary
 Swim Structure expression into an `Outlet` that updates whenever
 the state of any of its transitively dependend expressions changes.
 
-[structure]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/structure
-[streamlet]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/streamlet
+[structure]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/structure
+[streamlet]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/streamlet

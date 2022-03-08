@@ -473,4 +473,4 @@ swim.downlinkList()
     })
 ```
 
-[structure]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/structure
+[structure]: https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/@swim/structure
