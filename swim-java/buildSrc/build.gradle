@@ -10,7 +10,7 @@ repositories {
 sourceSets {
   main {
     groovy {
-      srcDir "${rootDir}/../swim-runtime-java/buildSrc/src/main/groovy"
+      srcDir "${rootDir}/../swim-runtime/buildSrc/src/main/groovy"
     }
   }
 }

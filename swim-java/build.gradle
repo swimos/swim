@@ -86,9 +86,9 @@ javadoc {
                    "</script>\n";
 
   options.addStringOption('-module-source-path', [
-                          "${projectDir}/swim-runtime-java/swim-core-java/*/src/main/java",
-                          "${projectDir}/swim-runtime-java/swim-host-java/*/src/main/java",
-                          "${projectDir}/swim-runtime-java/swim-polyglot-java/*/src/main/java"].join(':'))
+                          "${projectDir}/swim-runtime/swim-core/*/src/main/java",
+                          "${projectDir}/swim-runtime/swim-host/*/src/main/java",
+                          "${projectDir}/swim-runtime/swim-polyglot/*/src/main/java"].join(':'))
 }
 
 subprojects {

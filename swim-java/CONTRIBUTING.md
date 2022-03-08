@@ -5,7 +5,7 @@ implementing a different part of the backend stack. Frameworks group together
 into runtimes. With one or more runtimes bundled together making a stack.
 Please see each individual subsystem for its particular contributing guidelines.
 
-- **[Swim Runtime](swim-runtime-java)**
-  - [Core Framework](swim-runtime-java/swim-core-java)
-  - [Host Framework](swim-runtime-java/swim-host-java)
-  - [Polyglot Framework](swim-runtime-java/swim-polyglot-java)
+- **[Swim Runtime](swim-runtime)**
+  - [Core Framework](swim-runtime/swim-core)
+  - [Host Framework](swim-runtime/swim-host)
+  - [Polyglot Framework](swim-runtime/swim-polyglot)
