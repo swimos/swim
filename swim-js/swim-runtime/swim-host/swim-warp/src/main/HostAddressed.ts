@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Constructors} from "@swim/util";
+import {Instance, Murmur3, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {AnyValue, Value, Attr} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
@@ -90,7 +90,7 @@ export abstract class HostAddressed<E extends HostAddressed<E> = HostAddressed<a
     return Attr.of(this.tag).concat(this.body);
   }
 
-  static override fromValue<F extends HostAddressedConstructor<InstanceType<F>>>(this: F, value: Value): InstanceType<F> | null {
+  static override fromValue<S extends HostAddressedConstructor<Instance<S, HostAddressed<any>>>>(this: S, value: Value): InstanceType<S> | null {
     const header = value.header(this.tag);
     if (header.isDefined()) {
       const body = value.body();
@@ -99,7 +99,7 @@ export abstract class HostAddressed<E extends HostAddressed<E> = HostAddressed<a
     return null;
   }
 
-  static create<F extends HostAddressedConstructor<InstanceType<F>>>(this: F, body?: AnyValue): InstanceType<F> {
+  static create<S extends HostAddressedConstructor<Instance<S, HostAddressed<any>>>>(this: S, body?: AnyValue): InstanceType<S> {
     if (body === void 0) {
       body = Value.absent();
     } else {

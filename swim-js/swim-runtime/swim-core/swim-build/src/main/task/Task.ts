@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
+import type {Class, Instance} from "@swim/util";
 import {OutputSettings, Output, OutputStyle, Unicode} from "@swim/codec";
 import {Property} from "@swim/component";
 import {Scope} from "../scope/Scope";
@@ -132,7 +132,7 @@ export abstract class Task extends Scope {
     console.log("");
   }
 
-  static config<S extends Class<InstanceType<S>>>(this: S, options?: TaskOptionsType<InstanceType<S>>): TaskConfig<InstanceType<S>> {
+  static config<S extends Class<Instance<S, Task>>>(this: S, options?: TaskOptionsType<InstanceType<S>>): TaskConfig<InstanceType<S>> {
     return {
       class: this,
       options: options,

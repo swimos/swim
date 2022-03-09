@@ -15,6 +15,7 @@
 import {
   Mutable,
   Class,
+  Instance,
   Proto,
   Arrays,
   HashCode,
@@ -64,10 +65,6 @@ export interface ComponentClass<C extends Component = Component, U = AnyComponen
 export interface ComponentConstructor<C extends Component = Component, U = AnyComponent<C>> extends ComponentClass<C, U> {
   new(): C;
 }
-
-/** @public */
-export type ComponentCreator<F extends Class<C> & Creatable<InstanceType<F>>, C extends Component = Component> =
-  Class<InstanceType<F>> & Creatable<InstanceType<F>>;
 
 /** @public */
 export class Component<C extends Component<C> = Component<any>> implements HashCode, FastenerContext, Initable<ComponentInit>, Observable {
@@ -992,25 +989,25 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     // hook
   }
 
-  static create<F extends new () => InstanceType<F>>(this: F): InstanceType<F> {
+  static create<S extends new () => InstanceType<S>>(this: S): InstanceType<S> {
     return new this();
   }
 
-  static fromInit<F extends Class<InstanceType<F>>>(this: F, init: InitType<InstanceType<F>>): InstanceType<F> {
-    let type: Creatable<InstanceType<F>>;
+  static fromInit<S extends Class<Instance<S, Component>>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
+    let type: Creatable<InstanceType<S>>;
     if ((typeof init === "object" && init !== null || typeof init === "function") && Creatable.is((init as ComponentInit).type)) {
-      type = (init as ComponentInit).type as Creatable<InstanceType<F>>;
+      type = (init as ComponentInit).type as Creatable<InstanceType<S>>;
     } else {
-      type = this as unknown as Creatable<InstanceType<F>>;
+      type = this as unknown as Creatable<InstanceType<S>>;
     }
     const component = type.create();
-    (component as Initable<InitType<F>>).init(init);
+    (component as Initable<InitType<InstanceType<S>>>).init(init);
     return component;
   }
 
-  static fromAny<F extends Class<InstanceType<F>>>(this: F, value: AnyComponent<InstanceType<F>>): InstanceType<F> {
+  static fromAny<S extends Class<Instance<S, Component>>>(this: S, value: AnyComponent<InstanceType<S>>): InstanceType<S> {
     if (value === void 0 || value === null) {
-      return value as InstanceType<F>;
+      return value as InstanceType<S>;
     } else if (value instanceof Component) {
       if (value instanceof this) {
         return value;
@@ -1018,9 +1015,9 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
         throw new TypeError(value + " not an instance of " + this);
       }
     } else if (Creatable.is(value)) {
-      return (value as Creatable<InstanceType<F>>).create();
+      return (value as Creatable<InstanceType<S>>).create();
     } else {
-      return (this as unknown as ComponentFactory<InstanceType<F>>).fromInit(value);
+      return (this as unknown as ComponentFactory<InstanceType<S>>).fromInit(value);
     }
   }
 

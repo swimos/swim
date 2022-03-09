@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Numbers, Constructors} from "@swim/util";
+import {Instance, Murmur3, Numbers, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {Item, Attr, AnyValue, Value, Record} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
@@ -128,7 +128,7 @@ export abstract class LinkAddressed<E extends LinkAddressed<E> = LinkAddressed<a
     return Attr.of(this.tag, header).concat(this.body);
   }
 
-  static override fromValue<S extends LinkAddressedConstructor<InstanceType<S>>>(this: S, value: Value): InstanceType<S> | null {
+  static override fromValue<S extends LinkAddressedConstructor<Instance<S, LinkAddressed<any>>>>(this: S, value: Value): InstanceType<S> | null {
     let node: Uri | undefined;
     let lane: Uri | undefined;
     let prio = 0;
@@ -161,7 +161,7 @@ export abstract class LinkAddressed<E extends LinkAddressed<E> = LinkAddressed<a
     return null;
   }
 
-  static create<S extends LinkAddressedConstructor<InstanceType<S>>>(this: S, node: AnyUri, lane: AnyUri, prio?: number, rate?: number, body?: AnyValue): InstanceType<S> {
+  static create<S extends LinkAddressedConstructor<Instance<S, LinkAddressed<any>>>>(this: S, node: AnyUri, lane: AnyUri, prio?: number, rate?: number, body?: AnyValue): InstanceType<S> {
     node = Uri.fromAny(node);
     lane = Uri.fromAny(lane);
     if (prio === void 0) {

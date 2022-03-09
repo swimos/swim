@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Constructors} from "@swim/util";
+import {Instance, Murmur3, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {Item, Attr, AnyValue, Value, Record} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
@@ -83,7 +83,7 @@ export abstract class WorkerAddressed<S extends WorkerAddressed<S> = WorkerAddre
     return Attr.of(this.tag, header).concat(this.body);
   }
 
-  static override fromValue<S extends WorkerAddressedConstructor<InstanceType<S>>>(this: S, value: Value): InstanceType<S> | null {
+  static override fromValue<S extends WorkerAddressedConstructor<Instance<S, WorkerAddressed<any>>>>(this: S, value: Value): InstanceType<S> | null {
     let host: Uri | undefined;
     const header = value.header(this.tag);
     header.forEach(function (header: Item, index: number) {
@@ -105,7 +105,7 @@ export abstract class WorkerAddressed<S extends WorkerAddressed<S> = WorkerAddre
     return null;
   }
 
-  static create<S extends WorkerAddressedConstructor<InstanceType<S>>>(this: S, host: AnyUri, body?: AnyValue): InstanceType<S> {
+  static create<S extends WorkerAddressedConstructor<Instance<S, WorkerAddressed<any>>>>(this: S, host: AnyUri, body?: AnyValue): InstanceType<S> {
     host = Uri.fromAny(host);
     if (body === void 0) {
       body = Value.absent();

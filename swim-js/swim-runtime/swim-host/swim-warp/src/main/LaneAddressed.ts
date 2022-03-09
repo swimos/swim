@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Constructors} from "@swim/util";
+import {Instance, Murmur3, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {Item, Attr, AnyValue, Value, Record} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
@@ -94,7 +94,7 @@ export abstract class LaneAddressed<E extends LaneAddressed<E> = LaneAddressed<a
     return Attr.of(this.tag, header).concat(this.body);
   }
 
-  static override fromValue<S extends LaneAddressedConstructor<InstanceType<S>>>(this: S, value: Value): InstanceType<S> | null {
+  static override fromValue<S extends LaneAddressedConstructor<Instance<S, LaneAddressed<any>>>>(this: S, value: Value): InstanceType<S> | null {
     let node: Uri | undefined;
     let lane: Uri | undefined;
     const header = value.header(this.tag);
@@ -121,7 +121,7 @@ export abstract class LaneAddressed<E extends LaneAddressed<E> = LaneAddressed<a
     return null;
   }
 
-  static create<S extends LaneAddressedConstructor<InstanceType<S>>>(this: S, node: AnyUri, lane: AnyUri, body?: AnyValue): InstanceType<S> {
+  static create<S extends LaneAddressedConstructor<Instance<S, LaneAddressed<any>>>>(this: S, node: AnyUri, lane: AnyUri, body?: AnyValue): InstanceType<S> {
     node = Uri.fromAny(node);
     lane = Uri.fromAny(lane);
     if (body === void 0) {

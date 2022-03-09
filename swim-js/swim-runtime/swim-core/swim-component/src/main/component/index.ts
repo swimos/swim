@@ -19,7 +19,6 @@ export {
   ComponentFactory,
   ComponentClass,
   ComponentConstructor,
-  ComponentCreator,
   Component,
 } from "./Component";
 export {ComponentObserver} from "./ComponentObserver";

@@ -12,19 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {Mutable} from "./Mutable";
-
-export {Class} from "./Class";
-
-export {Instance} from "./Instance";
-
-export {
-  ProtoType,
-  Proto,
-} from "./Proto";
-
-export {
-  Methods,
-  MethodParameters,
-  MethodReturnType,
-} from "./Method";
+/** @public */
+export type Instance<C extends abstract new (...args: any) => any, B = unknown> =
+  C extends abstract new (...args: any) => infer T ? (T extends B ? B : never) : never;
