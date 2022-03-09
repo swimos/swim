@@ -145,6 +145,19 @@ export class DeckController extends Controller {
   readonly deck!: TraitViewRef<this, DeckTrait, DeckView>;
   static readonly deck: MemberFastenerClass<DeckController, "deck">;
 
+  protected didPressClose(input: PositionGestureInput, event: Event | null): void {
+    this.callObservers("controllerDidPressClose", input, event, this);
+  }
+
+  protected didPressBack(input: PositionGestureInput, event: Event | null): void {
+    this.topCard.dismiss();
+    this.callObservers("controllerDidPressBack", input, event, this);
+  }
+
+  protected didPressMenu(input: PositionGestureInput, event: Event | null): void {
+    this.callObservers("controllerDidPressMenu", input, event, this);
+  }
+
   @TraitViewControllerRef<DeckController, BarTrait, BarView, BarController, DeckControllerBarExt & ObserverType<BarController | DeckBarController>>({
     implements: true,
     type: BarController,
@@ -220,14 +233,13 @@ export class DeckController extends Controller {
       barView.remove();
     },
     controllerDidPressClose(input: PositionGestureInput, event: Event | null): void {
-      this.owner.callObservers("controllerDidPressClose", input, event, this.owner);
+      this.owner.didPressClose(input, event);
     },
     controllerDidPressBack(input: PositionGestureInput, event: Event | null): void {
-      this.owner.topCard.dismiss();
-      this.owner.callObservers("controllerDidPressBack", input, event, this.owner);
+      this.owner.didPressBack(input, event);
     },
     controllerDidPressMenu(input: PositionGestureInput, event: Event | null): void {
-      this.owner.callObservers("controllerDidPressMenu", input, event, this.owner);
+      this.owner.didPressMenu(input, event);
     },
     detectController(controller: Controller): BarController | null {
       return controller instanceof BarController ? controller : null;

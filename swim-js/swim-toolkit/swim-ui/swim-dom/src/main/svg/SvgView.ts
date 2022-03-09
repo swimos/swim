@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Creatable, InitType} from "@swim/util";
+import {Class, Instance, AnyTiming, Creatable, InitType} from "@swim/util";
 import type {MemberAnimatorInit} from "@swim/component";
 import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
 import {
@@ -26,7 +26,7 @@ import {
   AnyColor,
   Color,
 } from "@swim/style";
-import {AnyView, ViewCreator, View} from "@swim/view";
+import {AnyView, View} from "@swim/view";
 import {AttributeAnimator} from "../animator/AttributeAnimator";
 import {StyleAnimator} from "../animator/StyleAnimator";
 import type {
@@ -227,7 +227,7 @@ export class SvgView extends ElementView {
   override readonly node!: SVGElement;
 
   override setChild<V extends View>(key: string, newChild: V): View | null;
-  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
+  override setChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyView | Node | keyof SvgViewTagMap | null): View | null;
   override setChild(key: string, newChild: AnyView | Node | keyof SvgViewTagMap | null): View | null {
     if (typeof newChild === "string") {
@@ -237,7 +237,7 @@ export class SvgView extends ElementView {
   }
 
   override appendChild<V extends View>(child: V, key?: string): V;
-  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, key?: string): InstanceType<F>;
   override appendChild<K extends keyof SvgViewTagMap>(tag: K, key?: string): SvgViewTagMap[K];
   override appendChild(child: AnyView | Node | keyof SvgViewTagMap, key?: string): View;
   override appendChild(child: AnyView | Node | keyof SvgViewTagMap, key?: string): View {
@@ -248,7 +248,7 @@ export class SvgView extends ElementView {
   }
 
   override prependChild<V extends View>(child: V, key?: string): V;
-  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, key?: string): InstanceType<F>;
   override prependChild<K extends keyof SvgViewTagMap>(tag: K, key?: string): SvgViewTagMap[K];
   override prependChild(child: AnyView | Node | keyof SvgViewTagMap, key?: string): View;
   override prependChild(child: AnyView | Node | keyof SvgViewTagMap, key?: string): View {
@@ -259,7 +259,7 @@ export class SvgView extends ElementView {
   }
 
   override insertChild<V extends View>(child: V, target: View | Node | null, key?: string): V;
-  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | Node | null, key?: string): InstanceType<F>;
+  override insertChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, target: View | Node | null, key?: string): InstanceType<F>;
   override insertChild<K extends keyof SvgViewTagMap>(tag: K, target: View | Node | null, key?: string): SvgViewTagMap[K];
   override insertChild(child: AnyView | Node | keyof SvgViewTagMap, target: View | Node | null, key?: string): View;
   override insertChild(child: AnyView | Node | keyof SvgViewTagMap, target: View | Node | null, key?: string): View {
@@ -705,20 +705,20 @@ export class SvgView extends ElementView {
 
   static override readonly namespace: string = "http://www.w3.org/2000/svg";
 
-  static override create<S extends abstract new (...args: any) => InstanceType<S>>(this: S): InstanceType<S>;
+  static override create<S extends Class<Instance<S, SvgView>>>(this: S): InstanceType<S>;
   static override create(): SvgView;
   static override create(): SvgView {
     return this.fromTag(this.tag);
   }
 
-  static override fromTag<S extends abstract new (...args: any) => InstanceType<S>>(this: S, tag: string): InstanceType<S>;
+  static override fromTag<S extends Class<Instance<S, SvgView>>>(this: S, tag: string): InstanceType<S>;
   static override fromTag(tag: string): SvgView;
   static override fromTag(tag: string): SvgView {
     const node = document.createElementNS(this.namespace, tag) as SVGElement;
     return this.fromNode(node);
   }
 
-  static override fromNode<S extends new (node: SVGElement) => InstanceType<S>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
+  static override fromNode<S extends new (node: SVGElement) => Instance<S, SvgView>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
   static override fromNode(node: SVGElement): SvgView;
   static override fromNode(node: SVGElement): SvgView {
     let view = (node as ViewSvg).view;
@@ -731,7 +731,7 @@ export class SvgView extends ElementView {
     return view;
   }
 
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnySvgView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny<S extends Class<Instance<S, SvgView>>>(this: S, value: AnySvgView<InstanceType<S>>): InstanceType<S>;
   static override fromAny(value: AnySvgView | string): SvgView;
   static override fromAny(value: AnySvgView | string): SvgView {
     if (value === void 0 || value === null) {
@@ -753,7 +753,7 @@ export class SvgView extends ElementView {
     }
   }
 
-  static forTag<S extends abstract new (...args: any) => InstanceType<S>>(this: S, tag: string): SvgViewFactory<InstanceType<S>>;
+  static forTag<S extends Class<Instance<S, SvgView>>>(this: S, tag: string): SvgViewFactory<InstanceType<S>>;
   static forTag(tag: string): SvgViewFactory;
   static forTag(tag: string): SvgViewFactory {
     if (tag === this.tag) {

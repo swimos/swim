@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Timing} from "@swim/util";
+import type {Class, Instance, Creatable, Timing} from "@swim/util";
 import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {
@@ -29,7 +29,6 @@ import {
   PositionGesture,
   ViewContextType,
   ViewFlags,
-  ViewCreator,
   View,
   ViewSet,
 } from "@swim/view";
@@ -138,9 +137,9 @@ export class LeafView extends HtmlView {
   })
   readonly highlight!: FocusAnimator<this, Focus, AnyFocus>;
 
-  getCell<F extends abstract new (...args: any) => CellView>(key: string, cellViewClass: F): InstanceType<F> | null;
+  getCell<F extends Class<CellView>>(key: string, cellViewClass: F): InstanceType<F> | null;
   getCell(key: string): CellView | null;
-  getCell(key: string, cellViewClass?: abstract new (...args: any) => CellView): CellView | null {
+  getCell(key: string, cellViewClass?: Class<CellView>): CellView | null {
     if (cellViewClass === void 0) {
       cellViewClass = CellView;
     }
@@ -148,7 +147,7 @@ export class LeafView extends HtmlView {
     return cellView instanceof cellViewClass ? cellView : null;
   }
 
-  getOrCreateCell<F extends ViewCreator<F, CellView>>(key: string, cellViewClass: F): InstanceType<F> {
+  getOrCreateCell<F extends Class<Instance<F, CellView>> & Creatable<Instance<F, CellView>>>(key: string, cellViewClass: F): InstanceType<F> {
     let cellView = this.getChild(key, cellViewClass);
     if (cellView === null) {
       cellView = cellViewClass.create();

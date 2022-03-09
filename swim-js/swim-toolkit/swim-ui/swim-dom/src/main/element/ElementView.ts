@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Arrays, Creatable, ObserverType} from "@swim/util";
+import {Class, Instance, Arrays, Creatable, ObserverType} from "@swim/util";
 import {Affinity} from "@swim/component";
 import {R2Box} from "@swim/math";
 import {ThemeMatrix, Theme} from "@swim/theme";
@@ -388,7 +388,7 @@ export class ElementView extends NodeView implements StyleContext {
   /** @internal */
   static readonly namespace?: string;
 
-  static override create<S extends abstract new (...args: any) => InstanceType<S>>(this: S): InstanceType<S>;
+  static override create<S extends Class<Instance<S, ElementView>>>(this: S): InstanceType<S>;
   static override create(): ElementView;
   static override create(): ElementView {
     let tag = this.tag;
@@ -398,7 +398,7 @@ export class ElementView extends NodeView implements StyleContext {
     return this.fromTag(tag);
   }
 
-  static fromTag<S extends abstract new (...args: any) => InstanceType<S>>(this: S, tag: string, namespace?: string): InstanceType<S>;
+  static fromTag<S extends Class<Instance<S, ElementView>>>(this: S, tag: string, namespace?: string): InstanceType<S>;
   static fromTag(tag: string, namespace?: string): ElementView;
   static fromTag(tag: string, namespace?: string): ElementView {
     if (namespace === void 0) {
@@ -415,7 +415,7 @@ export class ElementView extends NodeView implements StyleContext {
     return this.fromNode(node);
   }
 
-  static override fromNode<S extends new (node: Element) => InstanceType<S>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
+  static override fromNode<S extends new (node: Element) => Instance<S, ElementView>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
   static override fromNode(node: Element): ElementView;
   static override fromNode(node: Element): ElementView {
     let view = (node as ViewElement).view;
@@ -434,7 +434,7 @@ export class ElementView extends NodeView implements StyleContext {
     return view;
   }
 
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyElementView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny<S extends Class<Instance<S, ElementView>>>(this: S, value: AnyElementView<InstanceType<S>>): InstanceType<S>;
   static override fromAny(value: AnyElementView | string): ElementView;
   static override fromAny(value: AnyElementView | string): ElementView {
     if (value === void 0 || value === null) {

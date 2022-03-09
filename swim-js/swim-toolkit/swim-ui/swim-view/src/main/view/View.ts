@@ -15,6 +15,7 @@
 import {
   Mutable,
   Class,
+  Instance,
   Arrays,
   FromAny,
   AnyTiming,
@@ -139,10 +140,6 @@ export interface ViewConstructor<V extends View = View, U = AnyView<V>> extends 
 }
 
 /** @public */
-export type ViewCreator<F extends (abstract new (...args: any) => V) & Creatable<InstanceType<F>>, V extends View = View> =
-  (abstract new (...args: any) => InstanceType<F>) & Creatable<InstanceType<F>>;
-
-/** @public */
 export class View extends Component<View> implements Initable<ViewInit>, ConstraintScope, ConstraintContext, ThemeContext {
   constructor() {
     super();
@@ -238,7 +235,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   override setChild<V extends View>(key: string, newChild: V): View | null;
-  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
+  override setChild<F extends Class<Instance<F, View>> & Creatable<InstanceType<F>>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null;
   override setChild(key: string, newChild: AnyView | null): View | null {
     if (newChild !== null) {
@@ -248,7 +245,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   override appendChild<V extends View>(child: V, key?: string): V;
-  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyView, key?: string): View;
   override appendChild(child: AnyView, key?: string): View {
     child = View.fromAny(child);
@@ -256,7 +253,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   override prependChild<V extends View>(child: V, key?: string): V;
-  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyView, key?: string): View;
   override prependChild(child: AnyView, key?: string): View {
     child = View.fromAny(child);
@@ -264,7 +261,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   override insertChild<V extends View>(child: V, target: View | null, key?: string): V;
-  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
+  override insertChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyView, target: View | null, key?: string): View;
   override insertChild(child: AnyView, target: View | null, key?: string): View {
     child = View.fromAny(child);
@@ -2049,7 +2046,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     return new this();
   }
 
-  static override fromInit<S extends abstract new (...args: any) => InstanceType<S>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
+  static override fromInit<S extends Class<Instance<S, View>>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
     let type: Creatable<View>;
     if ((typeof init === "object" && init !== null || typeof init === "function") && Creatable.is((init as ViewInit).type)) {
       type = (init as ViewInit).type!;
@@ -2061,7 +2058,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     return view as InstanceType<S>;
   }
 
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyView<InstanceType<S>>): InstanceType<S> {
+  static override fromAny<S extends Class<Instance<S, View>>>(this: S, value: AnyView<InstanceType<S>>): InstanceType<S> {
     if (value === void 0 || value === null) {
       return value as InstanceType<S>;
     } else if (value instanceof View) {

@@ -43,7 +43,6 @@ export class DeckView extends HtmlView {
   @ViewRef<DeckView, BarView>({
     type: BarView,
     binds: true,
-    observes: true,
     initView(barView: BarView): void {
       let deckWidth = this.owner.width.state;
       deckWidth = deckWidth instanceof Length ? deckWidth : Length.px(this.owner.node.offsetWidth);

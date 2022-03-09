@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
+import type {Class, Instance, Creatable} from "@swim/util";
 import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {Feel, ThemeConstraintAnimator} from "@swim/theme";
-import {ViewportInsets, ViewContextType, ViewFlags, ViewCreator, View, ViewSet} from "@swim/view";
+import {ViewportInsets, ViewContextType, ViewFlags, View, ViewSet} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {AnyBarLayout, BarLayout} from "../layout/BarLayout";
 import {ToolView} from "../tool/ToolView";
@@ -87,9 +87,9 @@ export class BarView extends HtmlView {
   @Property({type: Object, inherits: true, value: null, updateFlags: View.NeedsResize})
   readonly edgeInsets!: Property<this, ViewportInsets | null>;
 
-  getTool<F extends abstract new (...args: any) => ToolView>(key: string, toolViewClass: F): InstanceType<F> | null;
+  getTool<F extends Class<ToolView>>(key: string, toolViewClass: F): InstanceType<F> | null;
   getTool(key: string): ToolView | null;
-  getTool(key: string, toolViewClass?: abstract new (...args: any) => ToolView): ToolView | null {
+  getTool(key: string, toolViewClass?: Class<ToolView>): ToolView | null {
     if (toolViewClass === void 0) {
       toolViewClass = ToolView;
     }
@@ -97,7 +97,7 @@ export class BarView extends HtmlView {
     return toolView instanceof toolViewClass ? toolView : null;
   }
 
-  getOrCreateTool<F extends ViewCreator<F, ToolView>>(key: string, toolViewClass: F): InstanceType<F> {
+  getOrCreateTool<F extends Class<Instance<F, ToolView>> & Creatable<Instance<F, ToolView>>>(key: string, toolViewClass: F): InstanceType<F> {
     let toolView = this.getChild(key, toolViewClass);
     if (toolView === null) {
       toolView = toolViewClass.create();

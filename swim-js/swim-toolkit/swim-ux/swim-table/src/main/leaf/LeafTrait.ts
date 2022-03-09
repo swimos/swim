@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
+import type {Class, Instance, Creatable} from "@swim/util";
 import type {MemberFastenerClass} from "@swim/component";
-import {Model, TraitCreator, Trait, TraitSet} from "@swim/model";
+import {Model, Trait, TraitSet} from "@swim/model";
 import {CellTrait} from "../cell/CellTrait";
 import type {LeafTraitObserver} from "./LeafTraitObserver";
 
@@ -22,9 +22,9 @@ import type {LeafTraitObserver} from "./LeafTraitObserver";
 export class LeafTrait extends Trait {
   override readonly observerType?: Class<LeafTraitObserver>;
 
-  getCell<F extends abstract new (...args: any) => CellTrait>(key: string, cellTraitClass: F): InstanceType<F> | null;
+  getCell<F extends Class<CellTrait>>(key: string, cellTraitClass: F): InstanceType<F> | null;
   getCell(key: string): CellTrait | null;
-  getCell(key: string, cellTraitClass?: abstract new (...args: any) => CellTrait): CellTrait | null {
+  getCell(key: string, cellTraitClass?: Class<CellTrait>): CellTrait | null {
     if (cellTraitClass === void 0) {
       cellTraitClass = CellTrait;
     }
@@ -32,7 +32,7 @@ export class LeafTrait extends Trait {
     return cellTrait instanceof cellTraitClass ? cellTrait : null;
   }
 
-  getOrCreateCell<F extends TraitCreator<F, CellTrait>>(key: string, cellTraitClass: F): InstanceType<F> {
+  getOrCreateCell<F extends Class<Instance<F, CellTrait>> & Creatable<Instance<F, CellTrait>>>(key: string, cellTraitClass: F): InstanceType<F> {
     let cellTrait = this.getTrait(key, cellTraitClass);
     if (cellTrait === null) {
       cellTrait = cellTraitClass.create();

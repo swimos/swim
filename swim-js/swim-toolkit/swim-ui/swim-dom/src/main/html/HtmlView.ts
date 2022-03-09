@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Timing, Creatable, InitType} from "@swim/util";
+import {Class, Instance, AnyTiming, Timing, Creatable, InitType} from "@swim/util";
 import {Affinity, MemberAnimatorInit} from "@swim/component";
 import {Transform} from "@swim/math";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewFlags, AnyView, ViewCreator, View} from "@swim/view";
+import {ViewFlags, AnyView, View} from "@swim/view";
 import {AttributeAnimator} from "../animator/AttributeAnimator";
 import {StyleMapInit, StyleMap} from "../css/StyleMap";
 import type {ViewNodeType} from "../node/NodeView";
@@ -205,7 +205,7 @@ export class HtmlView extends ElementView {
   override readonly node!: HTMLElement;
 
   override setChild<V extends View>(key: string, newChild: V): View | null;
-  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
+  override setChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyView | Node | keyof HtmlViewTagMap | null): View | null;
   override setChild(key: string, newChild: AnyView | Node | keyof HtmlViewTagMap | null): View | null {
     if (typeof newChild === "string") {
@@ -215,7 +215,7 @@ export class HtmlView extends ElementView {
   }
 
   override appendChild<V extends View>(child: V, key?: string): V;
-  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, key?: string): InstanceType<F>;
   override appendChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
   override appendChild(child: AnyView | Node | keyof HtmlViewTagMap, key?: string): View;
   override appendChild(child: AnyView | Node | keyof HtmlViewTagMap, key?: string): View {
@@ -226,7 +226,7 @@ export class HtmlView extends ElementView {
   }
 
   override prependChild<V extends View>(child: V, key?: string): V;
-  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, key?: string): InstanceType<F>;
   override prependChild<K extends keyof HtmlViewTagMap>(tag: K, key?: string): HtmlViewTagMap[K];
   override prependChild(child: AnyView | Node | keyof HtmlViewTagMap, key?: string): View;
   override prependChild(child: AnyView | Node | keyof HtmlViewTagMap, key?: string): View {
@@ -237,7 +237,7 @@ export class HtmlView extends ElementView {
   }
 
   override insertChild<V extends View>(child: V, target: View | Node | null, key?: string): V;
-  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | Node | null, key?: string): InstanceType<F>;
+  override insertChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, target: View | Node | null, key?: string): InstanceType<F>;
   override insertChild<K extends keyof HtmlViewTagMap>(tag: K, target: View | Node | null, key?: string): HtmlViewTagMap[K];
   override insertChild(child: AnyView | Node | keyof HtmlViewTagMap, target: View | Node | null, key?: string): View;
   override insertChild(child: AnyView | Node | keyof HtmlViewTagMap, target: View | Node | null, key?: string): View {
@@ -448,7 +448,7 @@ export class HtmlView extends ElementView {
 
   static override readonly tag: string = "div";
 
-  static override create<S extends abstract new (...args: any) => InstanceType<S>>(this: S): InstanceType<S>;
+  static override create<S extends Class<Instance<S, HtmlView>>>(this: S): InstanceType<S>;
   static override create(): HtmlView;
   static override create(): HtmlView {
     return this.fromTag(this.tag);
@@ -456,7 +456,7 @@ export class HtmlView extends ElementView {
 
   static override fromTag(tag: "style"): StyleView;
   static override fromTag(tag: "svg"): SvgView;
-  static override fromTag<S extends abstract new (...args: any) => InstanceType<S>>(this: S, tag: string): InstanceType<S>;
+  static override fromTag<S extends Class<Instance<S, HtmlView>>>(this: S, tag: string): InstanceType<S>;
   static override fromTag(tag: string): HtmlView;
   static override fromTag(tag: string): ElementView {
     if (tag === "style" && this !== StyleView) {
@@ -469,7 +469,7 @@ export class HtmlView extends ElementView {
     }
   }
 
-  static override fromNode<S extends new (node: HTMLElement) => InstanceType<S>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
+  static override fromNode<S extends new (node: HTMLElement) => Instance<S, HtmlView>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
   static override fromNode(node: HTMLElement): HtmlView;
   static override fromNode(node: HTMLElement): HtmlView {
     let view = (node as ViewHtml).view;
@@ -482,7 +482,7 @@ export class HtmlView extends ElementView {
     return view;
   }
 
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyHtmlView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny<S extends Class<Instance<S, HtmlView>>>(this: S, value: AnyHtmlView<InstanceType<S>>): InstanceType<S>;
   static override fromAny(value: AnyHtmlView | string): HtmlView;
   static override fromAny(value: AnyHtmlView | string): HtmlView {
     if (value === void 0 || value === null) {
@@ -504,7 +504,7 @@ export class HtmlView extends ElementView {
     }
   }
 
-  static forTag<S extends abstract new (...args: any) => InstanceType<S>>(this: S, tag: string): HtmlViewFactory<InstanceType<S>>;
+  static forTag<S extends Class<Instance<S, HtmlView>>>(this: S, tag: string): HtmlViewFactory<InstanceType<S>>;
   static forTag(tag: string): HtmlViewFactory;
   static forTag(tag: string): HtmlViewFactory {
     if (tag === this.tag) {

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Creatable} from "@swim/util";
+import {Class, Instance, Creatable} from "@swim/util";
 import {Provider} from "@swim/component";
 import {R2Box, Transform} from "@swim/math";
-import {AnyView, ViewInit, ViewFactory, ViewClass, ViewCreator, View, ModalService} from "@swim/view";
+import {AnyView, ViewInit, ViewFactory, ViewClass, View, ModalService} from "@swim/view";
 import {DomService} from "../service/DomService";
 import {DomProvider} from "../service/DomProvider";
 import type {NodeViewObserver} from "./NodeViewObserver";
@@ -66,7 +66,7 @@ export class NodeView extends View {
   readonly node: Node;
 
   override setChild<V extends View>(key: string, newChild: V): View | null;
-  override setChild<F extends ViewCreator<F>>(key: string, factory: F): View | null;
+  override setChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(key: string, factory: F): View | null;
   override setChild(key: string, newChild: AnyView | Node | null): View | null;
   override setChild(key: string, newChild: AnyView | Node | null): View | null {
     const oldChild = this.getChild(key);
@@ -171,7 +171,7 @@ export class NodeView extends View {
   }
 
   override appendChild<V extends View>(child: V, key?: string): V;
-  override appendChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyView | Node, key?: string): View;
   override appendChild(child: AnyView | Node, key?: string): View {
     if (child instanceof Node) {
@@ -200,7 +200,7 @@ export class NodeView extends View {
   }
 
   override prependChild<V extends View>(child: V, key?: string): V;
-  override prependChild<F extends ViewCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyView | Node, key?: string): View;
   override prependChild(child: AnyView | Node, key?: string): View {
     if (child instanceof Node) {
@@ -230,7 +230,7 @@ export class NodeView extends View {
   }
 
   override insertChild<V extends View>(child: V, target: View | Node | null, key?: string): V;
-  override insertChild<F extends ViewCreator<F>>(factory: F, target: View | null, key?: string): InstanceType<F>;
+  override insertChild<F extends Class<Instance<F, View>> & Creatable<Instance<F, View>>>(factory: F, target: View | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyView | Node, target: View | Node | null, key?: string): View;
   override insertChild(child: AnyView | Node, target: View | Node | null, key?: string): View {
     if (target instanceof View && target.parent !== this || target instanceof Node && target.parentNode !== this.node) {
@@ -584,7 +584,7 @@ export class NodeView extends View {
     }
   }
 
-  static fromNode<S extends new (node: Node) => InstanceType<S>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
+  static fromNode<S extends new (node: Node) => Instance<S, NodeView>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
   static fromNode(node: Node): NodeView;
   static fromNode(node: Node): NodeView {
     let view = (node as ViewNode).view;
@@ -603,7 +603,7 @@ export class NodeView extends View {
     return view;
   }
 
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyNodeView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny<S extends Class<Instance<S, NodeView>>>(this: S, value: AnyNodeView<InstanceType<S>>): InstanceType<S>;
   static override fromAny(value: AnyNodeView): NodeView;
   static override fromAny(value: AnyNodeView): NodeView {
     if (value === void 0 || value === null) {

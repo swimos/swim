@@ -97,88 +97,18 @@ export class DrawerView extends HtmlView implements Modal {
     return this.placement.value === "left" || this.placement.value === "right";
   }
 
-  protected willSetPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillSetPlacement !== void 0) {
-        observer.viewWillSetPlacement(newPlacement, oldPlacement, this);
-      }
-    }
-  }
-
-  protected onSetPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-    // hook
-  }
-
-  protected didSetPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidSetPlacement !== void 0) {
-        observer.viewDidSetPlacement(newPlacement, oldPlacement, this);
-      }
-    }
-  }
-
   @Property<DrawerView, DrawerPlacement>({
     type: String,
     value: "left",
     updateFlags: View.NeedsResize | View.NeedsLayout,
     willSetValue(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-      this.owner.willSetPlacement(newPlacement, oldPlacement);
+      this.owner.callObservers("viewWillSetPlacement", newPlacement, oldPlacement, this.owner);
     },
     didSetValue(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-      this.owner.onSetPlacement(newPlacement, oldPlacement);
-      this.owner.didSetPlacement(newPlacement, oldPlacement);
+      this.owner.callObservers("viewDidSetPlacement", newPlacement, oldPlacement, this.owner);
     },
   })
   readonly placement!: Property<this, DrawerPlacement>;
-
-  protected willPresent(): void {
-    const observers = this.observers!;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillPresent !== void 0) {
-        observer.viewWillPresent(this);
-      }
-    }
-  }
-
-  protected didPresent(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidPresent !== void 0) {
-        observer.viewDidPresent(this);
-      }
-    }
-  }
-
-  protected willDismiss(): void {
-    const modalService = this.modalProvider.service;
-    if (modalService !== void 0 && modalService !== null) {
-      modalService.dismissModal(this);
-    }
-
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillDismiss !== void 0) {
-        observer.viewWillDismiss(this);
-      }
-    }
-  }
-
-  protected didDismiss(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidDismiss !== void 0) {
-        observer.viewDidDismiss(this);
-      }
-    }
-  }
 
   @PresenceAnimator<DrawerView, Presence, AnyPresence>({
     type: Presence,
@@ -188,69 +118,23 @@ export class DrawerView extends HtmlView implements Modal {
       return this.owner.getLookOr(Look.timing, null);
     },
     willPresent(): void {
-      this.owner.willPresent();
+      this.owner.callObservers("viewWillPresent", this.owner);
     },
     didPresent(): void {
-      this.owner.didPresent();
+      this.owner.callObservers("viewDidPresent", this.owner);
     },
     willDismiss(): void {
-      this.owner.willDismiss();
+      const modalService = this.owner.modalProvider.service;
+      if (modalService !== void 0 && modalService !== null) {
+        modalService.dismissModal(this.owner);
+      }
+      this.owner.callObservers("viewWillDismiss", this.owner);
     },
     didDismiss(): void {
-      this.owner.didDismiss();
+      this.owner.callObservers("viewDidDismiss", this.owner);
     },
   })
   readonly slide!: PresenceAnimator<this, Presence, AnyPresence>;
-
-  protected willExpand(): void {
-    const modalService = this.modalProvider.service;
-    if (modalService !== void 0 && modalService !== null) {
-      modalService.dismissModal(this);
-    }
-
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillExpand !== void 0) {
-        observer.viewWillExpand(this);
-      }
-    }
-  }
-
-  protected didExpand(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidExpand !== void 0) {
-        observer.viewDidExpand(this);
-      }
-    }
-  }
-
-  protected willCollapse(): void {
-    const modalService = this.modalProvider.service;
-    if (modalService !== void 0 && modalService !== null) {
-      modalService.dismissModal(this);
-    }
-
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewWillCollapse !== void 0) {
-        observer.viewWillCollapse(this);
-      }
-    }
-  }
-
-  protected didCollapse(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.viewDidCollapse !== void 0) {
-        observer.viewDidCollapse(this);
-      }
-    }
-  }
 
   @ExpansionAnimator<DrawerView, Expansion, AnyExpansion>({
     type: Expansion,
@@ -260,16 +144,24 @@ export class DrawerView extends HtmlView implements Modal {
       return this.owner.getLookOr(Look.timing, null);
     },
     willExpand(): void {
-      this.owner.willExpand();
+      const modalService = this.owner.modalProvider.service;
+      if (modalService !== void 0 && modalService !== null) {
+        modalService.dismissModal(this.owner);
+      }
+      this.owner.callObservers("viewWillExpand", this.owner);
     },
     didExpand(): void {
-      this.owner.didExpand();
+      this.owner.callObservers("viewDidExpand", this.owner);
     },
     willCollapse(): void {
-      this.owner.willCollapse();
+      const modalService = this.owner.modalProvider.service;
+      if (modalService !== void 0 && modalService !== null) {
+        modalService.dismissModal(this.owner);
+      }
+      this.owner.callObservers("viewWillCollapse", this.owner);
     },
     didCollapse(): void {
-      this.owner.didCollapse();
+      this.owner.callObservers("viewDidCollapse", this.owner);
     },
   })
   readonly stretch!: ExpansionAnimator<this, Expansion, AnyExpansion>;

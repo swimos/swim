@@ -22,7 +22,6 @@ export {
   ModelFactory,
   ModelClass,
   ModelConstructor,
-  ModelCreator,
   Model,
 } from "./Model";
 export {ModelObserver} from "./ModelObserver";

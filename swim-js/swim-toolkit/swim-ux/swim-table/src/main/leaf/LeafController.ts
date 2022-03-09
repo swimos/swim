@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, ObserverType} from "@swim/util";
+import type {Class, Instance, ObserverType, Creatable} from "@swim/util";
 import type {MemberFastenerClass} from "@swim/component";
-import type {TraitCreator, Trait} from "@swim/model";
-import type {PositionGestureInput, ViewCreator} from "@swim/view";
+import type {Trait} from "@swim/model";
+import type {PositionGestureInput} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
 import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
@@ -121,14 +121,14 @@ export class LeafController extends Controller {
   readonly leaf!: TraitViewRef<this, LeafTrait, LeafView>;
   static readonly leaf: MemberFastenerClass<LeafController, "leaf">;
 
-  getCellTrait<F extends abstract new (...args: any) => CellTrait>(key: string, cellTraitClass: F): InstanceType<F> | null;
+  getCellTrait<F extends Class<CellTrait>>(key: string, cellTraitClass: F): InstanceType<F> | null;
   getCellTrait(key: string): CellTrait | null;
-  getCellTrait(key: string, cellTraitClass?: abstract new (...args: any) => CellTrait): CellTrait | null {
+  getCellTrait(key: string, cellTraitClass?: Class<CellTrait>): CellTrait | null {
     const leafTrait = this.leaf.trait;
     return leafTrait !== null ? leafTrait.getCell(key, cellTraitClass!) : null;
   }
 
-  getOrCreateCellTrait<F extends TraitCreator<F, CellTrait>>(key: string, cellTraitClass: F): InstanceType<F> {
+  getOrCreateCellTrait<F extends Class<Instance<F, CellTrait>> & Creatable<Instance<F, CellTrait>>>(key: string, cellTraitClass: F): InstanceType<F> {
     const leafTrait = this.leaf.trait;
     if (leafTrait === null) {
       throw new Error("no leaf trait");
@@ -144,14 +144,14 @@ export class LeafController extends Controller {
     leafTrait.setCell(key, cellTrait);
   }
 
-  getCellView<F extends abstract new (...args: any) => CellView>(key: string, cellViewClass: F): InstanceType<F> | null;
+  getCellView<F extends Class<CellView>>(key: string, cellViewClass: F): InstanceType<F> | null;
   getCellView(key: string): CellView | null;
-  getCellView(key: string, cellViewClass?: abstract new (...args: any) => CellView): CellView | null {
+  getCellView(key: string, cellViewClass?: Class<CellView>): CellView | null {
     const leafView = this.leaf.view;
     return leafView !== null ? leafView.getCell(key, cellViewClass!) : null;
   }
 
-  getOrCreateCellView<F extends ViewCreator<F, CellView>>(key: string, cellViewClass: F): InstanceType<F> {
+  getOrCreateCellView<F extends Class<Instance<F, CellView>> & Creatable<Instance<F, CellView>>>(key: string, cellViewClass: F): InstanceType<F> {
     let leafView = this.leaf.view;
     if (leafView === null) {
       leafView = this.leaf.createView();

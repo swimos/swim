@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, ObserverType} from "@swim/util";
+import type {Class, Instance, ObserverType, Creatable} from "@swim/util";
 import type {MemberFastenerClass} from "@swim/component";
-import type {TraitCreator, Trait} from "@swim/model";
+import type {Trait} from "@swim/model";
 import {Look, Mood} from "@swim/theme";
-import type {PositionGestureInput, ViewCreator} from "@swim/view";
+import type {PositionGestureInput} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
 import {Controller, TraitViewRef, TraitViewControllerSet} from "@swim/controller";
@@ -133,14 +133,14 @@ export class BarController extends Controller {
     }
   }
 
-  getToolTrait<F extends abstract new (...args: any) => ToolTrait>(key: string, toolTraitClass: F): InstanceType<F> | null;
+  getToolTrait<F extends Class<ToolTrait>>(key: string, toolTraitClass: F): InstanceType<F> | null;
   getToolTrait(key: string): ToolTrait | null;
-  getToolTrait(key: string, toolTraitClass?: abstract new (...args: any) => ToolTrait): ToolTrait | null {
+  getToolTrait(key: string, toolTraitClass?: Class<ToolTrait>): ToolTrait | null {
     const barTrait = this.bar.trait;
     return barTrait !== null ? barTrait.getTool(key, toolTraitClass!) : null;
   }
 
-  getOrCreateToolTrait<F extends TraitCreator<F, ToolTrait>>(key: string, toolTraitClass: F): InstanceType<F> {
+  getOrCreateToolTrai<F extends Class<Instance<F, ToolTrait>> & Creatable<Instance<F, ToolTrait>>>(key: string, toolTraitClass: F): InstanceType<F> {
     const barTrait = this.bar.trait;
     if (barTrait === null) {
       throw new Error("no bar trait");
@@ -156,14 +156,14 @@ export class BarController extends Controller {
     barTrait.setTool(key, toolTrait);
   }
 
-  getToolView<F extends abstract new (...args: any) => ToolView>(key: string, toolViewClass: F): InstanceType<F> | null;
+  getToolView<F extends Class<ToolView>>(key: string, toolViewClass: F): InstanceType<F> | null;
   getToolView(key: string): ToolView | null;
-  getToolView(key: string, toolViewClass?: abstract new (...args: any) => ToolView): ToolView | null {
+  getToolView(key: string, toolViewClass?: Class<ToolView>): ToolView | null {
     const barView = this.bar.view;
     return barView !== null ? barView.getTool(key, toolViewClass!) : null;
   }
 
-  getOrCreateToolView<F extends ViewCreator<F, ToolView>>(key: string, toolViewClass: F): InstanceType<F> {
+  getOrCreateToolView<F extends Class<Instance<F, ToolView>> & Creatable<Instance<F, ToolView>>>(key: string, toolViewClass: F): InstanceType<F> {
     let barView = this.bar.view;
     if (barView === null) {
       barView = this.bar.createView();

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, FromAny, Creatable, InitType, Initable} from "@swim/util";
+import {Class, Instance, FromAny, Creatable, InitType, Initable} from "@swim/util";
 import {Fastener, Provider, ComponentFlags, ComponentInit, Component} from "@swim/component";
 import {ExecuteService} from "../execute/ExecuteService";
 import {ExecuteProvider} from "../execute/ExecuteProvider";
@@ -57,10 +57,6 @@ export interface ControllerClass<C extends Controller = Controller, U = AnyContr
 export interface ControllerConstructor<C extends Controller = Controller, U = AnyController<C>> extends ControllerClass<C, U> {
   new(): C;
 }
-
-/** @public */
-export type ControllerCreator<F extends (abstract new (...args: any) => C) & Creatable<InstanceType<F>>, C extends Controller = Controller> =
-  (abstract new (...args: any) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
 /** @public */
 export class Controller extends Component<Controller> implements Initable<ControllerInit> {
@@ -121,7 +117,7 @@ export class Controller extends Component<Controller> implements Initable<Contro
   }
 
   override setChild<C extends Controller>(key: string, newChild: C): Controller | null;
-  override setChild<F extends ControllerCreator<F>>(key: string, factory: F): Controller | null;
+  override setChild<F extends Class<Instance<F, Controller>> & Creatable<Instance<F, Controller>>>(key: string, factory: F): Controller | null;
   override setChild(key: string, newChild: AnyController | null): Controller | null;
   override setChild(key: string, newChild: AnyController | null): Controller | null {
     if (newChild !== null) {
@@ -131,7 +127,7 @@ export class Controller extends Component<Controller> implements Initable<Contro
   }
 
   override appendChild<C extends Controller>(child: C, key?: string): C;
-  override appendChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild<F extends Class<Instance<F, Controller>> & Creatable<Instance<F, Controller>>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyController, key?: string): Controller;
   override appendChild(child: AnyController, key?: string): Controller {
     child = Controller.fromAny(child);
@@ -139,7 +135,7 @@ export class Controller extends Component<Controller> implements Initable<Contro
   }
 
   override prependChild<C extends Controller>(child: C, key?: string): C;
-  override prependChild<F extends ControllerCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild<F extends Class<Instance<F, Controller>> & Creatable<Instance<F, Controller>>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyController, key?: string): Controller;
   override prependChild(child: AnyController, key?: string): Controller {
     child = Controller.fromAny(child);
@@ -147,7 +143,7 @@ export class Controller extends Component<Controller> implements Initable<Contro
   }
 
   override insertChild<C extends Controller>(child: C, target: Controller | null, key?: string): C;
-  override insertChild<F extends ControllerCreator<F>>(factory: F, target: Controller | null, key?: string): InstanceType<F>;
+  override insertChild<F extends Class<Instance<F, Controller>> & Creatable<Instance<F, Controller>>>(factory: F, target: Controller | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyController, target: Controller | null, key?: string): Controller;
   override insertChild(child: AnyController, target: Controller | null, key?: string): Controller {
     child = Controller.fromAny(child);
@@ -713,7 +709,7 @@ export class Controller extends Component<Controller> implements Initable<Contro
     return new this();
   }
 
-  static override fromInit<S extends abstract new (...args: any) => InstanceType<S>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
+  static override fromInit<S extends Class<Instance<S, Controller>>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
     let type: Creatable<Controller>;
     if ((typeof init === "object" && init !== null || typeof init === "function") && Creatable.is((init as ControllerInit).type)) {
       type = (init as ControllerInit).type!;
@@ -725,7 +721,7 @@ export class Controller extends Component<Controller> implements Initable<Contro
     return controller as InstanceType<S>;
   }
 
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyController<InstanceType<S>>): InstanceType<S> {
+  static override fromAny<S extends Class<Instance<S, Controller>>>(this: S, value: AnyController<InstanceType<S>>): InstanceType<S> {
     if (value === void 0 || value === null) {
       return value as InstanceType<S>;
     } else if (value instanceof Controller) {

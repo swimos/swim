@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
+import type {Class, Instance, Creatable} from "@swim/util";
 import type {MemberFastenerClass} from "@swim/component";
-import {Model, TraitCreator, Trait, TraitSet} from "@swim/model";
+import {Model, Trait, TraitSet} from "@swim/model";
 import {ToolTrait} from "../tool/ToolTrait";
 import type {BarTraitObserver} from "./BarTraitObserver";
 
@@ -22,9 +22,9 @@ import type {BarTraitObserver} from "./BarTraitObserver";
 export class BarTrait extends Trait {
   override readonly observerType?: Class<BarTraitObserver>;
 
-  getTool<F extends abstract new (...args: any) => ToolTrait>(key: string, toolTraitClass: F): InstanceType<F> | null;
+  getTool<F extends Class<ToolTrait>>(key: string, toolTraitClass: F): InstanceType<F> | null;
   getTool(key: string): ToolTrait | null;
-  getTool(key: string, toolTraitClass?: abstract new (...args: any) => ToolTrait): ToolTrait | null {
+  getTool(key: string, toolTraitClass?: Class<ToolTrait>): ToolTrait | null {
     if (toolTraitClass === void 0) {
       toolTraitClass = ToolTrait;
     }
@@ -32,7 +32,7 @@ export class BarTrait extends Trait {
     return toolTrait instanceof toolTraitClass ? toolTrait : null;
   }
 
-  getOrCreateTool<F extends TraitCreator<F, ToolTrait>>(key: string, toolTraitClass: F): InstanceType<F> {
+  getOrCreateTool<F extends Class<Instance<F, ToolTrait>> & Creatable<Instance<F, ToolTrait>>>(key: string, toolTraitClass: F): InstanceType<F> {
     let toolTrait = this.getTrait(key, toolTraitClass);
     if (toolTrait === null) {
       toolTrait = toolTraitClass.create();

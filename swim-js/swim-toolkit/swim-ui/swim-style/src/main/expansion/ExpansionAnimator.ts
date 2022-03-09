@@ -14,7 +14,7 @@
 
 import type {AnyTiming, Timing} from "@swim/util";
 import {Affinity, AnimatorInit, AnimatorClass, Animator} from "@swim/component";
-import {AnyExpansion, Expansion} from "@swim/style";
+import {AnyExpansion, Expansion} from "./Expansion";
 
 /** @public */
 export interface ExpansionAnimatorInit<T extends Expansion | null | undefined = Expansion | null | undefined, U extends AnyExpansion | null | undefined = T> extends AnimatorInit<T, U> {

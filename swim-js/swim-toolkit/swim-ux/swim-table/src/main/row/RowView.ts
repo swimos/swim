@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Timing} from "@swim/util";
+import type {Mutable, Class, Instance, Creatable, Timing} from "@swim/util";
 import {Affinity, MemberFastenerClass, Property} from "@swim/component";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
@@ -22,7 +22,6 @@ import {
   ViewContextType,
   ViewContext,
   ViewFlags,
-  ViewCreator,
   View,
   ViewRef,
 } from "@swim/view";
@@ -80,14 +79,14 @@ export class RowView extends HtmlView {
   @Property({type: Boolean, inherits: true, value: true})
   readonly glows!: Property<this, boolean>;
 
-  getCell<F extends abstract new (...args: any) => CellView>(key: string, cellViewClass: F): InstanceType<F> | null;
+  getCell<F extends Class<CellView>>(key: string, cellViewClass: F): InstanceType<F> | null;
   getCell(key: string): CellView | null;
-  getCell(key: string, cellViewClass?: abstract new (...args: any) => CellView): CellView | null {
+  getCell(key: string, cellViewClass?: Class<CellView>): CellView | null {
     const leafView = this.leaf.view;
     return leafView !== null ? leafView.getCell(key, cellViewClass!) : null;
   }
 
-  getOrCreateCell<F extends ViewCreator<F, CellView>>(key: string, cellViewClass: F): InstanceType<F> {
+  getOrCreateCell<F extends Class<Instance<F, CellView>> & Creatable<Instance<F, CellView>>>(key: string, cellViewClass: F): InstanceType<F> {
     const leafView = this.leaf.insertView();
     if (leafView === null) {
       throw new Error("no leaf view");

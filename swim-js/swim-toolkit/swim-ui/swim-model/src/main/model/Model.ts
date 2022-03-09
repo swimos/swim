@@ -15,6 +15,7 @@
 import {
   Mutable,
   Class,
+  Instance,
   Arrays,
   Comparator,
   FromAny,
@@ -43,7 +44,7 @@ import {SelectionProvider} from "../selection/SelectionProvider";
 import {ModelContext} from "./ModelContext";
 import type {ModelObserver} from "./ModelObserver";
 import {ModelRelation} from "./"; // forward import
-import {AnyTrait, TraitCreator, Trait} from "../"; // forward import
+import {AnyTrait, Trait} from "../"; // forward import
 import {TraitRelation} from "../"; // forward import
 
 /** @public */
@@ -78,10 +79,6 @@ export interface ModelClass<M extends Model = Model, U = AnyModel<M>> extends Fu
 export interface ModelConstructor<M extends Model = Model, U = AnyModel<M>> extends ModelClass<M, U> {
   new(): M;
 }
-
-/** @public */
-export type ModelCreator<F extends (abstract new (...args: any) => M) & Creatable<InstanceType<F>>, M extends Model = Model> =
-  (abstract new (...args: any) => InstanceType<F>) & Creatable<InstanceType<F>>;
 
 /** @public */
 export class Model extends Component<Model> implements Initable<ModelInit>, Consumable {
@@ -187,7 +184,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   override setChild<M extends Model>(key: string, newChild: M): Model | null;
-  override setChild<F extends ModelCreator<F>>(key: string, factory: F): Model | null;
+  override setChild<F extends Class<Instance<F, Model>> & Creatable<Instance<F, Model>>>(key: string, factory: F): Model | null;
   override setChild(key: string, newChild: AnyModel | null): Model | null;
   override setChild(key: string, newChild: AnyModel | null): Model | null {
     if (newChild !== null) {
@@ -197,7 +194,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   override appendChild<M extends Model>(child: M, key?: string): M;
-  override appendChild<F extends ModelCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override appendChild<F extends Class<Instance<F, Model>> & Creatable<Instance<F, Model>>>(factory: F, key?: string): InstanceType<F>;
   override appendChild(child: AnyModel, key?: string): Model;
   override appendChild(child: AnyModel, key?: string): Model {
     child = Model.fromAny(child);
@@ -205,7 +202,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   override prependChild<M extends Model>(child: M, key?: string): M;
-  override prependChild<F extends ModelCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  override prependChild<F extends Class<Instance<F, Model>> & Creatable<Instance<F, Model>>>(factory: F, key?: string): InstanceType<F>;
   override prependChild(child: AnyModel, key?: string): Model;
   override prependChild(child: AnyModel, key?: string): Model {
     child = Model.fromAny(child);
@@ -213,7 +210,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   override insertChild<M extends Model>(child: M, target: Model | null, key?: string): M;
-  override insertChild<F extends ModelCreator<F>>(factory: F, target: Model | null, key?: string): InstanceType<F>;
+  override insertChild<F extends Class<Instance<F, Model>> & Creatable<Instance<F, Model>>>(factory: F, target: Model | null, key?: string): InstanceType<F>;
   override insertChild(child: AnyModel, target: Model | null, key?: string): Model;
   override insertChild(child: AnyModel, target: Model | null, key?: string): Model {
     child = Model.fromAny(child);
@@ -1009,10 +1006,10 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
   }
 
-  getTrait<F extends abstract new (...args: any) => Trait>(key: string, traitBound: F): InstanceType<F> | null;
-  getTrait(key: string, traitBound?: abstract new (...args: any) => Trait): Trait | null;
-  getTrait<F extends abstract new (...args: any) => Trait>(traitBound: F): InstanceType<F> | null;
-  getTrait(key: string | (abstract new (...args: any) => Trait), traitBound?: abstract new (...args: any) => Trait): Trait | null {
+  getTrait<F extends Class<Trait>>(key: string, traitBound: F): InstanceType<F> | null;
+  getTrait(key: string, traitBound?: Class<Trait>): Trait | null;
+  getTrait<F extends Class<Trait>>(traitBound: F): InstanceType<F> | null;
+  getTrait(key: string | Class<Trait>, traitBound?: Class<Trait>): Trait | null {
     if (typeof key === "string") {
       const traitMap = this.traitMap;
       if (traitMap !== null) {
@@ -1034,7 +1031,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   setTrait<T extends Trait>(key: string, newTrait: T): Trait | null;
-  setTrait<F extends TraitCreator<F>>(key: string, factory: F): Trait | null;
+  setTrait<F extends Class<Instance<F, Trait>> & Creatable<Instance<F, Trait>>>(key: string, factory: F): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null;
   setTrait(key: string, newTrait: AnyTrait | null): Trait | null {
     if (newTrait !== null) {
@@ -1089,7 +1086,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   appendTrait<T extends Trait>(trait: T, key?: string): T;
-  appendTrait<F extends TraitCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  appendTrait<F extends Class<Instance<F, Trait>> & Creatable<Instance<F, Trait>>>(factory: F, key?: string): InstanceType<F>;
   appendTrait(trait: AnyTrait, key?: string): Trait;
   appendTrait(trait: AnyTrait, key?: string): Trait {
     trait = Trait.fromAny(trait);
@@ -1110,7 +1107,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   prependTrait<T extends Trait>(trait: T, key?: string): T;
-  prependTrait<F extends TraitCreator<F>>(factory: F, key?: string): InstanceType<F>;
+  prependTrait<F extends Class<Instance<F, Trait>> & Creatable<Instance<F, Trait>>>(factory: F, key?: string): InstanceType<F>;
   prependTrait(trait: AnyTrait, key?: string): Trait;
   prependTrait(trait: AnyTrait, key?: string): Trait {
     trait = Trait.fromAny(trait);
@@ -1132,7 +1129,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   insertTrait<T extends Trait>(trait: T, target: Trait | null, key?: string): T;
-  insertTrait<F extends TraitCreator<F>>(factory: F, target: Trait | null, key?: string): InstanceType<F>;
+  insertTrait<F extends Class<Instance<F, Trait>> & Creatable<Instance<F, Trait>>>(factory: F, target: Trait | null, key?: string): InstanceType<F>;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait;
   insertTrait(trait: AnyTrait, target: Trait | null, key?: string): Trait {
     if (target !== null && target.model !== this) {
@@ -1368,7 +1365,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
   }
 
-  getSuperTrait<F extends abstract new (...args: any) => Trait>(superBound: F): InstanceType<F> | null {
+  getSuperTrait<F extends Class<Trait>>(superBound: F): InstanceType<F> | null {
     const parent = this.parent;
     if (parent === null) {
       return null;
@@ -1382,7 +1379,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
   }
 
-  getBaseTrait<F extends abstract new (...args: any) => Trait>(baseBound: F): InstanceType<F> | null {
+  getBaseTrait<F extends Class<Trait>>(baseBound: F): InstanceType<F> | null {
     const parent = this.parent;
     if (parent === null) {
       return null;
@@ -1728,7 +1725,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     return new this();
   }
 
-  static override fromInit<S extends abstract new (...args: any) => InstanceType<S>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
+  static override fromInit<S extends Class<Instance<S, Model>>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
     let type: Creatable<Model>;
     if ((typeof init === "object" && init !== null || typeof init === "function") && Creatable.is((init as ModelInit).type)) {
       type = (init as ModelInit).type!;
@@ -1740,7 +1737,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     return view as InstanceType<S>;
   }
 
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyModel<InstanceType<S>>): InstanceType<S> {
+  static override fromAny<S extends Class<Instance<S, Model>>>(this: S, value: AnyModel<InstanceType<S>>): InstanceType<S> {
     if (value === void 0 || value === null) {
       return value as InstanceType<S>;
     } else if (value instanceof Model) {

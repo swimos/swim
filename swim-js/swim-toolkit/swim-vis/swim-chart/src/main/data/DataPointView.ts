@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Initable, AnyTiming} from "@swim/util";
+import type {Mutable, Class, Instance, Initable, AnyTiming} from "@swim/util";
 import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
 import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
@@ -331,8 +331,8 @@ export class DataPointView<X = unknown, Y = unknown> extends GraphicsView {
   }
 
   static override fromAny<X, Y>(value: AnyDataPointView<X, Y>): DataPointView<X, Y>;
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyView<InstanceType<S>>): InstanceType<S>;
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyView<InstanceType<S>>): InstanceType<S> {
+  static override fromAny<S extends Class<Instance<S, View>>>(this: S, value: AnyView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny<S extends Class<Instance<S, View>>>(this: S, value: AnyView<InstanceType<S>>): InstanceType<S> {
     return super.fromAny(value as any) as InstanceType<S>;
   }
 }

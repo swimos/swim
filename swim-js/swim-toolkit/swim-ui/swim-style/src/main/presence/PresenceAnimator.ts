@@ -14,7 +14,7 @@
 
 import type {AnyTiming, Timing} from "@swim/util";
 import {Affinity, AnimatorInit, AnimatorClass, Animator} from "@swim/component";
-import {AnyPresence, Presence} from "@swim/style";
+import {AnyPresence, Presence} from "./Presence";
 
 /** @public */
 export interface PresenceAnimatorInit<T extends Presence | null | undefined = Presence | null | undefined, U extends AnyPresence | null | undefined = T> extends AnimatorInit<T, U> {

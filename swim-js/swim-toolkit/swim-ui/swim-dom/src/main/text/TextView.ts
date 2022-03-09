@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Creatable} from "@swim/util";
+import {Class, Instance, Creatable} from "@swim/util";
 import {View} from "@swim/view";
 import {AnyNodeView, NodeViewInit, NodeViewConstructor, NodeView} from "../node/NodeView";
 import type {TextViewObserver} from "./TextViewObserver";
@@ -48,7 +48,7 @@ export class TextView extends NodeView {
     super.init(init);
   }
 
-  static override create<S extends new (node: Text) => InstanceType<S>>(this: S, text?: string): InstanceType<S>;
+  static override create<S extends new (node: Text) => Instance<S, TextView>>(this: S, text?: string): InstanceType<S>;
   static override create(text?: string): TextView;
   static override create(text?: string): TextView {
     if (text === void 0) {
@@ -58,7 +58,7 @@ export class TextView extends NodeView {
     return new this(node);
   }
 
-  static override fromNode<S extends new (node: Text) => InstanceType<S>>(this: S, node: Text): InstanceType<S>;
+  static override fromNode<S extends new (node: Text) => Instance<S, TextView>>(this: S, node: Text): InstanceType<S>;
   static override fromNode(node: Text): TextView;
   static override fromNode(node: Text): TextView {
     let view = (node as ViewText).view;
@@ -70,7 +70,7 @@ export class TextView extends NodeView {
     return view;
   }
 
-  static override fromAny<S extends abstract new (...args: any) => InstanceType<S>>(this: S, value: AnyTextView<InstanceType<S>>): InstanceType<S>;
+  static override fromAny<S extends Class<Instance<S, TextView>>>(this: S, value: AnyTextView<InstanceType<S>>): InstanceType<S>;
   static override fromAny(value: AnyTextView | string): TextView;
   static override fromAny(value: AnyTextView | string): TextView {
     if (value === void 0 || value === null) {
