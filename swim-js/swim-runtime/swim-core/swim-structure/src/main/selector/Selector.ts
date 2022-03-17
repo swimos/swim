@@ -64,14 +64,25 @@ export abstract class Selector extends Expression {
 
   override evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const selected = Record.create();
+    let selected = Item.absent();
+    let count = 0;
     this.forSelected(interpreter, function (interpreter: Interpreter): void {
       const scope = interpreter.peekScope();
       if (scope !== void 0) {
-        selected.push(scope);
+        if (count === 0) {
+          selected = scope;
+        } else {
+          if (count === 1) {
+            const record = Record.create();
+            record.push(selected);
+            selected = record;
+          }
+          (selected as Record).push(scope);
+        }
+        count += 1;
       }
     }, this);
-    return selected.isEmpty() ? Item.absent() : selected.flattened();
+    return selected;
   }
 
   abstract override substitute(interpreter: AnyInterpreter): Item;

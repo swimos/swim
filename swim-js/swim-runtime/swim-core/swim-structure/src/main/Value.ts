@@ -644,6 +644,8 @@ export abstract class Value extends Item {
   static override fromAny(value: AnyValue): Value {
     if (value instanceof Value) {
       return value;
+    } else if (value instanceof Item) {
+      return Record.create(1).item(value);
     } else if (value === void 0) {
       return Absent.absent();
     } else if (value === null) {

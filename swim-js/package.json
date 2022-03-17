@@ -61,6 +61,7 @@
     "./swim-toolkit/swim-ui/swim-controller",
     "./swim-toolkit/swim-ui",
     "./swim-toolkit/swim-ux/swim-button",
+    "./swim-toolkit/swim-ux/swim-toolbar",
     "./swim-toolkit/swim-ux/swim-token",
     "./swim-toolkit/swim-ux/swim-table",
     "./swim-toolkit/swim-ux/swim-window",

@@ -71,7 +71,7 @@ export class GetSelector extends Selector {
         }
       }
       if (field === void 0 && selected === void 0) {
-        GetSelector.forSelected(key, then, interpreter, callback, thisArg);
+        selected = GetSelector.forSelected(key, then, interpreter, callback, thisArg);
       }
       // Push the current selection back onto the stack.
       interpreter.pushScope(scope);
@@ -162,7 +162,7 @@ export class GetSelector extends Selector {
         }
       }
       if (field === void 0 && selected === void 0) {
-        GetSelector.substitute(key, then, interpreter);
+        selected = GetSelector.substitute(key, then, interpreter);
       }
       // Push the current selection back onto the stack.
       interpreter.pushScope(scope);
