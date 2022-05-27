@@ -14,29 +14,26 @@
 
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
-import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
+import {AnyColorOrLook, ColorOrLook, ColorLook} from "@swim/theme";
 import {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {AreaPlotTraitObserver} from "./AreaPlotTraitObserver";
+import type {SeriesPlotController} from "./SeriesPlotController";
+import {AreaPlotController} from "./"; // forward import
 
 /** @public */
 export class AreaPlotTrait<X = unknown, Y = unknown> extends SeriesPlotTrait<X, Y> {
   override readonly observerType?: Class<AreaPlotTraitObserver<X, Y>>;
 
-  @Property<AreaPlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<AreaPlotTrait<X, Y>["fill"]>({
+    valueType: ColorLook,
     value: null,
-    willSetValue(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitWillSetPlotFill", newFill, oldFill, this.owner);
-    },
-    didSetValue(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitDidSetPlotFill", newFill, oldFill, this.owner);
-    },
-    fromAny(fill: Look<Color> | AnyColor | null): Look<Color> | Color | null {
-      if (fill !== null && !(fill instanceof Look)) {
-        fill = Color.fromAny(fill);
-      }
-      return fill;
+    didSetValue(fill: ColorOrLook | null): void {
+      this.owner.callObservers("traitDidSetFill", fill, this.owner);
     },
   })
-  readonly fill!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly fill!: Property<this, ColorOrLook | null, AnyColorOrLook | null>;
+
+  override createPlotController(): SeriesPlotController<X, Y> {
+    return new AreaPlotController<X, Y>();
+  }
 }

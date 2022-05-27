@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {Class, Observes} from "@swim/util";
+import type {FastenerClass} from "@swim/component";
 import type {View} from "@swim/view";
 import {Controller, TraitViewRef, TraitViewControllerRef} from "@swim/controller";
 import type {GraphView} from "../graph/GraphView";
@@ -31,18 +31,10 @@ import {ChartTrait} from "./ChartTrait";
 import type {ChartControllerObserver} from "./ChartControllerObserver";
 
 /** @public */
-export interface ChartControllerAxisExt<D = unknown> {
-  attachAxisTrait(axisTrait: AxisTrait<D>): void;
-  detachAxisTrait(axisTrait: AxisTrait<D>): void;
-  attachAxisView(axisView: AxisView<D>): void;
-  detachAxisView(axisView: AxisView<D>): void;
-}
-
-/** @public */
 export class ChartController<X = unknown, Y = unknown> extends GraphController<X, Y> {
   override readonly observerType?: Class<ChartControllerObserver<X, Y>>;
 
-  @TraitViewRef<ChartController<X, Y>, ChartTrait<X, Y>, ChartView<X, Y>>({
+  @TraitViewRef<ChartController<X, Y>["chart"]>({
     traitType: ChartTrait,
     observesTrait: true,
     initTrait(chartTrait: ChartTrait<X, Y>): void {
@@ -142,10 +134,10 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
       this.owner.callObservers("controllerDidDetachChartView", chartView, this.owner);
     },
   })
-  readonly chart!: TraitViewRef<this, ChartTrait<X, Y>, ChartView<X, Y>>;
-  static readonly chart: MemberFastenerClass<ChartController, "chart">;
+  readonly chart!: TraitViewRef<this, ChartTrait<X, Y>, ChartView<X, Y>> & Observes<ChartTrait<X, Y>>;
+  static readonly chart: FastenerClass<ChartController["chart"]>;
 
-  @TraitViewRef<ChartController<X, Y>, GraphTrait<X, Y>, GraphView<X, Y>>({
+  @TraitViewRef<ChartController<X, Y>["graph"]>({
     extends: true,
     initTrait(graphTrait: GraphTrait<X, Y>): void {
       GraphController.graph.prototype.initTrait.call(this, graphTrait as GraphTrait);
@@ -166,12 +158,11 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
       graphView.remove();
     },
   })
-  override readonly graph!: TraitViewRef<this, GraphTrait<X, Y>, GraphView<X, Y>>;
-  static override readonly graph: MemberFastenerClass<ChartController, "graph">;
+  override readonly graph!: TraitViewRef<this, GraphTrait<X, Y>, GraphView<X, Y>> & GraphController<X, Y>["graph"];
+  static override readonly graph: FastenerClass<ChartController["graph"]>;
 
-  @TraitViewControllerRef<ChartController<X, Y>, AxisTrait<X>, AxisView<X>, AxisController<X>, ChartControllerAxisExt<X>>({
-    implements: true,
-    type: TopAxisController,
+  @TraitViewControllerRef<ChartController<X, Y>["topAxis"]>({
+    controllerType: TopAxisController,
     binds: true,
     observes: true,
     get parentView(): View | null {
@@ -238,12 +229,16 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
       return controller instanceof TopAxisController ? controller : null;
     },
   })
-  readonly topAxis!: TraitViewControllerRef<this, AxisTrait<X>, AxisView<X>, AxisController<X>>;
-  static readonly topAxis: MemberFastenerClass<ChartController, "topAxis">;
+  readonly topAxis!: TraitViewControllerRef<this, AxisTrait<X>, AxisView<X>, AxisController<X>> & Observes<AxisController<X>> & {
+    attachAxisTrait(axisTrait: AxisTrait<X>): void,
+    detachAxisTrait(axisTrait: AxisTrait<X>): void,
+    attachAxisView(axisView: AxisView<X>): void,
+    detachAxisView(axisView: AxisView<X>): void,
+  };
+  static readonly topAxis: FastenerClass<ChartController["topAxis"]>;
 
-  @TraitViewControllerRef<ChartController<X, Y>, AxisTrait<Y>, AxisView<Y>, AxisController<Y>, ChartControllerAxisExt<Y>>({
-    implements: true,
-    type: RightAxisController,
+  @TraitViewControllerRef<ChartController<X, Y>["rightAxis"]>({
+    controllerType: RightAxisController,
     binds: true,
     observes: true,
     get parentView(): View | null {
@@ -310,12 +305,16 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
       return controller instanceof RightAxisController ? controller : null;
     },
   })
-  readonly rightAxis!: TraitViewControllerRef<this, AxisTrait<Y>, AxisView<Y>, AxisController<Y>>;
-  static readonly rightAxis: MemberFastenerClass<ChartController, "rightAxis">;
+  readonly rightAxis!: TraitViewControllerRef<this, AxisTrait<Y>, AxisView<Y>, AxisController<Y>> & Observes<AxisController<Y>> & {
+    attachAxisTrait(axisTrait: AxisTrait<Y>): void,
+    detachAxisTrait(axisTrait: AxisTrait<Y>): void,
+    attachAxisView(axisView: AxisView<Y>): void,
+    detachAxisView(axisView: AxisView<Y>): void,
+  };
+  static readonly rightAxis: FastenerClass<ChartController["rightAxis"]>;
 
-  @TraitViewControllerRef<ChartController<X, Y>, AxisTrait<X>, AxisView<X>, AxisController<X>, ChartControllerAxisExt<X>>({
-    implements: true,
-    type: BottomAxisController,
+  @TraitViewControllerRef<ChartController<X, Y>["bottomAxis"]>({
+    controllerType: BottomAxisController,
     binds: true,
     observes: true,
     get parentView(): View | null {
@@ -382,12 +381,16 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
       return controller instanceof BottomAxisController ? controller : null;
     },
   })
-  readonly bottomAxis!: TraitViewControllerRef<this, AxisTrait<X>, AxisView<X>, AxisController<X>>;
-  static readonly bottomAxis: MemberFastenerClass<ChartController, "bottomAxis">;
+  readonly bottomAxis!: TraitViewControllerRef<this, AxisTrait<X>, AxisView<X>, AxisController<X>> & Observes<AxisController<X>> & {
+    attachAxisTrait(axisTrait: AxisTrait<X>): void;
+    detachAxisTrait(axisTrait: AxisTrait<X>): void;
+    attachAxisView(axisView: AxisView<X>): void;
+    detachAxisView(axisView: AxisView<X>): void;
+  };
+  static readonly bottomAxis: FastenerClass<ChartController["bottomAxis"]>;
 
-  @TraitViewControllerRef<ChartController<X, Y>, AxisTrait<Y>, AxisView<Y>, AxisController<Y>, ChartControllerAxisExt<Y>>({
-    implements: true,
-    type: LeftAxisController,
+  @TraitViewControllerRef<ChartController<X, Y>["leftAxis"]>({
+    controllerType: LeftAxisController,
     binds: true,
     observes: true,
     get parentView(): View | null {
@@ -454,6 +457,11 @@ export class ChartController<X = unknown, Y = unknown> extends GraphController<X
       return controller instanceof LeftAxisController ? controller : null;
     },
   })
-  readonly leftAxis!: TraitViewControllerRef<this, AxisTrait<Y>, AxisView<Y>, AxisController<Y>>;
-  static readonly leftAxis: MemberFastenerClass<ChartController, "leftAxis">;
+  readonly leftAxis!: TraitViewControllerRef<this, AxisTrait<Y>, AxisView<Y>, AxisController<Y>> & Observes<AxisController<Y>> & {
+    attachAxisTrait(axisTrait: AxisTrait<Y>): void;
+    detachAxisTrait(axisTrait: AxisTrait<Y>): void;
+    attachAxisView(axisView: AxisView<Y>): void;
+    detachAxisView(axisView: AxisView<Y>): void;
+  };
+  static readonly leftAxis: FastenerClass<ChartController["leftAxis"]>;
 }

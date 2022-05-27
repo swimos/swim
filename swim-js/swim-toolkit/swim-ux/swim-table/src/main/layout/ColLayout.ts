@@ -15,8 +15,7 @@
 import {Equivalent, Equals} from "@swim/util"
 import {Debug, Format, Output} from "@swim/codec";
 import {AnyLength, Length} from "@swim/math";
-import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
+import {AnyColorOrLook, ColorOrLook, ColorLook} from "@swim/theme";
 
 /** @public */
 export type AnyColLayout = ColLayout | ColLayoutInit;
@@ -29,7 +28,7 @@ export interface ColLayoutInit {
   basis?: AnyLength;
   optional?: boolean;
   persistent?: boolean;
-  textColor?: Look<Color> | AnyColor | null;
+  textColor?: AnyColorOrLook | null;
   width?: AnyLength | null;
   left?: AnyLength | null;
   right?: AnyLength | null;
@@ -39,7 +38,7 @@ export interface ColLayoutInit {
 /** @public */
 export class ColLayout implements Equals, Equivalent, Debug {
   constructor(key: string, grow: number, shrink: number, basis: Length,
-              optional: boolean, persistent: boolean, textColor: Look<Color> | Color | null,
+              optional: boolean, persistent: boolean, textColor: ColorOrLook | null,
               width: Length | null, left: Length | null, right: Length | null, hidden: boolean) {
     this.key = key;
     this.grow = grow;
@@ -55,6 +54,11 @@ export class ColLayout implements Equals, Equivalent, Debug {
   }
 
   readonly key: string;
+
+  withKey(key: string): ColLayout {
+    return this.copy(key, this.grow, this.shrink, this.basis, this.optional, this.persistent,
+                     this.textColor, this.width, this.left, this.right, this.hidden);
+  }
 
   readonly grow: number;
 
@@ -86,12 +90,10 @@ export class ColLayout implements Equals, Equivalent, Debug {
                      this.textColor, this.width, this.left, this.right, this.hidden);
   }
 
-  readonly textColor: Look<Color> | Color | null;
+  readonly textColor: ColorOrLook | null;
 
-  withTextColor(textColor: Look<Color> | AnyColor | null): ColLayout {
-    if (textColor !== null && !(textColor instanceof Look)) {
-      textColor = Color.fromAny(textColor);
-    }
+  withTextColor(textColor: AnyColorOrLook | null): ColLayout {
+    textColor = ColorLook.fromAny(textColor);
     return this.copy(this.key, this.grow, this.shrink, this.basis, this.optional, this.persistent,
                      textColor, this.width, this.left, this.right, this.hidden);
   }
@@ -128,7 +130,7 @@ export class ColLayout implements Equals, Equivalent, Debug {
   }
 
   protected copy(key: string, grow: number, shrink: number, basis: Length, optional: boolean,
-                 persistent: boolean, textColor: Look<Color> | Color | null,
+                 persistent: boolean, textColor: ColorOrLook | null,
                  width: Length | null, left: Length | null, right: Length | null,
                  hidden: boolean): ColLayout {
     return new ColLayout(key, grow, shrink, basis, optional, persistent,
@@ -188,7 +190,7 @@ export class ColLayout implements Equals, Equivalent, Debug {
   }
 
   static create(key: string, grow?: number, shrink?: number, basis?: AnyLength,
-                optional?: boolean, persistent?: boolean, textColor?: Look<Color> | AnyColor | null): ColLayout {
+                optional?: boolean, persistent?: boolean, textColor?: AnyColorOrLook | null): ColLayout {
     if (grow === void 0) {
       grow = 0;
     }
@@ -209,8 +211,11 @@ export class ColLayout implements Equals, Equivalent, Debug {
     if (textColor === void 0) {
       textColor = null;
     }
-    if (textColor !== null && !(textColor instanceof Look)) {
-      textColor = Color.fromAny(textColor);
+    if (textColor === void 0) {
+      textColor = null;
+    }
+    if (textColor !== null) {
+      textColor = ColorLook.fromAny(textColor);
     }
     return new ColLayout(key, grow, shrink, basis, optional, persistent,
                          textColor, null, null, null, false);
@@ -256,8 +261,8 @@ export class ColLayout implements Equals, Equivalent, Debug {
     if (textColor === void 0) {
       textColor = null;
     }
-    if (textColor !== null && !(textColor instanceof Look)) {
-      textColor = Color.fromAny(textColor);
+    if (textColor !== null) {
+      textColor = ColorLook.fromAny(textColor);
     }
     let width = init.width;
     if (width !== void 0 && width !== null) {

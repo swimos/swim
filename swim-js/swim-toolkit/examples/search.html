@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Search</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body swim-theme style="display: flex;">
+    <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
+    <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
+    <script src="../swim-ui/dist/swim-ui.js"></script>
+    <script src="../swim-ux/dist/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const layout = swim.BarLayout.fromInit({
+  tools: [
+    {
+      key: "close",
+      shrink: 0,
+      basis: 48,
+    },
+    {
+      key: "search",
+      grow: 1,
+      shrink: 0,
+      basis: 0,
+      align: 0.5,
+    },
+    {
+      key: "menu",
+      shrink: 0,
+      basis: 48,
+    },
+  ],
+});
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const barView = swim.BarView.create().width("100%").barHeight(60);
+barView.layout.setState(layout);
+
+const closeIcon = swim.VectorIcon.create(24, 24, "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12Z");
+const closeView = barView.appendChild(swim.ButtonToolView, "close").iconWidth(24).iconHeight(24).graphics(closeIcon);
+
+const searchView = barView.appendChild(swim.SearchToolView, "search");
+searchView.stylesheet.insertView();
+const inputView = searchView.input.insertView();
+inputView.placeholder("Search");
+
+const menuIcon = swim.VectorIcon.create(24, 24, "M3,18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3Z");
+const menuView = barView.appendChild(swim.ButtonToolView, "menu").iconWidth(24).iconHeight(24).graphics(menuIcon);
+
+bodyView.appendChild(barView);
+
+    </script>
+  </body>
+</html>

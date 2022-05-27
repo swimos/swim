@@ -18,7 +18,7 @@ import {BTree} from "@swim/collections";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {ViewFlags, View} from "@swim/view";
 import {GraphicsViewInit, GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import type {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import {AnyTickView, TickView} from "../tick/TickView";
@@ -88,38 +88,38 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     return tickView;
   }
 
-  @Property({type: TickGenerator, value: true})
+  @Property({valueType: TickGenerator, value: true})
   readonly tickGenerator!: Property<this, TickGenerator<D> | true | null>;
 
-  @ThemeAnimator({type: R2Point, value: R2Point.origin(), updateFlags: View.NeedsLayout | View.NeedsRender})
+  @ThemeAnimator({valueType: R2Point, value: R2Point.origin(), updateFlags: View.NeedsLayout | View.NeedsRender})
   readonly origin!: ThemeAnimator<this, R2Point, AnyR2Point>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly borderColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 1, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 1, inherits: true, updateFlags: View.NeedsRender})
   readonly borderWidth!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 6, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 6, inherits: true, updateFlags: View.NeedsRender})
   readonly borderSerif!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Number, value: 80, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 80, updateFlags: View.NeedsRender})
   readonly tickMarkSpacing!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly tickMarkColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 1, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 1, inherits: true, updateFlags: View.NeedsRender})
   readonly tickMarkWidth!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 6, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 6, inherits: true, updateFlags: View.NeedsRender})
   readonly tickMarkLength!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 2, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 2, inherits: true, updateFlags: View.NeedsRender})
   readonly tickLabelPadding!: ThemeAnimator<this, number>;
 
-  @Property({
-    type: Timing,
+  @Property<AxisView["tickTransition"]>({
+    valueType: Timing,
     inherits: true,
     initValue(): Timing {
       return Easing.cubicOut.withDuration(250);
@@ -127,16 +127,16 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
   })
   readonly tickTransition!: Property<this, Timing, AnyTiming>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly gridLineColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 0, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 0, inherits: true, updateFlags: View.NeedsRender})
   readonly gridLineWidth!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Font, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected updateTicks(): void {
@@ -194,7 +194,11 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     if (tickView !== null) {
       const tickLabel = this.createTickLabel(tickValue, tickView);
       if (tickLabel !== null) {
-        tickView.label(tickLabel);
+        if (typeof tickLabel === "string") {
+          tickView.label.setText(tickLabel);
+        } else {
+          tickView.label.setView(tickLabel);
+        }
         tickView.preserve(false);
       }
     }
@@ -252,39 +256,38 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     }
   }
 
-  protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsDisplay(displayFlags: ViewFlags): ViewFlags {
     if ((this.flags & View.NeedsLayout) === 0) {
       displayFlags &= ~View.NeedsLayout;
     }
     return displayFlags;
   }
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-    this.scale.recohere(viewContext.updateTime);
+  protected override onLayout(): void {
+    super.onLayout();
+    this.scale.recohere(this.updateTime);
     this.updateTicks();
   }
 
-  protected override displayChild(child: View, displayFlags: ViewFlags,
-                                  viewContext: ViewContextType<this>): void {
+  protected override displayChild(child: View, displayFlags: ViewFlags): void {
     if ((displayFlags & View.NeedsLayout) !== 0 && child instanceof TickView) {
       const scale = this.scale.value;
       if (scale !== null) {
         this.layoutTick(child, this.origin.getValue(), this.viewFrame, scale);
       }
     }
-    super.displayChild(child, displayFlags, viewContext);
+    super.displayChild(child, displayFlags);
   }
 
   protected abstract layoutTick(tick: TickView<D>, origin: R2Point, frame: R2Box,
                                 scale: ContinuousScale<D, number>): void;
 
-  protected override didRender(viewContext: ViewContextType<this>): void {
-    const renderer = viewContext.renderer;
+  protected override didRender(): void {
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer) {
       this.renderDomain(renderer.context, this.origin.getValue(), this.viewFrame);
     }
-    super.didRender(viewContext);
+    super.didRender();
   }
 
   protected abstract renderDomain(context: PaintingContext, origin: R2Point, frame: R2Box): void;

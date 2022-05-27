@@ -21,7 +21,7 @@ import type {Mood} from "../mood/Mood";
 import type {MoodVector} from "../mood/MoodVector";
 
 /** @public */
-export abstract class Look<T, U = never> implements Mood {
+export abstract class Look<T, U = T> implements Mood {
   constructor(name: string) {
     this.name = name;
   }
@@ -158,6 +158,8 @@ export abstract class Look<T, U = never> implements Mood {
   }
 
   static font: Look<Font, AnyFont>; // defined by looks
+  static smallFont: Look<Font, AnyFont>; // defined by looks
+  static largeFont: Look<Font, AnyFont>; // defined by looks
 
   static textColor: Look<Color, AnyColor>; // defined by looks
   static iconColor: Look<Color, AnyColor>; // defined by looks
@@ -170,7 +172,9 @@ export abstract class Look<T, U = never> implements Mood {
   static accentColor: Look<Color, AnyColor>; // defined by looks
 
   static backgroundColor: Look<Color, AnyColor>; // defined by looks
+  static selectionColor: Look<Color, AnyColor>; // defined by looks
   static borderColor: Look<Color, AnyColor>; // defined by looks
+  static focusColor: Look<Color, AnyColor>; // defined by looks
 
   static etchColor: Look<Color, AnyColor>; // defined by looks
   static maskColor: Look<Color, AnyColor>; // defined by looks

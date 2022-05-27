@@ -22,4 +22,6 @@ export interface PlotViewObserver<X = unknown, Y = unknown, V extends PlotView<X
   viewWillAttachDataPoint?(dataPointView: DataPointView<X, Y>, targetView: View | null, view: V): void;
 
   viewDidDetachDataPoint?(dataPointView: DataPointView<X, Y>, view: V): void;
+
+  viewDidSetOpacity?(opacity: number | undefined, view: V): void;
 }

@@ -17,5 +17,3 @@ export {
   SelectionService,
 } from "./SelectionService";
 export {SelectionServiceObserver} from "./SelectionServiceObserver";
-
-export {SelectionProvider} from "./SelectionProvider";

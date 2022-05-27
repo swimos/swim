@@ -12,76 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, ObserverType} from "@swim/util";
+import type {Mutable, Proto} from "@swim/util";
 import type {FastenerOwner} from "@swim/component";
+import type {View} from "../view/View";
 import type {GestureInputType} from "./GestureInput";
-import {GestureMethod, GestureInit, GestureClass, Gesture} from "./Gesture";
+import {GestureView, GestureDescriptor, GestureClass, Gesture} from "./Gesture";
 import {PositionGestureInput} from "./PositionGestureInput";
 import {MousePositionGesture} from "./"; // forward import
 import {TouchPositionGesture} from "./"; // forward import
 import {PointerPositionGesture} from "./"; // forward import
-import type {View} from "../view/View";
 
 /** @public */
-export interface PositionGestureInit<V extends View = View> extends GestureInit<V> {
-  extends?: {prototype: PositionGesture<any, any>} | string | boolean | null;
-
-  willStartHovering?(): void;
-  didStartHovering?(): void;
-  willStopHovering?(): void;
-  didStopHovering?(): void;
-
-  willBeginHover?(input: PositionGestureInput, event: Event | null): void;
-  didBeginHover?(input: PositionGestureInput, event: Event | null): void;
-  willEndHover?(input: PositionGestureInput, event: Event | null): void;
-  didEndHover?(input: PositionGestureInput, event: Event | null): void;
-
-  willStartPressing?(): void;
-  didStartPressing?(): void;
-  willStopPressing?(): void;
-  didStopPressing?(): void;
-
-  willBeginPress?(input: PositionGestureInput, event: Event | null): boolean | void;
-  didBeginPress?(input: PositionGestureInput, event: Event | null): void;
-
-  willMovePress?(input: PositionGestureInput, event: Event | null): void;
-  didMovePress?(input: PositionGestureInput, event: Event | null): void;
-
-  willEndPress?(input: PositionGestureInput, event: Event | null): void;
-  didEndPress?(input: PositionGestureInput, event: Event | null): void;
-
-  willCancelPress?(input: PositionGestureInput, event: Event | null): void;
-  didCancelPress?(input: PositionGestureInput, event: Event | null): void;
-
-  willPress?(input: PositionGestureInput, event: Event | null): void;
-  didPress?(input: PositionGestureInput, event: Event | null): void;
-
-  willLongPress?(input: PositionGestureInput): void;
-  didLongPress?(input: PositionGestureInput): void;
+export interface PositionGestureDescriptor<V extends View = View> extends GestureDescriptor<V> {
+  extends?: Proto<PositionGesture<any, any>> | string | boolean | null;
 }
 
 /** @public */
-export type PositionGestureDescriptor<O = unknown, V extends View = View, I = {}> = ThisType<PositionGesture<O, V> & I> & PositionGestureInit<V> & Partial<I>;
+export type PositionGestureTemplate<G extends PositionGesture<any, any>> =
+  ThisType<G> &
+  PositionGestureDescriptor<GestureView<G>> &
+  Partial<Omit<G, keyof PositionGestureDescriptor>>;
 
 /** @public */
 export interface PositionGestureClass<G extends PositionGesture<any, any> = PositionGesture<any, any>> extends GestureClass<G> {
-}
+  /** @override */
+  specialize(template: PositionGestureDescriptor<any>): PositionGestureClass<G>;
 
-/** @public */
-export interface PositionGestureFactory<G extends PositionGesture<any, any> = PositionGesture<any, any>> extends PositionGestureClass<G> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): PositionGestureFactory<G> & I;
+  /** @override */
+  refine(gestureClass: PositionGestureClass<any>): void;
 
-  specialize(method: GestureMethod): PositionGestureFactory | null;
+  /** @override */
+  extend<G2 extends G>(className: string, template: PositionGestureTemplate<G2>): PositionGestureClass<G2>;
+  extend<G2 extends G>(className: string, template: PositionGestureTemplate<G2>): PositionGestureClass<G2>;
 
-  define<O, V extends View = View>(className: string, descriptor: PositionGestureDescriptor<O, V>): PositionGestureFactory<PositionGesture<any, V>>;
-  define<O, V extends View = View>(className: string, descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, ObserverType<V>>): PositionGestureFactory<PositionGesture<any, V>>;
-  define<O, V extends View = View, I = {}>(className: string, descriptor: {implements: unknown} & PositionGestureDescriptor<O, V, I>): PositionGestureFactory<PositionGesture<any, V> & I>;
-  define<O, V extends View = View, I = {}>(className: string, descriptor: {implements: unknown; observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PositionGestureFactory<PositionGesture<any, V> & I>;
+  /** @override */
+  define<G2 extends G>(className: string, template: PositionGestureTemplate<G2>): PositionGestureClass<G2>;
+  define<G2 extends G>(className: string, template: PositionGestureTemplate<G2>): PositionGestureClass<G2>;
 
-  <O, V extends View = View>(descriptor: PositionGestureDescriptor<O, V>): PropertyDecorator;
-  <O, V extends View = View>(descriptor: {observes: boolean} & PositionGestureDescriptor<O, V, ObserverType<V>>): PropertyDecorator;
-  <O, V extends View = View, I = {}>(descriptor: {implements: unknown} & PositionGestureDescriptor<O, V, I>): PropertyDecorator;
-  <O, V extends View = View, I = {}>(descriptor: {implements: unknown; observes: boolean} & PositionGestureDescriptor<O, V, I & ObserverType<V>>): PropertyDecorator;
+  /** @override */
+  <G2 extends G>(template: PositionGestureTemplate<G2>): PropertyDecorator;
 }
 
 /** @public */
@@ -282,7 +251,7 @@ export interface PositionGesture<O = unknown, V extends View = View> extends Ges
 
 /** @public */
 export const PositionGesture = (function (_super: typeof Gesture) {
-  const PositionGesture: PositionGestureFactory = _super.extend("PositionGesture");
+  const PositionGesture = _super.extend("PositionGesture", {}) as PositionGestureClass;
 
   PositionGesture.prototype.attachEvents = function (this: PositionGesture, view: View): void {
     Gesture.prototype.attachEvents.call(this, view);
@@ -628,76 +597,32 @@ export const PositionGesture = (function (_super: typeof Gesture) {
     // hook
   };
 
-  PositionGesture.construct = function <G extends PositionGesture<any, any>>(gestureClass: {prototype: G}, gesture: G | null, owner: FastenerOwner<G>): G {
-    gesture = _super.construct(gestureClass, gesture, owner) as G;
+  PositionGesture.construct = function <G extends PositionGesture<any, any>>(gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct.call(this, gesture, owner) as G;
     (gesture as Mutable<typeof gesture>).hoverCount = 0;
     (gesture as Mutable<typeof gesture>).pressCount = 0;
     return gesture;
   };
 
-  PositionGesture.specialize = function (method: GestureMethod): PositionGestureFactory | null {
-    if (method === "pointer") {
-      return PointerPositionGesture;
-    } else if (method === "touch") {
-      return TouchPositionGesture;
-    } else if (method === "mouse") {
-      return MousePositionGesture;
-    } else if (typeof PointerEvent !== "undefined") {
-      return PointerPositionGesture;
-    } else if (typeof TouchEvent !== "undefined") {
-      return TouchPositionGesture;
-    } else {
-      return MousePositionGesture;
-    }
-  };
-
-  PositionGesture.define = function <O, V extends View>(className: string, descriptor: PositionGestureDescriptor<O, V>): PositionGestureFactory<PositionGesture<any, V>> {
-    let superClass = descriptor.extends as PositionGestureFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    let method = descriptor.method;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
-    delete descriptor.method;
-
-    if (descriptor.key === true) {
-      Object.defineProperty(descriptor, "key", {
-        value: className,
-        configurable: true,
-      });
-    } else if (descriptor.key === false) {
-      Object.defineProperty(descriptor, "key", {
-        value: void 0,
-        configurable: true,
-      });
-    }
-
-    if (method === void 0) {
-      method = "auto";
-    }
+  PositionGesture.specialize = function (template: PositionGestureDescriptor<any>): PositionGestureClass {
+    let superClass = template.extends as PositionGestureClass | null | undefined;
     if (superClass === void 0 || superClass === null) {
-      superClass = PositionGesture.specialize(method);
-    }
-    if (superClass === null) {
-      superClass = this;
-    }
-
-    const gestureClass = superClass.extend(className, descriptor);
-
-    gestureClass.construct = function (gestureClass: {prototype: PositionGesture<any, any>}, gesture: PositionGesture<O, V> | null, owner: O): PositionGesture<O, V> {
-      gesture = superClass!.construct(gestureClass, gesture, owner);
-      if (affinity !== void 0) {
-        gesture.initAffinity(affinity);
+      const method = template.method;
+      if (method === "pointer") {
+        superClass = PointerPositionGesture;
+      } else if (method === "touch") {
+        superClass = TouchPositionGesture;
+      } else if (method === "mouse") {
+        superClass = MousePositionGesture;
+      } else if (typeof PointerEvent !== "undefined") {
+        superClass = PointerPositionGesture;
+      } else if (typeof TouchEvent !== "undefined") {
+        superClass = TouchPositionGesture;
+      } else {
+        superClass = MousePositionGesture;
       }
-      if (inherits !== void 0) {
-        gesture.initInherits(inherits);
-      }
-      return gesture;
-    };
-
-    return gestureClass;
+    }
+    return superClass
   };
 
   return PositionGesture;

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class, Instance, Creatable} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {FastenerClass} from "@swim/component";
 import {Model, Trait, TraitSet} from "@swim/model";
 import {CellTrait} from "../cell/CellTrait";
 import type {LeafTraitObserver} from "./LeafTraitObserver";
@@ -41,12 +41,12 @@ export class LeafTrait extends Trait {
     return cellTrait!;
   }
 
-  setCell(key: string, cellTrait: CellTrait): void {
+  setCell(key: string, cellTrait: CellTrait | null): void {
     this.setTrait(key, cellTrait);
   }
 
-  @TraitSet<LeafTrait, CellTrait>({
-    type: CellTrait,
+  @TraitSet<LeafTrait["cells"]>({
+    traitType: CellTrait,
     binds: true,
     willAttachTrait(cellTrait: CellTrait, targetTrait: Trait | null): void {
       this.owner.callObservers("traitWillAttachCell", cellTrait, targetTrait, this.owner);
@@ -69,33 +69,15 @@ export class LeafTrait extends Trait {
     },
   })
   readonly cells!: TraitSet<this, CellTrait>;
-  static readonly cells: MemberFastenerClass<LeafTrait, "cells">;
-
-  /** @internal */
-  protected startConsumingCells(): void {
-    const cellTraits = this.cells.traits;
-    for (const traitId in cellTraits) {
-      const cellTrait = cellTraits[traitId]!;
-      cellTrait.consume(this);
-    }
-  }
-
-  /** @internal */
-  protected stopConsumingCells(): void {
-    const cellTraits = this.cells.traits;
-    for (const traitId in cellTraits) {
-      const cellTrait = cellTraits[traitId]!;
-      cellTrait.unconsume(this);
-    }
-  }
+  static readonly cells: FastenerClass<LeafTrait["cells"]>;
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();
-    this.startConsumingCells();
+    this.cells.consumeTraits(this);
   }
 
   protected override onStopConsuming(): void {
     super.onStopConsuming();
-    this.stopConsumingCells();
+    this.cells.unconsumeTraits(this);
   }
 }

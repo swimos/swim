@@ -13,7 +13,13 @@
 // limitations under the License.
 
 import type {Mutable, Proto, AnyTiming} from "@swim/util";
-import {FastenerContext, FastenerOwner, FastenerInit, FastenerClass, Fastener} from "@swim/component";
+import {
+  FastenerContext,
+  FastenerOwner,
+  FastenerDescriptor,
+  FastenerClass,
+  Fastener,
+} from "@swim/component";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,
@@ -27,29 +33,35 @@ import {Look, Feel, MoodVector, ThemeMatrix, ThemeContext} from "@swim/theme";
 import {CssContext} from "./CssContext";
 
 /** @public */
-export interface CssRuleInit extends FastenerInit {
-  extends?: {prototype: CssRule<any>} | string | boolean | null;
-  css?: string | (() => string);
-
-  initRule?(rule: CSSRule): void;
+export interface CssRuleDescriptor extends FastenerDescriptor {
+  extends?: Proto<CssRule<any>> | string | boolean | null;
+  css?: string;
 }
 
 /** @public */
-export type CssRuleDescriptor<O = unknown, I = {}> = ThisType<CssRule<O> & I> & CssRuleInit & Partial<I>;
+export type CssRuleTemplate<F extends CssRule<any>> =
+  ThisType<F> &
+  CssRuleDescriptor &
+  Partial<Omit<F, keyof CssRuleDescriptor>>;
 
 /** @public */
 export interface CssRuleClass<F extends CssRule<any> = CssRule<any>> extends FastenerClass<F> {
-}
+  /** @override */
+  specialize(template: CssRuleDescriptor): CssRuleClass<F>;
 
-/** @public */
-export interface CssRuleFactory<F extends CssRule<any> = CssRule<any>> extends CssRuleClass<F> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): CssRuleFactory<F> & I;
+  /** @override */
+  refine(fastenerClass: CssRuleClass<any>): void;
 
-  define<O>(className: string, descriptor: CssRuleDescriptor<O>): CssRuleFactory<CssRule<any>>;
-  define<O, I = {}>(className: string, descriptor: {implements: unknown} & CssRuleDescriptor<O, I>): CssRuleFactory<CssRule<any> & I>;
+  /** @override */
+  extend<F2 extends F>(className: string, template: CssRuleTemplate<F2>): CssRuleClass<F2>;
+  extend<F2 extends F>(className: string, template: CssRuleTemplate<F2>): CssRuleClass<F2>;
 
-  <O>(descriptor: CssRuleDescriptor<O>): PropertyDecorator;
-  <O, I = {}>(descriptor: {implements: unknown} & CssRuleDescriptor<O, I>): PropertyDecorator;
+  /** @override */
+  define<F2 extends F>(className: string, template: CssRuleTemplate<F2>): CssRuleClass<F2>;
+  define<F2 extends F>(className: string, template: CssRuleTemplate<F2>): CssRuleClass<F2>;
+
+  /** @override */
+  <F2 extends F>(template: CssRuleTemplate<F2>): PropertyDecorator;
 }
 
 /** @public */
@@ -57,7 +69,18 @@ export interface CssRule<O = unknown> extends Fastener<O>, FastenerContext, Cons
   /** @override */
   get fastenerType(): Proto<CssRule<any>>;
 
-  readonly rule: CSSRule;
+  /** @protected */
+  initCss(): string;
+
+  readonly css?: string; // optional prototype property
+
+  /** @internal */
+  initRule(): CSSRule | null;
+
+  /** @internal */
+  createRule(css: string): CSSRule;
+
+  readonly rule: CSSRule | null;
 
   /** @internal */
   readonly fasteners: {[fastenerName: string]: Fastener | undefined} | null;
@@ -82,8 +105,6 @@ export interface CssRule<O = unknown> extends Fastener<O>, FastenerContext, Cons
   getSuperFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Proto<F>): F | null;
   /** @override */
   getSuperFastener(fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null;
-  /** @internal @override */
-  getSuperFastener(): Fastener | null;
 
   /** @internal @protected */
   mountFasteners(): void;
@@ -145,31 +166,53 @@ export interface CssRule<O = unknown> extends Fastener<O>, FastenerContext, Cons
   applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void;
 
   /** @protected @override */
+  willMount(): void;
+
+  /** @protected @override */
   onMount(): void;
 
   /** @protected @override */
   onUnmount(): void;
 
-  /** @internal */
-  createRule(cssText: string): CSSRule;
-
-  /** @internal */
-  initRule?(rule: CSSRule): void;
-
-  /** @internal */
-  initCss?(): string;
+  /** @protected @override */
+  didUnmount(): void;
 }
 
 /** @public */
 export const CssRule = (function (_super: typeof Fastener) {
-  const CssRule: CssRuleFactory = _super.extend("CssRule");
+  const CssRule = _super.extend("CssRule", {}) as CssRuleClass;
 
   Object.defineProperty(CssRule.prototype, "fastenerType", {
-    get: function (this: CssRule): Proto<CssRule<any>> {
-      return CssRule;
-    },
+    value: CssRule,
     configurable: true,
   });
+
+  CssRule.prototype.initCss = function (this: CssRule): string {
+    let css = (Object.getPrototypeOf(this) as CssRule).css as string | undefined;
+    if (css === void 0) {
+      css = "";
+    }
+    return css;
+  };
+
+  CssRule.prototype.initRule = function (this: CssRule): CSSRule | null {
+    return this.createRule(this.initCss());
+  };
+
+  CssRule.prototype.createRule = function (this: CssRule, css: string): CSSRule {
+    const cssContext = this.owner;
+    if (CssContext.is(cssContext)) {
+      const index = cssContext.insertRule(css);
+      const rule = cssContext.getRule(index);
+      if (rule instanceof CSSRule) {
+        return rule;
+      } else {
+        throw new TypeError("" + rule);
+      }
+    } else {
+      throw new Error("no css context");
+    }
+  };
 
   CssRule.prototype.hasFastener = function (this: CssRule, fastenerName: string, fastenerBound?: Proto<Fastener> | null): boolean {
     const fasteners = this.fasteners;
@@ -217,12 +260,8 @@ export const CssRule = (function (_super: typeof Fastener) {
     return FastenerContext.getLazyFastener(this, fastenerName, fastenerBound);
   };
 
-  CssRule.prototype.getSuperFastener = function (this: CssRule, fastenerName?: string, fastenerBound?: Proto<Fastener> | null): Fastener | null {
-    if (arguments.length === 0) {
-      return _super.prototype.getSuperFastener.call(this);
-    } else {
-      return null;
-    }
+  CssRule.prototype.getSuperFastener = function (this: CssRule, fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null {
+    return null;
   };
 
   CssRule.prototype.mountFasteners = function (this: CssRule): void {
@@ -351,6 +390,11 @@ export const CssRule = (function (_super: typeof Fastener) {
     // hook
   };
 
+  CssRule.prototype.willMount = function (this: CssRule): void {
+    _super.prototype.willMount.call(this);
+    (this as Mutable<typeof this>).rule = this.initRule();
+  };
+
   CssRule.prototype.onMount = function (this: CssRule): void {
     _super.prototype.onMount.call(this);
     this.mountFasteners();
@@ -361,80 +405,18 @@ export const CssRule = (function (_super: typeof Fastener) {
     _super.prototype.onUnmount.call(this);
   };
 
-  CssRule.prototype.createRule = function (this: CssRule, cssText: string): CSSRule {
-    const cssContext = this.owner;
-    if (CssContext.is(cssContext)) {
-      const index = cssContext.insertRule(cssText);
-      const rule = cssContext.getRule(index);
-      if (rule instanceof CSSRule) {
-        return rule;
-      } else {
-        throw new TypeError("" + rule);
-      }
-    } else {
-      throw new Error("no css context");
-    }
+  CssRule.prototype.didUnmount = function (this: CssRule): void {
+    (this as Mutable<typeof this>).rule = null;
+    _super.prototype.didUnmount.call(this);
   };
 
-  CssRule.construct = function <F extends CssRule<any>>(ruleClass: {prototype: F}, rule: F | null, owner: FastenerOwner<F>): F {
-    rule = _super.construct(ruleClass, rule, owner) as F;
+  CssRule.construct = function <F extends CssRule<any>>(rule: F | null, owner: FastenerOwner<F>): F {
+    rule = _super.construct.call(this, rule, owner) as F;
     (rule as Mutable<typeof rule>).fasteners = null;
     (rule as Mutable<typeof rule>).decoherent = null;
-    (rule as Mutable<typeof rule>).rule = null as unknown as CSSRule;
+    (rule as Mutable<typeof rule>).rule = null;
     FastenerContext.init(rule);
     return rule;
-  };
-
-  CssRule.define = function <O>(className: string, descriptor: CssRuleDescriptor<O>): CssRuleFactory<CssRule<any>> {
-    let superClass = descriptor.extends as CssRuleFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    let css = descriptor.css;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
-    delete descriptor.css;
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this;
-    }
-
-    const ruleClass = superClass.extend(className, descriptor);
-
-    if (typeof css === "function") {
-      ruleClass.prototype.initCss = css;
-      css = void 0;
-    }
-
-    ruleClass.construct = function (ruleClass: {prototype: CssRule<any>}, rule: CssRule<O> | null, owner: O): CssRule<O> {
-      rule = superClass!.construct(ruleClass, rule, owner);
-
-      if (affinity !== void 0) {
-        rule.initAffinity(affinity);
-      }
-      if (inherits !== void 0) {
-        rule.initInherits(inherits);
-      }
-
-      let cssText: string | undefined;
-      if (css !== void 0) {
-        cssText = css as string;
-      } else if (rule.initCss !== void 0) {
-        cssText = rule.initCss();
-      } else {
-        throw new Error("undefined css");
-      }
-
-      (rule as Mutable<typeof rule>).rule = rule.createRule(cssText);
-      if (rule.initRule !== void 0) {
-        rule.initRule(rule.rule);
-      }
-
-      return rule;
-    };
-
-    return ruleClass;
   };
 
   return CssRule;

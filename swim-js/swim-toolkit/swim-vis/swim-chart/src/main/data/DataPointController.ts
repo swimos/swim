@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/component";
+import {Class, AnyTiming, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import type {AnyLength, Length} from "@swim/math";
-import type {AnyColor, Color} from "@swim/style";
-import {Look, Mood} from "@swim/theme";
+import type {Color} from "@swim/style";
+import {Look, Mood, AnyColorOrLook, ColorOrLook} from "@swim/theme";
 import {ViewRef} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
 import {Controller, TraitViewRef} from "@swim/controller";
 import {DataPointView} from "./DataPointView";
-import {DataPointLabel, DataPointTrait} from "./DataPointTrait";
+import {DataPointTrait} from "./DataPointTrait";
 import type {DataPointControllerObserver} from "./DataPointControllerObserver";
 
 /** @public */
@@ -35,7 +35,7 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     }
   }
 
-  protected setX(x: X, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setX(x: X, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -50,7 +50,7 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     }
   }
 
-  protected setY(y: Y, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setY(y: Y, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -65,7 +65,7 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     }
   }
 
-  protected setY2(y2: Y | undefined, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setY2(y2: Y | undefined, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -80,7 +80,7 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     }
   }
 
-  protected setRadius(radius: AnyLength | null, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setRadius(radius: AnyLength | null, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -95,7 +95,7 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     }
   }
 
-  protected setColor(color: Look<Color> | AnyColor | null, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setColor(color: AnyColorOrLook | null, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -114,7 +114,7 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     }
   }
 
-  protected setOpacity(opacity: number | undefined, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setOpacity(opacity: number | undefined, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -129,26 +129,17 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     }
   }
 
-  protected createLabelView(label: DataPointLabel<X, Y>, dataPointTrait: DataPointTrait<X, Y>): GraphicsView | string | null {
-    if (typeof label === "function") {
-      return label(dataPointTrait);
-    } else {
-      return label;
-    }
-  }
-
-  protected setLabelView(label: DataPointLabel<X, Y> | null, dataPointTrait: DataPointTrait<X, Y>): void {
+  protected setLabelView(label: string | undefined): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
-      const labelView = label !== null ? this.createLabelView(label, dataPointTrait) : null;
-      dataPointView.label.setView(labelView);
+      dataPointView.label.setText(label);
     }
   }
 
-  @Property({type: Timing, inherits: true})
-  readonly dataPointTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({valueType: Timing, inherits: true})
+  readonly dataPointTiming!: Property<this, Timing | boolean | undefined, AnyTiming | boolean | undefined>;
 
-  @TraitViewRef<DataPointController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>>({
+  @TraitViewRef<DataPointController<X, Y>["dataPoint"]>({
     traitType: DataPointTrait,
     observesTrait: true,
     willAttachTrait(dataPointTrait: DataPointTrait<X, Y>): void {
@@ -157,44 +148,44 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     didAttachTrait(dataPointTrait: DataPointTrait<X, Y>): void {
       const dataPointView = this.view;
       if (dataPointView !== null) {
-        this.owner.setX(dataPointTrait.x.value, dataPointTrait);
-        this.owner.setY(dataPointTrait.y.value, dataPointTrait);
-        this.owner.setY2(dataPointTrait.y2.value, dataPointTrait);
-        this.owner.setRadius(dataPointTrait.radius.value, dataPointTrait);
-        this.owner.setColor(dataPointTrait.color.value, dataPointTrait);
-        this.owner.setOpacity(dataPointTrait.opacity.value, dataPointTrait);
-        this.owner.setLabelView(dataPointTrait.label.value, dataPointTrait);
+        this.owner.setX(dataPointTrait.x.value);
+        this.owner.setY(dataPointTrait.y.value);
+        this.owner.setY2(dataPointTrait.y2.value);
+        this.owner.setRadius(dataPointTrait.radius.value);
+        this.owner.setColor(dataPointTrait.color.value);
+        this.owner.setOpacity(dataPointTrait.opacity.value);
+        this.owner.setLabelView(dataPointTrait.label.value);
       }
     },
     willDetachTrait(dataPointTrait: DataPointTrait<X, Y>): void {
       const dataPointView = this.view;
       if (dataPointView !== null) {
-        this.owner.setLabelView(null, dataPointTrait);
+        this.owner.setLabelView(void 0);
       }
     },
     didDetachTrait(dataPointTrait: DataPointTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachDataPointTrait", dataPointTrait, this.owner);
     },
-    traitDidSetDataPointX(newX: X , oldX: X, dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.setX(newX, dataPointTrait);
+    traitDidSetX(x: X): void {
+      this.owner.setX(x);
     },
-    traitDidSetDataPointY(newY: Y, oldY: Y, dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.setY(newY, dataPointTrait);
+    traitDidSetY(y: Y): void {
+      this.owner.setY(y);
     },
-    traitDidSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.setY2(newY2, dataPointTrait);
+    traitDidSetY2(y2: Y | undefined): void {
+      this.owner.setY2(y2);
     },
-    traitDidSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.setRadius(newRadius, dataPointTrait);
+    traitDidSetRadius(radius: Length | null): void {
+      this.owner.setRadius(radius);
     },
-    traitDidSetDataPointColor(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.setColor(newColor, dataPointTrait);
+    traitDidSetColor(color: ColorOrLook | null): void {
+      this.owner.setColor(color);
     },
-    traitDidSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.setOpacity(newOpacity, dataPointTrait);
+    traitDidSetOpacity(opacity: number | undefined): void {
+      this.owner.setOpacity(opacity);
     },
-    traitDidSetDataPointLabel(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null, dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.setLabelView(newLabel, dataPointTrait);
+    traitDidSetLabel(label: string | undefined): void {
+      this.owner.setLabelView(label);
     },
     viewType: DataPointView,
     observesView: true,
@@ -205,13 +196,13 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
       this.owner.label.setView(dataPointView.label.view);
       const dataPointTrait = this.trait;
       if (dataPointTrait !== null) {
-        this.owner.setX(dataPointTrait.x.value, dataPointTrait);
-        this.owner.setY(dataPointTrait.y.value, dataPointTrait);
-        this.owner.setY2(dataPointTrait.y2.value, dataPointTrait);
-        this.owner.setRadius(dataPointTrait.radius.value, dataPointTrait);
-        this.owner.setColor(dataPointTrait.color.value, dataPointTrait);
-        this.owner.setOpacity(dataPointTrait.opacity.value, dataPointTrait);
-        this.owner.setLabelView(dataPointTrait.label.value, dataPointTrait);
+        this.owner.setX(dataPointTrait.x.value);
+        this.owner.setY(dataPointTrait.y.value);
+        this.owner.setY2(dataPointTrait.y2.value);
+        this.owner.setRadius(dataPointTrait.radius.value);
+        this.owner.setColor(dataPointTrait.color.value);
+        this.owner.setOpacity(dataPointTrait.opacity.value);
+        this.owner.setLabelView(dataPointTrait.label.value);
         const x = dataPointView.x.value;
         const y = dataPointView.y.value;
         this.owner.updateLabel(x, y, dataPointTrait);
@@ -223,56 +214,38 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     didDetachView(dataPointView: DataPointView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachDataPointView", dataPointView, this.owner);
     },
-    viewWillSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointX", newX, oldX, this.owner);
-    },
-    viewDidSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
+    viewDidSetX(x: X | undefined, dataPointView: DataPointView<X, Y>): void {
       const dataPointTrait = this.trait;
       if (dataPointTrait !== null) {
         const y = dataPointView.y.value;
-        this.owner.updateLabel(newX, y, dataPointTrait);
+        this.owner.updateLabel(x, y, dataPointTrait);
       }
-      this.owner.callObservers("controllerDidSetDataPointX", newX, oldX, this.owner);
+      this.owner.callObservers("controllerDidSetDataPointX", x, this.owner);
     },
-    viewWillSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointY", newY, oldY, this.owner);
-    },
-    viewDidSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
+    viewDidSetY(y: Y | undefined, dataPointView: DataPointView<X, Y>): void {
       const dataPointTrait = this.trait;
       if (dataPointTrait !== null) {
         const x = dataPointView.x.value;
-        this.owner.updateLabel(x, newY, dataPointTrait);
+        this.owner.updateLabel(x, y, dataPointTrait);
       }
-      this.owner.callObservers("controllerDidSetDataPointY", newY, oldY, this.owner);
+      this.owner.callObservers("controllerDidSetDataPointY", y, this.owner);
     },
-    viewWillSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointY2", newY2, oldY2, this.owner);
+    viewDidSetY2(y2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointY2", y2, this.owner);
     },
-    viewDidSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointY2", newY2, oldY2, this.owner);
+    viewDidSetRadius(radius: Length | null, dataPointView: DataPointView<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointRadius", radius, this.owner);
     },
-    viewWillSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointRadius", newRadius, oldRadius, this.owner);
+    viewDidSetColor(color: Color | null, dataPointView: DataPointView<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointColor", color, this.owner);
     },
-    viewDidSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointRadius", newRadius, oldRadius, this.owner);
+    viewDidSetOpacity(opacity: number | undefined, dataPointView: DataPointView<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointOpacity", opacity, this.owner);
     },
-    viewWillSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointColor", newColor, oldColor, this.owner);
-    },
-    viewDidSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointColor", newColor, oldColor, this.owner);
-    },
-    viewWillSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointOpacity", newOpacity, oldOpacity, this.owner);
-    },
-    viewDidSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointView: DataPointView<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointOpacity", newOpacity, oldOpacity, this.owner);
-    },
-    viewWillAttachDataPointLabel(labelView: GraphicsView): void {
+    viewWillAttachLabel(labelView: GraphicsView): void {
       this.owner.label.setView(labelView);
     },
-    viewDidDetachDataPointLabel(labelView: GraphicsView): void {
+    viewDidDetachLabel(labelView: GraphicsView): void {
       this.owner.label.setView(null);
     },
     createView(): DataPointView<X, Y> {
@@ -287,11 +260,11 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
       return dataPointView;
     },
   })
-  readonly dataPoint!: TraitViewRef<this, DataPointTrait<X, Y>, DataPointView<X, Y>>;
-  static readonly dataPoint: MemberFastenerClass<DataPointController, "dataPoint">;
+  readonly dataPoint!: TraitViewRef<this, DataPointTrait<X, Y>, DataPointView<X, Y>> & Observes<DataPointTrait<X, Y> & DataPointView<X, Y>>;
+  static readonly dataPoint: FastenerClass<DataPointController["dataPoint"]>;
 
-  @ViewRef<DataPointController<X, Y>, GraphicsView>({
-    key: true,
+  @ViewRef<DataPointController<X, Y>["label"]>({
+    viewKey: true,
     willAttachView(labelView: GraphicsView): void {
       this.owner.callObservers("controllerWillAttachDataPointLabelView", labelView, this.owner);
     },
@@ -300,5 +273,5 @@ export class DataPointController<X = unknown, Y = unknown> extends Controller {
     },
   })
   readonly label!: ViewRef<this, GraphicsView>;
-  static readonly label: MemberFastenerClass<DataPointController, "label">;
+  static readonly label: FastenerClass<DataPointController["label"]>;
 }

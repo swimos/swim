@@ -13,25 +13,16 @@
 // limitations under the License.
 
 import type {TraitObserver} from "@swim/model";
-import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
-import type {SliceLabel, SliceLegend, SliceTrait} from "./SliceTrait";
+import type {ColorOrLook} from "@swim/theme";
+import type {SliceTrait} from "./SliceTrait";
 
 /** @public */
-export interface SliceTraitObserver<R extends SliceTrait = SliceTrait> extends TraitObserver<R> {
-  traitWillSetSliceValue?(newValue: number, oldValue: number, trait: R): void;
+export interface SliceTraitObserver<T extends SliceTrait = SliceTrait> extends TraitObserver<T> {
+  traitDidSetValue?(value: number, trait: T): void;
 
-  traitDidSetSliceValue?(newValue: number, oldValue: number, trait: R): void;
+  traitDidSetSliceColor?(sliceColor: ColorOrLook | null, trait: T): void;
 
-  traitWillSetSliceColor?(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null, trait: R): void;
+  traitDidSetLabel?(label: string | undefined, trait: T): void;
 
-  traitDidSetSliceColor?(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null, trait: R): void;
-
-  traitWillSetSliceLabel?(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, trait: R): void;
-
-  traitDidSetSliceLabel?(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, trait: R): void;
-
-  traitWillSetSliceLegend?(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, trait: R): void;
-
-  traitDidSetSliceLegend?(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, trait: R): void;
+  traitDidSetLegend?(legend: string | undefined, trait: T): void;
 }

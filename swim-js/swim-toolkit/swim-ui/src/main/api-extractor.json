@@ -1,15 +1,6 @@
 {
   "projectFolder": "../..",
   "mainEntryPointFilePath": "<projectFolder>/lib/main/index.d.ts",
-  "bundledPackages": [
-    "@swim/model",
-    "@swim/style",
-    "@swim/theme",
-    "@swim/view",
-    "@swim/dom",
-    "@swim/graphics",
-    "@swim/controller"
-  ],
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/src/main/tsconfig.json"
   },

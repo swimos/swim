@@ -26,12 +26,13 @@ export const Mood = {} as {
 
   primary: MoodVector; // defined by moods
   secondary: MoodVector; // defined by moods
-
-  selected: MoodVector; // defined by moods
   disabled: MoodVector; // defined by moods
   inactive: MoodVector; // defined by moods
   warning: MoodVector; // defined by moods
   alert: MoodVector; // defined by moods
+
+  unselected: MoodVector; // defined by moods
+  selected: MoodVector; // defined by moods
 
   darker: MoodVector; // defined by moods
   lighter: MoodVector; // defined by moods

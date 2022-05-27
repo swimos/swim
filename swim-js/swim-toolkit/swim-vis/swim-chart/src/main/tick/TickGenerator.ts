@@ -50,10 +50,10 @@ const TIME_TICK_INTERVALS = new BTree<number, TimeInterval>()
 
 const MILLISECOND_FORMAT = DateTimeFormat.pattern(".%L");
 const SECOND_FORMAT = DateTimeFormat.pattern(":%S");
-const MINUTE_FORMAT = DateTimeFormat.pattern("%I:%M");
-const HOUR_FORMAT = DateTimeFormat.pattern("%I %p");
-const WEEKDAY_FORMAT = DateTimeFormat.pattern("%a %d");
-const MONTHDAY_FORMAT = DateTimeFormat.pattern("%b %d");
+const MINUTE_FORMAT = DateTimeFormat.pattern("%i:%M");
+const HOUR_FORMAT = DateTimeFormat.pattern("%i %p");
+const WEEKDAY_FORMAT = DateTimeFormat.pattern("%a %e");
+const MONTHDAY_FORMAT = DateTimeFormat.pattern("%b %e");
 const MONTH_FORMAT = DateTimeFormat.pattern("%B");
 const YEAR_FORMAT = DateTimeFormat.pattern("%Y");
 

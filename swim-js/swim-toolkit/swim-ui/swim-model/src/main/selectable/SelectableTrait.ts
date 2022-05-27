@@ -14,9 +14,8 @@
 
 import type {Mutable, Class} from "@swim/util";
 import {Provider} from "@swim/component";
-import {SelectionOptions, SelectionService} from "../selection/SelectionService";
-import {SelectionProvider} from "../selection/SelectionProvider";
 import {Trait} from "../trait/Trait";
+import {SelectionOptions, SelectionService} from "../selection/SelectionService";
 import type {SelectableTraitObserver} from "./SelectableTraitObserver";
 
 /** @public */
@@ -34,10 +33,7 @@ export class SelectableTrait extends Trait {
     if (!this.selected) {
       (this as Mutable<this>).selected = true;
       if (this.mounted) {
-        const selectionService = this.selectionProvider.service;
-        if (selectionService !== void 0 && selectionService !== null) {
-          selectionService.select(this.model!, options);
-        }
+        this.selection.getService().select(this.model!, options);
       }
     }
   }
@@ -73,10 +69,7 @@ export class SelectableTrait extends Trait {
     if (this.selected) {
       (this as Mutable<this>).selected = false;
       if (this.mounted) {
-        const selectionService = this.selectionProvider.service;
-        if (selectionService !== void 0 && selectionService !== null) {
-          selectionService.unselect(this.model!);
-        }
+        this.selection.getService().unselect(this.model!);
       }
     }
   }
@@ -109,10 +102,7 @@ export class SelectableTrait extends Trait {
   }
 
   unselectAll(): void {
-    const selectionService = this.selectionProvider.service;
-    if (selectionService !== void 0 && selectionService !== null) {
-      selectionService.unselectAll();
-    }
+    this.selection.getService().unselectAll();
   }
 
   toggle(options?: SelectionOptions): void {
@@ -123,29 +113,20 @@ export class SelectableTrait extends Trait {
     }
   }
 
-  @Provider({
-    extends: SelectionProvider,
-    type: SelectionService,
-    observes: false,
-    service: SelectionService.global(),
+  @Provider<SelectableTrait["selection"]>({
+    serviceType: SelectionService,
   })
-  readonly selectionProvider!: SelectionProvider<this>;
+  readonly selection!: Provider<this, SelectionService>;
 
   protected override didMount(): void {
     if (this.selected) {
-      const selectionService = this.selectionProvider.service;
-      if (selectionService !== void 0 && selectionService !== null) {
-        selectionService.select(this.model!);
-      }
+      this.selection.getService().select(this.model!);
     }
     super.didMount();
   }
 
   protected override willUnmount(): void {
     super.willUnmount();
-    const selectionService = this.selectionProvider.service;
-    if (selectionService !== void 0 && selectionService !== null) {
-      selectionService.unselect(this.model!);
-    }
+    this.selection.getService().unselect(this.model!);
   }
 }

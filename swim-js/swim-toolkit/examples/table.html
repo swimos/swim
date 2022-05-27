@@ -26,8 +26,8 @@ const containerView = swim.HtmlView.create("div")
   .userSelect("none");
 
 containerView.observe({
-  viewWillResize(viewContext, view) {
-    if (viewContext.viewportIdiom === "desktop") {
+  viewWillResize(view) {
+    if (view.viewIdiom === "desktop") {
       view.margin(60);
     } else {
       view.margin(0);
@@ -72,15 +72,21 @@ const tableView = swim.TableView.create();
 tableView.layout.setValue(tableLayout);
 
 const headerView = tableView.header.insertView();
-headerView.getOrCreateCol("name").label("Name");
-headerView.getOrCreateCol("kpi1").label("KPI 1");
-headerView.getOrCreateCol("kpi2").label("KPI 2");
+const nameCell = headerView.getOrCreateCol("name", swim.TextColView);
+nameCell.label.setText("Name");
+const kpi1Cell = headerView.getOrCreateCol("kpi1", swim.TextColView);
+kpi1Cell.label.setText("KPI 1");
+const kpi2Cell = headerView.getOrCreateCol("kpi2", swim.TextColView);
+kpi2Cell.label.setText("KPI 2");
 
 function createRowView(i) {
   const rowView = swim.RowView.create();
-  rowView.getOrCreateCell("name", swim.TextCellView).content("Row " + i);
-  rowView.getOrCreateCell("kpi1", swim.TextCellView).content("" + i);
-  rowView.getOrCreateCell("kpi2", swim.TextCellView).content("" + -i);
+  const nameCell = rowView.getOrCreateCell("name", swim.TextCellView);
+  nameCell.content.setText("Row " + i);
+  const kpi1Cell = rowView.getOrCreateCell("kpi1", swim.TextCellView);
+  kpi1Cell.content.setText("" + i);
+  const kpi2Cell = rowView.getOrCreateCell("kpi2", swim.TextCellView);
+  kpi2Cell.content.setText("" + -i);
   return rowView;
 }
 for (let i = 1; i <= 100; i += 1) {

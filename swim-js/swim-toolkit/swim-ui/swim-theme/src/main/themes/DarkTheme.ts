@@ -23,6 +23,8 @@ import {ThemeMatrix} from "../theme/ThemeMatrix";
 
 Theme.dark = (function (): ThemeMatrix {
   const font = Font.parse("14px -apple-system, system-ui, sans-serif");
+  const smallFont = font.withSize(12);
+  const largeFont = font.withSize(16);
 
   const textColor = Color.parse("#ffffff");
   const iconColor = Color.parse("#ffffff");
@@ -31,7 +33,7 @@ Theme.dark = (function (): ThemeMatrix {
   const placeholderColor = Color.parse("#ffffff").alpha(0.25);
   const highlightColor = Color.white(0.1);
 
-  const accentColor = Color.parse("#6c6d6e");
+  const accentColor = Color.parse("#a1a3a4");
   const primaryColor = Color.parse("#66ffdd");
   const secondaryColor = Color.parse("#32c5ff");
 
@@ -40,8 +42,15 @@ Theme.dark = (function (): ThemeMatrix {
   const warningColor = Color.parse("#f9f070");
   const alertColor = Color.parse("#f6511d");
 
+  const selectionColor = Color.parse("#5e5f5f");
+  const primarySelectionColor = Color.parse("#2b6458");
+  const secondarySelectionColor = Color.parse("#326578");
+  const warningSelectionColor = Color.parse("#67643b");
+  const alertSelectionColor = Color.parse("#6a3423");
+
   const backgroundColor = Color.parse("#181818");
-  const borderColor = Color.parse("#ffffff").alpha(0.1);
+  const borderColor = Color.parse("#ffffff").alpha(0.25);
+  const focusColor = primaryColor.alpha(0.5);
 
   const raisedColor = Color.parse("#212121");
   const coveredColor = Color.parse("#363636");
@@ -55,6 +64,8 @@ Theme.dark = (function (): ThemeMatrix {
 
   const ambientFeel = FeelVector.of(
     [Look.font, font],
+    [Look.smallFont, smallFont],
+    [Look.largeFont, largeFont],
 
     [Look.textColor, textColor],
     [Look.iconColor, iconColor],
@@ -67,7 +78,9 @@ Theme.dark = (function (): ThemeMatrix {
     [Look.accentColor, accentColor],
 
     [Look.backgroundColor, backgroundColor],
+    [Look.selectionColor, selectionColor],
     [Look.borderColor, borderColor],
+    [Look.focusColor, focusColor],
 
     [Look.etchColor, etchColor],
     [Look.maskColor, maskColor],
@@ -75,11 +88,13 @@ Theme.dark = (function (): ThemeMatrix {
     [Look.gridColor, gridColor],
 
     [Look.spacing, spacing],
-    [Look.timing, Easing.linear.withDuration(1000)],
+    [Look.timing, Easing.linear.withDuration(250)],
   );
 
   const defaultFeel = FeelVector.of(
     [Look.font, font],
+    [Look.smallFont, smallFont],
+    [Look.largeFont, largeFont],
 
     [Look.textColor, textColor],
     [Look.iconColor, iconColor],
@@ -92,7 +107,9 @@ Theme.dark = (function (): ThemeMatrix {
     [Look.accentColor, accentColor],
 
     [Look.backgroundColor, backgroundColor],
+    [Look.selectionColor, selectionColor],
     [Look.borderColor, borderColor],
+    [Look.focusColor, focusColor],
 
     [Look.etchColor, etchColor],
     [Look.maskColor, maskColor],
@@ -105,22 +122,12 @@ Theme.dark = (function (): ThemeMatrix {
 
   const primaryFeel = FeelVector.of(
     [Look.accentColor, primaryColor],
+    [Look.selectionColor, primarySelectionColor],
   );
 
   const secondaryFeel = FeelVector.of(
     [Look.accentColor, secondaryColor],
-  );
-
-  const unselectedFeel = FeelVector.of(
-    [Look.textColor, labelColor],
-    [Look.iconColor, labelColor],
-    [Look.backgroundColor, backgroundColor.darker(1)],
-  );
-
-  const selectedFeel = FeelVector.of(
-    [Look.textColor, textColor],
-    [Look.iconColor, iconColor],
-    [Look.backgroundColor, backgroundColor.darker(1)],
+    [Look.selectionColor, secondarySelectionColor],
   );
 
   const disabledFeel = FeelVector.of(
@@ -138,11 +145,25 @@ Theme.dark = (function (): ThemeMatrix {
   const warningFeel = FeelVector.of(
     [Look.statusColor, warningColor],
     [Look.accentColor, warningColor],
+    [Look.selectionColor, warningSelectionColor],
   );
 
   const alertFeel = FeelVector.of(
     [Look.statusColor, alertColor],
     [Look.accentColor, alertColor],
+    [Look.selectionColor, alertSelectionColor],
+  );
+
+  const unselectedFeel = FeelVector.of(
+    [Look.textColor, labelColor],
+    [Look.iconColor, labelColor],
+    [Look.backgroundColor, backgroundColor.darker(1)],
+  );
+
+  const selectedFeel = FeelVector.of(
+    [Look.textColor, textColor],
+    [Look.iconColor, iconColor],
+    [Look.backgroundColor, selectionColor],
   );
 
   const raisedFeel = FeelVector.of(
@@ -166,20 +187,9 @@ Theme.dark = (function (): ThemeMatrix {
     [Look.shadow, BoxShadow.create(0, 2, 4, 0, Color.black(0.5))],
   );
 
-  const transparentFeel = FeelVector.of(
-    [Look.backgroundColor, backgroundColor.alpha(0)],
-    [Look.borderColor, borderColor.alpha(0)],
-  );
-
-  const translucentFeel = FeelVector.of(
-    [Look.iconColor, Color.black(0.8)],
-    [Look.statusColor, Color.black(0.8)],
-    [Look.accentColor, Color.black(0.8)],
-    [Look.backgroundColor, Color.black(0.8)],
-    [Look.borderColor, Color.black(0.8)],
-  );
-
   const darkerFeel = FeelVector.of(
+    [Look.backgroundColor, Color.black(1)],
+    [Look.selectionColor, Color.black(1)],
     [Look.iconColor, Color.black(1)],
     [Look.statusColor, Color.black(1)],
     [Look.accentColor, Color.black(1)],
@@ -188,6 +198,8 @@ Theme.dark = (function (): ThemeMatrix {
   );
 
   const lighterFeel = FeelVector.of(
+    [Look.backgroundColor, Color.black(-1)],
+    [Look.selectionColor, Color.black(-1)],
     [Look.iconColor, Color.black(-1)],
     [Look.statusColor, Color.black(-1)],
     [Look.accentColor, Color.black(-1)],
@@ -196,6 +208,8 @@ Theme.dark = (function (): ThemeMatrix {
   );
 
   const contrastedFeel = FeelVector.of(
+    [Look.backgroundColor, Color.black(-1)],
+    [Look.selectionColor, Color.black(-1)],
     [Look.iconColor, Color.black(-1)],
     [Look.statusColor, Color.black(-1)],
     [Look.accentColor, Color.black(-1)],
@@ -220,6 +234,19 @@ Theme.dark = (function (): ThemeMatrix {
     [Look.maskColor, Color.black(-1)],
   );
 
+  const translucentFeel = FeelVector.of(
+    [Look.iconColor, Color.black(0.8)],
+    [Look.statusColor, Color.black(0.8)],
+    [Look.accentColor, Color.black(0.8)],
+    [Look.backgroundColor, Color.black(0.8)],
+    [Look.selectionColor, Color.black(0.8)],
+  );
+
+  const transparentFeel = FeelVector.of(
+    [Look.backgroundColor, Color.black(0)],
+    [Look.selectionColor, Color.black(0)],
+  );
+
   const navigatingFeel = FeelVector.of(
     [Look.timing, Easing.cubicOut.withDuration(350)],
   );
@@ -230,13 +257,13 @@ Theme.dark = (function (): ThemeMatrix {
 
     [Feel.primary, primaryFeel],
     [Feel.secondary, secondaryFeel],
-
-    [Feel.unselected, unselectedFeel],
-    [Feel.selected, selectedFeel],
     [Feel.disabled, disabledFeel],
     [Feel.inactive, inactiveFeel],
     [Feel.warning, warningFeel],
     [Feel.alert, alertFeel],
+
+    [Feel.unselected, unselectedFeel],
+    [Feel.selected, selectedFeel],
 
     [Feel.darker, darkerFeel],
     [Feel.lighter, lighterFeel],
@@ -247,11 +274,11 @@ Theme.dark = (function (): ThemeMatrix {
 
     [Feel.opaque, opaqueFeel],
     [Feel.floating, floatingFeel],
-    [Feel.transparent, transparentFeel],
-    [Feel.translucent, translucentFeel],
     [Feel.embossed, embossedFeel],
     [Feel.nested, nestedFeel],
     [Feel.hovering, hoveringFeel],
+    [Feel.translucent, translucentFeel],
+    [Feel.transparent, transparentFeel],
 
     [Feel.navigating, navigatingFeel],
   );

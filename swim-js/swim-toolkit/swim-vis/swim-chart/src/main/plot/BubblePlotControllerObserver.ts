@@ -29,11 +29,7 @@ export interface BubblePlotControllerObserver<X = unknown, Y = unknown, C extend
 
   controllerDidDetachPlotView?(plotView: BubblePlotView<X, Y>, controller: C): void;
 
-  controllerWillSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, controller: C): void;
+  controllerDidSetPlotRadius?(radius: Length | null, controller: C): void;
 
-  controllerDidSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, controller: C): void;
-
-  controllerWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, controller: C): void;
-
-  controllerDidSetPlotFill?(newFill: Color | null, oldFill: Color | null, controller: C): void;
+  controllerDidSetPlotFill?(fill: Color | null, controller: C): void;
 }

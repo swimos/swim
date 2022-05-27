@@ -13,27 +13,19 @@
 // limitations under the License.
 
 import {Mutable, Class, Lazy, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import {Length} from "@swim/math";
-import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {AnyPresence, Presence, PresenceAnimator} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {
-  ModalOptions,
-  ModalState,
-  Modal,
-  PositionGestureInput,
-  PositionGesture,
-  ViewContextType,
-  View,
-} from "@swim/view";
-import {StyleAnimator, ViewNode, HtmlView} from "@swim/dom";
+import {View, PositionGestureInput, PositionGesture} from "@swim/view";
+import {StyleAnimator, ViewNode, HtmlView, ModalView} from "@swim/dom";
 import {Graphics, VectorIcon} from "@swim/graphics";
 import {FloatingButton} from "./FloatingButton";
 import {ButtonItem} from "./ButtonItem";
 import type {ButtonStackObserver} from "./ButtonStackObserver";
 
 /** @public */
-export class ButtonStack extends HtmlView implements Modal {
+export class ButtonStack extends HtmlView implements ModalView {
   constructor(node: HTMLElement) {
     super(node);
     this.stackHeight = 0;
@@ -70,91 +62,113 @@ export class ButtonStack extends HtmlView implements Modal {
     return FloatingButton.create();
   }
 
-  @PositionGesture<ButtonStack, HtmlView>({
+  @PositionGesture<ButtonStack["gesture"]>({
     didMovePress(input: PositionGestureInput, event: Event | null): void {
-      if (!input.defaultPrevented && !this.owner.disclosure.expanded) {
+      if (!input.defaultPrevented && !this.owner.presence.presented) {
         const stackHeight = this.owner.stackHeight;
         const phase = Math.min(Math.max(0, -(input.y - input.y0) / (0.5 * stackHeight)), 1);
-        this.owner.disclosure.setPhase(phase);
+        this.owner.presence.setPhase(phase);
         if (phase > 0.1) {
           input.clearHoldTimer();
-          if (!this.owner.disclosure.expanding) {
-            this.owner.disclosure.setState(this.owner.disclosure.value.asExpanding());
+          if (!this.owner.presence.presenting) {
+            this.owner.presence.setState(this.owner.presence.value.asPresenting());
           }
         }
       }
     },
     didEndPress(input: PositionGestureInput, event: Event | null): void {
       if (!input.defaultPrevented) {
-        const phase = this.owner.disclosure.getPhase();
+        const phase = this.owner.presence.getPhase();
         if (input.t - input.t0 < input.holdDelay) {
-          if (phase < 0.1 || this.owner.disclosure.expanded) {
-            this.owner.disclosure.collapse();
+          if (phase < 0.1 || this.owner.presence.presented) {
+            this.owner.presence.dismiss();
           } else {
-            this.owner.disclosure.expand();
+            this.owner.presence.present();
           }
         } else {
           if (phase < 0.5) {
-            this.owner.disclosure.collapse();
+            this.owner.presence.dismiss();
           } else if (phase >= 0.5) {
-            this.owner.disclosure.expand();
+            this.owner.presence.present();
           }
         }
       }
     },
     didCancelPress(input: PositionGestureInput, event: Event | null): void {
       if (input.buttons === 2) {
-        this.owner.disclosure.toggle();
+        this.owner.presence.toggle();
       } else {
-        const phase = this.owner.disclosure.getPhase();
-        if (phase < 0.1 || this.owner.disclosure.expanded) {
-          this.owner.disclosure.collapse();
+        const phase = this.owner.presence.getPhase();
+        if (phase < 0.1 || this.owner.presence.presented) {
+          this.owner.presence.dismiss();
         } else {
-          this.owner.disclosure.expand();
+          this.owner.presence.present();
         }
       }
     },
     didLongPress(input: PositionGestureInput): void {
       input.preventDefault();
-      this.owner.disclosure.toggle();
+      this.owner.presence.toggle();
     },
   })
   readonly gesture!: PositionGesture<this, HtmlView>;
-  static readonly gesture: MemberFastenerClass<ButtonStack, "gesture">;
+  static readonly gesture: FastenerClass<ButtonStack["gesture"]>;
 
-  @ExpansionAnimator<ButtonStack, Expansion, AnyExpansion>({
-    type: Expansion,
-    value: Expansion.collapsed(),
+  /** @override */
+  @PresenceAnimator<ButtonStack["presence"]>({
+    value: Presence.dismissed(),
     updateFlags: View.NeedsLayout,
     get transition(): Timing | null {
       return this.owner.getLookOr(Look.timing, null);
     },
-    willExpand(): void {
-      this.owner.willExpand();
-      this.owner.onExpand();
+    didSetValue(presence: Presence): void {
+      this.owner.callObservers("viewDidSetPresence", presence, this.owner);
+      this.owner.modality.setValue(presence.phase, Affinity.Intrinsic);
     },
-    didExpand(): void {
-      this.owner.didExpand();
+    willPresent(): void {
+      this.owner.callObservers("viewWillPresent", this.owner);
+      const button = this.owner.button;
+      if (button instanceof FloatingButton) {
+        const timing = this.timing;
+        button.pushIcon(this.owner.closeIcon, timing !== null ? timing : void 0);
+      }
+      this.owner.modal.present();
     },
-    willCollapse(): void {
-      this.owner.willCollapse();
-      this.owner.onCollapse();
+    didPresent(): void {
+      this.owner.callObservers("viewDidPresent", this.owner);
     },
-    didCollapse(): void {
-      this.owner.didCollapse();
+    willDismiss(): void {
+      this.owner.callObservers("viewWillDismiss", this.owner);
+      const button = this.owner.button;
+      if (button instanceof FloatingButton && button.iconCount > 1) {
+        const timing = this.timing;
+        button.popIcon(timing !== null ? timing : void 0);
+      }
+    },
+    didDismiss(): void {
+      this.owner.callObservers("viewDidDismiss", this.owner);
     },
   })
-  readonly disclosure!: ExpansionAnimator<this, Expansion, AnyExpansion>;
+  readonly presence!: PresenceAnimator<this, Presence, AnyPresence>;
 
-  @ThemeAnimator({type: Number, value: 28, updateFlags: View.NeedsLayout})
+  /** @override */
+  @Property<ButtonStack["modality"]>({
+    valueType: Number,
+    value: 0,
+    didSetValue(modality: number): void {
+      this.owner.callObservers("viewDidSetModality", modality, this.owner);
+    },
+  })
+  readonly modality!: Property<this, number>;
+
+  @ThemeAnimator({valueType: Number, value: 28, updateFlags: View.NeedsLayout})
   readonly buttonSpacing!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Number, value: 20, updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Number, value: 20, updateFlags: View.NeedsLayout})
   readonly itemSpacing!: ThemeAnimator<this, number>;
 
-  @StyleAnimator<ButtonStack, number | undefined>({
-    propertyNames: "opacity",
-    type: Number,
+  @StyleAnimator<ButtonStack["opacity"]>({
+    extends: HtmlView.getFastenerClass("opacity"),
     didTransition(opacity: number | undefined): void {
       if (opacity === 1) {
         this.owner.didShowStack();
@@ -164,26 +178,6 @@ export class ButtonStack extends HtmlView implements Modal {
     },
   })
   override readonly opacity!: StyleAnimator<this, number | undefined>;
-
-  get modalView(): View | null {
-    return null;
-  }
-
-  get modalState(): ModalState {
-    return this.disclosure.modalState! as ModalState;
-  }
-
-  get modality(): boolean | number {
-    return this.disclosure.phase!;
-  }
-
-  showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
-    this.disclosure.expand(timing);
-  }
-
-  hideModal(timing?: AnyTiming | boolean): void {
-    this.disclosure.collapse(timing);
-  }
 
   get button(): HtmlView | null {
     const childView = this.getChild("button");
@@ -225,27 +219,23 @@ export class ButtonStack extends HtmlView implements Modal {
 
   protected override onMount(): void {
     super.onMount();
-    this.on("click", this.onClick);
-    this.on("contextmenu", this.onContextMenu);
+    this.addEventListener("click", this.onClick);
+    this.addEventListener("contextmenu", this.onContextMenu);
   }
 
   protected override onUnmount(): void {
-    this.off("click", this.onClick);
-    this.off("contextmenu", this.onContextMenu);
+    this.removeEventListener("click", this.onClick);
+    this.removeEventListener("contextmenu", this.onContextMenu);
     super.onUnmount();
   }
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     this.layoutStack();
-    const modalService = this.modalProvider.service;
-    if (modalService !== void 0 && modalService !== null) {
-      modalService.updateModality();
-    }
   }
 
   protected layoutStack(): void {
-    const phase = this.disclosure.getPhase();
+    const phase = this.presence.getPhase();
     const childNodes = this.node.childNodes;
     const childCount = childNodes.length;
     const button = this.button;
@@ -313,8 +303,8 @@ export class ButtonStack extends HtmlView implements Modal {
   protected onInsertButton(button: HtmlView): void {
     this.gesture.setView(button);
     if (button instanceof FloatingButton) {
-      button.disclosure.setState(Expansion.expanded(), Affinity.Intrinsic);
-      if (this.disclosure.expanded || this.disclosure.expanding) {
+      button.presence.setState(Presence.presented(), Affinity.Intrinsic);
+      if (this.presence.presented || this.presence.presenting) {
         button.pushIcon(this.closeIcon);
       }
     }
@@ -335,66 +325,6 @@ export class ButtonStack extends HtmlView implements Modal {
 
   protected onRemoveItem(item: ButtonItem): void {
     // hook
-  }
-
-  protected willExpand(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.buttonStackWillExpand !== void 0) {
-        observer.buttonStackWillExpand(this);
-      }
-    }
-  }
-
-  protected onExpand(): void {
-    const button = this.button;
-    if (button instanceof FloatingButton) {
-      const timing = this.disclosure.timing;
-      button.pushIcon(this.closeIcon, timing !== null ? timing : void 0);
-    }
-
-    this.modalProvider.presentModal(this);
-  }
-
-  protected didExpand(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.buttonStackDidExpand !== void 0) {
-        observer.buttonStackDidExpand(this);
-      }
-    }
-  }
-
-  protected willCollapse(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.buttonStackWillCollapse !== void 0) {
-        observer.buttonStackWillCollapse(this);
-      }
-    }
-  }
-
-  protected onCollapse(): void {
-    this.modalProvider.dismissModal(this);
-
-    const button = this.button;
-    if (button instanceof FloatingButton && button.iconCount > 1) {
-      const timing = this.disclosure.timing;
-      button.popIcon(timing !== null ? timing : void 0);
-    }
-  }
-
-  protected didCollapse(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.buttonStackDidCollapse !== void 0) {
-        observer.buttonStackDidCollapse(this);
-      }
-    }
   }
 
   show(timing?: AnyTiming | boolean): void {

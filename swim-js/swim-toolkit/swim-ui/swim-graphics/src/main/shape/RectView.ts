@@ -13,10 +13,11 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/util";
+import {Animator} from "@swim/component";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
+import {View} from "@swim/view";
 import {GraphicsView} from "../graphics/GraphicsView";
 import type {PaintingContext} from "../painting/PaintingContext";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
@@ -39,25 +40,25 @@ export interface RectViewInit extends FillViewInit, StrokeViewInit {
 
 /** @public */
 export class RectView extends GraphicsView implements FillView, StrokeView {
-  @ThemeAnimator({type: Length, value: Length.zero(), updateFlags: View.NeedsRender})
-  readonly x!: ThemeAnimator<this, Length, AnyLength>;
+  @Animator({valueType: Length, value: Length.zero(), updateFlags: View.NeedsRender})
+  readonly x!: Animator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.zero(), updateFlags: View.NeedsRender})
-  readonly y!: ThemeAnimator<this, Length, AnyLength>;
+  @Animator({valueType: Length, value: Length.zero(), updateFlags: View.NeedsRender})
+  readonly y!: Animator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.zero(), updateFlags: View.NeedsRender})
-  readonly width!: ThemeAnimator<this, Length, AnyLength>;
+  @Animator({valueType: Length, value: Length.zero(), updateFlags: View.NeedsRender})
+  readonly width!: Animator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.zero(), updateFlags: View.NeedsRender})
-  readonly height!: ThemeAnimator<this, Length, AnyLength>;
+  @Animator({valueType: Length, value: Length.zero(), updateFlags: View.NeedsRender})
+  readonly height!: Animator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Rect {
@@ -95,9 +96,9 @@ export class RectView extends GraphicsView implements FillView, StrokeView {
     }
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderRect(renderer.context, this.viewFrame);
     }
@@ -142,8 +143,8 @@ export class RectView extends GraphicsView implements FillView, StrokeView {
 
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
       return this.hitTestRect(p.x, p.y, renderer.context, this.viewFrame);

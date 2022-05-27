@@ -12,12 +12,12 @@
     <script>
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").position("relative").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = containerView.appendChild(swim.CanvasView)
     .mouseEventsEnabled(true)
@@ -38,16 +38,16 @@ swim.TraitViewControllerSet({
   extends: true,
   attachSliceView(sliceView, sliceController) {
     swim.PieController.slices.prototype.attachSliceView.call(this, sliceView, sliceController);
-    sliceView.on("pointerenter", function (event) {
+    sliceView.addEventListener("pointerenter", function (event) {
       sliceView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
     });
-    sliceView.on("pointerleave", function (event) {
+    sliceView.addEventListener("pointerleave", function (event) {
       sliceView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
     });
   },
-  controllerWillSetSliceValue(newValue, oldValue, sliceController, pieController) {
-    swim.PieController.slices.prototype.controllerWillSetSliceValue.call(this, newValue, oldValue, sliceController, pieController);
-    const label = Math.round(100 * newValue).toString();
+  controllerDidSetSliceValue(sliceValue, sliceController, pieController) {
+    swim.PieController.slices.prototype.controllerDidSetSliceValue.call(this, sliceValue, sliceController, pieController);
+    const label = Math.round(100 * sliceValue).toString();
     sliceController.slice.trait.label.setValue(label);
   },
   attachSliceLabelView(labelView, sliceController) {

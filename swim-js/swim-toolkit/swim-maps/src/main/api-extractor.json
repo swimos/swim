@@ -1,13 +1,6 @@
 {
   "projectFolder": "../..",
   "mainEntryPointFilePath": "<projectFolder>/lib/main/index.d.ts",
-  "bundledPackages": [
-    "@swim/map",
-    "@swim/mapbox",
-    "@swim/leaflet",
-    "@swim/googlemap",
-    "@swim/esrimap"
-  ],
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/src/main/tsconfig.json"
   },

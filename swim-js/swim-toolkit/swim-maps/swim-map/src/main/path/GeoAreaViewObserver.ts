@@ -19,15 +19,9 @@ import type {GeoAreaView} from "./GeoAreaView";
 
 /** @public */
 export interface GeoAreaViewObserver<V extends GeoAreaView = GeoAreaView> extends GeoPathViewObserver<V> {
-  viewWillSetFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
+  viewDidSetFill?(fill: Color | null, view: V): void;
 
-  viewDidSetFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
+  viewDidSetStroke?(stoke: Color | null, view: V): void;
 
-  viewWillSetStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;
-
-  viewDidSetStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;
-
-  viewWillSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, view: V): void;
-
-  viewDidSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, view: V): void;
+  viewDidSetStrokeWidth?(strokeWidth: Length | null, view: V): void;
 }

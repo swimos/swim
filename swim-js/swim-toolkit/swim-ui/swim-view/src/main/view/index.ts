@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {ViewContext} from "./ViewContext";
+export {ViewIdiom} from "./ViewIdiom";
+
+export {ViewInsets} from "./ViewInsets";
 
 export {
-  ViewContextType,
   ViewFlags,
   AnyView,
   ViewInit,
@@ -52,28 +53,25 @@ export {
 } from "./ViewObserver";
 
 export {
-  ViewRelationType,
-  ViewRelationInit,
+  ViewRelationView,
   ViewRelationDescriptor,
+  ViewRelationTemplate,
   ViewRelationClass,
-  ViewRelationFactory,
   ViewRelation,
 } from "./ViewRelation";
 
 export {
-  ViewRefType,
-  ViewRefInit,
+  ViewRefView,
   ViewRefDescriptor,
+  ViewRefTemplate,
   ViewRefClass,
-  ViewRefFactory,
   ViewRef,
 } from "./ViewRef";
 
 export {
-  ViewSetType,
-  ViewSetInit,
+  ViewSetView,
   ViewSetDescriptor,
+  ViewSetTemplate,
   ViewSetClass,
-  ViewSetFactory,
   ViewSet,
 } from "./ViewSet";

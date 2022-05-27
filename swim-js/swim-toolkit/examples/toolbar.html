@@ -128,11 +128,14 @@ const closeView = barView.appendChild(swim.ButtonToolView, "close").iconWidth(24
 const backIcon = swim.VectorIcon.create(24, 24, "M17.77,3.77L16,2L6,12L16,22L17.77,20.23L9.54,12Z").withFillLook(swim.Look.accentColor);
 const backView = barView.appendChild(swim.ButtonToolView, "back").iconWidth(24).iconHeight(24).graphics(backIcon);
 
-const title0View = barView.appendChild(swim.TitleToolView, "title0").fontSize(16).content("Card 0");
+const title0View = barView.appendChild(swim.TitleToolView, "title0").fontSize(16);
+title0View.content.setText("Card 0");
 
-const title1View = barView.appendChild(swim.TitleToolView, "title1").fontSize(16).content("Card 1");
+const title1View = barView.appendChild(swim.TitleToolView, "title1").fontSize(16);
+title0View.content.setText("Card 1");
 
-const title2View = barView.appendChild(swim.TitleToolView, "title2").fontSize(16).content("Card 2");
+const title2View = barView.appendChild(swim.TitleToolView, "title2").fontSize(16);
+title0View.content.setText("Card 2");
 
 const menuIcon = swim.VectorIcon.create(24, 24, "M3,18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3Z");
 const menuView = barView.appendChild(swim.ButtonToolView, "menu").iconWidth(24).iconHeight(24).graphics(menuIcon);

@@ -20,5 +20,3 @@ export {
 
 export {HistoryService} from "./HistoryService";
 export {HistoryServiceObserver} from "./HistoryServiceObserver";
-
-export {HistoryProvider} from "./HistoryProvider";

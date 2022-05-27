@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Lazy, Objects} from "@swim/util";
+import {Mutable, Class, Objects} from "@swim/util";
 import {Service} from "@swim/component";
 import type {Uri} from "@swim/uri";
 import {HistoryStateInit, HistoryState} from "./HistoryState";
 import type {HistoryServiceObserver} from "./HistoryServiceObserver";
-import {Controller} from "../"; // forward import
 
 /** @public */
-export class HistoryService<C extends Controller = Controller> extends Service<C> {
+export class HistoryService extends Service {
   constructor() {
     super();
     this.historyState = HistoryState.current();
     this.popHistory = this.popHistory.bind(this);
   }
 
-  override readonly observerType?: Class<HistoryServiceObserver<C>>;
+  override readonly observerType?: Class<HistoryServiceObserver>;
 
   /** @internal */
   readonly historyState: HistoryState;
@@ -48,30 +47,15 @@ export class HistoryService<C extends Controller = Controller> extends Service<C
   }
 
   protected willPushHistory(newState: HistoryState, oldState: HistoryState): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceWillPushHistory !== void 0) {
-        observer.serviceWillPushHistory(newState, oldState, this);
-      }
-    }
+    this.callObservers("serviceWillPushHistory", newState, oldState, this);
   }
 
   protected onPushHistory(newState: HistoryState, oldState: HistoryState): void {
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(Controller.NeedsRevise);
-    }
+    // hook
   }
 
   protected didPushHistory(newState: HistoryState, oldState: HistoryState): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceDidPushHistory !== void 0) {
-        observer.serviceDidPushHistory(newState, oldState, this);
-      }
-    }
+    this.callObservers("serviceDidPushHistory", newState, oldState, this);
   }
 
   replaceHistory(deltaState: HistoryStateInit): void {
@@ -88,30 +72,15 @@ export class HistoryService<C extends Controller = Controller> extends Service<C
   }
 
   protected willReplaceHistory(newState: HistoryState, oldState: HistoryState): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceWillReplaceHistory !== void 0) {
-        observer.serviceWillReplaceHistory(newState, oldState, this);
-      }
-    }
+    this.callObservers("serviceWillReplaceHistory", newState, oldState, this);
   }
 
   protected onReplaceHistory(newState: HistoryState, oldState: HistoryState): void {
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(Controller.NeedsRevise);
-    }
+    // hook
   }
 
   protected didReplaceHistory(newState: HistoryState, oldState: HistoryState): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceDidReplaceHistory !== void 0) {
-        observer.serviceDidReplaceHistory(newState, oldState, this);
-      }
-    }
+    this.callObservers("serviceDidReplaceHistory", newState, oldState, this);
   }
 
   /** @internal */
@@ -129,56 +98,28 @@ export class HistoryService<C extends Controller = Controller> extends Service<C
   }
 
   protected willPopHistory(newState: HistoryState, oldState: HistoryState): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceWillPopHistory !== void 0) {
-        observer.serviceWillPopHistory(newState, oldState, this);
-      }
-    }
+    this.callObservers("serviceWillPopHistory", newState, oldState, this);
   }
 
   protected onPopHistory(newState: HistoryState, oldState: HistoryState): void {
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(Controller.NeedsRevise);
-    }
+    // hook
   }
 
   protected didPopHistory(newState: HistoryState, oldState: HistoryState): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceDidPopHistory !== void 0) {
-        observer.serviceDidPopHistory(newState, oldState, this);
-      }
-    }
+    this.callObservers("serviceDidPopHistory", newState, oldState, this);
   }
 
-  protected override onAttach(): void {
-    super.onAttach();
-    this.attachEvents();
-  }
-
-  protected override onDetach(): void {
-    this.detachEvents();
-    super.onDetach();
-  }
-
-  protected attachEvents(): void {
+  protected override onMount(): void {
+    super.onMount();
     if (typeof window !== "undefined") {
       window.addEventListener("popstate", this.popHistory);
     }
   }
 
-  protected detachEvents(): void {
+  protected override onUnmount(): void {
+    super.onUnmount();
     if (typeof window !== "undefined") {
       window.removeEventListener("popstate", this.popHistory);
     }
-  }
-
-  @Lazy
-  static global<C extends Controller>(): HistoryService<C> {
-    return new HistoryService();
   }
 }

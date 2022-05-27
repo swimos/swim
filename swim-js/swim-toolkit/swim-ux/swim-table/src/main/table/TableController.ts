@@ -12,13 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
+import type {Class, Observes} from "@swim/util";
+import {Affinity, FastenerClass} from "@swim/component";
 import type {Trait} from "@swim/model";
 import type {View} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
-import {Controller, TraitViewRef, TraitViewControllerRef, TraitViewControllerSet} from "@swim/controller";
+import {
+  Controller,
+  TraitViewRef,
+  TraitViewControllerRef,
+  TraitViewControllerSet,
+} from "@swim/controller";
 import type {TableLayout} from "../layout/TableLayout";
 import type {ColLayout} from "../layout/ColLayout";
 import type {CellView} from "../cell/CellView";
@@ -31,58 +36,16 @@ import type {RowView} from "../row/RowView";
 import type {RowTrait} from "../row/RowTrait";
 import {RowController} from "../row/RowController";
 import type {ColView} from "../col/ColView";
+import {TextColView} from "../col/TextColView";
 import type {ColTrait} from "../col/ColTrait";
 import {ColController} from "../col/ColController";
+import type {TextColController} from "../col/TextColController";
 import type {HeaderView} from "../header/HeaderView";
 import type {HeaderTrait} from "../header/HeaderTrait";
 import {HeaderController} from "../header/HeaderController";
 import {TableView} from "./TableView";
 import {TableTrait} from "./TableTrait";
 import type {TableControllerObserver} from "./TableControllerObserver";
-
-/** @public */
-export interface TableControllerHeaderExt {
-  attachHeaderTrait(headerTrait: HeaderTrait, headerController: HeaderController): void;
-  detachHeaderTrait(headerTrait: HeaderTrait, headerController: HeaderController): void;
-  attachHeaderView(headerView: HeaderView, headerController: HeaderController): void;
-  detachHeaderView(headerView: HeaderView, headerController: HeaderController): void;
-}
-
-/** @public */
-export interface TableControllerColExt {
-  attachColTrait(colTrait: ColTrait, colController: ColController): void;
-  detachColTrait(colTrait: ColTrait, colController: ColController): void;
-  attachColView(colView: ColView, colController: ColController): void;
-  detachColView(colView: ColView, colController: ColController): void;
-  attachColLabelView(colLabelView: HtmlView, colController: ColController): void;
-  detachColLabelView(colLabelView: HtmlView, colController: ColController): void;
-}
-
-/** @public */
-export interface TableControllerRowExt {
-  attachRowTrait(rowTrait: RowTrait, rowController: RowController): void;
-  detachRowTrait(rowTrait: RowTrait, rowController: RowController): void;
-  attachRowView(rowView: RowView, rowController: RowController): void;
-  detachRowView(rowView: RowView, rowController: RowController): void;
-  attachLeafTrait(leafTrait: LeafTrait, rowController: RowController): void;
-  detachLeafTrait(leafTrait: LeafTrait, rowController: RowController): void;
-  attachLeafView(leafView: LeafView, rowController: RowController): void;
-  detachLeafView(leafView: LeafView, rowController: RowController): void;
-  attachCell(cellController: CellController, rowController: RowController): void;
-  detachCell(cellController: CellController, rowController: RowController): void;
-  attachCellTrait(cellTrait: CellTrait, cellController: CellController, rowController: RowController): void;
-  detachCellTrait(cellTrait: CellTrait, cellController: CellController, rowController: RowController): void;
-  attachCellView(cellView: CellView, cellController: CellController, rowController: RowController): void;
-  detachCellView(cellView: CellView, cellController: CellController, rowController: RowController): void;
-  attachCellContentView(cellContentView: HtmlView, cellController: CellController, rowController: RowController): void;
-  detachCellContentView(cellContentView: HtmlView, cellController: CellController, rowController: RowController): void;
-  attachTree(treeController: TableController, rowController: RowController): void;
-  detachTree(treeController: TableController, rowController: RowController): void;
-  attachTreeTrait(treeTrait: TableTrait, treeController: TableController, rowController: RowController): void;
-  detachTreeTrait(treeTrait: TableTrait, treeController: TableController, rowController: RowController): void;
-  attachTreeView(treeView: TableView, treeController: TableController, rowController: RowController): void;
-  detachTreeView(treeView: TableView, treeController: TableController, rowController: RowController): void;
-}
 
 /** @public */
 export class TableController extends Controller {
@@ -92,7 +55,7 @@ export class TableController extends Controller {
     tableView.layout.setValue(tableLayout, Affinity.Intrinsic);
   }
 
-  @TraitViewRef<TableController, TableTrait, TableView>({
+  @TraitViewRef<TableController["table"]>({
     traitType: TableTrait,
     observesTrait: true,
     willAttachTrait(tableTrait: TableTrait): void {
@@ -106,13 +69,9 @@ export class TableController extends Controller {
       const colTraits = tableTrait.cols.traits;
       for (const traitId in colTraits) {
         const colTrait = colTraits[traitId]!;
-        this.owner.cols.addTraitController(colTrait, null, colTrait.key);
+        this.owner.cols.addTrait(colTrait, null, colTrait.key);
       }
-      const rowTraits = tableTrait.rows.traits;
-      for (const traitId in rowTraits) {
-        const rowTrait = rowTraits[traitId]!;
-        this.owner.rows.addTraitController(rowTrait);
-      }
+      this.owner.rows.addTraits(tableTrait.rows.traits);
       const tableView = this.view;
       if (tableView !== null) {
         const tableLayout = tableTrait.layout.value;
@@ -122,16 +81,8 @@ export class TableController extends Controller {
       }
     },
     willDetachTrait(tableTrait: TableTrait): void {
-      const rowTraits = tableTrait.rows.traits;
-      for (const traitId in rowTraits) {
-        const rowTrait = rowTraits[traitId]!;
-        this.owner.rows.deleteTraitController(rowTrait);
-      }
-      const colTraits = tableTrait.cols.traits;
-      for (const traitId in colTraits) {
-        const colTrait = colTraits[traitId]!;
-        this.owner.cols.deleteTraitController(colTrait);
-      }
+      this.owner.rows.deleteTraits(tableTrait.rows.traits);
+      this.owner.cols.deleteTraits(tableTrait.cols.traits);
       const headerTrait = tableTrait.header.trait;
       if (headerTrait !== null) {
         this.owner.header.deleteTrait(headerTrait);
@@ -140,11 +91,8 @@ export class TableController extends Controller {
     didDetachTrait(tableTrait: TableTrait): void {
       this.owner.callObservers("controllerDidDetachTableTrait", tableTrait, this.owner);
     },
-    traitWillSetTableLayout(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null): void {
-      this.owner.callObservers("controllerWillSetTableLayout", newTableLayout, oldTableLayout, this.owner);
-    },
-    traitDidSetTableLayout(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null): void {
-      this.owner.callObservers("controllerDidSetTableLayout", newTableLayout, oldTableLayout, this.owner);
+    traitDidSetTableLayout(tableLayout: TableLayout | null): void {
+      this.owner.callObservers("controllerDidSetTableLayout", tableLayout, this.owner);
     },
     traitWillAttachHeader(headerTrait: HeaderTrait): void {
       this.owner.header.setTrait(headerTrait);
@@ -153,16 +101,16 @@ export class TableController extends Controller {
       this.owner.header.deleteTrait(headerTrait);
     },
     traitWillAttachCol(colTrait: ColTrait, targetTrait: Trait): void {
-      this.owner.cols.addTraitController(colTrait, targetTrait, colTrait.key);
+      this.owner.cols.addTrait(colTrait, targetTrait, colTrait.key);
     },
     traitDidDetachCol(colTrait: ColTrait): void {
-      this.owner.cols.deleteTraitController(colTrait);
+      this.owner.cols.deleteTrait(colTrait);
     },
     traitWillAttachRow(rowTrait: RowTrait, targetTrait: Trait): void {
-      this.owner.rows.addTraitController(rowTrait, targetTrait);
+      this.owner.rows.addTrait(rowTrait, targetTrait);
     },
     traitDidDetachRow(rowTrait: RowTrait): void {
-      this.owner.rows.deleteTraitController(rowTrait);
+      this.owner.rows.deleteTrait(rowTrait);
     },
     viewType: TableView,
     observesView: true,
@@ -179,7 +127,8 @@ export class TableController extends Controller {
         const rowController = rowControllers[controllerId]!;
         const rowView = rowController.row.view;
         if (rowView !== null && rowView.parent === null) {
-          rowController.row.insertView(tableView);
+          const targetView = this.owner.rows.getTargetView(rowController);
+          rowController.row.insertView(tableView, void 0, targetView);
         }
       }
       const tableTrait = this.trait;
@@ -209,12 +158,11 @@ export class TableController extends Controller {
       }
     },
   })
-  readonly table!: TraitViewRef<this, TableTrait, TableView>;
-  static readonly table: MemberFastenerClass<TableController, "table">;
+  readonly table!: TraitViewRef<this, TableTrait, TableView> & Observes<TableTrait & TableView>;
+  static readonly table: FastenerClass<TableController["table"]>;
 
-  @TraitViewControllerRef<TableController, HeaderTrait, HeaderView, HeaderController, TableControllerHeaderExt>({
-    implements: true,
-    type: HeaderController,
+  @TraitViewControllerRef<TableController["header"]>({
+    controllerType: HeaderController,
     binds: true,
     observes: true,
     get parentView(): TableView | null {
@@ -293,12 +241,16 @@ export class TableController extends Controller {
       return controller instanceof HeaderController ? controller : null;
     },
   })
-  readonly header!: TraitViewControllerRef<this, HeaderTrait, HeaderView, HeaderController>;
-  static readonly header: MemberFastenerClass<TableController, "header">;
+  readonly header!: TraitViewControllerRef<this, HeaderTrait, HeaderView, HeaderController> & Observes<HeaderController> & {
+    attachHeaderTrait(headerTrait: HeaderTrait, headerController: HeaderController): void;
+    detachHeaderTrait(headerTrait: HeaderTrait, headerController: HeaderController): void;
+    attachHeaderView(headerView: HeaderView, headerController: HeaderController): void;
+    detachHeaderView(headerView: HeaderView, headerController: HeaderController): void;
+  };
+  static readonly header: FastenerClass<TableController["header"]>;
 
-  @TraitViewControllerSet<TableController, ColTrait, ColView, ColController, TableControllerColExt>({
-    implements: true,
-    type: ColController,
+  @TraitViewControllerSet<TableController["cols"]>({
+    controllerType: ColController,
     binds: true,
     observes: true,
     getTraitViewRef(colController: ColController): TraitViewRef<unknown, ColTrait, ColView> {
@@ -344,11 +296,8 @@ export class TableController extends Controller {
     detachColTrait(colTrait: ColTrait, colController: ColController): void {
       // hook
     },
-    controllerWillSetColLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController): void {
-      this.owner.callObservers("controllerWillSetColLayout", newColLayout, oldColLayout, colController, this.owner);
-    },
-    controllerDidSetColLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController): void {
-      this.owner.callObservers("controllerDidSetColLayout", newColLayout, oldColLayout, colController, this.owner);
+    controllerDidSetColLayout(colLayout: ColLayout | null, colController: ColController): void {
+      this.owner.callObservers("controllerDidSetColLayout", colLayout, colController, this.owner);
     },
     controllerWillAttachColView(colView: ColView, colController: ColController): void {
       this.owner.callObservers("controllerWillAttachColView", colView, colController, this.owner);
@@ -359,15 +308,19 @@ export class TableController extends Controller {
       this.owner.callObservers("controllerDidDetachColView", colView, colController, this.owner);
     },
     attachColView(colView: ColView, colController: ColController): void {
-      const colLabelView = colView.label.view;
-      if (colLabelView !== null) {
-        this.attachColLabelView(colLabelView, colController);
+      if (colView instanceof TextColView) {
+        const colLabelView = colView.label.view;
+        if (colLabelView !== null) {
+          this.attachColLabelView(colLabelView, colController);
+        }
       }
     },
     detachColView(colView: ColView, colController: ColController): void {
-      const colLabelView = colView.label.view;
-      if (colLabelView !== null) {
-        this.detachColLabelView(colLabelView, colController);
+      if (colView instanceof TextColView) {
+        const colLabelView = colView.label.view;
+        if (colLabelView !== null) {
+          this.detachColLabelView(colLabelView, colController);
+        }
       }
       colView.remove();
     },
@@ -386,12 +339,18 @@ export class TableController extends Controller {
       // hook
     },
   })
-  readonly cols!: TraitViewControllerSet<this, ColTrait, ColView, ColController>;
-  static readonly cols: MemberFastenerClass<TableController, "cols">;
+  readonly cols!: TraitViewControllerSet<this, ColTrait, ColView, ColController> & Observes<ColController & TextColController> & {
+    attachColTrait(colTrait: ColTrait, colController: ColController): void;
+    detachColTrait(colTrait: ColTrait, colController: ColController): void;
+    attachColView(colView: ColView, colController: ColController): void;
+    detachColView(colView: ColView, colController: ColController): void;
+    attachColLabelView(colLabelView: HtmlView, colController: ColController): void;
+    detachColLabelView(colLabelView: HtmlView, colController: ColController): void;
+  };
+  static readonly cols: FastenerClass<TableController["cols"]>;
 
-  @TraitViewControllerSet<TableController, RowTrait, RowView, RowController, TableControllerRowExt>({
-    implements: true,
-    type: RowController,
+  @TraitViewControllerSet<TableController["rows"]>({
+    controllerType: RowController,
     binds: true,
     observes: true,
     get parentView(): View | null {
@@ -425,6 +384,16 @@ export class TableController extends Controller {
     },
     didDetachController(rowController: RowController): void {
       this.owner.callObservers("controllerDidDetachRow", rowController, this.owner);
+    },
+    controllerDidAttachParent(parent: Controller, rowController: RowController): void {
+      const tableView = this.owner.table.view;
+      const rowView = rowController.row.view;
+      if (tableView !== null && rowView !== null) {
+        const targetController = rowController.getNextSibling(RowController);
+        const targetView = targetController !== null ? targetController.row.view : null;
+        tableView.reinsertChild(rowView, targetView);
+        //tableView.requireUpdate(View.NeedsScroll | View.NeedsLayout);
+      }
     },
     controllerWillAttachRowTrait(rowTrait: RowTrait, rowController: RowController): void {
       this.owner.callObservers("controllerWillAttachRowTrait", rowTrait, rowController, this.owner);
@@ -562,11 +531,8 @@ export class TableController extends Controller {
     detachCellContentView(cellContentView: HtmlView, cellController: CellController, rowController: RowController): void {
       // hook
     },
-    controllerWillSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController, rowController: RowController): void {
-      this.owner.callObservers("controllerWillSetCellIcon", newCellIcon, oldCellIcon, cellController, rowController, this.owner);
-    },
-    controllerDidSetCellIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController, rowController: RowController): void {
-      this.owner.callObservers("controllerDidSetCellIcon", newCellIcon, oldCellIcon, cellController, rowController, this.owner);
+    controllerDidSetCellIcon(cellIcon: Graphics | null, cellController: CellController, rowController: RowController): void {
+      this.owner.callObservers("controllerDidSetCellIcon", cellIcon, cellController, rowController, this.owner);
     },
     controllerWillAttachTree(treeController: TableController, rowController: RowController): void {
       this.owner.callObservers("controllerWillAttachTree", treeController, rowController, this.owner);
@@ -637,6 +603,29 @@ export class TableController extends Controller {
       this.owner.callObservers("controllerDidCollapseRowView", rowView, rowController, this.owner);
     },
   })
-  readonly rows!: TraitViewControllerSet<this, RowTrait, RowView, RowController>;
-  static readonly rows: MemberFastenerClass<TableController, "rows">;
+  readonly rows!: TraitViewControllerSet<this, RowTrait, RowView, RowController> & Observes<RowController> & {
+    attachRowTrait(rowTrait: RowTrait, rowController: RowController): void;
+    detachRowTrait(rowTrait: RowTrait, rowController: RowController): void;
+    attachRowView(rowView: RowView, rowController: RowController): void;
+    detachRowView(rowView: RowView, rowController: RowController): void;
+    attachLeafTrait(leafTrait: LeafTrait, rowController: RowController): void;
+    detachLeafTrait(leafTrait: LeafTrait, rowController: RowController): void;
+    attachLeafView(leafView: LeafView, rowController: RowController): void;
+    detachLeafView(leafView: LeafView, rowController: RowController): void;
+    attachCell(cellController: CellController, rowController: RowController): void;
+    detachCell(cellController: CellController, rowController: RowController): void;
+    attachCellTrait(cellTrait: CellTrait, cellController: CellController, rowController: RowController): void;
+    detachCellTrait(cellTrait: CellTrait, cellController: CellController, rowController: RowController): void;
+    attachCellView(cellView: CellView, cellController: CellController, rowController: RowController): void;
+    detachCellView(cellView: CellView, cellController: CellController, rowController: RowController): void;
+    attachCellContentView(cellContentView: HtmlView, cellController: CellController, rowController: RowController): void;
+    detachCellContentView(cellContentView: HtmlView, cellController: CellController, rowController: RowController): void;
+    attachTree(treeController: TableController, rowController: RowController): void;
+    detachTree(treeController: TableController, rowController: RowController): void;
+    attachTreeTrait(treeTrait: TableTrait, treeController: TableController, rowController: RowController): void;
+    detachTreeTrait(treeTrait: TableTrait, treeController: TableController, rowController: RowController): void;
+    attachTreeView(treeView: TableView, treeController: TableController, rowController: RowController): void;
+    detachTreeView(treeView: TableView, treeController: TableController, rowController: RowController): void;
+  };
+  static readonly rows: FastenerClass<TableController["rows"]>;
 }

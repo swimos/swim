@@ -250,7 +250,10 @@ export class RgbColor extends Color {
     return new RgbColor(value.r, value.g, value.b, value.a);
   }
 
-  static override fromAny(value: AnyRgbColor): RgbColor {
+  static override fromAny(value: AnyRgbColor): RgbColor;
+  static override fromAny(value: AnyRgbColor | null): RgbColor | null;
+  static override fromAny(value: AnyRgbColor | null | undefined): RgbColor | null | undefined;
+  static override fromAny(value: AnyRgbColor | null | undefined): RgbColor | null | undefined {
     if (value === void 0 || value === null || value instanceof RgbColor) {
       return value;
     } else if (typeof value === "string") {

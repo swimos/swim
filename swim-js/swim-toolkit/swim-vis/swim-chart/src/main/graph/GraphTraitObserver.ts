@@ -17,8 +17,8 @@ import type {PlotTrait} from "../plot/PlotTrait";
 import type {GraphTrait} from "./GraphTrait";
 
 /** @public */
-export interface GraphTraitObserver<X = unknown, Y = unknown, R extends GraphTrait<X, Y> = GraphTrait<X, Y>> extends TraitObserver<R> {
-  traitWillAttachPlot?(plotTrait: PlotTrait<X, Y>, trait: R): void;
+export interface GraphTraitObserver<X = unknown, Y = unknown, T extends GraphTrait<X, Y> = GraphTrait<X, Y>> extends TraitObserver<T> {
+  traitWillAttachPlot?(plotTrait: PlotTrait<X, Y>, trait: T): void;
 
-  traitDidDetachPlot?(plotTrait: PlotTrait<X, Y>, trait: R): void;
+  traitDidDetachPlot?(plotTrait: PlotTrait<X, Y>, trait: T): void;
 }

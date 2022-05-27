@@ -15,41 +15,35 @@
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
-import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
+import {AnyColorOrLook, ColorOrLook, ColorLook} from "@swim/theme";
 import {ScatterPlotTrait} from "./ScatterPlotTrait";
 import type {BubblePlotTraitObserver} from "./BubblePlotTraitObserver";
+import type {ScatterPlotController} from "./ScatterPlotController";
+import {BubblePlotController} from "./"; // forward import
 
 /** @public */
 export class BubblePlotTrait<X = unknown, Y = unknown> extends ScatterPlotTrait<X, Y> {
   override readonly observerType?: Class<BubblePlotTraitObserver<X, Y>>;
 
-  @Property<BubblePlotTrait<X, Y>, Length | null, AnyLength | null>({
-    type: Length,
+  @Property<BubblePlotTrait<X, Y>["radius"]>({
+    valueType: Length,
     value: null,
-    willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.callObservers("traitWillSetPlotRadius", newRadius, oldRadius, this.owner);
-    },
-    didSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.callObservers("traitDidSetPlotRadius", newRadius, oldRadius, this.owner);
+    didSetValue(radius: Length | null): void {
+      this.owner.callObservers("traitDidSetRadius", radius, this.owner);
     },
   })
   readonly radius!: Property<this, Length | null, AnyLength | null>;
 
-  @Property<BubblePlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<BubblePlotTrait<X, Y>["fill"]>({
+    valueType: ColorLook,
     value: null,
-    willSetValue(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitWillSetPlotFill", newFill, oldFill, this.owner);
-    },
-    didSetValue(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitDidSetPlotFill", newFill, oldFill, this.owner);
-    },
-    fromAny(fill: Look<Color> | AnyColor | null): Look<Color> | Color | null {
-      if (fill !== null && !(fill instanceof Look)) {
-        fill = Color.fromAny(fill);
-      }
-      return fill;
+    didSetValue(fill: ColorOrLook | null): void {
+      this.owner.callObservers("traitDidSetFill", fill, this.owner);
     },
   })
-  readonly fill!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly fill!: Property<this, ColorOrLook | null, AnyColorOrLook | null>;
+
+  override createPlotController(): ScatterPlotController<X, Y> {
+    return new BubblePlotController<X, Y>();
+  }
 }

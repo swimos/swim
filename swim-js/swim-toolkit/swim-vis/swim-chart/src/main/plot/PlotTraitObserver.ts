@@ -17,8 +17,8 @@ import type {DataSetTrait} from "../data/DataSetTrait";
 import type {PlotTrait} from "./PlotTrait";
 
 /** @public */
-export interface PlotTraitObserver<X = unknown, Y = unknown, R extends PlotTrait<X, Y> = PlotTrait<X, Y>> extends TraitObserver<R> {
-  traitWillAttachDataSet?(dataSetTrait: DataSetTrait<X, Y>, trait: R): void;
+export interface PlotTraitObserver<X = unknown, Y = unknown, T extends PlotTrait<X, Y> = PlotTrait<X, Y>> extends TraitObserver<T> {
+  traitWillAttachDataSet?(dataSetTrait: DataSetTrait<X, Y>, trait: T): void;
 
-  traitDidDetachDataSet?(dataSetTrait: DataSetTrait<X, Y>, trait: R): void;
+  traitDidDetachDataSet?(dataSetTrait: DataSetTrait<X, Y>, trait: T): void;
 }

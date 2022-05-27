@@ -18,8 +18,8 @@ import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
-import type {Graphics} from "../graphics/Graphics";
+import {View} from "@swim/view";
+import {Graphics} from "../graphics/Graphics";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
@@ -34,40 +34,46 @@ export interface GraphicsIconViewInit extends GraphicsViewInit, IconViewInit {
 
 /** @public */
 export class GraphicsIconView extends GraphicsView implements IconView {
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsRender})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsRender})
   readonly xAlign!: Animator<this, number>;
 
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsRender})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsRender})
   readonly yAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Length, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, updateFlags: View.NeedsRender})
   readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Length, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, updateFlags: View.NeedsRender})
   readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator<GraphicsIconView, Color | null, AnyColor | null>({
-    type: Color,
+  @ThemeAnimator<GraphicsIconView["iconColor"]>({
+    valueType: Color,
     value: null,
     updateFlags: View.NeedsRender,
-    didSetValue(newIconColor: Color | null, oldIconColor: Color | null): void {
-      if (newIconColor !== null) {
+    didSetState(iconColor: Color | null): void {
+      if (iconColor !== null) {
         const oldGraphics = this.owner.graphics.value;
         if (oldGraphics instanceof FilledIcon) {
-          const newGraphics = oldGraphics.withFillColor(newIconColor);
-          this.owner.graphics.setState(newGraphics, Affinity.Reflexive);
+          const newGraphics = oldGraphics.withFillColor(iconColor);
+          const timing = this.timing !== null ? this.timing : false;
+          this.owner.graphics.setState(newGraphics, timing, Affinity.Reflexive);
         }
       }
     },
   })
   readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({extends: IconGraphicsAnimator, type: Object, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator<GraphicsIconView["graphics"]>({
+    extends: IconGraphicsAnimator,
+    valueType: Graphics,
+    value: null,
+    updateFlags: View.NeedsRender,
+  })
   readonly graphics!: ThemeAnimator<this, Graphics | null>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (!this.graphics.inherited) {
+    if (!this.graphics.derived) {
       const oldGraphics = this.graphics.value;
       if (oldGraphics instanceof Icon) {
         const newGraphics = oldGraphics.withTheme(theme, mood);
@@ -76,9 +82,9 @@ export class GraphicsIconView extends GraphicsView implements IconView {
     }
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderIcon(renderer, this.viewBounds);
     }
@@ -95,8 +101,8 @@ export class GraphicsIconView extends GraphicsView implements IconView {
 
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       return this.hitTestIcon(x, y, renderer, this.viewBounds);
     }

@@ -12,28 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {PositionGestureInput} from "@swim/view";
 import type {Graphics} from "@swim/graphics";
 import type {ToolControllerObserver} from "./ToolControllerObserver";
 import type {ButtonToolView} from "./ButtonToolView";
-import type {ButtonToolTrait} from "./ButtonToolTrait";
 import type {ButtonToolController} from "./ButtonToolController";
 
 /** @public */
 export interface ButtonToolControllerObserver<C extends ButtonToolController = ButtonToolController> extends ToolControllerObserver<C> {
-  controllerWillAttachToolTrait?(toolTrait: ButtonToolTrait, controller: C): void;
-
-  controllerDidDetachToolTrait?(toolTrait: ButtonToolTrait, controller: C): void;
-
   controllerWillAttachToolView?(toolView: ButtonToolView, controller: C): void;
 
   controllerDidDetachToolView?(toolView: ButtonToolView, controller: C): void;
 
-  controllerWillSetToolIcon?(newToolIcon: Graphics | null, oldToolIcon: Graphics | null, controller: C): void;
-
-  controllerDidSetToolIcon?(newToolIcon: Graphics | null, oldToolIcon: Graphics | null, controller: C): void;
-
-  controllerDidPressToolView?(input: PositionGestureInput, event: Event | null, controller: C): void;
-
-  controllerDidLongPressToolView?(input: PositionGestureInput, controller: C): void;
+  controllerDidSetToolIcon?(toolIcon: Graphics | null, controller: C): void;
 }

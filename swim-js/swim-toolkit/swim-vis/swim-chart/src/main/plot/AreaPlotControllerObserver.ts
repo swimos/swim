@@ -28,7 +28,5 @@ export interface AreaPlotControllerObserver<X = unknown, Y = unknown, C extends 
 
   controllerDidDetachPlotView?(plotView: AreaPlotView<X, Y>, controller: C): void;
 
-  controllerWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, controller: C): void;
-
-  controllerDidSetPlotFill?(newFill: Color | null, oldFill: Color | null, controller: C): void;
+  controllerDidSetPlotFill?(fill: Color | null, controller: C): void;
 }

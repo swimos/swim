@@ -16,7 +16,7 @@ import {Mutable, AnyTiming, Timing} from "@swim/util";
 import {Affinity} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {StyleAnimator, StyleConstraintAnimator, HtmlView} from "@swim/dom";
+import {StyleAnimator, LengthStyleConstraintAnimator, HtmlView} from "@swim/dom";
 
 /** @public */
 export type ButtonGlowState = "ready" | "glowing" | "pulsing" | "fading";
@@ -47,23 +47,16 @@ export class ButtonGlow extends HtmlView {
   /** @internal */
   glowTimer: number;
 
-  @StyleConstraintAnimator<ButtonGlow, Length | null, AnyLength | null>({
-    propertyNames: "left",
-    type: Length,
-    value: null,
-    get constraintValue(): Length | null {
-      const node = this.owner.node;
-      return node instanceof HTMLElement ? Length.px(node.offsetLeft) : null;
-    },
+  @LengthStyleConstraintAnimator<ButtonGlow["left"]>({
+    extends: true,
     didTransition(): void {
       this.owner.didGlow();
     },
   })
-  override readonly left!: StyleConstraintAnimator<this, Length | null, AnyLength | null>;
+  override readonly left!: LengthStyleConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @StyleAnimator<ButtonGlow, number | undefined>({
-    propertyNames: "opacity",
-    type: Number,
+  @StyleAnimator<ButtonGlow["opacity"]>({
+    extends: true,
     didTransition(opacity: number | undefined): void {
       if (this.owner.glowState === "pulsing" && opacity === 0) {
         this.owner.didPulse();
@@ -107,7 +100,7 @@ export class ButtonGlow extends HtmlView {
     if (this.glowState === "ready") {
       this.cancelGlow();
       if (delay !== 0) {
-        const glow = this.glow.bind(this, clientX, clientY, timing, Affinity.Intrinsic);
+        const glow = this.glow.bind(this, clientX, clientY, timing, 0);
         this.glowTimer = setTimeout(glow, delay) as any;
       } else {
         if (timing === void 0 || timing === true) {

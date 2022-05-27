@@ -16,7 +16,13 @@ import type {Interpolator} from "@swim/util";
 import {AnyBoxShadow, BoxShadow, BoxShadowInterpolator} from "@swim/style";
 import {Look} from "./Look";
 
-/** @internal */
+/** @public */
+export type AnyShadowOrLook = Look<BoxShadow, any> | AnyBoxShadow;
+
+/** @public */
+export type ShadowOrLook = Look<BoxShadow, any> | BoxShadow;
+
+/** @public */
 export class ShadowLook extends Look<BoxShadow, AnyBoxShadow> {
   override combine(combination: BoxShadow | undefined, value: BoxShadow, weight?: number): BoxShadow {
     if (weight === void 0 || weight !== 0) {
@@ -34,5 +40,16 @@ export class ShadowLook extends Look<BoxShadow, AnyBoxShadow> {
 
   override coerce(value: AnyBoxShadow): BoxShadow {
     return BoxShadow.fromAny(value)!;
+  }
+
+  static fromAny(value: Look<BoxShadow> | AnyBoxShadow): Look<BoxShadow> | BoxShadow;
+  static fromAny(value: Look<BoxShadow> | AnyBoxShadow | null): Look<BoxShadow> | BoxShadow | null;
+  static fromAny(value: Look<BoxShadow> | AnyBoxShadow | null | undefined): Look<BoxShadow> | BoxShadow | null | undefined;
+  static fromAny(value: Look<BoxShadow> | AnyBoxShadow | null | undefined): Look<BoxShadow> | BoxShadow | null | undefined {
+    if (value === void 0 || value === null || value instanceof Look || value instanceof BoxShadow) {
+      return value;
+    } else {
+      return BoxShadow.fromAny(value);
+    }
   }
 }

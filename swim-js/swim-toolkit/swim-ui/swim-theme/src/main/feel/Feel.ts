@@ -49,13 +49,13 @@ export abstract class Feel implements Mood {
 
   static primary: Feel; // defined by feels
   static secondary: Feel; // defined by feels
-
-  static unselected: Feel; // defined by feels
-  static selected: Feel; // defined by feels
   static disabled: Feel; // defined by feels
   static inactive: Feel; // defined by feels
   static warning: Feel; // defined by feels
   static alert: Feel; // defined by feels
+
+  static unselected: Feel; // defined by feels
+  static selected: Feel; // defined by feels
 
   static darker: Feel; // defined by feels
   static lighter: Feel; // defined by feels
@@ -66,11 +66,11 @@ export abstract class Feel implements Mood {
 
   static opaque: Feel; // defined by feels
   static floating: Feel; // defined by feels
-  static transparent: Feel; // defined by feels
-  static translucent: Feel; // defined by feels
   static embossed: Feel; // defined by feels
   static nested: Feel; // defined by feels
   static hovering: Feel; // defined by feels
+  static translucent: Feel; // defined by feels
+  static transparent: Feel; // defined by feels
 
   static navigating: Feel; // defined by feels
 }

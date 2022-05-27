@@ -20,7 +20,6 @@ export {
 
 export {GeoViewport} from "./GeoViewport";
 
-export {GeoViewContext} from "./GeoViewContext";
 export {
   GeoViewInit,
   GeoView,

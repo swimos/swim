@@ -12,8 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, FromAny} from "@swim/util";
-import {Affinity, FastenerOwner, FastenerFlags} from "@swim/component";
+import type {Mutable, Proto} from "@swim/util";
+import {
+  Affinity,
+  FastenerFlags,
+  FastenerOwner,
+  AnimatorValue,
+  AnimatorValueInit,
+} from "@swim/component";
 import {
   ConstraintId,
   ConstraintMap,
@@ -27,30 +33,40 @@ import {
   ConstraintScope,
   ConstraintSolver,
 } from "@swim/constraint";
-import {AnyLength, Length} from "@swim/math";
-import {ThemeAnimatorInit, ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
-import {NumberThemeConstraintAnimator} from "./"; // forward import
-import {LengthThemeConstraintAnimator} from "./"; // forward import
+import {ThemeAnimatorDescriptor, ThemeAnimatorClass, ThemeAnimator} from "./ThemeAnimator";
 
 /** @public */
-export interface ThemeConstraintAnimatorInit<T = unknown, U = T> extends ThemeAnimatorInit<T, U> {
-  extends?: {prototype: ThemeConstraintAnimator<any, any>} | string | boolean | null;
-  constrain?: boolean;
+export interface ThemeConstraintAnimatorDescriptor<T = unknown, U = T> extends ThemeAnimatorDescriptor<T, U> {
+  extends?: Proto<ThemeConstraintAnimator<any, any, any>> | string | boolean | null;
   strength?: AnyConstraintStrength;
-
-  willStartConstraining?(): void;
-  didStartConstraining?(): void;
-  willStopConstraining?(): void;
-  didStopConstraining?(): void;
-
-  toNumber?(value: T): number;
+  constrained?: boolean;
 }
 
 /** @public */
-export type ThemeConstraintAnimatorDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<ThemeConstraintAnimator<O, T, U> & I> & ThemeConstraintAnimatorInit<T, U> & Partial<I>;
+export type ThemeConstraintAnimatorTemplate<A extends ThemeConstraintAnimator<any, any, any>> =
+  ThisType<A> &
+  ThemeConstraintAnimatorDescriptor<AnimatorValue<A>, AnimatorValueInit<A>> &
+  Partial<Omit<A, keyof ThemeConstraintAnimatorDescriptor>>;
 
 /** @public */
 export interface ThemeConstraintAnimatorClass<A extends ThemeConstraintAnimator<any, any> = ThemeConstraintAnimator<any, any>> extends ThemeAnimatorClass<A> {
+  /** @override */
+  specialize(template: ThemeConstraintAnimatorDescriptor<any, any>): ThemeConstraintAnimatorClass<A>;
+
+  /** @override */
+  refine(animatorClass: ThemeConstraintAnimatorClass<any>): void;
+
+  /** @override */
+  extend<A2 extends A>(className: string, template: ThemeConstraintAnimatorTemplate<A2>): ThemeConstraintAnimatorClass<A2>;
+  extend<A2 extends A>(className: string, template: ThemeConstraintAnimatorTemplate<A2>): ThemeConstraintAnimatorClass<A2>;
+
+  /** @override */
+  define<A2 extends A>(className: string, template: ThemeConstraintAnimatorTemplate<A2>): ThemeConstraintAnimatorClass<A2>;
+  define<A2 extends A>(className: string, template: ThemeConstraintAnimatorTemplate<A2>): ThemeConstraintAnimatorClass<A2>;
+
+  /** @override */
+  <A2 extends A>(template: ThemeConstraintAnimatorTemplate<A2>): PropertyDecorator;
+
   /** @internal */
   readonly ConstrainedFlag: FastenerFlags;
   /** @internal */
@@ -60,22 +76,6 @@ export interface ThemeConstraintAnimatorClass<A extends ThemeConstraintAnimator<
   readonly FlagShift: number;
   /** @internal @override */
   readonly FlagMask: FastenerFlags;
-}
-
-/** @public */
-export interface ThemeConstraintAnimatorFactory<A extends ThemeConstraintAnimator<any, any> = ThemeConstraintAnimator<any, any>> extends ThemeConstraintAnimatorClass<A> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): ThemeConstraintAnimatorFactory<A> & I;
-
-  specialize(type: unknown): ThemeConstraintAnimatorFactory | null;
-
-  define<O, T, U = T>(className: string, descriptor: ThemeConstraintAnimatorDescriptor<O, T, U>): ThemeConstraintAnimatorFactory<ThemeConstraintAnimator<any, T, U>>;
-  define<O, T, U = T, I = {}>(className: string, descriptor: {implements: unknown} & ThemeConstraintAnimatorDescriptor<O, T, U, I>): ThemeConstraintAnimatorFactory<ThemeConstraintAnimator<any, T, U> & I>;
-
-  <O, T extends Length | null | undefined = Length | null | undefined, U extends AnyLength | null | undefined = AnyLength | null | undefined>(descriptor: {type: typeof Length} & ThemeConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
-  <O, T extends number | null | undefined = number | null | undefined, U extends number | string | null | undefined = number | string | null | undefined>(descriptor: {type: typeof Number} & ThemeConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = T>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & ThemeConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = T>(descriptor: ThemeConstraintAnimatorDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = T, I = {}>(descriptor: {implements: unknown} & ThemeConstraintAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
 }
 
 /** @public */
@@ -100,6 +100,9 @@ export interface ThemeConstraintAnimator<O = unknown, T = unknown, U = T> extend
 
   /** @internal @override */
   updateConstraintSolution(value: number): void;
+
+  /** @internal @protected */
+  initStrength(): ConstraintStrength;
 
   /** @override */
   readonly strength: ConstraintStrength;
@@ -185,16 +188,13 @@ export interface ThemeConstraintAnimator<O = unknown, T = unknown, U = T> extend
   /** @protected @override */
   onUnmount(): void;
 
-  /** @override */
-  fromAny(value: T | U): T;
-
   /** @internal @protected */
   toNumber(value: T): number;
 }
 
 /** @public */
 export const ThemeConstraintAnimator = (function (_super: typeof ThemeAnimator) {
-  const ThemeConstraintAnimator: ThemeConstraintAnimatorFactory = _super.extend("ThemeConstraintAnimator");
+  const ThemeConstraintAnimator = _super.extend("ThemeConstraintAnimator", {}) as ThemeConstraintAnimatorClass;
 
   ThemeConstraintAnimator.prototype.isExternal = function (this: ThemeConstraintAnimator): boolean {
     return true;
@@ -222,14 +222,20 @@ export const ThemeConstraintAnimator = (function (_super: typeof ThemeAnimator) 
     }
   };
 
+  ThemeConstraintAnimator.prototype.initStrength = function (this: ThemeConstraintAnimator): ConstraintStrength {
+    let strength = (Object.getPrototypeOf(this) as ThemeConstraintAnimator).strength as ConstraintStrength | undefined;
+    if (strength === void 0) {
+      strength = ConstraintStrength.Strong;
+    }
+    return strength;
+  };
+
   ThemeConstraintAnimator.prototype.setStrength = function (this: ThemeConstraintAnimator, strength: AnyConstraintStrength): void {
     (this as Mutable<typeof this>).strength = ConstraintStrength.fromAny(strength);
   };
 
   Object.defineProperty(ThemeConstraintAnimator.prototype, "coefficient", {
-    get(this: ThemeConstraintAnimator): number {
-      return 1;
-    },
+    value: 1,
     configurable: true,
   });
 
@@ -250,9 +256,7 @@ export const ThemeConstraintAnimator = (function (_super: typeof ThemeAnimator) 
   });
 
   Object.defineProperty(ThemeConstraintAnimator.prototype, "constant", {
-    get(this: ThemeConstraintAnimator): number {
-      return 0;
-    },
+    value: 0,
     configurable: true,
   });
 
@@ -413,96 +417,53 @@ export const ThemeConstraintAnimator = (function (_super: typeof ThemeAnimator) 
     _super.prototype.onUnmount.call(this);
   };
 
-  ThemeConstraintAnimator.prototype.fromAny = function <T, U>(this: ThemeConstraintAnimator<unknown, T, U>, value: T | U): T {
-    if (typeof value === "string") {
-      const number = +value;
-      if (isFinite(number)) {
-        return number as unknown as T;
-      }
-    }
-    return value as T;
-  };
-
   ThemeConstraintAnimator.prototype.toNumber = function <T>(this: ThemeConstraintAnimator<unknown, T>, value: T): number {
     return value !== void 0 && value !== null ? +value : 0;
   };
 
-  ThemeConstraintAnimator.construct = function <A extends ThemeConstraintAnimator<any, any>>(animatorClass: {prototype: A}, animator: A | null, owner: FastenerOwner<A>): A {
-    animator = _super.construct(animatorClass, animator, owner) as A;
+  ThemeConstraintAnimator.construct = function <A extends ThemeConstraintAnimator<any, any>>(animator: A | null, owner: FastenerOwner<A>): A {
+    animator = _super.construct.call(this, animator, owner) as A;
     (animator as Mutable<typeof animator>).id = ConstraintId.next();
-    (animator as Mutable<typeof animator>).strength = ConstraintStrength.Strong;
+    (animator as Mutable<typeof animator>).strength = animator.initStrength();
     (animator as Mutable<typeof animator>).conditionCount = 0;
+    const flagsInit = animator.flagsInit;
+    if (flagsInit !== void 0) {
+      animator.constrain((flagsInit & ThemeConstraintAnimator.ConstrainedFlag) !== 0);
+    }
     return animator;
   };
 
-  ThemeConstraintAnimator.specialize = function (type: unknown): ThemeConstraintAnimatorFactory | null {
-  if (type === Number) {
-    return NumberThemeConstraintAnimator;
-  } else if (type === Length) {
-    return LengthThemeConstraintAnimator;
-  }
-    return null;
-  };
+  ThemeConstraintAnimator.refine = function (animatorClass: ThemeConstraintAnimatorClass<any>): void {
+    _super.refine.call(this, animatorClass);
+    const animatorPrototype = animatorClass.prototype;
+    let flagsInit = animatorPrototype.flagsInit;
 
-  ThemeConstraintAnimator.define = function <O, T, U>(className: string, descriptor: ThemeConstraintAnimatorDescriptor<O, T, U>): ThemeConstraintAnimatorFactory<ThemeConstraintAnimator<any, T, U>> {
-    let superClass = descriptor.extends as ThemeConstraintAnimatorFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    const strength = descriptor.strength !== void 0 ? ConstraintStrength.fromAny(descriptor.strength) : void 0;
-    const constrain = descriptor.constrain;
-    const look = descriptor.look;
-    const value = descriptor.value;
-    const initValue = descriptor.initValue;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
-    delete descriptor.strength;
-    delete descriptor.constrain;
-    delete descriptor.look;
-    delete descriptor.value;
-    delete descriptor.initValue;
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this.specialize(descriptor.type);
-    }
-    if (superClass === null) {
-      superClass = this;
-      if (descriptor.fromAny === void 0 && FromAny.is<T, U>(descriptor.type)) {
-        descriptor.fromAny = descriptor.type.fromAny;
+    if (Object.prototype.hasOwnProperty.call(animatorPrototype, "constrained")) {
+      if (flagsInit === void 0) {
+        flagsInit = 0;
       }
+      if (animatorPrototype.constrained) {
+        flagsInit |= ThemeConstraintAnimator.ConstrainedFlag;
+      } else {
+        flagsInit &= ~ThemeConstraintAnimator.ConstrainedFlag;
+      }
+      delete (animatorPrototype as ThemeConstraintAnimatorDescriptor).constrained;
     }
 
-    const animatorClass = superClass.extend(className, descriptor);
+    if (flagsInit !== void 0) {
+      Object.defineProperty(animatorPrototype, "flagsInit", {
+        value: flagsInit,
+        configurable: true,
+      });
+    }
 
-    animatorClass.construct = function (animatorClass: {prototype: ThemeConstraintAnimator<any, any>}, animator: ThemeConstraintAnimator<O, T, U> | null, owner: O): ThemeConstraintAnimator<O, T, U> {
-      animator = superClass!.construct(animatorClass, animator, owner);
-      if (affinity !== void 0) {
-        animator.initAffinity(affinity);
-      }
-      if (inherits !== void 0) {
-        animator.initInherits(inherits);
-      }
-      if (strength !== void 0) {
-        (animator as Mutable<typeof animator>).strength = strength;
-      }
-      if (look !== void 0) {
-        (animator as Mutable<typeof animator>).look = look;
-      }
-      if (initValue !== void 0) {
-        (animator as Mutable<typeof animator>).value = animator.fromAny(initValue());
-        (animator as Mutable<typeof animator>).state = animator.value;
-      } else if (value !== void 0) {
-        (animator as Mutable<typeof animator>).value = animator.fromAny(value);
-        (animator as Mutable<typeof animator>).state = animator.value;
-      }
-      if (constrain === true) {
-        animator.constrain();
-      }
-      return animator;
-    };
-
-    return animatorClass;
+    if (Object.prototype.hasOwnProperty.call(animatorPrototype, "strength")) {
+      Object.defineProperty(animatorPrototype, "strength", {
+        value: animatorPrototype.fromAny(animatorPrototype.strength),
+        enumerable: true,
+        configurable: true,
+      });
+    }
   };
 
   (ThemeConstraintAnimator as Mutable<typeof ThemeConstraintAnimator>).ConstrainedFlag = 1 << (_super.FlagShift + 0);

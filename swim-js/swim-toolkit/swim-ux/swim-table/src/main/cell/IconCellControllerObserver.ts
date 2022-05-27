@@ -28,7 +28,5 @@ export interface IconCellControllerObserver<C extends IconCellController = IconC
 
   controllerDidDetachCellView?(cellView: IconCellView, controller: C): void;
 
-  controllerWillSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, controller: C): void;
-
-  controllerDidSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, controller: C): void;
+  controllerDidSetCellIcon?(cellIcon: Graphics | null, controller: C): void;
 }

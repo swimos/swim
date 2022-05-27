@@ -17,7 +17,7 @@ import {AnyLength, Length, R2Box} from "@swim/math";
 import {Property} from "@swim/component";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
+import {View} from "@swim/view";
 import {
   GraphicsView,
   StrokeViewInit,
@@ -39,42 +39,36 @@ export interface GeoLineViewInit extends GeoPathViewInit, StrokeViewInit {
 export class GeoLineView extends GeoPathView implements StrokeView {
   override readonly observerType?: Class<GeoLineViewObserver>;
 
-  @ThemeAnimator<GeoLineView, Color | null, AnyColor | null>({
-    type: Color,
+  @ThemeAnimator<GeoLineView["stroke"]>({
+    valueType: Color,
     value: null,
     inherits: true,
     updateFlags: View.NeedsRender,
-    willSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.callObservers("viewWillSetStroke", newStroke, oldStroke, this.owner);
-    },
-    didSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.callObservers("viewDidSetStroke", newStroke, oldStroke, this.owner);
+    didSetValue(stroke: Color | null): void {
+      this.owner.callObservers("viewDidSetStroke", stroke, this.owner);
     },
   })
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator<GeoLineView, Length | null, AnyLength | null>({
-    type: Length,
+  @ThemeAnimator<GeoLineView["strokeWidth"]>({
+    valueType: Length,
     value: null,
     inherits: true,
     updateFlags: View.NeedsRender,
-    willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("viewWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
-    },
-    didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("viewDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
+    didSetValue(strokeWIdth: Length | null): void {
+      this.owner.callObservers("viewDidSetStrokeWidth", strokeWIdth, this.owner);
     },
   })
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @Property({type: Number})
+  @Property({valueType: Number})
   readonly hitWidth!: Property<this, number | undefined>;
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
-      this.renderLine(renderer.context, viewContext.viewFrame);
+      this.renderLine(renderer.context, this.viewFrame);
     }
   }
 
@@ -103,11 +97,11 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     }
   }
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
-      return this.hitTestLine(p.x, p.y, renderer.context, viewContext.viewFrame);
+      return this.hitTestLine(p.x, p.y, renderer.context, this.viewFrame);
     }
     return null;
   }

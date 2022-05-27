@@ -15,20 +15,12 @@
 export {
   AnyGaugeView,
   GaugeViewInit,
-  GaugeViewDialExt,
   GaugeView,
 } from "./GaugeView";
 export {GaugeViewObserver} from "./GaugeViewObserver";
 
-export {
-  GaugeTitle,
-  GaugeTitleFunction,
-  GaugeTrait,
-} from "./GaugeTrait";
+export {GaugeTrait} from "./GaugeTrait";
 export {GaugeTraitObserver} from "./GaugeTraitObserver";
 
-export {
-  GaugeControllerDialExt,
-  GaugeController,
-} from "./GaugeController";
+export {GaugeController} from "./GaugeController";
 export {GaugeControllerObserver} from "./GaugeControllerObserver";

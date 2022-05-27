@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {FastenerClass} from "@swim/component";
 import {Model, Trait, TraitSet} from "@swim/model";
 import {DataPointTrait} from "./DataPointTrait";
 import type {DataSetTraitObserver} from "./DataSetTraitObserver";
@@ -22,8 +22,8 @@ import type {DataSetTraitObserver} from "./DataSetTraitObserver";
 export class DataSetTrait<X = unknown, Y = unknown> extends Trait {
   override readonly observerType?: Class<DataSetTraitObserver<X, Y>>;
 
-  @TraitSet<DataSetTrait<X, Y>, DataPointTrait<X, Y>>({
-    type: DataPointTrait,
+  @TraitSet<DataSetTrait<X, Y>["dataPoints"]>({
+    traitType: DataPointTrait,
     binds: true,
     willAttachTrait(dataPointTrait: DataPointTrait<X, Y>, targetTrait: Trait | null): void {
       this.owner.callObservers("traitWillAttachDataPoint", dataPointTrait, targetTrait, this.owner);
@@ -46,33 +46,15 @@ export class DataSetTrait<X = unknown, Y = unknown> extends Trait {
     },
   })
   readonly dataPoints!: TraitSet<this, DataPointTrait<X, Y>>;
-  static readonly dataPoints: MemberFastenerClass<DataSetTrait, "dataPoints">;
-
-  /** @internal */
-  protected startConsumingDataPoints(): void {
-    const dataPointTraits = this.dataPoints.traits;
-    for (const traitId in dataPointTraits) {
-      const dataPointTrait = dataPointTraits[traitId]!;
-      dataPointTrait.consume(this);
-    }
-  }
-
-  /** @internal */
-  protected stopConsumingDataPoints(): void {
-    const dataPointTraits = this.dataPoints.traits;
-    for (const traitId in dataPointTraits) {
-      const dataPointTrait = dataPointTraits[traitId]!;
-      dataPointTrait.unconsume(this);
-    }
-  }
+  static readonly dataPoints: FastenerClass<DataSetTrait["dataPoints"]>;
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();
-    this.startConsumingDataPoints();
+    this.dataPoints.consumeTraits(this);
   }
 
   protected override onStopConsuming(): void {
     super.onStopConsuming();
-    this.stopConsumingDataPoints();
+    this.dataPoints.unconsumeTraits(this);
   }
 }

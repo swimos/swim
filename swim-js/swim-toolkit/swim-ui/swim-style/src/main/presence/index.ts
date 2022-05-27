@@ -19,10 +19,4 @@ export {
 } from "./Presence";
 export {PresenceInterpolator} from "./PresenceInterpolator";
 
-export {
-  PresenceAnimatorInit,
-  PresenceAnimatorDescriptor,
-  PresenceAnimatorClass,
-  PresenceAnimatorFactory,
-  PresenceAnimator,
-} from "./PresenceAnimator";
+export {PresenceAnimator} from "./PresenceAnimator";

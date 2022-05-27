@@ -12,18 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
+import {Mutable, AnyTiming, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass} from "@swim/component";
 import {Length, Angle, Transform} from "@swim/math";
-import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {AnyPresence, Presence, PresenceAnimator} from "@swim/style";
 import {Look, Feel, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
-import {
-  PositionGestureInput,
-  PositionGesture,
-  ViewContextType,
-  ViewContext,
-  ViewRef,
-} from "@swim/view";
+import {ViewRef, PositionGestureInput, PositionGesture} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import {Graphics, HtmlIconView} from "@swim/graphics";
 import {ButtonMembrane} from "./ButtonMembrane";
@@ -76,7 +70,7 @@ export class FloatingButton extends ButtonMembrane {
     }
   }
 
-  @PositionGesture<FloatingButton, HtmlView>({
+  @PositionGesture<FloatingButton["gesture"]>({
     extends: true,
     didStartHovering(): void {
       this.owner.modifyMood(Feel.default, [[Feel.hovering, 1]]);
@@ -97,12 +91,11 @@ export class FloatingButton extends ButtonMembrane {
     },
   })
   override readonly gesture!: PositionGesture<this, HtmlView>;
-  static override readonly gesture: MemberFastenerClass<FloatingButton, "gesture">;
+  static override readonly gesture: FastenerClass<FloatingButton["gesture"]>;
 
   /** @internal */
-  static IconRef = ViewRef.define<FloatingButton, HtmlIconView, {iconIndex: number}>("IconRef", {
-    implements: true,
-    type: HtmlIconView,
+  static IconRef = ViewRef.define<ViewRef<FloatingButton, HtmlIconView> & Observes<HtmlIconView> & {iconIndex: number}>("IconRef", {
+    viewType: HtmlIconView,
     observes: true,
     init(): void {
       this.iconIndex = 0;
@@ -111,11 +104,11 @@ export class FloatingButton extends ButtonMembrane {
       const iconColor = theme.getOr(Look.backgroundColor, mood, null);
       iconView.iconColor.setState(iconColor, timing);
     },
-    viewDidAnimate(viewContext: ViewContext, iconView: HtmlIconView): void {
+    viewDidAnimate(iconView: HtmlIconView): void {
       if (!iconView.opacity.tweening && this.iconIndex !== this.owner.iconCount) {
         iconView.remove();
         if (this.iconIndex > this.owner.iconCount) {
-          this.owner.setFastener(this.key!, null);
+          this.owner.setFastener(this.viewKey!, null);
         }
       }
     },
@@ -148,7 +141,7 @@ export class FloatingButton extends ButtonMembrane {
 
     const newIconCount = oldIconCount + 1;
     const newIconKey = "icon" + newIconCount;
-    const newIconRef = FloatingButton.IconRef.create(this);
+    const newIconRef = FloatingButton.IconRef.create(this) as ViewRef<this, HtmlIconView> & {iconIndex: number};
     Object.defineProperty(newIconRef, "name", {
       value: newIconKey,
       enumerable: true,
@@ -212,8 +205,8 @@ export class FloatingButton extends ButtonMembrane {
     this.icon = newIconRef;
   }
 
-  @ExpansionAnimator({type: Expansion, inherits: true})
-  readonly disclosure!: ExpansionAnimator<this, Expansion | undefined, AnyExpansion | undefined>;
+  @PresenceAnimator({inherits: true})
+  readonly presence!: PresenceAnimator<this, Presence | undefined, AnyPresence | undefined>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
@@ -223,19 +216,18 @@ export class FloatingButton extends ButtonMembrane {
     let shadow = theme.getOr(Look.shadow, Mood.floating, null);
     if (shadow !== null) {
       const shadowColor = shadow.color;
-      const phase = this.disclosure.getPhaseOr(1);
+      const phase = this.presence.getPhaseOr(1);
       shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * phase));
     }
     this.boxShadow.setState(shadow, timing, Affinity.Intrinsic);
   }
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-
+  protected override onLayout(): void {
+    super.onLayout();
     let shadow = this.getLookOr(Look.shadow, Mood.floating, null);
     if (shadow !== null) {
       const shadowColor = shadow.color;
-      const phase = this.disclosure.getPhaseOr(1);
+      const phase = this.presence.getPhaseOr(1);
       shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * phase));
     }
     this.boxShadow.setState(shadow, Affinity.Intrinsic);

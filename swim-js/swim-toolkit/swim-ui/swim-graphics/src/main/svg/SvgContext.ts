@@ -26,6 +26,8 @@ export class SvgContext implements PaintingContext {
     this.pathContext = null;
     this.pathView = null;
     this.pathFlags = 0;
+    this.globalAlpha = 1;
+    this.globalCompositeOperation = "source-over";
     this.fillStyle = "";
     this.strokeStyle = "";
     this.lineWidth = 1;
@@ -141,6 +143,10 @@ export class SvgContext implements PaintingContext {
     (this as Mutable<this>).pathFlags = pathFlags;
   }
 
+  globalAlpha: number;
+
+  globalCompositeOperation: string;
+
   fillStyle: string | CanvasGradient | CanvasPattern;
 
   strokeStyle: string | CanvasGradient | CanvasPattern;
@@ -225,6 +231,7 @@ export class SvgContext implements PaintingContext {
         created = true;
       }
       pathView.fill.setState(fillStyle, Affinity.Intrinsic);
+      pathView.fillOpacity.setState(this.globalAlpha !== 1 ? this.globalAlpha : void 0);
       this.setPathFlags(this.pathFlags | SvgContext.FillFlag);
       if (fillRule !== void 0) {
         pathView.fillRule.setState(fillRule, Affinity.Intrinsic);
@@ -263,6 +270,7 @@ export class SvgContext implements PaintingContext {
       pathView.strokeWidth.setState(lineWidth, Affinity.Intrinsic);
       pathView.strokeLinecap.setState(this.lineCap, Affinity.Intrinsic);
       pathView.strokeLinejoin.setState(this.lineJoin, Affinity.Intrinsic);
+      pathView.strokeOpacity.setState(this.globalAlpha !== 1 ? this.globalAlpha : void 0);
       if (this.lineJoin === "miter") {
         pathView.strokeMiterlimit.setState(this.miterLimit, Affinity.Intrinsic);
       } else {

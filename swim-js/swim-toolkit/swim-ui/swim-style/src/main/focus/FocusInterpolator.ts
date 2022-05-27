@@ -22,7 +22,7 @@ export const FocusInterpolator = (function (_super: typeof Interpolator) {
       const f0 = interpolator[0];
       const f1 = interpolator[1];
       const phase = f0.phase + u * (f1.phase - f0.phase);
-      const direction = u !== 1 ? f0.direction : 0;
+      const direction = u !== 1 ? f0.direction : f1.direction;
       return Focus.create(phase, direction);
     } as Interpolator<Focus>;
     Object.setPrototypeOf(interpolator, FocusInterpolator.prototype);

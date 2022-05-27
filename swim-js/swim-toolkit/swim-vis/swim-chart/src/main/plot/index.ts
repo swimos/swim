@@ -15,7 +15,6 @@
 export {
   AnyPlotView,
   PlotViewInit,
-  PlotViewDataPointExt,
   PlotView,
 } from "./PlotView";
 export {PlotViewObserver} from "./PlotViewObserver";

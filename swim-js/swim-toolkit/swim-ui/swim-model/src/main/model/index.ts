@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {ModelContext} from "./ModelContext";
-
 export {
-  ModelContextType,
   ModelFlags,
   AnyModel,
   ModelInit,
@@ -27,28 +24,25 @@ export {
 export {ModelObserver} from "./ModelObserver";
 
 export {
-  ModelRelationType,
-  ModelRelationInit,
+  ModelRelationModel,
   ModelRelationDescriptor,
+  ModelRelationTemplate,
   ModelRelationClass,
-  ModelRelationFactory,
   ModelRelation,
 } from "./ModelRelation";
 
 export {
-  ModelRefType,
-  ModelRefInit,
+  ModelRefModel,
   ModelRefDescriptor,
+  ModelRefTemplate,
   ModelRefClass,
-  ModelRefFactory,
   ModelRef,
 } from "./ModelRef";
 
 export {
-  ModelSetType,
-  ModelSetInit,
+  ModelSetModel,
   ModelSetDescriptor,
+  ModelSetTemplate,
   ModelSetClass,
-  ModelSetFactory,
   ModelSet,
 } from "./ModelSet";

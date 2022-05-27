@@ -27,14 +27,11 @@ export abstract class GeoPathTrait extends GeoTrait {
     return geoPath !== null ? geoPath.bounds : GeoBox.undefined();
   }
 
-  @Property<GeoPathTrait, GeoPath | null, AnyGeoPath | null>({
-    type: GeoPath,
+  @Property<GeoPathTrait["geoPath"]>({
+    valueType: GeoPath,
     value: null,
-    willSetValue(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-      this.owner.callObservers("traitWillSetGeoPath", newGeoPath, oldGeoPath, this.owner);
-    },
-    didSetValue(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-      this.owner.callObservers("traitDidSetGeoPath", newGeoPath, oldGeoPath, this.owner);
+    didSetValue(geoPath: GeoPath | null): void {
+      this.owner.callObservers("traitDidSetGeoPath", geoPath, this.owner);
     },
   })
   readonly geoPath!: Property<this, GeoPath | null, AnyGeoPath | null>;

@@ -122,7 +122,10 @@ export abstract class Color implements Interpolate<Color>, HashCode, Equivalent,
     throw new TypeError("" + value);
   }
 
-  static fromAny(value: AnyColor): Color {
+  static fromAny(value: AnyColor): Color;
+  static fromAny(value: AnyColor | null): Color | null;
+  static fromAny(value: AnyColor | null | undefined): Color | null | undefined;
+  static fromAny(value: AnyColor | null | undefined): Color | null | undefined {
     if (value === void 0 || value === null || value instanceof Color) {
       return value;
     } else if (typeof value === "string") {

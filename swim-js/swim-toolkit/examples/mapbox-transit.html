@@ -3,14 +3,14 @@
   <head>
     <title>Swim Transit Map</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
-    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.css">
+    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.css">
   </head>
   <body swim-theme style="width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
     <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
     <script src="../swim-ui/dist/swim-ui.js"></script>
     <script src="../swim-maps/dist/swim-maps.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js"></script>
     <script>
 
 const bodyView = swim.HtmlView.fromNode(document.body);
@@ -18,7 +18,7 @@ const bodyView = swim.HtmlView.fromNode(document.body);
 mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1Mnd6M3EifQ.qpRE7xC08AyZfxJ56LoN7w";
 const map = new mapboxgl.Map({
   container: bodyView.node,
-  style: "mapbox://styles/mapbox/dark-v10",
+  //style: "mapbox://styles/mapbox/dark-v10",
   center: {lng: -118, lat: 33.95},
   pitch: 45,
   zoom: 9.7,
@@ -34,50 +34,51 @@ const layerView = mapView.appendChild(swim.GeoTreeView);
 
 const vehicleIcon = swim.VectorIcon.create(24, 24, "M20,6L20,17C20,17.87,19.57,18.46,19,19L19,21C19,21.56,18.56,22,18,22L17,22C16.44,22,16,21.56,16,21.02L16,20L8,20L8,21C8,21.56,7.56,22,7,22L6,22C5.44,22,5.05,21.56,5,21L5,19C4.43,18.46,4.05,17.87,4,17L4,6C4,3.54,5.89,2.56,8.54,2.2L9,2.14L9,2.14L9.47,2.1L9.47,2.1L9.96,2.06L9.96,2.06L10.45,2.03L10.45,2.03L11.22,2.01L11.22,2.01L12,2L12,2L12.52,2L13.04,2.01L13.04,2.01L13.55,2.02L13.55,2.02L14.04,2.05L14.04,2.05L14.53,2.08C14.61,2.09,14.69,2.1,14.77,2.1L15.24,2.15L15.24,2.15L15.69,2.22C18.22,2.6,20,3.61,20,6ZM7.5,14C6.67,14,6,14.67,6,15.5C6,16.33,6.67,17,7.5,17C8.33,17,9,16.33,9,15.5C9,14.67,8.33,14,7.5,14ZM16.5,14C15.67,14,15,14.67,15,15.5C15,16.33,15.67,17,16.5,17C17.33,17,18,16.33,18,15.5C18,14.67,17.33,14,16.5,14ZM18,6L6,6L6,11L18,11L18,6Z");
 
-const vehiclesLink = swim.downlinkMap()
-    .hostUri("warp://transit.swim.services")
-    .nodeUri("/state/US/S-CA")
-    .laneUri("vehicles")
-    .didUpdate(function (key, value) {
-      key = key.stringValue();
-      const lng = value.get("longitude").numberValue(0);
-      const lat = value.get("latitude").numberValue(0);
-      const timing = swim.Easing.linear.withDuration(10000);
+const warp = swim.WarpClient.global();
+const vehiclesLink = warp.downlinkMap({
+  hostUri: "warp://transit.swim.services",
+  nodeUri: "/state/US/S-CA",
+  laneUri: "vehicles",
+  didUpdate(key, value) {
+    key = key.stringValue();
+    const lng = value.get("longitude").numberValue(0);
+    const lat = value.get("latitude").numberValue(0);
+    const timing = swim.Easing.linear.withDuration(10000);
 
-      let vehicleView = layerView.getChild(key);
-      if (vehicleView !== null) {
-        vehicleView.geoCenter([lng, lat], timing);
-        vehicleView.ripple({
-          color: vehicleView.getLook(swim.Look.accentColor),
-          opacity: 0.25,
-          timing: 2000,
-        });
-      } else {
-        //vehicleView = new swim.GeoCircleView().geoCenter([lng, lat]).radius(5);
-        vehicleView = new swim.GeoIconView()
-            .geoCenter([lng, lat])
-            .iconWidth(14)
-            .iconHeight(14)
-            .graphics(vehicleIcon);
-        vehicleView.iconColor.setLook(swim.Look.accentColor);
-        layerView.setChild(key, vehicleView);
-      }
-      const warnThreshold = 0.8;
-      const alertThreshold = 0.95;
-      let u = Math.random();
-      if (u < warnThreshold) {
-        vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, void 0]]);
-      } else if (u < alertThreshold) {
-        u = (u - warnThreshold) / (alertThreshold - warnThreshold);
-        u = 0.6 + 0.4 * u;
-        vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, 1], [swim.Feel.alert, void 0]]);
-      } else {
-        u = (u - alertThreshold) / (1 - alertThreshold);
-        u = 0.6 + 0.4 * u;
-        vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, u]]);
-      }
-    })
-    .open();
+    let vehicleView = layerView.getChild(key);
+    if (vehicleView !== null) {
+      vehicleView.geoCenter([lng, lat], timing);
+      vehicleView.ripple({
+        color: vehicleView.getLook(swim.Look.accentColor),
+        opacity: 0.25,
+        timing: 2000,
+      });
+    } else {
+      //vehicleView = new swim.GeoCircleView().geoCenter([lng, lat]).radius(5);
+      vehicleView = new swim.GeoIconView()
+          .geoCenter([lng, lat])
+          .iconWidth(14)
+          .iconHeight(14)
+          .graphics(vehicleIcon);
+      vehicleView.iconColor.setLook(swim.Look.accentColor);
+      layerView.setChild(key, vehicleView);
+    }
+    const warnThreshold = 0.8;
+    const alertThreshold = 0.95;
+    let u = Math.random();
+    if (u < warnThreshold) {
+      vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, void 0]]);
+    } else if (u < alertThreshold) {
+      u = (u - warnThreshold) / (alertThreshold - warnThreshold);
+      u = 0.6 + 0.4 * u;
+      vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, 1], [swim.Feel.alert, void 0]]);
+    } else {
+      u = (u - alertThreshold) / (1 - alertThreshold);
+      u = 0.6 + 0.4 * u;
+      vehicleView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, u]]);
+    }
+  },
+}).open();
 
     </script>
   </body>

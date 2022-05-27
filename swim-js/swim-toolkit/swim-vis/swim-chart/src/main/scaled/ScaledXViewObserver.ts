@@ -18,15 +18,9 @@ import type {ScaledXView} from "./ScaledXView";
 
 /** @public */
 export interface ScaledXViewObserver<X = unknown, V extends ScaledXView<X> = ScaledXView<X>> extends GraphicsViewObserver<V> {
-  viewWillSetXScale?(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null, view: V): void;
+  viewDidSetXScale?(xScale: ContinuousScale<X, number> | null, view: V): void;
 
-  viewDidSetXScale?(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null, view: V): void;
+  viewDidSetXRangePadding?(xRangePadding: readonly [number, number], view: V): void;
 
-  viewWillSetXRangePadding?(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number], view: V): void;
-
-  viewDidSetXRangePadding?(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number], view: V): void;
-
-  viewWillSetXDataDomain?(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null, view: V): void;
-
-  viewDidSetXDataDomain?(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null, view: V): void;
+  viewDidSetXDataDomain?(xDataDomain: Domain<X> | null, view: V): void;
 }

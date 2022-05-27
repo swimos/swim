@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {ControllerContext} from "./ControllerContext";
-
 export {
-  ControllerContextType,
   ControllerFlags,
   AnyController,
   ControllerInit,
@@ -27,28 +24,25 @@ export {
 export {ControllerObserver} from "./ControllerObserver";
 
 export {
-  ControllerRelationType,
-  ControllerRelationInit,
+  ControllerRelationController,
   ControllerRelationDescriptor,
+  ControllerRelationTemplate,
   ControllerRelationClass,
-  ControllerRelationFactory,
   ControllerRelation,
 } from "./ControllerRelation";
 
 export {
-  ControllerRefType,
-  ControllerRefInit,
+  ControllerRefController,
   ControllerRefDescriptor,
+  ControllerRefTemplate,
   ControllerRefClass,
-  ControllerRefFactory,
   ControllerRef,
 } from "./ControllerRef";
 
 export {
-  ControllerSetType,
-  ControllerSetInit,
+  ControllerSetController,
   ControllerSetDescriptor,
+  ControllerSetTemplate,
   ControllerSetClass,
-  ControllerSetFactory,
   ControllerSet,
 } from "./ControllerSet";

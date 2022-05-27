@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ContinuousScale} from "@swim/util";
-import {Affinity, Animator} from "@swim/component";
+import type {ContinuousScale} from "@swim/util";
+import {Affinity} from "@swim/component";
 import {R2Point, R2Box} from "@swim/math";
 import {View} from "@swim/view";
 import type {PaintingContext} from "@swim/graphics";
@@ -27,11 +27,9 @@ export class RightAxisView<Y = unknown> extends AxisView<Y> {
     return "right";
   }
 
-  @Animator({
-    extends: ContinuousScaleAnimator,
-    type: ContinuousScale,
-    inherits: "yScale",
+  @ContinuousScaleAnimator<RightAxisView<Y>["scale"]>({
     value: null,
+    inherits: "yScale",
     updateFlags: View.NeedsLayout,
   })
   override readonly scale!: ContinuousScaleAnimator<this, Y, number>;

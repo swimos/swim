@@ -358,7 +358,10 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     return null;
   }
 
-  static fromAny(value: AnyFont): Font {
+  static fromAny(value: AnyFont): Font;
+  static fromAny(value: AnyFont | null): Font | null;
+  static fromAny(value: AnyFont | null | undefined): Font | null | undefined;
+  static fromAny(value: AnyFont | null | undefined): Font | null | undefined {
     if (value === void 0 || value === null || value instanceof Font) {
       return value;
     } else if (typeof value === "object" && value !== null) {

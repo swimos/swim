@@ -15,41 +15,35 @@
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
-import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
+import {AnyColorOrLook, ColorOrLook, ColorLook} from "@swim/theme";
 import {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {LinePlotTraitObserver} from "./LinePlotTraitObserver";
+import type {SeriesPlotController} from "./SeriesPlotController";
+import {LinePlotController} from "./"; // forward import
 
 /** @public */
 export class LinePlotTrait<X = unknown, Y = unknown> extends SeriesPlotTrait<X, Y> {
   override readonly observerType?: Class<LinePlotTraitObserver<X, Y>>;
 
-  @Property<LinePlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<LinePlotTrait<X, Y>["stroke"]>({
+    valueType: ColorLook,
     value: null,
-    willSetValue(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitWillSetPlotStroke", newStroke, oldStroke, this.owner);
-    },
-    didSetValue(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitDidSetPlotStroke", newStroke, oldStroke, this.owner);
-    },
-    fromAny(stroke: Look<Color> | AnyColor | null): Look<Color> | Color | null {
-      if (stroke !== null && !(stroke instanceof Look)) {
-        stroke = Color.fromAny(stroke);
-      }
-      return stroke;
+    didSetValue(stroke: ColorOrLook | null): void {
+      this.owner.callObservers("traitDidSetStroke", stroke, this.owner);
     },
   })
-  readonly stroke!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly stroke!: Property<this, ColorOrLook | null, AnyColorOrLook | null>;
 
-  @Property<LinePlotTrait<X, Y>, Length | null, AnyLength | null>({
-    type: Length,
+  @Property<LinePlotTrait<X, Y>["strokeWidth"]>({
+    valueType: Length,
     value: null,
-    willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("traitWillSetPlotStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
-    },
-    didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("traitDidSetPlotStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
+    didSetValue(strokeWidth: Length | null): void {
+      this.owner.callObservers("traitDidSetStrokeWidth", strokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: Property<this, Length | null, AnyLength | null>;
+
+  override createPlotController(): SeriesPlotController<X, Y> {
+    return new LinePlotController<X, Y>();
+  }
 }

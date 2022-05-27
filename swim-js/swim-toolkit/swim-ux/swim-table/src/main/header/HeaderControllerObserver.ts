@@ -44,9 +44,7 @@ export interface HeaderControllerObserver<C extends HeaderController = HeaderCon
 
   controllerDidDetachColView?(colView: ColView, colController: ColController, controller: C): void;
 
-  controllerWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController, controller: C): void;
-
-  controllerDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController, controller: C): void;
+  controllerDidSetColLayout?(colLayout: ColLayout | null, colController: ColController, controller: C): void;
 
   controllerWillAttachColLabelView?(colLabelView: HtmlView, colController: ColController, controller: C): void;
 

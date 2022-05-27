@@ -137,7 +137,10 @@ export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
     return new ColorStop(color, stop, null);
   }
 
-  static fromAny(value: AnyColorStop): ColorStop {
+  static fromAny(value: AnyColorStop): ColorStop;
+  static fromAny(value: AnyColorStop | null): ColorStop | null;
+  static fromAny(value: AnyColorStop | null | undefined): ColorStop | null | undefined;
+  static fromAny(value: AnyColorStop | null | undefined): ColorStop | null | undefined {
     if (value === void 0 || value === null || value instanceof ColorStop) {
       return value;
     } else if (typeof value === "string") {

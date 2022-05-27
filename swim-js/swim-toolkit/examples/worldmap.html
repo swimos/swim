@@ -25,10 +25,10 @@ function addGeoShapes(shapes, mapView) {
     } else if (shape instanceof swim.GeoPath) {
       const shapeView = mapView.appendChild(swim.GeoAreaView).geoPath(shape);
       shapeView.fill.setLook(swim.Look.maskColor);
-      shapeView.on("pointerenter", function (event) {
+      shapeView.addEventListener("pointerenter", function (event) {
         shapeView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, 1]], shapeView.getLook(swim.Look.timing));
       });
-      shapeView.on("pointerleave", function (event) {
+      shapeView.addEventListener("pointerleave", function (event) {
         shapeView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, void 0]], shapeView.getLook(swim.Look.timing));
       });
     }
@@ -49,10 +49,10 @@ const dotView = mapView.appendChild(swim.GeoIconView)
   .graphics(swim.CircleIcon.create());
 dotView.iconColor.setLook(swim.Look.accentColor);
 dotView.modifyTheme(swim.Feel.default, [[swim.Feel.primary, 1]]);
-dotView.on("pointerenter", function (event) {
+dotView.addEventListener("pointerenter", function (event) {
   dotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], dotView.getLook(swim.Look.timing));
 });
-dotView.on("pointerleave", function (event) {
+dotView.addEventListener("pointerleave", function (event) {
   dotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], dotView.getLook(swim.Look.timing));
 });
 

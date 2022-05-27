@@ -14,10 +14,9 @@
 
 import type {Mutable, Dictionary, MutableDictionary} from "@swim/util";
 import {StorageService} from "./StorageService";
-import type {Controller} from "../controller/Controller";
 
 /** @public */
-export class EphemeralStorageService<C extends Controller = Controller> extends StorageService<C> {
+export class EphemeralStorageService extends StorageService {
   constructor(storage?: Dictionary<string>) {
     super();
     if (storage === void 0) {

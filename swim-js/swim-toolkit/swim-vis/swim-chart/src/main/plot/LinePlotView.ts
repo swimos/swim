@@ -35,28 +35,22 @@ export interface LinePlotViewInit<X = unknown, Y = unknown> extends SeriesPlotVi
 export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y> implements StrokeView {
   override readonly observerType?: Class<LinePlotViewObserver<X, Y>>;
 
-  @ThemeAnimator<LinePlotView<X, Y>, Color | null, AnyColor | null>({
-    type: Color,
+  @ThemeAnimator<LinePlotView<X, Y>["stroke"]>({
+    valueType: Color,
     value: null,
     look: Look.accentColor,
     updateFlags: View.NeedsRender,
-    willSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.callObservers("viewWillSetPlotStroke", newStroke, oldStroke, this.owner);
-    },
-    didSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.callObservers("viewDidSetPlotStroke", newStroke, oldStroke, this.owner);
+    didSetValue(stroke: Color | null): void {
+      this.owner.callObservers("viewDidSetStroke", stroke, this.owner);
     },
   })
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator<LinePlotView<X, Y>, Length | null, AnyLength | null>({
-    type: Length,
+  @ThemeAnimator<LinePlotView<X, Y>["strokeWidth"]>({
+    valueType: Length,
     value: Length.px(1),
     updateFlags: View.NeedsRender,
-    willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("viewWillSetPlotStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
-    },
-    didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+    didSetValue(strokeWidth: Length | null): void {
       if (this.owner.xRangePadding.hasAffinity(Affinity.Intrinsic) || this.owner.yRangePadding.hasAffinity(Affinity.Intrinsic)) {
         const frame = this.owner.viewFrame;
         const size = Math.min(frame.width, frame.height);
@@ -65,16 +59,17 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
         this.owner.xRangePadding.setValue([strokeRadius, strokeRadius], Affinity.Intrinsic);
         this.owner.yRangePadding.setValue([strokeRadius, strokeRadius], Affinity.Intrinsic);
       }
-      this.owner.callObservers("viewDidSetPlotStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
+      this.owner.callObservers("viewDidSetStrokeWidth", strokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @Property({type: Number, value: 5})
+  @Property({valueType: Number, value: 5})
   readonly hitWidth!: Property<this, number>;
 
   protected renderPlot(context: CanvasContext, frame: R2Box): void {
     const size = Math.min(frame.width, frame.height);
+    const opacity = this.opacity.value;
     const stroke = this.stroke.getValueOr(Color.transparent());
     const strokeWidth = this.strokeWidth.getValueOr(Length.zero()).pxValue(size);
     const gradientStops = this.gradientStops;
@@ -122,14 +117,19 @@ export class LinePlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     }, this);
 
       // save
+    const contextGlobalAlpha = context.globalAlpha;
     const contextLineWidth = context.lineWidth;
     const contextStrokeStyle = context.strokeStyle;
 
+    if (opacity !== void 0) {
+      context.globalAlpha = opacity;
+    }
     context.lineWidth = strokeWidth;
     context.strokeStyle = gradient !== null ? gradient : stroke.toString();
     context.stroke();
 
     // restore
+    context.globalAlpha = contextGlobalAlpha;
     context.lineWidth = contextLineWidth;
     context.strokeStyle = contextStrokeStyle;
   }

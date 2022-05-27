@@ -13,15 +13,10 @@
 // limitations under the License.
 
 import type {MapViewObserver} from "@swim/map";
-import type {LeafletViewport} from "./LeafletViewport";
 import type {LeafletView} from "./LeafletView";
 
 /** @public */
 export interface LeafletViewObserver<V extends LeafletView = LeafletView> extends MapViewObserver<V> {
-  viewWillSetGeoViewport?(newGeoViewport: LeafletViewport, oldGeoViewport: LeafletViewport, view: V): void;
-
-  viewDidSetGeoViewport?(newGeoViewport: LeafletViewport, oldGeoViewport: LeafletViewport, view: V): void;
-
   viewWillMoveMap?(view: V): void;
 
   viewDidMoveMap?(view: V): void;

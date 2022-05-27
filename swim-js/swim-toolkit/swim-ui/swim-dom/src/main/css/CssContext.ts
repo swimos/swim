@@ -18,7 +18,7 @@ export interface CssContext {
   getRule(index: number): CSSRule | null;
 
   /** @internal */
-  insertRule(cssText: string, index?: number): number;
+  insertRule(css: string, index?: number): number;
 
   /** @internal */
   removeRule(index: number): void;

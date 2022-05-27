@@ -22,7 +22,7 @@ export const PresenceInterpolator = (function (_super: typeof Interpolator) {
       const p0 = interpolator[0];
       const p1 = interpolator[1];
       const phase = p0.phase + u * (p1.phase - p0.phase);
-      const direction = u !== 1 ? p0.direction : 0;
+      const direction = u !== 1 ? p0.direction : p1.direction;
       return Presence.create(phase, direction);
     } as Interpolator<Presence>;
     Object.setPrototypeOf(interpolator, PresenceInterpolator.prototype);

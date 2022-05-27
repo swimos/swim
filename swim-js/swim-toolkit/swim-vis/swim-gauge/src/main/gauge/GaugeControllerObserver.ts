@@ -47,13 +47,9 @@ export interface GaugeControllerObserver<C extends GaugeController = GaugeContro
 
   controllerDidDetachDialView?(dialView: DialView, dialController: DialController, controller: C): void;
 
-  controllerWillSetDialValue?(newValue: number, oldValue: number, dialController: DialController, controller: C): void;
+  controllerDidSetDialValue?(value: number, dialController: DialController, controller: C): void;
 
-  controllerDidSetDialValue?(newValue: number, oldValue: number, dialController: DialController, controller: C): void;
-
-  controllerWillSetDialLimit?(newLimit: number, oldLimit: number, dialController: DialController, controller: C): void;
-
-  controllerDidSetDialLimit?(newLimit: number, oldLimit: number, dialController: DialController, controller: C): void;
+  controllerDidSetDialLimit?(limit: number, dialController: DialController, controller: C): void;
 
   controllerWillAttachDialLabelView?(labelView: GraphicsView, dialController: DialController, controller: C): void;
 

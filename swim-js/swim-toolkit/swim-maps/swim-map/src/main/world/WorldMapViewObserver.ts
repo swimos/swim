@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {GeoViewport} from "../geo/GeoViewport";
 import type {MapViewObserver} from "../map/MapViewObserver";
-import type {WorldMapViewport} from "./WorldMapViewport";
 import type {WorldMapView} from "./WorldMapView";
 
 /** @public */
 export interface WorldMapViewObserver<V extends WorldMapView = WorldMapView> extends MapViewObserver<V> {
-  viewWillSetGeoViewport?(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport, view: V): void;
+  viewWillSetGeoViewport?(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, view: V): void;
 
-  viewDidSetGeoViewport?(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport, view: V): void;
+  viewDidSetGeoViewport?(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, view: V): void;
 }

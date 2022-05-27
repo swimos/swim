@@ -15,41 +15,35 @@
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
-import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
+import {AnyColorOrLook, ColorOrLook, ColorLook} from "@swim/theme";
+import type {GeoController} from "../geo/GeoController";
 import {GeoPathTrait} from "./GeoPathTrait";
 import type {GeoLineTraitObserver} from "./GeoLineTraitObserver";
+import {GeoLineController} from "./"; // forward import
 
 /** @public */
 export abstract class GeoLineTrait extends GeoPathTrait {
   override readonly observerType?: Class<GeoLineTraitObserver>;
 
-  @Property<GeoLineTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<GeoLineTrait["stroke"]>({
+    valueType: ColorLook,
     value: null,
-    willSetValue(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitWillSetStroke", newStroke, oldStroke, this.owner);
-    },
-    didSetValue(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitDidSetStroke", newStroke, oldStroke, this.owner);
-    },
-    fromAny(stroke: Look<Color> | AnyColor | null): Look<Color> | Color | null {
-      if (stroke !== null && !(stroke instanceof Look)) {
-        stroke = Color.fromAny(stroke);
-      }
-      return stroke;
+    didSetValue(stroke: ColorOrLook | null): void {
+      this.owner.callObservers("traitDidSetStroke", stroke, this.owner);
     },
   })
-  readonly stroke!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly stroke!: Property<this, ColorOrLook | null, AnyColorOrLook | null>;
 
-  @Property<GeoLineTrait, Length | null, AnyLength | null>({
-    type: Length,
+  @Property<GeoLineTrait["strokeWidth"]>({
+    valueType: Length,
     value: null,
-    willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("traitWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
-    },
-    didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("traitDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
+    didSetValue(strokeWidth: Length | null): void {
+      this.owner.callObservers("traitDidSetStrokeWidth", strokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: Property<this, Length | null, AnyLength | null>;
+
+  override createGeoController(): GeoController {
+    return new GeoLineController();
+  }
 }

@@ -18,7 +18,5 @@ import type {GeoRippleView} from "./GeoRippleView";
 
 /** @public */
 export interface GeoRippleViewObserver<V extends GeoRippleView = GeoRippleView> extends GeoViewObserver<V> {
-  viewWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
-
-  viewDidSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
+  viewDidSetGeoCenter?(geoCenter: GeoPoint | null, view: V): void;
 }

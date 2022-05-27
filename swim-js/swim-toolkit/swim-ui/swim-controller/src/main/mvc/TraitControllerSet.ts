@@ -12,92 +12,116 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, ObserverType} from "@swim/util";
+import type {Mutable, Proto, Consumer} from "@swim/util";
 import type {FastenerOwner} from "@swim/component";
-import type {Trait, TraitRef} from "@swim/model";
-import type {Controller} from "../controller/Controller";
-import {ControllerSetInit, ControllerSetClass, ControllerSet} from "../controller/ControllerSet";
-
-/** @internal */
-export type TraitControllerSetType<F extends TraitControllerSet<any, any, any>> =
-  F extends TraitControllerSet<any, any, infer C> ? C : never;
+import type {TraitFactory, Trait, TraitRef} from "@swim/model";
+import type {ControllerFactory, Controller} from "../controller/Controller";
+import {ControllerSetDescriptor, ControllerSetClass, ControllerSet} from "../controller/ControllerSet";
 
 /** @public */
-export interface TraitControllerSetInit<T extends Trait = Trait, C extends Controller = Controller> extends ControllerSetInit<C> {
-  extends?: {prototype: TraitControllerSet<any, any, any>} | string | boolean | null;
-  getTraitRef?(controller: C): TraitRef<any, T>;
-  willAttachControllerTrait?(controller: C, trait: T, targetTrait: Trait | null): void;
-  didAttachControllerTrait?(controller: C, trait: T, targetTrait: Trait | null): void;
-  willDetachControllerTrait?(controller: C, trait: T): void;
-  didDetachControllerTrait?(controller: C, trait: T): void;
-  createController?(trait?: T): C;
+export type TraitControllerSetTrait<F extends TraitControllerSet<any, any, any>> =
+  F extends {traitType?: TraitFactory<infer T>} ? T : never;
+
+/** @public */
+export type TraitControllerSetController<F extends TraitControllerSet<any, any, any>> =
+  F extends {controllerType?: ControllerFactory<infer C>} ? C : never;
+
+/** @public */
+export interface TraitControllerSetDescriptor<T extends Trait = Trait, C extends Controller = Controller> extends ControllerSetDescriptor<C> {
+  extends?: Proto<TraitControllerSet<any, any, any>> | string | boolean | null;
+  traitType?: TraitFactory<T>;
 }
 
 /** @public */
-export type TraitControllerSetDescriptor<O = unknown, T extends Trait = Trait, C extends Controller = Controller, I = {}> = ThisType<TraitControllerSet<O, T, C> & I> & TraitControllerSetInit<T, C> & Partial<I>;
+export type TraitControllerSetTemplate<F extends TraitControllerSet<any, any, any>> =
+  ThisType<F> &
+  TraitControllerSetDescriptor<TraitControllerSetTrait<F>, TraitControllerSetController<F>> &
+  Partial<Omit<F, keyof TraitControllerSetDescriptor>>;
 
 /** @public */
 export interface TraitControllerSetClass<F extends TraitControllerSet<any, any, any> = TraitControllerSet<any, any, any>> extends ControllerSetClass<F> {
-}
+  /** @override */
+  specialize(template: TraitControllerSetDescriptor<any>): TraitControllerSetClass<F>;
 
-/** @public */
-export interface TraitControllerSetFactory<F extends TraitControllerSet<any, any, any> = TraitControllerSet<any, any, any>> extends TraitControllerSetClass<F> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): TraitControllerSetFactory<F> & I;
+  /** @override */
+  refine(fastenerClass: TraitControllerSetClass<any>): void;
 
-  define<O, T extends Trait = Trait, C extends Controller = Controller>(className: string, descriptor: TraitControllerSetDescriptor<O, T, C>): TraitControllerSetFactory<TraitControllerSet<any, T, C>>;
-  define<O, T extends Trait = Trait, C extends Controller = Controller>(className: string, descriptor: {observes: boolean} & TraitControllerSetDescriptor<O, T, C, ObserverType<C>>): TraitControllerSetFactory<TraitControllerSet<any, T, C>>;
-  define<O, T extends Trait = Trait, C extends Controller = Controller, I = {}>(className: string, descriptor: {implements: unknown} & TraitControllerSetDescriptor<O, T, C, I>): TraitControllerSetFactory<TraitControllerSet<any, T, C> & I>;
-  define<O, T extends Trait = Trait, C extends Controller = Controller, I = {}>(className: string, descriptor: {implements: unknown; observes: boolean} & TraitControllerSetDescriptor<O, T, C, I & ObserverType<C>>): TraitControllerSetFactory<TraitControllerSet<any, T, C> & I>;
+  /** @override */
+  extend<F2 extends F>(className: string, template: TraitControllerSetTemplate<F2>): TraitControllerSetClass<F2>;
+  extend<F2 extends F>(className: string, template: TraitControllerSetTemplate<F2>): TraitControllerSetClass<F2>;
 
-  <O, T extends Trait = Trait, C extends Controller = Controller>(descriptor: TraitControllerSetDescriptor<O, T, C>): PropertyDecorator;
-  <O, T extends Trait = Trait, C extends Controller = Controller>(descriptor: {observes: boolean} & TraitControllerSetDescriptor<O, T, C, ObserverType<C>>): PropertyDecorator;
-  <O, T extends Trait = Trait, C extends Controller = Controller, I = {}>(descriptor: {implements: unknown} & TraitControllerSetDescriptor<O, T, C, I>): PropertyDecorator;
-  <O, T extends Trait = Trait, C extends Controller = Controller, I = {}>(descriptor: {implements: unknown; observes: boolean} & TraitControllerSetDescriptor<O, T, C, I & ObserverType<C>>): PropertyDecorator;
+  /** @override */
+  define<F2 extends F>(className: string, template: TraitControllerSetTemplate<F2>): TraitControllerSetClass<F2>;
+  define<F2 extends F>(className: string, template: TraitControllerSetTemplate<F2>): TraitControllerSetClass<F2>;
+
+  /** @override */
+  <F2 extends F>(template: TraitControllerSetTemplate<F2>): PropertyDecorator;
 }
 
 /** @public */
 export interface TraitControllerSet<O = unknown, T extends Trait = Trait, C extends Controller = Controller> extends ControllerSet<O, C> {
   /** @internal */
-  readonly traitControllers: {readonly [traitId: number]: C | undefined};
+  readonly traitControllers: {readonly [traitId: string]: C | undefined};
 
   /** @internal */
   getTraitRef(controller: C): TraitRef<unknown, T>;
 
-  hasTraitController(trait: Trait): boolean;
+  /** @internal */
+  readonly traitType?: TraitFactory<T>; // optional prototype property
 
-  addTraitController(trait: T, targetTrait?: Trait | null, key?: string): C;
+  hasTrait(trait: Trait): boolean;
 
-  removeTraitController(trait: T): C | null;
+  addTrait(trait: T, targetTrait?: Trait | null, key?: string): C;
 
-  deleteTraitController(trait: T): C | null;
+  addTraits(traits: {readonly [traitId: string]: T | undefined}, targetTrait?: Trait | null): void;
 
-  attachControllerTrait(controller: C, trait: T, targetTrait?: Trait | null): C;
-
-  /** @protected */
-  initControllerTrait(controller: C, trait: T): void;
+  attachTrait(trait: T, targetTrait?: Trait | null, controller?: C): C;
 
   /** @protected */
-  willAttachControllerTrait(controller: C, trait: T, targetTrait: Trait | null): void;
+  initTrait(trait: T, controller: C): void;
 
   /** @protected */
-  onAttachControllerTrait(controller: C, trait: T, targetTrait: Trait | null): void;
+  willAttachTrait(trait: T, targetTrait: Trait | null, controller: C): void;
 
   /** @protected */
-  didAttachControllerTrait(controller: C, trait: T, targetTrait: Trait | null): void;
-
-  detachControllerTrait(controller: C, trait: T): C | null;
+  onAttachTrait(trait: T, targetTrait: Trait | null, controller: C): void;
 
   /** @protected */
-  deinitControllerTrait(controller: C, trait: T): void;
+  didAttachTrait(trait: T, targetTrait: Trait | null, controller: C): void;
+
+  attachTraits(traits: {readonly [traitId: string]: T | undefined}, targetTrait?: Trait | null): void;
+
+  detachTrait(trait: T): C | null;
 
   /** @protected */
-  willDetachControllerTrait(controller: C, trait: T): void;
+  deinitTrait(trait: T, controller: C): void;
 
   /** @protected */
-  onDetachControllerTrait(controller: C, trait: T): void;
+  willDetachTrait(trait: T, controller: C): void;
 
   /** @protected */
-  didDetachControllerTrait(controller: C, trait: T): void;
+  onDetachTrait(trait: T, controller: C): void;
+
+  /** @protected */
+  didDetachTrait(trait: T, controller: C): void;
+
+  detachTraits(traits: {readonly [traitId: string]: T | undefined}): void;
+
+  removeTrait(trait: T): C | null;
+
+  removeTraits(traits: {readonly [traitId: string]: T | undefined}): void;
+
+  deleteTrait(trait: T): C | null;
+
+  deleteTraits(traits: {readonly [traitId: string]: T | undefined}): void;
+
+  reinsertTrait(trait: T, targetTrait?: T | null): void;
+
+  consumeTraits(consumer: Consumer): void;
+
+  unconsumeTraits(consumer: Consumer): void;
+
+  createTrait(): T;
 
   /** @protected @override */
   onAttachController(controller: C, targetController: Controller | null): void;
@@ -105,23 +129,24 @@ export interface TraitControllerSet<O = unknown, T extends Trait = Trait, C exte
   /** @protected @override */
   onDetachController(controller: C): void;
 
+  /** @override */
   createController(trait?: T): C;
 }
 
 /** @public */
 export const TraitControllerSet = (function (_super: typeof ControllerSet) {
-  const TraitControllerSet: TraitControllerSetFactory = _super.extend("TraitControllerSet");
+  const TraitControllerSet = _super.extend("TraitControllerSet", {}) as TraitControllerSetClass;
 
   TraitControllerSet.prototype.getTraitRef = function <T extends Trait, C extends Controller>(controller: C): TraitRef<unknown, T> {
     throw new Error("missing implementation");
   };
 
-  TraitControllerSet.prototype.hasTraitController = function (this: TraitControllerSet, trait: Trait): boolean {
+  TraitControllerSet.prototype.hasTrait = function (this: TraitControllerSet, trait: Trait): boolean {
     return this.traitControllers[trait.uid] !== void 0;
   };
 
-  TraitControllerSet.prototype.addTraitController = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, targetTrait?: Trait | null, key?: string): C {
-    const traitControllers = this.traitControllers as {[traitId: number]: C | undefined};
+  TraitControllerSet.prototype.addTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, targetTrait?: Trait | null, key?: string): C {
+    const traitControllers = this.traitControllers as {[traitId: string]: C | undefined};
     let controller = traitControllers[trait.uid];
     if (controller === void 0) {
       controller = this.createController(trait);
@@ -133,7 +158,96 @@ export const TraitControllerSet = (function (_super: typeof ControllerSet) {
     return controller;
   };
 
-  TraitControllerSet.prototype.removeTraitController = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T): C | null {
+  TraitControllerSet.prototype.addTraits = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, newTraits: {readonly [traitId: string]: T | undefined}, target?: Trait | null): void {
+    for (const traitId in newTraits) {
+      this.addTrait(newTraits[traitId]!, target);
+    }
+  };
+
+  TraitControllerSet.prototype.attachTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, targetTrait?: Trait | null, controller?: C): C {
+    const traitControllers = this.traitControllers as {[traitId: string]: C | undefined};
+    if (controller === void 0) {
+      controller = traitControllers[trait.uid];
+    }
+    if (controller === void 0) {
+      controller = this.createController();
+      const traitRef = this.getTraitRef(controller);
+      traitRef.setTrait(trait, targetTrait);
+      const targetController = targetTrait !== void 0 && targetTrait !== null ? traitControllers[targetTrait.uid] : void 0;
+      this.attachController(controller, targetController);
+    }
+    if (traitControllers[trait.uid] === void 0) {
+      if (targetTrait === void 0) {
+        targetTrait = null;
+      }
+      traitControllers[trait.uid] = controller;
+      this.willAttachTrait(trait, targetTrait, controller);
+      this.onAttachTrait(trait, targetTrait, controller);
+      this.initTrait(trait, controller);
+      this.didAttachTrait(trait, targetTrait, controller);
+    }
+    return controller;
+  };
+
+  TraitControllerSet.prototype.initTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, controller: C): void {
+    // hook
+  };
+
+  TraitControllerSet.prototype.willAttachTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, targetTrait: Trait | null, controller: C): void {
+    // hook
+  };
+
+  TraitControllerSet.prototype.onAttachTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, targetTrait: Trait | null, controller: C): void {
+    // hook
+  };
+
+  TraitControllerSet.prototype.didAttachTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, targetTrait: Trait | null, controller: C): void {
+    // hook
+  };
+
+  TraitControllerSet.prototype.attachTraits = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, newTraits: {readonly [traitId: string]: T | undefined}, target?: Trait | null): void {
+    for (const traitId in newTraits) {
+      this.attachTrait(newTraits[traitId]!, target);
+    }
+  };
+
+  TraitControllerSet.prototype.detachTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T): C | null {
+    const traitControllers = this.traitControllers as {[traitId: string]: C | undefined};
+    const controller = traitControllers[trait.uid];
+    if (controller !== void 0) {
+      delete traitControllers[trait.uid];
+      this.willDetachTrait(trait, controller);
+      this.onDetachTrait(trait, controller);
+      this.deinitTrait(trait, controller);
+      this.didDetachTrait(trait, controller);
+      return controller;
+    }
+    return null;
+  };
+
+  TraitControllerSet.prototype.deinitTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, controller: C): void {
+    // hook
+  };
+
+  TraitControllerSet.prototype.willDetachTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, controller: C): void {
+    // hook
+  };
+
+  TraitControllerSet.prototype.onDetachTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, controller: C): void {
+    // hook
+  };
+
+  TraitControllerSet.prototype.didDetachTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, controller: C): void {
+    // hook
+  };
+
+  TraitControllerSet.prototype.detachTraits = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, traits: {readonly [traitId: string]: T | undefined}): void {
+    for (const traitId in traits) {
+      this.detachTrait(traits[traitId]!);
+    }
+  };
+
+  TraitControllerSet.prototype.removeTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T): C | null {
     const controllers = this.controllers;
     for (const controllerId in controllers) {
       const controller = controllers[controllerId]!;
@@ -146,7 +260,13 @@ export const TraitControllerSet = (function (_super: typeof ControllerSet) {
     return null;
   };
 
-  TraitControllerSet.prototype.deleteTraitController = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T): C | null {
+  TraitControllerSet.prototype.removeTraits = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, traits: {readonly [traitId: string]: T | undefined}): void {
+    for (const traitId in traits) {
+      this.removeTrait(traits[traitId]!);
+    }
+  };
+
+  TraitControllerSet.prototype.deleteTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T): C | null {
     const controllers = this.controllers;
     for (const controllerId in controllers) {
       const controller = controllers[controllerId]!;
@@ -159,76 +279,64 @@ export const TraitControllerSet = (function (_super: typeof ControllerSet) {
     return null;
   };
 
-  TraitControllerSet.prototype.attachControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T, targetTrait?: Trait | null): C {
-    const traitControllers = this.traitControllers as {[traitId: number]: C | undefined};
-    let traitController = traitControllers[trait.uid];
-    if (traitController === void 0) {
-      traitController = controller;
-      if (targetTrait === void 0) {
-        targetTrait = null;
+  TraitControllerSet.prototype.deleteTraits = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, traits: {readonly [traitId: string]: T | undefined}): void {
+    for (const traitId in traits) {
+      this.deleteTrait(traits[traitId]!);
+    }
+  };
+
+  TraitControllerSet.prototype.reinsertTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, trait: T, targetTrait: T | null): void {
+    const controller = this.traitControllers[trait.uid];
+    if (controller !== void 0) {
+      const targetController = targetTrait !== null ? this.traitControllers[targetTrait.uid] : void 0;
+      this.reinsertController(controller, targetController !== void 0 ? targetController : null);
+    }
+  };
+
+  TraitControllerSet.prototype.consumeTraits = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, consumer: Consumer): void {
+    const controllers = this.controllers;
+    for (const controllerId in controllers) {
+      const controller = controllers[controllerId]!;
+      const trait = this.getTraitRef(controller).trait;
+      if (trait !== null) {
+        trait.consume(consumer);
       }
-      traitControllers[trait.uid] = traitController;
-      (this as Mutable<typeof this>).controllerCount += 1;
-      this.willAttachControllerTrait(traitController, trait, targetTrait);
-      this.onAttachControllerTrait(traitController, trait, targetTrait);
-      this.initControllerTrait(traitController, trait);
-      this.didAttachControllerTrait(traitController, trait, targetTrait);
     }
-    return traitController;
   };
 
-  TraitControllerSet.prototype.detachControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T): C | null {
-    const traitControllers = this.traitControllers as {[comtroltraitIdltraitIderId: number]: C | undefined};
-    const traitController = traitControllers[trait.uid];
-    if (traitController !== void 0) {
-      (this as Mutable<typeof this>).controllerCount -= 1;
-      delete traitControllers[trait.uid];
-      this.willDetachControllerTrait(traitController, trait);
-      this.onDetachControllerTrait(traitController, trait);
-      this.deinitControllerTrait(traitController, trait);
-      this.didDetachControllerTrait(traitController, trait);
-      return traitController;
+  TraitControllerSet.prototype.unconsumeTraits = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, consumer: Consumer): void {
+    const controllers = this.controllers;
+    for (const controllerId in controllers) {
+      const controller = controllers[controllerId]!;
+      const trait = this.getTraitRef(controller).trait;
+      if (trait !== null) {
+        trait.unconsume(consumer);
+      }
     }
-    return null;
   };
 
-  TraitControllerSet.prototype.initControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T): void {
-    // hook
-  };
-
-  TraitControllerSet.prototype.willAttachControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T, targetTrait: Trait | null): void {
-    // hook
-  };
-
-  TraitControllerSet.prototype.onAttachControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T, targetTrait: Trait | null): void {
-    // hook
-  };
-
-  TraitControllerSet.prototype.didAttachControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T, targetTrait: Trait | null): void {
-    // hook
-  };
-
-  TraitControllerSet.prototype.deinitControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T): void {
-    // hook
-  };
-
-  TraitControllerSet.prototype.willDetachControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T): void {
-    // hook
-  };
-
-  TraitControllerSet.prototype.onDetachControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T): void {
-    // hook
-  };
-
-  TraitControllerSet.prototype.didDetachControllerTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, trait: T): void {
-    // hook
+  TraitControllerSet.prototype.createTrait = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>): T {
+    let trait: T | undefined;
+    const traitType = this.traitType;
+    if (traitType !== void 0) {
+      trait = traitType.create();
+    }
+    if (trait === void 0 || trait === null) {
+      let message = "Unable to create ";
+      if (this.name.length !== 0) {
+        message += this.name + " ";
+      }
+      message += "trait";
+      throw new Error(message);
+    }
+    return trait;
   };
 
   TraitControllerSet.prototype.onAttachController = function <T extends Trait, C extends Controller>(this: TraitControllerSet<unknown, T, C>, controller: C, targetController: Controller | null): void {
     const trait = this.getTraitRef(controller).trait;
     if (trait !== null) {
       const targetTrait = targetController !== null && this.hasController(targetController) ? this.getTraitRef(targetController as C).trait : null;
-      this.attachControllerTrait(controller, trait, targetTrait);
+      this.attachTrait(trait, targetTrait, controller);
     }
     ControllerSet.prototype.onAttachController.call(this, controller, targetController);
   };
@@ -237,48 +345,14 @@ export const TraitControllerSet = (function (_super: typeof ControllerSet) {
     ControllerSet.prototype.onDetachController.call(this, controller);
     const trait = this.getTraitRef(controller).trait;
     if (trait !== null) {
-      this.detachControllerTrait(controller, trait);
+      this.detachTrait(trait);
     }
   };
 
-  TraitControllerSet.construct = function <F extends TraitControllerSet<any, any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
-    fastener = _super.construct(fastenerClass, fastener, owner) as F;
+  TraitControllerSet.construct = function <F extends TraitControllerSet<any, any, any>>(fastener: F | null, owner: FastenerOwner<F>): F {
+    fastener = _super.construct.call(this, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).traitControllers = {};
     return fastener;
-  };
-
-  TraitControllerSet.define = function <O, T extends Trait, C extends Controller>(className: string, descriptor: TraitControllerSetDescriptor<O, T, C>): TraitControllerSetFactory<TraitControllerSet<any, T, C>> {
-    let superClass = descriptor.extends as TraitControllerSetFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    const sorted = descriptor.sorted;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
-    delete descriptor.sorted;
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this;
-    }
-
-    const fastenerClass = superClass.extend(className, descriptor);
-
-    fastenerClass.construct = function (fastenerClass: {prototype: TraitControllerSet<any, any, any>}, fastener: TraitControllerSet<O, T, C> | null, owner: O): TraitControllerSet<O, T, C> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner);
-      if (affinity !== void 0) {
-        fastener.initAffinity(affinity);
-      }
-      if (inherits !== void 0) {
-        fastener.initInherits(inherits);
-      }
-      if (sorted !== void 0) {
-        fastener.initSorted(sorted);
-      }
-      return fastener;
-    };
-
-    return fastenerClass;
   };
 
   return TraitControllerSet;

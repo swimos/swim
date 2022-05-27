@@ -3,14 +3,14 @@
   <head>
     <title>Swim Mapbox Controller</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
-    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.css">
+    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.css">
   </head>
   <body swim-theme style="width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
     <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
     <script src="../swim-ui/dist/swim-ui.js"></script>
     <script src="../swim-maps/dist/swim-maps.js"></script>
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js"></script>
     <script>
 
 mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1Mnd6M3EifQ.qpRE7xC08AyZfxJ56LoN7w";
@@ -21,7 +21,7 @@ class ExampleMapboxController extends swim.MapController {
   createMapView(containerView) {
     const map = new mapboxgl.Map({
       container: containerView.node,
-      style: "mapbox://styles/mapbox/dark-v10",
+      //style: "mapbox://styles/mapbox/dark-v10",
       center: {lng: 0, lat: 0},
       zoom: 1,
     });

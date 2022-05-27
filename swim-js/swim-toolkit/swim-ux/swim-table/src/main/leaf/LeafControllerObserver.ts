@@ -69,7 +69,5 @@ export interface LeafControllerObserver<C extends LeafController = LeafControlle
 
   controllerDidDetachCellContentView?(cellContentView: HtmlView, cellController: CellController, controller: C): void;
 
-  controllerWillSetCellIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, cellController: CellController, controller: C): void;
-
-  controllerDidSetCellIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, cellController: CellController, controller: C): void;
+  controllerDidSetCellIcon?(cellIcon: Graphics | null, cellController: CellController, controller: C): void;
 }

@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {HtmlViewObserver} from "@swim/dom";
+import type {Length} from "@swim/math";
+import type {HtmlViewObserver, ModalViewObserver} from "@swim/dom";
 import type {DrawerPlacement, DrawerView} from "./DrawerView";
 
 /** @public */
-export interface DrawerViewObserver<V extends DrawerView = DrawerView> extends HtmlViewObserver<V> {
-  viewWillSetPlacement?(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement, view: V): void;
+export interface DrawerViewObserver<V extends DrawerView = DrawerView> extends HtmlViewObserver<V>, ModalViewObserver<V> {
+  viewDidSetPlacement?(placement: DrawerPlacement, view: V): void;
 
-  viewDidSetPlacement?(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement, view: V): void;
+  viewDidSetEffectiveWidth?(effectiveWidth: Length | null, view: V): void;
+
+  viewDidSetEffectiveHeight?(effectiveHeight: Length | null, view: V): void;
 
   viewWillPresent?(view: V): void;
 

@@ -156,12 +156,12 @@ const tickPadding = document.getElementById("tickPadding");
 const updateRate = document.getElementById("updateRate");
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").id("ui").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").id("ui").position("relative").touchAction("none").userSelect("none");
 
 const canvasView = containerView.appendChild(swim.CanvasView)
     .mouseEventsEnabled(true)
@@ -170,22 +170,18 @@ const canvasView = containerView.appendChild(swim.CanvasView)
     .touchAction("manipulation");
 
 // Append a new pie view to the canvas.
-const pieView = canvasView.appendChild(swim.PieView)
-    .font("14px sans-serif")
-    .title(swim.TextRunView.fromAny("Pie").font("16px sans-serif"));
+const pieView = canvasView.appendChild(swim.PieView).font("14px sans-serif");
+pieView.title.setText("Pie").font("16px sans-serif");
 
 // Create an array to hold our active slice views.
 const sliceViews = [];
 
 function createSlice() {
   // Create a new slice.
-  const sliceView = new swim.SliceView()
-      .value(0) // initialize to zero so the slice will tween in
-      .label("")
-      .legend("");
+  const sliceView = new swim.SliceView().value(0); // initialize to zero so the slice will tween in
+  sliceView.label.setText("").setHidden(true);
+  sliceView.legend.setText("").setHidden(true);
   sliceView.label.view.textColor.setLook(swim.Look.backgroundColor);
-  sliceView.label.view.setHidden(true);
-  sliceView.legend.view.setHidden(true);
   sliceView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
   sliceView.observe({
     viewWillLayout() {
@@ -198,12 +194,12 @@ function createSlice() {
     },
   });
   // Add mouse event handlers.
-  sliceView.on("pointerenter", function (event) {
-             sliceView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, 1]], true);
-           })
-           .on("pointerleave", function (event) {
-             sliceView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, void 0]], true);
-           });
+  sliceView.addEventListener("pointerenter", function (event) {
+    sliceView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, 1]], true);
+  });
+  sliceView.addEventListener("pointerleave", function (event) {
+    sliceView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, void 0]], true);
+  });
   // Return the initialized slice.
   return sliceView;
 }

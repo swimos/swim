@@ -12,16 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Equals, Values, Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
+import {
+  Mutable,
+  Class,
+  Equals,
+  Values,
+  Domain,
+  Range,
+  AnyTiming,
+  LinearRange,
+  ContinuousScale,
+  Observes,
+} from "@swim/util";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewSet} from "@swim/view";
+import {ViewFlags, View, ViewSet} from "@swim/view";
 import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
-import type {PlotViewInit, PlotViewDataPointExt, PlotView} from "./PlotView";
+import type {PlotViewInit, PlotView} from "./PlotView";
 import type {ScatterPlotViewObserver} from "./ScatterPlotViewObserver";
 
 /** @public */
@@ -43,44 +54,46 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
 
   override readonly observerType?: Class<ScatterPlotViewObserver<X, Y>>;
 
-  @ThemeAnimator({type: Font, value: null, inherits: true})
+  @ThemeAnimator<ScatterPlotView<X, Y>["opacity"]>({
+    valueType: Number,
+    updateFlags: View.NeedsRender,
+    didSetValue(opacity: number | undefined): void {
+      this.owner.callObservers("viewDidSetOpacity", opacity, this.owner);
+    },
+  })
+  readonly opacity!: ThemeAnimator<this, number | undefined>;
+
+  @ThemeAnimator({valueType: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @Animator<ScatterPlotView<X, Y>, ContinuousScale<X, number> | null>({
-    extends: ContinuousScaleAnimator,
-    type: ContinuousScale,
-    inherits: true,
+  /** @override */
+  @ContinuousScaleAnimator<ScatterPlotView<X, Y>["xScale"]>({
     value: null,
+    inherits: true,
     updateFlags: View.NeedsLayout,
-    willSetValue(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-      this.owner.callObservers("viewWillSetXScale", newXScale, oldXScale, this.owner);
-    },
-    didSetValue(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
+    didSetValue(xScale: ContinuousScale<X, number> | null): void {
       this.owner.updateXDataRange();
-      this.owner.callObservers("viewDidSetXScale", newXScale, oldXScale, this.owner);
+      this.owner.callObservers("viewDidSetXScale", xScale, this.owner);
     },
   })
   readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
-  @Animator<ScatterPlotView<X, Y>, ContinuousScale<Y, number> | null>({
-    extends: ContinuousScaleAnimator,
-    type: ContinuousScale,
-    inherits: true,
+  /** @override */
+  @ContinuousScaleAnimator<ScatterPlotView<X, Y>["yScale"]>({
     value: null,
+    inherits: true,
     updateFlags: View.NeedsLayout,
-    willSetValue(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-      this.owner.callObservers("viewWillSetYScale", newYScale, oldYScale, this.owner);
-    },
-    didSetValue(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
+    didSetValue(yScale: ContinuousScale<Y, number> | null): void {
       this.owner.updateYDataRange();
-      this.owner.callObservers("viewDidSetYScale", newYScale, oldYScale, this.owner);
+      this.owner.callObservers("viewDidSetYScale", yScale, this.owner);
     },
   })
   readonly yScale!: ContinuousScaleAnimator<this, Y, number>;
 
+  /** @override */
   xDomain(): Domain<X> | null;
   xDomain(xDomain: Domain<X> | string | null, timing?: AnyTiming | boolean): this;
   xDomain(xMin: X, xMax: X, timing?: AnyTiming | boolean): this;
@@ -95,6 +108,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
     }
   }
 
+  /** @override */
   yDomain(): Domain<Y> | null;
   yDomain(yDomain: Domain<Y> | string | null, timing?: AnyTiming | boolean): this;
   yDomain(yMin: Y, yMax: Y, timing: AnyTiming | boolean): this;
@@ -109,42 +123,41 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
     }
   }
 
+  /** @override */
   xRange(): Range<number> | null {
     const xScale = this.xScale.value;
     return xScale !== null ? xScale.range : null;
   }
 
+  /** @override */
   yRange(): Range<number> | null {
     const yScale = this.yScale.value;
     return yScale !== null ? yScale.range : null;
   }
 
-  @Property<ScatterPlotView<X, Y>, readonly [number, number]>({
+  /** @override */
+  @Property<ScatterPlotView<X, Y>["xRangePadding"]>({
     initValue(): readonly [number, number] {
       return [0, 0];
     },
-    willSetValue(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-      this.owner.callObservers("viewWillSetXRangePadding", newXRangePadding, oldXRangePadding, this.owner);
-    },
-    didSetValue(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-      this.owner.callObservers("viewDidSetXRangePadding", newXRangePadding, oldXRangePadding, this.owner);
+    didSetValue(xRangePadding: readonly [number, number]): void {
+      this.owner.callObservers("viewDidSetXRangePadding", xRangePadding, this.owner);
     },
   })
   readonly xRangePadding!: Property<this, readonly [number, number]>
 
-  @Property<ScatterPlotView<X, Y>, readonly [number, number]>({
+  /** @override */
+  @Property<ScatterPlotView<X, Y>["yRangePadding"]>({
     initValue(): readonly [number, number] {
       return [0, 0];
     },
-    willSetValue(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-      this.owner.callObservers("viewWillSetYRangePadding", newYRangePadding, oldYRangePadding, this.owner);
-    },
-    didSetValue(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-      this.owner.callObservers("viewDidSetYRangePadding", newYRangePadding, oldYRangePadding, this.owner);
+    didSetValue(yRangePadding: readonly [number, number]): void {
+      this.owner.callObservers("viewDidSetYRangePadding", yRangePadding, this.owner);
     },
   })
   readonly yRangePadding!: Property<this, readonly [number, number]>
 
+  /** @override */
   readonly xDataDomain: Domain<X> | null;
 
   protected setXDataDomain(newXDataDomain: Domain<X> | null): void {
@@ -158,7 +171,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
   }
 
   protected willSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    this.callObservers("viewWillSetXDataDomain", newXDataDomain, oldXDataDomain, this);
+    // hook
   }
 
   protected onSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
@@ -167,24 +180,25 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
   }
 
   protected didSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    this.callObservers("viewDidSetXDataDomain", newXDataDomain, oldXDataDomain, this);
+    this.callObservers("viewDidSetXDataDomain", newXDataDomain, this);
   }
 
   protected updateXDataDomain(dataPointView: DataPointView<X, Y>): void {
     const x: X = dataPointView.x.getValue();
     let xDataDomain = this.xDataDomain;
     if (xDataDomain === null) {
-      xDataDomain = Domain(x, x);
+      xDataDomain = this.xScale.createDomain(x, x);
     } else {
       if (Values.compare(x, xDataDomain[0]) < 0) {
-        xDataDomain = Domain(x, xDataDomain[1]);
+        xDataDomain = this.xScale.createDomain(x, xDataDomain[1]);
       } else if (Values.compare(xDataDomain[1], x) < 0) {
-        xDataDomain = Domain(xDataDomain[0], x);
+        xDataDomain = this.xScale.createDomain(xDataDomain[0], x);
       }
     }
     this.setXDataDomain(xDataDomain);
   }
 
+  /** @override */
   readonly yDataDomain: Domain<Y> | null;
 
   protected setYDataDomain(newYDataDomain: Domain<Y> | null): void {
@@ -198,7 +212,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
   }
 
   protected willSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    this.callObservers("viewWillSetYDataDomain", newYDataDomain, oldYDataDomain, this);
+    // hook
   }
 
   protected onSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
@@ -207,32 +221,33 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
   }
 
   protected didSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    this.callObservers("viewDidSetYDataDomain", newYDataDomain, oldYDataDomain, this);
+    this.callObservers("viewDidSetYDataDomain", newYDataDomain, this);
   }
 
   protected updateYDataDomain(dataPointView: DataPointView<X, Y>): void {
-    const y = dataPointView.y.value;
+    const y = dataPointView.y.value as Y;
     const y2 = dataPointView.y2.value;
     let yDataDomain = this.yDataDomain;
     if (yDataDomain === null) {
-      yDataDomain = Domain(y, y);
+      yDataDomain = this.yScale.createDomain(y, y);
     } else {
       if (Values.compare(y, yDataDomain[0]) < 0) {
-        yDataDomain = Domain(y, yDataDomain[1]);
+        yDataDomain = this.yScale.createDomain(y, yDataDomain[1]);
       } else if (Values.compare(yDataDomain[1], y) < 0) {
-        yDataDomain = Domain(yDataDomain[0], y);
+        yDataDomain = this.yScale.createDomain(yDataDomain[0], y);
       }
       if (y2 !== void 0) {
         if (Values.compare(y2, yDataDomain[0]) < 0) {
-          yDataDomain = Domain(y2, yDataDomain[1]);
+          yDataDomain = this.yScale.createDomain(y2, yDataDomain[1]);
         } else if (Values.compare(yDataDomain[1], y2) < 0) {
-          yDataDomain = Domain(yDataDomain[0], y2);
+          yDataDomain = this.yScale.createDomain(yDataDomain[0], y2);
         }
       }
     }
     this.setYDataDomain(yDataDomain);
   }
 
+  /** @override */
   readonly xDataRange: Range<number> | null;
 
   protected setXDataRange(xDataRange: Range<number> | null): void {
@@ -251,6 +266,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
     }
   }
 
+  /** @override */
   readonly yDataRange: Range<number> | null;
 
   protected setYDataRange(yDataRange: Range<number> | null): void {
@@ -269,15 +285,14 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
     }
   }
 
-  @ViewSet<ScatterPlotView, DataPointView, PlotViewDataPointExt>({
-    implements: true,
-    type: DataPointView,
+  @ViewSet<ScatterPlotView<X, Y>["dataPoints"]>({
+    viewType: DataPointView,
     binds: true,
     observes: true,
-    willAttachView(newDataPointView: DataPointView, targetView: View | null): void {
+    willAttachView(newDataPointView: DataPointView<X, Y>, targetView: View | null): void {
       this.owner.callObservers("viewWillAttachDataPoint", newDataPointView, targetView, this.owner);
     },
-    didAttachView(dataPointView: DataPointView): void {
+    didAttachView(dataPointView: DataPointView<X, Y>): void {
       this.owner.updateXDataDomain(dataPointView);
       this.owner.updateYDataDomain(dataPointView);
       const labelView = dataPointView.label.view;
@@ -285,32 +300,32 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
         this.attachDataPointLabelView(labelView);
       }
     },
-    willDetachView(dataPointView: DataPointView): void {
+    willDetachView(dataPointView: DataPointView<X, Y>): void {
       const labelView = dataPointView.label.view;
       if (labelView !== null) {
         this.detachDataPointLabelView(labelView);
       }
       // xDataDomain and yDataDomain will be recomputed next layout pass
     },
-    didDetachView(newDataPointView: DataPointView): void {
+    didDetachView(newDataPointView: DataPointView<X, Y>): void {
       this.owner.callObservers("viewDidDetachDataPoint", newDataPointView, this.owner);
     },
-    viewDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView): void {
+    viewDidSetX(x: X | undefined, dataPointView: DataPointView<X, Y>): void {
       this.owner.updateXDataDomain(dataPointView);
       this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView): void {
+    viewDidSetY(y: Y | undefined, dataPointView: DataPointView<X, Y>): void {
       this.owner.updateYDataDomain(dataPointView);
       this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView): void {
+    viewDidSetY2(y2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
       this.owner.updateYDataDomain(dataPointView);
       this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewWillAttachDataPointLabel(labelView: GraphicsView): void {
+    viewWillAttachLabel(labelView: GraphicsView): void {
       this.attachDataPointLabelView(labelView);
     },
-    viewDidDetachDataPointLabel(labelView: GraphicsView): void {
+    viewDidDetachLabel(labelView: GraphicsView): void {
       this.detachDataPointLabelView(labelView);
     },
     attachDataPointLabelView(labelView: GraphicsView): void {
@@ -320,13 +335,17 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
       // hook
     },
   })
-  readonly dataPoints!: ViewSet<this, DataPointView<X, Y>>;
-  static readonly dataPoints: MemberFastenerClass<ScatterPlotView, "dataPoints">;
+  readonly dataPoints!: ViewSet<this, DataPointView<X, Y>> & Observes<DataPointView<X, Y>> & {
+    attachDataPointLabelView(labelView: GraphicsView): void,
+    detachDataPointLabelView(labelView: GraphicsView): void,
+  };
+  static readonly dataPoints: FastenerClass<ScatterPlotView["dataPoints"]>;
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-    this.xScale.recohere(viewContext.updateTime);
-    this.yScale.recohere(viewContext.updateTime);
+  protected override onLayout(): void {
+    super.onLayout();
+    const updateTime = this.updateTime;
+    this.xScale.recohere(updateTime);
+    this.yScale.recohere(updateTime);
     this.resizeScales(this.viewFrame);
   }
 
@@ -334,35 +353,30 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
    * Updates own scale ranges to project onto view frame.
    */
   protected resizeScales(frame: R2Box): void {
-    const xScale = !this.xScale.inherited ? this.xScale.value : null;
+    const xScale = !this.xScale.derived ? this.xScale.value : null;
     if (xScale !== null && xScale.range[1] !== frame.width) {
       this.xScale.setRange(0, frame.width);
     }
-    const yScale = !this.yScale.inherited ? this.yScale.value : null;
+    const yScale = !this.yScale.derived ? this.yScale.value : null;
     if (yScale !== null && yScale.range[1] !== frame.height) {
       this.yScale.setRange(0, frame.height);
     }
   }
 
-  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     displayChild: (this: this, childView: View, displayFlags: ViewFlags,
-                                                    viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, displayChild: (this: this, childView: View, displayFlags: ViewFlags) => void): void {
     let xScale: ContinuousScale<X, number> | null;
     let yScale: ContinuousScale<Y, number> | null;
     if ((displayFlags & View.NeedsLayout) !== 0 &&
         (xScale = this.xScale.value, xScale !== null) &&
         (yScale = this.yScale.value, yScale !== null)) {
-      this.layoutChildViews(xScale, yScale, displayFlags, viewContext, displayChild);
+      this.layoutChildren(xScale, yScale, displayFlags, displayChild);
     } else {
-      super.displayChildren(displayFlags, viewContext, displayChild);
+      super.displayChildren(displayFlags, displayChild);
     }
   }
 
-  protected layoutChildViews(xScale: ContinuousScale<X, number>,
-                             yScale: ContinuousScale<Y, number>,
-                             displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChild: (this: this, childView: View, displayFlags: ViewFlags,
-                                            viewContext: ViewContextType<this>) => void): void {
+  protected layoutChildren(xScale: ContinuousScale<X, number>, yScale: ContinuousScale<Y, number>,
+                           displayFlags: ViewFlags, displayChild: (this: this, childView: View, displayFlags: ViewFlags) => void): void {
     // Recompute extrema when laying out child views.
     const frame = this.viewFrame;
     const size = Math.min(frame.width, frame.height);
@@ -377,8 +391,7 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
 
     let point0 = null as DataPointView<X, Y> | null;
     type self = this;
-    function layoutChildView(this: self, point1: View, displayFlags: ViewFlags,
-                             viewContext: ViewContextType<self>): void {
+    function layoutChild(this: self, point1: View, displayFlags: ViewFlags): void {
       if (point1 instanceof DataPointView) {
         const x1 = point1.x.getValue();
         const y1 = point1.y.getValue();
@@ -425,22 +438,22 @@ export abstract class ScatterPlotView<X = unknown, Y = unknown> extends Graphics
         point0 = point1;
       }
 
-      displayChild.call(this, point1, displayFlags, viewContext);
+      displayChild.call(this, point1, displayFlags);
     }
-    super.displayChildren(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, layoutChild);
 
-    this.setXDataDomain(point0 !== null ? Domain<X>(xDataDomainMin!, xDataDomainMax!) : null);
-    this.setYDataDomain(point0 !== null ? Domain<Y>(yDataDomainMin!, yDataDomainMax!) : null);
+    this.setXDataDomain(point0 !== null ? this.xScale.createDomain(xDataDomainMin!, xDataDomainMax!) : null);
+    this.setYDataDomain(point0 !== null ? this.yScale.createDomain(yDataDomainMin!, yDataDomainMax!) : null);
     this.xRangePadding.setValue([xRangePaddingMin, xRangePaddingMax], Affinity.Intrinsic);
     this.yRangePadding.setValue([yRangePaddingMin, yRangePaddingMax], Affinity.Intrinsic);
   }
 
-  protected override didRender(viewContext: ViewContextType<this>): void {
-    const renderer = viewContext.renderer;
+  protected override didRender(): void {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer && !this.hidden && !this.culled) {
       this.renderPlot(renderer.context, this.viewFrame);
     }
-    super.didRender(viewContext);
+    super.didRender();
   }
 
   protected abstract renderPlot(context: CanvasContext, frame: R2Box): void;

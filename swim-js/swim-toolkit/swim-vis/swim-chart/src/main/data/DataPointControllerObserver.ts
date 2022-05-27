@@ -30,29 +30,17 @@ export interface DataPointControllerObserver<X = unknown, Y = unknown, C extends
 
   controllerDidDetachDataPointView?(dataPointView: DataPointView<X, Y> , controller: C): void;
 
-  controllerWillSetDataPointX?(newX: X | undefined, oldX: X | undefined, controller: C): void;
+  controllerDidSetDataPointX?(x: X | undefined, controller: C): void;
 
-  controllerDidSetDataPointX?(newX: X | undefined, oldX: X | undefined, controller: C): void;
+  controllerDidSetDataPointY?(y: Y | undefined, controller: C): void;
 
-  controllerWillSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, controller: C): void;
+  controllerDidSetDataPointY2?(y2: Y | undefined, controller: C): void;
 
-  controllerDidSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, controller: C): void;
+  controllerDidSetDataPointRadius?(radius: Length | null, controller: C): void;
 
-  controllerWillSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, controller: C): void;
+  controllerDidSetDataPointColor?(color: Color | null, controller: C): void;
 
-  controllerDidSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, controller: C): void;
-
-  controllerWillSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, controller: C): void;
-
-  controllerDidSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, controller: C): void;
-
-  controllerWillSetDataPointColor?(newColor: Color | null, oldColor: Color | null, controller: C): void;
-
-  controllerDidSetDataPointColor?(newColor: Color | null, oldColor: Color | null, controller: C): void;
-
-  controllerWillSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, controller: C): void;
-
-  controllerDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, controller: C): void;
+  controllerDidSetDataPointOpacity?(opacity: number | undefined, controller: C): void;
 
   controllerWillAttachDataPointLabelView?(labelView: GraphicsView, controller: C): void;
 

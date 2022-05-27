@@ -48,7 +48,7 @@ export interface MapControllerObserver<C extends MapController = MapController> 
 
   controllerWillAttachLayer?(layerController: GeoController, controller: C): void;
 
-  controllerDidDetachLayer(layerController: GeoController, controller: C): void;
+  controllerDidDetachLayer?(layerController: GeoController, controller: C): void;
 
   controllerWillAttachLayerTrait?(layerTrait: GeoTrait, layerController: GeoController, controller: C): void;
 

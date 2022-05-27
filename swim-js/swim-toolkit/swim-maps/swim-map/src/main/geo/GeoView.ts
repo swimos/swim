@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
+import {Property} from "@swim/component";
 import {GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {ViewFlags, View} from "@swim/view";
 import {GraphicsViewInit, GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
-import type {GeoViewport} from "./GeoViewport";
-import type {GeoViewContext} from "./GeoViewContext";
+import {GeoViewport} from "./GeoViewport";
 import type {GeoViewObserver} from "./GeoViewObserver";
 
 /** @public */
@@ -35,9 +35,7 @@ export class GeoView extends GraphicsView {
 
   override readonly observerType?: Class<GeoViewObserver>;
 
-  override readonly contextType?: Class<GeoViewContext>;
-
-  @ThemeAnimator({type: Color, value: null, inherits: true})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true})
   readonly geoBoundsColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected override didInsertChild(child: View, target: View | null): void {
@@ -54,18 +52,25 @@ export class GeoView extends GraphicsView {
     super.didRemoveChild(child);
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const outlineColor = this.geoBoundsColor.value;
-    if (outlineColor !== null) {
-      this.renderGeoBounds(viewContext, outlineColor, 1);
+  protected override willProcess(processFlags: ViewFlags): void {
+    super.willProcess(processFlags);
+    if ((processFlags & (View.NeedsChange | View.NeedsProject)) !== 0) {
+      this.geoViewport.recohere(this.updateTime);
     }
   }
 
-  protected renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const outlineColor = this.geoBoundsColor.value;
+    if (outlineColor !== null) {
+      this.renderGeoBounds(outlineColor, 1);
+    }
+  }
+
+  protected renderGeoBounds(outlineColor: Color, outlineWidth: number): void {
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled && !this.unbounded) {
-      this.renderGeoOutline(this.geoBounds, viewContext.geoViewport, renderer.context, outlineColor, outlineWidth);
+      this.renderGeoOutline(this.geoBounds, this.geoViewport.value, renderer.context, outlineColor, outlineWidth);
     }
   }
 
@@ -123,9 +128,11 @@ export class GeoView extends GraphicsView {
     this.setCulled(!geoFrame.intersects(this.geoBounds));
   }
 
-  get geoViewport(): GeoViewport {
-    return this.viewContext.geoViewport;
-  }
+  @Property<GeoView["geoViewport"]>({
+    valueType: GeoViewport,
+    inherits: true,
+  })
+  readonly geoViewport!: Property<this, GeoViewport>;
 
   /**
    * The map-specified geo-coordinate bounding box in which this view should layout

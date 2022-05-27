@@ -26,11 +26,7 @@ export {DisclosureCellView} from "./DisclosureCellView";
 export {CellTrait} from "./CellTrait";
 export {CellTraitObserver} from "./CellTraitObserver";
 
-export {
-  TextCellContent,
-  TextCellContentFunction,
-  TextCellTrait,
-} from "./TextCellTrait";
+export {TextCellTrait} from "./TextCellTrait";
 export {TextCellTraitObserver} from "./TextCellTraitObserver";
 
 export {IconCellTrait} from "./IconCellTrait";

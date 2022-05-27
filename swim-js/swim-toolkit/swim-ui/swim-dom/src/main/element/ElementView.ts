@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Instance, Arrays, Creatable, ObserverType} from "@swim/util";
-import {Affinity} from "@swim/component";
+import {Class, Instance, Arrays, Creatable, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Provider} from "@swim/component";
 import {R2Box} from "@swim/math";
 import {ThemeMatrix, Theme} from "@swim/theme";
 import {ToAttributeString, ToStyleString, ToCssValue} from "@swim/style";
-import {View, Viewport} from "@swim/view";
+import {View, ViewportColorScheme, ViewportService, StylerService} from "@swim/view";
 import type {StyleContext} from "../css/StyleContext";
 import {
   ViewNodeType,
@@ -36,9 +36,11 @@ import type {
   ViewWillSetStyle,
   ViewDidSetStyle,
 } from "./ElementViewObserver";
-import {DomService} from "../"; // forward import
 import {HtmlView} from "../"; // forward import
 import {SvgView} from "../"; // forward import
+import {DomService} from "../"; // forward import
+import {ModalOptions, ModalView} from "../"; // forward import
+import {ModalService} from "../"; // forward import
 
 /** @public */
 export interface ViewElement extends Element, ElementCSSInlineStyle {
@@ -73,20 +75,91 @@ export interface ElementViewConstructor<V extends ElementView = ElementView, U =
 export class ElementView extends NodeView implements StyleContext {
   constructor(node: Element) {
     super(node);
-    this.initElement(node);
   }
 
   override readonly observerType?: Class<ElementViewObserver>;
 
   override readonly node!: Element & ElementCSSInlineStyle;
 
-  protected initElement(node: Element): void {
-    const themeName = node.getAttribute("swim-theme");
-    if (themeName !== null && themeName !== "") {
+  @Provider<ElementView["viewport"]>({
+    extends: true,
+    observes: true,
+    serviceDidSetViewportColorScheme(colorScheme: ViewportColorScheme): void {
+      this.owner.detectTheme();
+    },
+  })
+  override readonly viewport!: Provider<this, ViewportService> & NodeView["viewport"] & Observes<ViewportService>;
+  static override readonly viewport: FastenerClass<ElementView["viewport"]>;
+
+  @Provider<ElementView["styler"]>({
+    extends: true,
+    lazy: false,
+  })
+  override readonly styler!: Provider<this, StylerService> & NodeView["styler"];
+  static override readonly styler: FastenerClass<ElementView["styler"]>;
+
+  @Provider<ElementView["dom"]>({
+    get serviceType(): typeof DomService { // avoid static forward reference
+      return DomService;
+    },
+    mountRootService(service: DomService,): void {
+      Provider.prototype.mountRootService.call(this, service);
+      service.roots.addView(this.owner);
+    },
+    unmountRootService(service: DomService): void {
+      Provider.prototype.unmountService.call(this, service);
+      service.roots.removeView(this.owner);
+    },
+  })
+  readonly dom!: Provider<this, DomService>;
+  static readonly dom: FastenerClass<ElementView["dom"]>;
+
+  @Provider<ElementView["modal"]>({
+    get serviceType(): typeof ModalService { // avoid static forward reference
+      return ModalService;
+    },
+    present(modalView?: ModalView, options?: ModalOptions): void {
+      if (modalView === void 0 && ModalView.is(this.owner)) {
+        modalView = this.owner;
+      }
+      if (modalView !== void 0) {
+        this.getService().presentModal(modalView, options);
+      }
+    },
+    dismiss(modalView?: ModalView): void {
+      if (modalView === void 0 && ModalView.is(this.owner)) {
+        modalView = this.owner;
+      }
+      if (modalView !== void 0) {
+        this.getService().dismissModal(modalView);
+      }
+    },
+    toggle(modalView?: ModalView, options?: ModalOptions): void {
+      if (modalView === void 0 && ModalView.is(this.owner)) {
+        modalView = this.owner;
+      }
+      if (modalView !== void 0) {
+        this.getService().toggleModal(modalView, options);
+      }
+    },
+  })
+  readonly modal!: Provider<this, ModalService> & {
+    present(modalView?: ModalView, options?: ModalOptions): void,
+    dismiss(modalView?: ModalView): void,
+    toggle(modalView?: ModalView): void,
+  };
+  static readonly modal: FastenerClass<ElementView["modal"]>;
+
+  protected detectTheme(): void {
+    let themeName = this.node.getAttribute("swim-theme");
+    if (themeName === "") {
+      themeName = "auto";
+    }
+    if (themeName !== null) {
       let theme: ThemeMatrix | undefined;
       if (themeName === "auto") {
-        const viewport = Viewport.detect();
-        const colorScheme = viewport.colorScheme;
+        const viewportService = this.viewport.getService();
+        const colorScheme = viewportService.colorScheme.value;
         if (colorScheme === "dark") {
           theme = Theme.dark;
         } else {
@@ -101,22 +174,6 @@ export class ElementView extends NodeView implements StyleContext {
         this.theme.setValue(theme, Affinity.Extrinsic);
       } else {
         throw new TypeError("unknown swim-theme: " + themeName);
-      }
-    }
-  }
-
-  /** @internal */
-  protected override mountTheme(): void {
-    super.mountTheme();
-    if (NodeView.isRootView(this.node)) {
-      const themeService = this.themeProvider.service;
-      if (themeService !== void 0 && themeService !== null) {
-        if (this.mood.hasAffinity(Affinity.Intrinsic) && this.mood.value === null) {
-          this.mood.setValue(themeService.mood, Affinity.Intrinsic);
-        }
-        if (this.theme.hasAffinity(Affinity.Intrinsic) && this.theme.value === null) {
-          this.theme.setValue(themeService.theme, Affinity.Intrinsic);
-        }
       }
     }
   }
@@ -321,26 +378,22 @@ export class ElementView extends NodeView implements StyleContext {
                      bounds.right + scrollX, bounds.bottom + scrollY);
   }
 
-  override on<K extends keyof ElementEventMap>(type: K, listener: (this: Element, event: ElementEventMap[K]) => unknown,
-                                               options?: AddEventListenerOptions | boolean): this;
-  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
-  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
+  override addEventListener<K extends keyof ElementEventMap>(type: K, listener: (this: Element, event: ElementEventMap[K]) => unknown, options?: AddEventListenerOptions | boolean): void;
+  override addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void;
+  override addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void {
     this.node.addEventListener(type, listener, options);
-    return this;
   }
 
-  override off<K extends keyof ElementEventMap>(type: K, listener: (this: Element, event: ElementEventMap[K]) => unknown,
-                                                options?: EventListenerOptions | boolean): this;
-  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
-  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
+  override removeEventListener<K extends keyof ElementEventMap>(type: K, listener: (this: Element, event: ElementEventMap[K]) => unknown, options?: EventListenerOptions | boolean): void;
+  override removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void;
+  override removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void {
     this.node.removeEventListener(type, listener, options);
-    return this;
   }
 
   /** @internal */
   override readonly observerCache!: ElementViewObserverCache<this>;
 
-  protected override onObserve(observer: ObserverType<this>): void {
+  protected override onObserve(observer: Observes<this>): void {
     super.onObserve(observer);
     if (observer.viewWillSetAttribute !== void 0) {
       this.observerCache.viewWillSetAttributeObservers = Arrays.inserted(observer as ViewWillSetAttribute, this.observerCache.viewWillSetAttributeObservers);
@@ -356,7 +409,7 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  protected override onUnobserve(observer: ObserverType<this>): void {
+  protected override onUnobserve(observer: Observes<this>): void {
     super.onUnobserve(observer);
     if (observer.viewWillSetAttribute !== void 0) {
       this.observerCache.viewWillSetAttributeObservers = Arrays.removed(observer as ViewWillSetAttribute, this.observerCache.viewWillSetAttributeObservers);
@@ -369,6 +422,21 @@ export class ElementView extends NodeView implements StyleContext {
     }
     if (observer.viewDidSetStyle !== void 0) {
       this.observerCache.viewDidSetStyleObservers = Arrays.removed(observer as ViewDidSetStyle, this.observerCache.viewDidSetStyleObservers);
+    }
+  }
+
+  protected override onMount(): void {
+    super.onMount();
+    if (this.node.hasAttribute("swim-theme")) {
+      this.detectTheme();
+      this.viewport.getService().observe(this.viewport);
+    }
+  }
+
+  protected override onUnmount(): void {
+    super.onUnmount();
+    if (this.node.hasAttribute("swim-theme")) {
+      this.viewport.getService().unobserve(this.viewport);
     }
   }
 

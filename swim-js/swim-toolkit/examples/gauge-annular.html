@@ -12,12 +12,12 @@
     <script>
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").position("relative").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .mouseEventsEnabled(true)
@@ -25,9 +25,8 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const gaugeView = canvasView.appendChild(swim.GaugeView)
-    .font("14px sans-serif")
-    .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"));
+const gaugeView = canvasView.appendChild(swim.GaugeView).font("14px sans-serif");
+gaugeView.title.setText("Gauge").font("20px sans-serif");
 
 const dial0View = gaugeView.appendChild(swim.DialView, "dial0")
     .arrangement("manual")
@@ -47,14 +46,14 @@ const ringView = gaugeView.appendChild(swim.DialView, "ring")
     .arrangement("manual")
     .innerRadius(swim.Length.pct(30))
     .outerRadius(swim.Length.pct(40))
-    .dialColor(swim.Color.transparent())
-    .legend("Legend")
-    .on("pointerenter", function (event) {
-      ringView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
-    })
-    .on("pointerleave", function (event) {
-      ringView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
-    });
+    .dialColor(swim.Color.transparent());
+ringView.addEventListener("pointerenter", function (event) {
+  ringView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+});
+ringView.addEventListener("pointerleave", function (event) {
+  ringView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+});
+ringView.legend.setText("Legend");
 
 setInterval(function () {
   const timing = swim.Easing.linear.withDuration(1000);

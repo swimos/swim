@@ -14,15 +14,13 @@
 
 import type {Trait, TraitObserver} from "@swim/model";
 import type {SliceTrait} from "../slice/SliceTrait";
-import type {PieTitle, PieTrait} from "./PieTrait";
+import type {PieTrait} from "./PieTrait";
 
 /** @public */
-export interface PieTraitObserver<R extends PieTrait = PieTrait> extends TraitObserver<R> {
-  traitWillSetPieTitle?(newTitle: PieTitle | null, oldTitle: PieTitle | null, trait: R): void;
+export interface PieTraitObserver<T extends PieTrait = PieTrait> extends TraitObserver<T> {
+  traitDidSetTitle?(title: string | undefined, trait: T): void;
 
-  traitDidSetPieTitle?(newTitle: PieTitle | null, oldTitle: PieTitle | null, trait: R): void;
+  traitWillAttachSlice?(sliceTrait: SliceTrait, targetTrait: Trait | null, trait: T): void;
 
-  traitWillAttachSlice?(sliceTrait: SliceTrait, targetTrait: Trait | null, trait: R): void;
-
-  traitDidDetachSlice?(sliceTrait: SliceTrait, trait: R): void;
+  traitDidDetachSlice?(sliceTrait: SliceTrait, trait: T): void;
 }

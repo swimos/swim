@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {ComponentObserver} from "@swim/component";
-import type {ControllerContextType, Controller} from "./Controller";
+import type {Controller} from "./Controller";
 
 /** @public */
 export interface ControllerObserver<C extends Controller = Controller> extends ComponentObserver<C> {
@@ -33,6 +33,10 @@ export interface ControllerObserver<C extends Controller = Controller> extends C
 
   controllerDidRemoveChild?(child: Controller, controller: C): void;
 
+  controllerWillReinsertChild?(child: Controller, target: Controller | null, controller: C): void;
+
+  controllerDidReinsertChild?(child: Controller, target: Controller | null, controller: C): void;
+
   controllerWillMount?(controller: Controller): void;
 
   controllerDidMount?(controller: Controller): void;
@@ -41,23 +45,31 @@ export interface ControllerObserver<C extends Controller = Controller> extends C
 
   controllerDidUnmount?(controller: Controller): void;
 
-  controllerWillResolve?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerWillResolve?(controller: C): void;
 
-  controllerDidResolve?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerDidResolve?(controller: C): void;
 
-  controllerWillGenerate?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerWillGenerate?(controller: C): void;
 
-  controllerDidGenerate?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerDidGenerate?(controller: C): void;
 
-  controllerWillAssemble?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerWillAssemble?(controller: C): void;
 
-  controllerDidAssemble?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerDidAssemble?(controller: C): void;
 
-  controllerWillRevise?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerWillRevise?(controller: C): void;
 
-  controllerDidRevise?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerDidRevise?(controller: C): void;
 
-  controllerWillCompute?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerWillCompute?(controller: C): void;
 
-  controllerDidCompute?(controllerContext: ControllerContextType<C>, controller: C): void;
+  controllerDidCompute?(controller: C): void;
+
+  controllerWillStartConsuming?(controller: C): void;
+
+  controllerDidStartConsuming?(controller: C): void;
+
+  controllerWillStopConsuming?(controller: C): void;
+
+  controllerDidStopConsuming?(controller: C): void;
 }

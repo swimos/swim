@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
+import type {Class} from "@swim/util";
+import {Affinity, FastenerClass} from "@swim/component";
 import {Length} from "@swim/math";
-import {ViewContextType, AnyView, ViewRef} from "@swim/view";
-import {HtmlViewInit, HtmlView} from "@swim/dom";
+import {PositionGestureInput, PositionGesture, ViewRef} from "@swim/view";
+import {HtmlView} from "@swim/dom";
 import {ToolView} from "./ToolView";
 import type {TitleToolViewObserver} from "./TitleToolViewObserver";
 
@@ -25,18 +25,17 @@ export class TitleToolView extends ToolView {
   protected override initTool(): void {
     super.initTool();
     this.addClass("tool-title");
-    this.pointerEvents.setState("none", Affinity.Intrinsic);
+    this.overflowX.setState("hidden", Affinity.Intrinsic);
   }
 
   override readonly observerType?: Class<TitleToolViewObserver>;
 
-  @ViewRef<TitleToolView, HtmlView & Initable<HtmlViewInit | string>, {create(value?: string): HtmlView}>({
-    implements: true,
-    key: true,
-    type: HtmlView,
+  @ViewRef<TitleToolView["content"]>({
+    viewType: HtmlView,
+    viewKey: true,
     binds: true,
     initView(contentView: HtmlView): void {
-      contentView.position.setState("absolute", Affinity.Intrinsic);
+      contentView.position.setState("relative", Affinity.Intrinsic);
       contentView.left.setState(0, Affinity.Intrinsic);
       contentView.top.setState(0, Affinity.Intrinsic);
     },
@@ -46,49 +45,89 @@ export class TitleToolView extends ToolView {
     didDetachView(contentView: HtmlView): void {
       this.owner.callObservers("viewDidDetachContent", contentView, this.owner);
     },
-    create(value?: string): HtmlView {
-      const contentView = HtmlView.fromTag("span");
-      contentView.display.setState("flex", Affinity.Intrinsic);
-      contentView.alignItems.setState("center", Affinity.Intrinsic);
-      contentView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
-      contentView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
-      if (value !== void 0) {
-        contentView.text(value);
+    setText(content: string | undefined): HtmlView {
+      let contentView = this.view;
+      if (contentView === null) {
+        contentView = this.createView();
+        this.setView(contentView);
       }
+      contentView.text(content);
       return contentView;
     },
-    fromAny(value: AnyView<HtmlView> | string): HtmlView {
-      if (typeof value === "string") {
-        return this.create(value);
-      } else {
-        return HtmlView.fromAny(value);
-      }
+    createView(): HtmlView {
+      const contentView = HtmlView.fromTag("span");
+      contentView.display.setState("block", Affinity.Intrinsic);
+      contentView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
+      contentView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
+      contentView.overflowX.setState("hidden", Affinity.Intrinsic);
+      contentView.overflowY.setState("hidden", Affinity.Intrinsic);
+      return contentView;
     },
   })
-  readonly content!: ViewRef<this, HtmlView & Initable<HtmlViewInit | string>> & {create(value?: string): HtmlView};
-  static readonly content: MemberFastenerClass<TitleToolView, "content">;
+  readonly content!: ViewRef<this, HtmlView> & {
+    setText(content: string | undefined): HtmlView,
+  };
+  static readonly content: FastenerClass<TitleToolView["content"]>;
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     this.layoutTool();
   }
 
   protected layoutTool(): void {
     const contentView = this.content.view;
     if (contentView !== null) {
-      let toolWidth: Length | number | null = this.width.value;
-      toolWidth = toolWidth instanceof Length ? toolWidth.pxValue() : this.node.offsetWidth;
       let contentWidth: Length | number | null = contentView.width.value;
-      contentWidth = contentWidth instanceof Length ? contentWidth.pxValue(toolWidth) : contentView.node.offsetWidth;
+      contentWidth = contentWidth instanceof Length ? contentWidth.pxValue() : contentView.node.offsetWidth;
+      let toolWidth: Length | number | null = this.width.value;
+      toolWidth = toolWidth instanceof Length ? toolWidth.pxValue() : 0;
       const excessWidth = toolWidth - contentWidth;
       const xAlign = this.xAlign.value;
-      contentView.left.setState(excessWidth * xAlign, Affinity.Intrinsic);
+      if (toolWidth !== 0) {
+        contentView.left.setState(excessWidth * xAlign, Affinity.Intrinsic);
+      } else {
+        contentView.left.setState(contentWidth * xAlign, Affinity.Intrinsic);
+      }
       contentView.top.setState(0, Affinity.Intrinsic);
-      contentView.maxWidth.setState(toolWidth, Affinity.Intrinsic);
       contentView.height.setState(this.height.value, Affinity.Intrinsic);
-      if (this.effectiveWidth.state === null && contentWidth !== 0) {
-        this.effectiveWidth.setState(contentWidth);
+      contentView.lineHeight.setState(this.height.value, Affinity.Intrinsic);
+      if (this.effectiveWidth.value === null && contentWidth !== 0) {
+        this.effectiveWidth.setValue(contentWidth);
       }
     }
+  }
+
+  @PositionGesture<TitleToolView["gesture"]>({
+    bindsOwner: true,
+    didPress(input: PositionGestureInput, event: Event | null): void {
+      if (!input.defaultPrevented && this.owner.clientBounds.contains(input.x, input.y)) {
+        this.owner.onPress(input, event);
+        this.owner.didPress(input, event);
+      }
+    },
+    didLongPress(input: PositionGestureInput): void {
+      if (!input.defaultPrevented) {
+        this.owner.onLongPress(input);
+        this.owner.didLongPress(input);
+      }
+    },
+  })
+  readonly gesture!: PositionGesture<this, HtmlView>;
+  static readonly gesture: FastenerClass<TitleToolView["gesture"]>;
+
+  onPress(input: PositionGestureInput, event: Event | null): void {
+    // hook
+  }
+
+  didPress(input: PositionGestureInput, event: Event | null): void {
+    this.callObservers("viewDidPress", input, event, this);
+  }
+
+  onLongPress(input: PositionGestureInput): void {
+    // hook
+  }
+
+  didLongPress(input: PositionGestureInput): void {
+    this.callObservers("viewDidLongPress", input, this);
   }
 }

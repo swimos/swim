@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import type {View} from "@swim/view";
-import type {HtmlViewObserver} from "@swim/dom";
+import type {HtmlViewObserver, ModalViewObserver} from "@swim/dom";
 import type {PopoverPlacement, PopoverView} from "./PopoverView";
 
 /** @public */
-export interface PopoverViewObserver<V extends PopoverView = PopoverView> extends HtmlViewObserver<V> {
+export interface PopoverViewObserver<V extends PopoverView = PopoverView> extends HtmlViewObserver<V>, ModalViewObserver<V> {
   popoverWillAttachSource?(sourceView: View, view: V): void;
 
   popoverDidDetachSource?(sourceView: View, view: V): void;
@@ -25,12 +25,4 @@ export interface PopoverViewObserver<V extends PopoverView = PopoverView> extend
   popoverWillPlace?(placement: PopoverPlacement, view: V): void;
 
   popoverDidPlace?(placement: PopoverPlacement, view: V): void;
-
-  popoverWillShow?(view: V): void;
-
-  popoverDidShow?(view: V): void;
-
-  popoverWillHide?(view: V): void;
-
-  popoverDidHide?(view: V): void;
 }

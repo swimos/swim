@@ -47,9 +47,7 @@ export interface PieControllerObserver<C extends PieController = PieController> 
 
   controllerDidDetachSliceView?(sliceView: SliceView, sliceController: SliceController, controller: C): void;
 
-  controllerWillSetSliceValue?(newValue: number, oldValue: number, sliceController: SliceController, controller: C): void;
-
-  controllerDidSetSliceValue?(newValue: number, oldValue: number, sliceController: SliceController, controller: C): void;
+  controllerDidSetSliceValue?(sliceValue: number, sliceController: SliceController, controller: C): void;
 
   controllerWillAttachSliceLabelView?(labelView: GraphicsView, sliceController: SliceController, controller: C): void;
 

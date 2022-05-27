@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/component";
+import type {Class, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {Model, Trait, TraitRef, TraitSet} from "@swim/model";
 import type {ColLayout} from "../layout/ColLayout";
@@ -46,20 +46,17 @@ export class TableTrait extends Trait {
     this.layout.setValue(layout, Affinity.Intrinsic);
   }
 
-  @Property<TableTrait, TableLayout | null, AnyTableLayout | null>({
-    type: TableLayout,
+  @Property<TableTrait["layout"]>({
+    valueType: TableLayout,
     value: null,
-    willSetValue(newLayout: TableLayout | null, oldLayout: TableLayout | null): void {
-      this.owner.callObservers("traitWillSetTableLayout", newLayout, oldLayout, this.owner);
-    },
-    didSetValue(newLayout: TableLayout | null, oldLayout: TableLayout | null): void {
-      this.owner.callObservers("traitDidSetTableLayout", newLayout, oldLayout, this.owner);
+    didSetValue(layout: TableLayout | null): void {
+      this.owner.callObservers("traitDidSetTableLayout", layout, this.owner);
     },
   })
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
-  @Property<TableTrait, Length | null, AnyLength | null>({
-    type: Length,
+  @Property<TableTrait["colSpacing"]>({
+    valueType: Length,
     value: null,
     didSetValue(newColSpacing: Length | null, oldColSpacing: Length | null): void {
       this.owner.updateLayout();
@@ -67,8 +64,8 @@ export class TableTrait extends Trait {
   })
   readonly colSpacing!: Property<this, Length | null, AnyLength | null>;
 
-  @TraitRef<TableTrait, HeaderTrait>({
-    type: HeaderTrait,
+  @TraitRef<TableTrait["header"]>({
+    traitType: HeaderTrait,
     binds: true,
     willAttachTrait(headerTrait: HeaderTrait): void {
       this.owner.callObservers("traitWillAttachHeader", headerTrait, this.owner);
@@ -81,10 +78,10 @@ export class TableTrait extends Trait {
     },
   })
   readonly header!: TraitRef<this, HeaderTrait>;
-  static readonly header: MemberFastenerClass<TableTrait, "header">;
+  static readonly header: FastenerClass<TableTrait["header"]>;
 
-  @TraitSet<TableTrait, ColTrait>({
-    type: ColTrait,
+  @TraitSet<TableTrait["cols"]>({
+    traitType: ColTrait,
     binds: true,
     observes: true,
     willAttachTrait(colTrait: ColTrait, targetTrait: Trait | null): void {
@@ -105,36 +102,18 @@ export class TableTrait extends Trait {
       this.owner.updateLayout();
       this.owner.callObservers("traitDidDetachCol", colTrait, this.owner);
     },
-    traitDidSetLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null): void {
+    traitDidSetLayout(colLayout: ColLayout | null): void {
       this.owner.updateLayout();
     },
     detectModel(model: Model): ColTrait | null {
       return model.getTrait(ColTrait);
     },
   })
-  readonly cols!: TraitSet<this, ColTrait>;
-  static readonly cols: MemberFastenerClass<TableTrait, "cols">;
+  readonly cols!: TraitSet<this, ColTrait> & Observes<ColTrait>;
+  static readonly cols: FastenerClass<TableTrait["cols"]>;
 
-  /** @internal */
-  protected startConsumingCols(): void {
-    const colTraits = this.cols.traits;
-    for (const traitId in colTraits) {
-      const colTrait = colTraits[traitId]!;
-      colTrait.consume(this);
-    }
-  }
-
-  /** @internal */
-  protected stopConsumingCols(): void {
-    const colTraits = this.cols.traits;
-    for (const traitId in colTraits) {
-      const colTrait = colTraits[traitId]!;
-      colTrait.unconsume(this);
-    }
-  }
-
-  @TraitSet<TableTrait, RowTrait>({
-    type: RowTrait,
+  @TraitSet<TableTrait["rows"]>({
+    traitType: RowTrait,
     binds: true,
     willAttachTrait(rowTrait: RowTrait, targetTrait: Trait | null): void {
       this.owner.callObservers("traitWillAttachRow", rowTrait, targetTrait, this.owner);
@@ -160,35 +139,17 @@ export class TableTrait extends Trait {
     },
   })
   readonly rows!: TraitSet<this, RowTrait>;
-  static readonly rows: MemberFastenerClass<TableTrait, "rows">;
-
-  /** @internal */
-  protected startConsumingRows(): void {
-    const rowTraits = this.rows.traits;
-    for (const traitId in rowTraits) {
-      const rowTrait = rowTraits[traitId]!;
-      rowTrait.consume(this);
-    }
-  }
-
-  /** @internal */
-  protected stopConsumingRows(): void {
-    const rowTraits = this.rows.traits;
-    for (const traitId in rowTraits) {
-      const rowTrait = rowTraits[traitId]!;
-      rowTrait.unconsume(this);
-    }
-  }
+  static readonly rows: FastenerClass<TableTrait["rows"]>;
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();
-    this.startConsumingCols();
-    this.startConsumingRows();
+    this.cols.consumeTraits(this);
+    this.rows.consumeTraits(this);
   }
 
   protected override onStopConsuming(): void {
     super.onStopConsuming();
-    this.stopConsumingRows();
-    this.stopConsumingCols();
+    this.rows.unconsumeTraits(this);
+    this.cols.unconsumeTraits(this);
   }
 }

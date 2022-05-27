@@ -13,47 +13,66 @@
 // limitations under the License.
 
 export {
-  TraitViewRefTraitType,
-  TraitViewRefViewType,
-  TraitViewRefInit,
+  TraitViewRefTrait,
+  TraitViewRefView,
   TraitViewRefDescriptor,
+  TraitViewRefTemplate,
   TraitViewRefClass,
-  TraitViewRefFactory,
   TraitViewRef,
 } from "./TraitViewRef";
 
 export {
-  TraitControllerRefType,
-  TraitControllerRefInit,
+  ViewControllerRefView,
+  ViewControllerRefController,
+  ViewControllerRefDescriptor,
+  ViewControllerRefTemplate,
+  ViewControllerRefClass,
+  ViewControllerRef,
+} from "./ViewControllerRef";
+
+export {
+  ViewControllerSetView,
+  ViewControllerSetController,
+  ViewControllerSetDescriptor,
+  ViewControllerSetTemplate,
+  ViewControllerSetClass,
+  ViewControllerSet,
+} from "./ViewControllerSet";
+
+export {
+  TraitControllerRefTrait,
+  TraitControllerRefController,
   TraitControllerRefDescriptor,
+  TraitControllerRefTemplate,
   TraitControllerRefClass,
-  TraitControllerRefFactory,
   TraitControllerRef,
 } from "./TraitControllerRef";
 
 export {
-  TraitControllerSetType,
-  TraitControllerSetInit,
+  TraitControllerSetTrait,
+  TraitControllerSetController,
   TraitControllerSetDescriptor,
+  TraitControllerSetTemplate,
   TraitControllerSetClass,
-  TraitControllerSetFactory,
   TraitControllerSet,
 } from "./TraitControllerSet";
 
 export {
-  TraitViewControllerRefType,
-  TraitViewControllerRefInit,
+  TraitViewControllerRefTrait,
+  TraitViewControllerRefView,
+  TraitViewControllerRefController,
   TraitViewControllerRefDescriptor,
+  TraitViewControllerRefTemplate,
   TraitViewControllerRefClass,
-  TraitViewControllerRefFactory,
   TraitViewControllerRef,
 } from "./TraitViewControllerRef";
 
 export {
-  TraitViewControllerSetType,
-  TraitViewControllerSetInit,
+  TraitViewControllerSetTrait,
+  TraitViewControllerSetView,
+  TraitViewControllerSetController,
   TraitViewControllerSetDescriptor,
+  TraitViewControllerSetTemplate,
   TraitViewControllerSetClass,
-  TraitViewControllerSetFactory,
   TraitViewControllerSet,
 } from "./TraitViewControllerSet";

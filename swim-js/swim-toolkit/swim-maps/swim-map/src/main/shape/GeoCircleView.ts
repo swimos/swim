@@ -14,11 +14,20 @@
 
 import type {Mutable, Class} from "@swim/util";
 import {Affinity, Property, Animator} from "@swim/component";
-import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, R2Circle, Transform} from "@swim/math";
+import {
+  AnyLength,
+  Length,
+  AnyR2Point,
+  R2Point,
+  R2Segment,
+  R2Box,
+  R2Circle,
+  Transform,
+} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
+import {View} from "@swim/view";
 import {
   GraphicsView,
   FillViewInit,
@@ -59,72 +68,64 @@ export class GeoCircleView extends GeoView implements FillView, StrokeView {
 
   override readonly observerType?: Class<GeoCircleViewObserver>;
 
-  @Animator<GeoCircleView, GeoPoint | null, AnyGeoPoint | null>({
-    type: GeoPoint,
+  @Animator<GeoCircleView["geoCenter"]>({
+    valueType: GeoPoint,
     value: null,
     didSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
       this.owner.projectGeoCenter(newGeoCenter);
     },
-    willSetValue(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.callObservers("viewWillSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
-    },
     didSetValue(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
       this.owner.setGeoBounds(newGeoCenter !== null ? newGeoCenter.bounds : GeoBox.undefined());
       if (this.mounted) {
-        this.owner.projectCircle(this.owner.viewContext);
+        this.owner.projectCircle();
       }
-      this.owner.callObservers("viewDidSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
+      this.owner.callObservers("viewDidSetGeoCenter", newGeoCenter, this.owner);
     },
   })
   readonly geoCenter!: Animator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @Animator<GeoCircleView, R2Point | null, AnyR2Point | null>({
-    type: R2Point,
-    value: R2Point.undefined(),
-    updateFlags: View.NeedsRender,
-  })
+  @Animator({valueType: R2Point, value: R2Point.undefined(), updateFlags: View.NeedsRender})
   readonly viewCenter!: Animator<this, R2Point | null, AnyR2Point | null>;
 
-  @ThemeAnimator({type: Length, value: Length.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.zero(), updateFlags: View.NeedsRender})
   readonly radius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @Property({type: Number})
+  @Property({valueType: Number})
   readonly hitRadius!: Property<this, number | undefined>;
 
-  protected override onProject(viewContext: ViewContextType<this>): void {
-    super.onProject(viewContext);
-    this.projectCircle(viewContext);
+  protected override onProject(): void {
+    super.onProject();
+    this.projectCircle();
   }
 
   protected projectGeoCenter(geoCenter: GeoPoint | null): void {
     if (this.mounted) {
-      const viewContext = this.viewContext as ViewContextType<this>;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
-                       ? viewContext.geoViewport.project(geoCenter)
+                       ? this.geoViewport.value.project(geoCenter)
                        : null;
       this.viewCenter.setInterpolatedValue(this.viewCenter.value, viewCenter);
-      this.projectCircle(viewContext);
+      this.projectCircle();
     }
   }
 
-  protected projectCircle(viewContext: ViewContextType<this>): void {
+  protected projectCircle(): void {
     if (Affinity.Intrinsic >= (this.viewCenter.flags & Affinity.Mask)) { // this.viewCenter.hasAffinity(Affinity.Intrinsic)
       const geoCenter = this.geoCenter.value;
       const viewCenter = geoCenter !== null && geoCenter.isDefined()
-                       ? viewContext.geoViewport.project(geoCenter)
+                       ? this.geoViewport.value.project(geoCenter)
                        : null;
       (this.viewCenter as Mutable<typeof this.viewCenter>).value = viewCenter; // this.viewCenter.setValue(viewCenter, Affinity.Intrinsic)
     }
-    const viewFrame = viewContext.viewFrame;
+    const viewFrame = this.viewFrame;
     const size = Math.min(viewFrame.width, viewFrame.height);
     const r = this.radius.getValue().pxValue(size);
     const p0 = this.viewCenter.value;
@@ -138,11 +139,11 @@ export class GeoCircleView extends GeoView implements FillView, StrokeView {
     }
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
-      this.renderCircle(renderer.context, viewContext.viewFrame);
+      this.renderCircle(renderer.context, this.viewFrame);
     }
   }
 
@@ -183,7 +184,7 @@ export class GeoCircleView extends GeoView implements FillView, StrokeView {
     }
   }
 
-  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
+  protected override renderGeoBounds(outlineColor: Color, outlineWidth: number): void {
     // nop
   }
 
@@ -196,7 +197,7 @@ export class GeoCircleView extends GeoView implements FillView, StrokeView {
   override deriveViewBounds(): R2Box {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
-      const viewFrame = this.viewContext.viewFrame;
+      const viewFrame = this.viewFrame;
       const size = Math.min(viewFrame.width, viewFrame.height);
       const radius = this.radius.getValue().pxValue(size);
       return new R2Box(viewCenter.x - radius, viewCenter.y - radius,
@@ -209,7 +210,7 @@ export class GeoCircleView extends GeoView implements FillView, StrokeView {
   override get popoverFrame(): R2Box {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
-      const viewFrame = this.viewContext.viewFrame;
+      const viewFrame = this.viewFrame;
       const size = Math.min(viewFrame.width, viewFrame.height);
       const inversePageTransform = this.pageTransform.inverse();
       const px = inversePageTransform.transformX(viewCenter.x, viewCenter.y);
@@ -224,7 +225,7 @@ export class GeoCircleView extends GeoView implements FillView, StrokeView {
   override get hitBounds(): R2Box {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
-      const viewFrame = this.viewContext.viewFrame;
+      const viewFrame = this.viewFrame;
       const size = Math.min(viewFrame.width, viewFrame.height);
       const radius = this.radius.getValue().pxValue(size);
       const hitRadius = Math.max(this.hitRadius.getValueOr(radius), radius);
@@ -235,10 +236,10 @@ export class GeoCircleView extends GeoView implements FillView, StrokeView {
     }
   }
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
-      return this.hitTestCircle(x, y, renderer.context, viewContext.viewFrame, renderer.transform);
+      return this.hitTestCircle(x, y, renderer.context, this.viewFrame, renderer.transform);
     }
     return null;
   }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, AnyTiming, Timing} from "@swim/util";
+import {Class, AnyTiming, Timing} from "@swim/util";
 import {Affinity, Property} from "@swim/component";
 import {ConstraintProperty} from "@swim/constraint";
 import {AnyLength, Length} from "@swim/math";
@@ -25,15 +25,8 @@ import {
   ExpansionAnimator,
 } from "@swim/style";
 import {Look, Mood, ThemeConstraintAnimator} from "@swim/theme";
-import {
-  ViewportInsets,
-  ViewContextType,
-  View,
-  ModalOptions,
-  ModalState,
-  Modal,
-} from "@swim/view";
-import {HtmlViewInit, HtmlView} from "@swim/dom";
+import {ViewInsets, View} from "@swim/view";
+import {HtmlViewInit, HtmlView, ModalView} from "@swim/dom";
 import type {DrawerViewObserver} from "./DrawerViewObserver";
 
 /** @public */
@@ -47,10 +40,9 @@ export interface DrawerViewInit extends HtmlViewInit {
 }
 
 /** @public */
-export class DrawerView extends HtmlView implements Modal {
+export class DrawerView extends HtmlView implements ModalView {
   constructor(node: HTMLElement) {
     super(node);
-    this.modality = true;
     this.initDrawer();
   }
 
@@ -65,24 +57,30 @@ export class DrawerView extends HtmlView implements Modal {
     this.overflowScrolling.setState("touch", Affinity.Intrinsic);
   }
 
-  @ThemeConstraintAnimator({type: Length, value: Length.px(60)})
+  @ThemeConstraintAnimator({valueType: Length, value: Length.px(60)})
   readonly collapsedWidth!: ThemeConstraintAnimator<this, Length, AnyLength>;
 
-  @ThemeConstraintAnimator({type: Length, value: Length.px(200)})
+  @ThemeConstraintAnimator({valueType: Length, value: Length.px(200)})
   readonly expandedWidth!: ThemeConstraintAnimator<this, Length, AnyLength>;
 
-  @ConstraintProperty<DrawerView, Length | null, AnyLength | null>({
-    type: Length,
+  @ConstraintProperty<DrawerView["effectiveWidth"]>({
+    valueType: Length,
     value: null,
+    didSetValue(newValue: Length | null, oldValue: Length | null): void {
+      this.owner.callObservers("viewDidSetEffectiveWidth", newValue, this.owner);
+    },
     toNumber(value: Length | null): number {
       return value !== null ? value.pxValue() : 0;
     },
   })
   readonly effectiveWidth!: ConstraintProperty<this, Length | null, AnyLength | null>;
 
-  @ConstraintProperty<DrawerView, Length | null, AnyLength | null>({
-    type: Length,
+  @ConstraintProperty<DrawerView["effectiveHeight"]>({
+    valueType: Length,
     value: null,
+    didSetValue(newValue: Length | null, oldValue: Length | null): void {
+      this.owner.callObservers("viewDidSetEffectiveHeight", newValue, this.owner);
+    },
     toNumber(value: Length | null): number {
       return value !== null ? value.pxValue() : 0;
     },
@@ -97,25 +95,26 @@ export class DrawerView extends HtmlView implements Modal {
     return this.placement.value === "left" || this.placement.value === "right";
   }
 
-  @Property<DrawerView, DrawerPlacement>({
-    type: String,
+  @Property<DrawerView["placement"]>({
+    valueType: String,
     value: "left",
     updateFlags: View.NeedsResize | View.NeedsLayout,
-    willSetValue(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-      this.owner.callObservers("viewWillSetPlacement", newPlacement, oldPlacement, this.owner);
-    },
-    didSetValue(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-      this.owner.callObservers("viewDidSetPlacement", newPlacement, oldPlacement, this.owner);
+    didSetValue(placement: DrawerPlacement): void {
+      this.owner.callObservers("viewDidSetPlacement", placement, this.owner);
+      this.owner.edgeInsets.decohereOutlets();
     },
   })
   readonly placement!: Property<this, DrawerPlacement>;
 
-  @PresenceAnimator<DrawerView, Presence, AnyPresence>({
-    type: Presence,
+  /** @override */
+  @PresenceAnimator<DrawerView["presence"]>({
     value: Presence.presented(),
     updateFlags: View.NeedsLayout,
     get transition(): Timing | null {
       return this.owner.getLookOr(Look.timing, null);
+    },
+    didSetValue(presence: Presence): void {
+      this.owner.callObservers("viewDidSetPresence", presence, this.owner);
     },
     willPresent(): void {
       this.owner.callObservers("viewWillPresent", this.owner);
@@ -124,40 +123,29 @@ export class DrawerView extends HtmlView implements Modal {
       this.owner.callObservers("viewDidPresent", this.owner);
     },
     willDismiss(): void {
-      const modalService = this.owner.modalProvider.service;
-      if (modalService !== void 0 && modalService !== null) {
-        modalService.dismissModal(this.owner);
-      }
       this.owner.callObservers("viewWillDismiss", this.owner);
     },
     didDismiss(): void {
       this.owner.callObservers("viewDidDismiss", this.owner);
     },
   })
-  readonly slide!: PresenceAnimator<this, Presence, AnyPresence>;
+  readonly presence!: PresenceAnimator<this, Presence, AnyPresence>;
 
-  @ExpansionAnimator<DrawerView, Expansion, AnyExpansion>({
-    type: Expansion,
+  @ExpansionAnimator<DrawerView["stretch"]>({
     value: Expansion.expanded(),
     updateFlags: View.NeedsResize | View.NeedsLayout,
     get transition(): Timing | null {
       return this.owner.getLookOr(Look.timing, null);
     },
     willExpand(): void {
-      const modalService = this.owner.modalProvider.service;
-      if (modalService !== void 0 && modalService !== null) {
-        modalService.dismissModal(this.owner);
-      }
+      this.owner.modal.dismiss();
       this.owner.callObservers("viewWillExpand", this.owner);
     },
     didExpand(): void {
       this.owner.callObservers("viewDidExpand", this.owner);
     },
     willCollapse(): void {
-      const modalService = this.owner.modalProvider.service;
-      if (modalService !== void 0 && modalService !== null) {
-        modalService.dismissModal(this.owner);
-      }
+      this.owner.modal.dismiss();
       this.owner.callObservers("viewWillCollapse", this.owner);
     },
     didCollapse(): void {
@@ -166,36 +154,60 @@ export class DrawerView extends HtmlView implements Modal {
   })
   readonly stretch!: ExpansionAnimator<this, Expansion, AnyExpansion>;
 
-  @Property({type: Object, inherits: true, value: null})
-  readonly edgeInsets!: Property<this, ViewportInsets | null>;
+  @Property<DrawerView["edgeInsets"]>({
+    extends: true,
+    getOutletValue(outlet: Property<unknown, ViewInsets>): ViewInsets {
+      let edgeInsets = this.value;
+      let insetTop = edgeInsets.insetTop;
+      let insetRight = edgeInsets.insetRight;
+      let insetBottom = edgeInsets.insetBottom;
+      let insetLeft = edgeInsets.insetLeft;
+      const placement = this.owner.placement.value;
+      if (placement === "top" && insetBottom !== 0) {
+        insetBottom = 0;
+        edgeInsets = {insetTop, insetRight, insetBottom, insetLeft};
+      } else if (placement === "right" && insetLeft !== 0) {
+        insetLeft = 0;
+        edgeInsets = {insetTop, insetRight, insetBottom, insetLeft};
+      } else if (placement === "bottom" && insetTop !== 0) {
+        insetTop = 0;
+        edgeInsets = {insetTop, insetRight, insetBottom, insetLeft};
+      } else if (placement === "left" && insetRight !== 0) {
+        insetRight = 0;
+        edgeInsets = {insetTop, insetRight, insetBottom, insetLeft};
+      }
+      return edgeInsets;
+    },
+  })
+  override readonly edgeInsets!: Property<this, ViewInsets>;
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-    this.display.setState(!this.slide.dismissed ? "flex" : "none", Affinity.Intrinsic);
-    this.layoutDrawer(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
+    this.display.setState(!this.presence.dismissed ? "flex" : "none", Affinity.Intrinsic);
+    this.layoutDrawer();
 
-    if (viewContext.viewportIdiom === "mobile") {
+    if (this.viewIdiom === "mobile") {
       this.boxShadow.setState(this.getLookOr(Look.shadow, Mood.floating, null), Affinity.Intrinsic);
     } else {
       this.boxShadow.setState(this.getLookOr(Look.shadow, null), Affinity.Intrinsic);
     }
   }
 
-  protected layoutDrawer(viewContext: ViewContextType<this>): void {
+  protected layoutDrawer(): void {
     const placement = this.placement.value;
     if (placement === "top") {
-      this.layoutDrawerTop(viewContext);
+      this.layoutDrawerTop();
     } else if (placement === "right") {
-      this.layoutDrawerRight(viewContext);
+      this.layoutDrawerRight();
     } else if (placement === "bottom") {
-      this.layoutDrawerBottom(viewContext);
+      this.layoutDrawerBottom();
     } else if (placement === "left") {
-      this.layoutDrawerLeft(viewContext);
+      this.layoutDrawerLeft();
     }
   }
 
-  protected layoutDrawerTop(viewContext: ViewContextType<this>): void {
-    const slidePhase = this.slide.getPhase();
+  protected layoutDrawerTop(): void {
+    const presencePhase = this.presence.getPhase();
 
     this.addClass("drawer-top")
         .removeClass("drawer-right")
@@ -213,30 +225,19 @@ export class DrawerView extends HtmlView implements Modal {
     if (height === null) {
       height = Length.px(this.node.offsetHeight);
     }
-    this.top.setState(height.times(slidePhase - 1), Affinity.Intrinsic);
+    this.top.setState(height.times(presencePhase - 1), Affinity.Intrinsic);
 
     this.effectiveWidth.setValue(this.width.value);
-    this.effectiveHeight.setValue(height.times(slidePhase), Affinity.Intrinsic);
-
-    let edgeInsets = this.edgeInsets.superValue;
-    if (edgeInsets === void 0 || edgeInsets === null) {
-      edgeInsets = viewContext.viewport.safeArea;
-    }
-    this.edgeInsets.setValue({
-      insetTop: 0,
-      insetRight: edgeInsets.insetRight,
-      insetBottom: 0,
-      insetLeft: edgeInsets.insetLeft,
-    }, Affinity.Intrinsic);
+    this.effectiveHeight.setValue(height.times(presencePhase), Affinity.Intrinsic);
 
     if (this.stretch.collapsed) {
       this.expand();
     }
   }
 
-  protected layoutDrawerRight(viewContext: ViewContextType<this>): void {
+  protected layoutDrawerRight(): void {
     const stretchPhase = this.stretch.getPhase();
-    const slidePhase = this.slide.getPhase();
+    const presencePhase = this.presence.getPhase();
 
     this.removeClass("drawer-top")
         .addClass("drawer-right")
@@ -261,27 +262,14 @@ export class DrawerView extends HtmlView implements Modal {
       }
     }
     this.width.setState(width, Affinity.Intrinsic);
-    this.right.setState(width.times(slidePhase - 1), Affinity.Intrinsic);
+    this.right.setState(width.times(presencePhase - 1), Affinity.Intrinsic);
 
-    this.effectiveWidth.setValue(width.times(slidePhase), Affinity.Intrinsic);
+    this.effectiveWidth.setValue(width.times(presencePhase), Affinity.Intrinsic);
     this.effectiveHeight.setValue(this.height.value, Affinity.Intrinsic);
-
-    let edgeInsets = this.edgeInsets.superValue;
-    if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
-      edgeInsets = viewContext.viewport.safeArea;
-    }
-    this.paddingTop.setState(Length.px(edgeInsets.insetTop), Affinity.Intrinsic);
-    this.paddingBottom.setState(Length.px(edgeInsets.insetBottom), Affinity.Intrinsic);
-    this.edgeInsets.setValue({
-      insetTop: 0,
-      insetRight: edgeInsets.insetRight,
-      insetBottom: 0,
-      insetLeft: 0,
-    }, Affinity.Intrinsic);
   }
 
-  protected layoutDrawerBottom(viewContext: ViewContextType<this>): void {
-    const slidePhase = this.slide.getPhase();
+  protected layoutDrawerBottom(): void {
+    const presencePhase = this.presence.getPhase();
 
     this.removeClass("drawer-top")
         .removeClass("drawer-right")
@@ -299,30 +287,19 @@ export class DrawerView extends HtmlView implements Modal {
     if (height === null) {
       height = Length.px(this.node.offsetHeight);
     }
-    this.bottom.setState(height.times(slidePhase - 1), Affinity.Intrinsic);
+    this.bottom.setState(height.times(presencePhase - 1), Affinity.Intrinsic);
 
     this.effectiveWidth.setValue(this.width.value, Affinity.Intrinsic);
-    this.effectiveHeight.setValue(height.times(slidePhase), Affinity.Intrinsic);
-
-    let edgeInsets = this.edgeInsets.superValue;
-    if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
-      edgeInsets = viewContext.viewport.safeArea;
-    }
-    this.edgeInsets.setValue({
-      insetTop: 0,
-      insetRight: edgeInsets.insetRight,
-      insetBottom: 0,
-      insetLeft: edgeInsets.insetLeft,
-    }, Affinity.Intrinsic);
+    this.effectiveHeight.setValue(height.times(presencePhase), Affinity.Intrinsic);
 
     if (this.stretch.collapsed) {
       this.expand();
     }
   }
 
-  protected layoutDrawerLeft(viewContext: ViewContextType<this>): void {
+  protected layoutDrawerLeft(): void {
     const stretchPhase = this.stretch.getPhase();
-    const slidePhase = this.slide.getPhase();
+    const presencePhase = this.presence.getPhase();
 
     this.removeClass("drawer-top")
         .removeClass("drawer-right")
@@ -347,45 +324,21 @@ export class DrawerView extends HtmlView implements Modal {
       }
     }
     this.width.setState(width, Affinity.Intrinsic);
-    this.left.setState(width.times(slidePhase - 1), Affinity.Intrinsic);
+    this.left.setState(width.times(presencePhase - 1), Affinity.Intrinsic);
 
-    this.effectiveWidth.setValue(width.times(slidePhase), Affinity.Intrinsic);
+    this.effectiveWidth.setValue(width.times(presencePhase), Affinity.Intrinsic);
     this.effectiveHeight.setValue(this.height.value, Affinity.Intrinsic);
-
-    let edgeInsets = this.edgeInsets.superValue;
-    if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
-      edgeInsets = viewContext.viewport.safeArea;
-    }
-    this.paddingTop.setState(Length.px(edgeInsets.insetTop), Affinity.Intrinsic);
-    this.paddingBottom.setState(Length.px(edgeInsets.insetBottom), Affinity.Intrinsic);
-    this.edgeInsets.setValue({
-      insetTop: 0,
-      insetRight: 0,
-      insetBottom: 0,
-      insetLeft: edgeInsets.insetLeft,
-    }, Affinity.Intrinsic);
   }
 
-  get modalView(): View | null {
-    return this;
-  }
-
-  get modalState(): ModalState {
-    return this.slide.modalState as ModalState;
-  }
-
-  readonly modality: boolean | number;
-
-  showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
-    if (options.modal !== void 0) {
-      (this as Mutable<this>).modality = options.modal;
-    }
-    this.present(timing);
-  }
-
-  hideModal(timing?: AnyTiming | boolean): void {
-    this.dismiss(timing);
-  }
+  /** @override */
+  @Property<DrawerView["modality"]>({
+    valueType: Number,
+    value: 0,
+    didSetValue(modality: number): void {
+      this.owner.callObservers("viewDidSetModality", modality, this.owner);
+    },
+  })
+  readonly modality!: Property<this, number>;
 
   present(timing?: AnyTiming | boolean): void {
     if (timing === void 0 || timing === true) {
@@ -393,7 +346,7 @@ export class DrawerView extends HtmlView implements Modal {
     } else {
       timing = Timing.fromAny(timing);
     }
-    this.slide.present(timing);
+    this.presence.present(timing);
   }
 
   dismiss(timing?: AnyTiming | boolean): void {
@@ -402,7 +355,7 @@ export class DrawerView extends HtmlView implements Modal {
     } else {
       timing = Timing.fromAny(timing);
     }
-    this.slide.dismiss(timing);
+    this.presence.dismiss(timing);
   }
 
   expand(timing?: AnyTiming | boolean): void {
@@ -429,20 +382,17 @@ export class DrawerView extends HtmlView implements Modal {
     } else {
       timing = Timing.fromAny(timing);
     }
-    if (this.viewportIdiom === "mobile" || this.isHorizontal()) {
-      if (this.slide.presented) {
-        this.slide.dismiss(timing);
+    if (this.viewIdiom === "mobile" || this.isHorizontal()) {
+      if (this.presence.presented) {
+        this.presence.dismiss(timing);
       } else {
         this.stretch.expand(timing);
-        this.slide.present(timing);
-        const modalService = this.modalProvider.service;
-        if (modalService !== void 0 && modalService !== null) {
-          modalService.presentModal(this, {modal: true});
-        }
+        this.presence.present(timing);
+        this.modal.present(this, {modal: true});
       }
     } else {
       this.stretch.toggle(timing);
-      this.slide.present(timing);
+      this.presence.present(timing);
     }
   }
 

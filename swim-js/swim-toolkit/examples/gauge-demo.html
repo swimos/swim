@@ -153,12 +153,12 @@ const tickPadding = document.getElementById("tickPadding");
 const updateRate = document.getElementById("updateRate");
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").id("ui").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").id("ui").position("relative").touchAction("none").userSelect("none");
 
 const canvasView = containerView.appendChild(swim.CanvasView)
     .mouseEventsEnabled(true)
@@ -171,20 +171,17 @@ const gaugeView = canvasView.appendChild(swim.GaugeView)
     .innerRadius(swim.Length.pct(30))
     .outerRadius(swim.Length.pct(40))
     .tickRadius(swim.Length.pct(45))
-    .font("14px sans-serif")
-    .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"));
+    .font("14px sans-serif");
+gaugeView.title.setText("Gauge").font("20px sans-serif");
 
 // Create an array to hold our active dial views.
 const dialViews = [];
 
 function createDial() {
   // Create a new dial.
-  const dialView = new swim.DialView()
-      .value(0) // initialize to zero so the dial will tween in
-      .label("")
-      .legend("");
-  dialView.label.view.setHidden(true);
-  dialView.legend.view.setHidden(true);
+  const dialView = new swim.DialView().value(0); // initialize to zero so the dial will tween in
+  dialView.label.setText("").setHidden(true);
+  dialView.legend.setText("").setHidden(true);
   //dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]]);
   dialView.value.didSetValue = function (newValue) {
     // Update the dial label.
@@ -195,12 +192,12 @@ function createDial() {
                         .setHidden(!showLegend.checked);
   };
   // Add mouse event handlers.
-  dialView.on("pointerenter", function (event) {
-            dialView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, 1]], true);
-          })
-          .on("pointerleave", function (event) {
-            dialView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, void 0]], true);
-          });
+  dialView.addEventListener("pointerenter", function (event) {
+    dialView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, 1]], true);
+  });
+  dialView.addEventListener("pointerleave", function (event) {
+    dialView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, void 0]], true);
+  });
   // Return the initialized dial.
   return dialView;
 }

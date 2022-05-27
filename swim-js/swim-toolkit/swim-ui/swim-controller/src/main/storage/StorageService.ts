@@ -12,51 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Lazy} from "@swim/util";
+import type {Class} from "@swim/util";
 import {Service} from "@swim/component";
 import type {StorageServiceObserver} from "./StorageServiceObserver";
 import {WebStorageService} from "../"; // forward import
 import {EphemeralStorageService} from "../"; // forward import
-import {Controller} from "../"; // forward import
 
 /** @public */
-export abstract class StorageService<C extends Controller = Controller> extends Service<C> {
-  override readonly observerType?: Class<StorageServiceObserver<C>>;
+export abstract class StorageService extends Service {
+  override readonly observerType?: Class<StorageServiceObserver>;
 
   abstract get(key: string): string | undefined;
 
   abstract set(key: string, newValue: string | undefined): string | undefined;
 
   protected willSet(key: string, newValue: string | undefined, oldValue: string | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceWillStore !== void 0) {
-        observer.serviceWillStore(key, newValue, oldValue, this);
-      }
-    }
+    this.callObservers("serviceWillStore", key, newValue, oldValue, this);
   }
 
   protected onSet(key: string, newValue: string | undefined, oldValue: string | undefined): void {
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(Controller.NeedsRevise);
-    }
+    // hook
   }
 
   protected didSet(key: string, newValue: string | undefined, oldValue: string | undefined): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceDidStore!== void 0) {
-        observer.serviceDidStore(key, newValue, oldValue, this);
-      }
-    }
+    this.callObservers("serviceDidStore", key, newValue, oldValue, this);
   }
 
   abstract clear(): void;
 
   protected willClear(): void {
+    this.callObservers("serviceWillClear", this);
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -67,25 +52,17 @@ export abstract class StorageService<C extends Controller = Controller> extends 
   }
 
   protected onClear(): void {
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(Controller.NeedsRevise);
-    }
+    // hook
   }
 
   protected didClear(): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceDidClear !== void 0) {
-        observer.serviceDidClear(this);
-      }
-    }
+    this.callObservers("serviceDidClear", this);
   }
 
-  @Lazy
-  static global<C extends Controller>(): StorageService<C> {
-    let service: StorageService<C> | null = WebStorageService.local();
+  static override create(): StorageService;
+  static override create(): StorageService;
+  static override create(): StorageService {
+    let service: StorageService | null = WebStorageService.local();
     if (service === null) {
       service = new EphemeralStorageService();
     }

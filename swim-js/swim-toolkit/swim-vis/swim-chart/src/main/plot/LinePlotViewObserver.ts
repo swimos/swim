@@ -19,11 +19,7 @@ import type {LinePlotView} from "./LinePlotView";
 
 /** @public */
 export interface LinePlotViewObserver<X = unknown, Y = unknown, V extends LinePlotView<X, Y> = LinePlotView<X, Y>> extends SeriesPlotViewObserver<X, Y, V> {
-  viewWillSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;
+  viewDidSetStroke?(stroke: Color | null, view: V): void;
 
-  viewDidSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;
-
-  viewWillSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, view: V): void;
-
-  viewDidSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, view: V): void;
+  viewDidSetStrokeWidth?(strokeWidth: Length | null, view: V): void;
 }

@@ -164,7 +164,10 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
     return new LinearGradient(angle, array);
   }
 
-  static fromAny(value: AnyLinearGradient): LinearGradient {
+  static fromAny(value: AnyLinearGradient): LinearGradient;
+  static fromAny(value: AnyLinearGradient | null): LinearGradient | null;
+  static fromAny(value: AnyLinearGradient | null | undefined): LinearGradient | null | undefined;
+  static fromAny(value: AnyLinearGradient | null | undefined): LinearGradient | null | undefined {
     if (value === void 0 || value === null || value instanceof LinearGradient) {
       return value;
     } else if (typeof value === "string") {

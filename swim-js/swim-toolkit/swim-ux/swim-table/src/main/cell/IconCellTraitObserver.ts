@@ -18,7 +18,5 @@ import type {IconCellTrait} from "./IconCellTrait";
 
 /** @public */
 export interface IconCellTraitObserver<T extends IconCellTrait = IconCellTrait> extends CellTraitObserver<T> {
-  traitWillSetIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, trait: T): void;
-
-  traitDidSetIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, trait: T): void;
+  traitDidSetIcon?(icon: Graphics | null, trait: T): void;
 }

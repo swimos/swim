@@ -20,5 +20,5 @@ import type {AxisView} from "./AxisView";
 export interface AxisViewObserver<D = unknown, V extends AxisView<D> = AxisView<D>> extends GraphicsViewObserver<V> {
   createTickLabel?(tickValue: D, tickView: TickView<D>, view: V): GraphicsView | string | null;
 
-  formatTickLabel?(tickLabel: string, tickView: TickView<D>, view: V): string | null;
+  formatTickLabel?(tickLabel: string, tickView: TickView<D>, view: V): string | undefined;
 }

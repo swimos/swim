@@ -15,58 +15,44 @@
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
-import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
+import {AnyColorOrLook, ColorOrLook, ColorLook} from "@swim/theme";
+import type {GeoController} from "../geo/GeoController";
 import {GeoPathTrait} from "./GeoPathTrait";
 import type {GeoAreaTraitObserver} from "./GeoAreaTraitObserver";
+import {GeoAreaController} from "./"; // forward import
 
 /** @public */
 export abstract class GeoAreaTrait extends GeoPathTrait {
   override readonly observerType?: Class<GeoAreaTraitObserver>;
 
-  @Property<GeoAreaTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<GeoAreaTrait["fill"]>({
+    valueType: ColorLook,
     value: null,
-    willSetValue(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitWillSetFill", newFill, oldFill, this.owner);
-    },
-    didSetValue(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitDidSetFill", newFill, oldFill, this.owner);
-    },
-    fromAny(fill: Look<Color> | AnyColor | null): Look<Color> | Color | null {
-      if (fill !== null && !(fill instanceof Look)) {
-        fill = Color.fromAny(fill);
-      }
-      return fill;
+    didSetValue(fill: ColorOrLook | null): void {
+      this.owner.callObservers("traitDidSetFill", fill, this.owner);
     },
   })
-  readonly fill!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly fill!: Property<this, ColorOrLook | null, AnyColorOrLook | null>;
 
-  @Property<GeoAreaTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<GeoAreaTrait["stroke"]>({
+    valueType: ColorLook,
     value: null,
-    willSetValue(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitWillSetStroke", newStroke, oldStroke, this.owner);
-    },
-    didSetValue(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitDidSetStroke", newStroke, oldStroke, this.owner);
-    },
-    fromAny(stroke: Look<Color> | AnyColor | null): Look<Color> | Color | null {
-      if (stroke !== null && !(stroke instanceof Look)) {
-        stroke = Color.fromAny(stroke);
-      }
-      return stroke;
+    didSetValue(stroke: ColorOrLook | null): void {
+      this.owner.callObservers("traitDidSetStroke", stroke, this.owner);
     },
   })
-  readonly stroke!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly stroke!: Property<this, ColorOrLook | null, AnyColorOrLook | null>;
 
-  @Property<GeoAreaTrait, Length | null, AnyLength | null>({
-    type: Length,
+  @Property<GeoAreaTrait["strokeWidth"]>({
+    valueType: Length,
     value: null,
-    willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("traitWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
-    },
-    didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("traitDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
+    didSetValue(strokeWidth: Length | null): void {
+      this.owner.callObservers("traitDidSetStrokeWidth", strokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: Property<this, Length | null, AnyLength | null>;
+
+  override createGeoController(): GeoController {
+    return new GeoAreaController();
+  }
 }

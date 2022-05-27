@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import type {Length} from "@swim/math";
-import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
+import type {ColorOrLook} from "@swim/theme";
 import type {GeoAreaView} from "./GeoAreaView";
 import type {GeoAreaTrait} from "./GeoAreaTrait";
 import type {GeoPathControllerObserver} from "./GeoPathControllerObserver";
@@ -30,15 +29,9 @@ export interface GeoAreaControllerObserver<C extends GeoAreaController = GeoArea
 
   controllerDidDetachGeoView?(geoView: GeoAreaView, controller: C): void;
 
-  controllerWillSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, controller: C): void;
+  controllerDidSetFill?(fill: ColorOrLook | null, controller: C): void;
 
-  controllerDidSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, controller: C): void;
+  controllerDidSetStroke?(stroke: ColorOrLook | null, controller: C): void;
 
-  controllerWillSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, controller: C): void;
-
-  controllerDidSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, controller: C): void;
-
-  controllerWillSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, controller: C): void;
-
-  controllerDidSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, controller: C): void;
+  controllerDidSetStrokeWidth?(strokeWidth: Length | null, controller: C): void;
 }

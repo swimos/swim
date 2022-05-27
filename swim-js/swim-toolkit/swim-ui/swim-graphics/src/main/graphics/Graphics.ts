@@ -19,3 +19,20 @@ import type {GraphicsRenderer} from "./GraphicsRenderer";
 export interface Graphics {
   render(renderer: GraphicsRenderer, frame: R2Box): void;
 }
+
+/** @public */
+export const Graphics = (function () {
+  const Graphics = {} as {
+    is(object: unknown): object is Graphics;
+  };
+
+  Graphics.is = function (object: unknown): object is Graphics {
+    if (typeof object === "object" && object !== null || typeof object === "function") {
+      const observable = object as Graphics;
+      return "render" in observable;
+    }
+    return false;
+  };
+
+  return Graphics;
+})();

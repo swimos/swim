@@ -18,15 +18,9 @@ import type {ScaledYView} from "./ScaledYView";
 
 /** @public */
 export interface ScaledYViewObserver<Y = unknown, V extends ScaledYView<Y> = ScaledYView<Y>> extends GraphicsViewObserver<V> {
-  viewWillSetYScale?(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null, view: V): void;
+  viewDidSetYScale?(yScale: ContinuousScale<Y, number> | null, view: V): void;
 
-  viewDidSetYScale?(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null, view: V): void;
+  viewDidSetYRangePadding?(yRangePadding: readonly [number, number], view: V): void;
 
-  viewWillSetYRangePadding?(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number], view: V): void;
-
-  viewDidSetYRangePadding?(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number], view: V): void;
-
-  viewWillSetYDataDomain?(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null, view: V): void;
-
-  viewDidSetYDataDomain?(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null, view: V): void;
+  viewDidSetYDataDomain?(yDataDomain: Domain<Y> | null, view: V): void;
 }

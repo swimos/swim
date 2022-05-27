@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {Class, Observes} from "@swim/util";
+import type {FastenerClass} from "@swim/component";
 import type {GeoBox} from "@swim/geo";
 import type {Trait} from "@swim/model";
 import {TraitViewRef, TraitViewControllerSet} from "@swim/controller";
@@ -25,36 +25,20 @@ import {GeoLayerTrait} from "./GeoLayerTrait";
 import type {GeoLayerControllerObserver} from "./GeoLayerControllerObserver";
 
 /** @public */
-export interface GeoLayerControllerFeatureExt {
-  attachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void;
-  detachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void;
-  attachFeatureView(featureView: GeoView, featureController: GeoController): void;
-  detachFeatureView(featureView: GeoView, featureController: GeoController): void;
-}
-
-/** @public */
 export class GeoLayerController extends GeoController {
   override readonly observerType?: Class<GeoLayerControllerObserver>;
 
-  @TraitViewRef<GeoLayerController, GeoLayerTrait, GeoView>({
+  @TraitViewRef<GeoLayerController["geo"]>({
     traitType: GeoLayerTrait,
     observesTrait: true,
     willAttachTrait(geoTrait: GeoLayerTrait): void {
       this.owner.callObservers("controllerWillAttachGeoTrait", geoTrait, this.owner);
     },
     didAttachTrait(geoTrait: GeoLayerTrait): void {
-      const featureTraits = geoTrait.features.traits;
-      for (const traitId in featureTraits) {
-        const featureTrait = featureTraits[traitId]!;
-        this.owner.features.addTraitController(featureTrait);
-      }
+      this.owner.features.addTraits(geoTrait.features.traits);
     },
     willDetachTrait(geoTrait: GeoLayerTrait): void {
-      const featureTraits = geoTrait.features.traits;
-      for (const traitId in featureTraits) {
-        const featureTrait = featureTraits[traitId]!;
-        this.owner.features.deleteTraitController(featureTrait);
-      }
+      this.owner.features.deleteTraits(geoTrait.features.traits);
     },
     didDetachTrait(geoTrait: GeoLayerTrait): void {
       this.owner.callObservers("controllerDidDetachGeoTrait", geoTrait, this.owner);
@@ -66,10 +50,10 @@ export class GeoLayerController extends GeoController {
       this.owner.callObservers("controllerDidSetGeoBounds", newGeoBounds, oldGeoBounds, this.owner);
     },
     traitWillAttachFeature(featureTrait: GeoTrait, targetTrait: Trait | null): void {
-      this.owner.features.addTraitController(featureTrait, targetTrait);
+      this.owner.features.addTrait(featureTrait, targetTrait);
     },
     traitDidDetachFeature(featureTrait: GeoTrait): void {
-      this.owner.features.deleteTraitController(featureTrait);
+      this.owner.features.deleteTrait(featureTrait);
     },
     viewType: GeoTreeView,
     willAttachView(geoView: GeoView): void {
@@ -89,12 +73,11 @@ export class GeoLayerController extends GeoController {
       this.owner.callObservers("controllerDidDetachGeoView", geoView, this.owner);
     },
   })
-  readonly geo!: TraitViewRef<this, GeoLayerTrait, GeoView>;
-  static readonly geo: MemberFastenerClass<GeoLayerController, "geo">;
+  readonly geo!: TraitViewRef<this, GeoLayerTrait, GeoView> & Observes<GeoLayerTrait>;
+  static readonly geo: FastenerClass<GeoLayerController["geo"]>;
 
-  @TraitViewControllerSet<GeoLayerController, GeoTrait, GeoView, GeoController, GeoLayerControllerFeatureExt>({
-    implements: true,
-    type: GeoController,
+  @TraitViewControllerSet<GeoLayerController["features"]>({
+    controllerType: GeoController,
     binds: true,
     observes: true,
     get parentView(): GeoView | null {
@@ -165,12 +148,17 @@ export class GeoLayerController extends GeoController {
     },
     createController(featureTrait?: GeoTrait): GeoController {
       if (featureTrait !== void 0) {
-        return GeoController.fromTrait(featureTrait);
+        return featureTrait.createGeoController();
       } else {
         return TraitViewControllerSet.prototype.createController.call(this);
       }
     },
   })
-  readonly features!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController> & GeoLayerControllerFeatureExt;
-  static readonly features: MemberFastenerClass<GeoLayerController, "features">;
+  readonly features!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController> & Observes<GeoController> & {
+    attachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void,
+    detachFeatureTrait(featureTrait: GeoTrait, featureController: GeoController): void,
+    attachFeatureView(featureView: GeoView, featureController: GeoController): void,
+    detachFeatureView(featureView: GeoView, featureController: GeoController): void,
+  };
+  static readonly features: FastenerClass<GeoLayerController["features"]>;
 }

@@ -19,11 +19,7 @@ import type {GeoLineView} from "./GeoLineView";
 
 /** @public */
 export interface GeoLineViewObserver<V extends GeoLineView = GeoLineView> extends GeoPathViewObserver<V> {
-  viewWillSetStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;
+  viewDidSetStroke?(stroke: Color | null, view: V): void;
 
-  viewDidSetStroke?(newStroke: Color | null, oldStroke: Color | null, view: V): void;
-
-  viewWillSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, view: V): void;
-
-  viewDidSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, view: V): void;
+  viewDidSetStrokeWidth?(strokeWidth: Length | null, view: V): void;
 }

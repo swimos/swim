@@ -13,14 +13,16 @@
 // limitations under the License.
 
 import {ThemeAnimatorClass, ThemeAnimator} from "@swim/theme";
-import type {Graphics} from "../graphics/Graphics";
+import {Graphics} from "../graphics/Graphics";
 import {Icon} from "./Icon";
 import {FilledIcon} from "./FilledIcon";
 import {IconView} from "./"; // forward import
 
 /** @internal */
 export const IconGraphicsAnimator = (function (_super: typeof ThemeAnimator) {
-  const IconGraphicsAnimator = _super.extend("IconGraphicsAnimator") as ThemeAnimatorClass<ThemeAnimator<any, Graphics | null | undefined, Graphics | null | undefined>>;
+  const IconGraphicsAnimator = _super.extend("IconGraphicsAnimator", {
+    valueType: Graphics,
+  }) as ThemeAnimatorClass<ThemeAnimator<any, any, any>>;
 
   IconGraphicsAnimator.prototype.transformState = function (this: ThemeAnimator<unknown, Graphics | null>, icon: Graphics | null): Graphics | null {
     const iconView = this.owner;

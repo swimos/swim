@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {FastenerClass} from "@swim/component";
 import {Model, Trait, TraitRef} from "@swim/model";
 import {LeafTrait} from "../leaf/LeafTrait";
 import type {RowTraitObserver} from "./RowTraitObserver";
@@ -23,8 +23,8 @@ import {TableTrait} from "../"; // forward import
 export class RowTrait extends LeafTrait {
   override readonly observerType?: Class<RowTraitObserver>;
 
-  @TraitRef<RowTrait, TableTrait>({
-    // avoid cyclic static reference to type: TableTrait
+  @TraitRef<RowTrait["tree"]>({
+    // avoid cyclic static reference to traitType: TableTrait
     binds: true,
     willAttachTrait(treeTrait: TableTrait): void {
       this.owner.callObservers("traitWillAttachTree", treeTrait, this.owner);
@@ -43,5 +43,5 @@ export class RowTrait extends LeafTrait {
     },
   })
   readonly tree!: TraitRef<this, TableTrait>;
-  static readonly tree: MemberFastenerClass<RowTrait, "tree">;
+  static readonly tree: FastenerClass<RowTrait["tree"]>;
 }

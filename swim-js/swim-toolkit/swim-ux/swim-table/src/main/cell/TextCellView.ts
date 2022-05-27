@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
-import {AnyView, ViewRef} from "@swim/view";
-import {HtmlViewInit, HtmlView} from "@swim/dom";
+import type {Class} from "@swim/util";
+import {Affinity, FastenerClass} from "@swim/component";
+import {ViewRef} from "@swim/view";
+import {HtmlView} from "@swim/dom";
 import {CellView} from "./CellView";
 import type {TextCellViewObserver} from "./TextCellViewObserver";
 
@@ -28,10 +28,9 @@ export class TextCellView extends CellView {
 
   override readonly observerType?: Class<TextCellViewObserver>;
 
-  @ViewRef<TextCellView, HtmlView & Initable<HtmlViewInit | string>, {create(value?: string): HtmlView}>({
-    implements: true,
-    key: true,
-    type: HtmlView,
+  @ViewRef<TextCellView["content"]>({
+    viewType: HtmlView,
+    viewKey: true,
     binds: true,
     willAttachView(contentView: HtmlView): void {
       this.owner.callObservers("viewWillAttachContent", contentView, this.owner);
@@ -39,26 +38,27 @@ export class TextCellView extends CellView {
     didDetachView(contentView: HtmlView): void {
       this.owner.callObservers("viewDidDetachContent", contentView, this.owner);
     },
-    create(value?: string): HtmlView {
+    setText(content: string | undefined): HtmlView {
+      let contentView = this.view;
+      if (contentView === null) {
+        contentView = this.createView();
+        this.setView(contentView);
+      }
+      contentView.text(content);
+      return contentView;
+    },
+    createView(): HtmlView {
       const contentView = HtmlView.fromTag("span");
       contentView.alignSelf.setState("center", Affinity.Intrinsic);
       contentView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
       contentView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
       contentView.overflowX.setState("hidden", Affinity.Intrinsic);
       contentView.overflowY.setState("hidden", Affinity.Intrinsic);
-      if (value !== void 0) {
-        contentView.text(value);
-      }
       return contentView;
     },
-    fromAny(value: AnyView<HtmlView> | string): HtmlView {
-      if (typeof value === "string") {
-        return this.create(value);
-      } else {
-        return HtmlView.fromAny(value);
-      }
-    },
   })
-  readonly content!: ViewRef<this, HtmlView & Initable<HtmlViewInit | string>> & {create(value?: string): HtmlView};
-  static readonly content: MemberFastenerClass<TextCellView, "content">;
+  readonly content!: ViewRef<this, HtmlView> & {
+    setText(content: string | undefined): HtmlView,
+  };
+  static readonly content: FastenerClass<TextCellView["content"]>;
 }

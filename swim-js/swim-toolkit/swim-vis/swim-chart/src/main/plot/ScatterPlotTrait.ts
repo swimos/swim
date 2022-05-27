@@ -15,8 +15,11 @@
 import type {Class} from "@swim/util";
 import {PlotTrait} from "./PlotTrait";
 import type {ScatterPlotTraitObserver} from "./ScatterPlotTraitObserver";
+import type {ScatterPlotController} from "./ScatterPlotController";
 
 /** @public */
-export class ScatterPlotTrait<X = unknown, Y = unknown> extends PlotTrait<X, Y> {
+export abstract class ScatterPlotTrait<X = unknown, Y = unknown> extends PlotTrait<X, Y> {
   override readonly observerType?: Class<ScatterPlotTraitObserver<X, Y>>;
+
+  abstract override createPlotController(): ScatterPlotController<X, Y>;
 }

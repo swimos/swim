@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import type {Length} from "@swim/math";
-import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
+import type {ColorOrLook} from "@swim/theme";
 import type {GeoLineView} from "./GeoLineView";
 import type {GeoLineTrait} from "./GeoLineTrait";
 import type {GeoPathControllerObserver} from "./GeoPathControllerObserver";
@@ -30,11 +29,7 @@ export interface GeoLineControllerObserver<C extends GeoLineController = GeoLine
 
   controllerDidDetachGeoView?(geoView: GeoLineView, controller: C): void;
 
-  controllerWillSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, controller: C): void;
+  controllerDidSetStroke?(stroke: ColorOrLook | null, controller: C): void;
 
-  controllerDidSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, controller: C): void;
-
-  controllerWillSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, controller: C): void;
-
-  controllerDidSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, controller: C): void;
+  controllerDidSetStrokeWidth?(strokeWidth: Length | null, controller: C): void;
 }

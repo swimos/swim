@@ -12,61 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
-import type {PositionGestureInput} from "@swim/view";
+import type {Class, Observes} from "@swim/util";
+import type {FastenerClass} from "@swim/component";
+import type {Trait} from "@swim/model";
 import type {Graphics} from "@swim/graphics";
 import {TraitViewRef} from "@swim/controller";
 import {ToolController} from "./ToolController";
 import {ButtonToolView} from "./ButtonToolView";
-import {ButtonToolTrait} from "./ButtonToolTrait";
 import type {ButtonToolControllerObserver} from "./ButtonToolControllerObserver";
 
 /** @public */
 export class ButtonToolController extends ToolController {
   override readonly observerType?: Class<ButtonToolControllerObserver>;
 
-  protected setIcon(icon: Graphics | null): void {
-    const toolView = this.tool.view;
-    if (toolView !== null) {
-      toolView.graphics.setState(icon);
-    }
-  }
-
-  @TraitViewRef<ButtonToolController, ButtonToolTrait, ButtonToolView>({
+  @TraitViewRef<ButtonToolController["tool"]>({
     extends: true,
-    traitType: ButtonToolTrait,
-    observesTrait: true,
-    initTrait(toolTrait: ButtonToolTrait): void {
-      this.owner.setIcon(toolTrait.icon.value);
-    },
-    deinitTrait(toolTrait: ButtonToolTrait): void {
-      this.owner.setIcon(null);
-    },
-    traitDidSetIcon(newToolIcon: Graphics | null, oldToolIcon: Graphics | null): void {
-      this.owner.setIcon(newToolIcon);
-    },
     viewType: ButtonToolView,
     observesView: true,
-    initView(toolView: ButtonToolView): void {
-      const toolTrait = this.trait;
-      if (toolTrait !== null) {
-        this.owner.setIcon(toolTrait.icon.value);
-      }
-    },
-    viewWillSetGraphics(newToolIcon: Graphics | null, oldToolIcon: Graphics | null): void {
-      this.owner.callObservers("controllerWillSetToolIcon", newToolIcon, oldToolIcon, this.owner);
-    },
-    viewDidSetGraphics(newToolIcon: Graphics | null, oldToolIcon: Graphics | null): void {
-      this.owner.callObservers("controllerDidSetToolIcon", newToolIcon, oldToolIcon, this.owner);
-    },
-    viewDidPress(input: PositionGestureInput, event: Event | null): void {
-      this.owner.callObservers("controllerDidPressToolView", input, event, this.owner);
-    },
-    viewDidLongPress(input: PositionGestureInput): void {
-      this.owner.callObservers("controllerDidLongPressToolView", input, this.owner);
+    viewDidSetGraphics(toolIcon: Graphics | null): void {
+      this.owner.callObservers("controllerDidSetToolIcon", toolIcon, this.owner);
     },
   })
-  override readonly tool!: TraitViewRef<this, ButtonToolTrait, ButtonToolView>;
-  static override readonly tool: MemberFastenerClass<ButtonToolController, "tool">;
+  override readonly tool!: TraitViewRef<this, Trait, ButtonToolView> & ToolController["tool"] & Observes<ButtonToolView>;
+  static override readonly tool: FastenerClass<ButtonToolController["tool"]>;
 }

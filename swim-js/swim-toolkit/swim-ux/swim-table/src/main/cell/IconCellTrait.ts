@@ -14,22 +14,26 @@
 
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
-import type {Graphics} from "@swim/graphics";
+import {Graphics} from "@swim/graphics";
 import {CellTrait} from "./CellTrait";
 import type {IconCellTraitObserver} from "./IconCellTraitObserver";
+import type {CellController} from "./CellController";
+import {IconCellController} from "./"; // forward import
 
 /** @public */
 export class IconCellTrait extends CellTrait {
   override readonly observerType?: Class<IconCellTraitObserver>;
 
-  @Property<IconCellTrait, Graphics | null>({
+  @Property<IconCellTrait["icon"]>({
+    valueType: Graphics,
     value: null,
-    willSetValue(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-      this.owner.callObservers("traitWillSetIcon", newIcon, oldIcon, this.owner);
-    },
-    didSetValue(newIcon: Graphics | null, oldIcon: Graphics | null): void {
-      this.owner.callObservers("traitDidSetIcon", newIcon, oldIcon, this.owner);
+    didSetValue(icon: Graphics | null): void {
+      this.owner.callObservers("traitDidSetIcon", icon, this.owner);
     },
   })
   readonly icon!: Property<this, Graphics | null>;
+
+  override createCellController(): CellController {
+    return new IconCellController();
+  }
 }

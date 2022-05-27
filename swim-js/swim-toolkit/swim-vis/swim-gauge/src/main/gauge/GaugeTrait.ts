@@ -13,47 +13,36 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import {MemberFastenerClass, Property} from "@swim/component";
+import {FastenerClass, Property} from "@swim/component";
 import {Model, Trait, TraitSet} from "@swim/model";
-import type {GraphicsView} from "@swim/graphics";
 import {DialTrait} from "../dial/DialTrait";
 import type {GaugeTraitObserver} from "./GaugeTraitObserver";
-
-/** @public */
-export type GaugeTitle = GaugeTitleFunction | string;
-/** @public */
-export type GaugeTitleFunction = (gaugeTrait: GaugeTrait) => GraphicsView | string | null;
 
 /** @public */
 export class GaugeTrait extends Trait {
   override readonly observerType?: Class<GaugeTraitObserver>;
 
-  @Property<GaugeTrait, GaugeTitle | null>({
-    value: null,
-    willSetValue(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null): void {
-      this.owner.callObservers("traitWillSetGaugeTitle", newTitle, oldTitle, this.owner);
-    },
-    didSetValue(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null): void {
-      this.owner.callObservers("traitDidSetGaugeTitle", newTitle, oldTitle, this.owner);
+  @Property<GaugeTrait["title"]>({
+    valueType: String,
+    didSetValue(title: string | undefined): void {
+      this.owner.callObservers("traitDidSetTitle", title, this.owner);
     },
   })
-  readonly title!: Property<this, GaugeTitle | null>;
-  static readonly title: MemberFastenerClass<GaugeTrait, "title">;
+  readonly title!: Property<this, string | undefined>;
+  static readonly title: FastenerClass<GaugeTrait["title"]>;
 
-  @Property<GaugeTrait, number>({
+  @Property<GaugeTrait["limit"]>({
+    valueType: Number,
     value: 0,
-    willSetValue(newLimit: number, oldLimit: number): void {
-      this.owner.callObservers("traitWillSetGaugeLimit", newLimit, oldLimit, this.owner);
-    },
-    didSetValue(newLimit: number, oldLimit: number): void {
-      this.owner.callObservers("traitDidSetGaugeLimit", newLimit, oldLimit, this.owner);
+    didSetValue(limit: number): void {
+      this.owner.callObservers("traitDidSetLimit", limit, this.owner);
     },
   })
   readonly limit!: Property<this, number>;
-  static readonly limit: MemberFastenerClass<GaugeTrait, "limit">;
+  static readonly limit: FastenerClass<GaugeTrait["limit"]>;
 
-  @TraitSet<GaugeTrait, DialTrait>({
-    type: DialTrait,
+  @TraitSet<GaugeTrait["dials"]>({
+    traitType: DialTrait,
     binds: true,
     willAttachTrait(dialTrait: DialTrait, targetTrait: Trait | null): void {
       this.owner.callObservers("traitWillAttachDial", dialTrait, targetTrait, this.owner);
@@ -76,33 +65,15 @@ export class GaugeTrait extends Trait {
     },
   })
   readonly dials!: TraitSet<this, DialTrait>;
-  static readonly dials: MemberFastenerClass<GaugeTrait, "dials">;
-
-  /** @internal */
-  protected startConsumingDials(): void {
-    const dialTraits = this.dials.traits;
-    for (const traitId in dialTraits) {
-      const dialTrait = dialTraits[traitId]!;
-      dialTrait.consume(this);
-    }
-  }
-
-  /** @internal */
-  protected stopConsumingDials(): void {
-    const dialTraits = this.dials.traits;
-    for (const traitId in dialTraits) {
-      const dialTrait = dialTraits[traitId]!;
-      dialTrait.unconsume(this);
-    }
-  }
+  static readonly dials: FastenerClass<GaugeTrait["dials"]>;
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();
-    this.startConsumingDials();
+    this.dials.consumeTraits(this);
   }
 
   protected override onStopConsuming(): void {
     super.onStopConsuming();
-    this.stopConsumingDials();
+    this.dials.unconsumeTraits(this);
   }
 }

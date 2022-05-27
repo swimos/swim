@@ -17,7 +17,9 @@ import {Property} from "@swim/component";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {Graphics, AnyIconLayout, IconLayout} from "@swim/graphics";
 import {GeoTrait} from "../geo/GeoTrait";
+import type {GeoController} from "../geo/GeoController";
 import type {GeoIconTraitObserver} from "./GeoIconTraitObserver";
+import {GeoIconController} from "./"; // forward import
 
 /** @public */
 export class GeoIconTrait extends GeoTrait {
@@ -28,38 +30,34 @@ export class GeoIconTrait extends GeoTrait {
     return geoCenter !== null ? geoCenter.bounds : GeoBox.undefined();
   }
 
-  @Property<GeoIconTrait, GeoPoint | null, AnyGeoPoint | null>({
-    type: GeoPoint,
+  @Property<GeoIconTrait["geoCenter"]>({
+    valueType: GeoPoint,
     value: null,
-    willSetValue(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.callObservers("traitWillSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
-    },
-    didSetValue(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.callObservers("traitDidSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
+    didSetValue(geoCenter: GeoPoint | null): void {
+      this.owner.callObservers("traitDidSetGeoCenter", geoCenter, this.owner);
     },
   })
   readonly geoCenter!: Property<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @Property<GeoIconTrait, IconLayout | null, AnyIconLayout | null>({
-    type: IconLayout,
+  @Property<GeoIconTrait["iconLayout"]>({
+    valueType: IconLayout,
     value: null,
-    willSetValue(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-      this.owner.callObservers("traitWillSetIconLayout", newIconLayout, oldIconLayout, this.owner);
-    },
-    didSetValue(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
-      this.owner.callObservers("traitDidSetIconLayout", newIconLayout, oldIconLayout, this.owner);
+    didSetValue(iconLayout: IconLayout | null): void {
+      this.owner.callObservers("traitDidSetIconLayout", iconLayout, this.owner);
     },
   })
   readonly iconLayout!: Property<this, IconLayout | null, AnyIconLayout | null>;
 
-  @Property<GeoIconTrait, Graphics | null>({
+  @Property<GeoIconTrait["graphics"]>({
+    valueType: Graphics,
     value: null,
-    willSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.callObservers("traitWillSetGraphics", newGraphics, oldGraphics, this.owner);
-    },
-    didSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.callObservers("traitDidSetGraphics", newGraphics, oldGraphics, this.owner);
+    didSetValue(graphics: Graphics | null): void {
+      this.owner.callObservers("traitDidSetGraphics", graphics, this.owner);
     },
   })
   readonly graphics!: Property<this, Graphics | null>;
+
+  override createGeoController(): GeoController {
+    return new GeoIconController();
+  }
 }

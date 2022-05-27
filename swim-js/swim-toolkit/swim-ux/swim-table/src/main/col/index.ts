@@ -15,12 +15,17 @@
 export {ColView} from "./ColView";
 export {ColViewObserver} from "./ColViewObserver";
 
-export {
-  ColLabel,
-  ColLabelFunction,
-  ColTrait,
-} from "./ColTrait";
+export {TextColView} from "./TextColView";
+export {TextColViewObserver} from "./TextColViewObserver";
+
+export {ColTrait} from "./ColTrait";
 export {ColTraitObserver} from "./ColTraitObserver";
+
+export {TextColTrait} from "./TextColTrait";
+export {TextColTraitObserver} from "./TextColTraitObserver";
 
 export {ColController} from "./ColController";
 export {ColControllerObserver} from "./ColControllerObserver";
+
+export {TextColController} from "./TextColController";
+export {TextColControllerObserver} from "./TextColControllerObserver";

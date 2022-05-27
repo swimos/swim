@@ -15,8 +15,11 @@
 import type {Class} from "@swim/util";
 import {PlotTrait} from "./PlotTrait";
 import type {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
+import type {SeriesPlotController} from "./SeriesPlotController";
 
 /** @public */
-export class SeriesPlotTrait<X = unknown, Y = unknown> extends PlotTrait<X, Y> {
+export abstract class SeriesPlotTrait<X = unknown, Y = unknown> extends PlotTrait<X, Y> {
   override readonly observerType?: Class<SeriesPlotTraitObserver<X, Y>>;
+
+  abstract override createPlotController(): SeriesPlotController<X, Y>;
 }

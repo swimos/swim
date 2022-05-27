@@ -32,7 +32,7 @@ export interface GeoLayerControllerObserver<C extends GeoLayerController = GeoLa
 
   controllerWillAttachFeature?(featureController: GeoController, controller: C): void;
 
-  controllerDidDetachFeature(featureController: GeoController, controller: C): void;
+  controllerDidDetachFeature?(featureController: GeoController, controller: C): void;
 
   controllerWillAttachFeatureTrait?(featureTrait: GeoTrait, featureController: GeoController, controller: C): void;
 

@@ -19,9 +19,9 @@ import type {PieView} from "./PieView";
 
 /** @public */
 export interface PieViewObserver<V extends PieView = PieView> extends ViewObserver<V> {
-  viewWillAttachPieTitle?(titleView: GraphicsView, view: V): void;
+  viewWillAttachTitle?(titleView: GraphicsView, view: V): void;
 
-  viewDidDetachPieTitle?(titleView: GraphicsView, view: V): void;
+  viewDidDetachTitle?(titleView: GraphicsView, view: V): void;
 
   viewWillAttachSlice?(sliceView: SliceView, targetView: View | null, view: V): void;
 

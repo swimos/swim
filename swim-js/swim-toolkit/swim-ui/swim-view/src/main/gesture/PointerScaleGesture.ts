@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import type {FastenerOwner} from "@swim/component";
+import type {View} from "../view/View";
 import {GestureInput} from "./GestureInput";
 import type {ScaleGestureInput} from "./ScaleGestureInput";
-import {ScaleGestureClass, ScaleGestureFactory, ScaleGesture} from "./ScaleGesture";
-import type {View} from "../view/View";
+import {ScaleGestureClass, ScaleGesture} from "./ScaleGesture";
 
 /** @internal */
 export interface PointerScaleGesture<O = unknown, V extends View = View, X = unknown, Y = unknown> extends ScaleGesture<O, V, X, Y> {
@@ -62,20 +62,22 @@ export interface PointerScaleGesture<O = unknown, V extends View = View, X = unk
 
 /** @internal */
 export const PointerScaleGesture = (function (_super: typeof ScaleGesture) {
-  const PointerScaleGesture = _super.extend("PointerScaleGesture") as ScaleGestureFactory<PointerScaleGesture<any, any, any, any>>;
+  const PointerScaleGesture = _super.extend("PointerScaleGesture", {
+    wheel: true,
+  }) as ScaleGestureClass<PointerScaleGesture<any, any, any, any>>;
 
   PointerScaleGesture.prototype.attachHoverEvents = function (this: PointerScaleGesture, view: View): void {
-    view.on("pointerenter", this.onPointerEnter as EventListener);
-    view.on("pointerleave", this.onPointerLeave as EventListener);
-    view.on("pointerdown", this.onPointerDown as EventListener);
-    view.on("wheel", this.onWheel as EventListener);
+    view.addEventListener("pointerenter", this.onPointerEnter as EventListener);
+    view.addEventListener("pointerleave", this.onPointerLeave as EventListener);
+    view.addEventListener("pointerdown", this.onPointerDown as EventListener);
+    view.addEventListener("wheel", this.onWheel as EventListener);
   };
 
   PointerScaleGesture.prototype.detachHoverEvents = function (this: PointerScaleGesture, view: View): void {
-    view.off("pointerenter", this.onPointerEnter as EventListener);
-    view.off("pointerleave", this.onPointerLeave as EventListener);
-    view.off("pointerdown", this.onPointerDown as EventListener);
-    view.off("wheel", this.onWheel as EventListener);
+    view.removeEventListener("pointerenter", this.onPointerEnter as EventListener);
+    view.removeEventListener("pointerleave", this.onPointerLeave as EventListener);
+    view.removeEventListener("pointerdown", this.onPointerDown as EventListener);
+    view.removeEventListener("wheel", this.onWheel as EventListener);
   };
 
   PointerScaleGesture.prototype.attachPressEvents = function (this: PointerScaleGesture, view: View): void {
@@ -197,8 +199,8 @@ export const PointerScaleGesture = (function (_super: typeof ScaleGesture) {
     }
   };
 
-  PointerScaleGesture.construct = function <G extends PointerScaleGesture<any, any, any, any>>(gestureClass: ScaleGestureClass<PointerScaleGesture<any, any, any, any>>, gesture: G | null, owner: FastenerOwner<G>): G {
-    gesture = _super.construct(gestureClass, gesture, owner) as G;
+  PointerScaleGesture.construct = function <G extends PointerScaleGesture<any, any, any, any>>(gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct.call(this, gesture, owner) as G;
     gesture.onPointerEnter = gesture.onPointerEnter.bind(gesture);
     gesture.onPointerLeave = gesture.onPointerLeave.bind(gesture);
     gesture.onPointerDown = gesture.onPointerDown.bind(gesture);

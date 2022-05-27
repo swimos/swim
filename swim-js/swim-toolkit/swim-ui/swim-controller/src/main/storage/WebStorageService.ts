@@ -14,10 +14,9 @@
 
 import {Lazy} from "@swim/util";
 import {StorageService} from "./StorageService";
-import type {Controller} from "../controller/Controller";
 
 /** @public */
-export class WebStorageService<C extends Controller = Controller> extends StorageService<C> {
+export class WebStorageService extends StorageService {
   constructor(storage: Storage) {
     super();
     this.storage = storage;
@@ -82,30 +81,22 @@ export class WebStorageService<C extends Controller = Controller> extends Storag
     }
   }
 
-  protected override onAttach(): void {
-    super.onAttach();
-    this.attachEvents();
-  }
-
-  protected override onDetach(): void {
-    this.detachEvents();
-    super.onDetach();
-  }
-
-  protected attachEvents(): void {
+  protected override onMount(): void {
+    super.onMount();
     if (typeof window !== "undefined") {
       window.addEventListener("storage", this.onStorage);
     }
   }
 
-  protected detachEvents(): void {
+  protected override onUnmount(): void {
+    super.onUnmount();
     if (typeof window !== "undefined") {
       window.removeEventListener("storage", this.onStorage);
     }
   }
 
   @Lazy
-  static local<C extends Controller>(): WebStorageService<C> | null {
+  static local(): WebStorageService | null {
     try {
       return new WebStorageService(window.localStorage);
     } catch (e) {
@@ -114,7 +105,7 @@ export class WebStorageService<C extends Controller = Controller> extends Storag
   }
 
   @Lazy
-  static session<C extends Controller>(): WebStorageService<C> | null {
+  static session(): WebStorageService | null {
     try {
       return new WebStorageService(window.sessionStorage);
     } catch (e) {

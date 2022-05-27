@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
+import type {Class, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Property, Animator} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
-import {AnyColor, Color} from "@swim/style";
+import {AnyColor, Color, AnyFocus, Focus, FocusAnimator} from "@swim/style";
 import {Look, Feel, MoodVector, ThemeMatrix, ThemeAnimator} from "@swim/theme";
-import {PositionGestureInput, PositionGesture, ViewContextType, View} from "@swim/view";
+import {ViewFlags, View, PositionGestureInput, PositionGesture} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import {Graphics, Icon, FilledIcon, IconGraphicsAnimator, SvgIconView} from "@swim/graphics";
 import {ButtonGlow} from "@swim/button";
@@ -43,8 +43,12 @@ export class ButtonToolView extends ToolView {
     this.overflowY.setState("hidden", Affinity.Intrinsic);
     this.userSelect.setState("none", Affinity.Intrinsic);
     this.cursor.setState("pointer", Affinity.Intrinsic);
+    this.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
 
-    this.modifyMood(Feel.default, [[Feel.translucent, 1]]);
+    const hoverPhase = this.hover.getPhase();
+    this.modifyMood(Feel.default, [[Feel.hovering, 1],
+                                   [Feel.translucent, 1],
+                                   [Feel.transparent, 1 - hoverPhase]], false);
   }
 
   override readonly observerType?: Class<ButtonToolViewObserver>;
@@ -65,45 +69,42 @@ export class ButtonToolView extends ToolView {
     return svgView instanceof SvgIconView ? svgView : null;
   }
 
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsLayout})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsLayout})
   override readonly xAlign!: Animator<this, number>;
 
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsLayout})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsLayout})
   readonly yAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Length, value: null, updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Length, value: null, updateFlags: View.NeedsLayout})
   readonly iconWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Length, value: null, updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Length, value: null, updateFlags: View.NeedsLayout})
   readonly iconHeight!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator<ButtonToolView, Color | null, AnyColor | null>({
-    type: Color,
+  @ThemeAnimator<ButtonToolView["iconColor"]>({
+    valueType: Color,
     value: null,
     updateFlags: View.NeedsLayout,
-    didSetValue(newIconColor: Color | null, oldIconColor: Color | null): void {
-      if (newIconColor !== null) {
+    didSetState(iconColor: Color | null): void {
+      if (iconColor !== null) {
         const oldGraphics = this.owner.graphics.value;
         if (oldGraphics instanceof FilledIcon) {
-          const newGraphics = oldGraphics.withFillColor(newIconColor);
-          this.owner.graphics.setState(newGraphics, Affinity.Reflexive);
+          const newGraphics = oldGraphics.withFillColor(iconColor);
+          const timing = this.timing !== null ? this.timing : false;
+          this.owner.graphics.setState(newGraphics, timing, Affinity.Reflexive);
         }
       }
     },
   })
   readonly iconColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator<ButtonToolView, Graphics | null>({
+  @ThemeAnimator<ButtonToolView["graphics"]>({
     extends: IconGraphicsAnimator,
-    type: Object,
+    valueType: Graphics,
     value: null,
     updateFlags: View.NeedsLayout,
-    willSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.callObservers("viewWillSetGraphics", newGraphics, oldGraphics, this.owner);
-    },
     didSetValue(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.requireUpdate(View.NeedsRasterize | View.NeedsComposite);
-      this.owner.callObservers("viewDidSetGraphics", newGraphics, oldGraphics, this.owner);
+      this.owner.callObservers("viewDidSetGraphics", newGraphics, this.owner);
     },
   })
   readonly graphics!: ThemeAnimator<this, Graphics | null>;
@@ -127,7 +128,7 @@ export class ButtonToolView extends ToolView {
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (!this.graphics.inherited) {
+    if (!this.graphics.derived) {
       const oldGraphics = this.graphics.value;
       if (oldGraphics instanceof Icon) {
         const newGraphics = oldGraphics.withTheme(theme, mood);
@@ -136,13 +137,20 @@ export class ButtonToolView extends ToolView {
     }
   }
 
-  protected override onResize(viewContext: ViewContextType<this>): void {
-    super.onResize(viewContext);
+  protected override onResize(): void {
+    super.onResize();
     this.requireUpdate(View.NeedsLayout);
   }
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override needsDisplay(displayFlags: ViewFlags): ViewFlags {
+    if ((this.flags & View.NeedsLayout) === 0) {
+      displayFlags &= ~View.NeedsLayout;
+    }
+    return displayFlags;
+  }
+
+  protected override onLayout(): void {
+    super.onLayout();
     this.layoutTool();
   }
 
@@ -158,14 +166,26 @@ export class ButtonToolView extends ToolView {
       svgView.width.setState(viewWidth, Affinity.Intrinsic);
       svgView.height.setState(viewHeight, Affinity.Intrinsic);
       svgView.viewBox.setState("0 0 " + viewWidth + " " + viewHeight, Affinity.Intrinsic);
-      this.effectiveWidth.setState(viewWidth);
+      this.effectiveWidth.setValue(viewWidth);
     }
   }
 
-  @Property({type: Boolean, inherits: true, value: true})
+  @Property({valueType: Boolean, value: true, inherits: true})
   readonly hovers!: Property<this, boolean>;
 
-  @Property({type: Boolean, inherits: true, value: true})
+  @FocusAnimator<ButtonToolView["hover"]>({
+    value: Focus.unfocused(),
+    get transition(): Timing | null {
+      return this.owner.getLookOr(Look.timing, null);
+    },
+    didSetValue(newHover: Focus, oldHover: Focus): void {
+      const hoverPhase = newHover.phase;
+      this.owner.modifyMood(Feel.default, [[Feel.transparent, 1 - hoverPhase]], false);
+    },
+  })
+  readonly hover!: FocusAnimator<this, Focus, AnyFocus>;
+
+  @Property({valueType: Boolean, value: true, inherits: true})
   readonly glows!: Property<this, boolean>;
 
   protected glow(input: PositionGestureInput): void {
@@ -180,37 +200,20 @@ export class ButtonToolView extends ToolView {
     }
   }
 
-  @PositionGesture<ButtonToolView, HtmlView>({
-    self: true,
+  @PositionGesture<ButtonToolView["gesture"]>({
+    bindsOwner: true,
     observes: true,
     viewDidUnmount(): void {
-      this.owner.modifyMood(Feel.default, [[Feel.hovering, void 0]]);
-      if (this.owner.backgroundColor.hasAffinity(Affinity.Intrinsic)) {
-        let backgroundColor = this.owner.getLookOr(Look.backgroundColor, null);
-        if (backgroundColor !== null) {
-          backgroundColor = backgroundColor.alpha(0);
-        }
-        this.owner.backgroundColor.setState(backgroundColor, false, Affinity.Intrinsic);
-      }
+      this.owner.hover.unfocus(false);
     },
     didStartHovering(): void {
       if (this.owner.hovers.value) {
-        this.owner.modifyMood(Feel.default, [[Feel.hovering, 1]]);
-        if (this.owner.backgroundColor.hasAffinity(Affinity.Intrinsic)) {
-          const timing = this.owner.getLook(Look.timing);
-          this.owner.backgroundColor.setState(this.owner.getLookOr(Look.backgroundColor, null), timing, Affinity.Intrinsic);
-        }
+        this.owner.hover.focus(false);
       }
     },
     didStopHovering(): void {
-      this.owner.modifyMood(Feel.default, [[Feel.hovering, void 0]]);
-      if (this.owner.backgroundColor.hasAffinity(Affinity.Intrinsic)) {
-        let backgroundColor = this.owner.getLookOr(Look.backgroundColor, null);
-        if (backgroundColor !== null) {
-          backgroundColor = backgroundColor.alpha(0);
-        }
-        const timing = this.owner.getLook(Look.timing);
-        this.owner.backgroundColor.setState(backgroundColor, timing, Affinity.Intrinsic);
+      if (this.owner.hovers.value) {
+        this.owner.hover.unfocus();
       }
     },
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
@@ -263,8 +266,8 @@ export class ButtonToolView extends ToolView {
       }
     },
   })
-  readonly gesture!: PositionGesture<this, HtmlView>;
-  static readonly gesture: MemberFastenerClass<ButtonToolView, "gesture">;
+  readonly gesture!: PositionGesture<this, HtmlView> & Observes<HtmlView>;
+  static readonly gesture: FastenerClass<ButtonToolView["gesture"]>;
 
   onPress(input: PositionGestureInput, event: Event | null): void {
     // hook

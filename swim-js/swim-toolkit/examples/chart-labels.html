@@ -12,12 +12,12 @@
     <script>
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").position("relative").width("90%").height("90%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
@@ -40,16 +40,16 @@ const graphView = chartView.graph.insertView();
 
 const plotView = graphView.appendChild(swim.LinePlotView)
     .hitMode("domain")
-    .strokeWidth(2)
-    .on("pointerover", function (event) {
-      const dataPoint = event.targetView;
-      const y = dataPoint.y.value;
-      dataPoint.label(y.toFixed(2));
-    })
-    .on("pointerout", function (event) {
-      const dataPoint = event.targetView;
-      dataPoint.label(null);
-    });
+    .strokeWidth(2);
+plotView.addEventListener("pointerover", function (event) {
+  const dataPoint = event.targetView;
+  const y = dataPoint.y.value;
+  dataPoint.label.setText(y.toFixed(2));
+});
+plotView.addEventListener("pointerout", function (event) {
+  const dataPoint = event.targetView;
+  dataPoint.label.setView(null);
+});
 plotView.textColor.setLook(swim.Look.labelColor);
 plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 

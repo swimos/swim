@@ -22,13 +22,13 @@ Feel.default = new InterpolatedFeel("default");
 
 Feel.primary = new InterpolatedFeel("primary");
 Feel.secondary = new InterpolatedFeel("secondary");
-
-Feel.unselected = new InterpolatedFeel("unselected");
-Feel.selected = new InterpolatedFeel("selected");
 Feel.disabled = new InterpolatedFeel("disabled");
 Feel.inactive = new InterpolatedFeel("inactive");
 Feel.warning = new InterpolatedFeel("warning");
 Feel.alert = new InterpolatedFeel("alert");
+
+Feel.unselected = new InterpolatedFeel("unselected");
+Feel.selected = new InterpolatedFeel("selected");
 
 Feel.darker = new BrightnessFeel("darker");
 Feel.lighter = new BrightnessFeel("lighter");
@@ -39,10 +39,10 @@ Feel.covered = new InterpolatedFeel("covered");
 
 Feel.opaque = new InterpolatedFeel("opaque");
 Feel.floating = new InterpolatedFeel("floating");
-Feel.transparent = new InterpolatedFeel("transparent");
-Feel.translucent = new OpacityFeel("translucent");
 Feel.embossed = new BrightnessFeel("embossed");
 Feel.nested = new BrightnessFeel("nested");
 Feel.hovering = new BrightnessFeel("hovering");
+Feel.translucent = new OpacityFeel("translucent");
+Feel.transparent = new OpacityFeel("transparent");
 
 Feel.navigating = new InterpolatedFeel("navigating");

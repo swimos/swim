@@ -12,9 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {PositionGestureInput} from "@swim/view";
 import type {HtmlViewObserver} from "@swim/dom";
 import type {ToolView} from "./ToolView";
 
 /** @public */
 export interface ToolViewObserver<V extends ToolView = ToolView> extends HtmlViewObserver<V> {
+  viewDidPress?(input: PositionGestureInput, event: Event | null, view: V): void;
+
+  viewDidLongPress?(input: PositionGestureInput, view: V): void;
 }

@@ -27,6 +27,4 @@ export abstract class EsriView extends MapView {
   override readonly observerType?: Class<EsriViewObserver>;
 
   abstract readonly map: __esri.View;
-
-  abstract override readonly geoViewport: EsriViewport;
 }

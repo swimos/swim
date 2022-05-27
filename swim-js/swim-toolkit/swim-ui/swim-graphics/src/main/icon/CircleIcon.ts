@@ -104,16 +104,19 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
 
   override paint(context: PaintingContext, frame: R2Box): void {
     // save
+    const contextGlobalAlpha = context.globalAlpha;
     const contextFillStyle = context.fillStyle;
 
     context.beginPath();
     this.draw(context, frame);
     if (this.fillColor !== null) {
-      context.fillStyle = this.fillColor.toString();
+      context.globalAlpha = this.fillColor.alpha();
+      context.fillStyle = this.fillColor.toHexString();
     }
     context.fill();
 
     // restore
+    context.globalAlpha = contextGlobalAlpha;
     context.fillStyle = contextFillStyle;
   }
 

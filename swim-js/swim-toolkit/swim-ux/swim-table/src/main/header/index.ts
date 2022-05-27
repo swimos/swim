@@ -18,8 +18,5 @@ export {HeaderViewObserver} from "./HeaderViewObserver";
 export {HeaderTrait} from "./HeaderTrait";
 export {HeaderTraitObserver} from "./HeaderTraitObserver";
 
-export {
-  HeaderControllerColExt,
-  HeaderController,
-} from "./HeaderController";
+export {HeaderController} from "./HeaderController";
 export {HeaderControllerObserver} from "./HeaderControllerObserver";

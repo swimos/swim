@@ -12,22 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Arrays, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/component";
+import {Mutable, Class, Arrays, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import {AnyLength, Length, AnyR2Box, R2Box} from "@swim/math";
-import {AnyColor, Color} from "@swim/style";
+import {AnyColor, Color, AnyPresence, Presence, PresenceAnimator} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {
-  ModalOptions,
-  ModalState,
-  Modal,
-  ViewContextType,
-  ViewContext,
-  ViewFlags,
-  View,
-  ViewRef,
-} from "@swim/view";
-import {StyleAnimator, HtmlViewInit, HtmlView, HtmlViewObserver} from "@swim/dom";
+import {ViewFlags, View, ViewRef} from "@swim/view";
+import {StyleAnimator, HtmlViewInit, HtmlView, ModalView} from "@swim/dom";
 import type {PopoverViewObserver} from "./PopoverViewObserver";
 
 /** @public */
@@ -43,12 +34,10 @@ export interface PopoverViewInit extends HtmlViewInit {
 }
 
 /** @public */
-export class PopoverView extends HtmlView implements Modal {
+export class PopoverView extends HtmlView implements ModalView {
   constructor(node: HTMLElement) {
     super(node);
     this.sourceFrame = null;
-    this.displayState = PopoverView.HiddenState;
-    this.modality = false;
     this.allowedPlacement = ["top", "bottom", "right", "left"];
     this.currentPlacement = "none";
     this.onClick = this.onClick.bind(this);
@@ -74,39 +63,24 @@ export class PopoverView extends HtmlView implements Modal {
     return arrow;
   }
 
-  /** @internal */
-  readonly displayState: number;
-
-  /** @internal */
-  setDisplayState(displayState: number): void {
-    (this as Mutable<this>).displayState = displayState;
-  }
-
-  @StyleAnimator<PopoverView, Color | null, AnyColor | null>({
-    propertyNames: "background-color",
-    type: Color,
-    value: null,
-    didSetValue(newBackgroundColor: Color, oldBackgroundColor: Color): void {
+  @StyleAnimator<PopoverView["backgroundColor"]>({
+    extends: HtmlView.getFastenerClass("backgroundColor"),
+    didSetValue(backgroundColor: Color): void {
       this.owner.place();
     },
   })
   override readonly backgroundColor!: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  /** @internal */
-  @ThemeAnimator({type: Number, value: 0})
-  readonly displayPhase!: ThemeAnimator<this, number>; // 0 = hidden; 1 = shown
-
-  @ThemeAnimator({type: Length, value: Length.zero()})
+  @ThemeAnimator({valueType: Length, value: Length.zero()})
   readonly placementGap!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.px(10)})
+  @ThemeAnimator({valueType: Length, value: Length.px(10)})
   readonly arrowWidth!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.px(8)})
+  @ThemeAnimator({valueType: Length, value: Length.px(8)})
   readonly arrowHeight!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ViewRef<PopoverView, View, HtmlViewObserver>({
-    implements: true,
+  @ViewRef<PopoverView["source"]>({
     observes: true,
     willAttachView(sourceView: View): void {
       this.owner.callObservers("popoverWillAttachSource", sourceView, this.owner);
@@ -120,19 +94,19 @@ export class PopoverView extends HtmlView implements Modal {
     viewDidMount(view: View): void {
       this.owner.place();
     },
-    viewDidResize(viewContext: ViewContext, view: View): void {
+    viewDidResize(view: View): void {
       this.owner.place();
     },
-    viewDidScroll(viewContext: ViewContext, view: View): void {
+    viewDidScroll(view: View): void {
       this.owner.place();
     },
-    viewDidAnimate(viewContext: ViewContext, view: View): void {
+    viewDidAnimate(view: View): void {
       this.owner.place();
     },
-    viewDidLayout(viewContext: ViewContext, view: View): void {
+    viewDidLayout(view: View): void {
       this.owner.place();
     },
-    viewDidProject(viewContext: ViewContext, view: View): void {
+    viewDidProject(view: View): void {
       this.owner.place();
     },
     viewDidSetAttribute(name: string, value: unknown, view: HtmlView): void {
@@ -142,146 +116,64 @@ export class PopoverView extends HtmlView implements Modal {
       this.owner.place();
     },
   })
-  readonly source!: ViewRef<this, View>;
-  static readonly source: MemberFastenerClass<PopoverView, "source">;
+  readonly source!: ViewRef<this, View> & Observes<HtmlView>;
+  static readonly source: FastenerClass<PopoverView["source"]>;
 
-  setSource(sourceView: View | null): void {
-    this.source.setView(sourceView);
-  }
-
-  get modalView(): View | null {
-    return this;
-  }
-
-  get modalState(): ModalState {
-    switch (this.displayState) {
-      case PopoverView.HiddenState: return "hidden";
-      case PopoverView.HidingState:
-      case PopoverView.HideState: return "hiding";
-      case PopoverView.ShownState: return "shown";
-      case PopoverView.ShowingState:
-      case PopoverView.ShowState: return "showing";
-      default: throw new Error("" + this.displayState);
-    }
-  }
-
-  isShown(): boolean {
-    switch (this.displayState) {
-      case PopoverView.ShownState:
-      case PopoverView.ShowingState:
-      case PopoverView.ShowState: return true;
-      default: return false;
-    }
-  }
-
-  isHidden(): boolean {
-    switch (this.displayState) {
-      case PopoverView.HiddenState:
-      case PopoverView.HidingState:
-      case PopoverView.HideState: return true;
-      default: return false;
-    }
-  }
-
-  readonly modality: boolean | number;
-
-  showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
-    if (this.isHidden()) {
-      if (timing === void 0 || timing === true) {
-        timing = this.getLookOr(Look.timing, false);
+  /** @override */
+  @PresenceAnimator<PopoverView["presence"]>({
+    value: Presence.dismissed(),
+    updateFlags: View.NeedsLayout,
+    get transition(): Timing | null {
+      return this.owner.getLookOr(Look.timing, null);
+    },
+    didSetValue(presence: Presence): void {
+      const phase = presence.phase;
+      const placement = this.owner.currentPlacement;
+      if (placement === "above") {
+        this.owner.opacity.setState(void 0, Affinity.Intrinsic);
+        this.owner.marginTop.setState((1 - phase) * -this.owner.node.clientHeight, Affinity.Intrinsic);
+      } else if (placement === "below") {
+        this.owner.opacity.setState(void 0, Affinity.Intrinsic);
+        this.owner.marginTop.setState((1 - phase) * this.owner.node.clientHeight, Affinity.Intrinsic);
       } else {
-        timing = Timing.fromAny(timing);
+        this.owner.marginTop.setState(null, Affinity.Intrinsic);
+        this.owner.opacity.setState(phase, Affinity.Intrinsic);
       }
-      if (options.modal !== void 0) {
-        (this as Mutable<this>).modality = options.modal;
-      }
-      this.setDisplayState(PopoverView.ShowState);
-      if (timing !== false) {
-        this.displayPhase.setState(1, timing);
-      } else {
-        this.willShowPopover();
-        this.didShowPopover();
-      }
-    }
-  }
+      this.owner.callObservers("viewDidSetPresence", presence, this.owner);
+    },
+    willPresent(): void {
+      this.owner.callObservers("viewWillPresent", this.owner);
+      this.owner.place();
+      this.owner.visibility.setState("visible", Affinity.Intrinsic);
+    },
+    didPresent(): void {
+      this.owner.pointerEvents.setState("auto", Affinity.Intrinsic);
+      this.owner.marginTop.setState(null, Affinity.Intrinsic);
+      this.owner.opacity.setState(void 0, Affinity.Intrinsic);
+      this.owner.callObservers("viewDidPresent", this.owner);
+    },
+    willDismiss(): void {
+      this.owner.callObservers("viewWillDismiss", this.owner);
+      this.owner.pointerEvents.setState("none", Affinity.Intrinsic);
+    },
+    didDismiss(): void {
+      this.owner.visibility.setState("hidden", Affinity.Intrinsic);
+      this.owner.marginTop.setState(null, Affinity.Intrinsic);
+      this.owner.opacity.setState(void 0, Affinity.Intrinsic);
+      this.owner.callObservers("viewDidDismiss", this.owner);
+    },
+  })
+  readonly presence!: PresenceAnimator<this, Presence, AnyPresence>;
 
-  protected willShowPopover(): void {
-    this.setDisplayState(PopoverView.ShowingState);
-
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.popoverWillShow !== void 0) {
-        observer.popoverWillShow(this);
-      }
-    }
-
-    this.place();
-    this.visibility.setState("visible", Affinity.Intrinsic);
-  }
-
-  protected didShowPopover(): void {
-    this.setDisplayState(PopoverView.ShownState);
-
-    this.pointerEvents.setState("auto", Affinity.Intrinsic);
-    this.marginTop.setState(null, Affinity.Intrinsic);
-    this.opacity.setState(void 0, Affinity.Intrinsic);
-
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.popoverDidShow !== void 0) {
-        observer.popoverDidShow(this);
-      }
-    }
-  }
-
-  hideModal(timing?: AnyTiming | boolean): void {
-    if (this.isShown()) {
-      if (timing === void 0 || timing === true) {
-        timing = this.getLookOr(Look.timing, false);
-      } else {
-        timing = Timing.fromAny(timing);
-      }
-      this.setDisplayState(PopoverView.HideState);
-      if (timing !== false) {
-        this.displayPhase.setState(0, timing);
-      } else {
-        this.willHidePopover();
-        this.didHidePopover();
-      }
-    }
-  }
-
-  protected willHidePopover(): void {
-    this.setDisplayState(PopoverView.HidingState);
-
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.popoverWillHide !== void 0) {
-        observer.popoverWillHide(this);
-      }
-    }
-
-    this.pointerEvents.setState("none", Affinity.Intrinsic);
-  }
-
-  protected didHidePopover(): void {
-    this.setDisplayState(PopoverView.HiddenState);
-
-    this.visibility.setState("hidden", Affinity.Intrinsic);
-    this.marginTop.setState(null, Affinity.Intrinsic);
-    this.opacity.setState(void 0, Affinity.Intrinsic);
-
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.popoverDidHide !== void 0) {
-        observer.popoverDidHide(this);
-      }
-    }
-  }
+  /** @override */
+  @Property<PopoverView["modality"]>({
+    valueType: Number,
+    value: 0,
+    didSetValue(modality: number): void {
+      this.owner.callObservers("viewDidSetModality", modality, this.owner);
+    },
+  })
+  readonly modality!: Property<this, number>;
 
   /** @internal */
   readonly allowedPlacement: PopoverPlacement[];
@@ -304,8 +196,8 @@ export class PopoverView extends HtmlView implements Modal {
   /** @internal */
   readonly currentPlacement: PopoverPlacement;
 
-  @Property<PopoverView, R2Box | null, AnyR2Box | null>({
-    type: R2Box,
+  @Property<PopoverView["placementFrame"]>({
+    valueType: R2Box,
     value: null,
     didSetValue(placementFrame: R2Box | null): void {
       this.owner.place();
@@ -316,8 +208,8 @@ export class PopoverView extends HtmlView implements Modal {
   })
   readonly placementFrame!: Property<this, R2Box | null, AnyR2Box | null>;
 
-  @Property<PopoverView, boolean>({
-    type: Boolean,
+  @Property<PopoverView["dropdown"]>({
+    valueType: Boolean,
     value: false,
     didSetValue(dropdown: boolean): void {
       this.owner.place();
@@ -336,53 +228,22 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   protected attachEvents(): void {
-    this.on("click", this.onClick);
+    this.addEventListener("click", this.onClick);
   }
 
   protected detachEvents(): void {
-    this.off("click", this.onClick);
+    this.removeEventListener("click", this.onClick);
   }
 
-  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags): ViewFlags {
     if ((processFlags & (View.NeedsScroll | View.NeedsAnimate)) !== 0) {
       this.requireUpdate(View.NeedsLayout);
     }
     return processFlags;
   }
 
-  protected override onAnimate(viewContext: ViewContextType<this>): void {
-    super.onAnimate(viewContext);
-    const displayState = this.displayState;
-    if (displayState === PopoverView.ShowState) {
-      this.willShowPopover();
-    } else if (displayState === PopoverView.HideState) {
-      this.willHidePopover();
-    } else if (displayState === PopoverView.ShowingState && !this.displayPhase.tweening) {
-      this.didShowPopover();
-    } else if (displayState === PopoverView.HidingState && !this.displayPhase.tweening) {
-      this.didHidePopover();
-    }
-    if (this.displayPhase.tweening) {
-      this.applyDisplayPhase(this.displayPhase.value);
-    }
-  }
-
-  protected applyDisplayPhase(displayPhase: number): void {
-    const placement = this.currentPlacement;
-    if (placement === "above") {
-      this.opacity.setState(void 0, Affinity.Intrinsic);
-      this.marginTop.setState((1 - displayPhase) * -this.node.clientHeight, Affinity.Intrinsic);
-    } else if (placement === "below") {
-      this.opacity.setState(void 0, Affinity.Intrinsic);
-      this.marginTop.setState((1 - displayPhase) * this.node.clientHeight, Affinity.Intrinsic);
-    } else {
-      this.marginTop.setState(null, Affinity.Intrinsic);
-      this.opacity.setState(displayPhase, Affinity.Intrinsic);
-    }
-  }
-
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     this.place();
   }
 

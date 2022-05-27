@@ -12,21 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Initable, AnyTiming} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property, Animator} from "@swim/component";
+import type {Class, AnyTiming} from "@swim/util";
+import {Affinity, FastenerClass, Property, Animator} from "@swim/component";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, AnyView, View, ViewRef} from "@swim/view";
-import {
-  GraphicsViewInit,
-  GraphicsView,
-  TypesetView,
-  TextRunView,
-  CanvasContext,
-  CanvasRenderer,
-} from "@swim/graphics";
+import {ViewFlags, View, ViewRef} from "@swim/view";
+import {GraphicsView, TypesetView, TextRunView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPointViewObserver} from "./GeoPointViewObserver";
@@ -64,47 +57,44 @@ export interface GeoPointViewInit extends GeoViewInit {
 export class GeoPointView extends GeoView {
   override readonly observerType?: Class<GeoPointViewObserver>;
 
-  @Animator<GeoPointView, GeoPoint, AnyGeoPoint>({
-    type: GeoPoint,
+  @Animator<GeoPointView["geoPoint"]>({
+    valueType: GeoPoint,
     value: GeoPoint.origin(),
     updateFlags: View.NeedsProject,
-    willSetValue(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-      this.owner.callObservers("viewWillSetGeoPoint", newGeoPoint, oldGeoPoint, this.owner);
-    },
     didSetValue(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
       this.owner.setGeoBounds(newGeoPoint.bounds);
-      this.owner.callObservers("viewDidSetGeoPoint", newGeoPoint, oldGeoPoint, this.owner);
+      this.owner.callObservers("viewDidSetGeoPoint", newGeoPoint, this.owner);
     },
   })
   readonly geoPoint!: Animator<this, GeoPoint, AnyGeoPoint>;
 
-  @Animator({type: R2Point, value: R2Point.origin()})
+  @Animator({valueType: R2Point, value: R2Point.origin()})
   readonly viewPoint!: Animator<this, R2Point, AnyR2Point>;
 
-  @ThemeAnimator({type: Length, value: null})
+  @ThemeAnimator({valueType: Length, value: null})
   readonly radius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Color, value: null})
+  @ThemeAnimator({valueType: Color, value: null})
   readonly color!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Number})
+  @ThemeAnimator({valueType: Number})
   readonly opacity!: ThemeAnimator<this, number | undefined>;
 
-  @ThemeAnimator({type: Length, value: null})
+  @ThemeAnimator({valueType: Length, value: null})
   readonly labelPadding!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Font, value: null, inherits: true})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @Property({type: Number})
+  @Property({valueType: Number})
   readonly hitRadius!: Property<this, number | undefined>;
 
-  @ViewRef<GeoPointView, GraphicsView & Initable<GraphicsViewInit | string>>({
-    key: true,
-    type: TextRunView,
+  @ViewRef<GeoPointView["label"]>({
+    viewType: TextRunView,
+    viewKey: true,
     binds: true,
     willAttachView(labelView: GraphicsView): void {
       this.owner.callObservers("viewWillAttachGeoLabel", labelView, this.owner);
@@ -112,23 +102,24 @@ export class GeoPointView extends GeoView {
     didDetachView(labelView: GraphicsView): void {
       this.owner.callObservers("viewDidDetachGeoLabel", labelView, this.owner);
     },
-    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
-      if (typeof value === "string") {
-        if (this.view instanceof TextRunView) {
-          this.view.text(value);
-          return this.view;
-        } else {
-          return TextRunView.fromAny(value);
-        }
-      } else {
-        return GraphicsView.fromAny(value);
+    setText(label: string | undefined): GraphicsView {
+      let labelView = this.view;
+      if (labelView === null) {
+        labelView = this.createView();
+        this.setView(labelView);
       }
+      if (labelView instanceof TextRunView) {
+        labelView.text(label !== void 0 ? label : "");
+      }
+      return labelView;
     },
   })
-  readonly label!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
-  static readonly label: MemberFastenerClass<GeoPointView, "label">;
+  readonly label!: ViewRef<this, GraphicsView> & {
+    setText(label: string | undefined): GraphicsView,
+  };
+  static readonly label: FastenerClass<GeoPointView["label"]>;
 
-  @Property({type: String, value: "auto"})
+  @Property({valueType: String, value: "auto"})
   readonly labelPlacement!: Property<this, GeoPointLabelPlacement>;
 
   isGradientStop(): boolean {
@@ -181,31 +172,33 @@ export class GeoPointView extends GeoView {
       this.textColor(init.textColor, timing);
     }
 
-    if (init.label !== void 0) {
-      this.label(init.label);
+    if (typeof init.label === "string") {
+      this.label.setText(init.label);
+    } else if (init.label !== void 0) {
+      this.label.setView(init.label);
     }
   }
 
-  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags): ViewFlags {
     if ((processFlags & View.NeedsProject) !== 0 && this.label.view !== null) {
       this.requireUpdate(View.NeedsLayout);
     }
     return processFlags;
   }
 
-  protected override onProject(viewContext: ViewContextType<this>): void {
-    super.onProject(viewContext);
+  protected override onProject(): void {
+    super.onProject();
     if (this.viewPoint.hasAffinity(Affinity.Intrinsic)) {
-      const viewPoint = viewContext.geoViewport.project(this.geoPoint.getValue());
+      const viewPoint = this.geoViewport.value.project(this.geoPoint.getValue());
       this.viewPoint.setInterpolatedValue(viewPoint, viewPoint);
     }
   }
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     const labelView = this.label.view;
     if (labelView !== null) {
-      this.layoutLabel(labelView, viewContext.viewFrame);
+      this.layoutLabel(labelView, this.viewFrame);
     }
   }
 
@@ -242,10 +235,10 @@ export class GeoPointView extends GeoView {
     return new R2Box(x - hitRadius, y - hitRadius, x + hitRadius, y + hitRadius);
   }
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
-      return this.hitTestPoint(x, y, renderer.context, viewContext.viewFrame);
+      return this.hitTestPoint(x, y, renderer.context, this.viewFrame);
     }
     return null;
   }

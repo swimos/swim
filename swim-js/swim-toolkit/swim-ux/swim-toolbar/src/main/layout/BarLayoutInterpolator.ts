@@ -49,10 +49,7 @@ export const BarLayoutInterpolator = (function (_super: typeof Interpolator) {
       const toolInterpolators = interpolator.toolInterpolators;
       const tools = new Array<ToolLayout>();
       for (let i = 0; i < toolInterpolators.length; i += 1) {
-        const tool = toolInterpolators[i]!(u);
-        if (!tool.presence.dismissed) {
-          tools.push(tool);
-        }
+        tools.push(toolInterpolators[i]!(u));
       }
       return new BarLayout(width, left, right, spacing, tools);
     } as BarLayoutInterpolator;
@@ -67,18 +64,25 @@ export const BarLayoutInterpolator = (function (_super: typeof Interpolator) {
     for (let i = 0; i < tools0.length; i += 1) {
       let tool0 = tools0[i]!;
       let tool1 = l1.getTool(tool0.key);
-      if (tool1 === null) {
+      if (tool1 === null && !tool0.presence.dismissed && tool0.outPresence !== null) {
+        tool1 = tool0.withPresence(tool0.outPresence);
+        tool1 = tool1.withAlign(tool1.outAlign);
         tool0 = tool0.withPresence(tool0.presence.asDismissing());
-        tool1 = tool0.withPresence(Presence.dismissed());
+      } else if (tool1 !== null && tool0.presence.dismissed) {
+        tool0 = tool0.withPresence(tool0.presence.asPresenting());
       }
-      toolInterpolators.push(tool0.interpolateTo(tool1));
+      if (tool1 !== null) {
+        toolInterpolators.push(tool0.interpolateTo(tool1));
+      }
     }
     for (let i = 0; i < tools1.length; i += 1) {
       let tool1 = tools1[i]!;
       let tool0 = l0.getTool(tool1.key);
       if (tool0 === null) {
-        tool0 = tool1.withPresence(tool1.presence.phase !== 1 ? tool1.presence.asPresenting() : Presence.presenting());
+        const inPresence = tool1.inPresence !== null ? tool1.inPresence : tool1.presence;
+        tool0 = tool1.withPresence(inPresence.asPresenting());
         tool1 = tool1.withPresence(Presence.presented());
+        tool0 = tool0.withAlign(tool0.inAlign);
         toolInterpolators.push(tool0.interpolateTo(tool1));
       }
     }
@@ -103,10 +107,7 @@ export const BarLayoutInterpolator = (function (_super: typeof Interpolator) {
       const toolInterpolators = this.toolInterpolators;
       const tools = new Array<ToolLayout>();
       for (let i = 0; i < toolInterpolators.length; i += 1) {
-        const tool = toolInterpolators[i]![0];
-        if (!tool.presence.dismissed) {
-          tools.push(tool);
-        }
+        tools.push(toolInterpolators[i]![0]);
       }
       return new BarLayout(width, left, right, spacing, tools);
     },
@@ -122,10 +123,7 @@ export const BarLayoutInterpolator = (function (_super: typeof Interpolator) {
       const toolInterpolators = this.toolInterpolators;
       const tools = new Array<ToolLayout>();
       for (let i = 0; i < toolInterpolators.length; i += 1) {
-        const tool = toolInterpolators[i]![1];
-        if (!tool.presence.dismissed) {
-          tools.push(tool);
-        }
+        tools.push(toolInterpolators[i]![1]);
       }
       return new BarLayout(width, left, right, spacing, tools);
     },

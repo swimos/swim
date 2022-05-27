@@ -12,12 +12,12 @@
     <script>
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").position("relative").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = containerView.appendChild(swim.CanvasView)
     .mouseEventsEnabled(true)
@@ -43,16 +43,16 @@ swim.TraitViewControllerSet({
   extends: true,
   attachDialView(dialView, dialController) {
     swim.GaugeController.dials.prototype.attachDialView.call(this, dialView, dialController);
-    dialView.on("pointerenter", function (event) {
+    dialView.addEventListener("pointerenter", function (event) {
       dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
     });
-    dialView.on("pointerleave", function (event) {
+    dialView.addEventListener("pointerleave", function (event) {
       dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
     });
   },
-  controllerWillSetDialValue(newValue, oldValue, dialController, gaugeController) {
-    swim.GaugeController.dials.prototype.controllerWillSetDialValue.call(this, newValue, oldValue, dialController, gaugeController);
-    const label = Math.round(100 * newValue).toString();
+  controllerDidSetDialValue(dialValue, dialController, gaugeController) {
+    swim.GaugeController.dials.prototype.controllerDidSetDialValue.call(this, dialValue, dialController, gaugeController);
+    const label = Math.round(100 * dialValue).toString();
     dialController.dial.trait.label.setValue(label);
   },
 })(ExampleGaugeController.prototype, "dials");

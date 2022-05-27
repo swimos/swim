@@ -42,9 +42,7 @@ export interface TableControllerObserver<C extends TableController = TableContro
 
   controllerDidDetachTableTrait?(tableTrait: TableTrait, controller: C): void;
 
-  controllerWillSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, controller: C): void;
-
-  controllerDidSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, controller: C): void;
+  controllerDidSetTableLayout?(tableLayout: TableLayout | null, controller: C): void;
 
   controllerWillAttachTableView?(tableView: TableView, controller: C): void;
 
@@ -70,9 +68,7 @@ export interface TableControllerObserver<C extends TableController = TableContro
 
   controllerDidDetachColTrait?(colTrait: ColTrait, colController: ColController, controller: C): void;
 
-  controllerWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController, controller: C): void;
-
-  controllerDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colController: ColController, controller: C): void;
+  controllerDidSetColLayout?(colLayout: ColLayout | null, colController: ColController, controller: C): void;
 
   controllerWillAttachColView?(colView: ColView, colController: ColController, controller: C): void;
 
@@ -134,9 +130,7 @@ export interface TableControllerObserver<C extends TableController = TableContro
 
   controllerDidDetachCellContentView?(cellContentView: HtmlView, cellController: CellController, rowController: RowController, controller: C): void;
 
-  controllerWillSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController, rowController: RowController, controller: C): void;
-
-  controllerDidSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellController: CellController, rowController: RowController, controller: C): void;
+  controllerDidSetCellIcon?(cellIcon: Graphics | null, cellController: CellController, rowController: RowController, controller: C): void;
 
   controllerWillAttachTree?(treeController: TableController, rowController: RowController, controller: C): void;
 

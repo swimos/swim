@@ -16,7 +16,7 @@ import type {Mutable} from "@swim/util";
 import type {GeoPoint, GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {ViewFlags, View} from "@swim/view";
 import {GraphicsView, PaintingContext, PaintingRenderer} from "@swim/graphics";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoTree} from "./GeoTree";
@@ -71,38 +71,35 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  protected override willProject(viewContext: ViewContextType<this>): void {
-    super.willProject(viewContext);
+  protected override willProject(): void {
+    super.willProject();
     (this as Mutable<this>).stem = null;
   }
 
-  protected override processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     processChild: (this: this, child: View, processFlags: ViewFlags,
-                                                    viewContext: ViewContextType<this>) => void): void {
-    const stem = this.getStem(viewContext.geoViewport.geoFrame);
-    this.processTree(stem, processFlags, viewContext, processChild);
+  protected override processChildren(processFlags: ViewFlags, processChild: (this: this, child: View, processFlags: ViewFlags) => void): void {
+    const geoFrame = this.geoViewport.value.geoFrame;
+    const stem = this.getStem(this.geoViewport.value.geoFrame);
+    this.processTree(stem, geoFrame, processFlags, processChild);
   }
 
   /** @internal */
-  protected processTree(tree: GeoTree, processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                        processChild: (this: this, child: View, processFlags: ViewFlags,
-                                       viewContext: ViewContextType<this>) => void): void {
-    if (tree.southWest !== null && tree.southWest.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.processTree(tree.southWest, processFlags, viewContext, processChild);
+  protected processTree(tree: GeoTree, geoFrame: GeoBox, processFlags: ViewFlags, processChild: (this: this, child: View, processFlags: ViewFlags) => void): void {
+    if (tree.southWest !== null && tree.southWest.geoFrame.intersects(geoFrame)) {
+      this.processTree(tree.southWest, geoFrame, processFlags, processChild);
     }
-    if (tree.northWest !== null && tree.northWest.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.processTree(tree.northWest, processFlags, viewContext, processChild);
+    if (tree.northWest !== null && tree.northWest.geoFrame.intersects(geoFrame)) {
+      this.processTree(tree.northWest, geoFrame, processFlags, processChild);
     }
-    if (tree.southEast !== null && tree.southEast.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.processTree(tree.southEast, processFlags, viewContext, processChild);
+    if (tree.southEast !== null && tree.southEast.geoFrame.intersects(geoFrame)) {
+      this.processTree(tree.southEast, geoFrame, processFlags, processChild);
     }
-    if (tree.northEast !== null && tree.northEast.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.processTree(tree.northEast, processFlags, viewContext, processChild);
+    if (tree.northEast !== null && tree.northEast.geoFrame.intersects(geoFrame)) {
+      this.processTree(tree.northEast, geoFrame, processFlags, processChild);
     }
     const children = tree.views;
     for (let i = 0; i < children.length; i += 1) {
       const child = children[i]!;
-      processChild.call(this, child, processFlags, viewContext);
+      processChild.call(this, child, processFlags);
       if ((child.flags & View.RemovingFlag) !== 0) {
         child.setFlags(child.flags & ~View.RemovingFlag);
         this.removeChild(child);
@@ -110,21 +107,21 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  @ThemeAnimator({type: Color, value: null})
+  @ThemeAnimator({valueType: Color, value: null})
   readonly geoTreeColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
+  protected override onRender(): void {
+    super.onRender();
     const outlineColor = this.geoTreeColor.value;
     if (outlineColor !== null) {
-      this.renderGeoTree(viewContext, outlineColor);
+      this.renderGeoTree(outlineColor);
     }
   }
 
-  protected renderGeoTree(viewContext: ViewContextType<this>, outlineColor: Color): void {
-    const renderer = viewContext.renderer;
+  protected renderGeoTree(outlineColor: Color): void {
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
-      this.renderGeoTreeOutline(this.root, viewContext.geoViewport, renderer.context, outlineColor);
+      this.renderGeoTreeOutline(this.root, this.geoViewport.value, renderer.context, outlineColor);
     }
   }
 
@@ -150,33 +147,30 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                                    viewContext: ViewContextType<this>) => void): void {
-    const stem = this.getStem(viewContext.geoViewport.geoFrame);
-    this.displayTree(stem, displayFlags, viewContext, displayChild);
+  protected override displayChildren(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
+    const geoFrame = this.geoViewport.value.geoFrame;
+    const stem = this.getStem(geoFrame);
+    this.displayTree(stem, geoFrame, displayFlags, displayChild);
   }
 
   /** @internal */
-  protected displayTree(tree: GeoTree, displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                        displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                       viewContext: ViewContextType<this>) => void): void {
-    if (tree.southWest !== null && tree.southWest.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.displayTree(tree.southWest, displayFlags, viewContext, displayChild);
+  protected displayTree(tree: GeoTree, geoFrame: GeoBox, displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
+    if (tree.southWest !== null && tree.southWest.geoFrame.intersects(geoFrame)) {
+      this.displayTree(tree.southWest, geoFrame, displayFlags, displayChild);
     }
-    if (tree.northWest !== null && tree.northWest.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.displayTree(tree.northWest, displayFlags, viewContext, displayChild);
+    if (tree.northWest !== null && tree.northWest.geoFrame.intersects(geoFrame)) {
+      this.displayTree(tree.northWest, geoFrame, displayFlags, displayChild);
     }
-    if (tree.southEast !== null && tree.southEast.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.displayTree(tree.southEast, displayFlags, viewContext, displayChild);
+    if (tree.southEast !== null && tree.southEast.geoFrame.intersects(geoFrame)) {
+      this.displayTree(tree.southEast, geoFrame, displayFlags, displayChild);
     }
-    if (tree.northEast !== null && tree.northEast.geoFrame.intersects(viewContext.geoViewport.geoFrame)) {
-      this.displayTree(tree.northEast, displayFlags, viewContext, displayChild);
+    if (tree.northEast !== null && tree.northEast.geoFrame.intersects(geoFrame)) {
+      this.displayTree(tree.northEast, geoFrame, displayFlags, displayChild);
     }
     const children = tree.views;
     for (let i = 0; i < children.length; i += 1) {
       const child = children[i]!;
-      displayChild.call(this, child, displayFlags, viewContext);
+      displayChild.call(this, child, displayFlags);
       if ((child.flags & View.RemovingFlag) !== 0) {
         child.setFlags(child.flags & ~View.RemovingFlag);
         this.removeChild(child);
@@ -192,33 +186,32 @@ export class GeoTreeView extends GeoView {
     this.updateRoot(this.root.moved(child, newChildViewGeoBounds, oldChildViewGeoBounds));
   }
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const geoViewport = viewContext.geoViewport;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const geoViewport = this.geoViewport.value;
     const geoPoint = geoViewport.unproject(x, y);
     const stem = this.getStem(geoViewport.geoFrame);
-    return this.hitTestTree(stem, x, y, geoPoint, viewContext);
+    return this.hitTestTree(stem, x, y, geoPoint);
   }
 
-  protected hitTestTree(tree: GeoTree, x: number, y: number, geoPoint: GeoPoint,
-                        viewContext: ViewContextType<this>): GraphicsView | null {
+  protected hitTestTree(tree: GeoTree, x: number, y: number, geoPoint: GeoPoint): GraphicsView | null {
     let hit: GraphicsView | null = null;
     if (tree.southWest !== null && tree.southWest.geoFrame.contains(geoPoint)) {
-      hit = this.hitTestTree(tree.southWest, x, y, geoPoint, viewContext);
+      hit = this.hitTestTree(tree.southWest, x, y, geoPoint);
     }
     if (hit === null && tree.northWest !== null && tree.northWest.geoFrame.contains(geoPoint)) {
-      hit = this.hitTestTree(tree.northWest, x, y, geoPoint, viewContext);
+      hit = this.hitTestTree(tree.northWest, x, y, geoPoint);
     }
     if (hit === null && tree.southEast !== null && tree.southEast.geoFrame.contains(geoPoint)) {
-      hit = this.hitTestTree(tree.southEast, x, y, geoPoint, viewContext);
+      hit = this.hitTestTree(tree.southEast, x, y, geoPoint);
     }
     if (hit === null && tree.northEast !== null && tree.northEast.geoFrame.contains(geoPoint)) {
-      hit = this.hitTestTree(tree.northEast, x, y, geoPoint, viewContext);
+      hit = this.hitTestTree(tree.northEast, x, y, geoPoint);
     }
     if (hit === null) {
       const children = tree.views;
       for (let i = 0; i < children.length; i += 1) {
         const child = children[i]!;
-        hit = child.cascadeHitTest(x, y, viewContext);
+        hit = child.cascadeHitTest(x, y);
         if (hit !== null) {
           break;
         }

@@ -13,10 +13,11 @@
 // limitations under the License.
 
 import type {Class, Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
-import type {Animator} from "@swim/component";
 import type {AnyFont, AnyColor} from "@swim/style";
+import type {ThemeAnimator} from "@swim/theme";
 import type {GraphicsViewInit, GraphicsView} from "@swim/graphics";
 import type {AnyDataPointView} from "../data/DataPointView";
+import type {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import type {ScaledXYView} from "../scaled/ScaledXYView";
 import type {PlotViewObserver} from "./PlotViewObserver";
 
@@ -35,41 +36,49 @@ export interface PlotViewInit<X = unknown, Y = unknown> extends GraphicsViewInit
 }
 
 /** @public */
-export interface PlotViewDataPointExt<X = unknown, Y = unknown> {
-  attachDataPointLabelView(labelView: GraphicsView): void;
-  detachDataPointLabelView(labelView: GraphicsView): void;
-}
-
-/** @public */
 export interface PlotView<X = unknown, Y = unknown> extends GraphicsView, ScaledXYView<X, Y> {
   /** @override */
   readonly observerType?: Class<PlotViewObserver<X, Y>>;
 
-  readonly xScale: Animator<this, ContinuousScale<X, number> | null, string>;
+  /** @override */
+  readonly xScale: ContinuousScaleAnimator<this, X, number>;
 
-  readonly yScale: Animator<this, ContinuousScale<Y, number> | null, string>;
+  /** @override */
+  readonly yScale: ContinuousScaleAnimator<this, Y, number>;
 
+  /** @override */
   xDomain(): Domain<X> | null;
   xDomain(xDomain: Domain<X> | null, timing?: AnyTiming | boolean): this;
   xDomain(xMin: X, xMax: X, timing?: AnyTiming | boolean): this;
 
+  /** @override */
   yDomain(): Domain<Y> | null;
   yDomain(yDomain: Domain<Y> | null, timing?: AnyTiming | boolean): this;
   yDomain(yMin: Y, yMax: Y, timingtimingtiming?: AnyTiming | boolean): this;
 
+  /** @override */
   xRange(): Range<number> | null;
 
+  /** @override */
   yRange(): Range<number> | null;
 
+  /** @override */
   xRangePadding(): readonly [number, number];
 
+  /** @override */
   yRangePadding(): readonly [number, number];
 
+  /** @override */
   readonly xDataDomain: Domain<X> | null;
 
+  /** @override */
   readonly yDataDomain: Domain<Y> | null;
 
+  /** @override */
   readonly xDataRange: Range<number> | null;
 
+  /** @override */
   readonly yDataRange: Range<number> | null;
+
+  readonly opacity: ThemeAnimator<this, number | undefined>;
 }

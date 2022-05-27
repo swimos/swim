@@ -16,15 +16,8 @@ import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {Trait} from "@swim/model";
-import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
-import type {GraphicsView} from "@swim/graphics";
+import {AnyColorOrLook, ColorOrLook, ColorLook} from "@swim/theme";
 import type {DataPointTraitObserver} from "./DataPointTraitObserver";
-
-/** @public */
-export type DataPointLabel<X = unknown, Y = unknown> = DataPointLabelFunction<X, Y> | string;
-/** @public */
-export type DataPointLabelFunction<X, Y> = (dataPointTrait: DataPointTrait<X, Y>) => GraphicsView | string | null;
 
 /** @public */
 export class DataPointTrait<X = unknown, Y = unknown> extends Trait {
@@ -36,72 +29,49 @@ export class DataPointTrait<X = unknown, Y = unknown> extends Trait {
 
   override readonly observerType?: Class<DataPointTraitObserver<X, Y>>;
 
-  @Property<DataPointTrait<X, Y>, X>({
-    willSetValue(newX: X, oldX: X): void {
-      this.owner.callObservers("traitWillSetDataPointX", newX, oldX, this.owner);
-    },
-    didSetValue(newX: X, oldX: X): void {
-      this.owner.callObservers("traitDidSetDataPointX", newX, oldX, this.owner);
+  @Property<DataPointTrait<X, Y>["x"]>({
+    didSetValue(x: X): void {
+      this.owner.callObservers("traitDidSetX", x, this.owner);
     },
   })
   readonly x!: Property<this, X>;
 
-  @Property<DataPointTrait<X, Y>, Y>({
-    willSetValue(newY: Y, oldY: Y): void {
-      this.owner.callObservers("traitWillSetDataPointY", newY, oldY, this.owner);
-    },
-    didSetValue(newY: Y, oldY: Y): void {
-      this.owner.callObservers("traitDidSetDataPointY", newY, oldY, this.owner);
+  @Property<DataPointTrait<X, Y>["y"]>({
+    didSetValue(y: Y): void {
+      this.owner.callObservers("traitDidSetY", y, this.owner);
     },
   })
   readonly y!: Property<this, Y>;
 
-  @Property<DataPointTrait<X, Y>, Y | undefined>({
-    willSetValue(newY2: Y | undefined, oldY2: Y | undefined): void {
-      this.owner.callObservers("traitWillSetDataPointY2", newY2, oldY2, this.owner);
-    },
-    didSetValue(newY2: Y | undefined, oldY2: Y | undefined): void {
-      this.owner.callObservers("traitDidSetDataPointY2", newY2, oldY2, this.owner);
+  @Property<DataPointTrait<X, Y>["y2"]>({
+    didSetValue(y2: Y | undefined): void {
+      this.owner.callObservers("traitDidSetY2", y2, this.owner);
     },
   })
   readonly y2!: Property<this, Y | undefined>;
 
-  @Property<DataPointTrait<X, Y>, Length | null, AnyLength | null>({
-    type: Length,
+  @Property<DataPointTrait<X, Y>["radius"]>({
+    valueType: Length,
     value: null,
-    willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.callObservers("traitWillSetDataPointRadius", newRadius, oldRadius, this.owner);
-    },
-    didSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.callObservers("traitDidSetDataPointRadius", newRadius, oldRadius, this.owner);
+    didSetValue(radius: Length | null): void {
+      this.owner.callObservers("traitDidSetRadius", radius, this.owner);
     },
   })
   readonly radius!: Property<this, Length | null, AnyLength | null>;
 
-  @Property<DataPointTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<DataPointTrait<X, Y>["color"]>({
+    valueType: ColorLook,
     value: null,
-    willSetValue(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitWillSetDataPointColor", newColor, oldColor, this.owner);
-    },
-    didSetValue(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitDidSetDataPointColor", newColor, oldColor, this.owner);
-    },
-    fromAny(color: Look<Color> | AnyColor | null): Look<Color> | Color | null {
-      if (color !== null && !(color instanceof Look)) {
-        color = Color.fromAny(color);
-      }
-      return color;
+    didSetValue(color: ColorOrLook | null): void {
+      this.owner.callObservers("traitDidSetColor", color, this.owner);
     },
   })
-  readonly color!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly color!: Property<this, ColorOrLook | null, AnyColorOrLook | null>;
 
-  @Property<DataPointTrait<X, Y>, number | undefined>({
-    type: Number,
-    willSetValue(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-      this.owner.callObservers("traitWillSetDataPointOpacity", newOpacity, oldOpacity, this.owner);
-    },
-    didSetValue(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-      this.owner.callObservers("traitDidSetDataPointOpacity", newOpacity, oldOpacity, this.owner);
+  @Property<DataPointTrait<X, Y>["opacity"]>({
+    valueType: Number,
+    didSetValue(opacity: number | undefined): void {
+      this.owner.callObservers("traitDidSetOpacity", opacity, this.owner);
     },
   })
   readonly opacity!: Property<this, number | undefined>;
@@ -110,14 +80,11 @@ export class DataPointTrait<X = unknown, Y = unknown> extends Trait {
     return void 0;
   }
 
-  @Property<DataPointTrait<X, Y>, DataPointLabel<X, Y> | null>({
-    value: null,
-    willSetValue(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null): void {
-      this.owner.callObservers("traitWillSetDataPointLabel", newLabel, oldLabel, this.owner);
-    },
-    didSetValue(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null): void {
-      this.owner.callObservers("traitDidSetDataPointLabel", newLabel, oldLabel, this.owner);
+  @Property<DataPointTrait<X, Y>["label"]>({
+    valueType: String,
+    didSetValue(label: string | undefined): void {
+      this.owner.callObservers("traitDidSetLabel", label, this.owner);
     },
   })
-  readonly label!: Property<this, DataPointLabel<X, Y> | null>;
+  readonly label!: Property<this, string | undefined>;
 }

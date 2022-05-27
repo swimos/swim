@@ -28,13 +28,9 @@ export interface DialControllerObserver<C extends DialController = DialControlle
 
   controllerDidDetachDialView?(dialView: DialView, controller: C): void;
 
-  controllerWillSetDialValue?(newValue: number, oldValue: number, controller: C): void;
+  controllerDidSetDialValue?(value: number, controller: C): void;
 
-  controllerDidSetDialValue?(newValue: number, oldValue: number, controller: C): void;
-
-  controllerWillSetDialLimit?(newLimit: number, oldLimit: number, controller: C): void;
-
-  controllerDidSetDialLimit?(newLimit: number, oldLimit: number, controller: C): void;
+  controllerDidSetDialLimit?(limit: number, controller: C): void;
 
   controllerWillAttachDialLabelView?(labelView: GraphicsView, controller: C): void;
 

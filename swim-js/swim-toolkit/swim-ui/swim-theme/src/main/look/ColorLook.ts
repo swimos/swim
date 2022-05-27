@@ -16,7 +16,13 @@ import type {Interpolator} from "@swim/util";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "./Look";
 
-/** @internal */
+/** @public */
+export type AnyColorOrLook = Look<Color, any> | AnyColor;
+
+/** @public */
+export type ColorOrLook = Look<Color, any> | Color;
+
+/** @public */
 export class ColorLook extends Look<Color, AnyColor> {
   override combine(combination: Color | undefined, value: Color, weight?: number): Color {
     if (combination !== void 0) {
@@ -40,5 +46,16 @@ export class ColorLook extends Look<Color, AnyColor> {
 
   override coerce(value: AnyColor): Color {
     return Color.fromAny(value);
+  }
+
+  static fromAny(value: Look<Color> | AnyColor): Look<Color> | Color;
+  static fromAny(value: Look<Color> | AnyColor | null): Look<Color> | Color | null;
+  static fromAny(value: Look<Color> | AnyColor | null | undefined): Look<Color> | Color | null | undefined;
+  static fromAny(value: Look<Color> | AnyColor | null | undefined): Look<Color> | Color | null | undefined {
+    if (value === void 0 || value === null || value instanceof Look || value instanceof Color) {
+      return value;
+    } else {
+      return Color.fromAny(value);
+    }
   }
 }

@@ -15,10 +15,9 @@
 import type {ServiceObserver} from "@swim/component";
 import type {HistoryState} from "./HistoryState";
 import type {HistoryService} from "./HistoryService";
-import type {Controller} from "../controller/Controller";
 
 /** @public */
-export interface HistoryServiceObserver<C extends Controller = Controller, S extends HistoryService<C> = HistoryService<C>> extends ServiceObserver<C, S> {
+export interface HistoryServiceObserver<S extends HistoryService = HistoryService> extends ServiceObserver<S> {
   serviceWillPushHistory?(newState: HistoryState, oldState: HistoryState, service: S): void;
 
   serviceDidPushHistory?(newState: HistoryState, oldState: HistoryState, service: S): void;

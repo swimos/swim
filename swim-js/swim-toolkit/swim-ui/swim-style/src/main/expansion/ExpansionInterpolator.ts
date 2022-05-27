@@ -22,7 +22,7 @@ export const ExpansionInterpolator = (function (_super: typeof Interpolator) {
       const e0 = interpolator[0];
       const e1 = interpolator[1];
       const phase = e0.phase + u * (e1.phase - e0.phase);
-      const direction = u !== 1 ? e0.direction : 0;
+      const direction = u !== 1 ? e0.direction : e1.direction;
       return Expansion.create(phase, direction);
     } as Interpolator<Expansion>;
     Object.setPrototypeOf(interpolator, ExpansionInterpolator.prototype);

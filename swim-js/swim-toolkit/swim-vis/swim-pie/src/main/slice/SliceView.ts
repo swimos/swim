@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Equivalent, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass, Animator} from "@swim/component";
+import {Class, Equivalent} from "@swim/util";
+import {Affinity, FastenerClass, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
+import {View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -64,133 +64,139 @@ export interface SliceViewInit extends GraphicsViewInit {
 export class SliceView extends GraphicsView {
   override readonly observerType?: Class<SliceViewObserver>;
 
-  @Animator<SliceView, number>({
-    type: Number,
+  @Animator<SliceView["value"]>({
+    valueType: Number,
     value: 0,
     updateFlags: View.NeedsRender,
-    willSetValue(newValue: number, oldValue: number): void {
-      this.owner.callObservers("viewWillSetSliceValue", newValue, oldValue, this.owner);
-    },
-    didSetValue(newValue: number, oldValue: number): void {
-      this.owner.callObservers("viewDidSetSliceValue", newValue, oldValue, this.owner);
+    didSetValue(value: number): void {
+      this.owner.callObservers("viewDidSetValue", value, this.owner);
     },
   })
   readonly value!: Animator<this, number>;
 
-  @Animator({type: Number, value: 1, updateFlags: View.NeedsRender})
+  @Animator({
+    valueType: Number,
+    value: 1,
+    updateFlags: View.NeedsRender,
+    didSetValue(total: number): void {
+      this.owner.callObservers("viewDidSetTotal", total, this.owner);
+    },
+  })
   readonly total!: Animator<this, number>;
 
-  @Animator({type: R2Point, inherits: true, value: R2Point.origin(), updateFlags: View.NeedsRender})
+  @Animator({valueType: R2Point, value: R2Point.origin(), inherits: true, updateFlags: View.NeedsRender})
   readonly center!: Animator<this, R2Point, AnyR2Point>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: Length.pct(3), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.pct(3), inherits: true, updateFlags: View.NeedsRender})
   readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: Length.pct(25), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.pct(25), inherits: true, updateFlags: View.NeedsRender})
   readonly outerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Angle, value: Angle.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Angle, value: Angle.zero(), updateFlags: View.NeedsRender})
   readonly phaseAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Angle, inherits: true, value: Angle.deg(2), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Angle, value: Angle.deg(2), inherits: true, updateFlags: View.NeedsRender})
   readonly padAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly padRadius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: Length.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.zero(), inherits: true, updateFlags: View.NeedsRender})
   readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: Length.pct(50), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.pct(50), inherits: true, updateFlags: View.NeedsRender})
   readonly labelRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, look: Look.accentColor, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.accentColor, inherits: true, updateFlags: View.NeedsRender})
   readonly sliceColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 0.5, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 0.5, inherits: true, updateFlags: View.NeedsRender})
   readonly tickAlign!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: Length.pct(30), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.pct(30), inherits: true, updateFlags: View.NeedsRender})
   readonly tickRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: Length.pct(50), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.pct(50), inherits: true, updateFlags: View.NeedsRender})
   readonly tickLength!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: Length.px(1), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.px(1), inherits: true, updateFlags: View.NeedsRender})
   readonly tickWidth!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, inherits: true, value: Length.px(2), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.px(2), inherits: true, updateFlags: View.NeedsRender})
   readonly tickPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, look: Look.legendColor, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.legendColor, inherits: true, updateFlags: View.NeedsRender})
   readonly tickColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Font, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, look: Look.legendColor, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.legendColor, inherits: true, updateFlags: View.NeedsRender})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewRef<SliceView, GraphicsView & Initable<GraphicsViewInit | string>>({
-    key: true,
-    type: TextRunView,
+  @ViewRef<SliceView["label"]>({
+    viewType: TextRunView,
+    viewKey: true,
     binds: true,
     willAttachView(labelView: GraphicsView): void {
-      this.owner.callObservers("viewWillAttachSliceLabel", labelView, this.owner);
+      this.owner.callObservers("viewWillAttachLabel", labelView, this.owner);
     },
     didDetachView(labelView: GraphicsView): void {
-      this.owner.callObservers("viewDidDetachSliceLabel", labelView, this.owner);
+      this.owner.callObservers("viewDidDetachLabel", labelView, this.owner);
     },
-    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
-      if (typeof value === "string") {
-        if (this.view instanceof TextRunView) {
-          this.view.text(value);
-          return this.view;
-        } else {
-          return TextRunView.fromAny(value);
-        }
-      } else {
-        return GraphicsView.fromAny(value);
+    setText(label: string | undefined): GraphicsView {
+      let labelView = this.view;
+      if (labelView === null) {
+        labelView = this.createView();
+        this.setView(labelView);
       }
+      if (labelView instanceof TextRunView) {
+        labelView.text(label !== void 0 ? label : "");
+      }
+      return labelView;
     },
   })
-  readonly label!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
-  static readonly label: MemberFastenerClass<SliceView, "label">;
+  readonly label!: ViewRef<this, GraphicsView> & {
+    setText(label: string | undefined): GraphicsView,
+  };
+  static readonly label: FastenerClass<SliceView["label"]>;
 
-  @ViewRef<SliceView, GraphicsView & Initable<GraphicsViewInit | string>>({
-    key: true,
-    type: TextRunView,
+  @ViewRef<SliceView["legend"]>({
+    viewType: TextRunView,
+    viewKey: true,
     binds: true,
     willAttachView(legendView: GraphicsView): void {
-      this.owner.callObservers("viewWillAttachSliceLegend", legendView, this.owner);
+      this.owner.callObservers("viewWillAttachLegend", legendView, this.owner);
     },
     didDetachView(legendView: GraphicsView): void {
-      this.owner.callObservers("viewDidDetachSliceLegend", legendView, this.owner);
+      this.owner.callObservers("viewDidDetachLegend", legendView, this.owner);
     },
-    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
-      if (typeof value === "string") {
-        if (this.view instanceof TextRunView) {
-          this.view.text(value);
-          return this.view;
-        } else {
-          return TextRunView.fromAny(value);
-        }
-      } else {
-        return GraphicsView.fromAny(value);
+    setText(legend: string | undefined): GraphicsView {
+      let legendView = this.view;
+      if (legendView === null) {
+        legendView = this.createView();
+        this.setView(legendView);
       }
+      if (legendView instanceof TextRunView) {
+        legendView.text(legend !== void 0 ? legend : "");
+      }
+      return legendView;
     },
   })
-  readonly legend!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
-  static readonly legend: MemberFastenerClass<SliceView, "legend">;
+  readonly legend!: ViewRef<this, GraphicsView> & {
+    setText(legend: string | undefined): GraphicsView,
+  };
+  static readonly legend: FastenerClass<SliceView["legend"]>;
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-    this.center.recohere(viewContext.updateTime);
+  protected override onLayout(): void {
+    super.onLayout();
+    this.center.recohere(this.updateTime);
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderSlice(renderer.context, this.viewFrame);
     }
@@ -316,8 +322,8 @@ export class SliceView extends GraphicsView {
     }
   }
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
       return this.hitTestSlice(p.x, p.y, renderer.context, this.viewFrame);
@@ -410,11 +416,15 @@ export class SliceView extends GraphicsView {
     if (init.textColor !== void 0) {
       this.textColor(init.textColor);
     }
-    if (init.label !== void 0) {
-      this.label(init.label);
+    if (typeof init.label === "string") {
+      this.label.setText(init.label);
+    } else if (init.label !== void 0) {
+      this.label.setView(init.label);
     }
-    if (init.legend !== void 0) {
-      this.legend(init.legend);
+    if (typeof init.legend === "string") {
+      this.legend.setText(init.legend);
+    } else if (init.legend !== void 0) {
+      this.legend.setView(init.legend);
     }
   }
 }

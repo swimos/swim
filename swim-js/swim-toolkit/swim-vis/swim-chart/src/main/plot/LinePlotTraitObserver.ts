@@ -13,18 +13,13 @@
 // limitations under the License.
 
 import type {Length} from "@swim/math";
-import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
+import type {ColorOrLook} from "@swim/theme";
 import type {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
 import type {LinePlotTrait} from "./LinePlotTrait";
 
 /** @public */
-export interface LinePlotTraitObserver<X = unknown, Y = unknown, R extends LinePlotTrait<X, Y> = LinePlotTrait<X, Y>> extends SeriesPlotTraitObserver<X, Y, R> {
-  traitWillSetPlotStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
+export interface LinePlotTraitObserver<X = unknown, Y = unknown, T extends LinePlotTrait<X, Y> = LinePlotTrait<X, Y>> extends SeriesPlotTraitObserver<X, Y, T> {
+  traitDidSetStroke?(stroke: ColorOrLook | null, trait: T): void;
 
-  traitDidSetPlotStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
-
-  traitWillSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, trait: R): void;
-
-  traitDidSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, trait: R): void;
+  traitDidSetStrokeWidth?(strokeWidth: Length | null, trait: T): void;
 }

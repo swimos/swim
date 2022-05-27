@@ -19,11 +19,7 @@ import type {GeoIconView} from "./GeoIconView";
 
 /** @public */
 export interface GeoIconViewObserver<V extends GeoIconView = GeoIconView> extends GeoViewObserver<V> {
-  viewWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
+  viewDidSetGeoCenter?(geoCenter: GeoPoint | null, view: V): void;
 
-  viewDidSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
-
-  viewWillSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, view: V): void;
-
-  viewDidSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, view: V): void;
+  viewDidSetGraphics?(graphics: Graphics | null, view: V): void;
 }

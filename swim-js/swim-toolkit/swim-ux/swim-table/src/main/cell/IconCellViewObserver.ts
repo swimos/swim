@@ -18,7 +18,5 @@ import type {IconCellView} from "./IconCellView";
 
 /** @public */
 export interface IconCellViewObserver<V extends IconCellView = IconCellView> extends CellViewObserver<V> {
-  viewWillSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, view: V): void;
-
-  viewDidSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, view: V): void;
+  viewDidSetGraphics?(graphics: Graphics | null, view: V): void;
 }

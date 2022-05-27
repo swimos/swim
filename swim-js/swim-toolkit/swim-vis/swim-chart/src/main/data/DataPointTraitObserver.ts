@@ -13,38 +13,23 @@
 // limitations under the License.
 
 import type {Length} from "@swim/math";
-import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
+import type {ColorOrLook} from "@swim/theme";
 import type {TraitObserver} from "@swim/model";
-import type {DataPointLabel, DataPointTrait} from "./DataPointTrait";
+import type {DataPointTrait} from "./DataPointTrait";
 
 /** @public */
-export interface DataPointTraitObserver<X = unknown, Y = unknown, R extends DataPointTrait<X, Y> = DataPointTrait<X, Y>> extends TraitObserver<R> {
-  traitWillSetDataPointX?(newX: X, oldX: X, trait: R): void;
+export interface DataPointTraitObserver<X = unknown, Y = unknown, T extends DataPointTrait<X, Y> = DataPointTrait<X, Y>> extends TraitObserver<T> {
+  traitDidSetX?(x: X, trait: T): void;
 
-  traitDidSetDataPointX?(newX: X, oldX: X, trait: R): void;
+  traitDidSetY?(y: Y, trait: T): void;
 
-  traitWillSetDataPointY?(newY: Y, oldY: Y, trait: R): void;
+  traitDidSetY2?(y2: Y | undefined, trait: T): void;
 
-  traitDidSetDataPointY?(newY: Y, oldY: Y, trait: R): void;
+  traitDidSetRadius?(radius: Length | null, trait: T): void;
 
-  traitWillSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, trait: R): void;
+  traitDidSetColor?(color: ColorOrLook | null, trait: T): void;
 
-  traitDidSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, trait: R): void;
+  traitDidSetOpacity?(opacity: number | undefined, trait: T): void;
 
-  traitWillSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
-
-  traitDidSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
-
-  traitWillSetDataPointColor?(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, trait: R): void;
-
-  traitDidSetDataPointColor?(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, trait: R): void;
-
-  traitWillSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, trait: R): void;
-
-  traitDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, trait: R): void;
-
-  traitWillSetDataPointLabel?(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null, trait: R): void;
-
-  traitDidSetDataPointLabel?(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null, trait: R): void;
+  traitDidSetLabel?(label: string | undefined, trait: T): void;
 }

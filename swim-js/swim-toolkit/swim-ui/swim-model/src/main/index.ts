@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./refresh";
-
-export * from "./selection";
-
 export * from "./model";
 
 export * from "./trait";
 
-export * from "./selectable";
+export * from "./refresher";
 
-export * from "./downlink";
+export * from "./selection";
+
+export * from "./selectable";

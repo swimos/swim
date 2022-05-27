@@ -29,11 +29,7 @@ export interface GeoIconControllerObserver<C extends GeoIconController = GeoIcon
 
   controllerDidDetachGeoView?(geoView: GeoIconView, controller: C): void;
 
-  controllerWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, controller: C): void;
+  controllerDidSetGeoCenter?(geoCenter: GeoPoint | null, controller: C): void;
 
-  controllerDidSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, controller: C): void;
-
-  controllerWillSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, controller: C): void;
-
-  controllerDidSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, controller: C): void;
+  controllerDidSetGraphics?(graphics: Graphics | null, controller: C): void;
 }

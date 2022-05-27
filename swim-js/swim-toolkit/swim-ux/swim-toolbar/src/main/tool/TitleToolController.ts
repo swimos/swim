@@ -12,41 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {Class, Observes} from "@swim/util";
+import type {FastenerClass} from "@swim/component";
+import type {Trait} from "@swim/model";
 import {ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {TraitViewRef} from "@swim/controller";
 import {ToolController} from "./ToolController";
 import {TitleToolView} from "./TitleToolView";
-import {TitleToolContent, TitleToolTrait} from "./TitleToolTrait";
 import type {TitleToolControllerObserver} from "./TitleToolControllerObserver";
 
 /** @public */
 export class TitleToolController extends ToolController {
   override readonly observerType?: Class<TitleToolControllerObserver>;
 
-  @TraitViewRef<TitleToolController, TitleToolTrait, TitleToolView>({
+  @TraitViewRef<TitleToolController["tool"]>({
     extends: true,
-    traitType: TitleToolTrait,
-    observesTrait: true,
-    initTrait(toolTrait: TitleToolTrait): void {
-      this.owner.setContentView(toolTrait.content.value, toolTrait);
-    },
-    deinitTrait(toolTrait: TitleToolTrait): void {
-      this.owner.setContentView(null, toolTrait);
-    },
-    traitDidSetContent(newContent: TitleToolContent | null, oldContent: TitleToolContent | null, toolTrait: TitleToolTrait): void {
-      this.owner.setContentView(newContent, toolTrait);
-    },
     viewType: TitleToolView,
     observesView: true,
     initView(toolView: TitleToolView): void {
       this.owner.content.setView(toolView.content.view);
-      const toolTrait = this.trait;
-      if (toolTrait !== null) {
-        this.owner.setContentView(toolTrait.content.value, toolTrait);
-      }
     },
     deinitView(toolView: TitleToolView): void {
       this.owner.content.setView(null);
@@ -58,27 +43,11 @@ export class TitleToolController extends ToolController {
       this.owner.content.setView(null);
     },
   })
-  override readonly tool!: TraitViewRef<this, TitleToolTrait, TitleToolView>;
-  static override readonly tool: MemberFastenerClass<TitleToolController, "tool">;
+  override readonly tool!: TraitViewRef<this, Trait, TitleToolView> & ToolController["tool"] & Observes<TitleToolView>;
+  static override readonly tool: FastenerClass<TitleToolController["tool"]>;
 
-  protected createContentView(content: TitleToolContent, toolTrait: TitleToolTrait): HtmlView | string | null {
-    if (typeof content === "function") {
-      return content(toolTrait);
-    } else {
-      return content;
-    }
-  }
-
-  protected setContentView(content: TitleToolContent | null, toolTrait: TitleToolTrait): void {
-    const toolView = this.tool.view;
-    if (toolView !== null) {
-      const contentView = content !== null ? this.createContentView(content, toolTrait) : null;
-      toolView.content.setView(contentView);
-    }
-  }
-
-  @ViewRef<TitleToolController, HtmlView>({
-    type: HtmlView,
+  @ViewRef<TitleToolController["content"]>({
+    viewType: HtmlView,
     willAttachView(contentView: HtmlView): void {
       this.owner.callObservers("controllerWillAttachToolContentView", contentView, this.owner);
     },
@@ -87,5 +56,5 @@ export class TitleToolController extends ToolController {
     },
   })
   readonly content!: ViewRef<this, HtmlView>;
-  static readonly content: MemberFastenerClass<TitleToolController, "content">;
+  static readonly content: FastenerClass<TitleToolController["content"]>;
 }

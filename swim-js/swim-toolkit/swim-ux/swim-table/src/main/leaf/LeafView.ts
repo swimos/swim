@@ -13,25 +13,11 @@
 // limitations under the License.
 
 import type {Class, Instance, Creatable, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/component";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
-import {
-  AnyFocus,
-  Focus,
-  FocusAnimator,
-  AnyExpansion,
-  Expansion,
-  ExpansionAnimator,
-} from "@swim/style";
+import {AnyFocus,  Focus, FocusAnimator, AnyExpansion,  Expansion, ExpansionAnimator} from "@swim/style";
 import {Look, Feel, ThemeConstraintAnimator} from "@swim/theme";
-import {
-  PositionGestureInput,
-  PositionGesture,
-  ViewContextType,
-  ViewFlags,
-  View,
-  ViewSet,
-} from "@swim/view";
+import {ViewFlags, View, ViewSet, PositionGestureInput, PositionGesture} from "@swim/view";
 import {ViewNode, HtmlView} from "@swim/dom";
 import {ButtonGlow} from "@swim/button";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
@@ -50,89 +36,68 @@ export class LeafView extends HtmlView {
     this.position.setState("relative", Affinity.Intrinsic);
     this.overflowX.setState("hidden", Affinity.Intrinsic);
     this.overflowY.setState("hidden", Affinity.Intrinsic);
-
-    const highlightPhase = this.highlight.getPhase();
-    const hoverPhase = this.hover.getPhase();
-    const backgroundPhase = Math.max(highlightPhase, hoverPhase);
-    this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
-                                   [Feel.hovering, hoverPhase * (1 - highlightPhase)],
-                                   [Feel.selected, highlightPhase]], false);
+    this.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
+    this.modifyMood(Feel.default, [[Feel.transparent, 1], [Feel.hovering, 0]], false);
   }
 
   override readonly observerType?: Class<LeafViewObserver>;
 
-  @Property({type: TableLayout, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @Property({valueType: TableLayout, value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
-  @Property({type: Number, inherits: true, value: 0, updateFlags: View.NeedsLayout})
+  @Property({valueType: Number, value: 0, inherits: true, updateFlags: View.NeedsLayout})
   readonly depth!: Property<this, number>;
 
-  @ThemeConstraintAnimator({type: Length, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @ThemeConstraintAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly rowSpacing!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeConstraintAnimator({type: Length, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @ThemeConstraintAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly rowHeight!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ExpansionAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @ExpansionAnimator({value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly stretch!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  @Property({type: Boolean, inherits: true, value: false})
+  @Property({valueType: Boolean, value: false, inherits: true})
   readonly hovers!: Property<this, boolean>;
 
-  @FocusAnimator<LeafView, Focus, AnyFocus>({
-    type: Focus,
+  @FocusAnimator<LeafView["hover"]>({
     value: Focus.unfocused(),
     get transition(): Timing | null {
       return this.owner.getLookOr(Look.timing, null);
     },
-    didSetValue(newHover: Focus, oldHover: Focus): void {
-      const highlightPhase = this.owner.highlight.getPhase();
-      const hoverPhase = newHover.phase;
-      const backgroundPhase = Math.max(highlightPhase, hoverPhase);
-      this.owner.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
-                                           [Feel.hovering, hoverPhase * (1 - highlightPhase)],
-                                           [Feel.selected, highlightPhase]], false);
-      if (backgroundPhase !== 0) {
-        this.owner.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
-      } else {
-        this.owner.backgroundColor.setLook(null, Affinity.Intrinsic);
-        this.owner.backgroundColor.setState(null, Affinity.Intrinsic);
-      }
+    willFocus(): void {
+      this.owner.modifyMood(Feel.default, [[Feel.transparent, 0],
+                                           [Feel.hovering, 1]], false);
+    },
+    willUnfocus(): void {
+      this.owner.modifyMood(Feel.default, [[Feel.transparent, 1 - this.owner.hover.state.phase],
+                                           [Feel.hovering, 0]], false);
     },
   })
   readonly hover!: FocusAnimator<this, Focus, AnyFocus>;
 
-  @FocusAnimator<LeafView, Focus, AnyFocus>({
-    type: Focus,
+  @FocusAnimator<LeafView["highlight"]>({
     value: Focus.unfocused(),
     get transition(): Timing | null {
       return this.owner.getLookOr(Look.timing, null);
     },
     willFocus(): void {
       this.owner.callObservers("viewWillHighlight", this.owner);
+      const timing = this.owner.getLook(Look.timing);
+      this.owner.modifyMood(Feel.default, [[Feel.transparent, 0]], timing);
+      this.owner.backgroundColor.setLook(Look.selectionColor, timing, Affinity.Intrinsic);
     },
     didFocus(): void {
       this.owner.callObservers("viewDidHighlight", this.owner);
     },
     willUnfocus(): void {
       this.owner.callObservers("viewWillUnhighlight", this.owner);
+      const timing = this.owner.getLook(Look.timing);
+      this.owner.modifyMood(Feel.default, [[Feel.transparent, 1 - this.owner.hover.state.phase]], timing);
+      this.owner.backgroundColor.setLook(Look.backgroundColor, timing, Affinity.Intrinsic);
     },
     didUnfocus(): void {
       this.owner.callObservers("viewDidUnhighlight", this.owner);
-    },
-    didSetValue(newHighlight: Focus, oldHighlight: Focus): void {
-      const highlightPhase = newHighlight.phase;
-      const hoverPhase = this.owner.hover.getPhase();
-      const backgroundPhase = Math.max(highlightPhase, hoverPhase);
-      this.owner.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
-                                           [Feel.hovering, hoverPhase * (1 - highlightPhase)],
-                                           [Feel.selected, highlightPhase]], false);
-      if (backgroundPhase !== 0) {
-        this.owner.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
-      } else {
-        this.owner.backgroundColor.setLook(null, Affinity.Intrinsic);
-        this.owner.backgroundColor.setState(null, Affinity.Intrinsic);
-      }
     },
   })
   readonly highlight!: FocusAnimator<this, Focus, AnyFocus>;
@@ -156,12 +121,12 @@ export class LeafView extends HtmlView {
     return cellView!;
   }
 
-  setCell(key: string, cellView: CellView): void {
+  setCell(key: string, cellView: CellView | null): void {
     this.setChild(key, cellView);
   }
 
-  @ViewSet<LeafView, CellView>({
-    type: CellView,
+  @ViewSet<LeafView["cells"]>({
+    viewType: CellView,
     binds: true,
     initView(cellView: CellView): void {
       cellView.display.setState("none", Affinity.Intrinsic);
@@ -179,10 +144,10 @@ export class LeafView extends HtmlView {
     },
   })
   readonly cells!: ViewSet<this, CellView>;
-  static readonly cells: MemberFastenerClass<LeafView, "cells">;
+  static readonly cells: FastenerClass<LeafView["cells"]>;
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     this.layoutLeaf();
   }
 
@@ -193,25 +158,20 @@ export class LeafView extends HtmlView {
     }
   }
 
-  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                                    viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
-      this.layoutChildViews(displayFlags, viewContext, displayChild);
+      this.layoutChildren(displayFlags, displayChild);
     } else {
-      super.displayChildren(displayFlags, viewContext, displayChild);
+      super.displayChildren(displayFlags, displayChild);
     }
   }
 
-  protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                            viewContext: ViewContextType<this>) => void): void {
+  protected layoutChildren(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
     const layout = this.layout.value;
     const height = this.height.state;
     const stretch = this.stretch.getPhaseOr(1);
     type self = this;
-    function layoutChildView(this: self, child: View, displayFlags: ViewFlags,
-                             viewContext: ViewContextType<self>): void {
+    function layoutChild(this: self, child: View, displayFlags: ViewFlags): void {
       if (child instanceof CellView) {
         const key = child.key;
         const col = layout !== null && key !== void 0 ? layout.getCol(key) : null;
@@ -236,12 +196,12 @@ export class LeafView extends HtmlView {
           child.height.setState(null, Affinity.Intrinsic);
         }
       }
-      displayChild.call(this, child, displayFlags, viewContext);
+      displayChild.call(this, child, displayFlags);
     }
-    super.displayChildren(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, layoutChild);
   }
 
-  @Property({type: Boolean, inherits: true, value: true})
+  @Property({valueType: Boolean, value: true, inherits: true})
   readonly glows!: Property<this, boolean>;
 
   protected glow(input: PositionGestureInput): void {
@@ -256,8 +216,8 @@ export class LeafView extends HtmlView {
     }
   }
 
-  @PositionGesture<LeafView, LeafView>({
-    self: true,
+  @PositionGesture<LeafView["gesture"]>({
+    bindsOwner: true,
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
       if (this.owner.glows.value) {
         this.owner.glow(input);
@@ -345,5 +305,5 @@ export class LeafView extends HtmlView {
     },
   })
   readonly gesture!: PositionGesture<this, LeafView>;
-  static readonly gesture: MemberFastenerClass<LeafView, "gesture">;
+  static readonly gesture: FastenerClass<LeafView["gesture"]>;
 }

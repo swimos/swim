@@ -16,7 +16,7 @@ import type {Class} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
+import {View} from "@swim/view";
 import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {ScaledViewInit, ScaledView} from "../scaled/ScaledView";
 import type {AnyPlotView, PlotView} from "../plot/PlotView";
@@ -37,10 +37,10 @@ export interface GraphViewInit<X = unknown, Y = unknown> extends ScaledViewInit<
 export class GraphView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
   override readonly observerType?: Class<GraphViewObserver<X, Y>>;
 
-  @ThemeAnimator({type: Font, inherits: true, value: null})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   addPlot(plot: AnyPlotView<X, Y>, key?: string): void {
@@ -51,9 +51,9 @@ export class GraphView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
     this.appendChild(plot);
   }
 
-  protected override willRender(viewContext: ViewContextType<this>): void {
-    super.willRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override willRender(): void {
+    super.willRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
       context.save();
@@ -61,13 +61,13 @@ export class GraphView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
     }
   }
 
-  protected override didRender(viewContext: ViewContextType<this>): void {
-    const renderer = viewContext.renderer;
+  protected override didRender(): void {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
       context.restore();
     }
-    super.didRender(viewContext);
+    super.didRender();
   }
 
   protected clipGraph(context: CanvasContext, frame: R2Box): void {
@@ -76,7 +76,7 @@ export class GraphView<X = unknown, Y = unknown> extends ScaledView<X, Y> {
     context.clip();
   }
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override hitTest(x: number, y: number): GraphicsView | null {
     return this;
   }
 

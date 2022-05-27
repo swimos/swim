@@ -12,27 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/component";
+import type {Class, Instance, Creatable, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
 import {Look, Feel, ThemeConstraintAnimator} from "@swim/theme";
-import {
-  ViewportInsets,
-  PositionGestureInput,
-  ViewContextType,
-  ViewContext,
-  ViewFlags,
-  View,
-  ViewRef,
-  ViewSet,
-} from "@swim/view";
+import {ViewFlags, View, ViewRef, ViewSet, PositionGestureInput} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import type {LeafView} from "../leaf/LeafView";
 import {RowView} from "../row/RowView";
 import {HeaderView} from "../header/HeaderView";
-import type {TableViewContext} from "./TableViewContext";
 import type {TableViewObserver} from "./TableViewObserver";
 
 /** @public */
@@ -40,7 +30,6 @@ export class TableView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
     this.visibleViews = [];
-    this.visibleFrame = new R2Box(0, 0, window.innerWidth, window.innerHeight);
     this.initTable();
   }
 
@@ -48,22 +37,18 @@ export class TableView extends HtmlView {
     this.addClass("table");
     this.position.setState("relative", Affinity.Intrinsic);
     this.backgroundColor.setLook(Look.backgroundColor, Affinity.Intrinsic);
+    this.boxSizing.setState("border-box", Affinity.Intrinsic);
   }
 
   override readonly observerType?: Class<TableViewObserver>;
 
-  override readonly contextType?: Class<TableViewContext>;
-
-  @Property({type: TableLayout, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @Property({valueType: TableLayout, value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
-  @Property({type: Object, inherits: true, value: null, updateFlags: View.NeedsLayout})
-  readonly edgeInsets!: Property<this, ViewportInsets | null>;
-
-  @Property<TableView, number>({
-    type: Number,
-    inherits: true,
+  @Property<TableView["depth"]>({
+    valueType: Number,
     value: 0,
+    inherits: true,
     updateFlags: View.NeedsLayout,
     didSetValue(newDepth: number, oldDepth: number): void {
       this.owner.modifyTheme(Feel.default, [[Feel.nested, newDepth !== 0 ? 1 : void 0]], false);
@@ -71,30 +56,30 @@ export class TableView extends HtmlView {
   })
   readonly depth!: Property<this, number>;
 
-  @ThemeConstraintAnimator({type: Length, inherits: true, value: Length.zero(), updateFlags: View.NeedsLayout})
+  @ThemeConstraintAnimator({valueType: Length, value: Length.zero(), inherits: true, updateFlags: View.NeedsScroll})
   readonly rowSpacing!: ThemeConstraintAnimator<this, Length, AnyLength>;
 
-  @ThemeConstraintAnimator({type: Length, inherits: true, value: Length.px(24), updateFlags: View.NeedsLayout})
+  @ThemeConstraintAnimator({valueType: Length, value: Length.px(24), inherits: true, updateFlags: View.NeedsScroll})
   readonly rowHeight!: ThemeConstraintAnimator<this, Length, AnyLength>;
 
-  @Property({type: Boolean, inherits: true, value: false})
+  @Property({valueType: Boolean, value: false, inherits: true})
   readonly hovers!: Property<this, boolean>;
 
-  @Property({type: Boolean, inherits: true, value: true})
+  @Property({valueType: Boolean, value: true, inherits: true})
   readonly glows!: Property<this, boolean>;
 
-  @ExpansionAnimator({type: Expansion, inherits: true, value: null})
+  @ExpansionAnimator({value: null, inherits: true})
   readonly disclosure!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  @ExpansionAnimator({type: Expansion, inherits: true, value: null})
+  @ExpansionAnimator({value: null, inherits: true})
   readonly disclosing!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  @ExpansionAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @ExpansionAnimator({value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly stretch!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
-  @ViewRef<TableView, HeaderView>({
-    key: true,
-    type: HeaderView,
+  @ViewRef<TableView["header"]>({
+    viewType: HeaderView,
+    viewKey: true,
     binds: true,
     initView(headerView: HeaderView): void {
       headerView.display.setState("none", Affinity.Intrinsic);
@@ -116,10 +101,38 @@ export class TableView extends HtmlView {
     }
   })
   readonly header!: ViewRef<this, HeaderView>;
-  static readonly header: MemberFastenerClass<TableView, "header">;
+  static readonly header: FastenerClass<TableView["header"]>;
 
-  @ViewSet<TableView, RowView>({
-    type: RowView,
+  getRow<F extends Class<RowView>>(key: string, rowViewClass: F): InstanceType<F> | null;
+  getRow(key: string): RowView | null;
+  getRow(key: string, rowViewClass?: Class<RowView>): RowView | null {
+    if (rowViewClass === void 0) {
+      rowViewClass = RowView;
+    }
+    const rowView = this.getChild(key);
+    return rowView instanceof rowViewClass ? rowView : null;
+  }
+
+  getOrCreateRow<F extends Class<Instance<F, RowView>> & Creatable<Instance<F, RowView>>>(key: string, rowViewClass: F): InstanceType<F>;
+  getOrCreateRow(key: string): RowView;
+  getOrCreateRow(key: string, rowViewClass?: Class<RowView> & Creatable<RowView>): RowView {
+    if (rowViewClass === void 0) {
+      rowViewClass = RowView;
+    }
+    let rowView = this.getChild(key, rowViewClass);
+    if (rowView === null) {
+      rowView = rowViewClass.create();
+      this.setChild(key, rowView);
+    }
+    return rowView!;
+  }
+
+  setRow(key: string, rowView: RowView | null): void {
+    this.setChild(key, rowView);
+  }
+
+  @ViewSet<TableView["rows"]>({
+    viewType: RowView,
     binds: true,
     observes: true,
     initView(rowView: RowView): void {
@@ -186,20 +199,42 @@ export class TableView extends HtmlView {
       this.owner.callObservers("viewDidCollapseRow", rowView);
     },
   })
-  readonly rows!: ViewSet<this, RowView>;
-  static readonly rows: MemberFastenerClass<TableView, "rows">;
+  readonly rows!: ViewSet<this, RowView> & Observes<RowView>;
+  static readonly rows: FastenerClass<TableView["rows"]>;
 
   /** @internal */
   readonly visibleViews: ReadonlyArray<View>;
 
-  /** @internal */
-  readonly visibleFrame: R2Box;
+  @Property<TableView["visibleFrame"]>({
+    valueType: R2Box,
+    value: null,
+    inherits: true,
+    init(): void {
+      this.outletValue = null;
+    },
+    getOutletValue(outlet: Property<unknown, R2Box | null>): R2Box | null {
+      return this.outletValue;
+    },
+    setOutletValue(newOutletValue: R2Box | null): void {
+      const oldOutletValue = this.outletValue;
+      if (!this.equalValues(newOutletValue, oldOutletValue)) {
+        this.outletValue = newOutletValue;
+        this.decohereOutlets();
+      }
+    },
+  })
+  readonly visibleFrame!: Property<this, R2Box | null> & {
+    /** @internal */
+    outletValue: R2Box | null,
+    /** @internal */
+    setOutletValue(newOutletValue: R2Box | null): void,
+  };
 
-  protected detectVisibleFrame(viewContext: ViewContext): R2Box {
+  protected detectVisibleFrame(): R2Box {
     const xBleed = 0;
     const yBleed = this.rowHeight.getValueOr(Length.zero()).pxValue();
-    const parentVisibleFrame = (viewContext as TableViewContext).visibleFrame as R2Box | undefined;
-    if (parentVisibleFrame !== void 0) {
+    const parentVisibleFrame = this.visibleFrame.value;
+    if (parentVisibleFrame !== null) {
       let left: Length | number | null = this.left.state;
       left = left instanceof Length ? left.pxValue() : 0;
       let top: Length | number | null = this.top.state;
@@ -216,41 +251,32 @@ export class TableView extends HtmlView {
     }
   }
 
-  override extendViewContext(viewContext: ViewContext): ViewContextType<this> {
-    const treeViewContext = Object.create(viewContext);
-    treeViewContext.visibleFrame = this.visibleFrame;
-    return treeViewContext;
-  }
-
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags): ViewFlags {
     if ((processFlags & View.NeedsResize) !== 0) {
       processFlags |= View.NeedsScroll;
     }
     return processFlags;
   }
 
-  protected override onResize(viewContext: ViewContextType<this>): void {
-    super.onResize(viewContext);
+  protected override onResize(): void {
+    super.onResize();
     this.resizeTable();
   }
 
   protected resizeTable(): void {
-    const oldLayout = !this.layout.inherited ? this.layout.value : null;
+    const oldLayout = !this.layout.derived ? this.layout.value : null;
     if (oldLayout !== null) {
-      const superLayout = this.layout.superValue;
+      const superLayout = this.layout.inletValue;
       let width: Length | number | null = null;
       if (superLayout !== void 0 && superLayout !== null && superLayout.width !== null) {
         width = superLayout.width.pxValue();
       }
       if (width === null) {
-        width = this.width.state;
-        width = width instanceof Length ? width.pxValue() : this.node.offsetWidth;
+        width = this.width.pxState();
       }
       const edgeInsets = this.edgeInsets.value;
-      let paddingLeft: Length | number | null = this.paddingLeft.state;
-      paddingLeft = paddingLeft instanceof Length ? paddingLeft.pxValue(width) : 0;
-      let paddingRight: Length | number | null = this.paddingRight.state;
-      paddingRight = paddingRight instanceof Length ? paddingRight.pxValue(width) : 0;
+      const paddingLeft = this.paddingLeft.pxState();
+      const paddingRight = this.paddingRight.pxState();
       let left = edgeInsets !== null ? edgeInsets.insetLeft : 0;
       left += paddingLeft;
       let right = edgeInsets !== null ? edgeInsets.insetRight : 0;
@@ -260,14 +286,12 @@ export class TableView extends HtmlView {
     }
   }
 
-  protected processVisibleViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                processChild: (this: this, child: View, processFlags: ViewFlags,
-                                               viewContext: ViewContextType<this>) => void): void {
+  protected processVisibleViews(processFlags: ViewFlags, processChild: (this: this, child: View, processFlags: ViewFlags) => void): void {
     const visibleViews = this.visibleViews;
     let i = 0;
     while (i < visibleViews.length) {
       const child = visibleViews[i]!;
-      processChild.call(this, child, processFlags, viewContext);
+      processChild.call(this, child, processFlags);
       if ((child.flags & View.RemovingFlag) !== 0) {
         child.setFlags(child.flags & ~View.RemovingFlag);
         this.removeChild(child);
@@ -277,31 +301,42 @@ export class TableView extends HtmlView {
     }
   }
 
-  protected override processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     processChild: (this: this, child: View, processFlags: ViewFlags,
-                                                    viewContext: ViewContextType<this>) => void): void {
+  protected override processChildren(processFlags: ViewFlags, processChild: (this: this, child: View, processFlags: ViewFlags) => void): void {
     if (!this.culled) {
       if ((processFlags & View.NeedsScroll) !== 0) {
-        this.scrollChildViews(processFlags, viewContext, processChild);
+        this.scrollChildren(processFlags, processChild);
       } else {
-        this.processVisibleViews(processFlags, viewContext, processChild);
+        this.processVisibleViews(processFlags, processChild);
       }
     }
   }
 
-  protected scrollChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             processChild: (this: this, child: View, processFlags: ViewFlags,
-                                            viewContext: ViewContextType<this>) => void): void {
+  protected scrollChildren(processFlags: ViewFlags, processChild: (this: this, child: View, processFlags: ViewFlags) => void): void {
+    const rowHeight = this.rowHeight.getValue();
+    const rowSpacing = this.rowSpacing.getValue().pxValue(rowHeight.pxValue());
+    const disclosingPhase = this.disclosing.getPhaseOr(1);
+
     const visibleViews = this.visibleViews as View[];
     visibleViews.length = 0;
 
-    const visibleFrame = this.detectVisibleFrame(Object.getPrototypeOf(viewContext));
-    (viewContext as Mutable<ViewContextType<this>>).visibleFrame = visibleFrame;
-    (this as Mutable<this>).visibleFrame = visibleFrame;
+    const visibleFrame = this.detectVisibleFrame();
+    this.visibleFrame.setOutletValue(visibleFrame);
+
+    let yValue = 0;
+    let yState = 0;
+    let rowIndex = 0;
 
     type self = this;
-    function scrollChildView(this: self, child: View, processFlags: ViewFlags,
-                             viewContext: ViewContextType<self>): void {
+    function scrollChild(this: self, child: View, processFlags: ViewFlags): void {
+      if (child instanceof RowView || child instanceof HeaderView) {
+        if (rowIndex !== 0) {
+          yValue += rowSpacing * disclosingPhase;
+          yState += rowSpacing;
+        }
+        if (child.top.hasAffinity(Affinity.Intrinsic)) {
+          child.top.setInterpolatedValue(Length.px(yValue), Length.px(yState));
+        }
+      }
       let isVisible: boolean;
       if (child instanceof HtmlView) {
         const top = child.top.state;
@@ -322,20 +357,27 @@ export class TableView extends HtmlView {
       }
       if (isVisible) {
         visibleViews.push(child);
-        processChild.call(this, child, processFlags, viewContext);
+        processChild.call(this, child, processFlags);
+      }
+      if (child instanceof RowView || child instanceof HeaderView) {
+        let heightValue: Length | number | null = child.height.value;
+        heightValue = heightValue instanceof Length ? heightValue.pxValue() : child.node.offsetHeight;
+        let heightState: Length | number | null = child.height.state;
+        heightState = heightState instanceof Length ? heightState.pxValue() : heightValue;
+        yValue += heightValue * disclosingPhase;
+        yState += heightState;
+        rowIndex += 1;
       }
     }
-    super.processChildren(processFlags, viewContext, scrollChildView);
+    super.processChildren(processFlags, scrollChild);
   }
 
-  protected displayVisibleViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                               viewContext: ViewContextType<this>) => void): void {
+  protected displayVisibleViews(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
     const visibleViews = this.visibleViews;
     let i = 0;
     while (i < visibleViews.length) {
       const child = visibleViews[i]!;
-      displayChild.call(this, child, displayFlags, viewContext);
+      displayChild.call(this, child, displayFlags);
       if ((child.flags & View.RemovingFlag) !== 0) {
         child.setFlags(child.flags & ~View.RemovingFlag);
         this.removeChild(child);
@@ -345,47 +387,46 @@ export class TableView extends HtmlView {
     }
   }
 
-  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                                    viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
-      this.layoutChildViews(displayFlags, viewContext, displayChild);
+      this.layoutChildren(displayFlags, displayChild);
     } else {
-      this.displayVisibleViews(displayFlags, viewContext, displayChild);
+      this.displayVisibleViews(displayFlags, displayChild);
     }
   }
 
-  protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                            viewContext: ViewContextType<this>) => void): void {
+  protected layoutChildren(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
     this.resizeTable();
     const layout = this.layout.value;
     const width = layout !== null ? layout.width : null;
     const rowHeight = this.rowHeight.getValue();
     const rowSpacing = this.rowSpacing.getValue().pxValue(rowHeight.pxValue());
     const disclosingPhase = this.disclosing.getPhaseOr(1);
+    const timing = !this.disclosing.tweening ? this.getLook(Look.timing) : null;
 
     const visibleViews = this.visibleViews as View[];
     visibleViews.length = 0;
 
-    const visibleFrame = this.detectVisibleFrame(Object.getPrototypeOf(viewContext));
-    (viewContext as Mutable<ViewContextType<this>>).visibleFrame = visibleFrame;
-    (this as Mutable<this>).visibleFrame = visibleFrame;
+    const visibleFrame = this.detectVisibleFrame();
+    this.visibleFrame.setOutletValue(visibleFrame);
 
     let yValue = 0;
     let yState = 0;
     let rowIndex = 0;
 
     type self = this;
-    function layoutChildView(this: self, child: View, displayFlags: ViewFlags,
-                             viewContext: ViewContextType<self>): void {
+    function layoutChild(this: self, child: View, displayFlags: ViewFlags): void {
       if (child instanceof RowView || child instanceof HeaderView) {
         if (rowIndex !== 0) {
           yValue += rowSpacing * disclosingPhase;
           yState += rowSpacing;
         }
         if (child.top.hasAffinity(Affinity.Intrinsic)) {
-          child.top.setInterpolatedValue(Length.px(yValue), Length.px(yState));
+          if (child.top.pxValue() === 0 || yValue !== yState) {
+            child.top.setInterpolatedValue(Length.px(yValue), Length.px(yState));
+          } else {
+            child.top.setState(yState, timing, Affinity.Intrinsic);
+          }
         }
         child.width.setState(width, Affinity.Intrinsic);
       }
@@ -410,7 +451,7 @@ export class TableView extends HtmlView {
       if (isVisible) {
         visibleViews.push(child);
       }
-      displayChild.call(this, child, displayFlags, viewContext);
+      displayChild.call(this, child, displayFlags);
       if (child instanceof RowView || child instanceof HeaderView) {
         let heightValue: Length | number | null = child.height.value;
         heightValue = heightValue instanceof Length ? heightValue.pxValue() : child.node.offsetHeight;
@@ -421,7 +462,7 @@ export class TableView extends HtmlView {
         rowIndex += 1;
       }
     }
-    super.displayChildren(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, layoutChild);
 
     if (this.height.hasAffinity(Affinity.Intrinsic)) {
       this.height.setInterpolatedValue(Length.px(yValue), Length.px(yState));

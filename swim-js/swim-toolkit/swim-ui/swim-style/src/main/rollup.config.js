@@ -8,6 +8,7 @@ const script = "swim-style";
 const external = [
   "@swim/util",
   "@swim/codec",
+  "@swim/component",
   "@swim/structure",
   "@swim/math",
   "@swim/time",

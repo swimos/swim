@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Equivalent, AnyTiming, Timing} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import {Class, Equivalent, AnyTiming, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Property, Provider} from "@swim/component";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
-import {View, ViewRef} from "@swim/view";
+import {View, ViewRef, ViewportColorScheme, ViewportService} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
-import {AnyGeoPerspective, MapView} from "@swim/map";
+import {AnyGeoPerspective, GeoViewport, MapView} from "@swim/map";
 import {MapboxViewport} from "./MapboxViewport";
 import type {MapboxViewObserver} from "./MapboxViewObserver";
 
@@ -28,12 +28,6 @@ export class MapboxView extends MapView {
   constructor(map: mapboxgl.Map) {
     super();
     this.map = map;
-    Object.defineProperty(this, "geoViewport", {
-      value: MapboxViewport.create(map),
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
     this.onMapRender = this.onMapRender.bind(this);
     this.onMoveStart = this.onMoveStart.bind(this);
     this.onMoveEnd = this.onMoveEnd.bind(this);
@@ -48,40 +42,39 @@ export class MapboxView extends MapView {
     map.on("render", this.onMapRender);
     map.on("movestart", this.onMoveStart);
     map.on("moveend", this.onMoveEnd);
-  }
-
-  override readonly geoViewport!: MapboxViewport;
-
-  protected willSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport): void {
-    this.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this);
-  }
-
-  protected onSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport): void {
-    // hook
-  }
-
-  protected didSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport): void {
-    this.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this);
-  }
-
-  protected updateGeoViewport(): boolean {
-    const oldGeoViewport = this.geoViewport;
-    const newGeoViewport = MapboxViewport.create(this.map);
-    if (!newGeoViewport.equals(oldGeoViewport)) {
-      this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
-      (this as Mutable<this>).geoViewport = newGeoViewport;
-      this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
-      this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
-      return true;
+    if ((map as any).style === void 0) {
+      this.mapStyle.update();
+    } else {
+      this.mapStyle.setAffinity(Affinity.Extrinsic);
     }
-    return false;
   }
+
+  @Property<MapboxView["geoViewport"]>({
+    extends: true,
+    initValue(): GeoViewport {
+      return MapboxViewport.create(this.owner.map);
+    },
+    willSetValue(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport): void {
+      this.owner.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this.owner);
+    },
+    didSetValue(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport): void {
+      this.owner.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this.owner);
+      const immediate = !this.owner.hidden && !this.owner.culled;
+      this.owner.requireUpdate(View.NeedsProject, immediate);
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        this.setValue(MapboxViewport.create(this.owner.map), Affinity.Intrinsic);
+      }
+    },
+  })
+  override readonly geoViewport!: Property<this, GeoViewport> & MapView["geoViewport"] & {
+    /** @internal */
+    update(): void;
+  };
 
   protected onMapRender(): void {
-    if (this.updateGeoViewport()) {
-      const immediate = !this.hidden && !this.culled;
-      this.requireUpdate(View.NeedsProject, immediate);
-    }
+    this.geoViewport.update();
   }
 
   protected onMoveStart(): void {
@@ -94,7 +87,7 @@ export class MapboxView extends MapView {
 
   override moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
     const options: mapboxgl.FlyToOptions = {};
-    const geoViewport = this.geoViewport;
+    const geoViewport = this.geoViewport.value;
     let geoCenter = geoPerspective.geoCenter;
     if (geoCenter !== void 0 && geoCenter !== null) {
       geoCenter = GeoPoint.fromAny(geoCenter);
@@ -133,7 +126,7 @@ export class MapboxView extends MapView {
     this.callObservers("viewDidMoveMap", this);
   }
 
-  @ViewRef<MapboxView, CanvasView>({
+  @ViewRef<MapboxView["canvas"]>({
     extends: true,
     didAttachView(canvasView: CanvasView, targetView: View | null): void {
       if (this.owner.parent === null) {
@@ -149,15 +142,35 @@ export class MapboxView extends MapView {
       }
     },
   })
-  override readonly canvas!: ViewRef<this, CanvasView>;
-  static override readonly canvas: MemberFastenerClass<MapboxView, "canvas">;
+  override readonly canvas!: ViewRef<this, CanvasView> & MapView["canvas"];
+  static override readonly canvas: FastenerClass<MapboxView["canvas"]>;
 
-  @ViewRef<MapboxView, HtmlView>({
+  @ViewRef<MapboxView["container"]>({
     extends: true,
     didAttachView(containerView: HtmlView, targetView: View | null): void {
       HtmlView.fromNode(this.owner.map.getContainer());
       const canvasContainerView =  HtmlView.fromNode(this.owner.map.getCanvasContainer());
       this.owner.canvas.insertView(canvasContainerView);
+      const controlContainerNode = containerView.node.querySelector(".mapboxgl-control-container") as HTMLElement | null;
+      if (controlContainerNode !== null) {
+        this.owner.controlContainer.setView(HtmlView.fromNode(controlContainerNode));
+        const topLeftControlsNode = controlContainerNode.querySelector(".mapboxgl-ctrl-top-left") as HTMLElement | null;
+        if (topLeftControlsNode !== null) {
+          this.owner.topLeftControls.setView(HtmlView.fromNode(topLeftControlsNode));
+        }
+        const topRightControlsNode = controlContainerNode.querySelector(".mapboxgl-ctrl-top-right") as HTMLElement | null;
+        if (topRightControlsNode !== null) {
+          this.owner.topRightControls.setView(HtmlView.fromNode(topRightControlsNode));
+        }
+        const bottomLeftControlsNode = controlContainerNode.querySelector(".mapboxgl-ctrl-bottom-left") as HTMLElement | null;
+        if (bottomLeftControlsNode !== null) {
+          this.owner.bottomLeftControls.setView(HtmlView.fromNode(bottomLeftControlsNode));
+        }
+        const bottomRightControlsNode = controlContainerNode.querySelector(".mapboxgl-ctrl-bottom-right") as HTMLElement | null;
+        if (bottomRightControlsNode !== null) {
+          this.owner.bottomRightControls.setView(HtmlView.fromNode(bottomRightControlsNode));
+        }
+      }
       MapView.container.prototype.didAttachView.call(this, containerView, targetView);
     },
     willDetachView(containerView: HtmlView): void {
@@ -167,8 +180,125 @@ export class MapboxView extends MapView {
       if (canvasView !== null && canvasView.parent === canvasContainerView) {
         canvasContainerView.removeChild(containerView);
       }
+      this.owner.controlContainer.setView(null);
+      this.owner.topLeftControls.setView(null);
+      this.owner.topRightControls.setView(null);
+      this.owner.bottomLeftControls.setView(null);
+      this.owner.bottomRightControls.setView(null);
     },
   })
-  override readonly container!: ViewRef<this, HtmlView>;
-  static override readonly container: MemberFastenerClass<MapboxView, "container">;
+  override readonly container!: ViewRef<this, HtmlView> & MapView["container"];
+  static override readonly container: FastenerClass<MapboxView["container"]>;
+
+  @ViewRef<MapboxView["controlContainer"]>({
+    viewType: HtmlView,
+  })
+  readonly controlContainer!: ViewRef<this, HtmlView>;
+
+  @ViewRef<MapboxView["topLeftControls"]>({
+    viewType: HtmlView,
+  })
+  readonly topLeftControls!: ViewRef<this, HtmlView>;
+
+  @ViewRef<MapboxView["topRightControls"]>({
+    viewType: HtmlView,
+  })
+  readonly topRightControls!: ViewRef<this, HtmlView>;
+
+  @ViewRef<MapboxView["bottomLeftControls"]>({
+    viewType: HtmlView,
+  })
+  readonly bottomLeftControls!: ViewRef<this, HtmlView>;
+
+  @ViewRef<MapboxView["bottomRightControls"]>({
+    viewType: HtmlView,
+  })
+  readonly bottomRightControls!: ViewRef<this, HtmlView>;
+
+  protected override onResize(): void {
+    super.onResize();
+    this.map.resize();
+  }
+
+  protected override onLayout(): void {
+    super.onLayout();
+    this.layoutControls();
+  }
+
+  protected layoutControls(): void {
+    const containerView = this.container.view;
+    if (containerView !== null) {
+      const edgeInsets = containerView.edgeInsets.value;
+      const top = Math.max(containerView.paddingTop.pxState(), edgeInsets.insetTop);
+      const right = Math.max(containerView.paddingRight.pxState(), edgeInsets.insetRight);
+      const bottom = Math.max(containerView.paddingBottom.pxState(), edgeInsets.insetBottom);
+      const left = Math.max(containerView.paddingLeft.pxState(), edgeInsets.insetLeft);
+      const topLeftControlsView = this.topLeftControls.view;
+      if (topLeftControlsView !== null) {
+        topLeftControlsView.top.setState(top, Affinity.Intrinsic);
+        topLeftControlsView.left.setState(left, Affinity.Intrinsic);
+      }
+      const topRightControlsView = this.topRightControls.view;
+      if (topRightControlsView !== null) {
+        topRightControlsView.top.setState(top, Affinity.Intrinsic);
+        topRightControlsView.right.setState(right, Affinity.Intrinsic);
+      }
+      const bottomLeftControlsView = this.bottomLeftControls.view;
+      if (bottomLeftControlsView !== null) {
+        bottomLeftControlsView.bottom.setState(bottom, Affinity.Intrinsic);
+        bottomLeftControlsView.left.setState(left, Affinity.Intrinsic);
+      }
+      const bottomRightControlsView = this.bottomRightControls.view;
+      if (bottomRightControlsView !== null) {
+        bottomRightControlsView.bottom.setState(bottom, Affinity.Intrinsic);
+        bottomRightControlsView.right.setState(right, Affinity.Intrinsic);
+      }
+    }
+  }
+
+  @Provider<MapboxView["viewport"]>({
+    extends: true,
+    observes: true,
+    serviceDidSetViewportColorScheme(colorScheme: ViewportColorScheme): void {
+      this.owner.mapStyle.update();
+    },
+  })
+  override readonly viewport!: Provider<this, ViewportService> & MapView["viewport"] & Observes<ViewportService>;
+  static override readonly viewport: FastenerClass<MapboxView["viewport"]>;
+
+  @Property<MapboxView["mapStyle"]>({
+    value: null,
+    init(): void {
+      this.dark = "mapbox://styles/mapbox/dark-v10";
+      this.light = "mapbox://styles/mapbox/light-v10";
+    },
+    didSetValue(mapStyle: mapboxgl.Style | string | null) {
+      if (mapStyle !== null) {
+        this.owner.map.setStyle(mapStyle);
+      }
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        const viewportService = this.owner.viewport.service;
+        if (viewportService !== null) {
+          const colorScheme = viewportService.colorScheme.value;
+          if (colorScheme === "dark") {
+            this.setValue(this.dark, Affinity.Intrinsic);
+          } else {
+            this.setValue(this.light, Affinity.Intrinsic);
+          }
+        }
+      }
+    },
+  })
+  readonly mapStyle!: Property<this, mapboxgl.Style | string | null> & {
+    dark: mapboxgl.Style | string | null,
+    light: mapboxgl.Style | string | null,
+    update(): void,
+  };
+
+  protected override onMount(): void {
+    super.onMount();
+    this.mapStyle.update();
+  }
 }

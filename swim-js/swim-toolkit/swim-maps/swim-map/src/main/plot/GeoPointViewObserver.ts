@@ -19,9 +19,7 @@ import type {GeoPointView} from "./GeoPointView";
 
 /** @public */
 export interface GeoPointViewObserver<V extends GeoPointView = GeoPointView> extends GeoViewObserver<V> {
-  viewWillSetGeoPoint?(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint, view: V): void;
-
-  viewDidSetGeoPoint?(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint, view: V): void;
+  viewDidSetGeoPoint?(geoPoint: GeoPoint, view: V): void;
 
   viewWillAttachGeoLabel?(labelView: GraphicsView, view: V): void;
 

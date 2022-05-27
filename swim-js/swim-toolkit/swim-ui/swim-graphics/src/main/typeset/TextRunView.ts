@@ -13,10 +13,11 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/util";
+import {Animator} from "@swim/component";
 import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
+import {View} from "@swim/view";
 import {GraphicsView} from "../graphics/GraphicsView";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
@@ -33,22 +34,22 @@ export interface TextRunViewInit extends TypesetViewInit {
 
 /** @public */
 export class TextRunView extends GraphicsView implements TypesetView {
-  @ThemeAnimator({type: String, value: "", updateFlags: View.NeedsRender})
-  readonly text!: ThemeAnimator<this, string>;
+  @Animator({valueType: String, value: "", updateFlags: View.NeedsRender})
+  readonly text!: Animator<this, string>;
 
-  @ThemeAnimator({type: Font, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: String, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: String, inherits: true, updateFlags: View.NeedsRender})
   readonly textAlign!: ThemeAnimator<this, CanvasTextAlign | undefined>;
 
-  @ThemeAnimator({type: String, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: String, inherits: true, updateFlags: View.NeedsRender})
   readonly textBaseline!: ThemeAnimator<this, CanvasTextBaseline | undefined>;
 
-  @ThemeAnimator({type: R2Point, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: R2Point, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly textOrigin!: ThemeAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   get value(): TextRun {
@@ -89,9 +90,9 @@ export class TextRunView extends GraphicsView implements TypesetView {
     }
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer && !this.hidden && !this.culled) {
       this.renderText(renderer.context);
     }

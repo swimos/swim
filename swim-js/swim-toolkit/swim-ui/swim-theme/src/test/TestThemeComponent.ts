@@ -16,10 +16,10 @@ import {Property, Component} from "@swim/component";
 import {Look, Feel, MoodVector, ThemeMatrix, ThemeContext} from "@swim/theme";
 
 export class TestThemeComponent extends Component implements ThemeContext {
-  @Property({type: MoodVector, value: null, inherits: true})
+  @Property({valueType: MoodVector, value: null, inherits: true})
   readonly mood!: Property<this, MoodVector | null>;
 
-  @Property({type: ThemeMatrix, value: null, inherits: true})
+  @Property({valueType: ThemeMatrix, value: null, inherits: true})
   readonly theme!: Property<this, ThemeMatrix | null>;
 
   getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {

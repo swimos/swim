@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
-import type {Animator} from "@swim/component";
+import type {Class, Domain, Range, AnyTiming} from "@swim/util";
 import {GraphicsView} from "@swim/graphics";
+import type {ContinuousScaleAnimator} from "./ContinuousScaleAnimator";
 import type {ScaledYViewObserver} from "./ScaledYViewObserver";
 import {ScaledView} from "../"; // forward import
 
@@ -23,7 +23,7 @@ export interface ScaledYView<Y = unknown> extends GraphicsView {
   /** @override */
   readonly observerType?: Class<ScaledYViewObserver<Y>>;
 
-  readonly yScale: Animator<this, ContinuousScale<Y, number> | null, string>;
+  readonly yScale: ContinuousScaleAnimator<this, Y, number>;
 
   yDomain(): Domain<Y> | null;
   yDomain(yDomain: Domain<Y> | null, timing?: AnyTiming | boolean): this;

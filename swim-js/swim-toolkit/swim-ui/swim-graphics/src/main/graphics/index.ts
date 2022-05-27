@@ -22,7 +22,6 @@ export {
 
 export {Graphics} from "./Graphics";
 
-export {GraphicsViewContext} from "./GraphicsViewContext";
 export {
   GraphicsViewEventMap,
   GraphicsViewInit,

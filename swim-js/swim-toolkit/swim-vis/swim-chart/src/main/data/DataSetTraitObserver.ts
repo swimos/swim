@@ -17,8 +17,8 @@ import type {DataPointTrait} from "./DataPointTrait";
 import type {DataSetTrait} from "./DataSetTrait";
 
 /** @public */
-export interface DataSetTraitObserver<X = unknown, Y = unknown, R extends DataSetTrait<X, Y> = DataSetTrait<X, Y>> extends TraitObserver<R> {
-  traitWillAttachDataPoint?(dataPointTrait: DataPointTrait<X, Y>, targetTrait: Trait | null, trait: R): void;
+export interface DataSetTraitObserver<X = unknown, Y = unknown, T extends DataSetTrait<X, Y> = DataSetTrait<X, Y>> extends TraitObserver<T> {
+  traitWillAttachDataPoint?(dataPointTrait: DataPointTrait<X, Y>, targetTrait: Trait | null, trait: T): void;
 
-  traitDidDetachDataPoint?(dataPointTrait: DataPointTrait<X, Y>, trait: R): void;
+  traitDidDetachDataPoint?(dataPointTrait: DataPointTrait<X, Y>, trait: T): void;
 }

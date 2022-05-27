@@ -66,20 +66,6 @@ export class Presence implements Interpolate<Presence>, HashCode, Equivalent, De
     }
   }
 
-  get modalState(): "hidden" | "showing" | "shown" | "hiding" | undefined {
-    if (this.phase === 0 && this.direction === 0) {
-      return "hidden";
-    } else if (this.phase === 1 && this.direction === 0) {
-      return "shown";
-    } else if (this.direction > 0) {
-      return "showing";
-    } else if (this.direction < 0) {
-      return "hiding";
-    } else {
-      return void 0;
-    }
-  }
-
   get dismissed(): boolean {
     return this.phase === 0 && this.direction === 0;
   }
@@ -237,7 +223,10 @@ export class Presence implements Interpolate<Presence>, HashCode, Equivalent, De
     return new Presence(value.phase, value.direction);
   }
 
-  static fromAny(value: AnyPresence): Presence {
+  static fromAny(value: AnyPresence): Presence;
+  static fromAny(value: AnyPresence | null): Presence | null;
+  static fromAny(value: AnyPresence | null | undefined): Presence | null | undefined;
+  static fromAny(value: AnyPresence | null | undefined): Presence | null | undefined {
     if (value === void 0 || value === null || value instanceof Presence) {
       return value;
     } else if (Presence.isInit(value)) {

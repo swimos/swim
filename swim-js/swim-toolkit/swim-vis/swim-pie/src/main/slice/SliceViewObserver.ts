@@ -18,15 +18,15 @@ import type {SliceView} from "./SliceView";
 
 /** @public */
 export interface SliceViewObserver<V extends SliceView = SliceView> extends ViewObserver<V> {
-  viewWillSetSliceValue?(newValue: number, oldValue: number, view: V): void;
+  viewDidSetValue?(value: number, view: V): void;
 
-  viewDidSetSliceValue?(newValue: number, oldValue: number, view: V): void;
+  viewDidSetTotal?(total: number, view: V): void;
 
-  viewWillAttachSliceLabel?(labelView: GraphicsView, view: V): void;
+  viewWillAttachLabel?(labelView: GraphicsView, view: V): void;
 
-  viewDidDetachSliceLabel?(labelView: GraphicsView, view: V): void;
+  viewDidDetachLabel?(labelView: GraphicsView, view: V): void;
 
-  viewWillAttachSliceLegend?(legendView: GraphicsView, view: V): void;
+  viewWillAttachLegend?(legendView: GraphicsView, view: V): void;
 
-  viewDidDetachSliceLegend?(legendView: GraphicsView, view: V): void;
+  viewDidDetachLegend?(legendView: GraphicsView, view: V): void;
 }

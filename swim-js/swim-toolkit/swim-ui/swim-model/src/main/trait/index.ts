@@ -13,8 +13,6 @@
 // limitations under the License.
 
 export {
-  TraitModelType,
-  TraitContextType,
   TraitFlags,
   AnyTrait,
   TraitInit,
@@ -26,28 +24,43 @@ export {
 export {TraitObserver} from "./TraitObserver";
 
 export {
-  TraitRelationType,
-  TraitRelationInit,
+  TraitRelationTrait,
   TraitRelationDescriptor,
+  TraitRelationTemplate,
   TraitRelationClass,
-  TraitRelationFactory,
   TraitRelation,
 } from "./TraitRelation";
 
 export {
-  TraitRefType,
-  TraitRefInit,
+  TraitRefTrait,
   TraitRefDescriptor,
+  TraitRefTemplate,
   TraitRefClass,
-  TraitRefFactory,
   TraitRef,
 } from "./TraitRef";
 
 export {
-  TraitSetType,
-  TraitSetInit,
+  TraitSetTrait,
   TraitSetDescriptor,
+  TraitSetTemplate,
   TraitSetClass,
-  TraitSetFactory,
   TraitSet,
 } from "./TraitSet";
+
+export {
+  TraitModelRefTrait,
+  TraitModelRefModel,
+  TraitModelRefDescriptor,
+  TraitModelRefTemplate,
+  TraitModelRefClass,
+  TraitModelRef,
+} from "./TraitModelRef";
+
+export {
+  TraitModelSetTrait,
+  TraitModelSetModel,
+  TraitModelSetDescriptor,
+  TraitModelSetTemplate,
+  TraitModelSetClass,
+  TraitModelSet,
+} from "./TraitModelSet";

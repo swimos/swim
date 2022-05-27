@@ -12,14 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {BarView} from "./BarView";
+export {
+  BarPlacement,
+  BarView,
+} from "./BarView";
 export {BarViewObserver} from "./BarViewObserver";
 
-export {BarTrait} from "./BarTrait";
-export {BarTraitObserver} from "./BarTraitObserver";
-
-export {
-  BarControllerToolExt,
-  BarController,
-} from "./BarController";
+export {BarController} from "./BarController";
 export {BarControllerObserver} from "./BarControllerObserver";

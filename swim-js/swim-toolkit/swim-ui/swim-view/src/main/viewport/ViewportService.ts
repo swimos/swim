@@ -12,269 +12,332 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Lazy, ObserverType} from "@swim/util";
-import {Service} from "@swim/component";
-import {R2Box} from "@swim/math";
-import type {ViewportIdiom} from "./ViewportIdiom";
-import {Viewport} from "./Viewport";
+import type {Class} from "@swim/util";
+import {Affinity, FastenerClass, Property, EventHandler, EventTimer, Service} from "@swim/component";
+import {Length} from "@swim/math";
+import type {ViewIdiom} from "../view/ViewIdiom";
+import {ViewInsets} from "../view/ViewInsets";
+import {LayoutViewport} from "./LayoutViewport";
+import {VisualViewport} from "./VisualViewport";
+import type {ViewportOrientation} from "./ViewportOrientation";
+import type {ViewportColorScheme} from "./ViewportColorScheme";
 import type {ViewportServiceObserver} from "./ViewportServiceObserver";
-import {ViewContext} from "../view/ViewContext";
-import {View} from "../"; // forward import
 
 /** @public */
-export class ViewportService<V extends View = View> extends Service<V> {
-  constructor() {
-    super();
-    this.viewContext = ViewContext.create();
-    this.viewportResizeTimer = 0;
-    this.reorientationTimer = 0;
+export class ViewportService extends Service {
+  override readonly observerType?: Class<ViewportServiceObserver>;
 
-    this.throttleScroll = this.throttleScroll.bind(this);
-    this.throttleResize = this.throttleResize.bind(this);
-    this.debounceViewportResize = this.debounceViewportResize.bind(this);
-    this.throttleViewportResize = this.throttleViewportResize.bind(this);
-    this.debounceReorientation = this.debounceReorientation.bind(this);
-    this.throttleReorientation = this.throttleReorientation.bind(this);
-  }
-
-  override readonly observerType?: Class<ViewportServiceObserver<V>>;
-
-  readonly viewContext: ViewContext;
-
-  get viewport(): Viewport {
-    return this.viewContext.viewport;
-  }
-
-  get viewportIdiom(): ViewportIdiom {
-    return this.viewContext.viewportIdiom;
-  }
-
-  /** @internal */
-  detectViewportIdiom(viewport: Viewport): ViewportIdiom | undefined {
-    if (viewport.width < 960 || viewport.height < 480) {
-      return "mobile";
-    } else {
-      return "desktop";
-    }
-  }
-
-  /** @internal */
-  updateViewportIdiom(viewport: Viewport): void {
-    let viewportIdiom: ViewportIdiom | undefined;
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.detectViewportIdiom !== void 0) {
-        viewportIdiom = observer.detectViewportIdiom(viewport, this) as ViewportIdiom | undefined;
-        if (viewportIdiom !== void 0) {
-          break;
-        }
+  @Property<ViewportService["layoutViewport"]>({
+    valueType: LayoutViewport,
+    lazy: false,
+    initValue(): LayoutViewport {
+      return this.detect();
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        const layoutViewport = this.detect();
+        this.setValue(layoutViewport, Affinity.Intrinsic);
       }
-    }
-    if (viewportIdiom === void 0) {
-      viewportIdiom = this.detectViewportIdiom(viewport);
-    }
-    if (viewportIdiom !== void 0) {
-      this.setViewportIdiom(viewportIdiom);
-    }
-  }
-
-  setViewportIdiom(newViewportIdiom: ViewportIdiom): void {
-    const viewContext = this.viewContext;
-    const oldViewportIdiom = viewContext.viewportIdiom;
-    if (oldViewportIdiom !== newViewportIdiom) {
-      this.willSetViewportIdiom(newViewportIdiom, oldViewportIdiom);
-      (viewContext as Mutable<ViewContext>).viewportIdiom = newViewportIdiom;
-      this.onSetViewportIdiom(newViewportIdiom, oldViewportIdiom);
-      this.didSetViewportIdiom(newViewportIdiom, oldViewportIdiom);
-    }
-  }
-
-  protected willSetViewportIdiom(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceWillSetViewportIdiom !== void 0) {
-        observer.serviceWillSetViewportIdiom(newViewportIdiom, oldViewportIdiom, this);
+    },
+    detect(): LayoutViewport {
+      return {
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+        pageLeft: window.pageXOffset,
+        pageTop: window.pageYOffset,
+      };
+    },
+    didSetValue(newLayoutViewport: LayoutViewport, oldLayoutViewport: LayoutViewport): void {
+      if (newLayoutViewport.width !== oldLayoutViewport.width || newLayoutViewport.height !== oldLayoutViewport.height) {
+        this.owner.callObservers("serviceDidResizeLayoutViewport", newLayoutViewport, this.owner);
+        this.owner.safeArea.update();
+        this.owner.viewIdiom.update();
+      } else {
+        this.owner.callObservers("serviceDidScrollLayoutViewport", newLayoutViewport, this.owner);
       }
-    }
-  }
+    },
+    equalValues: LayoutViewport.equal,
+  })
+  readonly layoutViewport!: Property<this, LayoutViewport> & {
+    update(): void,
+    detect(): LayoutViewport,
+  };
 
-  protected onSetViewportIdiom(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom): void {
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  protected didSetViewportIdiom(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceDidSetViewportIdiom !== void 0) {
-        observer.serviceDidSetViewportIdiom(newViewportIdiom, oldViewportIdiom, this);
+  @EventTimer<ViewportService["layoutViewportChange"]>({
+    delay: 33,
+    type: ["resize", "scroll"],
+    initTarget(): EventTarget | null {
+      if (typeof window !== "undefined") {
+        return window;
+      } else {
+        return null;
       }
-    }
-  }
+    },
+    handle(event: Event): void {
+      this.owner.layoutViewport.update();
+    },
+  })
+  readonly layoutViewportChange!: EventTimer<this>;
+  static readonly layoutViewportChange: FastenerClass<ViewportService["layoutViewportChange"]>;
 
-  protected willReorient(orientation: OrientationType): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceWillReorient !== void 0) {
-        observer.serviceWillReorient(orientation, this);
+  @Property<ViewportService["visualViewport"]>({
+    valueType: VisualViewport,
+    lazy: false,
+    initValue(): VisualViewport {
+      return this.detect();
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        const visualViewport = this.detect();
+        this.setValue(visualViewport, Affinity.Intrinsic);
       }
-    }
-  }
-
-  protected onReorient(orientation: OrientationType): void {
-    // hook
-  }
-
-  protected didReorient(orientation: OrientationType): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.serviceDidReorient !== void 0) {
-        observer.serviceDidReorient(orientation, this);
-      }
-    }
-  }
-
-  protected override onObserve(observer: ObserverType<this>): void {
-    super.onObserve(observer);
-    if (this.attached) {
-      this.updateViewportIdiom(this.viewport);
-    }
-  }
-
-  protected override onAttach(): void {
-    super.onAttach();
-    this.attachEvents();
-    this.updateViewportIdiom(this.viewport);
-  }
-
-  protected override onDetach(): void {
-    this.detachEvents();
-    super.onDetach();
-  }
-
-  protected attachEvents(): void {
-    if (typeof window !== "undefined") {
-      window.addEventListener("scroll", this.throttleScroll, {passive: true});
-      window.addEventListener("resize", this.throttleResize);
-      window.addEventListener("orientationchange", this.debounceReorientation);
+    },
+    detect(): VisualViewport {
+      let visualViewport: VisualViewport;
       if (window.visualViewport !== void 0) {
-        window.visualViewport.addEventListener('resize', this.debounceViewportResize);
+        visualViewport = {
+          width: window.visualViewport.width,
+          height: window.visualViewport.height,
+          pageLeft: window.visualViewport.pageLeft,
+          pageTop: window.visualViewport.pageTop,
+          offsetLeft: window.visualViewport.offsetLeft,
+          offsetTop: window.visualViewport.offsetTop,
+          scale: window.visualViewport.scale,
+        };
+      } else {
+        visualViewport = {
+          width: document.documentElement.clientWidth,
+          height: document.documentElement.clientHeight,
+          pageLeft: window.pageXOffset,
+          pageTop: window.pageYOffset,
+          offsetLeft: 0,
+          offsetTop: 0,
+          scale: 1,
+        };
       }
-    }
-  }
+      return visualViewport;
+    },
+    didSetValue(visualViewport: VisualViewport): void {
+      this.owner.callObservers("serviceDidResizeVisualViewport", visualViewport, this.owner);
+    },
+    equalValues: VisualViewport.equal,
+  })
+  readonly visualViewport!: Property<this, VisualViewport> & {
+    update(): void,
+    detect(): VisualViewport,
+  };
 
-  protected detachEvents(): void {
-    if (typeof window !== "undefined") {
-      window.removeEventListener("scroll", this.throttleScroll);
-      window.removeEventListener("resize", this.throttleResize);
-      window.removeEventListener("orientationchange", this.debounceReorientation);
-      if (window.visualViewport !== void 0) {
-        window.visualViewport.removeEventListener('resize', this.debounceViewportResize);
+  @EventTimer<ViewportService["visualViewportChange"]>({
+    delay: 33,
+    type: "resize",
+    initTarget(): EventTarget | null {
+      if (typeof window !== "undefined" && window.visualViewport !== void 0) {
+        return window.visualViewport;
+      } else {
+        return null;
       }
-    }
-  }
+    },
+    handle(event: Event): void {
+      this.owner.visualViewport.update();
+    },
+  })
+  readonly visualViewportChange!: EventTimer<this>;
+  static readonly visualViewportChange: FastenerClass<ViewportService["visualViewportChange"]>;
 
-  /** @internal */
-  throttleScroll(): void {
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(View.NeedsScroll);
-    }
-  }
+  @Property<ViewportService["safeArea"]>({
+    valueType: ViewInsets,
+    value: ViewInsets.zero,
+    lazy: false,
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        const safeArea = this.detect();
+        this.setValue(safeArea, Affinity.Intrinsic);
+      }
+    },
+    detect(): ViewInsets {
+      let safeArea: ViewInsets;
+      try {
+        const documentStyle = getComputedStyle(document.documentElement);
+        const insetTop = Length.parse(documentStyle.getPropertyValue("--safe-area-inset-top")).pxValue();
+        const insetRight = Length.parse(documentStyle.getPropertyValue("--safe-area-inset-right")).pxValue();
+        const insetBottom = Length.parse(documentStyle.getPropertyValue("--safe-area-inset-bottom")).pxValue();
+        const insetLeft = Length.parse(documentStyle.getPropertyValue("--safe-area-inset-left")).pxValue();
+        safeArea = {insetTop, insetRight, insetBottom, insetLeft};
+      } catch (swallow) {
+        safeArea = ViewInsets.zero;
+      }
+      return safeArea;
+    },
+    didSetValue(safeArea: ViewInsets): void {
+      this.owner.callObservers("serviceDidResizeViewportSafeArea", safeArea, this.owner);
+    },
+    equalValues: ViewInsets.equal,
+    didMount(): void {
+      if (typeof CSS !== "undefined" && CSS.supports !== void 0 &&
+          CSS.supports("--safe-area-inset-top: env(safe-area-inset-top)")) {
+        const documentStyle = document.documentElement.style;
+        documentStyle.setProperty("--safe-area-inset-top", "env(safe-area-inset-top)");
+        documentStyle.setProperty("--safe-area-inset-right", "env(safe-area-inset-right)");
+        documentStyle.setProperty("--safe-area-inset-bottom", "env(safe-area-inset-bottom)");
+        documentStyle.setProperty("--safe-area-inset-left", "env(safe-area-inset-left)");
+        this.update();
+      }
+    },
+  })
+  readonly safeArea!: Property<this, ViewInsets> & {
+    update(): void,
+    detect(): ViewInsets,
+  };
 
-  /** @internal */
-  throttleResize(): void {
-    const viewport = Viewport.detect();
-    const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
-    (this.viewContext as Mutable<ViewContext>).viewport = viewport;
-    (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
-    this.updateViewportIdiom(viewport);
+  @Property<ViewportService["orientation"]>({
+    valueType: String,
+    lazy: false,
+    initValue(): ViewportOrientation {
+      return this.detect();
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        const orientation = this.detect();
+        this.setValue(orientation, Affinity.Intrinsic);
+      }
+    },
+    detect(): ViewportOrientation {
+      let orientation: ViewportOrientation;
+      if (typeof window !== "undefined" && window.matchMedia("(orientation: portrait)").matches) {
+        orientation = "portrait";
+      } else if (typeof window !== "undefined" && window.matchMedia("(orientation: landscape)").matches) {
+        orientation = "landscape";
+      } else {
+        orientation = "landscape";
+      }
+      return orientation;
+    },
+    didSetValue(orientation: ViewportOrientation): void {
+      this.owner.callObservers("serviceDidSetViewportOrientation", orientation, this.owner);
+      this.owner.safeArea.update();
+      this.owner.viewIdiom.update();
+    },
+  })
+  readonly orientation!: Property<this, ViewportOrientation> & {
+    update(): void,
+    detect(): ViewportOrientation,
+  };
 
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(View.NeedsResize | View.NeedsLayout);
-    }
-  }
+  @EventHandler<ViewportService["orientationChange"]>({
+    type: "change",
+    initTarget(): EventTarget | null {
+      if (typeof window !== "undefined") {
+        return window.matchMedia("(orientation: landscape)");
+      } else {
+        return null;
+      }
+    },
+    handle(event: MediaQueryListEvent): void {
+      this.owner.orientation.update();
+    },
+  })
+  readonly orientationChange!: EventHandler<this>;
+  static readonly orientationChange: FastenerClass<ViewportService["orientationChange"]>;
 
-  /** @internal */
-  viewportResizeTimer: number;
+  @Property<ViewportService["colorScheme"]>({
+    valueType: String,
+    lazy: false,
+    initValue(): ViewportColorScheme {
+      return this.detect();
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        const colorScheme = this.detect();
+        this.setValue(colorScheme, Affinity.Intrinsic);
+      }
+    },
+    detect(): ViewportColorScheme {
+      let colorScheme: ViewportColorScheme;
+      if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        colorScheme = "dark";
+      } else if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: light)").matches) {
+        colorScheme = "light";
+      } else {
+        colorScheme = "no-preference";
+      }
+      return colorScheme;
+    },
+    didSetValue(colorScheme: ViewportColorScheme): void {
+      this.owner.callObservers("serviceDidSetViewportColorScheme", colorScheme, this.owner);
+    },
+  })
+  readonly colorScheme!: Property<this, ViewportColorScheme> & {
+    update(): void,
+    detect(): ViewportColorScheme,
+  };
 
-  /** @internal */
-  protected debounceViewportResize(): void {
-    if (this.viewportResizeTimer !== 0) {
-      clearTimeout(this.viewportResizeTimer);
-      this.viewportResizeTimer = 0;
-    }
-    this.viewportResizeTimer = setTimeout(this.throttleViewportResize, ViewportService.ViewportResizeDelay) as any;
-  }
+  @EventHandler<ViewportService["colorSchemeChange"]>({
+    type: "change",
+    initTarget(): EventTarget | null {
+      if (typeof window !== "undefined") {
+        return window.matchMedia("(prefers-color-scheme: dark)");
+      } else {
+        return null;
+      }
+    },
+    handle(event: MediaQueryListEvent): void {
+      this.owner.colorScheme.update();
+    },
+  })
+  readonly colorSchemeChange!: EventHandler<this>;
+  static readonly colorSchemeChange: FastenerClass<ViewportService["colorSchemeChange"]>;
 
-  /** @internal */
-  protected throttleViewportResize(): void {
-    if (this.viewportResizeTimer !== 0) {
-      clearTimeout(this.viewportResizeTimer);
-      this.viewportResizeTimer = 0;
-    }
+  @Property<ViewportService["viewIdiom"]>({
+    valueType: String,
+    lazy: false,
+    initValue(): ViewIdiom {
+      return this.detect();
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        const viewIdiom = this.detect();
+        this.setValue(viewIdiom, Affinity.Intrinsic);
+      }
+    },
+    detect(): ViewIdiom {
+      let viewIdiom: ViewIdiom;
+      const viewport = this.owner.layoutViewport.value;
+      if (viewport.width < 600) {
+        viewIdiom = "mobile";
+      } else if (viewport.width < 800) {
+        viewIdiom = "tablet";
+      } else {
+        viewIdiom = "desktop";
+      }
+      return viewIdiom;
+    },
+    didSetValue(viewIdiom: ViewIdiom): void {
+      return this.owner.callObservers("serviceDidSetViewIdiom", viewIdiom, this.owner);
+    },
+  })
+  readonly viewIdiom!: Property<this, ViewIdiom> & {
+    update(): void,
+    detect(): ViewIdiom,
+  };
 
-    const viewport = Viewport.detect();
-    const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
-    (this.viewContext as Mutable<ViewContext>).viewport = viewport;
-    (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
-    this.updateViewportIdiom(viewport);
-
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(View.NeedsResize | View.NeedsScroll | View.NeedsLayout);
-    }
-  }
-
-  /** @internal */
-  reorientationTimer: number;
-
-  /** @internal */
-  protected debounceReorientation(): void {
-    if (this.reorientationTimer !== 0) {
-      clearTimeout(this.reorientationTimer);
-      this.reorientationTimer = 0;
-    }
-    this.reorientationTimer = setTimeout(this.throttleReorientation, ViewportService.ReorientationDelay) as any;
-  }
-
-  /** @internal */
-  protected throttleReorientation(): void {
-    if (this.reorientationTimer !== 0) {
-      clearTimeout(this.reorientationTimer);
-      this.reorientationTimer = 0;
-    }
-
-    const viewport = Viewport.detect();
-    const viewFrame = new R2Box(0, 0, viewport.width, viewport.height);
-    (this.viewContext as Mutable<ViewContext>).viewport = viewport;
-    (this.viewContext as Mutable<ViewContext>).viewFrame = viewFrame;
-    this.willReorient(viewport.orientation);
-    this.updateViewportIdiom(viewport);
-    this.onReorient(viewport.orientation);
-    this.didReorient(viewport.orientation);
-
-    const roots = this.roots;
-    for (let i = 0, n = roots.length; i < n; i += 1) {
-      roots[i]!.requireUpdate(View.NeedsResize | View.NeedsScroll | View.NeedsLayout);
-    }
-  }
-
-  /** @internal */
-  static ViewportResizeDelay: number = 200;
-  /** @internal */
-  static ReorientationDelay: number = 100;
-
-  @Lazy
-  static global<V extends View>(): ViewportService<V> {
-    return new ViewportService();
-  }
+  @EventTimer<ViewportService["load"]>({
+    delay: 100, // work around safe area not available on standalone load
+    type: "load",
+    initTarget(): EventTarget | null {
+      if (typeof window !== "undefined") {
+        return window;
+      } else {
+        return null;
+      }
+    },
+    handle(event: Event): void {
+      this.owner.layoutViewport.update();
+      this.owner.visualViewport.update();
+      this.owner.safeArea.update();
+      this.owner.orientation.update();
+      this.owner.colorScheme.update();
+    },
+  })
+  readonly load!: EventTimer<this>;
+  static readonly load: FastenerClass<ViewportService["load"]>;
 }

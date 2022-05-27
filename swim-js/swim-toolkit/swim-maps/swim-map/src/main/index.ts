@@ -22,7 +22,7 @@ export * from "./raster";
 
 export * from "./tree";
 
-export * from "./grid";
+export * from "./tile";
 
 export * from "./shape";
 

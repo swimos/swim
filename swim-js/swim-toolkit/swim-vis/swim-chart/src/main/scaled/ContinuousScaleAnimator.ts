@@ -13,12 +13,13 @@
 // limitations under the License.
 
 import {Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
-import {Affinity, AnimatorFactory, Animator} from "@swim/component"
+import {AnyDateTime, DateTime, TimeDomain} from "@swim/time";
+import {Affinity, AnimatorClass, Animator} from "@swim/component"
 import type {View} from "@swim/view";
 import {ScaledView} from "../"; // forward import
 
 /** @public */
-export interface ContinuousScaleAnimator<O extends View = View, X = unknown, Y = unknown, T extends ContinuousScale<X, Y> | null | undefined = ContinuousScale<X, Y> | null, U extends string = string> extends Animator<O, T, U> {
+export interface ContinuousScaleAnimator<O extends View = View, X = unknown, Y = unknown, T extends ContinuousScale<X, Y> | null | undefined = ContinuousScale<X, Y> | null, U extends ContinuousScale<X, Y> | string | null | undefined = ContinuousScale<X, Y> | string | T> extends Animator<O, T, U> {
   setScale(domain: Domain<X> | string, range: Range<Y>, timing?: AnyTiming | boolean | null): void;
   setScale(xMin: X, xMax: X, yMin: Y, yMax: Y, timing?: AnyTiming | boolean | null): void;
 
@@ -37,13 +38,17 @@ export interface ContinuousScaleAnimator<O extends View = View, X = unknown, Y =
   setBaseRange(range: Range<Y>, timing?: AnyTiming | boolean | null): void;
   setBaseRange(yMin: Y, yMax: Y, timing?: AnyTiming | boolean | null): void;
 
+  createDomain(xMin: X, xMax: X): Domain<X>;
+
   /** @override */
   fromAny(value: T | U): T;
 }
 
 /** @public */
 export const ContinuousScaleAnimator = (function (_super: typeof Animator) {
-  const ContinuousScaleAnimator = _super.extend("ContinuousScaleAnimator") as AnimatorFactory<ContinuousScaleAnimator<any, any, any, any, any>>;
+  const ContinuousScaleAnimator = _super.extend("ContinuousScaleAnimator", {
+    valueType: ContinuousScale,
+  }) as AnimatorClass<ContinuousScaleAnimator<any, any, any, any, any>>;
 
   ContinuousScaleAnimator.prototype.setScale = function <X, Y>(this: ContinuousScaleAnimator<View, X, Y>, xMin?: Domain<X> | X | string, xMax?: Range<Y> | X,
                                                                yMin?: Y | AnyTiming | boolean | null, yMax?: Y, timing?: AnyTiming | boolean | null): void {
@@ -124,26 +129,34 @@ export const ContinuousScaleAnimator = (function (_super: typeof Animator) {
 
   ContinuousScaleAnimator.prototype.setBaseScale = function <X, Y>(this: ContinuousScaleAnimator<View, X, Y>, xMin?: Domain<X> | X | string, xMax?: Range<Y> | X,
                                                                    yMin?: Y | AnyTiming | boolean | null, yMax?: Y, timing?: AnyTiming | boolean | null): void {
-    if (this.inherited && this.superFastener instanceof ContinuousScaleAnimator) {
-      this.superFastener.setBaseScale(xMin as any, xMax as any, yMin as any, yMax as any, timing);
+    if (this.derived && this.inlet instanceof ContinuousScaleAnimator) {
+      this.inlet.setBaseScale(xMin as any, xMax as any, yMin as any, yMax as any, timing);
     } else {
       this.setScale(xMin as any, xMax as any, yMin as any, yMax as any, timing);
     }
   };
 
   ContinuousScaleAnimator.prototype.setBaseDomain = function <X, Y>(this: ContinuousScaleAnimator<View, X, Y>, xMin?: Domain<X> | X | string, xMax?: X | AnyTiming | boolean | null, timing?: AnyTiming | boolean | null): void {
-    if (this.inherited && this.superFastener instanceof ContinuousScaleAnimator) {
-      this.superFastener.setBaseDomain(xMin as any, xMax as any, timing);
+    if (this.derived && this.inlet instanceof ContinuousScaleAnimator) {
+      this.inlet.setBaseDomain(xMin as any, xMax as any, timing);
     } else {
       this.setDomain(xMin as any, xMax as any, timing);
     }
   };
 
   ContinuousScaleAnimator.prototype.setBaseRange = function <X, Y>(this: ContinuousScaleAnimator<View, X, Y>, yMin?: Range<Y> | Y, yMax?: Y | AnyTiming | boolean | null, timing?: AnyTiming | boolean | null): void {
-    if (this.inherited && this.superFastener instanceof ContinuousScaleAnimator) {
-      this.superFastener.setBaseRange(yMin as any, yMax as any, timing);
+    if (this.derived && this.inlet instanceof ContinuousScaleAnimator) {
+      this.inlet.setBaseRange(yMin as any, yMax as any, timing);
     } else {
       this.setRange(yMin as any, yMax as any, timing);
+    }
+  };
+
+  ContinuousScaleAnimator.prototype.createDomain = function <X, Y>(this: ContinuousScaleAnimator<View, X, Y>, xMin: X, xMax: X): Domain<X> {
+    if (xMin instanceof DateTime || xMax instanceof DateTime) {
+      return TimeDomain(DateTime.fromAny(xMin as AnyDateTime), DateTime.fromAny(xMax as AnyDateTime)) as unknown as Domain<X>;
+    } else {
+      return Domain(xMin, xMax);
     }
   };
 

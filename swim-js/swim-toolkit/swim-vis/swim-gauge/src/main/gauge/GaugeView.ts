@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass, Animator} from "@swim/component";
+import type {Class, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, AnyView, View, ViewRef, ViewSet} from "@swim/view";
+import {View, ViewRef, ViewSet} from "@swim/view";
 import {GraphicsViewInit, GraphicsView, TypesetView, TextRunView} from "@swim/graphics";
 import {AnyDialView, DialView} from "../dial/DialView";
 import type {GaugeViewObserver} from "./GaugeViewObserver";
@@ -51,77 +51,69 @@ export interface GaugeViewInit extends GraphicsViewInit {
 }
 
 /** @public */
-export interface GaugeViewDialExt {
-  attachLabelView(labelView: GraphicsView): void;
-  detachLabelView(labelView: GraphicsView): void;
-  attachLegendView(legendView: GraphicsView): void;
-  detachLegendView(legendView: GraphicsView): void;
-}
-
-/** @public */
 export class GaugeView extends GraphicsView {
   override readonly observerType?: Class<GaugeViewObserver>;
 
-  @Animator({type: Number, value: 0, updateFlags: View.NeedsLayout})
+  @Animator({valueType: Number, value: 0, updateFlags: View.NeedsLayout})
   readonly limit!: Animator<this, number>;
 
-  @Animator({type: R2Point, value: R2Point.origin(), updateFlags: View.NeedsLayout})
+  @Animator({valueType: R2Point, value: R2Point.origin(), updateFlags: View.NeedsLayout})
   readonly center!: Animator<this, R2Point, AnyR2Point>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(30), updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Length, value: Length.pct(30), updateFlags: View.NeedsLayout})
   readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(40), updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Length, value: Length.pct(40), updateFlags: View.NeedsLayout})
   readonly outerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Angle, value: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Angle, value: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
   readonly startAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Angle, value: Angle.rad(2 * Math.PI), updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Angle, value: Angle.rad(2 * Math.PI), updateFlags: View.NeedsLayout})
   readonly sweepAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(50)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(50)})
   readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.px(1), updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Length, value: Length.px(1), updateFlags: View.NeedsLayout})
   readonly dialSpacing!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.etchColor})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.etchColor})
   readonly dialColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.accentColor})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.accentColor})
   readonly meterColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(25)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(50)})
   readonly labelPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Number, value: 1.0})
+  @ThemeAnimator({valueType: Number, value: 1})
   readonly tickAlign!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(45)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(45)})
   readonly tickRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(50)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(50)})
   readonly tickLength!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.px(1)})
+  @ThemeAnimator({valueType: Length, value: Length.px(1)})
   readonly tickWidth!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.px(2)})
+  @ThemeAnimator({valueType: Length, value: Length.px(2)})
   readonly tickPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.legendColor})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.legendColor})
   readonly tickColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Font, value: null, inherits: true})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.legendColor})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.legendColor})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewRef<GaugeView, GraphicsView & Initable<GraphicsViewInit | string>>({
-    key: true,
-    type: TextRunView,
+  @ViewRef<GaugeView["title"]>({
+    viewType: TextRunView,
+    viewKey: true,
     binds: true,
     initView(titleView: GraphicsView): void {
       if (TypesetView.is(titleView)) {
@@ -131,30 +123,30 @@ export class GaugeView extends GraphicsView {
       }
     },
     willAttachView(titleView: GraphicsView): void {
-      this.owner.callObservers("viewWillAttachGaugeTitle", titleView, this.owner);
+      this.owner.callObservers("viewWillAttachTitle", titleView, this.owner);
     },
     didDetachView(titleView: GraphicsView): void {
-      this.owner.callObservers("viewDidDetachGaugeTitle", titleView, this.owner);
+      this.owner.callObservers("viewDidDetachTitle", titleView, this.owner);
     },
-    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
-      if (typeof value === "string") {
-        if (this.view instanceof TextRunView) {
-          this.view.text(value);
-          return this.view;
-        } else {
-          return TextRunView.fromAny(value);
-        }
-      } else {
-        return GraphicsView.fromAny(value);
+    setText(title: string | undefined): GraphicsView {
+      let titleView = this.view;
+      if (titleView === null) {
+        titleView = this.createView();
+        this.setView(titleView);
       }
+      if (titleView instanceof TextRunView) {
+        titleView.text(title !== void 0 ? title : "");
+      }
+      return titleView;
     },
   })
-  readonly title!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
-  static readonly title: MemberFastenerClass<GaugeView, "title">;
+  readonly title!: ViewRef<this, GraphicsView> & {
+    setText(title: string | undefined): GraphicsView,
+  };
+  static readonly title: FastenerClass<GaugeView["title"]>;
 
-  @ViewSet<GaugeView, DialView, GaugeViewDialExt>({
-    implements: true,
-    type: DialView,
+  @ViewSet<GaugeView["dials"]>({
+    viewType: DialView,
     binds: true,
     observes: true,
     willAttachView(dialView: DialView, targetView: View | null): void {
@@ -183,13 +175,13 @@ export class GaugeView extends GraphicsView {
     didDetachView(dialView: DialView): void {
       this.owner.callObservers("viewDidDetachDial", dialView, this.owner);
     },
-    viewDidSetDialValue(newValue: number, oldValue: number): void {
+    viewDidSetValue(value: number): void {
       this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewWillAttachDialLabel(labelView: GraphicsView): void {
+    viewWillAttachLabel(labelView: GraphicsView): void {
       this.attachLabelView(labelView);
     },
-    viewDidDetachDialLabel(labelView: GraphicsView): void {
+    viewDidDetachLabel(labelView: GraphicsView): void {
       this.detachLabelView(labelView);
     },
     attachLabelView(labelView: GraphicsView): void {
@@ -198,10 +190,10 @@ export class GaugeView extends GraphicsView {
     detachLabelView(labelView: GraphicsView): void {
       // hook
     },
-    viewWillAttachDialLegend(legendView: GraphicsView): void {
+    viewWillAttachLegend(legendView: GraphicsView): void {
       this.attachLegendView(legendView);
     },
-    viewDidDetachDialLegend(legendView: GraphicsView): void {
+    viewDidDetachLegend(legendView: GraphicsView): void {
       this.detachLegendView(legendView);
     },
     attachLegendView(legendView: GraphicsView): void {
@@ -211,11 +203,16 @@ export class GaugeView extends GraphicsView {
       // hook
     },
   })
-  readonly dials!: ViewSet<this, DialView> & GaugeViewDialExt;
-  static readonly dials: MemberFastenerClass<GaugeView, "dials">;
+  readonly dials!: ViewSet<this, DialView> & Observes<DialView> & {
+    attachLabelView(labelView: GraphicsView): void,
+    detachLabelView(labelView: GraphicsView): void,
+    attachLegendView(legendView: GraphicsView): void,
+    detachLegendView(legendView: GraphicsView): void,
+  };
+  static readonly dials: FastenerClass<GaugeView["dials"]>;
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     this.layoutGauge(this.viewFrame);
   }
 
@@ -322,8 +319,10 @@ export class GaugeView extends GraphicsView {
     if (init.textColor !== void 0) {
       this.textColor(init.textColor);
     }
-    if (init.title !== void 0) {
-      this.title(init.title);
+    if (typeof init.title === "string") {
+      this.title.setText(init.title);
+    } else if (init.title !== void 0) {
+      this.title.setView(init.title);
     }
     const dials = init.dials;
     if (dials !== void 0) {

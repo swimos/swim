@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
+import {Class, AnyTiming, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass} from "@swim/component";
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
-import {Look, Mood} from "@swim/theme";
+import {Look, Mood, ColorOrLook} from "@swim/theme";
 import {TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {DataPointView} from "../data/DataPointView";
 import type {DataPointTrait} from "../data/DataPointTrait";
 import type {DataPointController} from "../data/DataPointController";
-import type {DataSetControllerDataPointExt} from "../data/DataSetController";
 import {DataSetTrait} from "../data/DataSetTrait";
 import {BubblePlotView} from "./BubblePlotView";
 import {BubblePlotTrait} from "./BubblePlotTrait";
@@ -32,16 +31,16 @@ import type {BubblePlotControllerObserver} from "./BubblePlotControllerObserver"
 export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotController<X, Y> {
   override readonly observerType?: Class<BubblePlotControllerObserver<X, Y>>;
 
-  @TraitViewControllerSet<BubblePlotController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>>({
+  @TraitViewControllerSet<BubblePlotController<X, Y>["dataPoints"]>({
     extends: true,
     get parentView(): BubblePlotView<X, Y> | null {
       return this.owner.plot.view;
     },
   })
-  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & DataSetControllerDataPointExt<X, Y>;
-  static override readonly dataPoints: MemberFastenerClass<BubblePlotController, "dataPoints">;
+  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & ScatterPlotController<X, Y>["dataPoints"];
+  static override readonly dataPoints: FastenerClass<BubblePlotController["dataPoints"]>;
 
-  protected setPlotRadius(radius: Length | null, timing?: AnyTiming | boolean): void {
+  protected setRadius(radius: Length | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -56,7 +55,7 @@ export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotC
     }
   }
 
-  protected setPlotFill(fill: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
+  protected setFill(fill: ColorOrLook | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -75,7 +74,7 @@ export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotC
     }
   }
 
-  @TraitViewRef<BubblePlotController<X, Y>, BubblePlotTrait<X, Y>, BubblePlotView<X, Y>>({
+  @TraitViewRef<BubblePlotController<X, Y>["plot"]>({
     traitType: BubblePlotTrait,
     observesTrait: true,
     initTrait(plotTrait: BubblePlotTrait<X, Y>): void {
@@ -87,8 +86,8 @@ export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotC
       }
       const plotView = this.view;
       if (plotView !== null) {
-        this.owner.setPlotRadius(plotTrait.radius.value);
-        this.owner.setPlotFill(plotTrait.fill.value);
+        this.owner.setRadius(plotTrait.radius.value);
+        this.owner.setFill(plotTrait.fill.value);
       }
     },
     willAttachTrait(plotTrait: BubblePlotTrait<X, Y>): void {
@@ -97,11 +96,11 @@ export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotC
     didDetachTrait(plotTrait: BubblePlotTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotTrait", plotTrait, this.owner);
     },
-    traitDidSetPlotRadius(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.setPlotRadius(newRadius);
+    traitDidSetRadius(radius: Length | null): void {
+      this.owner.setRadius(radius);
     },
-    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.setPlotFill(newFill);
+    traitDidSetFill(fill: ColorOrLook | null): void {
+      this.owner.setFill(fill);
     },
     viewType: BubblePlotView,
     observesView: true,
@@ -113,8 +112,8 @@ export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotC
       }
       const plotTrait = this.trait;
       if (plotTrait !== null) {
-        this.owner.setPlotRadius(plotTrait.radius.value);
-        this.owner.setPlotFill(plotTrait.fill.value);
+        this.owner.setRadius(plotTrait.radius.value);
+        this.owner.setFill(plotTrait.fill.value);
       }
     },
     willAttachView(plotView: BubblePlotView<X, Y>): void {
@@ -123,19 +122,13 @@ export class BubblePlotController<X = unknown, Y = unknown> extends ScatterPlotC
     didDetachView(plotView: BubblePlotView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotView", plotView, this.owner);
     },
-    viewWillSetPlotRadius(newRadius: Length | null, oldRadius: Length | null, plotView: BubblePlotView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetPlotRadius", newRadius, oldRadius, this.owner);
+    viewDidSetRadius(radius: Length | null): void {
+      this.owner.callObservers("controllerDidSetPlotRadius", radius, this.owner);
     },
-    viewDidSetPlotRadius(newRadius: Length | null, oldRadius: Length | null, plotView: BubblePlotView<X, Y>): void {
-      this.owner.callObservers("controllerDidSetPlotRadius", newRadius, oldRadius, this.owner);
-    },
-    viewWillSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: BubblePlotView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetPlotFill", newFill, oldFill, this.owner);
-    },
-    viewDidSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: BubblePlotView<X, Y>): void {
-      this.owner.callObservers("controllerDidSetPlotFill", newFill, oldFill, this.owner);
+    viewDidSetFill(fill: Color | null): void {
+      this.owner.callObservers("controllerDidSetPlotFill", fill, this.owner);
     },
   })
-  readonly plot!: TraitViewRef<this, BubblePlotTrait<X, Y>, BubblePlotView<X, Y>>;
-  static readonly plot: MemberFastenerClass<BubblePlotController, "plot">;
+  readonly plot!: TraitViewRef<this, BubblePlotTrait<X, Y>, BubblePlotView<X, Y>> & Observes<BubblePlotTrait<X, Y> & BubblePlotView<X, Y>>;
+  static readonly plot: FastenerClass<BubblePlotController["plot"]>;
 }

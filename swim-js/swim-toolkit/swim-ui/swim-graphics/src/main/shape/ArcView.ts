@@ -17,7 +17,7 @@ import {Affinity, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
+import {View} from "@swim/view";
 import {GraphicsView} from "../graphics/GraphicsView";
 import type {PaintingContext} from "../painting/PaintingContext";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
@@ -36,43 +36,43 @@ export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 
 /** @public */
 export class ArcView extends GraphicsView implements FillView, StrokeView {
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsRender})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsRender})
   readonly xAlign!: Animator<this, number>;
 
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsRender})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsRender})
   readonly yAlign!: Animator<this, number>;
 
-  @Animator({type: R2Point, value: R2Point.origin(), updateFlags: View.NeedsRender})
+  @Animator({valueType: R2Point, value: R2Point.origin(), updateFlags: View.NeedsRender})
   readonly center!: Animator<this, R2Point, AnyR2Point>;
 
-  @ThemeAnimator({type: Length, value: Length.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.zero(), updateFlags: View.NeedsRender})
   readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.zero(), updateFlags: View.NeedsRender})
   readonly outerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Angle, value: Angle.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Angle, value: Angle.zero(), updateFlags: View.NeedsRender})
   readonly startAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Angle, value: Angle.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Angle, value: Angle.zero(), updateFlags: View.NeedsRender})
   readonly sweepAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Angle, value: Angle.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Angle, value: Angle.zero(), updateFlags: View.NeedsRender})
   readonly padAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Length, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, updateFlags: View.NeedsRender})
   readonly padRadius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Length, value: Length.zero(), updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: Length.zero(), updateFlags: View.NeedsRender})
   readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Arc {
@@ -135,9 +135,9 @@ export class ArcView extends GraphicsView implements FillView, StrokeView {
     }
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.layoutArc();
       this.renderArc(renderer.context, this.viewFrame);
@@ -193,8 +193,8 @@ export class ArcView extends GraphicsView implements FillView, StrokeView {
 
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
       this.layoutArc();

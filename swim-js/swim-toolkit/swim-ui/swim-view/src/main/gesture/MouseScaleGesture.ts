@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import type {FastenerOwner} from "@swim/component";
-import type {ScaleGestureInput} from "./ScaleGestureInput";
-import {ScaleGestureClass, ScaleGestureFactory, ScaleGesture} from "./ScaleGesture";
 import type {View} from "../view/View";
+import type {ScaleGestureInput} from "./ScaleGestureInput";
+import {ScaleGestureClass, ScaleGesture} from "./ScaleGesture";
 
 /** @internal */
 export interface MouseScaleGesture<O = unknown, V extends View = View, X = unknown, Y = unknown> extends ScaleGesture<O, V, X, Y> {
@@ -58,20 +58,22 @@ export interface MouseScaleGesture<O = unknown, V extends View = View, X = unkno
 
 /** @internal */
 export const MouseScaleGesture = (function (_super: typeof ScaleGesture) {
-  const MouseScaleGesture = _super.extend("MouseScaleGesture") as ScaleGestureFactory<MouseScaleGesture<any, any, any, any>>;
+  const MouseScaleGesture = _super.extend("MouseScaleGesture", {
+    wheel: true,
+  }) as ScaleGestureClass<MouseScaleGesture<any, any, any, any>>;
 
   MouseScaleGesture.prototype.attachHoverEvents = function (this: MouseScaleGesture, view: View): void {
-    view.on("mouseenter", this.onMouseEnter as EventListener);
-    view.on("mouseleave", this.onMouseLeave as EventListener);
-    view.on("mousedown", this.onMouseDown as EventListener);
-    view.on("wheel", this.onWheel as EventListener);
+    view.addEventListener("mouseenter", this.onMouseEnter as EventListener);
+    view.addEventListener("mouseleave", this.onMouseLeave as EventListener);
+    view.addEventListener("mousedown", this.onMouseDown as EventListener);
+    view.addEventListener("wheel", this.onWheel as EventListener);
   };
 
   MouseScaleGesture.prototype.detachHoverEvents = function (this: MouseScaleGesture, view: View): void {
-    view.off("mouseenter", this.onMouseEnter as EventListener);
-    view.off("mouseleave", this.onMouseLeave as EventListener);
-    view.off("mousedown", this.onMouseDown as EventListener);
-    view.off("wheel", this.onWheel as EventListener);
+    view.removeEventListener("mouseenter", this.onMouseEnter as EventListener);
+    view.removeEventListener("mouseleave", this.onMouseLeave as EventListener);
+    view.removeEventListener("mousedown", this.onMouseDown as EventListener);
+    view.removeEventListener("wheel", this.onWheel as EventListener);
   };
 
   MouseScaleGesture.prototype.attachPressEvents = function (this: MouseScaleGesture, view: View): void {
@@ -173,8 +175,8 @@ export const MouseScaleGesture = (function (_super: typeof ScaleGesture) {
     }
   };
 
-  MouseScaleGesture.construct = function <G extends MouseScaleGesture<any, any, any, any>>(gestureClass: ScaleGestureClass<MouseScaleGesture<any, any, any, any>>, gesture: G | null, owner: FastenerOwner<G>): G {
-    gesture = _super.construct(gestureClass, gesture, owner) as G;
+  MouseScaleGesture.construct = function <G extends MouseScaleGesture<any, any, any, any>>(gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct.call(this, gesture, owner) as G;
     gesture.onMouseEnter = gesture.onMouseEnter.bind(gesture);
     gesture.onMouseLeave = gesture.onMouseLeave.bind(gesture);
     gesture.onMouseDown = gesture.onMouseDown.bind(gesture);

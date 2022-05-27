@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import type {FastenerOwner} from "@swim/component";
-import type {MomentumGestureInput} from "./MomentumGestureInput";
-import {MomentumGestureClass, MomentumGestureFactory, MomentumGesture} from "./MomentumGesture";
 import type {View} from "../view/View";
+import type {MomentumGestureInput} from "./MomentumGestureInput";
+import {MomentumGestureClass, MomentumGesture} from "./MomentumGesture";
 
 /** @internal */
 export interface TouchMomentumGesture<O = unknown, V extends View = View> extends MomentumGesture<O, V> {
@@ -49,26 +49,26 @@ export interface TouchMomentumGesture<O = unknown, V extends View = View> extend
 
 /** @internal */
 export const TouchMomentumGesture = (function (_super: typeof MomentumGesture) {
-  const TouchMomentumGesture = _super.extend("TouchMomentumGesture") as MomentumGestureFactory<TouchMomentumGesture<any, any>>;
+  const TouchMomentumGesture = _super.extend("TouchMomentumGesture", {}) as MomentumGestureClass<TouchMomentumGesture<any, any>>;
 
   TouchMomentumGesture.prototype.attachHoverEvents = function (this: TouchMomentumGesture, view: View): void {
-    view.on("touchstart", this.onTouchStart as EventListener);
+    view.addEventListener("touchstart", this.onTouchStart as EventListener);
   };
 
   TouchMomentumGesture.prototype.detachHoverEvents = function (this: TouchMomentumGesture, view: View): void {
-    view.off("touchstart", this.onTouchStart as EventListener);
+    view.removeEventListener("touchstart", this.onTouchStart as EventListener);
   };
 
   TouchMomentumGesture.prototype.attachPressEvents = function (this: TouchMomentumGesture, view: View): void {
-    view.on("touchmove", this.onTouchMove as EventListener);
-    view.on("touchend", this.onTouchEnd as EventListener);
-    view.on("touchcancel", this.onTouchCancel as EventListener);
+    view.addEventListener("touchmove", this.onTouchMove as EventListener);
+    view.addEventListener("touchend", this.onTouchEnd as EventListener);
+    view.addEventListener("touchcancel", this.onTouchCancel as EventListener);
   };
 
   TouchMomentumGesture.prototype.detachPressEvents = function (this: TouchMomentumGesture, view: View): void {
-    view.off("touchmove", this.onTouchMove as EventListener);
-    view.off("touchend", this.onTouchEnd as EventListener);
-    view.off("touchcancel", this.onTouchCancel as EventListener);
+    view.removeEventListener("touchmove", this.onTouchMove as EventListener);
+    view.removeEventListener("touchend", this.onTouchEnd as EventListener);
+    view.removeEventListener("touchcancel", this.onTouchCancel as EventListener);
   };
 
   TouchMomentumGesture.prototype.updateInput = function (this: TouchMomentumGesture, input: MomentumGestureInput, event: TouchEvent, touch: Touch): void {
@@ -139,8 +139,8 @@ export const TouchMomentumGesture = (function (_super: typeof MomentumGesture) {
     }
   };
 
-  TouchMomentumGesture.construct = function <G extends TouchMomentumGesture<any, any>>(gestureClass: MomentumGestureClass<TouchMomentumGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>): G {
-    gesture = _super.construct(gestureClass, gesture, owner) as G;
+  TouchMomentumGesture.construct = function <G extends TouchMomentumGesture<any, any>>(gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct.call(this, gesture, owner) as G;
     gesture.onTouchStart = gesture.onTouchStart.bind(gesture);
     gesture.onTouchMove = gesture.onTouchMove.bind(gesture);
     gesture.onTouchEnd = gesture.onTouchEnd.bind(gesture);

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Folio Controller</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body swim-theme style="display: flex;">
+    <script src="../../swim-runtime/swim-core/dist/swim-core.js"></script>
+    <script src="../../swim-runtime/swim-host/dist/swim-host.js"></script>
+    <script src="../swim-ui/dist/swim-ui.js"></script>
+    <script src="../swim-ux/dist/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+class ExampleFolioController extends swim.FolioController {
+}
+swim.TraitViewControllerRef({
+  extends: true,
+  attachAppBarView(appBarView, appBarController) {
+    appBarView.barHeight(48);
+    swim.FolioController.appBar.prototype.attachAppBarView.call(this, appBarView, appBarController);
+  },
+})(ExampleFolioController.prototype, "appBar");
+swim.TraitViewControllerRef({
+  extends: true,
+  attachNavBarView(navBarView, navBarController) {
+    navBarView.barHeight(48);
+    swim.FolioController.navBar.prototype.attachNavBarView.call(this, navBarView, navBarController);
+  },
+})(ExampleFolioController.prototype, "navBar");
+
+const folioController = new ExampleFolioController();
+folioController.mount();
+const folioView = folioController.folio.attachView().flexGrow(1);
+
+const appBarController = folioController.appBar.insertController();
+appBarController.menuButton.insertController();
+
+const navBarController = folioController.navBar.insertController();
+const closeButtonController = navBarController.closeButton.insertController();
+closeButtonController.tool.setView(null);
+navBarController.backButton.insertController();
+navBarController.searchButton.insertController();
+navBarController.searchInput.insertController();
+navBarController.cancelSearch.insertController();
+
+const drawerView = folioView.drawer.attachView();
+drawerView.expandedWidth.setState(320);
+drawerView.modifyTheme(swim.Feel.default, [[swim.Feel.raised, 1]]);
+
+function createSheetController(i) {
+  const sheetTitle = "Sheet " + i;
+  const sheetController = new swim.SheetController();
+  sheetController.title.setText(sheetTitle);
+  sheetController.searchable.setValue(true);
+  const sheetView = sheetController.sheet.attachView();
+  sheetView.dismiss(false);
+  const headerView = sheetView.appendChild(swim.HtmlView.fromTag("h2").margin(12).text(sheetTitle), "header");
+  headerView.cursor("pointer").userSelect("none");
+  headerView.addEventListener("click", () => {
+    folioController.sheets.addController(createSheetController(i + 1));
+  });
+  const inspectView = sheetView.appendChild(swim.HtmlView.fromTag("h3").margin(12).text("Inspect"), "inspect");
+  inspectView.cursor("pointer").userSelect("none");
+  inspectView.addEventListener("click", () => {
+    folioController.cover.present();
+  });
+  return sheetController;
+}
+folioController.sheets.addController(createSheetController(1));
+
+const binderController = new swim.BinderController();
+binderController.title.setText("Binder");
+const binderView = binderController.binder.attachView();
+binderView.dismiss(false);
+
+const tabBarController = binderController.tabBar.insertController();
+const tabBarView = tabBarController.bar.insertView();
+tabBarView.barHeight(48);
+
+const tab1Controller = new swim.SheetController();
+tab1Controller.title.setText("Tab 1");
+tab1Controller.handle.setIcon(swim.PolygonIcon.create(4));
+const tab1View = tab1Controller.sheet.attachView();
+tab1View.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Tab 1"));
+binderController.tabs.addController(tab1Controller);
+
+const tab2Controller = new swim.SheetController();
+tab2Controller.title.setText("Tab 2");
+tab2Controller.handle.setIcon(swim.PolygonIcon.create(6));
+const tab2View = tab2Controller.sheet.attachView();
+tab2View.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Tab 2"));
+binderController.tabs.addController(tab2Controller);
+
+const tab3Controller = new swim.SheetController();
+tab3Controller.title.setText("Tab 3");
+tab3Controller.handle.setIcon(swim.PolygonIcon.create(8));
+const tab3View = tab3Controller.sheet.attachView();
+tab3View.appendChild(swim.HtmlView.fromTag("h2").margin(12).text("Tab 3"));
+binderController.tabs.addController(tab3Controller);
+
+folioController.appendChild(binderController);
+folioController.cover.setController(binderController);
+
+folioController.folio.insertView(bodyView);
+
+    </script>
+  </body>
+</html>

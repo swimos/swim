@@ -16,5 +16,5 @@ import type {TraitObserver} from "@swim/model";
 import type {AxisTrait} from "./AxisTrait";
 
 /** @public */
-export interface AxisTraitObserver<D = unknown, R extends AxisTrait<D> = AxisTrait<D>> extends TraitObserver<R> {
+export interface AxisTraitObserver<D = unknown, T extends AxisTrait<D> = AxisTrait<D>> extends TraitObserver<T> {
 }

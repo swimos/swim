@@ -14,15 +14,9 @@
 
 import type {TraitObserver} from "@swim/model";
 import type {ColLayout} from "../layout/ColLayout";
-import type {ColLabel, ColTrait} from "./ColTrait";
+import type {ColTrait} from "./ColTrait";
 
 /** @public */
 export interface ColTraitObserver<T extends ColTrait = ColTrait> extends TraitObserver<T> {
-  traitWillSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, trait: T): void;
-
-  traitDidSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, trait: T): void;
-
-  traitWillSetLabel?(newLabel: ColLabel | null, oldLabel: ColLabel | null, trait: T): void;
-
-  traitDidSetLabel?(newLabel: ColLabel | null, oldLabel: ColLabel | null, trait: T): void;
+  traitDidSetLayout?(layout: ColLayout | null, trait: T): void;
 }

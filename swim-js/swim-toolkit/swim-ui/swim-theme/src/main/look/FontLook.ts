@@ -16,7 +16,13 @@ import type {Interpolator} from "@swim/util";
 import {AnyFont, Font, FontInterpolator} from "@swim/style";
 import {Look} from "./Look";
 
-/** @internal */
+/** @public */
+export type AnyFontOrLook = Look<Font, any> | AnyFont;
+
+/** @public */
+export type FontOrLook = Look<Font, any> | Font;
+
+/** @public */
 export class FontLook extends Look<Font, AnyFont> {
   override combine(combination: Font | undefined, value: Font, weight?: number): Font {
     if (weight === void 0 || weight !== 0) {
@@ -34,5 +40,16 @@ export class FontLook extends Look<Font, AnyFont> {
 
   override coerce(value: AnyFont): Font {
     return Font.fromAny(value);
+  }
+
+  static fromAny(value: Look<Font> | AnyFont): Look<Font> | Font;
+  static fromAny(value: Look<Font> | AnyFont | null): Look<Font> | Font | null;
+  static fromAny(value: Look<Font> | AnyFont | null | undefined): Look<Font> | Font | null | undefined;
+  static fromAny(value: Look<Font> | AnyFont | null | undefined): Look<Font> | Font | null | undefined {
+    if (value === void 0 || value === null || value instanceof Look || value instanceof Font) {
+      return value;
+    } else {
+      return Font.fromAny(value);
+    }
   }
 }

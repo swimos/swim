@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, Instance, AnyTiming, Timing, Creatable, InitType} from "@swim/util";
-import {Affinity, MemberAnimatorInit} from "@swim/component";
+import {Class, Instance, AnyTiming, Timing, Creatable, Inits} from "@swim/util";
+import {Affinity, AnyAnimatorValue} from "@swim/component";
 import {Transform} from "@swim/math";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewFlags, AnyView, View} from "@swim/view";
-import {AttributeAnimator} from "../animator/AttributeAnimator";
+import {AttributeAnimator} from "../attribute/AttributeAnimator";
 import {StyleMapInit, StyleMap} from "../css/StyleMap";
 import type {ViewNodeType} from "../node/NodeView";
 import {
@@ -48,16 +48,16 @@ export interface HtmlViewInit extends ElementViewInit {
 
 /** @public */
 export interface HtmlViewAttributesInit {
-  autocomplete?: MemberAnimatorInit<HtmlView, "autocomplete">;
-  checked?: MemberAnimatorInit<HtmlView, "checked">;
-  colspan?: MemberAnimatorInit<HtmlView, "colspan">;
-  disabled?: MemberAnimatorInit<HtmlView, "disabled">;
-  placeholder?: MemberAnimatorInit<HtmlView, "placeholder">;
-  rowspan?: MemberAnimatorInit<HtmlView, "rowspan">;
-  selected?: MemberAnimatorInit<HtmlView, "selected">;
-  title?: MemberAnimatorInit<HtmlView, "title">;
-  type?: MemberAnimatorInit<HtmlView, "type">;
-  value?: MemberAnimatorInit<HtmlView, "value">;
+  autocomplete?: AnyAnimatorValue<HtmlView["autocomplete"]>;
+  checked?: AnyAnimatorValue<HtmlView["checked"]>;
+  colspan?: AnyAnimatorValue<HtmlView["colspan"]>;
+  disabled?: AnyAnimatorValue<HtmlView["disabled"]>;
+  placeholder?: AnyAnimatorValue<HtmlView["placeholder"]>;
+  rowspan?: AnyAnimatorValue<HtmlView["rowspan"]>;
+  selected?: AnyAnimatorValue<HtmlView["selected"]>;
+  title?: AnyAnimatorValue<HtmlView["title"]>;
+  type?: AnyAnimatorValue<HtmlView["type"]>;
+  value?: AnyAnimatorValue<HtmlView["value"]>;
 }
 
 /** @public */
@@ -256,35 +256,35 @@ export class HtmlView extends ElementView {
     return super.replaceChild(newChild, oldChild);
   }
 
-  @AttributeAnimator({attributeName: "autocomplete", type: String})
-  readonly autocomplete!: AttributeAnimator<this, string>;
+  @AttributeAnimator({attributeName: "autocomplete", valueType: String})
+  readonly autocomplete!: AttributeAnimator<this, string | undefined>;
 
-  @AttributeAnimator({attributeName: "checked", type: Boolean})
-  readonly checked!: AttributeAnimator<this, boolean, boolean | string>;
+  @AttributeAnimator({attributeName: "checked", valueType: Boolean})
+  readonly checked!: AttributeAnimator<this, boolean | undefined, boolean | string | undefined>;
 
-  @AttributeAnimator({attributeName: "colspan", type: Number})
-  readonly colspan!: AttributeAnimator<this, number, number | string>;
+  @AttributeAnimator({attributeName: "colspan", valueType: Number})
+  readonly colspan!: AttributeAnimator<this, number | undefined, number | string | undefined>;
 
-  @AttributeAnimator({attributeName: "disabled", type: Boolean})
-  readonly disabled!: AttributeAnimator<this, boolean, boolean | string>;
+  @AttributeAnimator({attributeName: "disabled", valueType: Boolean})
+  readonly disabled!: AttributeAnimator<this, boolean | undefined, boolean | string | undefined>;
 
-  @AttributeAnimator({attributeName: "placeholder", type: String})
-  readonly placeholder!: AttributeAnimator<this, string>;
+  @AttributeAnimator({attributeName: "placeholder", valueType: String})
+  readonly placeholder!: AttributeAnimator<this, string | undefined>;
 
-  @AttributeAnimator({attributeName: "rowspan", type: Number})
-  readonly rowspan!: AttributeAnimator<this, number, number | string>;
+  @AttributeAnimator({attributeName: "rowspan", valueType: Number})
+  readonly rowspan!: AttributeAnimator<this, number | undefined, number | string | undefined>;
 
-  @AttributeAnimator({attributeName: "selected", type: Boolean})
-  readonly selected!: AttributeAnimator<this, boolean, boolean | string>;
+  @AttributeAnimator({attributeName: "selected", valueType: Boolean})
+  readonly selected!: AttributeAnimator<this, boolean | undefined, boolean | string | undefined>;
 
-  @AttributeAnimator({attributeName: "title", type: String})
-  readonly title!: AttributeAnimator<this, string>;
+  @AttributeAnimator({attributeName: "title", valueType: String})
+  readonly title!: AttributeAnimator<this, string | undefined>;
 
-  @AttributeAnimator({attributeName: "type", type: String})
-  readonly type!: AttributeAnimator<this, string>;
+  @AttributeAnimator({attributeName: "type", valueType: String})
+  readonly type!: AttributeAnimator<this, string | undefined>;
 
-  @AttributeAnimator({attributeName: "value", type: String})
-  readonly value!: AttributeAnimator<this, string>;
+  @AttributeAnimator({attributeName: "value", valueType: String})
+  readonly value!: AttributeAnimator<this, string | undefined>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
@@ -381,20 +381,16 @@ export class HtmlView extends ElementView {
     }
   }
 
-  override on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, event: HTMLElementEventMap[K]) => unknown,
-                                                   options?: AddEventListenerOptions | boolean): this;
-  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
-  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
+  override addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, event: HTMLElementEventMap[K]) => unknown, options?: AddEventListenerOptions | boolean): void;
+  override addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void;
+  override addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void {
     this.node.addEventListener(type, listener, options);
-    return this;
   }
 
-  override off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, event: HTMLElementEventMap[K]) => unknown,
-                                                    options?: EventListenerOptions | boolean): this;
-  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
-  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
+  override removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, event: HTMLElementEventMap[K]) => unknown, options?: EventListenerOptions | boolean): void;
+  override removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void;
+  override removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void {
     this.node.removeEventListener(type, listener, options);
-    return this;
   }
 
   /** @internal */
@@ -546,7 +542,7 @@ export class HtmlViewTagFactory<V extends HtmlView> implements HtmlViewFactory<V
     return this.factory.fromNode(node);
   }
 
-  fromInit(init: InitType<V>): V {
+  fromInit(init: Inits<V>): V {
     let type = init.type;
     if (type === void 0) {
       type = this;

@@ -12,19 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Length} from "@swim/math";
 import type {View} from "@swim/view";
 import type {HtmlViewObserver} from "@swim/dom";
+import type {ToolLayout} from "../layout/ToolLayout";
 import type {BarLayout} from "../layout/BarLayout";
 import type {ToolView} from "../tool/ToolView";
-import type {BarView} from "./BarView";
+import type {BarPlacement, BarView} from "./BarView";
 
 /** @public */
 export interface BarViewObserver<V extends BarView = BarView> extends HtmlViewObserver<V> {
-  viewWillSetLayout?(newLayout: BarLayout | null, oldLayout: BarLayout | null, view: V): void;
+  viewDidSetPlacement?(placement: BarPlacement, view: V): void;
 
-  viewDidSetLayout?(newLayout: BarLayout | null, oldLayout: BarLayout | null, view: V): void;
+  viewDidSetEffectiveHeight?(effectiveHeight: Length | null, view: V): void;
+
+  viewDidSetBarLayout?(barLayout: BarLayout | null, view: V): void;
+
+  viewDidSetBarHeight?(barHeight: Length | null, view: V): void;
 
   viewWillAttachTool?(toolView: ToolView, targetView: View | null, view: V): void;
 
   viewDidDetachTool?(toolView: ToolView, view: V): void;
+
+  viewDidDismissTool?(toolView: ToolView, toolLayout: ToolLayout, view: V): void;
 }

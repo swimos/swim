@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
-import {Look} from "@swim/theme";
-import {AnyView, ViewRef} from "@swim/view";
-import {HtmlViewInit, HtmlView} from "@swim/dom";
+import type {Class} from "@swim/util";
+import {Affinity} from "@swim/component";
+import {HtmlView} from "@swim/dom";
 import type {ColViewObserver} from "./ColViewObserver";
 
 /** @public */
@@ -33,39 +31,4 @@ export class ColView extends HtmlView {
   }
 
   override readonly observerType?: Class<ColViewObserver>;
-
-  @ViewRef<ColView, HtmlView & Initable<HtmlViewInit | string>, {createView(value?: string): HtmlView}>({
-    implements: true,
-    key: true,
-    type: HtmlView,
-    binds: true,
-    willAttachView(labelView: HtmlView): void {
-      this.owner.callObservers("viewWillAttachLabel", labelView, this.owner);
-    },
-    didDetachView(labelView: HtmlView): void {
-      this.owner.callObservers("viewDidDetachLabel", labelView, this.owner);
-    },
-    createView(value?: string): HtmlView {
-      const labelView = HtmlView.fromTag("span");
-      labelView.alignSelf.setState("center", Affinity.Intrinsic);
-      labelView.whiteSpace.setState("nowrap", Affinity.Intrinsic);
-      labelView.textOverflow.setState("ellipsis", Affinity.Intrinsic);
-      labelView.overflowX.setState("hidden", Affinity.Intrinsic);
-      labelView.overflowY.setState("hidden", Affinity.Intrinsic);
-      labelView.color.setLook(Look.legendColor, Affinity.Intrinsic);
-      if (value !== void 0) {
-        labelView.text(value);
-      }
-      return labelView;
-    },
-    fromAny(value: AnyView<HtmlView> | string): HtmlView {
-      if (typeof value === "string") {
-        return this.createView(value);
-      } else {
-        return HtmlView.fromAny(value);
-      }
-    },
-  })
-  readonly label!: ViewRef<this, HtmlView & Initable<HtmlViewInit | string>> & {create(value?: string): HtmlView};
-  static readonly label: MemberFastenerClass<ColView, "label">;
 }

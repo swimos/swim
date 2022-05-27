@@ -21,12 +21,13 @@ Mood.default = MoodVector.of([Feel.default, 1]);
 
 Mood.primary = MoodVector.of([Feel.primary, 1]);
 Mood.secondary = MoodVector.of([Feel.secondary, 1]);
-
-Mood.selected = MoodVector.of([Feel.selected, 1]);
 Mood.disabled = MoodVector.of([Feel.disabled, 1]);
 Mood.inactive = MoodVector.of([Feel.inactive, 1]);
 Mood.warning = MoodVector.of([Feel.warning, 1]);
 Mood.alert = MoodVector.of([Feel.alert, 1]);
+
+Mood.unselected = MoodVector.of([Feel.unselected, 1]);
+Mood.selected = MoodVector.of([Feel.selected, 1]);
 
 Mood.darker = MoodVector.of([Feel.darker, 1]);
 Mood.lighter = MoodVector.of([Feel.lighter, 1]);

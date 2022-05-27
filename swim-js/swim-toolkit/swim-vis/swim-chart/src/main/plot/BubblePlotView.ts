@@ -33,50 +33,50 @@ export interface BubblePlotViewInit<X = unknown, Y = unknown> extends ScatterPlo
 export class BubblePlotView<X = unknown, Y = unknown> extends ScatterPlotView<X, Y> implements FillView, StrokeView {
   override readonly observerType?: Class<BubblePlotViewObserver<X, Y>>;
 
-  @ThemeAnimator<BubblePlotView<X, Y>, Length | null, AnyLength | null>({
-    type: Length,
+  @ThemeAnimator<BubblePlotView<X, Y>["radius"]>({
+    valueType: Length,
     value: Length.px(5),
     updateFlags: View.NeedsRender,
-    willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.callObservers("viewWillSetPlotRadius", newRadius, oldRadius, this.owner);
-    },
-    didSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.callObservers("viewDidSetPlotRadius", newRadius, oldRadius, this.owner);
+    didSetValue(radius: Length | null): void {
+      this.owner.callObservers("viewDidSetRadius", radius, this.owner);
     },
   })
   readonly radius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator<BubblePlotView<X, Y>, Color | null, AnyColor | null>({
-    type: Color,
+  @ThemeAnimator<BubblePlotView<X, Y>["fill"]>({
+    valueType: Color,
     value: null,
     look: Look.accentColor,
     updateFlags: View.NeedsRender,
-    willSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.callObservers("viewWillSetPlotFill", newFill, oldFill, this.owner);
-    },
-    didSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.callObservers("viewDidSetPlotFill", newFill, oldFill, this.owner);
+    didSetValue(fill: Color | null): void {
+      this.owner.callObservers("viewDidSetFill", fill, this.owner);
     },
   })
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Color, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, updateFlags: View.NeedsRender})
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Length, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, updateFlags: View.NeedsRender})
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
   protected renderPlot(context: CanvasContext, frame: R2Box): void {
     const size = Math.min(frame.width, frame.height);
     const radius = this.radius.getValueOr(Length.zero());
+    const opacity = this.opacity.value;
     const fill = this.fill.value;
     const stroke = this.stroke.value;
     const strokeWidth = this.strokeWidth.value;
 
     // save
+    const contextGlobalAlpha = context.globalAlpha;
     const contextFillStyle = context.fillStyle;
     const contextLineWidth = context.lineWidth;
     const contextStrokeStyle = context.strokeStyle;
+
+    if (opacity !== void 0) {
+      context.globalAlpha = opacity;
+    }
 
     const dataPointViews = this.dataPoints.views;
     for (const viewId in dataPointViews) {
@@ -103,6 +103,7 @@ export class BubblePlotView<X = unknown, Y = unknown> extends ScatterPlotView<X,
     }
 
     // restore
+    context.globalAlpha = contextGlobalAlpha;
     context.fillStyle = contextFillStyle;
     context.lineWidth = contextLineWidth;
     context.strokeStyle = contextStrokeStyle;

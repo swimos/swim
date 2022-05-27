@@ -19,10 +19,4 @@ export {
 } from "./Expansion";
 export {ExpansionInterpolator} from "./ExpansionInterpolator";
 
-export {
-  ExpansionAnimatorInit,
-  ExpansionAnimatorDescriptor,
-  ExpansionAnimatorClass,
-  ExpansionAnimatorFactory,
-  ExpansionAnimator,
-} from "./ExpansionAnimator";
+export {ExpansionAnimator} from "./ExpansionAnimator";

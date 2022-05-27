@@ -18,5 +18,3 @@ export {StorageServiceObserver} from "./StorageServiceObserver";
 export {WebStorageService} from "./WebStorageService";
 
 export {EphemeralStorageService} from "./EphemeralStorageService";
-
-export {StorageProvider} from "./StorageProvider";

@@ -18,19 +18,15 @@ import type {DialView} from "./DialView";
 
 /** @public */
 export interface DialViewObserver<V extends DialView = DialView> extends ViewObserver<V> {
-  viewWillSetDialValue?(newValue: number, oldValue: number, view: V): void;
+  viewDidSetValue?(value: number, view: V): void;
 
-  viewDidSetDialValue?(newValue: number, oldValue: number, view: V): void;
+  viewDidSetLimit?(limit: number, view: V): void;
 
-  viewWillSetDialLimit?(newLimit: number, oldLimit: number, view: V): void;
+  viewWillAttachLabel?(labelView: GraphicsView, view: V): void;
 
-  viewDidSetDialLimit?(newLimit: number, oldLimit: number, view: V): void;
+  viewDidDetachLabel?(labelView: GraphicsView, view: V): void;
 
-  viewWillAttachDialLabel?(labelView: GraphicsView, view: V): void;
+  viewWillAttachLegend?(legendView: GraphicsView, view: V): void;
 
-  viewDidDetachDialLabel?(labelView: GraphicsView, view: V): void;
-
-  viewWillAttachDialLegend?(legendView: GraphicsView, view: V): void;
-
-  viewDidDetachDialLegend?(legendView: GraphicsView, view: V): void;
+  viewDidDetachLegend?(legendView: GraphicsView, view: V): void;
 }

@@ -15,81 +15,52 @@
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
 import {Trait} from "@swim/model";
-import {AnyColor, Color} from "@swim/style";
-import {Look} from "@swim/theme";
-import type {GraphicsView} from "@swim/graphics";
+import {AnyColorOrLook, ColorOrLook, ColorLook} from "@swim/theme";
 import type {SliceTraitObserver} from "./SliceTraitObserver";
-
-/** @public */
-export type SliceLabel = SliceLabelFunction | string;
-/** @public */
-export type SliceLabelFunction = (sliceTrait: SliceTrait | null) => GraphicsView | string | null;
-
-/** @public */
-export type SliceLegend = SliceLegendFunction | string;
-/** @public */
-export type SliceLegendFunction = (sliceTrait: SliceTrait | null) => GraphicsView | string | null;
 
 /** @public */
 export class SliceTrait extends Trait {
   override readonly observerType?: Class<SliceTraitObserver>;
 
-  @Property<SliceTrait, number>({
-    type: Number,
+  @Property<SliceTrait["value"]>({
+    valueType: Number,
     value: 0,
-    willSetValue(newValue: number, oldValue: number): void {
-      this.owner.callObservers("traitWillSetSliceValue", newValue, oldValue, this.owner);
-    },
-    didSetValue(newValue: number, oldValue: number): void {
-      this.owner.callObservers("traitDidSetSliceValue", newValue, oldValue, this.owner);
+    didSetValue(value: number): void {
+      this.owner.callObservers("traitDidSetValue", value, this.owner);
     },
   })
   readonly value!: Property<this, number>;
 
-  @Property<SliceTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+  @Property<SliceTrait["sliceColor"]>({
+    valueType: ColorLook,
     value: null,
-    willSetValue(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitWillSetSliceColor", newSliceColor, oldSliceColor, this.owner);
-    },
-    didSetValue(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
-      this.owner.callObservers("traitDidSetSliceColor", newSliceColor, oldSliceColor, this.owner);
-    },
-    fromAny(sliceColor: Look<Color> | AnyColor | null): Look<Color> | Color | null {
-      if (sliceColor !== null && !(sliceColor instanceof Look)) {
-        sliceColor = Color.fromAny(sliceColor);
-      }
-      return sliceColor;
+    didSetValue(sliceColor: ColorOrLook | null): void {
+      this.owner.callObservers("traitDidSetSliceColor", sliceColor, this.owner);
     },
   })
-  readonly sliceColor!: Property<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly sliceColor!: Property<this, ColorOrLook | null,AnyColorOrLook | null>;
 
   formatLabel(value: number): string | undefined {
     return void 0;
   }
 
-  @Property<SliceTrait, SliceLabel | null>({
-    value: null,
-    willSetValue(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
-      this.owner.callObservers("traitWillSetSliceLabel", newLabel, oldLabel, this.owner);
-    },
-    didSetValue(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
-      this.owner.callObservers("traitDidSetSliceLabel", newLabel, oldLabel, this.owner);
+  @Property<SliceTrait["label"]>({
+    valueType: String,
+    didSetValue(label: string | undefined): void {
+      this.owner.callObservers("traitDidSetLabel", label, this.owner);
     },
   })
-  readonly label!: Property<this, SliceLabel | null>;
+  readonly label!: Property<this, string | undefined>;
 
   formatLegend(value: number): string | undefined {
     return void 0;
   }
 
-  @Property<SliceTrait, SliceLegend | null>({
-    value: null,
-    willSetValue(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
-      this.owner.callObservers("traitWillSetSliceLegend", newLegend, oldLegend, this.owner);
-    },
-    didSetValue(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
-      this.owner.callObservers("traitDidSetSliceLegend", newLegend, oldLegend, this.owner);
+  @Property<SliceTrait["legend"]>({
+    valueType: String,
+    didSetValue(legend: string | undefined): void {
+      this.owner.callObservers("traitDidSetLegend", legend, this.owner);
     },
   })
-  readonly legend!: Property<this, SliceLegend | null>;
+  readonly legend!: Property<this, string | undefined>;
 }

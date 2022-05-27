@@ -18,7 +18,7 @@ import {Property} from "@swim/component";
 import type {GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
+import {View} from "@swim/view";
 import {
   GraphicsView,
   FillViewInit,
@@ -42,55 +42,46 @@ export interface GeoAreaViewInit extends GeoPathViewInit, FillViewInit, StrokeVi
 export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   override readonly observerType?: Class<GeoAreaViewObserver>;
 
-  @ThemeAnimator<GeoAreaView, Color | null, AnyColor | null>({
-    type: Color,
+  @ThemeAnimator<GeoAreaView["fill"]>({
+    valueType: Color,
     value: null,
     inherits: true,
     updateFlags: View.NeedsRender,
-    willSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.callObservers("viewWillSetFill", newFill, oldFill, this.owner);
-    },
-    didSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.callObservers("viewDidSetFill", newFill, oldFill, this.owner);
+    didSetValue(fill: Color | null): void {
+      this.owner.callObservers("viewDidSetFill", fill, this.owner);
     },
   })
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator<GeoAreaView, Color | null, AnyColor | null>({
-    type: Color,
+  @ThemeAnimator<GeoAreaView["stroke"]>({
+    valueType: Color,
     value: null,
     inherits: true,
     updateFlags: View.NeedsRender,
-    willSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.callObservers("viewWillSetStroke", newStroke, oldStroke, this.owner);
-    },
-    didSetValue(newStroke: Color | null, oldStroke: Color | null): void {
-      this.owner.callObservers("viewDidSetStroke", newStroke, oldStroke, this.owner);
+    didSetValue(stroke: Color | null): void {
+      this.owner.callObservers("viewDidSetStroke", stroke, this.owner);
     },
   })
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator<GeoAreaView, Length | null, AnyLength | null>({
-    type: Length,
+  @ThemeAnimator<GeoAreaView["strokeWidth"]>({
+    valueType: Length,
     value: null,
     inherits: true,
     updateFlags: View.NeedsRender,
-    willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("viewWillSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
-    },
-    didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.callObservers("viewDidSetStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
+    didSetValue(strokeWidth: Length | null): void {
+      this.owner.callObservers("viewDidSetStrokeWidth", strokeWidth, this.owner);
     },
   })
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @Property({type: Boolean, value: true})
+  @Property({valueType: Boolean, value: true})
   readonly clipViewport!: Property<this, boolean>;
 
   override cullGeoFrame(geoFrame: GeoBox = this.geoFrame): void {
     let culled: boolean;
     if (geoFrame.intersects(this.geoBounds)) {
-      const viewFrame = this.viewContext.viewFrame;
+      const viewFrame = this.viewFrame;
       const bounds = this.viewBounds;
       // check if 9x9 view frame fully contains view bounds
       const contained = !this.clipViewport.value
@@ -105,11 +96,11 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     this.setCulled(culled);
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
-      this.renderArea(renderer.context, viewContext.viewFrame);
+      this.renderArea(renderer.context, this.viewFrame);
     }
   }
 
@@ -144,11 +135,11 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     }
   }
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
-      return this.hitTestArea(p.x, p.y, renderer.context, viewContext.viewFrame);
+      return this.hitTestArea(p.x, p.y, renderer.context, this.viewFrame);
     }
     return null;
   }

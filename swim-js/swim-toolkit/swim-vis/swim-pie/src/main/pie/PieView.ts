@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Initable} from "@swim/util";
-import {Affinity, MemberFastenerClass, Animator} from "@swim/component";
+import type {Class, Observes} from "@swim/util";
+import {Affinity, FastenerClass, Animator} from "@swim/component";
 import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look, ThemeAnimator} from "@swim/theme";
-import {ViewContextType, AnyView, View, ViewRef, ViewSet} from "@swim/view";
+import {View, ViewRef, ViewSet} from "@swim/view";
 import {GraphicsViewInit, GraphicsView, TypesetView, TextRunView} from "@swim/graphics";
 import {AnySliceView, SliceView} from "../slice/SliceView";
 import type {PieViewObserver} from "./PieViewObserver";
@@ -50,74 +50,66 @@ export interface PieViewInit extends GraphicsViewInit {
 }
 
 /** @public */
-export interface PieViewSliceExt {
-  attachLabelView(labelView: GraphicsView): void;
-  detachLabelView(labelView: GraphicsView): void;
-  attachLegendView(legendView: GraphicsView): void;
-  detachLegendView(legendView: GraphicsView): void;
-}
-
-/** @public */
 export class PieView extends GraphicsView {
   override readonly observerType?: Class<PieViewObserver>;
 
-  @Animator({type: Number, value: 0, updateFlags: View.NeedsLayout})
+  @Animator({valueType: Number, value: 0, updateFlags: View.NeedsLayout})
   readonly limit!: Animator<this, number>;
 
-  @Animator({type: R2Point, value: R2Point.origin(), updateFlags: View.NeedsLayout})
+  @Animator({valueType: R2Point, value: R2Point.origin(), updateFlags: View.NeedsLayout})
   readonly center!: Animator<this, R2Point, AnyR2Point>;
 
-  @ThemeAnimator({type: Angle, value: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
+  @ThemeAnimator({valueType: Angle, value: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
   readonly baseAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(3)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(3)})
   readonly innerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(25)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(25)})
   readonly outerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Angle, value: Angle.deg(2)})
+  @ThemeAnimator({valueType: Angle, value: Angle.deg(2)})
   readonly padAngle!: ThemeAnimator<this, Angle, AnyAngle>;
 
-  @ThemeAnimator({type: Length, value: null})
+  @ThemeAnimator({valueType: Length, value: null})
   readonly padRadius!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Length, value: Length.zero()})
+  @ThemeAnimator({valueType: Length, value: Length.zero()})
   readonly cornerRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(50)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(50)})
   readonly labelRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.accentColor})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.accentColor})
   readonly sliceColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Number, value: 0.5})
+  @ThemeAnimator({valueType: Number, value: 0.5})
   readonly tickAlign!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(30)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(30)})
   readonly tickRadius!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.pct(50)})
+  @ThemeAnimator({valueType: Length, value: Length.pct(50)})
   readonly tickLength!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.px(1)})
+  @ThemeAnimator({valueType: Length, value: Length.px(1)})
   readonly tickWidth!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Length, value: Length.px(2)})
+  @ThemeAnimator({valueType: Length, value: Length.px(2)})
   readonly tickPadding!: ThemeAnimator<this, Length, AnyLength>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.legendColor})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.legendColor})
   readonly tickColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Font, value: null, inherits: true})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, value: null, look: Look.legendColor})
+  @ThemeAnimator({valueType: Color, value: null, look: Look.legendColor})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewRef<PieView, GraphicsView & Initable<GraphicsViewInit | string>>({
-    key: true,
-    type: TextRunView,
+  @ViewRef<PieView["title"]>({
+    viewType: TextRunView,
+    viewKey: true,
     binds: true,
     initView(titleView: GraphicsView): void {
       if (TypesetView.is(titleView)) {
@@ -127,30 +119,30 @@ export class PieView extends GraphicsView {
       }
     },
     willAttachView(titleView: GraphicsView): void {
-      this.owner.callObservers("viewWillAttachPieTitle", titleView, this.owner);
+      this.owner.callObservers("viewWillAttachTitle", titleView, this.owner);
     },
     didDetachView(titleView: GraphicsView): void {
-      this.owner.callObservers("viewDidDetachPieTitle", titleView, this.owner);
+      this.owner.callObservers("viewDidDetachTitle", titleView, this.owner);
     },
-    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
-      if (typeof value === "string") {
-        if (this.view instanceof TextRunView) {
-          this.view.text(value);
-          return this.view;
-        } else {
-          return TextRunView.fromAny(value);
-        }
-      } else {
-        return GraphicsView.fromAny(value);
+    setText(title: string | undefined): GraphicsView {
+      let titleView = this.view;
+      if (titleView === null) {
+        titleView = this.createView();
+        this.setView(titleView);
       }
+      if (titleView instanceof TextRunView) {
+        titleView.text(title !== void 0 ? title : "");
+      }
+      return titleView;
     },
   })
-  readonly title!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
-  static readonly title: MemberFastenerClass<PieView, "title">;
+  readonly title!: ViewRef<this, GraphicsView> & {
+    setText(title: string | undefined): GraphicsView,
+  };
+  static readonly title: FastenerClass<PieView["title"]>;
 
-  @ViewSet<PieView, SliceView, PieViewSliceExt>({
-    implements: true,
-    type: SliceView,
+  @ViewSet<PieView["slices"]>({
+    viewType: SliceView,
     binds: true,
     observes: true,
     willAttachView(sliceView: SliceView, targetView: View | null): void {
@@ -179,13 +171,13 @@ export class PieView extends GraphicsView {
     didDetachView(sliceView: SliceView): void {
       this.owner.callObservers("viewDidDetachSlice", sliceView, this.owner);
     },
-    viewDidSetSliceValue(newValue: number, oldValue: number): void {
+    viewDidSetValue(value: number): void {
       this.owner.requireUpdate(View.NeedsLayout);
     },
-    viewWillAttachSliceLabel(labelView: GraphicsView): void {
+    viewWillAttachLabel(labelView: GraphicsView): void {
       this.attachLabelView(labelView);
     },
-    viewDidDetachSliceLabel(labelView: GraphicsView): void {
+    viewDidDetachLabel(labelView: GraphicsView): void {
       this.detachLabelView(labelView);
     },
     attachLabelView(labelView: GraphicsView): void {
@@ -194,10 +186,10 @@ export class PieView extends GraphicsView {
     detachLabelView(labelView: GraphicsView): void {
       // hook
     },
-    viewWillAttachSliceLegend(legendView: GraphicsView): void {
+    viewWillAttachLegend(legendView: GraphicsView): void {
       this.attachLegendView(legendView);
     },
-    viewDidDetachSliceLegend(legendView: GraphicsView): void {
+    viewDidDetachLegend(legendView: GraphicsView): void {
       this.detachLegendView(legendView);
     },
     attachLegendView(legendView: GraphicsView): void {
@@ -207,11 +199,16 @@ export class PieView extends GraphicsView {
       // hook
     },
   })
-  readonly slices!: ViewSet<this, SliceView> & PieViewSliceExt;
-  static readonly slices: MemberFastenerClass<PieView, "slices">;
+  readonly slices!: ViewSet<this, SliceView> & Observes<SliceView> & {
+    attachLabelView(labelView: GraphicsView): void,
+    detachLabelView(labelView: GraphicsView): void,
+    attachLegendView(legendView: GraphicsView): void,
+    detachLegendView(legendView: GraphicsView): void,
+  };
+  static readonly slices: FastenerClass<PieView["slices"]>;
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     this.layoutPie(this.viewFrame);
   }
 
@@ -308,8 +305,10 @@ export class PieView extends GraphicsView {
     if (init.textColor !== void 0) {
       this.textColor(init.textColor);
     }
-    if (init.title !== void 0) {
-      this.title(init.title);
+    if (typeof init.title === "string") {
+      this.title.setText(init.title);
+    } else if (init.title !== void 0) {
+      this.title.setView(init.title);
     }
     const slices = init.slices;
     if (slices !== void 0) {

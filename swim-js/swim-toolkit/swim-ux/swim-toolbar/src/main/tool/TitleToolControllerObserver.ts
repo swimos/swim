@@ -15,15 +15,10 @@
 import type {HtmlView} from "@swim/dom";
 import type {ToolControllerObserver} from "./ToolControllerObserver";
 import type {TitleToolView} from "./TitleToolView";
-import type {TitleToolTrait} from "./TitleToolTrait";
 import type {TitleToolController} from "./TitleToolController";
 
 /** @public */
 export interface TitleToolControllerObserver<C extends TitleToolController = TitleToolController> extends ToolControllerObserver<C> {
-  controllerWillAttachToolTrait?(toolTrait: TitleToolTrait, controller: C): void;
-
-  controllerDidDetachToolTrait?(toolTrait: TitleToolTrait, controller: C): void;
-
   controllerWillAttachToolView?(toolView: TitleToolView, controller: C): void;
 
   controllerDidDetachToolView?(toolView: TitleToolView, controller: C): void;

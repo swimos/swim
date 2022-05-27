@@ -12,12 +12,12 @@
     <script>
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").position("relative").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .mouseEventsEnabled(true)
@@ -29,30 +29,27 @@ const gaugeView = canvasView.appendChild(swim.GaugeView)
     .innerRadius(swim.Length.pct(25))
     .startAngle(swim.Angle.rad(3 * Math.PI / 4))
     .sweepAngle(swim.Angle.rad(3 * Math.PI / 2))
-    .font("14px sans-serif")
-    .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"))
-    .on("pointerover", function (event) {
-      if (event.targetView instanceof swim.DialView) {
-        event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
-      }
-    })
-    .on("pointerout", function (event) {
-      if (event.targetView instanceof swim.DialView) {
-        event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
-      }
-    });
+    .font("14px sans-serif");
+gaugeView.addEventListener("pointerover", function (event) {
+  if (event.targetView instanceof swim.DialView) {
+    event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+  }
+});
+gaugeView.addEventListener("pointerout", function (event) {
+  if (event.targetView instanceof swim.DialView) {
+    event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+  }
+});
+gaugeView.title.setText("Gauge").font("20px sans-serif");
 
-const dial0View = gaugeView.appendChild(swim.DialView, "dial0")
-    .value(0.33)
-    .label("label 0");
+const dial0View = gaugeView.appendChild(swim.DialView, "dial0").value(0.33);
+dial0View.label.setText("label 0");
 
-const dial1View = gaugeView.appendChild(swim.DialView, "dial1")
-    .value(0.5)
-    .label("label 1");
+const dial1View = gaugeView.appendChild(swim.DialView, "dial1").value(0.5);
+dial1View.label.setText("label 1");
 
-const dial2View = gaugeView.appendChild(swim.DialView, "dial2")
-    .value(0.67)
-    .label("label 2");
+const dial2View = gaugeView.appendChild(swim.DialView, "dial2").value(0.67);
+dial2View.label.setText("label 2");
 
 setInterval(function () {
   const timing = swim.Easing.linear.withDuration(1000);

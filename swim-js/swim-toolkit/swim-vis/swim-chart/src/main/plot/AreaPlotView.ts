@@ -32,21 +32,19 @@ export interface AreaPlotViewInit<X = unknown, Y = unknown> extends SeriesPlotVi
 export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y> implements FillView {
   override readonly observerType?: Class<AreaPlotViewObserver<X, Y>>;
 
-  @ThemeAnimator<AreaPlotView<X, Y>, Color | null, AnyColor | null>({
-    type: Color,
+  @ThemeAnimator<AreaPlotView<X, Y>["fill"]>({
+    valueType: Color,
     value: null,
     look: Look.accentColor,
     updateFlags: View.NeedsRender,
-    willSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.callObservers("viewWillSetPlotFill", newFill, oldFill, this.owner);
-    },
-    didSetValue(newFill: Color | null, oldFill: Color | null): void {
-      this.owner.callObservers("viewDidSetPlotFill", newFill, oldFill, this.owner);
+    didSetValue(fill: Color | null): void {
+      this.owner.callObservers("viewDidSetFill", fill, this.owner);
     },
   })
   readonly fill!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
   protected renderPlot(context: CanvasContext, frame: R2Box): void {
+    const opacity = this.opacity.value;
     const fill = this.fill.getValueOr(Color.transparent());
     const gradientStops = this.gradientStops;
     let gradient: CanvasGradient | null = null;
@@ -105,12 +103,17 @@ export class AreaPlotView<X = unknown, Y = unknown> extends SeriesPlotView<X, Y>
     }
 
     // save
+    const contextGlobalAlpha = context.globalAlpha;
     const contextFillStyle = context.fillStyle;
 
+    if (opacity !== void 0) {
+      context.globalAlpha = opacity;
+    }
     context.fillStyle = gradient !== null ? gradient : fill.toString();
     context.fill();
 
     // restore
+    context.globalAlpha = contextGlobalAlpha;
     context.fillStyle = contextFillStyle;
   }
 

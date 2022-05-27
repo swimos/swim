@@ -19,49 +19,39 @@ import type {ControllerObserver} from "@swim/controller";
 import type {ToolLayout} from "../layout/ToolLayout";
 import type {BarLayout} from "../layout/BarLayout";
 import type {ToolView} from "../tool/ToolView";
-import type {ToolTrait} from "../tool/ToolTrait";
 import type {ToolController} from "../tool/ToolController";
 import type {BarView} from "./BarView";
-import type {BarTrait} from "./BarTrait";
 import type {BarController} from "./BarController";
 
 /** @public */
 export interface BarControllerObserver<C extends BarController = BarController> extends ControllerObserver<C> {
-  controllerWillAttachBarTrait?(barTrait: BarTrait, controller: C): void;
-
-  controllerDidDetachBarTrait?(barTrait: BarTrait, controller: C): void;
-
   controllerWillAttachBarView?(barView: BarView, controller: C): void;
 
   controllerDidDetachBarView?(barView: BarView, controller: C): void;
 
-  controllerWillSetBarLayout?(newBarLayout: BarLayout | null, oldBarLayout: BarLayout | null, controller: C): void;
-
-  controllerDidSetBarLayout?(newBarLayout: BarLayout | null, oldBarLayout: BarLayout | null, controller: C): void;
+  controllerDidSetBarLayout?(barLayout: BarLayout | null, controller: C): void;
 
   controllerWillAttachTool?(toolController: ToolController, controller: C): void;
 
   controllerDidDetachTool?(toolController: ToolController, controller: C): void;
 
-  controllerWillAttachToolTrait?(toolTrait: ToolTrait, toolController: ToolController, controller: C): void;
-
-  controllerDidDetachToolTrait?(toolTrait: ToolTrait, toolController: ToolController, controller: C): void;
-
   controllerWillAttachToolView?(toolView: ToolView, toolController: ToolController, controller: C): void;
 
   controllerDidDetachToolView?(toolView: ToolView, toolController: ToolController, controller: C): void;
 
-  controllerWillSetToolLayout?(newToolLayout: ToolLayout | null, oldToolLayout: ToolLayout | null, toolController: ToolController, controller: C): void;
-
-  controllerDidSetToolLayout?(newToolLayout: ToolLayout | null, oldToolLayout: ToolLayout | null, toolController: ToolController, controller: C): void;
+  controllerDidSetToolLayout?(toolLayout: ToolLayout | null, toolController: ToolController, controller: C): void;
 
   controllerWillAttachToolContentView?(toolContentView: HtmlView, toolController: ToolController, controller: C): void;
 
   controllerDidDetachToolContentView?(toolContentView: HtmlView, toolController: ToolController, controller: C): void;
 
-  controllerWillSetToolIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, toolController: ToolController, controller: C): void;
+  controllerDidSetToolIcon?(toolIcon: Graphics | null, toolController: ToolController, controller: C): void;
 
-  controllerDidSetToolIcon?(newIcon: Graphics | null, oldIcon: Graphics | null, toolController: ToolController, controller: C): void;
+  controllerDidUpdateSearchTool?(query: string, inputView: HtmlView, toolController: ToolController, controller: C): void;
+
+  controllerDidSubmitSearchTool?(query: string, inputView: HtmlView, toolController: ToolController, controller: C): void;
+
+  controllerDidCancelSearchTool?(inputView: HtmlView, toolController: ToolController, controller: C): void;
 
   controllerDidPressToolView?(input: PositionGestureInput, event: Event | null, toolController: ToolController, controller: C): void;
 

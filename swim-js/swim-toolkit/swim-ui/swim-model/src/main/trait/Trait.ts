@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {
+  Murmur3,
   Mutable,
   Class,
   Instance,
@@ -22,34 +23,42 @@ import {
   Comparator,
   FromAny,
   Creatable,
-  InitType,
+  Inits,
   Initable,
-  ObserverType,
+  Observes,
   Observable,
   ObserverMethods,
   ObserverParameters,
-  ConsumerType,
-  Consumable,
   Consumer,
+  Consumable,
 } from "@swim/util";
-import {FastenerContext, Fastener, Property, Provider} from "@swim/component";
-import {WarpRef, WarpService, WarpProvider, DownlinkFastener} from "@swim/client";
-import {ModelContextType, ModelFlags, AnyModel, Model} from "../model/Model";
+import {FastenerContext, Fastener, Property} from "@swim/component";
+import {AnyValue, Value} from "@swim/structure";
+import {AnyUri, Uri} from "@swim/uri";
+import {
+  WarpDownlinkModel,
+  WarpDownlink,
+  EventDownlinkTemplate,
+  EventDownlink,
+  ValueDownlinkTemplate,
+  ValueDownlink,
+  ListDownlinkTemplate,
+  ListDownlink,
+  MapDownlinkTemplate,
+  MapDownlink,
+  WarpRef,
+  WarpClient,
+} from "@swim/client";
+import {ModelFlags, AnyModel, Model} from "../model/Model";
 import {ModelRelation} from "../model/ModelRelation";
 import type {TraitObserver} from "./TraitObserver";
 import {TraitRelation} from "./"; // forward import
 
 /** @public */
-export type TraitModelType<T extends Trait> = T extends {readonly model: infer M | null} ? M : never;
-
-/** @public */
-export type TraitContextType<T extends Trait> = ModelContextType<TraitModelType<T>>;
-
-/** @public */
 export type TraitFlags = number;
 
 /** @public */
-export type AnyTrait<T extends Trait = Trait> = T | TraitFactory<T> | InitType<T>;
+export type AnyTrait<T extends Trait = Trait> = T | TraitFactory<T> | Inits<T>;
 
 /** @public */
 export interface TraitInit {
@@ -62,7 +71,7 @@ export interface TraitInit {
 
 /** @public */
 export interface TraitFactory<T extends Trait = Trait, U = AnyTrait<T>> extends Creatable<T>, FromAny<T, U> {
-  fromInit(init: InitType<T>): T;
+  fromInit(init: Inits<T>): T;
 }
 
 /** @public */
@@ -76,7 +85,7 @@ export interface TraitConstructor<T extends Trait = Trait, U = AnyTrait<T>> exte
 }
 
 /** @public */
-export abstract class Trait implements HashCode, Initable<TraitInit>, Observable, Consumable, FastenerContext {
+export abstract class Trait implements HashCode, Initable<TraitInit>, Observable, Consumable, FastenerContext, WarpRef {
   constructor() {
     this.uid = (this.constructor as typeof Trait).uid();
     this.key = void 0;
@@ -94,11 +103,8 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
 
   readonly observerType?: Class<TraitObserver>;
 
-  /** @override */
-  readonly consumerType?: Class<Consumer>;
-
   /** @internal */
-  readonly uid: number;
+  readonly uid: string;
 
   readonly key: string | undefined;
 
@@ -115,6 +121,14 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   }
 
   readonly model: Model | null;
+
+  getModel(): Model {
+    const model = this.model;
+    if (model === null) {
+      throw new TypeError("no model");
+    }
+    return model;
+  }
 
   /** @internal */
   attachModel(model: Model, nextTrait: Trait | null): void {
@@ -379,6 +393,15 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
+  reinsertChild(child: Model, target: Model | null): void {
+    const model = this.model;
+    if (model !== null) {
+      model.reinsertChild(child, target);
+    } else {
+      throw new Error("no model");
+    }
+  }
+
   replaceChild<M extends Model>(newChild: Model, oldChild: M): M;
   replaceChild<M extends Model>(newChild: AnyModel, oldChild: M): M;
   replaceChild(newChild: AnyModel, oldChild: Model): Model {
@@ -465,6 +488,37 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
+  get reinsertChildFlags(): ModelFlags {
+    return (this.constructor as typeof Trait).ReinsertChildFlags;
+  }
+
+  /** @protected */
+  willReinsertChild(child: Model, target: Model | null): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitWillReinsertChild !== void 0) {
+        observer.traitWillReinsertChild(child, target, this);
+      }
+    }
+  }
+
+  /** @protected */
+  onReinsertChild(child: Model, target: Model | null): void {
+    this.requireUpdate(this.reinsertChildFlags);
+  }
+
+  /** @protected */
+  didReinsertChild(child: Model, target: Model | null): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.traitDidReinsertChild !== void 0) {
+        observer.traitDidReinsertChild(child, target, this);
+      }
+    }
+  }
+
   removeChildren(): void {
     const model = this.model;
     if (model !== null) {
@@ -476,6 +530,15 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     const model = this.model;
     if (model !== null) {
       return model.sortChildren(comparator);
+    }
+  }
+
+  getTargetChild(child: Model, comparator: Comparator<Model>): Model | null {
+    const model = this.model;
+    if (model !== null) {
+      return model.getTargetChild(child, comparator);
+    } else {
+      return null;
     }
   }
 
@@ -518,6 +581,13 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   forEachTrait<T, S>(callback: (this: S | undefined, trait: Trait) => T | void, thisArg?: S): T | undefined {
     const model = this.model;
     return model !== null ? model.forEachTrait(callback, thisArg) : void 0;
+  }
+
+  findTrait<F extends Class<Trait>>(key: string | undefined, traitBound: F): InstanceType<F> | null;
+  findTrait(key: string | undefined, traitBound: Class<Trait> | undefined): Trait | null;
+  findTrait(key: string | undefined, traitBound: Class<Trait> | undefined): Trait | null {
+    const model = this.model;
+    return model !== null ? model.findTrait(key, traitBound) : null;
   }
 
   getTrait<F extends Class<Trait>>(key: string, traitBound: F): InstanceType<F> | null;
@@ -591,6 +661,10 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     return (this.constructor as typeof Trait).InsertTraitFlags;
   }
 
+  get inserting(): boolean {
+    return (this.flags & Trait.InsertingFlag) !== 0;
+  }
+
   /** @protected */
   willInsertTrait(trait: Trait, target: Trait | null): void {
     const observers = this.observers;
@@ -632,6 +706,10 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
 
   get removeTraitFlags(): ModelFlags {
     return (this.constructor as typeof Trait).RemoveTraitFlags;
+  }
+
+  get removing(): boolean {
+    return (this.flags & Trait.RemovingFlag) !== 0;
   }
 
   /** @protected */
@@ -679,21 +757,208 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     return model !== null ? model.getBaseTrait(baseBound) : null;
   }
 
-  @Provider({
-    extends: WarpProvider,
-    type: WarpService,
-    observes: false,
-    service: WarpService.global(),
-  })
-  readonly warpProvider!: WarpProvider<this>;
+  /** @override */
+  @Property({valueType: Uri, value: null, inherits: true, updateFlags: Model.NeedsReconcile})
+  readonly hostUri!: Property<this, Uri | null, AnyUri | null>;
 
-  @Property({
-    type: Object,
+  /** @override */
+  @Property({valueType: Uri, value: null, inherits: true, updateFlags: Model.NeedsReconcile})
+  readonly nodeUri!: Property<this, Uri | null, AnyUri | null>;
+
+  /** @override */
+  @Property({valueType: Uri, value: null, inherits: true, updateFlags: Model.NeedsReconcile})
+  readonly laneUri!: Property<this, Uri | null, AnyUri | null>;
+
+  /** @override */
+  downlink(template?: EventDownlinkTemplate<EventDownlink<this>>): EventDownlink<this> {
+    let downlinkClass = EventDownlink;
+    if (template !== void 0) {
+      downlinkClass = downlinkClass.define("downlink", template);
+    }
+    return downlinkClass.create(this);
+  }
+
+  /** @override */
+  downlinkValue<V = Value, VU = V extends Value ? AnyValue & V : V>(template?: ValueDownlinkTemplate<ValueDownlink<this, V, VU>>): ValueDownlink<this, V, VU> {
+    let downlinkClass = ValueDownlink;
+    if (template !== void 0) {
+      downlinkClass = downlinkClass.define("downlinkValue", template);
+    }
+    return downlinkClass.create(this);
+  }
+
+  /** @override */
+  downlinkList<V = Value, VU = V extends Value ? AnyValue & V : V>(template?: ListDownlinkTemplate<ListDownlink<this, V, VU>>): ListDownlink<this, V, VU> {
+    let downlinkClass = ListDownlink;
+    if (template !== void 0) {
+      downlinkClass = downlinkClass.define("downlinkList", template);
+    }
+    return downlinkClass.create(this);
+  }
+
+  /** @override */
+  downlinkMap<K = Value, V = Value, KU = K extends Value ? AnyValue & K : K, VU = V extends Value ? AnyValue & V : V>(template?: MapDownlinkTemplate<MapDownlink<this, K, V, KU, VU>>): MapDownlink<this, K, V, KU, VU> {
+    let downlinkClass = MapDownlink;
+    if (template !== void 0) {
+      downlinkClass = downlinkClass.define("downlinkMap", template);
+    }
+    return downlinkClass.create(this);
+  }
+
+  /** @override */
+  command(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void;
+  /** @override */
+  command(nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void;
+  /** @override */
+  command(laneUri: AnyUri, body: AnyValue): void;
+  /** @override */
+  command(body: AnyValue): void;
+  command(hostUri: AnyUri | AnyValue, nodeUri?: AnyUri | AnyValue, laneUri?: AnyUri | AnyValue, body?: AnyValue): void {
+    if (nodeUri === void 0) {
+      body = Value.fromAny(hostUri as AnyValue);
+      laneUri = this.laneUri.getValue();
+      nodeUri = this.nodeUri.getValue();
+      hostUri = this.hostUri.value;
+    } else if (laneUri === void 0) {
+      body = Value.fromAny(nodeUri as AnyValue);
+      laneUri = Uri.fromAny(hostUri as AnyUri);
+      nodeUri = this.nodeUri.getValue();
+      hostUri = this.hostUri.value;
+    } else if (body === void 0) {
+      body = Value.fromAny(laneUri as AnyValue);
+      laneUri = Uri.fromAny(nodeUri as AnyUri);
+      nodeUri = Uri.fromAny(hostUri as AnyUri);
+      hostUri = this.hostUri.value;
+    } else {
+      body = Value.fromAny(body);
+      laneUri = Uri.fromAny(laneUri as AnyUri);
+      nodeUri = Uri.fromAny(nodeUri as AnyUri);
+      hostUri = Uri.fromAny(hostUri as AnyUri);
+    }
+    if (hostUri === null) {
+      hostUri = nodeUri.endpoint();
+      nodeUri = hostUri.unresolve(nodeUri);
+    }
+    const warpRef = this.warpRef.value;
+    warpRef.command(hostUri, nodeUri, laneUri, body);
+  }
+
+  /** @override */
+  authenticate(hostUri: AnyUri, credentials: AnyValue): void;
+  /** @override */
+  authenticate(credentials: AnyValue): void;
+  authenticate(hostUri: AnyUri | AnyValue, credentials?: AnyValue): void {
+    if (credentials === void 0) {
+      credentials = Value.fromAny(hostUri as AnyValue);
+      hostUri = this.hostUri.getValue();
+    } else {
+      credentials = Value.fromAny(credentials);
+      hostUri = Uri.fromAny(hostUri as AnyUri);
+    }
+    const warpRef = this.warpRef.value;
+    warpRef.authenticate(hostUri, credentials);
+  }
+
+  /** @override */
+  hostRef(hostUri: AnyUri): WarpRef {
+    hostUri = Uri.fromAny(hostUri);
+    const childRef = new Model();
+    childRef.hostUri.setValue(hostUri);
+    this.appendChild(childRef);
+    return childRef;
+  }
+
+  /** @override */
+  nodeRef(hostUri: AnyUri, nodeUri: AnyUri): WarpRef;
+  /** @override */
+  nodeRef(nodeUri: AnyUri): WarpRef;
+  nodeRef(hostUri: AnyUri | undefined, nodeUri?: AnyUri): WarpRef {
+    if (nodeUri === void 0) {
+      nodeUri = Uri.fromAny(hostUri as AnyUri);
+      hostUri = nodeUri.endpoint();
+      if (hostUri.isDefined()) {
+        nodeUri = hostUri.unresolve(nodeUri);
+      } else {
+        hostUri = void 0;
+      }
+    } else {
+      nodeUri = Uri.fromAny(nodeUri);
+      hostUri = Uri.fromAny(hostUri as AnyUri);
+    }
+    const childRef = new Model();
+    if (hostUri !== void 0) {
+      childRef.hostUri.setValue(hostUri);
+    }
+    if (nodeUri !== void 0) {
+      childRef.nodeUri.setValue(nodeUri);
+    }
+    this.appendChild(childRef);
+    return childRef;
+  }
+
+  /** @override */
+  laneRef(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri): WarpRef;
+  /** @override */
+  laneRef(nodeUri: AnyUri, laneUri: AnyUri): WarpRef;
+  /** @override */
+  laneRef(laneUri: AnyUri): WarpRef;
+  laneRef(hostUri: AnyUri | undefined, nodeUri?: AnyUri, laneUri?: AnyUri): WarpRef {
+    if (nodeUri === void 0) {
+      laneUri = Uri.fromAny(hostUri as AnyUri);
+      nodeUri = void 0;
+      hostUri = void 0;
+    } else if (laneUri === void 0) {
+      laneUri = Uri.fromAny(nodeUri);
+      nodeUri = Uri.fromAny(hostUri as AnyUri);
+      hostUri = nodeUri.endpoint();
+      if (hostUri.isDefined()) {
+        nodeUri = hostUri.unresolve(nodeUri);
+      } else {
+        hostUri = void 0;
+      }
+    } else {
+      laneUri = Uri.fromAny(laneUri);
+      nodeUri = Uri.fromAny(nodeUri);
+      hostUri = Uri.fromAny(hostUri as AnyUri);
+    }
+    const childRef = new Model();
+    if (hostUri !== void 0) {
+      childRef.hostUri.setValue(hostUri);
+    }
+    if (nodeUri !== void 0) {
+      childRef.nodeUri.setValue(nodeUri);
+    }
+    if (laneUri !== void 0) {
+      childRef.laneUri.setValue(laneUri);
+    }
+    this.appendChild(childRef);
+    return childRef;
+  }
+
+  /** @internal @override */
+  getDownlink(hostUri: Uri, nodeUri: Uri, laneUri: Uri): WarpDownlinkModel | null {
+    const warpRef = this.warpRef.value;
+    return warpRef.getDownlink(hostUri, nodeUri, laneUri);
+  }
+
+  /** @internal @override */
+  openDownlink(downlink: WarpDownlinkModel): void {
+    const warpRef = this.warpRef.value;
+    warpRef.openDownlink(downlink);
+  }
+
+  @Property<Trait["warpRef"]>({
+    valueType: WarpRef,
     inherits: true,
-    value: null,
     updateFlags: Model.NeedsReconcile,
+    initValue(): WarpRef {
+      return WarpClient.global();
+    },
+    equalValues(newValue: WarpRef, oldValue: WarpRef): boolean {
+      return newValue === oldValue;
+    },
   })
-  readonly warpRef!: Property<this, WarpRef | null>;
+  readonly warpRef!: Property<this, WarpRef>;
 
   get mounted(): boolean {
     return (this.flags & Trait.MountedFlag) !== 0;
@@ -818,114 +1083,110 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   }
 
   /** @protected */
-  needsAnalyze(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): ModelFlags {
+  needsAnalyze(analyzeFlags: ModelFlags): ModelFlags {
     return analyzeFlags;
   }
 
   /** @protected */
-  willAnalyze(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
+  willAnalyze(analyzeFlags: ModelFlags): void {
     // hook
   }
 
   /** @protected */
-  onAnalyze(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
+  onAnalyze(analyzeFlags: ModelFlags): void {
     // hook
   }
 
   /** @protected */
-  didAnalyze(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
+  didAnalyze(analyzeFlags: ModelFlags): void {
     // hook
   }
 
   /** @protected */
-  willMutate(modelContext: TraitContextType<this>): void {
+  willMutate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitWillMutate !== void 0) {
-        observer.traitWillMutate(modelContext, this);
+        observer.traitWillMutate(this);
       }
     }
   }
 
   /** @protected */
-  onMutate(modelContext: TraitContextType<this>): void {
-    this.recohereFasteners(modelContext.updateTime);
+  onMutate(): void {
+    this.recohereFasteners(this.updateTime);
   }
 
   /** @protected */
-  didMutate(modelContext: TraitContextType<this>): void {
+  didMutate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitDidMutate !== void 0) {
-        observer.traitDidMutate(modelContext, this);
+        observer.traitDidMutate(this);
       }
     }
   }
 
   /** @protected */
-  willAggregate(modelContext: TraitContextType<this>): void {
+  willAggregate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitWillAggregate !== void 0) {
-        observer.traitWillAggregate(modelContext, this);
+        observer.traitWillAggregate(this);
       }
     }
   }
 
   /** @protected */
-  onAggregate(modelContext: TraitContextType<this>): void {
+  onAggregate(): void {
     // hook
   }
 
   /** @protected */
-  didAggregate(modelContext: TraitContextType<this>): void {
+  didAggregate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitDidAggregate !== void 0) {
-        observer.traitDidAggregate(modelContext, this);
+        observer.traitDidAggregate(this);
       }
     }
   }
 
   /** @protected */
-  willCorrelate(modelContext: TraitContextType<this>): void {
+  willCorrelate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitWillCorrelate !== void 0) {
-        observer.traitWillCorrelate(modelContext, this);
+        observer.traitWillCorrelate(this);
       }
     }
   }
 
   /** @protected */
-  onCorrelate(modelContext: TraitContextType<this>): void {
+  onCorrelate(): void {
     // hook
   }
 
   /** @protected */
-  didCorrelate(modelContext: TraitContextType<this>): void {
+  didCorrelate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitDidCorrelate !== void 0) {
-        observer.traitDidCorrelate(modelContext, this);
+        observer.traitDidCorrelate(this);
       }
     }
   }
 
   /** @protected */
-  analyzeChildren(analyzeFlags: ModelFlags, modelContext: ModelContextType<Model>,
-                  analyzeChild: (this: Model, child: Model, analyzeFlags: ModelFlags,
-                                 modelContext: ModelContextType<Model>) => void,
-                  analyzeChildren: (this: Model, analyzeFlags: ModelFlags, modelContext: ModelContextType<Model>,
-                                    analyzeChild: (this: Model, child: Model, analyzeFlags: ModelFlags,
-                                                   modelContext: ModelContextType<Model>) => void) => void): void {
-    analyzeChildren.call(this.model!, analyzeFlags, modelContext, analyzeChild);
+  analyzeChildren(analyzeFlags: ModelFlags, analyzeChild: (this: Model, child: Model, analyzeFlags: ModelFlags) => void,
+                  analyzeChildren: (this: Model, analyzeFlags: ModelFlags, analyzeChild: (this: Model, child: Model, analyzeFlags: ModelFlags) => void) => void): void {
+    analyzeChildren.call(this.model!, analyzeFlags, analyzeChild);
   }
 
   get refreshing(): boolean {
@@ -934,87 +1195,83 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   }
 
   /** @protected */
-  needsRefresh(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): ModelFlags {
+  needsRefresh(refreshFlags: ModelFlags): ModelFlags {
     return refreshFlags;
   }
 
   /** @protected */
-  willRefresh(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
+  willRefresh(refreshFlags: ModelFlags): void {
     // hook
   }
 
   /** @protected */
-  onRefresh(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
+  onRefresh(refreshFlags: ModelFlags): void {
     // hook
   }
 
   /** @protected */
-  didRefresh(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
+  didRefresh(refreshFlags: ModelFlags): void {
     // hook
   }
 
   /** @protected */
-  willValidate(modelContext: TraitContextType<this>): void {
+  willValidate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitWillValidate !== void 0) {
-        observer.traitWillValidate(modelContext, this);
+        observer.traitWillValidate(this);
       }
     }
   }
 
   /** @protected */
-  onValidate(modelContext: TraitContextType<this>): void {
+  onValidate(): void {
     // hook
   }
 
   /** @protected */
-  didValidate(modelContext: TraitContextType<this>): void {
+  didValidate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitDidValidate !== void 0) {
-        observer.traitDidValidate(modelContext, this);
+        observer.traitDidValidate(this);
       }
     }
   }
 
   /** @protected */
-  willReconcile(modelContext: TraitContextType<this>): void {
+  willReconcile(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitWillReconcile !== void 0) {
-        observer.traitWillReconcile(modelContext, this);
+        observer.traitWillReconcile(this);
       }
     }
   }
 
   /** @protected */
-  onReconcile(modelContext: TraitContextType<this>): void {
-    this.recohereDownlinks(modelContext.updateTime);
+  onReconcile(): void {
+    this.recohereDownlinks(this.updateTime);
   }
 
   /** @protected */
-  didReconcile(modelContext: TraitContextType<this>): void {
+  didReconcile(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.traitDidReconcile !== void 0) {
-        observer.traitDidReconcile(modelContext, this);
+        observer.traitDidReconcile(this);
       }
     }
   }
 
   /** @protected */
-  refreshChildren(refreshFlags: ModelFlags, modelContext: ModelContextType<Model>,
-                  refreshChild: (this: Model, child: Model, refreshFlags: ModelFlags,
-                                 modelContext: ModelContextType<Model>) => void,
-                  refreshChildren: (this: Model, refreshFlags: ModelFlags, modelContext: ModelContextType<Model>,
-                                    refreshChild: (this: Model, child: Model, refreshFlags: ModelFlags,
-                                                   modelContext: ModelContextType<Model>) => void) => void): void {
-    refreshChildren.call(this.model!, refreshFlags, modelContext, refreshChild);
+  refreshChildren(refreshFlags: ModelFlags, refreshChild: (this: Model, child: Model, refreshFlags: ModelFlags) => void,
+                  refreshChildren: (this: Model, refreshFlags: ModelFlags, refreshChild: (this: Model, child: Model, refreshFlags: ModelFlags) => void) => void): void {
+    refreshChildren.call(this.model!, refreshFlags, refreshChild);
   }
 
   /** @internal */
@@ -1050,7 +1307,10 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   /** @override */
   setFastener(fastenerName: string, newFastener: Fastener | null): void {
     const fasteners = this.fasteners;
-    const oldFastener: Fastener | null | undefined = fasteners !== null ? fasteners[fastenerName] ?? null : null;
+    let oldFastener: Fastener | null | undefined = fasteners !== null ? fasteners[fastenerName] : void 0;
+    if (oldFastener === void 0) {
+      oldFastener = null;
+    }
     if (oldFastener !== newFastener) {
       if (oldFastener !== null) {
         this.detachFastener(fastenerName, oldFastener);
@@ -1071,6 +1331,13 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     // assert(fasteners[fastenerName] === void 0);
     this.willAttachFastener(fastenerName, fastener);
     fasteners[fastenerName] = fastener;
+    if (fastener.lazy === false) {
+      Object.defineProperty(this, fastenerName, {
+        value: fastener,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     if (this.mounted) {
       fastener.mount();
     }
@@ -1171,8 +1438,14 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
         fastener.bindTrait(trait, null);
       }, this);
     }
-    if (fastener instanceof DownlinkFastener && fastener.consumed === true && this.consuming) {
-      fastener.consume(this);
+    if (this.consuming) {
+      if (fastener instanceof WarpDownlink && fastener.consumed === true) {
+        fastener.consume(this);
+      } else if (fastener instanceof TraitRelation && fastener.consumed === true) {
+        fastener.consume(this);
+      } else if (fastener instanceof ModelRelation && fastener.consumed === true) {
+        fastener.consume(this);
+      }
     }
   }
 
@@ -1285,7 +1558,7 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
       (this as Mutable<this>).decoherent = decoherent;
     }
     decoherent.push(fastener);
-    if (fastener instanceof DownlinkFastener) {
+    if (fastener instanceof WarpDownlink) {
       this.requireUpdate(Model.NeedsReconcile);
     } else {
       this.requireUpdate(Model.NeedsMutate);
@@ -1304,7 +1577,7 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
         (this as Mutable<this>).decoherent = null;
         for (let i = 0; i < decoherentCount; i += 1) {
           const fastener = decoherent[i]!;
-          if (!(fastener instanceof DownlinkFastener)) {
+          if (!(fastener instanceof WarpDownlink)) {
             fastener.recohere(t);
           } else {
             this.decohereFastener(fastener);
@@ -1323,7 +1596,7 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
         (this as Mutable<this>).decoherent = null;
         for (let i = 0; i < decoherentCount; i += 1) {
           const fastener = decoherent[i]!;
-          if (fastener instanceof DownlinkFastener) {
+          if (fastener instanceof WarpDownlink) {
             fastener.recohere(t);
           } else {
             this.decohereFastener(fastener);
@@ -1334,10 +1607,10 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   }
 
   /** @internal */
-  readonly observers: ReadonlyArray<ObserverType<this>>;
+  readonly observers: ReadonlyArray<Observes<this>>;
 
   /** @override */
-  observe(observer: ObserverType<this>): void {
+  observe(observer: Observes<this>): void {
     const oldObservers = this.observers;
     const newObservers = Arrays.inserted(observer, oldObservers);
     if (oldObservers !== newObservers) {
@@ -1348,20 +1621,20 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  protected willObserve(observer: ObserverType<this>): void {
+  protected willObserve(observer: Observes<this>): void {
     // hook
   }
 
-  protected onObserve(observer: ObserverType<this>): void {
+  protected onObserve(observer: Observes<this>): void {
     // hook
   }
 
-  protected didObserve(observer: ObserverType<this>): void {
+  protected didObserve(observer: Observes<this>): void {
     // hook
   }
 
   /** @override */
-  unobserve(observer: ObserverType<this>): void {
+  unobserve(observer: Observes<this>): void {
     const oldObservers = this.observers;
     const newObservers = Arrays.removed(observer, oldObservers);
     if (oldObservers !== newObservers) {
@@ -1372,29 +1645,16 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  protected willUnobserve(observer: ObserverType<this>): void {
+  protected willUnobserve(observer: Observes<this>): void {
     // hook
   }
 
-  protected onUnobserve(observer: ObserverType<this>): void {
+  protected onUnobserve(observer: Observes<this>): void {
     // hook
   }
 
-  protected didUnobserve(observer: ObserverType<this>): void {
+  protected didUnobserve(observer: Observes<this>): void {
     // hook
-  }
-
-  protected forEachObserver<T>(callback: (this: this, observer: ObserverType<this>) => T | void): T | undefined {
-    let result: T | undefined;
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      result = callback.call(this, observer as ObserverType<this>) as T | undefined;
-      if (result !== void 0) {
-        return result;
-      }
-    }
-    return result;
   }
 
   callObservers<O, K extends keyof ObserverMethods<O>>(this: this & {readonly observerType?: Class<O>}, key: K, ...args: ObserverParameters<O, K>): void {
@@ -1409,10 +1669,10 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   }
 
   /** @internal */
-  readonly consumers: ReadonlyArray<ConsumerType<this>>;
+  readonly consumers: ReadonlyArray<Consumer>;
 
   /** @override */
-  consume(consumer: ConsumerType<this>): void {
+  consume(consumer: Consumer): void {
     const oldConsumers = this.consumers;
     const newConsumers = Arrays.inserted(consumer, oldConsumers);
     if (oldConsumers !== newConsumers) {
@@ -1426,20 +1686,20 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  protected willConsume(consumer: ConsumerType<this>): void {
+  protected willConsume(consumer: Consumer): void {
     // hook
   }
 
-  protected onConsume(consumer: ConsumerType<this>): void {
+  protected onConsume(consumer: Consumer): void {
     // hook
   }
 
-  protected didConsume(consumer: ConsumerType<this>): void {
+  protected didConsume(consumer: Consumer): void {
     // hook
   }
 
   /** @override */
-  unconsume(consumer: ConsumerType<this>): void {
+  unconsume(consumer: Consumer): void {
     const oldConsumers = this.consumers;
     const newConsumers = Arrays.removed(consumer, oldConsumers);
     if (oldConsumers !== newConsumers) {
@@ -1453,15 +1713,15 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     }
   }
 
-  protected willUnconsume(consumer: ConsumerType<this>): void {
+  protected willUnconsume(consumer: Consumer): void {
     // hook
   }
 
-  protected onUnconsume(consumer: ConsumerType<this>): void {
+  protected onUnconsume(consumer: Consumer): void {
     // hook
   }
 
-  protected didUnconsume(consumer: ConsumerType<this>): void {
+  protected didUnconsume(consumer: Consumer): void {
     // hook
   }
 
@@ -1550,7 +1810,11 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     const fasteners = this.fasteners;
     for (const fastenerName in fasteners) {
       const fastener = fasteners[fastenerName]!;
-      if (fastener instanceof DownlinkFastener && fastener.consumed === true) {
+      if (fastener instanceof WarpDownlink && fastener.consumed === true) {
+        fastener.consume(this);
+      } else if (fastener instanceof TraitRelation && fastener.consumed === true) {
+        fastener.consume(this);
+      } else if (fastener instanceof ModelRelation && fastener.consumed === true) {
         fastener.consume(this);
       }
     }
@@ -1561,15 +1825,18 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     const fasteners = this.fasteners;
     for (const fastenerName in fasteners) {
       const fastener = fasteners[fastenerName]!;
-      if (fastener instanceof DownlinkFastener && fastener.consumed === true) {
+      if (fastener instanceof WarpDownlink && fastener.consumed === true) {
+        fastener.unconsume(this);
+      } else if (fastener instanceof TraitRelation && fastener.consumed === true) {
+        fastener.unconsume(this);
+      } else if (fastener instanceof ModelRelation && fastener.consumed === true) {
         fastener.unconsume(this);
       }
     }
   }
 
-  get modelContext(): TraitContextType<this> | null {
-    const model = this.model;
-    return model !== null ? model.modelContext as TraitContextType<this> : null;
+  get updateTime(): number {
+    return this.getModel().updateTime;
   }
 
   /** @override */
@@ -1579,7 +1846,7 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
 
   /** @override */
   hashCode(): number {
-    return this.uid;
+    return Murmur3.mash(Murmur3.mixString(0, this.uid));
   }
 
   /** @override */
@@ -1591,7 +1858,7 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
     return new this();
   }
 
-  static fromInit<S extends Class<Instance<S, Trait>>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
+  static fromInit<S extends Class<Instance<S, Trait>>>(this: S, init: Inits<InstanceType<S>>): InstanceType<S> {
     let type: Creatable<Trait>;
     if ((typeof init === "object" && init !== null || typeof init === "function") && Creatable.is((init as TraitInit).type)) {
       type = (init as TraitInit).type!;
@@ -1620,28 +1887,33 @@ export abstract class Trait implements HashCode, Initable<TraitInit>, Observable
   }
 
   /** @internal */
-  static uid: () => number = (function () {
+  static uid: () => string = (function () {
     let nextId = 1;
-    return function uid(): number {
+    return function uid(): string {
       const id = ~~nextId;
       nextId += 1;
-      return id;
+      return "trait" + id;
     }
   })();
 
   /** @internal */
   static readonly MountedFlag: TraitFlags = 1 << 0;
   /** @internal */
-  static readonly ConsumingFlag: TraitFlags = 1 << 1;
+  static readonly InsertingFlag: TraitFlags = 1 << 1;
+  /** @internal */
+  static readonly RemovingFlag: TraitFlags = 1 << 2;
+  /** @internal */
+  static readonly ConsumingFlag: TraitFlags = 1 << 3;
 
   /** @internal */
-  static readonly FlagShift: number = 2;
+  static readonly FlagShift: number = 4;
   /** @internal */
   static readonly FlagMask: ModelFlags = (1 << Trait.FlagShift) - 1;
 
   static readonly MountFlags: ModelFlags = 0;
   static readonly InsertChildFlags: ModelFlags = 0;
   static readonly RemoveChildFlags: ModelFlags = 0;
+  static readonly ReinsertChildFlags: ModelFlags = 0;
   static readonly InsertTraitFlags: ModelFlags = 0;
   static readonly RemoveTraitFlags: ModelFlags = 0;
   static readonly StartConsumingFlags: TraitFlags = 0;

@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Interpolator, NumberInterpolator} from "@swim/util";
+import {Numbers, Interpolator, NumberInterpolator} from "@swim/util";
 import {Look} from "./Look";
 
-/** @internal */
+/** @public */
+export type AnyNumberOrLook = Look<number, any> | number | string | boolean;
+
+/** @public */
+export type NumberOrLook = Look<number, any> | number;
+
+/** @public */
 export class NumberLook extends Look<number> {
   override combine(combination: number | undefined, value: number, weight: number): number {
     if (combination !== void 0) {
@@ -39,5 +45,16 @@ export class NumberLook extends Look<number> {
 
   override coerce(value: number): number {
     return value;
+  }
+
+  static fromAny(value: Look<number> | number | string | boolean): Look<number> | number;
+  static fromAny(value: Look<number> | number | string | boolean | undefined): Look<number> | number | undefined;
+  static fromAny(value: Look<number> | number | string | boolean | null | undefined): Look<number> | number | null | undefined;
+  static fromAny(value: Look<number> | number | string | boolean | null | undefined): Look<number> | number | null | undefined {
+    if (value === void 0 || value === null || value instanceof Look) {
+      return value;
+    } else {
+      return Numbers.fromAny(value);
+    }
   }
 }

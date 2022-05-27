@@ -13,20 +13,27 @@
 // limitations under the License.
 
 import type {ServiceObserver} from "@swim/component";
-import type {ViewportIdiom} from "./ViewportIdiom";
-import type {Viewport} from "./Viewport";
+import type {ViewIdiom} from "../view/ViewIdiom";
+import type {ViewInsets} from "../view/ViewInsets";
+import type {LayoutViewport} from "./LayoutViewport";
+import type {VisualViewport} from "./VisualViewport";
+import type {ViewportOrientation} from "./ViewportOrientation";
+import type {ViewportColorScheme} from "./ViewportColorScheme";
 import type {ViewportService} from "./ViewportService";
-import type {View} from "../view/View";
 
 /** @public */
-export interface ViewportServiceObserver<V extends View = View, S extends ViewportService<V> = ViewportService<V>> extends ServiceObserver<V, S> {
-  detectViewportIdiom?(viewport: Viewport, service: S): void | ViewportIdiom;
+export interface ViewportServiceObserver<S extends ViewportService = ViewportService> extends ServiceObserver<S> {
+  serviceDidScrollLayoutViewport?(layoutViewport: LayoutViewport, service: S): void;
 
-  serviceWillSetViewportIdiom?(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom, service: S): void;
+  serviceDidResizeLayoutViewport?(layoutViewport: LayoutViewport, service: S): void;
 
-  serviceDidSetViewportIdiom?(newViewportIdiom: ViewportIdiom, oldViewportIdiom: ViewportIdiom, service: S): void;
+  serviceDidResizeVisualViewport?(visualViewport: VisualViewport, service: S): void;
 
-  serviceWillReorient?(orientation: OrientationType, service: S): void;
+  serviceDidResizeViewportSafeArea?(safeArea: ViewInsets, service: S): void;
 
-  serviceDidReorient?(orientation: OrientationType, service: S): void;
+  serviceDidSetViewportOrientation?(orientation: ViewportOrientation, service: S): void;
+
+  serviceDidSetViewportColorScheme?(colorScheme: ViewportColorScheme, service: S): void;
+
+  serviceDidSetViewIdiom?(viewIdiom: ViewIdiom, service: S): void;
 }

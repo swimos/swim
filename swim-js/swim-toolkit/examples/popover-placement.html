@@ -20,10 +20,10 @@ const source = bodyView.appendChild("div")
   .width(100)
   .height(100)
   .borderRadius(50)
-  .backgroundColor("#989898")
-  .on("click", function (event) {
-    bodyView.modalProvider.toggleModal(popover);
-  });
+  .backgroundColor("#989898");
+source.addEventListener("click", function (event) {
+  bodyView.modal.toggle(popover);
+});
 
 const popover = swim.PopoverView.create()
   .placement(["top", "bottom", "right", "left", "below"])
@@ -31,9 +31,9 @@ const popover = swim.PopoverView.create()
   .minHeight(360)
   .borderRadius(5)
   .backgroundColor("#4a4a4a");
-popover.setSource(source);
-popover.hideModal(false);
-bodyView.modalProvider.presentModal(popover);
+popover.source.setView(source);
+popover.presence.dismiss(false);
+bodyView.modal.present(popover);
 
 //setInterval(function () {
 //  const timing = swim.Easing.linear.withDuration(1000);

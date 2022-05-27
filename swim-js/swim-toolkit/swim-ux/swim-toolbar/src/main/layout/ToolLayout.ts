@@ -28,9 +28,13 @@ export interface ToolLayoutInit {
   shrink?: number;
   basis?: AnyLength;
   align?: number;
+  inAlign?: number;
+  outAlign?: number;
   overlap?: string | undefined;
   overpad?: AnyLength;
   presence?: AnyPresence;
+  inPresence?: AnyPresence | null;
+  outPresence?: AnyPresence | null;
   width?: AnyLength | null;
   left?: AnyLength | null;
   right?: AnyLength | null;
@@ -38,23 +42,36 @@ export interface ToolLayoutInit {
 
 /** @public */
 export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, Debug {
-  constructor(key: string, grow: number, shrink: number, basis: Length, align: number,
-              overlap: string | undefined, overpad: Length, presence: Presence,
+  constructor(key: string, grow: number, shrink: number, basis: Length,
+              align: number, inAlign: number, outAlign: number,
+              overlap: string | undefined, overpad: Length,
+              presence: Presence, inPresence: Presence | null, outPresence: Presence | null,
               width: Length | null, left: Length | null, right: Length | null) {
     this.key = key;
     this.grow = grow;
     this.shrink = shrink;
     this.basis = basis;
     this.align = align;
+    this.inAlign = inAlign;
+    this.outAlign = outAlign;
     this.overlap = overlap;
     this.overpad = overpad;
     this.presence = presence;
+    this.inPresence = inPresence;
+    this.outPresence = outPresence;
     this.width = width;
     this.left = left;
     this.right = right;
   }
 
   readonly key: string;
+
+  withKey(key: string): ToolLayout {
+    return this.copy(key, this.grow, this.shrink, this.basis, this.align,
+                     this.inAlign, this.outAlign, this.overlap, this.overpad,
+                     this.presence, this.inPresence, this.outPresence,
+                     this.width, this.left, this.right);
+  }
 
   readonly grow: number;
 
@@ -68,38 +85,78 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
     } else {
       basis = this.basis;
     }
-    return this.copy(this.key, grow, shrink, basis, this.align, this.overlap,
-                     this.overpad, this.presence, this.width, this.left, this.right);
+    return this.copy(this.key, grow, shrink, basis, this.align,
+                     this.inAlign, this.outAlign, this.overlap, this.overpad,
+                     this.presence, this.inPresence, this.outPresence,
+                     this.width, this.left, this.right);
   }
 
   readonly align: number;
 
-  withAlign(align: number): ToolLayout {
-    return this.copy(this.key, this.grow, this.shrink, this.basis, align, this.overlap,
-                     this.overpad, this.presence, this.width, this.left, this.right);
+  readonly inAlign: number;
+
+  readonly outAlign: number;
+
+  withAlign(align: number, inAlign?: number, outAlign?: number): ToolLayout {
+    if (inAlign === void 0) {
+      inAlign = this.inAlign;
+    }
+    if (outAlign === void 0) {
+      outAlign = this.outAlign;
+    }
+    return this.copy(this.key, this.grow, this.shrink, this.basis, align,
+                     inAlign, outAlign, this.overlap, this.overpad,
+                     this.presence, this.inPresence, this.outPresence,
+                     this.width, this.left, this.right);
   }
 
   readonly overlap: string | undefined;
 
   withOverlap(overlap: string | undefined): ToolLayout {
-    return this.copy(this.key, this.grow, this.shrink, this.basis, this.align, overlap,
-                     this.overpad, this.presence, this.width, this.left, this.right);
+    return this.copy(this.key, this.grow, this.shrink, this.basis, this.align,
+                     this.inAlign, this.outAlign, overlap, this.overpad,
+                     this.presence, this.inPresence, this.outPresence,
+                     this.width, this.left, this.right);
   }
 
   readonly overpad: Length;
 
   withOverpad(overpad: AnyLength): ToolLayout {
     overpad = Length.fromAny(overpad);
-    return this.copy(this.key, this.grow, this.shrink, this.basis, this.align, this.overlap,
-                     overpad, this.presence, this.width, this.left, this.right);
+    return this.copy(this.key, this.grow, this.shrink, this.basis, this.align,
+                     this.inAlign, this.outAlign, this.overlap, overpad,
+                     this.presence, this.inPresence, this.outPresence,
+                     this.width, this.left, this.right);
   }
 
   readonly presence: Presence;
 
-  withPresence(presence: AnyPresence): ToolLayout {
-    presence = Presence.fromAny(presence);
-    return this.copy(this.key, this.grow, this.shrink, this.basis, this.align, this.overlap,
-                     this.overpad, presence, this.width, this.left, this.right);
+  readonly inPresence: Presence | null;
+
+  readonly outPresence: Presence | null;
+
+  withPresence(presence: AnyPresence, inPresence?: AnyPresence | null, outPresence?: AnyPresence | null): ToolLayout;
+  withPresence(presence: AnyPresence | undefined, inPresence: AnyPresence | null | undefined, outPresence: AnyPresence | null | undefined): ToolLayout;
+  withPresence(presence: AnyPresence | undefined, inPresence?: AnyPresence | null, outPresence?: AnyPresence | null): ToolLayout {
+    if (presence === void 0) {
+      presence = this.presence;
+    } else {
+      presence = Presence.fromAny(presence);
+    }
+    if (inPresence === void 0) {
+      inPresence = this.inPresence;
+    } else {
+      inPresence = Presence.fromAny(inPresence);
+    }
+    if (outPresence === void 0) {
+      outPresence = this.outPresence;
+    } else {
+      outPresence = Presence.fromAny(outPresence);
+    }
+    return this.copy(this.key, this.grow, this.shrink, this.basis, this.align,
+                     this.inAlign, this.outAlign, this.overlap, this.overpad,
+                     presence, inPresence, outPresence,
+                     this.width, this.left, this.right);
   }
 
   readonly width: Length | null;
@@ -119,14 +176,19 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
       right = Length.fromAny(right);
     }
     return this.copy(this.key, this.grow, this.shrink, this.basis, this.align,
-                     this.overlap, this.overpad, this.presence, width, left, right);
+                     this.inAlign, this.outAlign, this.overlap, this.overpad,
+                     this.presence, this.inPresence, this.outPresence,
+                     width, left, right);
   }
 
   protected copy(key: string, grow: number, shrink: number, basis: Length,
-                 align: number, overlap: string | undefined, overpad: Length, presence: Presence,
+                 align: number, inAlign: number, outAlign: number,
+                 overlap: string | undefined, overpad: Length,
+                 presence: Presence, inPresence: Presence | null, outPresence: Presence | null,
                  width: Length | null, left: Length | null, right: Length | null): ToolLayout {
-    return new ToolLayout(key, grow, shrink, basis, align, overlap,
-                          overpad, presence, width, left, right);
+    return new ToolLayout(key, grow, shrink, basis, align, inAlign, outAlign,
+                          overlap, overpad, presence, inPresence, outPresence,
+                          width, left, right);
   }
 
   interpolateTo(that: ToolLayout): Interpolator<ToolLayout>;
@@ -148,9 +210,13 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
           && Equivalent(this.shrink, that.shrink, epsilon)
           && this.basis.equivalentTo(that.basis, epsilon)
           && Equivalent(this.align, that.align, epsilon)
+          && Equivalent(this.inAlign, that.inAlign, epsilon)
+          && Equivalent(this.outAlign, that.outAlign, epsilon)
           && this.overlap === that.overlap
           && this.overpad.equivalentTo(that.overpad, epsilon)
-          && this.presence.equivalentTo(that.presence, epsilon);
+          && this.presence.equivalentTo(that.presence, epsilon)
+          && Equivalent(this.inPresence, that.inPresence, epsilon)
+          && Equivalent(this.outPresence, that.outPresence, epsilon);
     }
     return false;
   }
@@ -161,8 +227,10 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
     } else if (that instanceof ToolLayout) {
       return this.key === that.key && this.grow === that.grow && this.shrink === that.shrink
           && this.basis.equals(that.basis) && this.align === that.align
+          && this.inAlign === that.inAlign && this.outAlign === that.outAlign
           && this.overlap === that.overlap && this.overpad.equals(that.overpad)
-          && this.presence.equals(that.presence) && Equals(this.width, that.width)
+          && this.presence.equals(that.presence) && Equals(this.inPresence, that.inPresence)
+          && Equals(this.outPresence, that.outPresence) && Equals(this.width, that.width)
           && Equals(this.left, that.left) && Equals(this.right, that.right);
     }
     return false;
@@ -172,9 +240,10 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
     output = output.write("ToolLayout").write(46/*'.'*/).write("create").write(40/*'('*/)
                    .debug(this.key).write(", ").debug(this.grow).write(", ")
                    .debug(this.shrink).write(", ").debug(this.basis).write(41/*')'*/);
-    if (this.align !== 0.5) {
+    if (this.align !== 0.5 || this.inAlign !== this.align || this.outAlign !== this.align) {
       output = output.write(46/*'.'*/).write("withAlign").write(40/*'('*/)
-                     .debug(this.align).write(41/*')'*/);
+                     .debug(this.align).write(", ").debug(this.inAlign).write(", ")
+                     .debug(this.outAlign).write(41/*')'*/);
     }
     if (this.overlap !== void 0) {
       output = output.write(46/*'.'*/).write("withOverlap").write(40/*'('*/)
@@ -184,9 +253,11 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
       output = output.write(46/*'.'*/).write("withOverpad").write(40/*'('*/)
                      .debug(this.overpad).write(41/*')'*/);
     }
-    if (!this.presence.presented) {
+    if (!this.presence.presented || this.inPresence === null || !this.inPresence.dismissed
+                                 || this.outPresence === null || !this.outPresence.dismissed) {
       output = output.write(46/*'.'*/).write("withPresence").write(40/*'('*/)
-                     .debug(this.presence).write(41/*')'*/);
+                     .debug(this.presence).write(", ").debug(this.inPresence).write(", ")
+                     .debug(this.outPresence).write(41/*')'*/);
     }
     if (this.width !== null || this.left !== null || this.right !== null) {
       output = output.write(46/*'.'*/).write("resized").write(40/*'('*/)
@@ -201,8 +272,10 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
   }
 
   static create(key: string, grow?: number, shrink?: number, basis?: AnyLength,
-                align?: number, overlap?: string | undefined, overpad?: AnyLength,
-                presence?: AnyPresence): ToolLayout {
+                align?: number, inAlign?: number, outAlign?: number,
+                overlap?: string | undefined, overpad?: AnyLength,
+                presence?: AnyPresence, inPresence?: AnyPresence | null,
+                outPresence?: AnyPresence | null): ToolLayout {
     if (grow === void 0) {
       grow = 0;
     }
@@ -217,6 +290,12 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
     if (align === void 0) {
       align = 0.5;
     }
+    if (inAlign === void 0) {
+      inAlign = align;
+    }
+    if (outAlign === void 0) {
+      outAlign = align
+    }
     if (overpad !== void 0) {
       overpad = Length.fromAny(overpad);
     } else {
@@ -227,8 +306,19 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
     } else {
       presence = Presence.presented();
     }
-    return new ToolLayout(key, grow, shrink, basis, align, overlap,
-                          overpad, presence, null, null, null);
+    if (inPresence === void 0) {
+      inPresence = Presence.dismissed();
+    } else {
+      inPresence = Presence.fromAny(inPresence);
+    }
+    if (outPresence === void 0) {
+      outPresence = Presence.dismissed();
+    } else {
+      outPresence = Presence.fromAny(outPresence);
+    }
+    return new ToolLayout(key, grow, shrink, basis, align, inAlign, outAlign,
+                          overlap, overpad, presence, inPresence, outPresence,
+                          null, null, null);
   }
 
   static fromAny(value: AnyToolLayout): ToolLayout {
@@ -263,6 +353,14 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
     if (align === void 0) {
       align = 0.5;
     }
+    let inAlign = init.inAlign;
+    if (inAlign === void 0) {
+      inAlign = align;
+    }
+    let outAlign = init.outAlign;
+    if (outAlign === void 0) {
+      outAlign = align;
+    }
     const overlap = init.overlap;
     let overpad = init.overpad;
     if (overpad !== void 0) {
@@ -275,6 +373,18 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
       presence = Presence.fromAny(presence);
     } else {
       presence = Presence.presented();
+    }
+    let inPresence = init.inPresence;
+    if (inPresence === void 0) {
+      inPresence = Presence.presented();
+    } else {
+      inPresence = Presence.fromAny(inPresence);
+    }
+    let outPresence = init.outPresence;
+    if (outPresence === void 0) {
+      outPresence = Presence.presented();
+    } else {
+      outPresence = Presence.fromAny(outPresence);
     }
     let width = init.width;
     if (width !== void 0 && width !== null) {
@@ -294,7 +404,8 @@ export class ToolLayout implements Interpolate<ToolLayout>, Equals, Equivalent, 
     } else {
       right = null;
     }
-    return new ToolLayout(key, grow, shrink, basis, align, overlap,
-                          overpad, presence, width, left, right);
+    return new ToolLayout(key, grow, shrink, basis, align, inAlign, outAlign,
+                          overlap, overpad, presence, inPresence, outPresence,
+                          width, left, right);
   }
 }

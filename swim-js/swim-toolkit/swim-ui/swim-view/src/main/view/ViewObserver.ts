@@ -15,7 +15,7 @@
 import type {Timing} from "@swim/util";
 import type {ComponentObserver} from "@swim/component";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
-import type {ViewContextType, View} from "./View";
+import type {View} from "./View";
 
 /** @public */
 export interface ViewObserver<V extends View = View> extends ComponentObserver<V> {
@@ -34,6 +34,10 @@ export interface ViewObserver<V extends View = View> extends ComponentObserver<V
   viewWillRemoveChild?(child: View, view: V): void;
 
   viewDidRemoveChild?(child: View, view: V): void;
+
+  viewWillReinsertChild?(child: View, target: View | null, view: V): void;
+
+  viewDidReinsertChild?(child: View, target: View | null, view: V): void;
 
   viewWillMount?(view: V): void;
 
@@ -59,41 +63,41 @@ export interface ViewObserver<V extends View = View> extends ComponentObserver<V
 
   viewDidUnhide?(view: V): void;
 
-  viewWillResize?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillResize?(view: V): void;
 
-  viewDidResize?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidResize?(view: V): void;
 
-  viewWillScroll?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillScroll?(view: V): void;
 
-  viewDidScroll?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidScroll?(view: V): void;
 
-  viewWillChange?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillChange?(view: V): void;
 
-  viewDidChange?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidChange?(view: V): void;
 
-  viewWillAnimate?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillAnimate?(view: V): void;
 
-  viewDidAnimate?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidAnimate?(view: V): void;
 
-  viewWillProject?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillProject?(view: V): void;
 
-  viewDidProject?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidProject?(view: V): void;
 
-  viewWillLayout?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillLayout?(view: V): void;
 
-  viewDidLayout?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidLayout?(view: V): void;
 
-  viewWillRender?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillRender?(view: V): void;
 
-  viewDidRender?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidRender?(view: V): void;
 
-  viewWillRasterize?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillRasterize?(view: V): void;
 
-  viewDidRasterize?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidRasterize?(view: V): void;
 
-  viewWillComposite?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillComposite?(view: V): void;
 
-  viewDidComposite?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidComposite?(view: V): void;
 
   viewWillApplyTheme?(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, view: V): void;
 
@@ -148,90 +152,90 @@ export interface ViewDidRemoveChild<V extends View = View> {
 
 /** @internal */
 export interface ViewWillResize<V extends View = View> {
-  viewWillResize(viewContext: ViewContextType<V>, view: V): void;
+  viewWillResize(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidResize<V extends View = View> {
-  viewDidResize(viewContext: ViewContextType<V>, view: V): void;
+  viewDidResize(view: V): void;
 }
 
 /** @internal */
 export interface ViewWillScroll<V extends View = View> {
-  viewWillScroll(viewContext: ViewContextType<V>, view: V): void;
+  viewWillScroll(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidScroll<V extends View = View> {
-  viewDidScroll(viewContext: ViewContextType<V>, view: V): void;
+  viewDidScroll(view: V): void;
 }
 
 /** @internal */
 export interface ViewWillChange<V extends View = View> {
-  viewWillChange(viewContext: ViewContextType<V>, view: V): void;
+  viewWillChange(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidChange<V extends View = View> {
-  viewDidChange(viewContext: ViewContextType<V>, view: V): void;
+  viewDidChange(view: V): void;
 }
 
 /** @internal */
 export interface ViewWillAnimate<V extends View = View> {
-  viewWillAnimate(viewContext: ViewContextType<V>, view: V): void;
+  viewWillAnimate(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidAnimate<V extends View = View> {
-  viewDidAnimate(viewContext: ViewContextType<V>, view: V): void;
+  viewDidAnimate(view: V): void;
 }
 
 /** @internal */
 export interface ViewWillProject<V extends View = View> {
-  viewWillProject(viewContext: ViewContextType<V>, view: V): void;
+  viewWillProject(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidProject<V extends View = View> {
-  viewDidProject(viewContext: ViewContextType<V>, view: V): void;
+  viewDidProject(view: V): void;
 }
 
 /** @internal */
 export interface ViewWillLayout<V extends View = View> {
-  viewWillLayout(viewContext: ViewContextType<V>, view: V): void;
+  viewWillLayout(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidLayout<V extends View = View> {
-  viewDidLayout(viewContext: ViewContextType<V>, view: V): void;
+  viewDidLayout(view: V): void;
 }
 
 /** @internal */
 export interface ViewWillRender<V extends View = View> {
-  viewWillRender(viewContext: ViewContextType<V>, view: V): void;
+  viewWillRender(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidRender<V extends View = View> {
-  viewDidRender(viewContext: ViewContextType<V>, view: V): void;
+  viewDidRender(view: V): void;
 }
 
 /** @internal */
 export interface ViewWillRasterize<V extends View = View> {
-  viewWillRasterize(viewContext: ViewContextType<V>, view: V): void;
+  viewWillRasterize(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidRasterize<V extends View = View> {
-  viewDidRasterize(viewContext: ViewContextType<V>, view: V): void;
+  viewDidRasterize(view: V): void;
 }
 
 /** @internal */
 export interface ViewWillComposite<V extends View = View> {
-  viewWillComposite(viewContext: ViewContextType<V>, view: V): void;
+  viewWillComposite(view: V): void;
 }
 
 /** @internal */
 export interface ViewDidComposite<V extends View = View> {
-  viewDidComposite(viewContext: ViewContextType<V>, view: V): void;
+  viewDidComposite(view: V): void;
 }

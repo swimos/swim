@@ -19,31 +19,19 @@ import type {DataPointView} from "./DataPointView";
 
 /** @public */
 export interface DataPointViewObserver<X = unknown, Y = unknown, V extends DataPointView<X, Y> = DataPointView<X, Y>> extends GraphicsViewObserver<V> {
-  viewWillSetDataPointX?(newX: X | undefined, oldX: X | undefined, view: V): void;
+  viewDidSetX?(x: X | undefined, view: V): void;
 
-  viewDidSetDataPointX?(newX: X | undefined, oldX: X | undefined, view: V): void;
+  viewDidSetY?(y: Y | undefined, view: V): void;
 
-  viewWillSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, view: V): void;
+  viewDidSetY2?(y2: Y | undefined, view: V): void;
 
-  viewDidSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, view: V): void;
+  viewDidSetRadius?(radius: Length | null, view: V): void;
 
-  viewWillSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, view: V): void;
+  viewDidSetColor?(color: Color | null, view: V): void;
 
-  viewDidSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, view: V): void;
+  viewDidSetOpacity?(opacity: number | undefined, view: V): void;
 
-  viewWillSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
+  viewWillAttachLabel?(labelView: GraphicsView, view: V): void;
 
-  viewDidSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
-
-  viewWillSetDataPointColor?(newColor: Color | null, oldColor: Color | null, view: V): void;
-
-  viewDidSetDataPointColor?(newColor: Color | null, oldColor: Color | null, view: V): void;
-
-  viewWillSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, view: V): void;
-
-  viewDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, view: V): void;
-
-  viewWillAttachDataPointLabel?(labelView: GraphicsView, view: V): void;
-
-  viewDidDetachDataPointLabel?(labelView: GraphicsView | null, view: V): void;
+  viewDidDetachLabel?(labelView: GraphicsView | null, view: V): void;
 }

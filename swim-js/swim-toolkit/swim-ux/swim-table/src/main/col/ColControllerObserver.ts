@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {HtmlView} from "@swim/dom";
 import type {ControllerObserver} from "@swim/controller";
 import type {ColLayout} from "../layout/ColLayout";
 import type {ColView} from "./ColView";
@@ -21,19 +20,13 @@ import type {ColController} from "./ColController";
 
 /** @public */
 export interface ColControllerObserver<C extends ColController = ColController> extends ControllerObserver<C> {
-  controllerWillAttachColView?(colView: ColView, controller: C): void;
-
-  controllerDidDetachColView?(colView: ColView, controller: C): void;
-
   controllerWillAttachColTrait?(colTrait: ColTrait, controller: C): void;
 
   controllerDidDetachColTrait?(colTrait: ColTrait, controller: C): void;
 
-  controllerWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, controller: C): void;
+  controllerWillAttachColView?(colView: ColView, controller: C): void;
 
-  controllerDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, controller: C): void;
+  controllerDidDetachColView?(colView: ColView, controller: C): void;
 
-  controllerWillAttachColLabelView?(colLabelView: HtmlView, controller: C): void;
-
-  controllerDidDetachColLabelView?(colLabelView: HtmlView, controller: C): void;
+  controllerDidSetColLayout?(colLayout: ColLayout | null, controller: C): void;
 }

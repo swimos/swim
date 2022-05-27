@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Timing} from "@swim/util";
-import {MemberFastenerClass, Property} from "@swim/component";
+import {Class, AnyTiming, Timing, Observes} from "@swim/util";
+import {FastenerClass, Property} from "@swim/component";
 import type {Length} from "@swim/math";
 import {Trait, TraitRef} from "@swim/model";
 import type {Color} from "@swim/style";
@@ -26,58 +26,39 @@ import {DataSetTrait} from "./DataSetTrait";
 import type {DataSetControllerObserver} from "./DataSetControllerObserver";
 
 /** @public */
-export interface DataSetControllerDataPointExt<X = unknown, Y = unknown> {
-  attachDataPointTrait(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>): void;
-  detachDataPointTrait(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>): void;
-  attachDataPointView(dataPointView: DataPointView<X, Y>, dataPointController: DataPointController<X, Y>): void;
-  detachDataPointView(dataPointView: DataPointView<X, Y>, dataPointController: DataPointController<X, Y>): void;
-  attachDataPointLabelView(labelView: GraphicsView, dataPointController: DataPointController<X, Y>): void;
-  detachDataPointLabelView(labelView: GraphicsView, dataPointController: DataPointController<X, Y>): void;
-}
-
-/** @public */
 export class DataSetController<X = unknown, Y = unknown> extends Controller {
   override readonly observerType?: Class<DataSetControllerObserver<X, Y>>;
 
-  @TraitRef<DataSetController<X, Y>, DataSetTrait<X, Y>>({
-    type: DataSetTrait,
+  @TraitRef<DataSetController<X, Y>["dataSet"]>({
+    traitType: DataSetTrait,
     observes: true,
     willAttachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
       this.owner.callObservers("controllerWillAttachDataSetTrait", dataSetTrait, this.owner);
     },
     didAttachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
-      const dataPointTraits = dataSetTrait.dataPoints.traits;
-      for (const traitId in dataPointTraits) {
-        const dataPointTrait = dataPointTraits[traitId]!;
-        this.owner.dataPoints.addTraitController(dataPointTrait);
-      }
+      this.owner.dataPoints.addTraits(dataSetTrait.dataPoints.traits);
     },
     willDetachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
-      const dataPointTraits = dataSetTrait.dataPoints.traits;
-      for (const traitId in dataPointTraits) {
-        const dataPointTrait = dataPointTraits[traitId]!;
-        this.owner.dataPoints.deleteTraitController(dataPointTrait);
-      }
+      this.owner.dataPoints.deleteTraits(dataSetTrait.dataPoints.traits);
     },
     didDetachTrait(dataSetTrait: DataSetTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachDataSetTrait", dataSetTrait, this.owner);
     },
     traitWillAttachDataPoint(dataPointTrait: DataPointTrait<X, Y>, targetTrait: Trait): void {
-      this.owner.dataPoints.addTraitController(dataPointTrait, targetTrait);
+      this.owner.dataPoints.addTrait(dataPointTrait, targetTrait);
     },
     traitDidDetachDataPoint(dataPointTrait: DataPointTrait<X, Y>): void {
-      this.owner.dataPoints.deleteTraitController(dataPointTrait);
+      this.owner.dataPoints.deleteTrait(dataPointTrait);
     },
   })
-  readonly dataSet!: TraitRef<this, DataSetTrait<X, Y>>;
-  static readonly dataSet: MemberFastenerClass<DataSetController, "dataSet">;
+  readonly dataSet!: TraitRef<this, DataSetTrait<X, Y>> & Observes<DataSetTrait<X, Y>>;
+  static readonly dataSet: FastenerClass<DataSetController["dataSet"]>;
 
-  @Property({type: Timing, value: true})
-  readonly dataPointTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({valueType: Timing, value: true})
+  readonly dataPointTiming!: Property<this, Timing | boolean | undefined, AnyTiming | boolean | undefined>;
 
-  @TraitViewControllerSet<DataSetController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>, DataSetControllerDataPointExt<X, Y>>({
-    implements: true,
-    type: DataPointController,
+  @TraitViewControllerSet<DataSetController<X, Y>["dataPoints"]>({
+    controllerType: DataPointController,
     binds: true,
     observes: true,
     getTraitViewRef(dataPointController: DataPointController<X, Y>): TraitViewRef<unknown, DataPointTrait<X, Y>, DataPointView<X, Y>> {
@@ -148,41 +129,23 @@ export class DataSetController<X = unknown, Y = unknown> extends Controller {
       }
       dataPointView.remove();
     },
-    controllerWillSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointX", newX, oldX, dataPointController, this.owner);
+    controllerDidSetDataPointX(x: X | undefined, dataPointController: DataPointController<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointX", x, dataPointController, this.owner);
     },
-    controllerDidSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointX", newX, oldX, dataPointController, this.owner);
+    controllerDidSetDataPointY(y: Y | undefined, dataPointController: DataPointController<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointY", y, dataPointController, this.owner);
     },
-    controllerWillSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointY", newY, oldY, dataPointController, this.owner);
+    controllerDidSetDataPointY2(y2: Y | undefined, dataPointController: DataPointController<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointY2", y2, dataPointController, this.owner);
     },
-    controllerDidSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointY", newY, oldY, dataPointController, this.owner);
+    controllerDidSetDataPointRadius(radius: Length | null, dataPointController: DataPointController<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointRadius", radius, dataPointController, this.owner);
     },
-    controllerWillSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointY2", newY2, oldY2, dataPointController, this.owner);
+    controllerDidSetDataPointColor(color: Color | null, dataPointController: DataPointController<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointColor", color, dataPointController, this.owner);
     },
-    controllerDidSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointY2", newY2, oldY2, dataPointController, this.owner);
-    },
-    controllerWillSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointRadius", newRadius, oldRadius, dataPointController, this.owner);
-    },
-    controllerDidSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointRadius", newRadius, oldRadius, dataPointController, this.owner);
-    },
-    controllerWillSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointColor", newColor, oldColor, dataPointController, this.owner);
-    },
-    controllerDidSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointColor", newColor, oldColor, dataPointController, this.owner);
-    },
-    controllerWillSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerWillSetDataPointOpacity", newOpacity, oldOpacity, dataPointController, this.owner);
-    },
-    controllerDidSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointController: DataPointController<X, Y>): void {
-      this.owner.callObservers("controllerDidSetDataPointOpacity", newOpacity, oldOpacity, dataPointController, this.owner);
+    controllerDidSetDataPointOpacity(opacity: number | undefined, dataPointController: DataPointController<X, Y>): void {
+      this.owner.callObservers("controllerDidSetDataPointOpacity", opacity, dataPointController, this.owner);
     },
     controllerWillAttachDataPointLabelView(labelView: GraphicsView, dataPointController: DataPointController<X, Y>): void {
       this.owner.callObservers("controllerWillAttachDataPointLabelView", labelView, dataPointController, this.owner);
@@ -199,6 +162,13 @@ export class DataSetController<X = unknown, Y = unknown> extends Controller {
       // hook
     },
   })
-  readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & DataSetControllerDataPointExt<X, Y>;
-  static readonly dataPoints: MemberFastenerClass<DataSetController, "dataPoints">;
+  readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & Observes<DataPointController<X, Y>> & {
+    attachDataPointTrait(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>): void,
+    detachDataPointTrait(dataPointTrait: DataPointTrait<X, Y>, dataPointController: DataPointController<X, Y>): void,
+    attachDataPointView(dataPointView: DataPointView<X, Y>, dataPointController: DataPointController<X, Y>): void,
+    detachDataPointView(dataPointView: DataPointView<X, Y>, dataPointController: DataPointController<X, Y>): void,
+    attachDataPointLabelView(labelView: GraphicsView, dataPointController: DataPointController<X, Y>): void,
+    detachDataPointLabelView(labelView: GraphicsView, dataPointController: DataPointController<X, Y>): void,
+  };
+  static readonly dataPoints: FastenerClass<DataSetController["dataPoints"]>;
 }

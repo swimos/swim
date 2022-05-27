@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {ComponentObserver} from "@swim/component";
-import type {ModelContextType, Model} from "./Model";
+import type {Model} from "./Model";
 import type {Trait} from "../trait/Trait";
 
 /** @public */
@@ -34,6 +34,10 @@ export interface ModelObserver<M extends Model = Model> extends ComponentObserve
 
   modelDidRemoveChild?(child: Model, model: M): void;
 
+  modelWillReinsertChild?(child: Model, target: Model | null, model: M): void;
+
+  modelDidReinsertChild?(child: Model, target: Model | null, model: M): void;
+
   modelWillInsertTrait?(trait: Trait, target: Trait | null, model: M): void;
 
   modelDidInsertTrait?(trait: Trait, target: Trait | null, model: M): void;
@@ -50,25 +54,25 @@ export interface ModelObserver<M extends Model = Model> extends ComponentObserve
 
   modelDidUnmount?(model: M): void;
 
-  modelWillMutate?(modelContext: ModelContextType<M>, model: M): void;
+  modelWillMutate?(model: M): void;
 
-  modelDidMutate?(modelContext: ModelContextType<M>, model: M): void;
+  modelDidMutate?(model: M): void;
 
-  modelWillAggregate?(modelContext: ModelContextType<M>, model: M): void;
+  modelWillAggregate?(model: M): void;
 
-  modelDidAggregate?(modelContext: ModelContextType<M>, model: M): void;
+  modelDidAggregate?(model: M): void;
 
-  modelWillCorrelate?(modelContext: ModelContextType<M>, model: M): void;
+  modelWillCorrelate?(model: M): void;
 
-  modelDidCorrelate?(modelContext: ModelContextType<M>, model: M): void;
+  modelDidCorrelate?(model: M): void;
 
-  modelWillValidate?(modelContext: ModelContextType<M>, model: M): void;
+  modelWillValidate?(model: M): void;
 
-  modelDidValidate?(modelContext: ModelContextType<M>, model: M): void;
+  modelDidValidate?(model: M): void;
 
-  modelWillReconcile?(modelContext: ModelContextType<M>, model: M): void;
+  modelWillReconcile?(model: M): void;
 
-  modelDidReconcile?(modelContext: ModelContextType<M>, model: M): void;
+  modelDidReconcile?(model: M): void;
 
   modelWillStartConsuming?(model: M): void;
 

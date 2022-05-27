@@ -71,10 +71,10 @@ export class ThemeMatrix implements Equals, Debug {
     return this.colIndex[feel] !== void 0;
   }
 
-  getRow<T>(look: Look<T>): LookVector<T> | undefined;
+  getRow<T>(look: Look<T, any>): LookVector<T> | undefined;
   getRow(name: string): LookVector<unknown> | undefined;
   getRow(index: number): LookVector<unknown> | undefined;
-  getRow<T>(look: Look<T> | string | number | undefined): LookVector<unknown> | undefined {
+  getRow<T>(look: Look<T, any> | string | number | undefined): LookVector<unknown> | undefined {
     if (typeof look === "object" && look !== null || typeof look === "function") {
       look = look.name;
     }
@@ -99,11 +99,11 @@ export class ThemeMatrix implements Equals, Debug {
     return entry !== void 0 ? entry[1] : void 0;
   }
 
-  get<T>(look: Look<T>, mood: MoodVector): T | undefined {
+  get<T>(look: Look<T, any>, mood: MoodVector): T | undefined {
     return this.dot(look, mood);
   }
 
-  getOr<T, E>(look: Look<T>, mood: MoodVector, elseValue: E): T | E {
+  getOr<T, E>(look: Look<T, any>, mood: MoodVector, elseValue: E): T | E {
     return this.dotOr(look, mood, elseValue);
   }
 
@@ -268,7 +268,7 @@ export class ThemeMatrix implements Equals, Debug {
     return new ThemeMatrix(newRowArray, newRowIndex, newColArray, newColIndex);
   }
 
-  row<T, U = never>(look: Look<T, U>, row: AnyLookVector<T> | undefined): ThemeMatrix {
+  row<T, U = T>(look: Look<T, U>, row: AnyLookVector<T> | undefined): ThemeMatrix {
     if (row !== void 0) {
       row = LookVector.fromAny(row);
     }
@@ -344,8 +344,8 @@ export class ThemeMatrix implements Equals, Debug {
     }
   }
 
-  updatedRow<T, U = never>(look: Look<T, U>, updates: LookVectorUpdates<T>,
-                           defaultRow?: AnyLookVector<T>): ThemeMatrix {
+  updatedRow<T, U = T>(look: Look<T, U>, updates: LookVectorUpdates<T>,
+                       defaultRow?: AnyLookVector<T>): ThemeMatrix {
     const oldRow = this.getRow(look);
     let newRow = oldRow;
     if (newRow === void 0) {

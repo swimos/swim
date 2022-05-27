@@ -12,19 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {HtmlViewObserver} from "@swim/dom";
+import type {HtmlViewObserver, ModalViewObserver} from "@swim/dom";
 import type {ButtonStack} from "./ButtonStack";
 
 /** @public */
-export interface ButtonStackObserver<V extends ButtonStack = ButtonStack> extends HtmlViewObserver<V> {
-  buttonStackWillExpand?(view: V): void;
-
-  buttonStackDidExpand?(view: V): void;
-
-  buttonStackWillCollapse?(view: V): void;
-
-  buttonStackDidCollapse?(view: V): void;
-
+export interface ButtonStackObserver<V extends ButtonStack = ButtonStack> extends HtmlViewObserver<V>, ModalViewObserver<V> {
   buttonStackWillShow?(view: V): void;
 
   buttonStackDidShow?(view: V): void;

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {FastenerClass} from "@swim/component";
 import {Controller, TraitViewRef} from "@swim/controller";
 import {AxisView} from "./AxisView";
 import {AxisTrait} from "./AxisTrait";
@@ -23,7 +23,7 @@ import type {AxisControllerObserver} from "./AxisControllerObserver";
 export abstract class AxisController<D = unknown> extends Controller {
   override readonly observerType?: Class<AxisControllerObserver<D>>;
 
-  @TraitViewRef<AxisController<D>, AxisTrait<D>, AxisView<D>>({
+  @TraitViewRef<AxisController<D>["axis"]>({
     traitType: AxisTrait,
     willAttachTrait(axisTrait: AxisTrait<D>): void {
       this.owner.callObservers("controllerWillAttachAxisTrait", axisTrait, this.owner);
@@ -40,5 +40,5 @@ export abstract class AxisController<D = unknown> extends Controller {
     },
   })
   readonly axis!: TraitViewRef<this, AxisTrait<D>, AxisView<D>>;
-  static readonly axis: MemberFastenerClass<AxisController, "axis">;
+  static readonly axis: FastenerClass<AxisController["axis"]>;
 }

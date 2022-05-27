@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {HtmlView, HtmlViewObserver} from "@swim/dom";
+import type {HtmlViewObserver} from "@swim/dom";
 import type {ColView} from "./ColView";
 
 /** @public */
 export interface ColViewObserver<V extends ColView = ColView> extends HtmlViewObserver<V> {
-  viewWillAttachLabel?(labelView: HtmlView, view: V): void;
-
-  viewDidDetachLabel?(labelView: HtmlView, view: V): void;
 }

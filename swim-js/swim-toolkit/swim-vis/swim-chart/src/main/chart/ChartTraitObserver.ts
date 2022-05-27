@@ -18,24 +18,24 @@ import type {AxisTrait} from "../axis/AxisTrait";
 import type {ChartTrait} from "./ChartTrait";
 
 /** @public */
-export interface ChartTraitObserver<X = unknown, Y = unknown, R extends ChartTrait<X, Y> = ChartTrait<X, Y>> extends TraitObserver<R> {
-  traitWillAttachGraph?(graphTrait: GraphTrait<X, Y>, trait: R): void;
+export interface ChartTraitObserver<X = unknown, Y = unknown, T extends ChartTrait<X, Y> = ChartTrait<X, Y>> extends TraitObserver<T> {
+  traitWillAttachGraph?(graphTrait: GraphTrait<X, Y>, trait: T): void;
 
-  traitDidDetachGraph?(graphTrait: GraphTrait<X, Y>, trait: R): void;
+  traitDidDetachGraph?(graphTrait: GraphTrait<X, Y>, trait: T): void;
 
-  traitWillAttachTopAxis?(topAxisTrait: AxisTrait<X>, trait: R): void;
+  traitWillAttachTopAxis?(topAxisTrait: AxisTrait<X>, trait: T): void;
 
-  traitDidDetachTopAxis?(topAxisTrait: AxisTrait<X>, trait: R): void;
+  traitDidDetachTopAxis?(topAxisTrait: AxisTrait<X>, trait: T): void;
 
-  traitWillAttachRightAxis?(rightAxisTrait: AxisTrait<Y>, trait: R): void;
+  traitWillAttachRightAxis?(rightAxisTrait: AxisTrait<Y>, trait: T): void;
 
-  traitDidDetachRightAxis?(rightAxisTrait: AxisTrait<Y>, trait: R): void;
+  traitDidDetachRightAxis?(rightAxisTrait: AxisTrait<Y>, trait: T): void;
 
-  traitWillAttachBottomAxis?(bottomAxisTrait: AxisTrait<X>, trait: R): void;
+  traitWillAttachBottomAxis?(bottomAxisTrait: AxisTrait<X>, trait: T): void;
 
-  traitDidDetachBottomAxis?(bottomAxisTrait: AxisTrait<X>, trait: R): void;
+  traitDidDetachBottomAxis?(bottomAxisTrait: AxisTrait<X>, trait: T): void;
 
-  traitWillAttachLeftAxis?(leftAxisTrait: AxisTrait<Y>, trait: R): void;
+  traitWillAttachLeftAxis?(leftAxisTrait: AxisTrait<Y>, trait: T): void;
 
-  traitDidDetachLeftAxis?(leftAxisTrait: AxisTrait<Y>, trait: R): void;
+  traitDidDetachLeftAxis?(leftAxisTrait: AxisTrait<Y>, trait: T): void;
 }

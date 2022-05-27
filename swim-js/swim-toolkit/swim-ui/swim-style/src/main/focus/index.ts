@@ -19,10 +19,4 @@ export {
 } from "./Focus";
 export {FocusInterpolator} from "./FocusInterpolator";
 
-export {
-  FocusAnimatorInit,
-  FocusAnimatorDescriptor,
-  FocusAnimatorClass,
-  FocusAnimatorFactory,
-  FocusAnimator,
-} from "./FocusAnimator";
+export {FocusAnimator} from "./FocusAnimator";

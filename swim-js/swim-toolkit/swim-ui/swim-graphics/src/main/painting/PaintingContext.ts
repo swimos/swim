@@ -19,6 +19,9 @@ export type PaintingFillRule = "nonzero" | "evenodd";
 
 /** @public */
 export interface PaintingContext extends DrawingContext {
+  globalAlpha: number;
+  globalCompositeOperation: string;
+
   fillStyle: string | CanvasGradient | CanvasPattern;
   strokeStyle: string | CanvasGradient | CanvasPattern;
 

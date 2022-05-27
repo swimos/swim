@@ -28,9 +28,7 @@ export interface SliceControllerObserver<C extends SliceController = SliceContro
 
   controllerDidDetachSliceView?(sliceView: SliceView, controller: C): void;
 
-  controllerWillSetSliceValue?(newValue: number, oldValue: number, controller: C): void;
-
-  controllerDidSetSliceValue?(newValue: number, oldValue: number, controller: C): void;
+  controllerDidSetSliceValue?(value: number, controller: C): void;
 
   controllerWillAttachSliceLabelView?(labelView: GraphicsView, controller: C): void;
 

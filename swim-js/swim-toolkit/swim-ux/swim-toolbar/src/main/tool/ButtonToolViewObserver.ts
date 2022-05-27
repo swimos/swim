@@ -12,18 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {PositionGestureInput} from "@swim/view";
 import type {Graphics} from "@swim/graphics";
 import type {ToolViewObserver} from "./ToolViewObserver";
 import type {ButtonToolView} from "./ButtonToolView";
 
 /** @public */
 export interface ButtonToolViewObserver<V extends ButtonToolView = ButtonToolView> extends ToolViewObserver<V> {
-  viewWillSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, view: V): void;
-
-  viewDidSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, view: V): void;
-
-  viewDidPress?(input: PositionGestureInput, event: Event | null, view: V): void;
-
-  viewDidLongPress?(input: PositionGestureInput, view: V): void;
+  viewDidSetGraphics?(graphics: Graphics | null, view: V): void;
 }

@@ -15,20 +15,12 @@
 export {
   AnyPieView,
   PieViewInit,
-  PieViewSliceExt,
   PieView,
 } from "./PieView";
 export {PieViewObserver} from "./PieViewObserver";
 
-export {
-  PieTitle,
-  PieTitleFunction,
-  PieTrait,
-} from "./PieTrait";
+export {PieTrait} from "./PieTrait";
 export {PieTraitObserver} from "./PieTraitObserver";
 
-export {
-  PieControllerSliceExt,
-  PieController,
-} from "./PieController";
+export {PieController} from "./PieController";
 export {PieControllerObserver} from "./PieControllerObserver";

@@ -18,8 +18,5 @@ export {LeafViewObserver} from "./LeafViewObserver";
 export {LeafTrait} from "./LeafTrait";
 export {LeafTraitObserver} from "./LeafTraitObserver";
 
-export {
-  LeafControllerCellExt,
-  LeafController,
-} from "./LeafController";
+export {LeafController} from "./LeafController";
 export {LeafControllerObserver} from "./LeafControllerObserver";

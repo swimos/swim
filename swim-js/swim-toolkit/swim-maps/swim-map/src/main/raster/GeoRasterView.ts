@@ -13,24 +13,21 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import {Affinity, Animator} from "@swim/component";
+import {Affinity, Property, Animator} from "@swim/component";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {ViewFlags, View} from "@swim/view";
 import {
   AnyGraphicsRenderer,
   GraphicsRendererType,
   GraphicsRenderer,
-  GraphicsView,
   CanvasCompositeOperation,
   CanvasRenderer,
   WebGLRenderer,
 } from "@swim/graphics";
-import type {GeoViewContext} from "../geo/GeoViewContext";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
-import type {GeoRasterViewContext} from "./GeoRasterViewContext";
 import type {GeoRasterViewObserver} from "./GeoRasterViewObserver";
 
 /** @public */
@@ -50,57 +47,46 @@ export class GeoRasterView extends GeoView {
   constructor() {
     super();
     this.canvas = this.createCanvas();
-    Object.defineProperty(this, "renderer", {
-      value: this.createRenderer(),
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
     this.ownRasterFrame = null;
   }
 
   override readonly observerType?: Class<GeoRasterViewObserver>;
 
-  override readonly contextType?: Class<GeoRasterViewContext>;
-
-  @Animator<GeoRasterView, GeoPoint | null, AnyGeoPoint | null>({
-    type: GeoPoint,
+  @Animator<GeoRasterView["geoAnchor"]>({
+    valueType: GeoPoint,
     value: null,
     didSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
       this.owner.projectGeoAnchor(newGeoCenter);
     },
-    willSetValue(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
-      this.owner.callObservers("viewWillSetGeoAnchor", newGeoAnchor, oldGeoAnchor, this.owner);
-    },
     didSetValue(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null): void {
       this.owner.setGeoBounds(newGeoAnchor !== null ? newGeoAnchor.bounds : GeoBox.undefined());
       if (this.mounted) {
-        this.owner.projectRaster(this.owner.viewContext);
+        this.owner.projectRaster();
       }
-      this.owner.callObservers("viewDidSetGeoAnchor", newGeoAnchor, oldGeoAnchor, this.owner);
+      this.owner.callObservers("viewDidSetGeoAnchor", newGeoAnchor, this.owner);
     },
   })
   readonly geoAnchor!: Animator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @Animator({type: R2Point, value: R2Point.undefined()})
+  @Animator({valueType: R2Point, value: R2Point.undefined()})
   readonly viewAnchor!: Animator<this, R2Point | null, AnyR2Point | null>;
 
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsComposite})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsComposite})
   readonly xAlign!: Animator<this, number>;
 
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsComposite})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsComposite})
   readonly yAlign!: Animator<this, number>;
 
-  @ThemeAnimator({type: Length, value: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
+  @ThemeAnimator({valueType: Length, value: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
   readonly width!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Length, value: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
+  @ThemeAnimator({valueType: Length, value: null, updateFlags: View.NeedsResize | View.NeedsLayout | View.NeedsRender | View.NeedsComposite})
   readonly height!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Number, value: 1, updateFlags: View.NeedsComposite})
+  @ThemeAnimator({valueType: Number, value: 1, updateFlags: View.NeedsComposite})
   readonly opacity!: ThemeAnimator<this, number>;
 
-  @Animator({type: String, value: "source-over", updateFlags: View.NeedsComposite})
+  @Animator({valueType: String, value: "source-over", updateFlags: View.NeedsComposite})
   readonly compositeOperation!: Animator<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
@@ -110,24 +96,28 @@ export class GeoRasterView extends GeoView {
   /** @internal */
   readonly canvas: HTMLCanvasElement;
 
-  get compositor(): GraphicsRenderer | null {
-    const parent = this.parent;
-    if (parent instanceof GraphicsView) {
-      return parent.renderer;
-    } else {
-      return null;
-    }
-  }
+  @Property<GeoRasterView["compositor"]>({
+    valueType: GraphicsRenderer,
+    value: null,
+    inherits: "renderer",
+  })
+  readonly compositor!: Property<this, GraphicsRenderer | null>;
 
-  override readonly renderer!: GraphicsRenderer | null;
-
-  setRenderer(renderer: AnyGraphicsRenderer | null): void {
-    if (typeof renderer === "string") {
-      renderer = this.createRenderer(renderer as GraphicsRendererType);
-    }
-    (this as Mutable<this>).renderer = renderer;
-    this.requireUpdate(View.NeedsRender | View.NeedsComposite);
-  }
+  @Property<GeoRasterView["renderer"]>({
+    extends: true,
+    inherits: false,
+    updateFlags: View.NeedsRender | View.NeedsComposite,
+    initValue(): GraphicsRenderer | null {
+      return this.owner.createRenderer();
+    },
+    fromAny(renderer: AnyGraphicsRenderer | null): GraphicsRenderer | null {
+      if (typeof renderer === "string") {
+        renderer = this.owner.createRenderer(renderer as GraphicsRendererType);
+      }
+      return renderer;
+    },
+  })
+  override readonly renderer!: Property<this, GraphicsRenderer | null, AnyGraphicsRenderer | null>;
 
   protected createRenderer(rendererType: GraphicsRendererType = "canvas"): GraphicsRenderer | null {
     if (rendererType === "canvas") {
@@ -159,47 +149,46 @@ export class GeoRasterView extends GeoView {
     return updateFlags;
   }
 
-  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags): ViewFlags {
     if ((this.flags & View.ProcessMask) === 0 && (processFlags & (View.NeedsResize | View.NeedsProject)) === 0) {
       processFlags = 0;
     }
     return processFlags;
   }
 
-  protected override onResize(viewContext: ViewContextType<this>): void {
-    super.onResize(viewContext);
+  protected override onResize(): void {
+    super.onResize();
     this.requireUpdate(View.NeedsRender | View.NeedsComposite);
   }
 
-  protected override onProject(viewContext: ViewContextType<this>): void {
-    super.onProject(viewContext);
-    this.projectRaster(viewContext);
+  protected override onProject(): void {
+    super.onProject();
+    this.projectRaster();
   }
 
   protected projectGeoAnchor(geoAnchor: GeoPoint | null): void {
     if (this.mounted) {
-      const viewContext = this.viewContext as ViewContextType<this>;
       const viewAnchor = geoAnchor !== null && geoAnchor.isDefined()
-                       ? viewContext.geoViewport.project(geoAnchor)
+                       ? this.geoViewport.value.project(geoAnchor)
                        : null;
       this.viewAnchor.setInterpolatedValue(this.viewAnchor.value, viewAnchor);
-      this.projectRaster(viewContext);
+      this.projectRaster();
     }
   }
 
-  protected projectRaster(viewContext: ViewContextType<this>): void {
+  protected projectRaster(): void {
     let viewAnchor: R2Point | null;
     if (this.viewAnchor.hasAffinity(Affinity.Intrinsic)) {
       const geoAnchor = this.geoAnchor.value;
       viewAnchor = geoAnchor !== null && geoAnchor.isDefined()
-                 ? viewContext.geoViewport.project(geoAnchor)
+                 ? this.geoViewport.value.project(geoAnchor)
                  : null;
       this.viewAnchor.setValue(viewAnchor, Affinity.Intrinsic);
     } else {
       viewAnchor = this.viewAnchor.value;
     }
     if (viewAnchor !== null) {
-      const viewFrame = viewContext.viewFrame;
+      const viewFrame = this.viewFrame;
       const viewWidth = viewFrame.width;
       const viewHeight = viewFrame.height;
       const viewSize = Math.min(viewWidth, viewHeight);
@@ -218,7 +207,7 @@ export class GeoRasterView extends GeoView {
     }
   }
 
-  protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsDisplay(displayFlags: ViewFlags): ViewFlags {
     if ((this.flags & View.DisplayMask) !== 0) {
       displayFlags |= View.NeedsComposite;
     } else if ((displayFlags & View.NeedsComposite) !== 0) {
@@ -229,24 +218,17 @@ export class GeoRasterView extends GeoView {
     return displayFlags;
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(): void {
     const rasterFrame = this.rasterFrame;
     this.resizeCanvas(this.canvas, rasterFrame);
     this.resetRenderer(rasterFrame);
     this.clearCanvas(rasterFrame);
-    super.onRender(viewContext);
+    super.onRender();
   }
 
-  protected override didComposite(viewContext: ViewContextType<this>): void {
-    this.compositeImage(viewContext);
-    super.didComposite(viewContext);
-  }
-
-  override extendViewContext(viewContext: GeoViewContext): ViewContextType<this> {
-    const rasterViewContext = Object.create(viewContext);
-    rasterViewContext.compositor = viewContext.renderer;
-    rasterViewContext.renderer = this.renderer;
-    return rasterViewContext;
+  protected override didComposite(): void {
+    this.compositeImage();
+    super.didComposite();
   }
 
   /** @internal */
@@ -290,7 +272,7 @@ export class GeoRasterView extends GeoView {
   }
 
   protected clearCanvas(rasterFrame: R2Box): void {
-    const renderer = this.renderer;
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       renderer.context.clearRect(0, 0, rasterFrame.xMax, rasterFrame.yMax);
     } else if (renderer instanceof WebGLRenderer) {
@@ -300,7 +282,7 @@ export class GeoRasterView extends GeoView {
   }
 
   protected resetRenderer(rasterFrame: R2Box): void {
-    const renderer = this.renderer;
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const pixelRatio = this.pixelRatio;
       const dx = rasterFrame.xMin * pixelRatio;
@@ -312,8 +294,8 @@ export class GeoRasterView extends GeoView {
     }
   }
 
-  protected compositeImage(viewContext: ViewContextType<this>): void {
-    const compositor = viewContext.compositor;
+  protected compositeImage(): void {
+    const compositor = this.compositor.value;
     if (compositor instanceof CanvasRenderer) {
       const context = compositor.context;
       const rasterFrame = this.rasterFrame;

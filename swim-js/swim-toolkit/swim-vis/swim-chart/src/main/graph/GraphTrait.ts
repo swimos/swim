@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {FastenerClass} from "@swim/component";
 import {Model, Trait, TraitSet} from "@swim/model";
 import {PlotTrait} from "../plot/PlotTrait";
 import type {GraphTraitObserver} from "./GraphTraitObserver";
@@ -22,8 +22,8 @@ import type {GraphTraitObserver} from "./GraphTraitObserver";
 export class GraphTrait<X = unknown, Y = unknown> extends Trait {
   override readonly observerType?: Class<GraphTraitObserver<X, Y>>;
 
-  @TraitSet<GraphTrait<X, Y>, PlotTrait<X, Y>>({
-    type: PlotTrait,
+  @TraitSet<GraphTrait<X, Y>["plots"]>({
+    traitType: PlotTrait,
     binds: true,
     willAttachTrait(plotTrait: PlotTrait<X, Y>): void {
       this.owner.callObservers("traitWillAttachPlot", plotTrait, this.owner);
@@ -46,33 +46,15 @@ export class GraphTrait<X = unknown, Y = unknown> extends Trait {
     },
   })
   readonly plots!: TraitSet<this, PlotTrait<X, Y>>;
-  static readonly plots: MemberFastenerClass<GraphTrait, "plots">;
-
-  /** @internal */
-  protected startConsumingPlots(): void {
-    const plotTraits = this.plots.traits;
-    for (const traitId in plotTraits) {
-      const plotTrait = plotTraits[traitId]!;
-      plotTrait.consume(this);
-    }
-  }
-
-  /** @internal */
-  protected stopConsumingPlots(): void {
-    const plotTraits = this.plots.traits;
-    for (const traitId in plotTraits) {
-      const plotTrait = plotTraits[traitId]!;
-      plotTrait.unconsume(this);
-    }
-  }
+  static readonly plots: FastenerClass<GraphTrait["plots"]>;
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();
-    this.startConsumingPlots();
+    this.plots.consumeTraits(this);
   }
 
   protected override onStopConsuming(): void {
     super.onStopConsuming();
-    this.stopConsumingPlots();
+    this.plots.unconsumeTraits(this);
   }
 }

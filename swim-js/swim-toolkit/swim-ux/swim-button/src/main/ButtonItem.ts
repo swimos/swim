@@ -14,9 +14,9 @@
 
 import type {Timing} from "@swim/util";
 import {Affinity} from "@swim/component";
-import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
+import {AnyPresence, Presence, PresenceAnimator} from "@swim/style";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import type {ViewContextType, View} from "@swim/view";
+import type {View} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {HtmlIconView} from "@swim/graphics";
 import {FloatingButton} from "./FloatingButton";
@@ -59,8 +59,8 @@ export class ButtonItem extends HtmlView {
     return childView instanceof HtmlView ? childView : null;
   }
 
-  @ExpansionAnimator({type: Expansion, inherits: true})
-  readonly disclosure!: ExpansionAnimator<this, Expansion | undefined, AnyExpansion | undefined>;
+  @PresenceAnimator({inherits: true})
+  readonly presence!: PresenceAnimator<this, Presence | undefined, AnyPresence | undefined>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
@@ -70,9 +70,9 @@ export class ButtonItem extends HtmlView {
     }
   }
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-    const phase = this.disclosure.getPhaseOr(1);
+  protected override onLayout(): void {
+    super.onLayout();
+    const phase = this.presence.getPhaseOr(1);
     const button = this.button;
     if (button !== null) {
       this.width.setState(button.width.state, Affinity.Intrinsic);
@@ -122,7 +122,7 @@ export class ButtonItem extends HtmlView {
     label.fontWeight.setState("500", Affinity.Intrinsic);
     label.lineHeight.setState(40, Affinity.Intrinsic);
     label.whiteSpace.setState("nowrap", Affinity.Intrinsic);
-    label.opacity.setState(this.disclosure.getPhaseOr(0), Affinity.Intrinsic);
+    label.opacity.setState(this.presence.getPhaseOr(0), Affinity.Intrinsic);
   }
 
   protected onRemoveLabel(label: HtmlView): void {

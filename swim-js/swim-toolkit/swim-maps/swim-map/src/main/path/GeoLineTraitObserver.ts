@@ -13,18 +13,13 @@
 // limitations under the License.
 
 import type {Length} from "@swim/math";
-import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
+import type {ColorOrLook} from "@swim/theme";
 import type {GeoPathTraitObserver} from "./GeoPathTraitObserver";
 import type {GeoLineTrait} from "./GeoLineTrait";
 
 /** @public */
-export interface GeoLineTraitObserver<R extends GeoLineTrait = GeoLineTrait> extends GeoPathTraitObserver<R> {
-  traitWillSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
+export interface GeoLineTraitObserver<T extends GeoLineTrait = GeoLineTrait> extends GeoPathTraitObserver<T> {
+  traitDidSetStroke?(stroke: ColorOrLook | null, trait: T): void;
 
-  traitDidSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
-
-  traitWillSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, trait: R): void;
-
-  traitDidSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, trait: R): void;
+  traitDidSetStrokeWidth?(strokeWidth: Length | null, trait: T): void;
 }

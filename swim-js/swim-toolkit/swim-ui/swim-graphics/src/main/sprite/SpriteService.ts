@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "@swim/util";
+import {Service} from "@swim/component";
 import type {Sprite} from "./Sprite";
 import {SpriteSheet} from "./SpriteSheet";
 
 /** @public */
-export class SpriteService {
+export class SpriteService extends Service {
   constructor(canvasWidth?: number, canvasHeight?: number, pixelRatio?: number,
               minSizeClass?: number, maxSizeClass?: number) {
+    super();
     if (pixelRatio === void 0) {
       pixelRatio = window.devicePixelRatio || 1;
     }
@@ -113,11 +114,6 @@ export class SpriteService {
     const sprite = sheet.acquireSprite()!;
     // assert(sprite !== null);
     return sprite;
-  }
-
-  @Lazy
-  static global(): SpriteService {
-    return new SpriteService();
   }
 
   /** @internal */

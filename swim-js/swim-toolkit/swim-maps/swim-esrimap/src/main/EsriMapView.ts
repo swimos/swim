@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Equivalent, AnyTiming, Timing} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import {Class, Equivalent, AnyTiming, Timing} from "@swim/util";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import {View, ViewRef} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
-import type {AnyGeoPerspective} from "@swim/map";
+import type {AnyGeoPerspective, GeoViewport} from "@swim/map";
 import {EsriView} from "./EsriView";
 import {EsriMapViewport} from "./EsriMapViewport";
 import type {EsriMapViewObserver} from "./EsriMapViewObserver";
@@ -29,12 +29,6 @@ export class EsriMapView extends EsriView {
   constructor(map: __esri.MapView) {
     super();
     this.map = map;
-    Object.defineProperty(this, "geoViewport", {
-      value: EsriMapViewport.create(map),
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
     this.onMapRender = this.onMapRender.bind(this);
     this.initMap(map);
   }
@@ -47,44 +41,38 @@ export class EsriMapView extends EsriView {
     map.watch("extent", this.onMapRender);
   }
 
-  override readonly geoViewport!: EsriMapViewport;
-
-  protected willSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport): void {
-    this.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this);
-  }
-
-  protected onSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport): void {
-    // hook
-  }
-
-  protected didSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport): void {
-    this.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this);
-  }
-
-  protected updateGeoViewport(): boolean {
-    const oldGeoViewport = this.geoViewport;
-    const newGeoViewport = EsriMapViewport.create(this.map);
-    if (!newGeoViewport.equals(oldGeoViewport)) {
-      this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
-      (this as Mutable<this>).geoViewport = newGeoViewport;
-      this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
-      this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
-      return true;
-    }
-    return false;
-  }
+  @Property<EsriMapView["geoViewport"]>({
+    extends: true,
+    initValue(): GeoViewport {
+      return EsriMapViewport.create(this.owner.map);
+    },
+    willSetValue(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport): void {
+      this.owner.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this.owner);
+    },
+    didSetValue(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport): void {
+      this.owner.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this.owner);
+      const immediate = !this.owner.hidden && !this.owner.culled;
+      this.owner.requireUpdate(View.NeedsProject, immediate);
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        this.setValue(EsriMapViewport.create(this.owner.map), Affinity.Intrinsic);
+      }
+    },
+  })
+  override readonly geoViewport!: Property<this, GeoViewport> & EsriView["geoViewport"] & {
+    /** @internal */
+    update(): void;
+  };
 
   protected onMapRender(): void {
-    if (this.updateGeoViewport()) {
-      const immediate = !this.hidden && !this.culled;
-      this.requireUpdate(View.NeedsProject, immediate);
-    }
+    this.geoViewport.update();
   }
 
   override moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
     const target: __esri.GoToTarget2D = {};
     const options: __esri.GoToOptions2D = {};
-    const geoViewport = this.geoViewport;
+    const geoViewport = this.geoViewport.value;
     let geoCenter = geoPerspective.geoCenter;
     if (geoCenter !== void 0 && geoCenter !== null) {
       geoCenter = GeoPoint.fromAny(geoCenter);
@@ -115,7 +103,7 @@ export class EsriMapView extends EsriView {
     this.map.goTo(target, options);
   }
 
-  @ViewRef<EsriMapView, CanvasView>({
+  @ViewRef<EsriMapView["canvas"]>({
     extends: true,
     didAttachView(canvasView: CanvasView, targetView: View | null): void {
       if (this.owner.parent === null) {
@@ -131,10 +119,10 @@ export class EsriMapView extends EsriView {
       }
     },
   })
-  override readonly canvas!: ViewRef<this, CanvasView>;
-  static override readonly canvas: MemberFastenerClass<EsriMapView, "canvas">;
+  override readonly canvas!: ViewRef<this, CanvasView> & EsriView["canvas"];
+  static override readonly canvas: FastenerClass<EsriMapView["canvas"]>;
 
-  @ViewRef<EsriMapView, HtmlView>({
+  @ViewRef<EsriMapView["container"]>({
     extends: true,
     didAttachView(containerView: HtmlView, targetView: View | null): void {
       const esriContainerView = HtmlView.fromNode(this.owner.map.container);
@@ -154,6 +142,6 @@ export class EsriMapView extends EsriView {
       }
     },
   })
-  override readonly container!: ViewRef<this, HtmlView>;
-  static override readonly container: MemberFastenerClass<EsriMapView, "container">;
+  override readonly container!: ViewRef<this, HtmlView> & EsriView["container"];
+  static override readonly container: FastenerClass<EsriMapView["container"]>;
 }

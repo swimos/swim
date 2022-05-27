@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
+import {Class, AnyTiming, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass} from "@swim/component";
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
-import {Look, Mood} from "@swim/theme";
+import {Look, Mood, ColorOrLook} from "@swim/theme";
 import {TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {DataPointView} from "../data/DataPointView";
 import type {DataPointTrait} from "../data/DataPointTrait";
 import type {DataPointController} from "../data/DataPointController";
-import type {DataSetControllerDataPointExt} from "../data/DataSetController";
 import {DataSetTrait} from "../data/DataSetTrait";
 import {LinePlotView} from "./LinePlotView";
 import {LinePlotTrait} from "./LinePlotTrait";
@@ -32,16 +31,16 @@ import type {LinePlotControllerObserver} from "./LinePlotControllerObserver";
 export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotController<X, Y> {
   override readonly observerType?: Class<LinePlotControllerObserver<X, Y>>;
 
-  @TraitViewControllerSet<LinePlotController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>>({
+  @TraitViewControllerSet<LinePlotController<X, Y>["dataPoints"]>({
     extends: true,
     get parentView(): LinePlotView<X, Y> | null {
       return this.owner.plot.view;
     },
   })
-  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & DataSetControllerDataPointExt<X, Y>;
-  static override readonly dataPoints: MemberFastenerClass<LinePlotController, "dataPoints">;
+  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & SeriesPlotController<X, Y>["dataPoints"];
+  static override readonly dataPoints: FastenerClass<LinePlotController["dataPoints"]>;
 
-  protected setPlotStroke(stroke: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
+  protected setStroke(stroke: ColorOrLook | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -60,7 +59,7 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     }
   }
 
-  protected setPlotStrokeWidth(strokeWidth: Length | null, timing?: AnyTiming | boolean): void {
+  protected setStrokeWidth(strokeWidth: Length | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -75,7 +74,7 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     }
   }
 
-  @TraitViewRef<LinePlotController<X, Y>, LinePlotTrait<X, Y>, LinePlotView<X, Y>>({
+  @TraitViewRef<LinePlotController<X, Y>["plot"]>({
     traitType: LinePlotTrait,
     observesTrait: true,
     initTrait(plotTrait: LinePlotTrait<X, Y>): void {
@@ -89,11 +88,11 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
       if (plotView !== null) {
         const stroke = plotTrait.stroke.value;
         if (stroke !== null) {
-          this.owner.setPlotStroke(stroke);
+          this.owner.setStroke(stroke);
         }
         const strokeWidth = plotTrait.strokeWidth.value;
         if (strokeWidth !== null) {
-          this.owner.setPlotStrokeWidth(strokeWidth);
+          this.owner.setStrokeWidth(strokeWidth);
         }
       }
     },
@@ -103,11 +102,11 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     didDetachTrait(plotTrait: LinePlotTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotTrait", plotTrait, this.owner);
     },
-    traitDidSetPlotStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
-      this.owner.setPlotStroke(newStroke);
+    traitDidSetStroke(stroke: ColorOrLook | null): void {
+      this.owner.setStroke(stroke);
     },
-    traitDidSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-      this.owner.setPlotStrokeWidth(newStrokeWidth);
+    traitDidSetStrokeWidth(strokeWidth: Length | null): void {
+      this.owner.setStrokeWidth(strokeWidth);
     },
     viewType: LinePlotView,
     observesView: true,
@@ -121,11 +120,11 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
       if (plotTrait !== null) {
         const stroke = plotTrait.stroke.value;
         if (stroke !== null) {
-          this.owner.setPlotStroke(stroke);
+          this.owner.setStroke(stroke);
         }
         const strokeWidth = plotTrait.strokeWidth.value;
         if (strokeWidth !== null) {
-          this.owner.setPlotStrokeWidth(strokeWidth);
+          this.owner.setStrokeWidth(strokeWidth);
         }
       }
     },
@@ -135,19 +134,13 @@ export class LinePlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     didDetachView(plotView: LinePlotView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotView", plotView, this.owner);
     },
-    viewWillSetPlotStroke(newStroke: Color | null, oldStroke: Color | null, plotView: LinePlotView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetPlotStroke", newStroke, oldStroke, this.owner);
+    viewDidSetStroke(stroke: Color | null): void {
+      this.owner.callObservers("controllerDidSetPlotStroke", stroke, this.owner);
     },
-    viewDidSetPlotStroke(newStroke: Color | null, oldStroke: Color | null, plotView: LinePlotView<X, Y>): void {
-      this.owner.callObservers("controllerDidSetPlotStroke", newStroke, oldStroke, this.owner);
-    },
-    viewWillSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, plotView: LinePlotView<X, Y>): void {
-      this.owner.callObservers("controllerWillSetPlotStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
-    },
-    viewDidSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, plotView: LinePlotView<X, Y>): void {
-      this.owner.callObservers("controllerDidSetPlotStrokeWidth", newStrokeWidth, oldStrokeWidth, this.owner);
+    viewDidSetStrokeWidth(strokeWidth: Length | null): void {
+      this.owner.callObservers("controllerDidSetPlotStrokeWidth", strokeWidth, this.owner);
     },
   })
-  readonly plot!: TraitViewRef<this, LinePlotTrait<X, Y>, LinePlotView<X, Y>>;
-  static readonly plot: MemberFastenerClass<LinePlotController, "plot">;
+  readonly plot!: TraitViewRef<this, LinePlotTrait<X, Y>, LinePlotView<X, Y>> & Observes<LinePlotTrait<X, Y> & LinePlotView<X, Y>>;
+  static readonly plot: FastenerClass<LinePlotController["plot"]>;
 }

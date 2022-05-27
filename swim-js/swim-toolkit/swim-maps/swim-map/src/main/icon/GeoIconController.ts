@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
+import {Class, AnyTiming, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass} from "@swim/component";
 import type {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import type {Graphics, IconLayout} from "@swim/graphics";
@@ -79,7 +79,7 @@ export class GeoIconController extends GeoController {
     }
   }
 
-  @TraitViewRef<GeoIconController, GeoIconTrait, GeoIconView>({
+  @TraitViewRef<GeoIconController["geo"]>({
     traitType: GeoIconTrait,
     observesTrait: true,
     willAttachTrait(geoTrait: GeoIconTrait): void {
@@ -96,14 +96,14 @@ export class GeoIconController extends GeoController {
     didDetachTrait(geoTrait: GeoIconTrait): void {
       this.owner.callObservers("controllerDidDetachGeoTrait", geoTrait, this.owner);
     },
-    traitDidSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoTrait: GeoIconTrait): void {
-      this.owner.setGeoCenter(newGeoCenter, geoTrait);
+    traitDidSetGeoCenter(geoCenter: GeoPoint | null, geoTrait: GeoIconTrait): void {
+      this.owner.setGeoCenter(geoCenter, geoTrait);
     },
-    traitDidSetIconLayout(newIconLayout: IconLayout, oldIconLayout: IconLayout, geoTrait: GeoIconTrait): void {
-      this.owner.setIconLayout(newIconLayout, geoTrait);
+    traitDidSetIconLayout(iconLayout: IconLayout, geoTrait: GeoIconTrait): void {
+      this.owner.setIconLayout(iconLayout, geoTrait);
     },
-    traitDidSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null, geoTrait: GeoIconTrait): void {
-      this.owner.setGraphics(newGraphics, geoTrait);
+    traitDidSetGraphics(graphics: Graphics | null, geoTrait: GeoIconTrait): void {
+      this.owner.setGraphics(graphics, geoTrait);
     },
     viewType: GeoIconView,
     observesView: true,
@@ -121,19 +121,13 @@ export class GeoIconController extends GeoController {
     didDetachView(geoView: GeoIconView): void {
       this.owner.callObservers("controllerDidDetachGeoView", geoView, this.owner);
     },
-    viewWillSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.callObservers("controllerWillSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
+    viewDidSetGeoCenter(geoCenter: GeoPoint | null): void {
+      this.owner.callObservers("controllerDidSetGeoCenter", geoCenter, this.owner);
     },
-    viewDidSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-      this.owner.callObservers("controllerDidSetGeoCenter", newGeoCenter, oldGeoCenter, this.owner);
-    },
-    viewWillSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.callObservers("controllerWillSetGraphics", newGraphics, oldGraphics, this.owner);
-    },
-    viewDidSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
-      this.owner.callObservers("controllerDidSetGraphics", newGraphics, oldGraphics, this.owner);
+    viewDidSetGraphics(graphics: Graphics | null): void {
+      this.owner.callObservers("controllerDidSetGraphics", graphics, this.owner);
     },
   })
-  readonly geo!: TraitViewRef<this, GeoIconTrait, GeoIconView>;
-  static readonly geo: MemberFastenerClass<GeoIconController, "geo">;
+  override readonly geo!: TraitViewRef<this, GeoIconTrait, GeoIconView> & Observes<GeoIconTrait & GeoIconView>;
+  static readonly geo: FastenerClass<GeoIconController["geo"]>;
 }

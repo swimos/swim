@@ -22,13 +22,13 @@ import {
   Dictionary,
   MutableDictionary,
   Creatable,
-  InitType,
+  Inits,
   Initable,
-  ConsumerType,
-  Consumable,
   Consumer,
+  Consumable,
 } from "@swim/util";
 import {
+  FastenerClass,
   Fastener,
   Property,
   Provider,
@@ -36,26 +36,34 @@ import {
   ComponentInit,
   Component,
 } from "@swim/component";
-import {WarpRef, WarpService, WarpProvider, DownlinkFastener} from "@swim/client";
-import {RefreshService} from "../refresh/RefreshService";
-import {RefreshProvider} from "../refresh/RefreshProvider";
-import {SelectionService} from "../selection/SelectionService";
-import {SelectionProvider} from "../selection/SelectionProvider";
-import {ModelContext} from "./ModelContext";
+import {AnyValue, Value} from "@swim/structure";
+import {AnyUri, Uri} from "@swim/uri";
+import {
+  WarpDownlinkModel,
+  WarpDownlink,
+  EventDownlinkTemplate,
+  EventDownlink,
+  ValueDownlinkTemplate,
+  ValueDownlink,
+  ListDownlinkTemplate,
+  ListDownlink,
+  MapDownlinkTemplate,
+  MapDownlink,
+  WarpRef,
+  WarpClient,
+} from "@swim/client";
 import type {ModelObserver} from "./ModelObserver";
 import {ModelRelation} from "./"; // forward import
 import {AnyTrait, Trait} from "../"; // forward import
 import {TraitRelation} from "../"; // forward import
-
-/** @public */
-export type ModelContextType<M extends Model> =
-  M extends {readonly contextType?: Class<infer T>} ? T : never;
+import {RefresherService} from "../"; // forward import
+import {SelectionService} from "../"; // forward import
 
 /** @public */
 export type ModelFlags = ComponentFlags;
 
 /** @public */
-export type AnyModel<M extends Model = Model> = M | ModelFactory<M> | InitType<M>;
+export type AnyModel<M extends Model = Model> = M | ModelFactory<M> | Inits<M>;
 
 /** @public */
 export interface ModelInit extends ComponentInit {
@@ -67,7 +75,7 @@ export interface ModelInit extends ComponentInit {
 
 /** @public */
 export interface ModelFactory<M extends Model = Model, U = AnyModel<M>> extends Creatable<M>, FromAny<M, U> {
-  fromInit(init: InitType<M>): M;
+  fromInit(init: Inits<M>): M;
 }
 
 /** @public */
@@ -81,7 +89,7 @@ export interface ModelConstructor<M extends Model = Model, U = AnyModel<M>> exte
 }
 
 /** @public */
-export class Model extends Component<Model> implements Initable<ModelInit>, Consumable {
+export class Model extends Component<Model> implements Initable<ModelInit>, Consumable, WarpRef {
   constructor() {
     super();
     this.consumers = Arrays.empty;
@@ -95,11 +103,6 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   override readonly observerType?: Class<ModelObserver>;
-
-  /** @override */
-  readonly consumerType?: Class<Consumer>;
-
-  readonly contextType?: Class<ModelContext>;
 
   protected override willAttachParent(parent: Model): void {
     const observers = this.observers;
@@ -217,6 +220,10 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     return super.insertChild(child, target, key);
   }
 
+  override reinsertChild(child: Model, target: Model | null): void {
+    super.reinsertChild(child, target);
+  }
+
   override replaceChild<M extends Model>(newChild: Model, oldChild: M): M;
   override replaceChild<M extends Model>(newChild: AnyModel, oldChild: M): M;
   override replaceChild(newChild: AnyModel, oldChild: Model): Model {
@@ -269,17 +276,14 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   /** @internal */
-  override cascadeInsert(updateFlags?: ModelFlags, modelContext?: ModelContext): void {
+  override cascadeInsert(updateFlags?: ModelFlags): void {
     if ((this.flags & Model.MountedFlag) !== 0) {
       if (updateFlags === void 0) {
         updateFlags = 0;
       }
       updateFlags |= this.flags & Model.UpdateMask;
       if ((updateFlags & Model.AnalyzeMask) !== 0) {
-        if (modelContext === void 0) {
-          modelContext = this.superModelContext;
-        }
-        this.cascadeAnalyze(updateFlags, modelContext);
+        this.cascadeAnalyze(updateFlags);
       }
     }
   }
@@ -326,6 +330,44 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
       }
     }
     super.didRemoveChild(child);
+  }
+
+  protected override willReinsertChild(child: Model, target: Model | null): void {
+    super.willReinsertChild(child, target);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.modelWillReinsertChild !== void 0) {
+        observer.modelWillReinsertChild(child, target, this);
+      }
+    }
+    let trait = this.firstTrait;
+    while (trait !== null) {
+      const next = trait.nextTrait;
+      trait.willReinsertChild(child, target);
+      trait = next !== null && next.model === this ? next : null;
+    }
+  }
+
+  protected override onReinsertChild(child: Model, target: Model | null): void {
+    super.onReinsertChild(child, target);
+  }
+
+  protected override didReinsertChild(child: Model, target: Model | null): void {
+    let trait = this.firstTrait;
+    while (trait !== null) {
+      const next = trait.nextTrait;
+      trait.didReinsertChild(child, target);
+      trait = next !== null && next.model === this ? next : null;
+    }
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.modelDidReinsertChild !== void 0) {
+        observer.modelDidReinsertChild(child, target, this);
+      }
+    }
+    super.didReinsertChild(child, target);
   }
 
   /** @internal */
@@ -455,9 +497,9 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
       if (parent !== null) {
         parent.requestUpdate(target, updateFlags, immediate);
       } else if (this.mounted) {
-        const refreshProvider = this.refreshProvider.service;
-        if (refreshProvider !== void 0 && refreshProvider !== null) {
-          refreshProvider.requestUpdate(target, updateFlags, immediate);
+        const updaterService = this.updater.service;
+        if (updaterService !== null) {
+          updaterService.requestUpdate(target, updateFlags, immediate);
         }
       }
     }
@@ -471,258 +513,247 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     return (this.flags & Model.AnalyzingFlag) !== 0;
   }
 
-  protected needsAnalyze(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): ModelFlags {
+  protected needsAnalyze(analyzeFlags: ModelFlags): ModelFlags {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      analyzeFlags = trait.needsAnalyze(analyzeFlags, modelContext);
+      analyzeFlags = trait.needsAnalyze(analyzeFlags);
       trait = next !== null && next.model === this ? next : null;
     }
     return analyzeFlags;
   }
 
-  cascadeAnalyze(analyzeFlags: ModelFlags, baesModelContext: ModelContext): void {
-    const modelContext = this.extendModelContext(baesModelContext);
-    const outerModelContext = ModelContext.current;
+  cascadeAnalyze(analyzeFlags: ModelFlags): void {
     try {
-      ModelContext.current = modelContext;
       analyzeFlags &= ~Model.NeedsAnalyze;
       analyzeFlags |= this.flags & Model.UpdateMask;
-      analyzeFlags = this.needsAnalyze(analyzeFlags, modelContext);
+      analyzeFlags = this.needsAnalyze(analyzeFlags);
       if ((analyzeFlags & Model.AnalyzeMask) !== 0) {
         let cascadeFlags = analyzeFlags;
-        this.setFlags(this.flags & ~Model.NeedsAnalyze | (Model.AnalyzingFlag | Model.ContextualFlag));
-        this.willAnalyze(cascadeFlags, modelContext);
+        this.setFlags(this.flags & ~Model.NeedsAnalyze | Model.AnalyzingFlag);
+        this.willAnalyze(cascadeFlags);
         if (((this.flags | analyzeFlags) & Model.NeedsMutate) !== 0) {
           cascadeFlags |= Model.NeedsMutate;
           this.setFlags(this.flags & ~Model.NeedsMutate);
-          this.willMutate(modelContext);
+          this.willMutate();
         }
         if (((this.flags | analyzeFlags) & Model.NeedsAggregate) !== 0) {
           cascadeFlags |= Model.NeedsAggregate;
           this.setFlags(this.flags & ~Model.NeedsAggregate);
-          this.willAggregate(modelContext);
+          this.willAggregate();
         }
         if (((this.flags | analyzeFlags) & Model.NeedsCorrelate) !== 0) {
           cascadeFlags |= Model.NeedsCorrelate;
           this.setFlags(this.flags & ~Model.NeedsCorrelate);
-          this.willCorrelate(modelContext);
+          this.willCorrelate();
         }
 
-        this.onAnalyze(cascadeFlags, modelContext);
+        this.onAnalyze(cascadeFlags);
         if ((cascadeFlags & Model.NeedsMutate) !== 0) {
-          this.onMutate(modelContext);
+          this.onMutate();
         }
         if ((cascadeFlags & Model.NeedsAggregate) !== 0) {
-          this.onAggregate(modelContext);
+          this.onAggregate();
         }
         if ((cascadeFlags & Model.NeedsCorrelate) !== 0) {
-          this.onCorrelate(modelContext);
+          this.onCorrelate();
         }
 
         if ((cascadeFlags & Model.AnalyzeMask) !== 0) {
-          this.setFlags(this.flags & ~Model.ContextualFlag);
-          this.analyzeChildren(cascadeFlags, modelContext, this.analyzeChild);
-          this.setFlags(this.flags | Model.ContextualFlag);
+          this.analyzeChildren(cascadeFlags, this.analyzeChild);
         }
 
         if ((cascadeFlags & Model.NeedsCorrelate) !== 0) {
-          this.didCorrelate(modelContext);
+          this.didCorrelate();
         }
         if ((cascadeFlags & Model.NeedsAggregate) !== 0) {
-          this.didAggregate(modelContext);
+          this.didAggregate();
         }
         if ((cascadeFlags & Model.NeedsMutate) !== 0) {
-          this.didMutate(modelContext);
+          this.didMutate();
         }
-        this.didAnalyze(cascadeFlags, modelContext);
+        this.didAnalyze(cascadeFlags);
       }
     } finally {
-      this.setFlags(this.flags & ~(Model.AnalyzingFlag | Model.ContextualFlag));
-      ModelContext.current = outerModelContext;
+      this.setFlags(this.flags & ~Model.AnalyzingFlag);
     }
   }
 
-  protected willAnalyze(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
+  protected willAnalyze(analyzeFlags: ModelFlags): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.willAnalyze(analyzeFlags, modelContext);
+      trait.willAnalyze(analyzeFlags);
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected onAnalyze(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
+  protected onAnalyze(analyzeFlags: ModelFlags): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.onAnalyze(analyzeFlags, modelContext);
+      trait.onAnalyze(analyzeFlags);
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected didAnalyze(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
+  protected didAnalyze(analyzeFlags: ModelFlags): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.didAnalyze(analyzeFlags, modelContext);
+      trait.didAnalyze(analyzeFlags);
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected willMutate(modelContext: ModelContextType<this>): void {
+  protected willMutate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelWillMutate !== void 0) {
-        observer.modelWillMutate(modelContext, this);
+        observer.modelWillMutate(this);
       }
     }
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.willMutate(modelContext);
+      trait.willMutate();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected onMutate(modelContext: ModelContextType<this>): void {
-    this.recohereFasteners(modelContext.updateTime);
+  protected onMutate(): void {
+    this.recohereFasteners(this.updateTime);
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.onMutate(modelContext);
+      trait.onMutate();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected didMutate(modelContext: ModelContextType<this>): void {
+  protected didMutate(): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.didMutate(modelContext);
+      trait.didMutate();
       trait = next !== null && next.model === this ? next : null;
     }
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelDidMutate !== void 0) {
-        observer.modelDidMutate(modelContext, this);
+        observer.modelDidMutate(this);
       }
     }
   }
 
-  protected willAggregate(modelContext: ModelContextType<this>): void {
+  protected willAggregate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelWillAggregate !== void 0) {
-        observer.modelWillAggregate(modelContext, this);
+        observer.modelWillAggregate(this);
       }
     }
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.willAggregate(modelContext);
+      trait.willAggregate();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected onAggregate(modelContext: ModelContextType<this>): void {
+  protected onAggregate(): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.onAggregate(modelContext);
+      trait.onAggregate();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected didAggregate(modelContext: ModelContextType<this>): void {
+  protected didAggregate(): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.didAggregate(modelContext);
+      trait.didAggregate();
       trait = next !== null && next.model === this ? next : null;
     }
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelDidAggregate !== void 0) {
-        observer.modelDidAggregate(modelContext, this);
+        observer.modelDidAggregate(this);
       }
     }
   }
 
-  protected willCorrelate(modelContext: ModelContextType<this>): void {
+  protected willCorrelate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelWillCorrelate !== void 0) {
-        observer.modelWillCorrelate(modelContext, this);
+        observer.modelWillCorrelate(this);
       }
     }
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.willCorrelate(modelContext);
+      trait.willCorrelate();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected onCorrelate(modelContext: ModelContextType<this>): void {
+  protected onCorrelate(): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.onCorrelate(modelContext);
+      trait.onCorrelate();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected didCorrelate(modelContext: ModelContextType<this>): void {
+  protected didCorrelate(): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.didCorrelate(modelContext);
+      trait.didCorrelate();
       trait = next !== null && next.model === this ? next : null;
     }
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelDidCorrelate !== void 0) {
-        observer.modelDidCorrelate(modelContext, this);
+        observer.modelDidCorrelate(this);
       }
     }
   }
 
-  protected analyzeChildren(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>,
-                            analyzeChild: (this: this, child: Model, analyzeFlags: ModelFlags,
-                                           modelContext: ModelContextType<this>) => void): void {
+  protected analyzeChildren(analyzeFlags: ModelFlags, analyzeChild: (this: this, child: Model, analyzeFlags: ModelFlags) => void): void {
     const trait = this.firstTrait;
     if (trait !== null) {
-      this.analyzeTraitChildren(trait, analyzeFlags, modelContext, analyzeChild);
+      this.analyzeTraitChildren(trait, analyzeFlags, analyzeChild);
     } else {
-      this.analyzeOwnChildren(analyzeFlags, modelContext, analyzeChild);
+      this.analyzeOwnChildren(analyzeFlags, analyzeChild);
     }
   }
 
-  protected analyzeTraitChildren(trait: Trait, analyzeFlags: ModelFlags, modelContext: ModelContextType<this>,
-                                 analyzeChild: (this: this, child: Model, analyzeFlags: ModelFlags,
-                                                modelContext: ModelContextType<this>) => void): void {
+  protected analyzeTraitChildren(trait: Trait, analyzeFlags: ModelFlags, analyzeChild: (this: this, child: Model, analyzeFlags: ModelFlags) => void): void {
     const next = trait.nextTrait;
     if (next !== null) {
-      trait.analyzeChildren(analyzeFlags, modelContext, analyzeChild as any, this.analyzeTraitChildren.bind(this, next) as any);
+      trait.analyzeChildren(analyzeFlags, analyzeChild as any, this.analyzeTraitChildren.bind(this, next) as any);
     } else {
-      trait.analyzeChildren(analyzeFlags, modelContext, analyzeChild as any, this.analyzeOwnChildren as any);
+      trait.analyzeChildren(analyzeFlags, analyzeChild as any, this.analyzeOwnChildren as any);
     }
   }
 
-  protected analyzeOwnChildren(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>,
-                               analyzeChild: (this: this, child: Model, analyzeFlags: ModelFlags,
-                                              modelContext: ModelContextType<this>) => void): void {
+  protected analyzeOwnChildren(analyzeFlags: ModelFlags,
+                               analyzeChild: (this: this, child: Model, analyzeFlags: ModelFlags) => void): void {
     let child = this.firstChild;
     while (child !== null) {
       const next = child.nextSibling;
-      analyzeChild.call(this, child, analyzeFlags, modelContext);
+      analyzeChild.call(this, child, analyzeFlags);
       if (next !== null && next.parent !== this) {
         throw new Error("inconsistent analyze pass");
       }
@@ -730,214 +761,202 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
   }
 
-  protected analyzeChild(child: Model, analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    child.cascadeAnalyze(analyzeFlags, modelContext);
+  protected analyzeChild(child: Model, analyzeFlags: ModelFlags): void {
+    child.cascadeAnalyze(analyzeFlags);
   }
 
   get refreshing(): boolean {
     return (this.flags & Model.RefreshingFlag) !== 0;
   }
 
-  protected needsRefresh(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): ModelFlags {
+  protected needsRefresh(refreshFlags: ModelFlags): ModelFlags {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      refreshFlags = trait.needsRefresh(refreshFlags, modelContext);
+      refreshFlags = trait.needsRefresh(refreshFlags);
       trait = next !== null && next.model === this ? next : null;
     }
     return refreshFlags;
   }
 
-  cascadeRefresh(refreshFlags: ModelFlags, baseModelContext: ModelContext): void {
-    const modelContext = this.extendModelContext(baseModelContext);
-    const outerModelContext = ModelContext.current;
+  cascadeRefresh(refreshFlags: ModelFlags): void {
     try {
-      ModelContext.current = modelContext;
       refreshFlags &= ~Model.NeedsRefresh;
       refreshFlags |= this.flags & Model.UpdateMask;
-      refreshFlags = this.needsRefresh(refreshFlags, modelContext);
+      refreshFlags = this.needsRefresh(refreshFlags);
       if ((refreshFlags & Model.RefreshMask) !== 0) {
         let cascadeFlags = refreshFlags;
-        this.setFlags(this.flags & ~Model.NeedsRefresh | (Model.RefreshingFlag | Model.ContextualFlag));
-        this.willRefresh(cascadeFlags, modelContext);
+        this.setFlags(this.flags & ~Model.NeedsRefresh | Model.RefreshingFlag);
+        this.willRefresh(cascadeFlags);
         if (((this.flags | refreshFlags) & Model.NeedsValidate) !== 0) {
           cascadeFlags |= Model.NeedsValidate;
           this.setFlags(this.flags & ~Model.NeedsValidate);
-          this.willValidate(modelContext);
+          this.willValidate();
         }
         if (((this.flags | refreshFlags) & Model.NeedsReconcile) !== 0) {
           cascadeFlags |= Model.NeedsReconcile;
           this.setFlags(this.flags & ~Model.NeedsReconcile);
-          this.willReconcile(modelContext);
+          this.willReconcile();
         }
 
-        this.onRefresh(cascadeFlags, modelContext);
+        this.onRefresh(cascadeFlags);
         if ((cascadeFlags & Model.NeedsValidate) !== 0) {
-          this.onValidate(modelContext);
+          this.onValidate();
         }
         if ((cascadeFlags & Model.NeedsReconcile) !== 0) {
-          this.onReconcile(modelContext);
+          this.onReconcile();
         }
 
         if ((cascadeFlags & Model.RefreshMask)) {
-          this.setFlags(this.flags & ~Model.ContextualFlag);
-          this.refreshChildren(cascadeFlags, modelContext, this.refreshChild);
-          this.setFlags(this.flags | Model.ContextualFlag);
+          this.refreshChildren(cascadeFlags, this.refreshChild);
         }
 
         if ((cascadeFlags & Model.NeedsReconcile) !== 0) {
-          this.didReconcile(modelContext);
+          this.didReconcile();
         }
         if ((cascadeFlags & Model.NeedsValidate) !== 0) {
-          this.didValidate(modelContext);
+          this.didValidate();
         }
-        this.didRefresh(cascadeFlags, modelContext);
+        this.didRefresh(cascadeFlags);
       }
     } finally {
-      this.setFlags(this.flags & ~(Model.RefreshingFlag | Model.ContextualFlag));
-      ModelContext.current = outerModelContext;
+      this.setFlags(this.flags & ~Model.RefreshingFlag);
     }
   }
 
-  protected willRefresh(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
+  protected willRefresh(refreshFlags: ModelFlags): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.willRefresh(refreshFlags, modelContext);
+      trait.willRefresh(refreshFlags);
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected onRefresh(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
+  protected onRefresh(refreshFlags: ModelFlags): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.onRefresh(refreshFlags, modelContext);
+      trait.onRefresh(refreshFlags);
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected didRefresh(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
+  protected didRefresh(refreshFlags: ModelFlags): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.didRefresh(refreshFlags, modelContext);
+      trait.didRefresh(refreshFlags);
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected willValidate(modelContext: ModelContextType<this>): void {
+  protected willValidate(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelWillValidate !== void 0) {
-        observer.modelWillValidate(modelContext, this);
+        observer.modelWillValidate(this);
       }
     }
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.willValidate(modelContext);
+      trait.willValidate();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected onValidate(modelContext: ModelContextType<this>): void {
+  protected onValidate(): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.onValidate(modelContext);
+      trait.onValidate();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected didValidate(modelContext: ModelContextType<this>): void {
+  protected didValidate(): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.didValidate(modelContext);
+      trait.didValidate();
       trait = next !== null && next.model === this ? next : null;
     }
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelDidValidate !== void 0) {
-        observer.modelDidValidate(modelContext, this);
+        observer.modelDidValidate(this);
       }
     }
   }
 
-  protected willReconcile(modelContext: ModelContextType<this>): void {
+  protected willReconcile(): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelWillReconcile !== void 0) {
-        observer.modelWillReconcile(modelContext, this);
+        observer.modelWillReconcile(this);
       }
     }
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.willReconcile(modelContext);
+      trait.willReconcile();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected onReconcile(modelContext: ModelContextType<this>): void {
-    this.recohereDownlinks(modelContext.updateTime);
+  protected onReconcile(): void {
+    this.recohereDownlinks(this.updateTime);
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.onReconcile(modelContext);
+      trait.onReconcile();
       trait = next !== null && next.model === this ? next : null;
     }
   }
 
-  protected didReconcile(modelContext: ModelContextType<this>): void {
+  protected didReconcile(): void {
     let trait = this.firstTrait;
     while (trait !== null) {
       const next = trait.nextTrait;
-      trait.didReconcile(modelContext);
+      trait.didReconcile();
       trait = next !== null && next.model === this ? next : null;
     }
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
       if (observer.modelDidReconcile !== void 0) {
-        observer.modelDidReconcile(modelContext, this);
+        observer.modelDidReconcile(this);
       }
     }
   }
 
-  protected refreshChildren(refreshFlags: ModelFlags, modelContext: ModelContextType<this>,
-                            refreshChild: (this: this, child: Model, refreshFlags: ModelFlags,
-                                           modelContext: ModelContextType<this>) => void): void {
+  protected refreshChildren(refreshFlags: ModelFlags, refreshChild: (this: this, child: Model, refreshFlags: ModelFlags) => void): void {
     const trait = this.firstTrait;
     if (trait !== null) {
-      this.refreshTraitChildren(trait, refreshFlags, modelContext, refreshChild);
+      this.refreshTraitChildren(trait, refreshFlags, refreshChild);
     } else {
-      this.refreshOwnChildren(refreshFlags, modelContext, refreshChild);
+      this.refreshOwnChildren(refreshFlags, refreshChild);
     }
   }
 
-  protected refreshTraitChildren(trait: Trait, refreshFlags: ModelFlags, modelContext: ModelContextType<this>,
-                                 refreshChild: (this: this, child: Model, refreshFlags: ModelFlags,
-                                                modelContext: ModelContextType<this>) => void): void {
+  protected refreshTraitChildren(trait: Trait, refreshFlags: ModelFlags, refreshChild: (this: this, child: Model, refreshFlags: ModelFlags) => void): void {
     const next = trait.nextTrait;
     if (next !== null) {
-      trait.refreshChildren(refreshFlags, modelContext, refreshChild as any, this.refreshTraitChildren.bind(this, next) as any);
+      trait.refreshChildren(refreshFlags, refreshChild as any, this.refreshTraitChildren.bind(this, next) as any);
     } else {
-      trait.refreshChildren(refreshFlags, modelContext, refreshChild as any, this.refreshOwnChildren as any);
+      trait.refreshChildren(refreshFlags, refreshChild as any, this.refreshOwnChildren as any);
     }
   }
 
-  protected refreshOwnChildren(refreshFlags: ModelFlags, modelContext: ModelContextType<this>,
-                               refreshChild: (this: this, child: Model, refreshFlags: ModelFlags,
-                                              modelContext: ModelContextType<this>) => void): void {
+  protected refreshOwnChildren(refreshFlags: ModelFlags, refreshChild: (this: this, child: Model, refreshFlags: ModelFlags) => void): void {
     let child = this.firstChild;
     while (child !== null) {
       const next = child.nextSibling;
-      refreshChild.call(this, child, refreshFlags, modelContext);
+      refreshChild.call(this, child, refreshFlags);
       if (next !== null && next.parent !== this) {
         throw new Error("inconsistent refresh pass");
       }
@@ -945,8 +964,8 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
   }
 
-  protected refreshChild(child: Model, refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    child.cascadeRefresh(refreshFlags, modelContext);
+  protected refreshChild(child: Model, refreshFlags: ModelFlags): void {
+    child.cascadeRefresh(refreshFlags);
   }
 
   readonly firstTrait: Trait | null;
@@ -1006,6 +1025,30 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
   }
 
+  findTrait<F extends Class<Trait>>(key: string | undefined, traitBound: F): InstanceType<F> | null;
+  findTrait(key: string | undefined, traitBound: Class<Trait> | undefined): Trait | null;
+  findTrait(key: string | undefined, traitBound: Class<Trait> | undefined): Trait | null {
+    if (key !== void 0) {
+      const traitMap = this.traitMap;
+      if (traitMap !== null) {
+        const trait = traitMap[key];
+        if (trait !== void 0 && (traitBound === void 0 || trait instanceof traitBound)) {
+          return trait;
+        }
+      }
+    }
+    if (traitBound !== void 0) {
+      let trait = this.firstTrait;
+      while (trait !== null) {
+        if (trait instanceof traitBound) {
+          return trait;
+        }
+        trait = (trait as Trait).nextTrait;
+      }
+    }
+    return null;
+  }
+
   getTrait<F extends Class<Trait>>(key: string, traitBound: F): InstanceType<F> | null;
   getTrait(key: string, traitBound?: Class<Trait>): Trait | null;
   getTrait<F extends Class<Trait>>(traitBound: F): InstanceType<F> | null;
@@ -1051,13 +1094,15 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
       this.didRemoveTrait(oldTrait);
       oldTrait.setKey(void 0);
 
+      newTrait.setFlags(newTrait.flags | Trait.InsertingFlag);
       newTrait.setKey(oldTrait.key);
       this.willInsertTrait(newTrait, target);
       this.insertTraitMap(newTrait);
       newTrait.attachModel(this, target);
       this.onInsertTrait(newTrait, target);
       this.didInsertTrait(newTrait, target);
-    } else if (newTrait !== oldTrait || newTrait !== null && newTrait.key !== key) {
+      newTrait.setFlags(newTrait.flags & ~Trait.InsertingFlag);
+    } else if (oldTrait !== newTrait || newTrait !== null && newTrait.key !== key) {
       if (oldTrait !== null) { // remove
         target = oldTrait.nextTrait;
         this.willRemoveTrait(oldTrait);
@@ -1073,12 +1118,14 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
       if (newTrait !== null) { // insert
         newTrait.remove();
 
+        newTrait.setFlags(newTrait.flags | Trait.InsertingFlag);
         newTrait.setKey(key);
         this.willInsertTrait(newTrait, target);
         this.insertTraitMap(newTrait);
         newTrait.attachModel(this, target);
         this.onInsertTrait(newTrait, target);
         this.didInsertTrait(newTrait, target);
+        newTrait.setFlags(newTrait.flags & ~Trait.InsertingFlag);
       }
     }
 
@@ -1096,12 +1143,14 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
       this.removeChild(key);
     }
 
+    trait.setFlags(trait.flags | Trait.InsertingFlag);
     trait.setKey(key);
     this.willInsertTrait(trait, null);
     this.insertTraitMap(trait);
     trait.attachModel(this, null);
     this.onInsertTrait(trait, null);
     this.didInsertTrait(trait, null);
+    trait.setFlags(trait.flags & ~Trait.InsertingFlag);
 
     return trait;
   }
@@ -1118,12 +1167,14 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
     const target = this.firstTrait;
 
+    trait.setFlags(trait.flags | Trait.InsertingFlag);
     trait.setKey(key);
     this.willInsertTrait(trait, target);
     this.insertTraitMap(trait);
     trait.attachModel(this, target);
     this.onInsertTrait(trait, target);
     this.didInsertTrait(trait, target);
+    trait.setFlags(trait.flags & ~Trait.InsertingFlag);
 
     return trait;
   }
@@ -1142,12 +1193,14 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
       this.removeChild(key);
     }
 
+    trait.setFlags(trait.flags | Trait.InsertingFlag);
     trait.setKey(key);
     this.willInsertTrait(trait, target);
     this.insertTraitMap(trait);
     trait.attachModel(this, target);
     this.onInsertTrait(trait, target);
     this.didInsertTrait(trait, target);
+    trait.setFlags(trait.flags & ~Trait.InsertingFlag);
 
     return trait;
   }
@@ -1160,7 +1213,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
     newTrait = Trait.fromAny(newTrait);
 
-    if (newTrait !== oldTrait) {
+    if (oldTrait !== newTrait) {
       newTrait.remove();
       const target = oldTrait.nextTrait;
 
@@ -1171,12 +1224,14 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
       this.didRemoveTrait(oldTrait);
       oldTrait.setKey(void 0);
 
+      newTrait.setFlags(newTrait.flags | Trait.InsertingFlag);
       newTrait.setKey(oldTrait.key);
       this.willInsertTrait(newTrait, target);
       this.insertTraitMap(newTrait);
       newTrait.attachModel(this, target);
       this.onInsertTrait(newTrait, target);
       this.didInsertTrait(newTrait, target);
+      newTrait.setFlags(newTrait.flags & ~Trait.InsertingFlag);
     }
 
     return oldTrait;
@@ -1403,8 +1458,14 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
         trait = next !== null && next.model === this ? next : null;
       }
     }
-    if (fastener instanceof DownlinkFastener && fastener.consumed === true && this.consuming) {
-      fastener.consume(this);
+    if (this.consuming) {
+      if (fastener instanceof WarpDownlink && fastener.consumed === true) {
+        fastener.consume(this);
+      } else if (fastener instanceof TraitRelation && fastener.consumed === true) {
+        fastener.consume(this);
+      } else if (fastener instanceof ModelRelation && fastener.consumed === true) {
+        fastener.consume(this);
+      }
     }
   }
 
@@ -1459,7 +1520,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   /** @internal @override */
   override decohereFastener(fastener: Fastener): void {
     super.decohereFastener(fastener);
-    if (fastener instanceof DownlinkFastener) {
+    if (fastener instanceof WarpDownlink) {
       this.requireUpdate(Model.NeedsReconcile);
     } else {
       this.requireUpdate(Model.NeedsMutate);
@@ -1478,7 +1539,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
         (this as Mutable<this>).decoherent = null;
         for (let i = 0; i < decoherentCount; i += 1) {
           const fastener = decoherent[i]!;
-          if (!(fastener instanceof DownlinkFastener)) {
+          if (!(fastener instanceof WarpDownlink)) {
             fastener.recohere(t);
           } else {
             this.decohereFastener(fastener);
@@ -1497,7 +1558,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
         (this as Mutable<this>).decoherent = null;
         for (let i = 0; i < decoherentCount; i += 1) {
           const fastener = decoherent[i]!;
-          if (fastener instanceof DownlinkFastener) {
+          if (fastener instanceof WarpDownlink) {
             fastener.recohere(t);
           } else {
             this.decohereFastener(fastener);
@@ -1508,10 +1569,10 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   /** @internal */
-  readonly consumers: ReadonlyArray<ConsumerType<this>>;
+  readonly consumers: ReadonlyArray<Consumer>;
 
   /** @override */
-  consume(consumer: ConsumerType<this>): void {
+  consume(consumer: Consumer): void {
     const oldConsumers = this.consumers;
     const newConsumers = Arrays.inserted(consumer, oldConsumers);
     if (oldConsumers !== newConsumers) {
@@ -1525,20 +1586,20 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
   }
 
-  protected willConsume(consumer: ConsumerType<this>): void {
+  protected willConsume(consumer: Consumer): void {
     // hook
   }
 
-  protected onConsume(consumer: ConsumerType<this>): void {
+  protected onConsume(consumer: Consumer): void {
     // hook
   }
 
-  protected didConsume(consumer: ConsumerType<this>): void {
+  protected didConsume(consumer: Consumer): void {
     // hook
   }
 
   /** @override */
-  unconsume(consumer: ConsumerType<this>): void {
+  unconsume(consumer: Consumer): void {
     const oldConsumers = this.consumers;
     const newConsumers = Arrays.removed(consumer, oldConsumers);
     if (oldConsumers !== newConsumers) {
@@ -1552,15 +1613,15 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     }
   }
 
-  protected willUnconsume(consumer: ConsumerType<this>): void {
+  protected willUnconsume(consumer: Consumer): void {
     // hook
   }
 
-  protected onUnconsume(consumer: ConsumerType<this>): void {
+  protected onUnconsume(consumer: Consumer): void {
     // hook
   }
 
-  protected didUnconsume(consumer: ConsumerType<this>): void {
+  protected didUnconsume(consumer: Consumer): void {
     // hook
   }
 
@@ -1649,7 +1710,11 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     const fasteners = this.fasteners;
     for (const fastenerName in fasteners) {
       const fastener = fasteners[fastenerName]!;
-      if (fastener instanceof DownlinkFastener && fastener.consumed === true) {
+      if (fastener instanceof WarpDownlink && fastener.consumed === true) {
+        fastener.consume(this);
+      } else if (fastener instanceof TraitRelation && fastener.consumed === true) {
+        fastener.consume(this);
+      } else if (fastener instanceof ModelRelation && fastener.consumed === true) {
         fastener.consume(this);
       }
     }
@@ -1660,61 +1725,246 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     const fasteners = this.fasteners;
     for (const fastenerName in fasteners) {
       const fastener = fasteners[fastenerName]!;
-      if (fastener instanceof DownlinkFastener && fastener.consumed === true) {
+      if (fastener instanceof WarpDownlink && fastener.consumed === true) {
+        fastener.unconsume(this);
+      } else if (fastener instanceof TraitRelation && fastener.consumed === true) {
+        fastener.unconsume(this);
+      } else if (fastener instanceof ModelRelation && fastener.consumed === true) {
         fastener.unconsume(this);
       }
     }
   }
 
-  @Provider({
-    extends: RefreshProvider,
-    type: RefreshService,
-    observes: false,
-    service: RefreshService.global(),
+  get updateTime(): number {
+    return this.updater.getService().updateTime;
+  }
+
+  @Provider<Model["updater"]>({
+    get serviceType(): typeof RefresherService { // avoid static forward reference
+      return RefresherService;
+    },
+    mountRootService(service: RefresherService): void {
+      Provider.prototype.mountRootService.call(this, service);
+      service.roots.addModel(this.owner);
+    },
+    unmountRootService(service: RefresherService): void {
+      Provider.prototype.unmountRootService.call(this, service);
+      service.roots.removeModel(this.owner);
+    },
   })
-  readonly refreshProvider!: RefreshProvider<this>;
+  readonly updater!: Provider<this, RefresherService>;
+  static readonly updater: FastenerClass<Model["updater"]>;
 
-  @Provider({
-    extends: SelectionProvider,
-    type: SelectionService,
-    observes: false,
-    service: SelectionService.global(),
+  @Provider<Model["selection"]>({
+    get serviceType(): typeof SelectionService { // avoid static forward reference
+      return SelectionService;
+    },
   })
-  readonly selectionProvider!: SelectionProvider<this>;
+  readonly selection!: Provider<this, SelectionService>;
+  static readonly selection: FastenerClass<Model["selection"]>;
 
-  @Provider({
-    extends: WarpProvider,
-    type: WarpService,
-    observes: false,
-    service: WarpService.global(),
-  })
-  readonly warpProvider!: WarpProvider<this>;
+  /** @override */
+  @Property({valueType: Uri, value: null, inherits: true, updateFlags: Model.NeedsReconcile})
+  readonly hostUri!: Property<this, Uri | null, AnyUri | null>;
 
-  @Property({type: Object, inherits: true, value: null, updateFlags: Model.NeedsReconcile})
-  readonly warpRef!: Property<this, WarpRef | null>;
+  /** @override */
+  @Property({valueType: Uri, value: null, inherits: true, updateFlags: Model.NeedsReconcile})
+  readonly nodeUri!: Property<this, Uri | null, AnyUri | null>;
 
-  /** @internal */
-  get superModelContext(): ModelContext {
-    const parent = this.parent;
-    if (parent !== null) {
-      return parent.modelContext;
-    } else {
-      return this.refreshProvider.updatedModelContext();
+  /** @override */
+  @Property({valueType: Uri, value: null, inherits: true, updateFlags: Model.NeedsReconcile})
+  readonly laneUri!: Property<this, Uri | null, AnyUri | null>;
+
+  /** @override */
+  downlink(template?: EventDownlinkTemplate<EventDownlink<this>>): EventDownlink<this> {
+    let downlinkClass = EventDownlink;
+    if (template !== void 0) {
+      downlinkClass = downlinkClass.define("downlink", template);
     }
+    return downlinkClass.create(this);
   }
 
-  /** @internal */
-  extendModelContext(modelContext: ModelContext): ModelContextType<this> {
-    return modelContext as ModelContextType<this>;
-  }
-
-  get modelContext(): ModelContextType<this> {
-    if ((this.flags & Model.ContextualFlag) !== 0) {
-      return ModelContext.current as ModelContextType<this>;
-    } else {
-      return this.extendModelContext(this.superModelContext);
+  /** @override */
+  downlinkValue<V = Value, VU = V extends Value ? AnyValue & V : V>(template?: ValueDownlinkTemplate<ValueDownlink<this, V, VU>>): ValueDownlink<this, V, VU> {
+    let downlinkClass = ValueDownlink;
+    if (template !== void 0) {
+      downlinkClass = downlinkClass.define("downlinkValue", template);
     }
+    return downlinkClass.create(this);
   }
+
+  /** @override */
+  downlinkList<V = Value, VU = V extends Value ? AnyValue & V : V>(template?: ListDownlinkTemplate<ListDownlink<this, V, VU>>): ListDownlink<this, V, VU> {
+    let downlinkClass = ListDownlink;
+    if (template !== void 0) {
+      downlinkClass = downlinkClass.define("downlinkList", template);
+    }
+    return downlinkClass.create(this);
+  }
+
+  /** @override */
+  downlinkMap<K = Value, V = Value, KU = K extends Value ? AnyValue & K : K, VU = V extends Value ? AnyValue & V : V>(template?: MapDownlinkTemplate<MapDownlink<this, K, V, KU, VU>>): MapDownlink<this, K, V, KU, VU> {
+    let downlinkClass = MapDownlink;
+    if (template !== void 0) {
+      downlinkClass = downlinkClass.define("downlinkMap", template);
+    }
+    return downlinkClass.create(this);
+  }
+
+  /** @override */
+  command(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void;
+  /** @override */
+  command(nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void;
+  /** @override */
+  command(laneUri: AnyUri, body: AnyValue): void;
+  /** @override */
+  command(body: AnyValue): void;
+  command(hostUri: AnyUri | AnyValue, nodeUri?: AnyUri | AnyValue, laneUri?: AnyUri | AnyValue, body?: AnyValue): void {
+    if (nodeUri === void 0) {
+      body = Value.fromAny(hostUri as AnyValue);
+      laneUri = this.laneUri.getValue();
+      nodeUri = this.nodeUri.getValue();
+      hostUri = this.hostUri.value;
+    } else if (laneUri === void 0) {
+      body = Value.fromAny(nodeUri as AnyValue);
+      laneUri = Uri.fromAny(hostUri as AnyUri);
+      nodeUri = this.nodeUri.getValue();
+      hostUri = this.hostUri.value;
+    } else if (body === void 0) {
+      body = Value.fromAny(laneUri as AnyValue);
+      laneUri = Uri.fromAny(nodeUri as AnyUri);
+      nodeUri = Uri.fromAny(hostUri as AnyUri);
+      hostUri = this.hostUri.value;
+    } else {
+      body = Value.fromAny(body);
+      laneUri = Uri.fromAny(laneUri as AnyUri);
+      nodeUri = Uri.fromAny(nodeUri as AnyUri);
+      hostUri = Uri.fromAny(hostUri as AnyUri);
+    }
+    if (hostUri === null) {
+      hostUri = nodeUri.endpoint();
+      nodeUri = hostUri.unresolve(nodeUri);
+    }
+    const warpRef = this.warpRef.value;
+    warpRef.command(hostUri, nodeUri, laneUri, body);
+  }
+
+  /** @override */
+  authenticate(hostUri: AnyUri, credentials: AnyValue): void;
+  /** @override */
+  authenticate(credentials: AnyValue): void;
+  authenticate(hostUri: AnyUri | AnyValue, credentials?: AnyValue): void {
+    if (credentials === void 0) {
+      credentials = Value.fromAny(hostUri as AnyValue);
+      hostUri = this.hostUri.getValue();
+    } else {
+      credentials = Value.fromAny(credentials);
+      hostUri = Uri.fromAny(hostUri as AnyUri);
+    }
+    const warpRef = this.warpRef.value;
+    warpRef.authenticate(hostUri, credentials);
+  }
+
+  /** @override */
+  hostRef(hostUri: AnyUri): WarpRef {
+    hostUri = Uri.fromAny(hostUri);
+    const childRef = new Model();
+    childRef.hostUri.setValue(hostUri);
+    this.appendChild(childRef);
+    return childRef;
+  }
+
+  /** @override */
+  nodeRef(hostUri: AnyUri, nodeUri: AnyUri): WarpRef;
+  /** @override */
+  nodeRef(nodeUri: AnyUri): WarpRef;
+  nodeRef(hostUri: AnyUri | undefined, nodeUri?: AnyUri): WarpRef {
+    if (nodeUri === void 0) {
+      nodeUri = Uri.fromAny(hostUri as AnyUri);
+      hostUri = nodeUri.endpoint();
+      if (hostUri.isDefined()) {
+        nodeUri = hostUri.unresolve(nodeUri);
+      } else {
+        hostUri = void 0;
+      }
+    } else {
+      nodeUri = Uri.fromAny(nodeUri);
+      hostUri = Uri.fromAny(hostUri as AnyUri);
+    }
+    const childRef = new Model();
+    if (hostUri !== void 0) {
+      childRef.hostUri.setValue(hostUri);
+    }
+    if (nodeUri !== void 0) {
+      childRef.nodeUri.setValue(nodeUri);
+    }
+    this.appendChild(childRef);
+    return childRef;
+  }
+
+  /** @override */
+  laneRef(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri): WarpRef;
+  /** @override */
+  laneRef(nodeUri: AnyUri, laneUri: AnyUri): WarpRef;
+  /** @override */
+  laneRef(laneUri: AnyUri): WarpRef;
+  laneRef(hostUri: AnyUri | undefined, nodeUri?: AnyUri, laneUri?: AnyUri): WarpRef {
+    if (nodeUri === void 0) {
+      laneUri = Uri.fromAny(hostUri as AnyUri);
+      nodeUri = void 0;
+      hostUri = void 0;
+    } else if (laneUri === void 0) {
+      laneUri = Uri.fromAny(nodeUri);
+      nodeUri = Uri.fromAny(hostUri as AnyUri);
+      hostUri = nodeUri.endpoint();
+      if (hostUri.isDefined()) {
+        nodeUri = hostUri.unresolve(nodeUri);
+      } else {
+        hostUri = void 0;
+      }
+    } else {
+      laneUri = Uri.fromAny(laneUri);
+      nodeUri = Uri.fromAny(nodeUri);
+      hostUri = Uri.fromAny(hostUri as AnyUri);
+    }
+    const childRef = new Model();
+    if (hostUri !== void 0) {
+      childRef.hostUri.setValue(hostUri);
+    }
+    if (nodeUri !== void 0) {
+      childRef.nodeUri.setValue(nodeUri);
+    }
+    if (laneUri !== void 0) {
+      childRef.laneUri.setValue(laneUri);
+    }
+    this.appendChild(childRef);
+    return childRef;
+  }
+
+  /** @internal @override */
+  getDownlink(hostUri: Uri, nodeUri: Uri, laneUri: Uri): WarpDownlinkModel | null {
+    const warpRef = this.warpRef.value;
+    return warpRef.getDownlink(hostUri, nodeUri, laneUri);
+  }
+
+  /** @internal @override */
+  openDownlink(downlink: WarpDownlinkModel): void {
+    const warpRef = this.warpRef.value;
+    warpRef.openDownlink(downlink);
+  }
+
+  @Property<Model["warpRef"]>({
+    valueType: WarpRef,
+    inherits: true,
+    updateFlags: Model.NeedsReconcile,
+    initValue(): WarpRef {
+      return WarpClient.global();
+    },
+    equalValues(newValue: WarpRef, oldValue: WarpRef): boolean {
+      return newValue === oldValue;
+    },
+  })
+  readonly warpRef!: Property<this, WarpRef>;
 
   /** @override */
   override init(init: ModelInit): void {
@@ -1725,7 +1975,7 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
     return new this();
   }
 
-  static override fromInit<S extends Class<Instance<S, Model>>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
+  static override fromInit<S extends Class<Instance<S, Model>>>(this: S, init: Inits<InstanceType<S>>): InstanceType<S> {
     let type: Creatable<Model>;
     if ((typeof init === "object" && init !== null || typeof init === "function") && Creatable.is((init as ModelInit).type)) {
       type = (init as ModelInit).type!;
@@ -1754,17 +2004,19 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   }
 
   /** @internal */
-  static override uid: () => number = (function () {
+  static override uid: () => string = (function () {
     let nextId = 1;
-    return function uid(): number {
+    return function uid(): string {
       const id = ~~nextId;
       nextId += 1;
-      return id;
+      return "model" + id;
     }
   })();
 
   /** @internal */
   static override readonly MountedFlag: ModelFlags = Component.MountedFlag;
+  /** @internal */
+  static override readonly InsertingFlag: ModelFlags = Component.InsertingFlag;
   /** @internal */
   static override readonly RemovingFlag: ModelFlags = Component.RemovingFlag;
   /** @internal */
@@ -1772,33 +2024,31 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
   /** @internal */
   static readonly RefreshingFlag: ModelFlags = 1 << (Component.FlagShift + 1);
   /** @internal */
-  static readonly ContextualFlag: ModelFlags = 1 << (Component.FlagShift + 2);
-  /** @internal */
-  static readonly ConsumingFlag: ModelFlags = 1 << (Component.FlagShift + 3);
+  static readonly ConsumingFlag: ModelFlags = 1 << (Component.FlagShift + 2);
   /** @internal */
   static readonly UpdatingMask: ModelFlags = Model.AnalyzingFlag
                                            | Model.RefreshingFlag;
   /** @internal */
   static readonly StatusMask: ModelFlags = Model.MountedFlag
+                                         | Model.InsertingFlag
                                          | Model.RemovingFlag
                                          | Model.AnalyzingFlag
                                          | Model.RefreshingFlag
-                                         | Model.ContextualFlag
                                          | Model.ConsumingFlag;
 
-  static readonly NeedsAnalyze: ModelFlags = 1 << (Component.FlagShift + 4);
-  static readonly NeedsMutate: ModelFlags = 1 << (Component.FlagShift + 5);
-  static readonly NeedsAggregate: ModelFlags = 1 << (Component.FlagShift + 6);
-  static readonly NeedsCorrelate: ModelFlags = 1 << (Component.FlagShift + 7);
+  static readonly NeedsAnalyze: ModelFlags = 1 << (Component.FlagShift + 3);
+  static readonly NeedsMutate: ModelFlags = 1 << (Component.FlagShift + 4);
+  static readonly NeedsAggregate: ModelFlags = 1 << (Component.FlagShift + 5);
+  static readonly NeedsCorrelate: ModelFlags = 1 << (Component.FlagShift + 6);
   /** @internal */
   static readonly AnalyzeMask: ModelFlags = Model.NeedsAnalyze
                                           | Model.NeedsMutate
                                           | Model.NeedsAggregate
                                           | Model.NeedsCorrelate;
 
-  static readonly NeedsRefresh: ModelFlags = 1 << (Component.FlagShift + 8);
-  static readonly NeedsValidate: ModelFlags = 1 << (Component.FlagShift + 9);
-  static readonly NeedsReconcile: ModelFlags = 1 << (Component.FlagShift + 10);
+  static readonly NeedsRefresh: ModelFlags = 1 << (Component.FlagShift + 7);
+  static readonly NeedsValidate: ModelFlags = 1 << (Component.FlagShift + 8);
+  static readonly NeedsReconcile: ModelFlags = 1 << (Component.FlagShift + 9);
   /** @internal */
   static readonly RefreshMask: ModelFlags = Model.NeedsRefresh
                                           | Model.NeedsValidate
@@ -1809,13 +2059,14 @@ export class Model extends Component<Model> implements Initable<ModelInit>, Cons
                                          | Model.RefreshMask;
 
   /** @internal */
-  static override readonly FlagShift: number = Component.FlagShift + 11;
+  static override readonly FlagShift: number = Component.FlagShift + 10;
   /** @internal */
   static override readonly FlagMask: ModelFlags = (1 << Model.FlagShift) - 1;
 
   static override readonly MountFlags: ModelFlags = 0;
   static override readonly InsertChildFlags: ModelFlags = 0;
   static override readonly RemoveChildFlags: ModelFlags = 0;
+  static override readonly ReinsertChildFlags: ModelFlags = 0;
   static readonly InsertTraitFlags: ModelFlags = 0;
   static readonly RemoveTraitFlags: ModelFlags = 0;
   static readonly StartConsumingFlags: ModelFlags = 0;

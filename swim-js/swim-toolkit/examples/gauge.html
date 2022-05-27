@@ -12,12 +12,12 @@
     <script>
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").position("relative").width("67%").height("67%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .mouseEventsEnabled(true)
@@ -25,19 +25,18 @@ const canvasView = swim.CanvasView.create()
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const gaugeView = canvasView.appendChild(swim.GaugeView)
-    .font("14px sans-serif")
-    .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"));
+const gaugeView = canvasView.appendChild(swim.GaugeView).font("14px sans-serif");
+gaugeView.title.setText("Gauge").font("20px sans-serif");
 
 const dialView = gaugeView.appendChild(swim.DialView)
-    .value(0.33)
-    .legend("Legend")
-    .on("pointerenter", function (event) {
-      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
-    })
-    .on("pointerleave", function (event) {
-      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
-    });
+dialView.value(0.33);
+dialView.addEventListener("pointerenter", function (event) {
+  dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+});
+dialView.addEventListener("pointerleave", function (event) {
+  dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+});
+dialView.legend.setText("Legend");
 
 setInterval(function () {
   const timing = swim.Easing.linear.withDuration(1000);

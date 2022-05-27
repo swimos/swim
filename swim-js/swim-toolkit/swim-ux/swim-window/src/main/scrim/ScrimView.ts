@@ -16,8 +16,7 @@ import {Mutable, AnyTiming, Timing} from "@swim/util";
 import {Affinity} from "@swim/component";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
-import type {ModalService, ModalServiceObserver} from "@swim/view";
-import {StyleAnimator, HtmlView} from "@swim/dom";
+import {StyleAnimator, HtmlView, ModalService, ModalServiceObserver} from "@swim/dom";
 
 /** @public */
 export class ScrimView extends HtmlView implements ModalServiceObserver {
@@ -27,14 +26,14 @@ export class ScrimView extends HtmlView implements ModalServiceObserver {
     this.onClick = this.onClick.bind(this);
     if (typeof PointerEvent !== "undefined") {
       this.onSyntheticClick = this.onSyntheticClick.bind(this);
-      this.on("pointerup", this.onClick);
-      this.on("click", this.onSyntheticClick);
+      this.addEventListener("pointerup", this.onClick);
+      this.addEventListener("click", this.onSyntheticClick);
     } else if (typeof TouchEvent !== "undefined") {
       this.onSyntheticClick = this.onSyntheticClick.bind(this);
-      this.on("touchend", this.onClick);
-      this.on("click", this.onSyntheticClick);
+      this.addEventListener("touchend", this.onClick);
+      this.addEventListener("click", this.onSyntheticClick);
     } else {
-      this.on("click", this.onClick);
+      this.addEventListener("click", this.onClick);
     }
     this.initScrim();
   }
@@ -60,10 +59,8 @@ export class ScrimView extends HtmlView implements ModalServiceObserver {
     (this as Mutable<this>).displayState = displayState;
   }
 
-  @StyleAnimator<ScrimView, Color | null, AnyColor | null>({
-    propertyNames: "background-color",
-    type: Color,
-    value: null,
+  @StyleAnimator<ScrimView["backgroundColor"]>({
+    extends: HtmlView.getFastenerClass("backgroundColor"),
     willTransition(): void {
       const displayState = this.owner.displayState;
       if (displayState === ScrimView.ShowState) {
@@ -160,23 +157,23 @@ export class ScrimView extends HtmlView implements ModalServiceObserver {
 
   protected override onMount(): void {
     super.onMount();
-    const modalService = this.modalProvider.service;
-    if (modalService !== void 0 && modalService !== null) {
+    const modalService = this.modal.service;
+    if (modalService !== null) {
       modalService.observe(this);
-      this.serviceDidUpdateModality(modalService.modality, 0, modalService);
+      this.serviceDidSetModality(modalService.modality.value, 0, modalService);
     }
   }
 
   protected override onUnmount(): void {
-    const modalService = this.modalProvider.service;
-    if (modalService !== void 0 && modalService !== null) {
+    const modalService = this.modal.service;
+    if (modalService !== null) {
       modalService.unobserve(this);
     }
     this.hide(false);
     super.onUnmount();
   }
 
-  serviceDidUpdateModality(newModality: number, oldModality: number, modalService: ModalService): void {
+  serviceDidSetModality(newModality: number, oldModality: number, modalService: ModalService): void {
     if (newModality !== 0) {
       const opacity = 0.5 * newModality;
       if (oldModality === 0) {
@@ -193,9 +190,9 @@ export class ScrimView extends HtmlView implements ModalServiceObserver {
   }
 
   protected onClick(event: Event): void {
-    const modalService = this.modalProvider.service;
-    if (modalService !== void 0 && modalService !== null) {
-      modalService.displaceModals(event);
+    const modalService = this.modal.service;
+    if (modalService !== null) {
+      modalService.displaceModals();
     }
   }
 

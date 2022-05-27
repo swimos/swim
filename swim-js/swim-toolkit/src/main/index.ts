@@ -26,7 +26,8 @@ export * from "@swim/toolbar";
 export * from "@swim/token";
 export * from "@swim/table";
 export * from "@swim/window";
-export * from "@swim/deck";
+export * from "@swim/sheet";
+export * from "@swim/panel";
 //export * from "@swim/ux";
 
 export * from "@swim/gauge";

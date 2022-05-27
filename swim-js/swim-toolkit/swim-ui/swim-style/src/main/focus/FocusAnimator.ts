@@ -12,46 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AnyTiming, Timing} from "@swim/util";
-import {Affinity, AnimatorInit, AnimatorClass, Animator} from "@swim/component";
+import type {AnyTiming} from "@swim/util";
+import {Affinity, AnimatorClass, Animator} from "@swim/component";
 import {AnyFocus, Focus} from "./Focus";
 
 /** @public */
-export interface FocusAnimatorInit<T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = T> extends AnimatorInit<T, U> {
-  extends?: {prototype: FocusAnimator<any, any>} | string | boolean | null;
-
-  transition?: Timing | null;
-
-  willFocus?(): void;
-  didFocus?(): void;
-  willUnfocus?(): void;
-  didUnfocus?(): void;
-}
-
-/** @public */
-export type FocusAnimatorDescriptor<O = unknown, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = T, I = {}> = ThisType<FocusAnimator<O, T, U> & I> & FocusAnimatorInit<T, U> & Partial<I>;
-
-/** @public */
-export interface FocusAnimatorClass<A extends FocusAnimator<any, any> = FocusAnimator<any, any>> extends AnimatorClass<A> {
-}
-
-/** @public */
-export interface FocusAnimatorFactory<A extends FocusAnimator<any, any> = FocusAnimator<any, any>> extends FocusAnimatorClass<A> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): FocusAnimatorFactory<A> & I;
-
-  specialize(type: unknown): FocusAnimatorFactory | null;
-
-  define<O, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = T>(className: string, descriptor: FocusAnimatorDescriptor<O, T, U>): FocusAnimatorFactory<FocusAnimator<any, T, U>>;
-  define<O, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = T, I = {}>(className: string, descriptor: {implements: unknown} & FocusAnimatorDescriptor<O, T, U, I>): FocusAnimatorFactory<FocusAnimator<any, T, U> & I>;
-
-  <O, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = T>(descriptor: FocusAnimatorDescriptor<O, T, U> & FocusAnimatorInit): PropertyDecorator;
-  <O, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = T, I = {}>(descriptor: {implements: unknown} & FocusAnimatorDescriptor<O, T, U, I>): PropertyDecorator;
-}
-
-/** @public */
-export interface FocusAnimator<O = unknown, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = T> extends Animator<O, T, U> {
-  get type(): typeof Focus;
-
+export interface FocusAnimator<O = unknown, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = AnyFocus | T> extends Animator<O, T, U> {
   get phase(): number | undefined;
 
   getPhase(): number;
@@ -102,22 +68,14 @@ export interface FocusAnimator<O = unknown, T extends Focus | null | undefined =
   equalValues(newState: T, oldState: T | undefined): boolean;
 
   /** @override */
-  fromAny(value: T | U): T
-
-  /** @internal */
-  get transition(): Timing | null | undefined; // optional prototype field
+  fromAny(value: T | U): T;
 }
 
 /** @public */
 export const FocusAnimator = (function (_super: typeof Animator) {
-  const FocusAnimator: FocusAnimatorFactory = _super.extend("FocusAnimator");
-
-  Object.defineProperty(FocusAnimator.prototype, "type", {
-    get(this: FocusAnimator): typeof Focus {
-      return Focus;
-    },
-    configurable: true,
-  });
+  const FocusAnimator = _super.extend("FocusAnimator", {
+    valueType: Focus,
+  }) as AnimatorClass<FocusAnimator<any, any, any>>;
 
   Object.defineProperty(FocusAnimator.prototype, "phase", {
     get(this: FocusAnimator): number | undefined {
@@ -292,10 +250,6 @@ export const FocusAnimator = (function (_super: typeof Animator) {
     } else {
       return newState === oldState;
     }
-  };
-
-  FocusAnimator.specialize = function (type: unknown): FocusAnimatorFactory | null {
-    return FocusAnimator;
   };
 
   return FocusAnimator;

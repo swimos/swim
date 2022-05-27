@@ -17,8 +17,8 @@ import type {TraitObserver} from "@swim/model";
 import type {GeoTrait} from "./GeoTrait";
 
 /** @public */
-export interface GeoTraitObserver<R extends GeoTrait = GeoTrait> extends TraitObserver<R> {
-  traitWillSetGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, trait: R): void;
+export interface GeoTraitObserver<T extends GeoTrait = GeoTrait> extends TraitObserver<T> {
+  traitWillSetGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, trait: T): void;
 
-  traitDidSetGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, trait: R): void;
+  traitDidSetGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, trait: T): void;
 }

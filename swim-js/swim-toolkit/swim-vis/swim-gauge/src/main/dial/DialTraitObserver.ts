@@ -13,33 +13,20 @@
 // limitations under the License.
 
 import type {TraitObserver} from "@swim/model";
-import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
-import type {DialLabel, DialLegend, DialTrait} from "./DialTrait";
+import type {ColorOrLook} from "@swim/theme";
+import type {DialTrait} from "./DialTrait";
 
 /** @public */
-export interface DialTraitObserver<R extends DialTrait = DialTrait> extends TraitObserver<R> {
-  traitWillSetDialValue?(newValue: number, oldValue: number, trait: R): void;
+export interface DialTraitObserver<T extends DialTrait = DialTrait> extends TraitObserver<T> {
+  traitDidSetValue?(value: number, trait: T): void;
 
-  traitDidSetDialValue?(newValue: number, oldValue: number, trait: R): void;
+  traitDidSetLimit?(limit: number, trait: T): void;
 
-  traitWillSetDialLimit?(newLimit: number, oldLimit: number, trait: R): void;
+  traitDidSetDialColor?(dialColor: ColorOrLook | null, trait: T): void;
 
-  traitDidSetDialLimit?(newLimit: number, oldLimit: number, trait: R): void;
+  traitDidSetMeterColor?(meterColor: ColorOrLook | null, trait: T): void;
 
-  traitWillSetDialColor?(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null, trait: R): void;
+  traitDidSetLabel?(label: string | undefined, trait: T): void;
 
-  traitDidSetDialColor?(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null, trait: R): void;
-
-  traitWillSetMeterColor?(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null, trait: R): void;
-
-  traitDidSetMeterColor?(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null, trait: R): void;
-
-  traitWillSetDialLabel?(newLabel: DialLabel | null, oldLabel: DialLabel | null, trait: R): void;
-
-  traitDidSetDialLabel?(newLabel: DialLabel | null, oldLabel: DialLabel | null, trait: R): void;
-
-  traitWillSetDialLegend?(newLegend: DialLegend | null, oldLegend: DialLegend | null, trait: R): void;
-
-  traitDidSetDialLegend?(newLegend: DialLegend | null, oldLegend: DialLegend | null, trait: R): void;
+  traitDidSetLegend?(legend: string | undefined, trait: T): void;
 }

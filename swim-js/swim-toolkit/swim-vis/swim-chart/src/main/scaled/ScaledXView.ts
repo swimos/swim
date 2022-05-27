@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
-import type {Animator} from "@swim/component";
+import type {Class, Domain, Range, AnyTiming} from "@swim/util";
 import {GraphicsView} from "@swim/graphics";
+import type {ContinuousScaleAnimator} from "./ContinuousScaleAnimator";
 import type {ScaledXViewObserver} from "./ScaledXViewObserver";
 import {ScaledView} from "../"; // forward import
 
@@ -23,7 +23,7 @@ export interface ScaledXView<X = unknown> extends GraphicsView {
   /** @override */
   readonly observerType?: Class<ScaledXViewObserver<X>>;
 
-  readonly xScale: Animator<this, ContinuousScale<X, number> | null, string>;
+  readonly xScale: ContinuousScaleAnimator<this, X, number>;
 
   xDomain(): Domain<X> | null;
   xDomain(xDomain: Domain<X> | null, timing?: AnyTiming | boolean): this;

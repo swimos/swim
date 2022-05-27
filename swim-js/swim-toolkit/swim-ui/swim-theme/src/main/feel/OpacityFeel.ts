@@ -21,14 +21,14 @@ export class OpacityFeel extends Feel {
   override combine<T>(look: Look<T, any>, combination: T | undefined,
                       value: T, weight?: number): T {
     if (combination instanceof Color && value instanceof Color) {
-      if (weight === void 0 || weight === 1) {
-        return combination.alpha(value.alpha()) as unknown as T;
-      } else if (weight === 0) {
-        return combination;
-      } else {
-        const alpha = (1.0 - weight) * combination.alpha() + weight * value.alpha();
-        return combination.alpha(alpha) as unknown as T;
+      if (weight === void 0) {
+        weight = 1;
       }
+      const alpha0 = combination.alpha();
+      const alpha1 = alpha0 * value.alpha();
+      const alpha = (1.0 - weight) * alpha0 + weight * alpha1;
+      const color = combination.alpha(alpha) as unknown as T;
+      return color;
     } else {
       return look.combine(combination, value, weight);
     }

@@ -18,35 +18,13 @@ import {Controller, TraitViewRef} from "@swim/controller";
 import type {GeoView} from "./GeoView";
 import type {GeoTrait} from "./GeoTrait";
 import type {GeoControllerObserver} from "./GeoControllerObserver";
-import {GeoLayerTrait} from "../"; // forward import
-import {GeoLayerController} from "../"; // forward import
-import {GeoLineTrait} from "../"; // forward import
-import {GeoLineController} from "../"; // forward import
-import {GeoAreaTrait} from "../"; // forward import
-import {GeoAreaController} from "../"; // forward import
-import {GeoIconTrait} from "../"; // forward import
-import {GeoIconController} from "../"; // forward import
 
 /** @public */
 export abstract class GeoController extends Controller {
   override readonly observerType?: Class<GeoControllerObserver>;
 
-  @Property({type: Timing, inherits: true})
-  readonly geoTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({valueType: Timing, inherits: true})
+  readonly geoTiming!: Property<this, Timing | boolean | undefined, AnyTiming | boolean | undefined>;
 
   abstract readonly geo: TraitViewRef<this, GeoTrait, GeoView>;
-
-  static fromTrait(geoTrait: GeoTrait): GeoController {
-    if (geoTrait instanceof GeoLayerTrait) {
-      return new GeoLayerController();
-    } else if (geoTrait instanceof GeoIconTrait) {
-      return new GeoIconController();
-    } else if (geoTrait instanceof GeoAreaTrait) {
-      return new GeoAreaController();
-    } else if (geoTrait instanceof GeoLineTrait) {
-      return new GeoLineController();
-    } else {
-      throw new Error("Can't create GeoController from " + geoTrait);
-    }
-  }
 }

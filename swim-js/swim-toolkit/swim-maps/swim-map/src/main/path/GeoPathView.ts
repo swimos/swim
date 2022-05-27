@@ -14,9 +14,8 @@
 
 import type {Mutable, Class} from "@swim/util";
 import {Affinity, Animator} from "@swim/component";
-import {AnyR2Point, R2Point, R2Box, R2Path} from "@swim/math";
+import {AnyR2Point, R2Point, R2Box, AnyR2Path, R2Path} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox, AnyGeoPath, GeoPath} from "@swim/geo";
-import type {ViewContextType} from "@swim/view";
 import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPathViewObserver} from "./GeoPathViewObserver";
@@ -40,39 +39,35 @@ export class GeoPathView extends GeoView {
 
   override readonly observerType?: Class<GeoPathViewObserver>;
 
-  @Animator<GeoPathView, GeoPath | null, AnyGeoPath | null>({
-    type: GeoPath,
+  @Animator<GeoPathView["geoPath"]>({
+    valueType: GeoPath,
     value: null,
-    willSetValue(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-      this.owner.callObservers("viewWillSetGeoPath", newGeoPath, oldGeoPath, this.owner);
-    },
     didSetValue(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
       this.owner.setGeoBounds(newGeoPath !== null ? newGeoPath.bounds : GeoBox.undefined());
       if (this.mounted) {
-        this.owner.projectPath(this.owner.viewContext);
+        this.owner.projectPath();
       }
-      this.owner.callObservers("viewDidSetGeoPath", newGeoPath, oldGeoPath, this.owner);
+      this.owner.callObservers("viewDidSetGeoPath", newGeoPath, this.owner);
     },
   })
   readonly geoPath!: Animator<this, GeoPath | null, AnyGeoPath | null>;
 
-  @Animator({type: R2Path, value: null})
-  readonly viewPath!: Animator<this, R2Path | null>;
+  @Animator({valueType: R2Path, value: null})
+  readonly viewPath!: Animator<this, R2Path | null, AnyR2Path | null>;
 
-  @Animator({type: GeoPoint, value: null})
+  @Animator({valueType: GeoPoint, value: null})
   readonly geoCentroid!: Animator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @Animator({type: R2Point, value: null})
+  @Animator({valueType: R2Point, value: null})
   readonly viewCentroid!: Animator<this, R2Point | null, AnyR2Point | null>;
 
-  protected override onProject(viewContext: ViewContextType<this>): void {
-    super.onProject(viewContext);
-    this.projectPath(viewContext);
+  protected override onProject(): void {
+    super.onProject();
+    this.projectPath();
   }
 
-  protected projectPath(viewContext: ViewContextType<this>): void {
-    const geoViewport = viewContext.geoViewport;
-
+  protected projectPath(): void {
+    const geoViewport = this.geoViewport.value;
     let viewPath: R2Path | null;
     if (this.viewPath.hasAffinity(Affinity.Intrinsic)) {
       const geoPath = this.geoPath.value;
@@ -90,9 +85,9 @@ export class GeoPathView extends GeoView {
       this.viewCentroid.setState(viewCentroid, Affinity.Intrinsic);
     }
 
-    (this as Mutable<this>).viewBounds = viewPath !== null ? viewPath.bounds : viewContext.viewFrame;
+    (this as Mutable<this>).viewBounds = viewPath !== null ? viewPath.bounds : this.viewFrame;
 
-    this.cullGeoFrame(viewContext.geoViewport.geoFrame);
+    this.cullGeoFrame(this.geoViewport.value.geoFrame);
   }
 
   protected override updateGeoBounds(): void {

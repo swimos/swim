@@ -13,12 +13,8 @@
 // limitations under the License.
 
 import type {MapViewObserver} from "@swim/map";
-import type {GoogleMapViewport} from "./GoogleMapViewport";
 import type {GoogleMapView} from "./GoogleMapView";
 
 /** @public */
 export interface GoogleMapViewObserver<V extends GoogleMapView = GoogleMapView> extends MapViewObserver<V> {
-  viewWillSetGeoViewport?(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport, view: V): void;
-
-  viewDidSetGeoViewport?(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport, view: V): void;
 }

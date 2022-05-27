@@ -18,7 +18,7 @@ import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, View} from "@swim/view";
+import {View} from "@swim/view";
 import {
   GraphicsView,
   StrokeViewInit,
@@ -152,25 +152,25 @@ export class GeoPlotView extends GeoView implements StrokeView {
     return point;
   }
 
-  @Property({type: GeoPoint, value: GeoPoint.origin()})
+  @Property({valueType: GeoPoint, value: GeoPoint.origin()})
   readonly geoCentroid!: Property<this, GeoPoint, AnyGeoPoint>;
 
-  @Property({type: R2Point, value: R2Point.origin()})
+  @Property({valueType: R2Point, value: R2Point.origin()})
   readonly viewCentroid!: Property<this, R2Point, AnyR2Point>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly stroke!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly strokeWidth!: ThemeAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeAnimator({type: Font, value: null, inherits: true})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, value: null, inherits: true})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @Property({type: Number})
+  @Property({valueType: Number})
   readonly hitWidth!: Property<this, number | undefined>;
 
   /** @internal */
@@ -187,7 +187,7 @@ export class GeoPlotView extends GeoView implements StrokeView {
     childView.requireUpdate(View.NeedsAnimate | View.NeedsProject);
   }
 
-  protected override didProject(viewContext: ViewContextType<this>): void {
+  protected override didProject(): void {
     const oldGeoBounds = this.geoBounds;
     let lngMin = Infinity;
     let latMin = Infinity;
@@ -239,7 +239,7 @@ export class GeoPlotView extends GeoView implements StrokeView {
       yMid /= pointCount;
       this.viewCentroid.setValue(new R2Point(xMid, yMid), Affinity.Intrinsic);
       (this as Mutable<this>).viewBounds = new R2Box(xMin, yMin, xMax, yMax);
-      this.cullGeoFrame(viewContext.geoViewport.geoFrame);
+      this.cullGeoFrame(this.geoViewport.value.geoFrame);
     } else {
       this.geoCentroid.setValue(GeoPoint.origin(), Affinity.Intrinsic);
       (this as Mutable<this>).geoBounds = GeoBox.undefined();
@@ -254,17 +254,17 @@ export class GeoPlotView extends GeoView implements StrokeView {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
       this.didSetGeoBounds(newGeoBounds, oldGeoBounds);
     }
-    super.didProject(viewContext);
+    super.didProject();
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    super.onRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       if (this.gradientStops !== 0 && renderer instanceof CanvasRenderer) {
-        this.renderPlotGradient(renderer.context, viewContext.viewFrame);
+        this.renderPlotGradient(renderer.context, this.viewFrame);
       } else {
-        this.renderPlotStroke(renderer.context, viewContext.viewFrame);
+        this.renderPlotStroke(renderer.context, this.viewFrame);
       }
     }
   }
@@ -372,11 +372,11 @@ export class GeoPlotView extends GeoView implements StrokeView {
 
   override readonly viewBounds!: R2Box;
 
-  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    const renderer = viewContext.renderer;
+  protected override hitTest(x: number, y: number): GraphicsView | null {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const p = renderer.transform.transform(x, y);
-      return this.hitTestPlot(p.x, p.y, renderer.context, viewContext.viewFrame);
+      return this.hitTestPlot(p.x, p.y, renderer.context, this.viewFrame);
     }
     return null;
   }

@@ -100,19 +100,17 @@ export class BarLayout implements Interpolate<BarLayout>, Equals, Equivalent, De
       let k = 0;
       for (let i = 0; i < toolCount; i += 1) {
         const tool = oldTools[i]!;
-        if (!tool.presence.dismissed) {
-          if (k !== 0) {
-            basis += toolSpacing;
-            x += toolSpacing;
-          }
-          const toolWidth = tool.basis.pxValue(barWidth);
-          newTools[i] = tool.resized(toolWidth, x, barWidth - toolWidth - x);
-          grow += tool.grow;
-          shrink += tool.shrink;
-          basis += toolWidth;
-          x += toolWidth;
-          k += 1;
+        if (k !== 0) {
+          basis += toolSpacing;
+          x += toolSpacing;
         }
+        const toolWidth = tool.basis.pxValue(barWidth);
+        newTools[i] = tool.resized(toolWidth, x, barWidth - toolWidth - x);
+        grow += tool.grow;
+        shrink += tool.shrink;
+        basis += toolWidth;
+        x += toolWidth;
+        k += 1;
       }
 
       if (basis < barWidth && grow > 0) {
@@ -121,18 +119,14 @@ export class BarLayout implements Interpolate<BarLayout>, Equals, Equivalent, De
         let j = 0;
         for (let i = 0; i < toolCount; i += 1) {
           const tool = newTools[i]!;
-          if (!tool.presence.dismissed) {
-            if (j !== 0) {
-              x += toolSpacing;
-            }
-            const toolBasis = tool.basis.pxValue(barWidth);
-            const toolWidth = toolBasis + delta * (tool.grow / grow);
-            newTools[i] = tool.resized(toolWidth, x, barWidth - toolWidth - x);
-            x += toolWidth;
-            j += 1;
-          } else {
-            newTools[i] = tool.resized(0, x + toolSpacing, barWidth - x - toolSpacing);
+          if (j !== 0) {
+            x += toolSpacing;
           }
+          const toolBasis = tool.basis.pxValue(barWidth);
+          const toolWidth = toolBasis + delta * (tool.grow / grow);
+          newTools[i] = tool.resized(toolWidth, x, barWidth - toolWidth - x);
+          x += toolWidth;
+          j += 1;
         }
       } else if (basis > barWidth && shrink > 0) {
         const delta = basis - barWidth;
@@ -140,18 +134,14 @@ export class BarLayout implements Interpolate<BarLayout>, Equals, Equivalent, De
         let j = 0;
         for (let i = 0; i < toolCount; i += 1) {
           const tool = newTools[i]!;
-          if (!tool.presence.dismissed) {
-            if (j !== 0) {
-              x += toolSpacing;
-            }
-            const toolBasis = tool.basis.pxValue(barWidth);
-            const toolWidth = toolBasis - delta * (tool.shrink / shrink);
-            newTools[i] = tool.resized(toolWidth, x, barWidth - toolWidth - x);
-            x += toolWidth;
-            j += 1;
-          } else {
-            newTools[i] = tool.resized(0, x + toolSpacing, barWidth - x - toolSpacing);
+          if (j !== 0) {
+            x += toolSpacing;
           }
+          const toolBasis = tool.basis.pxValue(barWidth);
+          const toolWidth = toolBasis - delta * (tool.shrink / shrink);
+          newTools[i] = tool.resized(toolWidth, x, barWidth - toolWidth - x);
+          x += toolWidth;
+          j += 1;
         }
       }
 

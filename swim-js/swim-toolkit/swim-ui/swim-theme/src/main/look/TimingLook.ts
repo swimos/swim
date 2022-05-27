@@ -15,7 +15,13 @@
 import {AnyTiming, Timing, Interpolator} from "@swim/util";
 import {Look} from "./Look";
 
-/** @internal */
+/** @public */
+export type AnyTimingOrLook = Look<Timing, any> | AnyTiming;
+
+/** @public */
+export type TimingOrLook = Look<Timing, any> | Timing;
+
+/** @public */
 export class TimingLook extends Look<Timing, AnyTiming> {
   override combine(combination: Timing | undefined, value: Timing, weight: number): Timing {
     if (weight === void 0 || weight !== 0) {
@@ -33,5 +39,16 @@ export class TimingLook extends Look<Timing, AnyTiming> {
 
   override coerce(value: AnyTiming): Timing {
     return Timing.fromAny(value);
+  }
+
+  static fromAny(value: Look<Timing> | AnyTiming): Look<Timing> | Timing;
+  static fromAny(value: Look<Timing> | AnyTiming | null): Look<Timing> | Timing | null;
+  static fromAny(value: Look<Timing> | AnyTiming | null | undefined): Look<Timing> | Timing | null | undefined;
+  static fromAny(value: Look<Timing> | AnyTiming | null | undefined): Look<Timing> | Timing | null | undefined {
+    if (value === void 0 || value === null || value instanceof Look || value instanceof Timing) {
+      return value;
+    } else {
+      return Timing.fromAny(value);
+    }
   }
 }

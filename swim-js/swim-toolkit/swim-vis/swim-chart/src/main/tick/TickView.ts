@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Initable, Timing} from "@swim/util";
-import {MemberFastenerClass, Animator} from "@swim/component";
+import type {Mutable, Class, Timing} from "@swim/util";
+import {FastenerClass, Animator} from "@swim/component";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ThemeAnimator} from "@swim/theme";
-import {ViewContextType, AnyView, View, ViewRef} from "@swim/view";
+import {View, ViewRef} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
@@ -92,39 +92,39 @@ export abstract class TickView<D = unknown> extends GraphicsView {
   /** @internal */
   readonly tickState: TickState;
 
-  @Animator({type: R2Point, value: R2Point.origin(), updateFlags: View.NeedsRender})
+  @Animator({valueType: R2Point, value: R2Point.origin(), updateFlags: View.NeedsRender})
   readonly anchor!: Animator<this, R2Point, AnyR2Point>;
 
-  @ThemeAnimator({type: Number, value: 1, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 1, updateFlags: View.NeedsRender})
   readonly opacity!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly tickMarkColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 1, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 1, inherits: true, updateFlags: View.NeedsRender})
   readonly tickMarkWidth!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 6, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 6, inherits: true, updateFlags: View.NeedsRender})
   readonly tickMarkLength!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 2, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 2, inherits: true, updateFlags: View.NeedsRender})
   readonly tickLabelPadding!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true, updateFlags: View.NeedsRender})
   readonly gridLineColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ThemeAnimator({type: Number, inherits: true, value: 0, updateFlags: View.NeedsRender})
+  @ThemeAnimator({valueType: Number, value: 0, inherits: true, updateFlags: View.NeedsRender})
   readonly gridLineWidth!: ThemeAnimator<this, number>;
 
-  @ThemeAnimator({type: Font, inherits: true, value: null})
+  @ThemeAnimator({valueType: Font, value: null, inherits: true})
   readonly font!: ThemeAnimator<this, Font | null, AnyFont | null>;
 
-  @ThemeAnimator({type: Color, inherits: true, value: null})
+  @ThemeAnimator({valueType: Color, value: null, inherits: true})
   readonly textColor!: ThemeAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewRef<TickView<D>, GraphicsView & Initable<GraphicsViewInit | string>>({
-    key: true,
-    type: TextRunView,
+  @ViewRef<TickView<D>["label"]>({
+    viewType: TextRunView,
+    viewKey: true,
     binds: true,
     willAttachView(labelView: GraphicsView): void {
       this.owner.callObservers("viewWillAttachTickLabel", labelView, this.owner);
@@ -132,21 +132,22 @@ export abstract class TickView<D = unknown> extends GraphicsView {
     didDetachView(labelView: GraphicsView): void {
       this.owner.callObservers("viewDidDetachTickLabel", labelView, this.owner);
     },
-    fromAny(value: AnyView<GraphicsView> | string): GraphicsView {
-      if (typeof value === "string") {
-        if (this.view instanceof TextRunView) {
-          this.view.text(value);
-          return this.view;
-        } else {
-          return TextRunView.fromAny(value);
-        }
-      } else {
-        return GraphicsView.fromAny(value);
+    setText(label: string | undefined): GraphicsView {
+      let labelView = this.view;
+      if (labelView === null) {
+        labelView = this.createView();
+        this.setView(labelView);
       }
+      if (labelView instanceof TextRunView) {
+        labelView.text(label !== void 0 ? label : "");
+      }
+      return labelView;
     },
   })
-  readonly label!: ViewRef<this, GraphicsView & Initable<GraphicsViewInit | string>>;
-  static readonly label: MemberFastenerClass<TickView, "label">;
+  readonly label!: ViewRef<this, GraphicsView> & {
+    setText(label: string | undefined): GraphicsView,
+  };
+  static readonly label: FastenerClass<TickView["label"]>;
 
   /** @internal */
   readonly preserved: boolean;
@@ -176,8 +177,8 @@ export abstract class TickView<D = unknown> extends GraphicsView {
     }
   }
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     const labelView = this.label.view;
     if (labelView !== null) {
       this.layoutLabel(labelView);
@@ -187,9 +188,9 @@ export abstract class TickView<D = unknown> extends GraphicsView {
   /** @internal */
   private static globalAlpha: number = NaN;
 
-  protected override willRender(viewContext: ViewContextType<this>): void {
-    super.willRender(viewContext);
-    const renderer = viewContext.renderer;
+  protected override willRender(): void {
+    super.willRender();
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
       // save
@@ -198,22 +199,22 @@ export abstract class TickView<D = unknown> extends GraphicsView {
     }
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
-    const renderer = viewContext.renderer;
+  protected override onRender(): void {
+    const renderer = this.renderer.value;
     if (renderer instanceof PaintingRenderer && !this.hidden && !this.culled) {
       this.renderTick(renderer.context, this.viewFrame);
     }
   }
 
-  protected override didRender(viewContext: ViewContextType<this>): void {
-    const renderer = viewContext.renderer;
+  protected override didRender(): void {
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
       // restore
       context.globalAlpha = TickView.globalAlpha;
       TickView.globalAlpha = NaN;
     }
-    super.didRender(viewContext);
+    super.didRender();
   }
 
   protected abstract layoutLabel(labelView: GraphicsView): void;
@@ -249,8 +250,10 @@ export abstract class TickView<D = unknown> extends GraphicsView {
       this.textColor(init.textColor);
     }
 
-    if (init.label !== void 0) {
-      this.label(init.label);
+    if (typeof init.label === "string") {
+      this.label.setText(init.label);
+    } else if (init.label !== void 0) {
+      this.label.setView(init.label);
     }
   }
 

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {Class, Observes} from "@swim/util";
+import type {FastenerClass} from "@swim/component";
 import type {Graphics} from "@swim/graphics";
 import {TraitViewRef} from "@swim/controller";
 import {CellController} from "./CellController";
@@ -32,7 +32,7 @@ export class IconCellController extends CellController {
     }
   }
 
-  @TraitViewRef<IconCellController, IconCellTrait, IconCellView>({
+  @TraitViewRef<IconCellController["cell"]>({
     extends: true,
     traitType: IconCellTrait,
     observesTrait: true,
@@ -42,8 +42,8 @@ export class IconCellController extends CellController {
     deinitTrait(cellTrait: IconCellTrait): void {
       this.owner.setIcon(null);
     },
-    traitDidSetIcon(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
-      this.owner.setIcon(newCellIcon);
+    traitDidSetIcon(icon: Graphics | null): void {
+      this.owner.setIcon(icon);
     },
     viewType: IconCellView,
     observesView: true,
@@ -53,13 +53,10 @@ export class IconCellController extends CellController {
         this.owner.setIcon(cellTrait.icon.value);
       }
     },
-    viewWillSetGraphics(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
-      this.owner.callObservers("controllerWillSetCellIcon", newCellIcon, oldCellIcon, this.owner);
-    },
-    viewDidSetGraphics(newCellIcon: Graphics | null, oldCellIcon: Graphics | null): void {
-      this.owner.callObservers("controllerDidSetCellIcon", newCellIcon, oldCellIcon, this.owner);
+    viewDidSetGraphics(cellIcon: Graphics | null): void {
+      this.owner.callObservers("controllerDidSetCellIcon", cellIcon, this.owner);
     },
   })
-  override readonly cell!: TraitViewRef<this, IconCellTrait, IconCellView>;
-  static override readonly cell: MemberFastenerClass<IconCellController, "cell">;
+  override readonly cell!: TraitViewRef<this, IconCellTrait, IconCellView> & CellController["cell"] & Observes<IconCellTrait & IconCellView>;
+  static override readonly cell: FastenerClass<IconCellController["cell"]>;
 }

@@ -15,8 +15,13 @@
 import type {Class} from "@swim/util";
 import {Trait} from "@swim/model";
 import type {CellTraitObserver} from "./CellTraitObserver";
+import {CellController} from "./"; // forward import
 
 /** @public */
 export class CellTrait extends Trait {
   override readonly observerType?: Class<CellTraitObserver>;
+
+  createCellController(): CellController {
+    return new CellController();
+  }
 }

@@ -29,11 +29,7 @@ export interface LinePlotControllerObserver<X = unknown, Y = unknown, C extends 
 
   controllerDidDetachPlotView?(plotView: LinePlotView<X, Y>, controller: C): void;
 
-  controllerWillSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, controller: C): void;
+  controllerDidSetPlotStroke?(stroke: Color | null, controller: C): void;
 
-  controllerDidSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, controller: C): void;
-
-  controllerWillSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, controller: C): void;
-
-  controllerDidSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, controller: C): void;
+  controllerDidSetPlotStrokeWidth?(strokeWidth: Length | null, controller: C): void;
 }

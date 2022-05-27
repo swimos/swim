@@ -52,11 +52,11 @@ tableModel.mount();
 const tableTrait = new swim.TableTrait();
 tableModel.setTrait("table", tableTrait);
 tableTrait.header.insertTrait();
-const colATrait = new swim.ColTrait()
+const colATrait = new swim.TextColTrait()
   .layout({key: "a", grow: 2, textColor: swim.Look.labelColor})
   .label("A");
 tableTrait.setTrait("a", colATrait);
-const colBTrait = new swim.ColTrait()
+const colBTrait = new swim.TextColTrait()
   .layout({key: "b", grow: 1})
   .label("B");
 tableTrait.setTrait("b", colBTrait);

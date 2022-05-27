@@ -19,9 +19,9 @@ import type {GaugeView} from "./GaugeView";
 
 /** @public */
 export interface GaugeViewObserver<V extends GaugeView = GaugeView> extends ViewObserver<V> {
-  viewWillAttachGaugeTitle?(titleView: GraphicsView, view: V): void;
+  viewWillAttachTitle?(titleView: GraphicsView, view: V): void;
 
-  viewDidDetachGaugeTitle?(titleView: GraphicsView, view: V): void;
+  viewDidDetachTitle?(titleView: GraphicsView, view: V): void;
 
   viewWillAttachDial?(dialView: DialView, targetView: View | null, view: V): void;
 

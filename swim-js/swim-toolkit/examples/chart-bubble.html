@@ -12,12 +12,12 @@
     <script>
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").position("relative").width("90%").height("90%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
@@ -47,17 +47,17 @@ chartView.leftAxis.view.createTickLabel = function (tickValue) {
   return tickValue + "%";
 };
 
-const plotView = graphView.appendChild(swim.BubblePlotView)
-    .on("pointerover", function (event) {
-      if (event.targetView instanceof swim.DataPointView) {
-        event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
-      }
-    })
-    .on("pointerout", function (event) {
-      if (event.targetView instanceof swim.DataPointView) {
-        event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
-      }
-    });
+const plotView = graphView.appendChild(swim.BubblePlotView);
+plotView.addEventListener("pointerover", function (event) {
+  if (event.targetView instanceof swim.DataPointView) {
+    event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+  }
+});
+plotView.addEventListener("pointerout", function (event) {
+  if (event.targetView instanceof swim.DataPointView) {
+    event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+  }
+});
 plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 
 const n = 10;

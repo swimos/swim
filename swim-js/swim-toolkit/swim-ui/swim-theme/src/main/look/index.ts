@@ -21,9 +21,38 @@ export {
   LookVector,
 } from "./LookVector";
 
-export {NumberLook} from "./NumberLook";
-export {LengthLook} from "./LengthLook";
-export {ColorLook} from "./ColorLook";
-export {FontLook} from "./FontLook";
-export {ShadowLook} from "./ShadowLook";
-export {TimingLook} from "./TimingLook";
+export {
+  AnyNumberOrLook,
+  NumberOrLook,
+  NumberLook,
+} from "./NumberLook";
+
+export {
+  AnyLengthOrLook,
+  LengthOrLook,
+  LengthLook,
+} from "./LengthLook";
+
+export {
+  AnyColorOrLook,
+  ColorOrLook,
+  ColorLook,
+} from "./ColorLook";
+
+export {
+  AnyFontOrLook,
+  FontOrLook,
+  FontLook,
+} from "./FontLook";
+
+export {
+  AnyShadowOrLook,
+  ShadowOrLook,
+  ShadowLook,
+} from "./ShadowLook";
+
+export {
+  AnyTimingOrLook,
+  TimingOrLook,
+  TimingLook,
+} from "./TimingLook";

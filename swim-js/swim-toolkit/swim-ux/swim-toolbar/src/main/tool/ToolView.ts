@@ -14,7 +14,7 @@
 
 import type {Class} from "@swim/util";
 import {Animator} from "@swim/component";
-import {ConstraintAnimator} from "@swim/constraint";
+import {ConstraintProperty} from "@swim/constraint";
 import {AnyLength, Length} from "@swim/math";
 import {View} from "@swim/view";
 import {HtmlView} from "@swim/dom";
@@ -33,9 +33,9 @@ export class ToolView extends HtmlView {
 
   override readonly observerType?: Class<ToolViewObserver>;
 
-  @Animator({type: Number, value: 0.5, updateFlags: View.NeedsLayout})
+  @Animator({valueType: Number, value: 0.5, updateFlags: View.NeedsLayout})
   readonly xAlign!: Animator<this, number>;
 
-  @ConstraintAnimator({type: Length, value: null})
-  readonly effectiveWidth!: ConstraintAnimator<this, Length | null, AnyLength | null>;
+  @ConstraintProperty({valueType: Length, value: null})
+  readonly effectiveWidth!: ConstraintProperty<this, Length | null, AnyLength | null>;
 }

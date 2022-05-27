@@ -224,7 +224,10 @@ export class HslColor extends Color {
     return new HslColor(h, value.s, value.l, value.a);
   }
 
-  static override fromAny(value: AnyHslColor): HslColor {
+  static override fromAny(value: AnyHslColor): HslColor;
+  static override fromAny(value: AnyHslColor | null): HslColor | null;
+  static override fromAny(value: AnyHslColor | null | undefined): HslColor | null | undefined;
+  static override fromAny(value: AnyHslColor | null | undefined): HslColor | null | undefined {
     if (value === void 0 || value === null || value instanceof HslColor) {
       return value;
     } else if (typeof value === "string") {

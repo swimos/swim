@@ -15,39 +15,24 @@
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
 import {Trait} from "@swim/model";
-import type {HtmlView} from "@swim/dom";
 import {AnyColLayout, ColLayout} from "../layout/ColLayout";
 import type {ColTraitObserver} from "./ColTraitObserver";
-
-/** @public */
-export type ColLabel = ColLabelFunction | string;
-/** @public */
-export type ColLabelFunction = (colTrait: ColTrait) => HtmlView | string | null;
+import {ColController} from "./"; // forward import
 
 /** @public */
 export class ColTrait extends Trait {
   override readonly observerType?: Class<ColTraitObserver>;
 
-  @Property<ColTrait, ColLayout | null, AnyColLayout | null>({
-    type: ColLayout,
+  @Property<ColTrait["layout"]>({
+    valueType: ColLayout,
     value: null,
-    willSetValue(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
-      this.owner.callObservers("traitWillSetLayout", newLayout, oldLayout, this.owner);
-    },
-    didSetValue(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
-      this.owner.callObservers("traitDidSetLayout", newLayout, oldLayout, this.owner);
+    didSetValue(layout: ColLayout | null): void {
+      this.owner.callObservers("traitDidSetLayout", layout, this.owner);
     },
   })
   readonly layout!: Property<this, ColLayout | null, AnyColLayout | null>;
 
-  @Property<ColTrait, ColLabel | null>({
-    value: null,
-    willSetValue(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-      this.owner.callObservers("traitWillSetLabel", newLabel, oldLabel, this.owner);
-    },
-    didSetValue(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
-      this.owner.callObservers("traitDidSetLabel", newLabel, oldLabel, this.owner);
-    },
-  })
-  readonly label!: Property<this, ColLabel | null>;
+  createColController(): ColController {
+    return new ColController();
+  }
 }

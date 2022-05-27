@@ -85,7 +85,7 @@ export class FeelVector implements Interpolate<FeelVector>, Equals, Debug {
     return entry !== void 0 ? entry[1] : elseValue;
   }
 
-  updated<T, U = never>(look: Look<T, U>, value: T | U | undefined): FeelVector;
+  updated<T, U = T>(look: Look<T, U>, value: T | U | undefined): FeelVector;
   updated(updates: FeelVectorUpdates): FeelVector;
   updated(updates: FeelVectorUpdates | Look<unknown>, value?: unknown | undefined): FeelVector {
     let look: Look<unknown>;

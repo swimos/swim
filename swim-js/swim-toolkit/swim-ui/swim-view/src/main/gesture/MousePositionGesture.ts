@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import type {FastenerOwner} from "@swim/component";
-import type {PositionGestureInput} from "./PositionGestureInput";
-import {PositionGestureClass, PositionGestureFactory, PositionGesture} from "./PositionGesture";
 import type {View} from "../view/View";
+import type {PositionGestureInput} from "./PositionGestureInput";
+import {PositionGestureClass, PositionGesture} from "./PositionGesture";
 
 /** @internal */
 export interface MousePositionGesture<O = unknown, V extends View = View> extends PositionGesture<O, V> {
@@ -55,18 +55,18 @@ export interface MousePositionGesture<O = unknown, V extends View = View> extend
 
 /** @internal */
 export const MousePositionGesture = (function (_super: typeof PositionGesture) {
-  const MousePositionGesture = _super.extend("MousePositionGesture") as PositionGestureFactory<MousePositionGesture<any, any>>;
+  const MousePositionGesture = _super.extend("MousePositionGesture", {}) as PositionGestureClass<MousePositionGesture<any, any>>;
 
   MousePositionGesture.prototype.attachHoverEvents = function (this: MousePositionGesture, view: View): void {
-    view.on("mouseenter", this.onMouseEnter as EventListener);
-    view.on("mouseleave", this.onMouseLeave as EventListener);
-    view.on("mousedown", this.onMouseDown as EventListener);
+    view.addEventListener("mouseenter", this.onMouseEnter as EventListener);
+    view.addEventListener("mouseleave", this.onMouseLeave as EventListener);
+    view.addEventListener("mousedown", this.onMouseDown as EventListener);
   };
 
   MousePositionGesture.prototype.detachHoverEvents = function (this: MousePositionGesture, view: View): void {
-    view.off("mouseenter", this.onMouseEnter as EventListener);
-    view.off("mouseleave", this.onMouseLeave as EventListener);
-    view.off("mousedown", this.onMouseDown as EventListener);
+    view.removeEventListener("mouseenter", this.onMouseEnter as EventListener);
+    view.removeEventListener("mouseleave", this.onMouseLeave as EventListener);
+    view.removeEventListener("mousedown", this.onMouseDown as EventListener);
   };
 
   MousePositionGesture.prototype.attachPressEvents = function (this: MousePositionGesture, view: View): void {
@@ -155,8 +155,8 @@ export const MousePositionGesture = (function (_super: typeof PositionGesture) {
     }
   };
 
-  MousePositionGesture.construct = function <G extends MousePositionGesture<any, any>>(gestureClass: PositionGestureClass<MousePositionGesture<any, any>>, gesture: G | null, owner: FastenerOwner<G>): G {
-    gesture = _super.construct(gestureClass, gesture, owner) as G;
+  MousePositionGesture.construct = function <G extends MousePositionGesture<any, any>>(gesture: G | null, owner: FastenerOwner<G>): G {
+    gesture = _super.construct.call(this, gesture, owner) as G;
     gesture.onMouseEnter = gesture.onMouseEnter.bind(gesture);
     gesture.onMouseLeave = gesture.onMouseLeave.bind(gesture);
     gesture.onMouseDown = gesture.onMouseDown.bind(gesture);

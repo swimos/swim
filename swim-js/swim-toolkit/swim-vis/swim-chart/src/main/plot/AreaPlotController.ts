@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Timing} from "@swim/util";
-import {Affinity, MemberFastenerClass} from "@swim/component";
+import {Class, AnyTiming, Timing, Observes} from "@swim/util";
+import {Affinity, FastenerClass} from "@swim/component";
 import type {Color} from "@swim/style";
-import {Look, Mood} from "@swim/theme";
+import {Look, Mood, ColorOrLook} from "@swim/theme";
 import {TraitViewRef, TraitViewControllerSet} from "@swim/controller";
 import type {DataPointView} from "../data/DataPointView";
 import type {DataPointTrait} from "../data/DataPointTrait";
 import type {DataPointController} from "../data/DataPointController";
-import type {DataSetControllerDataPointExt} from "../data/DataSetController";
 import {DataSetTrait} from "../data/DataSetTrait";
 import {AreaPlotView} from "./AreaPlotView";
 import {AreaPlotTrait} from "./AreaPlotTrait";
@@ -31,16 +30,16 @@ import type {AreaPlotControllerObserver} from "./AreaPlotControllerObserver";
 export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotController<X, Y> {
   override readonly observerType?: Class<AreaPlotControllerObserver<X, Y>>;
 
-  @TraitViewControllerSet<AreaPlotController<X, Y>, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>>({
+  @TraitViewControllerSet<AreaPlotController<X, Y>["dataPoints"]>({
     extends: true,
     get parentView(): AreaPlotView<X, Y> | null {
       return this.owner.plot.view;
     },
   })
-  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & DataSetControllerDataPointExt<X, Y>;
-  static override readonly dataPoints: MemberFastenerClass<AreaPlotController, "dataPoints">;
+  override readonly dataPoints!: TraitViewControllerSet<this, DataPointTrait<X, Y>, DataPointView<X, Y>, DataPointController<X, Y>> & SeriesPlotController<X, Y>["dataPoints"];
+  static override readonly dataPoints: FastenerClass<AreaPlotController["dataPoints"]>;
 
-  protected setPlotFill(fill: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
+  protected setFill(fill: ColorOrLook | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -59,31 +58,7 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     }
   }
 
-  protected willSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerWillSetPlotFill !== void 0) {
-        observer.controllerWillSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  protected onSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
-    // hook
-  }
-
-  protected didSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.controllerDidSetPlotFill !== void 0) {
-        observer.controllerDidSetPlotFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  @TraitViewRef<AreaPlotController<X, Y>, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>({
+  @TraitViewRef<AreaPlotController<X, Y>["plot"]>({
     traitType: AreaPlotTrait,
     observesTrait: true,
     initTrait(plotTrait: AreaPlotTrait<X, Y>): void {
@@ -97,7 +72,7 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
       if (plotView !== null) {
         const fill = plotTrait.fill.value;
         if (fill !== null) {
-          this.owner.setPlotFill(fill);
+          this.owner.setFill(fill);
         }
       }
     },
@@ -107,8 +82,8 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     didDetachTrait(plotTrait: AreaPlotTrait<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotTrait", plotTrait, this.owner);
     },
-    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
-      this.owner.setPlotFill(newFill);
+    traitDidSetFill(fill: ColorOrLook | null): void {
+      this.owner.setFill(fill);
     },
     viewType: AreaPlotView,
     observesView: true,
@@ -122,7 +97,7 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
       if (plotTrait !== null) {
         const fill = plotTrait.fill.value;
         if (fill !== null) {
-          this.owner.setPlotFill(fill);
+          this.owner.setFill(fill);
         }
       }
     },
@@ -132,14 +107,10 @@ export class AreaPlotController<X = unknown, Y = unknown> extends SeriesPlotCont
     didDetachView(plotView: AreaPlotView<X, Y>): void {
       this.owner.callObservers("controllerDidDetachPlotView", plotView, this.owner);
     },
-    viewWillSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
-      this.owner.willSetPlotFill(newFill, oldFill, plotView);
-    },
-    viewDidSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
-      this.owner.onSetPlotFill(newFill, oldFill, plotView);
-      this.owner.didSetPlotFill(newFill, oldFill, plotView);
+    viewDidSetFill(fill: Color | null): void {
+      this.owner.callObservers("controllerDidSetPlotFill", fill, this.owner);
     },
   })
-  readonly plot!: TraitViewRef<this, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>>;
-  static readonly plot: MemberFastenerClass<AreaPlotController, "plot">;
+  readonly plot!: TraitViewRef<this, AreaPlotTrait<X, Y>, AreaPlotView<X, Y>> & Observes<AreaPlotTrait<X, Y> & AreaPlotView<X, Y>>;
+  static readonly plot: FastenerClass<AreaPlotController["plot"]>;
 }

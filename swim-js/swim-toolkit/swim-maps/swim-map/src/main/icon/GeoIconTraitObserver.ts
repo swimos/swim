@@ -18,16 +18,10 @@ import type {GeoTraitObserver} from "../geo/GeoTraitObserver";
 import type {GeoIconTrait} from "./GeoIconTrait";
 
 /** @public */
-export interface GeoIconTraitObserver<R extends GeoIconTrait = GeoIconTrait> extends GeoTraitObserver<R> {
-  traitWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, trait: R): void;
+export interface GeoIconTraitObserver<T extends GeoIconTrait = GeoIconTrait> extends GeoTraitObserver<T> {
+  traitDidSetGeoCenter?(geoCenter: GeoPoint | null, trait: T): void;
 
-  traitDidSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, trait: R): void;
+  traitDidSetIconLayout?(iconLayout: IconLayout | null, trait: T): void;
 
-  traitWillSetIconLayout?(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null, trait: R): void;
-
-  traitDidSetIconLayout?(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null, trait: R): void;
-
-  traitWillSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, trait: R): void;
-
-  traitDidSetGraphics?(newGraphics: Graphics | null, oldGraphics: Graphics | null, trait: R): void;
+  traitDidSetGraphics?(graphics: Graphics | null, trait: T): void;
 }

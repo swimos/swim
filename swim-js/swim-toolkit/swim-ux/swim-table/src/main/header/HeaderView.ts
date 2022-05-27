@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import {Affinity, MemberFastenerClass, Property} from "@swim/component";
+import type {Class, Instance, Creatable} from "@swim/util";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import {AnyLength, Length} from "@swim/math";
 import {AnyExpansion, Expansion, ExpansionAnimator} from "@swim/style";
 import {Look, ThemeConstraintAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewSet} from "@swim/view";
-import {HtmlViewClass, HtmlView} from "@swim/dom";
+import {ViewFlags, View, ViewSet} from "@swim/view";
+import {HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {ColView} from "../col/ColView";
 import type {HeaderViewObserver} from "./HeaderViewObserver";
@@ -39,23 +39,23 @@ export class HeaderView extends HtmlView {
 
   override readonly observerType?: Class<HeaderViewObserver>;
 
-  @Property({type: TableLayout, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @Property({valueType: TableLayout, value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly layout!: Property<this, TableLayout | null, AnyTableLayout | null>;
 
-  @Property({type: Number, inherits: true, value: 0, updateFlags: View.NeedsLayout})
+  @Property({valueType: Number, value: 0, inherits: true, updateFlags: View.NeedsLayout})
   readonly depth!: Property<this, number>;
 
-  @ThemeConstraintAnimator({type: Length, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @ThemeConstraintAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly rowSpacing!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ThemeConstraintAnimator({type: Length, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @ThemeConstraintAnimator({valueType: Length, value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly rowHeight!: ThemeConstraintAnimator<this, Length | null, AnyLength | null>;
 
-  @ExpansionAnimator({type: Expansion, inherits: true, value: null, updateFlags: View.NeedsLayout})
+  @ExpansionAnimator({value: null, inherits: true, updateFlags: View.NeedsLayout})
   readonly stretch!: ExpansionAnimator<this, Expansion | null, AnyExpansion | null>;
 
+  getCol<F extends Class<ColView>>(key: string, colViewClass: F): InstanceType<F> | null;
   getCol(key: string): ColView | null;
-  getCol<V extends ColView>(key: string, colViewClass: Class<V>): V | null;
   getCol(key: string, colViewClass?: Class<ColView>): ColView | null {
     if (colViewClass === void 0) {
       colViewClass = ColView;
@@ -64,26 +64,21 @@ export class HeaderView extends HtmlView {
     return colView instanceof colViewClass ? colView : null;
   }
 
-  getOrCreateCol(key: string): ColView;
-  getOrCreateCol<V extends ColView>(key: string, colViewClass: HtmlViewClass<V>): V;
-  getOrCreateCol(key: string, colViewClass?: HtmlViewClass<ColView>): ColView {
-    if (colViewClass === void 0) {
-      colViewClass = ColView;
-    }
-    let colView = this.getChild(key) as ColView | null;
-    if (!(colView instanceof colViewClass)) {
+  getOrCreateCol<F extends Class<Instance<F, ColView>> & Creatable<Instance<F, ColView>>>(key: string, colViewClass: F): InstanceType<F> {
+    let colView = this.getChild(key, colViewClass);
+    if (colView === null) {
       colView = colViewClass.create();
       this.setChild(key, colView);
     }
-    return colView;
+    return colView!;
   }
 
-  setCol(key: string, colView: ColView): void {
+  setCol(key: string, colView: ColView | null): void {
     this.setChild(key, colView);
   }
 
-  @ViewSet<HeaderView, ColView>({
-    type: ColView,
+  @ViewSet<HeaderView["cols"]>({
+    viewType: ColView,
     binds: true,
     initView(colView: ColView): void {
       colView.display.setState("none", Affinity.Intrinsic);
@@ -101,10 +96,10 @@ export class HeaderView extends HtmlView {
     },
   })
   readonly cols!: ViewSet<this, ColView>;
-  static readonly cols: MemberFastenerClass<HeaderView, "cols">;
+  static readonly cols: FastenerClass<HeaderView["cols"]>;
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
+  protected override onLayout(): void {
+    super.onLayout();
     this.layoutHeader();
   }
 
@@ -115,25 +110,20 @@ export class HeaderView extends HtmlView {
     }
   }
 
-  protected override displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                                     displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                                    viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildren(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
-      this.layoutChildViews(displayFlags, viewContext, displayChild);
+      this.layoutChildren(displayFlags, displayChild);
     } else {
-      super.displayChildren(displayFlags, viewContext, displayChild);
+      super.displayChildren(displayFlags, displayChild);
     }
   }
 
-  protected layoutChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                             displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                            viewContext: ViewContextType<this>) => void): void {
+  protected layoutChildren(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
     const layout = this.layout.value;
     const height = this.height.state;
     const stretch = this.stretch.getPhaseOr(1);
     type self = this;
-    function layoutChildView(this: self, child: View, displayFlags: ViewFlags,
-                             viewContext: ViewContextType<self>): void {
+    function layoutChild(this: self, child: View, displayFlags: ViewFlags): void {
       if (child instanceof ColView) {
         const key = child.key;
         const col = layout !== null && key !== void 0 ? layout.getCol(key) : null;
@@ -158,8 +148,8 @@ export class HeaderView extends HtmlView {
           child.height.setState(null, Affinity.Intrinsic);
         }
       }
-      displayChild.call(this, child, displayFlags, viewContext);
+      displayChild.call(this, child, displayFlags);
     }
-    super.displayChildren(displayFlags, viewContext, layoutChildView);
+    super.displayChildren(displayFlags, layoutChild);
   }
 }

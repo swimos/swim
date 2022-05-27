@@ -12,51 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Proto, ObserverType} from "@swim/util";
+import type {Mutable, Proto} from "@swim/util";
 import {Affinity, FastenerOwner, Fastener} from "@swim/component";
-import type {AnyController, Controller} from "./Controller";
-import {ControllerRelationInit, ControllerRelationClass, ControllerRelation} from "./ControllerRelation";
-
-/** @internal */
-export type ControllerRefType<F extends ControllerRef<any, any>> =
-  F extends ControllerRef<any, infer C> ? C : never;
+import type {AnyController, ControllerFactory, Controller} from "./Controller";
+import {ControllerRelationDescriptor, ControllerRelationClass, ControllerRelation} from "./ControllerRelation";
 
 /** @public */
-export interface ControllerRefInit<C extends Controller = Controller> extends ControllerRelationInit<C> {
-  extends?: {prototype: ControllerRef<any, any>} | string | boolean | null;
-  key?: string | boolean;
+export type ControllerRefController<F extends ControllerRef<any, any>> =
+  F extends {controllerType?: ControllerFactory<infer C>} ? C : never;
 
-  willInherit?(superFastener: ControllerRef<unknown, C>): void;
-  didInherit?(superFastener: ControllerRef<unknown, C>): void;
-  willUninherit?(superFastener: ControllerRef<unknown, C>): void;
-  didUninherit?(superFastener: ControllerRef<unknown, C>): void;
-
-  willBindSuperFastener?(superFastener: ControllerRef<unknown, C>): void;
-  didBindSuperFastener?(superFastener: ControllerRef<unknown, C>): void;
-  willUnbindSuperFastener?(superFastener: ControllerRef<unknown, C>): void;
-  didUnbindSuperFastener?(superFastener: ControllerRef<unknown, C>): void;
+/** @public */
+export interface ControllerRefDescriptor<C extends Controller = Controller> extends ControllerRelationDescriptor<C> {
+  extends?: Proto<ControllerRef<any, any>> | string | boolean | null;
+  controllerKey?: string | boolean;
 }
 
 /** @public */
-export type ControllerRefDescriptor<O = unknown, C extends Controller = Controller, I = {}> = ThisType<ControllerRef<O, C> & I> & ControllerRefInit<C> & Partial<I>;
+export type ControllerRefTemplate<F extends ControllerRef<any, any>> =
+  ThisType<F> &
+  ControllerRefDescriptor<ControllerRefController<F>> &
+  Partial<Omit<F, keyof ControllerRefDescriptor>>;
 
 /** @public */
 export interface ControllerRefClass<F extends ControllerRef<any, any> = ControllerRef<any, any>> extends ControllerRelationClass<F> {
-}
+  /** @override */
+  specialize(template: ControllerRefDescriptor<any>): ControllerRefClass<F>;
 
-/** @public */
-export interface ControllerRefFactory<F extends ControllerRef<any, any> = ControllerRef<any, any>> extends ControllerRefClass<F> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): ControllerRefFactory<F> & I;
+  /** @override */
+  refine(fastenerClass: ControllerRefClass<any>): void;
 
-  define<O, C extends Controller = Controller>(className: string, descriptor: ControllerRefDescriptor<O, C>): ControllerRefFactory<ControllerRef<any, C>>;
-  define<O, C extends Controller = Controller>(className: string, descriptor: {observes: boolean} & ControllerRefDescriptor<O, C, ObserverType<C>>): ControllerRefFactory<ControllerRef<any, C>>;
-  define<O, C extends Controller = Controller, I = {}>(className: string, descriptor: {implements: unknown} & ControllerRefDescriptor<O, C, I>): ControllerRefFactory<ControllerRef<any, C> & I>;
-  define<O, C extends Controller = Controller, I = {}>(className: string, descriptor: {implements: unknown; observes: boolean} & ControllerRefDescriptor<O, C, I & ObserverType<C>>): ControllerRefFactory<ControllerRef<any, C> & I>;
+  /** @override */
+  extend<F2 extends F>(className: string, template: ControllerRefTemplate<F2>): ControllerRefClass<F2>;
+  extend<F2 extends F>(className: string, template: ControllerRefTemplate<F2>): ControllerRefClass<F2>;
 
-  <O, C extends Controller = Controller>(descriptor: ControllerRefDescriptor<O, C>): PropertyDecorator;
-  <O, C extends Controller = Controller>(descriptor: {observes: boolean} & ControllerRefDescriptor<O, C, ObserverType<C>>): PropertyDecorator;
-  <O, C extends Controller = Controller, I = {}>(descriptor: {implements: unknown} & ControllerRefDescriptor<O, C, I>): PropertyDecorator;
-  <O, C extends Controller = Controller, I = {}>(descriptor: {implements: unknown; observes: boolean} & ControllerRefDescriptor<O, C, I & ObserverType<C>>): PropertyDecorator;
+  /** @override */
+  define<F2 extends F>(className: string, template: ControllerRefTemplate<F2>): ControllerRefClass<F2>;
+  define<F2 extends F>(className: string, template: ControllerRefTemplate<F2>): ControllerRefClass<F2>;
+
+  /** @override */
+  <F2 extends F>(template: ControllerRefTemplate<F2>): PropertyDecorator;
 }
 
 /** @public */
@@ -68,62 +62,65 @@ export interface ControllerRef<O = unknown, C extends Controller = Controller> e
   get fastenerType(): Proto<ControllerRef<any, any>>;
 
   /** @internal @override */
-  setInherited(inherited: boolean, superFastener: ControllerRef<unknown, C>): void;
+  getSuper(): ControllerRef<unknown, C> | null;
+
+  /** @internal @override */
+  setDerived(derived: boolean, inlet: ControllerRef<unknown, C>): void;
 
   /** @protected @override */
-  willInherit(superFastener: ControllerRef<unknown, C>): void;
+  willDerive(inlet: ControllerRef<unknown, C>): void;
 
   /** @protected @override */
-  onInherit(superFastener: ControllerRef<unknown, C>): void;
+  onDerive(inlet: ControllerRef<unknown, C>): void;
 
   /** @protected @override */
-  didInherit(superFastener: ControllerRef<unknown, C>): void;
+  didDerive(inlet: ControllerRef<unknown, C>): void;
 
   /** @protected @override */
-  willUninherit(superFastener: ControllerRef<unknown, C>): void;
+  willUnderive(inlet: ControllerRef<unknown, C>): void;
 
   /** @protected @override */
-  onUninherit(superFastener: ControllerRef<unknown, C>): void;
+  onUnderive(inlet: ControllerRef<unknown, C>): void;
 
   /** @protected @override */
-  didUninherit(superFastener: ControllerRef<unknown, C>): void;
+  didUnderive(inlet: ControllerRef<unknown, C>): void;
 
   /** @override */
-  readonly superFastener: ControllerRef<unknown, C> | null;
+  readonly inlet: ControllerRef<unknown, C> | null;
+
+  /** @protected @override */
+  willBindInlet(inlet: ControllerRef<unknown, C>): void;
+
+  /** @protected @override */
+  onBindInlet(inlet: ControllerRef<unknown, C>): void;
+
+  /** @protected @override */
+  didBindInlet(inlet: ControllerRef<unknown, C>): void;
+
+  /** @protected @override */
+  willUnbindInlet(inlet: ControllerRef<unknown, C>): void;
+
+  /** @protected @override */
+  onUnbindInlet(inlet: ControllerRef<unknown, C>): void;
+
+  /** @protected @override */
+  didUnbindInlet(inlet: ControllerRef<unknown, C>): void;
 
   /** @internal @override */
-  getSuperFastener(): ControllerRef<unknown, C> | null;
+  readonly outlets: ReadonlyArray<ControllerRef<unknown, C>> | null;
 
-  /** @protected @override */
-  willBindSuperFastener(superFastener: ControllerRef<unknown, C>): void;
+  /** @internal @override */
+  attachOutlet(outlet: ControllerRef<unknown, C>): void;
 
-  /** @protected @override */
-  onBindSuperFastener(superFastener: ControllerRef<unknown, C>): void;
+  /** @internal @override */
+  detachOutlet(outlet: ControllerRef<unknown, C>): void;
 
-  /** @protected @override */
-  didBindSuperFastener(superFastener: ControllerRef<unknown, C>): void;
+  get inletController(): C | null;
 
-  /** @protected @override */
-  willUnbindSuperFastener(superFastener: ControllerRef<unknown, C>): void;
-
-  /** @protected @override */
-  onUnbindSuperFastener(superFastener: ControllerRef<unknown, C>): void;
-
-  /** @protected @override */
-  didUnbindSuperFastener(superFastener: ControllerRef<unknown, C>): void;
+  getInletController(): C;
 
   /** @internal */
-  readonly subFasteners: ReadonlyArray<ControllerRef<unknown, C>> | null;
-
-  /** @internal @override */
-  attachSubFastener(subFastener: ControllerRef<unknown, C>): void;
-
-  /** @internal @override */
-  detachSubFastener(subFastener: ControllerRef<unknown, C>): void;
-
-  get superController(): C | null;
-
-  getSuperController(): C;
+  readonly controllerKey?: string; // optional prototype property
 
   readonly controller: C | null;
 
@@ -135,7 +132,7 @@ export interface ControllerRef<O = unknown, C extends Controller = Controller> e
 
   detachController(): C | null;
 
-  insertController(parent?: Controller, controller?: AnyController<C>, target?: Controller | null, key?: string): C;
+  insertController(parent?: Controller | null, controller?: AnyController<C>, target?: Controller | null, key?: string): C;
 
   removeController(): C | null;
 
@@ -150,82 +147,59 @@ export interface ControllerRef<O = unknown, C extends Controller = Controller> e
   /** @override */
   detectController(controller: Controller): C | null;
 
-  /** @internal @protected */
-  decohereSubFasteners(): void;
+  /** @protected @override */
+  onStartConsuming(): void;
+
+  /** @protected @override */
+  onStopConsuming(): void;
 
   /** @internal @protected */
-  decohereSubFastener(subFastener: ControllerRef<unknown, C>): void;
+  decohereOutlets(): void;
+
+  /** @internal @protected */
+  decohereOutlet(outlet: ControllerRef<unknown, C>): void;
 
   /** @override */
   recohere(t: number): void;
-
-  /** @internal */
-  get key(): string | undefined; // optional prototype field
 }
 
 /** @public */
 export const ControllerRef = (function (_super: typeof ControllerRelation) {
-  const ControllerRef: ControllerRefFactory = _super.extend("ControllerRef");
+  const ControllerRef = _super.extend("ControllerRef", {}) as ControllerRefClass;
 
   Object.defineProperty(ControllerRef.prototype, "fastenerType", {
-    get: function (this: ControllerRef): Proto<ControllerRef<any, any>> {
-      return ControllerRef;
-    },
+    value: ControllerRef,
     configurable: true,
   });
 
-  ControllerRef.prototype.onInherit = function (this: ControllerRef, superFastener: ControllerRef): void {
-    this.setController(superFastener.controller);
-  };
-
-  ControllerRef.prototype.onBindSuperFastener = function <C extends Controller>(this: ControllerRef<unknown, C>, superFastener: ControllerRef<unknown, C>): void {
-    (this as Mutable<typeof this>).superFastener = superFastener;
-    _super.prototype.onBindSuperFastener.call(this, superFastener);
-  };
-
-  ControllerRef.prototype.onUnbindSuperFastener = function <C extends Controller>(this: ControllerRef<unknown, C>, superFastener: ControllerRef<unknown, C>): void {
-    _super.prototype.onUnbindSuperFastener.call(this, superFastener);
-    (this as Mutable<typeof this>).superFastener = null;
-  };
-
-  ControllerRef.prototype.attachSubFastener = function <C extends Controller>(this: ControllerRef<unknown, C>, subFastener: ControllerRef<unknown, C>): void {
-    let subFasteners = this.subFasteners as ControllerRef<unknown, C>[] | null;
-    if (subFasteners === null) {
-      subFasteners = [];
-      (this as Mutable<typeof this>).subFasteners = subFasteners;
-    }
-    subFasteners.push(subFastener);
-  };
-
-  ControllerRef.prototype.detachSubFastener = function <C extends Controller>(this: ControllerRef<unknown, C>, subFastener: ControllerRef<unknown, C>): void {
-    const subFasteners = this.subFasteners as ControllerRef<unknown, C>[] | null;
-    if (subFasteners !== null) {
-      const index = subFasteners.indexOf(subFastener);
-      if (index >= 0) {
-        subFasteners.splice(index, 1);
-      }
+  ControllerRef.prototype.onDerive = function (this: ControllerRef, inlet: ControllerRef): void {
+    const inletController = inlet.controller;
+    if (inletController !== null) {
+      this.attachController(inletController);
+    } else {
+      this.detachController();
     }
   };
 
-  Object.defineProperty(ControllerRef.prototype, "superController", {
+  Object.defineProperty(ControllerRef.prototype, "inletController", {
     get: function <C extends Controller>(this: ControllerRef<unknown, C>): C | null {
-      const superFastener = this.superFastener;
-      return superFastener !== null ? superFastener.controller : null;
+      const inlet = this.inlet;
+      return inlet !== null ? inlet.controller : null;
     },
     configurable: true,
   });
 
-  ControllerRef.prototype.getSuperController = function <C extends Controller>(this: ControllerRef<unknown, C>): C {
-    const superController = this.superController;
-    if (superController === void 0 || superController === null) {
-      let message = superController + " ";
+  ControllerRef.prototype.getInletController = function <C extends Controller>(this: ControllerRef<unknown, C>): C {
+    const inletController = this.inletController;
+    if (inletController === void 0 || inletController === null) {
+      let message = inletController + " ";
       if (this.name.length !== 0) {
         message += this.name + " ";
       }
-      message += "super controller";
+      message += "inlet controller";
       throw new TypeError(message);
     }
-    return superController;
+    return inletController;
   };
 
   ControllerRef.prototype.getController = function <C extends Controller>(this: ControllerRef<unknown, C>): C {
@@ -242,10 +216,10 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
   };
 
   ControllerRef.prototype.setController = function <C extends Controller>(this: ControllerRef<unknown, C>, newController: C  | null, target?: Controller | null, key?: string): C | null {
+    let oldController = this.controller;
     if (newController !== null) {
       newController = this.fromAny(newController);
     }
-    let oldController = this.controller;
     if (oldController !== newController) {
       if (target === void 0) {
         target = null;
@@ -260,7 +234,7 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
         }
         if (newController !== null) {
           if (key === void 0) {
-            key = this.key;
+            key = this.controllerKey;
           }
           this.insertChild(parent, newController, target, key);
         }
@@ -282,7 +256,7 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
           this.didAttachController(newController, target);
         }
         this.setCoherent(true);
-        this.decohereSubFasteners();
+        this.decohereOutlets();
       }
     }
     return oldController;
@@ -297,7 +271,7 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
     } else {
       newController = oldController;
     }
-    if (newController !== oldController) {
+    if (oldController !== newController) {
       if (target === void 0) {
         target = null;
       }
@@ -314,7 +288,7 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
       this.initController(newController);
       this.didAttachController(newController, target);
       this.setCoherent(true);
-      this.decohereSubFasteners();
+      this.decohereOutlets();
     }
     return newController;
   };
@@ -328,51 +302,54 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
       this.deinitController(oldController);
       this.didDetachController(oldController);
       this.setCoherent(true);
-      this.decohereSubFasteners();
+      this.decohereOutlets();
     }
     return oldController;
   };
 
   ControllerRef.prototype.insertController = function <C extends Controller>(this: ControllerRef<unknown, C>, parent?: Controller | null, newController?: AnyController<C>, target?: Controller | null, key?: string): C {
+    let oldController = this.controller;
     if (newController !== void 0 && newController !== null) {
       newController = this.fromAny(newController);
+    } else if (oldController === null) {
+      newController = this.createController();
     } else {
-      const oldController = this.controller;
-      if (oldController === null) {
-        newController = this.createController();
-      } else {
-        newController = oldController;
+      newController = oldController;
+    }
+    if (parent === void 0) {
+      parent = null;
+    }
+    if (this.binds || oldController !== newController || newController.parent === null || parent !== null || key !== void 0) {
+      if (parent === null) {
+        parent = this.parentController;
       }
-    }
-    if (parent === void 0 || parent === null) {
-      parent = this.parentController;
-    }
-    if (target === void 0) {
-      target = null;
-    }
-    if (key === void 0) {
-      key = this.key;
-    }
-    if (parent !== null && (newController.parent !== parent || newController.key !== key)) {
-      this.insertChild(parent, newController, target, key);
-    }
-    const oldController = this.controller;
-    if (newController !== oldController) {
-      if (oldController !== null) {
-        (this as Mutable<typeof this>).controller = null;
-        this.willDetachController(oldController);
-        this.onDetachController(oldController);
-        this.deinitController(oldController);
-        this.didDetachController(oldController);
-        oldController.remove();
+      if (target === void 0) {
+        target = null;
       }
-      (this as Mutable<typeof this>).controller = newController;
-      this.willAttachController(newController, target);
-      this.onAttachController(newController, target);
-      this.initController(newController);
-      this.didAttachController(newController, target);
-      this.setCoherent(true);
-      this.decohereSubFasteners();
+      if (key === void 0) {
+        key = this.controllerKey;
+      }
+      if (parent !== null && (newController.parent !== parent || newController.key !== key)) {
+        this.insertChild(parent, newController, target, key);
+      }
+      oldController = this.controller;
+      if (oldController !== newController) {
+        if (oldController !== null) {
+          (this as Mutable<typeof this>).controller = null;
+          this.willDetachController(oldController);
+          this.onDetachController(oldController);
+          this.deinitController(oldController);
+          this.didDetachController(oldController);
+          oldController.remove();
+        }
+        (this as Mutable<typeof this>).controller = newController;
+        this.willAttachController(newController, target);
+        this.onAttachController(newController, target);
+        this.initController(newController);
+        this.didAttachController(newController, target);
+        this.setCoherent(true);
+        this.decohereOutlets();
+      }
     }
     return newController;
   };
@@ -403,7 +380,7 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
         this.initController(newController);
         this.didAttachController(newController, target);
         this.setCoherent(true);
-        this.decohereSubFasteners();
+        this.decohereOutlets();
       }
     }
   };
@@ -418,47 +395,61 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
         this.deinitController(oldController);
         this.didDetachController(oldController);
         this.setCoherent(true);
-        this.decohereSubFasteners();
+        this.decohereOutlets();
       }
     }
   };
 
   ControllerRef.prototype.detectController = function <C extends Controller>(this: ControllerRef<unknown, C>, controller: Controller): C | null {
-    const key = this.key;
+    const key = this.controllerKey;
     if (key !== void 0 && key === controller.key) {
       return controller as C;
     }
     return null;
   };
 
-  ControllerRef.prototype.decohereSubFasteners = function (this: ControllerRef): void {
-    const subFasteners = this.subFasteners;
-    for (let i = 0, n = subFasteners !== null ? subFasteners.length : 0; i < n; i += 1) {
-      this.decohereSubFastener(subFasteners![i]!);
+  ControllerRef.prototype.onStartConsuming = function (this: ControllerRef): void {
+    const controller = this.controller;
+    if (controller !== null) {
+      controller.consume(this);
     }
   };
 
-  ControllerRef.prototype.decohereSubFastener = function (this: ControllerRef, subFastener: ControllerRef): void {
-    if ((subFastener.flags & Fastener.InheritedFlag) === 0 && Math.min(this.flags & Affinity.Mask, Affinity.Intrinsic) >= (subFastener.flags & Affinity.Mask)) {
-      subFastener.setInherited(true, this);
-    } else if ((subFastener.flags & Fastener.InheritedFlag) !== 0 && (subFastener.flags & Fastener.DecoherentFlag) === 0) {
-      subFastener.setCoherent(false);
-      subFastener.decohere();
+  ControllerRef.prototype.onStopConsuming = function (this: ControllerRef): void {
+    const controller = this.controller;
+    if (controller !== null) {
+      controller.unconsume(this);
+    }
+  };
+
+  ControllerRef.prototype.decohereOutlets = function (this: ControllerRef): void {
+    const outlets = this.outlets;
+    for (let i = 0, n = outlets !== null ? outlets.length : 0; i < n; i += 1) {
+      this.decohereOutlet(outlets![i]!);
+    }
+  };
+
+  ControllerRef.prototype.decohereOutlet = function (this: ControllerRef, outlet: ControllerRef): void {
+    if ((outlet.flags & Fastener.DerivedFlag) === 0 && Math.min(this.flags & Affinity.Mask, Affinity.Intrinsic) >= (outlet.flags & Affinity.Mask)) {
+      outlet.setDerived(true, this);
+    } else if ((outlet.flags & Fastener.DerivedFlag) !== 0 && (outlet.flags & Fastener.DecoherentFlag) === 0) {
+      outlet.setCoherent(false);
+      outlet.decohere();
     }
   };
 
   ControllerRef.prototype.recohere = function (this: ControllerRef, t: number): void {
-    if ((this.flags & Fastener.InheritedFlag) !== 0) {
-      const superFastener = this.superFastener;
-      if (superFastener !== null) {
-        this.setController(superFastener.controller);
+    if ((this.flags & Fastener.DerivedFlag) !== 0) {
+      const inlet = this.inlet;
+      if (inlet !== null) {
+        this.setController(inlet.controller);
       }
     }
   };
 
-  ControllerRef.construct = function <F extends ControllerRef<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
+  ControllerRef.construct = function <F extends ControllerRef<any, any>>(fastener: F | null, owner: FastenerOwner<F>): F {
     if (fastener === null) {
-      fastener = function (controller?: AnyController<ControllerRefType<F>> | null, target?: Controller | null, key?: string): ControllerRefType<F> | null | FastenerOwner<F> {
+      fastener = function (controller?: AnyController<ControllerRefController<F>> | null, target?: Controller | null, key?: string): ControllerRefController<F> | null | FastenerOwner<F> {
         if (controller === void 0) {
           return fastener!.controller;
         } else {
@@ -467,60 +458,33 @@ export const ControllerRef = (function (_super: typeof ControllerRelation) {
         }
       } as F;
       delete (fastener as Partial<Mutable<F>>).name; // don't clobber prototype name
-      Object.setPrototypeOf(fastener, fastenerClass.prototype);
+      Object.setPrototypeOf(fastener, this.prototype);
     }
-    fastener = _super.construct(fastenerClass, fastener, owner) as F;
-    Object.defineProperty(fastener, "superFastener", { // override getter
-      value: null,
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
-    (fastener as Mutable<typeof fastener>).subFasteners = null;
-    (fastener as Mutable<typeof fastener>).key = void 0;
+    fastener = _super.construct.call(this, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).controller = null;
     return fastener;
   };
 
-  ControllerRef.define = function <O, C extends Controller>(className: string, descriptor: ControllerRefDescriptor<O, C>): ControllerRefFactory<ControllerRef<any, C>> {
-    let superClass = descriptor.extends as ControllerRefFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
+  ControllerRef.refine = function (fastenerClass: ControllerRefClass<any>): void {
+    _super.refine.call(this, fastenerClass);
+    const fastenerPrototype = fastenerClass.prototype;
 
-    if (descriptor.key === true) {
-      Object.defineProperty(descriptor, "key", {
-        value: className,
-        configurable: true,
-      });
-    } else if (descriptor.key === false) {
-      Object.defineProperty(descriptor, "key", {
-        value: void 0,
-        configurable: true,
-      });
-    }
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this;
-    }
-
-    const fastenerClass = superClass.extend(className, descriptor);
-
-    fastenerClass.construct = function (fastenerClass: {prototype: ControllerRef<any, any>}, fastener: ControllerRef<O, C> | null, owner: O): ControllerRef<O, C> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner);
-      if (affinity !== void 0) {
-        fastener.initAffinity(affinity);
+    if (Object.prototype.hasOwnProperty.call(fastenerPrototype, "controllerKey")) {
+      const controllerKey = fastenerPrototype.controllerKey as string | boolean | undefined;
+      if (controllerKey === true) {
+        Object.defineProperty(fastenerPrototype, "controllerKey", {
+          value: fastenerClass.name,
+          enumerable: true,
+          configurable: true,
+        });
+      } else if (controllerKey === false) {
+        Object.defineProperty(fastenerPrototype, "controllerKey", {
+          value: void 0,
+          enumerable: true,
+          configurable: true,
+        });
       }
-      if (inherits !== void 0) {
-        fastener.initInherits(inherits);
-      }
-      return fastener;
-    };
-
-    return fastenerClass;
+    }
   };
 
   return ControllerRef;

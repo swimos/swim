@@ -16,7 +16,13 @@ import type {Interpolator} from "@swim/util";
 import {AnyLength, Length, LengthInterpolator} from "@swim/math";
 import {Look} from "./Look";
 
-/** @internal */
+/** @public */
+export type AnyLengthOrLook = Look<Length, any> | AnyLength;
+
+/** @public */
+export type LengthOrLook = Look<Length, any> | Length;
+
+/** @public */
 export class LengthLook extends Look<Length, AnyLength> {
   override combine(combination: Length | undefined, value: Length, weight?: number): Length {
     if (combination !== void 0) {
@@ -40,5 +46,16 @@ export class LengthLook extends Look<Length, AnyLength> {
 
   override coerce(value: AnyLength): Length {
     return Length.fromAny(value);
+  }
+
+  static fromAny(value: Look<Length> | AnyLength): Look<Length> | Length;
+  static fromAny(value: Look<Length> | AnyLength | null): Look<Length> | Length | null;
+  static fromAny(value: Look<Length> | AnyLength | null | undefined): Look<Length> | Length | null | undefined;
+  static fromAny(value: Look<Length> | AnyLength | null | undefined): Look<Length> | Length | null | undefined {
+    if (value === void 0 || value === null || value instanceof Look || value instanceof Length) {
+      return value;
+    } else {
+      return Length.fromAny(value);
+    }
   }
 }

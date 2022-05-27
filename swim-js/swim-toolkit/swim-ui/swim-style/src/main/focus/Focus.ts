@@ -223,7 +223,10 @@ export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
     return new Focus(value.phase, value.direction);
   }
 
-  static fromAny(value: AnyFocus): Focus {
+  static fromAny(value: AnyFocus): Focus;
+  static fromAny(value: AnyFocus | null): Focus | null;
+  static fromAny(value: AnyFocus | null | undefined): Focus | null | undefined;
+  static fromAny(value: AnyFocus | null | undefined): Focus | null | undefined {
     if (value === void 0 || value === null || value instanceof Focus) {
       return value;
     } else if (Focus.isInit(value)) {

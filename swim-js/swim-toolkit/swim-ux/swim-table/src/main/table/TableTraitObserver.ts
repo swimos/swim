@@ -21,9 +21,7 @@ import type {TableTrait} from "./TableTrait";
 
 /** @public */
 export interface TableTraitObserver<T extends TableTrait = TableTrait> extends TraitObserver<T> {
-  traitWillSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: T): void;
-
-  traitDidSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: T): void;
+  traitDidSetTableLayout?(tableLayout: TableLayout | null, trait: T): void;
 
   traitWillAttachHeader?(headerTrait: HeaderTrait, trait: T): void;
 

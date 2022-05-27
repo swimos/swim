@@ -19,11 +19,7 @@ import type {BubblePlotView} from "./BubblePlotView";
 
 /** @public */
 export interface BubblePlotViewObserver<X = unknown, Y = unknown, V extends BubblePlotView<X, Y> = BubblePlotView<X, Y>> extends ScatterPlotViewObserver<X, Y, V> {
-  viewWillSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
+  viewDidSetRadius?(radius: Length | null, view: V): void;
 
-  viewDidSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
-
-  viewWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
-
-  viewDidSetPlotFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
+  viewDidSetFill?(fill: Color | null, view: V): void;
 }

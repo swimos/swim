@@ -12,17 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {TableViewContext} from "./TableViewContext";
 export {TableView} from "./TableView";
 export {TableViewObserver} from "./TableViewObserver";
 
 export {TableTrait} from "./TableTrait";
 export {TableTraitObserver} from "./TableTraitObserver";
 
-export {
-  TableControllerHeaderExt,
-  TableControllerColExt,
-  TableControllerRowExt,
-  TableController,
-} from "./TableController";
+export {TableController} from "./TableController";
 export {TableControllerObserver} from "./TableControllerObserver";

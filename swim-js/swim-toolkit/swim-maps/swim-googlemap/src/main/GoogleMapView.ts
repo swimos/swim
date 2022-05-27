@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Lazy, Equivalent, AnyTiming} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import {Class, Lazy, Equivalent, AnyTiming} from "@swim/util";
+import {Affinity, FastenerClass, Property} from "@swim/component";
 import {GeoPoint} from "@swim/geo";
-import {ViewContextType, ViewFlags, View, ViewRef} from "@swim/view";
+import {ViewFlags, View, ViewRef} from "@swim/view";
 import {ViewHtml, HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
-import {AnyGeoPerspective, MapView} from "@swim/map";
+import {GeoViewport, AnyGeoPerspective, MapView} from "@swim/map";
 import {GoogleMapViewport} from "./GoogleMapViewport";
 import type {GoogleMapViewObserver} from "./GoogleMapViewObserver";
 
@@ -28,12 +28,6 @@ export class GoogleMapView extends MapView {
     super();
     this.map = map;
     this.mapOverlay = this.createMapOverlay(map);
-    Object.defineProperty(this, "geoViewport", {
-      value: GoogleMapViewport.create(this.map, this.mapOverlay.getProjection()),
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
     this.onMapDraw = this.onMapDraw.bind(this);
     this.onMapIdle = this.onMapIdle.bind(this);
     this.initMap(map);
@@ -79,45 +73,37 @@ export class GoogleMapView extends MapView {
     }
   }
 
-  override readonly geoViewport!: GoogleMapViewport;
+  @Property<GoogleMapView["geoViewport"]>({
+    extends: true,
+    initValue(): GeoViewport {
+      return GoogleMapViewport.create(this.owner.map, this.owner.mapOverlay.getProjection());
+    },
+    willSetValue(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport): void {
+      this.owner.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this.owner);
+    },
+    didSetValue(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport): void {
+      this.owner.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this.owner);
+      const immediate = !this.owner.hidden && !this.owner.culled;
+      this.owner.requireUpdate(View.NeedsProject, immediate);
+    },
+    update(): void {
+      if (this.hasAffinity(Affinity.Intrinsic)) {
+        this.setValue(GoogleMapViewport.create(this.owner.map, this.owner.mapOverlay.getProjection()), Affinity.Intrinsic);
+      }
+    },
+  })
+  override readonly geoViewport!: Property<this, GeoViewport> & MapView["geoViewport"] & {
+    /** @internal */
+    update(): void;
+  };
 
-  protected willSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
-    this.callObservers("viewWillSetGeoViewport", newGeoViewport, oldGeoViewport, this);
-  }
-
-  protected onSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
-    // hook
-  }
-
-  protected didSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
-    this.callObservers("viewDidSetGeoViewport", newGeoViewport, oldGeoViewport, this);
-  }
-
-  protected updateGeoViewport(): boolean {
-    const oldGeoViewport = this.geoViewport;
-    const newGeoViewport = GoogleMapViewport.create(this.map, this.mapOverlay.getProjection());
-    if (!newGeoViewport.equals(oldGeoViewport)) {
-      this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
-      (this as Mutable<this>).geoViewport = newGeoViewport;
-      this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
-      this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
-      return true;
-    }
-    return false;
-  }
-
-  protected override willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    if ((this.flags & View.NeedsProject) !== 0 && this.updateGeoViewport()) {
-      (viewContext as Mutable<ViewContextType<this>>).geoViewport = this.geoViewport;
-    }
-    super.willProcess(processFlags, viewContext);
+  protected override willProcess(processFlags: ViewFlags): void {
+    this.geoViewport.update();
+    super.willProcess(processFlags);
   }
 
   protected onMapDraw(): void {
-    if (this.updateGeoViewport()) {
-      const immediate = !this.hidden && !this.culled;
-      this.requireUpdate(View.NeedsProject, immediate);
-    }
+    this.geoViewport.update();
   }
 
   protected onMapIdle(): void {
@@ -125,7 +111,7 @@ export class GoogleMapView extends MapView {
   }
 
   override moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
-    const geoViewport = this.geoViewport;
+    const geoViewport = this.geoViewport.value;
     let geoCenter = geoPerspective.geoCenter;
     if (geoCenter !== void 0 && geoCenter !== null) {
       geoCenter = GeoPoint.fromAny(geoCenter);
@@ -147,7 +133,7 @@ export class GoogleMapView extends MapView {
     }
   }
 
-  @ViewRef<GoogleMapView, CanvasView>({
+  @ViewRef<GoogleMapView["canvas"]>({
     extends: true,
     didAttachView(canvasView: CanvasView, targetView: View | null): void {
       if (this.owner.parent === null) {
@@ -162,12 +148,28 @@ export class GoogleMapView extends MapView {
       }
     },
   })
-  override readonly canvas!: ViewRef<this, CanvasView>;
-  static override readonly canvas: MemberFastenerClass<GoogleMapView, "canvas">;
+  override readonly canvas!: ViewRef<this, CanvasView> & MapView["canvas"];
+  static override readonly canvas: FastenerClass<GoogleMapView["canvas"]>;
 
-  @ViewRef<GoogleMapView, HtmlView, {materializeView(containerView: HtmlView): void}>({
+  @ViewRef<GoogleMapView["container"]>({
     extends: true,
-    implements: true,
+    didAttachView(containerView: HtmlView, targetView: View | null): void {
+      this.materializeView(containerView);
+      MapView.container.prototype.didAttachView.call(this, containerView, targetView);
+    },
+    willDetachView(containerView: HtmlView): void {
+      MapView.container.prototype.willDetachView.call(this, containerView);
+      const canvasView = this.owner.canvas.view;
+      const mapPanes = this.owner.mapOverlay.getPanes();
+      if (mapPanes !== void 0 && mapPanes !== null) {
+        const overlayMouseTargetView = (mapPanes.overlayMouseTarget as ViewHtml).view!;
+        const overlayContainerView = overlayMouseTargetView.parent as HtmlView;
+        const canvasContainerView = overlayContainerView.parent as HtmlView;
+        if (canvasView !== null && canvasView.parent === canvasContainerView) {
+          canvasContainerView.removeChild(containerView);
+        }
+      }
+    },
     materializeView(containerView: HtmlView): void {
       function materializeAncestors(node: HTMLElement): HtmlView {
         const parentNode = node.parentNode;
@@ -187,24 +189,9 @@ export class GoogleMapView extends MapView {
         this.owner.canvas.attachView();
       }
     },
-    didAttachView(containerView: HtmlView, targetView: View | null): void {
-      this.materializeView(containerView);
-      MapView.container.prototype.didAttachView.call(this, containerView, targetView);
-    },
-    willDetachView(containerView: HtmlView): void {
-      MapView.container.prototype.willDetachView.call(this, containerView);
-      const canvasView = this.owner.canvas.view;
-      const mapPanes = this.owner.mapOverlay.getPanes();
-      if (mapPanes !== void 0 && mapPanes !== null) {
-        const overlayMouseTargetView = (mapPanes.overlayMouseTarget as ViewHtml).view!;
-        const overlayContainerView = overlayMouseTargetView.parent as HtmlView;
-        const canvasContainerView = overlayContainerView.parent as HtmlView;
-        if (canvasView !== null && canvasView.parent === canvasContainerView) {
-          canvasContainerView.removeChild(containerView);
-        }
-      }
-    },
   })
-  override readonly container!: ViewRef<this, HtmlView> & {materializeView(containerView: HtmlView): void};
-  static override readonly container: MemberFastenerClass<GoogleMapView, "container">;
+  override readonly container!: ViewRef<this, HtmlView> & MapView["container"] & {
+      materializeView(containerView: HtmlView): void,
+    };
+  static override readonly container: FastenerClass<GoogleMapView["container"]>;
 }

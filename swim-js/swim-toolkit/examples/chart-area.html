@@ -12,12 +12,12 @@
     <script>
 
 //setTimeout(function () {
-//  swim.ThemeService.global().setTheme(swim.Theme.light);
+//  swim.StylerService.global().theme(swim.Theme.light);
 //}, 1000);
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const containerView = bodyView.appendChild("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+const containerView = bodyView.appendChild("div").position("relative").width("90%").height("90%").touchAction("none").userSelect("none");
 
 const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
@@ -37,14 +37,14 @@ const chartView = canvasView.appendChild(swim.ChartView)
 
 const graphView = chartView.graph.insertView();
 
-const plotView = graphView.appendChild(swim.AreaPlotView)
-    .hitMode("plot")
-    .on("pointerenter", function (event) {
-      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
-    })
-    .on("pointerleave", function (event) {
-      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
-    });
+const plotView = graphView.appendChild(swim.AreaPlotView);
+plotView.hitMode("plot");
+plotView.addEventListener("pointerenter", function (event) {
+  plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+});
+plotView.addEventListener("pointerleave", function (event) {
+  plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+});
 plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 
 const cycles = 2;

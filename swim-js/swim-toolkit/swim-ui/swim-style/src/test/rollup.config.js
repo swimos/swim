@@ -9,6 +9,7 @@ const external = [
   "@swim/codec",
   "@swim/args",
   "@swim/unit",
+  "@swim/component",
   "@swim/structure",
   "@swim/math",
   "@swim/time",

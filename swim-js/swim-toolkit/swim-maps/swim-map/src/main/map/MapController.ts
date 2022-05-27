@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Class, AnyTiming, Timing} from "@swim/util";
-import {MemberFastenerClass, Property} from "@swim/component";
+import {Class, AnyTiming, Timing, Observes} from "@swim/util";
+import {FastenerClass, Property} from "@swim/component";
 import type {GeoBox} from "@swim/geo";
 import type {Trait} from "@swim/model";
 import {ViewRef} from "@swim/view";
@@ -30,18 +30,12 @@ import {MapTrait} from "./MapTrait";
 import type {MapControllerObserver} from "./MapControllerObserver";
 
 /** @public */
-export interface MapControllerLayerExt {
-  attachLayerTrait(layerTrait: GeoTrait, layerController: GeoController): void;
-  detachLayerTrait(layerTrait: GeoTrait, layerController: GeoController): void;
-  attachLayerView(layerView: GeoView, layerController: GeoController): void;
-  detachLayerView(layerView: GeoView, layerController: GeoController): void;
-}
-
-/** @public */
-export abstract class MapController extends Controller {
+export class MapController extends Controller {
   override readonly observerType?: Class<MapControllerObserver>;
 
-  protected abstract createMapView(containerView: HtmlView): MapView;
+  protected createMapView(containerView: HtmlView): MapView | null {
+    return null;
+  }
 
   protected setGeoPerspective(geoPerspective: GeoPerspective | null): void {
     if (geoPerspective !== null) {
@@ -52,7 +46,7 @@ export abstract class MapController extends Controller {
     }
   }
 
-  @TraitViewRef<MapController, MapTrait, MapView>({
+  @TraitViewRef<MapController["map"]>({
     traitType: MapTrait,
     observesTrait: true,
     willAttachTrait(mapTrait: MapTrait): void {
@@ -63,30 +57,22 @@ export abstract class MapController extends Controller {
       if (mapView !== null) {
         this.owner.setGeoPerspective(mapTrait.geoPerspective.value);
       }
-      const layerTraits = mapTrait.layers.traits;
-      for (const traitId in layerTraits) {
-        const layerTrait = layerTraits[traitId]!;
-        this.owner.layers.addTraitController(layerTrait);
-      }
+      this.owner.layers.addTraits(mapTrait.layers.traits);
     },
     willDetachTrait(mapTrait: MapTrait): void {
-      const layerTraits = mapTrait.layers.traits;
-      for (const traitId in layerTraits) {
-        const layerTrait = layerTraits[traitId]!;
-        this.owner.layers.deleteTraitController(layerTrait);
-      }
+      this.owner.layers.deleteTraits(mapTrait.layers.traits);
     },
     didDetachTrait(mapTrait: MapTrait): void {
       this.owner.callObservers("controllerDidDetachMapTrait", mapTrait, this.owner);
     },
-    traitDidSetGeoPerspective(newGeoPerspective: GeoPerspective | null, oldGeoPerspective: GeoPerspective | null): void {
-      this.owner.setGeoPerspective(newGeoPerspective);
+    traitDidSetGeoPerspective(geoPerspective: GeoPerspective | null): void {
+      this.owner.setGeoPerspective(geoPerspective);
     },
     traitWillAttachLayer(layerTrait: GeoTrait, targetTrait: Trait): void {
-      this.owner.layers.addTraitController(layerTrait, targetTrait);
+      this.owner.layers.addTrait(layerTrait, targetTrait);
     },
     traitDidDetachLayer(layerTrait: GeoTrait): void {
-      this.owner.layers.deleteTraitController(layerTrait);
+      this.owner.layers.deleteTrait(layerTrait);
     },
     viewType: MapView,
     observesView: true,
@@ -102,7 +88,7 @@ export abstract class MapController extends Controller {
       }
       const layerControllers = this.owner.layers.controllers;
       for (const controllerId in layerControllers) {
-      const layerController = layerControllers[controllerId]!;
+        const layerController = layerControllers[controllerId]!;
         const layerView = layerController.geo.view;
         if (layerView !== null && layerView.parent === null) {
           layerController.geo.insertView(mapView);
@@ -135,11 +121,11 @@ export abstract class MapController extends Controller {
       this.owner.container.setView(null);
     },
   })
-  readonly map!: TraitViewRef<this, MapTrait, MapView>;
-  static readonly map: MemberFastenerClass<MapController, "map">;
+  readonly map!: TraitViewRef<this, MapTrait, MapView> & Observes<MapTrait & MapView>;
+  static readonly map: FastenerClass<MapController["map"]>;
 
-  @ViewRef<MapController, CanvasView>({
-    type: CanvasView,
+  @ViewRef<MapController["canvas"]>({
+    viewType: CanvasView,
     willAttachView(mapCanvasView: CanvasView): void {
       this.owner.callObservers("controllerWillAttachMapCanvasView", mapCanvasView, this.owner);
     },
@@ -148,31 +134,35 @@ export abstract class MapController extends Controller {
     },
   })
   readonly canvas!: ViewRef<this, CanvasView>;
-  static readonly canvas: MemberFastenerClass<MapController, "canvas">;
+  static readonly canvas: FastenerClass<MapController["canvas"]>;
 
-  @ViewRef<MapController, HtmlView>({
-    type: HtmlView,
+  @ViewRef<MapController["container"]>({
+    viewType: HtmlView,
     willAttachView(mapContainerView: HtmlView): void {
       this.owner.callObservers("controllerWillAttachMapContainerView", mapContainerView, this.owner);
     },
     didAttachView(containerView: HtmlView): void {
-      const mapView = this.owner.createMapView(containerView);
-      mapView.container.setView(containerView);
-      this.owner.map.setView(mapView);
+      let mapView = this.owner.map.view;
+      if (mapView === null) {
+        mapView = this.owner.createMapView(containerView);
+        this.owner.map.setView(mapView);
+      }
+      if (mapView !== null) {
+        mapView.container.setView(containerView);
+      }
     },
     didDetachView(mapContainerView: HtmlView): void {
       this.owner.callObservers("controllerDidDetachMapContainerView", mapContainerView, this.owner);
     },
   })
   readonly container!: ViewRef<this, HtmlView>;
-  static readonly container: MemberFastenerClass<MapController, "container">;
+  static readonly container: FastenerClass<MapController["container"]>;
 
-  @Property({type: Timing, value: true})
-  readonly geoTiming!: Property<this, Timing | boolean | undefined, AnyTiming>;
+  @Property({valueType: Timing, value: true})
+  readonly geoTiming!: Property<this, Timing | boolean | undefined, AnyTiming | boolean | undefined>;
 
-  @TraitViewControllerSet<MapController, GeoTrait, GeoView, GeoController, MapControllerLayerExt>({
-    implements: true,
-    type: GeoController,
+  @TraitViewControllerSet<MapController["layers"]>({
+    controllerType: GeoController,
     binds: true,
     observes: true,
     get parentView(): MapView | null {
@@ -243,12 +233,17 @@ export abstract class MapController extends Controller {
     },
     createController(layerTrait?: GeoTrait): GeoController {
       if (layerTrait !== void 0) {
-        return GeoController.fromTrait(layerTrait);
+        return layerTrait.createGeoController();
       } else {
         return TraitViewControllerSet.prototype.createController.call(this);
       }
     },
   })
-  readonly layers!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController> & MapControllerLayerExt;
-  static readonly layers: MemberFastenerClass<MapController, "layers">;
+  readonly layers!: TraitViewControllerSet<this, GeoTrait, GeoView, GeoController> & Observes<GeoController> & {
+    attachLayerTrait(layerTrait: GeoTrait, layerController: GeoController): void,
+    detachLayerTrait(layerTrait: GeoTrait, layerController: GeoController): void,
+    attachLayerView(layerView: GeoView, layerController: GeoController): void,
+    detachLayerView(layerView: GeoView, layerController: GeoController): void,
+  };
+  static readonly layers: FastenerClass<MapController["layers"]>;
 }

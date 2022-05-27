@@ -17,12 +17,12 @@ import type {TraitObserver} from "../trait/TraitObserver";
 import type {SelectableTrait} from "./SelectableTrait";
 
 /** @public */
-export interface SelectableTraitObserver<R extends SelectableTrait = SelectableTrait> extends TraitObserver<R> {
-  traitWillSelect?(options: SelectionOptions | null, trait: R): void;
+export interface SelectableTraitObserver<T extends SelectableTrait = SelectableTrait> extends TraitObserver<T> {
+  traitWillSelect?(options: SelectionOptions | null, trait: T): void;
 
-  traitDidSelect?(options: SelectionOptions | null, trait: R): void;
+  traitDidSelect?(options: SelectionOptions | null, trait: T): void;
 
-  traitWillUnselect?(trait: R): void;
+  traitWillUnselect?(trait: T): void;
 
-  traitDidUnselect?(trait: R): void;
+  traitDidUnselect?(trait: T): void;
 }

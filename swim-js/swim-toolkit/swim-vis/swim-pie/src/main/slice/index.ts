@@ -19,13 +19,7 @@ export {
 } from "./SliceView";
 export {SliceViewObserver} from "./SliceViewObserver";
 
-export {
-  SliceLabel,
-  SliceLabelFunction,
-  SliceLegend,
-  SliceLegendFunction,
-  SliceTrait,
-} from "./SliceTrait";
+export {SliceTrait} from "./SliceTrait";
 export {SliceTraitObserver} from "./SliceTraitObserver";
 
 export {SliceController} from "./SliceController";

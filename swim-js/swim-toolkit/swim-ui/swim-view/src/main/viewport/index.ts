@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {ViewportIdiom} from "./ViewportIdiom";
+export {LayoutViewport} from "./LayoutViewport";
+
+export {VisualViewport} from "./VisualViewport";
+
+export {ViewportOrientation} from "./ViewportOrientation";
+
 export {ViewportColorScheme} from "./ViewportColorScheme";
-export {ViewportInsets} from "./ViewportInsets";
-export {ViewportArea} from "./ViewportArea";
-export {Viewport} from "./Viewport";
 
 export {ViewportService} from "./ViewportService";
 export {ViewportServiceObserver} from "./ViewportServiceObserver";
-
-export {ViewportProvider} from "./ViewportProvider";

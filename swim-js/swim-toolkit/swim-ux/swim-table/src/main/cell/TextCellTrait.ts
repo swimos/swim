@@ -14,27 +14,24 @@
 
 import type {Class} from "@swim/util";
 import {Property} from "@swim/component";
-import type {HtmlView} from "@swim/dom";
 import {CellTrait} from "./CellTrait";
 import type {TextCellTraitObserver} from "./TextCellTraitObserver";
-
-/** @public */
-export type TextCellContent = TextCellContentFunction | string;
-/** @public */
-export type TextCellContentFunction = (cellTrait: TextCellTrait) => HtmlView | string | null;
+import type {CellController} from "./CellController";
+import {TextCellController} from "./"; // forward import
 
 /** @public */
 export class TextCellTrait extends CellTrait {
   override readonly observerType?: Class<TextCellTraitObserver>;
 
-  @Property<TextCellTrait, TextCellContent | null>({
-    value: null,
-    willSetValue(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-      this.owner.callObservers("traitWillSetContent", newContent, oldContent, this.owner);
-    },
-    didSetValue(newContent: TextCellContent | null, oldContent: TextCellContent | null): void {
-      this.owner.callObservers("traitDidSetContent", newContent, oldContent, this.owner);
+  @Property<TextCellTrait["content"]>({
+    valueType: String,
+    didSetValue(content: string | undefined): void {
+      this.owner.callObservers("traitDidSetContent", content, this.owner);
     },
   })
-  readonly content!: Property<this, TextCellContent | null>;
+  readonly content!: Property<this, string | undefined>;
+
+  override createCellController(): CellController {
+    return new TextCellController();
+  }
 }

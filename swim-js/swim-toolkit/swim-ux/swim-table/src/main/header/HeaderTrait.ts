@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
-import {Model, TraitConstructor, TraitClass, Trait, TraitSet} from "@swim/model";
+import type {Class, Instance, Creatable} from "@swim/util";
+import type {FastenerClass} from "@swim/component";
+import {Model, Trait, TraitSet} from "@swim/model";
 import {ColTrait} from "../col/ColTrait";
 import type {HeaderTraitObserver} from "./HeaderTraitObserver";
 
@@ -22,9 +22,9 @@ import type {HeaderTraitObserver} from "./HeaderTraitObserver";
 export class HeaderTrait extends Trait {
   override readonly observerType?: Class<HeaderTraitObserver>;
 
+  getCol<F extends Class<ColTrait>>(key: string, colTraitClass: F): InstanceType<F> | null;
   getCol(key: string): ColTrait | null;
-  getCol<R extends ColTrait>(key: string, colTraitClass: TraitClass<R>): R | null;
-  getCol(key: string, colTraitClass?: TraitClass<ColTrait>): ColTrait | null {
+  getCol(key: string, colTraitClass?: Class<ColTrait>): ColTrait | null {
     if (colTraitClass === void 0) {
       colTraitClass = ColTrait;
     }
@@ -32,26 +32,21 @@ export class HeaderTrait extends Trait {
     return colTrait instanceof colTraitClass ? colTrait : null;
   }
 
-  getOrCreateCol(key: string): ColTrait;
-  getOrCreateCol<R extends ColTrait>(key: string, colTraitConstructor: TraitConstructor<R>): R;
-  getOrCreateCol(key: string, colTraitConstructor?: TraitConstructor<ColTrait>): ColTrait {
-    if (colTraitConstructor === void 0) {
-      colTraitConstructor = ColTrait;
-    }
-    let colTrait = this.getTrait(key) as ColTrait | null;
-    if (!(colTrait instanceof colTraitConstructor)) {
-      colTrait = new colTraitConstructor();
+  getOrCreateCol<F extends Class<Instance<F, ColTrait>> & Creatable<Instance<F, ColTrait>>>(key: string, colTraitClass: F): InstanceType<F> {
+    let colTrait = this.getTrait(key, colTraitClass);
+    if (colTrait === null) {
+      colTrait = colTraitClass.create();
       this.setTrait(key, colTrait);
     }
-    return colTrait;
+    return colTrait!;
   }
 
-  setCol(key: string, colTrait: ColTrait): void {
+  setCol(key: string, colTrait: ColTrait | null): void {
     this.setTrait(key, colTrait);
   }
 
-  @TraitSet<HeaderTrait, ColTrait>({
-    type: ColTrait,
+  @TraitSet<HeaderTrait["cols"]>({
+    traitType: ColTrait,
     binds: true,
     willAttachTrait(colTrait: ColTrait, targetTrait: Trait | null): void {
       this.owner.callObservers("traitWillAttachCol", colTrait, targetTrait, this.owner);
@@ -74,33 +69,15 @@ export class HeaderTrait extends Trait {
     },
   })
   readonly cols!: TraitSet<this, ColTrait>;
-  static readonly cols: MemberFastenerClass<HeaderTrait, "cols">;
-
-  /** @internal */
-  protected startConsumingCols(): void {
-    const colTraits = this.cols.traits;
-    for (const traitId in colTraits) {
-      const colTrait = colTraits[traitId]!;
-      colTrait.consume(this);
-    }
-  }
-
-  /** @internal */
-  protected stopConsumingCols(): void {
-    const colTraits = this.cols.traits;
-    for (const traitId in colTraits) {
-      const colTrait = colTraits[traitId]!;
-      colTrait.unconsume(this);
-    }
-  }
+  static readonly cols: FastenerClass<HeaderTrait["cols"]>;
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();
-    this.startConsumingCols();
+    this.cols.consumeTraits(this);
   }
 
   protected override onStopConsuming(): void {
     super.onStopConsuming();
-    this.stopConsumingCols();
+    this.cols.unconsumeTraits(this);
   }
 }

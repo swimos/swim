@@ -14,19 +14,15 @@
 
 import type {Trait, TraitObserver} from "@swim/model";
 import type {DialTrait} from "../dial/DialTrait";
-import type {GaugeTitle, GaugeTrait} from "./GaugeTrait";
+import type {GaugeTrait} from "./GaugeTrait";
 
 /** @public */
-export interface GaugeTraitObserver<R extends GaugeTrait = GaugeTrait> extends TraitObserver<R> {
-  traitWillSetGaugeTitle?(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, trait: R): void;
+export interface GaugeTraitObserver<T extends GaugeTrait = GaugeTrait> extends TraitObserver<T> {
+  traitDidSetTitle?(title: string | undefined, trait: T): void;
 
-  traitDidSetGaugeTitle?(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, trait: R): void;
+  traitDidSetLimit?(limit: number, trait: T): void;
 
-  traitWillSetGaugeLimit?(newLimit: number, oldLimit: number, trait: R): void;
+  traitWillAttachDial?(dialTrait: DialTrait, targetTrait: Trait | null, trait: T): void;
 
-  traitDidSetGaugeLimit?(newLimit: number, oldLimit: number, trait: R): void;
-
-  traitWillAttachDial?(dialTrait: DialTrait, targetTrait: Trait | null, trait: R): void;
-
-  traitDidDetachDial?(dialTrait: DialTrait, trait: R): void;
+  traitDidDetachDial?(dialTrait: DialTrait, trait: T): void;
 }

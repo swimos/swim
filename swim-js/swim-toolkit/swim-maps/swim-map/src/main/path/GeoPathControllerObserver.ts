@@ -28,7 +28,5 @@ export interface GeoPathControllerObserver<C extends GeoPathController = GeoPath
 
   controllerDidDetachGeoView?(geoView: GeoPathView, controller: C): void;
 
-  controllerWillSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, controller: C): void;
-
-  controllerDidSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, controller: C): void;
+  controllerDidSetGeoPath?(geoPath: GeoPath | null, controller: C): void;
 }

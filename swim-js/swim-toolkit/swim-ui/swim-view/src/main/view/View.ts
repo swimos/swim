@@ -21,14 +21,14 @@ import {
   AnyTiming,
   Timing,
   Creatable,
-  InitType,
+  Inits,
   Initable,
-  ObserverType,
+  Observes,
 } from "@swim/util";
 import {
   Affinity,
+  FastenerClass,
   Fastener,
-  MemberPropertyInitMap,
   Property,
   Animator,
   Provider,
@@ -60,20 +60,8 @@ import {
   ThemeContext,
   ThemeAnimator,
 } from "@swim/theme";
-import type {ViewportIdiom} from "../viewport/ViewportIdiom";
-import type {Viewport} from "../viewport/Viewport";
-import {ViewportService} from "../viewport/ViewportService";
-import {ViewportProvider} from "../viewport/ViewportProvider";
-import {DisplayService} from "../display/DisplayService";
-import {DisplayProvider} from "../display/DisplayProvider";
-import {LayoutService} from "../layout/LayoutService";
-import {LayoutProvider} from "../layout/LayoutProvider";
-import {ThemeService} from "../theme/ThemeService";
-import {ThemeProvider} from "../theme/ThemeProvider";
-import {ModalService} from "../modal/ModalService";
-import {ModalProvider} from "../modal/ModalProvider";
-import {Gesture} from "../gesture/Gesture";
-import {ViewContext} from "./ViewContext";
+import type {ViewIdiom} from "./ViewIdiom";
+import {ViewInsets} from "./ViewInsets";
 import type {
   ViewObserver,
   ViewWillInsertChild,
@@ -101,16 +89,19 @@ import type {
   ViewObserverCache,
 } from "./ViewObserver";
 import {ViewRelation} from "./"; // forward import
-
-/** @public */
-export type ViewContextType<V extends View> =
-  V extends {readonly contextType?: Class<infer T>} ? T : never;
+import {Gesture} from "../"; // forward import
+import type {LayoutViewport} from "../viewport/LayoutViewport";
+import type {VisualViewport} from "../viewport/VisualViewport";
+import {ViewportService} from "../"; // forward import
+import {DisplayerService} from "../"; // forward import
+import {SolverService} from "../"; // forward import
+import {StylerService} from "../"; // forward import
 
 /** @public */
 export type ViewFlags = ComponentFlags;
 
 /** @public */
-export type AnyView<V extends View = View> = V | ViewFactory<V> | InitType<V>;
+export type AnyView<V extends View = View> = V | ViewFactory<V> | Inits<V>;
 
 /** @public */
 export interface ViewInit extends ComponentInit {
@@ -126,7 +117,7 @@ export interface ViewInit extends ComponentInit {
 
 /** @public */
 export interface ViewFactory<V extends View = View, U = AnyView<V>> extends Creatable<V>, FromAny<V, U> {
-  fromInit(init: InitType<V>): V;
+  fromInit(init: Inits<V>): V;
 }
 
 /** @public */
@@ -140,7 +131,7 @@ export interface ViewConstructor<V extends View = View, U = AnyView<V>> extends 
 }
 
 /** @public */
-export class View extends Component<View> implements Initable<ViewInit>, ConstraintScope, ConstraintContext, ThemeContext {
+export class View extends Component<View> implements Initable<ViewInit>, ConstraintScope, ConstraintContext, ThemeContext, EventTarget {
   constructor() {
     super();
     this.observerCache = {};
@@ -153,8 +144,6 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   override readonly observerType?: Class<ViewObserver>;
-
-  readonly contextType?: Class<ViewContext>;
 
   /** @internal */
   override attachParent(parent: View, nextSibling: View | null): void {
@@ -268,6 +257,10 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     return super.insertChild(child, target, key);
   }
 
+  override reinsertChild(child: View, target: View | null): void {
+    super.reinsertChild(child, target);
+  }
+
   override replaceChild<V extends View>(newChild: View, oldChild: V): V;
   override replaceChild<V extends View>(newChild: AnyView, oldChild: V): V;
   override replaceChild(newChild: AnyView, oldChild: View): View {
@@ -302,17 +295,14 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   /** @internal */
-  override cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
+  override cascadeInsert(updateFlags?: ViewFlags): void {
     if ((this.flags & View.MountedFlag) !== 0) {
       if (updateFlags === void 0) {
         updateFlags = 0;
       }
       updateFlags |= this.flags & View.UpdateMask;
       if ((updateFlags & View.ProcessMask) !== 0) {
-        if (viewContext === void 0) {
-          viewContext = this.superViewContext;
-        }
-        this.cascadeProcess(updateFlags, viewContext);
+        this.cascadeProcess(updateFlags);
       }
     }
   }
@@ -343,6 +333,32 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     super.didRemoveChild(child);
   }
 
+  protected override willReinsertChild(child: View, target: View | null): void {
+    super.willReinsertChild(child, target);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewWillReinsertChild !== void 0) {
+        observer.viewWillReinsertChild(child, target, this);
+      }
+    }
+  }
+
+  protected override onReinsertChild(child: View, target: View | null): void {
+    super.onReinsertChild(child, target);
+  }
+
+  protected override didReinsertChild(child: View, target: View | null): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.viewDidReinsertChild !== void 0) {
+        observer.viewDidReinsertChild(child, target, this);
+      }
+    }
+    super.didReinsertChild(child, target);
+  }
+
   /** @internal */
   override mount(): void {
     throw new Error();
@@ -369,8 +385,6 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     }
 
     this.mountFasteners();
-    this.mountTheme();
-    this.updateTheme(false);
   }
 
   protected override didMount(): void {
@@ -531,10 +545,10 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
       this.requireUpdate(View.NeedsChange | View.NeedsAnimate);
     }
 
-    if (this.mood.inherited) {
+    if (this.mood.derived) {
       this.mood.decohere();
     }
-    if (this.theme.inherited) {
+    if (this.theme.derived) {
       this.theme.decohere();
     }
   }
@@ -792,9 +806,9 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
         if (parent !== null) {
           parent.requestUpdate(target, updateFlags, immediate);
         } else if (this.mounted) {
-          const displayService = this.displayProvider.service;
-          if (displayService !== void 0 && displayService !== null) {
-            displayService.requestUpdate(target, updateFlags, immediate);
+          const updaterService = this.updater.service;
+          if (updaterService !== null) {
+            updaterService.requestUpdate(target, updateFlags, immediate);
           }
         }
       }
@@ -809,235 +823,226 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     return (this.flags & View.ProcessingFlag) !== 0;
   }
 
-  protected needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected needsProcess(processFlags: ViewFlags): ViewFlags {
     return processFlags;
   }
 
-  cascadeProcess(processFlags: ViewFlags, baseViewContext: ViewContext): void {
-    const viewContext = this.extendViewContext(baseViewContext);
-    const outerViewContext = ViewContext.current;
+  cascadeProcess(processFlags: ViewFlags): void {
     try {
-      ViewContext.current = viewContext;
       processFlags &= ~View.NeedsProcess;
       processFlags |= this.flags & View.UpdateMask;
-      processFlags = this.needsProcess(processFlags, viewContext);
+      processFlags = this.needsProcess(processFlags);
       if ((processFlags & View.ProcessMask) !== 0) {
         let cascadeFlags = processFlags;
-        this.setFlags(this.flags & ~View.NeedsProcess | (View.ProcessingFlag | View.ContextualFlag));
-        this.willProcess(cascadeFlags, viewContext);
+        this.setFlags(this.flags & ~View.NeedsProcess | View.ProcessingFlag);
+        this.willProcess(cascadeFlags);
         if (((this.flags | processFlags) & View.NeedsResize) !== 0) {
           cascadeFlags |= View.NeedsResize;
           this.setFlags(this.flags & ~View.NeedsResize);
-          this.willResize(viewContext);
+          this.willResize();
         }
         if (((this.flags | processFlags) & View.NeedsScroll) !== 0) {
           cascadeFlags |= View.NeedsScroll;
           this.setFlags(this.flags & ~View.NeedsScroll);
-          this.willScroll(viewContext);
+          this.willScroll();
         }
         if (((this.flags | processFlags) & View.NeedsChange) !== 0) {
           cascadeFlags |= View.NeedsChange;
           this.setFlags(this.flags & ~View.NeedsChange);
-          this.willChange(viewContext);
+          this.willChange();
         }
         if (((this.flags | processFlags) & View.NeedsAnimate) !== 0) {
           cascadeFlags |= View.NeedsAnimate;
           this.setFlags(this.flags & ~View.NeedsAnimate);
-          this.willAnimate(viewContext);
+          this.willAnimate();
         }
         if (((this.flags | processFlags) & View.NeedsProject) !== 0) {
           cascadeFlags |= View.NeedsProject;
           this.setFlags(this.flags & ~View.NeedsProject);
-          this.willProject(viewContext);
+          this.willProject();
         }
 
-        this.onProcess(cascadeFlags, viewContext);
+        this.onProcess(cascadeFlags, );
         if ((cascadeFlags & View.NeedsResize) !== 0) {
-          this.onResize(viewContext);
+          this.onResize();
         }
         if ((cascadeFlags & View.NeedsScroll) !== 0) {
-          this.onScroll(viewContext);
+          this.onScroll();
         }
         if ((cascadeFlags & View.NeedsChange) !== 0) {
-          this.onChange(viewContext);
+          this.onChange();
         }
         if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-          this.onAnimate(viewContext);
+          this.onAnimate();
         }
         if ((cascadeFlags & View.NeedsProject) !== 0) {
-          this.onProject(viewContext);
+          this.onProject();
         }
 
         if ((cascadeFlags & View.ProcessMask) !== 0) {
-          this.setFlags(this.flags & ~View.ContextualFlag);
-          this.processChildren(cascadeFlags, viewContext, this.processChild);
-          this.setFlags(this.flags | View.ContextualFlag);
+          this.processChildren(cascadeFlags, this.processChild);
         }
 
         if ((cascadeFlags & View.NeedsProject) !== 0) {
-          this.didProject(viewContext);
+          this.didProject();
         }
         if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-          this.didAnimate(viewContext);
+          this.didAnimate();
         }
         if ((cascadeFlags & View.NeedsChange) !== 0) {
-          this.didChange(viewContext);
+          this.didChange();
         }
         if ((cascadeFlags & View.NeedsScroll) !== 0) {
-          this.didScroll(viewContext);
+          this.didScroll();
         }
         if ((cascadeFlags & View.NeedsResize) !== 0) {
-          this.didResize(viewContext);
+          this.didResize();
         }
-        this.didProcess(cascadeFlags, viewContext);
+        this.didProcess(cascadeFlags);
       }
     } finally {
-      this.setFlags(this.flags & ~(View.ProcessingFlag | View.ContextualFlag));
-      ViewContext.current = outerViewContext;
+      this.setFlags(this.flags & ~View.ProcessingFlag);
     }
   }
 
-  protected willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected willProcess(processFlags: ViewFlags): void {
     // hook
   }
 
-  protected onProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected onProcess(processFlags: ViewFlags): void {
     // hook
   }
 
-  protected didProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected didProcess(processFlags: ViewFlags): void {
     // hook
   }
 
-  protected willResize(viewContext: ViewContextType<this>): void {
+  protected willResize(): void {
     const observers = this.observerCache.viewWillResizeObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillResize(viewContext, this);
+        observer.viewWillResize(this);
       }
     }
     this.evaluateConstraintVariables();
   }
 
-  protected onResize(viewContext: ViewContextType<this>): void {
+  protected onResize(): void {
     // hook
   }
 
-  protected didResize(viewContext: ViewContextType<this>): void {
+  protected didResize(): void {
     const observers = this.observerCache.viewDidResizeObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidResize(viewContext, this);
+        observer.viewDidResize(this);
       }
     }
   }
 
-  protected willScroll(viewContext: ViewContextType<this>): void {
+  protected willScroll(): void {
     const observers = this.observerCache.viewWillScrollObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillScroll(viewContext, this);
+        observer.viewWillScroll(this);
       }
     }
   }
 
-  protected onScroll(viewContext: ViewContextType<this>): void {
+  protected onScroll(): void {
     // hook
   }
 
-  protected didScroll(viewContext: ViewContextType<this>): void {
+  protected didScroll(): void {
     const observers = this.observerCache.viewDidScrollObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidScroll(viewContext, this);
+        observer.viewDidScroll(this);
       }
     }
   }
 
-  protected willChange(viewContext: ViewContextType<this>): void {
+  protected willChange(): void {
     const observers = this.observerCache.viewWillChangeObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillChange(viewContext, this);
+        observer.viewWillChange(this);
       }
     }
   }
 
-  protected onChange(viewContext: ViewContextType<this>): void {
-    this.recohereFasteners(viewContext.updateTime);
-    this.updateTheme();
+  protected onChange(): void {
+    this.recohereFasteners(this.updateTime);
   }
 
-  protected didChange(viewContext: ViewContextType<this>): void {
+  protected didChange(): void {
     const observers = this.observerCache.viewDidChangeObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidChange(viewContext, this);
+        observer.viewDidChange(this);
       }
     }
   }
 
-  protected willAnimate(viewContext: ViewContextType<this>): void {
+  protected willAnimate(): void {
     const observers = this.observerCache.viewWillAnimateObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillAnimate(viewContext, this);
+        observer.viewWillAnimate(this);
       }
     }
   }
 
-  protected onAnimate(viewContext: ViewContextType<this>): void {
-    this.recohereAnimators(viewContext.updateTime);
+  protected onAnimate(): void {
+    this.recohereAnimators(this.updateTime);
   }
 
-  protected didAnimate(viewContext: ViewContextType<this>): void {
+  protected didAnimate(): void {
     const observers = this.observerCache.viewDidAnimateObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidAnimate(viewContext, this);
+        observer.viewDidAnimate(this);
       }
     }
   }
 
-  protected willProject(viewContext: ViewContextType<this>): void {
+  protected willProject(): void {
     const observers = this.observerCache.viewWillProjectObservers;
     if (observers !== void 0) {
       for (let i = 0; i < observers.length; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillProject(viewContext, this);
+        observer.viewWillProject(this);
       }
     }
   }
 
-  protected onProject(viewContext: ViewContextType<this>): void {
+  protected onProject(): void {
     // hook
   }
 
-  protected didProject(viewContext: ViewContextType<this>): void {
+  protected didProject(): void {
     const observers = this.observerCache.viewDidProjectObservers;
     if (observers !== void 0) {
       for (let i = 0; i < observers.length; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidProject(viewContext, this);
+        observer.viewDidProject(this);
       }
     }
   }
 
-  protected processChildren(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                            processChild: (this: this, child: View, processFlags: ViewFlags,
-                                           viewContext: ViewContextType<this>) => void): void {
+  protected processChildren(processFlags: ViewFlags, processChild: (this: this, child: View, processFlags: ViewFlags) => void): void {
     let child = this.firstChild;
     while (child !== null) {
       const next = child.nextSibling;
-      processChild.call(this, child, processFlags, viewContext);
+      processChild.call(this, child, processFlags);
       if (next !== null && next.parent !== this) {
         throw new Error("inconsistent process pass");
       }
@@ -1045,206 +1050,198 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     }
   }
 
-  protected processChild(child: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    child.cascadeProcess(processFlags, viewContext);
+  protected processChild(child: View, processFlags: ViewFlags): void {
+    child.cascadeProcess(processFlags);
   }
 
   get displaying(): boolean {
     return (this.flags & View.DisplayingFlag) !== 0;
   }
 
-  protected needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected needsDisplay(displayFlags: ViewFlags): ViewFlags {
     return displayFlags;
   }
 
-  cascadeDisplay(displayFlags: ViewFlags, baseViewContext: ViewContext): void {
-    const viewContext = this.extendViewContext(baseViewContext);
-    const outerViewContext = ViewContext.current;
+  cascadeDisplay(displayFlags: ViewFlags): void {
     try {
-      ViewContext.current = viewContext;
       displayFlags &= ~View.NeedsDisplay;
       displayFlags |= this.flags & View.UpdateMask;
-      displayFlags = this.needsDisplay(displayFlags, viewContext);
+      displayFlags = this.needsDisplay(displayFlags);
       if ((displayFlags & View.DisplayMask) !== 0) {
         let cascadeFlags = displayFlags;
-        this.setFlags(this.flags & ~View.NeedsDisplay | (View.DisplayingFlag | View.ContextualFlag));
-        this.willDisplay(cascadeFlags, viewContext);
+        this.setFlags(this.flags & ~View.NeedsDisplay | View.DisplayingFlag);
+        this.willDisplay(cascadeFlags);
         if (((this.flags | displayFlags) & View.NeedsLayout) !== 0) {
           cascadeFlags |= View.NeedsLayout;
           this.setFlags(this.flags & ~View.NeedsLayout);
-          this.willLayout(viewContext);
+          this.willLayout();
         }
         if (((this.flags | displayFlags) & View.NeedsRender) !== 0) {
           cascadeFlags |= View.NeedsRender;
           this.setFlags(this.flags & ~View.NeedsRender);
-          this.willRender(viewContext);
+          this.willRender();
         }
         if (((this.flags | displayFlags) & View.NeedsRasterize) !== 0) {
           cascadeFlags |= View.NeedsRasterize;
           this.setFlags(this.flags & ~View.NeedsRasterize);
-          this.willRasterize(viewContext);
+          this.willRasterize();
         }
         if (((this.flags | displayFlags) & View.NeedsComposite) !== 0) {
           cascadeFlags |= View.NeedsComposite;
           this.setFlags(this.flags & ~View.NeedsComposite);
-          this.willComposite(viewContext);
+          this.willComposite();
         }
 
-        this.onDisplay(cascadeFlags, viewContext);
+        this.onDisplay(cascadeFlags);
         if ((cascadeFlags & View.NeedsLayout) !== 0) {
-          this.onLayout(viewContext);
+          this.onLayout();
         }
         if ((cascadeFlags & View.NeedsRender) !== 0) {
-          this.onRender(viewContext);
+          this.onRender();
         }
         if ((cascadeFlags & View.NeedsRasterize) !== 0) {
-          this.onRasterize(viewContext);
+          this.onRasterize();
         }
         if ((cascadeFlags & View.NeedsComposite) !== 0) {
-          this.onComposite(viewContext);
+          this.onComposite();
         }
 
         if ((cascadeFlags & View.DisplayMask) !== 0 && !this.hidden && !this.culled) {
-          this.setFlags(this.flags & ~View.ContextualFlag);
-          this.displayChildren(cascadeFlags, viewContext, this.displayChild);
-          this.setFlags(this.flags | View.ContextualFlag);
+          this.displayChildren(cascadeFlags, this.displayChild);
         }
 
         if ((cascadeFlags & View.NeedsComposite) !== 0) {
-          this.didComposite(viewContext);
+          this.didComposite();
         }
         if ((cascadeFlags & View.NeedsRasterize) !== 0) {
-          this.didRasterize(viewContext);
+          this.didRasterize();
         }
         if ((cascadeFlags & View.NeedsRender) !== 0) {
-          this.didRender(viewContext);
+          this.didRender();
         }
         if ((cascadeFlags & View.NeedsLayout) !== 0) {
-          this.didLayout(viewContext);
+          this.didLayout();
         }
-        this.didDisplay(cascadeFlags, viewContext);
+        this.didDisplay(cascadeFlags);
       }
     } finally {
-      this.setFlags(this.flags & ~(View.DisplayingFlag | View.ContextualFlag));
-      ViewContext.current = outerViewContext;
+      this.setFlags(this.flags & ~View.DisplayingFlag);
     }
   }
 
-  protected willDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected willDisplay(displayFlags: ViewFlags): void {
     // hook
   }
 
-  protected onDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected onDisplay(displayFlags: ViewFlags): void {
     // hook
   }
 
-  protected didDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected didDisplay(displayFlags: ViewFlags): void {
     // hook
   }
 
-  protected willLayout(viewContext: ViewContextType<this>): void {
+  protected willLayout(): void {
     const observers = this.observerCache.viewWillLayoutObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillLayout(viewContext, this);
+        observer.viewWillLayout(this);
       }
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected onLayout(): void {
     // hook
   }
 
-  protected didLayout(viewContext: ViewContextType<this>): void {
+  protected didLayout(): void {
     const observers = this.observerCache.viewDidLayoutObservers;
     if (observers !== void 0) {
       for (let i = 0, n = observers.length; i < n; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidLayout(viewContext, this);
+        observer.viewDidLayout(this);
       }
     }
   }
 
-  protected willRender(viewContext: ViewContextType<this>): void {
+  protected willRender(): void {
     const observers = this.observerCache.viewWillRenderObservers;
     if (observers !== void 0) {
       for (let i = 0; i < observers.length; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillRender(viewContext, this);
+        observer.viewWillRender(this);
       }
     }
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected onRender(): void {
     // hook
   }
 
-  protected didRender(viewContext: ViewContextType<this>): void {
+  protected didRender(): void {
     const observers = this.observerCache.viewDidRenderObservers;
     if (observers !== void 0) {
       for (let i = 0; i < observers.length; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidRender(viewContext, this);
+        observer.viewDidRender(this);
       }
     }
   }
 
-  protected willRasterize(viewContext: ViewContextType<this>): void {
+  protected willRasterize(): void {
     const observers = this.observerCache.viewWillRasterizeObservers;
     if (observers !== void 0) {
       for (let i = 0; i < observers.length; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillRasterize(viewContext, this);
+        observer.viewWillRasterize(this);
       }
     }
   }
 
-  protected onRasterize(viewContext: ViewContextType<this>): void {
+  protected onRasterize(): void {
     // hook
   }
 
-  protected didRasterize(viewContext: ViewContextType<this>): void {
+  protected didRasterize(): void {
     const observers = this.observerCache.viewDidRasterizeObservers;
     if (observers !== void 0) {
       for (let i = 0; i < observers.length; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidRasterize(viewContext, this);
+        observer.viewDidRasterize(this);
       }
     }
   }
 
-  protected willComposite(viewContext: ViewContextType<this>): void {
+  protected willComposite(): void {
     const observers = this.observerCache.viewWillCompositeObservers;
     if (observers !== void 0) {
       for (let i = 0; i < observers.length; i += 1) {
         const observer = observers[i]!;
-        observer.viewWillComposite(viewContext, this);
+        observer.viewWillComposite(this);
       }
     }
   }
 
-  protected onComposite(viewContext: ViewContextType<this>): void {
+  protected onComposite(): void {
     // hook
   }
 
-  protected didComposite(viewContext: ViewContextType<this>): void {
+  protected didComposite(): void {
     const observers = this.observerCache.viewDidCompositeObservers;
     if (observers !== void 0) {
       for (let i = 0; i < observers.length; i += 1) {
         const observer = observers[i]!;
-        observer.viewDidComposite(viewContext, this);
+        observer.viewDidComposite(this);
       }
     }
   }
 
-  protected displayChildren(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                            displayChild: (this: this, child: View, displayFlags: ViewFlags,
-                                           viewContext: ViewContextType<this>) => void): void {
+  protected displayChildren(displayFlags: ViewFlags, displayChild: (this: this, child: View, displayFlags: ViewFlags) => void): void {
     let child = this.firstChild;
     while (child !== null) {
       const next = child.nextSibling;
-      displayChild.call(this, child, displayFlags, viewContext);
+      displayChild.call(this, child, displayFlags);
       if (next !== null && next.parent !== this) {
         throw new Error("inconsistent display pass");
       }
@@ -1252,55 +1249,123 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     }
   }
 
-  protected displayChild(child: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    child.cascadeDisplay(displayFlags, viewContext);
+  protected displayChild(child: View, displayFlags: ViewFlags): void {
+    child.cascadeDisplay(displayFlags);
   }
 
-  @Provider({
-    extends: ViewportProvider,
-    type: ViewportService,
-    observes: false,
-    service: ViewportService.global(),
+  get updateTime(): number {
+    return this.updater.getService().updateTime;
+  }
+
+  @Provider<View["viewport"]>({
+    get serviceType(): typeof ViewportService { // avoid static forward reference
+      return ViewportService;
+    },
   })
-  readonly viewportProvider!: ViewportProvider<this>;
+  readonly viewport!: Provider<this, ViewportService>;
+  static readonly viewport: FastenerClass<View["viewport"]>;
 
-  @Provider({
-    extends: DisplayProvider,
-    type: DisplayService,
-    observes: false,
-    service: DisplayService.global(),
+  @Provider<View["updater"]>({
+    get serviceType(): typeof DisplayerService { // avoid static forward reference
+      return DisplayerService;
+    },
+    mountRootService(service: DisplayerService): void {
+      Provider.prototype.mountRootService.call(this, service);
+      service.roots.addView(this.owner);
+    },
+    unmountRootService(service: DisplayerService): void {
+      Provider.prototype.unmountRootService.call(this, service);
+      service.roots.removeView(this.owner);
+    },
   })
-  readonly displayProvider!: DisplayProvider<this>;
+  readonly updater!: Provider<this, DisplayerService>;
+  static readonly updater: FastenerClass<View["updater"]>;
 
-  @Provider({
-    extends: LayoutProvider,
-    type: LayoutService,
-    observes: false,
-    service: LayoutService.global(),
+  @Provider<View["solver"]>({
+    get serviceType(): typeof SolverService { // avoid static forward reference
+      return SolverService;
+    },
   })
-  readonly layoutProvider!: LayoutProvider<this>;
+  readonly solver!: Provider<this, SolverService>;
+  static readonly solver: FastenerClass<View["solver"]>;
 
-  @Provider({
-    extends: ThemeProvider,
-    type: ThemeService,
-    observes: false,
-    service: ThemeService.global(),
+  @Provider<View["styler"]>({
+    get serviceType(): typeof StylerService { // avoid static forward reference
+      return StylerService;
+    },
+    mountRootService(service: StylerService): void {
+      Provider.prototype.mountRootService.call(this, service);
+      service.roots.addView(this.owner);
+    },
+    unmountRootService(service: StylerService): void {
+      Provider.prototype.unmountRootService.call(this, service);
+      service.roots.removeView(this.owner);
+    },
   })
-  readonly themeProvider!: ThemeProvider<this>;
+  readonly styler!: Provider<this, StylerService>;
+  static readonly styler: FastenerClass<View["styler"]>;
 
-  @Provider({
-    extends: ModalProvider,
-    type: ModalService,
-    observes: false,
-    service: ModalService.global(),
+  @Property<View["mood"]>({
+    valueType: MoodVector,
+    value: null,
+    affinity: Affinity.Inherited,
+    inherits: true,
+    init(): void {
+      this.timing = void 0;
+    },
+    transformInletValue(superMood: MoodVector | null): MoodVector | null {
+      if (superMood !== null) {
+        const moodModifierProperty = this.owner.getFastener<Property<unknown, MoodMatrix>>("moodModifier", Property);
+        const moodModifier = moodModifierProperty !== null ? moodModifierProperty.value : null;
+        if (moodModifier !== null) {
+          superMood = moodModifier.timesCol(superMood, true);
+        }
+      }
+      return superMood;
+    },
+    didSetValue(mood: MoodVector | null): void {
+      const theme = this.owner.theme.value;
+      if (theme !== null && mood !== null) {
+        this.owner.applyTheme(theme, mood, this.timing);
+        this.timing = void 0;
+      }
+    },
   })
-  readonly modalProvider!: ModalProvider<this>;
+  readonly mood!: Property<this, MoodVector | null> & {
+    /** @internal */
+    timing: AnyTiming | boolean | undefined,
+  };
 
-  @Property({type: MoodVector, value: null, inherits: true})
-  readonly mood!: Property<this, MoodVector | null>;
-
-  @Property({type: ThemeMatrix, value: null, inherits: true})
-  readonly theme!: Property<this, ThemeMatrix | null>;
+  @Property<View["theme"]>({
+    valueType: ThemeMatrix,
+    value: null,
+    affinity: Affinity.Inherited,
+    inherits: true,
+    init(): void {
+      this.timing = void 0;
+    },
+    transformInletValue(superTheme: ThemeMatrix | null): ThemeMatrix | null {
+      if (superTheme !== null) {
+        const themeModifierProperty = this.owner.getFastener<Property<unknown, MoodMatrix>>("themeModifier", Property);
+        const themeModifier = themeModifierProperty !== null ? themeModifierProperty.value : null;
+        if (themeModifier !== null) {
+          superTheme = superTheme.transform(themeModifier, true);
+        }
+      }
+      return superTheme;
+    },
+    didSetValue(theme: ThemeMatrix | null): void {
+      const mood = this.owner.mood.value;
+      if (theme !== null && mood !== null) {
+        this.owner.applyTheme(theme, mood, this.timing);
+        this.timing = void 0;
+      }
+    },
+  })
+  readonly theme!: Property<this, ThemeMatrix | null> & {
+    /** @internal */
+    timing: AnyTiming | boolean | undefined,
+  };
 
   /** @override */
   getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
@@ -1345,7 +1410,9 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
 
   /** @internal */
   applyTheme(theme: ThemeMatrix, mood: MoodVector, timing?: AnyTiming | boolean): void {
-    if (timing === void 0 || timing === true) {
+    if (timing === void 0 && this.inserting) {
+      timing = false;
+    } else if (timing === void 0 || timing === true) {
       timing = theme.getOr(Look.timing, Mood.ambient, false);
     } else {
       timing = Timing.fromAny(timing);
@@ -1390,124 +1457,86 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     }
   }
 
-  @Property({type: MoodMatrix, value: null})
+  @Property<View["moodModifier"]>({
+    valueType: MoodMatrix,
+    value: null,
+    didSetValue(moodModifier: MoodMatrix | null): void {
+      if (moodModifier !== null && this.owner.mood.hasAffinity(Affinity.Inherited)) {
+        let superMood = this.owner.mood.inletValue;
+        if (superMood === void 0 || superMood === null) {
+          const stylerService = this.owner.styler.service;
+          if (stylerService !== void 0 && stylerService !== null) {
+            superMood = stylerService.mood.value;
+          }
+        }
+        if (superMood !== void 0 && superMood !== null) {
+          const mood = moodModifier.timesCol(superMood, true);
+          this.owner.mood.setValue(mood, Affinity.Reflexive);
+        }
+      }
+    },
+  })
   readonly moodModifier!: Property<this, MoodMatrix | null>;
 
-  @Property({type: MoodMatrix, value: null})
-  readonly themeModifier!: Property<this, MoodMatrix | null>;
-
-  /** @internal */
   modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     if (this.moodModifier.hasAffinity(Affinity.Intrinsic)) {
       const oldMoodModifier = this.moodModifier.getValueOr(MoodMatrix.empty());
       const newMoodModifier = oldMoodModifier.updatedCol(feel, updates, true);
       if (!newMoodModifier.equals(oldMoodModifier)) {
+        this.mood.timing = timing;
         this.moodModifier.setValue(newMoodModifier, Affinity.Intrinsic);
-        this.changeMood();
-        if (timing !== void 0) {
-          const theme = this.theme.value;
-          const mood = this.mood.value;
-          if (theme !== null && mood !== null) {
-            if (timing === true) {
-              timing = theme.getOr(Look.timing, mood, false);
-            } else {
-              timing = Timing.fromAny(timing);
-            }
-            this.applyTheme(theme, mood, timing);
-          }
-        } else {
-          this.requireUpdate(View.NeedsChange);
-        }
       }
     }
   }
 
-  /** @internal */
-  modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
-    if (this.themeModifier.hasAffinity(Affinity.Intrinsic)) {
-      const oldThemeModifier = this.themeModifier.getValueOr(MoodMatrix.empty());
-      const newThemeModifier = oldThemeModifier.updatedCol(feel, updates, true);
-      if (!newThemeModifier.equals(oldThemeModifier)) {
-        this.themeModifier.setValue(newThemeModifier, Affinity.Intrinsic);
-        this.changeTheme();
-        if (timing !== void 0) {
-          const theme = this.theme.value;
-          const mood = this.mood.value;
-          if (theme !== null && mood !== null) {
-            if (timing === true) {
-              timing = theme.getOr(Look.timing, mood, false);
-            } else {
-              timing = Timing.fromAny(timing);
-            }
-            this.applyTheme(theme, mood, timing);
-          }
-        } else {
-          this.requireUpdate(View.NeedsChange);
-        }
-      }
-    }
-  }
-
-  /** @internal */
-  protected changeMood(): void {
-    const moodModifierProperty = this.getFastener("moodModifier", Property) as Property<this, MoodMatrix | null> | null;
-    if (moodModifierProperty !== null && this.mood.hasAffinity(Affinity.Intrinsic)) {
-      const moodModifier = moodModifierProperty.value;
-      if (moodModifier !== null) {
-        let superMood = this.mood.superValue;
-        if (superMood === void 0 || superMood === null) {
-          const themeService = this.themeProvider.service;
-          if (themeService !== void 0 && themeService !== null) {
-            superMood = themeService.mood;
-          }
-        }
-        if (superMood !== void 0 && superMood !== null) {
-          const mood = moodModifier.timesCol(superMood, true);
-          this.mood.setValue(mood, Affinity.Intrinsic);
-        }
-      } else {
-        this.mood.setAffinity(Affinity.Inherited);
-      }
-    }
-  }
-
-  /** @internal */
-  protected changeTheme(): void {
-    const themeModifierProperty = this.getFastener("themeModifier", Property) as Property<this, MoodMatrix | null> | null;
-    if (themeModifierProperty !== null && this.theme.hasAffinity(Affinity.Intrinsic)) {
-      const themeModifier = themeModifierProperty.value;
-      if (themeModifier !== null) {
-        let superTheme = this.theme.superValue;
+  @Property<View["themeModifier"]>({
+    valueType: MoodMatrix,
+    value: null,
+    didSetValue(themeModifier: MoodMatrix | null): void {
+      if (themeModifier !== null && this.owner.theme.hasAffinity(Affinity.Inherited)) {
+        let superTheme = this.owner.theme.inletValue;
         if (superTheme === void 0 || superTheme === null) {
-          const themeService = this.themeProvider.service;
-          if (themeService !== void 0 && themeService !== null) {
-            superTheme = themeService.theme;
+          const stylerService = this.owner.styler.service;
+          if (stylerService !== void 0 && stylerService !== null) {
+            superTheme = stylerService.theme.value;
           }
         }
         if (superTheme !== void 0 && superTheme !== null) {
           const theme = superTheme.transform(themeModifier, true);
-          this.theme.setValue(theme, Affinity.Intrinsic);
+          this.owner.theme.setValue(theme, Affinity.Reflexive);
         }
+      }
+    },
+  })
+  readonly themeModifier!: Property<this, MoodMatrix | null>;
+
+  modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void;
+  modifyTheme(cols: [feel: Feel, updates: MoodVectorUpdates<Feel> | undefined][], timing?: AnyTiming | boolean): void;
+  modifyTheme(feel: Feel | [feel: Feel, updates: MoodVectorUpdates<Feel> | undefined][], updates?: MoodVectorUpdates<Feel> | AnyTiming | boolean, timing?: AnyTiming | boolean): void {
+    if (this.themeModifier.hasAffinity(Affinity.Intrinsic)) {
+      const oldThemeModifier = this.themeModifier.getValueOr(MoodMatrix.empty());
+      let newThemeModifier: MoodMatrix;
+      if (feel instanceof Feel) {
+        newThemeModifier = oldThemeModifier.updatedCol(feel, updates as MoodVectorUpdates<Feel>, true);
       } else {
-        this.theme.setAffinity(Affinity.Inherited);
+        newThemeModifier = oldThemeModifier;
+        const cols = feel as [feel: Feel, updates: MoodVectorUpdates<Feel> | undefined][];
+        timing = updates as AnyTiming | boolean;
+        updates = void 0;
+        for (let i = 0, n = cols.length; i < n; i += 1) {
+          [feel, updates] = cols[i]!;
+          if (updates !== void 0) {
+            newThemeModifier = newThemeModifier.updatedCol(feel, updates, true);
+          } else {
+            newThemeModifier = newThemeModifier.col(feel, void 0);
+          }
+        }
+      }
+      if (!newThemeModifier.equals(oldThemeModifier)) {
+        this.theme.timing = timing;
+        this.themeModifier.setValue(newThemeModifier, Affinity.Intrinsic);
       }
     }
-  }
-
-  /** @internal */
-  protected updateTheme(timing?: AnyTiming | boolean): void {
-    this.changeMood();
-    this.changeTheme();
-    const theme = this.theme.value;
-    const mood = this.mood.value;
-    if (theme !== null && mood !== null) {
-      this.applyTheme(theme, mood, timing);
-    }
-  }
-
-  /** @internal */
-  protected mountTheme(): void {
-    // hook
   }
 
   /** @internal */
@@ -1625,18 +1654,18 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
 
   /** @internal @override */
   activateConstraint(constraint: Constraint): void {
-    const layoutService = this.layoutProvider.service;
-    if (layoutService !== void 0 && layoutService !== null) {
-      layoutService.activateConstraint(constraint);
+    const solverService = this.solver.service;
+    if (solverService !== null) {
+      solverService.activateConstraint(constraint);
       this.requireUpdate(View.NeedsLayout);
     }
   }
 
   /** @internal @override */
   deactivateConstraint(constraint: Constraint): void {
-    const layoutService = this.layoutProvider.service;
-    if (layoutService !== void 0 && layoutService !== null) {
-      layoutService.deactivateConstraint(constraint);
+    const solverService = this.solver.service;
+    if (solverService !== null) {
+      solverService.deactivateConstraint(constraint);
       this.requireUpdate(View.NeedsLayout);
     }
   }
@@ -1694,27 +1723,27 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
 
   /** @internal @override */
   activateConstraintVariable(constraintVariable: ConstraintVariable): void {
-    const layoutService = this.layoutProvider.service;
-    if (layoutService !== void 0 && layoutService !== null) {
-      layoutService.activateConstraintVariable(constraintVariable);
+    const solverService = this.solver.service;
+    if (solverService !== null) {
+      solverService.activateConstraintVariable(constraintVariable);
       this.requireUpdate(View.NeedsLayout);
     }
   }
 
   /** @internal @override */
   deactivateConstraintVariable(constraintVariable: ConstraintVariable): void {
-    const layoutService = this.layoutProvider.service;
-    if (layoutService !== void 0 && layoutService !== null) {
-      layoutService.deactivateConstraintVariable(constraintVariable);
+    const solverService = this.solver.service;
+    if (solverService !== null) {
+      solverService.deactivateConstraintVariable(constraintVariable);
       this.requireUpdate(View.NeedsLayout);
     }
   }
 
   /** @internal @override */
   setConstraintVariable(constraintVariable: ConstraintVariable, value: number): void {
-    const layoutService = this.layoutProvider.service;
-    if (layoutService !== void 0 && layoutService !== null) {
-      layoutService.setConstraintVariable(constraintVariable, value);
+    const solverService = this.solver.service;
+    if (solverService !== null) {
+      solverService.setConstraintVariable(constraintVariable, value);
     }
   }
 
@@ -1729,82 +1758,46 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
 
   /** @internal */
   protected activateLayout(): void {
-    const layoutService = this.layoutProvider.service;
-    if (layoutService !== void 0 && layoutService !== null) {
+    const solverService = this.solver.service;
+    if (solverService !== null) {
       const constraints = this.constraints;
       for (let i = 0, n = constraints.length; i < n; i += 1) {
-        layoutService.activateConstraint(constraints[i]!);
+        solverService.activateConstraint(constraints[i]!);
       }
     }
   }
 
   /** @internal */
   protected deactivateLayout(): void {
-    const layoutService = this.layoutProvider.service;
-    if (layoutService !== void 0 && layoutService !== null) {
+    const solverService = this.solver.service;
+    if (solverService !== null) {
       const constraints = this.constraints;
       for (let i = 0, n = constraints.length; i < n; i += 1) {
-        layoutService.deactivateConstraint(constraints[i]!);
+        solverService.deactivateConstraint(constraints[i]!);
       }
     }
   }
 
-  /** @internal */
-  setProperty(key: string, value: unknown, timing?: AnyTiming | boolean | null, affinity?: Affinity): void {
-    const property = this.getLazyFastener(key, Property);
-    if (property !== null) {
-      if (property instanceof Animator) {
-        property.setState(value, timing, affinity);
-      } else {
-        property.setValue(value, affinity);
-      }
-    }
+  get layoutViewport(): LayoutViewport {
+    return this.viewport.getService().layoutViewport.value;
   }
 
-  setProperties(properties: MemberPropertyInitMap<this>, timingOrAffinity: Affinity | AnyTiming | boolean | null | undefined): void;
-  setProperties(properties: MemberPropertyInitMap<this>, timing?: AnyTiming | boolean | null, affinity?: Affinity): void;
-  setProperties(properties: MemberPropertyInitMap<this>, timing?: Affinity | AnyTiming | boolean | null, affinity?: Affinity): void {
-    if (typeof timing === "number") {
-      affinity = timing;
-      timing = void 0;
-    }
-    for (const key in properties) {
-      const value = properties[key];
-      this.setProperty(key, value, timing, affinity);
-    }
+  get visualViewport(): VisualViewport {
+    return this.viewport.getService().visualViewport.value;
   }
 
-  /** @internal */
-  get superViewContext(): ViewContext {
-    const parent = this.parent;
-    if (parent !== null) {
-      return parent.viewContext;
-    } else {
-      const viewContext = this.viewportProvider.viewContext;
-      return this.displayProvider.updatedViewContext(viewContext);
-    }
+  get viewIdiom(): ViewIdiom {
+    return this.viewport.getService().viewIdiom.value;
   }
 
-  /** @internal */
-  extendViewContext(viewContext: ViewContext): ViewContextType<this> {
-    return viewContext as ViewContextType<this>;
-  }
-
-  get viewContext(): ViewContextType<this> {
-    if ((this.flags & View.ContextualFlag) !== 0) {
-      return ViewContext.current as ViewContextType<this>;
-    } else {
-      return this.extendViewContext(this.superViewContext);
-    }
-  }
-
-  get viewportIdiom(): ViewportIdiom {
-    return this.viewContext.viewportIdiom;
-  }
-
-  get viewport(): Viewport {
-    return this.viewContext.viewport;
-  }
+  @Property<View["edgeInsets"]>({
+    valueType: ViewInsets,
+    value: ViewInsets.zero,
+    inherits: true,
+    updateFlags: View.NeedsResize | View.NeedsScroll | View.NeedsLayout,
+    equalValues: ViewInsets.equal,
+  })
+  readonly edgeInsets!: Property<this, ViewInsets>;
 
   /**
    * Returns the transformation from the parent view coordinates to view
@@ -1857,8 +1850,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   get clientBounds(): R2Box {
-    const viewport = this.viewport;
-    return new R2Box(0, 0, viewport.width, viewport.height);
+    return R2Box.undefined();
   }
 
   intersectsViewport(): boolean {
@@ -1873,20 +1865,18 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     return true; // nop
   }
 
-  on(type: string, listener: EventListenerOrEventListenerObject,
-     options?: AddEventListenerOptions | boolean): this {
-    return this; // nop
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): void {
+    // nop
   }
 
-  off(type: string, listener: EventListenerOrEventListenerObject,
-      options?: EventListenerOptions | boolean): this {
-    return this; // nop
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): void {
+    // nop
   }
 
   /** @internal */
   readonly observerCache: ViewObserverCache<this>;
 
-  protected override onObserve(observer: ObserverType<this>): void {
+  protected override onObserve(observer: Observes<this>): void {
     super.onObserve(observer);
     if (observer.viewWillInsertChild !== void 0) {
       this.observerCache.viewWillInsertChildObservers = Arrays.inserted(observer as ViewWillInsertChild, this.observerCache.viewWillInsertChildObservers);
@@ -1956,7 +1946,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     }
   }
 
-  protected override onUnobserve(observer: ObserverType<this>): void {
+  protected override onUnobserve(observer: Observes<this>): void {
     super.onUnobserve(observer);
     if (observer.viewWillInsertChild !== void 0) {
       this.observerCache.viewWillInsertChildObservers = Arrays.removed(observer as ViewWillInsertChild, this.observerCache.viewWillInsertChildObservers);
@@ -2046,7 +2036,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
     return new this();
   }
 
-  static override fromInit<S extends Class<Instance<S, View>>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
+  static override fromInit<S extends Class<Instance<S, View>>>(this: S, init: Inits<InstanceType<S>>): InstanceType<S> {
     let type: Creatable<View>;
     if ((typeof init === "object" && init !== null || typeof init === "function") && Creatable.is((init as ViewInit).type)) {
       type = (init as ViewInit).type!;
@@ -2075,17 +2065,19 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   }
 
   /** @internal */
-  static override uid: () => number = (function () {
+  static override uid: () => string = (function () {
     let nextId = 1;
-    return function uid(): number {
+    return function uid(): string {
       const id = ~~nextId;
       nextId += 1;
-      return id;
+      return "view" + id;
     }
   })();
 
   /** @internal */
   static override readonly MountedFlag: ViewFlags = Component.MountedFlag;
+  /** @internal */
+  static override readonly InsertingFlag: ViewFlags = Component.InsertingFlag;
   /** @internal */
   static override readonly RemovingFlag: ViewFlags = Component.RemovingFlag;
   /** @internal */
@@ -2093,19 +2085,17 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   /** @internal */
   static readonly DisplayingFlag: ViewFlags = 1 << (Component.FlagShift + 1);
   /** @internal */
-  static readonly ContextualFlag: ViewFlags = 1 << (Component.FlagShift + 2);
+  static readonly CullFlag: ViewFlags = 1 << (Component.FlagShift + 2);
   /** @internal */
-  static readonly CullFlag: ViewFlags = 1 << (Component.FlagShift + 3);
+  static readonly CulledFlag: ViewFlags = 1 << (Component.FlagShift + 3);
   /** @internal */
-  static readonly CulledFlag: ViewFlags = 1 << (Component.FlagShift + 4);
+  static readonly HideFlag: ViewFlags = 1 << (Component.FlagShift + 4);
   /** @internal */
-  static readonly HideFlag: ViewFlags = 1 << (Component.FlagShift + 5);
+  static readonly HiddenFlag: ViewFlags = 1 << (Component.FlagShift + 5);
   /** @internal */
-  static readonly HiddenFlag: ViewFlags = 1 << (Component.FlagShift + 6);
+  static readonly UnboundedFlag: ViewFlags = 1 << (Component.FlagShift + 6);
   /** @internal */
-  static readonly UnboundedFlag: ViewFlags = 1 << (Component.FlagShift + 7);
-  /** @internal */
-  static readonly IntangibleFlag: ViewFlags = 1 << (Component.FlagShift + 8);
+  static readonly IntangibleFlag: ViewFlags = 1 << (Component.FlagShift + 7);
   /** @internal */
   static readonly CulledMask: ViewFlags = View.CullFlag
                                         | View.CulledFlag;
@@ -2117,22 +2107,22 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
                                           | View.DisplayingFlag;
   /** @internal */
   static readonly StatusMask: ViewFlags = View.MountedFlag
+                                        | View.InsertingFlag
                                         | View.RemovingFlag
                                         | View.ProcessingFlag
                                         | View.DisplayingFlag
-                                        | View.ContextualFlag
                                         | View.CullFlag
                                         | View.CulledFlag
                                         | View.HiddenFlag
                                         | View.UnboundedFlag
                                         | View.IntangibleFlag;
 
-  static readonly NeedsProcess: ViewFlags = 1 << (Component.FlagShift + 9);
-  static readonly NeedsResize: ViewFlags = 1 << (Component.FlagShift + 10);
-  static readonly NeedsScroll: ViewFlags = 1 << (Component.FlagShift + 11);
-  static readonly NeedsChange: ViewFlags = 1 << (Component.FlagShift + 12);
-  static readonly NeedsAnimate: ViewFlags = 1 << (Component.FlagShift + 13);
-  static readonly NeedsProject: ViewFlags = 1 << (Component.FlagShift + 14);
+  static readonly NeedsProcess: ViewFlags = 1 << (Component.FlagShift + 8);
+  static readonly NeedsResize: ViewFlags = 1 << (Component.FlagShift + 9);
+  static readonly NeedsScroll: ViewFlags = 1 << (Component.FlagShift + 10);
+  static readonly NeedsChange: ViewFlags = 1 << (Component.FlagShift + 11);
+  static readonly NeedsAnimate: ViewFlags = 1 << (Component.FlagShift + 12);
+  static readonly NeedsProject: ViewFlags = 1 << (Component.FlagShift + 13);
   /** @internal */
   static readonly ProcessMask: ViewFlags = View.NeedsProcess
                                          | View.NeedsResize
@@ -2141,11 +2131,11 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
                                          | View.NeedsAnimate
                                          | View.NeedsProject;
 
-  static readonly NeedsDisplay: ViewFlags = 1 << (Component.FlagShift + 15);
-  static readonly NeedsLayout: ViewFlags = 1 << (Component.FlagShift + 16);
-  static readonly NeedsRender: ViewFlags = 1 << (Component.FlagShift + 17);
-  static readonly NeedsRasterize: ViewFlags = 1 << (Component.FlagShift + 18);
-  static readonly NeedsComposite: ViewFlags = 1 << (Component.FlagShift + 19);
+  static readonly NeedsDisplay: ViewFlags = 1 << (Component.FlagShift + 14);
+  static readonly NeedsLayout: ViewFlags = 1 << (Component.FlagShift + 15);
+  static readonly NeedsRender: ViewFlags = 1 << (Component.FlagShift + 16);
+  static readonly NeedsRasterize: ViewFlags = 1 << (Component.FlagShift + 17);
+  static readonly NeedsComposite: ViewFlags = 1 << (Component.FlagShift + 18);
   /** @internal */
   static readonly DisplayMask: ViewFlags = View.NeedsDisplay
                                          | View.NeedsLayout
@@ -2158,7 +2148,7 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
                                         | View.DisplayMask;
 
   /** @internal */
-  static override readonly FlagShift: number = Component.FlagShift + 20;
+  static override readonly FlagShift: number = Component.FlagShift + 19;
   /** @internal */
   static override readonly FlagMask: ViewFlags = (1 << View.FlagShift) - 1;
 
@@ -2167,4 +2157,5 @@ export class View extends Component<View> implements Initable<ViewInit>, Constra
   static readonly UnhideFlags: ViewFlags = View.NeedsLayout;
   static override readonly InsertChildFlags: ViewFlags = Component.InsertChildFlags | View.NeedsLayout;
   static override readonly RemoveChildFlags: ViewFlags = Component.RemoveChildFlags | View.NeedsLayout;
+  static override readonly ReinsertChildFlags: ViewFlags = Component.InsertChildFlags | View.NeedsLayout;
 }

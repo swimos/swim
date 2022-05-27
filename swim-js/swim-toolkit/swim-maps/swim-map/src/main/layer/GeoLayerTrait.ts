@@ -13,11 +13,13 @@
 // limitations under the License.
 
 import type {Mutable, Class} from "@swim/util";
-import type {MemberFastenerClass} from "@swim/component";
+import type {FastenerClass} from "@swim/component";
 import {GeoBox} from "@swim/geo";
 import {Model, Trait, TraitSet} from "@swim/model";
 import {GeoTrait} from "../geo/GeoTrait";
+import type {GeoController} from "../geo/GeoController";
 import type {GeoLayerTraitObserver} from "./GeoLayerTraitObserver";
+import {GeoLayerController} from "./"; // forward import
 
 /** @public */
 export class GeoLayerTrait extends GeoTrait {
@@ -52,8 +54,8 @@ export class GeoLayerTrait extends GeoTrait {
     this.callObservers("traitDidSetGeoBounds", newGeoBounds, oldGeoBounds, this);
   }
 
-  @TraitSet<GeoLayerTrait, GeoTrait>({
-    type: GeoTrait,
+  @TraitSet<GeoLayerTrait["features"]>({
+    traitType: GeoTrait,
     binds: true,
     willAttachTrait(featureTrait: GeoTrait): void {
       this.owner.callObservers("traitWillAttachFeature", featureTrait, this.owner);
@@ -79,33 +81,19 @@ export class GeoLayerTrait extends GeoTrait {
     },
   })
   readonly features!: TraitSet<this, GeoTrait>;
-  static readonly features: MemberFastenerClass<GeoLayerTrait, "features">;
-
-  /** @internal */
-  protected startConsumingFeatures(): void {
-    const featureTraits = this.features.traits;
-    for (const traitId in featureTraits) {
-      const featureTrait = featureTraits[traitId]!;
-      featureTrait.consume(this);
-    }
-  }
-
-  /** @internal */
-  protected stopConsumingFeatures(): void {
-    const featureTraits = this.features.traits;
-    for (const traitId in featureTraits) {
-      const featureTrait = featureTraits[traitId]!;
-      featureTrait.unconsume(this);
-    }
-  }
+  static readonly features: FastenerClass<GeoLayerTrait["features"]>;
 
   protected override onStartConsuming(): void {
     super.onStartConsuming();
-    this.startConsumingFeatures();
+    this.features.consumeTraits(this);
   }
 
   protected override onStopConsuming(): void {
     super.onStopConsuming();
-    this.stopConsumingFeatures();
+    this.features.unconsumeTraits(this);
+  }
+
+  override createGeoController(): GeoController {
+    return new GeoLayerController();
   }
 }

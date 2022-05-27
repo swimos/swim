@@ -21,6 +21,8 @@ import {ShadowLook} from "../look/ShadowLook";
 import {TimingLook} from "../look/TimingLook";
 
 Look.font = new FontLook("font");
+Look.smallFont = new FontLook("smallFont");
+Look.largeFont = new FontLook("largeFont");
 
 Look.textColor = new ColorLook("textColor");
 Look.iconColor = new ColorLook("iconColor");
@@ -33,7 +35,9 @@ Look.statusColor = new ColorLook("statusColor");
 Look.accentColor = new ColorLook("accentColor");
 
 Look.backgroundColor = new ColorLook("backgroundColor");
+Look.selectionColor = new ColorLook("selectionColor");
 Look.borderColor = new ColorLook("borderColor");
+Look.focusColor = new ColorLook("focusColor");
 
 Look.etchColor = new ColorLook("etchColor");
 Look.maskColor = new ColorLook("maskColor");

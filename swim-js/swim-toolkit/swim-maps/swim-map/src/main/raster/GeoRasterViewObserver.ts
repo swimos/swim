@@ -18,7 +18,5 @@ import type {GeoRasterView} from "./GeoRasterView";
 
 /** @public */
 export interface GeoRasterViewObserver<V extends GeoRasterView = GeoRasterView> extends GeoViewObserver<V> {
-  viewWillSetGeoAnchor?(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null, view: V): void;
-
-  viewDidSetGeoAnchor?(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null, view: V): void;
+  viewDidSetGeoAnchor?(geoAnchor: GeoPoint | null, view: V): void;
 }

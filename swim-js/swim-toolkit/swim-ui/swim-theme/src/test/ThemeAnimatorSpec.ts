@@ -23,7 +23,7 @@ export class ThemeAnimatorSpec extends Spec {
   @Test
   testThemeAnimator(exam: Exam): void {
     const animator = ThemeAnimator.create(null);
-    exam.equal(animator.name, "");
+    exam.equal(animator.name, "ThemeAnimator");
     exam.equal(animator.look, null);
     exam.equal(animator.state, void 0);
     exam.equal(animator.value, void 0);
@@ -39,7 +39,7 @@ export class ThemeAnimatorSpec extends Spec {
 
   @Test
   testThemeAnimatorDefine(exam: Exam): void {
-    const testAnimator = ThemeAnimator.define("foo", {type: Number, value: 0});
+    const testAnimator = ThemeAnimator.define("foo", {valueType: Number, value: 0});
     const animator = testAnimator.create(null);
     exam.equal(animator.name, "foo");
     exam.equal(animator.state, 0);
@@ -56,7 +56,7 @@ export class ThemeAnimatorSpec extends Spec {
   @Test
   testThemeAnimatorDecorator(exam: Exam): void {
     class TestComponent extends TestThemeComponent {
-      @ThemeAnimator({type: Number, value: 0})
+      @ThemeAnimator({valueType: Number, value: 0})
       readonly foo!: ThemeAnimator<this, number>;
     }
     const component = new TestComponent();
@@ -81,7 +81,7 @@ export class ThemeAnimatorSpec extends Spec {
     const color = theme.get(Look.textColor, mood)!;
 
     class TestComponent extends TestThemeComponent {
-      @ThemeAnimator({type: Color, value: null})
+      @ThemeAnimator({valueType: Color, value: null})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
     const component = new TestComponent();
@@ -108,7 +108,7 @@ export class ThemeAnimatorSpec extends Spec {
     const backgroundColor = theme.get(Look.backgroundColor, mood)!;
 
     class TestComponent extends TestThemeComponent {
-      @ThemeAnimator({type: Color, value: null, inherits: true})
+      @ThemeAnimator({valueType: Color, value: null, inherits: true})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
     const parent = new TestComponent();
@@ -118,17 +118,17 @@ export class ThemeAnimatorSpec extends Spec {
     parent.appendChild(child);
     parent.mount();
 
-    exam.equal(child.foo.superFastener, parent.foo);
+    exam.equal(child.foo.inlet, parent.foo);
     exam.equal(parent.foo.look, null);
     exam.equal(parent.foo.state, null);
     exam.equal(parent.foo.value, null);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
     exam.equal(child.foo.look, null);
     exam.equal(child.foo.state, null);
     exam.equal(child.foo.value, null);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
 
@@ -136,13 +136,13 @@ export class ThemeAnimatorSpec extends Spec {
     exam.equal(parent.foo.look, Look.textColor);
     exam.equal(parent.foo.state, color);
     exam.equal(parent.foo.value, color);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
     exam.equal(child.foo.look, null);
     exam.equal(child.foo.state, null);
     exam.equal(child.foo.value, null);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.false(child.foo.coherent);
     exam.false(child.foo.tweening);
 
@@ -150,7 +150,7 @@ export class ThemeAnimatorSpec extends Spec {
     exam.equal(child.foo.look, Look.textColor);
     exam.equal(child.foo.state, color);
     exam.equal(child.foo.value, color);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
 
@@ -158,13 +158,13 @@ export class ThemeAnimatorSpec extends Spec {
     exam.equal(parent.foo.look, Look.textColor);
     exam.equal(parent.foo.state, color);
     exam.equal(parent.foo.value, color);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
     exam.equal(child.foo.look, Look.backgroundColor);
     exam.equal(child.foo.state, backgroundColor);
     exam.equal(child.foo.value, backgroundColor);
-    exam.false(child.foo.inherited);
+    exam.false(child.foo.derived);
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
 
@@ -172,13 +172,13 @@ export class ThemeAnimatorSpec extends Spec {
     exam.equal(parent.foo.look, Look.textColor);
     exam.equal(parent.foo.state, color);
     exam.equal(parent.foo.value, color);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
     exam.equal(child.foo.look, Look.textColor);
     exam.equal(child.foo.state, color);
     exam.equal(child.foo.value, color);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
   }
@@ -192,7 +192,7 @@ export class ThemeAnimatorSpec extends Spec {
     const colorInterpolator = color.interpolateTo(backgroundColor);
 
     class TestComponent extends TestThemeComponent {
-      @ThemeAnimator({type: Color, look: Look.textColor})
+      @ThemeAnimator({valueType: Color, look: Look.textColor})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
     const component = new TestComponent();
@@ -239,7 +239,7 @@ export class ThemeAnimatorSpec extends Spec {
     const colorInterpolator = color.interpolateTo(backgroundColor);
 
     class TestComponent extends TestThemeComponent {
-      @ThemeAnimator({type: Color, look: Look.textColor, inherits: true})
+      @ThemeAnimator({valueType: Color, look: Look.textColor, inherits: true})
       readonly foo!: ThemeAnimator<this, Color | null>;
     }
     const parent = new TestComponent();
@@ -249,7 +249,7 @@ export class ThemeAnimatorSpec extends Spec {
     parent.appendChild(child);
     parent.mount();
 
-    exam.equal(child.foo.superFastener, parent.foo);
+    exam.equal(child.foo.inlet, parent.foo);
     exam.equal(parent.foo.state, color);
     exam.equal(parent.foo.value, color);
     exam.true(parent.foo.coherent);

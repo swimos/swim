@@ -7,7 +7,8 @@
     {"path": "./swim-token"},
     {"path": "./swim-table"},
     {"path": "./swim-window"},
-    {"path": "./swim-deck"},
+    {"path": "./swim-sheet"},
+    {"path": "./swim-panel"},
     {"path": "./src/main"}
   ]
 }

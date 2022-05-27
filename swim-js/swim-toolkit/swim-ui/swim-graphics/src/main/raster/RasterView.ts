@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class} from "@swim/util";
+import type {Mutable} from "@swim/util";
 import {Property} from "@swim/component";
 import {R2Box, Transform} from "@swim/math";
 import {ThemeConstraintAnimator} from "@swim/theme";
-import {ViewContextType, ViewFlags, View} from "@swim/view";
-import type {AnyGraphicsRenderer, GraphicsRendererType, GraphicsRenderer} from "../graphics/GraphicsRenderer";
-import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
+import {ViewFlags, View} from "@swim/view";
+import {AnyGraphicsRenderer, GraphicsRendererType, GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 import {WebGLRenderer} from "../webgl/WebGLRenderer";
 import type {CanvasCompositeOperation} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
-import {CanvasView} from "../canvas/CanvasView";
-import type {RasterViewContext} from "./RasterViewContext";
 
 /** @public */
 export interface RasterViewInit extends GraphicsViewInit {
@@ -37,21 +34,13 @@ export class RasterView extends GraphicsView {
   constructor() {
     super();
     this.canvas = this.createCanvas();
-    Object.defineProperty(this, "renderer", {
-      value: this.createRenderer(),
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
     this.ownRasterFrame = null;
   }
 
-  override readonly contextType?: Class<RasterViewContext>;
-
-  @ThemeConstraintAnimator({type: Number, value: 1, updateFlags: View.NeedsComposite})
+  @ThemeConstraintAnimator({valueType: Number, value: 1, updateFlags: View.NeedsComposite})
   readonly opacity!: ThemeConstraintAnimator<this, number>;
 
-  @Property({type: String, value: "source-over", updateFlags: View.NeedsComposite})
+  @Property({valueType: String, value: "source-over", updateFlags: View.NeedsComposite})
   readonly compositeOperation!: Property<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
@@ -61,24 +50,28 @@ export class RasterView extends GraphicsView {
   /** @internal */
   readonly canvas: HTMLCanvasElement;
 
-  get compositor(): GraphicsRenderer | null {
-    const parent = this.parent;
-    if (parent instanceof GraphicsView || parent instanceof CanvasView) {
-      return parent.renderer;
-    } else {
-      return null;
-    }
-  }
+  @Property<RasterView["compositor"]>({
+    valueType: GraphicsRenderer,
+    value: null,
+    inherits: "renderer",
+  })
+  readonly compositor!: Property<this, GraphicsRenderer | null>;
 
-  override readonly renderer!: GraphicsRenderer | null;
-
-  setRenderer(renderer: AnyGraphicsRenderer | null): void {
-    if (typeof renderer === "string") {
-      renderer = this.createRenderer(renderer as GraphicsRendererType);
-    }
-    (this as Mutable<this>).renderer = renderer;
-    this.requireUpdate(View.NeedsRender | View.NeedsComposite);
-  }
+  @Property<RasterView["renderer"]>({
+    extends: true,
+    inherits: false,
+    updateFlags: View.NeedsRender | View.NeedsComposite,
+    initValue(): GraphicsRenderer | null {
+      return this.owner.createRenderer();
+    },
+    fromAny(renderer: AnyGraphicsRenderer | null): GraphicsRenderer | null {
+      if (typeof renderer === "string") {
+        renderer = this.owner.createRenderer(renderer as GraphicsRendererType);
+      }
+      return renderer;
+    },
+  })
+  override readonly renderer!: Property<this, GraphicsRenderer | null, AnyGraphicsRenderer | null>;
 
   protected createRenderer(rendererType: GraphicsRendererType = "canvas"): GraphicsRenderer | null {
     if (rendererType === "canvas") {
@@ -110,19 +103,19 @@ export class RasterView extends GraphicsView {
     return updateFlags;
   }
 
-  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags): ViewFlags {
     if ((this.flags & View.ProcessMask) === 0 && (processFlags & View.NeedsResize) === 0) {
       processFlags = 0;
     }
     return processFlags;
   }
 
-  protected override onResize(viewContext: ViewContextType<this>): void {
-    super.onResize(viewContext);
+  protected override onResize(): void {
+    super.onResize();
     this.requireUpdate(View.NeedsRender | View.NeedsComposite);
   }
 
-  protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsDisplay(displayFlags: ViewFlags): ViewFlags {
     if ((this.flags & View.DisplayMask) !== 0) {
       displayFlags |= View.NeedsComposite;
     } else if ((displayFlags & View.NeedsComposite) !== 0) {
@@ -133,24 +126,17 @@ export class RasterView extends GraphicsView {
     return displayFlags;
   }
 
-  protected override onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(): void {
     const rasterFrame = this.rasterFrame;
     this.resizeCanvas(this.canvas, rasterFrame);
     this.resetRenderer(rasterFrame);
     this.clearCanvas(rasterFrame);
-    super.onRender(viewContext);
+    super.onRender();
   }
 
-  protected override didComposite(viewContext: ViewContextType<this>): void {
-    this.compositeImage(viewContext);
-    super.didComposite(viewContext);
-  }
-
-  override extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
-    const rasterViewContext = Object.create(viewContext);
-    rasterViewContext.compositor = viewContext.renderer;
-    rasterViewContext.renderer = this.renderer;
-    return rasterViewContext;
+  protected override didComposite(): void {
+    this.compositeImage();
+    super.didComposite();
   }
 
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
@@ -196,7 +182,7 @@ export class RasterView extends GraphicsView {
   }
 
   protected clearCanvas(rasterFrame: R2Box): void {
-    const renderer = this.renderer;
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       renderer.context.clearRect(0, 0, rasterFrame.xMax, rasterFrame.yMax);
     } else if (renderer instanceof WebGLRenderer) {
@@ -206,7 +192,7 @@ export class RasterView extends GraphicsView {
   }
 
   protected resetRenderer(rasterFrame: R2Box): void {
-    const renderer = this.renderer;
+    const renderer = this.renderer.value;
     if (renderer instanceof CanvasRenderer) {
       const pixelRatio = this.pixelRatio;
       const dx = rasterFrame.xMin * pixelRatio;
@@ -218,8 +204,8 @@ export class RasterView extends GraphicsView {
     }
   }
 
-  protected compositeImage(viewContext: ViewContextType<this>): void {
-    const compositor = viewContext.compositor;
+  protected compositeImage(): void {
+    const compositor = this.compositor.value;
     if (compositor instanceof CanvasRenderer) {
       const context = compositor.context;
       const rasterFrame = this.rasterFrame;

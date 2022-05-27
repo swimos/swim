@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Trait} from "@swim/model";
+import type {Trait, TraitObserver} from "@swim/model";
 import type {GeoPerspective} from "../geo/GeoPerspective";
 import type {GeoTrait} from "../geo/GeoTrait";
-import type {GeoTraitObserver} from "../geo/GeoTraitObserver";
 import type {MapTrait} from "./MapTrait";
 
 /** @public */
-export interface MapTraitObserver<R extends MapTrait = MapTrait> extends GeoTraitObserver<R> {
-  traitWillSetGeoPerspective?(newGeoPerspective: GeoPerspective | null, oldGeoPerspective: GeoPerspective | null, trait: R): void;
+export interface MapTraitObserver<T extends MapTrait = MapTrait> extends TraitObserver<T> {
+  traitDidSetGeoPerspective?(geoPerspective: GeoPerspective | null, trait: T): void;
 
-  traitDidSetGeoPerspective?(newGeoPerspective: GeoPerspective | null, oldGeoPerspective: GeoPerspective | null, trait: R): void;
+  traitWillAttachLayer?(layerTrait: GeoTrait, targetTrait: Trait | null, trait: T): void;
 
-  traitWillAttachLayer?(layerTrait: GeoTrait, targetTrait: Trait | null, trait: R): void;
-
-  traitDidDetachLayer?(layerTrait: GeoTrait, trait: R): void;
+  traitDidDetachLayer?(layerTrait: GeoTrait, trait: T): void;
 }
