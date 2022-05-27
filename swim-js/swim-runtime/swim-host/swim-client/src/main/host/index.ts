@@ -12,17 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {HostDownlink} from "./HostDownlink";
+export {WarpHost} from "./WarpHost";
+export {WarpHostObserver} from "./WarpHostObserver";
 
-export {HostContext} from "./HostContext";
-
-export {
-  HostOptions,
-  Host,
- } from "./Host";
-
-export {RemoteHost} from "./RemoteHost";
-
-export {WebSocketHost} from "./WebSocketHost";
+export {WarpSocketHost} from "./WarpSocketHost";
 
 export {WarpWorkerHost} from "./WarpWorkerHost";

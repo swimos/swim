@@ -15,13 +15,8 @@
 import {TestOptions, Test, Spec, Report} from "@swim/unit";
 import {Text} from "@swim/structure";
 import {Uri} from "@swim/uri";
-import {
-  Envelope,
-  CommandMessage,
-  LinkRequest,
-  LinkedResponse,
-} from "@swim/warp";
-import {Downlink, WarpClient} from "@swim/client";
+import {Envelope, CommandMessage, LinkRequest, LinkedResponse} from "@swim/warp";
+import {WarpClient} from "@swim/client";
 import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
@@ -39,22 +34,22 @@ export class EventDownlinkSpec extends Spec {
         }
       };
       let linkCount = 0;
-      client.downlink()
-        .hostUri(server.hostUri)
-        .nodeUri("house/kitchen")
-        .laneUri("light")
-        .didLink(function (downlink: Downlink): void {
+      client.downlink({
+        hostUri: server.hostUri,
+        nodeUri: "house/kitchen",
+        laneUri: "light",
+        didLink(): void {
           linkCount += 1;
           if (linkCount === 1) {
             exam.comment("connected");
             server.close();
           } else if (linkCount === 2) {
-            downlink.keepLinked(false);
+            this.relink(false);
             exam.comment("reconnected");
             resolve();
           }
-        })
-        .open();
+        },
+      }).open();
     });
   }
 
@@ -67,29 +62,29 @@ export class EventDownlinkSpec extends Spec {
         }
       };
       let linkCount = 0;
-      client.downlink()
-        .hostUri(server.hostUri)
-        .nodeUri("house/kitchen")
-        .laneUri("light")
-        .didLink(function (downlink: Downlink): void {
+      client.downlink({
+        hostUri: server.hostUri,
+        nodeUri: "house/kitchen",
+        laneUri: "light",
+        didLink(): void {
           linkCount += 1;
           if (linkCount === 1) {
             exam.comment("online");
-            client.setOnline(false);
+            client.online(false);
             server.close();
           } else if (linkCount === 2) {
-            downlink.keepLinked(false);
+            this.relink(false);
             exam.comment("back online");
             resolve();
           }
-        })
-        .didDisconnect(function (downlink: Downlink): void {
+        },
+        didDisconnect(): void {
           exam.comment("offline");
           exam.equal(linkCount, 1);
-          client.setOnline(true);
-        })
-        .open();
-    }, void 0, new WarpClient({keepOnline: false}));
+          client.online(true);
+        },
+      }).open();
+    }, void 0, new WarpClient().online(true));
   }
 
   @Test
@@ -103,12 +98,12 @@ export class EventDownlinkSpec extends Spec {
           resolve();
         }
       };
-      const downlink = client.downlink()
-        .hostUri(server.hostUri)
-        .nodeUri("house/kitchen")
-        .laneUri("light")
-        .keepLinked(false)
-        .open();
+      const downlink = client.downlink({
+        hostUri: server.hostUri,
+        nodeUri: "house/kitchen",
+        laneUri: "light",
+        relinks: false,
+      }).open();
       downlink.command("on");
     });
   }

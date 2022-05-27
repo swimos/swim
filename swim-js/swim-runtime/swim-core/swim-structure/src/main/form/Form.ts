@@ -29,7 +29,7 @@ import {ValueForm} from "../"; // forward import
  * JavaScript object.
  * @public
  */
-export abstract class Form<T, U = never> {
+export abstract class Form<T, U = T> {
   /**
    * Returns the key of the tag attribute that distinguishes structures of this
    * `Form`; returns `undefined` if this `Form` has no distinguishing tag

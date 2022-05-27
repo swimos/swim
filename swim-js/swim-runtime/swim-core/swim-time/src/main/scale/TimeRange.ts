@@ -19,19 +19,28 @@ import {TimeRangeInterpolator} from "./"; // forward import
 
 /** @public */
 export interface TimeRange extends Range<DateTime>, Interpolate<TimeRange> {
+  /** @override */
   readonly 0: DateTime;
 
+  /** @override */
   readonly 1: DateTime;
 
   readonly inverse: TimeDomain;
 
+  /** @override */
+  union(that: Range<DateTime>): TimeRange;
+
+  /** @override */
   interpolateTo(that: TimeRange): Interpolator<TimeRange>;
   interpolateTo(that: unknown): Interpolator<TimeRange> | null;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -63,6 +72,29 @@ export const TimeRange = (function (_super: typeof Range) {
     },
     configurable: true,
   });
+
+  TimeRange.prototype.union = function (that: Range<DateTime>): TimeRange {
+    const t00 = this[0];
+    const t01 = this[1];
+    const t10 = that[0];
+    const t11 = that[1];
+    let t0: DateTime;
+    let t1: DateTime;
+    if (t00.time <= t01.time && t10.time <= t11.time) {
+      t0 = t00.time <= t10.time ? t00 : t10;
+      t1 = t01.time >= t11.time ? t01 : t11;
+    } else if (t00.time >= t01.time && t10.time >= t11.time) {
+      t0 = t00.time >= t10.time ? t00 : t10;
+      t1 = t01.time <= t11.time ? t01 : t11;
+    } else if (t00.time <= t01.time && t10.time >= t11.time) {
+      t0 = t00.time <= t11.time ? t00 : t11;
+      t1 = t01.time >= t10.time ? t01 : t10;
+    } else { // t00.time >= t01.time && t10.time <= t11.time
+      t0 = t01.time <= t10.time ? t01 : t10;
+      t1 = t00.time >= t11.time ? t00 : t11;
+    }
+    return TimeRange(t0, t1);
+  };
 
   TimeRange.prototype.interpolateTo = function (this: TimeRange, that: unknown): Interpolator<TimeRange> | null {
     if (that instanceof TimeRange) {

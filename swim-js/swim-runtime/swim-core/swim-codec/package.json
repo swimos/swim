@@ -1,6 +1,6 @@
 {
   "name": "@swim/codec",
-  "version": "4.0.0-dev.20210927.1",
+  "version": "4.0.0-dev.20220527.3",
   "description": "Incremental I/O; functional parsers and writers; display, debug, and diagnostic formatters; and Unicode and binary codecs",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-codec",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -32,7 +32,7 @@
     "writer"
   ],
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210927.1"
+    "@swim/util": "4.0.0-dev.20220527.3"
   },
   "scripts": {
     "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",

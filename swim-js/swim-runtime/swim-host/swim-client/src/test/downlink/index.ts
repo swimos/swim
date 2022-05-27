@@ -13,10 +13,11 @@
 // limitations under the License.
 
 export {EventDownlinkSpec} from "./EventDownlinkSpec";
-export {ListDownlinkSpec} from "./ListDownlinkSpec";
-export {MapDownlinkSpec} from "./MapDownlinkSpec";
+
 export {ValueDownlinkSpec} from "./ValueDownlinkSpec";
-export {MapDownlinkRecordSpec} from "./MapDownlinkRecordSpec";
-export {ValueDownlinkRecordSpec} from "./ValueDownlinkRecordSpec";
-export {DownlinkStreamletSpec} from "./DownlinkStreamletSpec";
+
+export {ListDownlinkSpec} from "./ListDownlinkSpec";
+
+export {MapDownlinkSpec} from "./MapDownlinkSpec";
+
 export {DownlinkSuite} from "./DownlinkSuite";

@@ -46,10 +46,10 @@ export abstract class Task extends Scope {
 
   readonly optionsType?: Class<TaskOptions>;
 
-  @Property({type: String, inherits: true})
+  @Property({valueType: String, inherits: true})
   override readonly baseDir!: Property<this, string | undefined>;
 
-  @Property({type: Number, value: TaskStatus.Pending})
+  @Property({valueType: Number, value: TaskStatus.Pending})
   readonly status!: Property<this, TaskStatus>;
 
   getPeerTask<C extends Class<Task>>(taskClass: C): InstanceType<C> | null {

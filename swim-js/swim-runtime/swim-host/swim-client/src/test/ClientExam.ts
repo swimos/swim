@@ -26,7 +26,7 @@ export class ClientExam extends Exam {
                            resolve: (result?: T) => void,
                            reject: (reason?: unknown) => void) => void,
                 hostUri?: AnyUri, client?: WarpClient): Promise<T | void> {
-    const server = new MockServer(hostUri, client);
+    const server = MockServer.create(hostUri, client);
     return server.run(callback);
   }
 }

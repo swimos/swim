@@ -17,7 +17,7 @@ import {Attr} from "../Attr";
 import {Form} from "./Form";
 
 /** @internal */
-export class TagForm<T, U = never> extends Form<T, U> {
+export class TagForm<T, U = T> extends Form<T, U> {
   constructor(form: Form<T, U>, tag: string) {
     super();
     this.form = form;

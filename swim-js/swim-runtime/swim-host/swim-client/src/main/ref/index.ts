@@ -12,19 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {RefContext} from "./RefContext";
-
-export {BaseRef} from "./BaseRef";
-export {HostRef} from "./HostRef";
-export {NodeRef} from "./NodeRef";
-export {LaneRef} from "./LaneRef";
-
 export {WarpRef} from "./WarpRef";
-export {
-  WarpDidConnect,
-  WarpDidAuthenticate,
-  WarpDidDeauthenticate,
-  WarpDidDisconnect,
-  WarpDidFail,
-  WarpObserver,
-} from "./WarpObserver";
+
+export {WarpScope} from "./WarpScope";
+
+export {WarpClient} from "./WarpClient";
+export {WarpClientObserver} from "./WarpClientObserver";

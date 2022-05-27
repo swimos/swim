@@ -19,11 +19,14 @@ import {Scale} from "./Scale";
 
 /** @public */
 export interface ContinuousScale<X, Y> extends Scale<X, Y> {
+  /** @override */
   readonly inverse: Mapping<Y, X>;
 
+  /** @override */
   withDomain(domain: Domain<X>): ContinuousScale<X, Y>;
   withDomain(x0: X, x1: X): ContinuousScale<X, Y>;
 
+  /** @override */
   overRange(range: Range<Y>): ContinuousScale<X, Y>;
   overRange(y0: Y, y1: Y): ContinuousScale<X, Y>;
 
@@ -34,10 +37,13 @@ export interface ContinuousScale<X, Y> extends Scale<X, Y> {
   solveDomain(x1: X, y1: Y, x2?: X, y2?: Y,
               reflect?: boolean, epsilon?: number): ContinuousScale<X, Y>;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 

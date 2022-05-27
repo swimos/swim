@@ -27,32 +27,43 @@ import {TimeScaleInterpolator} from "./"; // forward import
 
 /** @public */
 export interface TimeScale extends ContinuousScale<DateTime, number>, Interpolate<TimeScale> {
+  /** @override */
   readonly domain: TimeDomain;
 
+  /** @override */
   readonly range: LinearRange;
 
+  /** @override */
   readonly inverse: Mapping<number, DateTime>;
 
+  /** @override */
   withDomain(domain: TimeDomain): TimeScale;
   withDomain(x0: AnyDateTime, x1: AnyDateTime): TimeScale;
 
+  /** @override */
   overRange(range: LinearRange): TimeScale;
   overRange(y0: number, y1: number): TimeScale;
 
+  /** @override */
   clampDomain(xMin: DateTime | undefined, xMax: DateTime | undefined,
               zMin: number | undefined, zMax: number | undefined,
               epsilon?: number): TimeScale;
 
+  /** @override */
   solveDomain(x1: DateTime, y1: number, x2?: DateTime, y2?: number,
               reflect?: boolean, epsilon?: number): TimeScale;
 
+  /** @override */
   interpolateTo(that: TimeScale): Interpolator<TimeScale>;
   interpolateTo(that: unknown): Interpolator<TimeScale> | null;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 

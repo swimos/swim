@@ -48,6 +48,9 @@ export const Numbers = (function () {
      * returns `0` or `1` if `x` is `undefined` or `null`, respectively.
      */
     hash(x: number | null | undefined): number;
+
+    fromAny(value: number | string | boolean): number;
+    fromAny(value: number | string | boolean | null | undefined): number | null | undefined;
   };
 
   Numbers.equal = function (x: number | null | undefined, y: number | null | undefined): boolean {
@@ -89,6 +92,14 @@ export const Numbers = (function () {
       throw new TypeError("" + x);
     }
   };
+
+  Numbers.fromAny = function (value: number | string | boolean | null | undefined): number | null | undefined {
+    if (value == void 0 || value === null) {
+      return value;
+    } else {
+      return Number(value);
+    }
+  } as typeof Numbers.fromAny;
 
   return Numbers;
 })();

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {TestOptions, Test, Spec, Report} from "@swim/unit";
-import {AnyValue, Value, Text} from "@swim/structure";
+import {Value, Text} from "@swim/structure";
 import {Uri} from "@swim/uri";
 import {
   Envelope,
@@ -23,7 +23,7 @@ import {
   SyncRequest,
   SyncedResponse,
 } from "@swim/warp";
-import type {ValueDownlink, WarpClient} from "@swim/client";
+import type {WarpClient} from "@swim/client";
 import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
@@ -43,12 +43,12 @@ export class ValueDownlinkSpec extends Spec {
           resolve();
         }
       };
-      const downlink = client.downlinkValue()
-        .hostUri(server.hostUri)
-        .nodeUri("house/kitchen")
-        .laneUri("light")
-        .keepLinked(false)
-        .open();
+      const downlink = client.downlinkValue({
+        hostUri: server.hostUri,
+        nodeUri: "house/kitchen",
+        laneUri: "light",
+        relinks: false,
+      }).open();
       exam.equal(downlink.get(), Value.absent());
       downlink.set("on");
       exam.equal(downlink.get(), Text.from("on"));
@@ -65,24 +65,24 @@ export class ValueDownlinkSpec extends Spec {
           server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
-      client.downlinkValue()
-        .hostUri(server.hostUri)
-        .nodeUri("house/kitchen")
-        .laneUri("light")
-        .keepLinked(false)
-        .willSet(function (newValue: Value, downlink: ValueDownlink<Value, AnyValue>): void {
+      client.downlinkValue({
+        hostUri: server.hostUri,
+        nodeUri: "house/kitchen",
+        laneUri: "light",
+        relinks: false,
+        willSet(newValue: Value): void {
           exam.comment("willSet");
           exam.equal(newValue, Text.from("on"));
-          exam.equal(downlink.get(), Value.absent());
-        })
-        .didSet(function (newValue: Value, oldValue: Value, downlink: ValueDownlink<Value, AnyValue>): void {
+          exam.equal(this.get(), Value.absent());
+        },
+        didSet(newValue: Value, oldValue: Value): void {
           exam.comment("didSet");
           exam.equal(newValue, Text.from("on"));
           exam.equal(oldValue, Value.absent());
-          exam.equal(downlink.get(), Text.from("on"));
+          exam.equal(this.get(), Text.from("on"));
           resolve();
-        })
-        .open();
+        },
+      }).open();
     });
   }
 }

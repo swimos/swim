@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Class, Dictionary, MutableDictionary} from "@swim/util";
-import {MemberFastenerClass, Provider, Component, ComponentRef, ComponentSet} from "@swim/component";
+import type {Mutable, Class, Dictionary, MutableDictionary, Observes} from "@swim/util";
+import {FastenerClass, Provider, Component, ComponentRef, ComponentSet, Service} from "@swim/component";
 import {FileRef} from "@swim/sys";
 import type {Workspace} from "../workspace/Workspace";
 import {Scope} from "../scope/Scope";
@@ -60,7 +60,7 @@ export class PackageScope extends Scope {
     (this as Mutable<this>).unscopedName = PackageScope.unscopedName(name);
   }
 
-  @FileRef<PackageScope, PackageConfig | null>({
+  @FileRef<PackageScope["package"]>({
     fileName: "package.json",
     value: null,
     getBaseDir(): string | undefined {
@@ -68,10 +68,10 @@ export class PackageScope extends Scope {
     },
   })
   readonly package!: FileRef<this, PackageConfig | null>;
-  static readonly package: MemberFastenerClass<PackageScope, "package">;
+  static readonly package: FastenerClass<PackageScope["package"]>;
 
-  @ComponentSet<PackageScope, LibraryScope>({
-    // avoid cyclic static reference to type: LibraryScope
+  @ComponentSet<PackageScope["libraries"]>({
+    // avoid cyclic static reference to componentType: LibraryScope
     binds: true,
     observes: true,
     libraryDidChange(libraryScope: LibraryScope): void {
@@ -82,11 +82,11 @@ export class PackageScope extends Scope {
       return component instanceof LibraryScope ? component : null;
     },
   })
-  readonly libraries!: ComponentSet<this, LibraryScope>;
-  static readonly libraries: MemberFastenerClass<PackageScope, "libraries">;
+  readonly libraries!: ComponentSet<this, LibraryScope> & Observes<LibraryScope>;
+  static readonly libraries: FastenerClass<PackageScope["libraries"]>;
 
-  @ComponentSet<PackageScope, PackageScope>({
-    type: PackageScope,
+  @ComponentSet<PackageScope["dependencies"]>({
+    componentType: PackageScope,
     observes: true,
     didAttachComponent(dependencyScope: PackageScope): void {
       dependencyScope.dependents.addComponent(this.owner);
@@ -98,8 +98,8 @@ export class PackageScope extends Scope {
       this.owner.callObservers("packageDependencyDidChange", dependencyScope, this.owner);
     },
   })
-  readonly dependencies!: ComponentSet<this, PackageScope>;
-  static readonly dependencies: MemberFastenerClass<PackageScope, "dependencies">;
+  readonly dependencies!: ComponentSet<this, PackageScope> & Observes<PackageScope>;
+  static readonly dependencies: FastenerClass<PackageScope["dependencies"]>;
 
   protected detectDependency(packageScope: PackageScope): void {
     const packageDependencies = this.package.value !== null ? this.package.value.dependencies : void 0;
@@ -108,70 +108,53 @@ export class PackageScope extends Scope {
     }
   }
 
-  @ComponentSet<PackageScope, PackageScope>({
-    type: PackageScope,
+  @ComponentSet<PackageScope["dependents"]>({
+    componentType: PackageScope,
   })
   readonly dependents!: ComponentSet<this, PackageScope>;
-  static readonly dependents: MemberFastenerClass<PackageScope, "dependents">;
+  static readonly dependents: FastenerClass<PackageScope["dependents"]>;
 
-  @Provider<PackageScope, Workspace>({
-    extends: true,
-    observes: true,
-    didAttachService(service: Workspace): void {
-      const packages = service.packageNameMap;
-      for (const packageName in packages) {
-        const packageScope = packages[packageName]!;
-        this.owner.detectDependency(packageScope);
-      }
-    },
-    workspaceDidAttachPackage(packageScope: PackageScope): void {
-      this.owner.detectDependency(packageScope);
-    },
-  })
-  override readonly workspace!: Provider<this, Workspace>;
-  static override readonly workspace: MemberFastenerClass<PackageScope, "workspace">;
-
-  @ComponentRef<PackageScope, DepsTask>({
-    type: DepsTask,
+  @ComponentRef<PackageScope["deps"]>({
+    componentType: DepsTask,
   })
   readonly deps!: ComponentRef<this, DepsTask>;
-  static readonly deps: MemberFastenerClass<PackageScope, "deps">;
+  static readonly deps: FastenerClass<PackageScope["deps"]>;
 
-  @ComponentRef<PackageScope, LibsTask>({
-    type: LibsTask,
+  @ComponentRef<PackageScope["libs"]>({
+    componentType: LibsTask,
   })
   readonly libs!: ComponentRef<this, LibsTask>;
-  static readonly libs: MemberFastenerClass<PackageScope, "libs">;
+  static readonly libs: FastenerClass<PackageScope["libs"]>;
 
-  @ComponentRef<PackageScope, TestTask>({
-    type: TestTask,
+  @ComponentRef<PackageScope["test"]>({
+    componentType: TestTask,
   })
   readonly test!: ComponentRef<this, TestTask>;
-  static readonly test: MemberFastenerClass<PackageScope, "test">;
+  static readonly test: FastenerClass<PackageScope["test"]>;
 
-  @ComponentRef<PackageScope, DocTask>({
-    type: DocTask,
+  @ComponentRef<PackageScope["doc"]>({
+    componentType: DocTask,
   })
   readonly doc!: ComponentRef<this, DocTask>;
-  static readonly doc: MemberFastenerClass<PackageScope, "doc">;
+  static readonly doc: FastenerClass<PackageScope["doc"]>;
 
-  @ComponentRef<PackageScope, VersionTask>({
-    type: VersionTask,
+  @ComponentRef<PackageScope["version"]>({
+    componentType: VersionTask,
   })
   readonly version!: ComponentRef<this, VersionTask>;
-  static readonly version: MemberFastenerClass<PackageScope, "version">;
+  static readonly version: FastenerClass<PackageScope["version"]>;
 
-  @ComponentRef<PackageScope, PublishTask>({
-    type: PublishTask,
+  @ComponentRef<PackageScope["publish"]>({
+    componentType: PublishTask,
   })
   readonly publish!: ComponentRef<this, PublishTask>;
-  static readonly publish: MemberFastenerClass<PackageScope, "publish">;
+  static readonly publish: FastenerClass<PackageScope["publish"]>;
 
-  @ComponentRef<PackageScope, CleanTask>({
-    type: CleanTask,
+  @ComponentRef<PackageScope["clean"]>({
+    componentType: CleanTask,
   })
   readonly clean!: ComponentRef<this, CleanTask>;
-  static readonly clean: MemberFastenerClass<PackageScope, "clean">;
+  static readonly clean: FastenerClass<PackageScope["clean"]>;
 
   getLibraries(libraryNames?: string[] | string): MutableDictionary<LibraryScope> | null {
     if (typeof libraryNames === "string") {
@@ -517,6 +500,29 @@ export class PackageScope extends Scope {
     }
   }
 
+  @Provider<PackageScope["workspace"]>({
+    extends: true,
+    observes: true,
+    serviceDidAttachPackage(packageScope: PackageScope): void {
+      this.owner.detectDependency(packageScope);
+    },
+    mountService(service: Workspace, target: Service | null, key: string | undefined): void {
+      Provider.prototype.mountService.call(this, service, target, key);
+      service.packages.addComponent(this.owner);
+      const packages = service.packageNameMap;
+      for (const packageName in packages) {
+        const packageScope = packages[packageName]!;
+        this.owner.detectDependency(packageScope);
+      }
+    },
+    unmountService(service: Workspace): void {
+      Provider.prototype.unmountService.call(this, service);
+      service.packages.removeComponent(this.owner);
+    },
+  })
+  override readonly workspace!: Provider<this, Workspace> & Scope["workspace"] & Observes<Workspace>;
+  static override readonly workspace: FastenerClass<PackageScope["workspace"]>;
+
   static override async load(baseDir: string): Promise<PackageScope | null> {
     const packageScope = new PackageScope("");
     packageScope.baseDir.setValue(baseDir);
@@ -530,6 +536,7 @@ export class PackageScope extends Scope {
       packageScope.version.insertComponent();
       packageScope.publish.insertComponent();
       packageScope.clean.insertComponent();
+      packageScope.workspace; // instantiate
       await packageScope.initChildren();
       return packageScope;
     }

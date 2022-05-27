@@ -16,6 +16,7 @@ import {Spec, Unit} from "@swim/unit";
 import {HostRefSpec} from "./HostRefSpec";
 import {NodeRefSpec} from "./NodeRefSpec";
 import {LaneRefSpec} from "./LaneRefSpec";
+import {WarpClientSpec} from "./WarpClientSpec";
 
 @Unit
 export class RefSuite extends Spec {
@@ -32,5 +33,10 @@ export class RefSuite extends Spec {
   @Unit
   laneRefSpec(): Spec {
     return new LaneRefSpec();
+  }
+
+  @Unit
+  warpClientSpec(): Spec {
+    return new WarpClientSpec();
   }
 }

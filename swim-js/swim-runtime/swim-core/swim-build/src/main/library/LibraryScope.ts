@@ -14,9 +14,10 @@
 
 import * as Path from "path";
 import type * as FS from "fs";
-import type {Class} from "@swim/util";
+import type {Class, Observes} from "@swim/util";
 import {Output, OutputStyle} from "@swim/codec";
-import {MemberFastenerClass, ComponentRef} from "@swim/component";
+import {FastenerClass, Provider, ComponentRef, Service} from "@swim/component";
+import type {Workspace} from "../workspace/Workspace";
 import {Scope} from "../scope/Scope";
 import {TaskStatus, TaskConfig} from "../task/Task";
 import {PackageScope} from "../package/PackageScope";
@@ -44,41 +45,41 @@ export class LibraryScope extends Scope {
     return this.getSuper(PackageScope);
   }
 
-  @ComponentRef<LibraryScope, CompileTask>({
-    type: CompileTask,
+  @ComponentRef<LibraryScope["compile"]>({
+    componentType: CompileTask,
     initComponent(compileTask: CompileTask): void {
       compileTask.baseDir.setValue(this.owner.baseDir.value);
     },
   })
   readonly compile!: ComponentRef<this, CompileTask>;
-  static readonly compile: MemberFastenerClass<LibraryScope, "compile">;
+  static readonly compile: FastenerClass<LibraryScope["compile"]>;
 
-  @ComponentRef<LibraryScope, LintTask>({
-    type: LintTask,
+  @ComponentRef<LibraryScope["lint"]>({
+    componentType: LintTask,
   })
   readonly lint!: ComponentRef<this, LintTask>;
-  static readonly lint: MemberFastenerClass<LibraryScope, "lint">;
+  static readonly lint: FastenerClass<LibraryScope["lint"]>;
 
-  @ComponentRef<LibraryScope, ApiTask>({
-    type: ApiTask,
+  @ComponentRef<LibraryScope["api"]>({
+    componentType: ApiTask,
   })
   readonly api!: ComponentRef<this, ApiTask>;
-  static readonly api: MemberFastenerClass<LibraryScope, "api">;
+  static readonly api: FastenerClass<LibraryScope["api"]>;
 
-  @ComponentRef<LibraryScope, BundleTask>({
-    type: BundleTask,
+  @ComponentRef<LibraryScope["bundle"]>({
+    componentType: BundleTask,
   })
   readonly bundle!: ComponentRef<this, BundleTask>;
-  static readonly bundle: MemberFastenerClass<LibraryScope, "bundle">;
+  static readonly bundle: FastenerClass<LibraryScope["bundle"]>;
 
-  @ComponentRef<LibraryScope, BuildTask>({
-    type: BuildTask,
+  @ComponentRef<LibraryScope["build"]>({
+    componentType: BuildTask,
   })
   readonly build!: ComponentRef<this, BuildTask>;
-  static readonly build: MemberFastenerClass<LibraryScope, "build">;
+  static readonly build: FastenerClass<LibraryScope["build"]>;
 
-  @ComponentRef<LibraryScope, WatchTask>({
-    type: WatchTask,
+  @ComponentRef<LibraryScope["watch"]>({
+    componentType: WatchTask,
     observes: true,
     taskDidAdd(path: string, stats: FS.Stats | null): void {
       this.owner.callObservers("libraryDidChange", this.owner);
@@ -96,8 +97,8 @@ export class LibraryScope extends Scope {
       this.owner.callObservers("libraryDidChange", this.owner);
     },
   })
-  readonly watch!: ComponentRef<this, WatchTask>;
-  static readonly watch: MemberFastenerClass<LibraryScope, "watch">;
+  readonly watch!: ComponentRef<this, WatchTask> & Observes<WatchTask>;
+  static readonly watch: FastenerClass<LibraryScope["watch"]>;
 
   override async runTask(taskConfig: TaskConfig): Promise<TaskStatus> {
     const task = this.getTask(taskConfig.class);
@@ -124,6 +125,20 @@ export class LibraryScope extends Scope {
     return output;
   }
 
+  @Provider<LibraryScope["workspace"]>({
+    extends: true,
+    mountService(service: Workspace, target: Service | null, key: string | undefined): void {
+      Provider.prototype.mountService.call(this, service, target, key);
+      service.libraries.addComponent(this.owner);
+    },
+    unmountService(service: Workspace): void {
+      Provider.prototype.unmountService.call(this, service);
+      service.libraries.removeComponent(this.owner);
+    },
+  })
+  override readonly workspace!: Provider<this, Workspace> & Scope["workspace"];
+  static override readonly workspace: FastenerClass<LibraryScope["workspace"]>;
+
   static override async load(baseDir: string): Promise<LibraryScope | null> {
     const name = Path.basename(baseDir);
     const libraryScope = new LibraryScope(name);
@@ -136,6 +151,7 @@ export class LibraryScope extends Scope {
       libraryScope.bundle.insertComponent();
       libraryScope.build.insertComponent();
       libraryScope.watch.insertComponent();
+      libraryScope.workspace; // instantiate
       return libraryScope;
     }
     return null;

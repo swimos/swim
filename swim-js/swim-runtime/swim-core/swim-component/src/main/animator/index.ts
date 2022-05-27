@@ -13,21 +13,11 @@
 // limitations under the License.
 
 export {
-  MemberAnimatorValue,
-  MemberAnimatorValueInit,
-  MemberAnimatorInit,
-  MemberAnimatorInitMap,
   AnimatorValue,
   AnimatorValueInit,
-  AnimatorInit,
+  AnyAnimatorValue,
   AnimatorDescriptor,
+  AnimatorTemplate,
   AnimatorClass,
-  AnimatorFactory,
   Animator,
 } from "./Animator";
-
-export {StringAnimator} from "./StringAnimator";
-
-export {NumberAnimator} from "./NumberAnimator";
-
-export {BooleanAnimator} from "./BooleanAnimator";

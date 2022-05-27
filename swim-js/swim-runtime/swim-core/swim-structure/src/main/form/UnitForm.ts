@@ -16,7 +16,7 @@ import type {Item} from "../Item";
 import {Form} from "./Form";
 
 /** @internal */
-export class UnitForm<T, U = never> extends Form<T, U> {
+export class UnitForm<T, U = T> extends Form<T, U> {
   constructor(form: Form<T, U>, unit: T | undefined) {
     super();
     this.form = form;

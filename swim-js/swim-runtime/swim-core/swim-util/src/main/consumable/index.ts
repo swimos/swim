@@ -13,7 +13,6 @@
 // limitations under the License.
 
 export {
-  ConsumerType,
+  Consumer,
   Consumable,
 } from "./Consumable";
-export {Consumer} from "./Consumer";

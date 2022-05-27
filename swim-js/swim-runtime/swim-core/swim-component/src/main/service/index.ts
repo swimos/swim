@@ -12,5 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {Service} from "./Service";
+export {
+  ServiceFactory,
+  ServiceClass,
+  ServiceConstructor,
+  Service,
+} from "./Service";
 export {ServiceObserver} from "./ServiceObserver";

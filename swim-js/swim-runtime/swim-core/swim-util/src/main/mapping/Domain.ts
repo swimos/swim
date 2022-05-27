@@ -28,18 +28,26 @@ export interface Domain<X> extends Mapping<X, number> {
 
   readonly 1: X;
 
+  /** @override */
   readonly domain: this;
 
+  /** @override */
   readonly range: LinearRange;
 
   contains(x: X): boolean;
 
+  union(that: Domain<X>): Domain<X>;
+
+  /** @override */
   equivalentTo(that: unknown, epsilon?: number): boolean;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -73,17 +81,27 @@ export const Domain = (function (_super: typeof Mapping) {
   });
 
   Object.defineProperty(Domain.prototype, "range", {
-    get(): LinearRange {
+    get<X>(this: Domain<X>): LinearRange {
       return Range.unit;
     },
     configurable: true,
   });
 
-  Domain.prototype.contains = function (x: unknown): boolean {
+  Domain.prototype.contains = function <X>(this: Domain<X>, x: X): boolean {
     return Values.compare(this[0], x) <= 0 && Values.compare(x, this[1]) <= 0;
   };
 
-  Domain.prototype.equivalentTo = function (that: unknown, epsilon?: number): boolean {
+  Domain.prototype.union = function <X>(this: Domain<X>, that: Domain<X>): Domain<X> {
+    const x00 = this[0];
+    const x01 = this[1];
+    const x10 = that[0];
+    const x11 = that[1];
+    const x0 = Values.compare(x00, x10) <= 0 ? x00 : x10;
+    const x1 = Values.compare(x01, x11) >= 0 ? x01 : x11;
+    return Domain(x0, x1);
+  };
+
+  Domain.prototype.equivalentTo = function <X>(this: Domain<X>, that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Domain) {
@@ -93,11 +111,11 @@ export const Domain = (function (_super: typeof Mapping) {
     return false;
   };
 
-  Domain.prototype.canEqual = function (that: unknown): boolean {
+  Domain.prototype.canEqual = function <X>(this: Domain<X>, that: unknown): boolean {
     return that instanceof Domain;
   };
 
-  Domain.prototype.equals = function (that: unknown): boolean {
+  Domain.prototype.equals = function <X>(this: Domain<X>, that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Domain) {
@@ -108,7 +126,7 @@ export const Domain = (function (_super: typeof Mapping) {
     return false;
   };
 
-  Domain.prototype.toString = function (): string {
+  Domain.prototype.toString = function <X>(this: Domain<X>): string {
     return "Domain(" + this[0] + ", " + this[1] + ")";
   };
 

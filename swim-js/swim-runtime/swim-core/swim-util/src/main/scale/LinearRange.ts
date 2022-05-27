@@ -21,19 +21,28 @@ import {LinearRangeInterpolator} from "../"; // forward import
 
 /** @public */
 export interface LinearRange extends Range<number>, Interpolate<LinearRange> {
+  /** @override */
   readonly 0: number;
 
+  /** @override */
   readonly 1: number;
 
   readonly inverse: LinearDomain;
 
+  /** @override */
+  union(that: Range<number>): LinearRange;
+
+  /** @override */
   interpolateTo(that: LinearRange): Interpolator<LinearRange>;
   interpolateTo(that: unknown): Interpolator<LinearRange> | null;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -65,6 +74,29 @@ export const LinearRange = (function (_super: typeof Range) {
     },
     configurable: true,
   });
+
+  LinearRange.prototype.union = function (that: Range<number>): LinearRange {
+    const y00 = this[0];
+    const y01 = this[1];
+    const y10 = that[0];
+    const y11 = that[1];
+    let y0: number;
+    let y1: number;
+    if (y00 <= y01 && y10 <= y11) {
+      y0 = Math.min(y00, y10);
+      y1 = Math.max(y01, y11);
+    } else if (y00 >= y01 && y10 >= y11) {
+      y0 = Math.max(y00, y10);
+      y1 = Math.min(y01, y11);
+    } else if (y00 <= y01 && y10 >= y11) {
+      y0 = Math.min(y00, y11);
+      y1 = Math.max(y01, y10);
+    } else { // y00 >= y01 && y10 <= y11
+      y0 = Math.min(y01, y10);
+      y1 = Math.max(y00, y11);
+    }
+    return LinearRange(y0, y1);
+  };
 
   LinearRange.prototype.interpolateTo = function (this: LinearRange, that: unknown): Interpolator<LinearRange> | null {
     if (that instanceof LinearRange) {

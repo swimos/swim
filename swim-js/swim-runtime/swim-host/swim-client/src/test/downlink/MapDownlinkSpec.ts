@@ -14,7 +14,7 @@
 
 import {TestOptions, Test, Spec, Report} from "@swim/unit";
 import {BTree} from "@swim/collections";
-import {Attr, Slot, AnyValue, Value, Record, Text} from "@swim/structure";
+import {Attr, Slot, Value, Record, Text} from "@swim/structure";
 import {Uri} from "@swim/uri";
 import {
   Envelope,
@@ -24,7 +24,7 @@ import {
   SyncRequest,
   SyncedResponse,
 } from "@swim/warp";
-import type {MapDownlink, WarpClient} from "@swim/client";
+import type {WarpClient} from "@swim/client";
 import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
@@ -45,12 +45,12 @@ export class MapDownlinkSpec extends Spec {
           resolve();
         }
       };
-      const downlink = client.downlinkMap()
-        .hostUri(server.hostUri)
-        .nodeUri("dictionary/english")
-        .laneUri("definitions")
-        .keepLinked(false)
-        .open();
+      const downlink = client.downlinkMap({
+        hostUri: server.hostUri,
+        nodeUri: "dictionary/english",
+        laneUri: "definitions",
+        relinks: false,
+      }).open();
       exam.equal(downlink.size, 0);
       exam.equal(downlink.get("the"), Value.absent());
       downlink.set("the", "definite article");
@@ -71,28 +71,28 @@ export class MapDownlinkSpec extends Spec {
           server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
-      client.downlinkMap()
-        .hostUri(server.hostUri)
-        .nodeUri("dictionary/english")
-        .laneUri("definitions")
-        .keepLinked(false)
-        .willUpdate(function (key: Value, newValue: Value, downlink: MapDownlink<Value, Value, AnyValue, AnyValue>): void {
+      client.downlinkMap({
+        hostUri: server.hostUri,
+        nodeUri: "dictionary/english",
+        laneUri: "definitions",
+        relinks: false,
+        willUpdate(key: Value, newValue: Value): void {
           exam.comment("willUpdate");
           exam.equal(key, Text.from("the"));
           exam.equal(newValue, Text.from("definite article"));
-          exam.equal(downlink.size, 0);
-          exam.equal(downlink.get("the"), Value.absent());
-        })
-        .didUpdate(function (key: Value, newValue: Value, oldValue: Value, downlink: MapDownlink<Value, Value, AnyValue, AnyValue>): void {
+          exam.equal(this.size, 0);
+          exam.equal(this.get("the"), Value.absent());
+        },
+        didUpdate(key: Value, newValue: Value, oldValue: Value): void {
           exam.comment("didUpdate");
           exam.equal(key, Text.from("the"));
           exam.equal(newValue, Text.from("definite article"));
           exam.equal(oldValue, Value.absent());
-          exam.equal(downlink.size, 1);
-          exam.equal(downlink.get("the"), Text.from("definite article"));
+          exam.equal(this.size, 1);
+          exam.equal(this.get("the"), Text.from("definite article"));
           resolve();
-        })
-        .open();
+        },
+      }).open();
     });
   }
 
@@ -108,13 +108,13 @@ export class MapDownlinkSpec extends Spec {
           resolve();
         }
       };
-      const downlink = client.downlinkMap()
-        .hostUri(server.hostUri)
-        .nodeUri("dictionary/english")
-        .laneUri("definitions")
-        .keepLinked(false)
-        .initialState(new BTree<Value, Value>().set(Text.from("the"), Text.from("definite article")))
-        .open();
+      const downlink = client.downlinkMap({
+        hostUri: server.hostUri,
+        nodeUri: "dictionary/english",
+        laneUri: "definitions",
+        relinks: false,
+        stateInit: new BTree<Value, Value>().set(Text.from("the"), Text.from("definite article")),
+      }).open();
       exam.equal(downlink.size, 1);
       exam.equal(downlink.get("the"), Text.from("definite article"));
       downlink.delete("the");
@@ -134,27 +134,27 @@ export class MapDownlinkSpec extends Spec {
           server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
-      client.downlinkMap()
-        .hostUri(server.hostUri)
-        .nodeUri("dictionary/english")
-        .laneUri("definitions")
-        .keepLinked(false)
-        .willRemove(function (key: Value, downlink: MapDownlink<Value, Value, AnyValue, AnyValue>): void {
+      client.downlinkMap({
+        hostUri: server.hostUri,
+        nodeUri: "dictionary/english",
+        laneUri: "definitions",
+        relinks: false,
+        stateInit: new BTree<Value, Value>().set(Text.from("the"), Text.from("definite article")),
+        willRemove(key: Value): void {
           exam.comment("willRemove");
           exam.equal(key, Text.from("the"));
-          exam.equal(downlink.size, 1);
-          exam.equal(downlink.get("the"), Text.from("definite article"));
-        })
-        .didRemove(function (key: Value, oldValue: Value, downlink: MapDownlink<Value, Value, AnyValue, AnyValue>): void {
+          exam.equal(this.size, 1);
+          exam.equal(this.get("the"), Text.from("definite article"));
+        },
+        didRemove(key: Value, oldValue: Value): void {
           exam.comment("didRemove");
           exam.equal(key, Text.from("the"));
           exam.equal(oldValue, Text.from("definite article"));
-          exam.equal(downlink.size, 0);
-          exam.equal(downlink.get("the"), Value.absent());
+          exam.equal(this.size, 0);
+          exam.equal(this.get("the"), Value.absent());
           resolve();
-        })
-        .initialState(new BTree<Value, Value>().set(Text.from("the"), Text.from("definite article")))
-        .open();
+        },
+      }).open();
     });
   }
 
@@ -169,14 +169,14 @@ export class MapDownlinkSpec extends Spec {
           resolve();
         }
       };
-      const downlink = client.downlinkMap()
-        .hostUri(server.hostUri)
-        .nodeUri("dictionary/english")
-        .laneUri("definitions")
-        .keepLinked(false)
-        .initialState(new BTree<Value, Value>().set(Text.from("a"), Text.from("indefinite article"))
-                                               .set(Text.from("the"), Text.from("definite article")))
-        .open();
+      const downlink = client.downlinkMap({
+        hostUri: server.hostUri,
+        nodeUri: "dictionary/english",
+        laneUri: "definitions",
+        relinks: false,
+        stateInit: new BTree<Value, Value>().set(Text.from("a"), Text.from("indefinite article"))
+                                            .set(Text.from("the"), Text.from("definite article")),
+      }).open();
       exam.equal(downlink.size, 2);
       exam.equal(downlink.get("a"), Text.from("indefinite article"));
       exam.equal(downlink.get("the"), Text.from("definite article"));
@@ -193,31 +193,31 @@ export class MapDownlinkSpec extends Spec {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.create(envelope.node, envelope.lane));
-          server.send(EventMessage.create(envelope.node, envelope.lane, Record.of(Attr.of("clear"))));
           server.send(SyncedResponse.create(envelope.node, envelope.lane));
+          server.send(EventMessage.create(envelope.node, envelope.lane, Record.of(Attr.of("clear"))));
         }
       };
-      client.downlinkMap()
-        .hostUri(server.hostUri)
-        .nodeUri("dictionary/english")
-        .laneUri("definitions")
-        .keepLinked(false)
-        .willClear(function (downlink: MapDownlink<Value, Value, AnyValue, AnyValue>): void {
+      client.downlinkMap({
+        hostUri: server.hostUri,
+        nodeUri: "dictionary/english",
+        laneUri: "definitions",
+        relinks: false,
+        stateInit: new BTree<Value, Value>().set(Text.from("a"), Text.from("indefinite article"))
+                                            .set(Text.from("the"), Text.from("definite article")),
+        willClear(): void {
           exam.comment("willClear");
-          exam.equal(downlink.size, 2);
-          exam.equal(downlink.get("a"), Text.from("indefinite article"));
-          exam.equal(downlink.get("the"), Text.from("definite article"));
-        })
-        .didClear(function (downlink: MapDownlink<Value, Value, AnyValue, AnyValue>): void {
+          exam.equal(this.size, 2);
+          exam.equal(this.get("a"), Text.from("indefinite article"));
+          exam.equal(this.get("the"), Text.from("definite article"));
+        },
+        didClear(): void {
           exam.comment("didClear");
-          exam.equal(downlink.size, 0);
-          exam.equal(downlink.get("a"), Value.absent());
-          exam.equal(downlink.get("the"), Value.absent());
+          exam.equal(this.size, 0);
+          exam.equal(this.get("a"), Value.absent());
+          exam.equal(this.get("the"), Value.absent());
           resolve();
-        })
-        .initialState(new BTree<Value, Value>().set(Text.from("a"), Text.from("indefinite article"))
-                                               .set(Text.from("the"), Text.from("definite article")))
-        .open();
+        },
+      }).open();
     });
   }
 }

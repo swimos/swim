@@ -19,7 +19,7 @@ export class PropertySpec extends Spec {
   @Test
   testProperty(exam: Exam): void {
     const property = Property.create(null);
-    exam.equal(property.name, "");
+    exam.equal(property.name, "Property");
     exam.equal(property.value, void 0);
 
     property.setValue("bar");
@@ -73,41 +73,41 @@ export class PropertySpec extends Spec {
     parent.appendChild(child);
     parent.mount();
 
-    exam.equal(child.foo.superFastener, parent.foo);
+    exam.equal(child.foo.inlet, parent.foo);
     exam.equal(parent.foo.value, void 0);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.equal(child.foo.value, void 0);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
 
     parent.foo.setValue("bar");
     exam.equal(parent.foo.value, "bar");
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.equal(child.foo.value, void 0);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.false(child.foo.coherent);
 
     child.recohereFasteners();
     exam.equal(child.foo.value, "bar");
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
 
     child.foo.setValue("baz");
     exam.equal(parent.foo.value, "bar");
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.equal(child.foo.value, "baz");
-    exam.false(child.foo.inherited);
+    exam.false(child.foo.derived);
     exam.true(child.foo.coherent);
 
     child.foo.setAffinity(Affinity.Inherited);
     exam.equal(parent.foo.value, "bar");
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.equal(child.foo.value, "bar");
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
   }
 }

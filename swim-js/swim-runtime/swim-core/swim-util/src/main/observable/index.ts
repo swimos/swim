@@ -13,7 +13,7 @@
 // limitations under the License.
 
 export {
-  ObserverType,
+  Observes,
   Observable,
 } from "./Observable";
 export {

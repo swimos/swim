@@ -1,21 +1,6 @@
 {
   "projectFolder": "../..",
   "mainEntryPointFilePath": "<projectFolder>/lib/main/index.d.ts",
-  "bundledPackages": [
-    "@swim/util",
-    "@swim/codec",
-    "@swim/component",
-    "@swim/collections",
-    "@swim/constraint",
-    "@swim/structure",
-    "@swim/streamlet",
-    "@swim/dataflow",
-    "@swim/recon",
-    "@swim/uri",
-    "@swim/math",
-    "@swim/geo",
-    "@swim/time"
-  ],
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/src/main/tsconfig.json"
   },

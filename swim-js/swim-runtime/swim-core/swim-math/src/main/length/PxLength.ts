@@ -45,6 +45,10 @@ export class PxLength extends Length {
     }
   }
 
+  override valueOf(): number {
+    return this.value;
+  }
+
   override compareTo(that: unknown): number {
     if (that instanceof Length) {
       const x = this.value;

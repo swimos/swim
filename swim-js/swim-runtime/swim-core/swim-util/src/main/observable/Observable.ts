@@ -16,16 +16,16 @@ import type {Class} from "../types/Class";
 import type {Observer} from "./Observer";
 
 /** @public */
-export type ObserverType<O> =
-  O extends {readonly observerType?: Class<infer T>} ? T : never;
+export type Observes<O> =
+  O extends {readonly observerType?: Class<infer T>} ? T : {};
 
 /** @public */
 export interface Observable {
   readonly observerType?: Class<Observer>;
 
-  observe(observer: ObserverType<this>): void;
+  observe(observer: Observes<this>): void;
 
-  unobserve(observer: ObserverType<this>): void;
+  unobserve(observer: Observes<this>): void;
 }
 
 /** @public */

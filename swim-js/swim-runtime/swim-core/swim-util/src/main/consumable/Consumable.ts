@@ -12,20 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class} from "../types/Class";
-import type {Consumer} from "./Consumer";
-
 /** @public */
-export type ConsumerType<O> =
-  O extends {readonly consumerType?: Class<infer T>} ? T : never;
+export type Consumer = unknown;
 
 /** @public */
 export interface Consumable {
-  readonly consumerType?: Class<Consumer>;
+  consume(consumer: Consumer): void;
 
-  consume(consumer: ConsumerType<this>): void;
-
-  unconsume(consumer: ConsumerType<this>): void;
+  unconsume(consumer: Consumer): void;
 }
 
 /** @public */
@@ -37,7 +31,8 @@ export const Consumable = (function () {
   Consumable.is = function (object: unknown): object is Consumable {
     if (typeof object === "object" && object !== null || typeof object === "function") {
       const consumable = object as Consumable;
-      return "consume" in consumable;
+      return "consume" in consumable
+          && "unconsume" in consumable;
     }
     return false;
   };

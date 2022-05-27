@@ -134,6 +134,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   ok(condition: unknown, message?: string): void {
     if (condition) {
       this.proove(Proof.valid("ok", message));
@@ -143,6 +144,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   notOk(condition: unknown, message?: string): void {
     if (!condition) {
       this.proove(Proof.valid("not ok", message));
@@ -170,6 +172,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   identical(lhs: unknown, rhs: unknown, message?: string): void {
     if (lhs === rhs) {
       this.proove(Proof.valid("identical", message));
@@ -179,6 +182,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   notIdentical(lhs: unknown, rhs: unknown, message?: string): void {
     if (lhs !== rhs) {
       this.proove(Proof.valid("not identical", message));
@@ -188,6 +192,87 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
+  lessThan(lhs: unknown, rhs: unknown, message?: string): void {
+    if ((lhs as any) < (rhs as any)) {
+      this.proove(Proof.valid("less than", message));
+    } else {
+      this.proove(Proof.refuted(lhs, "!<", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  /** @override */
+  lessThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
+    if ((lhs as any) <= (rhs as any)) {
+      this.proove(Proof.valid("less than or equal", message));
+    } else {
+      this.proove(Proof.refuted(lhs, "!<=", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  /** @override */
+  greaterThan(lhs: unknown, rhs: unknown, message?: string): void {
+    if ((lhs as any) > (rhs as any)) {
+      this.proove(Proof.valid("greater than", message));
+    } else {
+      this.proove(Proof.refuted(lhs, "!>", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  /** @override */
+  greaterThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
+    if ((lhs as any) >= (rhs as any)) {
+      this.proove(Proof.valid("greater than or equal", message));
+    } else {
+      this.proove(Proof.refuted(lhs, "!>=", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  /** @override */
+  notLessThan(lhs: unknown, rhs: unknown, message?: string): void {
+    if (!((lhs as any) < (rhs as any))) {
+      this.proove(Proof.valid("not less than", message));
+    } else {
+      this.proove(Proof.refuted(lhs, "<", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  /** @override */
+  notLessThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
+    if (!((lhs as any) <= (rhs as any))) {
+      this.proove(Proof.valid("not less than or equal", message));
+    } else {
+      this.proove(Proof.refuted(lhs, "<=", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  /** @override */
+  notGreaterThan(lhs: unknown, rhs: unknown, message?: string): void {
+    if (!((lhs as any) > (rhs as any))) {
+      this.proove(Proof.valid("not greater than", message));
+    } else {
+      this.proove(Proof.refuted(lhs, ">", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  /** @override */
+  notGreaterThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
+    if (!((lhs as any) >= (rhs as any))) {
+      this.proove(Proof.valid("not greater than or equal", message));
+    } else {
+      this.proove(Proof.refuted(lhs, ">=", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  /** @override */
   instanceOf(object: unknown, constructor: Function, message?: string): void {
     if (object instanceof constructor) {
       this.proove(Proof.valid("instanceof", message));
@@ -197,6 +282,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   notInstanceOf(object: unknown, constructor: Function, message?: string): void {
     if (!(object instanceof constructor)) {
       this.proove(Proof.valid("not instanceof", message));
@@ -206,6 +292,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   equal(lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.equal(lhs, rhs)) {
       this.proove(Proof.valid("equal", message));
@@ -215,6 +302,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   notEqual(lhs: unknown, rhs: unknown, message?: string): void {
     if (!Values.equal(lhs, rhs)) {
       this.proove(Proof.valid("not equal"));
@@ -224,6 +312,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   equivalent(lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.equivalent(lhs, rhs)) {
       this.proove(Proof.valid("equivalent", message));
@@ -233,6 +322,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   notEquivalent(lhs: unknown, rhs: unknown, message?: string): void {
     if (!Values.equivalent(lhs, rhs)) {
       this.proove(Proof.valid("not equivalent"));
@@ -242,6 +332,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareLessThan(lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) < 0) {
       this.proove(Proof.valid("compare less than", message));
@@ -251,6 +342,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareNotLessThan(lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) < 0)) {
       this.proove(Proof.valid("compare not less than", message));
@@ -260,6 +352,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareLessThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) <= 0) {
       this.proove(Proof.valid("compare less than or equal", message));
@@ -269,6 +362,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareNotLessThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) <= 0)) {
       this.proove(Proof.valid("compare not less than or equal", message));
@@ -278,6 +372,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareEqual(lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) === 0) {
       this.proove(Proof.valid("compare equal", message));
@@ -287,6 +382,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareNotEqual(lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) === 0)) {
       this.proove(Proof.valid("compare not equal", message));
@@ -296,6 +392,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareGreaterThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) >= 0) {
       this.proove(Proof.valid("compare greater than or equal", message));
@@ -305,6 +402,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareNotGreaterThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) >= 0)) {
       this.proove(Proof.valid("compare not greater than or equal", message));
@@ -314,6 +412,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareGreaterThan(lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) > 0) {
       this.proove(Proof.valid("compare greater than", message));
@@ -323,6 +422,7 @@ export class Exam implements Assert {
     }
   }
 
+  /** @override */
   compareNotGreaterThan(lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) > 0)) {
       this.proove(Proof.valid("compare not greater than", message));

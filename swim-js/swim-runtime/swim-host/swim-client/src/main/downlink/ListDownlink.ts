@@ -12,385 +12,594 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Cursor} from "@swim/util";
+import type {Mutable, Class, Proto, Cursor} from "@swim/util";
+import type {FastenerOwner} from "@swim/component";
 import type {STree} from "@swim/collections";
 import {AnyValue, Value, Form, ValueCursor, ValueEntryCursor} from "@swim/structure";
-import type {AnyUri, Uri} from "@swim/uri";
-import type {DownlinkContext} from "./DownlinkContext";
-import type {DownlinkOwner} from "./DownlinkOwner";
-import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
+import {WarpDownlinkContext} from "./WarpDownlinkContext";
+import {WarpDownlinkDescriptor, WarpDownlinkClass, WarpDownlink} from "./WarpDownlink";
 import {ListDownlinkModel} from "./ListDownlinkModel";
+import type {ListDownlinkObserver} from "./ListDownlinkObserver";
 
 /** @public */
-export type ListDownlinkWillUpdate<V, VU = never> = (index: number, newValue: V, downlink: ListDownlink<V, VU>) => V | void;
-/** @public */
-export type ListDownlinkDidUpdate<V, VU = never> = (index: number, newValue: V, oldValue: V, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkWillMove<V, VU = never> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkDidMove<V, VU = never> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkWillRemove<V, VU = never> = (index: number, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkDidRemove<V, VU = never> = (index: number, oldValue: V, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkWillDrop<V, VU = never> = (lower: number, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkDidDrop<V, VU = never> = (lower: number, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkWillTake<V, VU = never> = (upper: number, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkDidTake<V, VU = never> = (upper: number, downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkWillClear<V, VU = never> = (downlink: ListDownlink<V, VU>) => void;
-/** @public */
-export type ListDownlinkDidClear<V, VU = never> = (downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkValue<D extends ListDownlink<any, any, any>> =
+  D extends {value: infer V} ? V : never;
 
 /** @public */
-export interface ListDownlinkObserver<V, VU = never> extends DownlinkObserver {
-  willUpdate?: ListDownlinkWillUpdate<V, VU>;
-  didUpdate?: ListDownlinkDidUpdate<V, VU>;
-  willMove?: ListDownlinkWillMove<V, VU>;
-  didMove?: ListDownlinkDidMove<V, VU>;
-  willRemove?: ListDownlinkWillRemove<V, VU>;
-  didRemove?: ListDownlinkDidRemove<V, VU>;
-  willDrop?: ListDownlinkWillDrop<V, VU>;
-  didDrop?: ListDownlinkDidDrop<V, VU>;
-  willTake?: ListDownlinkWillTake<V, VU>;
-  didTake?: ListDownlinkDidTake<V, VU>;
-  willClear?: ListDownlinkWillClear<V, VU>;
-  didClear?: ListDownlinkDidClear<V, VU>;
-}
+export type ListDownlinkValueInit<D extends ListDownlink<any, any, any>> =
+  D extends {valueInit?: infer VU} ? VU : never;
 
 /** @public */
-export interface ListDownlinkInit<V, VU = never> extends ListDownlinkObserver<V, VU>, DownlinkInit {
+export type AnyListDownlinkValue<D extends ListDownlink<any, any, any>> =
+  ListDownlinkValue<D> | ListDownlinkValueInit<D>;
+
+/** @public */
+export interface ListDownlinkDescriptor<V = unknown, VU = V> extends WarpDownlinkDescriptor {
+  extends?: Proto<ListDownlink<any, any, any>> | string | boolean | null;
   valueForm?: Form<V, VU>;
+  /** @internal */
+  stateInit?: STree<Value, Value> | null;
 }
 
 /** @public */
-export class ListDownlink<V, VU = never> extends Downlink {
-  /** @internal */
-  constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: ListDownlinkInit<V, VU>,
-              hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number, rate?: number,
-              body?: Value, flags: number = DownlinkFlags.KeepLinkedSynced,
-              observers?: ReadonlyArray<ListDownlinkObserver<V, VU>> | ListDownlinkObserver<V, VU>,
-              valueForm?: Form<V, VU>, state0: STree<Value, Value> | null = null) {
-    super(context, owner, init, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
-    if (init !== void 0) {
-      const observer = this.observers[this.observers.length - 1]!;
-      observer.willUpdate = init.willUpdate ?? observer.willUpdate;
-      observer.didUpdate = init.didUpdate ?? observer.didUpdate;
-      observer.willMove = init.willMove ?? observer.willMove;
-      observer.didMove = init.didMove ?? observer.didMove;
-      observer.willRemove = init.willRemove ?? observer.willRemove;
-      observer.didRemove = init.didRemove ?? observer.didRemove;
-      observer.willDrop = init.willDrop ?? observer.willDrop;
-      observer.didDrop = init.didDrop ?? observer.didDrop;
-      observer.willTake = init.willTake ?? observer.willTake;
-      observer.didTake = init.didTake ?? observer.didTake;
-      observer.willClear = init.willClear ?? observer.willClear;
-      observer.didClear = init.didClear ?? observer.didClear;
-      valueForm = init.valueForm !== void 0 ? init.valueForm : valueForm;
-    }
-    this.ownValueForm = valueForm !== void 0 ? valueForm : Form.forValue() as unknown as Form<V, VU>;
-    this.state0 = state0;
-  }
+export type ListDownlinkTemplate<D extends ListDownlink<any, any, any>> =
+  ThisType<D> &
+  ListDownlinkDescriptor<ListDownlinkValue<D>, ListDownlinkValueInit<D>> &
+  Partial<Omit<D, keyof ListDownlinkDescriptor>>;
+
+/** @public */
+export interface ListDownlinkClass<D extends ListDownlink<any, any, any> = ListDownlink<any, any, any>> extends WarpDownlinkClass<D> {
+  /** @override */
+  specialize(template: ListDownlinkDescriptor<any>): ListDownlinkClass<D>;
+
+  /** @override */
+  refine(downlinkClass: ListDownlinkClass<any>): void;
+
+  /** @override */
+  extend<D2 extends D>(className: string, template: ListDownlinkTemplate<D2>): ListDownlinkClass<D2>;
+  extend<D2 extends D>(className: string, template: ListDownlinkTemplate<D2>): ListDownlinkClass<D2>;
+
+  /** @override */
+  define<D2 extends D>(className: string, template: ListDownlinkTemplate<D2>): ListDownlinkClass<D2>;
+  define<D2 extends D>(className: string, template: ListDownlinkTemplate<D2>): ListDownlinkClass<D2>;
+
+  /** @override */
+  <D2 extends D>(template: ListDownlinkTemplate<D2>): PropertyDecorator;
+}
+
+/** @public */
+export interface ListDownlink<O = unknown, V = Value, VU = V extends Value ? AnyValue & V : V> extends WarpDownlink<O> {
+  (index: number): V | undefined;
+  (index: number, newObject: V | VU): O;
+
+  /** @override */
+  readonly observerType?: Class<ListDownlinkObserver<V>>;
+
+  /** @internal @override */
+  readonly model: ListDownlinkModel | null;
+
+  /** @protected */
+  initValueForm(): Form<V, VU>;
+
+  readonly valueForm: Form<V, VU>;
+
+  setValueForm(valueForm: Form<V, VU>): this;
 
   /** @internal */
-  override readonly model!: ListDownlinkModel | null;
+  readonly value?: V; // for type destructuring
 
   /** @internal */
-  override readonly observers!: ReadonlyArray<ListDownlinkObserver<V, VU>>;
+  readonly valueInit?: VU; // for type destructuring
 
   /** @internal */
-  readonly ownValueForm: Form<V, VU>;
+  readonly stateInit?: STree<Value, Value> | null; // optional prototype property
 
   /** @internal */
-  readonly state0: STree<Value, Value> | null;
-
-  override get type(): DownlinkType {
-    return "list";
-  }
+  initState(): STree<Value, Value> | null;
 
   /** @internal */
-  protected override copy<V, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
-                                 hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
-                                 body: Value, flags: number, observers: ReadonlyArray<ListDownlinkObserver<V, VU>>,
-                                 valueForm?: Form<V, VU>, state0?: STree<Value, Value> | null): ListDownlink<V, VU> {
-    if (arguments.length === 10) {
-      valueForm = this.ownValueForm as unknown as Form<V, VU>;
-      state0 = this.state0;
-    }
-    return new ListDownlink(context, owner, void 0, hostUri, nodeUri, laneUri,
-                            prio, rate, body, flags, observers, valueForm, state0);
-  }
+  setState(state: STree<Value, Value>): void;
 
-  valueForm(): Form<V, VU>;
-  valueForm<V2, V2U = never>(valueForm: Form<V2, V2U>): ListDownlink<V2, V2U>;
-  valueForm<V2, V2U = never>(valueForm?: Form<V2, V2U>): Form<V, VU> | ListDownlink<V2, V2U> {
-    if (valueForm === void 0) {
-      return this.ownValueForm;
-    } else {
-      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
-                       this.ownPrio, this.ownRate, this.ownBody, this.flags, this.observers as any,
-                       valueForm, this.state0);
-    }
-  }
+  get size(): number;
 
-  get length(): number {
-    return this.model!.length;
-  }
+  isEmpty(): boolean;
 
-  isEmpty(): boolean {
-    return this.model!.isEmpty();
-  }
+  get(index: number, id?: Value): V;
 
-  get(index: number, id?: Value): V {
-    const value = this.model!.get(index, id);
-    return value.coerce(this.ownValueForm);
-  }
+  getEntry(index: number, id?: Value): [V, Value] | undefined;
 
-  getEntry(index: number, id?: Value): [V, Value] | undefined {
-    const entry = this.model!.getEntry(index, id);
-    if (entry !== void 0) {
-      return [entry[0].coerce(this.ownValueForm), entry[1]];
-    }
-    return void 0;
-  }
+  set(index: number, newObject: V | VU, id?: Value): this;
 
-  set(index: number, newObject: V | VU, id?: Value): this {
-    const newValue = this.ownValueForm.mold(newObject);
-    this.model!.set(index, newValue, id);
-    return this;
-  }
+  insert(index: number, newObject: V | VU, id?: Value): this;
 
-  insert(index: number, newObject: V | VU, id?: Value): this {
-    const newValue = this.ownValueForm.mold(newObject);
-    this.model!.insert(index, newValue, id);
-    return this;
-  }
+  remove(index: number, id?: Value): this;
 
-  remove(index: number, id?: Value): this {
-    this.model!.remove(index, id);
-    return this;
-  }
+  push(...newObjects: (V | VU)[]): number;
 
-  push(...newObjects: (V | VU)[]): number {
-    const newValues = new Array(newObjects.length);
-    for (let i = 0; i < newObjects.length; i += 1) {
-      newValues[i] = this.ownValueForm.mold(newObjects[i]!);
-    }
-    return this.model!.push.apply(this.model, newValues);
-  }
+  pop(): V;
 
-  pop(): V {
-    const value = this.model!.pop();
-    return value.coerce(this.ownValueForm);
-  }
+  unshift(...newObjects: (V | VU)[]): number;
 
-  unshift(...newObjects: (V | VU)[]): number {
-    const newValues = new Array(newObjects.length);
-    for (let i = 0; i < newObjects.length; i += 1) {
-      newValues[i] = this.ownValueForm.mold(newObjects[i]!);
-    }
-    return this.model!.unshift.apply(this.model, newValues);
-  }
+  shift(): V;
 
-  shift(): V {
-    const value = this.model!.shift();
-    return value.coerce(this.ownValueForm);
-  }
+  move(fromIndex: number, toIndex: number, id?: Value): this;
 
-  move(fromIndex: number, toIndex: number, id?: Value): this {
-    this.model!.move(fromIndex, toIndex, id);
-    return this;
-  }
+  splice(start: number, deleteCount?: number, ...newObjects: (V | VU)[]): V[];
 
-  splice(start: number, deleteCount?: number, ...newObjects: (V | VU)[]): V[] {
-    const newValues = new Array(newObjects.length);
-    for (let i = 0; i < newObjects.length; i += 1) {
-      newValues[i] = this.ownValueForm.mold(newObjects[i]!);
-    }
-    const oldValues = this.model!.splice(start, deleteCount, ...newValues);
-    const oldObjects = new Array(oldValues.length);
-    for (let i = 0; i < oldValues.length; i += 1) {
-      oldObjects[i] = oldValues[i]!.coerce(this.ownValueForm);
-    }
-    return oldObjects;
-  }
-
-  clear(): void {
-    this.model!.clear();
-  }
+  clear(): void;
 
   forEach<T, S>(callback: (value: V, index: number, id: Value) => T | void): T | undefined;
   forEach<T, S>(callback: (this: S, value: V, index: number, id: Value) => T | void,
                 thisArg: S): T | undefined;
-  forEach<T, S>(callback: (this: S | undefined, value: V, index: number, id: Value) => T | void,
-                thisArg?: S): T | undefined {
-    if (this.ownValueForm as unknown === Form.forValue()) {
-      return this.model!.state.forEach(callback as any, thisArg);
-    } else {
-      return this.model!.state.forEach(function (value: Value, index: number, id: Value): T | void {
-        const object = value.coerce(this.ownValueForm);
-        return callback.call(thisArg, object, index, id);
-      }, this);
-    }
-  }
 
-  values(): Cursor<V> {
-    const cursor = this.model!.values();
-    if (this.ownValueForm as unknown === Form.forValue()) {
-      return cursor as unknown as Cursor<V>;
-    } else {
-      return new ValueCursor(cursor, this.ownValueForm);
-    }
-  }
+  values(): Cursor<V>;
 
-  keys(): Cursor<Value> {
-    return this.model!.keys();
-  }
+  keys(): Cursor<Value>;
 
-  entries(): Cursor<[Value, V]> {
-    const cursor = this.model!.entries();
-    if (this.ownValueForm as unknown === Form.forValue()) {
-      return cursor as unknown as Cursor<[Value, V]>;
-    } else {
-      return new ValueEntryCursor(cursor, Form.forValue(), this.ownValueForm);
-    }
-  }
+  entries(): Cursor<[Value, V]>;
 
-  snapshot(): STree<Value, Value> {
-    return this.model!.snapshot();
-  }
+  snapshot(): STree<Value, Value>;
 
-  setState(state: STree<Value, Value>): void {
-    this.model!.setState(state);
-  }
+  /** @protected */
+  willUpdate?(index: number, newValue: V): V | void;
 
-  override observe(observer: ListDownlinkObserver<V, VU>): this {
-    return super.observe(observer);
-  }
+  /** @protected */
+  didUpdate?(index: number, newValue: V, oldValue: V): void;
 
-  willUpdate(willUpdate: ListDownlinkWillUpdate<V, VU>): this {
-    return this.observe({willUpdate});
-  }
+  /** @protected */
+  willMove?(fromIndex: number, toIndex: number, value: V): void;
 
-  didUpdate(didUpdate: ListDownlinkDidUpdate<V, VU>): this {
-    return this.observe({didUpdate});
-  }
+  /** @protected */
+  didMove?(fromIndex: number, toIndex: number, value: V): void;
 
-  willMove(willMove: ListDownlinkWillMove<V, VU>): this {
-    return this.observe({willMove});
-  }
+  /** @protected */
+  willRemove?(index: number): void;
 
-  didMove(didMove: ListDownlinkDidMove<V, VU>): this {
-    return this.observe({didMove});
-  }
+  /** @protected */
+  didRemove?(index: number, oldValue: V): void;
 
-  willRemove(willRemove: ListDownlinkWillRemove<V, VU>): this {
-    return this.observe({willRemove});
-  }
+  /** @protected */
+  willDrop?(lower: number): void;
 
-  didRemove(didRemove: ListDownlinkDidRemove<V, VU>): this {
-    return this.observe({didRemove});
-  }
+  /** @protected */
+  didDrop?(lower: number): void;
 
-  willDrop(willDrop: ListDownlinkWillDrop<V, VU>): this {
-    return this.observe({willDrop});
-  }
+  /** @protected */
+  willTake?(upper: number): void;
 
-  didDrop(didDrop: ListDownlinkDidDrop<V, VU>): this {
-    return this.observe({didDrop});
-  }
+  /** @protected */
+  didTake?(upper: number): void;
 
-  willTake(willTake: ListDownlinkWillTake<V, VU>): this {
-    return this.observe({willTake});
-  }
+  /** @protected */
+  willClear?(): void;
 
-  didTake(didTake: ListDownlinkDidTake<V, VU>): this {
-    return this.observe({didTake});
-  }
-
-  willClear(willClear: ListDownlinkWillClear<V, VU>): this {
-    return this.observe({willClear});
-  }
-
-  didClear(didClear: ListDownlinkDidClear<V, VU>): this {
-    return this.observe({didClear});
-  }
+  /** @protected */
+  didClear?(): void;
 
   /** @internal */
-  listWillUpdate(index: number, newValue: Value): Value {
+  listWillUpdate(index: number, newValue: Value): Value;
+
+  /** @internal */
+  listDidUpdate(index: number, newValue: Value, oldValue: Value): void;
+
+  /** @internal */
+  listWillMove(fromIndex: number, toIndex: number, value: Value): void;
+
+  /** @internal */
+  listDidMove(fromIndex: number, toIndex: number, value: Value): void;
+
+  /** @internal */
+  listWillRemove(index: number): void;
+
+  /** @internal */
+  listDidRemove(index: number, oldValue: Value): void;
+
+  /** @internal */
+  listWillDrop(lower: number): void;
+
+  /** @internal */
+  listDidDrop(lower: number): void;
+
+  /** @internal */
+  listWillTake(upper: number): void;
+
+  /** @internal */
+  listDidTake(upper: number): void;
+
+  /** @internal */
+  listWillClear(): void;
+
+  /** @internal */
+  listDidClear(): void;
+
+  /** @internal */
+  didAliasModel(): void;
+
+  /** @override */
+  open(): this;
+}
+
+/** @public */
+export const ListDownlink = (function (_super: typeof WarpDownlink) {
+  const ListDownlink = _super.extend("ListDownlink", {
+    relinks: true,
+    syncs: true,
+  }) as ListDownlinkClass;
+
+  ListDownlink.prototype.initValueForm = function <V, VU>(this: ListDownlink<unknown, V, VU>): Form<V, VU> {
+    let valueForm = (Object.getPrototypeOf(this) as ListDownlink<unknown, V, VU>).valueForm as Form<V, VU> | undefined;
+    if (valueForm === void 0) {
+      valueForm = Form.forValue() as unknown as Form<V, VU>;
+    }
+    return valueForm;
+  };
+
+  ListDownlink.prototype.setValueForm = function <V, VU>(this: ListDownlink<unknown, V, VU>, valueForm: Form<V, VU>): ListDownlink<unknown, V, VU> {
+    if (this.valueForm !== valueForm) {
+      (this as Mutable<typeof this>).valueForm = valueForm;
+      this.relink();
+    }
+    return this;
+  };
+
+  ListDownlink.prototype.initState = function (this: ListDownlink): STree<Value, Value> | null {
+    let state = this.stateInit;
+    if (state === void 0) {
+      state = null;
+    }
+    return state;
+  };
+
+  ListDownlink.prototype.setState = function (this: ListDownlink, state: STree<Value, Value>): void {
+    const model = this.model;
+    if (model !== null) {
+      model.setState(state);
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  Object.defineProperty(ListDownlink.prototype, "size", {
+    get(this: ListDownlink): number {
+      const model = this.model;
+      return model !== null ? model.size : 0;
+    },
+    configurable: true,
+  });
+
+  ListDownlink.prototype.isEmpty = function (this: ListDownlink): boolean {
+    const model = this.model;
+    if (model !== null) {
+      return model.isEmpty();
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.get = function <V>(this: ListDownlink<unknown, V>, index: number, id?: Value): V {
+    const model = this.model;
+    if (model !== null) {
+      const value = model.get(index, id);
+      return value.coerce(this.valueForm);
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.getEntry = function <V>(this: ListDownlink<unknown, V>, index: number, id?: Value): [V, Value] | undefined {
+    const model = this.model;
+    if (model !== null) {
+      const entry = model.getEntry(index, id);
+      if (entry !== void 0) {
+        return [entry[0].coerce(this.valueForm), entry[1]];
+      } else {
+        return void 0;
+      }
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.set = function <V, VU>(this: ListDownlink<unknown, V, VU>, index: number, newObject: V | VU, id?: Value): ListDownlink<unknown, V, VU> {
+    const model = this.model;
+    if (model !== null) {
+      const newValue = this.valueForm.mold(newObject);
+      model.set(index, newValue, id);
+      return this;
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.insert = function <V, VU>(this: ListDownlink<unknown, V, VU>, index: number, newObject: V | VU, id?: Value): ListDownlink<unknown, V, VU> {
+    const model = this.model;
+    if (model !== null) {
+      const newValue = this.valueForm.mold(newObject);
+      model.insert(index, newValue, id);
+      return this;
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.remove = function <V>(this: ListDownlink<unknown, V>, index: number, id?: Value): ListDownlink<unknown, V> {
+    const model = this.model;
+    if (model !== null) {
+      model.remove(index, id);
+      return this;
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.push = function <V, VU>(this: ListDownlink<unknown, V, VU>, ...newObjects: (V | VU)[]): number {
+    const model = this.model;
+    if (model !== null) {
+      const valueForm = this.valueForm;
+      const newValues = new Array(newObjects.length);
+      for (let i = 0; i < newObjects.length; i += 1) {
+        newValues[i] = valueForm.mold(newObjects[i]!);
+      }
+      return model.push(...newValues);
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.pop = function <V>(this: ListDownlink<unknown, V>): V {
+    const model = this.model;
+    if (model !== null) {
+      const value = model.pop();
+      return value.coerce(this.valueForm);
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.unshift = function <V, VU>(this: ListDownlink<unknown, V, VU>, ...newObjects: (V | VU)[]): number {
+    const model = this.model;
+    if (model !== null) {
+      const valueForm = this.valueForm;
+      const newValues = new Array(newObjects.length);
+      for (let i = 0; i < newObjects.length; i += 1) {
+        newValues[i] = valueForm.mold(newObjects[i]!);
+      }
+      return model.unshift(...newValues);
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.shift = function <V>(this: ListDownlink<unknown, V>): V {
+    const model = this.model;
+    if (model !== null) {
+      const value = model.shift();
+      return value.coerce(this.valueForm);
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.move = function <V>(this: ListDownlink<unknown, V>, fromIndex: number, toIndex: number, id?: Value): ListDownlink<unknown, V> {
+    const model = this.model;
+    if (model !== null) {
+      model.move(fromIndex, toIndex, id);
+      return this;
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.splice = function <V, VU>(this: ListDownlink<unknown, V, VU>, start: number, deleteCount?: number, ...newObjects: (V | VU)[]): V[] {
+    const model = this.model;
+    if (model !== null) {
+      const valueForm = this.valueForm;
+      const newValues = new Array(newObjects.length);
+      for (let i = 0; i < newObjects.length; i += 1) {
+        newValues[i] = valueForm.mold(newObjects[i]!);
+      }
+      const oldValues = this.model!.splice(start, deleteCount, ...newValues);
+      const oldObjects = new Array(oldValues.length);
+      for (let i = 0; i < oldValues.length; i += 1) {
+        oldObjects[i] = oldValues[i]!.coerce(valueForm);
+      }
+      return oldObjects;
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.clear = function (this: ListDownlink): void {
+    const model = this.model;
+    if (model !== null) {
+      model.clear();
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.forEach = function <V, T, S>(this: ListDownlink<unknown, V>,
+                                                      callback: (this: S | undefined, value: V, index: number, id: Value) => T | void,
+                                                      thisArg?: S): T | undefined {
+    const model = this.model;
+    if (model !== null) {
+      const valueForm = this.valueForm;
+      if (valueForm as unknown === Form.forValue()) {
+        return model.state.forEach(callback as any, thisArg);
+      } else {
+        return model.state.forEach(function (value: Value, index: number, id: Value): T | void {
+          const object = value.coerce(valueForm);
+          return callback.call(thisArg, object, index, id);
+        }, this);
+      }
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.values = function <V>(this: ListDownlink<unknown, V>): Cursor<V> {
+    const model = this.model;
+    if (model !== null) {
+      const cursor = model.values();
+      const valueForm = this.valueForm;
+      if (valueForm as unknown === Form.forValue()) {
+        return cursor as unknown as Cursor<V>;
+      } else {
+        return new ValueCursor(cursor, valueForm);
+      }
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.keys = function <V>(this: ListDownlink<unknown, V>): Cursor<Value> {
+    const model = this.model;
+    if (model !== null) {
+      return model.keys();
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.entries = function <V>(this: ListDownlink<unknown, V>): Cursor<[Value, V]> {
+    const model = this.model;
+    if (model !== null) {
+      const cursor = model.entries();
+      if (this.valueForm as unknown === Form.forValue()) {
+        return cursor as unknown as Cursor<[Value, V]>;
+      } else {
+        return new ValueEntryCursor(cursor, Form.forValue(), this.valueForm);
+      }
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.snapshot = function <V>(this: ListDownlink<unknown, V>): STree<Value, Value> {
+    const model = this.model;
+    if (model !== null) {
+      return model.snapshot();
+    } else {
+      throw new Error("unopened downlink");
+    }
+  };
+
+  ListDownlink.prototype.listWillUpdate = function <V>(this: ListDownlink<unknown, V>, index: number, newValue: Value): Value {
     let newObject: V | undefined;
+    const valueForm = this.valueForm;
+
+    if (this.willUpdate !== void 0) {
+      newObject = newValue.coerce(valueForm);
+      const newResult = this.willUpdate(index, newObject);
+      if (newResult !== void 0) {
+        newObject = newResult;
+        newValue = valueForm.mold(newObject);
+      }
+    }
+
     const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.willUpdate !== void 0) {
-        if (newObject === void 0) {
-          newObject = newValue.coerce(this.ownValueForm);
-        }
-        const newResult = observer.willUpdate(index, newObject, this);
-        if (newResult !== void 0) {
-          newObject = newResult;
-          newValue = this.ownValueForm.mold(newObject);
+    const observerCount = observers.length;
+    if (observerCount !== 0) {
+      if (newObject === void 0) {
+        newObject = newValue.coerce(valueForm);
+      }
+      for (let i = 0; i < observerCount; i += 1) {
+        const observer = observers[i]!;
+        if (observer.willUpdate !== void 0) {
+          const newResult = observer.willUpdate(index, newObject, this);
+          if (newResult !== void 0) {
+            newObject = newResult;
+            newValue = valueForm.mold(newObject);
+          }
         }
       }
     }
-    return newValue;
-  }
 
-  /** @internal */
-  listDidUpdate(index: number, newValue: Value, oldValue: Value): void {
+    return newValue;
+  };
+
+  ListDownlink.prototype.listDidUpdate = function <V>(this: ListDownlink<unknown, V>, index: number, newValue: Value, oldValue: Value): void {
     let newObject: V | undefined;
     let oldObject: V | undefined;
+    const valueForm = this.valueForm;
+
+    if (this.didUpdate !== void 0) {
+      newObject = newValue.coerce(valueForm);
+      oldObject = oldValue.coerce(valueForm);
+      this.didUpdate(index, newObject, oldObject);
+    }
+
     const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.didUpdate !== void 0) {
-        if (newObject === void 0) {
-          newObject = newValue.coerce(this.ownValueForm);
+    const observerCount = observers.length;
+    if (observerCount !== 0) {
+      if (newObject === void 0) {
+        newObject = newValue.coerce(valueForm);
+      }
+      if (oldObject === void 0) {
+        oldObject = oldValue.coerce(valueForm);
+      }
+      for (let i = 0; i < observerCount; i += 1) {
+        const observer = observers[i]!;
+        if (observer.didUpdate !== void 0) {
+          observer.didUpdate(index, newObject, oldObject, this);
         }
-        if (oldObject === void 0) {
-          oldObject = oldValue.coerce(this.ownValueForm);
-        }
-        observer.didUpdate(index, newObject, oldObject, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listWillMove(fromIndex: number, toIndex: number, value: Value): void {
+  ListDownlink.prototype.listWillMove = function <V>(this: ListDownlink<unknown, V>, fromIndex: number, toIndex: number, value: Value): void {
     let object: V | undefined;
+    const valueForm = this.valueForm;
+
+    if (this.willMove !== void 0) {
+      object = value.coerce(valueForm);
+      this.willMove(fromIndex, toIndex, object);
+    }
+
     const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.willMove !== void 0) {
-        if (object === void 0) {
-          object = value.coerce(this.ownValueForm);
+    const observerCount = observers.length;
+    if (observerCount !== 0) {
+      if (object === void 0) {
+        object = value.coerce(valueForm);
+      }
+      for (let i = 0; i < observerCount; i += 1) {
+        const observer = observers[i]!;
+        if (observer.willMove !== void 0) {
+          observer.willMove(fromIndex, toIndex, object, this);
         }
-        observer.willMove(fromIndex, toIndex, object, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listDidMove(fromIndex: number, toIndex: number, value: Value): void {
+  ListDownlink.prototype.listDidMove = function <V>(this: ListDownlink<unknown, V>, fromIndex: number, toIndex: number, value: Value): void {
     let object: V | undefined;
+    const valueForm = this.valueForm;
+
+    if (this.didMove !== void 0) {
+      object = value.coerce(valueForm);
+      this.didMove(fromIndex, toIndex, object);
+    }
+
     const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.didMove !== void 0) {
-        if (object === void 0) {
-          object = value.coerce(this.ownValueForm);
+    const observerCount = observers.length;
+    if (observerCount !== 0) {
+      if (object === void 0) {
+        object = value.coerce(valueForm);
+      }
+      for (let i = 0; i < observerCount; i += 1) {
+        const observer = observers[i]!;
+        if (observer.didMove !== void 0) {
+          observer.didMove(fromIndex, toIndex, object, this);
         }
-        observer.didMove(fromIndex, toIndex, object, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listWillRemove(index: number): void {
+  ListDownlink.prototype.listWillRemove = function <V>(this: ListDownlink<unknown, V>, index: number): void {
+    if (this.willRemove !== void 0) {
+      this.willRemove(index);
+    }
+
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -398,25 +607,37 @@ export class ListDownlink<V, VU = never> extends Downlink {
         observer.willRemove(index, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listDidRemove(index: number, oldValue: Value): void {
+  ListDownlink.prototype.listDidRemove = function <V>(this: ListDownlink<unknown, V>, index: number, oldValue: Value): void {
     let oldObject: V | undefined;
+    const valueForm = this.valueForm;
+
+    if (this.didRemove !== void 0) {
+      oldObject = oldValue.coerce(valueForm);
+      this.didRemove(index, oldObject);
+    }
+
     const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      if (observer.didRemove !== void 0) {
-        if (oldObject === void 0) {
-          oldObject = oldValue.coerce(this.ownValueForm);
+    const observerCount = observers.length;
+    if (observerCount !== 0) {
+      if (oldObject === void 0) {
+        oldObject = oldValue.coerce(valueForm);
+      }
+      for (let i = 0; i < observerCount; i += 1) {
+        const observer = observers[i]!;
+        if (observer.didRemove !== void 0) {
+          observer.didRemove(index, oldObject, this);
         }
-        observer.didRemove(index, oldObject, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listWillDrop(lower: number): void {
+  ListDownlink.prototype.listWillDrop = function (this: ListDownlink, lower: number): void {
+    if (this.willDrop !== void 0) {
+      this.willDrop(lower);
+    }
+
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -424,10 +645,13 @@ export class ListDownlink<V, VU = never> extends Downlink {
         observer.willDrop(lower, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listDidDrop(lower: number): void {
+  ListDownlink.prototype.listDidDrop = function (this: ListDownlink, lower: number): void {
+    if (this.didDrop !== void 0) {
+      this.didDrop(lower);
+    }
+
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -435,10 +659,13 @@ export class ListDownlink<V, VU = never> extends Downlink {
         observer.didDrop(lower, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listWillTake(upper: number): void {
+  ListDownlink.prototype.listWillTake = function (this: ListDownlink, upper: number): void {
+    if (this.willTake !== void 0) {
+      this.willTake(upper);
+    }
+
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -446,10 +673,13 @@ export class ListDownlink<V, VU = never> extends Downlink {
         observer.willTake(upper, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listDidTake(upper: number): void {
+  ListDownlink.prototype.listDidTake = function (this: ListDownlink, upper: number): void {
+    if (this.didTake !== void 0) {
+      this.didTake(upper);
+    }
+
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -457,10 +687,13 @@ export class ListDownlink<V, VU = never> extends Downlink {
         observer.didTake(upper, this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listWillClear(): void {
+  ListDownlink.prototype.listWillClear = function (this: ListDownlink): void {
+    if (this.willClear !== void 0) {
+      this.willClear();
+    }
+
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -468,10 +701,13 @@ export class ListDownlink<V, VU = never> extends Downlink {
         observer.willClear(this);
       }
     }
-  }
+  };
 
-  /** @internal */
-  listDidClear(): void {
+  ListDownlink.prototype.listDidClear = function (this: ListDownlink): void {
+    if (this.didClear !== void 0) {
+      this.didClear();
+    }
+
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -479,87 +715,89 @@ export class ListDownlink<V, VU = never> extends Downlink {
         observer.didClear(this);
       }
     }
-  }
+  };
 
-  initialState(): STree<Value, Value> | null;
-  initialState(state0: STree<Value, Value> | null): ListDownlink<V, VU>;
-  initialState(state0?: STree<Value, Value> | null): STree<Value, Value> | null | ListDownlink<V, VU> {
-    if (state0 === void 0) {
-      return this.state0;
-    } else {
-      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
-                       this.ownPrio, this.ownRate, this.ownBody, this.flags, this.observers,
-                       this.ownValueForm, state0);
-    }
-  }
-
-  /** @internal */
-  protected didAliasModel(): void {
-    this.onLinkedResponse();
-    this.model!.state.forEach(function (value: Value, index: number) {
-      this.listDidUpdate(index, value, Value.absent());
-    }, this);
-    this.onSyncedResponse();
-  }
-
-  override open(): this {
-    const laneUri = this.ownLaneUri;
-    if (laneUri.isEmpty()) {
-      throw new Error("no lane");
-    }
-    let nodeUri = this.ownNodeUri;
-    if (nodeUri.isEmpty()) {
-      throw new Error("no node");
-    }
-    let hostUri = this.ownHostUri;
-    if (hostUri.isEmpty()) {
-      hostUri = nodeUri.endpoint();
-      nodeUri = hostUri.unresolve(nodeUri);
-    }
-    let model = this.context.getDownlink(hostUri, nodeUri, laneUri);
-    if (model !== void 0) {
-      if (!(model instanceof ListDownlinkModel)) {
-        throw new Error("downlink type mismatch");
+  ListDownlink.prototype.didAliasModel = function (this: ListDownlink): void {
+    const model = this.model;
+    if (model !== null && model.linked) {
+      this.onLinkedResponse();
+      model.state.forEach(function (value: Value, index: number) {
+        this.listDidUpdate(index, value, Value.absent());
+      }, this);
+      if (model.synced) {
+        this.onSyncedResponse();
       }
-      model.addDownlink(this);
-      (this as Mutable<this>).model = model as ListDownlinkModel;
-      setTimeout(this.didAliasModel.bind(this));
-    } else {
-      model = new ListDownlinkModel(this.context, hostUri, nodeUri, laneUri, this.ownPrio,
-                                    this.ownRate, this.ownBody, this.state0 ?? void 0);
-      model.addDownlink(this);
-      this.context.openDownlink(model);
-      (this as Mutable<this>).model = model as ListDownlinkModel;
     }
-    if (this.owner !== null) {
-      this.owner.addDownlink(this);
+  };
+
+  ListDownlink.prototype.open = function (this: ListDownlink): ListDownlink {
+    if (this.model === null) {
+      const laneUri = this.getLaneUri();
+      if (laneUri === null) {
+        throw new Error("no laneUri");
+      }
+      let nodeUri = this.getNodeUri();
+      if (nodeUri === null) {
+        throw new Error("no nodeUri");
+      }
+      let hostUri = this.getHostUri();
+      if (hostUri === null) {
+        hostUri = nodeUri.endpoint();
+        nodeUri = hostUri.unresolve(nodeUri);
+      }
+      let prio = this.getPrio();
+      if (prio === void 0) {
+        prio = 0;
+      }
+      let rate = this.getRate();
+      if (rate === void 0) {
+        rate = 0;
+      }
+      let body = this.getBody();
+      if (body === null) {
+        body = Value.absent();
+      }
+      const owner = this.owner;
+      if (WarpDownlinkContext.is(owner)) {
+        let model = owner.getDownlink(hostUri, nodeUri, laneUri);
+        if (model !== null) {
+          if (!(model instanceof ListDownlinkModel)) {
+            throw new Error("downlink type mismatch");
+          }
+          model.addDownlink(this);
+          (this as Mutable<typeof this>).model = model as ListDownlinkModel;
+          setTimeout(this.didAliasModel.bind(this));
+        } else {
+          const state = this.initState();
+          model = new ListDownlinkModel(hostUri, nodeUri, laneUri, prio, rate, body, state);
+          model.addDownlink(this);
+          owner.openDownlink(model);
+          (this as Mutable<typeof this>).model = model as ListDownlinkModel;
+        }
+      } else {
+        throw new Error("no downlink context");
+      }
     }
     return this;
-  }
-}
-/** @public */
-export interface ListDownlink<V, VU> {
-  hostUri(): Uri;
-  hostUri(hostUri: AnyUri): ListDownlink<V, VU>;
+  };
 
-  nodeUri(): Uri;
-  nodeUri(nodeUri: AnyUri): ListDownlink<V, VU>;
+  ListDownlink.construct = function <D extends ListDownlink<any, any, any>>(downlink: D | null, owner: FastenerOwner<D>): D {
+    if (downlink === null) {
+      downlink = function (index: number, value?: ListDownlinkValue<D> | ListDownlinkValueInit<D>): ListDownlinkValue<D> | undefined | FastenerOwner<D> {
+        if (arguments.length === 0) {
+          return downlink!.get(index);
+        } else {
+          downlink!.set(index, value!);
+          return downlink!.owner;
+        }
+      } as D;
+      delete (downlink as Partial<Mutable<D>>).name; // don't clobber prototype name
+      Object.setPrototypeOf(downlink, this.prototype);
+    }
+    downlink = _super.construct.call(this, downlink, owner) as D;
+    (downlink as Mutable<typeof downlink>).valueForm = downlink.initValueForm();
+    return downlink;
+  };
 
-  laneUri(): Uri;
-  laneUri(laneUri: AnyUri): ListDownlink<V, VU>;
-
-  prio(): number;
-  prio(prio: number): ListDownlink<V, VU>;
-
-  rate(): number;
-  rate(rate: number): ListDownlink<V, VU>;
-
-  body(): Value;
-  body(body: AnyValue): ListDownlink<V, VU>;
-
-  keepLinked(): boolean;
-  keepLinked(keepLinked: boolean): ListDownlink<V, VU>;
-
-  keepSynced(): boolean;
-  keepSynced(keepSynced: boolean): ListDownlink<V, VU>;
-}
+  return ListDownlink;
+})(WarpDownlink);

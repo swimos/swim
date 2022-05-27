@@ -12,63 +12,112 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Proto, ObserverType} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "../fastener/Fastener";
+import type {Mutable, Proto, Observes} from "@swim/util";
+import {FastenerOwner, FastenerDescriptor, FastenerClass, Fastener} from "../fastener/Fastener";
 import {AnyComponent, ComponentFactory, Component} from "./Component";
 
-/** @internal */
-export type ComponentRelationType<F extends ComponentRelation<any, any>> =
-  F extends ComponentRelation<any, infer C> ? C : never;
+/** @public */
+export type ComponentRelationComponent<F extends ComponentRelation<any, any>> =
+  F extends {componentType?: ComponentFactory<infer C>} ? C : never;
 
 /** @public */
-export interface ComponentRelationInit<C extends Component = Component> extends FastenerInit {
-  extends?: {prototype: ComponentRelation<any, any>} | string | boolean | null;
-  type?: ComponentFactory<C>;
-  binds?: boolean;
+export interface ComponentRelationDescriptor<C extends Component = Component> extends FastenerDescriptor {
+  extends?: Proto<ComponentRelation<any, any>> | string | boolean | null;
+  componentType?: ComponentFactory<any, any>;
   observes?: boolean;
-
-  initComponent?(component: C): void;
-  willAttachComponent?(component: C, target: Component | null): void;
-  didAttachComponent?(component: C, target: Component | null): void;
-
-  deinitComponent?(component: C): void;
-  willDetachComponent?(component: C): void;
-  didDetachComponent?(component: C): void;
-
-  parentComponent?: Component | null;
-  insertChild?(parent: Component, child: C, target: Component | null, key: string | undefined): void;
-
-  detectComponent?(component: Component): C | null;
-  createComponent?(): C;
-  fromAny?(value: AnyComponent<C>): C;
+  binds?: boolean;
 }
 
 /** @public */
-export type ComponentRelationDescriptor<O = unknown, C extends Component = Component, I = {}> = ThisType<ComponentRelation<O, C> & I> & ComponentRelationInit<C> & Partial<I>;
+export type ComponentRelationTemplate<F extends ComponentRelation<any, any>> =
+  ThisType<F> &
+  ComponentRelationDescriptor<ComponentRelationComponent<F>> &
+  Partial<Omit<F, keyof ComponentRelationDescriptor>>;
 
 /** @public */
 export interface ComponentRelationClass<F extends ComponentRelation<any, any> = ComponentRelation<any, any>> extends FastenerClass<F> {
-}
+  /** @override */
+  specialize(template: ComponentRelationDescriptor<any>): ComponentRelationClass<F>;
 
-/** @public */
-export interface ComponentRelationFactory<F extends ComponentRelation<any, any> = ComponentRelation<any, any>> extends ComponentRelationClass<F> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): ComponentRelationFactory<F> & I;
+  /** @override */
+  refine(fastenerClass: ComponentRelationClass<any>): void;
 
-  define<O, C extends Component = Component>(className: string, descriptor: ComponentRelationDescriptor<O, C>): ComponentRelationFactory<ComponentRelation<any, C>>;
-  define<O, C extends Component = Component>(className: string, descriptor: {observes: boolean} & ComponentRelationDescriptor<O, C, ObserverType<C>>): ComponentRelationFactory<ComponentRelation<any, C>>;
-  define<O, C extends Component = Component, I = {}>(className: string, descriptor: {implements: unknown} & ComponentRelationDescriptor<O, C, I>): ComponentRelationFactory<ComponentRelation<any, C> & I>;
-  define<O, C extends Component = Component, I = {}>(className: string, descriptor: {implements: unknown; observes: boolean} & ComponentRelationDescriptor<O, C, I & ObserverType<C>>): ComponentRelationFactory<ComponentRelation<any, C> & I>;
+  /** @override */
+  extend<F2 extends F>(className: string, template: ComponentRelationTemplate<F2>): ComponentRelationClass<F2>;
+  extend<F2 extends F>(className: string, template: ComponentRelationTemplate<F2>): ComponentRelationClass<F2>;
 
-  <O, C extends Component = Component>(descriptor: ComponentRelationDescriptor<O, C>): PropertyDecorator;
-  <O, C extends Component = Component>(descriptor: {observes: boolean} & ComponentRelationDescriptor<O, C, ObserverType<C>>): PropertyDecorator;
-  <O, C extends Component = Component, I = {}>(descriptor: {implements: unknown} & ComponentRelationDescriptor<O, C, I>): PropertyDecorator;
-  <O, C extends Component = Component, I = {}>(descriptor: {implements: unknown; observes: boolean} & ComponentRelationDescriptor<O, C, I & ObserverType<C>>): PropertyDecorator;
+  /** @override */
+  define<F2 extends F>(className: string, template: ComponentRelationTemplate<F2>): ComponentRelationClass<F2>;
+  define<F2 extends F>(className: string, template: ComponentRelationTemplate<F2>): ComponentRelationClass<F2>;
+
+  /** @override */
+  <F2 extends F>(template: ComponentRelationTemplate<F2>): PropertyDecorator;
 }
 
 /** @public */
 export interface ComponentRelation<O = unknown, C extends Component = Component> extends Fastener<O> {
   /** @override */
   get fastenerType(): Proto<ComponentRelation<any, any>>;
+
+  /** @internal */
+  readonly observes?: boolean; // optional prototype property
+
+  /** @internal @override */
+  getSuper(): ComponentRelation<unknown, C> | null;
+
+  /** @internal @override */
+  setDerived(derived: boolean, inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  willDerive(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  onDerive(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  didDerive(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  willUnderive(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  onUnderive(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  didUnderive(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @override */
+  readonly inlet: ComponentRelation<unknown, C> | null;
+
+  /** @protected @override */
+  willBindInlet(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  onBindInlet(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  didBindInlet(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  willUnbindInlet(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  onUnbindInlet(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @protected @override */
+  didUnbindInlet(inlet: ComponentRelation<unknown, C>): void;
+
+  /** @internal */
+  readonly outlets: ReadonlyArray<ComponentRelation<unknown, C>> | null;
+
+  /** @internal @override */
+  attachOutlet(outlet: ComponentRelation<unknown, C>): void;
+
+  /** @internal @override */
+  detachOutlet(outlet: ComponentRelation<unknown, C>): void;
+
+  /** @internal */
+  readonly componentType?: ComponentFactory<C>; // optional prototype property
 
   /** @protected */
   initComponent(component: C): void;
@@ -112,33 +161,48 @@ export interface ComponentRelation<O = unknown, C extends Component = Component>
 
   /** @internal @protected */
   fromAny(value: AnyComponent<C>): C;
-
-  /** @internal @protected */
-  get type(): ComponentFactory<C> | undefined; // optional prototype property
-
-  /** @internal @protected */
-  get binds(): boolean | undefined; // optional prototype property
-
-  /** @internal @protected */
-  get observes(): boolean | undefined; // optional prototype property
-
-  /** @internal @override */
-  get lazy(): boolean; // prototype property
-
-  /** @internal @override */
-  get static(): string | boolean; // prototype property
 }
 
 /** @public */
 export const ComponentRelation = (function (_super: typeof Fastener) {
-  const ComponentRelation: ComponentRelationFactory = _super.extend("ComponentRelation");
+  const ComponentRelation = _super.extend("ComponentRelation", {
+    lazy: false,
+    static: true,
+  }) as ComponentRelationClass;
 
   Object.defineProperty(ComponentRelation.prototype, "fastenerType", {
-    get: function (this: ComponentRelation): Proto<ComponentRelation<any, any>> {
-      return ComponentRelation;
-    },
+    value: ComponentRelation,
     configurable: true,
   });
+
+  ComponentRelation.prototype.onBindInlet = function <C extends Component>(this: ComponentRelation<unknown, C>, inlet: ComponentRelation<unknown, C>): void {
+    (this as Mutable<typeof this>).inlet = inlet;
+    _super.prototype.onBindInlet.call(this, inlet);
+  };
+
+  ComponentRelation.prototype.onUnbindInlet = function <C extends Component>(this: ComponentRelation<unknown, C>, inlet: ComponentRelation<unknown, C>): void {
+    _super.prototype.onUnbindInlet.call(this, inlet);
+    (this as Mutable<typeof this>).inlet = null;
+  };
+
+  ComponentRelation.prototype.attachOutlet = function <C extends Component>(this: ComponentRelation<unknown, C>, outlet: ComponentRelation<unknown, C>): void {
+    let outlets = this.outlets as ComponentRelation<unknown, C>[] | null;
+    if (outlets === null) {
+      outlets = [];
+      (this as Mutable<typeof this>).outlets = outlets;
+    }
+    outlets.push(outlet);
+  };
+
+  ComponentRelation.prototype.detachOutlet = function <C extends Component>(this: ComponentRelation<unknown, C>, outlet: ComponentRelation<unknown, C>): void {
+    const outlets = this.outlets as ComponentRelation<unknown, C>[] | null;
+    if (outlets !== null) {
+      const index = outlets.indexOf(outlet);
+      if (index >= 0) {
+        outlets.splice(index, 1);
+      }
+    }
+  };
 
   ComponentRelation.prototype.initComponent = function <C extends Component>(this: ComponentRelation<unknown, C>, component: C): void {
     // hook
@@ -150,7 +214,7 @@ export const ComponentRelation = (function (_super: typeof Fastener) {
 
   ComponentRelation.prototype.onAttachComponent = function <C extends Component>(this: ComponentRelation<unknown, C>, component: C, target: Component | null): void {
     if (this.observes === true) {
-      component.observe(this as ObserverType<C>);
+      component.observe(this as Observes<C>);
     }
   };
 
@@ -168,7 +232,7 @@ export const ComponentRelation = (function (_super: typeof Fastener) {
 
   ComponentRelation.prototype.onDetachComponent = function <C extends Component>(this: ComponentRelation<unknown, C>, component: C): void {
     if (this.observes === true) {
-      component.unobserve(this as ObserverType<C>);
+      component.unobserve(this as Observes<C>);
     }
   };
 
@@ -202,9 +266,9 @@ export const ComponentRelation = (function (_super: typeof Fastener) {
 
   ComponentRelation.prototype.createComponent = function <C extends Component>(this: ComponentRelation<unknown, C>): C {
     let component: C | undefined;
-    const type = this.type;
-    if (type !== void 0) {
-      component = type.create();
+    const componentType = this.componentType;
+    if (componentType !== void 0) {
+      component = componentType.create();
     }
     if (component === void 0 || component === null) {
       let message = "Unable to create ";
@@ -218,60 +282,24 @@ export const ComponentRelation = (function (_super: typeof Fastener) {
   };
 
   ComponentRelation.prototype.fromAny = function <C extends Component>(this: ComponentRelation<unknown, C>, value: AnyComponent<C>): C {
-    const type = this.type;
-    if (type !== void 0) {
-      return type.fromAny(value);
+    const componentType = this.componentType;
+    if (componentType !== void 0) {
+      return componentType.fromAny(value);
     } else {
       return Component.fromAny(value) as C;
     }
   };
 
-  Object.defineProperty(ComponentRelation.prototype, "lazy", {
-    get: function (this: ComponentRelation): boolean {
-      return false;
-    },
-    configurable: true,
-  });
-
-  Object.defineProperty(ComponentRelation.prototype, "static", {
-    get: function (this: ComponentRelation): string | boolean {
-      return true;
-    },
-    configurable: true,
-  });
-
-  ComponentRelation.construct = function <F extends ComponentRelation<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
-    fastener = _super.construct(fastenerClass, fastener, owner) as F;
+  ComponentRelation.construct = function <F extends ComponentRelation<any, any>>(fastener: F | null, owner: FastenerOwner<F>): F {
+    fastener = _super.construct.call(this, fastener, owner) as F;
+    Object.defineProperty(fastener, "inlet", { // override getter
+      value: null,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+    (fastener as Mutable<typeof fastener>).outlets = null;
     return fastener;
-  };
-
-  ComponentRelation.define = function <O, C extends Component>(className: string, descriptor: ComponentRelationDescriptor<O, C>): ComponentRelationFactory<ComponentRelation<any, C>> {
-    let superClass = descriptor.extends as ComponentRelationFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this;
-    }
-
-    const fastenerClass = superClass.extend(className, descriptor);
-
-    fastenerClass.construct = function (fastenerClass: {prototype: ComponentRelation<any, any>}, fastener: ComponentRelation<O, C> | null, owner: O): ComponentRelation<O, C> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner);
-      if (affinity !== void 0) {
-        fastener.initAffinity(affinity);
-      }
-      if (inherits !== void 0) {
-        fastener.initInherits(inherits);
-      }
-      return fastener;
-    };
-
-    return fastenerClass;
   };
 
   return ComponentRelation;

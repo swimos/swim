@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Class, MutableDictionary} from "@swim/util";
+import type {Class, MutableDictionary, Observes} from "@swim/util";
 import {OutputSettings, Output, OutputStyle, Format, Unicode} from "@swim/codec";
-import {MemberFastenerClass, Provider, Timer} from "@swim/component";
+import {FastenerClass, Provider, Timer} from "@swim/component";
 import type {Workspace} from "../workspace/Workspace";
 import {Scope} from "../scope/Scope";
 import type {TaskConfig} from "../task/Task";
@@ -59,7 +59,7 @@ export class WatcherScope extends Scope {
 
       const t0 = Date.now();
       this.onRebuildBegin(packageNames);
-      const workspace = this.workspace.service;
+      const workspace = this.workspace.getService();
       rebuildPromise = workspace.runPackageLibraryTasks(this.buildConfigs, packageNames, this.libraryNames);
       rebuildPromise = rebuildPromise.then(this.onRebuildSuccess.bind(this, packageNames, t0), this.onRebuildFailure.bind(this));
       this.rebuildPromise = rebuildPromise;
@@ -156,7 +156,7 @@ export class WatcherScope extends Scope {
     }
   }
 
-  @Timer<WatcherScope>({
+  @Timer<WatcherScope["buildTimer"]>({
     delay: 500,
     fire(): void {
       this.owner.rebuild();
@@ -177,7 +177,7 @@ export class WatcherScope extends Scope {
       changedPackageNames = this.packageNames;
     }
 
-    const workspace = this.workspace.service;
+    const workspace = this.workspace.getService();
     const dependentPackages = workspace.getDependents(changedPackageNames);
     const selectedPackages = workspace.getDependencies(this.packageNames);
 
@@ -216,7 +216,7 @@ export class WatcherScope extends Scope {
   build(): Promise<void> {
     let rebuildPromise = this.rebuildPromise;
     if (rebuildPromise === null) {
-      const workspace = this.workspace.service;
+      const workspace = this.workspace.getService();
       rebuildPromise = workspace.runPackageLibraryDependencyTasks(this.buildConfigs, this.packageNames, this.libraryNames);
       rebuildPromise = rebuildPromise.then(this.onBuildSuccess.bind(this), this.onBuildFailure.bind(this));
       this.rebuildPromise = rebuildPromise;
@@ -235,7 +235,7 @@ export class WatcherScope extends Scope {
   }
 
   watch(watchConfig: TaskConfig): Promise<void> {
-    const workspace = this.workspace.service;
+    const workspace = this.workspace.getService();
     return workspace.runPackageLibraryDependencyTasks(watchConfig, this.packageNames, this.libraryNames);
   }
 
@@ -252,15 +252,16 @@ export class WatcherScope extends Scope {
     console.log("");
   }
 
-  @Provider<WatcherScope, Workspace>({
+  @Provider<WatcherScope["workspace"]>({
     extends: true,
+    lazy: false,
     observes: true,
-    workspacePackageDidChange(packageScope: PackageScope): void {
+    servicePackageDidChange(packageScope: PackageScope): void {
       this.owner.rebuildPackage(packageScope);
     },
   })
-  override readonly workspace!: Provider<this, Workspace>;
-  static override readonly workspace: MemberFastenerClass<Scope, "workspace">;
+  override readonly workspace!: Provider<this, Workspace> & Scope["workspace"] & Observes<Workspace>;
+  static override readonly workspace: FastenerClass<Scope["workspace"]>;
 
   static async watch(watchConfig: TaskConfig, buildConfigs: TaskConfig | readonly TaskConfig[], packageNames?: string[] | string, libraryNames?: string[] | string): Promise<WatcherScope> {
     if (typeof packageNames === "string") {

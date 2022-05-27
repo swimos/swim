@@ -14,6 +14,7 @@
 
 import {Spec, Unit} from "@swim/unit";
 import {RuntimeSuite} from "./runtime/RuntimeSuite";
+import {MappingSuite} from "./mapping/MappingSuite";
 import {InterpolateSuite} from "./interpolate/InterpolateSuite";
 import {TransitionSuite} from "./transition/TransitionSuite";
 import {ScaleSuite} from "./scale/ScaleSuite";
@@ -23,6 +24,11 @@ export class UtilSuite extends Spec {
   @Unit
   runtimeSuite(): Spec {
     return new RuntimeSuite();
+  }
+
+  @Unit
+  mappingSuite(): Spec {
+    return new MappingSuite();
   }
 
   @Unit

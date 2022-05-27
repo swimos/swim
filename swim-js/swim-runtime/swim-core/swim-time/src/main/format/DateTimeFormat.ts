@@ -93,69 +93,198 @@ export abstract class DateTimeFormat {
   /** @internal */
   abstract parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit>;
 
-  @Lazy
-  static get year(): DateTimeFormat {
-    return new YearFormat();
+  /** @internal */
+  static Year: DateTimeFormat | null = null;
+  static year(): DateTimeFormat {
+    let year = this.Year;
+    if (year === null) {
+      year = new YearFormat();
+      this.Year = year;
+    }
+    return year;
   }
 
-  @Lazy
-  static get monthOfYear(): DateTimeFormat {
-    return new MonthOfYearFormat();
+  /** @internal */
+  static MonthOfYear: DateTimeFormat | null = null;
+  static monthOfYear(): DateTimeFormat {
+    let monthOfYear = this.MonthOfYear;
+    if (monthOfYear === null) {
+      monthOfYear = new MonthOfYearFormat();
+      this.MonthOfYear = monthOfYear;
+    }
+    return monthOfYear;
   }
 
-  @Lazy
-  static get month(): DateTimeFormat {
-    return new MonthFormat(DateTimeLocale.standard());
+  /** @internal */
+  static Month: DateTimeFormat | null = null;
+  static month(locale?: DateTimeLocale): DateTimeFormat {
+    let month: DateTimeFormat | null;
+    if (locale === void 0 || locale === DateTimeLocale.standard()) {
+      month = this.Month;
+      if (month === null) {
+        month = new MonthFormat(DateTimeLocale.standard());
+        this.Month = month;
+      }
+    } else {
+      month = new MonthFormat(locale);
+    }
+    return month;
   }
 
-  @Lazy
-  static get shortMonth(): DateTimeFormat {
-    return new ShortMonthFormat(DateTimeLocale.standard());
+  /** @internal */
+  static ShortMonth: DateTimeFormat | null = null;
+  static shortMonth(locale?: DateTimeLocale): DateTimeFormat {
+    let shortMonth: DateTimeFormat | null;
+    if (locale === void 0 || locale === DateTimeLocale.standard()) {
+      shortMonth = this.ShortMonth;
+      if (shortMonth === null) {
+        shortMonth = new ShortMonthFormat(DateTimeLocale.standard());
+        this.ShortMonth = shortMonth;
+      }
+    } else {
+      shortMonth = new ShortMonthFormat(locale);
+    }
+    return shortMonth;
   }
 
-  @Lazy
-  static get dayOfMonth(): DateTimeFormat {
-    return new DayOfMonthFormat();
+  /** @internal */
+  static DayOfMonthZeroPadded: DateTimeFormat | null = null;
+  /** @internal */
+  static DayOfMonthSpacePadded: DateTimeFormat | null = null;
+  static dayOfMonth(padChar?: number): DateTimeFormat {
+    let dayOfMonth: DateTimeFormat | null;
+    if (padChar === void 0 || padChar === 48/*'0'*/) {
+      dayOfMonth = this.DayOfMonthZeroPadded;
+      if (dayOfMonth === null) {
+        dayOfMonth = new DayOfMonthFormat(48/*'0'*/);
+        this.DayOfMonthZeroPadded = dayOfMonth;
+      }
+    } else if (padChar === 32/*' '*/) {
+      dayOfMonth = this.DayOfMonthSpacePadded;
+      if (dayOfMonth === null) {
+        dayOfMonth = new DayOfMonthFormat(32/*' '*/);
+        this.DayOfMonthSpacePadded = dayOfMonth;
+      }
+    } else {
+      dayOfMonth = new DayOfMonthFormat(padChar);
+    }
+    return dayOfMonth;
   }
 
-  @Lazy
-  static get weekday(): DateTimeFormat {
-    return new WeekdayFormat(DateTimeLocale.standard());
+  /** @internal */
+  static Weekday: DateTimeFormat | null = null;
+  static weekday(locale?: DateTimeLocale): DateTimeFormat {
+    let weekday: DateTimeFormat | null;
+    if (locale === void 0 || locale === DateTimeLocale.standard()) {
+      weekday = this.Weekday;
+      if (weekday === null) {
+        weekday = new WeekdayFormat(DateTimeLocale.standard());
+        this.Weekday = weekday;
+      }
+    } else {
+      weekday = new WeekdayFormat(locale);
+    }
+    return weekday;
   }
 
-  @Lazy
-  static get shortWeekday(): DateTimeFormat {
-    return new ShortWeekdayFormat(DateTimeLocale.standard());
+  /** @internal */
+  static ShortWeekday: DateTimeFormat | null = null;
+  static shortWeekday(locale?: DateTimeLocale): DateTimeFormat {
+    let shortWeekday: DateTimeFormat | null;
+    if (locale === void 0 || locale === DateTimeLocale.standard()) {
+      shortWeekday = this.ShortWeekday;
+      if (shortWeekday === null) {
+        shortWeekday = new ShortWeekdayFormat(DateTimeLocale.standard());
+        this.ShortWeekday = shortWeekday;
+      }
+    } else {
+      shortWeekday = new ShortWeekdayFormat(locale);
+    }
+    return shortWeekday;
   }
 
-  @Lazy
-  static get hour24(): DateTimeFormat {
-    return new Hour24Format();
+  /** @internal */
+  static Hour24: DateTimeFormat | null = null;
+  static hour24(): DateTimeFormat {
+    let hour24 = this.Hour24;
+    if (hour24 === null) {
+      hour24 = new Hour24Format();
+      this.Hour24 = hour24;
+    }
+    return hour24;
   }
 
-  @Lazy
-  static get hour12(): DateTimeFormat {
-    return new Hour12Format();
+  /** @internal */
+  static Hour12ZeroPadded: DateTimeFormat | null = null;
+  /** @internal */
+  static Hour12SpacePadded: DateTimeFormat | null = null;
+  static hour12(padChar?: number): DateTimeFormat {
+    let hour12: DateTimeFormat | null;
+    if (padChar === void 0 || padChar === 48/*'0'*/) {
+      hour12 = this.Hour12ZeroPadded;
+      if (hour12 === null) {
+        hour12 = new Hour12Format(48/*'0'*/);
+        this.Hour12ZeroPadded = hour12;
+      }
+    } else if (padChar === 32/*' '*/) {
+      hour12 = this.Hour12SpacePadded;
+      if (hour12 === null) {
+        hour12 = new Hour12Format(32/*' '*/);
+        this.Hour12SpacePadded = hour12;
+      }
+    } else {
+      hour12 = new Hour12Format(padChar);
+    }
+    return hour12;
   }
 
-  @Lazy
-  static get period(): DateTimeFormat {
-    return new PeriodFormat(DateTimeLocale.standard());
+  /** @internal */
+  static Period: DateTimeFormat | null = null;
+  static period(locale?: DateTimeLocale): DateTimeFormat {
+    let period: DateTimeFormat | null;
+    if (locale === void 0 || locale === DateTimeLocale.standard()) {
+      period = this.Period;
+      if (period === null) {
+        period = new PeriodFormat(DateTimeLocale.standard());
+        this.Period = period;
+      }
+    } else {
+      period = new PeriodFormat(locale);
+    }
+    return period;
   }
 
-  @Lazy
-  static get minute(): DateTimeFormat {
-    return new MinuteFormat();
+  /** @internal */
+  static Minute: DateTimeFormat | null = null;
+  static minute(): DateTimeFormat {
+    let minute = this.Minute;
+    if (minute === null) {
+      minute = new MinuteFormat();
+      this.Minute = minute;
+    }
+    return minute;
   }
 
-  @Lazy
-  static get second(): DateTimeFormat {
-    return new SecondFormat();
+  /** @internal */
+  static Second: DateTimeFormat | null = null;
+  static second(): DateTimeFormat {
+    let second = this.Second;
+    if (second === null) {
+      second = new SecondFormat();
+      this.Second = second;
+    }
+    return second;
   }
 
-  @Lazy
-  static get millisecond(): DateTimeFormat {
-    return new MillisecondFormat();
+  /** @internal */
+  static Millisecond: DateTimeFormat | null = null;
+  static millisecond(): DateTimeFormat {
+    let millisecond = this.Millisecond;
+    if (millisecond === null) {
+      millisecond = new MillisecondFormat();
+      this.Millisecond = millisecond;
+    }
+    return millisecond;
   }
 
   static pattern(pattern: string, specifiers?: DateTimeSpecifiers | DateTimeLocale): DateTimeFormat {
@@ -213,35 +342,50 @@ export abstract class DateTimeFormat {
   }
 
   /** @internal */
-  static writeDateNumber2<T>(output: Output<T>, value: number): Output<T> {
-    const c1 = 48/*'0'*/ + value % 10;
+  static writeDateNumber2<T>(output: Output<T>, value: number, padChar?: number): Output<T> {
+    if (padChar === void 0) {
+      padChar = 48/*'0'*/;
+    }
+    const c1 = Math.floor(value % 10);
     value /= 10;
-    const c0 = 48/*'0'*/ + value % 10;
-    output = output.write(c0).write(c1);
+    const c0 = Math.floor(value % 10);
+    output = output.write(c0 !== 0 ? 48/*'0'*/ + c0 : padChar);
+    output = output.write(48/*'0'*/ + c1);
     return output;
   }
 
   /** @internal */
-  static writeDateNumber3<T>(output: Output<T>, value: number): Output<T> {
-    const c2 = 48/*'0'*/ + value % 10;
+  static writeDateNumber3<T>(output: Output<T>, value: number, padChar?: number): Output<T> {
+    if (padChar === void 0) {
+      padChar = 48/*'0'*/;
+    }
+    const c2 = Math.floor(value % 10);
     value /= 10;
-    const c1 = 48/*'0'*/ + value % 10;
+    const c1 = Math.floor(value % 10);
     value /= 10;
-    const c0 = 48/*'0'*/ + value % 10;
-    output = output.write(c0).write(c1).write(c2);
+    const c0 = Math.floor(value % 10);
+    output = output.write(c0 !== 0 ? 48/*'0'*/ + c0 : padChar);
+    output = output.write(c1 !== 0 ? 48/*'0'*/ + c1 : padChar);
+    output = output.write(48/*'0'*/ + c2);
     return output;
   }
 
   /** @internal */
-  static writeDateNumber4<T>(output: Output<T>, value: number): Output<T> {
-    const c3 = 48/*'0'*/ + value % 10;
+  static writeDateNumber4<T>(output: Output<T>, value: number, padChar?: number): Output<T> {
+    if (padChar === void 0) {
+      padChar = 48/*'0'*/;
+    }
+    const c3 = Math.floor(value % 10);
     value /= 10;
-    const c2 = 48/*'0'*/ + value % 10;
+    const c2 = Math.floor(value % 10);
     value /= 10;
-    const c1 = 48/*'0'*/ + value % 10;
+    const c1 = Math.floor(value % 10);
     value /= 10;
-    const c0 = 48/*'0'*/ + value % 10;
-    output = output.write(c0).write(c1).write(c2).write(c3);
+    const c0 = Math.floor(value % 10);
+    output = output.write(c0 !== 0 ? 48/*'0'*/ + c0 : padChar);
+    output = output.write(c1 !== 0 ? 48/*'0'*/ + c1 : padChar);
+    output = output.write(c2 !== 0 ? 48/*'0'*/ + c2 : padChar);
+    output = output.write(48/*'0'*/ + c3);
     return output;
   }
 }

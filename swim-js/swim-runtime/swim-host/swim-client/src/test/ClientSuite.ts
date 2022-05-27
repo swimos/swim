@@ -15,7 +15,6 @@
 import {Spec, Unit} from "@swim/unit";
 import {DownlinkSuite} from "./downlink/DownlinkSuite";
 import {RefSuite} from "./ref/RefSuite";
-import {WarpClientSpec} from "./WarpClientSpec";
 
 @Unit
 export class ClientSuite extends Spec {
@@ -27,10 +26,5 @@ export class ClientSuite extends Spec {
   @Unit
   refSuite(): Spec {
     return new RefSuite();
-  }
-
-  @Unit
-  warpClientSpec(): Spec {
-    return new WarpClientSpec();
   }
 }

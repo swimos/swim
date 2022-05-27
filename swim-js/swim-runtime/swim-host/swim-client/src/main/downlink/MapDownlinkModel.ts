@@ -17,17 +17,18 @@ import {BTree} from "@swim/collections";
 import {Attr, Value, Record} from "@swim/structure";
 import type {Uri} from "@swim/uri";
 import type {EventMessage} from "@swim/warp";
-import type {Host} from "../host/Host";
-import type {DownlinkContext} from "./DownlinkContext";
-import {DownlinkModel} from "./DownlinkModel";
-import type {DownlinkType} from "./Downlink";
+import {WarpDownlinkModel} from "./WarpDownlinkModel";
 import type {MapDownlink} from "./MapDownlink";
+import type {WarpHost} from "../host/WarpHost";
 
 /** @internal */
-export class MapDownlinkModel extends DownlinkModel {
-  constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
-              prio?: number, rate?: number, body?: Value, state: BTree<Value, Value> = new BTree()) {
-    super(context, hostUri, nodeUri, laneUri, prio, rate, body);
+export class MapDownlinkModel extends WarpDownlinkModel {
+  constructor(hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number,
+              rate: number, body: Value, state: BTree<Value, Value> | null) {
+    super(hostUri, nodeUri, laneUri, prio, rate, body);
+    if (state === null) {
+      state = new BTree();
+    }
     this.state = state;
   }
 
@@ -35,10 +36,6 @@ export class MapDownlinkModel extends DownlinkModel {
 
   /** @internal */
   readonly state: BTree<Value, Value>;
-
-  override get type(): DownlinkType {
-    return "map";
-  }
 
   get size(): number {
     return this.state.size;
@@ -135,7 +132,7 @@ export class MapDownlinkModel extends DownlinkModel {
     (this as Mutable<this>).state = state;
   }
 
-  override onEventMessage(message: EventMessage, host: Host): void {
+  override onEventMessage(message: EventMessage, host: WarpHost): void {
     super.onEventMessage(message, host);
     const event = message.body;
     const tag = event.tag;

@@ -302,7 +302,7 @@ export const Format = (function () {
   };
 
   Format.prefix = (function () {
-    const prefixes: ReadonlyArray<string> = ["y", "z", "a", "f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E"," Z", "Y"];
+    const prefixes: ReadonlyArray<string> = ["y", "z", "a", "f", "p", "n", String.fromCharCode(0x03BC/*'µ'*/), "m", "", "k", "M", "G", "T", "P", "E"," Z", "Y"];
     return function (value: number, precision: number = 1): string {
       if (isFinite(value)) {
         const exponential = Math.abs(value).toExponential();

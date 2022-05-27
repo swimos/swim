@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {
+  Murmur3,
   Mutable,
   Class,
   Instance,
@@ -23,16 +24,21 @@ import {
   Dictionary,
   MutableDictionary,
   FromAny,
+  AnyTiming,
   Creatable,
-  InitType,
+  Inits,
   Initable,
-  ObserverType,
+  Observes,
   Observable,
   ObserverMethods,
   ObserverParameters,
 } from "@swim/util";
-import {FastenerContext} from "../fastener/FastenerContext";
-import type {Fastener} from "../fastener/Fastener";
+import type {Affinity} from "../fastener/Affinity";
+import {FastenerContextClass, FastenerContext} from "../fastener/FastenerContext";
+import type {FastenerClass, Fastener} from "../fastener/Fastener";
+import {Property} from "../property/Property";
+import {Animator} from "../animator/Animator";
+import {EventHandler} from "../event/EventHandler";
 import type {ComponentObserver} from "./ComponentObserver";
 import {ComponentRelation} from "./"; // forward import
 
@@ -40,7 +46,7 @@ import {ComponentRelation} from "./"; // forward import
 export type ComponentFlags = number;
 
 /** @public */
-export type AnyComponent<C extends Component = Component> = C | ComponentFactory<C> | InitType<C>;
+export type AnyComponent<C extends Component<any> = Component> = C | ComponentFactory<C> | Inits<C>;
 
 /** @public */
 export interface ComponentInit {
@@ -52,17 +58,17 @@ export interface ComponentInit {
 }
 
 /** @public */
-export interface ComponentFactory<C extends Component = Component, U = AnyComponent<C>> extends Creatable<C>, FromAny<C, U> {
-  fromInit(init: InitType<C>): C;
+export interface ComponentFactory<C extends Component<any> = Component, U = AnyComponent<C>> extends Creatable<C>, FromAny<C, U> {
+  fromInit(init: Inits<C>): C;
 }
 
 /** @public */
-export interface ComponentClass<C extends Component = Component, U = AnyComponent<C>> extends Function, ComponentFactory<C, U> {
+export interface ComponentClass<C extends Component<any> = Component, U = AnyComponent<C>> extends Function, ComponentFactory<C, U> {
   readonly prototype: C;
 }
 
 /** @public */
-export interface ComponentConstructor<C extends Component = Component, U = AnyComponent<C>> extends ComponentClass<C, U> {
+export interface ComponentConstructor<C extends Component<any> = Component, U = AnyComponent<C>> extends ComponentClass<C, U> {
   new(): C;
 }
 
@@ -93,7 +99,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
   readonly observerType?: Class<ComponentObserver>;
 
   /** @internal */
-  readonly uid: number;
+  readonly uid: string;
 
   readonly key: string | undefined;
 
@@ -190,7 +196,66 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     // hook
   }
 
+  /** @internal */
+  reattachParent(newNextSibling: C | null): void;
+  reattachParent(this: C, newNextSibling: C | null): void {
+    const parent = this.parent!;
+    // assert(parent !== null);
+
+    this.willDetachParent(parent);
+    this.onDetachParent(parent);
+    const oldNextSibling = this.nextSibling;
+    const oldPreviousSibling = this.previousSibling;
+    if (oldNextSibling !== null) {
+      this.setNextSibling(null);
+      oldNextSibling.setPreviousSibling(oldPreviousSibling);
+    } else {
+      parent.setLastChild(oldPreviousSibling);
+    }
+    if (oldPreviousSibling !== null) {
+      oldPreviousSibling.setNextSibling(oldNextSibling);
+      this.setPreviousSibling(null);
+    } else {
+      parent.setFirstChild(oldNextSibling);
+    }
+    this.didDetachParent(parent);
+
+    this.willAttachParent(parent);
+    let newPreviousSibling: C | null;
+    if (newNextSibling !== null) {
+      newPreviousSibling = newNextSibling.previousSibling;
+      this.setNextSibling(newNextSibling);
+      newNextSibling.setPreviousSibling(this);
+    } else {
+      newPreviousSibling = parent.lastChild;
+      parent.setLastChild(this);
+    }
+    if (newPreviousSibling !== null) {
+      newPreviousSibling.setNextSibling(this);
+      this.setPreviousSibling(newPreviousSibling);
+    } else {
+      parent.setFirstChild(this);
+    }
+    this.onAttachParent(parent);
+    this.didAttachParent(parent);
+  }
+
   readonly nextSibling: C | null;
+
+  getNextSibling<F extends Class<C>>(siblingBound: F): InstanceType<F> | null;
+  getNextSibling(siblingBound: Class<C>): C | null;
+  getNextSibling(siblingBound: Class<C>): C | null {
+    let nextSibling = this.nextSibling;
+    do {
+      if (nextSibling === null) {
+        return null;
+      } else if (nextSibling instanceof siblingBound) {
+        return nextSibling;
+      } else {
+        nextSibling = nextSibling.nextSibling;
+      }
+    } while (true);
+  }
 
   /** @internal */
   setNextSibling(nextSibling: C | null): void {
@@ -199,6 +264,21 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
 
   readonly previousSibling: C | null;
 
+  getPreviousSibling<F extends Class<C>>(siblingBound: F): InstanceType<F> | null;
+  getPreviousSibling(siblingBound: Class<C>): C | null;
+  getPreviousSibling(siblingBound: Class<C>): C | null {
+    let previousSibling = this.previousSibling;
+    do {
+      if (previousSibling === null) {
+        return null;
+      } else if (previousSibling instanceof siblingBound) {
+        return previousSibling;
+      } else {
+        previousSibling = previousSibling.previousSibling;
+      }
+    } while (true);
+  }
+
   /** @internal */
   setPreviousSibling(previousSibling: C | null): void {
     (this as Mutable<this>).previousSibling = previousSibling;
@@ -206,12 +286,42 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
 
   readonly firstChild: C | null;
 
+  getFirstChild<F extends Class<C>>(childBound: F): InstanceType<F> | null;
+  getFirstChild(childBound: Class<C>): C | null;
+  getFirstChild(childBound: Class<C>): C | null {
+    let child = this.firstChild;
+    do {
+      if (child === null) {
+        return null;
+      } else if (child instanceof childBound) {
+        return child;
+      } else {
+        child = child.nextSibling;
+      }
+    } while (true);
+  }
+
   /** @internal */
   setFirstChild(firstChild: C | null): void {
     (this as Mutable<this>).firstChild = firstChild;
   }
 
   readonly lastChild: C | null;
+
+  getLastChild<F extends Class<C>>(childBound: F): InstanceType<F> | null;
+  getLastChild(childBound: Class<C>): C | null;
+  getLastChild(childBound: Class<C>): C | null {
+    let child = this.lastChild;
+    do {
+      if (child === null) {
+        return null;
+      } else if (child instanceof childBound) {
+        return child;
+      } else {
+        child = child.previousSibling;
+      }
+    } while (true);
+  }
 
   /** @internal */
   setLastChild(lastChild: C | null): void {
@@ -294,6 +404,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
         oldChild.setFlags(oldChild.flags & ~Component.RemovingFlag);
       }
 
+      newChild.setFlags(newChild.flags | Component.InsertingFlag);
       newChild.setKey(oldChild.key);
       this.willInsertChild(newChild, target);
       this.insertChildMap(newChild);
@@ -301,6 +412,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
       this.onInsertChild(newChild, target);
       this.didInsertChild(newChild, target);
       newChild.cascadeInsert();
+      newChild.setFlags(newChild.flags & ~Component.InsertingFlag);
     } else if (newChild !== oldChild || newChild !== null && newChild.key !== key) {
       if (oldChild !== null) { // remove
         target = oldChild.nextSibling;
@@ -321,6 +433,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
       if (newChild !== null) { // insert
         newChild.remove();
 
+        newChild.setFlags(newChild.flags | Component.InsertingFlag);
         newChild.setKey(key);
         this.willInsertChild(newChild, target);
         this.insertChildMap(newChild);
@@ -328,6 +441,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
         this.onInsertChild(newChild, target);
         this.didInsertChild(newChild, target);
         newChild.cascadeInsert();
+        newChild.setFlags(newChild.flags & ~Component.InsertingFlag);
       }
     }
 
@@ -342,6 +456,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
       this.removeChild(key);
     }
 
+    child.setFlags(child.flags | Component.InsertingFlag);
     child.setKey(key);
     this.willInsertChild(child, null);
     this.insertChildMap(child);
@@ -349,6 +464,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     this.onInsertChild(child, null);
     this.didInsertChild(child, null);
     child.cascadeInsert();
+    child.setFlags(child.flags & ~Component.InsertingFlag);
 
     return child;
   }
@@ -362,6 +478,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     }
     const target = this.firstChild;
 
+    child.setFlags(child.flags | Component.InsertingFlag);
     child.setKey(key);
     this.willInsertChild(child, target);
     this.insertChildMap(child);
@@ -369,6 +486,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
+    child.setFlags(child.flags & ~Component.InsertingFlag);
 
     return child;
   }
@@ -377,7 +495,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
   insertChild(child: C, target: C | null, key?: string): C;
   insertChild(this: C, child: C, target: C | null, key?: string): C {
     if (target !== null && target.parent !== this) {
-      throw new Error("insert target is not a child");
+      target = null;
     }
 
     child.remove();
@@ -385,6 +503,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
       this.removeChild(key);
     }
 
+    child.setFlags(child.flags | Component.InsertingFlag);
     child.setKey(key);
     this.willInsertChild(child, target);
     this.insertChildMap(child);
@@ -392,6 +511,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     this.onInsertChild(child, target);
     this.didInsertChild(child, target);
     child.cascadeInsert();
+    child.setFlags(child.flags & ~Component.InsertingFlag);
 
     return child;
   }
@@ -418,6 +538,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
         oldChild.setFlags(oldChild.flags & ~Component.RemovingFlag);
       }
 
+      newChild.setFlags(newChild.flags | Component.InsertingFlag);
       newChild.setKey(oldChild.key);
       this.willInsertChild(newChild, target);
       this.insertChildMap(newChild);
@@ -425,6 +546,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
       this.onInsertChild(newChild, target);
       this.didInsertChild(newChild, target);
       newChild.cascadeInsert();
+      newChild.setFlags(newChild.flags & ~Component.InsertingFlag);
     }
 
     return oldChild;
@@ -432,6 +554,10 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
 
   get insertChildFlags(): ComponentFlags {
     return (this.constructor as typeof Component).InsertChildFlags;
+  }
+
+  get inserting(): boolean {
+    return (this.flags & Component.InsertingFlag) !== 0;
   }
 
   protected willInsertChild(child: C, target: C | null): void {
@@ -487,6 +613,10 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     return (this.constructor as typeof Component).RemoveChildFlags;
   }
 
+  get removing(): boolean {
+    return (this.flags & Component.RemovingFlag) !== 0;
+  }
+
   protected willRemoveChild(child: C): void {
     // hook
   }
@@ -522,7 +652,42 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     const parent = this.parent;
     if (parent !== null) {
       parent.removeChild(this);
+    } else if (this.mounted) {
+      this.unmount();
     }
+  }
+
+  get reinsertChildFlags(): ComponentFlags {
+    return (this.constructor as typeof Component).ReinsertChildFlags;
+  }
+
+  reinsertChild(child: C, target: C | null): void;
+  reinsertChild(this: C, child: C, target: C | null): void {
+    if (child.parent !== this) {
+      throw new Error("not a child");
+    }
+    if (target !== null && target.parent !== this) {
+      throw new Error("reinsert target is not a child");
+    }
+
+    if (child.nextSibling !== target) {
+      this.willReinsertChild(child, target);
+      child.reattachParent(target);
+      this.onReinsertChild(child, target);
+      this.didReinsertChild(child, target);
+    }
+  }
+
+  protected willReinsertChild(child: C, target: C | null): void {
+    // hook
+  }
+
+  protected onReinsertChild(child: C, target: C | null): void {
+    this.requireUpdate(this.reinsertChildFlags);
+  }
+
+  protected didReinsertChild(child: C, target: C | null): void {
+    // hook
   }
 
   sortChildren(comparator: Comparator<C>): void {
@@ -547,6 +712,25 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
       child.setNextSibling(null);
       this.setLastChild(child);
     }
+  }
+
+  getTargetChild(child: C, comparator: Comparator<C>): C | null {
+    let target = this.lastChild;
+    while (target !== null) {
+      if (target !== child && comparator(child, target) >= 0) {
+        target = target.nextSibling;
+        if (target === child) {
+          target = target.nextSibling;
+        }
+        return target;
+      }
+      target = target.previousSibling;
+    }
+    target = this.firstChild;
+    if (target === child) {
+      target = target.nextSibling;
+    }
+    return target;
   }
 
   getSuper<F extends Class<C>>(superBound: F): InstanceType<F> | null;
@@ -578,6 +762,28 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     }
   }
 
+  isAncestorOf(descendant: C | null): boolean;
+  isAncestorOf(this: C, descendant: C | null): boolean {
+    while (descendant !== null) {
+      if (descendant === this) {
+        return true;
+      }
+      descendant = descendant.parent;
+    }
+    return false;
+  }
+
+  commonAncestor(relative: C | null): C | null;
+  commonAncestor(this: C, relative: C | null): C | null {
+    while (relative !== null) {
+      if (relative.isAncestorOf(this)) {
+        return relative;
+      }
+      relative = relative.parent;
+    }
+    return null;
+  }
+
   get mounted(): boolean {
     return (this.flags & Component.MountedFlag) !== 0;
   }
@@ -588,8 +794,10 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
 
   mount(): void {
     if (!this.mounted && this.parent === null) {
+      this.setFlags(this.flags | Component.InsertingFlag);
       this.cascadeMount();
       this.cascadeInsert();
+      this.setFlags(this.flags & ~Component.InsertingFlag);
     }
   }
 
@@ -715,7 +923,10 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
   /** @override */
   setFastener(fastenerName: string, newFastener: Fastener | null): void {
     const fasteners = this.fasteners;
-    const oldFastener: Fastener | null | undefined = fasteners !== null ? fasteners[fastenerName] ?? null : null;
+    let oldFastener: Fastener | null | undefined = fasteners !== null ? fasteners[fastenerName] : void 0;
+    if (oldFastener === void 0) {
+      oldFastener = null;
+    }
     if (oldFastener !== newFastener) {
       if (oldFastener !== null) {
         this.detachFastener(fastenerName, oldFastener);
@@ -736,6 +947,13 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     // assert(fasteners[fastenerName] === void 0);
     this.willAttachFastener(fastenerName, fastener);
     fasteners[fastenerName] = fastener;
+    if (fastener.lazy === false) {
+      Object.defineProperty(this, fastenerName, {
+        value: fastener,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     if (this.mounted) {
       fastener.mount();
     }
@@ -848,7 +1066,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
 
   /** @internal */
   protected bindChildFastener(fastener: Fastener, child: C, target: C | null): void {
-    if (fastener instanceof ComponentRelation) {
+    if (fastener instanceof ComponentRelation || fastener instanceof EventHandler) {
       fastener.bindComponent(child, target);
     }
   }
@@ -864,8 +1082,38 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
 
   /** @internal */
   protected unbindChildFastener(fastener: Fastener, child: C): void {
-    if (fastener instanceof ComponentRelation) {
+    if (fastener instanceof ComponentRelation || fastener instanceof EventHandler) {
       fastener.unbindComponent(child);
+    }
+  }
+
+  setProperty<P extends {[K in keyof this as this[K] extends Property<any, any, any> ? K : never]?: this[K] extends Property<any, infer T, infer U> ? T | U : never}, K extends keyof P>(key: K, value: P[K], timingOrAffinity: Affinity | AnyTiming | boolean | null | undefined): void;
+  setProperty<P extends {[K in keyof this as this[K] extends Property<any, any, any> ? K : never]?: this[K] extends Property<any, infer T, infer U> ? T | U : never}, K extends keyof P>(key: K, value: P[K], timing?: AnyTiming | boolean | null, affinity?: Affinity): void;
+  setProperty<P extends {[K in keyof this as this[K] extends Property<any, any, any> ? K : never]?: this[K] extends Property<any, infer T, infer U> ? T | U : never}, K extends keyof P>(key: K, value: P[K], timing?: Affinity | AnyTiming | boolean | null, affinity?: Affinity): void {
+    if (typeof timing === "number") {
+      affinity = timing;
+      timing = void 0;
+    }
+    const property = this.getLazyFastener(key as string, Property);
+    if (property !== null) {
+      if (property instanceof Animator) {
+        property.setState(value, timing, affinity);
+      } else {
+        property.setValue(value, affinity);
+      }
+    }
+  }
+
+  setProperties<P extends {[K in keyof this as this[K] extends Property<any, any, any> ? K : never]?: this[K] extends Property<any, infer T, infer U> ? T | U : never}>(properties: P, timingOrAffinity: Affinity | AnyTiming | boolean | null | undefined): void;
+  setProperties<P extends {[K in keyof this as this[K] extends Property<any, any, any> ? K : never]?: this[K] extends Property<any, infer T, infer U> ? T | U : never}>(properties: P, timing?: AnyTiming | boolean | null, affinity?: Affinity): void;
+  setProperties<P extends {[K in keyof this as this[K] extends Property<any, any, any> ? K : never]?: this[K] extends Property<any, infer T, infer U> ? T | U : never}>(properties: P, timing?: Affinity | AnyTiming | boolean | null, affinity?: Affinity): void {
+    if (typeof timing === "number") {
+      affinity = timing;
+      timing = void 0;
+    }
+    for (const key in properties) {
+      const value = properties[key];
+      this.setProperty(key as any, value, timing, affinity);
     }
   }
 
@@ -900,10 +1148,10 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
   }
 
   /** @internal */
-  readonly observers: ReadonlyArray<ObserverType<this>>;
+  readonly observers: ReadonlyArray<Observes<this>>;
 
   /** @override */
-  observe(observer: ObserverType<this>): void {
+  observe(observer: Observes<this>): void {
     const oldObservers = this.observers;
     const newObservers = Arrays.inserted(observer, oldObservers);
     if (oldObservers !== newObservers) {
@@ -914,20 +1162,20 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     }
   }
 
-  protected willObserve(observer: ObserverType<this>): void {
+  protected willObserve(observer: Observes<this>): void {
     // hook
   }
 
-  protected onObserve(observer: ObserverType<this>): void {
+  protected onObserve(observer: Observes<this>): void {
     // hook
   }
 
-  protected didObserve(observer: ObserverType<this>): void {
+  protected didObserve(observer: Observes<this>): void {
     // hook
   }
 
   /** @override */
-  unobserve(observer: ObserverType<this>): void {
+  unobserve(observer: Observes<this>): void {
     const oldObservers = this.observers;
     const newObservers = Arrays.removed(observer, oldObservers);
     if (oldObservers !== newObservers) {
@@ -938,29 +1186,16 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     }
   }
 
-  protected willUnobserve(observer: ObserverType<this>): void {
+  protected willUnobserve(observer: Observes<this>): void {
     // hook
   }
 
-  protected onUnobserve(observer: ObserverType<this>): void {
+  protected onUnobserve(observer: Observes<this>): void {
     // hook
   }
 
-  protected didUnobserve(observer: ObserverType<this>): void {
+  protected didUnobserve(observer: Observes<this>): void {
     // hook
-  }
-
-  forEachObserver<T>(callback: (this: this, observer: ObserverType<this>) => T | void): T | undefined {
-    let result: T | undefined;
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      result = callback.call(this, observer as ObserverType<this>) as T | undefined;
-      if (result !== void 0) {
-        return result;
-      }
-    }
-    return result;
   }
 
   callObservers<O, K extends keyof ObserverMethods<O>>(this: this & {readonly observerType?: Class<O>}, key: K, ...args: ObserverParameters<O, K>): void {
@@ -981,7 +1216,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
 
   /** @override */
   hashCode(): number {
-    return this.uid;
+    return Murmur3.mash(Murmur3.mixString(0, this.uid));
   }
 
   /** @override */
@@ -993,7 +1228,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     return new this();
   }
 
-  static fromInit<S extends Class<Instance<S, Component>>>(this: S, init: InitType<InstanceType<S>>): InstanceType<S> {
+  static fromInit<S extends Class<Instance<S, Component>>>(this: S, init: Inits<InstanceType<S>>): InstanceType<S> {
     let type: Creatable<InstanceType<S>>;
     if ((typeof init === "object" && init !== null || typeof init === "function") && Creatable.is((init as ComponentInit).type)) {
       type = (init as ComponentInit).type as Creatable<InstanceType<S>>;
@@ -1001,7 +1236,7 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
       type = this as unknown as Creatable<InstanceType<S>>;
     }
     const component = type.create();
-    (component as Initable<InitType<InstanceType<S>>>).init(init);
+    (component as Initable<Inits<InstanceType<S>>>).init(init);
     return component;
   }
 
@@ -1021,27 +1256,41 @@ export class Component<C extends Component<C> = Component<any>> implements HashC
     }
   }
 
+  static getFastenerClass<S extends Class<InstanceType<S>>,
+                          K extends keyof {[K in keyof InstanceType<S> as InstanceType<S>[K] extends F ? K : never]: InstanceType<S>[K]},
+                          F extends Fastener<any> = Fastener<any>>
+                         (this: S, fastenerName: K, fastenerBound?: Proto<F> | null)
+                         : FastenerClass<InstanceType<S>[K] extends F ? InstanceType<S>[K] : never>;
+  static getFastenerClass<F extends Fastener<any>>(fastenerName: string, fastenerBound: Proto<F>): FastenerClass | null;
+  static getFastenerClass(fastenerName: string, fastenerBound?: Proto<Fastener> | null): FastenerClass | null;
+  static getFastenerClass(fastenerName: string, fastenerBound?: Proto<Fastener> | null): FastenerClass | null {
+    return FastenerContext.getFastenerClass(this as FastenerContextClass, fastenerName, fastenerBound);
+  }
+
   /** @internal */
-  static uid: () => number = (function () {
+  static uid: () => string = (function () {
     let nextId = 1;
-    return function uid(): number {
+    return function uid(): string {
       const id = ~~nextId;
       nextId += 1;
-      return id;
+      return "component" + id;
     }
   })();
 
   /** @internal */
   static readonly MountedFlag: ComponentFlags = 1 << 0;
   /** @internal */
-  static readonly RemovingFlag: ComponentFlags = 1 << 1;
+  static readonly InsertingFlag: ComponentFlags = 1 << 1;
+  /** @internal */
+  static readonly RemovingFlag: ComponentFlags = 1 << 2;
 
   /** @internal */
-  static readonly FlagShift: number = 2;
+  static readonly FlagShift: number = 3;
   /** @internal */
   static readonly FlagMask: ComponentFlags = (1 << Component.FlagShift) - 1;
 
   static readonly MountFlags: ComponentFlags = 0;
   static readonly InsertChildFlags: ComponentFlags = 0;
   static readonly RemoveChildFlags: ComponentFlags = 0;
+  static readonly ReinsertChildFlags: ComponentFlags = 0;
 }

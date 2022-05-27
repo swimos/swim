@@ -1,6 +1,6 @@
 {
   "name": "@swim/structure",
-  "version": "4.0.0-dev.20210927.1",
+  "version": "4.0.0-dev.20220527.3",
   "description": "Generic structured data model, with support for selectors, expressions, and lambda functions",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-structure",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -18,7 +18,7 @@
   },
   "types": "./dist/swim-structure.d.ts",
   "typedocMain": "./src/main/index.ts",
-  "sideEffects": true,
+  "sideEffects": false,
   "keywords": [
     "attributes",
     "data",
@@ -31,8 +31,8 @@
     "swim"
   ],
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210927.1",
-    "@swim/codec": "4.0.0-dev.20210927.1"
+    "@swim/util": "4.0.0-dev.20220527.3",
+    "@swim/codec": "4.0.0-dev.20220527.3"
   },
   "scripts": {
     "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",

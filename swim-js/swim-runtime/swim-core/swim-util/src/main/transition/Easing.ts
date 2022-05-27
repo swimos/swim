@@ -32,18 +32,25 @@ export type EasingType = "linear" | "quad-in" | "quad-out" | "quad-in-out"
 export interface Easing extends Timing {
   readonly type: string;
 
+  /** @override */
   readonly 0: 0;
 
+  /** @override */
   readonly 1: 1;
 
+  /** @override */
   readonly easing: this;
 
+  /** @override */
   equivalentTo(that: unknown, epsilon?: number): boolean;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 

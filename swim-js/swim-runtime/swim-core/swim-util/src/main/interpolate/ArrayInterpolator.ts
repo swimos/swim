@@ -20,10 +20,13 @@ export interface ArrayInterpolator<Y> extends Interpolator<ReadonlyArray<Y>> {
   /** @internal */
   readonly interpolators: ReadonlyArray<Interpolator<Y>>;
 
+  /** @override */
   readonly 0: ReadonlyArray<Y>;
 
+  /** @override */
   readonly 1: ReadonlyArray<Y>;
 
+  /** @override */
   equals(that: unknown): boolean;
 }
 
@@ -83,7 +86,7 @@ export const ArrayInterpolator = (function (_super: typeof Interpolator) {
     configurable: true,
   });
 
-  ArrayInterpolator.prototype.equals = function (that: unknown): boolean {
+  ArrayInterpolator.prototype.equals = function <Y>(this: ArrayInterpolator<Y>, that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof ArrayInterpolator) {

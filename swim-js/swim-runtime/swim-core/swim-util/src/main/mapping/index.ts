@@ -23,3 +23,7 @@ export {
   AnyRange,
   Range,
 } from "./Range";
+
+export {Constant} from "./Constant";
+
+export {Piecewise} from "./Piecewise";

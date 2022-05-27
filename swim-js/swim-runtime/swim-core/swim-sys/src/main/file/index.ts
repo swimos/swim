@@ -14,27 +14,16 @@
 
 export {
   FileRelationValue,
-  FileRelationInit,
   FileRelationDescriptor,
+  FileRelationTemplate,
   FileRelationClass,
-  FileRelationFactory,
   FileRelation,
 } from "./FileRelation";
 
 export {
   FileRefValue,
-  FileRefInit,
   FileRefDescriptor,
+  FileRefTemplate,
   FileRefClass,
-  FileRefFactory,
   FileRef,
 } from "./FileRef";
-
-//export {
-//  FileSetType,
-//  FileSetInit,
-//  FileSetDescriptor,
-//  FileSetClass,
-//  FileSetFactory,
-//  FileSet,
-//} from "./FileSet";

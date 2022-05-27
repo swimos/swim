@@ -19,7 +19,7 @@ export class FastenerSpec extends Spec {
   @Test
   testFastener(exam: Exam): void {
     const fastener = Fastener.create(null);
-    exam.equal(fastener.name, "");
+    exam.equal(fastener.name, "Fastener");
   }
 
   @Test
@@ -52,22 +52,22 @@ export class FastenerSpec extends Spec {
     parent.appendChild(child);
     parent.mount();
 
-    exam.equal(child.foo.superFastener, parent.foo);
+    exam.equal(child.foo.inlet, parent.foo);
     exam.equal(parent.foo.affinity, Affinity.Intrinsic);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.equal(child.foo.affinity, Affinity.Intrinsic);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
 
     child.foo.setAffinity(Affinity.Extrinsic);
     exam.equal(parent.foo.affinity, Affinity.Intrinsic);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.equal(child.foo.affinity, Affinity.Extrinsic);
-    exam.false(child.foo.inherited);
+    exam.false(child.foo.derived);
 
     child.foo.setAffinity(Affinity.Inherited);
     exam.equal(parent.foo.affinity, Affinity.Intrinsic);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.equal(child.foo.affinity, Affinity.Inherited);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
   }
 }

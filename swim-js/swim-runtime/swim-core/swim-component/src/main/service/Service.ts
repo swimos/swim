@@ -12,405 +12,226 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Class, Proto, Arrays, ObserverType, Observable, ObserverMethods, ObserverParameters} from "@swim/util";
-import {FastenerContext} from "../fastener/FastenerContext";
-import type {Fastener} from "../fastener/Fastener";
+import type {Class, Creatable} from "@swim/util";
+import {Component} from "../component/Component";
 import type {ServiceObserver} from "./ServiceObserver";
 
 /** @public */
-export class Service<R> implements FastenerContext, Observable {
-  constructor() {
-    this.roots = Arrays.empty;
-    this.fasteners = null;
-    this.decoherent = null;
-    this.observers = Arrays.empty;
+export interface ServiceFactory<S extends Service = Service> extends Creatable<S> {
+  global(): S;
+}
+
+/** @public */
+export interface ServiceClass<S extends Service = Service> extends Function, ServiceFactory<S> {
+  readonly prototype: S;
+}
+
+/** @public */
+export interface ServiceConstructor<S extends Service = Service> extends ServiceClass<S> {
+  new(): S;
+}
+
+/** @public */
+export class Service extends Component<Service> {
+  override get componentType(): Class<Service> {
+    return Service;
   }
 
-  /** @override */
-  readonly observerType?: Class<ServiceObserver<R>>;
+  override readonly observerType?: Class<ServiceObserver>;
 
-  /** @internal */
-  readonly roots: ReadonlyArray<R>;
-
-  /** @override */
-  attachRoot(root: R): void {
-    const oldRoots = this.roots;
-    const newRoots = Arrays.inserted(root, oldRoots);
-    if (oldRoots !== newRoots) {
-      const needsAttach = oldRoots.length === 0;
-      if (needsAttach) {
-        this.willAttach();
-      }
-      this.willAttachRoot(root);
-      (this as Mutable<this>).roots = newRoots;
-      if (needsAttach) {
-        this.onAttach();
-      }
-      this.onAttachRoot(root);
-      this.didAttachRoot(root);
-      if (needsAttach) {
-        this.didAttach();
-      }
-    }
-  }
-
-  protected willAttachRoot(root: R): void {
+  protected override willAttachParent(parent: Service): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceWillAttachRoot !== void 0) {
-        observer.serviceWillAttachRoot(root, this);
+      if (observer.serviceWillAttachParent !== void 0) {
+        observer.serviceWillAttachParent(parent, this);
       }
     }
   }
 
-  protected onAttachRoot(root: R): void {
+  protected override onAttachParent(parent: Service): void {
     // hook
   }
 
-  protected didAttachRoot(root: R): void {
+  protected override didAttachParent(parent: Service): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceDidAttachRoot !== void 0) {
-        observer.serviceDidAttachRoot(root, this);
+      if (observer.serviceDidAttachParent !== void 0) {
+        observer.serviceDidAttachParent(parent, this);
       }
     }
   }
 
-  /** @override */
-  detachRoot(root: R): void {
-    const oldRoots = this.roots;
-    const newRoots = Arrays.removed(root, oldRoots);
-    if (oldRoots !== newRoots) {
-      const needsDetach = oldRoots.length === 1;
-      if (needsDetach) {
-        this.willDetach();
-      }
-      this.willDetachRoot(root);
-      (this as Mutable<this>).roots = newRoots;
-      if (needsDetach) {
-        this.onDetach();
-      }
-      this.onDetachRoot(root);
-      this.didDetachRoot(root);
-      if (needsDetach) {
-        this.didDetach();
-      }
-    }
-  }
-
-  protected willDetachRoot(root: R): void {
+  protected override willDetachParent(parent: Service): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceWillDetachRoot !== void 0) {
-        observer.serviceWillDetachRoot(root, this);
+      if (observer.serviceWillDetachParent !== void 0) {
+        observer.serviceWillDetachParent(parent, this);
       }
     }
   }
 
-  protected onDetachRoot(root: R): void {
+  protected override onDetachParent(parent: Service): void {
     // hook
   }
 
-  protected didDetachRoot(root: R): void {
+  protected override didDetachParent(parent: Service): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceDidDetachRoot !== void 0) {
-        observer.serviceDidDetachRoot(root, this);
+      if (observer.serviceDidDetachParent !== void 0) {
+        observer.serviceDidDetachParent(parent, this);
       }
     }
   }
 
-  get attached(): boolean {
-    return this.roots.length !== 0;
-  }
-
-  protected willAttach(): void {
+  protected override willInsertChild(child: Service, target: Service | null): void {
+    super.willInsertChild(child, target);
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceWillAttach !== void 0) {
-        observer.serviceWillAttach(this);
+      if (observer.serviceWillInsertChild !== void 0) {
+        observer.serviceWillInsertChild(child, target, this);
       }
     }
   }
 
-  protected onAttach(): void {
-    this.mountFasteners();
-  }
-
-  protected didAttach(): void {
+  protected override didInsertChild(child: Service, target: Service | null): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceDidAttach !== void 0) {
-        observer.serviceDidAttach(this);
+      if (observer.serviceDidInsertChild !== void 0) {
+        observer.serviceDidInsertChild(child, target, this);
       }
     }
+    super.didInsertChild(child, target);
   }
 
-  protected willDetach(): void {
+  protected override willRemoveChild(child: Service): void {
+    super.willRemoveChild(child);
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceWillDetach !== void 0) {
-        observer.serviceWillDetach(this);
+      if (observer.serviceWillRemoveChild !== void 0) {
+        observer.serviceWillRemoveChild(child, this);
       }
     }
   }
 
-  protected onDetach(): void {
-    this.unmountFasteners();
-  }
-
-  protected didDetach(): void {
+  protected override didRemoveChild(child: Service): void {
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
-      if (observer.serviceDidDetach !== void 0) {
-        observer.serviceDidDetach(this);
+      if (observer.serviceDidRemoveChild !== void 0) {
+        observer.serviceDidRemoveChild(child, this);
+      }
+    }
+    super.didRemoveChild(child);
+  }
+
+  protected override willReinsertChild(child: Service, target: Service | null): void {
+    super.willReinsertChild(child, target);
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.serviceWillReinsertChild !== void 0) {
+        observer.serviceWillReinsertChild(child, target, this);
       }
     }
   }
 
-  /** @internal */
-  readonly fasteners: {[fastenerName: string]: Fastener | undefined} | null;
-
-  /** @override */
-  hasFastener(fastenerName: string, fastenerBound?: Proto<Fastener> | null): boolean {
-    const fasteners = this.fasteners;
-    if (fasteners !== null) {
-      const fastener = fasteners[fastenerName];
-      if (fastener !== void 0 && (fastenerBound === void 0 || fastenerBound === null || fastener instanceof fastenerBound)) {
-        return true;
+  protected override didReinsertChild(child: Service, target: Service | null): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.serviceDidReinsertChild !== void 0) {
+        observer.serviceDidReinsertChild(child, target, this);
       }
     }
-    return false;
+    super.didReinsertChild(child, target);
   }
 
-  /** @override */
-  getFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Proto<F>): F | null;
-  /** @override */
-  getFastener(fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null;
-  getFastener(fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null {
-    const fasteners = this.fasteners;
-    if (fasteners !== null) {
-      const fastener = fasteners[fastenerName];
-      if (fastener !== void 0 && (fastenerBound === void 0 || fastenerBound === null || fastener instanceof fastenerBound)) {
-        return fastener;
+  protected override willMount(): void {
+    super.willMount();
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.serviceWillMount !== void 0) {
+        observer.serviceWillMount(this);
       }
     }
-    return null;
   }
 
-  /** @override */
-  setFastener(fastenerName: string, newFastener: Fastener | null): void {
-    const fasteners = this.fasteners;
-    const oldFastener: Fastener | null | undefined = fasteners !== null ? fasteners[fastenerName] ?? null : null;
-    if (oldFastener !== newFastener) {
-      if (oldFastener !== null) {
-        this.detachFastener(fastenerName, oldFastener);
-      }
-      if (newFastener !== null) {
-        this.attachFastener(fastenerName, newFastener);
+  protected override didMount(): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.serviceDidMount !== void 0) {
+        observer.serviceDidMount(this);
       }
     }
+    super.didMount();
+  }
+
+  protected override willUnmount(): void {
+    super.willUnmount();
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.serviceWillUnmount !== void 0) {
+        observer.serviceWillUnmount(this);
+      }
+    }
+  }
+
+  protected override didUnmount(): void {
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
+      if (observer.serviceDidUnmount !== void 0) {
+        observer.serviceDidUnmount(this);
+      }
+    }
+    super.didUnmount();
+  }
+
+  static override create<S extends new () => InstanceType<S>>(this: S): InstanceType<S> {
+    return new this();
   }
 
   /** @internal */
-  protected attachFastener(fastenerName: string, fastener: Fastener): void {
-    let fasteners = this.fasteners;
-    if (fasteners === null) {
-      fasteners = {};
-      (this as Mutable<this>).fasteners = fasteners;
+  static Global?: Service;
+  static global<S extends new () => InstanceType<S>>(this: S): InstanceType<S> {
+    let service: InstanceType<S> | undefined;
+    if (Object.hasOwnProperty.call(this, "Global")) {
+      service = (this as unknown as typeof Service).Global as InstanceType<S> | undefined;
     }
-    // assert(fasteners[fastenerName] === void 0);
-    this.willAttachFastener(fastenerName, fastener);
-    fasteners[fastenerName] = fastener;
-    if (this.attached) {
-      fastener.mount();
-    }
-    this.onAttachFastener(fastenerName, fastener);
-    this.didAttachFastener(fastenerName, fastener);
-  }
-
-  protected willAttachFastener(fastenerName: string, fastener: Fastener): void {
-    // hook
-  }
-
-  protected onAttachFastener(fastenerName: string, fastener: Fastener): void {
-    // hook
-  }
-
-  protected didAttachFastener(fastenerName: string, fastener: Fastener): void {
-    // hook
-  }
-
-  /** @internal */
-  protected detachFastener(fastenerName: string, fastener: Fastener): void {
-    const fasteners = this.fasteners!;
-    // assert(fasteners !== null);
-    // assert(fasteners[fastenerName] === fastener);
-    this.willDetachFastener(fastenerName, fastener);
-    this.onDetachFastener(fastenerName, fastener);
-    if (this.attached) {
-      fastener.unmount();
-    }
-    delete fasteners[fastenerName];
-    this.didDetachFastener(fastenerName, fastener);
-  }
-
-  protected willDetachFastener(fastenerName: string, fastener: Fastener): void {
-    // hook
-  }
-
-  protected onDetachFastener(fastenerName: string, fastener: Fastener): void {
-    // hook
-  }
-
-  protected didDetachFastener(fastenerName: string, fastener: Fastener): void {
-    // hook
-  }
-
-  /** @override */
-  getLazyFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Proto<F>): F | null;
-  /** @override */
-  getLazyFastener(fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null;
-  getLazyFastener(fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null {
-    return FastenerContext.getLazyFastener(this, fastenerName, fastenerBound);
-  }
-
-  /** @override */
-  getSuperFastener<F extends Fastener<any>>(fastenerName: string, fastenerBound: Proto<F>): F | null;
-  /** @override */
-  getSuperFastener(fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null;
-  getSuperFastener(fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null {
-    return null;
-  }
-
-  /** @internal */
-  protected mountFasteners(): void {
-    const fasteners = this.fasteners;
-    for (const fastenerName in fasteners) {
-      const fastener = fasteners[fastenerName]!;
-      fastener.mount();
-    }
-  }
-
-  /** @internal */
-  protected unmountFasteners(): void {
-    const fasteners = this.fasteners;
-    for (const fastenerName in fasteners) {
-      const fastener = fasteners[fastenerName]!;
-      fastener.unmount();
-    }
-  }
-
-  /** @internal */
-  readonly decoherent: ReadonlyArray<Fastener> | null;
-
-  /** @override */
-  decohereFastener(fastener: Fastener): void {
-    let decoherent = this.decoherent as Fastener[];
-    if (decoherent === null) {
-      decoherent = [];
-      (this as Mutable<this>).decoherent = decoherent;
-    }
-    decoherent.push(fastener);
-  }
-
-  recohereFasteners(t?: number): void {
-    const decoherent = this.decoherent;
-    if (decoherent !== null) {
-      const decoherentCount = decoherent.length;
-      if (decoherentCount !== 0) {
-        if (t === void 0) {
-          t = performance.now();
-        }
-        (this as Mutable<this>).decoherent = null;
-        for (let i = 0; i < decoherentCount; i += 1) {
-          const fastener = decoherent[i]!;
-          fastener.recohere(t);
-        }
+    if (service === void 0) {
+      service = (this as unknown as Creatable<InstanceType<S>>).create();
+      Object.defineProperty(this, "Global", {
+        value: service,
+        configurable: true,
+      });
+      if (this.prototype instanceof Service) {
+        const superClass = Object.getPrototypeOf(this) as typeof Service;
+        const superService = superClass.global();
+        superService.appendChild(service as Service);
+      } else { // mount root service
+        (service as Service).mount();
       }
     }
+    return service;
   }
 
   /** @internal */
-  readonly observers: ReadonlyArray<ObserverType<this>>;
-
-  /** @override */
-  observe(observer: ObserverType<this>): void {
-    const oldObservers = this.observers;
-    const newObservers = Arrays.inserted(observer, oldObservers);
-    if (oldObservers !== newObservers) {
-      this.willObserve(observer);
-      (this as Mutable<this>).observers = newObservers;
-      this.onObserve(observer);
-      this.didObserve(observer);
+  static override uid: () => string = (function () {
+    let nextId = 1;
+    return function uid(): string {
+      const id = ~~nextId;
+      nextId += 1;
+      return "service" + id;
     }
-  }
-
-  protected willObserve(observer: ObserverType<this>): void {
-    // hook
-  }
-
-  protected onObserve(observer: ObserverType<this>): void {
-    // hook
-  }
-
-  protected didObserve(observer: ObserverType<this>): void {
-    // hook
-  }
-
-  /** @override */
-  unobserve(observer: ObserverType<this>): void {
-    const oldObservers = this.observers;
-    const newObservers = Arrays.removed(observer, oldObservers);
-    if (oldObservers !== newObservers) {
-      this.willUnobserve(observer);
-      (this as Mutable<this>).observers = newObservers;
-      this.onUnobserve(observer);
-      this.didUnobserve(observer);
-    }
-  }
-
-  protected willUnobserve(observer: ObserverType<this>): void {
-    // hook
-  }
-
-  protected onUnobserve(observer: ObserverType<this>): void {
-    // hook
-  }
-
-  protected didUnobserve(observer: ObserverType<this>): void {
-    // hook
-  }
-
-  protected forEachObserver<T>(callback: (this: this, observer: ObserverType<this>) => T | void): T | undefined {
-    let result: T | undefined;
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]!;
-      result = callback.call(this, observer as ObserverType<this>) as T | undefined;
-      if (result !== void 0) {
-        return result;
-      }
-    }
-    return result;
-  }
-
-  callObservers<O, K extends keyof ObserverMethods<O>>(this: this & {readonly observerType?: Class<O>}, key: K, ...args: ObserverParameters<O, K>): void {
-    const observers = this.observers;
-    for (let i = 0, n = observers.length; i < n; i += 1) {
-      const observer = observers[i]! as ObserverMethods<O>;
-      const method = observer[key];
-      if (typeof method === "function") {
-        method.call(observer, ...args);
-      }
-    }
-  }
+  })();
 }

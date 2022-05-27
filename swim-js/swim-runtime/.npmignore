@@ -4,6 +4,7 @@
 .npmignore
 CONTRIBUTING.md
 bin/
+!dist
 dist/*-test.*
 doc/
 lib/

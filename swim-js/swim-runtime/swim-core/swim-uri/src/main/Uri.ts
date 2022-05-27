@@ -539,10 +539,11 @@ export class Uri implements HashCode, Compare, Debug, Display {
     }
   }
 
-  static fromAny(value: AnyUri | null | undefined): Uri {
-    if (value === void 0 || value === null) {
-      return Uri.empty();
-    } else if (value instanceof Uri) {
+  static fromAny(value: AnyUri): Uri;
+  static fromAny(value: AnyUri | null): Uri | null;
+  static fromAny(value: AnyUri | null | undefined): Uri | null | undefined;
+  static fromAny(value: AnyUri | null | undefined): Uri | null | undefined {
+    if (value === void 0 || value === null || value instanceof Uri) {
       return value;
     } else if (typeof value === "object") {
       return Uri.fromInit(value);

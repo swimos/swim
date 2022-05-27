@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /** @public */
-export type InitType<I> =
+export type Inits<I> =
   I extends {init(init: infer T): any} ? T : never;
 
 /** @public */

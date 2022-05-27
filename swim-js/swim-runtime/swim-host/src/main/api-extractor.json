@@ -1,10 +1,6 @@
 {
   "projectFolder": "../..",
   "mainEntryPointFilePath": "<projectFolder>/lib/main/index.d.ts",
-  "bundledPackages": [
-    "@swim/warp",
-    "@swim/client"
-  ],
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/src/main/tsconfig.json"
   },

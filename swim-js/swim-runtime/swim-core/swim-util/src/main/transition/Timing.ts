@@ -32,14 +32,17 @@ export interface TimingInit {
 
 /** @public */
 export interface Timing extends Domain<number> {
+  /** @override */
   readonly 0: number;
 
+  /** @override */
   readonly 1: number;
 
   readonly duration: number;
 
   readonly easing: Easing;
 
+  /** @override */
   contains(t: number): boolean;
 
   withDomain(t0: number, t1: number): Timing;
@@ -49,12 +52,19 @@ export interface Timing extends Domain<number> {
   overRange<Y>(range: Interpolator<Y>): Tweening<Y>;
   overRange<Y>(y0: Y, y1: Y): Tweening<Y>;
 
+  /** @override */
+  union(that: Domain<number>): Timing;
+
+  /** @override */
   equivalentTo(that: unknown, epsilon?: number): boolean;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -115,6 +125,10 @@ export const Timing = (function (_super: typeof Domain) {
     }
     return Tweening(this, range);
   } as typeof Timing.prototype.overRange;
+
+  Timing.prototype.union = function (that: Domain<number>): Timing {
+    return Timing(this.easing, Math.min(this[0], that[0]), Math.max(this[1], that[1]));
+  };
 
   Timing.prototype.equivalentTo = function (that: unknown, epsilon?: number): boolean {
     if (this === that) {

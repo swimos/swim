@@ -23,10 +23,13 @@ export interface InterpolatorMap<Y, FY> extends Interpolator<FY> {
   /** @internal */
   readonly transform: (y: Y) => FY;
 
+  /** @override */
   readonly 0: FY;
 
+  /** @override */
   readonly 1: FY;
 
+  /** @override */
   equals(that: unknown): boolean;
 }
 
@@ -65,7 +68,7 @@ export const InterpolatorMap = (function (_super: typeof Interpolator) {
     configurable: true,
   });
 
-  InterpolatorMap.prototype.equals = function (that: unknown): boolean {
+  InterpolatorMap.prototype.equals = function <Y, FY>(this: InterpolatorMap<Y, FY>, that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof InterpolatorMap) {

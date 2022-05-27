@@ -13,6 +13,6 @@
 // limitations under the License.
 
 export {
-  CreateType,
+  Creates,
   Creatable,
 } from "./Creatable";

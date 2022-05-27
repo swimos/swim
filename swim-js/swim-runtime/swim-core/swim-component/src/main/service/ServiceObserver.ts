@@ -12,24 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Observer} from "@swim/util";
+import type {ComponentObserver} from "../component/ComponentObserver";
 import type {Service} from "./Service";
 
 /** @public */
-export interface ServiceObserver<R, S extends Service<R> = Service<R>> extends Observer<S> {
-  serviceWillAttachRoot?(root: R, service: S): void;
+export interface ServiceObserver<S extends Service = Service> extends ComponentObserver<S> {
+  serviceWillAttachParent?(parent: Service, service: S): void;
 
-  serviceDidAttachRoot?(root: R, service: S): void;
+  serviceDidAttachParent?(parent: Service, service: S): void;
 
-  serviceWillDetachRoot?(root: R, service: S): void;
+  serviceWillDetachParent?(parent: Service, service: S): void;
 
-  serviceDidDetachRoot?(root: R, service: S): void;
+  serviceDidDetachParent?(parent: Service, service: S): void;
 
-  serviceWillAttach?(service: S): void;
+  serviceWillInsertChild?(child: Service, target: Service | null, service: S): void;
 
-  serviceDidAttach?(service: S): void;
+  serviceDidInsertChild?(child: Service, target: Service | null, service: S): void;
 
-  serviceWillDetach?(service: S): void;
+  serviceWillRemoveChild?(child: Service, service: S): void;
 
-  serviceDidDetach?(service: S): void;
+  serviceDidRemoveChild?(child: Service, service: S): void;
+
+  serviceWillReinsertChild?(child: Service, target: Service | null, service: S): void;
+
+  serviceDidReinsertChild?(child: Service, target: Service | null, service: S): void;
+
+  serviceWillMount?(service: S): void;
+
+  serviceDidMount?(service: S): void;
+
+  serviceWillUnmount?(service: S): void;
+
+  serviceDidUnmount?(service: S): void;
 }

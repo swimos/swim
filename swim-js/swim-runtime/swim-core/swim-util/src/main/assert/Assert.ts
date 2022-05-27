@@ -16,12 +16,16 @@ import {Values} from "../values/Values";
 import {AssertException} from "./AssertException";
 
 /**
- * Callable assertion function.
+ * Callable [[Assert]] interface.
  *
- * @throws [[AssertException]] if the assertion fails.
  * @public
  */
-export interface AssertFunction {
+export interface AssertFunction extends Assert {
+  /**
+   * Asserts that `condition` is truthy.
+   *
+   * @throws [[AssertException]] with `message` if `condition` is falsy.
+   */
   (condition: unknown, message?: string): void;
 }
 
@@ -57,6 +61,62 @@ export interface Assert {
    * @throws [[AssertException]] with `message` if `lhs` is identical (`===`) to `rhs`.
    */
   notIdentical(lhs: unknown, rhs: unknown, message?: string): void;
+
+  /**
+   * Asserts that `lhs` is less than (`<`) `rhs`.
+   *
+   * @throws [[AssertException]] with `message` if `lhs` is not less than (`!<`) `rhs`.
+   */
+  lessThan(lhs: unknown, rhs: unknown, message?: string): void;
+
+  /**
+   * Asserts that `lhs` is less than or equal (`<=`) to `rhs`.
+   *
+   * @throws [[AssertException]] with `message` if `lhs` is not less than or equal (`!<=`) to `rhs`.
+   */
+  lessThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void;
+
+  /**
+   * Asserts that `lhs` is greater than (`>`) `rhs`.
+   *
+   * @throws [[AssertException]] with `message` if `lhs` is not greater than (`!>`) `rhs`.
+   */
+  greaterThan(lhs: unknown, rhs: unknown, message?: string): void;
+
+  /**
+   * Asserts that `lhs` is greater than or equal (`>=`) to `rhs`.
+   *
+   * @throws [[AssertException]] with `message` if `lhs` is not greater than or equal (`!>=`) to `rhs`.
+   */
+  greaterThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void;
+
+  /**
+   * Asserts that `lhs` is not less than (`!<`) `rhs`.
+   *
+   * @throws [[AssertException]] with `message` if `lhs` is less than (`<`) `rhs`.
+   */
+  notLessThan(lhs: unknown, rhs: unknown, message?: string): void;
+
+  /**
+   * Asserts that `lhs` is not less than or equal (`!<=`) to `rhs`.
+   *
+   * @throws [[AssertException]] with `message` if `lhs` is less than or equal (`<=`) to `rhs`.
+   */
+  notLessThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void;
+
+  /**
+   * Asserts that `lhs` is not greater than (`!>`) `rhs`.
+   *
+   * @throws [[AssertException]] with `message` if `lhs` is greater than (`>`) `rhs`.
+   */
+  notGreaterThan(lhs: unknown, rhs: unknown, message?: string): void;
+
+  /**
+   * Asserts that `lhs` is not greater than or equal (`!>=`) to `rhs`.
+   *
+   * @throws [[AssertException]] with `message` if `lhs` is greater than or equal (`>=`) to `rhs`.
+   */
+  notGreaterThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void;
 
   /**
    * Asserts that `object` has the prototype of `constructor` in its prototype chain.
@@ -171,127 +231,169 @@ export interface Assert {
   compareNotGreaterThan(lhs: unknown, rhs: unknown, message?: string): void;
 }
 
-/**
- * General `Assert` implementation. When called as a function, asserts that
- * `condition` is truthy.
- *
- * @throws [[AssertException]] with `message` if `condition` is falsy.
- * @public
- */
-export const assert = (function () {
-  const assert = function (condition: unknown, message?: string): void {
+/** @public */
+export const Assert = (function () {
+  const Assert = function (condition: unknown, message?: string): void {
     if (!condition) {
       throw new AssertException(message);
     }
-  } as Assert & AssertFunction;
+  } as AssertFunction;
 
-  assert.ok = function (condition: unknown, message?: string): void {
+  Assert.ok = function (condition: unknown, message?: string): void {
     if (!condition) {
       throw new AssertException(message);
     }
   };
 
-  assert.notOk = function (condition: unknown, message?: string): void {
+  Assert.notOk = function (condition: unknown, message?: string): void {
     if (condition) {
       throw new AssertException(message);
     }
   };
 
-  assert.equal = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.equal = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (!Values.equal(lhs, rhs)) {
       throw new AssertException(message);
     }
   };
 
-  assert.notEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.notEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.equal(lhs, rhs)) {
       throw new AssertException(message);
     }
   };
 
-  assert.identical = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.identical = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (lhs !== rhs) {
       throw new AssertException(message);
     }
   };
 
-  assert.notIdentical = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.notIdentical = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (lhs === rhs) {
       throw new AssertException(message);
     }
   };
 
-  assert.instanceOf = function (object: unknown, constructor: Function, message?: string): void {
+  Assert.lessThan = function (lhs: unknown, rhs: unknown, message?: string): void {
+    if (!((lhs as any) < (rhs as any))) {
+      throw new AssertException(message);
+    }
+  };
+
+  Assert.lessThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+    if (!((lhs as any) <= (rhs as any))) {
+      throw new AssertException(message);
+    }
+  };
+
+  Assert.greaterThan = function (lhs: unknown, rhs: unknown, message?: string): void {
+    if (!((lhs as any) > (rhs as any))) {
+      throw new AssertException(message);
+    }
+  };
+
+  Assert.greaterThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+    if (!((lhs as any) >= (rhs as any))) {
+      throw new AssertException(message);
+    }
+  };
+
+  Assert.notLessThan = function (lhs: unknown, rhs: unknown, message?: string): void {
+    if ((lhs as any) < (rhs as any)) {
+      throw new AssertException(message);
+    }
+  };
+
+  Assert.notLessThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+    if ((lhs as any) <= (rhs as any)) {
+      throw new AssertException(message);
+    }
+  };
+
+  Assert.notGreaterThan = function (lhs: unknown, rhs: unknown, message?: string): void {
+    if ((lhs as any) > (rhs as any)) {
+      throw new AssertException(message);
+    }
+  };
+
+  Assert.notGreaterThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+    if ((lhs as any) >= (rhs as any)) {
+      throw new AssertException(message);
+    }
+  };
+
+  Assert.instanceOf = function (object: unknown, constructor: Function, message?: string): void {
     if (!(object instanceof constructor)) {
       throw new AssertException(message);
     }
   };
 
-  assert.notInstanceOf = function (object: unknown, constructor: Function, message?: string): void {
+  Assert.notInstanceOf = function (object: unknown, constructor: Function, message?: string): void {
     if (object instanceof constructor) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareLessThan = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareLessThan = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) < 0)) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareNotLessThan = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareNotLessThan = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) < 0) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareLessThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareLessThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) <= 0)) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareNotLessThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareNotLessThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) <= 0) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) === 0)) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareNotEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareNotEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) === 0) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareGreaterThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareGreaterThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) >= 0)) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareNotGreaterThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareNotGreaterThanOrEqual = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) >= 0) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareGreaterThan = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareGreaterThan = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (!(Values.compare(lhs, rhs) > 0)) {
       throw new AssertException(message);
     }
   };
 
-  assert.compareNotGreaterThan = function (lhs: unknown, rhs: unknown, message?: string): void {
+  Assert.compareNotGreaterThan = function (lhs: unknown, rhs: unknown, message?: string): void {
     if (Values.compare(lhs, rhs) > 0) {
       throw new AssertException(message);
     }
   };
 
-  return assert;
+  return Assert;
 })();

@@ -12,14 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./host";
-
 export * from "./downlink";
 
+export * from "./host";
+
 export * from "./ref";
-
-export * from "./client";
-
-export * from "./service";
-
-export * from "./fastener";

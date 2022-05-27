@@ -23,10 +23,12 @@ export interface DateTimeSpecifiers {
   B: DateTimeFormat;
   b: DateTimeFormat;
   d: DateTimeFormat;
+  e: DateTimeFormat;
   A: DateTimeFormat;
   a: DateTimeFormat;
   H: DateTimeFormat;
   I: DateTimeFormat;
+  i: DateTimeFormat;
   p: DateTimeFormat;
   M: DateTimeFormat;
   S: DateTimeFormat;
@@ -51,19 +53,21 @@ export const DateTimeSpecifiers = (function () {
     }
     if (specifiers === null) {
       specifiers = {
-        Y: DateTimeFormat.year,
-        m: DateTimeFormat.monthOfYear,
-        B: DateTimeFormat.month.withLocale(locale),
-        b: DateTimeFormat.shortMonth.withLocale(locale),
-        d: DateTimeFormat.dayOfMonth,
-        A: DateTimeFormat.weekday.withLocale(locale),
-        a: DateTimeFormat.shortWeekday.withLocale(locale),
-        H: DateTimeFormat.hour24,
-        I: DateTimeFormat.hour12,
-        p: DateTimeFormat.period.withLocale(locale),
-        M: DateTimeFormat.minute,
-        S: DateTimeFormat.second,
-        L: DateTimeFormat.millisecond,
+        Y: DateTimeFormat.year(),
+        m: DateTimeFormat.monthOfYear(),
+        B: DateTimeFormat.month(locale),
+        b: DateTimeFormat.shortMonth(locale),
+        d: DateTimeFormat.dayOfMonth(48/*'0'*/),
+        e: DateTimeFormat.dayOfMonth(32/*' '*/),
+        A: DateTimeFormat.weekday(locale),
+        a: DateTimeFormat.shortWeekday(locale),
+        H: DateTimeFormat.hour24(),
+        I: DateTimeFormat.hour12(48/*'0'*/),
+        i: DateTimeFormat.hour12(32/*' '*/),
+        p: DateTimeFormat.period(locale),
+        M: DateTimeFormat.minute(),
+        S: DateTimeFormat.second(),
+        L: DateTimeFormat.millisecond(),
       };
       if (locale === DateTimeLocale.standard()) {
         standard = specifiers;

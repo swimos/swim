@@ -19,8 +19,15 @@ import {DayOfMonthParser} from "../"; // forward import
 
 /** @internal */
 export class DayOfMonthFormat extends DateTimeFormat {
+  constructor(padChar: number) {
+    super();
+    this.padChar = padChar;
+  }
+
+  readonly padChar: number;
+
   override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
-    output = DateTimeFormat.writeDateNumber2(output, date.day);
+    output = DateTimeFormat.writeDateNumber2(output, date.day, this.padChar);
     return output;
   }
 

@@ -14,21 +14,15 @@
 
 import type {Value} from "@swim/structure";
 import type {Uri} from "@swim/uri";
-import type {DownlinkContext} from "./DownlinkContext";
-import {DownlinkModel} from "./DownlinkModel";
-import type {DownlinkType} from "./Downlink";
+import {WarpDownlinkModel} from "./WarpDownlinkModel";
 import type {EventDownlink} from "./EventDownlink";
 
 /** @internal */
-export class EventDownlinkModel extends DownlinkModel {
-  constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
-              prio?: number, rate?: number, body?: Value) {
-    super(context, hostUri, nodeUri, laneUri, prio, rate, body);
+export class EventDownlinkModel extends WarpDownlinkModel {
+  constructor(hostUri: Uri, nodeUri: Uri, laneUri: Uri,
+              prio: number, rate: number, body: Value) {
+    super(hostUri, nodeUri, laneUri, prio, rate, body);
   }
 
   override views!: ReadonlyArray<EventDownlink>;
-
-  override get type(): DownlinkType {
-    return "event";
-  }
 }

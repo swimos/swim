@@ -13,21 +13,11 @@
 // limitations under the License.
 
 export {
-  MemberPropertyValue,
-  MemberPropertyValueInit,
-  MemberPropertyInit,
-  MemberPropertyInitMap,
   PropertyValue,
   PropertyValueInit,
-  PropertyInit,
+  AnyPropertyValue,
   PropertyDescriptor,
+  PropertyTemplate,
   PropertyClass,
-  PropertyFactory,
   Property,
 } from "./Property";
-
-export {StringProperty} from "./StringProperty";
-
-export {NumberProperty} from "./NumberProperty";
-
-export {BooleanProperty} from "./BooleanProperty";

@@ -32,6 +32,8 @@ export const Identity = (function () {
      * Returns a unique 32-bit hash value for a particular object instance.
      */
     hash(x: object | null | undefined): number;
+
+    fromAny(value: unknown): unknown;
   };
 
   Identity.compare = function (x: object | null | undefined, y: object | null | undefined): number {
@@ -72,6 +74,10 @@ export const Identity = (function () {
     } else {
       throw new TypeError("" + x);
     }
+  };
+
+  Identity.fromAny = function (value: unknown): unknown {
+    return value;
   };
 
   return Identity;

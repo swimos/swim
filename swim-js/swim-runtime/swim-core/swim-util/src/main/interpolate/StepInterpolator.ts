@@ -13,27 +13,53 @@
 // limitations under the License.
 
 import type {Mutable} from "../types/Mutable";
+import {Values} from "../values/Values";
 import {Interpolator} from "./Interpolator";
 
 /** @internal */
+export interface StepInterpolator<Y> extends Interpolator<Y> {
+  /** @internal */
+  readonly phase: number;
+
+  /** @override */
+  equals(that: unknown): boolean;
+}
+
+/** @internal */
 export const StepInterpolator = (function (_super: typeof Interpolator) {
-  const StepInterpolator = function <Y>(y0: Y, y1: Y): Interpolator<Y> {
+  const StepInterpolator = function <Y>(y0: Y, y1: Y, phase?: number): StepInterpolator<Y> {
     const interpolator = function (u: number): Y {
-      return u < 1 ? interpolator[0] : interpolator[1];
-    } as Interpolator<Y>;
+      return u < interpolator.phase ? interpolator[0] : interpolator[1];
+    } as StepInterpolator<Y>;
     Object.setPrototypeOf(interpolator, StepInterpolator.prototype);
+    if (phase === void 0) {
+      phase = 1;
+    }
+    (interpolator as Mutable<typeof interpolator>).phase = phase;
     (interpolator as Mutable<typeof interpolator>)[0] = y0;
     (interpolator as Mutable<typeof interpolator>)[1] = y1;
     return interpolator;
   } as {
-    <Y>(y0: Y, y1: Y): Interpolator<Y>;
+    <Y>(y0: Y, y1: Y, phase?: number): StepInterpolator<Y>;
 
     /** @internal */
-    prototype: Interpolator<any>;
+    prototype: StepInterpolator<any>;
   };
 
   StepInterpolator.prototype = Object.create(_super.prototype);
   StepInterpolator.prototype.constructor = StepInterpolator;
+
+  StepInterpolator.prototype.equals = function <Y>(this: StepInterpolator<Y>, that: unknown): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof StepInterpolator) {
+      return that.canEqual(this)
+          && this.phase === that.phase
+          && Values.equal(this[0], that[0])
+          && Values.equal(this[1], that[1]);
+    }
+    return false;
+  };
 
   return StepInterpolator;
 })(Interpolator);

@@ -37,18 +37,16 @@ export {ConstraintConstant} from "./ConstraintConstant";
 export {ConstraintVariable} from "./ConstraintVariable";
 
 export {
-  ConstraintPropertyInit,
   ConstraintPropertyDescriptor,
+  ConstraintPropertyTemplate,
   ConstraintPropertyClass,
-  ConstraintPropertyFactory,
   ConstraintProperty,
 } from "./ConstraintProperty";
 
 export {
-  ConstraintAnimatorInit,
   ConstraintAnimatorDescriptor,
+  ConstraintAnimatorTemplate,
   ConstraintAnimatorClass,
-  ConstraintAnimatorFactory,
   ConstraintAnimator,
 } from "./ConstraintAnimator";
 

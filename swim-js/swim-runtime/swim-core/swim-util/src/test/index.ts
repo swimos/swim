@@ -13,6 +13,7 @@
 // limitations under the License.
 
 export * from "./runtime";
+export * from "./mapping";
 export * from "./interpolate";
 export * from "./transition";
 export * from "./scale";

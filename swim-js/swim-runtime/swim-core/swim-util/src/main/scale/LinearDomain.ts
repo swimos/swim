@@ -21,21 +21,31 @@ import {LinearRange} from "../"; // forward import
 
 /** @public */
 export interface LinearDomain extends Domain<number>, Interpolate<LinearDomain> {
+  /** @override */
   readonly 0: number;
 
+  /** @override */
   readonly 1: number;
 
   readonly inverse: LinearRange;
 
+  /** @override */
   contains(x: number): boolean;
 
+  /** @override */
+  union(that: Domain<number>): LinearDomain;
+
+  /** @override */
   interpolateTo(that: LinearDomain): Interpolator<LinearDomain>;
   interpolateTo(that: unknown): Interpolator<LinearDomain> | null;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -71,6 +81,10 @@ export const LinearDomain = (function (_super: typeof Domain) {
 
   LinearDomain.prototype.contains = function (x: number): boolean {
     return this[0] <= x && x <= this[1];
+  };
+
+  LinearDomain.prototype.union = function (that: Domain<number>): LinearDomain {
+    return LinearDomain(Math.min(this[0], that[0]), Math.max(this[1], that[1]));
   };
 
   LinearDomain.prototype.interpolateTo = function (this: LinearDomain, that: unknown): Interpolator<LinearDomain> | null {

@@ -1,6 +1,6 @@
 {
   "name": "@swim/collections",
-  "version": "4.0.0-dev.20210927.1",
+  "version": "4.0.0-dev.20220527.3",
   "description": "Immutable, structure sharing collections, including B-trees and S-trees (sequence trees)",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime/swim-core/swim-collections",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -18,15 +18,15 @@
   },
   "types": "./dist/swim-collections.d.ts",
   "typedocMain": "./src/main/index.ts",
-  "sideEffects": true,
+  "sideEffects": false,
   "keywords": [
     "collections",
     "immutable",
     "trie"
   ],
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210927.1",
-    "@swim/codec": "4.0.0-dev.20210927.1"
+    "@swim/util": "4.0.0-dev.20220527.3",
+    "@swim/codec": "4.0.0-dev.20220527.3"
   },
   "scripts": {
     "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",

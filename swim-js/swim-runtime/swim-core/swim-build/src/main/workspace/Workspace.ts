@@ -13,17 +13,17 @@
 // limitations under the License.
 
 import * as Path from "path";
-import {Class, Lazy, Dictionary, MutableDictionary} from "@swim/util";
+import type {Class, Dictionary, MutableDictionary, Observes} from "@swim/util";
 import {OutputSettings, OutputStyle, Unicode} from "@swim/codec";
-import {MemberFastenerClass, Service, ComponentSet} from "@swim/component";
+import {FastenerClass, Service, ComponentSet} from "@swim/component";
 import type {WorkspaceObserver} from "./WorkspaceObserver";
 import {Scope} from "../"; // forward import
 import type {TaskConfig} from "../task/Task";
-import {PackageScope} from "../" // forward import
-import {LibraryScope} from "../" // forward import
+import type {PackageScope} from "../package/PackageScope";
+import type {LibraryScope} from "../library/LibraryScope";
 
 /** @public */
-export class Workspace<T extends Scope = Scope> extends Service<T> {
+export class Workspace extends Service {
   constructor() {
     super();
     this.packageNameMap = {};
@@ -31,93 +31,92 @@ export class Workspace<T extends Scope = Scope> extends Service<T> {
     this.libraryPathMap = {};
   }
 
-  override readonly observerType?: Class<WorkspaceObserver<T>>;
+  override readonly observerType?: Class<WorkspaceObserver>;
 
-  @ComponentSet<Workspace, PackageScope>({
-    // avoid cyclic static reference to type: PackageScope
+  @ComponentSet<Workspace["packages"]>({
+    // avoid cyclic static reference to componentType: PackageScope
     observes: true,
-    packageLibraryDidChange(libraryScope: LibraryScope): void {
-      this.owner.callObservers("workspaceLibraryDidChange", libraryScope, this.owner);
+    initComponent(packageScope: PackageScope): void {
+      const packageNameMap = this.owner.packageNameMap as MutableDictionary<PackageScope>;
+      const unscopedPackageNameMap = this.owner.unscopedPackageNameMap as MutableDictionary<PackageScope>;
+      packageNameMap[packageScope.name] = packageScope;
+      if (packageScope.unscopedName !== void 0) {
+        unscopedPackageNameMap[packageScope.unscopedName] = packageScope;
+      }
+    },
+    willAttachComponent(packageScope: PackageScope): void {
+      this.owner.callObservers("serviceWillAttachPackage", packageScope, this.owner);
+    },
+    didAttachComponent(packageScope: PackageScope): void {
+      this.owner.callObservers("serviceDidAttachPackage", packageScope, this.owner);
+    },
+    deinitComponent(packageScope: PackageScope): void {
+      const packageNameMap = this.owner.packageNameMap as MutableDictionary<PackageScope>;
+      const unscopedPackageNameMap = this.owner.unscopedPackageNameMap as MutableDictionary<PackageScope>;
+      if (packageNameMap[packageScope.name] === packageScope) {
+        if (packageScope.unscopedName !== void 0 && unscopedPackageNameMap[packageScope.unscopedName] === packageScope) {
+          delete unscopedPackageNameMap[packageScope.unscopedName];
+        }
+        delete packageNameMap[packageScope.name];
+      }
+    },
+    willDetachComponent(packageScope: PackageScope): void {
+      this.owner.callObservers("serviceWillDetachPackage", packageScope, this.owner);
+    },
+    didDetachComponent(packageScope: PackageScope): void {
+      this.owner.callObservers("serviceDidDetachPackage", packageScope, this.owner);
     },
     packageDidChange(packageScope: PackageScope): void {
-      this.owner.callObservers("workspacePackageDidChange", packageScope, this.owner);
+      this.owner.callObservers("servicePackageDidChange", packageScope, this.owner);
+    },
+    packageLibraryDidChange(libraryScope: LibraryScope): void {
+      this.owner.callObservers("serviceLibraryDidChange", libraryScope, this.owner);
     },
   })
-  readonly packages!: ComponentSet<this, PackageScope>;
-  static readonly packages: MemberFastenerClass<Workspace, "packages">;
+  readonly packages!: ComponentSet<this, PackageScope> & Observes<PackageScope>;
+  static readonly packages: FastenerClass<Workspace["packages"]>;
 
   readonly packageNameMap: Dictionary<PackageScope>;
 
   readonly unscopedPackageNameMap: Dictionary<PackageScope>;
+
+  @ComponentSet<Workspace["libraries"]>({
+    // avoid cyclic static reference to componentType: LibraryScope
+    initComponent(libraryScope: LibraryScope): void {
+      const libraries = this.owner.libraryPathMap as MutableDictionary<LibraryScope>;
+      const libraryDir = libraryScope.baseDir.value;
+      if (libraryDir !== void 0) {
+        libraries[libraryDir] = libraryScope;
+      }
+    },
+    willAttachComponent(libraryScope: LibraryScope): void {
+      this.owner.callObservers("serviceWillAttachLibrary", libraryScope, this.owner);
+    },
+    didAttachComponent(libraryScope: LibraryScope): void {
+      this.owner.callObservers("serviceDidAttachLibrary", libraryScope, this.owner);
+    },
+    deinitComponent(libraryScope: LibraryScope): void {
+      const libraries = this.owner.libraryPathMap as MutableDictionary<LibraryScope>;
+      const libraryDir = libraryScope.baseDir.value;
+      if (libraryDir !== void 0 && libraries[libraryDir] === libraryScope) {
+        delete libraries[libraryDir];
+      }
+    },
+    willDetachComponent(libraryScope: LibraryScope): void {
+      this.owner.callObservers("serviceWillDetachLibrary", libraryScope, this.owner);
+    },
+    didDetachComponent(libraryScope: LibraryScope): void {
+      this.owner.callObservers("serviceDidDetachLibrary", libraryScope, this.owner);
+    },
+  })
+  readonly libraries!: ComponentSet<this, LibraryScope>;
+  static readonly libraries: FastenerClass<Workspace["libraries"]>;
 
   readonly libraryPathMap: Dictionary<LibraryScope>;
 
   getLibrary(libraryDir: string): LibraryScope | null {
     const libraryScope = this.libraryPathMap[libraryDir];
     return libraryScope !== void 0 ? libraryScope : null;
-  }
-
-  protected override onAttachRoot(scope: T): void {
-    super.onAttachRoot(scope);
-    if (scope instanceof PackageScope) {
-      this.attachPackage(scope);
-    } else if (scope instanceof LibraryScope) {
-      this.attachLibrary(scope);
-    }
-  }
-
-  protected override onDetachRoot(scope: T): void {
-    if (scope instanceof PackageScope) {
-      this.detachPackage(scope);
-    } else if (scope instanceof LibraryScope) {
-      this.detachLibrary(scope);
-    }
-    super.onDetachRoot(scope);
-  }
-
-  protected attachPackage(packageScope: PackageScope): void {
-    const packageNameMap = this.packageNameMap as MutableDictionary<PackageScope>;
-    const unscopedPackageNameMap = this.unscopedPackageNameMap as MutableDictionary<PackageScope>;
-    this.callObservers("workspaceWillAttachPackage", packageScope, this);
-    packageNameMap[packageScope.name] = packageScope;
-    if (packageScope.unscopedName !== void 0) {
-      unscopedPackageNameMap[packageScope.unscopedName] = packageScope;
-    }
-    this.packages.addComponent(packageScope);
-    this.callObservers("workspaceDidAttachPackage", packageScope, this);
-  }
-
-  protected detachPackage(packageScope: PackageScope): void {
-    const packageNameMap = this.packageNameMap as MutableDictionary<PackageScope>;
-    const unscopedPackageNameMap = this.unscopedPackageNameMap as MutableDictionary<PackageScope>;
-    if (packageNameMap[packageScope.name] === packageScope) {
-      this.callObservers("workspaceWillDetachPackage", packageScope, this);
-      if (packageScope.unscopedName !== void 0 && unscopedPackageNameMap[packageScope.unscopedName] === packageScope) {
-        delete unscopedPackageNameMap[packageScope.unscopedName];
-      }
-      delete packageNameMap[packageScope.name];
-      this.callObservers("workspaceDidDetachPackage", packageScope, this);
-    }
-  }
-
-  protected attachLibrary(libraryScope: LibraryScope): void {
-    const libraries = this.libraryPathMap as MutableDictionary<LibraryScope>;
-    const libraryDir = libraryScope.baseDir.value;
-    if (libraryDir !== void 0) {
-      this.callObservers("workspaceWillAttachLibrary", libraryScope, this);
-      libraries[libraryDir] = libraryScope;
-      this.callObservers("workspaceDidAttachLibrary", libraryScope, this);
-    }
-  }
-
-  protected detachLibrary(libraryScope: LibraryScope): void {
-    const libraries = this.libraryPathMap as MutableDictionary<LibraryScope>;
-    const libraryDir = libraryScope.baseDir.value;
-    if (libraryDir !== void 0 && libraries[libraryDir] === libraryScope) {
-      this.callObservers("workspaceWillDetachLibrary", libraryScope, this);
-      delete libraries[libraryDir];
-      this.callObservers("workspaceDidDetachLibrary", libraryScope, this);
-    }
   }
 
   getDependencies(packageNames: string[] | string | undefined): MutableDictionary<PackageScope>;
@@ -368,11 +367,6 @@ export class Workspace<T extends Scope = Scope> extends Service<T> {
       }
     }
     return packageVersions;
-  }
-
-  @Lazy
-  static global<T extends Scope>(): Workspace<T> {
-    return new Workspace();
   }
 
   static async load(path: string): Promise<Workspace | null> {

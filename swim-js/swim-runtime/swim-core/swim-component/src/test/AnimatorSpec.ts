@@ -20,7 +20,7 @@ export class AnimatorSpec extends Spec {
   @Test
   testAnimator(exam: Exam): void {
     const animator = Animator.create(null);
-    exam.equal(animator.name, "");
+    exam.equal(animator.name, "Animator");
     exam.equal(animator.value, void 0);
     exam.equal(animator.state, void 0);
 
@@ -34,7 +34,7 @@ export class AnimatorSpec extends Spec {
 
   @Test
   testAnimatorDefine(exam: Exam): void {
-    const testAnimator = Animator.define("foo", {type: Number, value: 0});
+    const testAnimator = Animator.define("foo", {valueType: Number, value: 0});
     const animator = testAnimator.create(null);
     exam.equal(animator.name, "foo");
     exam.equal(animator.value, 0);
@@ -51,7 +51,7 @@ export class AnimatorSpec extends Spec {
   @Test
   testAnimatorDecorator(exam: Exam): void {
     class TestComponent extends Component {
-      @Animator({type: Number, value: 0})
+      @Animator({valueType: Number, value: 0})
       readonly foo!: Animator<this, number>;
     }
     const component = new TestComponent();
@@ -72,7 +72,7 @@ export class AnimatorSpec extends Spec {
   @Test
   testAnimatorInheritance(exam: Exam): void {
     class TestComponent extends Component {
-      @Animator({type: Number, value: 0, inherits: true})
+      @Animator({valueType: Number, value: 0, inherits: true})
       readonly foo!: Animator<this, number>;
     }
     const parent = new TestComponent();
@@ -80,65 +80,65 @@ export class AnimatorSpec extends Spec {
     parent.appendChild(child);
     parent.mount();
 
-    exam.equal(child.foo.superFastener, parent.foo);
+    exam.equal(child.foo.inlet, parent.foo);
     exam.equal(parent.foo.value, 0);
     exam.equal(parent.foo.state, 0);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
     exam.equal(child.foo.value, 0);
     exam.equal(child.foo.state, 0);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
 
     parent.foo.setState(1);
     exam.equal(parent.foo.value, 1);
     exam.equal(parent.foo.state, 1);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
     exam.equal(child.foo.value, 0);
     exam.equal(child.foo.state, 0);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.false(child.foo.coherent);
     exam.false(child.foo.tweening);
 
     child.recohereFasteners();
     exam.equal(child.foo.value, 1);
     exam.equal(child.foo.state, 1);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
 
     child.foo.setState(2);
     exam.equal(parent.foo.value, 1);
     exam.equal(parent.foo.state, 1);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
     exam.equal(child.foo.value, 2);
     exam.equal(child.foo.state, 2);
-    exam.false(child.foo.inherited);
+    exam.false(child.foo.derived);
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
 
     child.foo.setAffinity(Affinity.Inherited);
     exam.equal(parent.foo.value, 1);
     exam.equal(parent.foo.state, 1);
-    exam.false(parent.foo.inherited);
+    exam.false(parent.foo.derived);
     exam.true(parent.foo.coherent);
     exam.false(parent.foo.tweening);
     exam.equal(child.foo.value, 1);
     exam.equal(child.foo.state, 1);
-    exam.true(child.foo.inherited);
+    exam.true(child.foo.derived);
     exam.true(child.foo.coherent);
     exam.false(child.foo.tweening);
   }
 
   @Test
   testAnimatorTweening(exam: Exam): void {
-    const testAnimator = Animator.define("foo", {type: Number, value: 0});
+    const testAnimator = Animator.define("foo", {valueType: Number, value: 0});
     const animator = testAnimator.create(null);
     exam.equal(animator.name, "foo");
     exam.equal(animator.value, 0);
@@ -169,7 +169,7 @@ export class AnimatorSpec extends Spec {
   @Test
   testAnimatorTweeningInheritance(exam: Exam): void {
     class TestComponent extends Component {
-      @Animator({type: Number, value: 0, inherits: true})
+      @Animator({valueType: Number, value: 0, inherits: true})
       readonly foo!: Animator<this, number>;
     }
     const parent = new TestComponent();
@@ -177,7 +177,7 @@ export class AnimatorSpec extends Spec {
     parent.appendChild(child);
     parent.mount();
 
-    exam.equal(child.foo.superFastener, parent.foo);
+    exam.equal(child.foo.inlet, parent.foo);
     exam.equal(parent.foo.value, 0);
     exam.equal(parent.foo.state, 0);
     exam.true(parent.foo.coherent);

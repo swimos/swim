@@ -14,49 +14,67 @@
 
 import type {AnyValue, Value} from "@swim/structure";
 import type {AnyUri} from "@swim/uri";
-import type {EventDownlinkInit, EventDownlink} from "../downlink/EventDownlink";
-import type {ListDownlinkInit, ListDownlink} from "../downlink/ListDownlink";
-import type {MapDownlinkInit, MapDownlink} from "../downlink/MapDownlink";
-import type {ValueDownlinkInit, ValueDownlink} from "../downlink/ValueDownlink";
-import type {HostRef} from "./HostRef";
-import type {NodeRef} from "./NodeRef";
-import type {LaneRef} from "./LaneRef";
-import type {
-  WarpDidConnect,
-  WarpDidAuthenticate,
-  WarpDidDeauthenticate,
-  WarpDidDisconnect,
-  WarpDidFail,
-  WarpObserver,
-} from "./WarpObserver";
+import type {WarpDownlinkContext} from "../downlink/WarpDownlinkContext";
+import type {EventDownlinkTemplate, EventDownlink} from "../downlink/EventDownlink";
+import type {ValueDownlinkTemplate, ValueDownlink} from "../downlink/ValueDownlink";
+import type {ListDownlinkTemplate, ListDownlink} from "../downlink/ListDownlink";
+import type {MapDownlinkTemplate, MapDownlink} from "../downlink/MapDownlink";
 
 /** @public */
-export interface WarpRef {
-  downlink(init?: EventDownlinkInit): EventDownlink;
+export interface WarpRef extends WarpDownlinkContext {
+  downlink(template?: EventDownlinkTemplate<EventDownlink<this>>): EventDownlink<this>;
 
-  downlinkList(init?: ListDownlinkInit<Value, AnyValue>): ListDownlink<Value, AnyValue>;
-  downlinkList<V extends VU, VU = never>(init?: ListDownlinkInit<V, VU>): ListDownlink<V, VU>;
+  downlinkValue<V = Value, VU = V extends Value ? AnyValue & V : V>(template?: ValueDownlinkTemplate<ValueDownlink<this, V, VU>>): ValueDownlink<this, V, VU>;
 
-  downlinkMap(init?: MapDownlinkInit<Value, Value, AnyValue, AnyValue>): MapDownlink<Value, Value, AnyValue, AnyValue>;
-  downlinkMap<K extends KU, V extends VU, KU = never, VU = never>(init?: MapDownlinkInit<K, V, KU, VU>): MapDownlink<K, V, KU, VU>;
+  downlinkList<V = Value, VU = V extends Value ? AnyValue & V : V>(template?: ListDownlinkTemplate<ListDownlink<this, V, VU>>): ListDownlink<this, V, VU>;
 
-  downlinkValue(init?: ValueDownlinkInit<Value, AnyValue>): ValueDownlink<Value, AnyValue>;
-  downlinkValue<V extends VU, VU = never>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU>;
+  downlinkMap<K = Value, V = Value, KU = K extends Value ? AnyValue & K : K, VU = V extends Value ? AnyValue & V : V>(template?: MapDownlinkTemplate<MapDownlink<this, K, V, KU, VU>>): MapDownlink<this, K, V, KU, VU>;
 
-  hostRef(hostUri: AnyUri): HostRef;
+  command(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void;
+  command(nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void;
+  command(laneUri: AnyUri, body: AnyValue): void;
+  command(body: AnyValue): void;
 
-  nodeRef(hostUri: AnyUri, nodeUri: AnyUri): NodeRef;
-  nodeRef(nodeUri: AnyUri): NodeRef;
+  authenticate(hostUri: AnyUri, credentials: AnyValue): void;
+  authenticate(credentials: AnyValue): void;
 
-  laneRef(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri): LaneRef;
-  laneRef(nodeUri: AnyUri, laneUri: AnyUri): LaneRef;
+  hostRef(hostUri: AnyUri): WarpRef;
 
-  observe(observer: WarpObserver): this;
-  unobserve(observer: unknown): this;
+  nodeRef(hostUri: AnyUri, nodeUri: AnyUri): WarpRef;
+  nodeRef(nodeUri: AnyUri): WarpRef;
 
-  didConnect(didConnect: WarpDidConnect): this;
-  didAuthenticate(didAuthenticate: WarpDidAuthenticate): this;
-  didDeauthenticate(didDeauthenticate: WarpDidDeauthenticate): this;
-  didDisconnect(didDisconnect: WarpDidDisconnect): this;
-  didFail(didFail: WarpDidFail): this;
+  laneRef(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri): WarpRef;
+  laneRef(nodeUri: AnyUri, laneUri: AnyUri): WarpRef;
+  laneRef(laneUri: AnyUri): WarpRef;
 }
+
+/** @public */
+export const WarpRef = (function () {
+  const WarpRef = {} as {
+    /** @internal */
+    has<K extends keyof WarpRef>(object: unknown, key: K): object is Required<Pick<WarpRef, K>>;
+
+    /** @internal */
+    is(object: unknown): object is WarpRef;
+  };
+
+  WarpRef.has = function <K extends keyof WarpRef>(object: unknown, key: K): object is Required<Pick<WarpRef, K>> {
+    if (typeof object === "object" && object !== null || typeof object === "function") {
+      return key in object;
+    }
+    return false;
+  };
+
+  WarpRef.is = function (object: unknown): object is WarpRef {
+    if (typeof object === "object" && object !== null || typeof object === "function") {
+      const warpRef = object as WarpRef;
+      return "downlink" in warpRef
+          && "downlinkValue" in warpRef
+          && "downlinkList" in warpRef
+          && "downlinkMap" in warpRef;
+    }
+    return false;
+  };
+
+  return WarpRef;
+})();

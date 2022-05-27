@@ -16,17 +16,18 @@ import type {Mutable} from "@swim/util";
 import {Value} from "@swim/structure";
 import type {Uri} from "@swim/uri";
 import type {EventMessage} from "@swim/warp";
-import type {Host} from "../host/Host";
-import type {DownlinkContext} from "./DownlinkContext";
-import {DownlinkModel} from "./DownlinkModel";
-import type {DownlinkType} from "./Downlink";
+import {WarpDownlinkModel} from "./WarpDownlinkModel";
 import type {ValueDownlink} from "./ValueDownlink";
+import type {WarpHost} from "../host/WarpHost";
 
 /** @internal */
-export class ValueDownlinkModel extends DownlinkModel {
-  constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
-              prio?: number, rate?: number, body?: Value, state: Value = Value.absent()) {
-    super(context, hostUri, nodeUri, laneUri, prio, rate, body);
+export class ValueDownlinkModel extends WarpDownlinkModel {
+  constructor(hostUri: Uri, nodeUri: Uri, laneUri: Uri,
+              prio: number, rate: number, body: Value, state: Value | null) {
+    super(hostUri, nodeUri, laneUri, prio, rate, body);
+    if (state === null) {
+      state = Value.absent();
+    }
     this.state = state;
   }
 
@@ -34,10 +35,6 @@ export class ValueDownlinkModel extends DownlinkModel {
 
   /** @internal */
   readonly state: Value;
-
-  override get type(): DownlinkType {
-    return "value";
-  }
 
   get(): Value {
     return this.state;
@@ -55,7 +52,7 @@ export class ValueDownlinkModel extends DownlinkModel {
     (this as Mutable<this>).state = state;
   }
 
-  override onEventMessage(message: EventMessage, host: Host): void {
+  override onEventMessage(message: EventMessage, host: WarpHost): void {
     super.onEventMessage(message, host);
     this.onSetEvent(message.body);
   }

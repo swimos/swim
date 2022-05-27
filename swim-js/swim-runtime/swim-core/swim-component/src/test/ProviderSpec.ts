@@ -13,72 +13,95 @@
 // limitations under the License.
 
 import {Spec, Test, Exam} from "@swim/unit";
-import {Provider, Component} from "@swim/component";
+import {Provider, Component, Service} from "@swim/component";
 
 export class ProviderSpec extends Spec {
   @Test
   testProviderDefine(exam: Exam): void {
-    const testProvider = Provider.define("foo", {service: "bar"});
+    const service = new Service();
+    const testProvider = Provider.define("foo", {
+      createService(): Service {
+        return service;
+      },
+    });
     const provider = testProvider.create(null);
     exam.equal(provider.name, "foo");
-    exam.equal(provider.service, "bar");
-    exam.equal(provider(), "bar", "accessor");
+    exam.identical(provider.service, service);
+    exam.equal(provider(), service, "accessor");
   }
 
   @Test
   testProviderDecorator(exam: Exam): void {
+    const service = new Service();
     class TestComponent extends Component {
-      @Provider({service: "bar"})
-      readonly foo!: Provider<this, string>;
+      @Provider({
+        createService(): Service {
+          return service;
+        },
+      })
+      readonly foo!: Provider<this, Service>;
     }
     const component = new TestComponent();
     component.mount();
 
     exam.equal(component.foo.name, "foo");
-    exam.equal(component.foo.service, "bar");
-    exam.equal(component.foo(), "bar", "accessor");
+    exam.identical(component.foo.service, service);
+    exam.equal(component.foo(), service, "accessor");
   }
 
   @Test
   testProviderInheritance(exam: Exam): void {
     let id = 0;
+    class TestService extends Service {
+      constructor() {
+        super();
+        this.id = id;
+        id += 1;
+      }
+      readonly id: number;
+    }
     class TestComponent extends Component {
-      @Provider<TestComponent, {id: number} | undefined>({
+      @Provider<TestComponent["foo"]>({
         inherits: true,
-        createService(): {id: number} | undefined {
-          const service = {id};
-          id += 1;
-          return service;
+        lazy: false,
+        createService(): TestService {
+          return new TestService();
         },
       })
-      readonly foo!: Provider<this, {id: number} | undefined>;
+      readonly foo!: Provider<this, TestService>;
     }
     const parent = new TestComponent();
     const child = new TestComponent();
     parent.appendChild(child);
     parent.mount();
 
-    exam.equal(child.foo.superFastener, parent.foo);
-    exam.equal(parent.foo.service, {id: 0});
-    exam.false(parent.foo.inherited);
-    exam.equal(child.foo.service, {id: 0});
-    exam.true(child.foo.inherited);
+    exam.equal(child.foo.inlet, parent.foo);
+    exam.equal(parent.foo.getService().id, 0);
+    exam.false(parent.foo.derived);
+    exam.equal(child.foo.getService().id, 0);
+    exam.true(child.foo.derived);
   }
 
   @Test
   testProviderOverride(exam: Exam): void {
     let id = 0;
+    class TestService extends Service {
+      constructor() {
+        super();
+        this.id = id;
+        id += 1;
+      }
+      readonly id: number;
+    }
     class TestComponent extends Component {
-      @Provider<TestComponent, {id: number} | undefined>({
+      @Provider<TestComponent["foo"]>({
         lazy: false,
         inherits: true,
-        createService(): {id: number} | undefined {
-          const service = {id};
-          id += 1;
-          return service;
+        createService(): TestService {
+          return new TestService();
         },
       })
-      readonly foo!: Provider<this, {id: number} | undefined>;
+      readonly foo!: Provider<this, TestService>;
     }
     const parent = new TestComponent();
     const child = new TestComponent();
@@ -86,16 +109,16 @@ export class ProviderSpec extends Spec {
     parent.appendChild(child);
     parent.mount();
 
-    exam.equal(child.foo.superFastener, null);
-    exam.equal(parent.foo.service, {id: 0});
-    exam.false(parent.foo.inherited);
-    exam.equal(child.foo.service, {id: 1});
-    exam.false(child.foo.inherited);
+    exam.equal(child.foo.inlet, null);
+    exam.equal(parent.foo.getService().id, 0);
+    exam.false(parent.foo.derived);
+    exam.equal(child.foo.getService().id, 1);
+    exam.false(child.foo.derived);
 
     child.foo.setInherits(true);
-    exam.equal(parent.foo.service, {id: 0});
-    exam.false(parent.foo.inherited);
-    exam.equal(child.foo.service, {id: 0});
-    exam.true(child.foo.inherited);
+    exam.equal(parent.foo.getService().id, 0);
+    exam.false(parent.foo.derived);
+    exam.equal(child.foo.getService().id, 0);
+    exam.true(child.foo.derived);
   }
 }

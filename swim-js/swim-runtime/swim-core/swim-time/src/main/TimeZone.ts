@@ -103,7 +103,10 @@ export class TimeZone implements HashCode, Debug {
     }
   }
 
-  static fromAny(value: AnyTimeZone): TimeZone {
+  static fromAny(value: AnyTimeZone): TimeZone;
+  static fromAny(value: AnyTimeZone | null): TimeZone | null;
+  static fromAny(value: AnyTimeZone | null | undefined): TimeZone | null | undefined;
+  static fromAny(value: AnyTimeZone | null | undefined): TimeZone | null | undefined {
     if (value === void 0 || value === null || value instanceof TimeZone) {
       return value;
     } else if (typeof value === "string") {

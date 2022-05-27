@@ -17,17 +17,18 @@ import {STree} from "@swim/collections";
 import {Attr, Value, Record} from "@swim/structure";
 import type {Uri} from "@swim/uri";
 import type {EventMessage} from "@swim/warp";
-import type {Host} from "../host/Host";
-import type {DownlinkContext} from "./DownlinkContext";
-import {DownlinkModel} from "./DownlinkModel";
-import type {DownlinkType} from "./Downlink";
+import {WarpDownlinkModel} from "./WarpDownlinkModel";
 import type {ListDownlink} from "./ListDownlink";
+import type {WarpHost} from "../host/WarpHost";
 
 /** @internal */
-export class ListDownlinkModel extends DownlinkModel {
-  constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
-              prio?: number, rate?: number, body?: Value, state: STree<Value, Value> = new STree()) {
-    super(context, hostUri, nodeUri, laneUri, prio, rate, body);
+export class ListDownlinkModel extends WarpDownlinkModel {
+  constructor(hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number,
+              rate: number, body: Value, state: STree<Value, Value> | null) {
+    super(hostUri, nodeUri, laneUri, prio, rate, body);
+    if (state === null) {
+      state = new STree();
+    }
     this.state = state;
   }
 
@@ -36,11 +37,7 @@ export class ListDownlinkModel extends DownlinkModel {
   /** @internal */
   readonly state: STree<Value, Value>;
 
-  override get type(): DownlinkType {
-    return "list";
-  }
-
-  get length(): number {
+  get size(): number {
     return this.state.length;
   }
 
@@ -88,23 +85,29 @@ export class ListDownlinkModel extends DownlinkModel {
     return this;
   }
 
-  remove(index: number, key?: Value): this {
-    if (key !== void 0) {
-      index = this.state.lookup(key, index);
-      if (index < 0) {
-        throw new RangeError("" + key);
+  override remove(): void;
+  override remove(index: number, key?: Value): this;
+  override remove(index?: number, key?: Value): this | void {
+    if (arguments.length === 0) {
+      super.remove();
+    } else {
+      if (key !== void 0) {
+        index = this.state.lookup(key, index);
+        if (index < 0) {
+          throw new RangeError("" + key);
+        }
       }
+      if (index! < 0 || index! > this.state.length) {
+        throw new RangeError("" + index);
+      }
+      this.listWillRemove(index!);
+      const oldEntry = this.state.getEntry(index!)!;
+      this.state.remove(index!);
+      this.listDidRemove(index!, oldEntry[1]);
+      const header = Record.create(2).slot("key", oldEntry[0]).slot("index", index!);
+      this.command(Record.create(1).attr("remove", header));
+      return this;
     }
-    if (index < 0 || index > this.state.length) {
-      throw new RangeError("" + index);
-    }
-    this.listWillRemove(index);
-    const oldEntry = this.state.getEntry(index)!;
-    this.state.remove(index);
-    this.listDidRemove(index, oldEntry[1]);
-    const header = Record.create(2).slot("key", oldEntry[0]).slot("index", index);
-    this.command(Record.create(1).attr("remove", header));
-    return this;
   }
 
   push(...newValues: Value[]): number {
@@ -250,7 +253,7 @@ export class ListDownlinkModel extends DownlinkModel {
     (this as Mutable<this>).state = state;
   }
 
-  override onEventMessage(message: EventMessage, host: Host): void {
+  override onEventMessage(message: EventMessage, host: WarpHost): void {
     super.onEventMessage(message, host);
     const event = message.body;
     const tag = event.tag;

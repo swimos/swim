@@ -13,6 +13,6 @@
 // limitations under the License.
 
 export {
-  InitType,
+  Inits,
   Initable,
 } from "./Initable";

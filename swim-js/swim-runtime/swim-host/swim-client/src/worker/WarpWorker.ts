@@ -14,8 +14,16 @@
 
 import {AnyValue, Value} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
-import {Message, Signal, OpenSignal, OpenedSignal, CloseSignal, ClosedSignal, Envelope} from "@swim/warp";
-import {WebSocketHostWorker} from "./WebSocketHostWorker";
+import {
+  Message,
+  Signal,
+  OpenSignal,
+  OpenedSignal,
+  CloseSignal,
+  ClosedSignal,
+  Envelope,
+} from "@swim/warp";
+import {WarpSocketHostWorker} from "./WarpSocketHostWorker";
 
 /** @internal */
 export interface WarpWorkerOptions {
@@ -42,33 +50,33 @@ export class WarpWorker {
   readonly options: WarpWorkerOptions;
 
   /** @internal */
-  readonly hosts: {readonly [hostUri: string]: WebSocketHostWorker | undefined};
+  readonly hosts: {readonly [hostUri: string]: WarpSocketHostWorker | undefined};
 
   /** @internal */
-  getHost(hostUri: AnyUri): WebSocketHostWorker | null {
+  getHost(hostUri: AnyUri): WarpSocketHostWorker | null {
     hostUri = Uri.fromAny(hostUri);
     const host = this.hosts[hostUri.toString()];
     return host !== void 0 ? host : null;
   }
 
   /** @internal */
-  openHost(hostUri: AnyUri, options: WarpWorkerOptions): WebSocketHostWorker {
+  openHost(hostUri: AnyUri, options: WarpWorkerOptions): WarpSocketHostWorker {
     hostUri = Uri.fromAny(hostUri);
-    const hosts = this.hosts as {[hostUri: string]: WebSocketHostWorker | undefined};
+    const hosts = this.hosts as {[hostUri: string]: WarpSocketHostWorker | undefined};
     let host = hosts[hostUri.toString()];
     if (host === void 0) {
-      host = new WebSocketHostWorker(hostUri, options);
+      host = new WarpSocketHostWorker(hostUri, options);
       hosts[hostUri.toString()] = host;
     }
     return host;
   }
 
   /** @internal */
-  closeHost(host: WebSocketHostWorker): void {
-    const hosts = this.hosts as {[hostUri: string]: WebSocketHostWorker | undefined};
+  closeHost(host: WarpSocketHostWorker): void {
+    const hosts = this.hosts as {[hostUri: string]: WarpSocketHostWorker | undefined};
     if (hosts[host.hostUri.toString()] !== void 0) {
       delete hosts[host.hostUri.toString()];
-      host.closeUp();
+      host.close();
     }
   }
 
@@ -105,16 +113,16 @@ export class WarpWorker {
   protected onOpenSignal(request: OpenSignal): void {
     const hostUri = request.host;
     const host = this.openHost(hostUri, {});
-    if (host instanceof WebSocketHostWorker) {
+    if (host instanceof WarpSocketHostWorker) {
       this.scope.postMessage(OpenedSignal.create(hostUri).toAny(), [host.channel.port2]);
-      host.open();
+      host.connect();
     }
   }
 
   protected onCloseSignal(request: CloseSignal): void {
     const hostUri = request.host;
     const host = this.getHost(hostUri);
-    if (host instanceof WebSocketHostWorker) {
+    if (host instanceof WarpSocketHostWorker) {
       this.closeHost(host);
       this.scope.postMessage(ClosedSignal.create(hostUri).toAny());
     }

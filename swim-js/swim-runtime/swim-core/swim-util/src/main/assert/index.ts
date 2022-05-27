@@ -16,7 +16,6 @@ export {AssertException} from "./AssertException";
 export {
   AssertFunction,
   Assert,
-  assert,
 } from "./Assert";
 
 export {Severity} from "./Severity";

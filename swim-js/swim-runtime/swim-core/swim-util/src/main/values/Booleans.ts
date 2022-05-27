@@ -31,6 +31,9 @@ export const Booleans = (function () {
      * Returns a hash code for a number.
      */
     hash(x: boolean | null | undefined): number;
+
+    fromAny(value: boolean | string | number): boolean;
+    fromAny(value: boolean | string | number | null | undefined): boolean | null | undefined;
   };
 
   Booleans.compare = function (x: boolean | null | undefined, y: boolean | null | undefined): number {
@@ -58,6 +61,14 @@ export const Booleans = (function () {
       throw new TypeError("" + x);
     }
   };
+
+  Booleans.fromAny = function (value: boolean | string | number | null | undefined): boolean | null | undefined {
+    if (value === void 0 || value === null) {
+      return value;
+    } else {
+      return Boolean(value);
+    }
+  } as typeof Booleans.fromAny;
 
   return Booleans;
 })();

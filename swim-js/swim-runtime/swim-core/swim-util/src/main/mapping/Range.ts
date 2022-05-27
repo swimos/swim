@@ -28,16 +28,24 @@ export interface Range<Y> extends Mapping<number, Y> {
 
   readonly 1: Y;
 
+  /** @override */
   readonly domain: LinearDomain;
 
+  /** @override */
   readonly range: this;
 
+  union(that: Range<Y>): Range<Y>;
+
+  /** @override */
   equivalentTo(that: unknown, epsilon?: number): boolean;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -64,7 +72,7 @@ export const Range = (function (_super: typeof Mapping) {
   Range.prototype.constructor = Range;
 
   Object.defineProperty(Range.prototype, "domain", {
-    get(): LinearDomain {
+    get<Y>(this: Range<Y>): LinearDomain {
       return Domain.unit;
     },
     configurable: true,
@@ -77,7 +85,32 @@ export const Range = (function (_super: typeof Mapping) {
     configurable: true,
   });
 
-  Range.prototype.equivalentTo = function (that: unknown, epsilon?: number): boolean {
+  Range.prototype.union = function <Y>(this: Range<Y>, that: Range<Y>): Range<Y> {
+    const y00 = this[0];
+    const y01 = this[1];
+    const y10 = that[0];
+    const y11 = that[1];
+    let y0: Y;
+    let y1: Y;
+    const y0Order = Values.compare(y00, y01);
+    const y1Order = Values.compare(y10, y11);
+    if (y0Order <= 0 && y1Order <= 0) {
+      y0 = Values.compare(y00, y10) <= 0 ? y00 : y10;
+      y1 = Values.compare(y01, y11) >= 0 ? y01 : y11;
+    } else if (y0Order >= 0 && y1Order >= 0) {
+      y0 = Values.compare(y00, y10) >= 0 ? y00 : y10;
+      y1 = Values.compare(y01, y11) <= 0 ? y01 : y11;
+    } else if (y0Order <= 0 && y1Order >= 0) {
+      y0 = Values.compare(y00, y11) <= 0 ? y00 : y11;
+      y1 = Values.compare(y01, y10) >= 0 ? y01 : y10;
+    } else { // y0Order >= 0 && y1Order <= 0
+      y0 = Values.compare(y01, y10) <= 0 ? y01 : y10;
+      y1 = Values.compare(y00, y11) >= 0 ? y00 : y11;
+    }
+    return Range(y0, y1);
+  };
+
+  Range.prototype.equivalentTo = function <Y>(this: Domain<Y>, that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Range) {
@@ -87,11 +120,11 @@ export const Range = (function (_super: typeof Mapping) {
     return false;
   };
 
-  Range.prototype.canEqual = function (that: unknown): boolean {
+  Range.prototype.canEqual = function <Y>(this: Domain<Y>, that: unknown): boolean {
     return that instanceof Range;
   };
 
-  Range.prototype.equals = function (that: unknown): boolean {
+  Range.prototype.equals = function <Y>(this: Domain<Y>, that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Range) {
@@ -102,7 +135,7 @@ export const Range = (function (_super: typeof Mapping) {
     return false;
   };
 
-  Range.prototype.toString = function (): string {
+  Range.prototype.toString = function <Y>(this: Domain<Y>): string {
     return "Range(" + this[0] + ", " + this[1] + ")";
   };
 

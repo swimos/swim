@@ -11,8 +11,6 @@ const external = [
   "@swim/component",
   "@swim/collections",
   "@swim/structure",
-  "@swim/streamlet",
-  "@swim/dataflow",
   "@swim/recon",
   "@swim/uri",
   "@swim/core",

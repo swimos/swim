@@ -18,10 +18,12 @@ export * from "./property";
 
 export * from "./animator";
 
-export * from "./service";
+export * from "./timer";
+
+export * from "./event";
 
 export * from "./provider";
 
-export * from "./timer";
-
 export * from "./component";
+
+export * from "./service";

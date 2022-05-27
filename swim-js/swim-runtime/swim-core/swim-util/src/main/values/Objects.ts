@@ -23,6 +23,25 @@ import {Values} from "./Values";
 export const Objects = (function () {
   const Objects = {} as {
     /**
+     * Returns `true` if the given object has no own properties.
+     */
+    isEmpty(x: object | null | undefined): boolean;
+
+    /**
+     * Returns a shallow copy of `object` with the given `key`-`value` pair
+     * inserted before the `target` entry value, in traversal order.
+     */
+    inserted<O, K extends keyof O>(object: O, key: K, value: O[K], target: unknown): O;
+
+    getFirstKey<O>(object: O): keyof O | undefined;
+
+    getFirstValue<O>(object: O): O[keyof O] | undefined;
+
+    getNextKey<O>(object: O, key: keyof O): keyof O | undefined;
+
+    getNextValue<O>(object: O, key: keyof O): O[keyof O] | undefined;
+
+    /**
      * Returns `true` if `x` and `y` are structurally equal objects; otherwise
      * returns `x === y` if either `x` or `y` is not an object.
      */
@@ -50,6 +69,82 @@ export const Objects = (function () {
      * otherwise returns `0` or `1` if `x` is `undefined` or `null`, respectively.
      */
     hash(x: object | null | undefined): number;
+  };
+
+  Objects.isEmpty = function (x: object | null | undefined) {
+    if (typeof x === "object" && x !== null) {
+      for (const k in x) {
+        if (Object.prototype.hasOwnProperty.call(x, k)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  Objects.inserted = function <O, K extends keyof O>(oldObject: O, newKey: K, newValue: O[K], targetValue: unknown): O {
+    let inserted = false;
+    const newObject = {} as O;
+    for (const oldKey in oldObject) {
+      if (Object.prototype.hasOwnProperty.call(oldObject, oldKey)) {
+        const oldValue = oldObject[oldKey]!;
+        if (!inserted && oldValue === targetValue) {
+          newObject[newKey as keyof O] = newValue as O[keyof O];
+          inserted = true;
+        }
+        newObject[oldKey] = oldValue;
+      }
+    }
+    if (!inserted) {
+      newObject[newKey as keyof O] = newValue as O[keyof O];
+    }
+    return newObject;
+  };
+
+  Objects.getFirstKey = function <O>(object: O): keyof O | undefined {
+    for (const k in object) {
+      if (Object.prototype.hasOwnProperty.call(object, k)) {
+        return k;
+      }
+    }
+    return void 0;
+  };
+
+  Objects.getFirstValue = function <O>(object: O): O[keyof O] | undefined {
+    for (const k in object) {
+      if (Object.prototype.hasOwnProperty.call(object, k)) {
+        return object[k]!;
+      }
+    }
+    return void 0;
+  };
+
+  Objects.getNextKey = function <O>(object: O, key: keyof O): keyof O | undefined {
+    let mark = false;
+    for (const k in object) {
+      if (Object.prototype.hasOwnProperty.call(object, k)) {
+        if (mark) {
+          return k;
+        } else if (k === key) {
+          mark = true;
+        }
+      }
+    }
+    return void 0;
+  };
+
+  Objects.getNextValue = function <O>(object: O, key: keyof O): O[keyof O] | undefined {
+    let mark = false;
+    for (const k in object) {
+      if (Object.prototype.hasOwnProperty.call(object, k)) {
+        if (mark) {
+          return object[k]!;
+        } else if (k === key) {
+          mark = true;
+        }
+      }
+    }
+    return void 0;
   };
 
   Objects.equal = function (x: object | null | undefined, y: object | null | undefined): boolean {

@@ -2,6 +2,7 @@
 .gitignore
 .npmignore
 bin/
+!dist
 dist/*-test.*
 doc/
 lib/

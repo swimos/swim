@@ -16,7 +16,7 @@ import * as Path from "path";
 import * as ts from "typescript";
 import {MutableDictionary, Severity} from "@swim/util";
 import {Input, OutputSettings, Tag, Mark, Span, Diagnostic, Unicode} from "@swim/codec";
-import type {MemberFastenerClass} from "@swim/component";
+import type {FastenerClass} from "@swim/component";
 import {FileRef} from "@swim/sys";
 import {TaskStatus} from "../task/Task";
 import type {PackageScope} from "../package/PackageScope";
@@ -44,7 +44,7 @@ export class CompileTask extends LibraryTask {
 
   invalidated: boolean;
 
-  @FileRef<CompileTask, ts.ParsedCommandLine | null>({
+  @FileRef<CompileTask["tsconfig"]>({
     fileName: "tsconfig.json",
     value: null,
     getBaseDir(): string | undefined {
@@ -56,7 +56,7 @@ export class CompileTask extends LibraryTask {
     },
   })
   readonly tsconfig!: FileRef<this, ts.ParsedCommandLine | null>;
-  static readonly tsconfig: MemberFastenerClass<CompileTask, "tsconfig">;
+  static readonly tsconfig: FastenerClass<CompileTask["tsconfig"]>;
 
   override async exec(): Promise<TaskStatus> {
     this.logBegin("compiling");
@@ -109,7 +109,7 @@ export class CompileTask extends LibraryTask {
   }
 
   protected getParsedCommandLine(fileName: string): ts.ParsedCommandLine | undefined {
-    const workspace = this.workspace.service;
+    const workspace = this.workspace.getService();
     const libraryDir = Path.dirname(fileName);
     const libraryScope = workspace.getLibrary(libraryDir);
     if (libraryScope !== null) {
@@ -133,7 +133,7 @@ export class CompileTask extends LibraryTask {
   protected injectProjectReferences(packageScope: PackageScope, projectReferences: readonly ts.ProjectReference[] | undefined): readonly ts.ProjectReference[] | undefined {
     const dependencyReferences = projectReferences !== void 0 ? projectReferences.slice(0) : [];
 
-    const workspace = this.workspace.service;
+    const workspace = this.workspace.getService();
     const dependencies = packageScope.getDependencies();
     for (let i = 0; i < dependencyReferences.length; i += 1) {
       const dependencyReference = dependencyReferences[i]!;

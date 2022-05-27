@@ -20,15 +20,8 @@ import {Envelope} from "@swim/warp";
 import {WarpClient} from "@swim/client";
 
 export class MockServer {
-  constructor(hostUri?: AnyUri, client?: WarpClient) {
-    if (hostUri === void 0) {
-      hostUri = "ws://localhost:5619";
-    }
-    if (client === void 0) {
-      client = new WarpClient();
-    }
-
-    this.hostUri = Uri.fromAny(hostUri);
+  constructor(hostUri: Uri, client: WarpClient) {
+    this.hostUri = hostUri;
     this.client = client;
 
     this.httpServer = null;
@@ -78,20 +71,21 @@ export class MockServer {
                     resolve: (result?: T) => void,
                     reject: (reason?: unknown) => void) => void): Promise<T | void> {
     return new Promise((resolve: (result?: T) => void, reject: (reason?: unknown) => void): void => {
-        const httpServer = http.createServer();
-        (this as Mutable<this>).httpServer = httpServer;
-        httpServer.listen(this.hostUri.portNumber, (): void => {
-          try {
-            const wsServer = new ws.WebSocketServer({port: void 0, server: httpServer});
-            (this as Mutable<this>).wsServer = wsServer;
-            wsServer.on("connection", this.onOpen);
-            callback(this, this.client, resolve, reject);
-          } catch (error) {
-            reject(error);
-          }
-        });
-      })
-      .then(this.runSuccess.bind(this), this.runFailure.bind(this));
+      const httpServer = http.createServer();
+      (this as Mutable<this>).httpServer = httpServer;
+      httpServer.listen(this.hostUri.portNumber, (): void => {
+        try {
+          const wsServer = new ws.WebSocketServer({port: void 0, server: httpServer});
+          (this as Mutable<this>).wsServer = wsServer;
+          wsServer.on("connection", this.onOpen);
+          this.client.mount();
+          callback(this, this.client, resolve, reject);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    })
+    .then(this.runSuccess.bind(this), this.runFailure.bind(this));
   }
 
   protected runSuccess<T>(result: T): Promise<T> {
@@ -107,7 +101,7 @@ export class MockServer {
   }
 
   stop(): Promise<void> {
-    this.client.close();
+    this.client.unmount();
     const socket = this.socket;
     if (socket !== null) {
       socket.terminate();
@@ -163,5 +157,16 @@ export class MockServer {
 
   onEnvelope(envelope: Envelope): void {
     // hook
+  }
+
+  static create(hostUri?: AnyUri, client?: WarpClient): MockServer {
+    if (hostUri === void 0) {
+      hostUri = "ws://localhost:5619";
+    }
+    hostUri = Uri.fromAny(hostUri);
+    if (client === void 0) {
+      client = new WarpClient();
+    }
+    return new MockServer(hostUri, client);
   }
 }

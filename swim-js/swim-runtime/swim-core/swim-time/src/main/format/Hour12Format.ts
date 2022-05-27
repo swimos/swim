@@ -19,12 +19,19 @@ import {Hour12Parser} from "../"; // forward import
 
 /** @internal */
 export class Hour12Format extends DateTimeFormat {
+  constructor(padChar: number) {
+    super();
+    this.padChar = padChar;
+  }
+
+  readonly padChar: number;
+
   override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
     let hour = date.hour % 12;
     if (hour === 0) {
       hour = 12;
     }
-    output = DateTimeFormat.writeDateNumber2(output, hour);
+    output = DateTimeFormat.writeDateNumber2(output, hour, this.padChar);
     return output;
   }
 

@@ -26,10 +26,13 @@ export interface Scale<X, Y> extends Mapping<X, Y> {
   overRange(range: Range<Y>): Scale<X, Y>;
   overRange(y0: Y, y1: Y): Scale<X, Y>;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 

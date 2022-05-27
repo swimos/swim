@@ -20,10 +20,13 @@ export interface IdentityInterpolator<Y> extends Interpolator<Y> {
   /** @internal */
   readonly value: Y;
 
+  /** @override */
   readonly 0: Y;
 
+  /** @override */
   readonly 1: Y;
 
+  /** @override */
   equals(that: unknown): boolean;
 }
 

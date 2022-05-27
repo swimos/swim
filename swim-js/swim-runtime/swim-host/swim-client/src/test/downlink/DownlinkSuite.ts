@@ -14,18 +14,20 @@
 
 import {Spec, Unit} from "@swim/unit";
 import {EventDownlinkSpec} from "./EventDownlinkSpec";
+import {ValueDownlinkSpec} from "./ValueDownlinkSpec";
 import {ListDownlinkSpec} from "./ListDownlinkSpec";
 import {MapDownlinkSpec} from "./MapDownlinkSpec";
-import {ValueDownlinkSpec} from "./ValueDownlinkSpec";
-import {MapDownlinkRecordSpec} from "./MapDownlinkRecordSpec";
-import {ValueDownlinkRecordSpec} from "./ValueDownlinkRecordSpec";
-import {DownlinkStreamletSpec} from "./DownlinkStreamletSpec";
 
 @Unit
 export class DownlinkSuite extends Spec {
   @Unit
   eventDownlinkSpec(): Spec {
     return new EventDownlinkSpec();
+  }
+
+  @Unit
+  valueDownlinkSpec(): Spec {
+    return new ValueDownlinkSpec();
   }
 
   @Unit
@@ -36,25 +38,5 @@ export class DownlinkSuite extends Spec {
   @Unit
   mapDownlinkSpec(): Spec {
     return new MapDownlinkSpec();
-  }
-
-  @Unit
-  valueDownlinkSpec(): Spec {
-    return new ValueDownlinkSpec();
-  }
-
-  @Unit
-  mapDownlinkRecordSpec(): Spec {
-    return new MapDownlinkRecordSpec();
-  }
-
-  @Unit
-  valueDownlinkRecordSpec(): Spec {
-    return new ValueDownlinkRecordSpec();
-  }
-
-  @Unit
-  downlinkStreamletSpec(): Spec {
-    return new DownlinkStreamletSpec();
   }
 }

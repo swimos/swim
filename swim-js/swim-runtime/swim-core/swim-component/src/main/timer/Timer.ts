@@ -13,58 +13,58 @@
 // limitations under the License.
 
 import type {Mutable, Proto} from "@swim/util";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "../fastener/Fastener";
+import {
+  FastenerOwner,
+  FastenerDescriptor,
+  FastenerClass,
+  Fastener,
+} from "../fastener/Fastener";
 
 /** @public */
-export interface TimerInit extends FastenerInit {
-  extends?: {prototype: Timer<any>} | string | boolean | null;
+export interface TimerDescriptor extends FastenerDescriptor {
+  extends?: Proto<Timer<any>> | string | boolean | null;
   delay?: number;
-
-  fire?(): void;
-
-  willSchedule?(delay: number): void;
-  didSchedule?(delay: number): void;
-
-  willCancel?(): void;
-  didCancel?(): void;
-
-  willExpire?(): void;
-  didExpire?(): void;
-
-  setTimeout?(callback: () => void, delay: number): unknown;
-  clearTimeout?(timeout: unknown): void;
 }
 
 /** @public */
-export type TimerDescriptor<O = unknown, I = {}> = ThisType<Timer<O> & I> & TimerInit & Partial<I>;
+export type TimerTemplate<F extends Timer<any>> =
+  ThisType<F> &
+  TimerDescriptor &
+  Partial<Omit<F, keyof TimerDescriptor>>;
 
 /** @public */
 export interface TimerClass<F extends Timer<any> = Timer<any>> extends FastenerClass<F> {
-}
+  /** @override */
+  specialize(template: TimerDescriptor): TimerClass<F>;
 
-/** @public */
-export interface TimerFactory<F extends Timer<any> = Timer<any>> extends TimerClass<F> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): TimerFactory<F> & I;
+  /** @override */
+  refine(fastenerClass: TimerClass<any>): void;
 
-  define<O>(className: string, descriptor: TimerDescriptor<O>): TimerFactory<Timer<any>>;
-  define<O, I = {}>(className: string, descriptor: {implements: unknown} & TimerDescriptor<O, I>): TimerFactory<Timer<any> & I>;
+  /** @override */
+  extend<F2 extends F>(className: string, template: TimerTemplate<F2>): TimerClass<F2>;
+  extend<F2 extends F>(className: string, template: TimerTemplate<F2>): TimerClass<F2>;
 
-  <O>(descriptor: TimerDescriptor<O>): PropertyDecorator;
-  <O, I = {}>(descriptor: {implements: unknown} & TimerDescriptor<O, I>): PropertyDecorator;
+  /** @override */
+  define<F2 extends F>(className: string, template: TimerTemplate<F2>): TimerClass<F2>;
+  define<F2 extends F>(className: string, template: TimerTemplate<F2>): TimerClass<F2>;
+
+  /** @override */
+  <F2 extends F>(template: TimerTemplate<F2>): PropertyDecorator;
 }
 
 /** @public */
 export interface Timer<O = unknown> extends Fastener<O> {
+  (): void;
+
   /** @override */
   get fastenerType(): Proto<Timer<any>>;
 
-  /** @protected @override */
-  onInherit(superFastener: Fastener): void;
+  /** @protected */
+  fire(): void;
+
+  initDelay(): number;
 
   readonly delay: number;
-
-  /** @internal @protected */
-  initDelay(delay: number): void;
 
   setDelay(delay: number): void;
 
@@ -73,9 +73,6 @@ export interface Timer<O = unknown> extends Fastener<O> {
   get elapsed(): number | undefined;
 
   get remaining(): number | undefined;
-
-  /** @internal @protected */
-  fire(): void;
 
   get scheduled(): boolean;
 
@@ -128,31 +125,30 @@ export interface Timer<O = unknown> extends Fastener<O> {
 
   /** @override @protected */
   onUnmount(): void;
-
-  /** @internal @override */
-  get lazy(): boolean; // prototype property
-
-  /** @internal @override */
-  get static(): string | boolean; // prototype property
 }
 
 /** @public */
 export const Timer = (function (_super: typeof Fastener) {
-  const Timer: TimerFactory = _super.extend("Timer");
+  const Timer = _super.extend("Timer", {
+    lazy: false,
+    static: true,
+  }) as TimerClass;
 
   Object.defineProperty(Timer.prototype, "fastenerType", {
-    get: function (this: Timer): Proto<Timer<any>> {
-      return Timer;
-    },
+    value: Timer,
     configurable: true,
   });
 
-  Timer.prototype.onInherit = function (this: Timer, superFastener: Timer): void {
-    this.setDelay(superFastener.delay);
+  Timer.prototype.fire = function (this: Timer): void {
+    // hook
   };
 
-  Timer.prototype.initDelay = function (this: Timer, delay: number): void {
-    (this as Mutable<typeof this>).delay = Math.max(0, delay);
+  Timer.prototype.initDelay = function (this: Timer): number {
+    let delay = (Object.getPrototypeOf(this) as Timer).delay as number | undefined;
+    if (delay === void 0) {
+      delay = 0;
+    }
+    return Math.max(0, delay);
   };
 
   Timer.prototype.setDelay = function (this: Timer, delay: number): void {
@@ -183,10 +179,6 @@ export const Timer = (function (_super: typeof Fastener) {
     configurable: true,
   });
 
-  Timer.prototype.fire = function (this: Timer): void {
-    // hook
-  };
-
   Object.defineProperty(Timer.prototype, "scheduled", {
     get: function (this: Timer): boolean {
       return this.timeout !== void 0;
@@ -204,7 +196,7 @@ export const Timer = (function (_super: typeof Fastener) {
       }
       this.willSchedule(delay);
       (this as Mutable<typeof this>).deadline = performance.now() + delay;
-      timeout = this.setTimeout(this.expire.bind(this), delay);
+      timeout = this.setTimeout(this, delay);
       (this as Mutable<typeof this>).timeout = timeout;
       this.onSchedule(delay);
       this.didSchedule(delay);
@@ -223,7 +215,7 @@ export const Timer = (function (_super: typeof Fastener) {
       }
       this.willSchedule(delay);
       (this as Mutable<typeof this>).deadline = performance.now() + delay;
-      timeout = this.setTimeout(this.expire.bind(this), delay);
+      timeout = this.setTimeout(this, delay);
       (this as Mutable<typeof this>).timeout = timeout;
       this.onSchedule(delay);
       this.didSchedule(delay);
@@ -246,7 +238,7 @@ export const Timer = (function (_super: typeof Fastener) {
     }
     this.willSchedule(delay);
     (this as Mutable<typeof this>).deadline = performance.now() + delay;
-    timeout = this.setTimeout(this.expire.bind(this), delay);
+    timeout = this.setTimeout(this, delay);
     (this as Mutable<typeof this>).timeout = timeout;
     this.onSchedule(delay);
     this.didSchedule(delay);
@@ -322,61 +314,19 @@ export const Timer = (function (_super: typeof Fastener) {
     this.cancel();
   };
 
-  Object.defineProperty(Timer.prototype, "lazy", {
-    get: function (this: Timer): boolean {
-      return false;
-    },
-    configurable: true,
-  });
-
-  Object.defineProperty(Timer.prototype, "static", {
-    get: function (this: Timer): string | boolean {
-      return true;
-    },
-    configurable: true,
-  });
-
-  Timer.construct = function <F extends Timer<any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
-    fastener = _super.construct(fastenerClass, fastener, owner) as F;
-    (fastener as Mutable<typeof fastener>).delay = 0;
+  Timer.construct = function <F extends Timer<any>>(fastener: F | null, owner: FastenerOwner<F>): F {
+    if (fastener === null) {
+      fastener = function (): void {
+        fastener!.expire();
+      } as F;
+      delete (fastener as Partial<Mutable<F>>).name; // don't clobber prototype name
+      Object.setPrototypeOf(fastener, this.prototype);
+    }
+    fastener = _super.construct.call(this, fastener, owner) as F;
+    (fastener as Mutable<typeof fastener>).delay = fastener.initDelay();
     (fastener as Mutable<typeof fastener>).deadline = 0;
     (fastener as Mutable<typeof fastener>).timeout = void 0;
-    (fastener as Mutable<typeof fastener>).expire = fastener.expire.bind(fastener);
     return fastener;
-  };
-
-  Timer.define = function <O>(className: string, descriptor: TimerDescriptor<O>): TimerFactory<Timer<any>> {
-    let superClass = descriptor.extends as TimerFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    const delay = descriptor.delay;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
-    delete descriptor.delay;
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this;
-    }
-
-    const fastenerClass = superClass.extend(className, descriptor);
-
-    fastenerClass.construct = function (fastenerClass: {prototype: Timer<any>}, fastener: Timer<O> | null, owner: O): Timer<O> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner);
-      if (affinity !== void 0) {
-        fastener.initAffinity(affinity);
-      }
-      if (inherits !== void 0) {
-        fastener.initInherits(inherits);
-      }
-      if (delay !== void 0) {
-        fastener.initDelay(delay);
-      }
-      return fastener;
-    };
-
-    return fastenerClass;
   };
 
   return Timer;

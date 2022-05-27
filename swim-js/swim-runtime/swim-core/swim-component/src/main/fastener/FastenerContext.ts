@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Proto} from "@swim/util";
-import type {FastenerDescriptor, FastenerClass, FastenerFactory, Fastener} from "./Fastener";
+import type {FastenerDescriptor, FastenerClass, Fastener} from "./Fastener";
 
 /** @public */
 export interface FastenerContextClass {
@@ -49,14 +49,15 @@ export const FastenerContext = (function () {
     getLazyFastener<F extends Fastener<any>>(fastenerContext: FastenerContext, fastenerName: string, fastenerBound: Proto<F>): F | null;
     getLazyFastener(fastenerContext: FastenerContext, fastenerName: string, fastenerBound?: Proto<Fastener> | null): Fastener | null;
   
+    getFastenerClass<O, K extends keyof {[K in keyof O as O[K] extends F ? K : never]: O[K]}, F extends Fastener<any> = Fastener<any>>(contextClass: Proto<O>, fastenerName: K, fastenerBound?: Proto<F> | null): FastenerClass<O[K] extends F ? O[K] : never>;
     getFastenerClass<F extends Fastener<any>>(contextClass: FastenerContextClass, fastenerName: string, fastenerBound: Proto<F>): FastenerClass | null;
     getFastenerClass(contextClass: FastenerContextClass, fastenerName: string, fastenerBound?: Proto<Fastener> | null): FastenerClass | null;
   
     getSuperFastenerClass(contextClass: FastenerContextClass, fastenerName: string, fastenerBound?: Proto<Fastener> | null): FastenerClass;
   
-    decorate(factory: FastenerFactory, descriptor: FastenerDescriptor, target: Object, propertyKey: string | symbol): void;
+    decorate(superClass: FastenerClass, template: FastenerDescriptor, target: Object, propertyKey: string | symbol): void;
 
-    decorator(factory: FastenerFactory, descriptor: FastenerDescriptor): PropertyDecorator;
+    decorator(superClass: FastenerClass, template: FastenerDescriptor): PropertyDecorator;
 
     init(fastenerContext: FastenerContext): void;
   
@@ -93,7 +94,7 @@ export const FastenerContext = (function () {
       contextClass = Object.getPrototypeOf(contextClass);
     } while (contextClass !== null);
     return null;
-  };
+  } as typeof FastenerContext.getFastenerClass;
 
   FastenerContext.getSuperFastenerClass = function (contextClass: FastenerContextClass, fastenerName: string, fastenerBound?: Proto<Fastener> | null): FastenerClass {
     const superContextClass = Object.getPrototypeOf(contextClass) as FastenerContextClass;
@@ -104,55 +105,61 @@ export const FastenerContext = (function () {
     return fastenerClass;
   };
 
-  FastenerContext.decorate = function (factory: FastenerFactory, descriptor: FastenerDescriptor, target: Object, propertyKey: string | symbol): void {
+  FastenerContext.decorate = function (superClass: FastenerClass, template: FastenerDescriptor, target: Object, propertyKey: string | symbol): void {
     const contextClass = target.constructor as FastenerContextClass;
     const fastenerName = propertyKey.toString();
 
-    const fastenerExtends = descriptor.extends;
+    const fastenerExtends = template.extends;
     if (typeof fastenerExtends === "string") {
-      Object.defineProperty(descriptor, "extends", {
+      Object.defineProperty(template, "extends", {
         value: FastenerContext.getSuperFastenerClass(contextClass, fastenerExtends),
-        writable: true,
         enumerable: true,
         configurable: true,
       });
     } else if (fastenerExtends === true) {
-      Object.defineProperty(descriptor, "extends", {
+      Object.defineProperty(template, "extends", {
         value: FastenerContext.getSuperFastenerClass(contextClass, fastenerName),
-        writable: true,
         enumerable: true,
         configurable: true,
       });
     } else if (fastenerExtends === false) {
-      Object.defineProperty(descriptor, "extends", {
+      Object.defineProperty(template, "extends", {
         value: null,
-        writable: true,
         enumerable: true,
         configurable: true,
       });
     }
 
-    const fastenerClass = factory.define(fastenerName, descriptor);
+    const fastenerClass = superClass.define(fastenerName, template);
     fastenerClass.contextClass = contextClass;
 
     if (!Object.prototype.hasOwnProperty.call(contextClass, "fastenerClassMap")) {
-      contextClass.fastenerClassMap = {};
+      Object.defineProperty(contextClass, "fastenerClassMap", {
+        value: {},
+        configurable: true,
+      });
     }
     contextClass.fastenerClassMap![fastenerName] = fastenerClass;
 
-    if (!fastenerClass.prototype.lazy) {
+    if (fastenerClass.prototype.lazy === false) {
       if (!Object.prototype.hasOwnProperty.call(contextClass, "fastenerClassInitMap")) {
-        contextClass.fastenerClassInitMap = {};
+        Object.defineProperty(contextClass, "fastenerClassInitMap", {
+          value: {},
+          configurable: true,
+        });
       }
       contextClass.fastenerClassInitMap![fastenerName] = fastenerClass;
     }
 
     let staticName = fastenerClass.prototype.static;
-    if (staticName !== false) {
-      if (staticName === true) {
-        staticName = fastenerName;
-      }
-      (contextClass as any)[staticName] = fastenerClass;
+    if (typeof staticName === "boolean") {
+      staticName = staticName ? fastenerName : void 0;
+    }
+    if (staticName !== void 0) {
+      Object.defineProperty(contextClass, staticName, {
+        value: fastenerClass,
+        configurable: true,
+      });
     }
 
     Object.defineProperty(target, propertyKey, {
@@ -168,8 +175,8 @@ export const FastenerContext = (function () {
     });
   };
 
-  FastenerContext.decorator = function (factory: FastenerFactory, descriptor: FastenerDescriptor): PropertyDecorator {
-    return FastenerContext.decorate.bind(FastenerContext, factory, descriptor);
+  FastenerContext.decorator = function (superClass: FastenerClass, template: FastenerDescriptor): PropertyDecorator {
+    return FastenerContext.decorate.bind(FastenerContext, superClass, template);
   };
 
   FastenerContext.init = function (fastenerContext: FastenerContext): void {
@@ -179,8 +186,9 @@ export const FastenerContext = (function () {
         const fastenerClassInitMap = contextClass.fastenerClassInitMap!;
         for (const fastenerName in fastenerClassInitMap) {
           const fastenerClass = fastenerClassInitMap[fastenerName]!;
-          if (!fastenerContext.hasFastener(fastenerName)) {
-            const fastener = fastenerClass.create(fastenerContext);
+          let fastener = fastenerContext.getFastener(fastenerName);
+          if (fastener === null) {
+            fastener = fastenerClass.create(fastenerContext);
             fastenerContext.setFastener(fastenerName, fastener);
           }
         }

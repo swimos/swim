@@ -17,7 +17,7 @@ import type {Equals} from "../compare/Equals";
 import type {Equivalent} from "../compare/Equivalent";
 import type {Domain} from "./Domain";
 import type {Range} from "./Range";
- 
+
 /** @public */
 export interface Mapping<X, Y> extends Equals, Equivalent {
   (x: X): Y;
@@ -26,12 +26,15 @@ export interface Mapping<X, Y> extends Equals, Equivalent {
 
   readonly range: Range<Y>;
 
+  /** @override */
   equivalentTo(that: unknown, epsilon?: number): boolean;
 
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -55,7 +58,7 @@ export const Mapping = (function (_super: typeof Function) {
   Mapping.prototype = Object.create(_super.prototype);
   Mapping.prototype.constructor = Mapping;
 
-  Mapping.prototype.equivalentTo = function (that: unknown, epsilon?: number): boolean {
+  Mapping.prototype.equivalentTo = function <X, Y>(this: Mapping<X, Y>, that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Mapping) {
@@ -65,11 +68,11 @@ export const Mapping = (function (_super: typeof Function) {
     return false;
   };
 
-  Mapping.prototype.canEqual = function (that: unknown): boolean {
+  Mapping.prototype.canEqual = function <X, Y>(this: Mapping<X, Y>, that: unknown): boolean {
     return that instanceof Mapping;
   };
 
-  Mapping.prototype.equals = function (that: unknown): boolean {
+  Mapping.prototype.equals = function <X, Y>(this: Mapping<X, Y>, that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Mapping) {
@@ -80,7 +83,7 @@ export const Mapping = (function (_super: typeof Function) {
     return false;
   };
 
-  Mapping.prototype.toString = function (): string {
+  Mapping.prototype.toString = function <X, Y>(this: Mapping<X, Y>): string {
     return "Mapping(" + this.domain + ", " + this.range + ")";
   };
 

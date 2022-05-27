@@ -13,6 +13,11 @@
 // limitations under the License.
 
 export {HostRefSpec} from "./HostRefSpec";
+
 export {NodeRefSpec} from "./NodeRefSpec";
+
 export {LaneRefSpec} from "./LaneRefSpec";
+
+export {WarpClientSpec} from "./WarpClientSpec";
+
 export {RefSuite} from "./RefSuite";

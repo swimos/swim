@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as ChildProcess from "child_process";
+import {exec} from "child_process";
 import {TaskStatus} from "../task/Task";
 import {PackageTask} from "./PackageTask";
 
@@ -31,12 +31,8 @@ export class TestTask extends PackageTask {
       return new Promise<TaskStatus>((resolve, reject): void => {
         this.logBegin("testing");
         const t0 = Date.now();
-        ChildProcess.exec(testScript!, {cwd: this.baseDir.value}, (error, stdout, stderr) => {
+        const testProcess = exec(testScript!, {cwd: this.baseDir.value}, (error) => {
           const dt = Date.now() - t0;
-          console.log(stdout);
-          if (stderr.length !== 0) {
-            console.error(stderr);
-          }
           if (error === null) {
             this.logSuccess("tested", dt);
             resolve(TaskStatus.Success);
@@ -44,6 +40,12 @@ export class TestTask extends PackageTask {
             this.logFailure("failed to test");
             resolve(TaskStatus.Failure);
           }
+        });
+        testProcess.stdout!.on("data", function (data: string): void {
+          process.stdout.write(data);
+        });
+        testProcess.stderr!.on("data", function (data: string): void {
+          process.stderr.write(data);
         });
       });
     } else {

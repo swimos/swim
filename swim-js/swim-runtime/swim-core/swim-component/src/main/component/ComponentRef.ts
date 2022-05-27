@@ -12,52 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable, Proto, ObserverType} from "@swim/util";
+import type {Mutable, Proto} from "@swim/util";
 import {Affinity} from "../fastener/Affinity";
 import {FastenerOwner, Fastener} from "../fastener/Fastener";
-import type {AnyComponent, Component} from "./Component";
-import {ComponentRelationInit, ComponentRelationClass, ComponentRelation} from "./ComponentRelation";
-
-/** @internal */
-export type ComponentRefType<F extends ComponentRef<any, any>> =
-  F extends ComponentRef<any, infer C> ? C : never;
+import type {AnyComponent, ComponentFactory, Component} from "./Component";
+import {ComponentRelationDescriptor, ComponentRelationClass, ComponentRelation} from "./ComponentRelation";
 
 /** @public */
-export interface ComponentRefInit<C extends Component = Component> extends ComponentRelationInit<C> {
-  extends?: {prototype: ComponentRef<any, any>} | string | boolean | null;
-  key?: string | boolean;
+export type ComponentRefComponent<F extends ComponentRef<any, any>> =
+  F extends {componentType?: ComponentFactory<infer C>} ? C : never;
 
-  willInherit?(superFastener: ComponentRef<unknown, C>): void;
-  didInherit?(superFastener: ComponentRef<unknown, C>): void;
-  willUninherit?(superFastener: ComponentRef<unknown, C>): void;
-  didUninherit?(superFastener: ComponentRef<unknown, C>): void;
-
-  willBindSuperFastener?(superFastener: ComponentRef<unknown, C>): void;
-  didBindSuperFastener?(superFastener: ComponentRef<unknown, C>): void;
-  willUnbindSuperFastener?(superFastener: ComponentRef<unknown, C>): void;
-  didUnbindSuperFastener?(superFastener: ComponentRef<unknown, C>): void;
+/** @public */
+export interface ComponentRefDescriptor<C extends Component = Component> extends ComponentRelationDescriptor<C> {
+  extends?: Proto<ComponentRef<any, any>> | string | boolean | null;
+  componentKey?: string | boolean;
 }
 
 /** @public */
-export type ComponentRefDescriptor<O = unknown, C extends Component = Component, I = {}> = ThisType<ComponentRef<O, C> & I> & ComponentRefInit<C> & Partial<I>;
+export type ComponentRefTemplate<F extends ComponentRef<any, any>> =
+  ThisType<F> &
+  ComponentRefDescriptor<ComponentRefComponent<F>> &
+  Partial<Omit<F, keyof ComponentRefDescriptor>>;
 
 /** @public */
 export interface ComponentRefClass<F extends ComponentRef<any, any> = ComponentRef<any, any>> extends ComponentRelationClass<F> {
-}
+  /** @override */
+  specialize(template: ComponentRefDescriptor<any>): ComponentRefClass<F>;
 
-/** @public */
-export interface ComponentRefFactory<F extends ComponentRef<any, any> = ComponentRef<any, any>> extends ComponentRefClass<F> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): ComponentRefFactory<F> & I;
+  /** @override */
+  refine(fastenerClass: ComponentRefClass<any>): void;
 
-  define<O, C extends Component = Component>(className: string, descriptor: ComponentRefDescriptor<O, C>): ComponentRefFactory<ComponentRef<any, C>>;
-  define<O, C extends Component = Component>(className: string, descriptor: {observes: boolean} & ComponentRefDescriptor<O, C, ObserverType<C>>): ComponentRefFactory<ComponentRef<any, C>>;
-  define<O, C extends Component = Component, I = {}>(className: string, descriptor: {implements: unknown} & ComponentRefDescriptor<O, C, I>): ComponentRefFactory<ComponentRef<any, C> & I>;
-  define<O, C extends Component = Component, I = {}>(className: string, descriptor: {implements: unknown; observes: boolean} & ComponentRefDescriptor<O, C, I & ObserverType<C>>): ComponentRefFactory<ComponentRef<any, C> & I>;
+  /** @override */
+  extend<F2 extends F>(className: string, template: ComponentRefTemplate<F2>): ComponentRefClass<F2>;
+  extend<F2 extends F>(className: string, template: ComponentRefTemplate<F2>): ComponentRefClass<F2>;
 
-  <O, C extends Component = Component>(descriptor: ComponentRefDescriptor<O, C>): PropertyDecorator;
-  <O, C extends Component = Component>(descriptor: {observes: boolean} & ComponentRefDescriptor<O, C, ObserverType<C>>): PropertyDecorator;
-  <O, C extends Component = Component, I = {}>(descriptor: {implements: unknown} & ComponentRefDescriptor<O, C, I>): PropertyDecorator;
-  <O, C extends Component = Component, I = {}>(descriptor: {implements: unknown; observes: boolean} & ComponentRefDescriptor<O, C, I & ObserverType<C>>): PropertyDecorator;
+  /** @override */
+  define<F2 extends F>(className: string, template: ComponentRefTemplate<F2>): ComponentRefClass<F2>;
+  define<F2 extends F>(className: string, template: ComponentRefTemplate<F2>): ComponentRefClass<F2>;
+
+  /** @override */
+  <F2 extends F>(template: ComponentRefTemplate<F2>): PropertyDecorator;
 }
 
 /** @public */
@@ -69,62 +63,65 @@ export interface ComponentRef<O = unknown, C extends Component = Component> exte
   get fastenerType(): Proto<ComponentRef<any, any>>;
 
   /** @internal @override */
-  setInherited(inherited: boolean, superFastener: ComponentRef<unknown, C>): void;
+  getSuper(): ComponentRef<unknown, C> | null;
+
+  /** @internal @override */
+  setDerived(derived: boolean, inlet: ComponentRef<unknown, C>): void;
 
   /** @protected @override */
-  willInherit(superFastener: ComponentRef<unknown, C>): void;
+  willDerive(inlet: ComponentRef<unknown, C>): void;
 
   /** @protected @override */
-  onInherit(superFastener: ComponentRef<unknown, C>): void;
+  onDerive(inlet: ComponentRef<unknown, C>): void;
 
   /** @protected @override */
-  didInherit(superFastener: ComponentRef<unknown, C>): void;
+  didDerive(inlet: ComponentRef<unknown, C>): void;
 
   /** @protected @override */
-  willUninherit(superFastener: ComponentRef<unknown, C>): void;
+  willUnderive(inlet: ComponentRef<unknown, C>): void;
 
   /** @protected @override */
-  onUninherit(superFastener: ComponentRef<unknown, C>): void;
+  onUnderive(inlet: ComponentRef<unknown, C>): void;
 
   /** @protected @override */
-  didUninherit(superFastener: ComponentRef<unknown, C>): void;
+  didUnderive(inlet: ComponentRef<unknown, C>): void;
 
   /** @override */
-  readonly superFastener: ComponentRef<unknown, C> | null;
+  readonly inlet: ComponentRef<unknown, C> | null;
+
+  /** @protected @override */
+  willBindInlet(inlet: ComponentRef<unknown, C>): void;
+
+  /** @protected @override */
+  onBindInlet(inlet: ComponentRef<unknown, C>): void;
+
+  /** @protected @override */
+  didBindInlet(inlet: ComponentRef<unknown, C>): void;
+
+  /** @protected @override */
+  willUnbindInlet(inlet: ComponentRef<unknown, C>): void;
+
+  /** @protected @override */
+  onUnbindInlet(inlet: ComponentRef<unknown, C>): void;
+
+  /** @protected @override */
+  didUnbindInlet(inlet: ComponentRef<unknown, C>): void;
 
   /** @internal @override */
-  getSuperFastener(): ComponentRef<unknown, C> | null;
+  readonly outlets: ReadonlyArray<ComponentRef<unknown, C>> | null;
 
-  /** @protected @override */
-  willBindSuperFastener(superFastener: ComponentRef<unknown, C>): void;
+  /** @internal @override */
+  attachOutlet(outlet: ComponentRef<unknown, C>): void;
 
-  /** @protected @override */
-  onBindSuperFastener(superFastener: ComponentRef<unknown, C>): void;
+  /** @internal @override */
+  detachOutlet(outlet: ComponentRef<unknown, C>): void;
 
-  /** @protected @override */
-  didBindSuperFastener(superFastener: ComponentRef<unknown, C>): void;
+  get inletComponent(): C | null;
 
-  /** @protected @override */
-  willUnbindSuperFastener(superFastener: ComponentRef<unknown, C>): void;
-
-  /** @protected @override */
-  onUnbindSuperFastener(superFastener: ComponentRef<unknown, C>): void;
-
-  /** @protected @override */
-  didUnbindSuperFastener(superFastener: ComponentRef<unknown, C>): void;
+  getInletComponent(): C;
 
   /** @internal */
-  readonly subFasteners: ReadonlyArray<ComponentRef<unknown, C>> | null;
-
-  /** @internal @override */
-  attachSubFastener(subFastener: ComponentRef<unknown, C>): void;
-
-  /** @internal @override */
-  detachSubFastener(subFastener: ComponentRef<unknown, C>): void;
-
-  get superComponent(): C | null;
-
-  getSuperComponent(): C;
+  readonly componentKey?: string; // optional prototype property
 
   readonly component: C | null;
 
@@ -136,7 +133,7 @@ export interface ComponentRef<O = unknown, C extends Component = Component> exte
 
   detachComponent(): C | null;
 
-  insertComponent(parent?: Component, component?: AnyComponent<C>, target?: Component | null, key?: string): C;
+  insertComponent(parent?: Component | null, component?: AnyComponent<C>, target?: Component | null, key?: string): C;
 
   removeComponent(): C | null;
 
@@ -152,81 +149,52 @@ export interface ComponentRef<O = unknown, C extends Component = Component> exte
   detectComponent(component: Component): C | null;
 
   /** @internal @protected */
-  decohereSubFasteners(): void;
+  decohereOutlets(): void;
 
   /** @internal @protected */
-  decohereSubFastener(subFastener: ComponentRef<unknown, C>): void;
+  decohereOutlet(outlet: ComponentRef<unknown, C>): void;
 
   /** @override */
   recohere(t: number): void;
-
-  /** @internal */
-  get key(): string | undefined; // optional prototype field
 }
 
 /** @public */
 export const ComponentRef = (function (_super: typeof ComponentRelation) {
-  const ComponentRef: ComponentRefFactory = _super.extend("ComponentRef");
+  const ComponentRef = _super.extend("ComponentRef", {}) as ComponentRefClass;
 
   Object.defineProperty(ComponentRef.prototype, "fastenerType", {
-    get: function (this: ComponentRef): Proto<ComponentRef<any, any>> {
-      return ComponentRef;
-    },
+    value: ComponentRef,
     configurable: true,
   });
 
-  ComponentRef.prototype.onInherit = function (this: ComponentRef, superFastener: ComponentRef): void {
-    this.setComponent(superFastener.component);
-  };
-
-  ComponentRef.prototype.onBindSuperFastener = function <C extends Component>(this: ComponentRef<unknown, C>, superFastener: ComponentRef<unknown, C>): void {
-    (this as Mutable<typeof this>).superFastener = superFastener;
-    _super.prototype.onBindSuperFastener.call(this, superFastener);
-  };
-
-  ComponentRef.prototype.onUnbindSuperFastener = function <C extends Component>(this: ComponentRef<unknown, C>, superFastener: ComponentRef<unknown, C>): void {
-    _super.prototype.onUnbindSuperFastener.call(this, superFastener);
-    (this as Mutable<typeof this>).superFastener = null;
-  };
-
-  ComponentRef.prototype.attachSubFastener = function <C extends Component>(this: ComponentRef<unknown, C>, subFastener: ComponentRef<unknown, C>): void {
-    let subFasteners = this.subFasteners as ComponentRef<unknown, C>[] | null;
-    if (subFasteners === null) {
-      subFasteners = [];
-      (this as Mutable<typeof this>).subFasteners = subFasteners;
-    }
-    subFasteners.push(subFastener);
-  };
-
-  ComponentRef.prototype.detachSubFastener = function <C extends Component>(this: ComponentRef<unknown, C>, subFastener: ComponentRef<unknown, C>): void {
-    const subFasteners = this.subFasteners as ComponentRef<unknown, C>[] | null;
-    if (subFasteners !== null) {
-      const index = subFasteners.indexOf(subFastener);
-      if (index >= 0) {
-        subFasteners.splice(index, 1);
-      }
+  ComponentRef.prototype.onDerive = function (this: ComponentRef, inlet: ComponentRef): void {
+    const inletComponent = inlet.component;
+    if (inletComponent !== null) {
+      this.attachComponent(inletComponent);
+    } else {
+      this.detachComponent();
     }
   };
 
-  Object.defineProperty(ComponentRef.prototype, "superComponent", {
+  Object.defineProperty(ComponentRef.prototype, "inletComponent", {
     get: function <C extends Component>(this: ComponentRef<unknown, C>): C | null {
-      const superFastener = this.superFastener;
-      return superFastener !== null ? superFastener.component : null;
+      const inlet = this.inlet;
+      return inlet !== null ? inlet.component : null;
     },
     configurable: true,
   });
 
-  ComponentRef.prototype.getSuperComponent = function <C extends Component>(this: ComponentRef<unknown, C>): C {
-    const superComponent = this.superComponent;
-    if (superComponent === void 0 || superComponent === null) {
-      let message = superComponent + " ";
+  ComponentRef.prototype.getInletComponent = function <C extends Component>(this: ComponentRef<unknown, C>): C {
+    const inletComponent = this.inletComponent;
+    if (inletComponent === void 0 || inletComponent === null) {
+      let message = inletComponent + " ";
       if (this.name.length !== 0) {
         message += this.name + " ";
       }
-      message += "super component";
+      message += "inlet component";
       throw new TypeError(message);
     }
-    return superComponent;
+    return inletComponent;
   };
 
   ComponentRef.prototype.getComponent = function <C extends Component>(this: ComponentRef<unknown, C>): C {
@@ -243,10 +211,10 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
   };
 
   ComponentRef.prototype.setComponent = function <C extends Component>(this: ComponentRef<unknown, C>, newComponent: C  | null, target?: Component | null, key?: string): C | null {
+    let oldComponent = this.component;
     if (newComponent !== null) {
       newComponent = this.fromAny(newComponent);
     }
-    let oldComponent = this.component;
     if (oldComponent !== newComponent) {
       if (target === void 0) {
         target = null;
@@ -261,7 +229,7 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
         }
         if (newComponent !== null) {
           if (key === void 0) {
-            key = this.key;
+            key = this.componentKey;
           }
           this.insertChild(parent, newComponent, target, key);
         }
@@ -283,7 +251,7 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
           this.didAttachComponent(newComponent, target);
         }
         this.setCoherent(true);
-        this.decohereSubFasteners();
+        this.decohereOutlets();
       }
     }
     return oldComponent;
@@ -298,7 +266,7 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
     } else {
       newComponent = oldComponent;
     }
-    if (newComponent !== oldComponent) {
+    if (oldComponent !== newComponent) {
       if (target === void 0) {
         target = null;
       }
@@ -315,7 +283,7 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
       this.initComponent(newComponent);
       this.didAttachComponent(newComponent, target);
       this.setCoherent(true);
-      this.decohereSubFasteners();
+      this.decohereOutlets();
     }
     return newComponent;
   };
@@ -329,51 +297,54 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
       this.deinitComponent(oldComponent);
       this.didDetachComponent(oldComponent);
       this.setCoherent(true);
-      this.decohereSubFasteners();
+      this.decohereOutlets();
     }
     return oldComponent;
   };
 
   ComponentRef.prototype.insertComponent = function <C extends Component>(this: ComponentRef<unknown, C>, parent?: Component | null, newComponent?: AnyComponent<C>, target?: Component | null, key?: string): C {
+    let oldComponent = this.component;
     if (newComponent !== void 0 && newComponent !== null) {
       newComponent = this.fromAny(newComponent);
+    } else if (oldComponent === null) {
+      newComponent = this.createComponent();
     } else {
-      const oldComponent = this.component;
-      if (oldComponent === null) {
-        newComponent = this.createComponent();
-      } else {
-        newComponent = oldComponent;
+      newComponent = oldComponent;
+    }
+    if (parent === void 0) {
+      parent = null;
+    }
+    if (this.binds || oldComponent !== newComponent || newComponent.parent === null || parent !== null || key !== void 0) {
+      if (parent === null) {
+        parent = this.parentComponent;
       }
-    }
-    if (parent === void 0 || parent === null) {
-      parent = this.parentComponent;
-    }
-    if (target === void 0) {
-      target = null;
-    }
-    if (key === void 0) {
-      key = this.key;
-    }
-    if (parent !== null && (newComponent.parent !== parent || newComponent.key !== key)) {
-      this.insertChild(parent, newComponent, target, key);
-    }
-    const oldComponent = this.component;
-    if (newComponent !== oldComponent) {
-      if (oldComponent !== null) {
-        (this as Mutable<typeof this>).component = null;
-        this.willDetachComponent(oldComponent);
-        this.onDetachComponent(oldComponent);
-        this.deinitComponent(oldComponent);
-        this.didDetachComponent(oldComponent);
-        oldComponent.remove();
+      if (target === void 0) {
+        target = null;
       }
-      (this as Mutable<typeof this>).component = newComponent;
-      this.willAttachComponent(newComponent, target);
-      this.onAttachComponent(newComponent, target);
-      this.initComponent(newComponent);
-      this.didAttachComponent(newComponent, target);
-      this.setCoherent(true);
-      this.decohereSubFasteners();
+      if (key === void 0) {
+        key = this.componentKey;
+      }
+      if (parent !== null && (newComponent.parent !== parent || newComponent.key !== key)) {
+        this.insertChild(parent, newComponent, target, key);
+      }
+      oldComponent = this.component;
+      if (oldComponent !== newComponent) {
+        if (oldComponent !== null) {
+          (this as Mutable<typeof this>).component = null;
+          this.willDetachComponent(oldComponent);
+          this.onDetachComponent(oldComponent);
+          this.deinitComponent(oldComponent);
+          this.didDetachComponent(oldComponent);
+          oldComponent.remove();
+        }
+        (this as Mutable<typeof this>).component = newComponent;
+        this.willAttachComponent(newComponent, target);
+        this.onAttachComponent(newComponent, target);
+        this.initComponent(newComponent);
+        this.didAttachComponent(newComponent, target);
+        this.setCoherent(true);
+        this.decohereOutlets();
+      }
     }
     return newComponent;
   };
@@ -404,7 +375,7 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
         this.initComponent(newComponent);
         this.didAttachComponent(newComponent, target);
         this.setCoherent(true);
-        this.decohereSubFasteners();
+        this.decohereOutlets();
       }
     }
   };
@@ -419,47 +390,47 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
         this.deinitComponent(oldComponent);
         this.didDetachComponent(oldComponent);
         this.setCoherent(true);
-        this.decohereSubFasteners();
+        this.decohereOutlets();
       }
     }
   };
 
   ComponentRef.prototype.detectComponent = function <C extends Component>(this: ComponentRef<unknown, C>, component: Component): C | null {
-    const key = this.key;
+    const key = this.componentKey;
     if (key !== void 0 && key === component.key) {
       return component as C;
     }
     return null;
   };
 
-  ComponentRef.prototype.decohereSubFasteners = function (this: ComponentRef): void {
-    const subFasteners = this.subFasteners;
-    for (let i = 0, n = subFasteners !== null ? subFasteners.length : 0; i < n; i += 1) {
-      this.decohereSubFastener(subFasteners![i]!);
+  ComponentRef.prototype.decohereOutlets = function (this: ComponentRef): void {
+    const outlets = this.outlets;
+    for (let i = 0, n = outlets !== null ? outlets.length : 0; i < n; i += 1) {
+      this.decohereOutlet(outlets![i]!);
     }
   };
 
-  ComponentRef.prototype.decohereSubFastener = function (this: ComponentRef, subFastener: ComponentRef): void {
-    if ((subFastener.flags & Fastener.InheritedFlag) === 0 && Math.min(this.flags & Affinity.Mask, Affinity.Intrinsic) >= (subFastener.flags & Affinity.Mask)) {
-      subFastener.setInherited(true, this);
-    } else if ((subFastener.flags & Fastener.InheritedFlag) !== 0 && (subFastener.flags & Fastener.DecoherentFlag) === 0) {
-      subFastener.setCoherent(false);
-      subFastener.decohere();
+  ComponentRef.prototype.decohereOutlet = function (this: ComponentRef, outlet: ComponentRef): void {
+    if ((outlet.flags & Fastener.DerivedFlag) === 0 && Math.min(this.flags & Affinity.Mask, Affinity.Intrinsic) >= (outlet.flags & Affinity.Mask)) {
+      outlet.setDerived(true, this);
+    } else if ((outlet.flags & Fastener.DerivedFlag) !== 0 && (outlet.flags & Fastener.DecoherentFlag) === 0) {
+      outlet.setCoherent(false);
+      outlet.decohere();
     }
   };
 
   ComponentRef.prototype.recohere = function (this: ComponentRef, t: number): void {
-    if ((this.flags & Fastener.InheritedFlag) !== 0) {
-      const superFastener = this.superFastener;
-      if (superFastener !== null) {
-        this.setComponent(superFastener.component);
+    if ((this.flags & Fastener.DerivedFlag) !== 0) {
+      const inlet = this.inlet;
+      if (inlet !== null) {
+        this.setComponent(inlet.component);
       }
     }
   };
 
-  ComponentRef.construct = function <F extends ComponentRef<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
+  ComponentRef.construct = function <F extends ComponentRef<any, any>>(fastener: F | null, owner: FastenerOwner<F>): F {
     if (fastener === null) {
-      fastener = function (component?: AnyComponent<ComponentRefType<F>> | null, target?: Component | null, key?: string): ComponentRefType<F> | null | FastenerOwner<F> {
+      fastener = function (component?: AnyComponent<ComponentRefComponent<F>> | null, target?: Component | null, key?: string): ComponentRefComponent<F> | null | FastenerOwner<F> {
         if (component === void 0) {
           return fastener!.component;
         } else {
@@ -468,60 +439,33 @@ export const ComponentRef = (function (_super: typeof ComponentRelation) {
         }
       } as F;
       delete (fastener as Partial<Mutable<F>>).name; // don't clobber prototype name
-      Object.setPrototypeOf(fastener, fastenerClass.prototype);
+      Object.setPrototypeOf(fastener, this.prototype);
     }
-    fastener = _super.construct(fastenerClass, fastener, owner) as F;
-    Object.defineProperty(fastener, "superFastener", { // override getter
-      value: null,
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
-    (fastener as Mutable<typeof fastener>).subFasteners = null;
-    (fastener as Mutable<typeof fastener>).key = void 0;
+    fastener = _super.construct.call(this, fastener, owner) as F;
     (fastener as Mutable<typeof fastener>).component = null;
     return fastener;
   };
 
-  ComponentRef.define = function <O, C extends Component>(className: string, descriptor: ComponentRefDescriptor<O, C>): ComponentRefFactory<ComponentRef<any, C>> {
-    let superClass = descriptor.extends as ComponentRefFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
+  ComponentRef.refine = function (fastenerClass: ComponentRefClass<any>): void {
+    _super.refine.call(this, fastenerClass);
+    const fastenerPrototype = fastenerClass.prototype;
 
-    if (descriptor.key === true) {
-      Object.defineProperty(descriptor, "key", {
-        value: className,
-        configurable: true,
-      });
-    } else if (descriptor.key === false) {
-      Object.defineProperty(descriptor, "key", {
-        value: void 0,
-        configurable: true,
-      });
-    }
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this;
-    }
-
-    const fastenerClass = superClass.extend(className, descriptor);
-
-    fastenerClass.construct = function (fastenerClass: {prototype: ComponentRef<any, any>}, fastener: ComponentRef<O, C> | null, owner: O): ComponentRef<O, C> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner);
-      if (affinity !== void 0) {
-        fastener.initAffinity(affinity);
+    if (Object.prototype.hasOwnProperty.call(fastenerPrototype, "componentKey")) {
+      const componentKey = fastenerPrototype.componentKey as string | boolean | undefined;
+      if (componentKey === true) {
+        Object.defineProperty(fastenerPrototype, "componentKey", {
+          value: fastenerClass.name,
+          enumerable: true,
+          configurable: true,
+        });
+      } else if (componentKey === false) {
+        Object.defineProperty(fastenerPrototype, "componentKey", {
+          value: void 0,
+          enumerable: true,
+          configurable: true,
+        });
       }
-      if (inherits !== void 0) {
-        fastener.initInherits(inherits);
-      }
-      return fastener;
-    };
-
-    return fastenerClass;
+    }
   };
 
   return ComponentRef;

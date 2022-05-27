@@ -16,31 +16,26 @@ import {Arg, Opt, Cmd} from "@swim/args";
 import type {Value} from "@swim/structure";
 import {Recon} from "@swim/recon";
 import {AnyUri, Uri} from "@swim/uri";
-import * as client from "@swim/client";
+import {WarpDownlink, WarpClient} from "@swim/client";
 
 function link(hostUri: AnyUri | undefined, nodeUri: AnyUri | undefined,
-              laneUri: AnyUri | undefined, format?: string): client.Downlink {
-  let downlink = client.downlink();
-  if (hostUri !== void 0) {
-    downlink = downlink.hostUri(hostUri);
-  }
-  if (nodeUri !== void 0) {
-    downlink = downlink.nodeUri(nodeUri);
-  }
-  if (laneUri !== void 0) {
-    downlink = downlink.laneUri(laneUri);
-  }
-  return downlink.keepSynced(true)
-    .onEvent(function (body: Value): void {
+              laneUri: AnyUri | undefined, format?: string): WarpDownlink {
+  return WarpClient.global().downlink({
+    hostUri: hostUri,
+    nodeUri: nodeUri,
+    laneUri: laneUri,
+    syncs: true,
+    onEvent(body: Value): void {
       if (format === "json") {
         console.log(JSON.stringify(body.toAny()));
       } else {
         console.log(Recon.toString(body));
       }
-    })
-    .didUnlink(function (downlink: client.Downlink): void {
-      downlink.close();
-    });
+    },
+    didUnlink(): void {
+      this.close();
+    },
+  });
 }
 
 const linkCmd = Cmd.create("link")
@@ -51,7 +46,7 @@ const linkCmd = Cmd.create("link")
   .withOpt(Opt.create("lane").withFlag("l").withArg("laneUri").withDesc("lane to link"))
   .withOpt(Opt.create("format").withFlag("f").withArg("json|recon").withDesc("event output format"))
   .onExec(function (this: Cmd, args: {[name: string]: string | undefined}): void {
-    link(args.host, args.node, args.lane, args.format).keepSynced(false).open();
+    link(args.host, args.node, args.lane, args.format).sync(false).open();
   });
 
 const syncCmd = Cmd.create("sync")
@@ -73,11 +68,25 @@ const getCmd = Cmd.create("get")
   .withOpt(Opt.create("lane").withFlag("l").withArg("laneUri").withDesc("lane to link"))
   .withOpt(Opt.create("format").withFlag("f").withArg("json|recon").withDesc("event output format"))
   .onExec(function (this: Cmd, args: {[name: string]: string | undefined}): void {
-    link(args.host, args.node, args.lane, args.format)
-      .didSync((downlink: client.Downlink) => {
-        downlink.close();
-      })
-      .open();
+    WarpClient.global().downlink({
+      hostUri: args.host,
+      nodeUri: args.node,
+      laneUri: args.lane,
+      syncs: true,
+      onEvent(body: Value): void {
+        if (args.format === "json") {
+          console.log(JSON.stringify(body.toAny()));
+        } else {
+          console.log(Recon.toString(body));
+        }
+      },
+      didSync(): void {
+        this.close();
+      },
+      didUnlink(): void {
+        this.close();
+      },
+    }).open();
   });
 
 const reflectLogCmd = Cmd.create("log")

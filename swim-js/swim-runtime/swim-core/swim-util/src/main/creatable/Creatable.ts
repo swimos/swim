@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /** @public */
-export type CreateType<C> =
+export type Creates<C> =
   C extends {create(...args: any): infer T} ? T : never;
 
 /** @public */

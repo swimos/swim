@@ -15,87 +15,52 @@
 import {Mutable, Proto, Equals, FromAny} from "@swim/util";
 import {Affinity} from "../fastener/Affinity";
 import {FastenerContext} from "../fastener/FastenerContext";
-import {FastenerOwner, FastenerInit, FastenerClass, Fastener} from "../fastener/Fastener";
-import {StringProperty} from "./"; // forward import
-import {NumberProperty} from "./"; // forward import
-import {BooleanProperty} from "./"; // forward import
-
-/** @internal */
-export type MemberPropertyValue<O, K extends keyof O> =
-  O[K] extends Property<any, infer T> ? T : never;
-
-/** @internal */
-export type MemberPropertyValueInit<O, K extends keyof O> =
-  O[K] extends Property<any, any, infer U> ? U : never;
-
-/** @internal */
-export type MemberPropertyInit<O, K extends keyof O> =
-  O[K] extends Property<any, infer T, infer U> ? T | U : never;
-
-/** @internal */
-export type MemberPropertyInitMap<O> =
-  {-readonly [K in keyof O as O[K] extends Property ? K : never]?: MemberPropertyInit<O, K>};
-
-/** @internal */
-export type PropertyValue<P extends Property<any, any>> =
-  P extends Property<any, infer T> ? T : never;
-
-/** @internal */
-export type PropertyValueInit<P extends Property<any, any>> =
-  P extends Property<any, infer T, infer U> ? T | U : never;
+import {FastenerOwner, FastenerDescriptor, FastenerClass, Fastener} from "../fastener/Fastener";
 
 /** @public */
-export interface PropertyInit<T = unknown, U = T> extends FastenerInit {
-  extends?: {prototype: Property<any, any>} | string | boolean | null;
-  type?: unknown;
+export type PropertyValue<P extends Property<any, any, any>> =
+  P extends {value: infer T} ? T : never;
 
+/** @public */
+export type PropertyValueInit<P extends Property<any, any, any>> =
+  P extends {valueInit?: infer U} ? U : never;
+
+/** @public */
+export type AnyPropertyValue<P extends Property<any, any, any>> =
+  PropertyValue<P> | PropertyValueInit<P>;
+
+/** @public */
+export interface PropertyDescriptor<T = unknown, U = T> extends FastenerDescriptor {
+  extends?: Proto<Property<any, any, any>> | string | boolean | null;
+  valueType?: unknown;
   value?: T | U;
   updateFlags?: number;
-
-  willInherit?(superFastener: Property<unknown, T>): void;
-  didInherit?(superFastener: Property<unknown, T>): void;
-  willUninherit?(superFastener: Property<unknown, T>): void;
-  didUninherit?(superFastener: Property<unknown, T>): void;
-
-  willBindSuperFastener?(superFastener: Property<unknown, T>): void;
-  didBindSuperFastener?(superFastener: Property<unknown, T>): void;
-  willUnbindSuperFastener?(superFastener: Property<unknown, T>): void;
-  didUnbindSuperFastener?(superFastener: Property<unknown, T>): void;
-
-  transformSuperValue?(superValue: T): T;
-  transformValue?(value: T): T;
-
-  willSetValue?(newValue: T, oldValue: T): void;
-  didSetValue?(newValue: T, oldValue: T): void;
-
-  initValue?(): T | U;
-  definedValue?(value: T): boolean;
-  equalValues?(newValue: T, oldValue: T | undefined): boolean;
-  fromAny?(value: T | U): T;
 }
 
 /** @public */
-export type PropertyDescriptor<O = unknown, T = unknown, U = T, I = {}> = ThisType<Property<O, T, U> & I> & PropertyInit<T, U> & Partial<I>;
+export type PropertyTemplate<P extends Property<any, any, any>> =
+  ThisType<P> &
+  PropertyDescriptor<PropertyValue<P>, PropertyValueInit<P>> &
+  Partial<Omit<P, keyof PropertyDescriptor>>;
 
 /** @public */
-export interface PropertyClass<P extends Property<any, any> = Property<any, any>> extends FastenerClass<P> {
-}
+export interface PropertyClass<P extends Property<any, any, any> = Property<any, any, any>> extends FastenerClass<P> {
+  /** @override */
+  specialize(template: PropertyDescriptor<any, any>): PropertyClass<P>;
 
-/** @public */
-export interface PropertyFactory<P extends Property<any, any> = Property<any, any>> extends PropertyClass<P> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): PropertyFactory<P> & I;
+  /** @override */
+  refine(propertyClass: PropertyClass<any>): void;
 
-  specialize(type: unknown): PropertyFactory | null;
+  /** @override */
+  extend<P2 extends P>(className: string, template: PropertyTemplate<P2>): PropertyClass<P2>;
+  extend<P2 extends P>(className: string, template: PropertyTemplate<P2>): PropertyClass<P2>;
 
-  define<O, T, U = T>(className: string, descriptor: PropertyDescriptor<O, T, U>): PropertyFactory<Property<any, T, U>>;
-  define<O, T, U = T, I = {}>(className: string, descriptor: {implements: unknown} & PropertyDescriptor<O, T, U, I>): PropertyFactory<Property<any, T, U> & I>;
+  /** @override */
+  define<P2 extends P>(className: string, template: PropertyTemplate<P2>): PropertyClass<P2>;
+  define<P2 extends P>(className: string, template: PropertyTemplate<P2>): PropertyClass<P2>;
 
-  <O, T extends string | undefined = string | undefined, U extends string | undefined = string | undefined>(descriptor: {type: typeof String} & PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T extends number | undefined = number | undefined, U extends number | string | undefined = number | string | undefined>(descriptor: {type: typeof Number} & PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T extends boolean | undefined = boolean | undefined, U extends boolean | string | undefined = boolean | string | undefined>(descriptor: {type: typeof Boolean} & PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = T>(descriptor: ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = T>(descriptor: PropertyDescriptor<O, T, U>): PropertyDecorator;
-  <O, T, U = T, I = {}>(descriptor: {implements: unknown} & PropertyDescriptor<O, T, U, I>): PropertyDecorator;
+  /** @override */
+  <P2 extends P>(template: PropertyTemplate<P2>): PropertyDecorator;
 }
 
 /** @public */
@@ -104,69 +69,79 @@ export interface Property<O = unknown, T = unknown, U = T> extends Fastener<O> {
   (value: T | U, affinity?: Affinity): O;
 
   /** @override */
-  get fastenerType(): Proto<Property<any, any>>;
+  get fastenerType(): Proto<Property<any, any, any>>;
 
   /** @internal @override */
-  setInherited(inherited: boolean, superFastener: Property<unknown, T>): void;
+  getSuper(): Property<unknown, T> | null;
+
+  /** @internal @override */
+  setDerived(derived: boolean, inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  willInherit(superFastener: Property<unknown, T>): void;
+  willDerive(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  onInherit(superFastener: Property<unknown, T>): void;
+  onDerive(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  didInherit(superFastener: Property<unknown, T>): void;
+  didDerive(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  willUninherit(superFastener: Property<unknown, T>): void;
+  willUnderive(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  onUninherit(superFastener: Property<unknown, T>): void;
+  onUnderive(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  didUninherit(superFastener: Property<unknown, T>): void;
+  didUnderive(inlet: Property<unknown, T>): void;
 
   /** @override */
-  readonly superFastener: Property<unknown, T> | null;
-
-  /** @internal @override */
-  getSuperFastener(): Property<unknown, T> | null;
+  readonly inlet: Property<unknown, T> | null;
 
   /** @protected @override */
-  willBindSuperFastener(superFastener: Property<unknown, T>): void;
+  willBindInlet(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  onBindSuperFastener(superFastener: Property<unknown, T>): void;
+  onBindInlet(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  didBindSuperFastener(superFastener: Property<unknown, T>): void;
+  didBindInlet(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  willUnbindSuperFastener(superFastener: Property<unknown, T>): void;
+  willUnbindInlet(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  onUnbindSuperFastener(superFastener: Property<unknown, T>): void;
+  onUnbindInlet(inlet: Property<unknown, T>): void;
 
   /** @protected @override */
-  didUnbindSuperFastener(superFastener: Property<unknown, T>): void;
+  didUnbindInlet(inlet: Property<unknown, T>): void;
 
   /** @internal */
-  readonly subFasteners: ReadonlyArray<Property<unknown, T>> | null;
+  readonly outlets: ReadonlyArray<Property<unknown, T>> | null;
 
   /** @internal @override */
-  attachSubFastener(subFastener: Property<unknown, T>): void;
+  attachOutlet(outlet: Property<unknown, T>): void;
 
   /** @internal @override */
-  detachSubFastener(subFastener: Property<unknown, T>): void;
+  detachOutlet(outlet: Property<unknown, T>): void;
 
-  get superValue(): T | undefined;
+  getOutletValue(outlet: Property<unknown, T>): T;
 
-  getSuperValue(): NonNullable<T>;
+  get inletValue(): T | undefined;
 
-  getSuperValueOr<E>(elseValue: E): NonNullable<T> | E;
+  getInletValue(): NonNullable<T>;
 
-  transformSuperValue(superValue: T): T;
+  getInletValueOr<E>(elseValue: E): NonNullable<T> | E;
+
+  transformInletValue(inletValue: T): T;
+
+  /** @internal */
+  readonly valueType?: unknown; // optional prototype property
+
+  /** @internal */
+  readonly valueInit?: U; // for type destructuring
+
+  initValue(): T;
 
   readonly value: T;
 
@@ -187,16 +162,17 @@ export interface Property<O = unknown, T = unknown, U = T> extends Fastener<O> {
   /** @protected */
   didSetValue(newValue: T, oldValue: T): void;
 
-  /** @internal @protected */
-  decohereSubFasteners(): void;
+  /** @internal */
+  readonly updateFlags?: number; // optional prototype property
 
   /** @internal @protected */
-  decohereSubFastener(subFastener: Property<unknown, T>): void;
+  decohereOutlets(): void;
+
+  /** @internal @protected */
+  decohereOutlet(outlet: Property<unknown, T>): void;
 
   /** @override */
   recohere(t: number): void;
-
-  get updateFlags(): number | undefined; // optional prototype field
 
   /** @internal */
   definedValue(value: T): boolean;
@@ -210,80 +186,86 @@ export interface Property<O = unknown, T = unknown, U = T> extends Fastener<O> {
 
 /** @public */
 export const Property = (function (_super: typeof Fastener) {
-  const Property: PropertyFactory = _super.extend("Property");
+  const Property = _super.extend("Property", {}) as PropertyClass;
 
   Object.defineProperty(Property.prototype, "fastenerType", {
-    get: function (this: Property): Proto<Property<any, any>> {
-      return Property;
-    },
+    value: Property,
     configurable: true,
   });
 
-  Property.prototype.onInherit = function <T>(this: Property<unknown, T>, superFastener: Property<unknown, T>): void {
-    const superValue = this.transformSuperValue(superFastener.value);
-    this.setValue(superValue, Affinity.Reflexive);
+  Property.prototype.onDerive = function <T>(this: Property<unknown, T>, inlet: Property<unknown, T>): void {
+    const inletValue = this.transformInletValue(inlet.getOutletValue(this));
+    this.setValue(inletValue, Affinity.Reflexive);
   };
 
-  Property.prototype.onBindSuperFastener = function <T>(this: Property<unknown, T>, superFastener: Property<unknown, T>): void {
-    (this as Mutable<typeof this>).superFastener = superFastener;
-    _super.prototype.onBindSuperFastener.call(this, superFastener);
+  Property.prototype.onBindInlet = function <T>(this: Property<unknown, T>, inlet: Property<unknown, T>): void {
+    (this as Mutable<typeof this>).inlet = inlet;
+    _super.prototype.onBindInlet.call(this, inlet);
   };
 
-  Property.prototype.onUnbindSuperFastener = function <T>(this: Property<unknown, T>, superFastener: Property<unknown, T>): void {
-    _super.prototype.onUnbindSuperFastener.call(this, superFastener);
-    (this as Mutable<typeof this>).superFastener = null;
+  Property.prototype.onUnbindInlet = function <T>(this: Property<unknown, T>, inlet: Property<unknown, T>): void {
+    _super.prototype.onUnbindInlet.call(this, inlet);
+    (this as Mutable<typeof this>).inlet = null;
   };
 
-  Property.prototype.attachSubFastener = function <T>(this: Property<unknown, T>, subFastener: Property<unknown, T>): void {
-    let subFasteners = this.subFasteners as Property<unknown, T>[] | null;
-    if (subFasteners === null) {
-      subFasteners = [];
-      (this as Mutable<typeof this>).subFasteners = subFasteners;
+  Property.prototype.attachOutlet = function <T>(this: Property<unknown, T>, outlet: Property<unknown, T>): void {
+    let outlets = this.outlets as Property<unknown, T>[] | null;
+    if (outlets === null) {
+      outlets = [];
+      (this as Mutable<typeof this>).outlets = outlets;
     }
-    subFasteners.push(subFastener);
+    outlets.push(outlet);
   };
 
-  Property.prototype.detachSubFastener = function <T>(this: Property<unknown, T>, subFastener: Property<unknown, T>): void {
-    const subFasteners = this.subFasteners as Property<unknown, T>[] | null;
-    if (subFasteners !== null) {
-      const index = subFasteners.indexOf(subFastener);
+  Property.prototype.detachOutlet = function <T>(this: Property<unknown, T>, outlet: Property<unknown, T>): void {
+    const outlets = this.outlets as Property<unknown, T>[] | null;
+    if (outlets !== null) {
+      const index = outlets.indexOf(outlet);
       if (index >= 0) {
-        subFasteners.splice(index, 1);
+        outlets.splice(index, 1);
       }
     }
   };
 
-  Object.defineProperty(Property.prototype, "superValue", {
+  Property.prototype.getOutletValue = function <T>(this: Property<unknown, T>, outlet: Property<unknown, T>): T {
+    return this.value;
+  };
+
+  Object.defineProperty(Property.prototype, "inletValue", {
     get: function <T>(this: Property<unknown, T>): T | undefined {
-      const superFastener = this.superFastener;
-      return superFastener !== null ? superFastener.value : void 0;
+      const inlet = this.inlet;
+      return inlet !== null ? inlet.getOutletValue(this) : void 0;
     },
     configurable: true,
   });
 
-  Property.prototype.getSuperValue = function <T>(this: Property<unknown, T>): NonNullable<T> {
-    const superValue = this.superValue;
-    if (superValue === void 0 || superValue === null) {
-      let message = superValue + " ";
+  Property.prototype.getInletValue = function <T>(this: Property<unknown, T>): NonNullable<T> {
+    const inletValue = this.inletValue;
+    if (inletValue === void 0 || inletValue === null) {
+      let message = inletValue + " ";
       if (this.name.length !== 0) {
         message += this.name + " ";
       }
-      message += "super value";
+      message += "inlet value";
       throw new TypeError(message);
     }
-    return superValue as NonNullable<T>;
+    return inletValue as NonNullable<T>;
   };
 
-  Property.prototype.getSuperValueOr = function <T, E>(this: Property<unknown, T>, elseValue: E): NonNullable<T> | E {
-    let superValue: T | E | undefined = this.superValue;
-    if (superValue === void 0 || superValue === null) {
-      superValue = elseValue;
+  Property.prototype.getInletValueOr = function <T, E>(this: Property<unknown, T>, elseValue: E): NonNullable<T> | E {
+    let inletValue: T | E | undefined = this.inletValue;
+    if (inletValue === void 0 || inletValue === null) {
+      inletValue = elseValue;
     }
-    return superValue as NonNullable<T> | E;
+    return inletValue as NonNullable<T> | E;
   };
 
-  Property.prototype.transformSuperValue = function <T>(this: Property<unknown, T>, superValue: T): T {
-    return superValue;
+  Property.prototype.transformInletValue = function <T>(this: Property<unknown, T>, inletValue: T): T {
+    return inletValue;
+  };
+
+  Property.prototype.initValue = function <T>(this: Property<unknown, T>): T {
+    return (Object.getPrototypeOf(this) as Property<unknown, T>).value;
   };
 
   Property.prototype.getValue = function <T>(this: Property<unknown, T>): NonNullable<T> {
@@ -325,7 +307,9 @@ export const Property = (function (_super: typeof Fastener) {
         this.onSetValue(newValue, oldValue);
         this.didSetValue(newValue, oldValue);
         this.setCoherent(true);
-        this.decohereSubFasteners();
+        this.decohereOutlets();
+      } else {
+        this.setCoherent(true);
       }
     }
   };
@@ -336,9 +320,8 @@ export const Property = (function (_super: typeof Fastener) {
 
   Property.prototype.onSetValue = function <T>(this: Property<unknown, T>, newValue: T, oldValue: T): void {
     const updateFlags = this.updateFlags;
-    const fastenerContext = this.owner;
-    if (updateFlags !== void 0 && FastenerContext.has(fastenerContext, "requireUpdate")) {
-      fastenerContext.requireUpdate(updateFlags);
+    if (updateFlags !== void 0 && FastenerContext.has(this.owner, "requireUpdate")) {
+      this.owner.requireUpdate(updateFlags);
     }
   };
 
@@ -346,28 +329,28 @@ export const Property = (function (_super: typeof Fastener) {
     // hook
   };
 
-  Property.prototype.decohereSubFasteners = function (this: Property): void {
-    const subFasteners = this.subFasteners;
-    for (let i = 0, n = subFasteners !== null ? subFasteners.length : 0; i < n; i += 1) {
-      this.decohereSubFastener(subFasteners![i]!);
+  Property.prototype.decohereOutlets = function (this: Property): void {
+    const outlets = this.outlets;
+    for (let i = 0, n = outlets !== null ? outlets.length : 0; i < n; i += 1) {
+      this.decohereOutlet(outlets![i]!);
     }
   };
 
-  Property.prototype.decohereSubFastener = function (this: Property, subFastener: Property): void {
-    if ((subFastener.flags & Fastener.InheritedFlag) === 0 && Math.min(this.flags & Affinity.Mask, Affinity.Intrinsic) >= (subFastener.flags & Affinity.Mask)) {
-      subFastener.setInherited(true, this);
-    } else if ((subFastener.flags & Fastener.InheritedFlag) !== 0 && (subFastener.flags & Fastener.DecoherentFlag) === 0) {
-      subFastener.setCoherent(false);
-      subFastener.decohere();
+  Property.prototype.decohereOutlet = function (this: Property, outlet: Property): void {
+    if ((outlet.flags & Fastener.DerivedFlag) === 0 && Math.min(this.flags & Affinity.Mask, Affinity.Intrinsic) >= (outlet.flags & Affinity.Mask)) {
+      outlet.setDerived(true, this);
+    } else if ((outlet.flags & Fastener.DerivedFlag) !== 0 && (outlet.flags & Fastener.DecoherentFlag) === 0) {
+      outlet.setCoherent(false);
+      outlet.decohere();
     }
   };
 
   Property.prototype.recohere = function (this: Property, t: number): void {
-    if ((this.flags & Fastener.InheritedFlag) !== 0) {
-      const superFastener = this.superFastener;
-      if (superFastener !== null) {
-        const superValue = this.transformSuperValue(superFastener.value);
-        this.setValue(superValue, Affinity.Reflexive);
+    if ((this.flags & Fastener.DerivedFlag) !== 0) {
+      const inlet = this.inlet;
+      if (inlet !== null) {
+        const inletValue = this.transformInletValue(inlet.getOutletValue(this));
+        this.setValue(inletValue, Affinity.Reflexive);
       }
     }
   };
@@ -381,10 +364,10 @@ export const Property = (function (_super: typeof Fastener) {
   };
 
   Property.prototype.fromAny = function <T, U>(this: Property<unknown, T, U>, value: T | U): T {
-    return value as T;
+    return FromAny.fromAny<T, U>(this.valueType, value);
   };
 
-  Property.construct = function <P extends Property<any, any>>(propertyClass: {prototype: P}, property: P | null, owner: FastenerOwner<P>): P {
+  Property.construct = function <P extends Property<any, any, any>>(property: P | null, owner: FastenerOwner<P>): P {
     if (property === null) {
       property = function (value?: PropertyValue<P> | PropertyValueInit<P>, affinity?: Affinity): PropertyValue<P> | FastenerOwner<P> {
         if (arguments.length === 0) {
@@ -395,73 +378,31 @@ export const Property = (function (_super: typeof Fastener) {
         }
       } as P;
       delete (property as Partial<Mutable<P>>).name; // don't clobber prototype name
-      Object.setPrototypeOf(property, propertyClass.prototype);
+      Object.setPrototypeOf(property, this.prototype);
     }
-    property = _super.construct(propertyClass, property, owner) as P;
-    Object.defineProperty(property, "superFastener", { // override getter
+    property = _super.construct.call(this, property, owner) as P;
+    Object.defineProperty(property, "inlet", { // override getter
       value: null,
       writable: true,
       enumerable: true,
       configurable: true,
     });
-    (property as Mutable<typeof property>).subFasteners = null;
-    (property as Mutable<typeof property>).value = void 0 as unknown as PropertyValue<P>;
+    (property as Mutable<typeof property>).outlets = null;
+    (property as Mutable<typeof property>).value = property.initValue();
     return property;
   };
 
-  Property.specialize = function (type: unknown): PropertyFactory | null {
-    if (type === String) {
-      return StringProperty;
-    } else if (type === Number) {
-      return NumberProperty;
-    } else if (type === Boolean) {
-      return BooleanProperty;
+  Property.refine = function (propertyClass: PropertyClass<any>): void {
+    _super.refine.call(this, propertyClass);
+    const propertyProtortype = propertyClass.prototype;
+
+    if (Object.prototype.hasOwnProperty.call(propertyProtortype, "value")) {
+      Object.defineProperty(propertyProtortype, "value", {
+        value: propertyProtortype.fromAny(propertyProtortype.value),
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return null;
-  };
-
-  Property.define = function <O, T, U>(className: string, descriptor: PropertyDescriptor<O, T, U>): PropertyFactory<Property<any, T, U>> {
-    let superClass = descriptor.extends as PropertyFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    const value = descriptor.value;
-    const initValue = descriptor.initValue;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
-    delete descriptor.value;
-    delete descriptor.initValue;
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this.specialize(descriptor.type);
-    }
-    if (superClass === null) {
-      superClass = this;
-      if (descriptor.fromAny === void 0 && FromAny.is<T, U>(descriptor.type)) {
-        descriptor.fromAny = descriptor.type.fromAny;
-      }
-    }
-
-    const propertyClass = superClass.extend(className, descriptor);
-
-    propertyClass.construct = function (propertyClass: {prototype: Property<any, any>}, property: Property<O, T, U> | null, owner: O): Property<O, T, U> {
-      property = superClass!.construct(propertyClass, property, owner);
-      if (affinity !== void 0) {
-        property.initAffinity(affinity);
-      }
-      if (inherits !== void 0) {
-        property.initInherits(inherits);
-      }
-      if (initValue !== void 0) {
-        (property as Mutable<typeof property>).value = property.fromAny(initValue());
-      } else if (value !== void 0) {
-        (property as Mutable<typeof property>).value = property.fromAny(value);
-      }
-      return property;
-    };
-
-    return propertyClass;
   };
 
   return Property;

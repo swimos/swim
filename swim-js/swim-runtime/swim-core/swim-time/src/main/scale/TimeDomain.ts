@@ -19,21 +19,31 @@ import {TimeRange} from "./"; // forward import
 
 /** @public */
 export interface TimeDomain extends Domain<DateTime>, Interpolate<TimeDomain> {
+  /** @override */
   readonly 0: DateTime;
 
+  /** @override */
   readonly 1: DateTime;
 
   readonly inverse: TimeRange;
 
+  /** @override */
   contains(t: AnyDateTime): boolean;
 
+  /** @override */
+  union(that: Domain<DateTime>): TimeDomain;
+
+  /** @override */
   interpolateTo(that: TimeDomain): Interpolator<TimeDomain>;
   interpolateTo(that: unknown): Interpolator<TimeDomain> | null;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -70,6 +80,16 @@ export const TimeDomain = (function (_super: typeof Domain) {
   TimeDomain.prototype.contains = function (t: AnyDateTime): boolean {
     t = DateTime.time(t);
     return this[0].time <= t && t <= this[1].time;
+  };
+
+  TimeDomain.prototype.union = function (that: Domain<DateTime>): TimeDomain {
+    const t0Min = this[0];
+    const t0Max = this[1];
+    const t1Min = that[0];
+    const t1Max = that[1];
+    const tMin = t0Min.time <= t1Min.time ? t0Min : t1Min;
+    const tMax = t0Max.time >= t1Max.time ? t0Max : t1Max;
+    return TimeDomain(tMin, tMax);
   };
 
   TimeDomain.prototype.interpolateTo = function (this: TimeDomain, that: unknown): Interpolator<TimeDomain> | null {

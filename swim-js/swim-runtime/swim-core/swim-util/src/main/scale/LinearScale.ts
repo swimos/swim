@@ -23,32 +23,43 @@ import {LinearScaleInterpolator} from "./"; // forward import
 
 /** @public */
 export interface LinearScale extends ContinuousScale<number, number>, Interpolate<LinearScale> {
+  /** @override */
   readonly domain: LinearDomain;
 
+  /** @override */
   readonly range: LinearRange;
 
+  /** @override */
   readonly inverse: LinearScale;
 
+  /** @override */
   withDomain(domain: LinearDomain): LinearScale;
   withDomain(x0: number, x1: number): LinearScale;
 
+  /** @override */
   overRange(range: LinearRange): LinearScale;
   overRange(y0: number, y1: number): LinearScale;
 
+  /** @override */
   clampDomain(xMin: number | undefined, xMax: number | undefined,
               zMin: number | undefined, zMax: number | undefined,
               epsilon?: number): LinearScale;
 
+  /** @override */
   solveDomain(x1: number, y1: number, x2?: number, y2?: number,
               reflect?: boolean, epsilon?: number): LinearScale;
 
+  /** @override */
   interpolateTo(that: LinearScale): Interpolator<LinearScale>;
   interpolateTo(that: unknown): Interpolator<LinearScale> | null;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 

@@ -14,29 +14,28 @@
 
 import type {ServiceObserver} from "@swim/component";
 import type {Workspace} from "./Workspace";
-import type {Scope} from "../scope/Scope";
 import type {PackageScope} from "../package/PackageScope";
 import type {LibraryScope} from "../library/LibraryScope";
 
 /** @public */
-export interface WorkspaceObserver<T extends Scope = Scope, S extends Workspace<T> = Workspace<T>> extends ServiceObserver<T, S> {
-  workspaceWillAttachPackage?(packageScope: PackageScope, workspace: S): void;
+export interface WorkspaceObserver<S extends Workspace = Workspace> extends ServiceObserver<S> {
+  serviceWillAttachPackage?(packageScope: PackageScope, service: S): void;
 
-  workspaceDidAttachPackage?(packageScope: PackageScope, workspace: S): void;
+  serviceDidAttachPackage?(packageScope: PackageScope, service: S): void;
 
-  workspaceWillDetachPackage?(packageScope: PackageScope, workspace: S): void;
+  serviceWillDetachPackage?(packageScope: PackageScope, service: S): void;
 
-  workspaceDidDetachPackage?(packageScope: PackageScope, workspace: S): void;
+  serviceDidDetachPackage?(packageScope: PackageScope, service: S): void;
 
-  workspaceWillAttachLibrary?(libraryScope: LibraryScope, workspace: S): void;
+  serviceWillAttachLibrary?(libraryScope: LibraryScope, service: S): void;
 
-  workspaceDidAttachLibrary?(libraryScope: LibraryScope, workspace: S): void;
+  serviceDidAttachLibrary?(libraryScope: LibraryScope, service: S): void;
 
-  workspaceWillDetachLibrary?(libraryScope: LibraryScope, workspace: S): void;
+  serviceWillDetachLibrary?(libraryScope: LibraryScope, service: S): void;
 
-  workspaceDidDetachLibrary?(libraryScope: LibraryScope, workspace: S): void;
+  serviceDidDetachLibrary?(libraryScope: LibraryScope, service: S): void;
 
-  workspacePackageDidChange?(packageScope: PackageScope, workspace: S): void;
+  servicePackageDidChange?(packageScope: PackageScope, service: S): void;
 
-  workspaceLibraryDidChange?(libraryScope: LibraryScope, workspace: S): void;
+  serviceLibraryDidChange?(libraryScope: LibraryScope, service: S): void;
 }

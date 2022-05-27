@@ -13,29 +13,45 @@
 // limitations under the License.
 
 import type {Mutable, Proto} from "@swim/util";
-import type {FastenerOwner, FastenerFlags, Fastener} from "@swim/component";
-import {FileRelationInit, FileRelationClass, FileRelation} from "./FileRelation";
-
-/** @internal */
-export type FileRefValue<F extends FileRef<any, any>> =
-  F extends FileRef<any, infer T> ? T : never;
+import type {FastenerFlags, FastenerOwner, Fastener} from "@swim/component";
+import {FileRelationDescriptor, FileRelationClass, FileRelation} from "./FileRelation";
 
 /** @public */
-export interface FileRefInit<T = unknown> extends FileRelationInit<T> {
-  extends?: {prototype: FileRef<any, any>} | string | boolean | null;
+export type FileRefValue<F extends FileRef<any, any>> =
+  F extends {value: infer T} ? T : never;
+
+/** @public */
+export interface FileRefDescriptor<T = unknown> extends FileRelationDescriptor {
+  extends?: Proto<FileRef<any, any>> | string | boolean | null;
   fileName?: string;
   value?: T;
-
-  getFileName?(): string | undefined;
-  willSetFileName?(newFileName: string | undefined, oldFileName: string | undefined): void;
-  didSetFileName?(newFileName: string | undefined, oldFileName: string | undefined): void;
 }
 
 /** @public */
-export type FileRefDescriptor<O = unknown, T = unknown, I = {}> = ThisType<FileRef<O, T> & I> & FileRefInit<T> & Partial<I>;
+export type FileRefTemplate<F extends FileRef<any, any>> =
+  ThisType<F> &
+  FileRefDescriptor<FileRefValue<F>> &
+  Partial<Omit<F, keyof FileRefDescriptor>>;
 
 /** @public */
 export interface FileRefClass<F extends FileRef<any, any> = FileRef<any, any>> extends FileRelationClass<F> {
+  /** @override */
+  specialize(template: FileRefDescriptor<any>): FileRefClass<F>;
+
+  /** @override */
+  refine(fastenerClass: FileRefClass<any>): void;
+
+  /** @override */
+  extend<F2 extends F>(className: string, template: FileRefTemplate<F2>): FileRefClass<F2>;
+  extend<F2 extends F>(className: string, template: FileRefTemplate<F2>): FileRefClass<F2>;
+
+  /** @override */
+  define<F2 extends F>(className: string, template: FileRefTemplate<F2>): FileRefClass<F2>;
+  define<F2 extends F>(className: string, template: FileRefTemplate<F2>): FileRefClass<F2>;
+
+  /** @override */
+  <F2 extends F>(template: FileRefTemplate<F2>): PropertyDecorator;
+
   /** @internal */
   readonly LoadedFlag: FastenerFlags;
   /** @internal */
@@ -48,17 +64,6 @@ export interface FileRefClass<F extends FileRef<any, any> = FileRef<any, any>> e
 }
 
 /** @public */
-export interface FileRefFactory<F extends FileRef<any, any> = FileRef<any, any>> extends FileRefClass<F> {
-  extend<I = {}>(className: string, classMembers?: Partial<I> | null): FileRefFactory<F> & I;
-
-  define<O, T = unknown>(className: string, descriptor: FileRefDescriptor<O, T>): FileRefFactory<FileRef<any, T>>;
-  define<O, T = unknown, I = {}>(className: string, descriptor: {implements: unknown} & FileRefDescriptor<O, T, I>): FileRefFactory<FileRef<any, T> & I>;
-
-  <O, T = unknown>(descriptor: FileRefDescriptor<O, T>): PropertyDecorator;
-  <O, T = unknown, I = {}>(descriptor: {implements: unknown} & FileRefDescriptor<O, T, I>): PropertyDecorator;
-}
-
-/** @public */
 export interface FileRef<O = unknown, T = unknown> extends FileRelation<O, T> {
   (): T | null;
   (fileName: string | undefined): O;
@@ -67,14 +72,13 @@ export interface FileRef<O = unknown, T = unknown> extends FileRelation<O, T> {
   get fastenerType(): Proto<FileRef<any, any>>;
 
   /** @protected @override */
-  onInherit(superFastener: Fastener): void;
+  onDerive(inlet: Fastener): void;
+
+  initFileName(): string | undefined;
 
   readonly fileName: string | undefined;
 
   getFileName(): string | undefined;
-
-  /** @internal */
-  initFileName(fileName: string | undefined): void;
 
   setFileName(fileName: string | undefined): void;
 
@@ -102,41 +106,38 @@ export interface FileRef<O = unknown, T = unknown> extends FileRelation<O, T> {
 
   readonly path: string | undefined;
 
+  initValue(): T;
+
   readonly value: T;
+
+  setValue(path: string, value: T): T;
 
   getOrLoad(): Promise<T>;
 
   getOrLoadIfExists(): Promise<T | undefined>;
   getOrLoadIfExists<E>(elseValue: E): Promise<T | E>;
-
-  /** @internal */
-  initValue(value: T): void;
-
-  setValue(path: string, value: T): T;
 }
 
 /** @public */
 export const FileRef = (function (_super: typeof FileRelation) {
-  const FileRef: FileRefFactory = _super.extend("FileRef");
+  const FileRef = _super.extend("FileRef", {}) as FileRefClass;
 
   Object.defineProperty(FileRef.prototype, "fastenerType", {
-    get: function (this: FileRef): Proto<FileRef<any, any>> {
-      return FileRef;
-    },
+    value: FileRef,
     configurable: true,
   });
 
-  FileRef.prototype.onInherit = function (this: FileRef, superFastener: FileRef): void {
-    this.setBaseDir(superFastener.baseDir);
-    this.setFileName(superFastener.fileName);
+  FileRef.prototype.onDerive = function (this: FileRef, inlet: FileRef): void {
+    this.setBaseDir(inlet.baseDir);
+    this.setFileName(inlet.fileName);
+  };
+
+  FileRef.prototype.initFileName = function (this: FileRef): string | undefined {
+    return (Object.getPrototypeOf(this) as FileRef).fileName;
   };
 
   FileRef.prototype.getFileName = function (this: FileRef): string | undefined {
     return this.fileName;
-  };
-
-  FileRef.prototype.initFileName = function (this: FileRef, fileName: string | undefined): void {
-    (this as Mutable<typeof this>).fileName = fileName;
   };
 
   FileRef.prototype.setFileName = function (this: FileRef, newFileName: string | undefined): void {
@@ -263,8 +264,8 @@ export const FileRef = (function (_super: typeof FileRelation) {
     }
   };
 
-  FileRef.prototype.initValue = function <T>(this: FileRef<unknown, T>, value: T): void {
-    (this as Mutable<typeof this>).value = value;
+  FileRef.prototype.initValue = function <T>(this: FileRef<unknown, T>): T {
+    return (Object.getPrototypeOf(this) as FileRef<unknown, T>).value;
   };
 
   FileRef.prototype.setValue = function <T>(this: FileRef<unknown, T>, path: string, newValue: T): void {
@@ -279,7 +280,7 @@ export const FileRef = (function (_super: typeof FileRelation) {
     }
   };
 
-  FileRef.construct = function <F extends FileRef<any, any>>(fastenerClass: {prototype: F}, fastener: F | null, owner: FastenerOwner<F>): F {
+  FileRef.construct = function <F extends FileRef<any, any>>(fastener: F | null, owner: FastenerOwner<F>): F {
     if (fastener === null) {
       fastener = function (fileName?: string | undefined): FileRefValue<F> | FastenerOwner<F> {
         if (arguments.length === 0) {
@@ -290,62 +291,13 @@ export const FileRef = (function (_super: typeof FileRelation) {
         }
       } as F;
       delete (fastener as Partial<Mutable<F>>).name; // don't clobber prototype name
-      Object.setPrototypeOf(fastener, fastenerClass.prototype);
+      Object.setPrototypeOf(fastener, this.prototype);
     }
-    fastener = _super.construct(fastenerClass, fastener, owner) as F;
-    (fastener as Mutable<typeof fastener>).fileName = void 0;
+    fastener = _super.construct.call(this, fastener, owner) as F;
+    (fastener as Mutable<typeof fastener>).fileName = fastener.initFileName();
     (fastener as Mutable<typeof fastener>).path = void 0;
-    (fastener as Mutable<typeof fastener>).value = void 0;
+    (fastener as Mutable<typeof fastener>).value = fastener.initValue();
     return fastener;
-  };
-
-  FileRef.define = function <O, T>(className: string, descriptor: FileRefDescriptor<O, T>): FileRefFactory<FileRef<any, T>> {
-    let superClass = descriptor.extends as FileRefFactory | null | undefined;
-    const affinity = descriptor.affinity;
-    const inherits = descriptor.inherits;
-    const baseDir = descriptor.baseDir;
-    const fileName = descriptor.fileName;
-    const resolves = descriptor.resolves;
-    const value = descriptor.value;
-    delete descriptor.extends;
-    delete descriptor.implements;
-    delete descriptor.affinity;
-    delete descriptor.inherits;
-    delete descriptor.baseDir;
-    delete descriptor.fileName;
-    delete descriptor.resolves;
-    delete descriptor.value;
-
-    if (superClass === void 0 || superClass === null) {
-      superClass = this;
-    }
-
-    const fastenerClass = superClass.extend(className, descriptor);
-
-    fastenerClass.construct = function (fastenerClass: {prototype: FileRef<any, any>}, fastener: FileRef<O, T> | null, owner: O): FileRef<O, T> {
-      fastener = superClass!.construct(fastenerClass, fastener, owner);
-      if (affinity !== void 0) {
-        fastener.initAffinity(affinity);
-      }
-      if (inherits !== void 0) {
-        fastener.initInherits(inherits);
-      }
-      if (baseDir !== void 0) {
-        fastener.initBaseDir(baseDir);
-      }
-      if (fileName !== void 0) {
-        fastener.initFileName(fileName);
-      }
-      if (resolves !== void 0) {
-        fastener.initResolves(resolves);
-      }
-      if (value !== void 0) {
-        fastener.initValue(value);
-      }
-      return fastener;
-    };
-
-    return fastenerClass;
   };
 
   (FileRef as Mutable<typeof FileRef>).LoadedFlag = 1 << (_super.FlagShift + 0);

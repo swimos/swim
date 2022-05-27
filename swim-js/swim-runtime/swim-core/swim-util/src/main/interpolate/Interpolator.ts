@@ -24,19 +24,27 @@ import {InterpolatorInterpolator} from "./"; // forward import
 
 /** @public */
 export interface Interpolator<Y = unknown> extends Range<Y>, Interpolate<Interpolator<Y>> {
+  /** @override */
   readonly 0: Y;
 
+  /** @override */
   readonly 1: Y;
+
+  /** @override */
+  union(that: Range<Y>): Interpolator<Y>;
 
   map<FY>(transform: (y: Y) => FY): Interpolator<FY>;
 
   interpolateTo(that: Interpolator<Y>): Interpolator<Interpolator<Y>>;
   interpolateTo(that: unknown): Interpolator<Interpolator<Y>> | null;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -68,6 +76,31 @@ export const Interpolator = (function (_super: typeof Range) {
   Interpolator.prototype = Object.create(_super.prototype);
   Interpolator.prototype.constructor = Interpolator;
 
+  Interpolator.prototype.union = function <Y>(this: Interpolator<Y>, that: Range<Y>): Interpolator<Y> {
+    const y00 = this[0];
+    const y01 = this[1];
+    const y10 = that[0];
+    const y11 = that[1];
+    let y0: Y;
+    let y1: Y;
+    const y0Order = Values.compare(y00, y01);
+    const y1Order = Values.compare(y10, y11);
+    if (y0Order <= 0 && y1Order <= 0) {
+      y0 = Values.compare(y00, y10) <= 0 ? y00 : y10;
+      y1 = Values.compare(y01, y11) >= 0 ? y01 : y11;
+    } else if (y0Order >= 0 && y1Order >= 0) {
+      y0 = Values.compare(y00, y10) >= 0 ? y00 : y10;
+      y1 = Values.compare(y01, y11) <= 0 ? y01 : y11;
+    } else if (y0Order <= 0 && y1Order >= 0) {
+      y0 = Values.compare(y00, y11) <= 0 ? y00 : y11;
+      y1 = Values.compare(y01, y10) >= 0 ? y01 : y10;
+    } else { // y0Order >= 0 && y1Order <= 0
+      y0 = Values.compare(y01, y10) <= 0 ? y01 : y10;
+      y1 = Values.compare(y00, y11) >= 0 ? y00 : y11;
+    }
+    return Interpolator(y0, y1);
+  };
+
   Interpolator.prototype.map = function <Y, FY>(this: Interpolator<Y>, transform: (y: Y) => FY): Interpolator<FY> {
     return InterpolatorMap(this, transform);
   };
@@ -79,11 +112,11 @@ export const Interpolator = (function (_super: typeof Range) {
     return null;
   } as typeof Interpolator.prototype.interpolateTo;
 
-  Interpolator.prototype.canEqual = function (that: unknown): boolean {
+  Interpolator.prototype.canEqual = function <Y>(this: Interpolator<Y>, that: unknown): boolean {
     return that instanceof this.constructor;
   };
 
-  Interpolator.prototype.equals = function (that: unknown): boolean {
+  Interpolator.prototype.equals = function <Y>(this: Interpolator<Y>, that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Interpolator) {
@@ -94,7 +127,7 @@ export const Interpolator = (function (_super: typeof Range) {
     return false;
   };
 
-  Interpolator.prototype.toString = function (): string {
+  Interpolator.prototype.toString = function <Y>(this: Interpolator<Y>): string {
     return "Interpolator(" + this[0] + ", " + this[1] + ")";
   };
 

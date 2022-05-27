@@ -266,18 +266,21 @@ export abstract class Length implements Interpolate<Length>, HashCode, Equivalen
 
   /** @internal */
   static emUnit(basis?: LengthBasis | number): number {
-    if (typeof basis === "object" && typeof basis.emUnit === "number") {
-      return basis.emUnit;
-    } else if (typeof basis === "object" && basis.emUnit instanceof Node) {
-      let node: Node | null = basis.emUnit;
-      while (node !== null) {
-        if (node instanceof Element) {
-          const fontSize = getComputedStyle(node).fontSize;
-          if (typeof fontSize === "string") {
-            return parseFloat(fontSize);
+    if (typeof basis !== "number" && basis !== void 0) {
+      const emUnit = basis.emUnit;
+      if (typeof emUnit === "number") {
+        return emUnit;
+      } else if (emUnit instanceof Node) {
+        let node: Node | null = emUnit;
+        while (node !== null) {
+          if (node instanceof Element) {
+            const fontSize = getComputedStyle(node).fontSize;
+            if (typeof fontSize === "string") {
+              return parseFloat(fontSize);
+            }
           }
+          node = node.parentNode;
         }
-        node = node.parentNode;
       }
     }
     throw new LengthException("unknown em unit");
@@ -285,13 +288,15 @@ export abstract class Length implements Interpolate<Length>, HashCode, Equivalen
 
   /** @internal */
   static remUnit(basis?: LengthBasis | number): number {
-    if (typeof basis === "object" && typeof basis.remUnit === "number") {
-      return basis.remUnit;
-    } else {
-      const fontSize = getComputedStyle(document.documentElement).fontSize;
-      if (typeof fontSize === "string") {
-        return parseFloat(fontSize);
+    if (typeof basis !== "number" && basis !== void 0) {
+      const remUnit = basis.remUnit;
+      if (typeof remUnit === "number") {
+        return remUnit;
       }
+    }
+    const fontSize = getComputedStyle(document.documentElement).fontSize;
+    if (typeof fontSize === "string") {
+      return parseFloat(fontSize);
     }
     throw new LengthException("unknown rem unit");
   }
@@ -300,8 +305,11 @@ export abstract class Length implements Interpolate<Length>, HashCode, Equivalen
   static pctUnit(basis?: LengthBasis | number): number {
     if (typeof basis === "number") {
       return basis;
-    } else if (typeof basis === "object" && typeof basis.pctUnit === "number") {
-      return basis.pctUnit;
+    } else if (basis !== void 0) {
+      const pctUnit = basis.pctUnit;
+      if (typeof pctUnit === "number") {
+        return pctUnit;
+      }
     }
     throw new LengthException("unknown percentage unit");
   }

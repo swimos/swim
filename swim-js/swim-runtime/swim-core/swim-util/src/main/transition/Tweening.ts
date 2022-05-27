@@ -19,16 +19,21 @@ import type {Timing} from "./Timing";
 
 /** @public */
 export interface Tweening<Y> extends Mapping<number, Y> {
+  /** @override */
   readonly domain: Timing;
 
+  /** @override */
   readonly range: Interpolator<Y>;
 
   withDomain(t0: number, t1: number): Tweening<Y>;
 
+  /** @override */
   canEqual(that: unknown): boolean;
 
+  /** @override */
   equals(that: unknown): boolean;
 
+  /** @override */
   toString(): string;
 }
 
@@ -56,11 +61,11 @@ export const Tweening = (function (_super: typeof Mapping) {
     return this.domain.withDomain(t0, t1).overRange(this.range);
   };
 
-  Tweening.prototype.canEqual = function (that: unknown): boolean {
+  Tweening.prototype.canEqual = function <Y>(this: Tweening<Y>, that: unknown): boolean {
     return that instanceof Tweening;
   };
 
-  Tweening.prototype.equals = function (that: unknown): boolean {
+  Tweening.prototype.equals = function <Y>(this: Tweening<Y>, that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Tweening) {
@@ -69,7 +74,7 @@ export const Tweening = (function (_super: typeof Mapping) {
     return false;
   };
 
-  Tweening.prototype.toString = function (): string {
+  Tweening.prototype.toString = function <Y>(this: Tweening<Y>): string {
     return "Tweening(" + this.domain + ", " + this.range + ")";
   };
 

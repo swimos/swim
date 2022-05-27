@@ -35,6 +35,9 @@ export const Strings = (function () {
      */
     hash(x: string | null | undefined): number;
 
+    fromAny(value: string | number | boolean): string;
+    fromAny(value: string | number | boolean | null | undefined): string | null | undefined;
+
     codePointAt(string: string, index: number): number | undefined;
 
     offsetByCodePoints(string: string, index: number, count: number): number;
@@ -63,6 +66,14 @@ export const Strings = (function () {
       throw new TypeError("" + x);
     }
   };
+
+  Strings.fromAny = function (value: string | number | boolean | null | undefined): string | null | undefined {
+    if (value === void 0 || value === null) {
+      return value;
+    } else {
+      return String(value);
+    }
+  } as typeof Strings.fromAny;
 
   Strings.codePointAt = function (string: string, index: number): number | undefined {
     const length = string.length;
