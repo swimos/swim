@@ -19,7 +19,7 @@ package swim.codec;
  * {@code Encoder} enables efficient, interruptible encoding of network
  * protocols and data formats, without intermediate buffer copying.
  *
- * <h3>Encoder states</h3>
+ * <h2>Encoder states</h2>
  * <p>An {@code Encoder} is always in one of three states: <em>cont</em>inue,
  * <em>done</em>, or <em>error</em>. The <em>cont</em> state indicates that
  * {@link #pull(OutputBuffer) pull} is ready to produce buffer data; the
@@ -29,13 +29,13 @@ package swim.codec;
  * trap} will return the encode error. {@code Encoder} subclasses default to
  * the <em>cont</em> state.</p>
  *
- * <h3>Feeding input</h3>
+ * <h2>Feeding input</h2>
  * <p>The {@link #feed(Object) feed(I)} method returns an {@code Encoder} that
  * represents the continuation of how to encode the given input object to
  * subsequent output buffers. {@code feed} can be used to specify an initial
  * object to encode, or to change the object to be encoded.</p>
  *
- * <h3>Pulling output</h3>
+ * <h2>Pulling output</h2>
  * <p>The {@link #pull(OutputBuffer)} method incrementally encodes as much
  * buffer data as it can, before returning another {@code Encoder} that
  * represents the continuation of how to encoded additional buffer data.
@@ -43,7 +43,7 @@ package swim.codec;
  * duration of the method call; references to the provided buffer must not be
  * stored.</p>
  *
- * <h3>Encoder results</h3>
+ * <h2>Encoder results</h2>
  * <p>An {@code Encoder} produces an encoded result of type {@code O}, obtained
  * via the {@link #bind()} method. {@code bind} is only guaranteed to return a
  * result when in the <em>done</em> state; though {@code bind} may optionally
@@ -51,7 +51,7 @@ package swim.codec;
  * provides a write error via the {@link #trap()} method. {@code trap} is only
  * guaranteed to return an error when in the <em>error</em> state.</p>
  *
- * <h3>Continuations</h3>
+ * <h2>Continuations</h2>
  * <p>An {@code Encoder} instance represents a continuation of how to encode
  * remaining buffer data. Rather than encoding a completely buffered output in
  * one go, an {@code Encoder} takes a buffer chunk and returns another {@code
@@ -63,7 +63,7 @@ package swim.codec;
  * Encoder} in the <em>done</em> state. {@link Encoder#error(Throwable)}
  * returns an {@code Encoder} in the <em>error</em> state.</p>
  *
- * <h3>Forking</h3>
+ * <h2>Forking</h2>
  * <p>The {@link #fork(Object)} method passes an out-of-band condition to an
  * {@code Encoder}, yielding an {@code Encoder} continuation whose behavior may
  * be altered by the given condition. For example, a text {@code Encoder}

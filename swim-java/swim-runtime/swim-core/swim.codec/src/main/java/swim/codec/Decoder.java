@@ -19,7 +19,7 @@ package swim.codec;
  * {@code Decoder} enables efficient, interruptible decoding of network
  * protocols and data formats, without intermediate buffer copying.
  *
- * <h3>Decoder states</h3>
+ * <h2>Decoder states</h2>
  * <p>A {@code Decoder} is always in one of three states: <em>cont</em>inue,
  * <em>done</em>, or <em>error</em>. The <em>cont</em> state indicates that
  * {@link #feed(InputBuffer) feed} is ready to consume input buffer data; the
@@ -29,7 +29,7 @@ package swim.codec;
  * will return the decode error. {@code Decoder} subclasses default to the
  * <em>cont</em> state.</p>
  *
- * <h3>Feeding input</h3>
+ * <h2>Feeding input</h2>
  * <p>The {@link #feed(InputBuffer)} method incrementally decodes as much
  * {@code InputBuffer} data as it can, before returning another {@code Decoder}
  * that represents the continuation of how to decode additional {@code
@@ -37,7 +37,7 @@ package swim.codec;
  * guaranteed to be valid for the duration of the method call; references to
  * the provided {@code InputBuffer} instance must not be stored.</p>
  *
- * <h3>Decoder results</h3>
+ * <h2>Decoder results</h2>
  * <p>A {@code Decoder} produces a decoded result of type {@code O}, obtained
  * via the {@link #bind()} method. {@code bind} is only guaranteed to return
  * a result when in the <em>done</em> state; though {@code bind} may optionally
@@ -45,7 +45,7 @@ package swim.codec;
  * provides a decode error via the {@link #trap()} method. {@code trap} is
  * only guaranteed to return an error when in the <em>error</em> state.</p>
  *
- * <h3>Continuations</h3>
+ * <h2>Continuations</h2>
  * <p>A {@code Decoder} instance represents a continuation of how to decode
  * remaining {@code InputBuffer} data. Rather than parsing a completely
  * buffered input in one go, a {@code Decoder} takes a buffered chunk and
@@ -58,14 +58,14 @@ package swim.codec;
  * {@link Decoder#error(Throwable)} returns a {@code Decoder} in the
  * <em>error</em> state.</p>
  *
- * <h3>Immutability</h3>
+ * <h2>Immutability</h2>
  * <p>A {@code Decoder} should be immutable. Specifically, an invocation of
  * {@code feed} should not alter the behavior of future calls to {@code feed}
  * on the same {@code Decoder} instance. A {@code Decoder} should only mutate
  * its internal state if it's essential to do so, such as for critical path
  * performance reasons.</p>
  *
- * <h3>Forking</h3>
+ * <h2>Forking</h2>
  * <p>The {@link #fork(Object)} method passes an out-of-band condition to a
  * {@code Decoder}, yielding a {@code Decoder} continuation whose behavior may
  * be altered by the given condition. For example, a text {@code Decoder}

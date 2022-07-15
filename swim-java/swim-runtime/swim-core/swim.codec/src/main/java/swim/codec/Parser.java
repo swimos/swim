@@ -19,13 +19,13 @@ package swim.codec;
  * {@code Parser} enables efficient, interruptible parsing of network protocols
  * and data formats, without intermediate buffering.
  *
- * <h3>Input tokens</h3>
+ * <h2>Input tokens</h2>
  * <p>A {@code Parser} reads tokens from an {@code Input} reader. Input tokens
  * are modeled as primitive {@code int}s, commonly representing Unicode code
  * points, or raw octets. Each {@code Parser} implementation specifies the
  * semantic type of input tokens it consumes.</p>
  *
- * <h3>Parser states</h3>
+ * <h2>Parser states</h2>
  * <p>A {@code Parser} is always in one of three states: <em>cont</em>inue,
  * <em>done</em>, or <em>error</em>. The <em>cont</em> state indicates that
  * {@link #feed(Input) feed} is ready to consume {@code Input}; the
@@ -35,7 +35,7 @@ package swim.codec;
  * will return the parse error. {@code Parser} subclasses default to the
  * <em>cont</em> state.</p>
  *
- * <h3>Feeding input</h3>
+ * <h2>Feeding input</h2>
  * <p>The {@link #feed(Input)} method incrementally parses as much {@code
  * Input} as it can, before returning another {@code Parser} that represents
  * the continuation of how to parse additional {@code Input}. The {@code Input}
@@ -43,7 +43,7 @@ package swim.codec;
  * the method call; references to the provided {@code Input} instance must not
  * be stored.</p>
  *
- * <h3>Parser results</h3>
+ * <h2>Parser results</h2>
  * <p>A {@code Parser} produces a parsed result of type {@code O}, obtained
  * via the {@link #bind()} method. {@code bind} is only guaranteed to return a
  * result when in the <em>done</em> state; though {@code bind} may optionally
@@ -51,7 +51,7 @@ package swim.codec;
  * provides a parse error via the {@link #trap()} method. {@code trap} is only
  * guaranteed to return an error when in the <em>error</em> state.</p>
  *
- * <h3>Continuations</h3>
+ * <h2>Continuations</h2>
  * <p>A {@code Parser} instance represents a continuation of how to parse
  * remaining {@code Input}. Rather than parsing a complete input in one go,
  * a {@code Parser} takes an {@code Input} chunk and returns another {@code
@@ -64,7 +64,7 @@ package swim.codec;
  * state. {@link Parser#error(Throwable)} returns a {@code Parser} in the
  * <em>error</em> state.</p>
  *
- * <h3>Iteratees</h3>
+ * <h2>Iteratees</h2>
  * <p>{@code Parser} is an <a href="https://en.wikipedia.org/wiki/Iteratee">
  * Iteratee</a>. Though unlike strictly functional iteratees, a {@code Parser}
  * statefully iterates over its {@code Input}, rather than allocating an object
@@ -75,21 +75,21 @@ package swim.codec;
  * {@code Input} in a state that's consistent with the returned {@code Parser}
  * continuation.</p>
  *
- * <h3>Immutability</h3>
+ * <h2>Immutability</h2>
  * <p>A {@code Parser} should be immutable. Specifically, an invocation of
  * {@code feed} should not alter the behavior of future calls to {@code feed}
  * on the same {@code Parser} instance. A {@code Parser} should only mutate
  * its internal state if it's essential to do so, such as for critical path
  * performance reasons.</p>
  *
- * <h3>Backtracking</h3>
+ * <h2>Backtracking</h2>
  * <p>{@code feed} can internally {@link Input#clone() clone} its {@code
  * Input}, if it might need to backtrack. Keep in mind that, because {@code
  * Input} is only valid for the duration of a call to {@code feed}, input must
  * be internally buffered if it needs to be preserved between {@code feed}
  * invocations.</p>
  *
- * <h3>Forking</h3>
+ * <h2>Forking</h2>
  * <p>The {@link #fork(Object)} method passes an out-of-band condition to a
  * {@code Parser}, yielding a {@code Parser} continuation whose behavior may
  * be altered by the given condition. For example, an HTML {@code Parser}
