@@ -20,7 +20,7 @@ package swim.concurrent;
  * to a {@code Stage}, and invoke {@link TaskRef#cue()} to schedule the
  * concurrent execution of the sequential task.
  *
- * <h3>Blocking</h3>
+ * <h2>Blocking</h2>
  * {@code TaskFunction} implementations should not perform long running or
  * blocking operations. If a blocking operation needs to be performed,
  * implement a {@link Task} that returns {@code true} from {@link

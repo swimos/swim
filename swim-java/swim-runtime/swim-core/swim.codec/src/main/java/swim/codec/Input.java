@@ -19,14 +19,14 @@ package swim.codec;
  * {@code Input} enable incremental, interruptible parsing of network protocols
  * and data formats.
  *
- * <h3>Input tokens</h3>
+ * <h2>Input tokens</h2>
  * <p>Input tokens are modeled as primitive {@code int}s, commonly representing
  * Unicode code points, or raw octets; each {@code Input} implementation
  * specifies the semantic type of its tokens. The {@link #head()}  method
  * peeks at the current lookahead token, without consuming it, and the {@link
  * #step()} method advances the input to the next token.</p>
  *
- * <h3>Input states</h3>
+ * <h2>Input states</h2>
  * <p>{@code Input} is always in one of four states: <em>cont</em>inue,
  * <em>empty</em>, <em>done</em>, or <em>error</em>. The <em>cont</em> state
  * indicates that a lookahead token is immediately available; the <em>empty</em>
@@ -39,7 +39,7 @@ package swim.codec;
  * {@link #isDone()} returns {@code true} when in the <em>done</em> state; and
  * {@link #isError()} returns {@code true} when in the <em>error</em> state.</p>
  *
- * <h3>Non-blocking semantics</h3>
+ * <h2>Non-blocking semantics</h2>
  * <p>{@code Input} never blocks. An {@code Input} that would otherwise block
  * awaiting additional tokens instead enters the <em>empty</em> state,
  * signaling the input consumer to back off processing the input, but to remain
@@ -56,14 +56,14 @@ package swim.codec;
  * state. {@link Input#done()} returns an {@code Input} in the <em>done</em>
  * state.</p>
  *
- * <h3>Position tracking</h3>
+ * <h2>Position tracking</h2>
  * <p>The logical position of the current lookahead token is made available via
  * the {@link #mark()} method, with optimized callouts for the byte {@link
  * #offset() offset}, one-based {@link #line() line} number, and one-based
  * {@link #column() column} in the current line. The {@link #id()} method
  * returns a diagnostic identifier for the token stream.</p>
  *
- * <h3>Cloning</h3>
+ * <h2>Cloning</h2>
  * <p>An {@code Input} may be {@link #clone() cloned} to provide an indepently
  * mutable position into a shared token stream. Not all {@code Input}
  * implementations support cloning.</p>

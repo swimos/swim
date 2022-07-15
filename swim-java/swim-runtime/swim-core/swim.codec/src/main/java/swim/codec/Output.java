@@ -18,12 +18,12 @@ package swim.codec;
  * Non-blocking token stream writer. {@code Output} enables incremental,
  * interruptible writing of network protocols and data formats.
  *
- * <h3>Output tokens</h3>
+ * <h2>Output tokens</h2>
  * <p>Output tokens are modeled as primitive {@code int}s, commonly
  * representing Unicode code points, or raw octets; each {@code Output}
  * implementation specifies the semantic type of its tokens.</p>
  *
- * <h3>Output states</h3>
+ * <h2>Output states</h2>
  * <p>{@code Output} is always in one of four states: <em>cont</em>inue,
  * <em>full</em>, <em>done</em>, or <em>error</em>. The <em>cont</em> state
  * indicates that the stream is ready to write a single token; the <em>full</em>
@@ -37,14 +37,14 @@ package swim.codec;
  * {@link #isDone()} returns {@code true} when in the <em>done</em> state; and
  * {@link #isError()} returns {@code true} when in the <em>error</em> state.</p>
  *
- * <h3>Output results</h3>
+ * <h2>Output results</h2>
  * <p>An {@code Output} yields a value of type {@code T}, obtained via the
  * {@link #bind()} method, representing some implementation defined result of
  * writing the output. For example, an {@code Output<String>} implementation
  * may–but is not required to–yield a {@code String} containing all code points
  * written to the output.</p>
  *
- * <h3>Non-blocking behavior</h3>
+ * <h2>Non-blocking behavior</h2>
  * <p>{@code Output} writers never block. An {@code Output} that would
  * otherwise block writing additional output instead enters the <em>full</em>
  * state, signaling the output generator to back off producing the output, but
@@ -52,13 +52,13 @@ package swim.codec;
  * Output} enters the <em>done</em> state when it encounters the final enf of
  * its output, signaling to the output generator to stop producing.</p>
  *
- * <h3>Output settings</h3>
+ * <h2>Output settings</h2>
  * <p>An output generator may alter the tokens it produces based on its {@code
  * Output}'s {@link #settings() settings}. Uses include pretty printing and
  * styling generated output. {@link OutputSettings} subclasses can provide
  * additional parameters understood by specialized output producers.</p>
  *
- * <h3>Cloning</h3>
+ * <h2>Cloning</h2>
  * <p>An {@code Output} may be {@link #clone() cloned} to branch the token
  * stream in an implementation specified manner. Not all {@code Output}
  * implementations support cloning.</p>

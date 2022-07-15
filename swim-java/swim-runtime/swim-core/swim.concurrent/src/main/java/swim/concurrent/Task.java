@@ -21,7 +21,7 @@ package swim.concurrent;
  * bind a new {@code Task} to a {@code Stage}, and invoke {@link TaskRef#cue()}
  * to schedule the concurrent execution of the sequential task.
  *
- * <h3>Blocking</h3>
+ * <h2>Blocking</h2>
  * {@code Task} implementations should not perform long running or blocking
  * operations, if possible. If a {@code Task} does need to block, it should
  * return {@code true} from {@link #taskWillBlock()} to avoid thread starvation

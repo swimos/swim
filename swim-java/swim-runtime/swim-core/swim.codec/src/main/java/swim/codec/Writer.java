@@ -19,13 +19,13 @@ package swim.codec;
  * {@code Writer} enables efficient, interruptible writing of network protocols
  * and data formats, without intermediate buffering.
  *
- * <h3>Output tokens</h3>
+ * <h2>Output tokens</h2>
  * <p>A {@code Writer} writes tokens to an {@code Output} writer. Output
  * tokens are modeled as primitive {@code int}s, commonly representing Unicode
  * code points, or raw octets. Each {@code Writer} implementation specifies
  * the semantic type of output tokens it produces.</p>
  *
- * <h3>Writer states</h3>
+ * <h2>Writer states</h2>
  * <p>A {@code Writer} is always in one of three states: <em>cont</em>inue,
  * <em>done</em>, or <em>error</em>. The <em>cont</em> state indicates that
  * {@link #pull(Output) pull} is ready to produce {@code Output}; the
@@ -35,13 +35,13 @@ package swim.codec;
  * trap} will return the write error. {@code Writer} subclasses default to the
  * <em>cont</em> state.</p>
  *
- * <h3>Feeding input</h3>
+ * <h2>Feeding input</h2>
  * <p>The {@link #feed(Object) feed(I)} method returns a {@code Writer} that
  * represents the continuation of how to write the given input object to
  * subsequent {@code Output} writers. {@code feed} can be used to specify
  * an initial object to write, or to change the object to be written.</p>
  *
- * <h3>Pulling output</h3>
+ * <h2>Pulling output</h2>
  * <p>The {@link #pull(Output)} method incrementally writes as much {@code
  * Output} as it can, before returning another {@code Writer} that represents
  * the continuation of how to write additional {@code Output}. The {@code
@@ -49,7 +49,7 @@ package swim.codec;
  * duration of the method call; references to the provided {@code Output}
  * instance must not be stored.</p>
  *
- * <h3>Writer results</h3>
+ * <h2>Writer results</h2>
  * <p>A {@code Writer} produces a written result of type {@code O}, obtained
  * via the {@link #bind()} method. {@code bind} is only guaranteed to return a
  * result when in the <em>done</em> state; though {@code bind} may optionally
@@ -57,7 +57,7 @@ package swim.codec;
  * provides a write error via the {@link #trap()} method. {@code trap} is only
  * guaranteed to return an error when in the <em>error</em> state.</p>
  *
- * <h3>Continuations</h3>
+ * <h2>Continuations</h2>
  * <p>A {@code Writer} instance represents a continuation of how to write
  * remaining {@code Output}. Rather than writing a complete output in one go,
  * a {@code Writer} takes an {@code Output} chunk and returns another {@code
@@ -69,7 +69,7 @@ package swim.codec;
  * Writer} in the <em>done</em> state. {@link Writer#error(Throwable)} returns
  * a {@code Writer} in the <em>error</em> state.</p>
  *
- * <h3>Forking</h3>
+ * <h2>Forking</h2>
  * <p>The {@link #fork(Object)} method passes an out-of-band condition to a
  * {@code Writer}, yielding a {@code Writer} continuation whose behavior may
  * be altered by the given condition. For example, a console {@code Writer}
