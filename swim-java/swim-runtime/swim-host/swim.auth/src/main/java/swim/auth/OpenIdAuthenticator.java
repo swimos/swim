@@ -14,6 +14,8 @@
 
 package swim.auth;
 
+import java.util.Arrays;
+import java.util.List;
 import swim.api.auth.AbstractAuthenticator;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -37,9 +39,6 @@ import swim.structure.Item;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class OpenIdAuthenticator extends AbstractAuthenticator implements HttpInterface {
 
