@@ -18,13 +18,16 @@ import swim.api.auth.AuthenticatorDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
+import swim.codec.ParserException;
 import swim.collections.FingerTrieSeq;
+import swim.io.http.HttpSettings;
 import swim.security.PublicKeyDef;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;
 import swim.structure.Record;
 import swim.structure.Value;
+import swim.uri.Uri;
 import swim.util.Builder;
 import swim.util.Murmur3;
 
@@ -34,14 +37,19 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
   final FingerTrieSeq<String> issuers;
   final FingerTrieSeq<String> audiences;
   final FingerTrieSeq<PublicKeyDef> publicKeyDefs;
+  final Uri publicKeyUri;
+  final HttpSettings httpSettings;
 
   public OpenIdAuthenticatorDef(String authenticatorName, FingerTrieSeq<String> issuers,
                                 FingerTrieSeq<String> audiences,
-                                FingerTrieSeq<PublicKeyDef> publicKeyDefs) {
+                                FingerTrieSeq<PublicKeyDef> publicKeyDefs, Uri publicKeyUri,
+                                HttpSettings httpSettings) {
     this.authenticatorName = authenticatorName;
     this.issuers = issuers;
     this.audiences = audiences;
     this.publicKeyDefs = publicKeyDefs;
+    this.publicKeyUri = publicKeyUri;
+    this.httpSettings = httpSettings;
   }
 
   @Override
@@ -61,6 +69,14 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
     return this.publicKeyDefs;
   }
 
+  public final Uri publicKeyUri() {
+    return this.publicKeyUri;
+  }
+
+  public final HttpSettings httpSettings() {
+    return this.httpSettings;
+  }
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {
@@ -69,7 +85,8 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
       final OpenIdAuthenticatorDef that = (OpenIdAuthenticatorDef) other;
       return (this.authenticatorName == null ? that.authenticatorName == null : this.authenticatorName.equals(that.authenticatorName))
           && this.issuers.equals(that.issuers) && this.audiences.equals(that.audiences)
-          && this.publicKeyDefs.equals(that.publicKeyDefs);
+          && this.publicKeyDefs.equals(that.publicKeyDefs) && this.publicKeyUri.equals(that.publicKeyUri)
+          && this.httpSettings.equals(that.httpSettings);
     }
     return false;
   }
@@ -81,16 +98,18 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
     if (OpenIdAuthenticatorDef.hashSeed == 0) {
       OpenIdAuthenticatorDef.hashSeed = Murmur3.seed(OpenIdAuthenticatorDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(OpenIdAuthenticatorDef.hashSeed,
-        Murmur3.hash(this.authenticatorName)), this.issuers.hashCode()),
-        this.audiences.hashCode()), this.publicKeyDefs.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(OpenIdAuthenticatorDef.hashSeed, Murmur3.hash(this.authenticatorName)),
+        this.issuers.hashCode()), this.audiences.hashCode()), this.publicKeyDefs.hashCode()),
+        this.publicKeyUri.hashCode()), this.httpSettings.hashCode()));
   }
 
   @Override
   public <T> Output<T> debug(Output<T> output) {
     output = output.write("new").write(' ').write("OpenIdAuthenticatorDef").write('(')
                    .debug(this.authenticatorName).write(", ").debug(this.issuers).write(", ")
-                   .debug(this.audiences).write(", ").debug(this.publicKeyDefs).write(')');
+                   .debug(this.audiences).write(", ").debug(this.publicKeyDefs).write(", ")
+                   .debug(this.publicKeyUri).write(", ").debug(this.httpSettings).write(')');
     return output;
   }
 
@@ -148,7 +167,7 @@ final class OpenIdAuthenticatorForm extends Form<OpenIdAuthenticatorDef> {
         record.add(publicKeyDef.toValue());
       }
 
-      return record;
+      return record.concat(authenticatorDef.httpSettings.toValue());
     } else {
       return Item.extant();
     }
@@ -176,8 +195,17 @@ final class OpenIdAuthenticatorForm extends Form<OpenIdAuthenticatorDef> {
           }
         }
       }
+      Uri publicKeyUri = null;
+      try {
+        publicKeyUri = Uri.parse(value.get("publicKeyUri").stringValue(null));
+      } catch (NullPointerException | ParserException error) {
+        // continue
+      }
+      final HttpSettings httpSettings = HttpSettings.form().cast(value);
+
       return new OpenIdAuthenticatorDef(authenticatorName, issuers.bind(),
-                                        audiences.bind(), publicKeyDefs.bind());
+                                        audiences.bind(), publicKeyDefs.bind(),
+                                        publicKeyUri, httpSettings);
     }
     return null;
   }
