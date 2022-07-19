@@ -130,13 +130,13 @@ public class OpenIdAuthenticator extends AbstractAuthenticator implements HttpIn
   @Override
   public void didStart() {
     if (this.publicKeyUri != null) {
-        this.refreshPublicKeys();
-        final TimerRef publicKeyRefreshTimer = this.publicKeyRefreshTimer;
-        if (publicKeyRefreshTimer != null) {
-          publicKeyRefreshTimer.cancel();
-        }
-        this.publicKeyRefreshTimer = this.schedule().setTimer(OpenIdAuthenticator.PUBLIC_KEY_REFRESH_INTERVAL,
-                new OpenIdAuthenticatorPublicKeyRefreshTimer(this));
+      this.refreshPublicKeys();
+      final TimerRef publicKeyRefreshTimer = this.publicKeyRefreshTimer;
+      if (publicKeyRefreshTimer != null) {
+        publicKeyRefreshTimer.cancel();
+      }
+      this.publicKeyRefreshTimer = this.schedule().setTimer(OpenIdAuthenticator.PUBLIC_KEY_REFRESH_INTERVAL,
+              new OpenIdAuthenticatorPublicKeyRefreshTimer(this));
     }
   }
 
