@@ -87,7 +87,10 @@ public abstract class MapUplinkModem extends WarpUplinkModem {
   protected Value nextDownCue() {
     do {
       final HashTrieSet<Value> oldKeyQueue = MapUplinkModem.KEY_QUEUE.get(this);
-      final Value key = oldKeyQueue.next(this.lastKey);
+      Value key = oldKeyQueue.next(this.lastKey);
+      if (key == null) {
+        key = oldKeyQueue.head();
+      }
       final HashTrieSet<Value> newKeyQueue = oldKeyQueue.removed(key);
       if (MapUplinkModem.KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
         if (key != null) {
