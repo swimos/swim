@@ -93,7 +93,10 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
   protected Push<CommandMessage> nextUpCue() {
     do {
       final HashTrieSet<Value> oldKeyQueue = MapDownlinkModem.KEY_QUEUE.get(this);
-      final Value key = oldKeyQueue.next(this.lastKey);
+      Value key = oldKeyQueue.next(this.lastKey);
+      if (key == null) {
+        key = oldKeyQueue.head();
+      }
       final HashTrieSet<Value> newKeyQueue = oldKeyQueue.removed(key);
       if (MapDownlinkModem.KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
         if (key != null) {
