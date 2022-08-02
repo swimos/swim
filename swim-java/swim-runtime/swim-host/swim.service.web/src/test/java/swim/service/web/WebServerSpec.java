@@ -39,7 +39,7 @@ public class WebServerSpec {
   @Test
   public void testExtensions() {
     final WsSettings wsSettings = WsSettings.bestCompression();
-    final WebServiceDef serviceDef = new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, WarpSettings.create(wsSettings));
+    final WebServiceDef serviceDef = new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, null, WarpSettings.create(wsSettings));
     final WebServer server = new WebServer(new WebServiceKernel(), serviceDef, request -> request.respond(HttpResponse.create(HttpStatus.OK))) {
       @Override
       protected RemoteHost openHost(Uri requestUri) {
