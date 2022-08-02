@@ -29,18 +29,20 @@ public class WebServiceDef implements ServiceDef, Debug {
   final int port;
   final boolean isSecure;
   final String spaceName;
+  final String routerClass;
   final UriPath documentRoot;
   final UriPath resourceRoot;
   final WarpSettings warpSettings;
 
   public WebServiceDef(String serviceName, String address, int port, boolean isSecure,
-                       String spaceName, UriPath documentRoot, UriPath resourceRoot,
-                       WarpSettings warpSettings) {
+                       String spaceName, String routerClass, UriPath documentRoot,
+                       UriPath resourceRoot, WarpSettings warpSettings) {
     this.serviceName = serviceName;
     this.address = address;
     this.port = port;
     this.isSecure = isSecure;
     this.spaceName = spaceName;
+    this.routerClass = routerClass;
     this.documentRoot = documentRoot;
     this.resourceRoot = resourceRoot;
     this.warpSettings = warpSettings;
@@ -53,7 +55,7 @@ public class WebServiceDef implements ServiceDef, Debug {
 
   public WebServiceDef serviceName(String serviceName) {
     return this.copy(serviceName, this.address, this.port, this.isSecure,
-                     this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
+                     this.spaceName, this.routerClass, this.documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final String address() {
@@ -62,7 +64,7 @@ public class WebServiceDef implements ServiceDef, Debug {
 
   public WebServiceDef address(String address) {
     return this.copy(this.serviceName, address, this.port, this.isSecure,
-                     this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
+                     this.spaceName, this.routerClass, this.documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final int port() {
@@ -71,7 +73,7 @@ public class WebServiceDef implements ServiceDef, Debug {
 
   public WebServiceDef port(int port) {
     return this.copy(this.serviceName, this.address, port, this.isSecure,
-                     this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
+                     this.spaceName, this.routerClass, this.documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final String spaceName() {
@@ -80,7 +82,7 @@ public class WebServiceDef implements ServiceDef, Debug {
 
   public WebServiceDef spaceName(String spaceName) {
     return this.copy(this.serviceName, this.address, this.port, this.isSecure,
-                     spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
+                     spaceName, this.routerClass, this.documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final UriPath documentRoot() {
@@ -89,7 +91,7 @@ public class WebServiceDef implements ServiceDef, Debug {
 
   public WebServiceDef documentRoot(UriPath documentRoot) {
     return this.copy(this.serviceName, this.address, this.port, this.isSecure,
-                     this.spaceName, documentRoot, this.resourceRoot, this.warpSettings);
+                     this.spaceName, this.routerClass, documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final UriPath resourceRoot() {
@@ -98,7 +100,7 @@ public class WebServiceDef implements ServiceDef, Debug {
 
   public WebServiceDef resourceRoot(UriPath resourceRoot) {
     return this.copy(this.serviceName, this.address, this.port, this.isSecure,
-                     this.spaceName, this.documentRoot, resourceRoot, this.warpSettings);
+                     this.spaceName, this.routerClass, this.documentRoot, resourceRoot, this.warpSettings);
   }
 
   public final WarpSettings warpSettings() {
@@ -107,13 +109,13 @@ public class WebServiceDef implements ServiceDef, Debug {
 
   public WebServiceDef warpSettings(WarpSettings warpSettings) {
     return this.copy(this.serviceName, this.address, this.port, this.isSecure,
-                     this.spaceName, this.documentRoot, this.resourceRoot, warpSettings);
+                     this.spaceName, this.routerClass, this.documentRoot, this.resourceRoot, warpSettings);
   }
 
   protected WebServiceDef copy(String serviceName, String address, int port, boolean isSecure,
-                               String spaceName, UriPath documentRoot, UriPath resourceRoot,
+                               String spaceName, String routerClass, UriPath documentRoot, UriPath resourceRoot,
                                WarpSettings warpSettings) {
-    return new WebServiceDef(serviceName, address, port, isSecure, spaceName,
+    return new WebServiceDef(serviceName, address, port, isSecure, spaceName, routerClass,
                              documentRoot, resourceRoot, warpSettings);
   }
 
@@ -126,6 +128,7 @@ public class WebServiceDef implements ServiceDef, Debug {
       return (this.serviceName == null ? that.serviceName == null : this.serviceName.equals(that.serviceName))
           && this.address.equals(that.address) && this.port == that.port && this.isSecure == that.isSecure
           && (this.spaceName == null ? that.spaceName == null : this.spaceName.equals(that.spaceName))
+          && (this.routerClass == null ? that.routerClass == null : this.routerClass.equals(that.routerClass))
           && (this.documentRoot == null ? that.documentRoot == null : this.documentRoot.equals(that.documentRoot))
           && (this.resourceRoot == null ? that.resourceRoot == null : this.resourceRoot.equals(that.resourceRoot))
           && this.warpSettings.equals(that.warpSettings);
@@ -140,11 +143,11 @@ public class WebServiceDef implements ServiceDef, Debug {
     if (WebServiceDef.hashSeed == 0) {
       WebServiceDef.hashSeed = Murmur3.seed(WebServiceDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(WebServiceDef.hashSeed, Murmur3.hash(this.serviceName)),
         this.address.hashCode()), this.port), Murmur3.hash(this.isSecure)),
-        Murmur3.hash(this.spaceName)), Murmur3.hash(this.documentRoot)),
-        Murmur3.hash(this.resourceRoot)), this.warpSettings.hashCode()));
+        Murmur3.hash(this.spaceName)), Murmur3.hash(this.routerClass)),
+        Murmur3.hash(this.documentRoot)), Murmur3.hash(this.resourceRoot)), this.warpSettings.hashCode()));
   }
 
   @Override
@@ -162,6 +165,9 @@ public class WebServiceDef implements ServiceDef, Debug {
     }
     if (this.spaceName != null) {
       output = output.write('.').write("spaceName").write('(').debug(this.spaceName).write(')');
+    }
+    if (this.routerClass != null) {
+      output = output.write('.').write("routerClass").write('(').debug(this.routerClass).write(')');
     }
     if (this.documentRoot != null) {
       output = output.write('.').write("documentRoot").write('(').debug(this.documentRoot).write(')');
@@ -181,11 +187,11 @@ public class WebServiceDef implements ServiceDef, Debug {
   }
 
   public static WebServiceDef standard() {
-    return new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, WarpSettings.standard());
+    return new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, null, WarpSettings.standard());
   }
 
   public static WebServiceDef secure() {
-    return new WebServiceDef("web", "0.0.0.0", 443, true, null, null, null, WarpSettings.standard());
+    return new WebServiceDef("web", "0.0.0.0", 443, true, null, null, null, null, WarpSettings.standard());
   }
 
 }
