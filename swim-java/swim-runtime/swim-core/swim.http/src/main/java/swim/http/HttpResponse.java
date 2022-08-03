@@ -22,6 +22,8 @@ import swim.codec.Output;
 import swim.codec.OutputBuffer;
 import swim.codec.Writer;
 import swim.collections.FingerTrieSeq;
+import swim.http.header.LocationHeader;
+import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
@@ -278,6 +280,18 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
 
   public static <T> HttpResponse<T> create(HttpStatus status) {
     return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.<HttpHeader>empty());
+  }
+
+  public static <T> HttpResponse<T> redirect(Uri location) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, HttpStatus.FOUND, FingerTrieSeq.of(LocationHeader.create(location)));
+  }
+
+  public static <T> HttpResponse<T> redirect(Uri location, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, HttpStatus.FOUND, headers.appended(LocationHeader.create(location)));
+  }
+
+  public static <T> HttpResponse<T> redirect(Uri location, HttpHeader... headers) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, HttpStatus.FOUND, FingerTrieSeq.of(headers).appended(LocationHeader.create(location)));
   }
 
   public static <T> HttpResponse<T> parseHttp(String string) {
