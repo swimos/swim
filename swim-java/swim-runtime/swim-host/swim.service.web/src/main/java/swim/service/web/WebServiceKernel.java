@@ -104,13 +104,14 @@ public class WebServiceKernel extends KernelProxy {
     return new WebServiceFactory(kernel, serviceDef, router);
   }
 
+  @SuppressWarnings("unchecked")
   protected WebRoute createWebRouter(WebServiceDef serviceDef) {
     if (serviceDef.routerClass != null) {
       try {
         final Class<? extends WebRoute> webRouteClass = (Class<? extends WebRoute>) Class.forName(serviceDef.routerClass);
         return webRouteClass.getDeclaredConstructor().newInstance();
-      } catch (Exception e) {
-        throw new RuntimeException(e);
+      } catch (ReflectiveOperationException cause) {
+        throw new RuntimeException(cause);
       }
     } else {
       return new RejectRoute();
