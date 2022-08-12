@@ -70,10 +70,19 @@ public class WebServiceKernel extends KernelProxy {
         if (spaceName == null) {
           spaceName = value.get("plane").stringValue(null); // deprecated
         }
+
+        String routerClass = null;
+        for (int i = 0, n = value.length(); i < n; i += 1) {
+          final Value router = value.getItem(i).getAttr("router");
+          if (router.isDefined()) {
+            routerClass = router.get("class").stringValue(null);
+          }
+        }
+
         final UriPath documentRoot = value.get("documentRoot").cast(UriPath.pathForm());
         final UriPath resourceRoot = value.get("resourceRoot").cast(UriPath.pathForm());
         final WarpSettings warpSettings = WarpSettings.form().cast(value);
-        return new WebServiceDef(serviceName, address, port, isSecure, spaceName,
+        return new WebServiceDef(serviceName, address, port, isSecure, spaceName, routerClass,
                                  documentRoot, resourceRoot, warpSettings);
       }
     }
@@ -95,8 +104,18 @@ public class WebServiceKernel extends KernelProxy {
     return new WebServiceFactory(kernel, serviceDef, router);
   }
 
+  @SuppressWarnings("unchecked")
   protected WebRoute createWebRouter(WebServiceDef serviceDef) {
-    return new RejectRoute(); // TODO: parse from config
+    if (serviceDef.routerClass != null) {
+      try {
+        final Class<? extends WebRoute> webRouteClass = (Class<? extends WebRoute>) Class.forName(serviceDef.routerClass);
+        return webRouteClass.getDeclaredConstructor().newInstance();
+      } catch (ReflectiveOperationException cause) {
+        throw new RuntimeException(cause);
+      }
+    } else {
+      return new RejectRoute();
+    }
   }
 
   private static final double KERNEL_PRIORITY = 0.75;
