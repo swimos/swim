@@ -31,6 +31,7 @@ import swim.http.header.ConnectionHeader;
 import swim.http.header.ContentEncodingHeader;
 import swim.http.header.ContentLengthHeader;
 import swim.http.header.ContentTypeHeader;
+import swim.http.header.CookieHeader;
 import swim.http.header.ExpectHeader;
 import swim.http.header.HostHeader;
 import swim.http.header.MaxForwardsHeader;
@@ -126,6 +127,10 @@ public class HttpParser {
 
   public WebSocketExtension webSocketExtension(String name, FingerTrieSeq<WebSocketParam> params) {
     return WebSocketExtension.create(name, params);
+  }
+
+  public Cookie cookie(String name, String value) {
+    return Cookie.create(name, value);
   }
 
   public <T> Parser<HttpRequest<T>> requestParser() {
@@ -275,6 +280,8 @@ public class HttpParser {
       return UpgradeHeader.parseHeaderValue(input, this);
     } else if ("User-Agent".equalsIgnoreCase(name)) {
       return UserAgentHeader.parseHeaderValue(input, this);
+    } else if ("Cookie".equalsIgnoreCase(name)) {
+      return CookieHeader.parseHeaderValue(input, this);
     } else {
       return RawHeader.parseHeaderValue(input, this, name.toLowerCase(), name);
     }
@@ -495,6 +502,23 @@ public class HttpParser {
   public WebSocketExtension parseWebSocketExtensionString(String string) {
     final Input input = Unicode.stringInput(string);
     Parser<WebSocketExtension> parser = this.parseWebSocketExtension(input);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    }
+    return parser.bind();
+  }
+
+  public Parser<Cookie> cookieParser() {
+    return new CookieParser(this);
+  }
+
+  public Parser<Cookie> parseCookie(Input input) {
+    return CookieParser.parse(input, this);
+  }
+
+  public Cookie parseCookieString(String string) {
+    final Input input = Unicode.stringInput(string);
+    Parser<Cookie> parser = this.parseCookie(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
