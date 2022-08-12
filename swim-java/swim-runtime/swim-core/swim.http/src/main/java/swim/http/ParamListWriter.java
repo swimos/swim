@@ -25,27 +25,29 @@ final class ParamListWriter extends Writer<Object, Object> {
   final Iterator<? extends HttpPart> params;
   final Writer<?, ?> paramWriter;
   final int step;
+  final char separator;
 
-  ParamListWriter(HttpWriter http, Iterator<? extends HttpPart> params,
+  ParamListWriter(HttpWriter http, Iterator<? extends HttpPart> params, char separator,
                   Writer<?, ?> paramWriter, int step) {
     this.http = http;
     this.params = params;
     this.paramWriter = paramWriter;
     this.step = step;
+    this.separator = separator;
   }
 
-  ParamListWriter(HttpWriter http, Iterator<? extends HttpPart> params) {
-    this(http, params, null, 1);
+  ParamListWriter(HttpWriter http, Iterator<? extends HttpPart> params, char separator) {
+    this(http, params, separator, null, 1);
   }
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return ParamListWriter.write(output, this.http, this.params,
-                                 this.paramWriter, this.step);
+    return ParamListWriter.write(output, this.http, this.params, this.separator,
+         this.paramWriter, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
-                                      Iterator<? extends HttpPart> params,
+                                      Iterator<? extends HttpPart> params, char separator,
                                       Writer<?, ?> paramWriter, int step) {
     do {
       if (step == 1) {
@@ -70,7 +72,7 @@ final class ParamListWriter extends Writer<Object, Object> {
         }
       }
       if (step == 2 && output.isCont()) {
-        output = output.write(',');
+        output = output.write(separator);
         step = 3;
       }
       if (step == 3 && output.isCont()) {
@@ -85,12 +87,12 @@ final class ParamListWriter extends Writer<Object, Object> {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new ParamListWriter(http, params, paramWriter, step);
+    return new ParamListWriter(http, params, separator, paramWriter, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
-                                      Iterator<? extends HttpPart> params) {
-    return ParamListWriter.write(output, http, params, null, 1);
+                                      Iterator<? extends HttpPart> params, char separator) {
+    return ParamListWriter.write(output, http, params, separator, null, 1);
   }
 
 }

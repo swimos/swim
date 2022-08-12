@@ -249,7 +249,11 @@ public class HttpWriter {
   }
 
   public Writer<?, ?> writeParamList(Output<?> output, Iterator<? extends HttpPart> params) {
-    return ParamListWriter.write(output, this, params);
+    return ParamListWriter.write(output, this, params, ',');
+  }
+
+  public Writer<?, ?> writeParamListWithSeparator(Output<?> output, Iterator<? extends HttpPart> params, char separator) {
+    return ParamListWriter.write(output, this, params, separator);
   }
 
   public Writer<?, ?> writeParamMap(Output<?> output, Iterator<? extends Map.Entry<?, ?>> params) {
