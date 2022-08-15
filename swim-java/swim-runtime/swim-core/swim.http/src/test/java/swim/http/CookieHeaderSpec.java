@@ -37,7 +37,7 @@ public class CookieHeaderSpec {
   public void writesCookieHeader() {
     assertWrites(CookieHeader.create(Cookie.create("foo", "bar")), "Cookie: foo=bar");
     assertWrites(CookieHeader.create(Cookie.create("foo", "bar"), Cookie.create("baz", "qux")), "Cookie: foo=bar; baz=qux");
-    assertWrites(CookieHeader.create(Cookie.create("foo", "bar"), Cookie.create("baz", "qux"), Cookie.create("qux", "quux")), "Cookie: foo=bar; baz=qux; qux=quux");
+    assertWrites(CookieHeader.create(Cookie.create("foo", "bar"), Cookie.create("baz", "qux"), Cookie.create("qux", "quux")), "Cookie: foo=bar; qux=quux; baz=qux");
     assertWrites(CookieHeader.create(Cookie.create("foo")), "Cookie: foo=");
     assertWrites(CookieHeader.create(Cookie.create("foo"), Cookie.create("bar")), "Cookie: foo=; bar=");
     assertWrites(CookieHeader.create(Cookie.create("foo"), Cookie.create("bar"), Cookie.create("baz")), "Cookie: foo=; bar=; baz=");
