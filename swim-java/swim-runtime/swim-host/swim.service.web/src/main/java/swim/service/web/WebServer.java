@@ -19,6 +19,8 @@ import swim.api.policy.PlanePolicy;
 import swim.api.policy.PolicyDirective;
 import swim.api.service.ServiceException;
 import swim.api.space.Space;
+import swim.collections.HashTrieMap;
+import swim.http.Cookie;
 import swim.http.HttpBody;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -132,11 +134,11 @@ public class WebServer extends AbstractWarpServer {
   }
 
   protected HttpResponder<?> warpWebSocketResponder(WsRequest wsRequest, WsResponse wsResponse) {
-    final RemoteHost host = this.openHost(wsRequest.httpRequest().uri());
+    final RemoteHost host = this.openHost(wsRequest.httpRequest().uri(), wsRequest.cookies());
     return this.upgrade(host, wsResponse);
   }
 
-  protected RemoteHost openHost(Uri requestUri) {
+  protected RemoteHost openHost(Uri requestUri, HashTrieMap<String, Cookie> cookies) {
     final Uri baseUri = Uri.create(UriScheme.create("warp"),
                                    UriAuthority.create(UriHost.inetAddress(context.localAddress().getAddress()),
                                                        UriPort.create(context.localAddress().getPort())),
@@ -152,7 +154,7 @@ public class WebServer extends AbstractWarpServer {
       final EdgeBinding edge = ((EdgeContext) space).edgeWrapper();
       final MeshBinding mesh = edge.openMesh(remoteUri);
       final PartBinding gateway = mesh.openGateway();
-      final RemoteHost host = new RemoteHost(requestUri, baseUri);
+      final RemoteHost host = new RemoteHost(requestUri, baseUri, cookies);
       gateway.openHost(remoteUri, host);
       return host;
     } else {

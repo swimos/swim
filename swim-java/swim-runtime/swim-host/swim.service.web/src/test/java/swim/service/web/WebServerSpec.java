@@ -15,6 +15,8 @@
 package swim.service.web;
 
 import org.testng.annotations.Test;
+import swim.collections.HashTrieMap;
+import swim.http.Cookie;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
@@ -42,7 +44,7 @@ public class WebServerSpec {
     final WebServiceDef serviceDef = new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, null, WarpSettings.create(wsSettings));
     final WebServer server = new WebServer(new WebServiceKernel(), serviceDef, request -> request.respond(HttpResponse.create(HttpStatus.OK))) {
       @Override
-      protected RemoteHost openHost(Uri requestUri) {
+      protected RemoteHost openHost(Uri requestUri, HashTrieMap<String, Cookie> cookies) {
         return new RemoteHost(requestUri);
       }
     };

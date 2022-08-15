@@ -39,6 +39,7 @@ import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.concurrent.Stay;
 import swim.concurrent.StayContext;
+import swim.http.Cookie;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.io.FlowModifier;
@@ -46,6 +47,8 @@ import swim.io.IpSocket;
 import swim.io.warp.WarpSocket;
 import swim.io.warp.WarpSocketContext;
 import swim.store.StoreBinding;
+import swim.structure.Record;
+import swim.structure.Slot;
 import swim.structure.Value;
 import swim.system.AbstractTierBinding;
 import swim.system.HostAddress;
@@ -102,6 +105,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   protected WarpSocketContext warpSocketContext;
   final Uri requestUri;
   final Uri baseUri;
+  final HashTrieMap<String, Cookie> cookies;
   Uri remoteUri;
 
   volatile int flags;
@@ -135,8 +139,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   DemandLane<HostPulse> metaPulse;
 
   public RemoteHost(Uri requestUri, Uri baseUri) {
+    this(requestUri, baseUri, HashTrieMap.empty());
+  }
+
+  public RemoteHost(Uri requestUri, Uri baseUri, HashTrieMap<String, Cookie> cookies) {
     this.hostContext = null;
     this.warpSocketContext = null;
+    this.cookies = cookies;
     this.requestUri = requestUri;
     this.baseUri = baseUri;
     this.remoteUri = null;
@@ -979,7 +988,15 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void onAuthRequest(AuthRequest request) {
-    final RemoteCredentials credentials = new RemoteCredentials(this.requestUri, this.remoteUri, request.body());
+    final RemoteCredentials credentials;
+
+    if (request.body().containsKey("cookie")) {
+      final Cookie authCookie = this.cookies.get(request.body().get("cookie").stringValue());
+      credentials = new RemoteCredentials(this.requestUri, this.remoteUri, Record.of(Slot.of("idToken", authCookie.getValue())));
+    } else {
+      credentials = new RemoteCredentials(this.requestUri, this.remoteUri, request.body());
+    }
+
     final PolicyDirective<Identity> directive = this.hostContext.authenticate(credentials);
     if (directive != null && directive.isAllowed()) {
       RemoteHost.REMOTE_IDENTITY.set(this, directive.get());
