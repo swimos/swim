@@ -11,7 +11,7 @@ public class CookieSpec {
     assertParses("foo=baz.bar", Cookie.create("foo", "baz.bar"));
     assertParses("foo.bar=baz.qux", Cookie.create("foo.bar", "baz.qux"));
     assertParses("{foo.bar}={baz.qux}", Cookie.create("{foo.bar}", "{baz.qux}"));
-    assertParses("foo", Cookie.create("foo"));
+    assertParses("foo=", Cookie.create("foo"));
   }
 
   @Test
@@ -19,7 +19,7 @@ public class CookieSpec {
     assertWrites(Cookie.create("foo", "bar"), "foo=bar");
     assertWrites(Cookie.create("foo", "baz.bar"), "foo=baz.bar");
     assertWrites(Cookie.create("foo.bar", "baz.qux"), "foo.bar=baz.qux");
-    assertWrites(Cookie.create("foo", ""), "foo");
+    assertWrites(Cookie.create("foo", ""), "foo=");
 
   }
 

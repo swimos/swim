@@ -82,6 +82,14 @@ public class SetCookieHeader extends HttpHeader {
     return new SetCookieHeader(cookie, HashTrieMap.empty());
   }
 
+  public static SetCookieHeader create(String name, String value) {
+    return new SetCookieHeader(Cookie.create(name, value), HashTrieMap.empty());
+  }
+
+  public static SetCookieHeader create(String name) {
+    return new SetCookieHeader(Cookie.create(name), HashTrieMap.empty());
+  }
+
   public void expire() {
     this.setMaxAge(0);
   }
