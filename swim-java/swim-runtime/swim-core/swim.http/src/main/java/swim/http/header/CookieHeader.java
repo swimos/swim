@@ -4,19 +4,18 @@ import swim.codec.Input;
 import swim.codec.Output;
 import swim.codec.Parser;
 import swim.codec.Writer;
-import swim.collections.FingerTrieSeq;
+import swim.collections.HashTrieMap;
 import swim.http.Cookie;
 import swim.http.HttpHeader;
 import swim.http.HttpParser;
 import swim.http.HttpWriter;
-import swim.util.Builder;
 import swim.util.Murmur3;
 
 public class CookieHeader extends HttpHeader {
 
-  final FingerTrieSeq<Cookie> cookies;
+  final HashTrieMap<String, Cookie> cookies;
 
-  CookieHeader(FingerTrieSeq<Cookie> cookies) {
+  CookieHeader(HashTrieMap<String, Cookie> cookies) {
     this.cookies = cookies;
   }
 
@@ -35,13 +34,13 @@ public class CookieHeader extends HttpHeader {
     return "Cookie";
   }
 
-  public FingerTrieSeq<Cookie> cookies() {
+  public HashTrieMap<String, Cookie> cookies() {
     return this.cookies;
   }
 
   @Override
   public Writer<?, ?> writeHeaderValue(Output<?> output, HttpWriter http) {
-    return http.writeParamListWithSeparator(output, this.cookies.iterator(), ';');
+    return http.writeParamListWithSeparator(output, this.cookies.values().iterator(), ';');
   }
 
   @Override
@@ -68,35 +67,41 @@ public class CookieHeader extends HttpHeader {
   @Override
   public <T> Output<T> debug(Output<T> output) {
     output = output.write("CookieHeader").write('.').write("create").write('(');
-    final int n = this.cookies.size();
-    if (n > 0) {
-      output = output.debug(this.cookies.head());
-      for (int i = 1; i < n; i += 1) {
-        output = output.write(", ").debug(this.cookies.get(i));
-      }
+
+    for (Cookie cookie: this.cookies.values()) {
+      output = output.write(", ").debug(cookie);
     }
+
     output = output.write(')');
     return output;
   }
 
   public static CookieHeader empty() {
-    return new CookieHeader(FingerTrieSeq.empty());
+    return new CookieHeader(HashTrieMap.empty());
   }
 
-  public static CookieHeader create(FingerTrieSeq<Cookie> cookies) {
+  public static CookieHeader create(HashTrieMap<String, Cookie> cookies) {
     return new CookieHeader(cookies);
   }
 
   public static CookieHeader create(Cookie... cookies) {
-    return new CookieHeader(FingerTrieSeq.of(cookies));
+    HashTrieMap<String, Cookie> cookieMap = HashTrieMap.empty();
+
+    for (Cookie cookie: cookies) {
+      cookieMap = cookieMap.updated(cookie.getName(), cookie);
+    }
+
+    return new CookieHeader(cookieMap);
   }
 
   public static CookieHeader create(String... cookiesString) {
-    final Builder<Cookie, FingerTrieSeq<Cookie>> cookies = FingerTrieSeq.builder();
-    for (int i = 0, n = cookiesString.length; i < n; i += 1) {
-      cookies.add(Cookie.parse(cookiesString[i]));
+    HashTrieMap<String, Cookie> cookieMap = HashTrieMap.empty();
+
+    for (String cookieString: cookiesString) {
+      final Cookie cookie = Cookie.parse(cookieString);
+      cookieMap = cookieMap.updated(cookie.getName(), cookie);
     }
-    return new CookieHeader(cookies.bind());
+    return new CookieHeader(cookieMap);
   }
 
   public static Parser<CookieHeader> parseHeaderValue(Input input, HttpParser http) {

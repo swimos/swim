@@ -2,21 +2,20 @@ package swim.http.header;
 
 import swim.codec.Input;
 import swim.codec.Parser;
-import swim.collections.FingerTrieSeq;
+import swim.collections.HashTrieMap;
 import swim.http.Cookie;
 import swim.http.Http;
 import swim.http.HttpParser;
-import swim.util.Builder;
 
 public class CookieHeaderParser extends Parser<CookieHeader> {
 
   final HttpParser http;
   final Parser<Cookie> cookiesParser;
-  final Builder<Cookie, FingerTrieSeq<Cookie>> cookies;
+  final HashTrieMap<String, Cookie> cookies;
   final int step;
 
   CookieHeaderParser(HttpParser http, Parser<Cookie> cookiesParser,
-                     Builder<Cookie, FingerTrieSeq<Cookie>> cookies, int step) {
+                     HashTrieMap<String, Cookie> cookies, int step) {
     this.http = http;
     this.cookiesParser = cookiesParser;
     this.cookies = cookies;
@@ -33,7 +32,7 @@ public class CookieHeaderParser extends Parser<CookieHeader> {
   }
 
   static Parser<CookieHeader> parse(Input input, HttpParser http, Parser<Cookie> cookieParser,
-                                    Builder<Cookie, FingerTrieSeq<Cookie>> cookies, int step) {
+                                    HashTrieMap<String, Cookie> cookies, int step) {
 
 
     int c = 0;
@@ -45,9 +44,10 @@ public class CookieHeaderParser extends Parser<CookieHeader> {
       }
       if (cookieParser.isDone()) {
         if (cookies == null) {
-          cookies = FingerTrieSeq.builder();
+          cookies = HashTrieMap.empty();
         }
-        cookies.add(cookieParser.bind());
+        final Cookie cookie = cookieParser.bind();
+        cookies = cookies.updated(cookie.getName(), cookie);
         cookieParser = null;
         step = 2;
       } else if (cookieParser.isError()) {
@@ -73,7 +73,7 @@ public class CookieHeaderParser extends Parser<CookieHeader> {
         if (input.isCont() && Http.isVisibleChar(c)) {
           step = 3;
         } else if (!input.isEmpty()) {
-          return Parser.done(CookieHeader.create(cookies.bind()));
+          return Parser.done(CookieHeader.create(cookies));
         }
       }
       if (step == 3) {
@@ -83,7 +83,8 @@ public class CookieHeaderParser extends Parser<CookieHeader> {
           cookieParser = cookieParser.feed(input);
         }
         if (cookieParser.isDone()) {
-          cookies.add(cookieParser.bind());
+          final Cookie cookie = cookieParser.bind();
+          cookies = cookies.updated(cookie.getName(), cookie);
           cookieParser = null;
           step = 2;
           continue;
