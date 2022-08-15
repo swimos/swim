@@ -75,36 +75,20 @@ final class CookieParser extends Parser<Cookie> {
       }
       if (!input.isEmpty()) {
         step = 3;
-      } else if (input.isDone()) {
+      } else if (input.isDone() || !Http.isVisibleChar(c)) {
         return Parser.done(http.cookie(nameBuilder.toString(), ""));
       }
     }
     if (step == 3) {
       if (input.isCont() && c == '=') {
         input = input.step();
+        valueBuilder = new StringBuilder();
         step = 4;
-      } else if (!input.isEmpty()) {
+      } else if (!input.isEmpty() || !Http.isVisibleChar(c)) {
         return Parser.done(http.cookie(nameBuilder.toString(), ""));
       }
     }
     if (step == 4) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isVisibleChar(c) && c != '=' && c != ';') {
-          input = input.step();
-          if (valueBuilder == null) {
-            valueBuilder = new StringBuilder();
-          }
-          valueBuilder.appendCodePoint(c);
-          step = 5;
-        } else {
-          return Parser.error(Diagnostic.expected("cookie value", input));
-        }
-      } else if (input.isDone()) {
-        return Parser.error(Diagnostic.expected("cookie value", input));
-      }
-    }
-    if (step == 5) {
       while (input.isCont()) {
         c = input.head();
         if (Http.isVisibleChar(c) && c != '=' && c != ';') {
@@ -115,7 +99,7 @@ final class CookieParser extends Parser<Cookie> {
         }
       }
 
-      if (input.isDone() || c == ';') {
+      if (input.isDone() || c == ';' || !Http.isVisibleChar(c)) {
         return Parser.done(http.cookie(nameBuilder.toString(), valueBuilder.toString()));
       }
     }

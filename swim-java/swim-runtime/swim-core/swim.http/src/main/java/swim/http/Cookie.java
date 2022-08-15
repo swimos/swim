@@ -60,12 +60,12 @@ public class Cookie extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> httpWriter(HttpWriter http) {
-    return new ParamWriter(http, this.name, this.value);
+    return new CookieWriter(http, this.name, this.value);
   }
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return ParamWriter.write(output, http, this.name, this.value);
+    return CookieWriter.write(output, http, this.name, this.value);
   }
 
   public static Cookie create(String name, String value) {
