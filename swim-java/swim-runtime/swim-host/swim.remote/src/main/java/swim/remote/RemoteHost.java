@@ -47,8 +47,8 @@ import swim.io.IpSocket;
 import swim.io.warp.WarpSocket;
 import swim.io.warp.WarpSocketContext;
 import swim.store.StoreBinding;
-import swim.structure.Record;
-import swim.structure.Slot;
+import swim.structure.Item;
+import swim.structure.Text;
 import swim.structure.Value;
 import swim.system.AbstractTierBinding;
 import swim.system.HostAddress;
@@ -988,15 +988,22 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void onAuthRequest(AuthRequest request) {
-    final RemoteCredentials credentials;
 
-    if (request.body().containsKey("cookie")) {
-      final Cookie authCookie = this.cookies.get(request.body().get("cookie").stringValue());
-      credentials = new RemoteCredentials(this.requestUri, this.remoteUri, Record.of(Slot.of("idToken", authCookie.getValue())));
-    } else {
-      credentials = new RemoteCredentials(this.requestUri, this.remoteUri, request.body());
+    final Value claims = request.body().branch();
+    for (int i = 0; i < claims.length(); i++) {
+      final Item claim = claims.getItem(i);
+      final Value claimKey = claim.key();
+      final Value claimValue = claims.getField(claimKey).value();
+
+      if (claimValue.containsKey("cookie")) {
+        final Cookie authCookie = this.cookies.get(claimValue.get("cookie").stringValue());
+        if (authCookie != null) {
+          claims.updated(claimKey, Text.from(authCookie.getValue()));
+        }
+      }
     }
 
+    final RemoteCredentials credentials = new RemoteCredentials(this.requestUri, this.remoteUri, claims);
     final PolicyDirective<Identity> directive = this.hostContext.authenticate(credentials);
     if (directive != null && directive.isAllowed()) {
       RemoteHost.REMOTE_IDENTITY.set(this, directive.get());
