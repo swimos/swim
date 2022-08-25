@@ -40,10 +40,7 @@ import swim.uri.UriHost;
 import swim.uri.UriPath;
 import swim.uri.UriPort;
 import swim.uri.UriScheme;
-import swim.web.WebRequest;
-import swim.web.WebResponse;
 import swim.web.WebRoute;
-import swim.web.WebServerRequest;
 import swim.web.route.DirectoryRoute;
 import swim.web.route.ResourceDirectoryRoute;
 import swim.ws.WsRequest;
@@ -123,14 +120,7 @@ public class WebServer extends AbstractWarpServer {
       // nop
     }
 
-    final WebRequest webRequest = new WebServerRequest(httpRequest);
-    // Route application requests.
-    WebResponse webResponse = this.router.routeRequest(webRequest);
-    if (webResponse.isRejected()) {
-      // Route kernel module requests.
-      webResponse = this.kernel.routeRequest(webRequest);
-    }
-    return webResponse.httpResponder();
+    return new HttpWebResponder<Object>(this.router, this.kernel);
   }
 
   protected HttpResponder<?> warpWebSocketResponder(WsRequest wsRequest, WsResponse wsResponse) {
