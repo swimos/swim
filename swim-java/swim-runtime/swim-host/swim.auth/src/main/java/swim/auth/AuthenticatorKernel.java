@@ -42,6 +42,9 @@ public class AuthenticatorKernel extends KernelProxy {
     AuthenticatorDef authenticatorDef = GoogleIdAuthenticatorDef.form().cast(authenticatorConfig);
     if (authenticatorDef == null) {
       authenticatorDef = OpenIdAuthenticatorDef.form().cast(authenticatorConfig);
+      if (authenticatorDef == null) {
+        authenticatorDef = BaseAuthenticatorDef.form().cast(authenticatorConfig);
+      }
     }
     return authenticatorDef != null ? authenticatorDef : super.defineAuthenticator(authenticatorConfig);
   }
@@ -49,9 +52,11 @@ public class AuthenticatorKernel extends KernelProxy {
   @Override
   public Authenticator createAuthenticator(AuthenticatorDef authenticatorDef, ClassLoader classLoader) {
     if (authenticatorDef instanceof GoogleIdAuthenticatorDef) {
-      return new GoogleIdAuthenticator((GoogleIdAuthenticatorDef) authenticatorDef);
+      return new BaseAuthenticator((GoogleIdAuthenticatorDef) authenticatorDef);
     } else if (authenticatorDef instanceof OpenIdAuthenticatorDef) {
-      return new OpenIdAuthenticator((OpenIdAuthenticatorDef) authenticatorDef);
+      return new BaseAuthenticator((OpenIdAuthenticatorDef) authenticatorDef);
+    } else if (authenticatorDef instanceof BaseAuthenticatorDef) {
+      return new BaseAuthenticator((BaseAuthenticatorDef) authenticatorDef);
     } else {
       return super.createAuthenticator(authenticatorDef, classLoader);
     }
