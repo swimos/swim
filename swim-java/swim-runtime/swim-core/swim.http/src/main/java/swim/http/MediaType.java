@@ -276,25 +276,25 @@ public final class MediaType extends HttpPart implements Debug {
 
   public static MediaType forPath(String path) {
     // TODO: configurable extension mapping
-    if (".js".endsWith(path)) {
+    if (path.endsWith(".js")) {
       return MediaType.applicationJavascript();
-    } else if (".json".endsWith(path)) {
+    } else if (path.endsWith(".json")) {
       return MediaType.applicationJson();
-    } else if (".xml".endsWith(path)) {
+    } else if (path.endsWith(".xml")) {
       return MediaType.applicationXml();
-    } else if (".recon".endsWith(path)) {
+    } else if (path.endsWith(".recon")) {
       return MediaType.applicationXRecon();
-    } else if (".jpeg".endsWith(path) || ".jpg".endsWith(path)) {
+    } else if (path.endsWith(".jpeg") || path.endsWith(".jpg")) {
       return MediaType.imageJpeg();
-    } else if (".png".endsWith(path)) {
+    } else if (path.endsWith(".png")) {
       return MediaType.imagePng();
-    } else if (".svg".endsWith(path)) {
+    } else if (path.endsWith(".svg")) {
       return MediaType.imageSvgXml();
-    } else if (".css".endsWith(path)) {
+    } else if (path.endsWith(".css")) {
       return MediaType.textCss();
-    } else if (".html".endsWith(path)) {
+    } else if (path.endsWith(".html")) {
       return MediaType.textHtml();
-    } else if (".txt".endsWith(path)) {
+    } else if (path.endsWith(".txt")) {
       return MediaType.textPlain();
     } else {
       return null;
