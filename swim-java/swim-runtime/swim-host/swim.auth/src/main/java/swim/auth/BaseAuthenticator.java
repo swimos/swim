@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import swim.api.auth.AbstractAuthenticator;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -36,7 +35,10 @@ import swim.io.http.AbstractHttpClient;
 import swim.io.http.AbstractHttpRequester;
 import swim.io.http.HttpInterface;
 import swim.io.http.HttpSettings;
-import swim.security.*;
+import swim.security.JsonWebKey;
+import swim.security.JsonWebSignature;
+import swim.security.JsonWebToken;
+import swim.security.PublicKeyDef;
 import swim.structure.Item;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -134,7 +136,7 @@ public class BaseAuthenticator extends AbstractAuthenticator implements HttpInte
 
   @Override
   public PolicyDirective<Identity> authenticate(Credentials credentials) {
-    String compactJws = credentials.claims().get(this.tokenName).stringValue(null);
+    final String compactJws = credentials.claims().get(this.tokenName).stringValue(null);
     if (compactJws != null) {
       final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
       if (jws != null) {
@@ -149,11 +151,11 @@ public class BaseAuthenticator extends AbstractAuthenticator implements HttpInte
     if (payloadValue.isDefined()) {
       final JsonWebToken token = new JsonWebToken(payloadValue);
 
-      Value expiration = token.get(this.expiration);
-      if (!hasExpired(expiration)) {
+      final Value expiration = token.get(this.expiration);
+      if (!this.hasExpired(expiration)) {
 
         for (Map.Entry<String, FingerTrieSeq<String>> claim : this.claims) {
-          Value tokenClaim = token.get(claim.getKey());
+          final Value tokenClaim = token.get(claim.getKey());
 
           if (!tokenClaim.isDefinite()) {
             return null;
@@ -178,7 +180,7 @@ public class BaseAuthenticator extends AbstractAuthenticator implements HttpInte
   private boolean hasExpired(Value expiration) {
     if (expiration != null) {
       try {
-        Instant expirationInstant = Instant.ofEpochSecond(expiration.longValue());
+        final Instant expirationInstant = Instant.ofEpochSecond(expiration.longValue());
         if (expirationInstant.isAfter(Instant.now())) {
           return false;
         }

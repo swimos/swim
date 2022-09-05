@@ -14,6 +14,8 @@
 
 package swim.auth;
 
+import java.util.Map;
+import java.util.Objects;
 import swim.api.auth.AuthenticatorDef;
 import swim.codec.Debug;
 import swim.codec.Format;
@@ -27,12 +29,11 @@ import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;
 import swim.structure.Record;
+import swim.structure.Slot;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Builder;
 import swim.util.Murmur3;
-
-import java.util.Objects;
 
 public class BaseAuthenticatorDef implements AuthenticatorDef, Debug {
 
@@ -153,35 +154,32 @@ final class BaseAuthenticatorForm extends Form<BaseAuthenticatorDef> {
   public Item mold(BaseAuthenticatorDef authenticatorDef) {
     if (authenticatorDef != null) {
       final Record record = Record.create().attr(this.tag());
+      record.add(Record.create().attr("token", authenticatorDef.tokenName).toValue());
+      record.add(Record.create().attr("expiration", authenticatorDef.expiration));
 
-      // Token (name) as issuer
-      // Expiration as issuer
-
-      // Claims are more complicated
-
-
-//      Value issuers = Value.absent();
-//     TODO
-//      for (String issuer : authenticatorDef.issuers) {
-//        issuers = issuers.appended(issuer);
-//      }
-//      if (issuers.isDefined()) {
-//        record.slot("issuers", issuers);
-//      }
-
-//      Value audiences = Value.absent();
-//      for (String audience : authenticatorDef.audiences) {
-//        audiences = audiences.appended(audience);
-//      }
-//      if (audiences.isDefined()) {
-//        record.slot("audiences", audiences);
-//      }
+      for (Map.Entry<String, FingerTrieSeq<String>> claim : authenticatorDef.claims) {
+        final Record claimRecord = Record.create();
+        for (String claimValue : claim.getValue()) {
+          claimRecord.add(claimValue);
+        }
+        if (claimRecord.size() == 1) {
+          record.add(Record.create().attr("claim", Record.create().slot(claim.getKey(), claimRecord.get(0).toValue())));
+        } else {
+          record.add(Record.create().attr("claim", Record.create().slot(claim.getKey(), claimRecord)));
+        }
+      }
 
       for (PublicKeyDef publicKeyDef : authenticatorDef.publicKeyDefs) {
         record.add(publicKeyDef.toValue());
       }
 
-      return record.concat(authenticatorDef.httpSettings.toValue());
+      if (authenticatorDef.publicKeyUri != null) {
+        record.add(Slot.of("publicKeyUri", authenticatorDef.publicKeyUri.toString()));
+      }
+
+      record.add(authenticatorDef.httpSettings.toValue());
+
+      return Slot.of(authenticatorDef.authenticatorName, record);
     } else {
       return Item.extant();
     }
@@ -204,15 +202,14 @@ final class BaseAuthenticatorForm extends Form<BaseAuthenticatorDef> {
           expiration = member.get("expiration").stringValue();
         } else if ("token".equals(tag)) {
           tokenName = member.get("token").stringValue();
-        } else if ("claims".equals(tag)) {
-          for (Item claim : member.tail()) {
+        } else if ("claim".equals(tag)) {
+          final Value claim = member.get("claim");
+          for (Item claimMember : claim) {
             final Builder<String, FingerTrieSeq<String>> claimValues = FingerTrieSeq.builder();
-
-            for (Item claimValue : claim.target()) {
+            for (Item claimValue : claimMember.toValue()) {
               claimValues.add(claimValue.stringValue());
             }
-
-            claims = claims.updated(claim.key().stringValue(), claimValues.bind());
+            claims = claims.updated(claimMember.key().stringValue(), claimValues.bind());
           }
         } else {
           final PublicKeyDef publicKeyDef = PublicKeyDef.publicKeyForm().cast(member.toValue());
