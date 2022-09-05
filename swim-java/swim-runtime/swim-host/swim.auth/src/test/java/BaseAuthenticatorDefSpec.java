@@ -1,3 +1,4 @@
+import java.math.BigInteger;
 import org.testng.annotations.Test;
 import swim.auth.BaseAuthenticatorDef;
 import swim.collections.FingerTrieSeq;
@@ -8,9 +9,7 @@ import swim.security.RsaPublicKeyDef;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.uri.Uri;
-import java.math.BigInteger;
 import static org.testng.AssertJUnit.assertEquals;
-
 
 public class BaseAuthenticatorDefSpec {
 
