@@ -18,6 +18,7 @@ import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
 import swim.collections.FingerTrieSeq;
+import swim.collections.HashTrieMap;
 import swim.http.HttpHeader;
 import swim.http.WebSocketExtension;
 import swim.http.WebSocketParam;
@@ -229,7 +230,7 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsRequest handshakeRequest(Uri uri, FingerTrieSeq<String> protocols, FingerTrieSeq<HttpHeader> headers) {
-    return WsRequest.create(uri, protocols, this.extensions(), headers);
+    return WsRequest.create(uri, protocols, this.extensions(), HashTrieMap.empty(), headers);
   }
 
   public WsRequest handshakeRequest(Uri uri, FingerTrieSeq<String> protocols, HttpHeader... headers) {

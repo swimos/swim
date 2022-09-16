@@ -15,6 +15,8 @@
 package swim.ws;
 
 import swim.collections.FingerTrieSeq;
+import swim.collections.HashTrieMap;
+import swim.http.Cookie;
 import swim.http.HttpHeader;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -22,6 +24,7 @@ import swim.http.HttpStatus;
 import swim.http.UpgradeProtocol;
 import swim.http.WebSocketExtension;
 import swim.http.header.ConnectionHeader;
+import swim.http.header.CookieHeader;
 import swim.http.header.HostHeader;
 import swim.http.header.SecWebSocketAcceptHeader;
 import swim.http.header.SecWebSocketExtensionsHeader;
@@ -42,12 +45,14 @@ public class WsRequest {
   protected final SecWebSocketKeyHeader key;
   protected final FingerTrieSeq<String> protocols;
   protected final FingerTrieSeq<WebSocketExtension> extensions;
+  protected final HashTrieMap<String, Cookie> cookies;
 
   public WsRequest(HttpRequest<?> httpRequest, SecWebSocketKeyHeader key, FingerTrieSeq<String> protocols,
-                   FingerTrieSeq<WebSocketExtension> extensions) {
+                   HashTrieMap<String, Cookie> cookies, FingerTrieSeq<WebSocketExtension> extensions) {
     this.httpRequest = httpRequest;
     this.key = key;
     this.protocols = protocols;
+    this.cookies = cookies;
     this.extensions = extensions;
   }
 
@@ -61,6 +66,10 @@ public class WsRequest {
 
   public final FingerTrieSeq<String> protocols() {
     return this.protocols;
+  }
+
+  public final HashTrieMap<String, Cookie> cookies() {
+    return this.cookies;
   }
 
   public final FingerTrieSeq<WebSocketExtension> extensions() {
@@ -160,6 +169,7 @@ public class WsRequest {
 
   public static WsRequest create(Uri uri, FingerTrieSeq<String> protocols,
                                  FingerTrieSeq<WebSocketExtension> extensions,
+                                 HashTrieMap<String, Cookie> cookies,
                                  FingerTrieSeq<HttpHeader> headers) {
     final SecWebSocketKeyHeader key = SecWebSocketKeyHeader.generate();
     final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> requestHeaders = FingerTrieSeq.builder();
@@ -180,23 +190,23 @@ public class WsRequest {
     final UriPath requestPath = uri.path().isEmpty() ? UriPath.slash() : uri.path();
     final Uri requestUri = Uri.create(null, null, requestPath, uri.query(), null);
     final HttpRequest<?> httpRequest = HttpRequest.get(requestUri, requestHeaders.bind());
-    return new WsRequest(httpRequest, key, protocols, extensions);
+    return new WsRequest(httpRequest, key, protocols, cookies, extensions);
   }
 
   public static WsRequest create(Uri uri, FingerTrieSeq<String> protocols, HttpHeader... headers) {
-    return WsRequest.create(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
+    return WsRequest.create(uri, protocols, FingerTrieSeq.empty(), HashTrieMap.empty(), FingerTrieSeq.of(headers));
   }
 
   public static WsRequest create(Uri uri, FingerTrieSeq<String> protocols) {
-    return WsRequest.create(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
+    return WsRequest.create(uri, protocols, FingerTrieSeq.empty(), HashTrieMap.empty(), FingerTrieSeq.empty());
   }
 
   public static WsRequest create(Uri uri, HttpHeader... headers) {
-    return WsRequest.create(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
+    return WsRequest.create(uri, FingerTrieSeq.empty(), FingerTrieSeq.empty(), HashTrieMap.empty(), FingerTrieSeq.of(headers));
   }
 
   public static WsRequest create(Uri uri) {
-    return WsRequest.create(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
+    return WsRequest.create(uri, FingerTrieSeq.empty(), FingerTrieSeq.empty(), HashTrieMap.empty(), FingerTrieSeq.empty());
   }
 
   public static WsRequest create(HttpRequest<?> httpRequest) {
@@ -204,6 +214,7 @@ public class WsRequest {
     boolean upgradeWebSocket = false;
     SecWebSocketKeyHeader key = null;
     FingerTrieSeq<String> protocols = FingerTrieSeq.empty();
+    HashTrieMap<String, Cookie> cookies = HashTrieMap.empty();
     FingerTrieSeq<WebSocketExtension> extensions = FingerTrieSeq.empty();
     for (HttpHeader header : httpRequest.headers()) {
       if (header instanceof ConnectionHeader && ((ConnectionHeader) header).contains("Upgrade")) {
@@ -214,12 +225,14 @@ public class WsRequest {
         key = (SecWebSocketKeyHeader) header;
       } else if (header instanceof SecWebSocketProtocolHeader) {
         protocols = ((SecWebSocketProtocolHeader) header).protocols();
+      } else if (header instanceof CookieHeader) {
+        cookies = ((CookieHeader) header).cookies();
       } else if (header instanceof SecWebSocketExtensionsHeader) {
         extensions = ((SecWebSocketExtensionsHeader) header).extensions();
       }
     }
     if (connectionUpgrade && upgradeWebSocket && key != null) {
-      return new WsRequest(httpRequest, key, protocols, extensions);
+      return new WsRequest(httpRequest, key, protocols, cookies, extensions);
     }
     return null;
   }
