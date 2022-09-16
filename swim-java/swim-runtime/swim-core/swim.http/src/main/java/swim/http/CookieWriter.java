@@ -68,7 +68,7 @@ final class CookieWriter extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = http.writeValue(output, value);
+        part = http.writePhrase(output, value);
       } else {
         part = part.pull(output);
       }
