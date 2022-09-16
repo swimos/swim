@@ -20,6 +20,7 @@ public class CookieSpec {
     assertWrites(Cookie.create("foo", "baz.bar"), "foo=baz.bar");
     assertWrites(Cookie.create("foo.bar", "baz.qux"), "foo.bar=baz.qux");
     assertWrites(Cookie.create("foo", ""), "foo=");
+    assertWrites(Cookie.create("email", "foo@example.com"), "email=foo@example.com");
 
   }
 
