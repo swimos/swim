@@ -1,0 +1,6 @@
+google: @googleId {
+    @audience("custom_google_audience")
+    @email("email_1@google.com")
+    @email("email_2@google.com")
+    publicKeyUri: "https://google.com"
+}

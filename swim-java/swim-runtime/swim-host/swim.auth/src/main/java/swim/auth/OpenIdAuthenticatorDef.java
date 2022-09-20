@@ -26,6 +26,7 @@ import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;
 import swim.structure.Record;
+import swim.structure.Slot;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Builder;
@@ -40,8 +41,7 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
   final Uri publicKeyUri;
   final HttpSettings httpSettings;
 
-  public OpenIdAuthenticatorDef(String authenticatorName, FingerTrieSeq<String> issuers,
-                                FingerTrieSeq<String> audiences,
+  public OpenIdAuthenticatorDef(String authenticatorName, FingerTrieSeq<String> audiences, FingerTrieSeq<String> issuers,
                                 FingerTrieSeq<PublicKeyDef> publicKeyDefs, Uri publicKeyUri,
                                 HttpSettings httpSettings) {
     this.authenticatorName = authenticatorName;
@@ -84,9 +84,9 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
     } else if (other instanceof OpenIdAuthenticatorDef) {
       final OpenIdAuthenticatorDef that = (OpenIdAuthenticatorDef) other;
       return (this.authenticatorName == null ? that.authenticatorName == null : this.authenticatorName.equals(that.authenticatorName))
-          && this.issuers.equals(that.issuers) && this.audiences.equals(that.audiences)
-          && this.publicKeyDefs.equals(that.publicKeyDefs) && this.publicKeyUri.equals(that.publicKeyUri)
-          && this.httpSettings.equals(that.httpSettings);
+           && this.issuers.equals(that.issuers) && this.audiences.equals(that.audiences)
+           && this.publicKeyDefs.equals(that.publicKeyDefs) && this.publicKeyUri.equals(that.publicKeyUri)
+           && this.httpSettings.equals(that.httpSettings);
     }
     return false;
   }
@@ -99,17 +99,17 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
       OpenIdAuthenticatorDef.hashSeed = Murmur3.seed(OpenIdAuthenticatorDef.class);
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(OpenIdAuthenticatorDef.hashSeed, Murmur3.hash(this.authenticatorName)),
-        this.issuers.hashCode()), this.audiences.hashCode()), this.publicKeyDefs.hashCode()),
-        this.publicKeyUri.hashCode()), this.httpSettings.hashCode()));
+              Murmur3.mix(OpenIdAuthenticatorDef.hashSeed, Murmur3.hash(this.authenticatorName)),
+              this.issuers.hashCode()), this.audiences.hashCode()), this.publicKeyDefs.hashCode()),
+         this.publicKeyUri.hashCode()), this.httpSettings.hashCode()));
   }
 
   @Override
   public <T> Output<T> debug(Output<T> output) {
     output = output.write("new").write(' ').write("OpenIdAuthenticatorDef").write('(')
-                   .debug(this.authenticatorName).write(", ").debug(this.issuers).write(", ")
-                   .debug(this.audiences).write(", ").debug(this.publicKeyDefs).write(", ")
-                   .debug(this.publicKeyUri).write(", ").debug(this.httpSettings).write(')');
+         .debug(this.authenticatorName).write(", ").debug(this.issuers).write(", ")
+         .debug(this.audiences).write(", ").debug(this.publicKeyDefs).write(", ")
+         .debug(this.publicKeyUri).write(", ").debug(this.httpSettings).write(')');
     return output;
   }
 
@@ -147,27 +147,23 @@ final class OpenIdAuthenticatorForm extends Form<OpenIdAuthenticatorDef> {
     if (authenticatorDef != null) {
       final Record record = Record.create().attr(this.tag());
 
-      Value issuers = Value.absent();
-      for (String issuer : authenticatorDef.issuers) {
-        issuers = issuers.appended(issuer);
-      }
-      if (issuers.isDefined()) {
-        record.slot("issuers", issuers);
-      }
-
-      Value audiences = Value.absent();
       for (String audience : authenticatorDef.audiences) {
-        audiences = audiences.appended(audience);
+        record.add(Record.create(1).attr("audience", audience));
       }
-      if (audiences.isDefined()) {
-        record.slot("audiences", audiences);
+      for (String email : authenticatorDef.issuers) {
+        record.add(Record.create(1).attr("issuer", email));
       }
 
       for (PublicKeyDef publicKeyDef : authenticatorDef.publicKeyDefs) {
         record.add(publicKeyDef.toValue());
       }
 
-      return record.concat(authenticatorDef.httpSettings.toValue());
+      if (authenticatorDef.publicKeyUri != null) {
+        record.add(Slot.of("publicKeyUri", authenticatorDef.publicKeyUri.toString()));
+      }
+
+      record.add(authenticatorDef.httpSettings.toValue());
+      return Slot.of(authenticatorDef.authenticatorName, record);
     } else {
       return Item.extant();
     }
@@ -203,9 +199,9 @@ final class OpenIdAuthenticatorForm extends Form<OpenIdAuthenticatorDef> {
       }
       final HttpSettings httpSettings = HttpSettings.form().cast(value);
 
-      return new OpenIdAuthenticatorDef(authenticatorName, issuers.bind(),
-                                        audiences.bind(), publicKeyDefs.bind(),
-                                        publicKeyUri, httpSettings);
+      return new OpenIdAuthenticatorDef(authenticatorName, audiences.bind(), issuers.bind(),
+           publicKeyDefs.bind(),
+           publicKeyUri, httpSettings);
     }
     return null;
   }
