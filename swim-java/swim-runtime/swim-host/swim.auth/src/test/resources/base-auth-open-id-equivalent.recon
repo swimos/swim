@@ -1,0 +1,17 @@
+open_id: @auth {
+    @token("idToken")
+    @claim(aud: {
+        "open_id_audience_1",
+        "open_id_audience_2"
+    })
+    @claim(iss: "open_id_issuer")
+    @RSAPublicKey {
+        modulus: 987
+        publicExponent: 654
+    }
+    @RSAPublicKey {
+        modulus: 432
+        publicExponent: 210
+    }
+    publicKeyUri: "https://open-id.com"
+}

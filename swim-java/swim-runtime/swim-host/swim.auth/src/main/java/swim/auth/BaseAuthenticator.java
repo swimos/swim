@@ -43,6 +43,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
+import swim.util.Murmur3;
 
 public class BaseAuthenticator extends AbstractAuthenticator implements HttpInterface {
 
@@ -132,6 +133,32 @@ public class BaseAuthenticator extends AbstractAuthenticator implements HttpInte
   @Override
   public final HttpSettings httpSettings() {
     return this.httpSettings;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof BaseAuthenticator) {
+      final BaseAuthenticator that = (BaseAuthenticator) other;
+      return this.tokenName.equals(that.tokenName) && this.expiration.equals(that.expiration)
+           && this.claims.equals(that.claims) && this.publicKeyDefs.equals(that.publicKeyDefs)
+           && this.publicKeyUri.equals(that.publicKeyUri) && this.httpSettings.equals(that.httpSettings);
+
+    }
+    return false;
+  }
+
+  private static int hashSeed;
+
+  @Override
+  public int hashCode() {
+    if (BaseAuthenticator.hashSeed == 0) {
+      BaseAuthenticator.hashSeed = Murmur3.seed(BaseAuthenticator.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(BaseAuthenticator.hashSeed,
+              Murmur3.hash(this.tokenName)), Murmur3.hash(this.expiration)),
+         this.claims.hashCode()), this.publicKeyDefs.hashCode()), this.publicKeyUri.hashCode()), this.httpSettings.hashCode()));
   }
 
   @Override
