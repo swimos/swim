@@ -1,0 +1,19 @@
+cognito: @auth {
+    @token("custom_access_token")
+    @expiration("custom_exp")
+    @claim(client_id: "some_client_id")
+    @claim(iss: "https://example.com")
+    @claim(token_use: {
+        "first_access",
+        "second_access"
+    })
+    @RSAPublicKey {
+        modulus: 123
+        publicExponent: 456
+    }
+    @RSAPublicKey {
+        modulus: 321
+        publicExponent: 654
+    }
+    publicKeyUri: "https://test.com"
+}

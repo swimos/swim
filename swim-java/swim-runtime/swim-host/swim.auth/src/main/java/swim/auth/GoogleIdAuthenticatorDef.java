@@ -20,12 +20,12 @@ import swim.codec.Format;
 import swim.codec.Output;
 import swim.codec.ParserException;
 import swim.collections.FingerTrieSeq;
-import swim.collections.HashTrieSet;
 import swim.io.http.HttpSettings;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;
 import swim.structure.Record;
+import swim.structure.Slot;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Builder;
@@ -35,12 +35,12 @@ public class GoogleIdAuthenticatorDef implements AuthenticatorDef, Debug {
 
   final String authenticatorName;
   final FingerTrieSeq<String> audiences;
-  final HashTrieSet<String> emails;
+  final FingerTrieSeq<String> emails;
   final Uri publicKeyUri;
   final HttpSettings httpSettings;
 
   public GoogleIdAuthenticatorDef(String authenticatorName, FingerTrieSeq<String> audiences,
-                                  HashTrieSet<String> emails, Uri publicKeyUri,
+                                  FingerTrieSeq<String> emails, Uri publicKeyUri,
                                   HttpSettings httpSettings) {
     this.authenticatorName = authenticatorName;
     this.audiences = audiences;
@@ -58,7 +58,7 @@ public class GoogleIdAuthenticatorDef implements AuthenticatorDef, Debug {
     return this.audiences;
   }
 
-  public final HashTrieSet<String> emails() {
+  public final FingerTrieSeq<String> emails() {
     return this.emails;
   }
 
@@ -155,7 +155,13 @@ final class GoogleIdAuthenticatorForm extends Form<GoogleIdAuthenticatorDef> {
       for (String email : authenticatorDef.emails) {
         record.add(Record.create(1).attr("email", email));
       }
-      return record.concat(authenticatorDef.httpSettings.toValue());
+
+      if (authenticatorDef.publicKeyUri != null) {
+        record.add(Slot.of("publicKeyUri", authenticatorDef.publicKeyUri.toString()));
+      }
+
+      record.add(authenticatorDef.httpSettings.toValue());
+      return Slot.of(authenticatorDef.authenticatorName, record);
     } else {
       return Item.extant();
     }
@@ -168,13 +174,13 @@ final class GoogleIdAuthenticatorForm extends Form<GoogleIdAuthenticatorDef> {
     if (headers.isDefined()) {
       final String authenticatorName = item.key().stringValue(null);
       final Builder<String, FingerTrieSeq<String>> audiences = FingerTrieSeq.builder();
-      HashTrieSet<String> emails = HashTrieSet.empty();
+      final Builder<String, FingerTrieSeq<String>> emails = FingerTrieSeq.builder();
       for (Item member : value) {
         final String tag = member.tag();
         if ("audience".equals(tag)) {
           audiences.add(member.get("audience").stringValue());
         } else if ("email".equals(tag)) {
-          emails = emails.added(member.get("email").stringValue());
+          emails.add(member.get("email").stringValue());
         }
       }
       Uri publicKeyUri = null;
@@ -188,7 +194,7 @@ final class GoogleIdAuthenticatorForm extends Form<GoogleIdAuthenticatorDef> {
       }
       final HttpSettings httpSettings = HttpSettings.form().cast(value);
       return new GoogleIdAuthenticatorDef(authenticatorName, audiences.bind(),
-                                          emails, publicKeyUri, httpSettings);
+                                          emails.bind(), publicKeyUri, httpSettings);
     }
     return null;
   }
