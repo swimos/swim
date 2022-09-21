@@ -39,7 +39,7 @@ public class AuthenticatorKernel extends KernelProxy {
 
   @Override
   public AuthenticatorDef defineAuthenticator(Item authenticatorConfig) {
-    AuthenticatorDef authenticatorDef = BaseAuthenticatorDef.form().cast(authenticatorConfig);
+    final AuthenticatorDef authenticatorDef = BaseAuthenticatorDef.form().cast(authenticatorConfig);
     return authenticatorDef != null ? authenticatorDef : super.defineAuthenticator(authenticatorConfig);
   }
 
