@@ -72,48 +72,6 @@ public class BaseAuthenticator extends AbstractAuthenticator implements HttpInte
          authenticatorDef.publicKeyUri, authenticatorDef.httpSettings);
   }
 
-  public BaseAuthenticator(GoogleIdAuthenticatorDef authenticatorDef) {
-    this.tokenName = "idToken";
-    this.expiration = "exp";
-    this.publicKeyDefs = Arrays.asList(FingerTrieSeq.empty(), FingerTrieSeq.empty());
-    this.publicKeyUri = authenticatorDef.publicKeyUri;
-    this.httpSettings = authenticatorDef.httpSettings;
-    this.publicKeyRefreshTimer = null;
-
-    HashTrieMap<String, FingerTrieSeq<String>> claims = HashTrieMap.empty();
-
-    if (!authenticatorDef.emails.isEmpty()) {
-      claims = claims.updated("email", FingerTrieSeq.from(authenticatorDef.emails));
-    }
-
-    if (!authenticatorDef.audiences.isEmpty()) {
-      claims = claims.updated("aud", authenticatorDef.audiences);
-    }
-
-    this.claims = claims;
-  }
-
-  public BaseAuthenticator(OpenIdAuthenticatorDef authenticatorDef) {
-    this.tokenName = "idToken";
-    this.expiration = "exp";
-    this.publicKeyDefs = Arrays.asList(authenticatorDef.publicKeyDefs, FingerTrieSeq.empty());
-    this.publicKeyUri = authenticatorDef.publicKeyUri;
-    this.httpSettings = authenticatorDef.httpSettings;
-    this.publicKeyRefreshTimer = null;
-
-    HashTrieMap<String, FingerTrieSeq<String>> claims = HashTrieMap.empty();
-
-    if (!authenticatorDef.issuers.isEmpty()) {
-      claims = claims.updated("iss", authenticatorDef.issuers);
-    }
-
-    if (!authenticatorDef.audiences.isEmpty()) {
-      claims = claims.updated("aud", authenticatorDef.audiences);
-    }
-
-    this.claims = claims;
-  }
-
   public final String expiration() {
     return this.expiration;
   }
