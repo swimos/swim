@@ -277,7 +277,7 @@ public final class MediaType extends HttpPart implements Debug {
   public static MediaType forPath(String path) {
     // TODO: configurable extension mapping
     if (path == null) {
-      return null
+      return null;
     } else if (path.endsWith(".js")) {
       return MediaType.applicationJavascript();
     } else if (path.endsWith(".json")) {
