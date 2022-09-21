@@ -1,4 +1,4 @@
-cognito: @auth {
+auth: @auth {
     @token("custom_access_token")
     @expiration("custom_exp")
     @claim(client_id: "some_client_id")

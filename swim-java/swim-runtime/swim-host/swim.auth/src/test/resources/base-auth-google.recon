@@ -5,5 +5,5 @@ google: @auth {
         "email_1@google.com",
         "email_2@google.com"
     })
-    publicKeyUri: "https://google.com"
+    publicKeyUri: "https://www.googleapis.com/oauth2/v3/certs"
 }
