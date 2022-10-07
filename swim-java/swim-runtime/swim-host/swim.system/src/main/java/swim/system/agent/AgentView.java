@@ -280,6 +280,11 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
+  public void close() {
+    this.node.close();
+  }
+
+  @Override
   public <V> CommandLane<V> commandLane() {
     return new CommandLaneView<V>(this, null);
   }
@@ -507,7 +512,6 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   @Override
   public void willClose() {
     this.agent.willClose();
-    this.node.close();
   }
 
   @Override
