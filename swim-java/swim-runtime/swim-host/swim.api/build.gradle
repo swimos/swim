@@ -22,4 +22,6 @@ dependencies {
   api group: 'org.swimos', name: 'swim-warp', version: project.version
   api group: 'org.swimos', name: 'swim-concurrent', version: project.version
   api group: 'org.swimos', name: 'swim-io', version: project.version
+  testImplementation group: 'org.swimos', name: 'swim-service-web', version: project.version
+  testImplementation group: 'org.swimos', name: 'swim-server', version: project.version
 }
