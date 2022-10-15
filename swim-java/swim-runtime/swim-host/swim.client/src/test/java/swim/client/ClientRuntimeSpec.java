@@ -93,7 +93,7 @@ public class ClientRuntimeSpec {
     try {
       client.start();
       client.downlink()
-            .hostUri("warp://traffic.swim.services")
+            .hostUri("warps://traffic.swim.services")
             .nodeUri("city/PaloAlto_CA_US")
             .laneUri("intersections")
             .keepSynced(true)

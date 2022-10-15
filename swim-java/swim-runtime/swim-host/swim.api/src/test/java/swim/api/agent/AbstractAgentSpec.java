@@ -1,5 +1,8 @@
 package swim.api.agent;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import swim.actor.ActorSpaceDef;
@@ -13,10 +16,6 @@ import swim.service.web.WebServiceDef;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
 public class AbstractAgentSpec {
 
   private static final Uri TEST_AGENT_URI = Uri.parse("/test/agent");
@@ -26,15 +25,15 @@ public class AbstractAgentSpec {
 
   @Test
   public void testAgentLifecycleCallbacksOnClose() {
-    runTestAgainstPlane(testPlane -> {
+    this.runTestAgainstPlane(testPlane -> {
 
-      givenTestAgent(testPlane);
-      givenTestTraitAgent(testPlane);
+      this.givenTestAgent(testPlane);
+      this.givenTestTraitAgent(testPlane);
 
-      whenCloseCalled(testPlane);
+      this.whenCloseCalled(testPlane);
 
-      thenTestAgentClosed();
-      thenTestTraitAgentClosed();
+      this.thenTestAgentClosed();
+      this.thenTestTraitAgentClosed();
     });
   }
 
@@ -110,84 +109,84 @@ public class AbstractAgentSpec {
     public void willOpen() {
       super.willOpen();
       System.out.println(nodeUri() + ": willOpen");
-      latch.willOpen();
+      this.latch.willOpen();
     }
 
     @Override
     public void didOpen() {
       super.didOpen();
       System.out.println(nodeUri() + ": didOpen");
-      latch.didOpen();
+      this.latch.didOpen();
     }
 
     @Override
     public void willLoad() {
       super.willLoad();
       System.out.println(nodeUri() + ": willLoad");
-      latch.willLoad();
+      this.latch.willLoad();
     }
 
     @Override
     public void didLoad() {
       super.didLoad();
       System.out.println(nodeUri() + ": didLoad");
-      latch.didLoad();
+      this.latch.didLoad();
     }
 
     @Override
     public void willStart() {
       super.willStart();
       System.out.println(nodeUri() + ": willStart");
-      latch.willStart();
+      this.latch.willStart();
     }
 
     @Override
     public void didStart() {
       super.didStart();
       System.out.println(nodeUri() + ": didStart");
-      latch.didStart();
+      this.latch.didStart();
     }
 
     @Override
     public void willStop() {
       super.willStop();
       System.out.println(nodeUri() + ": willStop");
-      latch.willStop();
+      this.latch.willStop();
     }
 
     @Override
     public void didStop() {
       super.didStop();
       System.out.println(nodeUri() + ": didStop");
-      latch.didStop();
+      this.latch.didStop();
     }
 
     @Override
     public void willUnload() {
       super.willUnload();
       System.out.println(nodeUri() + ": willUnload");
-      latch.willUnload();
+      this.latch.willUnload();
     }
 
     @Override
     public void didUnload() {
       super.didUnload();
       System.out.println(nodeUri() + ": didUnload");
-      latch.didUnload();
+      this.latch.didUnload();
     }
 
     @Override
     public void willClose() {
       super.willClose();
       System.out.println(nodeUri() + ": willClose");
-      latch.willClose();
+      this.latch.willClose();
     }
 
     @Override
     public void didClose() {
       super.didClose();
       System.out.println(nodeUri() + ": didClose");
-      latch.didClose();
+      this.latch.didClose();
     }
 
   }
@@ -209,7 +208,7 @@ public class AbstractAgentSpec {
 
     private boolean wasCloseSuccessful() {
       try {
-        return agentDidCloseCalled.await(2, TimeUnit.SECONDS);
+        return this.agentDidCloseCalled.await(2, TimeUnit.SECONDS);
       } catch (InterruptedException interruptedException) {
         return false;
       }
@@ -217,20 +216,20 @@ public class AbstractAgentSpec {
 
     private boolean wasStartSuccessful() {
       try {
-        return agentDidStartCalled.await(2, TimeUnit.SECONDS);
+        return this.agentDidStartCalled.await(2, TimeUnit.SECONDS);
       } catch (InterruptedException interruptedException) {
         return false;
       }
     }
 
     public void willOpen() {
-      agentWillOpenCalled.countDown();
+      this.agentWillOpenCalled.countDown();
     }
 
     public void didOpen() {
       try {
-        Assert.assertTrue(agentWillOpenCalled.await(2, TimeUnit.SECONDS));
-        agentDidOpenCalled.countDown();
+        Assert.assertTrue(this.agentWillOpenCalled.await(2, TimeUnit.SECONDS));
+        this.agentDidOpenCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -238,8 +237,8 @@ public class AbstractAgentSpec {
 
     public void willLoad() {
       try {
-        Assert.assertTrue(agentDidOpenCalled.await(2, TimeUnit.SECONDS));
-        agentWillLoadCalled.countDown();
+        Assert.assertTrue(this.agentDidOpenCalled.await(2, TimeUnit.SECONDS));
+        this.agentWillLoadCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -247,8 +246,8 @@ public class AbstractAgentSpec {
 
     public void didLoad() {
       try {
-        Assert.assertTrue(agentWillLoadCalled.await(2, TimeUnit.SECONDS));
-        agentDidLoadCalled.countDown();
+        Assert.assertTrue(this.agentWillLoadCalled.await(2, TimeUnit.SECONDS));
+        this.agentDidLoadCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -256,8 +255,8 @@ public class AbstractAgentSpec {
 
     public void willStart() {
       try {
-        Assert.assertTrue(agentDidLoadCalled.await(2, TimeUnit.SECONDS));
-        agentWillStartCalled.countDown();
+        Assert.assertTrue(this.agentDidLoadCalled.await(2, TimeUnit.SECONDS));
+        this.agentWillStartCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -265,8 +264,8 @@ public class AbstractAgentSpec {
 
     public void didStart() {
       try {
-        Assert.assertTrue(agentWillStartCalled.await(2, TimeUnit.SECONDS));
-        agentDidStartCalled.countDown();
+        Assert.assertTrue(this.agentWillStartCalled.await(2, TimeUnit.SECONDS));
+        this.agentDidStartCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -274,8 +273,8 @@ public class AbstractAgentSpec {
 
     public void willStop() {
       try {
-        Assert.assertTrue(agentDidStartCalled.await(2, TimeUnit.SECONDS));
-        agentWillStopCalled.countDown();
+        Assert.assertTrue(this.agentDidStartCalled.await(2, TimeUnit.SECONDS));
+        this.agentWillStopCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -283,8 +282,8 @@ public class AbstractAgentSpec {
 
     public void didStop() {
       try {
-        Assert.assertTrue(agentWillStopCalled.await(2, TimeUnit.SECONDS));
-        agentDidStopCalled.countDown();
+        Assert.assertTrue(this.agentWillStopCalled.await(2, TimeUnit.SECONDS));
+        this.agentDidStopCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -292,8 +291,8 @@ public class AbstractAgentSpec {
 
     public void willUnload() {
       try {
-        Assert.assertTrue(agentDidStopCalled.await(2, TimeUnit.SECONDS));
-        agentWillUnloadCalled.countDown();
+        Assert.assertTrue(this.agentDidStopCalled.await(2, TimeUnit.SECONDS));
+        this.agentWillUnloadCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -301,8 +300,8 @@ public class AbstractAgentSpec {
 
     public void didUnload() {
       try {
-        Assert.assertTrue(agentWillUnloadCalled.await(2, TimeUnit.SECONDS));
-        agentDidUnloadCalled.countDown();
+        Assert.assertTrue(this.agentWillUnloadCalled.await(2, TimeUnit.SECONDS));
+        this.agentDidUnloadCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -310,8 +309,8 @@ public class AbstractAgentSpec {
 
     public void willClose() {
       try {
-        Assert.assertTrue(agentDidUnloadCalled.await(2, TimeUnit.SECONDS));
-        agentWillCloseCalled.countDown();
+        Assert.assertTrue(this.agentDidUnloadCalled.await(2, TimeUnit.SECONDS));
+        this.agentWillCloseCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -319,8 +318,8 @@ public class AbstractAgentSpec {
 
     public void didClose() {
       try {
-        Assert.assertTrue(agentWillCloseCalled.await(2, TimeUnit.SECONDS));
-        agentDidCloseCalled.countDown();
+        Assert.assertTrue(this.agentWillCloseCalled.await(2, TimeUnit.SECONDS));
+        this.agentDidCloseCalled.countDown();
       } catch (InterruptedException ie) {
         // Fail test
       }
@@ -350,4 +349,5 @@ public class AbstractAgentSpec {
       kernel.stop();
     }
   }
+
 }
