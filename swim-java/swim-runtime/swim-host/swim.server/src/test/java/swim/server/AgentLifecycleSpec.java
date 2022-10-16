@@ -1,4 +1,4 @@
-package swim.api.agent;
+package swim.server;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -8,15 +8,16 @@ import org.testng.annotations.Test;
 import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
+import swim.api.agent.AbstractAgent;
+import swim.api.agent.AgentRoute;
 import swim.api.lane.CommandLane;
 import swim.api.plane.AbstractPlane;
 import swim.kernel.Kernel;
-import swim.server.ServerLoader;
 import swim.service.web.WebServiceDef;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public class AbstractAgentSpec {
+public class AgentLifecycleSpec {
 
   private static final Uri TEST_AGENT_URI = Uri.parse("/test/agent");
 
