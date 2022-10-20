@@ -6,7 +6,7 @@
 [subrepo]
   remote = git@github.com:swimos/swim-runtime-js.git
   branch = main
-	commit = b76740641f115c155e018463082aa6293bf48e95
-	parent = c1a31eaebc338e1d87f168c7214ebd7354ae456d
+	commit = d18f50274b7756d30f316c79cccb0bea63a4b9bb
+	parent = f3e2cd7d76e1627ec4b5b95f8526dabf0f6dea52
 	method = merge
-	cmdver = 0.4.3
+	cmdver = 0.4.5
