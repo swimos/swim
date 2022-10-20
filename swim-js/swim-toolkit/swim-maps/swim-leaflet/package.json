@@ -44,7 +44,7 @@
     "@types/leaflet": ">= 1.0"
   },
   "devDependencies": {
-    "@types/leaflet": "1.7"
+    "@types/leaflet": "1.9"
   },
   "scripts": {
     "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",

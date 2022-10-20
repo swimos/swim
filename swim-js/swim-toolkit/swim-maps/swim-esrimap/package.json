@@ -44,7 +44,7 @@
     "@types/arcgis-js-api": ">= 4.0"
   },
   "devDependencies": {
-    "@types/arcgis-js-api": "4.23"
+    "@types/arcgis-js-api": "4.24"
   },
   "scripts": {
     "main:compile": "tsc -b src/main && api-extractor run -l -c src/main/api-extractor.json",

@@ -59,7 +59,7 @@ export class EsriSceneViewport extends EsriViewport {
     let mapFrame = map.extent;
     let geoFrame: GeoBox;
     if (mapFrame !== null) {
-      mapFrame = EsriViewport.webMercatorUtils!.webMercatorToGeographic(mapFrame) as __esri.Extent;
+      mapFrame = EsriViewport.webMercatorUtils!.webMercatorToGeographic(mapFrame, false) as __esri.Extent;
       geoFrame = new GeoBox(mapFrame.xmin, mapFrame.ymin, mapFrame.xmax, mapFrame.ymax);
     } else {
       geoFrame = GeoBox.undefined();
