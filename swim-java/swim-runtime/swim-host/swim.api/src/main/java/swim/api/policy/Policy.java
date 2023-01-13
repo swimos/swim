@@ -18,6 +18,7 @@ import swim.api.auth.Identity;
 import swim.http.HttpMessage;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
+import swim.uri.Uri;
 import swim.warp.CommandMessage;
 import swim.warp.EventMessage;
 import swim.warp.LinkRequest;
@@ -36,5 +37,7 @@ public interface Policy extends HttpPolicy {
   PolicyDirective<HttpMessage<?>> canRequest(HttpRequest<?> request);
 
   PolicyDirective<HttpResponse<?>> canRespond(HttpRequest<?> request, HttpResponse<?> response);
+
+  PolicyDirective<Object> authorizeHttpLane(Uri nodeUri, Uri laneUri, HttpRequest<?> httpRequest);
 
 }

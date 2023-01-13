@@ -91,7 +91,7 @@ public class WebServer extends AbstractWarpServer {
 
     // Verify request permission.
     if (policy != null) {
-      final PolicyDirective<?> directive = policy.canConnect(requestUri);
+      final PolicyDirective<?> directive = policy.canConnect(httpRequest);
       if (directive.isDenied()) {
         return new StaticHttpResponder<Object>(HttpResponse.create(HttpStatus.UNAUTHORIZED).content(HttpBody.empty()));
       }
@@ -112,6 +112,15 @@ public class WebServer extends AbstractWarpServer {
     try {
       final Uri laneUri = Uri.parse(requestUri.query().get("lane"));
       final Uri nodeUri = Uri.create(requestUri.path());
+
+      // Verify HTTP lane request permission.
+      if (policy != null) {
+        final PolicyDirective<?> directive = policy.authorizeHttpLane(nodeUri, laneUri, httpRequest);
+        if (directive.isDenied()) {
+          return new StaticHttpResponder<Object>(HttpResponse.create(HttpStatus.UNAUTHORIZED).content(HttpBody.empty()));
+        }
+      }
+
       final HttpLaneResponder httpBinding = new HttpLaneResponder(Uri.empty(), Uri.empty(), nodeUri, laneUri, httpRequest);
       final EdgeBinding edge = ((EdgeContext) space).edgeWrapper();
       edge.openUplink(httpBinding);

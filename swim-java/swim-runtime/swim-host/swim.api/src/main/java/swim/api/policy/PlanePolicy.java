@@ -16,7 +16,7 @@ package swim.api.policy;
 
 import swim.api.Downlink;
 import swim.api.agent.AgentRoute;
-import swim.uri.Uri;
+import swim.http.HttpRequest;
 
 public interface PlanePolicy extends Policy {
 
@@ -24,6 +24,6 @@ public interface PlanePolicy extends Policy {
 
   DownlinkPolicy downlinkPolicy(Downlink downlink);
 
-  PolicyDirective<Object> canConnect(Uri requestUri);
+  PolicyDirective<Object> canConnect(HttpRequest<?> httpRequest);
 
 }

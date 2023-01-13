@@ -62,7 +62,12 @@ public class AbstractPolicy implements Policy, PlanePolicy, AgentRoutePolicy, Ag
   }
 
   @Override
-  public PolicyDirective<Object> canConnect(Uri requestUri) {
+  public PolicyDirective<Object> canConnect(HttpRequest<?> httpRequest) {
+    return this.allow();
+  }
+
+  @Override
+  public PolicyDirective<Object> authorizeHttpLane(Uri nodeUri, Uri laneUri, HttpRequest<?> httpRequest) {
     return this.allow();
   }
 
