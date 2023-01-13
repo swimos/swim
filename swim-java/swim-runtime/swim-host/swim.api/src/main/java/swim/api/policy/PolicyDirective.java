@@ -182,6 +182,11 @@ public abstract class PolicyDirective<T> implements Debug {
     }
 
     @Override
+    public boolean isForbidden() {
+      return true;
+    }
+
+    @Override
     public Policy policy() {
       return this.policy;
     }
@@ -241,6 +246,11 @@ public abstract class PolicyDirective<T> implements Debug {
     Forbid(Policy policy, Object reason) {
       this.policy = policy;
       this.reason = reason;
+    }
+
+    @Override
+    public boolean isDenied() {
+      return true;
     }
 
     @Override
