@@ -4,7 +4,7 @@
   "description": "Multi-plot, fully animatable, canvas rendered chart widget, suppporting line, area, and bubble graphs, with customizeable axes, and kinematic multitouch scale gestures for panning and zooming with momentum",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-toolkit/swim-vis/swim-chart",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2022 Swim.inc",
+  "copyright": "2015-2023 Swim.inc",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "./dist/swim-chart.js",

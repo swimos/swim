@@ -4,7 +4,7 @@
   "description": "Procedurally animated, interactive diagrams, including gauges, pie charts, and line, area, and bubble charts",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-toolkit/swim-vis",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2022 Swim.inc",
+  "copyright": "2015-2023 Swim.inc",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "./dist/swim-vis.js",
