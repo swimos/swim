@@ -16,6 +16,7 @@
  * Swim system interfaces.
  */
 module swim.system {
+  requires transitive jdk.management;
   requires swim.util;
   requires transitive swim.codec;
   requires transitive swim.structure;

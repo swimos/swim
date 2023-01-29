@@ -27,20 +27,22 @@ public class PartPulse extends Pulse {
   protected final AgentPulse agents;
   protected final WarpDownlinkPulse downlinks;
   protected final WarpUplinkPulse uplinks;
+  protected final SystemPulse system;
 
   public PartPulse(int hostCount, long nodeCount, AgentPulse agents,
-                   WarpDownlinkPulse downlinks, WarpUplinkPulse uplinks) {
+                   WarpDownlinkPulse downlinks, WarpUplinkPulse uplinks, SystemPulse system) {
     this.hostCount = hostCount;
     this.nodeCount = nodeCount;
     this.agents = agents;
     this.downlinks = downlinks;
     this.uplinks = uplinks;
+    this.system = system;
   }
 
   @Override
   public boolean isDefined() {
     return this.hostCount != 0 || this.nodeCount != 0L || this.agents.isDefined()
-        || this.downlinks.isDefined() || this.uplinks.isDefined();
+        || this.downlinks.isDefined() || this.uplinks.isDefined() || this.system.isDefined();
   }
 
   public final int hostCount() {
@@ -61,6 +63,10 @@ public class PartPulse extends Pulse {
 
   public final WarpUplinkPulse uplinks() {
     return this.uplinks;
+  }
+
+  public SystemPulse system() {
+    return this.system;
   }
 
   @Override
@@ -90,7 +96,7 @@ final class PartPulseForm extends Form<PartPulse> {
   @Override
   public Item mold(PartPulse pulse) {
     if (pulse != null) {
-      final Record record = Record.create(5);
+      final Record record = Record.create(6);
       if (pulse.hostCount > 0) {
         record.slot("hostCount", pulse.hostCount);
       }
@@ -106,6 +112,9 @@ final class PartPulseForm extends Form<PartPulse> {
       if (pulse.uplinks.isDefined()) {
         record.slot("uplinks", pulse.uplinks.toValue());
       }
+      if (pulse.system != null && pulse.system.isDefined()) {
+        record.slot("system", pulse.system.toValue());
+      }
       return record;
     } else {
       return Item.extant();
@@ -120,7 +129,8 @@ final class PartPulseForm extends Form<PartPulse> {
     final AgentPulse agents = value.get("agents").coerce(AgentPulse.form());
     final WarpDownlinkPulse downlinks = value.get("downlinks").coerce(WarpDownlinkPulse.form());
     final WarpUplinkPulse uplinks = value.get("uplinks").coerce(WarpUplinkPulse.form());
-    return new PartPulse(hostCount, nodeCount, agents, downlinks, uplinks);
+    final SystemPulse system = value.get("system").coerce(SystemPulse.form());
+    return new PartPulse(hostCount, nodeCount, agents, downlinks, uplinks, system);
   }
 
 }
