@@ -14,6 +14,14 @@
 
 package swim.system.router;
 
+import com.sun.management.OperatingSystemMXBean;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
@@ -28,9 +36,11 @@ import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
 import swim.collections.HashTrieMap;
+import swim.concurrent.AbstractTimer;
 import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.concurrent.TimerRef;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.system.AbstractTierBinding;
@@ -60,6 +70,7 @@ import swim.system.reflect.AgentPulse;
 import swim.system.reflect.HostInfo;
 import swim.system.reflect.LogEntry;
 import swim.system.reflect.PartPulse;
+import swim.system.reflect.SystemPulse;
 import swim.system.reflect.WarpDownlinkPulse;
 import swim.system.reflect.WarpUplinkPulse;
 import swim.uri.Uri;
@@ -110,6 +121,7 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
   volatile int uplinkCommandDelta;
   volatile int uplinkCommandRate;
   volatile long uplinkCommandCount;
+  volatile SystemPulse systemPulse;
   volatile long lastReportTime;
 
   PartPulse pulse;
@@ -122,6 +134,7 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
   SupplyLane<LogEntry> metaWarnLog;
   SupplyLane<LogEntry> metaErrorLog;
   SupplyLane<LogEntry> metaFailLog;
+  private TimerRef systemPulseTimer;
 
   public PartTable(PartPredicate predicate) {
     this.predicate = predicate;
@@ -168,6 +181,7 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
     this.uplinkCommandDelta = 0;
     this.uplinkCommandRate = 0;
     this.uplinkCommandCount = 0L;
+    this.systemPulse = SystemPulse.empty();
     this.lastReportTime = 0L;
 
     this.pulse = null;
@@ -645,6 +659,11 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
   }
 
   @Override
+  protected void didOpen() {
+    this.systemPulseTimer = this.schedule().setTimer(POLL_INTERVAL, new PartSystemPulseTimer(this));
+  }
+
+  @Override
   protected void willLoad() {
     super.willLoad();
     final Iterator<HostBinding> hostsIterator = PartTable.HOSTS.get(this).valueIterator();
@@ -703,6 +722,11 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
       this.metaWarnLog = null;
       this.metaErrorLog = null;
       this.metaFailLog = null;
+    }
+    final TimerRef systemPulseTimer = this.systemPulseTimer;
+    if (systemPulseTimer != null) {
+      systemPulseTimer.cancel();
+      this.systemPulseTimer = null;
     }
     this.flushMetrics();
   }
@@ -860,7 +884,8 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
                                                             uplinkCommandRate, uplinkCommandCount);
-    this.pulse = new PartPulse(hostCount, nodeCount, agentPulse, downlinkPulse, uplinkPulse);
+    final SystemPulse systemPulse = PartTable.SYSTEM_PULSE.getAndSet(this, SystemPulse.empty());
+    this.pulse = new PartPulse(hostCount, nodeCount, agentPulse, downlinkPulse, uplinkPulse, systemPulse);
     final DemandLane<PartPulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
       metaPulse.cue();
@@ -880,7 +905,33 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
                            uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
 
+  protected void updateSystemPulse(OperatingSystemMXBean operatingSystemMXBean, RuntimeMXBean runtimeMXBean) {
+    final int cpuTotal = 100 * operatingSystemMXBean.getAvailableProcessors();
+    final int cpuUsage = (int) Math.round(operatingSystemMXBean.getProcessCpuLoad() * cpuTotal);
+
+    final long memTotal = operatingSystemMXBean.getTotalPhysicalMemorySize();
+    final long memUsage = memTotal - operatingSystemMXBean.getFreePhysicalMemorySize();
+
+    long diskTotal = 0L;
+    long diskFree = 0L;
+    try {
+      for (Path root : FileSystems.getDefault().getRootDirectories()) {
+        final FileStore store = Files.getFileStore(root);
+        diskTotal += store.getTotalSpace();
+        diskFree += store.getUsableSpace();
+      }
+    } catch (IOException swallow) {
+      // nop
+    }
+    final long diskUsage = diskTotal - diskFree;
+    final long startTime = runtimeMXBean.getStartTime();
+    final SystemPulse systemPulse = new SystemPulse(cpuUsage, cpuTotal, memUsage, memTotal, diskUsage, diskTotal, startTime);
+    SYSTEM_PULSE.set(this, systemPulse);
+    this.flushMetrics();
+  }
+
   static final Uri HOSTS_URI = Uri.parse("hosts");
+  static final long POLL_INTERVAL = 2000L;
 
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<PartTable, HashTrieMap<Uri, HostBinding>> HOSTS =
@@ -966,6 +1017,8 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
       AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkCommandRate");
   static final AtomicLongFieldUpdater<PartTable> UPLINK_COMMAND_COUNT =
       AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkCommandCount");
+  static final AtomicReferenceFieldUpdater<PartTable, SystemPulse> SYSTEM_PULSE =
+      AtomicReferenceFieldUpdater.newUpdater(PartTable.class, SystemPulse.class, "systemPulse");
   static final AtomicLongFieldUpdater<PartTable> LAST_REPORT_TIME =
       AtomicLongFieldUpdater.newUpdater(PartTable.class, "lastReportTime");
 
@@ -1006,6 +1059,27 @@ final class PartTablePulseController implements OnCue<PartPulse> {
   @Override
   public PartPulse onCue(WarpUplink uplink) {
     return this.part.pulse;
+  }
+
+}
+
+final class PartSystemPulseTimer extends AbstractTimer {
+
+  final PartTable part;
+  private final OperatingSystemMXBean operatingSystemMXBean;
+  private final RuntimeMXBean runtimeMXBean;
+
+  PartSystemPulseTimer(PartTable part) {
+    this.part = part;
+    this.operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+    this.runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+
+  }
+
+  @Override
+  public void runTimer() {
+    this.part.updateSystemPulse(this.operatingSystemMXBean, this.runtimeMXBean);
+    reschedule(PartTable.POLL_INTERVAL);
   }
 
 }
