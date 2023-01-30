@@ -14,11 +14,21 @@
 
 package swim.system.reflect;
 
+import com.sun.management.OperatingSystemMXBean;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicLong;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;
 import swim.structure.Record;
 import swim.structure.Value;
+import swim.system.Metric;
 
 public class SystemPulse extends Pulse {
 
@@ -29,6 +39,10 @@ public class SystemPulse extends Pulse {
   protected final long diskUsage;
   protected final long diskTotal;
   protected final long startTime;
+
+  private static final OperatingSystemMXBean OS_MX_BEAN =
+      (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+  private static final RuntimeMXBean RT_MX_BEAN = ManagementFactory.getRuntimeMXBean();
 
   public SystemPulse(int cpuUsage, int cpuTotal, long memUsage, long memTotal,
                      long diskUsage, long diskTotal, long startTime) {
@@ -74,6 +88,53 @@ public class SystemPulse extends Pulse {
 
   public long startTime() {
     return this.startTime;
+  }
+
+  private static SystemPulse latestPulse;
+  private static AtomicLong lastReportTime = new AtomicLong(0L);
+
+  public static SystemPulse latest() {
+    do {
+      final long newReportTime = System.currentTimeMillis();
+      final long oldReportTime = lastReportTime.get();
+      final long dt = newReportTime - oldReportTime;
+      if (dt >= Metric.REPORT_INTERVAL) {
+        if (lastReportTime.compareAndSet(oldReportTime, newReportTime)) {
+          try {
+            latestPulse = latestPulse();
+          } catch (Throwable error) {
+            throw error;
+          }
+          break;
+        }
+      } else {
+        break;
+      }
+    } while (true);
+    return latestPulse;
+  }
+
+  private static SystemPulse latestPulse() {
+    final int cpuTotal = 100 * OS_MX_BEAN.getAvailableProcessors();
+    final int cpuUsage = (int) Math.round(OS_MX_BEAN.getProcessCpuLoad() * cpuTotal);
+
+    final long memTotal = OS_MX_BEAN.getTotalPhysicalMemorySize();
+    final long memUsage = memTotal - OS_MX_BEAN.getFreePhysicalMemorySize();
+
+    long diskTotal = 0L;
+    long diskFree = 0L;
+    try {
+      for (Path root : FileSystems.getDefault().getRootDirectories()) {
+        final FileStore store = Files.getFileStore(root);
+        diskTotal += store.getTotalSpace();
+        diskFree += store.getUsableSpace();
+      }
+    } catch (IOException swallow) {
+      // nop
+    }
+    final long diskUsage = diskTotal - diskFree;
+    final long startTime = RT_MX_BEAN.getStartTime();
+    return new SystemPulse(cpuUsage, cpuTotal, memUsage, memTotal, diskUsage, diskTotal, startTime);
   }
 
   @Override

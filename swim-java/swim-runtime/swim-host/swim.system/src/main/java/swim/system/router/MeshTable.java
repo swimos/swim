@@ -14,14 +14,6 @@
 
 package swim.system.router;
 
-import com.sun.management.OperatingSystemMXBean;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.nio.file.FileStore;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
@@ -36,11 +28,9 @@ import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.AbstractTimer;
 import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.concurrent.TimerRef;
 import swim.store.StoreBinding;
 import swim.structure.Extant;
 import swim.structure.Form;
@@ -125,7 +115,6 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   volatile int uplinkCommandDelta;
   volatile int uplinkCommandRate;
   volatile long uplinkCommandCount;
-  volatile SystemPulse systemPulse;
   volatile long lastReportTime;
 
   MeshPulse pulse;
@@ -138,7 +127,6 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   SupplyLane<LogEntry> metaWarnLog;
   SupplyLane<LogEntry> metaErrorLog;
   SupplyLane<LogEntry> metaFailLog;
-  private TimerRef systemPulseTimer;
 
   public MeshTable() {
     this.meshContext = null;
@@ -188,7 +176,6 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     this.uplinkCommandDelta = 0;
     this.uplinkCommandRate = 0;
     this.uplinkCommandCount = 0L;
-    this.systemPulse = SystemPulse.empty();
     this.lastReportTime = 0L;
 
     this.pulse = null;
@@ -709,11 +696,6 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   }
 
   @Override
-  protected void didOpen() {
-    this.systemPulseTimer = this.schedule().setTimer(POLL_INTERVAL, new MeshSystemPulseTimer(this));
-  }
-
-  @Override
   protected void willLoad() {
     super.willLoad();
     final Iterator<PartBinding> partsIterator = MeshTable.PARTS.get(this).iterator();
@@ -772,11 +754,6 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
       this.metaWarnLog = null;
       this.metaErrorLog = null;
       this.metaFailLog = null;
-    }
-    final TimerRef systemPulseTimer = this.systemPulseTimer;
-    if (systemPulseTimer != null) {
-      systemPulseTimer.cancel();
-      this.systemPulseTimer = null;
     }
     this.flushMetrics();
   }
@@ -942,8 +919,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
                                                             uplinkCommandRate, uplinkCommandCount);
-    final SystemPulse systemPulse = MeshTable.SYSTEM_PULSE.getAndSet(this, SystemPulse.empty());
-    this.pulse = new MeshPulse(partCount, hostCount, nodeCount, agentPulse, downlinkPulse, uplinkPulse, systemPulse);
+    this.pulse = new MeshPulse(partCount, hostCount, nodeCount, agentPulse, downlinkPulse, uplinkPulse, SystemPulse.latest());
     final DemandLane<MeshPulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
       metaPulse.cue();
@@ -965,33 +941,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   }
 
-  protected void updateSystemPulse(OperatingSystemMXBean operatingSystemMXBean, RuntimeMXBean runtimeMXBean) {
-    final int cpuTotal = 100 * operatingSystemMXBean.getAvailableProcessors();
-    final int cpuUsage = (int) Math.round(operatingSystemMXBean.getProcessCpuLoad() * cpuTotal);
-
-    final long memTotal = operatingSystemMXBean.getTotalPhysicalMemorySize();
-    final long memUsage = memTotal - operatingSystemMXBean.getFreePhysicalMemorySize();
-
-    long diskTotal = 0L;
-    long diskFree = 0L;
-    try {
-      for (Path root : FileSystems.getDefault().getRootDirectories()) {
-        final FileStore store = Files.getFileStore(root);
-        diskTotal += store.getTotalSpace();
-        diskFree += store.getUsableSpace();
-      }
-    } catch (IOException swallow) {
-      // nop
-    }
-    final long diskUsage = diskTotal - diskFree;
-    final long startTime = runtimeMXBean.getStartTime();
-    final SystemPulse systemPulse = new SystemPulse(cpuUsage, cpuTotal, memUsage, memTotal, diskUsage, diskTotal, startTime);
-    SYSTEM_PULSE.set(this, systemPulse);
-    this.flushMetrics();
-  }
-
   static final Uri PARTS_URI = Uri.parse("parts");
-  static final long POLL_INTERVAL = 2000L;
 
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<MeshTable, FingerTrieSeq<PartBinding>> PARTS =
@@ -1081,8 +1031,6 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
       AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandRate");
   static final AtomicLongFieldUpdater<MeshTable> UPLINK_COMMAND_COUNT =
       AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandCount");
-  static final AtomicReferenceFieldUpdater<MeshTable, SystemPulse> SYSTEM_PULSE =
-      AtomicReferenceFieldUpdater.newUpdater(MeshTable.class, SystemPulse.class, "systemPulse");
   static final AtomicLongFieldUpdater<MeshTable> LAST_REPORT_TIME =
       AtomicLongFieldUpdater.newUpdater(MeshTable.class, "lastReportTime");
 
@@ -1148,26 +1096,6 @@ final class MeshTablePulseController implements OnCue<MeshPulse> {
   @Override
   public MeshPulse onCue(WarpUplink uplink) {
     return this.mesh.pulse;
-  }
-
-}
-
-final class MeshSystemPulseTimer extends AbstractTimer {
-
-  final MeshTable mesh;
-  private final OperatingSystemMXBean operatingSystemMXBean;
-  private final RuntimeMXBean runtimeMXBean;
-
-  MeshSystemPulseTimer(MeshTable mesh) {
-    this.mesh = mesh;
-    this.operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-    this.runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-  }
-
-  @Override
-  public void runTimer() {
-    this.mesh.updateSystemPulse(this.operatingSystemMXBean, this.runtimeMXBean);
-    reschedule(MeshTable.POLL_INTERVAL);
   }
 
 }
