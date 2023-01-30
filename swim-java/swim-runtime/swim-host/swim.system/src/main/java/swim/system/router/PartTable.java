@@ -882,7 +882,6 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
   }
 
   static final Uri HOSTS_URI = Uri.parse("hosts");
-  static final long POLL_INTERVAL = 2000L;
 
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<PartTable, HashTrieMap<Uri, HostBinding>> HOSTS =
