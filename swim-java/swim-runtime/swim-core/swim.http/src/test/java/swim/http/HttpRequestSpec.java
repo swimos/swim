@@ -69,6 +69,13 @@ public class HttpRequestSpec {
   }
 
   @Test
+  public void parseRequestsWithParams() {
+    final HttpRequest<Object> req = HttpRequest.create(HttpMethod.GET, Uri.parse("/chat/?p1=v1&p2=v2"), HttpVersion.HTTP_1_0);
+    assertParses("GET /chat/?p1=v1&p2=v2 HTTP/1.0\r\n"
+            + "\r\n", req);
+  }
+
+  @Test
   public void writeRequestsWithNoHeaders() {
     assertWrites(HttpRequest.create(HttpMethod.GET, Uri.parse("/"), HttpVersion.HTTP_1_0),
                  "GET / HTTP/1.0\r\n"
