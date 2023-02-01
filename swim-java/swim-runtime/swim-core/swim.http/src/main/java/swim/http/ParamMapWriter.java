@@ -26,27 +26,25 @@ final class ParamMapWriter extends Writer<Object, Object> {
   final Iterator<? extends Map.Entry<?, ?>> params;
   final Writer<?, ?> part;
   final int step;
+  final boolean raw;
 
   ParamMapWriter(HttpWriter http, Iterator<? extends Map.Entry<?, ?>> params,
-                 Writer<?, ?> part, int step) {
+                 Writer<?, ?> part, int step, boolean raw) {
     this.http = http;
     this.params = params;
     this.part = part;
     this.step = step;
-  }
-
-  ParamMapWriter(HttpWriter http, Iterator<? extends Map.Entry<?, ?>> params) {
-    this(http, params, null, 1);
+    this.raw = raw;
   }
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return ParamMapWriter.write(output, this.http, this.params, this.part, this.step);
+    return ParamMapWriter.write(output, this.http, this.params, this.part, this.step, this.raw);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
                                       Iterator<? extends Map.Entry<?, ?>> params,
-                                      Writer<?, ?> part, int step) {
+                                      Writer<?, ?> part, int step, boolean raw) {
     do {
       if (step == 1) {
         if (!params.hasNext()) {
@@ -63,7 +61,12 @@ final class ParamMapWriter extends Writer<Object, Object> {
       if (step == 3) {
         if (part == null) {
           final Map.Entry<?, ?> param = params.next();
-          part = http.writeParam(output, param.getKey().toString(), param.getValue().toString());
+          if (raw) {
+            part = http.writeRawParam(output, param.getKey().toString(), param.getValue().toString());
+          } else {
+            part = http.writeParam(output, param.getKey().toString(), param.getValue().toString());
+          }
+
         } else {
           part = part.pull(output);
         }
@@ -82,12 +85,17 @@ final class ParamMapWriter extends Writer<Object, Object> {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new ParamMapWriter(http, params, part, step);
+    return new ParamMapWriter(http, params, part, step, raw);
   }
 
   public static Writer<Object, Object> write(Output<?> output, HttpWriter http,
                                              Iterator<? extends Map.Entry<?, ?>> params) {
-    return ParamMapWriter.write(output, http, params, null, 1);
+    return ParamMapWriter.write(output, http, params, null, 1, false);
+  }
+
+  public static Writer<Object, Object> writeRaw(Output<?> output, HttpWriter http,
+                                                Iterator<? extends Map.Entry<?, ?>> params) {
+    return ParamMapWriter.write(output, http, params, null, 1, true);
   }
 
 }
