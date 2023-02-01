@@ -25,26 +25,28 @@ final class ParamWriter extends Writer<Object, Object> {
   final String value;
   final Writer<?, ?> part;
   final int step;
+  final boolean raw;
 
-  ParamWriter(HttpWriter http, String key, String value, Writer<?, ?> part, int step) {
+  ParamWriter(HttpWriter http, String key, String value, Writer<?, ?> part, int step, boolean raw) {
     this.http = http;
     this.key = key;
     this.value = value;
     this.part = part;
     this.step = step;
+    this.raw = raw;
   }
 
   ParamWriter(HttpWriter http, String key, String value) {
-    this(http, key, value, null, 1);
+    this(http, key, value, null, 1, false);
   }
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return ParamWriter.write(output, this.http, this.key, this.value, this.part, this.step);
+    return ParamWriter.write(output, this.http, this.key, this.value, this.part, this.step, this.raw);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String key,
-                                      String value, Writer<?, ?> part, int step) {
+                                      String value, Writer<?, ?> part, int step, boolean raw) {
     if (step == 1) {
       if (part == null) {
         part = http.writeToken(output, key);
@@ -68,7 +70,11 @@ final class ParamWriter extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = http.writeValue(output, value);
+        if (raw) {
+          part = http.writePhrase(output, value);
+        } else {
+          part = http.writeValue(output, value);
+        }
       } else {
         part = part.pull(output);
       }
@@ -83,11 +89,15 @@ final class ParamWriter extends Writer<Object, Object> {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new ParamWriter(http, key, value, part, step);
+    return new ParamWriter(http, key, value, part, step, raw);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String key, String value) {
-    return ParamWriter.write(output, http, key, value, null, 1);
+    return ParamWriter.write(output, http, key, value, null, 1, false);
+  }
+
+  static Writer<Object, Object> writeRaw(Output<?> output, HttpWriter http, String key, String value) {
+    return ParamWriter.write(output, http, key, value, null, 1, true);
   }
 
 }

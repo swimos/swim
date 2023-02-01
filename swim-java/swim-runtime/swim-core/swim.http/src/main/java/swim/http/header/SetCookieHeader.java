@@ -141,7 +141,7 @@ public class SetCookieHeader extends HttpHeader {
   }
 
   public void setPath(String path) {
-    this.params = this.params.updated("Path", UriPath.of(path).toString());
+    this.params = this.params.updated("Path", path);
   }
 
   public void unsetPath() {

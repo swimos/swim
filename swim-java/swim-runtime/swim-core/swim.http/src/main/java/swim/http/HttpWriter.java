@@ -248,6 +248,10 @@ public class HttpWriter {
     return ParamWriter.write(output, this, key, value);
   }
 
+  public Writer<?, ?> writeRawParam(Output<?> output, String key, String value) {
+    return ParamWriter.writeRaw(output, this, key, value);
+  }
+
   public Writer<?, ?> writeParamList(Output<?> output, Iterator<? extends HttpPart> params) {
     return ParamListWriter.write(output, this, params, ',');
   }
@@ -258,6 +262,10 @@ public class HttpWriter {
 
   public Writer<?, ?> writeParamMap(Output<?> output, Iterator<? extends Map.Entry<?, ?>> params) {
     return ParamMapWriter.write(output, this, params);
+  }
+
+  public Writer<?, ?> writeRawParamMap(Output<?> output, Iterator<? extends Map.Entry<?, ?>> params) {
+    return ParamMapWriter.writeRaw(output, this, params);
   }
 
   public <T2> Encoder<?, HttpMessage<T2>> bodyEncoder(HttpMessage<T2> message,

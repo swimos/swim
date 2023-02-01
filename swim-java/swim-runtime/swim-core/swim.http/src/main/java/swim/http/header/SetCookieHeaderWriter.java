@@ -66,7 +66,7 @@ final class SetCookieHeaderWriter extends Writer<Object, Object> {
     }
     if (step == 2) {
       if (part == null) {
-        part = http.writeParamMap(output, params.iterator());
+        part = http.writeRawParamMap(output, params.iterator());
       } else {
         part = part.pull(output);
       }
