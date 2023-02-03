@@ -20,7 +20,6 @@ import swim.collections.HashTrieMap;
 import swim.http.Cookie;
 import swim.http.HttpHeader;
 import swim.http.HttpWriter;
-import swim.uri.UriPath;
 import swim.util.Murmur3;
 
 public class SetCookieHeader extends HttpHeader {
