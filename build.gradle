@@ -1,0 +1,48 @@
+plugins {
+  id 'net.ltgt.errorprone' version "$errorpronePluginVersion" apply false
+}
+
+description = 'Swim'
+
+subprojects {
+  afterEvaluate {
+    localizeDependencies(project) // override maven dependencies with project dependencies
+  }
+}
+
+def localizeDependencies(subproject) {
+  if (subproject.plugins.hasPlugin(JavaLibraryPlugin)) {
+    subproject.configurations.api.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.api.dependencies.remove(dependency)
+        subproject.dependencies {
+          api project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.implementation.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.implementation.dependencies.remove(dependency)
+        subproject.dependencies {
+          implementation project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.testImplementation.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.testImplementation.dependencies.remove(dependency)
+        subproject.dependencies {
+          testImplementation project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.runtimeOnly.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.runtimeOnly.dependencies.remove(dependency)
+        subproject.dependencies {
+          runtimeOnly project(':' + dependency.name)
+        }
+      }
+    }
+  }
+}

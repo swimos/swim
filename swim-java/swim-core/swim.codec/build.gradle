@@ -1,0 +1,14 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'Incremental I/O; functional parsers and writers; display, debug, and diagnostic formatters; and Unicode and binary codecs'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.codec'
+ext.moduleName = 'swim.codec'
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-util')
+  api project(':swim-collections')
+}

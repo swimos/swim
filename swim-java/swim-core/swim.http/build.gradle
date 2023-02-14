@@ -1,0 +1,16 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'HTTP message model and wire protocol codec that incrementally decodes and encodes HTTP streams without intermediate buffering'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.http'
+ext.moduleName = 'swim.http'
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-codec')
+  api project(':swim-uri')
+}

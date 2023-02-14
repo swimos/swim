@@ -1,0 +1,19 @@
+# ignore IDE files
+.classpath
+.gradle
+.idea
+*.iml
+.project
+.settings
+.vscode
+
+# ignore hidden macOS files
+.DS_Store
+*.DS_Store
+
+# ignore folders
+build
+
+# ignore files
+out
+*~

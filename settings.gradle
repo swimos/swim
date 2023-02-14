@@ -1,0 +1,5 @@
+apply from: 'swim-java/swim-core/framework.gradle'
+
+rootProject.name = 'swim'
+
+includeSwimCore(file("${rootDir}/swim-java/swim-core"))

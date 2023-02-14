@@ -1,0 +1,17 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'JavaScript Object Notation (JSON) codec'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.json'
+ext.moduleName = 'swim.json'
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-codec')
+  api project(':swim-expr')
+  api project(':swim-repr')
+}

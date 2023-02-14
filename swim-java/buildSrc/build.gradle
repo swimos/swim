@@ -1,0 +1,16 @@
+plugins {
+  id 'groovy-gradle-plugin'
+}
+
+repositories {
+  mavenCentral()
+  gradlePluginPortal()
+}
+
+sourceSets {
+  main {
+    groovy {
+      srcDir "${rootDir}/../swim-core/buildSrc/src/main/groovy"
+    }
+  }
+}

@@ -1,0 +1,90 @@
+plugins {
+  id 'SwimFramework'
+  id 'SwimPublish'
+  id 'net.ltgt.errorprone' version "$errorpronePluginVersion" apply false
+}
+
+description = 'Swim Java SDK'
+ext.homepage = 'https://github.com/swimos/swim'
+ext.moduleName = null
+
+dependencies {
+  api project(':swim-core')
+}
+
+javadoc {
+  title 'Swim Java SDK'
+  options.overview = "${projectDir}/overview.html"
+  options.group('Core',
+                'swim.annotations',
+                'swim.codec',
+                'swim.collections',
+                'swim.exec',
+                'swim.expr',
+                'swim.http',
+                'swim.json',
+                'swim.log',
+                'swim.net',
+                'swim.net.http',
+                'swim.repr',
+                'swim.uri',
+                'swim.util',
+                'swim.waml')
+
+  // Google Analytics Tracking Code
+  options.addBooleanOption("-allow-script-in-comments", true)
+  options.header = "<script async src=\"https://www.googletagmanager.com/gtag/js?id=UA-79441805-2\"></script>\n" +
+                   "<script>\n" +
+                   "  window.dataLayer = window.dataLayer || [];\n" +
+                   "  function gtag(){dataLayer.push(arguments);}\n" +
+                   "  gtag('js', new Date());\n" +
+                   "  gtag('config', 'UA-79441805-2');\n" +
+                   "</script>\n";
+
+  options.addStringOption('-module-source-path', [
+                            "${projectDir}/swim-core/*/src/main/java",
+                          ].join(':'))
+}
+
+subprojects {
+  afterEvaluate {
+    localizeDependencies(project) // override maven dependencies with project dependencies
+  }
+}
+
+def localizeDependencies(subproject) {
+  if (subproject.plugins.hasPlugin(JavaLibraryPlugin)) {
+    subproject.configurations.api.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.api.dependencies.remove(dependency)
+        subproject.dependencies {
+          api project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.implementation.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.implementation.dependencies.remove(dependency)
+        subproject.dependencies {
+          implementation project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.testImplementation.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.testImplementation.dependencies.remove(dependency)
+        subproject.dependencies {
+          testImplementation project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.runtimeOnly.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.runtimeOnly.dependencies.remove(dependency)
+        subproject.dependencies {
+          runtimeOnly project(':' + dependency.name)
+        }
+      }
+    }
+  }
+}

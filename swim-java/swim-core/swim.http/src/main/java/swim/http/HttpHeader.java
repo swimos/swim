@@ -1,0 +1,429 @@
+// Copyright 2015-2022 Swim.inc
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package swim.http;
+
+import java.util.Map;
+import swim.annotations.Nullable;
+import swim.annotations.Public;
+import swim.annotations.Since;
+import swim.codec.Diagnostic;
+import swim.codec.Input;
+import swim.codec.MediaRange;
+import swim.codec.MediaType;
+import swim.codec.Output;
+import swim.codec.Parse;
+import swim.codec.StringInput;
+import swim.codec.StringOutput;
+import swim.codec.Write;
+import swim.codec.WriteException;
+import swim.collections.FingerTrieList;
+import swim.collections.StringTrieMap;
+import swim.http.header.HttpAcceptHeader;
+import swim.http.header.HttpAllowHeader;
+import swim.http.header.HttpConnectionHeader;
+import swim.http.header.HttpContentLengthHeader;
+import swim.http.header.HttpContentTypeHeader;
+import swim.http.header.HttpCookieHeader;
+import swim.http.header.HttpExpectHeader;
+import swim.http.header.HttpHostHeader;
+import swim.http.header.HttpMaxForwardsHeader;
+import swim.http.header.HttpOriginHeader;
+import swim.http.header.HttpServerHeader;
+import swim.http.header.HttpSetCookieHeader;
+import swim.http.header.HttpTransferEncodingHeader;
+import swim.http.header.HttpUpgradeHeader;
+import swim.http.header.HttpUserAgentHeader;
+import swim.uri.Uri;
+import swim.uri.UriAuthority;
+import swim.util.Assume;
+import swim.util.Notation;
+import swim.util.ToSource;
+import swim.util.ToString;
+
+@Public
+@Since("5.0")
+public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHeader>, ToSource, ToString {
+
+  protected final String name;
+
+  protected final String value;
+
+  protected HttpHeader(String name, String value) {
+    this.name = name;
+    this.value = value;
+  }
+
+  public final String name() {
+    return this.name;
+  }
+
+  public final String value() {
+    return this.value;
+  }
+
+  @Override
+  public final String getKey() {
+    return this.name;
+  }
+
+  @Override
+  public final String getValue() {
+    return this.value;
+  }
+
+  @Override
+  public String setValue(String newValue) {
+    throw new UnsupportedOperationException();
+  }
+
+  public HttpHeader withValue(String newValue) {
+    return HttpHeader.of(this.name, newValue);
+  }
+
+  public Write<?> write(Output<?> output) {
+    return WriteHttpHeader.write(output, this.name, this.value, 0, 1);
+  }
+
+  public Write<?> write() {
+    return new WriteHttpHeader(this.name, this.value, 0, 1);
+  }
+
+  @Override
+  public int compareTo(HttpHeader that) {
+    int order = this.name.compareTo(that.name);
+    if (order == 0) {
+      order = this.value.compareTo(that.value);
+    }
+    return order;
+  }
+
+  @Override
+  public boolean equals(@Nullable Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof HttpHeader) {
+      final HttpHeader that = (HttpHeader) other;
+      return this.name.equals(that.name) && this.value.equals(that.value);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return this.name.hashCode() ^ this.value.hashCode();
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("HttpHeader", "of")
+            .appendArgument(this.name)
+            .appendArgument(this.value)
+            .endInvoke();
+  }
+
+  @Override
+  public void writeString(Appendable output) {
+    this.write(StringOutput.from(output)).checkDone();
+  }
+
+  @Override
+  public String toString() {
+    final StringOutput output = new StringOutput();
+    this.write(output).checkDone();
+    return output.get();
+  }
+
+  public static HttpHeader of(String name, String value) {
+    final HttpHeaderType<?> headerType = HttpHeader.registry().getHeaderType(name);
+    if (headerType != null) {
+      return headerType.of(name, value);
+    } else {
+      return new HttpHeader(name, value);
+    }
+  }
+
+  public static Parse<HttpHeader> parse(Input input, @Nullable HttpHeaderRegistry headerRegistry) {
+    return ParseHttpHeader.parse(input, headerRegistry != null ? headerRegistry.headerTypes() : null, null, null, 1);
+  }
+
+  public static Parse<HttpHeader> parse(Input input) {
+    return HttpHeader.parse(input, HttpHeader.registry());
+  }
+
+  public static Parse<HttpHeader> parse(@Nullable HttpHeaderRegistry headerRegistry) {
+    return new ParseHttpHeader(headerRegistry != null ? headerRegistry.headerTypes() : null, null, null, 1);
+  }
+
+  public static Parse<HttpHeader> parse() {
+    return HttpHeader.parse(HttpHeader.registry());
+  }
+
+  public static HttpHeader parse(String string) {
+    final Input input = new StringInput(string);
+    Parse<HttpHeader> parse = HttpHeader.parse(input);
+    if (input.isCont() && !parse.isError()) {
+      parse = Parse.error(Diagnostic.unexpected(input));
+    } else if (input.isError()) {
+      parse = Parse.error(input.getError());
+    }
+    return parse.getNonNull();
+  }
+
+  private static final HttpHeaderRegistry REGISTRY = new HttpHeaderRegistry();
+
+  public static HttpHeaderRegistry registry() {
+    return REGISTRY;
+  }
+
+  public static final HttpHeaderType<FingerTrieList<MediaRange>> ACCEPT = HttpAcceptHeader.TYPE;
+
+  public static final HttpHeaderType<FingerTrieList<HttpMethod>> ALLOW = HttpAllowHeader.TYPE;
+
+  public static final HttpHeaderType<FingerTrieList<String>> CONNECTION = HttpConnectionHeader.TYPE;
+
+  public static final HttpHeaderType<Long> CONTENT_LENGTH = HttpContentLengthHeader.TYPE;
+
+  public static final HttpHeaderType<MediaType> CONTENT_TYPE = HttpContentTypeHeader.TYPE;
+
+  public static final HttpHeaderType<FingerTrieList<HttpCookie>> COOKIE = HttpCookieHeader.TYPE;
+
+  public static final HttpHeaderType<String> EXPECT = HttpExpectHeader.TYPE;
+
+  public static final HttpHeaderType<UriAuthority> HOST = HttpHostHeader.TYPE;
+
+  public static final HttpHeaderType<Integer> MAX_FORWARDS = HttpMaxForwardsHeader.TYPE;
+
+  public static final HttpHeaderType<FingerTrieList<Uri>> ORIGIN = HttpOriginHeader.TYPE;
+
+  public static final HttpHeaderType<FingerTrieList<HttpProduct>> SERVER = HttpServerHeader.TYPE;
+
+  public static final HttpHeaderType<HttpCookieState> SET_COOKIE = HttpSetCookieHeader.TYPE;
+
+  public static final HttpHeaderType<FingerTrieList<HttpTransferCoding>> TRANSFER_ENCODING = HttpTransferEncodingHeader.TYPE;
+
+  public static final HttpHeaderType<FingerTrieList<HttpProtocol>> UPGRADE = HttpUpgradeHeader.TYPE;
+
+  public static final HttpHeaderType<FingerTrieList<HttpProduct>> USER_AGENT = HttpUserAgentHeader.TYPE;
+
+}
+
+final class ParseHttpHeader extends Parse<HttpHeader> {
+
+  final @Nullable StringTrieMap<HttpHeaderType<?>> nameTrie;
+  final @Nullable StringBuilder nameBuilder;
+  final @Nullable StringBuilder valueBuilder;
+  final int step;
+
+  ParseHttpHeader(@Nullable StringTrieMap<HttpHeaderType<?>> nameTrie,
+                  @Nullable StringBuilder nameBuilder,
+                  @Nullable StringBuilder valueBuilder, int step) {
+    this.nameTrie = nameTrie;
+    this.nameBuilder = nameBuilder;
+    this.valueBuilder = valueBuilder;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<HttpHeader> consume(Input input) {
+    return ParseHttpHeader.parse(input, this.nameTrie, this.nameBuilder,
+                                 this.valueBuilder, this.step);
+  }
+
+  static Parse<HttpHeader> parse(Input input,
+                                 @Nullable StringTrieMap<HttpHeaderType<?>> nameTrie,
+                                 @Nullable StringBuilder nameBuilder,
+                                 @Nullable StringBuilder valueBuilder, int step) {
+    int c = 0;
+    if (step == 1) {
+      if (input.isCont()) {
+        c = input.head();
+        if (Http.isTokenChar(c)) {
+          input.step();
+          if (nameTrie != null) {
+            nameTrie = nameTrie.getBranch(nameTrie.normalized(c));
+          }
+          nameBuilder = new StringBuilder();
+          nameBuilder.appendCodePoint(c);
+          step = 2;
+        } else {
+          return Parse.error(Diagnostic.expected("header name", input));
+        }
+      } else if (input.isDone()) {
+        return Parse.error(Diagnostic.expected("header name", input));
+      }
+    }
+    if (step == 2) {
+      nameBuilder = Assume.nonNull(nameBuilder);
+      while (input.isCont()) {
+        c = input.head();
+        if (Http.isTokenChar(c)) {
+          input.step();
+          if (nameTrie != null) {
+            nameTrie = nameTrie.getBranch(nameTrie.normalized(c));
+          }
+          nameBuilder.appendCodePoint(c);
+        } else {
+          break;
+        }
+      }
+      if (input.isCont()) {
+        step = 3;
+      } else if (input.isDone()) {
+        return Parse.error(Diagnostic.unexpected(input));
+      }
+    }
+    if (step == 3) {
+      if (input.isCont() && input.head() == ':') {
+        input.step();
+        step = 4;
+      } else if (input.isReady()) {
+        return Parse.error(Diagnostic.expected(':', input));
+      }
+    }
+    do {
+      if (step == 4) {
+        nameBuilder = Assume.nonNull(nameBuilder);
+        while (input.isCont()) {
+          c = input.head();
+          if (Http.isFieldChar(c)) {
+            input.step();
+            if (valueBuilder == null) {
+              valueBuilder = new StringBuilder();
+            }
+            valueBuilder.appendCodePoint(c);
+          } else {
+            break;
+          }
+        }
+        if (input.isCont() && Http.isSpace(c)) {
+          input.step();
+          step = 5;
+        } else if (input.isReady()) {
+          final HttpHeaderType<?> headerType = nameTrie != null ? nameTrie.value() : null;
+          final String value = valueBuilder != null ? valueBuilder.toString() : "";
+          if (headerType != null) {
+            return Parse.done(headerType.of(value));
+          } else {
+            return Parse.done(HttpHeader.of(nameBuilder.toString(), value));
+          }
+        }
+      }
+      if (step == 5) {
+        while (input.isCont()) {
+          c = input.head();
+          if (Http.isSpace(c)) {
+            input.step();
+          } else {
+            break;
+          }
+        }
+        if (input.isCont() && Http.isFieldChar(c)) {
+          if (valueBuilder != null) {
+            valueBuilder.appendCodePoint(' ');
+          }
+          step = 4;
+          continue;
+        } else if (input.isReady()) {
+          step = 4;
+          continue;
+        }
+      }
+      break;
+    } while (true);
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseHttpHeader(nameTrie, nameBuilder, valueBuilder, step);
+  }
+
+}
+
+final class WriteHttpHeader extends Write<Object> {
+
+  final String name;
+  final String value;
+  final int index;
+  final int step;
+
+  WriteHttpHeader(String name, String value, int index, int step) {
+    this.name = name;
+    this.value = value;
+    this.index = index;
+    this.step = step;
+  }
+
+  @Override
+  public Write<Object> produce(Output<?> output) {
+    return WriteHttpHeader.write(output, this.name, this.value,
+                                 this.index, this.step);
+  }
+
+  static Write<Object> write(Output<?> output, String name, String value,
+                             int index, int step) {
+    int c = 0;
+    if (step == 1) {
+      if (name.length() == 0) {
+        return Write.error(new WriteException("Blank header name"));
+      }
+      while (index < name.length() && output.isCont()) {
+        c = name.codePointAt(index);
+        if (Http.isTokenChar(c)) {
+          output.write(c);
+          index = name.offsetByCodePoints(index, 1);
+        } else {
+          return Write.error(new WriteException("Invalid header name: " + name));
+        }
+      }
+      if (index >= name.length()) {
+        index = 0;
+        step = 2;
+      }
+    }
+    if (step == 2 && output.isCont()) {
+      output.write(':');
+      if (value.isEmpty()) {
+        return Write.done();
+      } else {
+        step = 3;
+      }
+    }
+    if (step == 3 && output.isCont()) {
+      output.write(' ');
+      step = 4;
+    }
+    if (step == 4) {
+      while (index < value.length() && output.isCont()) {
+        c = value.codePointAt(index);
+        if (Http.isFieldChar(c) || Http.isSpace(c)) {
+          output.write(c);
+          index = value.offsetByCodePoints(index, 1);
+        } else {
+          return Write.error(new WriteException("Invalid header value: " + value));
+        }
+      }
+      if (index >= value.length()) {
+        return Write.done();
+      }
+    }
+    if (output.isDone()) {
+      return Write.error(new WriteException("Truncated write"));
+    } else if (output.isError()) {
+      return Write.error(output.getError());
+    }
+    return new WriteHttpHeader(name, value, index, step);
+  }
+
+}

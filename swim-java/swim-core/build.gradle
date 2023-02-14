@@ -1,0 +1,75 @@
+plugins {
+  id 'SwimCoreFramework'
+  id 'SwimCorePublish'
+  id 'net.ltgt.errorprone' version "$errorpronePluginVersion" apply false
+}
+
+description = 'Swim Core Framework'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core'
+ext.moduleName = null
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-codec')
+  api project(':swim-expr')
+  api project(':swim-repr')
+  api project(':swim-uri')
+  api project(':swim-json')
+  api project(':swim-waml')
+  api project(':swim-http')
+  api project(':swim-log')
+  api project(':swim-exec')
+  api project(':swim-net')
+  api project(':swim-net-http')
+}
+
+javadoc {
+  title 'Swim Core Framework'
+  options.overview = "${projectDir}/overview.html"
+  options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
+}
+
+subprojects {
+  afterEvaluate {
+    localizeDependencies(project) // override maven dependencies with project dependencies
+  }
+}
+
+def localizeDependencies(subproject) {
+  if (subproject.plugins.hasPlugin(JavaLibraryPlugin)) {
+    subproject.configurations.api.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.api.dependencies.remove(dependency)
+        subproject.dependencies {
+          api project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.implementation.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.implementation.dependencies.remove(dependency)
+        subproject.dependencies {
+          implementation project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.testImplementation.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.testImplementation.dependencies.remove(dependency)
+        subproject.dependencies {
+          testImplementation project(':' + dependency.name)
+        }
+      }
+    }
+    subproject.configurations.runtimeOnly.dependencies.toArray().each { dependency ->
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
+        subproject.configurations.runtimeOnly.dependencies.remove(dependency)
+        subproject.dependencies {
+          runtimeOnly project(':' + dependency.name)
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'Lightweight concurrency APIs for sequential processes, continuations, and timeouts, along with scheduler and timer interfaces and implementations'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.exec'
+ext.moduleName = 'swim.exec'
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-util')
+  implementation project(':swim-repr')
+  api project(':swim-log')
+}

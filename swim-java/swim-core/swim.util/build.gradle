@@ -1,0 +1,12 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'Extended collection, iterator, and builder interfaces, lightweight cache sets and maps, and other foundational utilities'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.util'
+ext.moduleName = 'swim.util'
+
+dependencies {
+  api project(':swim-annotations')
+}

@@ -1,0 +1,18 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'Explicitly flow-controlled, non-blocking, parallel I/O engine, with swim-codec-modulated socket modems, and TCP and TLS transports'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.net'
+ext.moduleName = 'swim.net'
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-codec')
+  implementation project(':swim-repr')
+  api project(':swim-log')
+  api project(':swim-exec')
+}

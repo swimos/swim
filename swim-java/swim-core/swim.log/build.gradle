@@ -1,0 +1,19 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'Structured logging framework'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.log'
+ext.moduleName = 'swim.log'
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-codec')
+  api project(':swim-expr')
+  implementation project(':swim-repr')
+  implementation project(':swim-json')
+  implementation project(':swim-waml')
+}

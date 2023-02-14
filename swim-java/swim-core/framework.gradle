@@ -1,0 +1,50 @@
+ext.includeSwimCore = { frameworkDir ->
+  gradle.ext.swimCoreDir = frameworkDir
+
+  if (!frameworkDir.equals(rootProject.projectDir)) {
+    include 'swim-core'
+    project(':swim-core').projectDir = frameworkDir
+  }
+
+  include 'swim-annotations'
+  project(':swim-annotations').projectDir = file("${frameworkDir}/swim.annotations")
+
+  include 'swim-collections'
+  project(':swim-collections').projectDir = file("${frameworkDir}/swim.collections")
+
+  include 'swim-util'
+  project(':swim-util').projectDir = file("${frameworkDir}/swim.util")
+
+  include 'swim-codec'
+  project(':swim-codec').projectDir = file("${frameworkDir}/swim.codec")
+
+  include 'swim-expr'
+  project(':swim-expr').projectDir = file("${frameworkDir}/swim.expr")
+
+  include 'swim-repr'
+  project(':swim-repr').projectDir = file("${frameworkDir}/swim.repr")
+
+  include 'swim-uri'
+  project(':swim-uri').projectDir = file("${frameworkDir}/swim.uri")
+
+  include 'swim-waml'
+  project(':swim-waml').projectDir = file("${frameworkDir}/swim.waml")
+
+  include 'swim-json'
+  project(':swim-json').projectDir = file("${frameworkDir}/swim.json")
+
+  include 'swim-http'
+  project(':swim-http').projectDir = file("${frameworkDir}/swim.http")
+
+  include 'swim-log'
+  project(':swim-log').projectDir = file("${frameworkDir}/swim.log")
+
+  include 'swim-exec'
+  project(':swim-exec').projectDir = file("${frameworkDir}/swim.exec")
+
+  include 'swim-net'
+  project(':swim-net').projectDir = file("${frameworkDir}/swim.net")
+
+  include 'swim-net-http'
+  project(':swim-net-http').projectDir = file("${frameworkDir}/swim.net.http")
+}
