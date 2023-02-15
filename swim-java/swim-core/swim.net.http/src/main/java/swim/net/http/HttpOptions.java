@@ -146,12 +146,12 @@ public class HttpOptions implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpOptions.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpOptions.class);
 
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        hashSeed, this.clientPipelineLength), this.serverPipelineLength),
+        HASH_SEED, this.clientPipelineLength), this.serverPipelineLength),
         this.maxMessageSize), this.readBufferSize), this.writeBufferSize));
   }
 

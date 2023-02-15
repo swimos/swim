@@ -18,11 +18,9 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import javax.net.ssl.SSLSession;
 import swim.annotations.Nullable;
-import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutputBuffer;
 import swim.codec.Decode;
 import swim.codec.Encode;
@@ -38,7 +36,6 @@ import swim.log.LogScope;
 import swim.net.NetSocket;
 import swim.repr.Repr;
 import swim.repr.TupleRepr;
-import swim.util.Result;
 import swim.util.Severity;
 
 final class HttpServerResponder implements HttpResponderContext, InputFuture, OutputFuture {
@@ -152,6 +149,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     }
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   void doRead() throws IOException {
     final LogScope scope = LogScope.swapCurrent("responder");
     LogScope.push("read");
@@ -175,6 +173,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     }
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doReadInitial(int status) throws IOException {
     // Don't initiate the request until data is available.
     if (this.socket.readBuffer.position() == 0) {
@@ -189,18 +188,18 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         this.socket.inputBuffer.asLast(true);
         // Close the read end of the socket.
         this.socket.doneReading();
-        // Dequeue the responder from the request pipeline.
-        this.socket.dequeueRequest(this);
+        // Dequeue the responder from the requester queue.
+        this.socket.dequeueRequester(this);
         return status;
       }
     }
 
-    // Enqueue the responder in the response pipeline.
+    // Enqueue the responder in the responder queue.
     // Don't initiate the request until the response has been enqueue.
-    if (!this.socket.enqueueResponse(this)) {
-      // The response queue is full; discontinue reading requests to propagate
+    if (!this.socket.enqueueResponder(this)) {
+      // The responder queue is full; discontinue reading requests to propagate
       // response processing backpressure to the client until a slot opens up
-      // in the response queue.
+      // in the responder queue.
       this.socket.log.debug("pipeline full");
       return status;
     }
@@ -230,6 +229,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     return status;
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doReadMessage(int status) throws IOException {
     Decode<? extends HttpRequest<?>> decodeMessage = (Decode<? extends HttpRequest<?>>) DECODE_MESSAGE.getOpaque(this);
     if (decodeMessage == null) {
@@ -283,6 +283,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     return status;
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doReadPayload(int status) throws IOException {
     Decode<? extends HttpPayload<?>> decodePayload = (Decode<? extends HttpPayload<?>>) DECODE_PAYLOAD.getOpaque(this);
     if (decodePayload == null) {
@@ -319,8 +320,8 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
 
           this.didReadRequestPayload(request);
 
-          // Dequeue the responder from the request pipeline.
-          this.socket.dequeueRequest(this);
+          // Dequeue the responder from the requester queue.
+          this.socket.dequeueRequester(this);
 
           this.didReadRequest(request);
 
@@ -435,6 +436,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     }
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   void doWrite() throws IOException {
     final LogScope scope = LogScope.swapCurrent("responder");
     LogScope.push("write");
@@ -458,6 +460,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     }
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doWriteInitial(int status) throws IOException {
     // Don't initiate the response until request message has been read.
     final Decode<HttpRequest<?>> decodeMessage = (Decode<HttpRequest<?>>) DECODE_MESSAGE.getOpaque(this);
@@ -491,6 +494,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     return status;
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doWriteMessage(int status) throws IOException {
     Encode<? extends HttpResponse<?>> encodeMessage = (Encode<? extends HttpResponse<?>>) ENCODE_MESSAGE.getOpaque(this);
     if (encodeMessage == null) {
@@ -543,6 +547,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     return status;
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doWritePayload(int status) throws IOException {
     Encode<HttpPayload<?>> encodePayload = (Encode<HttpPayload<?>>) ENCODE_PAYLOAD.getOpaque(this);
     if (encodePayload == null) {
@@ -583,8 +588,8 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
 
           this.didWriteResponsePayload(request, response);
 
-          // Dequeue the responder from the response pipeline.
-          this.socket.dequeueResponse(this);
+          // Dequeue the responder from the responder queue.
+          this.socket.dequeueResponder(this);
 
           this.didWriteResponse(request, response);
 

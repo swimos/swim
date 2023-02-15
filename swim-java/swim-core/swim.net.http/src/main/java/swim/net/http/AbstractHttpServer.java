@@ -95,10 +95,28 @@ public abstract class AbstractHttpServer implements HttpServer {
     }
   }
 
-  protected void enqueueRequest(HttpResponder responder) {
+  public boolean isRequesting() {
     final HttpServerContext context = this.context;
     if (context != null) {
-      context.enqueueRequest(responder);
+      return context.isRequesting();
+    } else {
+      throw new IllegalStateException("Unbound socket");
+    }
+  }
+
+  public boolean isResponding() {
+    final HttpServerContext context = this.context;
+    if (context != null) {
+      return context.isResponding();
+    } else {
+      throw new IllegalStateException("Unbound socket");
+    }
+  }
+
+  protected void enqueueRequester(HttpResponder responder) {
+    final HttpServerContext context = this.context;
+    if (context != null) {
+      context.enqueueRequester(responder);
     } else {
       throw new IllegalStateException("Unbound socket");
     }

@@ -15,24 +15,18 @@
 package swim.net.http;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
-import swim.annotations.Nullable;
 import swim.codec.Text;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
-import swim.http.HttpChunked;
 import swim.http.HttpEmpty;
-import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
 import swim.net.AbstractNetListener;
 import swim.net.TransportDriver;
-import swim.util.Assume;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpServerTests {
 
@@ -134,7 +128,7 @@ public class HttpServerTests {
 
       @Override
       public void didOpen() {
-        this.enqueueRequest(new TestResponder());
+        this.enqueueRequester(new TestResponder());
       }
 
       //@Override
@@ -164,7 +158,7 @@ public class HttpServerTests {
 
       @Override
       public void didReadRequest(HttpRequest<?> request, HttpResponder responder) {
-        this.enqueueRequest(new TestResponder());
+        this.enqueueRequester(new TestResponder());
       }
 
       //@Override

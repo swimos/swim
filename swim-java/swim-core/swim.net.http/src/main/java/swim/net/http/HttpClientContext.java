@@ -17,7 +17,6 @@ package swim.net.http;
 import java.net.InetSocketAddress;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.collections.FingerTrieList;
 import swim.net.ConnectionContext;
 import swim.net.NetSocket;
 
@@ -50,9 +49,17 @@ public interface HttpClientContext extends ConnectionContext {
    */
   boolean isOpening();
 
-  FingerTrieList<HttpRequesterContext> requestQueue();
+  /**
+   * Returns {@code true} if the request queue is non-empty.
+   */
+  boolean isRequesting();
 
-  void enqueueRequest(HttpRequester requester);
+  /**
+   * Returns {@code true} if the response queue is non-empty.
+   */
+  boolean isResponding();
+
+  boolean enqueueRequester(HttpRequester requester);
 
   /**
    * Rebinds the network connection to use a new {@code socket} handler.

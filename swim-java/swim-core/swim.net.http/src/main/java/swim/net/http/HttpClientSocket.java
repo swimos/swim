@@ -24,10 +24,8 @@ import javax.net.ssl.SSLSession;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.collections.FingerTrieList;
 import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutputBuffer;
-import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.log.Log;
@@ -35,7 +33,6 @@ import swim.net.FlowContext;
 import swim.net.NetSocket;
 import swim.net.NetSocketContext;
 import swim.net.TcpEndpoint;
-import swim.util.Assume;
 
 @Public
 @Since("5.0")
@@ -48,8 +45,12 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   protected ByteBuffer writeBuffer;
   protected BinaryInputBuffer inputBuffer;
   protected BinaryOutputBuffer outputBuffer;
-  FingerTrieList<HttpClientRequester> requesters;
-  FingerTrieList<HttpClientRequester> responders;
+  final HttpClientRequester[] requesters;
+  int requesterReadIndex;
+  int requesterWriteIndex;
+  final HttpClientRequester[] responders;
+  int responderReadIndex;
+  int responderWriteIndex;
   Log log;
 
   public HttpClientSocket(HttpClient client, HttpOptions httpOptions) {
@@ -66,9 +67,13 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     this.inputBuffer = new BinaryInputBuffer(this.readBuffer).asLast(false);
     this.outputBuffer = new BinaryOutputBuffer(this.writeBuffer).asLast(false);
 
-    // Initialize pipeline queues.
-    this.requesters = FingerTrieList.empty();
-    this.responders = FingerTrieList.empty();
+    // Initialize the request pipeline.
+    this.requesters = new HttpClientRequester[Math.max(2, httpOptions.clientPipelineLength())];
+    this.requesterReadIndex = 0;
+    this.requesterWriteIndex = 0;
+    this.responders = new HttpClientRequester[Math.max(2, httpOptions.clientPipelineLength())];
+    this.responderReadIndex = 0;
+    this.responderWriteIndex = 0;
 
     // Initialize the socket log.
     this.log = this.initLog();
@@ -250,49 +255,96 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   }
 
   @Override
-  public FingerTrieList<HttpRequesterContext> requestQueue() {
-    return (FingerTrieList<HttpRequesterContext>) REQUESTERS.getOpaque(this);
+  public boolean isRequesting() {
+    final int readIndex = (int) REQUESTER_READ_INDEX.getAcquire(this);
+    final int writeIndex = (int) REQUESTER_WRITE_INDEX.getAcquire(this);
+    return readIndex != writeIndex;
+  }
+
+  @Nullable HttpClientRequester requesting() {
+    // Peek at the head of the MPSC requester queue.
+    // Only the read task can safely peek at the current requester.
+    final int readIndex = (int) REQUESTER_READ_INDEX.getOpaque(this);
+    final int writeIndex = (int) REQUESTER_WRITE_INDEX.getAcquire(this);
+    if (readIndex == writeIndex) {
+      // The requester queue is empty.
+      return null;
+    }
+
+    do {
+      // Try to atomically acquire the head of the requester queue.
+      final HttpClientRequester requesterContext = (HttpClientRequester) REQUESTER_QUEUE.getAcquire(this.requesters, readIndex);
+      if (requesterContext != null) {
+        // Return the current requester.
+        return requesterContext;
+      } else {
+        // A new current requester is concurrently being enqueued; spin and try again.
+        Thread.onSpinWait();
+      }
+    } while (true);
   }
 
   @SuppressWarnings("ReferenceEquality")
   @Override
-  public void enqueueRequest(HttpRequester requester) {
+  public boolean enqueueRequester(HttpRequester requester) {
     final HttpClientRequester requesterContext = new HttpClientRequester(this, requester);
     requester.setRequesterContext(requesterContext);
 
-    FingerTrieList<HttpClientRequester> requesters = (FingerTrieList<HttpClientRequester>) REQUESTERS.getOpaque(this);
+    // Try to enqueue the requester into the MPSC requester queue.
+    int writeIndex = (int) REQUESTER_WRITE_INDEX.getOpaque(this);
     do {
-      final FingerTrieList<HttpClientRequester> oldRequesters = requesters;
-      final FingerTrieList<HttpClientRequester> newRequesters = oldRequesters.appended(requesterContext);
-      requesters = (FingerTrieList<HttpClientRequester>) REQUESTERS.compareAndExchangeRelease(this, oldRequesters, newRequesters);
-      if (requesters == oldRequesters) {
-        requesters = newRequesters;
-        if (oldRequesters.isEmpty()) {
+      final int oldWriteIndex = writeIndex;
+      final int newWriteIndex = (oldWriteIndex + 1) % this.requesters.length;
+      final int readIndex = (int) REQUESTER_READ_INDEX.getAcquire(this);
+      if (newWriteIndex == readIndex) {
+        // The requester queue appears to be full.
+        return false;
+      }
+      writeIndex = (int) REQUESTER_WRITE_INDEX.compareAndExchangeAcquire(this, oldWriteIndex, newWriteIndex);
+      if (writeIndex == oldWriteIndex) {
+        // Successfully acquired a slot in the requester queue;
+        // release the requester into the queue.
+        REQUESTER_QUEUE.setRelease(this.requesters, oldWriteIndex, requesterContext);
+        if (oldWriteIndex == readIndex) {
+          // The requester queue was empty; trigger a write to begin processing
+          // the request. We force a write instead of requesting one because
+          // the selector might have already dispatched a write ready event,
+          // in which case it won't dispatch a new write ready event until data
+          // has been written to the socket.
           this.triggerWrite();
         }
-        break;
+        return true;
       }
     } while (true);
   }
 
   @SuppressWarnings("ReferenceEquality")
-  void dequeueRequest(HttpClientRequester requesterContext) {
-    FingerTrieList<HttpClientRequester> requesters = (FingerTrieList<HttpClientRequester>) REQUESTERS.getOpaque(this);
-    do {
-      final FingerTrieList<HttpClientRequester> oldRequesters = requesters;
-      if (oldRequesters.isEmpty() || oldRequesters.head() != requesterContext) {
-        throw new IllegalStateException();
-      }
-      final FingerTrieList<HttpClientRequester> newRequesters = oldRequesters.tail();
-      requesters = (FingerTrieList<HttpClientRequester>) REQUESTERS.compareAndExchangeAcquire(this, oldRequesters, newRequesters);
-      if (requesters == oldRequesters) {
-        requesters = newRequesters;
-        if (!newRequesters.isEmpty() && !this.isDoneWriting()) {
-          this.triggerWrite();
-        }
-        break;
-      }
-    } while (true);
+  void dequeueRequester(HttpClientRequester requesterContext) {
+    // Try to dequeue the requester from the MPSC requester queue.
+    // Only the write task is permitted to dequeue requesters.
+    final int readIndex = (int) REQUESTER_READ_INDEX.getOpaque(this);
+    int writeIndex = (int) REQUESTER_WRITE_INDEX.getAcquire(this);
+    if (readIndex == writeIndex) {
+      // The requester queue is empty.
+      throw new IllegalStateException("Inconsistent request pipeline");
+    }
+
+    // Clear the current requester, if it's the head of the requester queue.
+    if (REQUESTER_QUEUE.compareAndExchangeAcquire(this.requesters, readIndex, requesterContext, null) != requesterContext) {
+      // The requester was not the head of the requester queue.
+      throw new IllegalStateException("Inconsistent request pipeline");
+    }
+    // Increment the read index to free up the dequeued requester's old slot.
+    final int newReadIndex = (readIndex + 1) % this.requesters.length;
+    REQUESTER_READ_INDEX.setRelease(this, newReadIndex);
+
+    // Reload the write index to check for concurrent enqueues.
+    writeIndex = (int) REQUESTER_WRITE_INDEX.getAcquire(this);
+    if (newReadIndex != writeIndex) {
+      // The requester queue is non-empty; trigger a write to begin processing
+      // the next request.
+      this.triggerWrite();
+    }
   }
 
   @Override
@@ -327,9 +379,9 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   @Override
   public void doWrite() throws IOException {
-    final FingerTrieList<HttpClientRequester> requesters = (FingerTrieList<HttpClientRequester>) REQUESTERS.getAcquire(this);
-    if (!requesters.isEmpty()) {
-      final HttpClientRequester requesterContext = Assume.nonNull(requesters.head());
+    final HttpClientRequester requesterContext = this.requesting();
+    if (requesterContext != null) {
+      // Delegate the write operation to the current requester.
       requesterContext.doWrite();
     }
   }
@@ -367,43 +419,94 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     this.client.didWriteRequest(request, requester);
   }
 
-  @SuppressWarnings("ReferenceEquality")
-  void enqueueResponse(HttpClientRequester requesterContext) {
-    FingerTrieList<HttpClientRequester> responders = (FingerTrieList<HttpClientRequester>) RESPONDERS.getOpaque(this);
+  @Override
+  public boolean isResponding() {
+    final int readIndex = (int) RESPONDER_READ_INDEX.getAcquire(this);
+    final int writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
+    return readIndex != writeIndex;
+  }
+
+  @Nullable HttpClientRequester responding() {
+    // Peek at the head of the MPSC responder queue.
+    // Only the read task can safely peek at the current responder.
+    final int readIndex = (int) RESPONDER_READ_INDEX.getOpaque(this);
+    final int writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
+    if (readIndex == writeIndex) {
+      // The responder queue is empty.
+      return null;
+    }
+
     do {
-      final FingerTrieList<HttpClientRequester> oldResponders = responders;
-      final FingerTrieList<HttpClientRequester> newResponders = oldResponders.appended(requesterContext);
-      responders = (FingerTrieList<HttpClientRequester>) RESPONDERS.compareAndExchangeRelease(this, oldResponders, newResponders);
-      if (responders == oldResponders) {
-        responders = newResponders;
-        if (oldResponders.isEmpty()) {
-          this.triggerRead();
-        }
-        break;
+      // Try to atomically acquire the head of the responder queue.
+      final HttpClientRequester requesterContext = (HttpClientRequester) REQUESTER_QUEUE.getAcquire(this.responders, readIndex);
+      if (requesterContext != null) {
+        // Return the current responder.
+        return requesterContext;
+      } else {
+        // A new current responder is concurrently being enqueued; spin and try again.
+        Thread.onSpinWait();
       }
     } while (true);
   }
 
   @SuppressWarnings("ReferenceEquality")
-  void dequeueResponse(HttpClientRequester requesterContext) {
-    FingerTrieList<HttpClientRequester> responders = (FingerTrieList<HttpClientRequester>) RESPONDERS.getOpaque(this);
+  void enqueueResponder(HttpClientRequester requesterContext) {
+    // Enqueue the requester into the MPSC responder queue.
+    int writeIndex = (int) RESPONDER_WRITE_INDEX.getOpaque(this);
     do {
-      final FingerTrieList<HttpClientRequester> oldResponders = responders;
-      if (oldResponders.isEmpty() || oldResponders.head() != requesterContext) {
-        throw new IllegalStateException();
+      final int oldWriteIndex = writeIndex;
+      final int newWriteIndex = (oldWriteIndex + 1) % this.responders.length;
+      final int readIndex = (int) RESPONDER_READ_INDEX.getAcquire(this);
+      if (newWriteIndex == readIndex) {
+        // The responder queue is somehow full; this should not be possible.
+        throw new IllegalStateException("Inconsistent response pipeline");
       }
-      final FingerTrieList<HttpClientRequester> newResponders = oldResponders.tail();
-      responders = (FingerTrieList<HttpClientRequester>) RESPONDERS.compareAndExchangeAcquire(this, oldResponders, newResponders);
-      if (responders == oldResponders) {
-        responders = newResponders;
-        if (!newResponders.isEmpty()) {
+      writeIndex = (int) RESPONDER_WRITE_INDEX.compareAndExchangeAcquire(this, oldWriteIndex, newWriteIndex);
+      if (writeIndex == oldWriteIndex) {
+        // Successfully acquired a slot in the responder queue;
+        // release the requester into the queue.
+        REQUESTER_QUEUE.setRelease(this.responders, oldWriteIndex, requesterContext);
+        if (oldWriteIndex == readIndex) {
+          // The responder queue was empty; trigger a read to begin processing
+          // the response. We force a read instead of requesting one to ensure
+          // that any buffered data left over from the previous request gets
+          // consumed.
           this.triggerRead();
-        } else if (this.isDoneWriting()) {
-          this.doneReading();
         }
-        break;
+        return;
       }
     } while (true);
+  }
+
+  @SuppressWarnings("ReferenceEquality")
+  void dequeueResponder(HttpClientRequester requesterContext) {
+    // Try to dequeue the requester from the MPSC responder queue.
+    // Only the read task is permitted to dequeue responders.
+    final int readIndex = (int) RESPONDER_READ_INDEX.getOpaque(this);
+    int writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
+    if (readIndex == writeIndex) {
+      // The responder queue is empty.
+      throw new IllegalStateException("Inconsistent response pipeline");
+    }
+
+    // Clear the current responder, if it's the head of the responder queue.
+    if (REQUESTER_QUEUE.compareAndExchangeAcquire(this.responders, readIndex, requesterContext, null) != requesterContext) {
+      // The responder was not the head of the responder queue.
+      throw new IllegalStateException("Inconsistent response pipeline");
+    }
+    // Increment the read index to free up the dequeued responder's old slot.
+    final int newReadIndex = (readIndex + 1) % this.responders.length;
+    RESPONDER_READ_INDEX.setRelease(this, newReadIndex);
+
+    // Reload the write index to check for concurrent enqueues.
+    writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
+    if (newReadIndex != writeIndex) {
+      // The responder queue is non-empty; trigger a read to begin processing
+      // the next response.
+      this.triggerRead();
+    } else if (this.isDoneWriting()) {
+      this.doneReading();
+    }
   }
 
   @Override
@@ -438,9 +541,9 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   @Override
   public void doRead() throws IOException {
-    final FingerTrieList<HttpClientRequester> responders = (FingerTrieList<HttpClientRequester>) RESPONDERS.getAcquire(this);
-    if (!responders.isEmpty()) {
-      final HttpClientRequester requesterContext = Assume.nonNull(responders.head());
+    final HttpClientRequester requesterContext = this.responding();
+    if (requesterContext != null) {
+      // Delegate the read operation to the current responder.
       requesterContext.doRead();
     }
   }
@@ -576,21 +679,40 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   }
 
   /**
-   * {@code VarHandle} for atomically accessing the {@link #requesters} field.
+   * {@code VarHandle} for atomically accessing elements of an
+   * {@link HttpClientRequester} array.
    */
-  static final VarHandle REQUESTERS;
+  static final VarHandle REQUESTER_QUEUE;
 
   /**
-   * {@code VarHandle} for atomically accessing the {@link #responders} field.
+   * {@code VarHandle} for atomically accessing the {@link #requesterReadIndex} field.
    */
-  static final VarHandle RESPONDERS;
+  static final VarHandle REQUESTER_READ_INDEX;
+
+  /**
+   * {@code VarHandle} for atomically accessing the {@link #requesterWriteIndex} field.
+   */
+  static final VarHandle REQUESTER_WRITE_INDEX;
+
+  /**
+   * {@code VarHandle} for atomically accessing the {@link #responderReadIndex} field.
+   */
+  static final VarHandle RESPONDER_READ_INDEX;
+
+  /**
+   * {@code VarHandle} for atomically accessing the {@link #responderWriteIndex} field.
+   */
+  static final VarHandle RESPONDER_WRITE_INDEX;
 
   static {
     // Initialize var handles.
+    REQUESTER_QUEUE = MethodHandles.arrayElementVarHandle(HttpClientRequester.class.arrayType());
     final MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
-      REQUESTERS = lookup.findVarHandle(HttpClientSocket.class, "requesters", FingerTrieList.class);
-      RESPONDERS = lookup.findVarHandle(HttpClientSocket.class, "responders", FingerTrieList.class);
+      REQUESTER_READ_INDEX = lookup.findVarHandle(HttpClientSocket.class, "requesterReadIndex", Integer.TYPE);
+      REQUESTER_WRITE_INDEX = lookup.findVarHandle(HttpClientSocket.class, "requesterWriteIndex", Integer.TYPE);
+      RESPONDER_READ_INDEX = lookup.findVarHandle(HttpClientSocket.class, "responderReadIndex", Integer.TYPE);
+      RESPONDER_WRITE_INDEX = lookup.findVarHandle(HttpClientSocket.class, "responderWriteIndex", Integer.TYPE);
     } catch (ReflectiveOperationException cause) {
       throw new ExceptionInInitializerError(cause);
     }

@@ -36,7 +36,17 @@ public interface HttpServerContext extends ConnectionContext {
    */
   boolean isOpening();
 
-  boolean enqueueRequest(HttpResponder responder);
+  /**
+   * Returns {@code true} if the request queue is non-empty.
+   */
+  boolean isRequesting();
+
+  /**
+   * Returns {@code true} if the response queue is non-empty.
+   */
+  boolean isResponding();
+
+  boolean enqueueRequester(HttpResponder responder);
 
   /**
    * Rebinds the network connection to use a new {@code socket} handler.

@@ -26,7 +26,6 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutputBuffer;
-import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.log.Log;
@@ -34,7 +33,6 @@ import swim.net.FlowContext;
 import swim.net.NetSocket;
 import swim.net.NetSocketContext;
 import swim.net.TcpEndpoint;
-import swim.util.Assume;
 
 @Public
 @Since("5.0")
@@ -67,7 +65,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     this.inputBuffer = new BinaryInputBuffer(this.readBuffer).asLast(false);
     this.outputBuffer = new BinaryOutputBuffer(this.writeBuffer).asLast(false);
 
-    // Initialize the request pipeline.
+    // Initialize the response pipeline.
     this.requesting = null;
     this.responders = new HttpServerResponder[Math.max(2, httpOptions.serverPipelineLength())];
     this.responderReadIndex = 0;
@@ -213,12 +211,17 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     this.log.infoConfig("opened socket", this);
   }
 
+  @Override
+  public boolean isRequesting() {
+    return REQUESTING.getOpaque(this) != null;
+  }
+
   @Nullable HttpServerResponder requesting() {
     return (HttpServerResponder) REQUESTING.getOpaque(this);
   }
 
   @Override
-  public boolean enqueueRequest(HttpResponder responder) {
+  public boolean enqueueRequester(HttpResponder responder) {
     final HttpServerResponder responderContext = new HttpServerResponder(this, responder);
     responder.setResponderContext(responderContext);
 
@@ -231,15 +234,15 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     }
 
     // Trigger a read operation to begin processing the request.
-    // We force a read instead of requesting one to ensure that
-    // any buffered data left over from the last request gets consumed.
+    // We force a read instead of requesting one to ensure that any
+    // buffered data left over from the previous request gets consumed.
     this.triggerRead();
     // The requester was successfully enqueued.
     return true;
   }
 
   @SuppressWarnings("ReferenceEquality")
-  void dequeueRequest(HttpServerResponder responderContext) {
+  void dequeueRequester(HttpServerResponder responderContext) {
     // Atomically clear the current requester, synchronizing with concurrent enqueues.
     if (REQUESTING.compareAndExchangeRelease(this, responderContext, null) != responderContext) {
       throw new IllegalStateException("Inconsistent request pipeline");
@@ -330,6 +333,13 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     this.server.didReadRequest(request, responder);
   }
 
+  @Override
+  public boolean isResponding() {
+    final int readIndex = (int) RESPONDER_READ_INDEX.getAcquire(this);
+    final int writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
+    return readIndex != writeIndex;
+  }
+
   @Nullable HttpServerResponder responding() {
     // Peek at the head of the MPSC responder queue.
     // Only the write task can safely peek at the current responder.
@@ -347,14 +357,13 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
         // Return the current responder.
         return responderContext;
       } else {
-        // A new current responder is being concurrently enqueued; spin and try again.
+        // A new current responder is concurrently being enqueued; spin and try again.
         Thread.onSpinWait();
       }
     } while (true);
   }
 
-  @SuppressWarnings("ReferenceEquality")
-  boolean enqueueResponse(HttpServerResponder responderContext) {
+  boolean enqueueResponder(HttpServerResponder responderContext) {
     // Try to enqueue the responder into the MPSC responder queue.
     int writeIndex = (int) RESPONDER_WRITE_INDEX.getOpaque(this);
     do {
@@ -378,7 +387,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   }
 
   @SuppressWarnings("ReferenceEquality")
-  void dequeueResponse(HttpServerResponder responderContext) {
+  void dequeueResponder(HttpServerResponder responderContext) {
     // Try to dequeue the responder from the MPSC responder queue.
     // Only the write task is permitted to dequeue responders.
     final int readIndex = (int) RESPONDER_READ_INDEX.getOpaque(this);
@@ -388,8 +397,9 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       throw new IllegalStateException("Inconsistent response pipeline");
     }
 
-    // Clear the current responder, assuming it's at the head of the responder queue.
+    // Clear the current responder, if it's the head of the responder queue.
     if (RESPONDER_QUEUE.compareAndExchangeAcquire(this.responders, readIndex, responderContext, null) != responderContext) {
+      // The responder was not the head of the responder queue.
       throw new IllegalStateException("Inconsistent response pipeline");
     }
     // Increment the read index to free up the dequeued responder's old slot.

@@ -18,11 +18,9 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import javax.net.ssl.SSLSession;
 import swim.annotations.Nullable;
-import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutputBuffer;
 import swim.codec.Decode;
 import swim.codec.Encode;
@@ -38,7 +36,6 @@ import swim.log.LogScope;
 import swim.net.NetSocket;
 import swim.repr.Repr;
 import swim.repr.TupleRepr;
-import swim.util.Result;
 import swim.util.Severity;
 
 final class HttpClientRequester implements HttpRequesterContext, InputFuture, OutputFuture {
@@ -157,6 +154,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     }
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   void doWrite() throws IOException {
     final LogScope scope = LogScope.swapCurrent("requester");
     LogScope.push("write");
@@ -180,6 +178,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     }
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doWriteInitial(int status) throws IOException {
     do {
       if ((status & WRITE_MASK) >>> WRITE_SHIFT != WRITE_PENDING) {
@@ -206,6 +205,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     return status;
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doWriteMessage(int status) throws IOException {
     Encode<? extends HttpRequest<?>> encodeMessage = (Encode<? extends HttpRequest<?>>) ENCODE_MESSAGE.getOpaque(this);
     if (encodeMessage == null) {
@@ -238,8 +238,8 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
 
           this.didWriteRequestMessage(request);
 
-          // Enqueue the requester in the response pipeline.
-          this.socket.enqueueResponse(this);
+          // Enqueue the requester in the responder queue.
+          this.socket.enqueueResponder(this);
 
           this.willWriteRequestPayload(request);
 
@@ -260,6 +260,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     return status;
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doWritePayload(int status) throws IOException {
     Encode<HttpPayload<?>> encodePayload = (Encode<HttpPayload<?>>) ENCODE_PAYLOAD.getOpaque(this);
     if (encodePayload == null) {
@@ -299,8 +300,8 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
 
           this.didWriteRequestPayload(request);
 
-          // Dequeue the responder from the request pipeline.
-          this.socket.dequeueRequest(this);
+          // Dequeue the requester from the requester queue.
+          this.socket.dequeueRequester(this);
 
           this.didWriteRequest(request);
 
@@ -415,6 +416,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     }
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   void doRead() throws IOException {
     final LogScope scope = LogScope.swapCurrent("requester");
     LogScope.push("read");
@@ -438,6 +440,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     }
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doReadInitial(int status) throws IOException {
     do {
       if ((status & READ_MASK) >>> READ_SHIFT != READ_PENDING) {
@@ -465,6 +468,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     return status;
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doReadMessage(int status) throws IOException {
     Decode<? extends HttpResponse<?>> decodeMessage = (Decode<? extends HttpResponse<?>>) DECODE_MESSAGE.getOpaque(this);
     if (decodeMessage == null) {
@@ -516,6 +520,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     return status;
   }
 
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doReadPayload(int status) throws IOException {
     Decode<? extends HttpPayload<?>> decodePayload = (Decode<? extends HttpPayload<?>>) DECODE_PAYLOAD.getOpaque(this);
     if (decodePayload == null) {
@@ -553,8 +558,8 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
 
           this.didReadResponsePayload(request, response);
 
-          // Dequeue the responder from the response pipeline.
-          this.socket.dequeueResponse(this);
+          // Dequeue the requester from the responder queue.
+          this.socket.dequeueResponder(this);
 
           this.didReadResponse(request, response);
 

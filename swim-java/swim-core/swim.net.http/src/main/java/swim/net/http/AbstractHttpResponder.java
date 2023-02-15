@@ -110,6 +110,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   }
 
   protected void readRequestMessage(Decode<? extends HttpRequest<?>> decodeMessage) {
+    final HttpResponderContext context = this.context;
     if (context != null) {
       context.readRequestMessage(decodeMessage);
     } else {
@@ -118,6 +119,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   }
 
   protected void readRequestPayload(Decode<? extends HttpPayload<?>> decodePayload) {
+    final HttpResponderContext context = this.context;
     if (context != null) {
       context.readRequestPayload(decodePayload);
     } else {

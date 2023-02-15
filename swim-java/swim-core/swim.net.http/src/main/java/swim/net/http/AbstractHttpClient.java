@@ -19,10 +19,6 @@ import javax.net.ssl.SSLSession;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.collections.FingerTrieList;
-import swim.http.HttpPayload;
-import swim.http.HttpRequest;
-import swim.http.HttpResponse;
 import swim.net.NetSocket;
 
 @Public
@@ -126,19 +122,28 @@ public abstract class AbstractHttpClient implements HttpClient {
     }
   }
 
-  protected FingerTrieList<HttpRequesterContext> requestQueue() {
+  public boolean isRequesting() {
     final HttpClientContext context = this.context;
     if (context != null) {
-      return context.requestQueue();
+      return context.isRequesting();
     } else {
       throw new IllegalStateException("Unbound socket");
     }
   }
 
-  protected void enqueueRequest(HttpRequester requester) {
+  public boolean isResponding() {
     final HttpClientContext context = this.context;
     if (context != null) {
-      context.enqueueRequest(requester);
+      return context.isResponding();
+    } else {
+      throw new IllegalStateException("Unbound socket");
+    }
+  }
+
+  protected void enqueueRequester(HttpRequester requester) {
+    final HttpClientContext context = this.context;
+    if (context != null) {
+      context.enqueueRequester(requester);
     } else {
       throw new IllegalStateException("Unbound socket");
     }

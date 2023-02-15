@@ -14,28 +14,20 @@
 
 package swim.net.http;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
-import swim.annotations.Nullable;
 import swim.codec.Text;
 import swim.collections.FingerTrieList;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
 import swim.http.HttpChunked;
-import swim.http.HttpEmpty;
 import swim.http.HttpHeader;
-import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
-import swim.http.HttpStatus;
 import swim.http.HttpTransferCoding;
-import swim.net.AbstractNetListener;
 import swim.net.TransportDriver;
 import swim.util.Assume;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpClientTests {
 
@@ -139,8 +131,8 @@ public class HttpClientTests {
 
       @Override
       public void didOpen() {
-        this.enqueueRequest(new TestRequester());
-        //this.enqueueRequest(new TestRequester());
+        this.enqueueRequester(new TestRequester());
+        //this.enqueueRequester(new TestRequester());
       }
 
       //@Override
@@ -170,7 +162,7 @@ public class HttpClientTests {
 
       @Override
       public void didWriteRequest(HttpRequest<?> request, HttpRequester requester) {
-        if (this.requestQueue().isEmpty()) {
+        if (!this.isRequesting()) {
           this.doneWriting();
         }
       }
