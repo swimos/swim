@@ -492,7 +492,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
         if (status == oldStatus) {
           status = newStatus;
-        final HttpRequest<?> request = ((Encode<HttpRequest<?>>) ENCODE_MESSAGE.getOpaque(this)).getNonNull();
+          final HttpRequest<?> request = ((Encode<HttpRequest<?>>) ENCODE_MESSAGE.getOpaque(this)).getNonNull();
           final HttpResponse<?> response = decodeMessage.getNonNull();
 
           this.didReadResponseMessage(request, response);
@@ -545,7 +545,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
         if (status == oldStatus) {
           status = newStatus;
-        final HttpRequest<?> request = ((Encode<HttpRequest<?>>) ENCODE_MESSAGE.getOpaque(this)).getNonNull();
+          final HttpRequest<?> request = ((Encode<HttpRequest<?>>) ENCODE_MESSAGE.getOpaque(this)).getNonNull();
           final Decode<HttpResponse<?>> decodeMessage = (Decode<HttpResponse<?>>) DECODE_MESSAGE.getOpaque(this);
           final HttpPayload<?> payload = decodePayload.getNonNull();
           final HttpResponse<?> response = decodeMessage.getNonNull().withPayload(payload);

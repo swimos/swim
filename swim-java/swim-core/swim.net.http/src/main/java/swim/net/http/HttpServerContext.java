@@ -16,7 +16,6 @@ package swim.net.http;
 
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.collections.FingerTrieList;
 import swim.net.ConnectionContext;
 import swim.net.NetSocket;
 
@@ -37,9 +36,7 @@ public interface HttpServerContext extends ConnectionContext {
    */
   boolean isOpening();
 
-  FingerTrieList<HttpResponderContext> responseQueue();
-
-  void enqueueRequest(HttpResponder responder);
+  boolean enqueueRequest(HttpResponder responder);
 
   /**
    * Rebinds the network connection to use a new {@code socket} handler.

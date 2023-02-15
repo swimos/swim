@@ -39,25 +39,25 @@ public class LogService implements LogHandler {
 
   final LogThread thread;
 
-  public LogService(LogHandler handler, int queueSize) {
-    if (queueSize <= 0) {
-      throw new IllegalArgumentException(Integer.toString(queueSize));
+  public LogService(LogHandler handler, int queueLength) {
+    if (queueLength < 2) {
+      throw new IllegalArgumentException("Invalid log event queue length: " + Integer.toString(queueLength));
     }
 
-    // Round the queue size up to the next power of two.
-    queueSize = queueSize - 1;
-    queueSize |= queueSize >> 1;
-    queueSize |= queueSize >> 2;
-    queueSize |= queueSize >> 4;
-    queueSize |= queueSize >> 8;
-    queueSize |= queueSize >> 16;
-    queueSize = queueSize + 1;
+    // Round the queue length up to the next power of two.
+    queueLength = queueLength - 1;
+    queueLength |= queueLength >> 1;
+    queueLength |= queueLength >> 2;
+    queueLength |= queueLength >> 4;
+    queueLength |= queueLength >> 8;
+    queueLength |= queueLength >> 16;
+    queueLength = queueLength + 1;
 
     // Initialize the underlying log handler.
     this.handler = handler;
 
     // Initialize the log event queue.
-    this.queue = new LogEvent[queueSize];
+    this.queue = new LogEvent[queueLength];
     this.readIndex = 0;
     this.writeIndex = 0;
     this.dropCount = 0;
@@ -222,64 +222,62 @@ public class LogService implements LogHandler {
 
   protected final boolean enqueue(LogEvent event) {
     this.start();
-
-    final LogEvent[] queue = this.queue;
+    // Try to enqueue the event into the MPSC log event queue.
     int writeIndex = (int) WRITE_INDEX.getOpaque(this);
     do {
       final int oldWriteIndex = writeIndex;
-      final int newWriteIndex = (oldWriteIndex + 1) % queue.length;
+      final int newWriteIndex = (oldWriteIndex + 1) % this.queue.length;
       final int readIndex = (int) READ_INDEX.getAcquire(this);
       if (newWriteIndex == readIndex) {
+        // The event queue appears to be full; count and drop the event.
         DROP_COUNT.getAndAddRelease(this, 1);
         return false;
       }
       writeIndex = (int) WRITE_INDEX.compareAndExchangeAcquire(this, oldWriteIndex, newWriteIndex);
       if (writeIndex == oldWriteIndex) {
-        break;
+        // Successfully acquired a slot in the event queue;
+        // release the event into the queue.
+        QUEUE.setRelease(this.queue, oldWriteIndex, event);
+        // Notify the log thread of the new event.
+        synchronized (this.thread) {
+          this.thread.notifyAll();
+        }
+        return true;
       }
     } while (true);
-
-    QUEUE.setRelease(queue, writeIndex, event);
-
-    final LogThread thread = this.thread;
-    synchronized (thread) {
-      thread.notifyAll();
-    }
-
-    return true;
   }
 
   final @Nullable LogEvent dequeue() {
-    final LogEvent[] queue = this.queue;
+    // Try to dequeue an event from the MPSC log event queue.
+    // Only the log thread is permitted to dequeue events.
     int readIndex = (int) READ_INDEX.getOpaque(this);
     final int writeIndex = (int) WRITE_INDEX.getAcquire(this);
     if (readIndex == writeIndex) {
+      // The event queue is empty.
       return null;
     }
 
-    LogEvent event;
     do {
-      event = (LogEvent) QUEUE.getAndSetAcquire(queue, readIndex, null);
+      // Try to atomically acquire and clear the event at the head of the queue.
+      final LogEvent event = (LogEvent) QUEUE.getAndSetAcquire(this.queue, readIndex, null);
       if (event != null) {
-        break;
+        // Increment the read index to free up the dequeued event's old slot.
+        READ_INDEX.setRelease(this, (readIndex + 1) % this.queue.length);
+        return event;
       } else {
+        // The next event is being concurrently enqueue; spin and try again.
         Thread.onSpinWait();
       }
     } while (true);
-
-    READ_INDEX.setRelease(this, (readIndex + 1) % queue.length);
-
-    return event;
   }
 
   protected void await() throws InterruptedException {
-    final LogThread thread = this.thread;
     // Prepare to wait for another event.
-    synchronized (thread) {
+    synchronized (this.thread) {
       // Ensure the service is still running before waiting.
       final int status = (int) STATUS.getOpaque(this);
       if ((status & STATE_MASK) == STARTED_STATE) {
-        thread.wait(1000L);
+        this.thread.wait(1000L);
       }
     }
   }
@@ -293,9 +291,8 @@ public class LogService implements LogHandler {
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
       if (status == oldStatus) {
         if (oldStatus != newStatus) {
-          final LogThread thread = this.thread;
-          synchronized (thread) {
-            thread.notifyAll();
+          synchronized (this.thread) {
+            this.thread.notifyAll();
           }
         }
         break;
@@ -356,7 +353,7 @@ public class LogService implements LogHandler {
 
   /**
    * {@code VarHandle} for atomically accessing elements of a
-   * {@link LogEvent} queue.
+   * {@link LogEvent} array.
    */
   static final VarHandle QUEUE;
 

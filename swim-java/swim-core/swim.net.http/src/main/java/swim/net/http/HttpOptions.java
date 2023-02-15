@@ -28,14 +28,53 @@ import swim.util.ToSource;
 @Since("5.0")
 public class HttpOptions implements ToSource {
 
+  protected final int clientPipelineLength;
+  protected final int serverPipelineLength;
   protected final int maxMessageSize;
   protected final int readBufferSize;
   protected final int writeBufferSize;
 
-  public HttpOptions(int maxMessageSize, int readBufferSize, int writeBufferSize) {
+  public HttpOptions(int clientPipelineLength, int serverPipelineLength,
+                     int maxMessageSize, int readBufferSize, int writeBufferSize) {
+    this.clientPipelineLength = clientPipelineLength;
+    this.serverPipelineLength = serverPipelineLength;
     this.maxMessageSize = maxMessageSize;
     this.readBufferSize = readBufferSize;
     this.writeBufferSize = writeBufferSize;
+  }
+
+  /**
+   * Returns the maximum number of requests that can be enqueued
+   * in an HTTP client pipeline.
+   */
+  public final int clientPipelineLength() {
+    return this.clientPipelineLength;
+  }
+
+  /**
+   * Returns a copy of these options configured with the given maximum
+   * {@code clientPipelineLength}.
+   */
+  public HttpOptions clientPipelineLength(int clientPipelineLength) {
+    return this.copy(clientPipelineLength, this.serverPipelineLength,
+                     this.maxMessageSize, this.readBufferSize, this.writeBufferSize);
+  }
+
+  /**
+   * Returns the maximum number of requests that can be enqueued
+   * in an HTTP server pipeline.
+   */
+  public final int serverPipelineLength() {
+    return this.serverPipelineLength;
+  }
+
+  /**
+   * Returns a copy of these options configured with the given maximum
+   * {@code serverPipelineLength}.
+   */
+  public HttpOptions serverPipelineLength(int serverPipelineLength) {
+    return this.copy(this.clientPipelineLength, serverPipelineLength,
+                     this.maxMessageSize, this.readBufferSize, this.writeBufferSize);
   }
 
   /**
@@ -50,7 +89,8 @@ public class HttpOptions implements ToSource {
    * {@code maxMessageSize} limit on HTTP message + payload sizes.
    */
   public HttpOptions maxMessageSize(int maxMessageSize) {
-    return this.copy(maxMessageSize, this.readBufferSize, this.writeBufferSize);
+    return this.copy(this.clientPipelineLength, this.serverPipelineLength,
+                     maxMessageSize, this.readBufferSize, this.writeBufferSize);
   }
 
   public final int readBufferSize() {
@@ -58,7 +98,8 @@ public class HttpOptions implements ToSource {
   }
 
   public HttpOptions readBufferSize(int readBufferSize) {
-    return this.copy(this.maxMessageSize, readBufferSize, this.writeBufferSize);
+    return this.copy(this.clientPipelineLength, this.serverPipelineLength,
+                     this.maxMessageSize, readBufferSize, this.writeBufferSize);
   }
 
   public final int writeBufferSize() {
@@ -66,7 +107,8 @@ public class HttpOptions implements ToSource {
   }
 
   public HttpOptions writeBufferSize(int writeBufferSize) {
-    return this.copy(this.maxMessageSize, this.readBufferSize, writeBufferSize);
+    return this.copy(this.clientPipelineLength, this.serverPipelineLength,
+                     this.maxMessageSize, this.readBufferSize, writeBufferSize);
   }
 
   /**
@@ -74,8 +116,10 @@ public class HttpOptions implements ToSource {
    * Subclasses may override this method to ensure the proper class
    * is instantiated when updating options.
    */
-  protected HttpOptions copy(int maxMessageSize, int readBufferSize, int writeBufferSize) {
-    return new HttpOptions(maxMessageSize, readBufferSize, writeBufferSize);
+  protected HttpOptions copy(int clientPipelineLength, int serverPipelineLength,
+                             int maxMessageSize, int readBufferSize, int writeBufferSize) {
+    return new HttpOptions(clientPipelineLength, serverPipelineLength,
+                           maxMessageSize, readBufferSize, writeBufferSize);
   }
 
   /**
@@ -93,6 +137,8 @@ public class HttpOptions implements ToSource {
     } else if (other instanceof HttpOptions) {
       final HttpOptions that = (HttpOptions) other;
       return that.canEqual(this)
+          && this.clientPipelineLength == that.clientPipelineLength
+          && this.serverPipelineLength == that.serverPipelineLength
           && this.maxMessageSize == that.maxMessageSize
           && this.readBufferSize == that.readBufferSize
           && this.writeBufferSize == that.writeBufferSize;
@@ -104,7 +150,8 @@ public class HttpOptions implements ToSource {
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        hashSeed, this.clientPipelineLength), this.serverPipelineLength),
         this.maxMessageSize), this.readBufferSize), this.writeBufferSize));
   }
 
@@ -112,6 +159,8 @@ public class HttpOptions implements ToSource {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("HttpOptions", "standard").endInvoke()
+            .beginInvoke("clientPipelineLength").appendArgument(this.clientPipelineLength).endInvoke()
+            .beginInvoke("serverPipelineLength").appendArgument(this.serverPipelineLength).endInvoke()
             .beginInvoke("maxMessageSize").appendArgument(this.maxMessageSize).endInvoke()
             .beginInvoke("readBufferSize").appendArgument(this.readBufferSize).endInvoke()
             .beginInvoke("writeBufferSize").appendArgument(this.writeBufferSize).endInvoke();
@@ -129,6 +178,20 @@ public class HttpOptions implements ToSource {
    */
   public static HttpOptions standard() {
     if (HttpOptions.standard == null) {
+      int clientPipelineLength;
+      try {
+        clientPipelineLength = Integer.parseInt(System.getProperty("swim.net.http.client.pipeline.length"));
+      } catch (NumberFormatException error) {
+        clientPipelineLength = 4;
+      }
+
+      int serverPipelineLength;
+      try {
+        serverPipelineLength = Integer.parseInt(System.getProperty("swim.net.http.server.pipeline.length"));
+      } catch (NumberFormatException error) {
+        serverPipelineLength = 4;
+      }
+
       int maxMessageSize;
       try {
         maxMessageSize = Integer.parseInt(System.getProperty("swim.net.http.max.message.size"));
@@ -150,7 +213,8 @@ public class HttpOptions implements ToSource {
         writeBufferSize = 4 * 1024;
       }
 
-      HttpOptions.standard = new HttpOptions(maxMessageSize, readBufferSize, writeBufferSize);
+      HttpOptions.standard = new HttpOptions(clientPipelineLength, serverPipelineLength,
+                                             maxMessageSize, readBufferSize, writeBufferSize);
     }
     return HttpOptions.standard;
   }

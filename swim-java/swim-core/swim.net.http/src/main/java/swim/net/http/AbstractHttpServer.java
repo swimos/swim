@@ -19,7 +19,6 @@ import javax.net.ssl.SSLSession;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.collections.FingerTrieList;
 import swim.net.NetSocket;
 
 @Public
@@ -91,15 +90,6 @@ public abstract class AbstractHttpServer implements HttpServer {
     final HttpServerContext context = this.context;
     if (context != null) {
       return context.sslSession();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
-  }
-
-  protected FingerTrieList<HttpResponderContext> responseQueue() {
-    final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.responseQueue();
     } else {
       throw new IllegalStateException("Unbound socket");
     }

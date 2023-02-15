@@ -50,7 +50,6 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   protected BinaryOutputBuffer outputBuffer;
   FingerTrieList<HttpClientRequester> requesters;
   FingerTrieList<HttpClientRequester> responders;
-  int status;
   Log log;
 
   public HttpClientSocket(HttpClient client, HttpOptions httpOptions) {
@@ -70,9 +69,6 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     // Initialize pipeline queues.
     this.requesters = FingerTrieList.empty();
     this.responders = FingerTrieList.empty();
-
-    // Initialize socket status.
-    this.status = 0;
 
     // Initialize the socket log.
     this.log = this.initLog();
@@ -589,18 +585,12 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
    */
   static final VarHandle RESPONDERS;
 
-  /**
-   * {@code VarHandle} for atomically accessing the {@link #status} field.
-   */
-  static final VarHandle STATUS;
-
   static {
     // Initialize var handles.
     final MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
       REQUESTERS = lookup.findVarHandle(HttpClientSocket.class, "requesters", FingerTrieList.class);
       RESPONDERS = lookup.findVarHandle(HttpClientSocket.class, "responders", FingerTrieList.class);
-      STATUS = lookup.findVarHandle(HttpClientSocket.class, "status", Integer.TYPE);
     } catch (ReflectiveOperationException cause) {
       throw new ExceptionInInitializerError(cause);
     }
