@@ -193,11 +193,12 @@ public class TlsSocket extends TcpSocket {
             if (count < 0) {
               this.sslEngine.closeInbound();
             }
+          } catch (ClosedChannelException cause) {
+            // Initiate socket close.
+            this.close();
           } catch (IOException cause) {
-            if (!(cause instanceof ClosedChannelException)) {
-              // Report the exception.
-              this.log.warningStatus("opening read failed", this, cause);
-            }
+            // Report the exception.
+            this.log.warningStatus("opening read failed", this, cause);
             // Initiate socket close.
             this.close();
           }
@@ -266,11 +267,12 @@ public class TlsSocket extends TcpSocket {
               default:
                 throw new AssertionError(); // unreachable
             }
+          } catch (ClosedChannelException cause) {
+            // Initiate socket close.
+            this.close();
           } catch (IOException cause) {
-            if (!(cause instanceof ClosedChannelException)) {
-              // Report the exception.
-              this.log.warningStatus("opening write failed", this, cause);
-            }
+            // Report the exception.
+            this.log.warningStatus("opening write failed", this, cause);
             // Initiate socket close.
             this.close();
           }
@@ -338,11 +340,12 @@ public class TlsSocket extends TcpSocket {
             if (count < 0) {
               this.sslEngine.closeInbound();
             }
+          } catch (ClosedChannelException cause) {
+            // Initiate socket close.
+            this.close();
           } catch (IOException cause) {
-            if (!(cause instanceof ClosedChannelException)) {
-              // Report the exception.
-              this.log.warningStatus("read failed", this, cause);
-            }
+            // Report the exception.
+            this.log.warningStatus("read failed", this, cause);
             // Initiate socket close.
             this.close();
           }
@@ -431,11 +434,12 @@ public class TlsSocket extends TcpSocket {
               default:
                 throw new AssertionError(); // unreachable
             }
+          } catch (ClosedChannelException cause) {
+            // Initiate socket close.
+            this.close();
           } catch (IOException cause) {
-            if (!(cause instanceof ClosedChannelException)) {
-              // Report the exception.
-              this.log.warningStatus("write failed", this, cause);
-            }
+            // Report the exception.
+            this.log.warningStatus("write failed", this, cause);
             // Initiate socket close.
             this.close();
           }
@@ -461,7 +465,11 @@ public class TlsSocket extends TcpSocket {
         break;
       case CLOSED:
         if (this.sendBuffer.position() == 0) {
-          this.channel.shutdownOutput();
+          try {
+            this.channel.shutdownOutput();
+          } catch (ClosedChannelException cause) {
+            // The channel was already fully closed.
+          }
         } else {
           this.requestOpeningWrite();
         }
@@ -567,11 +575,12 @@ public class TlsSocket extends TcpSocket {
             if (count < 0) {
               this.sslEngine.closeInbound();
             }
+          } catch (ClosedChannelException cause) {
+            // Initiate socket close.
+            this.close();
           } catch (IOException cause) {
-            if (!(cause instanceof ClosedChannelException)) {
-              // Report the exception.
-              this.log.warningStatus("closing read failed", this, cause);
-            }
+            // Report the exception.
+            this.log.warningStatus("closing read failed", this, cause);
             // Initiate socket close.
             this.close();
           }
@@ -604,24 +613,12 @@ public class TlsSocket extends TcpSocket {
             this.sendBuffer.compact();
           }
           if (this.sendBuffer.position() == 0) {
-            try {
-              this.channel.shutdownOutput();
-            } catch (ClosedChannelException cause) {
-              // concurrently closed
-            }
+            this.channel.shutdownOutput();
             if (this.isDoneReading()) {
               if (this.sslEngine.isInboundDone()) {
-                try {
-                  this.channel.shutdownInput();
-                } catch (ClosedChannelException cause) {
-                  // concurrently closed
-                }
+                this.channel.shutdownInput();
               } else {
-                try {
-                  this.requestClosingRead();
-                } catch (CancelledKeyException cause) {
-                  // concurrently closed
-                }
+                this.requestClosingRead();
               }
             }
           } else {
@@ -664,11 +661,12 @@ public class TlsSocket extends TcpSocket {
               default:
                 throw new AssertionError(); // unreachable
             }
+          } catch (ClosedChannelException cause) {
+            // Initiate socket close.
+            this.close();
           } catch (IOException cause) {
-            if (!(cause instanceof ClosedChannelException)) {
-              // Report the exception.
-              this.log.warningStatus("closing write failed", this, cause);
-            }
+            // Report the exception.
+            this.log.warningStatus("closing write failed", this, cause);
             // Initiate socket close.
             this.close();
           }

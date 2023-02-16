@@ -27,7 +27,8 @@ public class StringTrieMapTests {
     final StringTrieMap<String> trie = StringTrieMap.empty();
     assertTrue(trie.isEmpty());
     assertEquals(0, trie.size());
-    assertNull(trie.prefix());
+    assertFalse(trie.isDefined());
+    assertEquals("", trie.prefix());
     assertNull(trie.value());
   }
 
@@ -37,12 +38,14 @@ public class StringTrieMapTests {
     trie = trie.updated("", "blank");
     assertFalse(trie.isEmpty());
     assertEquals(1, trie.size());
+    assertTrue(trie.isDefined());
     assertEquals("", trie.prefix());
     assertEquals("blank", trie.value());
     trie = trie.removed("");
     assertTrue(trie.isEmpty());
     assertEquals(0, trie.size());
-    assertNull(trie.prefix());
+    assertFalse(trie.isDefined());
+    assertEquals("", trie.prefix());
     assertNull(trie.value());
   }
 

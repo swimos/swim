@@ -44,12 +44,12 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
   final int size;
   final int flags;
   final StringTrieMap<V>[] branches;
-  final @Nullable String prefix;
+  final String prefix;
   final @Nullable V value;
 
   StringTrieMap(long branchMap0, long branchMap1, long branchMap2, long branchMap3,
                 int size, int flags, StringTrieMap<V>[] branches,
-                @Nullable String prefix, @Nullable V value) {
+                String prefix, @Nullable V value) {
     this.branchMap0 = branchMap0;
     this.branchMap1 = branchMap1;
     this.branchMap2 = branchMap2;
@@ -62,10 +62,10 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
   }
 
   public boolean isDefined() {
-    return this.prefix != null;
+    return (this.flags & DEFINED_FLAG) != 0;
   }
 
-  public @Nullable String prefix() {
+  public String prefix() {
     return this.prefix;
   }
 
@@ -74,7 +74,7 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
   }
 
   public int normalized(int c) {
-    if ((this.flags & CASE_INSENSITIVE) != 0) {
+    if ((this.flags & CASE_INSENSITIVE_FLAG) != 0) {
       c = Character.toLowerCase(c);
     }
     return c;
@@ -150,24 +150,23 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
   }
 
   private StringTrieMap<V> updated(String prefix, int index, @Nullable V value) {
-    if (index >= prefix.length()) {
-      if (prefix.equals(this.prefix) && Objects.equals(value, this.value)) {
-        return this;
-      } else {
-        final int newSize = this.size + (this.isDefined() ? 0 : 1);
-        return new StringTrieMap<V>(this.branchMap0, this.branchMap1,
-                                    this.branchMap2, this.branchMap3,
-                                    newSize, this.flags, this.branches,
-                                    prefix, value);
-      }
-    } else {
+    if (index < prefix.length()) {
       final int c = this.normalized(prefix.codePointAt(index));
       StringTrieMap<V> oldBranch = this.getBranch(c);
       if (oldBranch == null) {
-        oldBranch = StringTrieMap.empty(this.flags);
+        oldBranch = StringTrieMap.emptyBranch(this.flags & INHERITED_MASK,
+                                              prefix.substring(0, index + 1));
       }
       final StringTrieMap<V> newBranch = oldBranch.updated(prefix, prefix.offsetByCodePoints(index, 1), value);
       return this.updatedBranch(c, newBranch);
+    } else if (!prefix.equals(this.prefix) || !Objects.equals(value, this.value)) {
+      final int newSize = this.isDefined() ? this.size : this.size + 1;
+      return new StringTrieMap<V>(this.branchMap0, this.branchMap1,
+                                  this.branchMap2, this.branchMap3,
+                                  newSize, this.flags | DEFINED_FLAG,
+                                  this.branches, prefix, value);
+    } else {
+      return this;
     }
   }
 
@@ -180,17 +179,7 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
   }
 
   private StringTrieMap<V> removed(String prefix, int index) {
-    if (index >= prefix.length()) {
-      if (!this.isDefined()) {
-        return this;
-      } else {
-        final int newSize = this.size - 1;
-        return new StringTrieMap<V>(this.branchMap0, this.branchMap1,
-                                    this.branchMap2, this.branchMap3,
-                                    newSize, this.flags, this.branches,
-                                    null, null);
-      }
-    } else {
+    if (index < prefix.length()) {
       final int c = this.normalized(prefix.codePointAt(index));
       final StringTrieMap<V> oldBranch = this.getBranch(c);
       if (oldBranch != null) {
@@ -203,6 +192,14 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
       } else {
         return this;
       }
+    } else if (this.isDefined()) {
+      final int newSize = this.size - 1;
+      return new StringTrieMap<V>(this.branchMap0, this.branchMap1,
+                                  this.branchMap2, this.branchMap3,
+                                  newSize, this.flags & ~DEFINED_FLAG,
+                                  this.branches, this.prefix, null);
+    } else {
+      return this;
     }
   }
 
@@ -450,7 +447,7 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
       final byte b1 = (byte) (0x80 | (c & 0x3F));
       StringTrieMap<V> branch0 = this.getBranch(b0);
       if (branch0 == null) {
-        branch0 = StringTrieMap.empty(this.flags);
+        branch0 = StringTrieMap.emptyBranch(this.flags & INHERITED_MASK, this.prefix);
       }
       branch0 = branch0.updatedBranch(b1, newBranch);
       return this.updatedBranch(b0, branch0);
@@ -461,11 +458,11 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
       final byte b2 = (byte) (0x80 | (c & 0x3F));
       StringTrieMap<V> branch0 = this.getBranch(b0);
       if (branch0 == null) {
-        branch0 = StringTrieMap.empty(this.flags);
+        branch0 = StringTrieMap.emptyBranch(this.flags & INHERITED_MASK, this.prefix);
       }
       StringTrieMap<V> branch1 = branch0.getBranch(b1);
       if (branch1 == null) {
-        branch1 = StringTrieMap.empty(this.flags);
+        branch1 = StringTrieMap.emptyBranch(this.flags & INHERITED_MASK, this.prefix);
       }
       branch1 = branch1.updatedBranch(b2, newBranch);
       branch0 = branch0.updatedBranch(b1, branch1);
@@ -477,15 +474,15 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
       final byte b3 = (byte) (0x80 | (c & 0x3F));
       StringTrieMap<V> branch0 = this.getBranch(b0);
       if (branch0 == null) {
-        branch0 = StringTrieMap.empty(this.flags);
+        branch0 = StringTrieMap.emptyBranch(this.flags & INHERITED_MASK, this.prefix);
       }
       StringTrieMap<V> branch1 = branch0.getBranch(b1);
       if (branch1 == null) {
-        branch1 = StringTrieMap.empty(this.flags);
+        branch1 = StringTrieMap.emptyBranch(this.flags & INHERITED_MASK, this.prefix);
       }
       StringTrieMap<V> branch2 = branch1.getBranch(b2);
       if (branch2 == null) {
-        branch2 = StringTrieMap.empty(this.flags);
+        branch2 = StringTrieMap.emptyBranch(this.flags & INHERITED_MASK, this.prefix);
       }
       branch2 = branch2.updatedBranch(b3, newBranch);
       branch1 = branch1.updatedBranch(b2, branch2);
@@ -828,18 +825,22 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
     return this.toMarkup();
   }
 
-  static final int CASE_INSENSITIVE = 1 << 0;
+  static final int DEFINED_FLAG = 1 << 0;
+
+  static final int CASE_INSENSITIVE_FLAG = 1 << 1;
+
+  static final int INHERITED_MASK = CASE_INSENSITIVE_FLAG;
 
   static final StringTrieMap<Object>[] EMPTY_BRANCHES =
       Assume.conforms(new StringTrieMap<?>[0]);
 
   static final StringTrieMap<Object> EMPTY_CASE_SENSITIVE =
       new StringTrieMap<Object>(0L, 0L, 0L, 0L, 0, 0,
-                                EMPTY_BRANCHES, null, null);
+                                EMPTY_BRANCHES, "", null);
 
   static final StringTrieMap<Object> EMPTY_CASE_INSENSITIVE =
-      new StringTrieMap<Object>(0L, 0L, 0L, 0L, 0, CASE_INSENSITIVE,
-                                EMPTY_BRANCHES, null, null);
+      new StringTrieMap<Object>(0L, 0L, 0L, 0L, 0, CASE_INSENSITIVE_FLAG,
+                                EMPTY_BRANCHES, "", null);
 
   public static <V> StringTrieMap<V> empty() {
     return Assume.conforms(EMPTY_CASE_SENSITIVE);
@@ -853,15 +854,9 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
     return Assume.conforms(EMPTY_CASE_INSENSITIVE);
   }
 
-  static <V> StringTrieMap<V> empty(int flags) {
-    if (flags == 0) {
-      return Assume.conforms(EMPTY_CASE_SENSITIVE);
-    } else if (flags == CASE_INSENSITIVE) {
-      return Assume.conforms(EMPTY_CASE_INSENSITIVE);
-    } else {
-      return new StringTrieMap<V>(0L, 0L, 0L, 0L, 0, flags,
-                                  Assume.conforms(EMPTY_BRANCHES), null, null);
-    }
+  static <V> StringTrieMap<V> emptyBranch(int flags, String prefix) {
+    return new StringTrieMap<V>(0L, 0L, 0L, 0L, 0, flags,
+                                Assume.conforms(EMPTY_BRANCHES), prefix, null);
   }
 
 }
@@ -994,7 +989,7 @@ final class StringTrieMapKeyIterator<V> extends StringTrieMapIterator<V> impleme
   }
 
   @Override
-  public @Nullable String next() {
+  public String next() {
     return this.nextNode().prefix;
   }
 

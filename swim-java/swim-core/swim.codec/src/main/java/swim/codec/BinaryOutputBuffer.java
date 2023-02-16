@@ -15,7 +15,7 @@
 package swim.codec;
 
 import java.io.IOException;
-import java.nio.Buffer;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import swim.annotations.Public;
@@ -75,7 +75,7 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
 
   @Override
   public BinaryOutputBuffer index(int index) {
-    ((Buffer) this.buffer).position(index);
+    this.buffer.position(index);
     return this;
   }
 
@@ -133,11 +133,11 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
 
   @Override
   public BinaryOutputBuffer write(int token) {
-    final int position = this.buffer.position();
-    if (position >= this.buffer.limit()) {
+    try {
+      this.buffer.put((byte) token);
+    } catch (BufferOverflowException e) {
       throw new IllegalStateException("Buffer full");
     }
-    this.buffer.put((byte) token);
     return this;
   }
 
@@ -170,11 +170,11 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
       System.arraycopy(array, fromIndex, array, toIndex, length);
     } else {
       final ByteBuffer dup = this.buffer.duplicate();
-      ((Buffer) dup).position(fromIndex).limit(fromIndex + length);
+      dup.position(fromIndex).limit(fromIndex + length);
       final int position = this.buffer.position();
-      ((Buffer) this.buffer).position(toIndex);
+      this.buffer.position(toIndex);
       this.buffer.put(dup);
-      ((Buffer) this.buffer).position(position);
+      this.buffer.position(position);
     }
     return this;
   }
@@ -185,14 +185,14 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
     if (position < 0 || position > this.buffer.limit()) {
       throw new IllegalStateException("Invalid step to " + position);
     }
-    ((Buffer) this.buffer).position(position);
+    this.buffer.position(position);
     return this;
   }
 
   @Override
   public ByteBuffer get() {
     final ByteBuffer dup = this.buffer.duplicate();
-    ((Buffer) dup).flip();
+    dup.flip();
     return dup;
   }
 

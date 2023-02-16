@@ -23,6 +23,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SocketChannel;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSession;
@@ -346,7 +348,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
           this.willConnect();
         } catch (IOException cause) {
           // Initiate transport close.
-          status = this.requestClose(status);
+          status = this.readerRequestClose(status);
           // Report the exception.
           this.log.warningStatus("willConnect callback failed", this.socket, cause);
           // Abort and close the socket.
@@ -354,7 +356,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
             // Initiate transport close.
-            status = this.requestClose(status);
+            status = this.readerRequestClose(status);
             // Report non-fatal exception.
             this.log.errorStatus("willConnect callback failed", this.socket, cause);
             // Abort and close the socket.
@@ -377,7 +379,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       connected = this.channel.connect(this.remoteAddress);
     } catch (IOException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("failed to connect socket", this.socket, cause);
       // Abort and close the socket.
@@ -385,7 +387,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("failed to connect socket", this.socket, cause);
         // Abort and close the socket.
@@ -417,13 +419,14 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // The connection operation is still in progress; ask the I/O dispatcher
       // to inform us when the transport is ready to finish connecting.
       this.getTransportContext().requestConnect();
-      status = (int) STATUS.getAcquire(this);
     }
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
+    } else {
+      status = (int) STATUS.getAcquire(this);
     }
 
     return status;
@@ -501,14 +504,14 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       connected = this.channel.finishConnect();
     } catch (ConnectException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report connect exception.
       this.log.infoStatus("failed to establish connection", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("failed to establish connection", this.socket, cause);
       // Abort and close the socket.
@@ -516,7 +519,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("failed to establish connection", this.socket, cause);
         // Abort and close the socket.
@@ -543,7 +546,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
             this.willOpen();
           } catch (IOException cause) {
             // Initiate transport close.
-            status = this.requestClose(status);
+            status = this.readerRequestClose(status);
             // Report the exception.
             this.log.warningStatus("willOpen callback failed", this.socket, cause);
             // Abort and close the socket.
@@ -551,7 +554,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
               // Initiate transport close.
-              status = this.requestClose(status);
+              status = this.readerRequestClose(status);
               // Report non-fatal exception.
               this.log.errorStatus("willOpen callback failed", this.socket, cause);
               // Abort and close the socket.
@@ -561,7 +564,6 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
               throw cause;
             }
           }
-          status = (int) STATUS.getAcquire(this);
           break;
         } else {
           // CAS failed; try again.
@@ -572,13 +574,14 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // The connection operation is still in progress; ask the I/O dispatcher
       // to inform us when the transport is ready to finish connecting.
       this.getTransportContext().requestConnect();
-      status = (int) STATUS.getAcquire(this);
     }
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
+    } else {
+      status = (int) STATUS.getAcquire(this);
     }
 
     return status;
@@ -615,9 +618,14 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       // Invoke opening I/O callback.
       this.doOpeningRead();
+    } catch (CancelledKeyException | ClosedChannelException | ClosedSelectorException cause) {
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doOpeningRead failed", this.socket, cause);
       // Abort and close the socket.
@@ -625,7 +633,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("doOpeningRead failed", this.socket, cause);
         // Abort and close the socket.
@@ -635,12 +643,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
+    } else {
+      status = (int) STATUS.getAcquire(this);
     }
 
     return status;
@@ -671,32 +680,37 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       // Invoke opening I/O callback.
       this.doOpeningWrite();
+    } catch (CancelledKeyException | ClosedChannelException | ClosedSelectorException cause) {
+      // Initiate transport close.
+      status = this.writerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      this.close();
+      status = this.writerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doOpeningWrite failed", this.socket, cause);
       // Abort and close the socket.
-      return (int) STATUS.getAcquire(this);
+      return status;
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        this.close();
+        status = this.writerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("doOpeningWrite failed", this.socket, cause);
         // Abort and close the socket.
-        return (int) STATUS.getAcquire(this);
+        return status;
       } else {
         // Rethrow fatal exception.
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      this.close();
+      status = this.writerRequestClose(status);
+    } else {
       status = (int) STATUS.getAcquire(this);
     }
 
@@ -751,7 +765,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
           this.didOpen();
         } catch (IOException cause) {
           // Initiate transport close.
-          status = this.requestClose(status);
+          status = this.readerRequestClose(status);
           // Report the exception.
           this.log.warningStatus("didOpen callback failed", this.socket, cause);
           // Abort and close the socket.
@@ -759,7 +773,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
             // Initiate transport close.
-            status = this.requestClose(status);
+            status = this.readerRequestClose(status);
             // Report none-fatal exception.
             this.log.errorStatus("didOpen callback failed", this.socket, cause);
             // Abort and close the socket.
@@ -777,7 +791,6 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         if ((oldStatus & WRITE_REQUEST) != 0) {
           this.getTransportContext().requestWrite();
         }
-        status = (int) STATUS.getAcquire(this);
         // Done opening the socket.
         break;
       } else {
@@ -789,7 +802,9 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
+    } else {
+      status = (int) STATUS.getAcquire(this);
     }
 
     return status;
@@ -850,7 +865,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final NetSocket newSocket = this.becoming;
     if (newSocket == null) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the failure.
       this.log.errorStatus("tried to become null socket", oldSocket);
       // Abort and close the socket.
@@ -866,7 +881,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report none-fatal exception.
         this.log.errorStatus("willBecome callback failed", oldSocket, cause);
         // Abort and close the socket.
@@ -887,7 +902,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       newSocket.didOpen();
     } catch (IOException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("didOpen callback failed", newSocket, cause);
       // Abort and close the socket.
@@ -895,7 +910,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report none-fatal exception.
         this.log.errorStatus("didOpen callback failed", newSocket, cause);
         // Abort and close the socket.
@@ -912,7 +927,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report the exception.
         this.log.errorStatus("didBecome callback failed", oldSocket, cause);
         // Abort and close the socket.
@@ -926,7 +941,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
     }
 
     return status;
@@ -1103,9 +1118,14 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       // Invoke I/O callback.
       this.doRead();
+    } catch (CancelledKeyException | ClosedChannelException | ClosedSelectorException cause) {
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doRead failed", this.socket, cause);
       // Abort and close the socket.
@@ -1113,7 +1133,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("doRead failed", this.socket, cause);
         // Abort and close the socket.
@@ -1123,12 +1143,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
+    } else {
+      status = (int) STATUS.getAcquire(this);
     }
 
     return status;
@@ -1301,32 +1322,37 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       // Invoke I/O callback.
       this.doWrite();
+    } catch (CancelledKeyException | ClosedChannelException | ClosedSelectorException cause) {
+      // Initiate transport close.
+      status = this.writerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      this.close();
+      status = this.writerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doWrite failed", this.socket, cause);
       // Abort and close the socket.
-      return (int) STATUS.getAcquire(this);
+      return status;
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        this.close();
+        status = this.writerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("doWrite failed", this.socket, cause);
         // Abort and close the socket.
-        return (int) STATUS.getAcquire(this);
+        return status;
       } else {
         // Rethrow fatal exception.
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      this.close();
+      status = this.writerRequestClose(status);
+    } else {
       status = (int) STATUS.getAcquire(this);
     }
 
@@ -1395,7 +1421,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       this.doTimeout();
     } catch (IOException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doTimeout failed", this.socket, cause);
       // Abort and close the socket.
@@ -1403,7 +1429,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("doTimeout failed", this.socket, cause);
         // Abort and close the socket.
@@ -1413,12 +1439,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
+    } else {
+      status = (int) STATUS.getAcquire(this);
     }
 
     return status;
@@ -1491,9 +1518,14 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       // Invoke lifecycle callback.
       this.doCloseInbound();
+    } catch (CancelledKeyException | ClosedChannelException | ClosedSelectorException cause) {
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doCloseInbound failed", this.socket, cause);
       // Abort and close the socket.
@@ -1501,7 +1533,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("doCloseInbound failed", this.socket, cause);
         // Abort and close the socket.
@@ -1511,12 +1543,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
+    } else {
+      status = (int) STATUS.getAcquire(this);
     }
 
     return status;
@@ -1525,11 +1558,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   protected void doCloseInbound() throws IOException {
     this.log.debugEntity("close inbound", this.socket);
 
-    try {
-      this.getTransportContext().requestRead();
-    } catch (CancelledKeyException cause) {
-      // already closed
-    }
+    this.getTransportContext().requestRead();
   }
 
   @Override
@@ -1594,32 +1623,37 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       // Invoke lifecycle callback.
       this.doCloseOutbound();
+    } catch (CancelledKeyException | ClosedChannelException | ClosedSelectorException cause) {
+      // Initiate transport close.
+      status = this.writerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      this.close();
+      status = this.writerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doCloseOutbound failed", this.socket, cause);
       // Abort and close the socket.
-      return (int) STATUS.getAcquire(this);
+      return status;
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        this.close();
+        status = this.writerRequestClose(status);
         // Report none-fatal exception.
         this.log.errorStatus("doCloseOutbound failed", this.socket, cause);
         // Abort and close the socket.
-        return (int) STATUS.getAcquire(this);
+        return status;
       } else {
         // Rethrow fatal exception.
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      this.close();
+      status = this.writerRequestClose(status);
+    } else {
       status = (int) STATUS.getAcquire(this);
     }
 
@@ -1655,9 +1689,14 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       // Invoke close I/O callback.
       this.doClosingRead();
+    } catch (CancelledKeyException | ClosedChannelException | ClosedSelectorException cause) {
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doClosingRead failed", this.socket, cause);
       // Abort and close the socket.
@@ -1665,7 +1704,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        status = this.requestClose(status);
+        status = this.readerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("doClosingRead failed", this.socket, cause);
         // Abort and close the socket.
@@ -1675,12 +1714,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      status = this.requestClose(status);
+      status = this.readerRequestClose(status);
+    } else {
+      status = (int) STATUS.getAcquire(this);
     }
 
     return status;
@@ -1723,32 +1763,37 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       // Invoke close I/O callback.
       this.doClosingWrite();
+    } catch (CancelledKeyException | ClosedChannelException | ClosedSelectorException cause) {
+      // Initiate transport close.
+      status = this.writerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     } catch (IOException cause) {
       // Initiate transport close.
-      this.close();
+      status = this.writerRequestClose(status);
       // Report the exception.
       this.log.warningStatus("doClosingWrite failed", this.socket, cause);
       // Abort and close the socket.
-      return (int) STATUS.getAcquire(this);
+      return status;
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
-        this.close();
+        status = this.writerRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("doClosingWrite failed", this.socket, cause);
         // Abort and close the socket.
-        return (int) STATUS.getAcquire(this);
+        return status;
       } else {
         // Rethrow fatal exception.
         throw cause;
       }
     }
-    status = (int) STATUS.getAcquire(this);
 
     // Check if the network channel has closed.
     if (!this.channel.isOpen() || (this.channel.socket().isInputShutdown() && this.channel.socket().isOutputShutdown())) {
       // Initiate transport close.
-      this.close();
+      status = this.writerRequestClose(status);
+    } else {
       status = (int) STATUS.getAcquire(this);
     }
 
@@ -1760,7 +1805,8 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   }
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
-  int requestClose(int status) {
+  int readerRequestClose(int status) {
+    // Request socket close; must only be called from the reader task.
     do {
       if ((status & CLOSE_REQUEST) == 0) {
         // The transport does not have a pending close request.
@@ -1772,6 +1818,35 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
           // The transport has transitioned into the closing state.
           status = newStatus;
           this.log.trace("request close");
+          break;
+        } else {
+          // CAS failed; try again.
+          continue;
+        }
+      } else {
+        // The transport already has a pending close request.
+        break;
+      }
+    } while (true);
+    return status;
+  }
+
+  @SuppressWarnings("checkstyle:RequireThis") // false positive
+  int writerRequestClose(int status) {
+    // Request socket close; must only be called from the writer task.
+    do {
+      if ((status & CLOSE_REQUEST) == 0) {
+        // The transport does not have a pending close request.
+        final int oldStatus = status;
+        final int newStatus = oldStatus | CLOSE_REQUEST;
+        // Try to request socket close; must happen before continuing.
+        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+        if (status == oldStatus) {
+          // The transport has transitioned into the closing state.
+          status = newStatus;
+          this.log.trace("request close");
+          // Schedule the reader task to perform the close.
+          this.reader.schedule();
           break;
         } else {
           // CAS failed; try again.
@@ -1858,7 +1933,6 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Report exception and continue closing.
       this.log.warningStatus("failed to close channel", this.socket, cause);
     }
-    status = (int) STATUS.getAcquire(this);
 
     do {
       final int oldStatus = status;

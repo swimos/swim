@@ -180,6 +180,15 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doWriteInitial(int status) throws IOException {
+    // Enqueue the requester in the responder queue.
+    // Don't initiate the request until enqueued in the responder queue.
+    if (!this.socket.enqueueResponder(this)) {
+      // The responder queue is full; discontinue writing requests until
+      // a slot opens up in the responder queue.
+      this.socket.log.debug("pipeline full");
+      return status;
+    }
+
     do {
       if ((status & WRITE_MASK) >>> WRITE_SHIFT != WRITE_PENDING) {
         throw new AssertionError();
@@ -238,8 +247,8 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
 
           this.didWriteRequestMessage(request);
 
-          // Enqueue the requester in the responder queue.
-          this.socket.enqueueResponder(this);
+          // Request a read to ensure that the response gets processed.
+          this.socket.requestRead();
 
           this.willWriteRequestPayload(request);
 
@@ -296,7 +305,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
           final Encode<HttpRequest<?>> encodeMessage = (Encode<HttpRequest<?>>) ENCODE_MESSAGE.getOpaque(this);
           final HttpPayload<?> payload = encodePayload.getNonNull();
           final HttpRequest<?> request = encodeMessage.getNonNull().withPayload(payload);
-          ENCODE_MESSAGE.setRelease(this, Encode.done(request));
+          ENCODE_MESSAGE.setOpaque(this, Encode.done(request));
 
           this.didWriteRequestPayload(request);
 
@@ -442,6 +451,12 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doReadInitial(int status) throws IOException {
+    // Don't initiate the response until the request message has been written.
+    final Encode<HttpRequest<?>> encodeMessage = (Encode<HttpRequest<?>>) ENCODE_MESSAGE.getOpaque(this);
+    if (encodeMessage == null || !encodeMessage.isDone()) {
+      return status;
+    }
+
     do {
       if ((status & READ_MASK) >>> READ_SHIFT != READ_PENDING) {
         throw new AssertionError();
@@ -554,7 +569,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
           final Decode<HttpResponse<?>> decodeMessage = (Decode<HttpResponse<?>>) DECODE_MESSAGE.getOpaque(this);
           final HttpPayload<?> payload = decodePayload.getNonNull();
           final HttpResponse<?> response = decodeMessage.getNonNull().withPayload(payload);
-          DECODE_MESSAGE.setRelease(this, Decode.done(response));
+          DECODE_MESSAGE.setOpaque(this, Decode.done(response));
 
           this.didReadResponsePayload(request, response);
 

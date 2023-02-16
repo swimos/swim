@@ -27,7 +27,6 @@ import swim.codec.StringOutput;
 import swim.codec.Text;
 import swim.codec.Write;
 import swim.codec.WriteException;
-import swim.collections.StringTrieMap;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -217,86 +216,6 @@ public final class HttpRequest<T> extends HttpMessage<T> {
   public static <T> HttpRequest<T> create(HttpMethod method, String target,
                                           HttpHeader... headers) {
     return new HttpRequest<T>(method, target, HttpVersion.HTTP_1_1,
-                              HttpHeaders.of(headers), HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> get(String target, HttpHeaders headers) {
-    return new HttpRequest<T>(HttpMethod.GET, target, HttpVersion.HTTP_1_1,
-                              headers, HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> get(String target, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.GET, target, HttpVersion.HTTP_1_1,
-                              HttpHeaders.of(headers), HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> head(String target, HttpHeaders headers) {
-    return new HttpRequest<T>(HttpMethod.HEAD, target, HttpVersion.HTTP_1_1,
-                              headers, HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> head(String target, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.HEAD, target, HttpVersion.HTTP_1_1,
-                              HttpHeaders.of(headers), HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> post(String target, HttpHeaders headers) {
-    return new HttpRequest<T>(HttpMethod.POST, target, HttpVersion.HTTP_1_1,
-                              headers, HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> post(String target, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.POST, target, HttpVersion.HTTP_1_1,
-                              HttpHeaders.of(headers), HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> put(String target, HttpHeaders headers) {
-    return new HttpRequest<T>(HttpMethod.PUT, target, HttpVersion.HTTP_1_1,
-                              headers, HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> put(String target, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.PUT, target, HttpVersion.HTTP_1_1,
-                              HttpHeaders.of(headers), HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> delete(String target, HttpHeaders headers) {
-    return new HttpRequest<T>(HttpMethod.DELETE, target, HttpVersion.HTTP_1_1,
-                              headers, HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> delete(String target, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.DELETE, target, HttpVersion.HTTP_1_1,
-                              HttpHeaders.of(headers), HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> connect(String target, HttpHeaders headers) {
-    return new HttpRequest<T>(HttpMethod.CONNECT, target, HttpVersion.HTTP_1_1,
-                              headers, HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> connect(String target, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.CONNECT, target, HttpVersion.HTTP_1_1,
-                              HttpHeaders.of(headers), HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> options(String target, HttpHeaders headers) {
-    return new HttpRequest<T>(HttpMethod.OPTIONS, target, HttpVersion.HTTP_1_1,
-                              headers, HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> options(String target, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.OPTIONS, target, HttpVersion.HTTP_1_1,
-                              HttpHeaders.of(headers), HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> trace(String target, HttpHeaders headers) {
-    return new HttpRequest<T>(HttpMethod.TRACE, target, HttpVersion.HTTP_1_1,
-                              headers, HttpEmpty.payload());
-  }
-
-  public static <T> HttpRequest<T> trace(String target, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.TRACE, target, HttpVersion.HTTP_1_1,
                               HttpHeaders.of(headers), HttpEmpty.payload());
   }
 

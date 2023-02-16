@@ -146,6 +146,8 @@ public class HttpHeaderRegistry implements ToSource {
     return this.toSource();
   }
 
+  static final HttpHeaderRegistry REGISTRY;
+
   /**
    * {@code VarHandle} for atomically accessing the {@link #providers} field.
    */
@@ -165,6 +167,7 @@ public class HttpHeaderRegistry implements ToSource {
     } catch (ReflectiveOperationException cause) {
       throw new ExceptionInInitializerError(cause);
     }
+    REGISTRY = new HttpHeaderRegistry();
   }
 
 }

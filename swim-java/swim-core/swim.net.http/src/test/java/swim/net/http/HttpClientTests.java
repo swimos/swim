@@ -23,6 +23,7 @@ import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
 import swim.http.HttpChunked;
 import swim.http.HttpHeader;
+import swim.http.HttpMethod;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpTransferCoding;
@@ -43,7 +44,7 @@ public class HttpClientTests {
 
       @Override
       public void willWriteRequest() {
-        final HttpRequest<?> request = HttpRequest.get("/", HttpHeader.HOST.of("www.google.com"));
+        final HttpRequest<?> request = HttpRequest.create(HttpMethod.GET, "/", HttpHeader.HOST.of("www.google.com"));
         this.writeRequestMessage(request.write());
         this.writeRequestPayload(request.payload().encode());
       }
@@ -238,7 +239,6 @@ public class HttpClientTests {
       driver.stop();
       scheduler.stop();
     }
-
   }
 
 }

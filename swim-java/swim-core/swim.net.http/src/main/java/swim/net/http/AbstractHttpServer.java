@@ -113,10 +113,10 @@ public abstract class AbstractHttpServer implements HttpServer {
     }
   }
 
-  protected void enqueueRequester(HttpResponder responder) {
+  protected boolean enqueueRequester(HttpResponder responder) {
     final HttpServerContext context = this.context;
     if (context != null) {
-      context.enqueueRequester(responder);
+      return context.enqueueRequester(responder);
     } else {
       throw new IllegalStateException("Unbound socket");
     }

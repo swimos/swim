@@ -39,6 +39,7 @@ public final class LogScope implements Term, ToMarkup, ToSource {
   final @Nullable LogScope parent;
   HashTrieMap<String, SoftReference<LogScope>> children;
   @Nullable String purgeKey;
+  long purgeTime;
 
   LogScope(int depth, @Nullable String key, String path,
            @Nullable LogScope parent,
@@ -50,6 +51,7 @@ public final class LogScope implements Term, ToMarkup, ToSource {
     this.parent = parent;
     this.children = children;
     this.purgeKey = purgeKey;
+    this.purgeTime = 0L;
   }
 
   public int depth() {
@@ -112,42 +114,23 @@ public final class LogScope implements Term, ToMarkup, ToSource {
       }
     } while (true);
 
-    // Help incrementally purge child scope references cleared by the GC.
-    // Load the most recently checked child key, synchronizing with concurrent purges.
-    String purgeKey = (String) PURGE_KEY.getAcquire(this);
-    // To keep the amount of work we do bounded, we don't retry CAS failures;
-    // the "loop" is only used to support goto-style breaks.
-    do {
+    // Periodically Help purge child scope references cleared by the GC.
+    final long t = System.currentTimeMillis();
+    if (t - (long) PURGE_TIME.getOpaque(this) >= PURGE_INTERVAL) {
+      // Load the most recently checked child key.
+      final String oldPurgeKey = (String) PURGE_KEY.getOpaque(this);
       // Get the next child key to check.
-      final String oldPurgeKey = purgeKey;
       final String newPurgeKey = children.nextKey(oldPurgeKey);
       // Check if the GC has cleared the child scope referenced by the purge key.
       final SoftReference<LogScope> clearRef = children.get(newPurgeKey);
-      if (clearRef != null && clearRef.get() == null) {
-        // Try to remove the cleared child scope reference from the children map.
-        final HashTrieMap<String, SoftReference<LogScope>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<LogScope>> newChildren = oldChildren.removed(newPurgeKey);
-        children = (HashTrieMap<String, SoftReference<LogScope>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          // Successfully removed the cleared child scope reference.
-          children = newChildren;
-        } else {
-          // Another thread concurrently updated the children map.
-          // Don't update the purge key so that the next helper will try again.
-          break;
+      if (clearRef == null || clearRef.get() != null
+          || CHILDREN.weakCompareAndSetRelease(this, children, children.removed(newPurgeKey))) {
+        // Try to update the purge key so that the next helper will pick up where we left off.
+        if (PURGE_KEY.weakCompareAndSetPlain(this, oldPurgeKey, newPurgeKey)) {
+          PURGE_TIME.setOpaque(this, t);
         }
       }
-      // Update the purge key so that the next helper will pick up where we left off.
-      purgeKey = (String) PURGE_KEY.compareAndExchangeRelease(this, oldPurgeKey, newPurgeKey);
-      if (purgeKey == oldPurgeKey) {
-        // Successfully updated the purge key.
-        purgeKey = newPurgeKey;
-        break;
-      } else {
-        // Another thread concurrently checked the same key.
-        break;
-      }
-    } while (true);
+    }
 
     // Return the child scope.
     return child;
@@ -339,6 +322,8 @@ public final class LogScope implements Term, ToMarkup, ToSource {
     return scope.toString();
   }
 
+  static final long PURGE_INTERVAL = 1000L;
+
   /**
    * {@code VarHandle} for atomically accessing the {@link #children} field.
    */
@@ -348,6 +333,11 @@ public final class LogScope implements Term, ToMarkup, ToSource {
    * {@code VarHandle} for atomically accessing the {@link #purgeKey} field.
    */
   static final VarHandle PURGE_KEY;
+
+  /**
+   * {@code VarHandle} for atomically accessing the {@link #purgeTime} field.
+   */
+  static final VarHandle PURGE_TIME;
 
   static final LogScope ROOT;
 
@@ -359,6 +349,7 @@ public final class LogScope implements Term, ToMarkup, ToSource {
     try {
       CHILDREN = lookup.findVarHandle(LogScope.class, "children", HashTrieMap.class);
       PURGE_KEY = lookup.findVarHandle(LogScope.class, "purgeKey", String.class);
+      PURGE_TIME = lookup.findVarHandle(LogScope.class, "purgeTime", Long.TYPE);
     } catch (ReflectiveOperationException cause) {
       throw new ExceptionInInitializerError(cause);
     }

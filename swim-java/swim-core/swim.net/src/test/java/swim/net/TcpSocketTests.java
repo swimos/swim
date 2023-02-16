@@ -340,8 +340,8 @@ public class TcpSocketTests {
 
         @Override
         public void didOpen() {
-          this.readBuffer = ByteBuffer.allocate(1024);
-          this.writeBuffer = ByteBuffer.allocate(1024);
+          this.readBuffer = ByteBuffer.allocateDirect(1024);
+          this.writeBuffer = ByteBuffer.allocateDirect(1024);
           this.requestRead();
         }
 

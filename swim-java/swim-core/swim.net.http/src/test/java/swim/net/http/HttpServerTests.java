@@ -248,7 +248,6 @@ public class HttpServerTests {
       driver.stop();
       scheduler.stop();
     }
-
   }
 
 }

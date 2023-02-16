@@ -147,9 +147,9 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
   }
 
   public static HttpHeader of(String name, String value) {
-    final HttpHeaderType<?> headerType = HttpHeader.registry().getHeaderType(name);
-    if (headerType != null) {
-      return headerType.of(name, value);
+    final HttpHeaderType<?> type = HttpHeader.registry().getHeaderType(name);
+    if (type != null) {
+      return type.of(name, value);
     } else {
       return new HttpHeader(name, value);
     }
@@ -182,10 +182,8 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
     return parse.getNonNull();
   }
 
-  private static final HttpHeaderRegistry REGISTRY = new HttpHeaderRegistry();
-
   public static HttpHeaderRegistry registry() {
-    return REGISTRY;
+    return HttpHeaderRegistry.REGISTRY;
   }
 
   public static final HttpHeaderType<FingerTrieList<MediaRange>> ACCEPT = HttpAcceptHeader.TYPE;
@@ -253,10 +251,18 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
         if (Http.isTokenChar(c)) {
           input.step();
           if (nameTrie != null) {
-            nameTrie = nameTrie.getBranch(nameTrie.normalized(c));
+            final StringTrieMap<HttpHeaderType<?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
+            if (subTrie != null) {
+              nameTrie = subTrie;
+            } else {
+              nameBuilder = new StringBuilder();
+              nameBuilder.appendCodePoint(c);
+              nameTrie = null;
+            }
+          } else {
+            nameBuilder = new StringBuilder();
+            nameBuilder.appendCodePoint(c);
           }
-          nameBuilder = new StringBuilder();
-          nameBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parse.error(Diagnostic.expected("header name", input));
@@ -266,15 +272,22 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
       }
     }
     if (step == 2) {
-      nameBuilder = Assume.nonNull(nameBuilder);
       while (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input.step();
           if (nameTrie != null) {
-            nameTrie = nameTrie.getBranch(nameTrie.normalized(c));
+            final StringTrieMap<HttpHeaderType<?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
+            if (subTrie != null) {
+              nameTrie = subTrie;
+            } else {
+              nameBuilder = new StringBuilder(nameTrie.prefix());
+              nameBuilder.appendCodePoint(c);
+              nameTrie = null;
+            }
+          } else {
+            Assume.nonNull(nameBuilder).appendCodePoint(c);
           }
-          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -295,7 +308,6 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
     }
     do {
       if (step == 4) {
-        nameBuilder = Assume.nonNull(nameBuilder);
         while (input.isCont()) {
           c = input.head();
           if (Http.isFieldChar(c)) {
@@ -312,12 +324,13 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
           input.step();
           step = 5;
         } else if (input.isReady()) {
-          final HttpHeaderType<?> headerType = nameTrie != null ? nameTrie.value() : null;
+          final HttpHeaderType<?> type = nameTrie != null ? nameTrie.value() : null;
           final String value = valueBuilder != null ? valueBuilder.toString() : "";
-          if (headerType != null) {
-            return Parse.done(headerType.of(value));
+          if (type != null) {
+            return Parse.done(type.of(value));
           } else {
-            return Parse.done(HttpHeader.of(nameBuilder.toString(), value));
+            final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
+            return Parse.done(HttpHeader.of(name, value));
           }
         }
       }

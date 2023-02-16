@@ -14,7 +14,7 @@
 
 package swim.codec;
 
-import java.nio.Buffer;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -79,7 +79,7 @@ public final class BinaryInputBuffer extends InputBuffer {
 
   @Override
   public BinaryInputBuffer index(int index) {
-    ((Buffer) this.buffer).position(index);
+    this.buffer.position(index);
     return this;
   }
 
@@ -90,7 +90,7 @@ public final class BinaryInputBuffer extends InputBuffer {
 
   @Override
   public BinaryInputBuffer limit(int limit) {
-    ((Buffer) this.buffer).limit(limit);
+    this.buffer.limit(limit);
     return this;
   }
 
@@ -156,12 +156,12 @@ public final class BinaryInputBuffer extends InputBuffer {
 
   @Override
   public BinaryInputBuffer step() {
-    final int position = this.buffer.position();
-    if (position >= this.buffer.limit()) {
+    try {
+      this.buffer.get();
+      this.offset += 1L;
+    } catch (BufferUnderflowException e) {
       throw new IllegalStateException("Invalid step");
     }
-    ((Buffer) this.buffer).position(position + 1);
-    this.offset += 1L;
     return this;
   }
 
@@ -171,7 +171,7 @@ public final class BinaryInputBuffer extends InputBuffer {
     if (position < 0 || position > this.buffer.limit()) {
       throw new IllegalStateException("Invalid step to " + position);
     }
-    ((Buffer) this.buffer).position(position);
+    this.buffer.position(position);
     this.offset += (long) offset;
     return this;
   }
@@ -184,12 +184,12 @@ public final class BinaryInputBuffer extends InputBuffer {
       if (offset < 0 || offset > (long) buffer.limit()) {
         throw new IllegalStateException("Invalid seek to " + position);
       }
-      ((Buffer) buffer).position((int) offset);
+      buffer.position((int) offset);
       this.offset = position.offset();
       return this;
     } else {
       this.offset -= (long) buffer.position();
-      ((Buffer) buffer).position(0);
+      buffer.position(0);
       return this;
     }
   }

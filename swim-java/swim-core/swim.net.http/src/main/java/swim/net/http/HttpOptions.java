@@ -182,14 +182,14 @@ public class HttpOptions implements ToSource {
       try {
         clientPipelineLength = Integer.parseInt(System.getProperty("swim.net.http.client.pipeline.length"));
       } catch (NumberFormatException error) {
-        clientPipelineLength = 4;
+        clientPipelineLength = 8;
       }
 
       int serverPipelineLength;
       try {
         serverPipelineLength = Integer.parseInt(System.getProperty("swim.net.http.server.pipeline.length"));
       } catch (NumberFormatException error) {
-        serverPipelineLength = 4;
+        serverPipelineLength = 8;
       }
 
       int maxMessageSize;

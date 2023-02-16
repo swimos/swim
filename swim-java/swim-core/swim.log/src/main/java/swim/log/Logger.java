@@ -48,6 +48,8 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
 
   @Nullable String purgeKey;
 
+  long purgeTime;
+
   @Nullable Object subscribers; // LogSubscriber | LogSubscriber[]
 
   protected Logger(String topic) {
@@ -59,6 +61,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
     this.parent = null;
     this.children = HashTrieMap.empty();
     this.purgeKey = null;
+    this.purgeTime = 0L;
     this.subscribers = null;
   }
 
@@ -340,42 +343,23 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
       }
     } while (true);
 
-    // Help incrementally purge child logger references cleared by the GC.
-    // Load the most recently checked child key, synchronizing with concurrent purges.
-    String purgeKey = (String) PURGE_KEY.getAcquire(this);
-    // To keep the amount of work we do bounded, we don't retry CAS failures;
-    // the "loop" is only used to support goto-style breaks.
-    do {
+    // Periodically help purge child logger references cleared by the GC.
+    final long t = System.currentTimeMillis();
+    if (t - (long) PURGE_TIME.getOpaque(this) >= PURGE_INTERVAL) {
+      // Load the most recently checked child key.
+      final String oldPurgeKey = (String) PURGE_KEY.getOpaque(this);
       // Get the next child key to check.
-      final String oldPurgeKey = purgeKey;
       final String newPurgeKey = children.nextKey(oldPurgeKey);
       // Check if the GC has cleared the child logger referenced by the purge key.
       final SoftReference<Logger> clearRef = children.get(newPurgeKey);
-      if (clearRef != null && clearRef.get() == null) {
-        // Try to remove the cleared child logger reference from the children map.
-        final HashTrieMap<String, SoftReference<Logger>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<Logger>> newChildren = oldChildren.removed(newPurgeKey);
-        children = (HashTrieMap<String, SoftReference<Logger>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          // Successfully removed the cleared child logger reference.
-          children = newChildren;
-        } else {
-          // Another thread concurrently updated the children map.
-          // Don't update the purge key so that the next helper will try again.
-          break;
+      if (clearRef == null || clearRef.get() != null
+          || CHILDREN.weakCompareAndSetRelease(this, children, children.removed(newPurgeKey))) {
+        // Try to update the purge key so that the next helper will pick up where we left off.
+        if (PURGE_KEY.weakCompareAndSetPlain(this, oldPurgeKey, newPurgeKey)) {
+          PURGE_TIME.setOpaque(this, t);
         }
       }
-      // Update the purge key so that the next helper will pick up where we left off.
-      purgeKey = (String) PURGE_KEY.compareAndExchangeRelease(this, oldPurgeKey, newPurgeKey);
-      if (purgeKey == oldPurgeKey) {
-        // Successfully updated the purge key.
-        purgeKey = newPurgeKey;
-        break;
-      } else {
-        // Another thread concurrently checked the same key.
-        break;
-      }
-    } while (true);
+    }
 
     // Return the child logger.
     return child;
@@ -668,6 +652,8 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
     return root;
   }
 
+  static final long PURGE_INTERVAL = 1000L;
+
   /**
    * {@code VarHandle} for atomically accessing the {@link #flags} field.
    */
@@ -699,6 +685,11 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
   static final VarHandle PURGE_KEY;
 
   /**
+   * {@code VarHandle} for atomically accessing the {@link #purgeTime} field.
+   */
+  static final VarHandle PURGE_TIME;
+
+  /**
    * {@code VarHandle} for atomically accessing the {@link #subscribers} field.
    */
   static final VarHandle SUBSCRIBERS;
@@ -718,6 +709,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
       THRESHOLD = lookup.findVarHandle(Logger.class, "threshold", Severity.class);
       CHILDREN = lookup.findVarHandle(Logger.class, "children", HashTrieMap.class);
       PURGE_KEY = lookup.findVarHandle(Logger.class, "purgeKey", String.class);
+      PURGE_TIME = lookup.findVarHandle(Logger.class, "purgeTime", Long.TYPE);
       SUBSCRIBERS = lookup.findVarHandle(Logger.class, "subscribers", Object.class);
       ROOT = lookup.findStaticVarHandle(Logger.class, "root", Logger.class);
     } catch (ReflectiveOperationException cause) {

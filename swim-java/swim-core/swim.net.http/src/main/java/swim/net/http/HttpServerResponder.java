@@ -195,7 +195,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     }
 
     // Enqueue the responder in the responder queue.
-    // Don't initiate the request until the response has been enqueue.
+    // Don't initiate the request until enqueued in the responder queue.
     if (!this.socket.enqueueResponder(this)) {
       // The responder queue is full; discontinue reading requests to propagate
       // response processing backpressure to the client until a slot opens up
@@ -261,7 +261,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
 
           this.didReadRequestMessage(request);
 
-          // Request a write to ensure that response processing begins.
+          // Request a write to ensure that the response gets processed.
           this.socket.requestWrite();
 
           this.willReadRequestPayload(request);
@@ -316,7 +316,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
           final Decode<HttpRequest<?>> decodeMessage = (Decode<HttpRequest<?>>) DECODE_MESSAGE.getOpaque(this);
           final HttpPayload<?> payload = decodePayload.getNonNull();
           final HttpRequest<?> request = decodeMessage.getNonNull().withPayload(payload);
-          DECODE_MESSAGE.setRelease(this, Decode.done(request));
+          DECODE_MESSAGE.setOpaque(this, Decode.done(request));
 
           this.didReadRequestPayload(request);
 
@@ -462,10 +462,9 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
   int doWriteInitial(int status) throws IOException {
-    // Don't initiate the response until request message has been read.
+    // Don't initiate the response until the request message has been received.
     final Decode<HttpRequest<?>> decodeMessage = (Decode<HttpRequest<?>>) DECODE_MESSAGE.getOpaque(this);
-    final HttpRequest<?> request = decodeMessage != null ? decodeMessage.get() : null;
-    if (request == null) {
+    if (decodeMessage == null || !decodeMessage.isDone()) {
       return status;
     }
 
@@ -478,6 +477,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
       if (status == oldStatus) {
         status = newStatus;
+        final HttpRequest<?> request = ((Decode<HttpRequest<?>>) DECODE_MESSAGE.getOpaque(this)).getNonNull();
 
         this.willWriteResponse(request);
 
@@ -584,7 +584,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
           final Encode<HttpResponse<?>> encodeMessage = (Encode<HttpResponse<?>>) ENCODE_MESSAGE.getOpaque(this);
           final HttpPayload<?> payload = encodePayload.getNonNull();
           final HttpResponse<?> response = encodeMessage.getNonNull().withPayload(payload);
-          ENCODE_MESSAGE.setRelease(this, Encode.done(response));
+          ENCODE_MESSAGE.setOpaque(this, Encode.done(response));
 
           this.didWriteResponsePayload(request, response);
 

@@ -38,6 +38,7 @@ public final class ObjectShape implements ToMarkup, ToSource {
   final @Nullable ObjectShape parent;
   HashTrieMap<String, SoftReference<ObjectShape>> children;
   @Nullable String purgeKey;
+  long purgeTime;
 
   ObjectShape(int size, int rank, @Nullable String key,
               ObjectShape @Nullable [] fields,
@@ -53,6 +54,7 @@ public final class ObjectShape implements ToMarkup, ToSource {
     this.parent = parent;
     this.children = children;
     this.purgeKey = purgeKey;
+    this.purgeTime = 0L;
   }
 
   public int size() {
@@ -173,42 +175,23 @@ public final class ObjectShape implements ToMarkup, ToSource {
       }
     } while (true);
 
-    // Help incrementally purge child shape references cleared by the GC.
-    // Load the most recently checked child key, synchronizing with concurrent purges.
-    String purgeKey = (String) PURGE_KEY.getAcquire(this);
-    // To keep the amount of work we do bounded, we don't retry CAS failures;
-    // the "loop" is only used to support goto-style breaks.
-    do {
+    // Periodically help purge child shape references cleared by the GC.
+    final long t = System.currentTimeMillis();
+    if (t - (long) PURGE_TIME.getOpaque(this) >= PURGE_INTERVAL) {
+      // Load the most recently checked child key.
+      final String oldPurgeKey = (String) PURGE_KEY.getOpaque(this);
       // Get the next child key to check.
-      final String oldPurgeKey = purgeKey;
       final String newPurgeKey = children.nextKey(oldPurgeKey);
       // Check if the GC has cleared the child shape referenced by the purge key.
       final SoftReference<ObjectShape> clearRef = children.get(newPurgeKey);
-      if (clearRef != null && clearRef.get() == null) {
-        // Try to remove the cleared child shape reference from the children map.
-        final HashTrieMap<String, SoftReference<ObjectShape>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<ObjectShape>> newChildren = oldChildren.removed(newPurgeKey);
-        children = (HashTrieMap<String, SoftReference<ObjectShape>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          // Successfully removed the cleared child shape reference.
-          children = newChildren;
-        } else {
-          // Another thread concurrently updated the children map.
-          // Don't update the purge key so that the next helper will try again.
-          break;
+      if (clearRef == null || clearRef.get() != null
+          || CHILDREN.weakCompareAndSetRelease(this, children, children.removed(newPurgeKey))) {
+        // Try to update the purge key so that the next helper will pick up where we left off.
+        if (PURGE_KEY.weakCompareAndSetPlain(this, oldPurgeKey, newPurgeKey)) {
+          PURGE_TIME.setOpaque(this, t);
         }
       }
-      // Update the purge key so that the next helper will pick up where we left off.
-      purgeKey = (String) PURGE_KEY.compareAndExchangeRelease(this, oldPurgeKey, newPurgeKey);
-      if (purgeKey == oldPurgeKey) {
-        // Successfully updated the purge key.
-        purgeKey = newPurgeKey;
-        break;
-      } else {
-        // Another thread concurrently checked the same key.
-        break;
-      }
-    } while (true);
+    }
 
     // Return the child shape.
     return child;
@@ -287,6 +270,8 @@ public final class ObjectShape implements ToMarkup, ToSource {
     return shape;
   }
 
+  static final long PURGE_INTERVAL = 1000L;
+
   /**
    * {@code VarHandle} for atomically accessing the {@link #children} field.
    */
@@ -296,6 +281,11 @@ public final class ObjectShape implements ToMarkup, ToSource {
    * {@code VarHandle} for atomically accessing the {@link #purgeKey} field.
    */
   static final VarHandle PURGE_KEY;
+
+  /**
+   * {@code VarHandle} for atomically accessing the {@link #purgeTime} field.
+   */
+  static final VarHandle PURGE_TIME;
 
   private static final ObjectShape EMPTY;
 
@@ -307,6 +297,7 @@ public final class ObjectShape implements ToMarkup, ToSource {
     try {
       CHILDREN = lookup.findVarHandle(ObjectShape.class, "children", HashTrieMap.class);
       PURGE_KEY = lookup.findVarHandle(ObjectShape.class, "purgeKey", String.class);
+      PURGE_TIME = lookup.findVarHandle(ObjectShape.class, "purgeTime", Long.TYPE);
     } catch (ReflectiveOperationException cause) {
       throw new ExceptionInInitializerError(cause);
     }

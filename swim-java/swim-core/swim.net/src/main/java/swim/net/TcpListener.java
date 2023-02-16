@@ -185,25 +185,22 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   public boolean listen(InetSocketAddress localAddress) {
     // Load the current listener status; synchronized by subsequent accesses.
     int status = (int) STATUS.getOpaque(this);
-    int state = status & STATE_MASK;
     // Track whether or not this operation causes the listener to open.
     boolean opened = false;
     // Track opening interrupts.
     boolean interrupted = false;
     // Loop while the listener has not been requested to open.
     do {
-      if (state == INITIAL_STATE && (status & (OPEN_REQUEST | CLOSE_REQUEST)) == 0) {
+      if ((status & STATE_MASK) == INITIAL_STATE && (status & (OPEN_REQUEST | CLOSE_REQUEST)) == 0) {
         // The listener has not yet been opened, requested to open, or requested to close.
         final int oldStatus = status;
         final int newStatus = oldStatus | OPEN_REQUEST;
         // Try to request listener open, synchronizing with concurrent status updates.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        state = status & STATE_MASK;
         // Check if we succeeded at requesting listener open.
         if (status == oldStatus) {
           // This operation caused the opening of the listener.
           status = newStatus;
-          state = status & STATE_MASK;
           opened = true;
           // Store the address to which the listener should bind.
           this.localAddress = localAddress;
@@ -218,7 +215,7 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
           // CAS failed; try again.
           continue;
         }
-      } else if (state == INITIAL_STATE || state == OPENING_STATE) {
+      } else if ((status & STATE_MASK) == INITIAL_STATE || (status & STATE_MASK) == OPENING_STATE) {
         // The listener is concurrently opening;
         // loop until the concurrent operation is complete.
         do {
@@ -227,9 +224,8 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
             // Re-check listener status before waiting,
             // synchronized by monitor barrier.
             status = (int) STATUS.getOpaque(this);
-            state = status & STATE_MASK;
             // Ensure the concurrent operation is still ongoing before waiting.
-            if (state == OPENING_STATE) {
+            if ((status & STATE_MASK) == OPENING_STATE) {
               try {
                 this.wait(100L);
               } catch (InterruptedException e) {
@@ -244,7 +240,6 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
         } while (true);
         // Re-check listener status.
         status = (int) STATUS.getOpaque(this);
-        state = status & STATE_MASK;
         // Continue opening sequence.
         continue;
       } else {
@@ -300,7 +295,7 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       this.channel.bind(this.localAddress, this.tcpOptions.backlog());
     } catch (IOException cause) {
       // Initiate listener close.
-      status = this.requestClose(status);
+      status = this.acceptorRequestClose(status);
       // Report the exception.
       this.log.warningStatus("failed to bind server socket", this.listener, cause);
       // Continue closing the listener.
@@ -308,7 +303,7 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
         // Initiate listener close.
-        status = this.requestClose(status);
+        status = this.acceptorRequestClose(status);
         // Report non-fatal exception.
         this.log.errorStatus("failed to bind server socket", this.listener, cause);
         // Continue closing the listener.
@@ -364,7 +359,7 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     // Check if the channel has closed.
     if (!this.channel.isOpen()) {
       // Initiate listener close.
-      status = this.requestClose(status);
+      status = this.acceptorRequestClose(status);
     }
 
     return status;
@@ -388,7 +383,6 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   public boolean requestAccept() {
     // Load the current listener status; synchronized by subsequent accesses.
     int status = (int) STATUS.getOpaque(this);
-    int state = status & STATE_MASK;
     // Loop while the listener does not have a pending accept request.
     do {
       // Check that the listener does not have a pending accept request.
@@ -399,15 +393,14 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
         final int newStatus = oldStatus | ACCEPT_REQUEST;
         // Try to set the accept request flag, synchronizing with concurrent status updates.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        state = status & STATE_MASK;
         // Check if we succeeded at setting the accept request flag.
         if (status == oldStatus) {
           // The accept request flag has been set.
           status = newStatus;
           this.log.trace("request accept");
           final TransportContext context = this.context;
-          // Only schedule accepts when the transport is in the opened state.
-          if (context != null && state == OPENED_STATE) {
+          // Only schedule accepts when the listener is in the opened state.
+          if (context != null && (status & STATE_MASK) == OPENED_STATE) {
             // Schedule the accept request with the I/O dispatcher.
             context.requestAccept();
           }
@@ -428,7 +421,6 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   public boolean cancelAccept() {
     // Load the current listener status; synchronized by subsequent accesses.
     int status = (int) STATUS.getOpaque(this);
-    int state = status & STATE_MASK;
     // Loop while the listener has a pending accept request.
     do {
       // Check that the listener has a pending accept request.
@@ -439,15 +431,14 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
         final int newStatus = oldStatus & ~ACCEPT_REQUEST;
         // Try to clear the accept request flag, synchronizing with concurrent status updates.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        state = status & STATE_MASK;
         // Check if we succeeded at clearing the accept request flag.
         if (status == oldStatus) {
           // The accept request flag has been cleared.
           status = newStatus;
           this.log.trace("cancel accept");
           final TransportContext context = this.context;
-          // Only cancel accepts when the transport is in the opened state.
-          if (context != null && state == OPENED_STATE) {
+          // Only cancel accepts when the listener is in the opened state.
+          if (context != null && (status & STATE_MASK) == OPENED_STATE) {
             // Cancel the accept request with the I/O dispatcher.
             context.cancelAccept();
           }
@@ -467,11 +458,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   public void dispatchAccept() {
     // Load the current listener status; synchronized by subsequent accesses.
     int status = (int) STATUS.getOpaque(this);
-    int state = status & STATE_MASK;
     // Loop while the listener has not been signaled to accept a new connection.
     do {
       // Check that the listener has not been closed, or requested to close.
-      if (state != CLOSED_STATE && state != CLOSING_STATE
+      if ((status & STATE_MASK) != CLOSED_STATE && (status & STATE_MASK) != CLOSING_STATE
           && (status & CLOSE_REQUEST) == 0) {
         // The listener has not been closed, or requested to close;
         // signal that the network channel is ready to accept a new connection.
@@ -479,7 +469,6 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
         final int newStatus = oldStatus | ACCEPT_READY;
         // Try to set the accept ready flag, synchronizing with concurrent status updates.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        state = status & STATE_MASK;
         // Check if we succeeded at setting the accept ready flag.
         if (status == oldStatus) {
           // The accept ready flag has been set; schedule the acceptor task
@@ -538,7 +527,7 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     // Check if the channel has closed.
     if (!this.channel.isOpen()) {
       // Initiate listener close.
-      status = this.requestClose(status);
+      status = this.acceptorRequestClose(status);
     }
 
     return status;
@@ -594,22 +583,21 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   }
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
-  int requestClose(int status) {
-    int state = status & STATE_MASK;
-    // Loop while the listener has not been requested to close.
+  int acceptorRequestClose(int status) {
+    // Request listener close; must only be called from the acceptor task.
+    // Loop while the listener has not been closed or requested to close.
     do {
       // Check that the listener has not already been closed, or requested to close.
-      if (state != CLOSED_STATE && state != CLOSING_STATE
+      if ((status & STATE_MASK) != CLOSED_STATE && (status & STATE_MASK) != CLOSING_STATE
           && (status & CLOSE_REQUEST) == 0) {
         // The listener has not been closed, or requested to close.
         final int oldStatus = status;
         final int newStatus = oldStatus | CLOSE_REQUEST;
         // Try to request listener close, synchronizing with concurrent status updates.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        state = status & STATE_MASK;
         // Check if we succeeded at requesting listener close.
         if (status == oldStatus) {
-          // The listener has transitioned into the closing state.
+          // The listener has been requested to close.
           status = newStatus;
           this.log.trace("request close");
           break;
@@ -618,7 +606,7 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
           continue;
         }
       } else {
-        // The listener has been closed, or requested to close.
+        // The listener has already been closed, or requested to close.
         break;
       }
     } while (true);
@@ -629,17 +617,16 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   public void close() {
     // Load the current listener status; synchronized by subsequent accesses.
     int status = (int) STATUS.getOpaque(this);
-    int state = status & STATE_MASK;
     // Loop while the listener has not been closed, or requested to close.
     do {
       // Check if the listener has not yet been closed, or requested to close.
-      if (state != CLOSED_STATE && state != CLOSING_STATE && (status & CLOSE_REQUEST) == 0) {
+      if ((status & STATE_MASK) != CLOSED_STATE && (status & STATE_MASK) != CLOSING_STATE
+          && (status & CLOSE_REQUEST) == 0) {
         // The listener has not yet been requested to close; clear any pending open request.
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~OPEN_REQUEST) | CLOSE_REQUEST;
         // Try to request listener close, synchronizing with concurrent status updates.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        state = status & STATE_MASK;
         // Check if we succeeded at requesting listener close.
         if (status == oldStatus) {
           // The listener has transitioned into the closing state.

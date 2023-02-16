@@ -208,6 +208,8 @@ final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
       return decodePayload.asError();
     } else if (input.isError()) {
       return Decode.error(input.getError());
+    } else if (input.isLast()) {
+      return Decode.error(new DecodeException("Incomplete payload; read " + offset + " of " + contentLength + " bytes"));
     }
     return new DecodeHttpBody<T>(transcoder, decodePayload, contentLength, offset);
   }

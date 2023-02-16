@@ -140,10 +140,10 @@ public abstract class AbstractHttpClient implements HttpClient {
     }
   }
 
-  protected void enqueueRequester(HttpRequester requester) {
+  protected boolean enqueueRequester(HttpRequester requester) {
     final HttpClientContext context = this.context;
     if (context != null) {
-      context.enqueueRequester(requester);
+      return context.enqueueRequester(requester);
     } else {
       throw new IllegalStateException("Unbound socket");
     }

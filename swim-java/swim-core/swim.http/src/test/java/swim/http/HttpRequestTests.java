@@ -27,11 +27,11 @@ public class HttpRequestTests {
 
   @Test
   public void parseRequestsWithASingleHeader() {
-    assertParses(HttpRequest.head("/path", HttpHeader.of("Key", "Value")),
+    assertParses(HttpRequest.create(HttpMethod.HEAD, "/path", HttpHeader.of("Key", "Value")),
                  "HEAD /path HTTP/1.1\r\n"
                + "Key: Value\r\n"
                + "\r\n");
-    assertParses(HttpRequest.head("/path", HttpHeader.of("Host", "example.com")),
+    assertParses(HttpRequest.create(HttpMethod.HEAD, "/path", HttpHeader.of("Host", "example.com")),
                  "HEAD /path HTTP/1.1\r\n"
                + "Host: example.com\r\n"
                + "\r\n");
@@ -39,14 +39,14 @@ public class HttpRequestTests {
 
   @Test
   public void parseRequestsWithMultipleHeaders() {
-    assertParses(HttpRequest.get("/chat",
-                                 HttpHeader.of("Host", "example.com"),
-                                 HttpHeader.of("Upgrade", "websocket"),
-                                 HttpHeader.of("Connection", "Upgrade"),
-                                 HttpHeader.of("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ=="),
-                                 HttpHeader.of("Origin", "http://example.com"),
-                                 HttpHeader.of("Sec-WebSocket-Protocol", "chat, superchat"),
-                                 HttpHeader.of("Sec-WebSocket-Version", "13")),
+    assertParses(HttpRequest.create(HttpMethod.GET, "/chat",
+                                    HttpHeader.of("Host", "example.com"),
+                                    HttpHeader.of("Upgrade", "websocket"),
+                                    HttpHeader.of("Connection", "Upgrade"),
+                                    HttpHeader.of("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ=="),
+                                    HttpHeader.of("Origin", "http://example.com"),
+                                    HttpHeader.of("Sec-WebSocket-Protocol", "chat, superchat"),
+                                    HttpHeader.of("Sec-WebSocket-Version", "13")),
                  "GET /chat HTTP/1.1\r\n"
                + "Host: example.com\r\n"
                + "Upgrade: websocket\r\n"
@@ -70,11 +70,11 @@ public class HttpRequestTests {
     assertWrites("HEAD /path HTTP/1.1\r\n"
                + "Key: Value\r\n"
                + "\r\n",
-                 HttpRequest.head("/path", HttpHeader.of("Key", "Value")));
+                 HttpRequest.create(HttpMethod.HEAD, "/path", HttpHeader.of("Key", "Value")));
     assertWrites("HEAD /path HTTP/1.1\r\n"
                + "Host: example.com\r\n"
                + "\r\n",
-                 HttpRequest.head("/path", HttpHeader.of("Host", "example.com")));
+                 HttpRequest.create(HttpMethod.HEAD, "/path", HttpHeader.of("Host", "example.com")));
   }
 
   @Test
@@ -88,14 +88,14 @@ public class HttpRequestTests {
                + "Sec-WebSocket-Protocol: chat, superchat\r\n"
                + "Sec-WebSocket-Version: 13\r\n"
                + "\r\n",
-                 HttpRequest.get("/chat",
-                                 HttpHeader.of("Host", "example.com"),
-                                 HttpHeader.of("Upgrade", "websocket"),
-                                 HttpHeader.of("Connection", "Upgrade"),
-                                 HttpHeader.of("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ=="),
-                                 HttpHeader.of("Origin", "http://example.com"),
-                                 HttpHeader.of("Sec-WebSocket-Protocol", "chat, superchat"),
-                                 HttpHeader.of("Sec-WebSocket-Version", "13")));
+                 HttpRequest.create(HttpMethod.GET, "/chat",
+                                    HttpHeader.of("Host", "example.com"),
+                                    HttpHeader.of("Upgrade", "websocket"),
+                                    HttpHeader.of("Connection", "Upgrade"),
+                                    HttpHeader.of("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ=="),
+                                    HttpHeader.of("Origin", "http://example.com"),
+                                    HttpHeader.of("Sec-WebSocket-Protocol", "chat, superchat"),
+                                    HttpHeader.of("Sec-WebSocket-Version", "13")));
   }
 
   public static <T> void assertParses(HttpRequest<T> expected, String string) {

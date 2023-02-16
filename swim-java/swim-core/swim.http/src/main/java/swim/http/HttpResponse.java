@@ -26,7 +26,6 @@ import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Write;
 import swim.codec.WriteException;
-import swim.collections.StringTrieMap;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;

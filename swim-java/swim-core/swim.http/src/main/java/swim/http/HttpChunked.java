@@ -20,6 +20,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base16;
 import swim.codec.Decode;
+import swim.codec.DecodeException;
 import swim.codec.Diagnostic;
 import swim.codec.Encode;
 import swim.codec.EncodeException;
@@ -298,6 +299,8 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
     }
     if (input.isError()) {
       return Decode.error(input.getError());
+    } else if (input.isLast()) {
+      return Decode.error(new DecodeException("Incomplete payload"));
     }
     return new DecodeHttpChunked<T>(transcoder, parseHeader, decodePayload,
                                     parseTrailers, offset, step);

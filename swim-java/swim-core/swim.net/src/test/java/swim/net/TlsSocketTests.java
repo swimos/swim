@@ -352,8 +352,8 @@ public class TlsSocketTests {
 
         @Override
         public void didOpen() {
-          this.readBuffer = ByteBuffer.allocate(16 * 1024);
-          this.writeBuffer = ByteBuffer.allocate(16 * 1024);
+          this.readBuffer = ByteBuffer.allocateDirect(16 * 1024);
+          this.writeBuffer = ByteBuffer.allocateDirect(16 * 1024);
           this.requestRead();
         }
 
