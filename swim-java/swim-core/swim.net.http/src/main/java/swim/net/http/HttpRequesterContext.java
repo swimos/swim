@@ -28,6 +28,8 @@ import swim.net.NetSocket;
 @Since("5.0")
 public interface HttpRequesterContext extends ConnectionContext {
 
+  HttpRequester requester();
+
   HttpOptions httpOptions();
 
   boolean isConnecting();
@@ -42,6 +44,10 @@ public interface HttpRequesterContext extends ConnectionContext {
 
   boolean writeRequestPayload(Encode<? extends HttpPayload<?>> encodePayload);
 
+  Encode<? extends HttpRequest<?>> requestMessage();
+
+  Encode<? extends HttpPayload<?>> requestPayload();
+
   boolean isReading();
 
   boolean isDoneReading();
@@ -49,6 +55,12 @@ public interface HttpRequesterContext extends ConnectionContext {
   boolean readResponseMessage(Decode<? extends HttpResponse<?>> decodeMessage);
 
   boolean readResponsePayload(Decode<? extends HttpPayload<?>> decodePayload);
+
+  Decode<? extends HttpResponse<?>> responseMessage();
+
+  Decode<? extends HttpPayload<?>> responsePayload();
+
+  void become(HttpRequester requester);
 
   /**
    * Rebinds the network connection to use a new {@code socket} handler.

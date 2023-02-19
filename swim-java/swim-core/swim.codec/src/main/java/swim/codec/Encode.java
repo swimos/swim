@@ -22,6 +22,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
+import swim.util.Result;
 import swim.util.ToSource;
 
 /**
@@ -262,6 +263,18 @@ public abstract class Encode<T> {
     }
   }
 
+  public Result<T> toResult() {
+    try {
+      return Result.success(this.get());
+    } catch (Throwable error) {
+      if (Result.isNonFatal(error)) {
+        return Result.failure(error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   /**
    * Returns a {@code Encode} instance that continues encoding {@code that}
    * after it finishes encoding {@code this}.
@@ -307,10 +320,10 @@ public abstract class Encode<T> {
 
 final class EncodeDone<T> extends Encode<T> implements ToSource {
 
-  private final @Nullable T result;
+  private final @Nullable T value;
 
-  EncodeDone(@Nullable T result) {
-    this.result = result;
+  EncodeDone(@Nullable T value) {
+    this.value = value;
   }
 
   @Override
@@ -324,14 +337,19 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
   }
 
   @Override
-  public Encode<T> produce(OutputBuffer<?> result) {
+  public Encode<T> produce(OutputBuffer<?> output) {
     return this;
   }
 
   @CheckReturnValue
   @Override
   public @Nullable T get() {
-    return this.result;
+    return this.value;
+  }
+
+  @Override
+  public Result<T> toResult() {
+    return Result.success(this.value);
   }
 
   @Override
@@ -343,8 +361,8 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("Encode", "done");
-    if (this.result != null) {
-      notation.appendArgument(this.result);
+    if (this.value != null) {
+      notation.appendArgument(this.value);
     }
     notation.endInvoke();
   }
@@ -393,6 +411,11 @@ final class EncodeError<T> extends Encode<T> implements ToSource {
   @Override
   public <T2> Encode<T2> asError() {
     return Assume.conforms(this);
+  }
+
+  @Override
+  public Result<T> toResult() {
+    return Result.failure(this.error);
   }
 
   @Override

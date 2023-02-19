@@ -17,8 +17,6 @@ package swim.net.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.http.HttpRequest;
-import swim.http.HttpResponse;
 
 @Public
 @Since("5.0")
@@ -36,43 +34,43 @@ public interface HttpRequester {
     // hook
   }
 
-  default void didWriteRequestMessage(HttpRequest<?> request) {
+  default void didWriteRequestMessage() {
     // hook
   }
 
-  default void willWriteRequestPayload(HttpRequest<?> request) {
+  default void willWriteRequestPayload() {
     // hook
   }
 
-  default void didWriteRequestPayload(HttpRequest<?> request) {
+  default void didWriteRequestPayload() {
     // hook
   }
 
-  default void didWriteRequest(HttpRequest<?> request) {
+  default void didWriteRequest() {
     // hook
   }
 
-  default void willReadResponse(HttpRequest<?> request) {
+  default void willReadResponse() {
     // hook
   }
 
-  default void willReadResponseMessage(HttpRequest<?> request) {
+  default void willReadResponseMessage() {
     // hook
   }
 
-  default void didReadResponseMessage(HttpRequest<?> request, HttpResponse<?> response) {
+  default void didReadResponseMessage() {
     // hook
   }
 
-  default void willReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response) {
+  default void willReadResponsePayload() {
     // hook
   }
 
-  default void didReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response) {
+  default void didReadResponsePayload() {
     // hook
   }
 
-  default void didReadResponse(HttpRequest<?> request, HttpResponse<?> response) {
+  default void didReadResponse() {
     // hook
   }
 

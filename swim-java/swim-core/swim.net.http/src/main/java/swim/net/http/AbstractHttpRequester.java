@@ -118,6 +118,15 @@ public abstract class AbstractHttpRequester implements HttpRequester {
     }
   }
 
+  public boolean isDoneWriting() {
+    final HttpRequesterContext context = this.context;
+    if (context != null) {
+      return context.isDoneWriting();
+    } else {
+      throw new IllegalStateException("Unbound socket");
+    }
+  }
+
   protected void writeRequestMessage(Encode<? extends HttpRequest<?>> encodeMessage) {
     final HttpRequesterContext context = this.context;
     if (context != null) {
@@ -136,10 +145,19 @@ public abstract class AbstractHttpRequester implements HttpRequester {
     }
   }
 
-  public boolean isDoneWriting() {
+  public Encode<? extends HttpRequest<?>> requestMessage() {
     final HttpRequesterContext context = this.context;
     if (context != null) {
-      return context.isDoneWriting();
+      return context.requestMessage();
+    } else {
+      throw new IllegalStateException("Unbound socket");
+    }
+  }
+
+  public Encode<? extends HttpPayload<?>> requestPayload() {
+    final HttpRequesterContext context = this.context;
+    if (context != null) {
+      return context.requestPayload();
     } else {
       throw new IllegalStateException("Unbound socket");
     }
@@ -149,6 +167,15 @@ public abstract class AbstractHttpRequester implements HttpRequester {
     final HttpRequesterContext context = this.context;
     if (context != null) {
       return context.isReading();
+    } else {
+      throw new IllegalStateException("Unbound socket");
+    }
+  }
+
+  public boolean isDoneReading() {
+    final HttpRequesterContext context = this.context;
+    if (context != null) {
+      return context.isDoneReading();
     } else {
       throw new IllegalStateException("Unbound socket");
     }
@@ -172,10 +199,28 @@ public abstract class AbstractHttpRequester implements HttpRequester {
     }
   }
 
-  public boolean isDoneReading() {
+  public Decode<? extends HttpResponse<?>> responseMessage() {
     final HttpRequesterContext context = this.context;
     if (context != null) {
-      return context.isDoneReading();
+      return context.responseMessage();
+    } else {
+      throw new IllegalStateException("Unbound socket");
+    }
+  }
+
+  public Decode<? extends HttpPayload<?>> responsePayload() {
+    final HttpRequesterContext context = this.context;
+    if (context != null) {
+      return context.responsePayload();
+    } else {
+      throw new IllegalStateException("Unbound socket");
+    }
+  }
+
+  protected void become(HttpRequester requester) {
+    final HttpRequesterContext context = this.context;
+    if (context != null) {
+      context.become(requester);
     } else {
       throw new IllegalStateException("Unbound socket");
     }

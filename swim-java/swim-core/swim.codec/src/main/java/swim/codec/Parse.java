@@ -22,6 +22,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
+import swim.util.Result;
 import swim.util.ToSource;
 
 /**
@@ -314,6 +315,19 @@ public abstract class Parse<T> extends Decode<T> {
     }
   }
 
+  @Override
+  public Result<T> toResult() {
+    try {
+      return Result.success(this.get());
+    } catch (Throwable error) {
+      if (Result.isNonFatal(error)) {
+        return Result.failure(error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   private static final Parse<Object> DONE = new ParseDone<Object>(null);
 
   /**
@@ -369,10 +383,10 @@ public abstract class Parse<T> extends Decode<T> {
 
 final class ParseDone<T> extends Parse<T> implements ToSource {
 
-  final @Nullable T result;
+  final @Nullable T value;
 
-  ParseDone(@Nullable T result) {
-    this.result = result;
+  ParseDone(@Nullable T value) {
+    this.value = value;
   }
 
   @Override
@@ -393,15 +407,20 @@ final class ParseDone<T> extends Parse<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @Nullable T get() {
-    return this.result;
+    return this.value;
+  }
+
+  @Override
+  public Result<T> toResult() {
+    return Result.success(this.value);
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("Parse", "done");
-    if (this.result != null) {
-      notation.appendArgument(this.result);
+    if (this.value != null) {
+      notation.appendArgument(this.value);
     }
     notation.endInvoke();
   }
@@ -450,6 +469,11 @@ final class ParseError<T> extends Parse<T> implements ToSource {
   @Override
   public <T2> Parse<T2> asError() {
     return Assume.conforms(this);
+  }
+
+  @Override
+  public Result<T> toResult() {
+    return Result.failure(this.error);
   }
 
   @Override

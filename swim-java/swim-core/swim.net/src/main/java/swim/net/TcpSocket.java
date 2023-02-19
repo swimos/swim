@@ -145,6 +145,10 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     this.log = log.withFocus(this.logFocus());
   }
 
+  String protocol() {
+    return "tcp";
+  }
+
   @Override
   public final @Nullable TransportContext transportContext() {
     return this.context;
@@ -2216,7 +2220,7 @@ final class TcpReader extends AbstractTask {
   public void run() {
     LogScope.reset();
     try {
-      LogScope.push("reader");
+      LogScope.push(this.transport.protocol());
       // Load the current socket status.
       int status = (int) TcpSocket.STATUS.getOpaque(this.transport);
       // Loop while there are reader operations to perform.
@@ -2257,7 +2261,7 @@ final class TcpReader extends AbstractTask {
             LogScope.pop();
           }
         } else if ((status & (TcpSocket.OPENING_MASK | TcpSocket.READ_READY)) == (TcpSocket.OPENING_MASK | TcpSocket.READ_READY)) {
-          LogScope.push("opening");
+          LogScope.push("read");
           try {
             status = this.transport.runOpeningRead(status);
             continue;
@@ -2273,7 +2277,7 @@ final class TcpReader extends AbstractTask {
             LogScope.pop();
           }
         } else if ((status & (TcpSocket.CONNECTED | TcpSocket.CLOSE_INBOUND_REQUEST)) == (TcpSocket.CONNECTED | TcpSocket.CLOSE_INBOUND_REQUEST)) {
-          LogScope.push("shutdown");
+          LogScope.push("read");
           try {
             status = this.transport.runCloseInbound(status);
             continue;
@@ -2281,7 +2285,7 @@ final class TcpReader extends AbstractTask {
             LogScope.pop();
           }
         } else if ((status & (TcpSocket.CONNECTED | TcpSocket.DONE_READING | TcpSocket.READ_READY)) == (TcpSocket.CONNECTED | TcpSocket.DONE_READING | TcpSocket.READ_READY)) {
-          LogScope.push("closing");
+          LogScope.push("read");
           try {
             status = this.transport.runClosingRead(status);
             continue;
@@ -2326,13 +2330,13 @@ final class TcpWriter extends AbstractTask {
   public void run() {
     LogScope.reset();
     try {
-      LogScope.push("writer");
+      LogScope.push(this.transport.protocol());
       // Load the current socket status.
       int status = (int) TcpSocket.STATUS.getOpaque(this.transport);
       // Loop while there are writer operations to perform.
       do {
         if ((status & (TcpSocket.OPENING_MASK | TcpSocket.WRITE_READY)) == (TcpSocket.OPENING_MASK | TcpSocket.WRITE_READY)) {
-          LogScope.push("opening");
+          LogScope.push("write");
           try {
             status = this.transport.runOpeningWrite(status);
             continue;
@@ -2340,7 +2344,7 @@ final class TcpWriter extends AbstractTask {
             LogScope.pop();
           }
         } else if ((status & (TcpSocket.CONNECTED | TcpSocket.CLOSE_OUTBOUND_REQUEST)) == (TcpSocket.CONNECTED | TcpSocket.CLOSE_OUTBOUND_REQUEST)) {
-          LogScope.push("shutdown");
+          LogScope.push("write");
           try {
             status = this.transport.runCloseOutbound(status);
             continue;
@@ -2348,7 +2352,7 @@ final class TcpWriter extends AbstractTask {
             LogScope.pop();
           }
         } else if ((status & (TcpSocket.CONNECTED | TcpSocket.DONE_WRITING | TcpSocket.WRITE_READY)) == (TcpSocket.CONNECTED | TcpSocket.DONE_WRITING | TcpSocket.WRITE_READY)) {
-          LogScope.push("closing");
+          LogScope.push("write");
           try {
             status = this.transport.runClosingWrite(status);
             continue;

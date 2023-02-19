@@ -80,6 +80,11 @@ public class TlsSocket extends TcpSocket {
   }
 
   @Override
+  String protocol() {
+    return "tls";
+  }
+
+  @Override
   public @Nullable SSLSession sslSession() {
     return this.sslEngine.getSession();
   }

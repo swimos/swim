@@ -49,48 +49,14 @@ public class HttpClientTests {
         this.writeRequestPayload(request.payload().encode());
       }
 
-      //@Override
-      //public void willWriteRequestMessage() {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteRequestMessage(HttpRequest<?> request) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willWriteRequestPayload(HttpRequest<?> request) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteRequestPayload(HttpRequest<?> request) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteRequest(HttpRequest<?> request) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willReadResponse(HttpRequest<?> request) {
-      //  // hook
-      //}
-
       @Override
-      public void willReadResponseMessage(HttpRequest<?> request) {
+      public void willReadResponseMessage() {
         this.readResponseMessage(HttpResponse.parse());
       }
 
-      //@Override
-      //public void didReadResponseMessage(HttpRequest<?> request, HttpResponse<?> response) {
-      //  // hook
-      //}
-
       @Override
-      public void willReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response) {
+      public void willReadResponsePayload() {
+        final HttpResponse<?> response = this.responseMessage().getNonNull();
         final FingerTrieList<HttpTransferCoding> transferCodings = response.headers().getValue(HttpHeader.TRANSFER_ENCODING);
         if (transferCodings != null && !transferCodings.isEmpty() && HttpTransferCoding.chunked().equals(transferCodings.head())) {
           this.readResponsePayload(HttpChunked.decode(Text.transcoder()));
@@ -100,35 +66,16 @@ public class HttpClientTests {
         }
       }
 
-      //@Override
-      //public void didReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response) {
-      //  // hook
-      //}
-
       @Override
-      public void didReadResponse(HttpRequest<?> request, HttpResponse<?> response) {
+      public void didReadResponse() {
+        final HttpResponse<?> response = this.responseMessage().getNonNull();
         System.out.println(response);
         System.out.println(response.payload());
       }
 
-      //@Override
-      //public void willClose() {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didClose() {
-      //  // hook
-      //}
-
     }
 
     class TestClient extends AbstractHttpClient {
-
-      //@Override
-      //public void willOpen() {
-      //  // hook
-      //}
 
       @Override
       public void didOpen() {
@@ -136,87 +83,12 @@ public class HttpClientTests {
         //this.enqueueRequester(new TestRequester());
       }
 
-      //@Override
-      //public void willWriteRequest(HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willWriteRequestMessage(HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteRequestMessage(HttpRequest<?> request, HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willWriteRequestPayload(HttpRequest<?> request, HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteRequestPayload(HttpRequest<?> request, HttpRequester requester) {
-      //  // hook
-      //}
-
       @Override
-      public void didWriteRequest(HttpRequest<?> request, HttpRequester requester) {
+      public void didWriteRequest(HttpRequesterContext handler) {
         if (!this.isRequesting()) {
           this.doneWriting();
         }
       }
-
-      //@Override
-      //public void willReadResponse(HttpRequest<?> request, HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willReadResponseMessage(HttpRequest<?> request, HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didReadResponseMessage(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didReadResponse(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willBecome(NetSocket socket) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didBecome(NetSocket socket) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void doTimeout() {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willClose() {
-      //  // hook
-      //}
 
       @Override
       public void didClose() {

@@ -26,9 +26,8 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutputBuffer;
-import swim.http.HttpRequest;
-import swim.http.HttpResponse;
 import swim.log.Log;
+import swim.log.LogScope;
 import swim.net.FlowContext;
 import swim.net.NetSocket;
 import swim.net.NetSocketContext;
@@ -75,7 +74,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     this.responderReadIndex = 0;
     this.responderWriteIndex = 0;
 
-    // Initialize the socket log.
+    // Initialize the client log.
     this.log = this.initLog();
   }
 
@@ -101,6 +100,15 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public void setLog(Log log) {
     Objects.requireNonNull(log);
     this.log = log.withFocus(this.logFocus());
+  }
+
+  String protocol() {
+    final NetSocketContext context = this.context;
+    if (context != null && context.sslSession() != null) {
+      return "https";
+    } else {
+      return "http";
+    }
   }
 
   @Override
@@ -263,7 +271,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   @Nullable HttpClientRequester requester() {
     // Peek at the head of the MPSC requester queue.
-    // Only the read task can safely peek at the current requester.
+    // Only the read task can safely peek at the current request handler.
     final int readIndex = (int) REQUESTER_READ_INDEX.getOpaque(this);
     final int writeIndex = (int) REQUESTER_WRITE_INDEX.getAcquire(this);
     if (readIndex == writeIndex) {
@@ -273,12 +281,13 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
     do {
       // Try to atomically acquire the head of the requester queue.
-      final HttpClientRequester requester = (HttpClientRequester) REQUESTER_QUEUE.getAcquire(this.requesters, readIndex);
-      if (requester != null) {
-        // Return the current requester.
-        return requester;
+      final HttpClientRequester handler = (HttpClientRequester) REQUESTER_ARRAY.getAcquire(this.requesters, readIndex);
+      if (handler != null) {
+        // Return the current request handler.
+        return handler;
       } else {
-        // A new current requester is concurrently being enqueued; spin and try again.
+        // A new current request handler is concurrently being enqueued;
+        // spin and try again.
         Thread.onSpinWait();
       }
     } while (true);
@@ -286,11 +295,11 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   @SuppressWarnings("ReferenceEquality")
   @Override
-  public boolean enqueueRequester(HttpRequester handler) {
-    final HttpClientRequester requester = new HttpClientRequester(this, handler);
-    handler.setRequesterContext(requester);
+  public boolean enqueueRequester(HttpRequester requester) {
+    final HttpClientRequester handler = new HttpClientRequester(this, requester);
+    requester.setRequesterContext(handler);
 
-    // Try to enqueue the requester into the MPSC requester queue.
+    // Try to enqueue the request handler into the MPSC requester queue.
     int writeIndex = (int) REQUESTER_WRITE_INDEX.getOpaque(this);
     do {
       final int oldWriteIndex = writeIndex;
@@ -303,14 +312,14 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
       writeIndex = (int) REQUESTER_WRITE_INDEX.compareAndExchangeAcquire(this, oldWriteIndex, newWriteIndex);
       if (writeIndex == oldWriteIndex) {
         // Successfully acquired a slot in the requester queue;
-        // release the requester into the queue.
-        REQUESTER_QUEUE.setRelease(this.requesters, oldWriteIndex, requester);
+        // release the request handler into the queue.
+        REQUESTER_ARRAY.setRelease(this.requesters, oldWriteIndex, handler);
         if (oldWriteIndex == readIndex) {
-          // The requester queue was empty; trigger a write to begin processing
+          // The requester queue was empty; trigger a write to begin handling
           // the request. We force a write instead of requesting one because
           // the selector might have already dispatched a write ready event,
-          // in which case it won't dispatch a new write ready event until data
-          // has been written to the socket.
+          // in which case it won't dispatch a new write ready event until
+          // data has been written to the socket.
           this.triggerWrite();
         }
         return true;
@@ -319,8 +328,8 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   }
 
   @SuppressWarnings("ReferenceEquality")
-  void dequeueRequester(HttpClientRequester requester) {
-    // Try to dequeue the requester from the MPSC requester queue.
+  void dequeueRequester(HttpClientRequester handler) {
+    // Try to dequeue the request handler from the MPSC requester queue.
     // Only the write task is permitted to dequeue requesters.
     final int readIndex = (int) REQUESTER_READ_INDEX.getOpaque(this);
     int writeIndex = (int) REQUESTER_WRITE_INDEX.getAcquire(this);
@@ -329,21 +338,31 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
       throw new IllegalStateException("Inconsistent request pipeline");
     }
 
-    // Clear the current requester, if it's the head of the requester queue.
-    if (REQUESTER_QUEUE.compareAndExchange(this.requesters, readIndex, requester, null) != requester) {
-      // The requester was not the head of the requester queue.
+    // Clear the current request handler, if it's the head of the requester queue.
+    if (REQUESTER_ARRAY.compareAndExchange(this.requesters, readIndex, handler, null) != handler) {
+      // The request handler was not the head of the requester queue.
       throw new IllegalStateException("Inconsistent request pipeline");
     }
-    // Increment the read index to free up the dequeued requester's old slot.
+    // Increment the read index to free up the dequeued request handler's old slot.
     final int newReadIndex = (readIndex + 1) % this.requesters.length;
     REQUESTER_READ_INDEX.setRelease(this, newReadIndex);
 
     // Reload the write index to check for concurrent enqueues.
     writeIndex = (int) REQUESTER_WRITE_INDEX.getAcquire(this);
     if (newReadIndex != writeIndex) {
-      // The requester queue is non-empty; trigger a write to begin processing
+      // The requester queue is non-empty; trigger a write to begin handling
       // the next request.
       this.triggerWrite();
+    }
+
+    if (this.isDoneWriting() && !this.isDoneReading()) {
+      // The socket is done writing, but not done reading;
+      // check if the responder queue is empty.
+      if ((int) RESPONDER_READ_INDEX.getOpaque(this) == (int) RESPONDER_WRITE_INDEX.getAcquire(this)) {
+        // The responder queue is empty, and the socket is done writing;
+        // no more responses can be generated, so we're also done reading.
+        this.doneReading();
+      }
     }
   }
 
@@ -379,17 +398,24 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   @Override
   public void doWrite() throws IOException {
-    HttpClientRequester requester = this.requester();
-    while (requester != null) {
-      // Delegate the write operation to the current requester.
-      requester.doWrite();
-      // Start processing the next requester, if the current requester changed.
-      final HttpClientRequester nextRequester = this.requester();
-      if (requester != nextRequester) {
-        requester = nextRequester;
-      } else {
-        break;
+    final LogScope scope = LogScope.swapCurrent(this.protocol());
+    LogScope.push("write");
+    try {
+      HttpClientRequester handler = this.requester();
+      while (handler != null) {
+        // Delegate the write operation to the current request handler.
+        handler.doWrite();
+        // Start handling the next request, if the current request handler changed.
+        final HttpClientRequester nextHandler = this.requester();
+        if (handler != nextHandler) {
+          handler = nextHandler;
+        } else {
+          break;
+        }
       }
+    } finally {
+      LogScope.pop();
+      LogScope.setCurrent(scope);
     }
   }
 
@@ -402,28 +428,28 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     }
   }
 
-  protected void willWriteRequest(HttpRequester requester) {
-    this.client.willWriteRequest(requester);
+  protected void willWriteRequest(HttpRequesterContext handler) {
+    this.client.willWriteRequest(handler);
   }
 
-  protected void willWriteRequestMessage(HttpRequester requester) {
-    this.client.willWriteRequestMessage(requester);
+  protected void willWriteRequestMessage(HttpRequesterContext handler) {
+    this.client.willWriteRequestMessage(handler);
   }
 
-  protected void didWriteRequestMessage(HttpRequest<?> request, HttpRequester requester) {
-    this.client.didWriteRequestMessage(request, requester);
+  protected void didWriteRequestMessage(HttpRequesterContext handler) {
+    this.client.didWriteRequestMessage(handler);
   }
 
-  protected void willWriteRequestPayload(HttpRequest<?> request, HttpRequester requester) {
-    this.client.willWriteRequestPayload(request, requester);
+  protected void willWriteRequestPayload(HttpRequesterContext handler) {
+    this.client.willWriteRequestPayload(handler);
   }
 
-  protected void didWriteRequestPayload(HttpRequest<?> request, HttpRequester requester) {
-    this.client.didWriteRequestPayload(request, requester);
+  protected void didWriteRequestPayload(HttpRequesterContext handler) {
+    this.client.didWriteRequestPayload(handler);
   }
 
-  protected void didWriteRequest(HttpRequest<?> request, HttpRequester requester) {
-    this.client.didWriteRequest(request, requester);
+  protected void didWriteRequest(HttpRequesterContext handler) {
+    this.client.didWriteRequest(handler);
   }
 
   @Override
@@ -435,7 +461,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   @Nullable HttpClientRequester responder() {
     // Peek at the head of the MPSC responder queue.
-    // Only the read task can safely peek at the current responder.
+    // Only the read task can safely peek at the current response handler.
     final int readIndex = (int) RESPONDER_READ_INDEX.getOpaque(this);
     final int writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
     if (readIndex == writeIndex) {
@@ -445,20 +471,21 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
     do {
       // Try to atomically acquire the head of the responder queue.
-      final HttpClientRequester responder = (HttpClientRequester) REQUESTER_QUEUE.getAcquire(this.responders, readIndex);
-      if (responder != null) {
-        // Return the current responder.
-        return responder;
+      final HttpClientRequester handle = (HttpClientRequester) REQUESTER_ARRAY.getAcquire(this.responders, readIndex);
+      if (handle != null) {
+        // Return the current response handler.
+        return handle;
       } else {
-        // A new current responder is concurrently being enqueued; spin and try again.
+        // A new current response handler is concurrently being enqueued;
+        // spin and try again.
         Thread.onSpinWait();
       }
     } while (true);
   }
 
   @SuppressWarnings("ReferenceEquality")
-  boolean enqueueResponder(HttpClientRequester responder) {
-    // Enqueue the requester into the MPSC responder queue.
+  boolean enqueueResponder(HttpClientRequester handler) {
+    // Enqueue the response handler into the MPSC responder queue.
     int writeIndex = (int) RESPONDER_WRITE_INDEX.getOpaque(this);
     do {
       final int oldWriteIndex = writeIndex;
@@ -470,8 +497,8 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
       writeIndex = (int) RESPONDER_WRITE_INDEX.compareAndExchangeAcquire(this, oldWriteIndex, newWriteIndex);
       if (writeIndex == oldWriteIndex) {
         // Successfully acquired a slot in the responder queue;
-        // release the requester into the queue.
-        REQUESTER_QUEUE.setRelease(this.responders, oldWriteIndex, responder);
+        // release the response handler into the queue.
+        REQUESTER_ARRAY.setRelease(this.responders, oldWriteIndex, handler);
         // Responders aren't ready to read when first enqueued; the response
         // will begin after the request message has been written.
         return true;
@@ -480,8 +507,8 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   }
 
   @SuppressWarnings("ReferenceEquality")
-  void dequeueResponder(HttpClientRequester responder) {
-    // Try to dequeue the requester from the MPSC responder queue.
+  void dequeueResponder(HttpClientRequester handler) {
+    // Try to dequeue the response handler from the MPSC responder queue.
     // Only the read task is permitted to dequeue responders.
     final int readIndex = (int) RESPONDER_READ_INDEX.getOpaque(this);
     int writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
@@ -490,25 +517,27 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
       throw new IllegalStateException("Inconsistent response pipeline");
     }
 
-    // Clear the current responder, if it's the head of the responder queue.
-    if (REQUESTER_QUEUE.compareAndExchange(this.responders, readIndex, responder, null) != responder) {
-      // The responder was not the head of the responder queue.
+    // Clear the current response handler, if it's the head of the responder queue.
+    if (REQUESTER_ARRAY.compareAndExchange(this.responders, readIndex, handler, null) != handler) {
+      // The response handler was not the head of the responder queue.
       throw new IllegalStateException("Inconsistent response pipeline");
     }
-    // Increment the read index to free up the dequeued responder's old slot.
+    // Increment the read index to free up the dequeued response handler's old slot.
     final int newReadIndex = (readIndex + 1) % this.responders.length;
     RESPONDER_READ_INDEX.setRelease(this, newReadIndex);
 
-    // Request a write to ensure that request processing continues.
+    // Request a write to ensure that request handling continues.
     this.requestWrite();
 
     // Reload the write index to check for concurrent enqueues.
     writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
     if (newReadIndex != writeIndex) {
-      // The responder queue is non-empty; trigger a read to begin processing
+      // The responder queue is non-empty; trigger a read to begin handling
       // the next response.
       this.triggerRead();
     } else if (this.isDoneWriting()) {
+      // The responder queue is empty, and the socket is done writing;
+      // no more responses can be generated, so we're also done reading.
       this.doneReading();
     }
   }
@@ -545,17 +574,24 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   @Override
   public void doRead() throws IOException {
-    HttpClientRequester responder = this.responder();
-    while (responder != null) {
-      // Delegate the read operation to the current responder.
-      responder.doRead();
-      // Start processing the next responder, if the current responder changed.
-      final HttpClientRequester nextResponder = this.responder();
-      if (responder != nextResponder) {
-        responder = nextResponder;
-      } else {
-        break;
+    final LogScope scope = LogScope.swapCurrent(this.protocol());
+    LogScope.push("read");
+    try {
+      HttpClientRequester handler = this.responder();
+      while (handler != null) {
+        // Delegate the read operation to the current response handler.
+        handler.doRead();
+        // Start handling the next response, if the current response handler changed.
+        final HttpClientRequester nextHandler = this.responder();
+        if (handler != nextHandler) {
+          handler = nextHandler;
+        } else {
+          break;
+        }
       }
+    } finally {
+      LogScope.pop();
+      LogScope.setCurrent(scope);
     }
   }
 
@@ -568,28 +604,28 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     }
   }
 
-  protected void willReadResponse(HttpRequest<?> request, HttpRequester requester) {
-    this.client.willReadResponse(request, requester);
+  protected void willReadResponse(HttpRequesterContext handler) {
+    this.client.willReadResponse(handler);
   }
 
-  protected void willReadResponseMessage(HttpRequest<?> request, HttpRequester requester) {
-    this.client.willReadResponseMessage(request, requester);
+  protected void willReadResponseMessage(HttpRequesterContext handler) {
+    this.client.willReadResponseMessage(handler);
   }
 
-  protected void didReadResponseMessage(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
-    this.client.didReadResponseMessage(request, response, requester);
+  protected void didReadResponseMessage(HttpRequesterContext handler) {
+    this.client.didReadResponseMessage(handler);
   }
 
-  protected void willReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
-    this.client.willReadResponsePayload(request, response, requester);
+  protected void willReadResponsePayload(HttpRequesterContext handler) {
+    this.client.willReadResponsePayload(handler);
   }
 
-  protected void didReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
-    this.client.didReadResponsePayload(request, response, requester);
+  protected void didReadResponsePayload(HttpRequesterContext handler) {
+    this.client.didReadResponsePayload(handler);
   }
 
-  protected void didReadResponse(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
-    this.client.didReadResponse(request, response, requester);
+  protected void didReadResponse(HttpRequesterContext handler) {
+    this.client.didReadResponse(handler);
   }
 
   @Override
@@ -658,7 +694,11 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   @Override
   public void doTimeout() throws IOException {
-    this.client.doTimeout();
+    HttpClientRequester handler = this.responder();
+    if (handler == null) {
+      handler = this.requester();
+    }
+    this.client.doTimeout(handler);
   }
 
   @Override
@@ -693,7 +733,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
    * {@code VarHandle} for atomically accessing elements of an
    * {@link HttpClientRequester} array.
    */
-  static final VarHandle REQUESTER_QUEUE;
+  static final VarHandle REQUESTER_ARRAY;
 
   /**
    * {@code VarHandle} for atomically accessing the {@link #requesterReadIndex} field.
@@ -717,7 +757,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
 
   static {
     // Initialize var handles.
-    REQUESTER_QUEUE = MethodHandles.arrayElementVarHandle(HttpClientRequester.class.arrayType());
+    REQUESTER_ARRAY = MethodHandles.arrayElementVarHandle(HttpClientRequester.class.arrayType());
     final MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
       REQUESTER_READ_INDEX = lookup.findVarHandle(HttpClientSocket.class, "requesterReadIndex", Integer.TYPE);

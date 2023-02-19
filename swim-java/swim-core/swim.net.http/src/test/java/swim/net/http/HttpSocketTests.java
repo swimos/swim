@@ -57,23 +57,25 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void didWriteRequest(HttpRequest<?> request) {
+      public void didWriteRequest() {
         clientRequestLatch.countDown();
       }
 
       @Override
-      public void willReadResponseMessage(HttpRequest<?> request) {
+      public void willReadResponseMessage() {
         this.readResponseMessage(HttpResponse.parse());
       }
 
       @Override
-      public void willReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response) {
+      public void willReadResponsePayload() {
+        final HttpResponse<?> response = this.responseMessage().getNonNull();
         final long contentLength = Assume.nonNull(response.headers().getValue(HttpHeader.CONTENT_LENGTH)).longValue();
         this.readResponsePayload(HttpBody.decode(Text.transcoder(), contentLength));
       }
 
       @Override
-      public void didReadResponse(HttpRequest<?> request, HttpResponse<?> response) {
+      public void didReadResponse() {
+        final HttpResponse<?> response = this.responseMessage().getNonNull();
         assertEquals(HttpStatus.OK, response.status());
         assertEquals("serverToClient", response.payload().get());
         clientResponseLatch.countDown();
@@ -89,14 +91,14 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void didWriteRequest(HttpRequest<?> request, HttpRequester requester) {
+      public void didWriteRequest(HttpRequesterContext handler) {
         if (clientRequestLatch.getCount() != 0L) {
           this.enqueueRequester(new TestRequester());
         }
       }
 
       @Override
-      public void didReadResponse(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
+      public void didReadResponse(HttpRequesterContext handler) {
         if (clientRequestLatch.getCount() != 0L) {
           this.enqueueRequester(new TestRequester());
         } else {
@@ -114,20 +116,22 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void willReadRequestPayload(HttpRequest<?> request) {
+      public void willReadRequestPayload() {
+        final HttpRequest<?> request = this.requestMessage().getNonNull();
         final long contentLength = Assume.nonNull(request.headers().getValue(HttpHeader.CONTENT_LENGTH)).longValue();
         this.readRequestPayload(HttpBody.decode(Text.transcoder(), contentLength));
       }
 
       @Override
-      public void didReadRequest(HttpRequest<?> request) {
+      public void didReadRequest() {
+        final HttpRequest<?> request = this.requestMessage().getNonNull();
         assertEquals("/test", request.target());
         assertEquals("clientToServer", request.payload().get());
         serverRequestLatch.countDown();
       }
 
       @Override
-      public void willWriteResponse(HttpRequest<?> request) {
+      public void willWriteResponse() {
         final HttpBody<String> payload = HttpBody.create("serverToClient", Text.transcoder());
         final HttpResponse<String> response = HttpResponse.create(HttpStatus.OK, payload.headers(), payload);
         this.writeResponseMessage(response.write());
@@ -135,7 +139,7 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void didWriteResponse(HttpRequest<?> request, HttpResponse<?> response) {
+      public void didWriteResponse() {
         serverResponseLatch.countDown();
       }
 
@@ -149,7 +153,7 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void didReadRequest(HttpRequest<?> request, HttpResponder responder) {
+      public void didReadRequest(HttpResponderContext handler) {
         this.enqueueRequester(new TestResponder());
       }
 

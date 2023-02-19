@@ -21,6 +21,7 @@ import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.util.Result;
 
 /**
  * Non-blocking token stream writer. {@code Output} enables incremental,
@@ -240,6 +241,18 @@ public abstract class Output<T> implements Flushable {
   @CheckReturnValue
   public Throwable getError() {
     throw new IllegalStateException("No output error");
+  }
+
+  public Result<T> toResult() {
+    try {
+      return Result.success(this.get());
+    } catch (Throwable error) {
+      if (Result.isNonFatal(error)) {
+        return Result.failure(error);
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**

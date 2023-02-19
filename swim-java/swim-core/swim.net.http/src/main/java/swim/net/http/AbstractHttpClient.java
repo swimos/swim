@@ -195,7 +195,7 @@ public abstract class AbstractHttpClient implements HttpClient {
   }
 
   @Override
-  public void doTimeout() {
+  public void doTimeout(@Nullable HttpRequesterContext handler) {
     this.close();
   }
 

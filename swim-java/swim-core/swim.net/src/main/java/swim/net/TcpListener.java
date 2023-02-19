@@ -128,6 +128,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     this.log = log.withFocus(this.logFocus());
   }
 
+  String protocol() {
+    return "tcp";
+  }
+
   @Override
   public final @Nullable TransportContext transportContext() {
     return this.context;
@@ -876,13 +880,13 @@ final class TcpAcceptor extends AbstractTask {
   public void run() {
     LogScope.reset();
     try {
-      LogScope.push("acceptor");
+      LogScope.push(this.transport.protocol());
       // Load the current listener status.
       int status = (int) TcpListener.STATUS.getOpaque(this.transport);
       // Loop while there are operations to perform.
       do {
         if ((status & TcpListener.CLOSE_REQUEST) != 0) {
-          LogScope.push("close");
+          LogScope.push("unbind");
           try {
             status = this.transport.runClose(status);
             continue;
@@ -890,7 +894,7 @@ final class TcpAcceptor extends AbstractTask {
             LogScope.pop();
           }
         } else if ((status & TcpListener.OPEN_REQUEST) != 0) {
-          LogScope.push("open");
+          LogScope.push("bind");
           try {
             status = this.transport.runOpen(status);
             continue;

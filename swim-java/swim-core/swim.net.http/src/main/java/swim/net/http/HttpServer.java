@@ -17,8 +17,6 @@ package swim.net.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.http.HttpRequest;
-import swim.http.HttpResponse;
 import swim.net.NetSocket;
 
 @Public
@@ -54,51 +52,51 @@ public interface HttpServer {
     // hook
   }
 
-  default void willReadRequest(HttpResponder responder) {
+  default void willReadRequest(HttpResponderContext handler) {
     // hook
   }
 
-  default void willReadRequestMessage(HttpResponder responder) {
+  default void willReadRequestMessage(HttpResponderContext handler) {
     // hook
   }
 
-  default void didReadRequestMessage(HttpRequest<?> request, HttpResponder responder) {
+  default void didReadRequestMessage(HttpResponderContext handler) {
     // hook
   }
 
-  default void willReadRequestPayload(HttpRequest<?> request, HttpResponder responder) {
+  default void willReadRequestPayload(HttpResponderContext handler) {
     // hook
   }
 
-  default void didReadRequestPayload(HttpRequest<?> request, HttpResponder responder) {
+  default void didReadRequestPayload(HttpResponderContext handler) {
     // hook
   }
 
-  default void didReadRequest(HttpRequest<?> request, HttpResponder responder) {
+  default void didReadRequest(HttpResponderContext handler) {
     // hook
   }
 
-  default void willWriteResponse(HttpRequest<?> request, HttpResponder responder) {
+  default void willWriteResponse(HttpResponderContext handler) {
     // hook
   }
 
-  default void willWriteResponseMessage(HttpRequest<?> request, HttpResponder responder) {
+  default void willWriteResponseMessage(HttpResponderContext handler) {
     // hook
   }
 
-  default void didWriteResponseMessage(HttpRequest<?> request, HttpResponse<?> response, HttpResponder responder) {
+  default void didWriteResponseMessage(HttpResponderContext handler) {
     // hook
   }
 
-  default void willWriteResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpResponder responder) {
+  default void willWriteResponsePayload(HttpResponderContext handler) {
     // hook
   }
 
-  default void didWriteResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpResponder responder) {
+  default void didWriteResponsePayload(HttpResponderContext handler) {
     // hook
   }
 
-  default void didWriteResponse(HttpRequest<?> request, HttpResponse<?> response, HttpResponder responder) {
+  default void didWriteResponse(HttpResponderContext handler) {
     // hook
   }
 
@@ -125,7 +123,7 @@ public interface HttpServer {
    * due to inactivity. No default action is taken by the network transport
    * other than to inform the socket of the timeout.
    */
-  default void doTimeout() {
+  default void doTimeout(@Nullable HttpResponderContext handler) {
     // hook
   }
 

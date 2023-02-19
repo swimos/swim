@@ -40,41 +40,18 @@ public class HttpServerTests {
 
     class TestResponder extends AbstractHttpResponder {
 
-      //@Override
-      //public void willReadRequest() {
-      //  // hook
-      //}
-
       @Override
       public void willReadRequestMessage() {
         this.readRequestMessage(HttpRequest.parse());
       }
 
-      //@Override
-      //public void didReadRequestMessage(HttpRequest<?> request) {
-      //  // hook
-      //}
-
       @Override
-      public void willReadRequestPayload(HttpRequest<?> request) {
+      public void willReadRequestPayload() {
         this.readRequestPayload(HttpEmpty.decode());
       }
 
-      //@Override
-      //public void didReadRequestPayload(HttpRequest<?> request) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didReadRequest(HttpRequest<?> request) {
-      //  final HttpBody<String> payload = HttpBody.create("Hello, world!\n", Text.transcoder());
-      //  final HttpResponse<String> message = HttpResponse.create(HttpStatus.OK, payload.headers(), payload);
-      //  this.writeResponseMessage(message.write());
-      //  this.writeResponsePayload(payload.encode());
-      //}
-
       @Override
-      public void willWriteResponse(HttpRequest<?> request) {
+      public void willWriteResponse() {
         final HttpBody<String> payload = HttpBody.create("Hello, world!\n", Text.transcoder());
         //final HttpChunked<String> payload = HttpChunked.create("Hello, world!\n", Text.transcoder());
         final HttpResponse<String> message = HttpResponse.create(HttpStatus.OK, payload.headers(), payload);
@@ -82,139 +59,19 @@ public class HttpServerTests {
         this.writeResponsePayload(payload.encode());
       }
 
-      //@Override
-      //public void willWriteResponseMessage(HttpRequest<?> request) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteResponseMessage(HttpRequest<?> request, HttpResponse<?> response) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willWriteResponsePayload(HttpRequest<?> request, HttpResponse<?> response) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteResponsePayload(HttpRequest<?> request, HttpResponse<?> response) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteResponse(HttpRequest<?> request, HttpResponse<?> response) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willClose() {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didClose() {
-      //  // hook
-      //}
-
     }
 
     class TestServer extends AbstractHttpServer {
-
-      //@Override
-      //public void willOpen() {
-      //  // hook
-      //}
 
       @Override
       public void didOpen() {
         this.enqueueRequester(new TestResponder());
       }
 
-      //@Override
-      //public void willReadRequest(HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willReadRequestMessage(HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didReadRequestMessage(HttpRequest<?> request, HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willReadRequestPayload(HttpRequest<?> request, HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didReadRequestPayload(HttpRequest<?> request, HttpResponder responder) {
-      //  // hook
-      //}
-
       @Override
-      public void didReadRequest(HttpRequest<?> request, HttpResponder responder) {
+      public void didReadRequest(HttpResponderContext handler) {
         this.enqueueRequester(new TestResponder());
       }
-
-      //@Override
-      //public void willWriteResponse(HttpRequest<?> request, HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willWriteResponseMessage(HttpRequest<?> request, HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteResponseMessage(HttpRequest<?> request, HttpResponse<?> response, HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willWriteResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didWriteResponse(HttpRequest<?> request, HttpResponse<?> response, HttpResponder responder) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willBecome(NetSocket socket) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didBecome(NetSocket socket) {
-      //  // hook
-      //}
-
-      //@Override
-      //public void doTimeout() {
-      //  // hook
-      //}
-
-      //@Override
-      //public void willClose() {
-      //  // hook
-      //}
-
-      //@Override
-      //public void didClose() {
-      //  // hook
-      //}
 
     }
 

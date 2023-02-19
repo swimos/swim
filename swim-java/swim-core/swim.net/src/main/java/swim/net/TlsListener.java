@@ -52,6 +52,11 @@ public class TlsListener extends TcpListener {
   }
 
   @Override
+  String protocol() {
+    return "tls";
+  }
+
+  @Override
   public @Nullable NetSocketRef accept(NetSocket socket) throws IOException {
     final SocketChannel channel = this.channel.accept();
     channel.configureBlocking(false);

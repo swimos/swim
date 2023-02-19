@@ -17,8 +17,6 @@ package swim.net.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.http.HttpRequest;
-import swim.http.HttpResponse;
 import swim.net.NetSocket;
 
 @Public
@@ -62,51 +60,51 @@ public interface HttpClient {
     // hook
   }
 
-  default void willWriteRequest(HttpRequester requester) {
+  default void willWriteRequest(HttpRequesterContext handler) {
     // hook
   }
 
-  default void willWriteRequestMessage(HttpRequester requester) {
+  default void willWriteRequestMessage(HttpRequesterContext handler) {
     // hook
   }
 
-  default void didWriteRequestMessage(HttpRequest<?> request, HttpRequester requester) {
+  default void didWriteRequestMessage(HttpRequesterContext handler) {
     // hook
   }
 
-  default void willWriteRequestPayload(HttpRequest<?> request, HttpRequester requester) {
+  default void willWriteRequestPayload(HttpRequesterContext handler) {
     // hook
   }
 
-  default void didWriteRequestPayload(HttpRequest<?> request, HttpRequester requester) {
+  default void didWriteRequestPayload(HttpRequesterContext handler) {
     // hook
   }
 
-  default void didWriteRequest(HttpRequest<?> request, HttpRequester requester) {
+  default void didWriteRequest(HttpRequesterContext handler) {
     // hook
   }
 
-  default void willReadResponse(HttpRequest<?> request, HttpRequester requester) {
+  default void willReadResponse(HttpRequesterContext handler) {
     // hook
   }
 
-  default void willReadResponseMessage(HttpRequest<?> request, HttpRequester requester) {
+  default void willReadResponseMessage(HttpRequesterContext handler) {
     // hook
   }
 
-  default void didReadResponseMessage(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
+  default void didReadResponseMessage(HttpRequesterContext handler) {
     // hook
   }
 
-  default void willReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
+  default void willReadResponsePayload(HttpRequesterContext handler) {
     // hook
   }
 
-  default void didReadResponsePayload(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
+  default void didReadResponsePayload(HttpRequesterContext handler) {
     // hook
   }
 
-  default void didReadResponse(HttpRequest<?> request, HttpResponse<?> response, HttpRequester requester) {
+  default void didReadResponse(HttpRequesterContext handler) {
     // hook
   }
 
@@ -133,7 +131,7 @@ public interface HttpClient {
    * due to inactivity. No default action is taken by the network transport
    * other than to inform the socket of the timeout.
    */
-  default void doTimeout() {
+  default void doTimeout(@Nullable HttpRequesterContext handler) {
     // hook
   }
 

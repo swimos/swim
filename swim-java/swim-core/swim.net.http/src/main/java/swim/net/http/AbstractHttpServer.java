@@ -168,7 +168,7 @@ public abstract class AbstractHttpServer implements HttpServer {
   }
 
   @Override
-  public void doTimeout() {
+  public void doTimeout(@Nullable HttpResponderContext handler) {
     this.close();
   }
 
