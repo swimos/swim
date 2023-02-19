@@ -15,8 +15,6 @@
 package swim.log;
 
 import org.junit.jupiter.api.Test;
-import swim.util.Severity;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LoggerTests {
 

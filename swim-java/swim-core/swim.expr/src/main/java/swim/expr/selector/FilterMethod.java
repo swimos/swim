@@ -55,11 +55,11 @@ public final class FilterMethod implements Term, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(FilterMethod.class);
+  private static final int HASH_SEED = Murmur3.seed(FilterMethod.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(FilterMethod.hashSeed, this.scope.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.scope.hashCode()));
   }
 
   @Override

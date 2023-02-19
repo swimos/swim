@@ -22,7 +22,6 @@ import swim.codec.Parse;
 import swim.expr.ExprParser;
 import swim.expr.IdentifierTermForm;
 import swim.expr.Term;
-import swim.expr.selector.ChildExpr;
 import swim.util.Assume;
 
 @Internal

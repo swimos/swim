@@ -67,7 +67,7 @@ public final class HttpTransferCoding implements ToSource, ToString {
   }
 
   public HttpTransferCoding withParam(String key, String value) {
-    return HttpTransferCoding.create(this.name, this.params.updated(key, value));
+    return HttpTransferCoding.of(this.name, this.params.updated(key, value));
   }
 
   public boolean isChunked() {
@@ -107,18 +107,18 @@ public final class HttpTransferCoding implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpTransferCoding.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpTransferCoding.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpTransferCoding.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.name.hashCode()), this.params.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpTransferCoding", "create")
+    notation.beginInvoke("HttpTransferCoding", "of")
             .appendArgument(this.name)
             .endInvoke();
     for (Map.Entry<String, String> param : this.params) {
@@ -165,7 +165,7 @@ public final class HttpTransferCoding implements ToSource, ToString {
     return GZIP;
   }
 
-  public static HttpTransferCoding create(String name, ArrayMap<String, String> params) {
+  public static HttpTransferCoding of(String name, ArrayMap<String, String> params) {
     if (params.isEmpty()) {
       if ("chunked".equals(name)) {
         return HttpTransferCoding.chunked();
@@ -180,8 +180,8 @@ public final class HttpTransferCoding implements ToSource, ToString {
     return new HttpTransferCoding(name, params);
   }
 
-  public static HttpTransferCoding create(String name) {
-    return HttpTransferCoding.create(name, ArrayMap.<String, String>empty());
+  public static HttpTransferCoding of(String name) {
+    return HttpTransferCoding.of(name, ArrayMap.<String, String>empty());
   }
 
   public static Parse<HttpTransferCoding> parse(Input input) {
@@ -283,7 +283,7 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
           input.step();
           step = 4;
         } else if (input.isReady()) {
-          return Parse.done(HttpTransferCoding.create(nameBuilder.toString(), params));
+          return Parse.done(HttpTransferCoding.of(nameBuilder.toString(), params));
         }
       }
       if (step == 4) {

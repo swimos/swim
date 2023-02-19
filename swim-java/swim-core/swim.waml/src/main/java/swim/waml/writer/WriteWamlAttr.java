@@ -20,7 +20,6 @@ import swim.codec.Base16;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.codec.WriteException;
-import swim.waml.Waml;
 import swim.waml.WamlAttrForm;
 import swim.waml.WamlWriter;
 

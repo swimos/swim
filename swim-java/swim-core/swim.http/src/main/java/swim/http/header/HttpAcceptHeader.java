@@ -57,7 +57,7 @@ public final class HttpAcceptHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpAcceptHeader", "create")
+    notation.beginInvoke("HttpAcceptHeader", "of")
             .appendArgument(this.mediaRanges())
             .endInvoke();
   }
@@ -70,17 +70,17 @@ public final class HttpAcceptHeader extends HttpHeader {
     return new HttpAcceptHeader(name, value, null);
   }
 
-  public static HttpAcceptHeader create(String name, FingerTrieList<MediaRange> mediaRanges) {
+  public static HttpAcceptHeader of(String name, FingerTrieList<MediaRange> mediaRanges) {
     final String value = HttpAcceptHeader.writeValue(mediaRanges.iterator());
     return new HttpAcceptHeader(name, value, mediaRanges);
   }
 
-  public static HttpAcceptHeader create(FingerTrieList<MediaRange> mediaRanges) {
-    return HttpAcceptHeader.create(NAME, mediaRanges);
+  public static HttpAcceptHeader of(FingerTrieList<MediaRange> mediaRanges) {
+    return HttpAcceptHeader.of(NAME, mediaRanges);
   }
 
-  public static HttpAcceptHeader create(MediaRange... mediaRanges) {
-    return HttpAcceptHeader.create(NAME, FingerTrieList.of(mediaRanges));
+  public static HttpAcceptHeader of(MediaRange... mediaRanges) {
+    return HttpAcceptHeader.of(NAME, FingerTrieList.of(mediaRanges));
   }
 
   private static FingerTrieList<MediaRange> parseValue(String value) {
@@ -158,8 +158,8 @@ final class HttpAcceptHeaderType implements HttpHeaderType<FingerTrieList<MediaR
   }
 
   @Override
-  public HttpHeader create(String name, FingerTrieList<MediaRange> mediaRanges) {
-    return HttpAcceptHeader.create(name, mediaRanges);
+  public HttpHeader of(String name, FingerTrieList<MediaRange> mediaRanges) {
+    return HttpAcceptHeader.of(name, mediaRanges);
   }
 
   @Override

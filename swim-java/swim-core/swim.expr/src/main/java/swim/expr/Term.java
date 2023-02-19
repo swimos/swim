@@ -15,8 +15,6 @@
 package swim.expr;
 
 import java.math.BigInteger;
-import java.util.Collections;
-import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;

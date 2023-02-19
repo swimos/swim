@@ -23,9 +23,9 @@ import swim.expr.ContextExpr;
 import swim.expr.Term;
 import swim.expr.selector.ChildrenExpr;
 import swim.expr.selector.DescendantsExpr;
-import swim.util.Assume;
 import swim.json.JsonForm;
 import swim.json.JsonParser;
+import swim.util.Assume;
 
 @Internal
 public final class ParseJsonLiteral extends Parse<Term> {

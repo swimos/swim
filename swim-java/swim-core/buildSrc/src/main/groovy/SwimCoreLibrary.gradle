@@ -66,6 +66,10 @@ test {
     if (!project.hasProperty('benchmark')) {
       excludeTags 'benchmark'
     }
+    // Run `gradle -Pmanual test` to run manual tests.
+    if (!project.hasProperty('manual')) {
+      excludeTags 'manual'
+    }
   }
 
   // Pass -P*log.* properties through to tests.

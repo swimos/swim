@@ -20,33 +20,13 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
-import swim.codec.MediaRange;
-import swim.codec.MediaType;
 import swim.codec.Output;
 import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Write;
 import swim.codec.WriteException;
-import swim.collections.FingerTrieList;
 import swim.collections.StringTrieMap;
-import swim.http.header.HttpAcceptHeader;
-import swim.http.header.HttpAllowHeader;
-import swim.http.header.HttpConnectionHeader;
-import swim.http.header.HttpContentLengthHeader;
-import swim.http.header.HttpContentTypeHeader;
-import swim.http.header.HttpCookieHeader;
-import swim.http.header.HttpExpectHeader;
-import swim.http.header.HttpHostHeader;
-import swim.http.header.HttpMaxForwardsHeader;
-import swim.http.header.HttpOriginHeader;
-import swim.http.header.HttpServerHeader;
-import swim.http.header.HttpSetCookieHeader;
-import swim.http.header.HttpTransferEncodingHeader;
-import swim.http.header.HttpUpgradeHeader;
-import swim.http.header.HttpUserAgentHeader;
-import swim.uri.Uri;
-import swim.uri.UriAuthority;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -185,36 +165,6 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
   public static HttpHeaderRegistry registry() {
     return HttpHeaderRegistry.REGISTRY;
   }
-
-  public static final HttpHeaderType<FingerTrieList<MediaRange>> ACCEPT = HttpAcceptHeader.TYPE;
-
-  public static final HttpHeaderType<FingerTrieList<HttpMethod>> ALLOW = HttpAllowHeader.TYPE;
-
-  public static final HttpHeaderType<FingerTrieList<String>> CONNECTION = HttpConnectionHeader.TYPE;
-
-  public static final HttpHeaderType<Long> CONTENT_LENGTH = HttpContentLengthHeader.TYPE;
-
-  public static final HttpHeaderType<MediaType> CONTENT_TYPE = HttpContentTypeHeader.TYPE;
-
-  public static final HttpHeaderType<FingerTrieList<HttpCookie>> COOKIE = HttpCookieHeader.TYPE;
-
-  public static final HttpHeaderType<String> EXPECT = HttpExpectHeader.TYPE;
-
-  public static final HttpHeaderType<UriAuthority> HOST = HttpHostHeader.TYPE;
-
-  public static final HttpHeaderType<Integer> MAX_FORWARDS = HttpMaxForwardsHeader.TYPE;
-
-  public static final HttpHeaderType<FingerTrieList<Uri>> ORIGIN = HttpOriginHeader.TYPE;
-
-  public static final HttpHeaderType<FingerTrieList<HttpProduct>> SERVER = HttpServerHeader.TYPE;
-
-  public static final HttpHeaderType<HttpCookieState> SET_COOKIE = HttpSetCookieHeader.TYPE;
-
-  public static final HttpHeaderType<FingerTrieList<HttpTransferCoding>> TRANSFER_ENCODING = HttpTransferEncodingHeader.TYPE;
-
-  public static final HttpHeaderType<FingerTrieList<HttpProtocol>> UPGRADE = HttpUpgradeHeader.TYPE;
-
-  public static final HttpHeaderType<FingerTrieList<HttpProduct>> USER_AGENT = HttpUserAgentHeader.TYPE;
 
 }
 

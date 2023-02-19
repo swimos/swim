@@ -14,8 +14,8 @@
 
 package swim.net;
 
-import java.net.InetAddress;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import swim.annotations.Public;
 import swim.annotations.Since;

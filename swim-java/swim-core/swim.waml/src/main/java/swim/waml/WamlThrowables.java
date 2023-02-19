@@ -74,7 +74,7 @@ public final class WamlThrowables implements WamlProvider, ToSource {
     return this.toSource();
   }
 
-  private static WamlThrowables PROVIDER = new WamlThrowables(GENERIC_PRIORITY);
+  private static final WamlThrowables PROVIDER = new WamlThrowables(GENERIC_PRIORITY);
 
   public static WamlThrowables provider(int priority) {
     if (priority == GENERIC_PRIORITY) {

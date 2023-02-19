@@ -46,481 +46,481 @@ public interface Log {
 
   default void log(Severity level, String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, detail, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, detail, cause));
     }
   }
 
   default void log(Severity level, String message, @Nullable Object detail) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, detail, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, detail, null));
     }
   }
 
   default void log(Severity level, String message, @Nullable Throwable cause) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, null, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, null, cause));
     }
   }
 
   default void log(Severity level, String message) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, null, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, null, null));
     }
   }
 
   default void logConfig(Severity level, String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, LogConfig.of(detail, level), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, LogConfig.of(detail, level), cause));
     }
   }
 
   default void logConfig(Severity level, String message, @Nullable Object detail) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, LogConfig.of(detail, level), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, LogConfig.of(detail, level), null));
     }
   }
 
   default void logEntity(Severity level, String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, LogEntity.of(detail, level), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, LogEntity.of(detail, level), cause));
     }
   }
 
   default void logEntity(Severity level, String message, @Nullable Object detail) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, LogEntity.of(detail, level), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, LogEntity.of(detail, level), null));
     }
   }
 
   default void logStatus(Severity level, String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, LogStatus.of(detail, level), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, LogStatus.of(detail, level), cause));
     }
   }
 
   default void logStatus(Severity level, String message, @Nullable Object detail) {
     if (this.handles(level)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), level, message, LogStatus.of(detail, level), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), level, message, LogStatus.of(detail, level), null));
     }
   }
 
   default void trace(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, detail, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, detail, cause));
     }
   }
 
   default void trace(String message, @Nullable Object detail) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, detail, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, detail, null));
     }
   }
 
   default void trace(String message, @Nullable Throwable cause) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, null, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, null, cause));
     }
   }
 
   default void trace(String message) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, null, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, null, null));
     }
   }
 
   default void traceConfig(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogConfig.of(detail, Severity.TRACE), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogConfig.of(detail, Severity.TRACE), cause));
     }
   }
 
   default void traceConfig(String message, @Nullable Object detail) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogConfig.of(detail, Severity.TRACE), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogConfig.of(detail, Severity.TRACE), null));
     }
   }
 
   default void traceEntity(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogEntity.of(detail, Severity.TRACE), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogEntity.of(detail, Severity.TRACE), cause));
     }
   }
 
   default void traceEntity(String message, @Nullable Object detail) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogEntity.of(detail, Severity.TRACE), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogEntity.of(detail, Severity.TRACE), null));
     }
   }
 
   default void traceStatus(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogStatus.of(detail, Severity.TRACE), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogStatus.of(detail, Severity.TRACE), cause));
     }
   }
 
   default void traceStatus(String message, @Nullable Object detail) {
     if (this.handles(Severity.TRACE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogStatus.of(detail, Severity.TRACE), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.TRACE, message, LogStatus.of(detail, Severity.TRACE), null));
     }
   }
 
   default void debug(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, detail, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, detail, cause));
     }
   }
 
   default void debug(String message, @Nullable Object detail) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, detail, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, detail, null));
     }
   }
 
   default void debug(String message, @Nullable Throwable cause) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, null, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, null, cause));
     }
   }
 
   default void debug(String message) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, null, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, null, null));
     }
   }
 
   default void debugConfig(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogConfig.of(detail, Severity.DEBUG), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogConfig.of(detail, Severity.DEBUG), cause));
     }
   }
 
   default void debugConfig(String message, @Nullable Object detail) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogConfig.of(detail, Severity.DEBUG), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogConfig.of(detail, Severity.DEBUG), null));
     }
   }
 
   default void debugEntity(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogEntity.of(detail, Severity.DEBUG), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogEntity.of(detail, Severity.DEBUG), cause));
     }
   }
 
   default void debugEntity(String message, @Nullable Object detail) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogEntity.of(detail, Severity.DEBUG), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogEntity.of(detail, Severity.DEBUG), null));
     }
   }
 
   default void debugStatus(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogStatus.of(detail, Severity.DEBUG), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogStatus.of(detail, Severity.DEBUG), cause));
     }
   }
 
   default void debugStatus(String message, @Nullable Object detail) {
     if (this.handles(Severity.DEBUG)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogStatus.of(detail, Severity.DEBUG), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.DEBUG, message, LogStatus.of(detail, Severity.DEBUG), null));
     }
   }
 
   default void info(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, detail, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, detail, cause));
     }
   }
 
   default void info(String message, @Nullable Object detail) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, detail, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, detail, null));
     }
   }
 
   default void info(String message, @Nullable Throwable cause) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, null, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, null, cause));
     }
   }
 
   default void info(String message) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, null, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, null, null));
     }
   }
 
   default void infoConfig(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogConfig.of(detail, Severity.INFO), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogConfig.of(detail, Severity.INFO), cause));
     }
   }
 
   default void infoConfig(String message, @Nullable Object detail) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogConfig.of(detail, Severity.INFO), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogConfig.of(detail, Severity.INFO), null));
     }
   }
 
   default void infoEntity(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogEntity.of(detail, Severity.INFO), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogEntity.of(detail, Severity.INFO), cause));
     }
   }
 
   default void infoEntity(String message, @Nullable Object detail) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogEntity.of(detail, Severity.INFO), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogEntity.of(detail, Severity.INFO), null));
     }
   }
 
   default void infoStatus(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogStatus.of(detail, Severity.INFO), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogStatus.of(detail, Severity.INFO), cause));
     }
   }
 
   default void infoStatus(String message, @Nullable Object detail) {
     if (this.handles(Severity.INFO)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogStatus.of(detail, Severity.INFO), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.INFO, message, LogStatus.of(detail, Severity.INFO), null));
     }
   }
 
   default void notice(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, detail, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, detail, cause));
     }
   }
 
   default void notice(String message, @Nullable Object detail) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, detail, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, detail, null));
     }
   }
 
   default void notice(String message, @Nullable Throwable cause) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, null, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, null, cause));
     }
   }
 
   default void notice(String message) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, null, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, null, null));
     }
   }
 
   default void noticeConfig(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogConfig.of(detail, Severity.NOTICE), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogConfig.of(detail, Severity.NOTICE), cause));
     }
   }
 
   default void noticeConfig(String message, @Nullable Object detail) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogConfig.of(detail, Severity.NOTICE), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogConfig.of(detail, Severity.NOTICE), null));
     }
   }
 
   default void noticeEntity(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogEntity.of(detail, Severity.NOTICE), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogEntity.of(detail, Severity.NOTICE), cause));
     }
   }
 
   default void noticeEntity(String message, @Nullable Object detail) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogEntity.of(detail, Severity.NOTICE), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogEntity.of(detail, Severity.NOTICE), null));
     }
   }
 
   default void noticeStatus(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogStatus.of(detail, Severity.NOTICE), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogStatus.of(detail, Severity.NOTICE), cause));
     }
   }
 
   default void noticeStatus(String message, @Nullable Object detail) {
     if (this.handles(Severity.NOTICE)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogStatus.of(detail, Severity.NOTICE), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.NOTICE, message, LogStatus.of(detail, Severity.NOTICE), null));
     }
   }
 
   default void warning(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, detail, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, detail, cause));
     }
   }
 
   default void warning(String message, @Nullable Object detail) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, detail, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, detail, null));
     }
   }
 
   default void warning(String message, @Nullable Throwable cause) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, null, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, null, cause));
     }
   }
 
   default void warning(String message) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, null, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, null, null));
     }
   }
 
   default void warningConfig(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogConfig.of(detail, Severity.WARNING), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogConfig.of(detail, Severity.WARNING), cause));
     }
   }
 
   default void warningConfig(String message, @Nullable Object detail) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogConfig.of(detail, Severity.WARNING), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogConfig.of(detail, Severity.WARNING), null));
     }
   }
 
   default void warningEntity(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogEntity.of(detail, Severity.WARNING), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogEntity.of(detail, Severity.WARNING), cause));
     }
   }
 
   default void warningEntity(String message, @Nullable Object detail) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogEntity.of(detail, Severity.WARNING), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogEntity.of(detail, Severity.WARNING), null));
     }
   }
 
   default void warningStatus(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogStatus.of(detail, Severity.WARNING), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogStatus.of(detail, Severity.WARNING), cause));
     }
   }
 
   default void warningStatus(String message, @Nullable Object detail) {
     if (this.handles(Severity.WARNING)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogStatus.of(detail, Severity.WARNING), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.WARNING, message, LogStatus.of(detail, Severity.WARNING), null));
     }
   }
 
   default void error(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, detail, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, detail, cause));
     }
   }
 
   default void error(String message, @Nullable Object detail) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, detail, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, detail, null));
     }
   }
 
   default void error(String message, @Nullable Throwable cause) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, null, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, null, cause));
     }
   }
 
   default void error(String message) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, null, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, null, null));
     }
   }
 
   default void errorConfig(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogConfig.of(detail, Severity.ERROR), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogConfig.of(detail, Severity.ERROR), cause));
     }
   }
 
   default void errorConfig(String message, @Nullable Object detail) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogConfig.of(detail, Severity.ERROR), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogConfig.of(detail, Severity.ERROR), null));
     }
   }
 
   default void errorEntity(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogEntity.of(detail, Severity.ERROR), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogEntity.of(detail, Severity.ERROR), cause));
     }
   }
 
   default void errorEntity(String message, @Nullable Object detail) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogEntity.of(detail, Severity.ERROR), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogEntity.of(detail, Severity.ERROR), null));
     }
   }
 
   default void errorStatus(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogStatus.of(detail, Severity.ERROR), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogStatus.of(detail, Severity.ERROR), cause));
     }
   }
 
   default void errorStatus(String message, @Nullable Object detail) {
     if (this.handles(Severity.ERROR)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogStatus.of(detail, Severity.ERROR), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.ERROR, message, LogStatus.of(detail, Severity.ERROR), null));
     }
   }
 
   default void fatal(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, detail, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, detail, cause));
     }
   }
 
   default void fatal(String message, @Nullable Object detail) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, detail, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, detail, null));
     }
   }
 
   default void fatal(String message, @Nullable Throwable cause) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, null, cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, null, cause));
     }
   }
 
   default void fatal(String message) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, null, null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, null, null));
     }
   }
 
   default void fatalConfig(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogConfig.of(detail, Severity.FATAL), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogConfig.of(detail, Severity.FATAL), cause));
     }
   }
 
   default void fatalConfig(String message, @Nullable Object detail) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogConfig.of(detail, Severity.FATAL), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogConfig.of(detail, Severity.FATAL), null));
     }
   }
 
   default void fatalEntity(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogEntity.of(detail, Severity.FATAL), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogEntity.of(detail, Severity.FATAL), cause));
     }
   }
 
   default void fatalEntity(String message, @Nullable Object detail) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogEntity.of(detail, Severity.FATAL), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogEntity.of(detail, Severity.FATAL), null));
     }
   }
 
   default void fatalStatus(String message, @Nullable Object detail, @Nullable Throwable cause) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogStatus.of(detail, Severity.FATAL), cause));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogStatus.of(detail, Severity.FATAL), cause));
     }
   }
 
   default void fatalStatus(String message, @Nullable Object detail) {
     if (this.handles(Severity.FATAL)) {
-      this.publish(LogEvent.create(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogStatus.of(detail, Severity.FATAL), null));
+      this.publish(LogEvent.of(this.topic(), this.focus(), LogScope.current(), Severity.FATAL, message, LogStatus.of(detail, Severity.FATAL), null));
     }
   }
 
@@ -530,7 +530,6 @@ public interface Log {
   static Logger forTopic(String topic) {
     return Logger.root().getChild(topic);
   }
-
 
   static String uniqueId(@Nullable Object object) {
     final int hash = Murmur3.mash(System.identityHashCode(object));
@@ -552,4 +551,5 @@ public interface Log {
         .append("0123456789ABCDEF".charAt(hash & 0xF))
         .toString();
   }
+
 }

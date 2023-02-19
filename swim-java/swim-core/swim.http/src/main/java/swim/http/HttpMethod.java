@@ -83,11 +83,11 @@ public final class HttpMethod implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpMethod.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpMethod.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(HttpMethod.hashSeed, this.name.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.name.hashCode()));
   }
 
   @Override
@@ -99,7 +99,7 @@ public final class HttpMethod implements ToSource, ToString {
         || "OPTIONS".equals(this.name) || "TRACE".equals(this.name)) {
       notation.append("HttpMethod").append('.').append(this.name);
     } else {
-      notation.beginInvoke("HttpMethod", "create")
+      notation.beginInvoke("HttpMethod", "of")
               .appendArgument(this.name)
               .endInvoke();
     }
@@ -117,7 +117,7 @@ public final class HttpMethod implements ToSource, ToString {
     return output.get();
   }
 
-  public static HttpMethod create(String name) {
+  public static HttpMethod of(String name) {
     Objects.requireNonNull(name);
     HttpMethod method = ((StringTrieMap<HttpMethod>) NAMES.getOpaque()).get(name);
     if (method == null) {
@@ -246,7 +246,7 @@ final class ParseHttpMethod extends Parse<HttpMethod> {
         HttpMethod method = nameTrie != null ? nameTrie.value() : null;
         if (method == null) {
           final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
-          method = HttpMethod.create(name);
+          method = HttpMethod.of(name);
         }
         return Parse.done(method);
       }

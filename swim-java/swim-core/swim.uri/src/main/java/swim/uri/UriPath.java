@@ -166,7 +166,7 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
   @Override
   public boolean containsAll(Collection<?> components) {
     UriPath path = this;
-    HashSet<?> missing = new HashSet<Object>(components);
+    final HashSet<?> missing = new HashSet<Object>(components);
     while (!path.isEmpty() && !missing.isEmpty()) {
       missing.remove(path.head());
       path = path.tail();
@@ -300,7 +300,7 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
 
   public UriPath removeDotSegments() {
     UriPath path = this;
-    UriPathBuilder builder = new UriPathBuilder();
+    final UriPathBuilder builder = new UriPathBuilder();
     while (!path.isEmpty()) {
       final String head = path.head();
       if (head.equals(".") || head.equals("..")) {

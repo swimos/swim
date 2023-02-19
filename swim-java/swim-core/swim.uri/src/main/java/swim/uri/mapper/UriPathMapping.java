@@ -248,11 +248,11 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UriPathMapping.class);
+  private static final int HASH_SEED = Murmur3.seed(UriPathMapping.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(UriPathMapping.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.table.hashCode()), this.wildcard.hashCode()), this.terminal.hashCode()));
   }
 

@@ -24,7 +24,6 @@ import swim.annotations.Nullable;
 import swim.codec.ParseException;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.waml.WamlForm;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class WamlJavaParserTests {

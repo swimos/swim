@@ -57,7 +57,7 @@ public final class HttpTransferEncodingHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpTransferEncodingHeader", "create")
+    notation.beginInvoke("HttpTransferEncodingHeader", "of")
             .appendArgument(this.codings())
             .endInvoke();
   }
@@ -76,17 +76,17 @@ public final class HttpTransferEncodingHeader extends HttpHeader {
     return new HttpTransferEncodingHeader(name, value, null);
   }
 
-  public static HttpTransferEncodingHeader create(String name, FingerTrieList<HttpTransferCoding> codings) {
+  public static HttpTransferEncodingHeader of(String name, FingerTrieList<HttpTransferCoding> codings) {
     final String value = HttpTransferEncodingHeader.writeValue(codings.iterator());
     return new HttpTransferEncodingHeader(name, value, codings);
   }
 
-  public static HttpTransferEncodingHeader create(FingerTrieList<HttpTransferCoding> codings) {
-    return HttpTransferEncodingHeader.create(NAME, codings);
+  public static HttpTransferEncodingHeader of(FingerTrieList<HttpTransferCoding> codings) {
+    return HttpTransferEncodingHeader.of(NAME, codings);
   }
 
-  public static HttpTransferEncodingHeader create(HttpTransferCoding... codings) {
-    return HttpTransferEncodingHeader.create(NAME, FingerTrieList.of(codings));
+  public static HttpTransferEncodingHeader of(HttpTransferCoding... codings) {
+    return HttpTransferEncodingHeader.of(NAME, FingerTrieList.of(codings));
   }
 
   private static FingerTrieList<HttpTransferCoding> parseValue(String value) {
@@ -164,8 +164,8 @@ final class HttpTransferEncodingHeaderType implements HttpHeaderType<FingerTrieL
   }
 
   @Override
-  public HttpHeader create(String name, FingerTrieList<HttpTransferCoding> codings) {
-    return HttpTransferEncodingHeader.create(name, codings);
+  public HttpHeader of(String name, FingerTrieList<HttpTransferCoding> codings) {
+    return HttpTransferEncodingHeader.of(name, codings);
   }
 
   @Override

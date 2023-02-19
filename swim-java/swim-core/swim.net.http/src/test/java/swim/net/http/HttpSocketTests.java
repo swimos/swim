@@ -22,12 +22,13 @@ import org.junit.platform.commons.JUnitException;
 import swim.codec.Text;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
-import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import swim.http.HttpMethod;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
+import swim.http.header.HttpContentLengthHeader;
+import swim.http.header.HttpHostHeader;
 import swim.net.AbstractNetListener;
 import swim.net.TransportDriver;
 import swim.util.Assume;
@@ -49,9 +50,9 @@ public class HttpSocketTests {
 
       @Override
       public void willWriteRequest() {
-        final HttpBody<String> payload = HttpBody.create("clientToServer", Text.transcoder());
-        final HttpHeaders headers = payload.headers().prepended(HttpHeader.HOST.of("localhost"));
-        final HttpRequest<?> request = HttpRequest.create(HttpMethod.POST, "/test", headers, payload);
+        final HttpBody<String> payload = HttpBody.of("clientToServer", Text.transcoder());
+        final HttpHeaders headers = payload.headers().prepended(HttpHostHeader.of("localhost"));
+        final HttpRequest<?> request = HttpRequest.of(HttpMethod.POST, "/test", headers, payload);
         this.writeRequestMessage(request.write());
         this.writeRequestPayload(payload.encode());
       }
@@ -69,7 +70,7 @@ public class HttpSocketTests {
       @Override
       public void willReadResponsePayload() {
         final HttpResponse<?> response = this.responseMessage().getNonNull();
-        final long contentLength = Assume.nonNull(response.headers().getValue(HttpHeader.CONTENT_LENGTH)).longValue();
+        final long contentLength = Assume.nonNull(response.headers().getValue(HttpContentLengthHeader.TYPE)).longValue();
         this.readResponsePayload(HttpBody.decode(Text.transcoder(), contentLength));
       }
 
@@ -118,7 +119,7 @@ public class HttpSocketTests {
       @Override
       public void willReadRequestPayload() {
         final HttpRequest<?> request = this.requestMessage().getNonNull();
-        final long contentLength = Assume.nonNull(request.headers().getValue(HttpHeader.CONTENT_LENGTH)).longValue();
+        final long contentLength = Assume.nonNull(request.headers().getValue(HttpContentLengthHeader.TYPE)).longValue();
         this.readRequestPayload(HttpBody.decode(Text.transcoder(), contentLength));
       }
 
@@ -132,8 +133,8 @@ public class HttpSocketTests {
 
       @Override
       public void willWriteResponse() {
-        final HttpBody<String> payload = HttpBody.create("serverToClient", Text.transcoder());
-        final HttpResponse<String> response = HttpResponse.create(HttpStatus.OK, payload.headers(), payload);
+        final HttpBody<String> payload = HttpBody.of("serverToClient", Text.transcoder());
+        final HttpResponse<String> response = HttpResponse.of(HttpStatus.OK, payload.headers(), payload);
         this.writeResponseMessage(response.write());
         this.writeResponsePayload(payload.encode());
       }

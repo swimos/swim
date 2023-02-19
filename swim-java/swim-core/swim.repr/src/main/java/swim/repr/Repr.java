@@ -15,8 +15,6 @@
 package swim.repr;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.util.Map;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;

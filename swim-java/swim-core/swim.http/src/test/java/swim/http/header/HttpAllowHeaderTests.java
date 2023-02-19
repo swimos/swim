@@ -28,22 +28,22 @@ public class HttpAllowHeaderTests {
   @Test
   public void parseAllowHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Allow: GET\r\n");
-    assertInstanceOf(HttpAllowHeader.class, headers.getHeader(HttpHeader.ALLOW));
-    assertEquals(HttpAllowHeader.create(HttpMethod.GET), headers.getHeader(HttpHeader.ALLOW));
-    assertEquals("GET", headers.get(HttpHeader.ALLOW));
-    assertEquals(FingerTrieList.of(HttpMethod.GET), headers.getValue(HttpHeader.ALLOW));
+    assertInstanceOf(HttpAllowHeader.class, headers.getHeader(HttpAllowHeader.TYPE));
+    assertEquals(HttpAllowHeader.of(HttpMethod.GET), headers.getHeader(HttpAllowHeader.TYPE));
+    assertEquals("GET", headers.get(HttpAllowHeader.TYPE));
+    assertEquals(FingerTrieList.of(HttpMethod.GET), headers.getValue(HttpAllowHeader.TYPE));
   }
 
   @Test
   public void parseAllowHeaders() {
-    assertParses(HttpAllowHeader.create(HttpMethod.GET), "Allow: GET");
-    assertParses(HttpAllowHeader.create(HttpMethod.GET, HttpMethod.PUT), "Allow: GET, PUT");
+    assertParses(HttpAllowHeader.of(HttpMethod.GET), "Allow: GET");
+    assertParses(HttpAllowHeader.of(HttpMethod.GET, HttpMethod.PUT), "Allow: GET, PUT");
   }
 
   @Test
   public void writeAllowHeaders() {
-    assertWrites("Allow: GET", HttpAllowHeader.create(HttpMethod.GET));
-    assertWrites("Allow: GET, PUT", HttpAllowHeader.create(HttpMethod.GET, HttpMethod.PUT));
+    assertWrites("Allow: GET", HttpAllowHeader.of(HttpMethod.GET));
+    assertWrites("Allow: GET, PUT", HttpAllowHeader.of(HttpMethod.GET, HttpMethod.PUT));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

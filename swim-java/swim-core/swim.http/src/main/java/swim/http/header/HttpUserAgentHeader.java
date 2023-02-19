@@ -57,7 +57,7 @@ public final class HttpUserAgentHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpUserAgentHeader", "create")
+    notation.beginInvoke("HttpUserAgentHeader", "of")
             .appendArgument(this.products())
             .endInvoke();
   }
@@ -70,17 +70,17 @@ public final class HttpUserAgentHeader extends HttpHeader {
     return new HttpUserAgentHeader(name, value, null);
   }
 
-  public static HttpUserAgentHeader create(String name, FingerTrieList<HttpProduct> products) {
+  public static HttpUserAgentHeader of(String name, FingerTrieList<HttpProduct> products) {
     final String value = HttpUserAgentHeader.writeValue(products.iterator());
     return new HttpUserAgentHeader(name, value, products);
   }
 
-  public static HttpUserAgentHeader create(FingerTrieList<HttpProduct> products) {
-    return HttpUserAgentHeader.create(NAME, products);
+  public static HttpUserAgentHeader of(FingerTrieList<HttpProduct> products) {
+    return HttpUserAgentHeader.of(NAME, products);
   }
 
-  public static HttpUserAgentHeader create(HttpProduct... products) {
-    return HttpUserAgentHeader.create(NAME, FingerTrieList.of(products));
+  public static HttpUserAgentHeader of(HttpProduct... products) {
+    return HttpUserAgentHeader.of(NAME, FingerTrieList.of(products));
   }
 
   private static FingerTrieList<HttpProduct> parseValue(String value) {
@@ -144,8 +144,8 @@ final class HttpUserAgentHeaderType implements HttpHeaderType<FingerTrieList<Htt
   }
 
   @Override
-  public HttpHeader create(String name, FingerTrieList<HttpProduct> products) {
-    return HttpUserAgentHeader.create(name, products);
+  public HttpHeader of(String name, FingerTrieList<HttpProduct> products) {
+    return HttpUserAgentHeader.of(name, products);
   }
 
   @Override

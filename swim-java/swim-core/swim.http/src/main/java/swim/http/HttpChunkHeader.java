@@ -72,7 +72,7 @@ public final class HttpChunkHeader implements ToSource, ToString {
   }
 
   public HttpChunkHeader withExt(String key, @Nullable String value) {
-    return HttpChunkHeader.create(this.size, this.exts.updated(key, value));
+    return HttpChunkHeader.of(this.size, this.exts.updated(key, value));
   }
 
   public Write<?> write(Output<?> output) {
@@ -96,11 +96,11 @@ public final class HttpChunkHeader implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpChunkHeader.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpChunkHeader.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpChunkHeader.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         Murmur3.hash(this.size)), this.exts.hashCode()));
   }
 
@@ -110,7 +110,7 @@ public final class HttpChunkHeader implements ToSource, ToString {
     if (this.size == 0L) {
       notation.beginInvoke("HttpChunkHeader", "last").endInvoke();
     } else {
-      notation.beginInvoke("HttpChunkHeader", "create")
+      notation.beginInvoke("HttpChunkHeader", "of")
               .appendArgument(this.size)
               .endInvoke();
     }
@@ -140,7 +140,7 @@ public final class HttpChunkHeader implements ToSource, ToString {
     return LAST;
   }
 
-  public static HttpChunkHeader create(long size, ArrayMap<String, String> exts) {
+  public static HttpChunkHeader of(long size, ArrayMap<String, String> exts) {
     if (size == 0L && exts.isEmpty()) {
       return HttpChunkHeader.last();
     } else {
@@ -148,8 +148,8 @@ public final class HttpChunkHeader implements ToSource, ToString {
     }
   }
 
-  public static HttpChunkHeader create(long size) {
-    return HttpChunkHeader.create(size, ArrayMap.empty());
+  public static HttpChunkHeader of(long size) {
+    return HttpChunkHeader.of(size, ArrayMap.empty());
   }
 
   public static Parse<HttpChunkHeader> parse(Input input) {
@@ -193,7 +193,7 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
 
   @Override
   public Parse<HttpChunkHeader> consume(Input input) {
-    return ParseHttpChunkHeader.parse(input, this.size, this.exts, nameBuilder,
+    return ParseHttpChunkHeader.parse(input, this.size, this.exts, this.nameBuilder,
                                       this.valueBuilder, this.step);
   }
 
@@ -246,7 +246,7 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
           if (exts == null) {
             exts = ArrayMap.empty();
           }
-          return Parse.done(HttpChunkHeader.create(size, exts));
+          return Parse.done(HttpChunkHeader.of(size, exts));
         }
       }
       if (step == 4) {

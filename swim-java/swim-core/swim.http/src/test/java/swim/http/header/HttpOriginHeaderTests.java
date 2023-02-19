@@ -30,21 +30,21 @@ public class HttpOriginHeaderTests {
   @Test
   public void parseOriginHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Origin: http://www.example.com\r\n");
-    assertInstanceOf(HttpOriginHeader.class, headers.getHeader(HttpHeader.ORIGIN));
-    assertEquals(HttpOriginHeader.create(Uri.parse("http://www.example.com")), headers.getHeader(HttpHeader.ORIGIN));
-    assertEquals("http://www.example.com", headers.get(HttpHeader.ORIGIN));
-    assertEquals(FingerTrieList.of(Uri.parse("http://www.example.com")), headers.getValue(HttpHeader.ORIGIN));
+    assertInstanceOf(HttpOriginHeader.class, headers.getHeader(HttpOriginHeader.TYPE));
+    assertEquals(HttpOriginHeader.of(Uri.parse("http://www.example.com")), headers.getHeader(HttpOriginHeader.TYPE));
+    assertEquals("http://www.example.com", headers.get(HttpOriginHeader.TYPE));
+    assertEquals(FingerTrieList.of(Uri.parse("http://www.example.com")), headers.getValue(HttpOriginHeader.TYPE));
   }
 
   @Test
   public void parseOriginHeaders() {
-    assertParses(HttpOriginHeader.create(Uri.parse("http://www.example.com")),
+    assertParses(HttpOriginHeader.of(Uri.parse("http://www.example.com")),
                  "Origin: http://www.example.com");
-    assertParses(HttpOriginHeader.create(Uri.parse("https://www.example.com:443")),
+    assertParses(HttpOriginHeader.of(Uri.parse("https://www.example.com:443")),
                  "Origin: https://www.example.com:443");
-    assertParses(HttpOriginHeader.create(Uri.parse("http://example1.com"), Uri.parse("http://example2.com")),
+    assertParses(HttpOriginHeader.of(Uri.parse("http://example1.com"), Uri.parse("http://example2.com")),
                  "Origin: http://example1.com http://example2.com");
-    assertParses(HttpOriginHeader.create(Uri.parse("http://example1.com:8080"), Uri.parse("http://example2.com:8081")),
+    assertParses(HttpOriginHeader.of(Uri.parse("http://example1.com:8080"), Uri.parse("http://example2.com:8081")),
                  "Origin: http://example1.com:8080 http://example2.com:8081");
     assertParses(HttpOriginHeader.empty(), "Origin: null");
   }
@@ -52,20 +52,20 @@ public class HttpOriginHeaderTests {
   @Test
   public void writeOriginHeaders() {
     assertWrites("Origin: http://www.example.com",
-                 HttpOriginHeader.create(Uri.parse("http://www.example.com")));
+                 HttpOriginHeader.of(Uri.parse("http://www.example.com")));
     assertWrites("Origin: https://www.example.com:443",
-                 HttpOriginHeader.create(Uri.parse("https://www.example.com:443")));
+                 HttpOriginHeader.of(Uri.parse("https://www.example.com:443")));
     assertWrites("Origin: http://example1.com http://example2.com",
-                 HttpOriginHeader.create(Uri.parse("http://example1.com"), Uri.parse("http://example2.com")));
+                 HttpOriginHeader.of(Uri.parse("http://example1.com"), Uri.parse("http://example2.com")));
     assertWrites("Origin: http://example1.com:8080 http://example2.com:8081",
-                 HttpOriginHeader.create(Uri.parse("http://example1.com:8080"), Uri.parse("http://example2.com:8081")));
+                 HttpOriginHeader.of(Uri.parse("http://example1.com:8080"), Uri.parse("http://example2.com:8081")));
     assertWrites("Origin: null", HttpOriginHeader.empty());
   }
 
   @Test
   public void writeOriginHeadersOmittingPath() {
     assertWrites("Origin: http://www.example.com",
-                 HttpOriginHeader.create(Uri.parse("http://www.example.com/")));
+                 HttpOriginHeader.of(Uri.parse("http://www.example.com/")));
   }
 
   @Test

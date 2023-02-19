@@ -15,6 +15,7 @@
 package swim.net.http;
 
 import java.util.concurrent.CountDownLatch;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
 import swim.codec.Text;
@@ -22,17 +23,20 @@ import swim.collections.FingerTrieList;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
 import swim.http.HttpChunked;
-import swim.http.HttpHeader;
 import swim.http.HttpMethod;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpTransferCoding;
+import swim.http.header.HttpContentLengthHeader;
+import swim.http.header.HttpHostHeader;
+import swim.http.header.HttpTransferEncodingHeader;
 import swim.net.TransportDriver;
 import swim.util.Assume;
 
 public class HttpClientTests {
 
   @Test
+  @Tag("manual")
   public void testClient() {
     final CountDownLatch finishedLatch = new CountDownLatch(1);
 
@@ -44,7 +48,7 @@ public class HttpClientTests {
 
       @Override
       public void willWriteRequest() {
-        final HttpRequest<?> request = HttpRequest.create(HttpMethod.GET, "/", HttpHeader.HOST.of("www.google.com"));
+        final HttpRequest<?> request = HttpRequest.of(HttpMethod.GET, "/", HttpHostHeader.of("www.google.com"));
         this.writeRequestMessage(request.write());
         this.writeRequestPayload(request.payload().encode());
       }
@@ -57,11 +61,11 @@ public class HttpClientTests {
       @Override
       public void willReadResponsePayload() {
         final HttpResponse<?> response = this.responseMessage().getNonNull();
-        final FingerTrieList<HttpTransferCoding> transferCodings = response.headers().getValue(HttpHeader.TRANSFER_ENCODING);
+        final FingerTrieList<HttpTransferCoding> transferCodings = response.headers().getValue(HttpTransferEncodingHeader.TYPE);
         if (transferCodings != null && !transferCodings.isEmpty() && HttpTransferCoding.chunked().equals(transferCodings.head())) {
           this.readResponsePayload(HttpChunked.decode(Text.transcoder()));
         } else {
-          final long contentLength = Assume.nonNull(response.headers().getValue(HttpHeader.CONTENT_LENGTH)).longValue();
+          final long contentLength = Assume.nonNull(response.headers().getValue(HttpContentLengthHeader.TYPE)).longValue();
           this.readResponsePayload(HttpBody.decode(Text.transcoder(), contentLength));
         }
       }

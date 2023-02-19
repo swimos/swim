@@ -20,20 +20,20 @@ public class MediaTypeTests {
 
   @Test
   public void parseSimpleMediaTypes() {
-    assertParses(MediaType.create("text", "plain"), "text/plain");
+    assertParses(MediaType.of("text", "plain"), "text/plain");
   }
 
   @Test
   public void writeSimpleMediaTypes() {
-    assertWrites("text/plain", MediaType.create("text", "plain"));
+    assertWrites("text/plain", MediaType.of("text", "plain"));
   }
 
   @Test
   public void parseMediaTypesWithParams() {
-    assertParses(MediaType.create("text", "html")
+    assertParses(MediaType.of("text", "html")
                           .withParam("charset", "UTF-8"),
                  "text/html;charset=UTF-8");
-    assertParses(MediaType.create("text", "html")
+    assertParses(MediaType.of("text", "html")
                           .withParam("charset", "UTF-8"),
                  "text/html ; charset=UTF-8");
   }
@@ -41,16 +41,16 @@ public class MediaTypeTests {
   @Test
   public void writeMediaTypesWithParams() {
     assertWrites("text/html; charset=UTF-8",
-                 MediaType.create("text", "html")
+                 MediaType.of("text", "html")
                           .withParam("charset", "UTF-8"));
   }
 
   @Test
   public void parseMediaTypesWithQuotedParams() {
-    assertParses(MediaType.create("application", "json")
+    assertParses(MediaType.of("application", "json")
                           .withParam("format", "pretty print"),
                  "application/json;format=\"pretty print\"");
-    assertParses(MediaType.create("application", "json")
+    assertParses(MediaType.of("application", "json")
                           .withParam("format", "pretty print"),
                  "application/json ; format=\"pretty print\"");
   }
@@ -58,17 +58,17 @@ public class MediaTypeTests {
   @Test
   public void writeMediaTypesWithQuotedParams() {
     assertWrites("application/json; format=\"pretty print\"",
-                 MediaType.create("application", "json")
+                 MediaType.of("application", "json")
                           .withParam("format", "pretty print"));
   }
 
   @Test
   public void parseMediaTypesWithMultipleParams() {
-    assertParses(MediaType.create("application", "json")
+    assertParses(MediaType.of("application", "json")
                           .withParam("charset", "UTF-8")
                           .withParam("format", "pretty print"),
                  "application/json;charset=UTF-8;format=\"pretty print\"");
-    assertParses(MediaType.create("application", "json")
+    assertParses(MediaType.of("application", "json")
                           .withParam("charset", "UTF-8")
                           .withParam("format", "pretty print"),
                  "application/json ; charset=UTF-8 ; format=\"pretty print\"");
@@ -77,7 +77,7 @@ public class MediaTypeTests {
   @Test
   public void writeMediaTypesWithMultipleParams() {
     assertWrites("application/json; charset=UTF-8; format=\"pretty print\"",
-                 MediaType.create("application", "json")
+                 MediaType.of("application", "json")
                           .withParam("charset", "UTF-8")
                           .withParam("format", "pretty print"));
   }

@@ -338,7 +338,7 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
     return Json.codec();
   }
 
-  static final MediaType APPLICATION_JSON = MediaType.create("application", "json");
+  static final MediaType APPLICATION_JSON = MediaType.of("application", "json");
 
   /**
    * {@code VarHandle} for atomically accessing the {@link #providers} field.

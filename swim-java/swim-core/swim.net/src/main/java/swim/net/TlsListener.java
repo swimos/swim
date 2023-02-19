@@ -20,7 +20,6 @@ import java.net.SocketException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import swim.annotations.Nullable;
 import swim.annotations.Public;

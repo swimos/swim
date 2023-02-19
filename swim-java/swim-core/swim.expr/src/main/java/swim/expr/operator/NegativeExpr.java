@@ -56,11 +56,11 @@ public final class NegativeExpr extends PrefixExpr implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(NegativeExpr.class);
+  private static final int HASH_SEED = Murmur3.seed(NegativeExpr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(NegativeExpr.hashSeed, this.rhs.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.rhs.hashCode()));
   }
 
   @Override

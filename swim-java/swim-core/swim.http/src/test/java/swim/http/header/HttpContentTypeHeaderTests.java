@@ -27,24 +27,24 @@ public class HttpContentTypeHeaderTests {
   @Test
   public void parseContentTypeHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Content-Type: application/json\r\n");
-    assertInstanceOf(HttpContentTypeHeader.class, headers.getHeader(HttpHeader.CONTENT_TYPE));
-    assertEquals(HttpContentTypeHeader.create(MediaType.create("application", "json")), headers.getHeader(HttpHeader.CONTENT_TYPE));
-    assertEquals("application/json", headers.get(HttpHeader.CONTENT_TYPE));
-    assertEquals(MediaType.create("application", "json"), headers.getValue(HttpHeader.CONTENT_TYPE));
+    assertInstanceOf(HttpContentTypeHeader.class, headers.getHeader(HttpContentTypeHeader.TYPE));
+    assertEquals(HttpContentTypeHeader.of(MediaType.of("application", "json")), headers.getHeader(HttpContentTypeHeader.TYPE));
+    assertEquals("application/json", headers.get(HttpContentTypeHeader.TYPE));
+    assertEquals(MediaType.of("application", "json"), headers.getValue(HttpContentTypeHeader.TYPE));
   }
 
   @Test
   public void parseContentTypeHeaders() {
-    assertParses(HttpContentTypeHeader.create(MediaType.create("text", "plain")), "Content-Type: text/plain");
-    assertParses(HttpContentTypeHeader.create(MediaType.create("text", "html").withParam("charset", "UTF-8")),
+    assertParses(HttpContentTypeHeader.of(MediaType.of("text", "plain")), "Content-Type: text/plain");
+    assertParses(HttpContentTypeHeader.of(MediaType.of("text", "html").withParam("charset", "UTF-8")),
                  "Content-Type: text/html; charset=UTF-8");
   }
 
   @Test
   public void writeContentTypeHeaders() {
-    assertWrites("Content-Type: text/plain", HttpContentTypeHeader.create(MediaType.create("text", "plain")));
+    assertWrites("Content-Type: text/plain", HttpContentTypeHeader.of(MediaType.of("text", "plain")));
     assertWrites("Content-Type: text/html; charset=UTF-8",
-                 HttpContentTypeHeader.create(MediaType.create("text", "html").withParam("charset", "UTF-8")));
+                 HttpContentTypeHeader.of(MediaType.of("text", "html").withParam("charset", "UTF-8")));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

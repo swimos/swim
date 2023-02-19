@@ -24,7 +24,6 @@ import swim.expr.ExprParser;
 import swim.expr.FormatExpr;
 import swim.expr.Term;
 import swim.expr.TermForm;
-import swim.expr.selector.ChildExpr;
 import swim.util.ArrayBuilder;
 import swim.util.Assume;
 

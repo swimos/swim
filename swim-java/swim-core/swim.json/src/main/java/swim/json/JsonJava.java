@@ -20,13 +20,12 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.math.BigInteger;
-import java.net.InetAddress;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -39,14 +38,13 @@ import swim.codec.ParseException;
 import swim.codec.StringOutput;
 import swim.codec.Write;
 import swim.codec.WriteException;
-import swim.collections.HashTrieMap;
 import swim.expr.ContextExpr;
 import swim.expr.ExprParser;
 import swim.expr.Term;
 import swim.expr.selector.ChildExpr;
-import swim.util.Assume;
 import swim.util.ArrayBuilder;
 import swim.util.ArrayIterator;
+import swim.util.Assume;
 import swim.util.CacheSet;
 import swim.util.LruCacheSet;
 import swim.util.Notation;
@@ -1039,7 +1037,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     @Override
     public Write<?> write(Output<?> output, @Nullable String value, JsonWriter writer) {
       if (value != null) {
-      return writer.writeString(output, value);
+        return writer.writeString(output, value);
       } else {
         return writer.writeNull(output);
       }

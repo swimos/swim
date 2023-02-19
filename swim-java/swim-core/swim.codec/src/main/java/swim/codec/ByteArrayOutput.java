@@ -108,7 +108,7 @@ public final class ByteArrayOutput extends Output<byte[]> {
 
   private static final byte[] EMPTY_ARRAY = new byte[0];
 
-  public static ByteArrayOutput create(int capacity) {
+  public static ByteArrayOutput ofCapacity(int capacity) {
     return new ByteArrayOutput(new byte[capacity], capacity, true);
   }
 

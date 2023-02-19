@@ -64,7 +64,7 @@ public final class SwimTerms implements TermProvider, ToSource {
     return this.toSource();
   }
 
-  private static SwimTerms PROVIDER = new SwimTerms(BUILTIN_PRIORITY);
+  private static final SwimTerms PROVIDER = new SwimTerms(BUILTIN_PRIORITY);
 
   public static SwimTerms provider(int priority) {
     if (priority == BUILTIN_PRIORITY) {

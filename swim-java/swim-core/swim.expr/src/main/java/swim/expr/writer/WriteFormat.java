@@ -17,7 +17,6 @@ package swim.expr.writer;
 import java.util.Iterator;
 import swim.annotations.Internal;
 import swim.annotations.Nullable;
-import swim.codec.Base16;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.codec.WriteException;

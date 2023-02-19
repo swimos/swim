@@ -28,28 +28,28 @@ public class HttpUserAgentHeaderTests {
   @Test
   public void parseUserAgentHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("User-Agent: swim/5.0\r\n");
-    assertInstanceOf(HttpUserAgentHeader.class, headers.getHeader(HttpHeader.USER_AGENT));
-    assertEquals(HttpUserAgentHeader.create(HttpProduct.create("swim", "5.0")), headers.getHeader(HttpHeader.USER_AGENT));
-    assertEquals("swim/5.0", headers.get(HttpHeader.USER_AGENT));
-    assertEquals(FingerTrieList.of(HttpProduct.create("swim", "5.0")), headers.getValue(HttpHeader.USER_AGENT));
+    assertInstanceOf(HttpUserAgentHeader.class, headers.getHeader(HttpUserAgentHeader.TYPE));
+    assertEquals(HttpUserAgentHeader.of(HttpProduct.of("swim", "5.0")), headers.getHeader(HttpUserAgentHeader.TYPE));
+    assertEquals("swim/5.0", headers.get(HttpUserAgentHeader.TYPE));
+    assertEquals(FingerTrieList.of(HttpProduct.of("swim", "5.0")), headers.getValue(HttpUserAgentHeader.TYPE));
   }
 
   @Test
   public void parseUserAgentHeaders() {
-    assertParses(HttpUserAgentHeader.create(HttpProduct.create("swim")), "User-Agent: swim");
-    assertParses(HttpUserAgentHeader.create(HttpProduct.create("swim", "5.0")), "User-Agent: swim/5.0");
-    assertParses(HttpUserAgentHeader.create(HttpProduct.create("swim", "5.0").withComment("beta").withComment("debug"),
-                                            HttpProduct.create("waml").withComment("expr")),
+    assertParses(HttpUserAgentHeader.of(HttpProduct.of("swim")), "User-Agent: swim");
+    assertParses(HttpUserAgentHeader.of(HttpProduct.of("swim", "5.0")), "User-Agent: swim/5.0");
+    assertParses(HttpUserAgentHeader.of(HttpProduct.of("swim", "5.0").withComment("beta").withComment("debug"),
+                                        HttpProduct.of("waml").withComment("expr")),
                  "User-Agent: swim/5.0 (beta) (debug) waml (expr)");
   }
 
   @Test
   public void writeUserAgentHeaders() {
-    assertWrites("User-Agent: swim", HttpUserAgentHeader.create(HttpProduct.create("swim")));
-    assertWrites("User-Agent: swim/5.0", HttpUserAgentHeader.create(HttpProduct.create("swim", "5.0")));
+    assertWrites("User-Agent: swim", HttpUserAgentHeader.of(HttpProduct.of("swim")));
+    assertWrites("User-Agent: swim/5.0", HttpUserAgentHeader.of(HttpProduct.of("swim", "5.0")));
     assertWrites("User-Agent: swim/5.0 (beta) (debug) waml (expr)",
-                 HttpUserAgentHeader.create(HttpProduct.create("swim", "5.0").withComment("beta").withComment("debug"),
-                                            HttpProduct.create("waml").withComment("expr")));
+                 HttpUserAgentHeader.of(HttpProduct.of("swim", "5.0").withComment("beta").withComment("debug"),
+                                        HttpProduct.of("waml").withComment("expr")));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

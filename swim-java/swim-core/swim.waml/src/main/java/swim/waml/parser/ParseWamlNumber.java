@@ -21,7 +21,6 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
-import swim.waml.Waml;
 import swim.waml.WamlForm;
 import swim.waml.WamlNumberForm;
 import swim.waml.WamlParser;

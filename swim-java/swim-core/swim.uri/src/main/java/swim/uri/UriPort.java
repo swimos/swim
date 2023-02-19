@@ -65,11 +65,11 @@ public final class UriPort implements Comparable<UriPort>, ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UriPort.class);
+  private static final int HASH_SEED = Murmur3.seed(UriPort.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(UriPort.hashSeed, this.number));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.number));
   }
 
   @Override

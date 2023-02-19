@@ -69,8 +69,8 @@ public final class MediaRange implements ToSource, ToString {
   }
 
   public MediaRange withParam(String key, String value) {
-    return MediaRange.create(this.type, this.subtype, this.params.updated(key, value),
-                             this.weight, this.extParams);
+    return MediaRange.of(this.type, this.subtype, this.params.updated(key, value),
+                         this.weight, this.extParams);
   }
 
   public int weight() {
@@ -146,12 +146,12 @@ public final class MediaRange implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(MediaRange.class);
+  private static final int HASH_SEED = Murmur3.seed(MediaRange.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        MediaRange.hashSeed, this.type.hashCode()), this.subtype.hashCode()),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(HASH_SEED, this.type.hashCode()), this.subtype.hashCode()),
         this.params.hashCode()), Murmur3.hash(this.weight)),
         this.extParams.hashCode()));
   }
@@ -159,7 +159,7 @@ public final class MediaRange implements ToSource, ToString {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("MediaRange", "create");
+    notation.beginInvoke("MediaRange", "of");
     notation.appendArgument(this.type);
     notation.appendArgument(this.subtype);
     notation.endInvoke();
@@ -194,17 +194,17 @@ public final class MediaRange implements ToSource, ToString {
     return output.get();
   }
 
-  public static MediaRange create(String type, String subtype, ArrayMap<String, String> params,
-                                  int weight, ArrayMap<String, String> extParams) {
+  public static MediaRange of(String type, String subtype, ArrayMap<String, String> params,
+                              int weight, ArrayMap<String, String> extParams) {
     return new MediaRange(type, subtype, params, weight, extParams);
   }
 
-  public static MediaRange create(String type, String subtype, ArrayMap<String, String> params) {
-    return MediaRange.create(type, subtype, params, 1000, ArrayMap.empty());
+  public static MediaRange of(String type, String subtype, ArrayMap<String, String> params) {
+    return MediaRange.of(type, subtype, params, 1000, ArrayMap.empty());
   }
 
-  public static MediaRange create(String type, String subtype) {
-    return MediaRange.create(type, subtype, ArrayMap.empty(), 1000, ArrayMap.empty());
+  public static MediaRange of(String type, String subtype) {
+    return MediaRange.of(type, subtype, ArrayMap.empty(), 1000, ArrayMap.empty());
   }
 
   public static Parse<MediaRange> parse(Input input) {
@@ -376,9 +376,9 @@ final class ParseMediaRange extends Parse<MediaRange> {
           if (weight < 0) {
             weight = 1000;
           }
-          return Parse.done(MediaRange.create(typeBuilder.toString(),
-                                              subtypeBuilder.toString(),
-                                              params, weight, extParams));
+          return Parse.done(MediaRange.of(typeBuilder.toString(),
+                                          subtypeBuilder.toString(),
+                                          params, weight, extParams));
         }
       }
       if (step == 6) {

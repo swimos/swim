@@ -24,7 +24,7 @@ public class HttpTransferCodingTests {
     assertParses(HttpTransferCoding.compress(), "compress");
     assertParses(HttpTransferCoding.deflate(), "deflate");
     assertParses(HttpTransferCoding.gzip(), "gzip");
-    assertParses(HttpTransferCoding.create("enhance"), "enhance");
+    assertParses(HttpTransferCoding.of("enhance"), "enhance");
   }
 
   @Test
@@ -33,18 +33,18 @@ public class HttpTransferCodingTests {
     assertWrites("compress", HttpTransferCoding.compress());
     assertWrites("deflate", HttpTransferCoding.deflate());
     assertWrites("gzip", HttpTransferCoding.gzip());
-    assertWrites("enhance", HttpTransferCoding.create("enhance"));
+    assertWrites("enhance", HttpTransferCoding.of("enhance"));
   }
 
   @Test
   public void parseTransferCodingsWithParams() {
-    assertParses(HttpTransferCoding.create("time")
+    assertParses(HttpTransferCoding.of("time")
                                    .withParam("dilation", "on"),
                  "time;dilation=on");
-    assertParses(HttpTransferCoding.create("enhance")
+    assertParses(HttpTransferCoding.of("enhance")
                                    .withParam("zoom", "500x"),
                  "enhance; zoom=500x");
-    assertParses(HttpTransferCoding.create("enhance")
+    assertParses(HttpTransferCoding.of("enhance")
                                    .withParam("zoom", "500x")
                                    .withParam("quality", "very good"),
                  "enhance; zoom=500x; quality=\"very good\"");
@@ -53,13 +53,13 @@ public class HttpTransferCodingTests {
   @Test
   public void writeTransferCodingsWithParams() {
     assertWrites("time; dilation=on",
-                 HttpTransferCoding.create("time")
+                 HttpTransferCoding.of("time")
                                    .withParam("dilation", "on"));
     assertWrites("enhance; zoom=500x",
-                 HttpTransferCoding.create("enhance")
+                 HttpTransferCoding.of("enhance")
                                    .withParam("zoom", "500x"));
     assertWrites("enhance; zoom=500x; quality=\"very good\"",
-                 HttpTransferCoding.create("enhance")
+                 HttpTransferCoding.of("enhance")
                                    .withParam("zoom", "500x")
                                    .withParam("quality", "very good"));
   }

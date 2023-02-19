@@ -17,7 +17,6 @@ package swim.expr.operator;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.expr.Expr;
-import swim.expr.Term;
 
 @Public
 @Since("5.0")

@@ -57,7 +57,7 @@ public final class HttpConnectionHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpConnectionHeader", "create")
+    notation.beginInvoke("HttpConnectionHeader", "of")
             .appendArgument(this.options())
             .endInvoke();
   }
@@ -70,17 +70,13 @@ public final class HttpConnectionHeader extends HttpHeader {
     return new HttpConnectionHeader(name, value, null);
   }
 
-  public static HttpConnectionHeader create(String name, FingerTrieList<String> options) {
+  public static HttpConnectionHeader of(String name, FingerTrieList<String> options) {
     final String value = HttpConnectionHeader.writeValue(options.iterator());
     return new HttpConnectionHeader(name, value, options);
   }
 
-  public static HttpConnectionHeader create(FingerTrieList<String> options) {
-    return HttpConnectionHeader.create(NAME, options);
-  }
-
-  public static HttpConnectionHeader create(String... options) {
-    return HttpConnectionHeader.create(NAME, FingerTrieList.of(options));
+  public static HttpConnectionHeader of(FingerTrieList<String> options) {
+    return HttpConnectionHeader.of(NAME, options);
   }
 
   private static FingerTrieList<String> parseValue(String value) {
@@ -183,8 +179,8 @@ final class HttpConnectionHeaderType implements HttpHeaderType<FingerTrieList<St
   }
 
   @Override
-  public HttpHeader create(String name, FingerTrieList<String> options) {
-    return HttpConnectionHeader.create(name, options);
+  public HttpHeader of(String name, FingerTrieList<String> options) {
+    return HttpConnectionHeader.of(name, options);
   }
 
   @Override

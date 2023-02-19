@@ -32,7 +32,6 @@ import swim.expr.Term;
 import swim.expr.selector.ChildExpr;
 import swim.repr.ArrayRepr;
 import swim.repr.Attrs;
-import swim.repr.BooleanRepr;
 import swim.repr.ObjectRepr;
 import swim.repr.Repr;
 import swim.repr.StringRepr;

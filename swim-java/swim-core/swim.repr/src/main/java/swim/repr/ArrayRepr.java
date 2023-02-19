@@ -652,7 +652,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
     return EMPTY;
   }
 
-  public static ArrayRepr withCapacity(int initialCapacity) {
+  public static ArrayRepr ofCapacity(int initialCapacity) {
     return new ArrayRepr(0, 0, Attrs.empty(), new Repr[initialCapacity]);
   }
 

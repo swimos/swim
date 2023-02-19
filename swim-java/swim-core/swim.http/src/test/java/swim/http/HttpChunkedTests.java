@@ -23,7 +23,6 @@ import swim.codec.MediaType;
 import swim.codec.OutputBuffer;
 import swim.codec.Text;
 import swim.codec.Transcoder;
-import swim.codec.Utf8DecodedInput;
 import swim.codec.Utf8EncodedOutput;
 import swim.codec.Write;
 
@@ -31,34 +30,34 @@ public class HttpChunkedTests {
 
   @Test
   public void decodeEmptyChunk() {
-    assertDecodes(HttpChunked.create("", Text.transcoder()), "0\r\n\r\n");
+    assertDecodes(HttpChunked.of("", Text.transcoder()), "0\r\n\r\n");
   }
 
   @Test
   public void decodeSingleChunk() {
-    assertDecodes(HttpChunked.create("test", Text.transcoder()), "4\r\ntest\r\n0\r\n\r\n");
+    assertDecodes(HttpChunked.of("test", Text.transcoder()), "4\r\ntest\r\n0\r\n\r\n");
   }
 
   @Test
   public void decodeMultipleChunks() {
-    assertDecodes(HttpChunked.create("Hello, world!", Text.transcoder()), "7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n");
+    assertDecodes(HttpChunked.of("Hello, world!", Text.transcoder()), "7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n");
   }
 
   @Test
   public void encodeEmptyChunk() {
-    assertEncodes("0\r\n\r\n", HttpChunked.create("", Text.transcoder()));
+    assertEncodes("0\r\n\r\n", HttpChunked.of("", Text.transcoder()));
   }
 
   @Test
   public void encodeSingleChunk() {
-    assertEncodes("4\r\ntest\r\n0\r\n\r\n", HttpChunked.create("test", Text.transcoder()));
+    assertEncodes("4\r\ntest\r\n0\r\n\r\n", HttpChunked.of("test", Text.transcoder()));
   }
 
   @Test
   public void encodeMultipleChunks() {
     final Transcoder<String> transcoder = new SplitTranscoder(7);
     assertEncodes("7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n",
-                  HttpChunked.create("Hello, world!", transcoder));
+                  HttpChunked.of("Hello, world!", transcoder));
   }
 
   public static <T> void assertDecodes(HttpChunked<T> expected, String string) {
@@ -79,7 +78,7 @@ public class HttpChunkedTests {
 
     @Override
     public MediaType mediaType() {
-      return MediaType.create("text", "plain");
+      return MediaType.of("text", "plain");
     }
 
     @Override

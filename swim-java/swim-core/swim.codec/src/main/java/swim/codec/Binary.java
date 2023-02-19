@@ -32,7 +32,7 @@ public final class Binary {
     // static
   }
 
-  static final MediaType APPLICATION_OCTET_STREAM = MediaType.create("application", "octet-stream");
+  static final MediaType APPLICATION_OCTET_STREAM = MediaType.of("application", "octet-stream");
 
   static final BlankTranscoder<?> BLANK_TRANSCODER = new BlankTranscoder<Object>(APPLICATION_OCTET_STREAM);
 

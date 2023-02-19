@@ -29,7 +29,7 @@ public final class BlobReprOutput extends Output<BlobRepr> {
   }
 
   public BlobReprOutput() {
-    this(BlobRepr.create());
+    this(BlobRepr.of());
   }
 
   @Override
@@ -78,8 +78,8 @@ public final class BlobReprOutput extends Output<BlobRepr> {
     return new BlobReprOutput(this.blob.clone());
   }
 
-  public static BlobReprOutput withCapacity(int initialCapacity) {
-    return new BlobReprOutput(BlobRepr.withCapacity(initialCapacity));
+  public static BlobReprOutput ofCapacity(int initialCapacity) {
+    return new BlobReprOutput(BlobRepr.ofCapacity(initialCapacity));
   }
 
 }

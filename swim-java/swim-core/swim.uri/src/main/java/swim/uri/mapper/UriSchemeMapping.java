@@ -185,11 +185,11 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UriSchemeMapping.class);
+  private static final int HASH_SEED = Murmur3.seed(UriSchemeMapping.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(UriSchemeMapping.hashSeed, this.table.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.table.hashCode()));
   }
 
 }

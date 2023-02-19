@@ -75,11 +75,11 @@ public final class CondExpr extends OperatorExpr implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(CondExpr.class);
+  private static final int HASH_SEED = Murmur3.seed(CondExpr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(CondExpr.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.ifTerm.hashCode()), this.thenTerm.hashCode()), this.elseTerm.hashCode()));
   }
 

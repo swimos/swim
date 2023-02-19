@@ -21,8 +21,8 @@ import swim.repr.ArrayRepr;
 import swim.repr.BooleanRepr;
 import swim.repr.NumberRepr;
 import swim.repr.ObjectRepr;
-import swim.repr.StringRepr;
 import swim.repr.Repr;
+import swim.repr.StringRepr;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JsonReprParserTests {

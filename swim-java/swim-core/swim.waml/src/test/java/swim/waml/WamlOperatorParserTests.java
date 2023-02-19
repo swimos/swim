@@ -15,7 +15,6 @@
 package swim.waml;
 
 import org.junit.jupiter.api.Test;
-import swim.codec.ParseException;
 import swim.expr.ContextExpr;
 import swim.expr.operator.AndExpr;
 import swim.expr.operator.BitwiseAndExpr;

@@ -20,7 +20,6 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
-import swim.waml.Waml;
 import swim.waml.WamlArrayForm;
 import swim.waml.WamlForm;
 import swim.waml.WamlIdentifierForm;

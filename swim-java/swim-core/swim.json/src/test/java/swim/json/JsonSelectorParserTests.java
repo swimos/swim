@@ -15,7 +15,6 @@
 package swim.json;
 
 import org.junit.jupiter.api.Test;
-import swim.codec.ParseException;
 import swim.expr.ContextExpr;
 import swim.expr.GlobalExpr;
 import swim.expr.selector.InvokeExpr;

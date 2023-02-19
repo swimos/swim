@@ -31,10 +31,10 @@ public interface HttpHeaderType<V> {
     return this.of(this.name(), value);
   }
 
-  HttpHeader create(String name, V value);
+  HttpHeader of(String name, V value);
 
-  default HttpHeader create(V value) {
-    return this.create(this.name(), value);
+  default HttpHeader of(V value) {
+    return this.of(this.name(), value);
   }
 
 }

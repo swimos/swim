@@ -20,20 +20,20 @@ public class HttpCookieTests {
 
   @Test
   public void parseCookies() {
-    assertParses(HttpCookie.create("foo", "bar"), "foo=bar");
-    assertParses(HttpCookie.create("foo", "baz.bar"), "foo=baz.bar");
-    assertParses(HttpCookie.create("foo.bar", "baz.qux"), "foo.bar=baz.qux");
-    assertParses(HttpCookie.create("foo", ""), "foo=");
-    assertParses(HttpCookie.create("email", "foo@example.com"), "email=foo@example.com");
+    assertParses(HttpCookie.of("foo", "bar"), "foo=bar");
+    assertParses(HttpCookie.of("foo", "baz.bar"), "foo=baz.bar");
+    assertParses(HttpCookie.of("foo.bar", "baz.qux"), "foo.bar=baz.qux");
+    assertParses(HttpCookie.of("foo", ""), "foo=");
+    assertParses(HttpCookie.of("email", "foo@example.com"), "email=foo@example.com");
   }
 
   @Test
   public void writeCookies() {
-    assertWrites("foo=bar", HttpCookie.create("foo", "bar"));
-    assertWrites("foo=baz.bar", HttpCookie.create("foo", "baz.bar"));
-    assertWrites("foo.bar=baz.qux", HttpCookie.create("foo.bar", "baz.qux"));
-    assertWrites("foo=", HttpCookie.create("foo", ""));
-    assertWrites("email=foo@example.com", HttpCookie.create("email", "foo@example.com"));
+    assertWrites("foo=bar", HttpCookie.of("foo", "bar"));
+    assertWrites("foo=baz.bar", HttpCookie.of("foo", "baz.bar"));
+    assertWrites("foo.bar=baz.qux", HttpCookie.of("foo.bar", "baz.qux"));
+    assertWrites("foo=", HttpCookie.of("foo", ""));
+    assertWrites("email=foo@example.com", HttpCookie.of("email", "foo@example.com"));
   }
 
   public static void assertParses(HttpCookie expected, String string) {

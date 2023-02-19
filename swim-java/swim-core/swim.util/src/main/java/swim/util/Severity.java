@@ -134,7 +134,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
     if (this.label.equals(label)) {
       return this;
     } else {
-      return Severity.create(this.value, label);
+      return Severity.of(this.value, label);
     }
   }
 
@@ -182,11 +182,11 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(Severity.class);
+  private static final int HASH_SEED = Murmur3.seed(Severity.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Severity.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.value), this.label.hashCode()));
   }
 
@@ -316,7 +316,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
    * @throws IllegalArgumentException if {@code value} is not
    *         a valid severity value.
    */
-  public static Severity create(int value, @Nullable String label) {
+  public static Severity of(int value, @Nullable String label) {
     switch (value) {
       case ALL_VALUE:
         if (label == null || ALL_LABEL.equals(label)) {
@@ -375,7 +375,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
    * @throws IllegalArgumentException if {@code value} is not
    *         a valid severity value.
    */
-  public static Severity create(int value) {
+  public static Severity of(int value) {
     switch (value) {
       case ALL_VALUE:
         return ALL;

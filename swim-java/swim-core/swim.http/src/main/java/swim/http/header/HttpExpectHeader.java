@@ -37,7 +37,7 @@ public final class HttpExpectHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpExpectHeader", "create")
+    notation.beginInvoke("HttpExpectHeader", "of")
             .appendArgument(this.value)
             .endInvoke();
   }
@@ -50,7 +50,7 @@ public final class HttpExpectHeader extends HttpHeader {
     return new HttpExpectHeader(name, value);
   }
 
-  public static HttpExpectHeader create(String value) {
+  public static HttpExpectHeader of(String value) {
     return new HttpExpectHeader(NAME, value);
   }
 
@@ -74,8 +74,8 @@ final class HttpExpectHeaderType implements HttpHeaderType<String>, ToSource {
   }
 
   @Override
-  public HttpHeader create(String name, String value) {
-    return HttpExpectHeader.of(name, value);
+  public HttpHeader of(String value) {
+    return this.of(this.name(), value);
   }
 
   @Override

@@ -21,8 +21,6 @@ import swim.annotations.Nullable;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.codec.WriteException;
-import swim.util.Assume;
-import swim.waml.WamlForm;
 import swim.waml.WamlTupleForm;
 import swim.waml.WamlWriter;
 

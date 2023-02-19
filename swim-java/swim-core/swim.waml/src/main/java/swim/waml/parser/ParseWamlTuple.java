@@ -20,10 +20,8 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
-import swim.waml.Waml;
 import swim.waml.WamlForm;
 import swim.waml.WamlParser;
-import swim.waml.WamlStringForm;
 
 @Internal
 public final class ParseWamlTuple<T> extends Parse<T> {

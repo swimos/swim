@@ -16,7 +16,6 @@ package swim.exec;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.Map;
 import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;

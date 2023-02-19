@@ -67,7 +67,7 @@ public class LogService implements LogHandler {
 
     // Initialize--but don't start--the log thread.
     this.thread = new LogThread(this);
-    thread.setName("swim.log.service" + '-' + Log.uniqueId(this));
+    this.thread.setName("swim.log.service" + '-' + Log.uniqueId(this));
   }
 
   public final LogHandler handler() {
@@ -250,7 +250,7 @@ public class LogService implements LogHandler {
   final @Nullable LogEvent dequeue() {
     // Try to dequeue an event from the MPSC log event queue.
     // Only the log thread is permitted to dequeue events.
-    int readIndex = (int) READ_INDEX.getOpaque(this);
+    final int readIndex = (int) READ_INDEX.getOpaque(this);
     final int writeIndex = (int) WRITE_INDEX.getAcquire(this);
     if (readIndex == writeIndex) {
       // The event queue is empty.

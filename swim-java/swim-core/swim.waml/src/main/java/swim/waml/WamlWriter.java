@@ -15,7 +15,6 @@
 package swim.waml;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Map;
 import swim.annotations.Public;

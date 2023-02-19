@@ -61,7 +61,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
       if (start == this.start && end == this.end) {
         return this;
       } else {
-        return SourceRange.create(start, end);
+        return SourceRange.of(start, end);
       }
     } else if (other instanceof SourceRange) {
       final SourceRange that = (SourceRange) other;
@@ -70,7 +70,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
       if (start == this.start && end == this.end) {
         return this;
       } else {
-        return SourceRange.create(start, end);
+        return SourceRange.of(start, end);
       }
     }
     throw new UnsupportedOperationException(other.toString());
@@ -84,7 +84,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
     if (start == this.start && end == this.end) {
       return this;
     } else {
-      return SourceRange.create(start, end);
+      return SourceRange.of(start, end);
     }
   }
 
@@ -99,18 +99,18 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(SourceRange.class);
+  private static final int HASH_SEED = Murmur3.seed(SourceRange.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(SourceRange.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.start.hashCode()), this.end.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("SourceRange", "create");
+    notation.beginInvoke("SourceRange", "of");
     notation.appendArgument(this.start);
     notation.appendArgument(this.end);
     notation.endInvoke();
@@ -149,7 +149,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
    * Returns a new {@code SourceRange} representing the closed interval
    * between the given {@code start} and {@code end} positions.
    */
-  public static SourceRange create(SourcePosition start, SourcePosition end) {
+  public static SourceRange of(SourcePosition start, SourcePosition end) {
     Objects.requireNonNull(start, "start");
     Objects.requireNonNull(end, "end");
     if (start.offset > end.offset) {

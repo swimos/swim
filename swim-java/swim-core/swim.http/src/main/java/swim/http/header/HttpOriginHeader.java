@@ -61,7 +61,7 @@ public final class HttpOriginHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpOriginHeader", "create")
+    notation.beginInvoke("HttpOriginHeader", "of")
             .appendArgument(this.origins())
             .endInvoke();
   }
@@ -78,17 +78,17 @@ public final class HttpOriginHeader extends HttpHeader {
     return new HttpOriginHeader(name, value, null);
   }
 
-  public static HttpOriginHeader create(String name, FingerTrieList<Uri> origins) {
+  public static HttpOriginHeader of(String name, FingerTrieList<Uri> origins) {
     final String value = HttpOriginHeader.writeValue(origins.iterator());
     return new HttpOriginHeader(name, value, origins);
   }
 
-  public static HttpOriginHeader create(FingerTrieList<Uri> origins) {
-    return HttpOriginHeader.create(NAME, origins);
+  public static HttpOriginHeader of(FingerTrieList<Uri> origins) {
+    return HttpOriginHeader.of(NAME, origins);
   }
 
-  public static HttpOriginHeader create(Uri... origins) {
-    return HttpOriginHeader.create(NAME, FingerTrieList.of(origins));
+  public static HttpOriginHeader of(Uri... origins) {
+    return HttpOriginHeader.of(NAME, FingerTrieList.of(origins));
   }
 
   private static FingerTrieList<Uri> parseValue(String value) {
@@ -192,8 +192,8 @@ final class HttpOriginHeaderType implements HttpHeaderType<FingerTrieList<Uri>>,
   }
 
   @Override
-  public HttpHeader create(String name, FingerTrieList<Uri> origins) {
-    return HttpOriginHeader.create(name, origins);
+  public HttpHeader of(String name, FingerTrieList<Uri> origins) {
+    return HttpOriginHeader.of(name, origins);
   }
 
   @Override

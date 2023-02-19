@@ -55,11 +55,11 @@ public final class ChildMethod implements Term, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(ChildMethod.class);
+  private static final int HASH_SEED = Murmur3.seed(ChildMethod.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(ChildMethod.hashSeed, this.scope.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.scope.hashCode()));
   }
 
   @Override

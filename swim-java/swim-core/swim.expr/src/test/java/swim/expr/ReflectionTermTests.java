@@ -14,7 +14,6 @@
 
 package swim.expr;
 
-import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 import swim.annotations.Nullable;
 import swim.expr.selector.ChildExpr;
@@ -26,14 +25,14 @@ import swim.util.Notation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class ReflectedTermTests {
+public class ReflectionTermTests {
 
   static final class Point {
 
     final int x;
     final int y;
 
-    public Point(int x, int y) {
+    Point(int x, int y) {
       this.x = x;
       this.y = y;
     }

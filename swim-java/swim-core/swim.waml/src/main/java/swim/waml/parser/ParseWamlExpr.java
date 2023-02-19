@@ -16,7 +16,6 @@ package swim.waml.parser;
 
 import swim.annotations.Internal;
 import swim.annotations.Nullable;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.Term;

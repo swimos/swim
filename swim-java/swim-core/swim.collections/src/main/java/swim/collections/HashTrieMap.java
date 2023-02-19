@@ -174,7 +174,6 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
     } while (true);
   }
 
-
   public @Nullable V headValue() {
     HashTrieMap<K, V> tree = this;
     loop: do {

@@ -50,7 +50,6 @@ import swim.repr.TermRepr;
 import swim.repr.TupleRepr;
 import swim.repr.UndefinedRepr;
 import swim.repr.UnitRepr;
-import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.CacheSet;
 import swim.util.LruCacheMap;
@@ -848,7 +847,7 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public Output<BlobRepr> stringBuilder() {
-      return Base64.standard().decodedOutput(new BlobReprOutput(BlobRepr.create().withAttrs(this.attrs)));
+      return Base64.standard().decodedOutput(new BlobReprOutput(BlobRepr.of().withAttrs(this.attrs)));
     }
 
     @Override

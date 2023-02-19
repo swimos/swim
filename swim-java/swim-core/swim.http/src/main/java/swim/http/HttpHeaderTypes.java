@@ -72,7 +72,7 @@ public final class HttpHeaderTypes implements HttpHeaderProvider, ToSource {
     return this.toSource();
   }
 
-  private static HttpHeaderTypes PROVIDER = new HttpHeaderTypes();
+  private static final HttpHeaderTypes PROVIDER = new HttpHeaderTypes();
 
   public static HttpHeaderTypes provider() {
     return PROVIDER;

@@ -86,18 +86,18 @@ public final class HttpProtocol implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpProtocol.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpProtocol.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpProtocol.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.name.hashCode()), Objects.hashCode(this.version)));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpProtocol", "create")
+    notation.beginInvoke("HttpProtocol", "of")
             .appendArgument(this.name);
     if (this.version != null) {
       notation.appendArgument(this.version);
@@ -129,7 +129,7 @@ public final class HttpProtocol implements ToSource, ToString {
     return WEBSOCKET;
   }
 
-  public static HttpProtocol create(String name, @Nullable String version) {
+  public static HttpProtocol of(String name, @Nullable String version) {
     if (version == null && "h2c".equals(name)) {
       return HttpProtocol.h2c();
     } else if (version == null && "websocket".equals(name)) {
@@ -139,8 +139,8 @@ public final class HttpProtocol implements ToSource, ToString {
     }
   }
 
-  public static HttpProtocol create(String name) {
-    return HttpProtocol.create(name, null);
+  public static HttpProtocol of(String name) {
+    return HttpProtocol.of(name, null);
   }
 
   public static Parse<HttpProtocol> parse(Input input) {
@@ -216,7 +216,7 @@ final class ParseHttpProtocol extends Parse<HttpProtocol> {
         input.step();
         step = 3;
       } else if (input.isReady()) {
-        return Parse.done(HttpProtocol.create(nameBuilder.toString(), null));
+        return Parse.done(HttpProtocol.of(nameBuilder.toString(), null));
       }
     }
     if (step == 3) {
@@ -247,8 +247,8 @@ final class ParseHttpProtocol extends Parse<HttpProtocol> {
         }
       }
       if (input.isReady()) {
-        return Parse.done(HttpProtocol.create(nameBuilder.toString(),
-                                              versionBuilder.toString()));
+        return Parse.done(HttpProtocol.of(nameBuilder.toString(),
+                                          versionBuilder.toString()));
       }
     }
     if (input.isError()) {

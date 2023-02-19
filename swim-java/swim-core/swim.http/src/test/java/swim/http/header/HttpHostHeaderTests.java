@@ -29,32 +29,32 @@ public class HttpHostHeaderTests {
   @Test
   public void parseHostHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Host: www.example.com\r\n");
-    assertInstanceOf(HttpHostHeader.class, headers.getHeader(HttpHeader.HOST));
-    assertEquals(HttpHostHeader.create(UriAuthority.parse("www.example.com")), headers.getHeader(HttpHeader.HOST));
-    assertEquals("www.example.com", headers.get(HttpHeader.HOST));
-    assertEquals(UriAuthority.parse("www.example.com"), headers.getValue(HttpHeader.HOST));
+    assertInstanceOf(HttpHostHeader.class, headers.getHeader(HttpHostHeader.TYPE));
+    assertEquals(HttpHostHeader.of(UriAuthority.parse("www.example.com")), headers.getHeader(HttpHostHeader.TYPE));
+    assertEquals("www.example.com", headers.get(HttpHostHeader.TYPE));
+    assertEquals(UriAuthority.parse("www.example.com"), headers.getValue(HttpHostHeader.TYPE));
   }
 
   @Test
   public void parseHostHeaders() {
-    assertParses(HttpHostHeader.create(UriAuthority.parse("example.com")), "Host: example.com");
-    assertParses(HttpHostHeader.create(UriAuthority.parse("example.com:80")), "Host: example.com:80");
-    assertParses(HttpHostHeader.create(UriAuthority.parse("127.0.0.1")), "Host: 127.0.0.1");
-    assertParses(HttpHostHeader.create(UriAuthority.parse("127.0.0.1:8080")), "Host: 127.0.0.1:8080");
+    assertParses(HttpHostHeader.of(UriAuthority.parse("example.com")), "Host: example.com");
+    assertParses(HttpHostHeader.of(UriAuthority.parse("example.com:80")), "Host: example.com:80");
+    assertParses(HttpHostHeader.of(UriAuthority.parse("127.0.0.1")), "Host: 127.0.0.1");
+    assertParses(HttpHostHeader.of(UriAuthority.parse("127.0.0.1:8080")), "Host: 127.0.0.1:8080");
   }
 
   @Test
   public void writeHostHeaders() {
-    assertWrites("Host: example.com", HttpHostHeader.create(UriAuthority.parse("example.com")));
-    assertWrites("Host: example.com:80", HttpHostHeader.create(UriAuthority.parse("example.com:80")));
-    assertWrites("Host: 127.0.0.1", HttpHostHeader.create(UriAuthority.parse("127.0.0.1")));
-    assertWrites("Host: 127.0.0.1:8080", HttpHostHeader.create(UriAuthority.parse("127.0.0.1:8080")));
+    assertWrites("Host: example.com", HttpHostHeader.of(UriAuthority.parse("example.com")));
+    assertWrites("Host: example.com:80", HttpHostHeader.of(UriAuthority.parse("example.com:80")));
+    assertWrites("Host: 127.0.0.1", HttpHostHeader.of(UriAuthority.parse("127.0.0.1")));
+    assertWrites("Host: 127.0.0.1:8080", HttpHostHeader.of(UriAuthority.parse("127.0.0.1:8080")));
   }
 
   @Test
   public void writeHostHeadersOmittingUser() {
     assertWrites("Host: www.example.com:8080",
-                 HttpHostHeader.create(UriAuthority.parse("user:pass@www.example.com:8080")));
+                 HttpHostHeader.of(UriAuthority.parse("user:pass@www.example.com:8080")));
   }
 
   @Test

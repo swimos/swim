@@ -179,11 +179,11 @@ final class UtfFatalErrorMode extends UtfErrorMode {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UtfFatalErrorMode.class);
+  private static final int HASH_SEED = Murmur3.seed(UtfFatalErrorMode.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(UtfFatalErrorMode.hashSeed, Murmur3.hash(this.isNonZero)));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, Murmur3.hash(this.isNonZero)));
   }
 
   @Override
@@ -249,11 +249,11 @@ final class UtfReplacementErrorMode extends UtfErrorMode {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UtfReplacementErrorMode.class);
+  private static final int HASH_SEED = Murmur3.seed(UtfReplacementErrorMode.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(UtfReplacementErrorMode.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.replacementChar), Murmur3.hash(this.isNonZero)));
   }
 

@@ -31,7 +31,7 @@ public final class Text {
     // static
   }
 
-  static final MediaType TEXT_PLAIN = MediaType.create("text", "plain");
+  static final MediaType TEXT_PLAIN = MediaType.of("text", "plain");
 
   static final TextTranscoder TRANSCODER = new TextTranscoder(TEXT_PLAIN, UtfErrorMode.fatal());
 

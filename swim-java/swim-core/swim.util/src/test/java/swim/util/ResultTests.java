@@ -187,14 +187,18 @@ public class ResultTests {
   public void successMapNonFatalThrowsToFailure() {
     final RuntimeException error = new RuntimeException();
     final Result<Integer> result = Result.success(1);
-    assertEquals(Result.failure(error), result.map(value -> { throw error; }));
+    assertEquals(Result.failure(error), result.map(value -> {
+      throw error;
+    }));
   }
 
   @Test
   public void successMapFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
     final Result<Integer> result = Result.success(1);
-    assertThrows(error.getClass(), () -> result.map(value -> { throw error; }));
+    assertThrows(error.getClass(), () -> result.map(value -> {
+      throw error;
+    }));
   }
 
   @Test
@@ -221,14 +225,18 @@ public class ResultTests {
   public void successFlatMapNonFatalThrowsToFailure() {
     final RuntimeException error = new RuntimeException();
     final Result<Integer> result = Result.success(1);
-    assertEquals(Result.failure(error), result.flatMap(value -> { throw error; }));
+    assertEquals(Result.failure(error), result.flatMap(value -> {
+      throw error;
+    }));
   }
 
   @Test
   public void successFlatMapFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
     final Result<Integer> result = Result.success(1);
-    assertThrows(error.getClass(), () -> result.flatMap(value -> { throw error; }));
+    assertThrows(error.getClass(), () -> result.flatMap(value -> {
+      throw error;
+    }));
   }
 
   @Test
@@ -255,14 +263,18 @@ public class ResultTests {
   public void failureMapFailureNonFatalThrowsToFailure() {
     final RuntimeException error = new RuntimeException();
     final Result<Integer> result = Result.failure(new RuntimeException());
-    assertEquals(Result.failure(error), result.mapFailure(value -> { throw error; }));
+    assertEquals(Result.failure(error), result.mapFailure(value -> {
+      throw error;
+    }));
   }
 
   @Test
   public void failureMapFailureFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
     final Result<Integer> result = Result.failure(new RuntimeException());
-    assertThrows(error.getClass(), () -> result.mapFailure(value -> { throw error; }));
+    assertThrows(error.getClass(), () -> result.mapFailure(value -> {
+      throw error;
+    }));
   }
 
   @Test
@@ -281,14 +293,18 @@ public class ResultTests {
   public void failureRecoverNonFatalThrowsToFailure() {
     final RuntimeException error = new RuntimeException();
     final Result<Integer> result = Result.failure(new RuntimeException());
-    assertEquals(Result.failure(error), result.recover(value -> { throw error; }));
+    assertEquals(Result.failure(error), result.recover(value -> {
+      throw error;
+    }));
   }
 
   @Test
   public void failureRecoverFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
     final Result<Integer> result = Result.failure(new RuntimeException());
-    assertThrows(error.getClass(), () -> result.recover(value -> { throw error; }));
+    assertThrows(error.getClass(), () -> result.recover(value -> {
+      throw error;
+    }));
   }
 
   @Test
@@ -315,14 +331,18 @@ public class ResultTests {
   public void failureRecoverWithNonFatalThrowsToFailure() {
     final RuntimeException error = new RuntimeException();
     final Result<Integer> result = Result.failure(new RuntimeException());
-    assertEquals(Result.failure(error), result.recoverWith(value -> { throw error; }));
+    assertEquals(Result.failure(error), result.recoverWith(value -> {
+      throw error;
+    }));
   }
 
   @Test
   public void failureRecoverWithFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
     final Result<Integer> result = Result.failure(new RuntimeException());
-    assertThrows(error.getClass(), () -> result.recoverWith(value -> { throw error; }));
+    assertThrows(error.getClass(), () -> result.recoverWith(value -> {
+      throw error;
+    }));
   }
 
   @Test
@@ -381,14 +401,18 @@ public class ResultTests {
   public void failureOrElseNonFatalThrowsReturnsFailure() {
     final RuntimeException error = new RuntimeException();
     final Result<Integer> result = Result.failure(new RuntimeException());
-    assertEquals(Result.failure(error), result.orElse(() -> { throw error; }));
+    assertEquals(Result.failure(error), result.orElse(() -> {
+      throw error;
+    }));
   }
 
   @Test
   public void failureOrElseFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
     final Result<Integer> result = Result.failure(new RuntimeException());
-    assertThrows(error.getClass(), () -> result.orElse(() -> { throw error; }));
+    assertThrows(error.getClass(), () -> result.orElse(() -> {
+      throw error;
+    }));
   }
 
   @Test
@@ -411,7 +435,9 @@ public class ResultTests {
   @Test
   public void resultOfFailure() {
     final RuntimeException error = new RuntimeException();
-    assertEquals(Result.failure(error), Result.of(() -> { throw error; }));
+    assertEquals(Result.failure(error), Result.of(() -> {
+      throw error;
+    }));
   }
 
 }

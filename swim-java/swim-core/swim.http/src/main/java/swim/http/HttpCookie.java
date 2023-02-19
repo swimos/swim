@@ -70,18 +70,18 @@ public final class HttpCookie implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpCookie.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpCookie.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpCookie.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.name.hashCode()), this.value.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpCookie", "create")
+    notation.beginInvoke("HttpCookie", "of")
             .appendArgument(this.name)
             .appendArgument(this.value)
             .endInvoke();
@@ -99,7 +99,7 @@ public final class HttpCookie implements ToSource, ToString {
     return output.get();
   }
 
-  public static HttpCookie create(String name, String value) {
+  public static HttpCookie of(String name, String value) {
     return new HttpCookie(name, value);
   }
 
@@ -190,7 +190,7 @@ final class ParseHttpCookie extends Parse<HttpCookie> {
           step = 6;
         }
       } else if (input.isDone()) {
-        return Parse.done(HttpCookie.create(nameBuilder.toString(), ""));
+        return Parse.done(HttpCookie.of(nameBuilder.toString(), ""));
       }
     }
     if (step == 4) {
@@ -213,8 +213,8 @@ final class ParseHttpCookie extends Parse<HttpCookie> {
       valueBuilder = Assume.nonNull(valueBuilder);
       if (input.isCont() && input.head() == '"') {
         input.step();
-        return Parse.done(HttpCookie.create(nameBuilder.toString(),
-                                            valueBuilder.toString()));
+        return Parse.done(HttpCookie.of(nameBuilder.toString(),
+                                        valueBuilder.toString()));
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected('"', input));
       }
@@ -232,8 +232,8 @@ final class ParseHttpCookie extends Parse<HttpCookie> {
         }
       }
       if (input.isReady()) {
-        return Parse.done(HttpCookie.create(nameBuilder.toString(),
-                                            valueBuilder.toString()));
+        return Parse.done(HttpCookie.of(nameBuilder.toString(),
+                                        valueBuilder.toString()));
       }
     }
     if (input.isError()) {

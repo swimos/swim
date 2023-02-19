@@ -27,6 +27,6 @@ public interface HttpHeaderProvider {
 
   void registerHeaderTypes(HttpHeaderRegistry registry);
 
-  public static final int DEFAULT_PRIORITY = 0;
+  static final int DEFAULT_PRIORITY = 0;
 
 }

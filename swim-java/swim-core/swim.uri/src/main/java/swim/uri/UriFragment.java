@@ -67,12 +67,11 @@ public final class UriFragment extends UriPart implements Comparable<UriFragment
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UriFragment.class);
+  private static final int HASH_SEED = Murmur3.seed(UriFragment.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(UriFragment.hashSeed,
-        Objects.hashCode(this.identifier)));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, Objects.hashCode(this.identifier)));
   }
 
   @Override

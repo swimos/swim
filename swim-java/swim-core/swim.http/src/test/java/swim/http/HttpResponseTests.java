@@ -15,24 +15,23 @@
 package swim.http;
 
 import org.junit.jupiter.api.Test;
-import swim.http.HttpAssertions;
 
 public class HttpResponseTests {
 
   @Test
   public void parseResponsesWithNoHeaders() {
-    assertParses(HttpResponse.create(HttpVersion.HTTP_1_0, HttpStatus.OK),
+    assertParses(HttpResponse.of(HttpVersion.HTTP_1_0, HttpStatus.OK),
                  "HTTP/1.0 200 OK\r\n"
                + "\r\n");
   }
 
   @Test
   public void parseResponsesWithASingleHeader() {
-    assertParses(HttpResponse.create(HttpStatus.OK, HttpHeader.of("Key", "Value")),
+    assertParses(HttpResponse.of(HttpStatus.OK, HttpHeader.of("Key", "Value")),
                  "HTTP/1.1 200 OK\r\n"
                + "Key: Value\r\n"
                + "\r\n");
-    assertParses(HttpResponse.create(HttpStatus.OK, HttpHeader.of("Content-Length", "0")),
+    assertParses(HttpResponse.of(HttpStatus.OK, HttpHeader.of("Content-Length", "0")),
                  "HTTP/1.1 200 OK\r\n"
                + "Content-Length: 0\r\n"
                + "\r\n");
@@ -40,11 +39,11 @@ public class HttpResponseTests {
 
   @Test
   public void parseResponsesWithMultipleHeaders() {
-    assertParses(HttpResponse.create(HttpStatus.SWITCHING_PROTOCOLS,
-                                     HttpHeader.of("Upgrade", "websocket"),
-                                     HttpHeader.of("Connection", "Upgrade"),
-                                     HttpHeader.of("Sec-WebSocket-Accept", "s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-                                     HttpHeader.of("Sec-WebSocket-Protocol", "chat")),
+    assertParses(HttpResponse.of(HttpStatus.SWITCHING_PROTOCOLS,
+                                 HttpHeader.of("Upgrade", "websocket"),
+                                 HttpHeader.of("Connection", "Upgrade"),
+                                 HttpHeader.of("Sec-WebSocket-Accept", "s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                                 HttpHeader.of("Sec-WebSocket-Protocol", "chat")),
                  "HTTP/1.1 101 Switching Protocols\r\n"
                + "Upgrade: websocket\r\n"
                + "Connection: Upgrade\r\n"
@@ -57,7 +56,7 @@ public class HttpResponseTests {
   public void writeResponsesWithNoHeaders() {
     assertWrites("HTTP/1.0 200 OK\r\n"
                + "\r\n",
-                 HttpResponse.create(HttpVersion.HTTP_1_0, HttpStatus.OK));
+                 HttpResponse.of(HttpVersion.HTTP_1_0, HttpStatus.OK));
   }
 
   @Test
@@ -65,11 +64,11 @@ public class HttpResponseTests {
     assertWrites("HTTP/1.1 200 OK\r\n"
                + "Foo: Bar\r\n"
                + "\r\n",
-                 HttpResponse.create(HttpStatus.OK, HttpHeader.of("Foo", "Bar")));
+                 HttpResponse.of(HttpStatus.OK, HttpHeader.of("Foo", "Bar")));
     assertWrites("HTTP/1.1 200 OK\r\n"
                + "Content-Length: 0\r\n"
                + "\r\n",
-                 HttpResponse.create(HttpStatus.OK, HttpHeader.of("Content-Length", "0")));
+                 HttpResponse.of(HttpStatus.OK, HttpHeader.of("Content-Length", "0")));
   }
 
   @Test
@@ -80,11 +79,11 @@ public class HttpResponseTests {
                + "Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n"
                + "Sec-WebSocket-Protocol: chat\r\n"
                + "\r\n",
-                 HttpResponse.create(HttpStatus.SWITCHING_PROTOCOLS,
-                                     HttpHeader.of("Upgrade", "websocket"),
-                                     HttpHeader.of("Connection", "Upgrade"),
-                                     HttpHeader.of("Sec-WebSocket-Accept", "s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-                                     HttpHeader.of("Sec-WebSocket-Protocol", "chat")));
+                 HttpResponse.of(HttpStatus.SWITCHING_PROTOCOLS,
+                                 HttpHeader.of("Upgrade", "websocket"),
+                                 HttpHeader.of("Connection", "Upgrade"),
+                                 HttpHeader.of("Sec-WebSocket-Accept", "s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                                 HttpHeader.of("Sec-WebSocket-Protocol", "chat")));
   }
 
   public static <T> void assertParses(HttpResponse<T> expected, String string) {

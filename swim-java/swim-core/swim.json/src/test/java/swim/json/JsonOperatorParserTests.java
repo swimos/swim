@@ -15,7 +15,6 @@
 package swim.json;
 
 import org.junit.jupiter.api.Test;
-import swim.codec.ParseException;
 import swim.expr.ContextExpr;
 import swim.expr.operator.AndExpr;
 import swim.expr.operator.BitwiseAndExpr;
@@ -40,7 +39,6 @@ import swim.expr.operator.PositiveExpr;
 import swim.expr.operator.TimesExpr;
 import swim.repr.Repr;
 import swim.repr.TermRepr;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JsonOperatorParserTests {
 

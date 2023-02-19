@@ -137,11 +137,11 @@ public final class UnitRepr implements Repr, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UnitRepr.class);
+  private static final int HASH_SEED = Murmur3.seed(UnitRepr.class);
 
   @Override
   public int hashCode() {
-    return UnitRepr.hashSeed;
+    return HASH_SEED;
   }
 
   @Override

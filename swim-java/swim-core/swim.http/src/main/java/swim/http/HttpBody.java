@@ -69,8 +69,8 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
   @Override
   public HttpHeaders headers() {
     final HttpHeaders headers = HttpHeaders.of();
-    headers.add(HttpContentTypeHeader.create(this.contentType()));
-    headers.add(HttpContentLengthHeader.create(this.contentLength()));
+    headers.add(HttpContentTypeHeader.of(this.contentType()));
+    headers.add(HttpContentLengthHeader.of(this.contentLength()));
     return headers;
   }
 
@@ -96,18 +96,18 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpBody.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpBody.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpBody.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         Objects.hashCode(this.value)), this.transcoder.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpBody", "create")
+    notation.beginInvoke("HttpBody", "of")
             .appendArgument(this.value)
             .appendArgument(this.transcoder)
             .endInvoke();
@@ -118,12 +118,12 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
     return this.toSource();
   }
 
-  public static <T> HttpBody<T> create(@Nullable T value, Transcoder<T> transcoder,
-                                       long contentLength) {
+  public static <T> HttpBody<T> of(@Nullable T value, Transcoder<T> transcoder,
+                                   long contentLength) {
     return new HttpBody<T>(value, transcoder, contentLength);
   }
 
-  public static <T> HttpBody<T> create(@Nullable T value, Transcoder<T> transcoder) {
+  public static <T> HttpBody<T> of(@Nullable T value, Transcoder<T> transcoder) {
     return new HttpBody<T>(value, transcoder);
   }
 
@@ -202,7 +202,7 @@ final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
       } else if (offset > contentLength) {
         return Decode.error(new DecodeException("Buffer overflow"));
       } else {
-        return Decode.done(HttpBody.create(decodePayload.get(), transcoder, contentLength));
+        return Decode.done(HttpBody.of(decodePayload.get(), transcoder, contentLength));
       }
     } else if (decodePayload.isError()) {
       return decodePayload.asError();

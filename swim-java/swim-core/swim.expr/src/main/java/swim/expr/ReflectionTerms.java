@@ -21,7 +21,6 @@ import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -260,11 +259,11 @@ final class ReflectionTerm<T> implements Term, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(ReflectionTerm.class);
+  private static final int HASH_SEED = Murmur3.seed(ReflectionTerm.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(ReflectionTerm.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.form.hashCode()), Objects.hashCode(this.object)));
   }
 

@@ -57,7 +57,7 @@ public final class HttpUpgradeHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpUpgradeHeader", "create")
+    notation.beginInvoke("HttpUpgradeHeader", "of")
             .appendArgument(this.protocols())
             .endInvoke();
   }
@@ -70,17 +70,17 @@ public final class HttpUpgradeHeader extends HttpHeader {
     return new HttpUpgradeHeader(name, value, null);
   }
 
-  public static HttpUpgradeHeader create(String name, FingerTrieList<HttpProtocol> protocols) {
+  public static HttpUpgradeHeader of(String name, FingerTrieList<HttpProtocol> protocols) {
     final String value = HttpUpgradeHeader.writeValue(protocols.iterator());
     return new HttpUpgradeHeader(name, value, protocols);
   }
 
-  public static HttpUpgradeHeader create(FingerTrieList<HttpProtocol> protocols) {
-    return HttpUpgradeHeader.create(NAME, protocols);
+  public static HttpUpgradeHeader of(FingerTrieList<HttpProtocol> protocols) {
+    return HttpUpgradeHeader.of(NAME, protocols);
   }
 
-  public static HttpUpgradeHeader create(HttpProtocol... protocols) {
-    return HttpUpgradeHeader.create(NAME, FingerTrieList.of(protocols));
+  public static HttpUpgradeHeader of(HttpProtocol... protocols) {
+    return HttpUpgradeHeader.of(NAME, FingerTrieList.of(protocols));
   }
 
   private static FingerTrieList<HttpProtocol> parseValue(String value) {
@@ -158,8 +158,8 @@ final class HttpUpgradeHeaderType implements HttpHeaderType<FingerTrieList<HttpP
   }
 
   @Override
-  public HttpHeader create(String name, FingerTrieList<HttpProtocol> protocols) {
-    return HttpUpgradeHeader.create(name, protocols);
+  public HttpHeader of(String name, FingerTrieList<HttpProtocol> protocols) {
+    return HttpUpgradeHeader.of(name, protocols);
   }
 
   @Override

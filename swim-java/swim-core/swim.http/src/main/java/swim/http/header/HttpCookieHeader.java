@@ -57,7 +57,7 @@ public final class HttpCookieHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpCookieHeader", "create")
+    notation.beginInvoke("HttpCookieHeader", "of")
             .appendArgument(this.cookies())
             .endInvoke();
   }
@@ -70,17 +70,17 @@ public final class HttpCookieHeader extends HttpHeader {
     return new HttpCookieHeader(name, value, null);
   }
 
-  public static HttpCookieHeader create(String name, FingerTrieList<HttpCookie> cookies) {
+  public static HttpCookieHeader of(String name, FingerTrieList<HttpCookie> cookies) {
     final String value = HttpCookieHeader.writeValue(cookies.iterator());
     return new HttpCookieHeader(name, value, cookies);
   }
 
-  public static HttpCookieHeader create(FingerTrieList<HttpCookie> cookies) {
-    return HttpCookieHeader.create(NAME, cookies);
+  public static HttpCookieHeader of(FingerTrieList<HttpCookie> cookies) {
+    return HttpCookieHeader.of(NAME, cookies);
   }
 
-  public static HttpCookieHeader create(HttpCookie... cookies) {
-    return HttpCookieHeader.create(NAME, FingerTrieList.of(cookies));
+  public static HttpCookieHeader of(HttpCookie... cookies) {
+    return HttpCookieHeader.of(NAME, FingerTrieList.of(cookies));
   }
 
   private static FingerTrieList<HttpCookie> parseValue(String value) {
@@ -146,8 +146,8 @@ final class HttpCookieHeaderType implements HttpHeaderType<FingerTrieList<HttpCo
   }
 
   @Override
-  public HttpHeader create(String name, FingerTrieList<HttpCookie> cookies) {
-    return HttpCookieHeader.create(name, cookies);
+  public HttpHeader of(String name, FingerTrieList<HttpCookie> cookies) {
+    return HttpCookieHeader.of(name, cookies);
   }
 
   @Override

@@ -130,6 +130,7 @@ public class LogEvent implements Term, ToSource {
           return Term.from(this.detail);
         case "cause":
           return THROWABLE_FORM.intoTerm(this.cause);
+        default:
       }
     }
     return null;
@@ -169,13 +170,13 @@ public class LogEvent implements Term, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(LogEvent.class);
+  private static final int HASH_SEED = Murmur3.seed(LogEvent.class);
 
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        LogEvent.hashSeed, Murmur3.hash(this.seq)), this.time.hashCode()),
+        HASH_SEED, Murmur3.hash(this.seq)), this.time.hashCode()),
         this.topic.hashCode()), this.focus.hashCode()),
         this.scope.hashCode()), this.level.hashCode()),
         this.message.hashCode()), Objects.hashCode(this.detail)),
@@ -207,10 +208,10 @@ public class LogEvent implements Term, ToSource {
     return this.toSource();
   }
 
-  public static LogEvent create(String topic, String focus, LogScope scope,
-                                Severity level, String message,
-                                @Nullable Object detail,
-                                @Nullable Throwable cause) {
+  public static LogEvent of(String topic, String focus, LogScope scope,
+                            Severity level, String message,
+                            @Nullable Object detail,
+                            @Nullable Throwable cause) {
     return new LogEvent(LogEvent.nextSequence(), LogEvent.nextInstant(),
                         topic, focus, scope, level, message, detail, cause);
   }

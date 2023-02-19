@@ -1167,29 +1167,6 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     return new AttrsValues(this);
   }
 
-//  @Override
-//  public int compareTo(Attrs that) {
-//    final Iterator<Map.Entry<String, Repr>> xs = this.iterator();
-//    final Iterator<Map.Entry<String, Repr>> ys = that.iterator();
-//    int order = 0;
-//    do {
-//      if (xs.hasNext() && ys.hasNext()) {
-//        order = xs.next().compareTo(ys.next());
-//      } else {
-//        break;
-//      }
-//    } while (order == 0);
-//    if (order != 0) {
-//      return order;
-//    } else if (!xs.hasNext() && ys.hasNext()) {
-//      return -1;
-//    } else if (xs.hasNext() && !ys.hasNext()) {
-//      return 1;
-//    } else {
-//      return 0;
-//    }
-//  }
-
   @Override
   public boolean equals(@Nullable Object other) {
     if (this == other) {
@@ -1241,7 +1218,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       if (entry.getValue() != UnitRepr.unit()) {
         notation.appendArgument(entry.getValue());
       }
-      notation.endInvoke();;
+      notation.endInvoke();
     }
   }
 

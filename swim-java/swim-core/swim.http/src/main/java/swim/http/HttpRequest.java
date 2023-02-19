@@ -14,7 +14,6 @@
 
 package swim.http;
 
-import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -55,7 +54,7 @@ public final class HttpRequest<T> extends HttpMessage<T> {
   }
 
   public HttpRequest<T> withMethod(HttpMethod method) {
-    return HttpRequest.create(method, this.target, this.version,
+    return HttpRequest.of(method, this.target, this.version,
                               this.headers, this.payload);
   }
 
@@ -64,8 +63,8 @@ public final class HttpRequest<T> extends HttpMessage<T> {
   }
 
   public HttpRequest<T> withUri(String target) {
-    return HttpRequest.create(this.method, target, this.version,
-                              this.headers, this.payload);
+    return HttpRequest.of(this.method, target, this.version,
+                          this.headers, this.payload);
   }
 
   @Override
@@ -74,8 +73,8 @@ public final class HttpRequest<T> extends HttpMessage<T> {
   }
 
   public HttpRequest<T> withVersion(HttpVersion version) {
-    return HttpRequest.create(this.method, this.target, version,
-                              this.headers, this.payload);
+    return HttpRequest.of(this.method, this.target, version,
+                          this.headers, this.payload);
   }
 
   @Override
@@ -90,8 +89,8 @@ public final class HttpRequest<T> extends HttpMessage<T> {
 
   @Override
   public HttpRequest<T> withHeaders(HttpHeaders headers) {
-    return HttpRequest.create(this.method, this.target, this.version,
-                              headers, this.payload);
+    return HttpRequest.of(this.method, this.target, this.version,
+                          headers, this.payload);
   }
 
   @Override
@@ -106,8 +105,8 @@ public final class HttpRequest<T> extends HttpMessage<T> {
 
   @Override
   public <T2> HttpRequest<T2> withPayload(HttpPayload<T2> payload) {
-    return HttpRequest.create(this.method, this.target, this.version,
-                              this.headers, payload);
+    return HttpRequest.of(this.method, this.target, this.version,
+                          this.headers, payload);
   }
 
   @Override
@@ -135,19 +134,19 @@ public final class HttpRequest<T> extends HttpMessage<T> {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpRequest.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpRequest.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        HttpRequest.hashSeed, this.method.hashCode()), this.target.hashCode()),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(HASH_SEED, this.method.hashCode()), this.target.hashCode()),
         this.version.hashCode()), this.headers.hashCode()), this.payload.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpRequest", "create")
+    notation.beginInvoke("HttpRequest", "of")
             .appendArgument(this.method)
             .appendArgument(this.target)
             .appendArgument(this.version);
@@ -174,47 +173,43 @@ public final class HttpRequest<T> extends HttpMessage<T> {
     return output.get();
   }
 
-  public static <T> HttpRequest<T> create(HttpMethod method, String target,
-                                          HttpVersion version,
-                                          HttpHeaders headers,
-                                          HttpPayload<T> payload) {
+  public static <T> HttpRequest<T> of(HttpMethod method, String target,
+                                      HttpVersion version, HttpHeaders headers,
+                                      HttpPayload<T> payload) {
     return new HttpRequest<T>(method, target, version, headers, payload);
   }
 
-  public static <T> HttpRequest<T> create(HttpMethod method, String target,
-                                          HttpVersion version,
-                                          HttpHeaders headers) {
+  public static <T> HttpRequest<T> of(HttpMethod method, String target,
+                                      HttpVersion version, HttpHeaders headers) {
     return new HttpRequest<T>(method, target, version, headers, HttpEmpty.payload());
   }
 
-  public static <T> HttpRequest<T> create(HttpMethod method, String target,
-                                          HttpVersion version,
-                                          HttpHeader... headers) {
+  public static <T> HttpRequest<T> of(HttpMethod method, String target,
+                                      HttpVersion version, HttpHeader... headers) {
     return new HttpRequest<T>(method, target, version,
                               HttpHeaders.of(headers), HttpEmpty.payload());
   }
 
-  public static <T> HttpRequest<T> create(HttpMethod method, String target,
-                                          HttpVersion version) {
+  public static <T> HttpRequest<T> of(HttpMethod method, String target,
+                                      HttpVersion version) {
     return new HttpRequest<T>(method, target, version,
                               HttpHeaders.empty(), HttpEmpty.payload());
   }
 
-  public static <T> HttpRequest<T> create(HttpMethod method, String target,
-                                          HttpHeaders headers,
-                                          HttpPayload<T> payload) {
+  public static <T> HttpRequest<T> of(HttpMethod method, String target,
+                                      HttpHeaders headers, HttpPayload<T> payload) {
     return new HttpRequest<T>(method, target, HttpVersion.HTTP_1_1,
                               headers, payload);
   }
 
-  public static <T> HttpRequest<T> create(HttpMethod method, String target,
-                                          HttpHeaders headers) {
+  public static <T> HttpRequest<T> of(HttpMethod method, String target,
+                                      HttpHeaders headers) {
     return new HttpRequest<T>(method, target, HttpVersion.HTTP_1_1,
                               headers, HttpEmpty.payload());
   }
 
-  public static <T> HttpRequest<T> create(HttpMethod method, String target,
-                                          HttpHeader... headers) {
+  public static <T> HttpRequest<T> of(HttpMethod method, String target,
+                                      HttpHeader... headers) {
     return new HttpRequest<T>(method, target, HttpVersion.HTTP_1_1,
                               HttpHeaders.of(headers), HttpEmpty.payload());
   }
@@ -385,11 +380,11 @@ final class ParseHttpRequest<T> extends Parse<HttpRequest<T>> {
       parseHeaders = Assume.nonNull(parseHeaders);
       if (input.isCont() && input.head() == '\n') {
         input.step();
-        return Parse.done(HttpRequest.create(parseMethod.getNonNull(),
-                                             targetBuilder.toString(),
-                                             parseVersion.getNonNull(),
-                                             parseHeaders.getNonNull(),
-                                             HttpEmpty.payload()));
+        return Parse.done(HttpRequest.of(parseMethod.getNonNull(),
+                                         targetBuilder.toString(),
+                                         parseVersion.getNonNull(),
+                                         parseHeaders.getNonNull(),
+                                         HttpEmpty.payload()));
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("line feed", input));
       }

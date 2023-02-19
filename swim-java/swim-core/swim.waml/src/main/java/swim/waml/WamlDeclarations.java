@@ -23,9 +23,6 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Notation;
 import swim.util.ToSource;
-import swim.waml.WamlCodec;
-import swim.waml.WamlForm;
-import swim.waml.WamlProvider;
 
 @Public
 @Since("5.0")
@@ -91,7 +88,7 @@ public final class WamlDeclarations implements WamlProvider, ToSource {
     return new WamlDeclarations(codec, GENERIC_PRIORITY);
   }
 
-  public static @Nullable WamlForm<?> declarationForm(WamlCodec codec, Class<?> javaClass, Type @Nullable ... typeArguments) {
+  public static @Nullable WamlForm<?> declarationForm(WamlCodec codec, Class<?> javaClass, Type @Nullable... typeArguments) {
     if (typeArguments != null && typeArguments.length != 0) {
       // public static WamlForm<?> wamlForm(WamlCodec codec, WamlForm<?> arg0, ..., WamlForm<?> argN);
       try {

@@ -136,11 +136,11 @@ public final class UndefinedRepr implements Repr, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UndefinedRepr.class);
+  private static final int HASH_SEED = Murmur3.seed(UndefinedRepr.class);
 
   @Override
   public int hashCode() {
-    return UndefinedRepr.hashSeed;
+    return HASH_SEED;
   }
 
   @Override

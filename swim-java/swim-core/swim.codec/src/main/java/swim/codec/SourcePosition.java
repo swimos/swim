@@ -116,7 +116,7 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
       if (this.offset == that.offset && this.line == that.line && this.column == that.column) {
         return this;
       } else {
-        return SourceRange.create(this, that);
+        return SourceRange.of(this, that);
       }
     } else if (other instanceof SourceRange) {
       final SourceRange that = (SourceRange) other;
@@ -125,7 +125,7 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
       if (start == that.start && end == that.end) {
         return that;
       } else {
-        return SourceRange.create(start, end);
+        return SourceRange.of(start, end);
       }
     }
     throw new UnsupportedOperationException(other.toString());
@@ -163,11 +163,11 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(SourcePosition.class);
+  private static final int HASH_SEED = Murmur3.seed(SourcePosition.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(SourcePosition.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
         Murmur3.hash(this.offset)), this.line), this.column), Murmur3.hash(this.note)));
   }
 

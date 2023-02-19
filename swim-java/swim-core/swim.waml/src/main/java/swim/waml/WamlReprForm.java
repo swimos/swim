@@ -19,7 +19,6 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.repr.Attrs;
 import swim.repr.Repr;
-import swim.util.Assume;
 
 @Public
 @Since("5.0")

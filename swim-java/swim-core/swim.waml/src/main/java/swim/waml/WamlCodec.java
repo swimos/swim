@@ -371,7 +371,7 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
     return Waml.codec();
   }
 
-  static final MediaType APPLICATION_X_WAML = MediaType.create("application", "x-waml");
+  static final MediaType APPLICATION_X_WAML = MediaType.of("application", "x-waml");
 
   /**
    * {@code VarHandle} for atomically accessing the {@link #providers} field.

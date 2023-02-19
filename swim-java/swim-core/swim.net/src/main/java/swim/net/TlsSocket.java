@@ -706,7 +706,7 @@ public class TlsSocket extends TcpSocket {
     if (LOG_CERTIFICATES) {
       final Certificate[] localCertificates = sslSession.getLocalCertificates();
       if (localCertificates != null) {
-        final ArrayRepr certificateBlobs = ArrayRepr.withCapacity(localCertificates.length);
+        final ArrayRepr certificateBlobs = ArrayRepr.ofCapacity(localCertificates.length);
         for (int i = 0; i < localCertificates.length; i += 1) {
           try {
             certificateBlobs.add(BlobRepr.wrap(localCertificates[i].getEncoded()));
@@ -730,15 +730,15 @@ public class TlsSocket extends TcpSocket {
       try {
         final Certificate[] remoteCertificates = sslSession.getPeerCertificates();
         if (remoteCertificates != null) {
-        final ArrayRepr certificateBlobs = ArrayRepr.withCapacity(remoteCertificates.length);
-        for (int i = 0; i < remoteCertificates.length; i += 1) {
-          try {
-            certificateBlobs.add(BlobRepr.wrap(remoteCertificates[i].getEncoded()));
-          } catch (CertificateEncodingException e) {
-            certificateBlobs.add(Repr.unit());
+          final ArrayRepr certificateBlobs = ArrayRepr.ofCapacity(remoteCertificates.length);
+          for (int i = 0; i < remoteCertificates.length; i += 1) {
+            try {
+              certificateBlobs.add(BlobRepr.wrap(remoteCertificates[i].getEncoded()));
+            } catch (CertificateEncodingException e) {
+              certificateBlobs.add(Repr.unit());
+            }
           }
-        }
-        context.put("localCertificates", certificateBlobs);
+          context.put("localCertificates", certificateBlobs);
         }
       } catch (SSLPeerUnverifiedException e) {
         // ignore

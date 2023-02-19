@@ -22,7 +22,6 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.codec.ParseException;
 import swim.util.Assume;
-import swim.waml.Waml;
 import swim.waml.WamlForm;
 import swim.waml.WamlParser;
 import swim.waml.WamlStringForm;

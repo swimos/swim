@@ -15,7 +15,6 @@
 package swim.expr;
 
 import org.junit.jupiter.api.Test;
-import swim.expr.ExprAssertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FormatExprTests {

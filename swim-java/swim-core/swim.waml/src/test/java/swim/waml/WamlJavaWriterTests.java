@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import swim.annotations.Nullable;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.waml.WamlForm;
 
 public class WamlJavaWriterTests {
 

@@ -181,12 +181,12 @@ public class TlsOptions implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(TlsOptions.class);
+  private static final int HASH_SEED = Murmur3.seed(TlsOptions.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(TlsOptions.hashSeed,
-        Murmur3.hash(this.sslContext)), this.clientAuth.hashCode()),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        HASH_SEED, Murmur3.hash(this.sslContext)), this.clientAuth.hashCode()),
         Murmur3.hash(this.protocols)), Murmur3.hash(this.cipherSuites)));
   }
 
@@ -230,14 +230,14 @@ public class TlsOptions implements ToSource {
       } catch (NullPointerException cause) {
         cipherSuites = null;
       }
-      TlsOptions.standard = TlsOptions.create(clientAuth, protocols, cipherSuites);
+      TlsOptions.standard = TlsOptions.of(clientAuth, protocols, cipherSuites);
     }
     return TlsOptions.standard;
   }
 
-  public static @Nullable TlsOptions create(TlsClientAuth clientAuth,
-                                            @Nullable Collection<String> protocols,
-                                            @Nullable Collection<String> cipherSuites) {
+  public static @Nullable TlsOptions of(TlsClientAuth clientAuth,
+                                        @Nullable Collection<String> protocols,
+                                        @Nullable Collection<String> cipherSuites) {
     try {
       final String tlsProtocol = System.getProperty("swim.net.tls.protocol", "TLS");
       final String tlsProvider = System.getProperty("swim.net.tls.provider");

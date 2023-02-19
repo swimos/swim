@@ -352,7 +352,7 @@ final class ParseNumber extends Parse<Number> {
 
   @Override
   public Parse<Number> consume(Input input) {
-    return ParseNumber.parse(input,this.builder, this.sign, this.value,
+    return ParseNumber.parse(input, this.builder, this.sign, this.value,
                              this.digits, this.step);
   }
 

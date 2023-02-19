@@ -15,7 +15,6 @@
 package swim.waml;
 
 import org.junit.jupiter.api.Test;
-import swim.codec.ParseException;
 import swim.expr.ContextExpr;
 import swim.expr.GlobalExpr;
 import swim.expr.operator.PlusExpr;
@@ -25,8 +24,8 @@ import swim.expr.selector.DescendantsExpr;
 import swim.expr.selector.InvokeExpr;
 import swim.expr.selector.MemberExpr;
 import swim.repr.ArrayRepr;
-import swim.repr.Repr;
 import swim.repr.ObjectRepr;
+import swim.repr.Repr;
 import swim.repr.TermRepr;
 import swim.repr.TupleRepr;
 

@@ -19,7 +19,6 @@ import swim.annotations.Nullable;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
-import swim.util.Assume;
 import swim.waml.WamlArrayForm;
 import swim.waml.WamlForm;
 import swim.waml.WamlMarkupForm;

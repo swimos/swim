@@ -106,7 +106,7 @@ public final class JavaTerms implements TermProvider, ToSource {
     return this.toSource();
   }
 
-  private static JavaTerms PROVIDER = new JavaTerms(BUILTIN_PRIORITY);
+  private static final JavaTerms PROVIDER = new JavaTerms(BUILTIN_PRIORITY);
 
   public static JavaTerms provider(int priority) {
     if (priority == BUILTIN_PRIORITY) {

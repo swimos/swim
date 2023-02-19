@@ -178,12 +178,12 @@ public class TcpOptions implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(TcpOptions.class);
+  private static final int HASH_SEED = Murmur3.seed(TcpOptions.class);
 
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-      TcpOptions.hashSeed, this.backlog), this.recvBufferSize), this.sendBufferSize),
+      HASH_SEED, this.backlog), this.recvBufferSize), this.sendBufferSize),
       Murmur3.hash(this.keepAlive)), Murmur3.hash(this.noDelay)));
   }
 

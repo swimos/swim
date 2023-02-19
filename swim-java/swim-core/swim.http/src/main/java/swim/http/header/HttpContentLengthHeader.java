@@ -51,7 +51,7 @@ public final class HttpContentLengthHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpContentLengthHeader", "create")
+    notation.beginInvoke("HttpContentLengthHeader", "of")
             .appendArgument(this.length())
             .endInvoke();
   }
@@ -64,7 +64,7 @@ public final class HttpContentLengthHeader extends HttpHeader {
     return new HttpContentLengthHeader(name, value, -1L);
   }
 
-  public static HttpContentLengthHeader create(String name, long length) {
+  public static HttpContentLengthHeader of(String name, long length) {
     final String value = Long.toString(length);
     if (length < 0L) {
       throw new IllegalArgumentException(value);
@@ -72,8 +72,8 @@ public final class HttpContentLengthHeader extends HttpHeader {
     return new HttpContentLengthHeader(name, value, length);
   }
 
-  public static HttpContentLengthHeader create(long length) {
-    return HttpContentLengthHeader.create(NAME, length);
+  public static HttpContentLengthHeader of(long length) {
+    return HttpContentLengthHeader.of(NAME, length);
   }
 
   private static long parseValue(String value) {
@@ -131,8 +131,8 @@ final class HttpContentLengthHeaderType implements HttpHeaderType<Long>, ToSourc
   }
 
   @Override
-  public HttpHeader create(String name, Long length) {
-    return HttpContentLengthHeader.create(name, length);
+  public HttpHeader of(String name, Long length) {
+    return HttpContentLengthHeader.of(name, length);
   }
 
   @Override

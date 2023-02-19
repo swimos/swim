@@ -28,44 +28,44 @@ public class HttpTransferEncodingHeaderTests {
   @Test
   public void parseTransferEncodingHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Transfer-Encoding: chunked\r\n");
-    assertInstanceOf(HttpTransferEncodingHeader.class, headers.getHeader(HttpHeader.TRANSFER_ENCODING));
-    assertEquals(HttpTransferEncodingHeader.create(HttpTransferCoding.chunked()), headers.getHeader(HttpHeader.TRANSFER_ENCODING));
-    assertEquals("chunked", headers.get(HttpHeader.TRANSFER_ENCODING));
-    assertEquals(FingerTrieList.of(HttpTransferCoding.chunked()), headers.getValue(HttpHeader.TRANSFER_ENCODING));
+    assertInstanceOf(HttpTransferEncodingHeader.class, headers.getHeader(HttpTransferEncodingHeader.TYPE));
+    assertEquals(HttpTransferEncodingHeader.of(HttpTransferCoding.chunked()), headers.getHeader(HttpTransferEncodingHeader.TYPE));
+    assertEquals("chunked", headers.get(HttpTransferEncodingHeader.TYPE));
+    assertEquals(FingerTrieList.of(HttpTransferCoding.chunked()), headers.getValue(HttpTransferEncodingHeader.TYPE));
   }
 
   @Test
   public void parseTransferEncodingHeaders() {
-    assertParses(HttpTransferEncodingHeader.create(HttpTransferCoding.chunked()),
+    assertParses(HttpTransferEncodingHeader.of(HttpTransferCoding.chunked()),
                  "Transfer-Encoding: chunked");
-    assertParses(HttpTransferEncodingHeader.create(HttpTransferCoding.create("enhance")),
+    assertParses(HttpTransferEncodingHeader.of(HttpTransferCoding.of("enhance")),
                  "Transfer-Encoding: enhance");
-    assertParses(HttpTransferEncodingHeader.create(HttpTransferCoding.gzip(), HttpTransferCoding.chunked()),
+    assertParses(HttpTransferEncodingHeader.of(HttpTransferCoding.gzip(), HttpTransferCoding.chunked()),
                  "Transfer-Encoding: gzip, chunked");
-    assertParses(HttpTransferEncodingHeader.create(HttpTransferCoding.create("enhance").withParam("zoom", "500x")),
+    assertParses(HttpTransferEncodingHeader.of(HttpTransferCoding.of("enhance").withParam("zoom", "500x")),
                  "Transfer-Encoding: enhance; zoom=500x");
-    assertParses(HttpTransferEncodingHeader.create(HttpTransferCoding.create("enhance").withParam("zoom", "500x").withParam("quality", "very good")),
+    assertParses(HttpTransferEncodingHeader.of(HttpTransferCoding.of("enhance").withParam("zoom", "500x").withParam("quality", "very good")),
                  "Transfer-Encoding: enhance; zoom=500x; quality=\"very good\"");
-    assertParses(HttpTransferEncodingHeader.create(HttpTransferCoding.create("enhance").withParam("zoom", "500x").withParam("quality", "very good"),
-                                                   HttpTransferCoding.create("time").withParam("dilation", "on")),
+    assertParses(HttpTransferEncodingHeader.of(HttpTransferCoding.of("enhance").withParam("zoom", "500x").withParam("quality", "very good"),
+                                               HttpTransferCoding.of("time").withParam("dilation", "on")),
                  "Transfer-Encoding: enhance; zoom=500x; quality=\"very good\", time; dilation=on");
   }
 
   @Test
   public void writeTransferEncodingHeaders() {
     assertWrites("Transfer-Encoding: chunked",
-                 HttpTransferEncodingHeader.create(HttpTransferCoding.chunked()));
+                 HttpTransferEncodingHeader.of(HttpTransferCoding.chunked()));
     assertWrites("Transfer-Encoding: enhance",
-                 HttpTransferEncodingHeader.create(HttpTransferCoding.create("enhance")));
+                 HttpTransferEncodingHeader.of(HttpTransferCoding.of("enhance")));
     assertWrites("Transfer-Encoding: gzip, chunked",
-                 HttpTransferEncodingHeader.create(HttpTransferCoding.gzip(), HttpTransferCoding.chunked()));
+                 HttpTransferEncodingHeader.of(HttpTransferCoding.gzip(), HttpTransferCoding.chunked()));
     assertWrites("Transfer-Encoding: enhance; zoom=500x",
-                 HttpTransferEncodingHeader.create(HttpTransferCoding.create("enhance").withParam("zoom", "500x")));
+                 HttpTransferEncodingHeader.of(HttpTransferCoding.of("enhance").withParam("zoom", "500x")));
     assertWrites("Transfer-Encoding: enhance; zoom=500x; quality=\"very good\"",
-                 HttpTransferEncodingHeader.create(HttpTransferCoding.create("enhance").withParam("zoom", "500x").withParam("quality", "very good")));
+                 HttpTransferEncodingHeader.of(HttpTransferCoding.of("enhance").withParam("zoom", "500x").withParam("quality", "very good")));
     assertWrites("Transfer-Encoding: enhance; zoom=500x; quality=\"very good\", time; dilation=on",
-                 HttpTransferEncodingHeader.create(HttpTransferCoding.create("enhance").withParam("zoom", "500x").withParam("quality", "very good"),
-                                                   HttpTransferCoding.create("time").withParam("dilation", "on")));
+                 HttpTransferEncodingHeader.of(HttpTransferCoding.of("enhance").withParam("zoom", "500x").withParam("quality", "very good"),
+                                               HttpTransferCoding.of("time").withParam("dilation", "on")));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

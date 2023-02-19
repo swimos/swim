@@ -87,12 +87,11 @@ public final class FormatExpr implements Expr, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(FormatExpr.class);
+  private static final int HASH_SEED = Murmur3.seed(FormatExpr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(FormatExpr.hashSeed,
-        Arrays.hashCode(this.parts)));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, Arrays.hashCode(this.parts)));
   }
 
   @Override

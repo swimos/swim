@@ -47,7 +47,6 @@ import swim.repr.TermRepr;
 import swim.repr.TupleRepr;
 import swim.repr.UndefinedRepr;
 import swim.repr.UnitRepr;
-import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.CacheSet;
 import swim.util.LruCacheMap;

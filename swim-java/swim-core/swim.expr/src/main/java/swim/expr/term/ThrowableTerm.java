@@ -18,7 +18,6 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.expr.Term;
-import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
 

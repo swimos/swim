@@ -73,7 +73,7 @@ public final class JsonThrowables implements JsonProvider, ToSource {
     return this.toSource();
   }
 
-  private static JsonThrowables PROVIDER = new JsonThrowables(GENERIC_PRIORITY);
+  private static final JsonThrowables PROVIDER = new JsonThrowables(GENERIC_PRIORITY);
 
   public static JsonThrowables provider(int priority) {
     if (priority == GENERIC_PRIORITY) {

@@ -28,24 +28,24 @@ public class HttpUpgradeHeaderTests {
   @Test
   public void parseUpgradeHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Upgrade: websocket\r\n");
-    assertInstanceOf(HttpUpgradeHeader.class, headers.getHeader(HttpHeader.UPGRADE));
-    assertEquals(HttpUpgradeHeader.create(HttpProtocol.websocket()), headers.getHeader(HttpHeader.UPGRADE));
-    assertEquals("websocket", headers.get(HttpHeader.UPGRADE));
-    assertEquals(FingerTrieList.of(HttpProtocol.websocket()), headers.getValue(HttpHeader.UPGRADE));
+    assertInstanceOf(HttpUpgradeHeader.class, headers.getHeader(HttpUpgradeHeader.TYPE));
+    assertEquals(HttpUpgradeHeader.of(HttpProtocol.websocket()), headers.getHeader(HttpUpgradeHeader.TYPE));
+    assertEquals("websocket", headers.get(HttpUpgradeHeader.TYPE));
+    assertEquals(FingerTrieList.of(HttpProtocol.websocket()), headers.getValue(HttpUpgradeHeader.TYPE));
   }
 
   @Test
   public void parseUpgradeHeaders() {
-    assertParses(HttpUpgradeHeader.create(HttpProtocol.websocket()), "Upgrade: websocket");
-    assertParses(HttpUpgradeHeader.create(HttpProtocol.h2c(), HttpProtocol.create("SHTTP", "1.3"), HttpProtocol.create("IRC", "6.9"), HttpProtocol.create("RTA", "x11")),
+    assertParses(HttpUpgradeHeader.of(HttpProtocol.websocket()), "Upgrade: websocket");
+    assertParses(HttpUpgradeHeader.of(HttpProtocol.h2c(), HttpProtocol.of("SHTTP", "1.3"), HttpProtocol.of("IRC", "6.9"), HttpProtocol.of("RTA", "x11")),
                  "Upgrade: h2c, SHTTP/1.3, IRC/6.9, RTA/x11");
   }
 
   @Test
   public void writeUpgradeHeaders() {
-    assertWrites("Upgrade: websocket", HttpUpgradeHeader.create(HttpProtocol.websocket()));
+    assertWrites("Upgrade: websocket", HttpUpgradeHeader.of(HttpProtocol.websocket()));
     assertWrites("Upgrade: h2c, SHTTP/1.3, IRC/6.9, RTA/x11",
-                 HttpUpgradeHeader.create(HttpProtocol.h2c(), HttpProtocol.create("SHTTP", "1.3"), HttpProtocol.create("IRC", "6.9"), HttpProtocol.create("RTA", "x11")));
+                 HttpUpgradeHeader.of(HttpProtocol.h2c(), HttpProtocol.of("SHTTP", "1.3"), HttpProtocol.of("IRC", "6.9"), HttpProtocol.of("RTA", "x11")));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

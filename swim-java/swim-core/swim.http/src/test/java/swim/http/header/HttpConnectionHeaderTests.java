@@ -27,24 +27,24 @@ public class HttpConnectionHeaderTests {
   @Test
   public void parseConnectionHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Connection: Upgrade\r\n");
-    assertInstanceOf(HttpConnectionHeader.class, headers.getHeader(HttpHeader.CONNECTION));
-    assertEquals(HttpConnectionHeader.create("Upgrade"), headers.getHeader(HttpHeader.CONNECTION));
-    assertEquals("Upgrade", headers.get(HttpHeader.CONNECTION));
-    assertEquals(FingerTrieList.of("Upgrade"), headers.getValue(HttpHeader.CONNECTION));
+    assertInstanceOf(HttpConnectionHeader.class, headers.getHeader(HttpConnectionHeader.TYPE));
+    assertEquals(HttpConnectionHeader.of(FingerTrieList.of("Upgrade")), headers.getHeader(HttpConnectionHeader.TYPE));
+    assertEquals("Upgrade", headers.get(HttpConnectionHeader.TYPE));
+    assertEquals(FingerTrieList.of("Upgrade"), headers.getValue(HttpConnectionHeader.TYPE));
   }
 
   @Test
   public void parseConnectionHeaders() {
-    assertParses(HttpConnectionHeader.create("close"), "Connection: close");
-    assertParses(HttpConnectionHeader.create("Upgrade"), "Connection: Upgrade");
-    assertParses(HttpConnectionHeader.create("Upgrade", "HTTP2-Settings"), "Connection: Upgrade, HTTP2-Settings");
+    assertParses(HttpConnectionHeader.of(FingerTrieList.of("close")), "Connection: close");
+    assertParses(HttpConnectionHeader.of(FingerTrieList.of("Upgrade")), "Connection: Upgrade");
+    assertParses(HttpConnectionHeader.of(FingerTrieList.of("Upgrade", "HTTP2-Settings")), "Connection: Upgrade, HTTP2-Settings");
   }
 
   @Test
   public void writeConnectionHeaders() {
-    assertWrites("Connection: close", HttpConnectionHeader.create("close"));
-    assertWrites("Connection: Upgrade", HttpConnectionHeader.create("Upgrade"));
-    assertWrites("Connection: Upgrade, HTTP2-Settings", HttpConnectionHeader.create("Upgrade", "HTTP2-Settings"));
+    assertWrites("Connection: close", HttpConnectionHeader.of(FingerTrieList.of("close")));
+    assertWrites("Connection: Upgrade", HttpConnectionHeader.of(FingerTrieList.of("Upgrade")));
+    assertWrites("Connection: Upgrade, HTTP2-Settings", HttpConnectionHeader.of(FingerTrieList.of("Upgrade", "HTTP2-Settings")));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

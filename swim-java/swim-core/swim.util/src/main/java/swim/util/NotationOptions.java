@@ -100,7 +100,7 @@ public class NotationOptions implements ToSource {
   }
 
   @Override
-  public boolean equals(java.lang.@Nullable Object other) {
+  public boolean equals(@Nullable Object other) {
     if (other instanceof NotationOptions) {
       final NotationOptions that = (NotationOptions) other;
       return that.canEqual(this)
@@ -113,12 +113,12 @@ public class NotationOptions implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(NotationOptions.class);
+  private static final int HASH_SEED = Murmur3.seed(NotationOptions.class);
 
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        hashSeed, Murmur3.hash(this.verbose)), Murmur3.hash(this.stylize)),
+        HASH_SEED, Murmur3.hash(this.verbose)), Murmur3.hash(this.stylize)),
         Murmur3.hash(this.whitespace)), Murmur3.hash(this.indentation)),
         Murmur3.hash(this.lineSeparator)));
   }

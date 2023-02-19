@@ -49,7 +49,7 @@ public final class HttpContentTypeHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpContentTypeHeader", "create")
+    notation.beginInvoke("HttpContentTypeHeader", "of")
             .appendArgument(this.mediaType())
             .endInvoke();
   }
@@ -62,13 +62,17 @@ public final class HttpContentTypeHeader extends HttpHeader {
     return new HttpContentTypeHeader(name, value, null);
   }
 
-  public static HttpContentTypeHeader create(String name, MediaType mediaType) {
+  public static HttpContentTypeHeader of(String name, MediaType mediaType) {
     final String value = mediaType.toString();
     return new HttpContentTypeHeader(name, value, mediaType);
   }
 
-  public static HttpContentTypeHeader create(MediaType mediaType) {
-    return HttpContentTypeHeader.create(NAME, mediaType);
+  public static HttpContentTypeHeader of(MediaType mediaType) {
+    return HttpContentTypeHeader.of(NAME, mediaType);
+  }
+
+  public static HttpContentTypeHeader of(String value) {
+    return HttpContentTypeHeader.of(NAME, value);
   }
 
 }
@@ -91,8 +95,8 @@ final class HttpContentTypeHeaderType implements HttpHeaderType<MediaType>, ToSo
   }
 
   @Override
-  public HttpHeader create(String name, MediaType mediaType) {
-    return HttpContentTypeHeader.create(name, mediaType);
+  public HttpHeader of(String name, MediaType mediaType) {
+    return HttpContentTypeHeader.of(name, mediaType);
   }
 
   @Override

@@ -26,24 +26,24 @@ public class HttpMaxForwardsHeaderTests {
   @Test
   public void parseMaxForwardsHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Max-Forwards: 42\r\n");
-    assertInstanceOf(HttpMaxForwardsHeader.class, headers.getHeader(HttpHeader.MAX_FORWARDS));
-    assertEquals(HttpMaxForwardsHeader.create(42), headers.getHeader(HttpHeader.MAX_FORWARDS));
-    assertEquals("42", headers.get(HttpHeader.MAX_FORWARDS));
-    assertEquals(42, headers.getValue(HttpHeader.MAX_FORWARDS));
+    assertInstanceOf(HttpMaxForwardsHeader.class, headers.getHeader(HttpMaxForwardsHeader.TYPE));
+    assertEquals(HttpMaxForwardsHeader.of(42), headers.getHeader(HttpMaxForwardsHeader.TYPE));
+    assertEquals("42", headers.get(HttpMaxForwardsHeader.TYPE));
+    assertEquals(42, headers.getValue(HttpMaxForwardsHeader.TYPE));
   }
 
   @Test
   public void parseMaxForwardsHeaders() {
-    assertParses(HttpMaxForwardsHeader.create(0), "Max-Forwards: 0");
-    assertParses(HttpMaxForwardsHeader.create(1), "Max-Forwards: 1");
-    assertParses(HttpMaxForwardsHeader.create(15), "Max-Forwards: 15");
+    assertParses(HttpMaxForwardsHeader.of(0), "Max-Forwards: 0");
+    assertParses(HttpMaxForwardsHeader.of(1), "Max-Forwards: 1");
+    assertParses(HttpMaxForwardsHeader.of(15), "Max-Forwards: 15");
   }
 
   @Test
   public void writeMaxForwardsHeaders() {
-    assertWrites("Max-Forwards: 0", HttpMaxForwardsHeader.create(0));
-    assertWrites("Max-Forwards: 1", HttpMaxForwardsHeader.create(1));
-    assertWrites("Max-Forwards: 15", HttpMaxForwardsHeader.create(15));
+    assertWrites("Max-Forwards: 0", HttpMaxForwardsHeader.of(0));
+    assertWrites("Max-Forwards: 1", HttpMaxForwardsHeader.of(1));
+    assertWrites("Max-Forwards: 15", HttpMaxForwardsHeader.of(15));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

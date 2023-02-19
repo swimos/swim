@@ -14,7 +14,6 @@
 
 package swim.codec;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +64,7 @@ public final class MediaType implements ToSource, ToString {
   }
 
   public MediaType withParam(String key, String value) {
-    return MediaType.create(this.type, this.subtype, this.params.updated(key, value));
+    return MediaType.of(this.type, this.subtype, this.params.updated(key, value));
   }
 
   public boolean isApplication() {
@@ -114,18 +113,18 @@ public final class MediaType implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(MediaType.class);
+  private static final int HASH_SEED = Murmur3.seed(MediaType.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(MediaType.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.type.hashCode()), this.subtype.hashCode()), this.params.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("MediaType", "create");
+    notation.beginInvoke("MediaType", "of");
     notation.appendArgument(this.type);
     notation.appendArgument(this.subtype);
     notation.endInvoke();
@@ -149,13 +148,13 @@ public final class MediaType implements ToSource, ToString {
     return output.get();
   }
 
-  public static MediaType create(String type, String subtype,
+  public static MediaType of(String type, String subtype,
                                  ArrayMap<String, String> params) {
     return new MediaType(type, subtype, params);
   }
 
-  public static MediaType create(String type, String subtype) {
-    return MediaType.create(type, subtype, ArrayMap.empty());
+  public static MediaType of(String type, String subtype) {
+    return MediaType.of(type, subtype, ArrayMap.empty());
   }
 
   public static Parse<MediaType> parse(Input input) {
@@ -363,9 +362,9 @@ final class ParseMediaType extends Parse<MediaType> {
           input.step();
           step = 6;
         } else if (input.isReady()) {
-          return Parse.done(MediaType.create(typeBuilder.toString(),
-                                             subtypeBuilder.toString(),
-                                             params));
+          return Parse.done(MediaType.of(typeBuilder.toString(),
+                                         subtypeBuilder.toString(),
+                                         params));
         }
       }
       if (step == 6) {

@@ -65,12 +65,11 @@ public final class UriScheme extends UriPart implements Comparable<UriScheme>, T
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UriScheme.class);
+  private static final int HASH_SEED = Murmur3.seed(UriScheme.class);
 
   @Override
-  public final int hashCode() {
-    return Murmur3.mash(Murmur3.mix(UriScheme.hashSeed,
-        Objects.hashCode(this.name)));
+  public int hashCode() {
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, Objects.hashCode(this.name)));
   }
 
   @Override
@@ -115,7 +114,7 @@ public final class UriScheme extends UriPart implements Comparable<UriScheme>, T
   }
 
   @Override
-  public final String toString() {
+  public String toString() {
     return this.name != null ? this.name : "";
   }
 

@@ -28,36 +28,36 @@ public class HttpAcceptHeaderTests {
   @Test
   public void parseAcceptHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Accept: */*\r\n");
-    assertInstanceOf(HttpAcceptHeader.class, headers.getHeader(HttpHeader.ACCEPT));
-    assertEquals(HttpAcceptHeader.create(MediaRange.create("*", "*")), headers.getHeader(HttpHeader.ACCEPT));
-    assertEquals("*/*", headers.get(HttpHeader.ACCEPT));
-    assertEquals(FingerTrieList.of(MediaRange.create("*", "*")), headers.getValue(HttpHeader.ACCEPT));
+    assertInstanceOf(HttpAcceptHeader.class, headers.getHeader(HttpAcceptHeader.TYPE));
+    assertEquals(HttpAcceptHeader.of(MediaRange.of("*", "*")), headers.getHeader(HttpAcceptHeader.TYPE));
+    assertEquals("*/*", headers.get(HttpAcceptHeader.TYPE));
+    assertEquals(FingerTrieList.of(MediaRange.of("*", "*")), headers.getValue(HttpAcceptHeader.TYPE));
   }
 
   @Test
   public void parseAcceptHeaders() {
-    assertParses(HttpAcceptHeader.create(MediaRange.create("*", "*")), "Accept: */*");
-    assertParses(HttpAcceptHeader.create(MediaRange.create("text", "*").withParam("charset", "UTF-8").withWeight(500)),
+    assertParses(HttpAcceptHeader.of(MediaRange.of("*", "*")), "Accept: */*");
+    assertParses(HttpAcceptHeader.of(MediaRange.of("text", "*").withParam("charset", "UTF-8").withWeight(500)),
                  "Accept: text/*; charset=UTF-8; q=0.5");
-    assertParses(HttpAcceptHeader.create(MediaRange.create("text", "*").withWeight(300),
-                                         MediaRange.create("text", "html").withWeight(700),
-                                         MediaRange.create("text", "html").withExtParam("level", "1"),
-                                         MediaRange.create("text", "html").withWeight(400).withExtParam("level", "2"),
-                                         MediaRange.create("*", "*").withWeight(500)),
+    assertParses(HttpAcceptHeader.of(MediaRange.of("text", "*").withWeight(300),
+                                     MediaRange.of("text", "html").withWeight(700),
+                                     MediaRange.of("text", "html").withExtParam("level", "1"),
+                                     MediaRange.of("text", "html").withWeight(400).withExtParam("level", "2"),
+                                     MediaRange.of("*", "*").withWeight(500)),
                  "Accept: text/*; q=0.3, text/html; q=0.7, text/html; q=1; level=1, text/html; q=0.4; level=2, */*; q=0.5");
   }
 
   @Test
   public void writeAcceptHeaders() {
-    assertWrites("Accept: */*", HttpAcceptHeader.create(MediaRange.create("*", "*")));
+    assertWrites("Accept: */*", HttpAcceptHeader.of(MediaRange.of("*", "*")));
     assertWrites("Accept: text/*; charset=UTF-8; q=0.5",
-                 HttpAcceptHeader.create(MediaRange.create("text", "*").withParam("charset", "UTF-8").withWeight(500)));
+                 HttpAcceptHeader.of(MediaRange.of("text", "*").withParam("charset", "UTF-8").withWeight(500)));
     assertWrites("Accept: text/*; q=0.3, text/html; q=0.7, text/html; q=1; level=1, text/html; q=0.4; level=2, */*; q=0.5",
-                 HttpAcceptHeader.create(MediaRange.create("text", "*").withWeight(300),
-                                         MediaRange.create("text", "html").withWeight(700),
-                                         MediaRange.create("text", "html").withExtParam("level", "1"),
-                                         MediaRange.create("text", "html").withWeight(400).withExtParam("level", "2"),
-                                         MediaRange.create("*", "*").withWeight(500)));
+                 HttpAcceptHeader.of(MediaRange.of("text", "*").withWeight(300),
+                                     MediaRange.of("text", "html").withWeight(700),
+                                     MediaRange.of("text", "html").withExtParam("level", "1"),
+                                     MediaRange.of("text", "html").withWeight(400).withExtParam("level", "2"),
+                                     MediaRange.of("*", "*").withWeight(500)));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

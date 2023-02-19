@@ -115,18 +115,18 @@ public final class HttpStatus implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpStatus.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpStatus.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpStatus.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.code), this.phrase.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpStatus", "create")
+    notation.beginInvoke("HttpStatus", "of")
             .appendArgument(this.code)
             .appendArgument(this.phrase)
             .endInvoke();
@@ -160,20 +160,7 @@ public final class HttpStatus implements ToSource, ToString {
     return -(lo + 1);
   }
 
-  public static HttpStatus forCode(int code) {
-    if (code < 0 || code >= 1000) {
-      throw new IllegalArgumentException("Invalid status code: " + code);
-    }
-    final HttpStatus[] codes = (HttpStatus[]) CODES.getOpaque();
-    final int index = HttpStatus.lookup(codes, code);
-    if (index >= 0) {
-      return codes[index];
-    } else {
-      return new HttpStatus(code, "");
-    }
-  }
-
-  public static HttpStatus create(int code, @Nullable String phrase) {
+  public static HttpStatus of(int code, @Nullable String phrase) {
     if (code < 0 || code >= 1000) {
       throw new IllegalArgumentException("Invalid status code: " + code);
     }
@@ -186,6 +173,19 @@ public final class HttpStatus implements ToSource, ToString {
       }
     }
     return new HttpStatus(code, phrase != null ? phrase : "");
+  }
+
+  public static HttpStatus of(int code) {
+    if (code < 0 || code >= 1000) {
+      throw new IllegalArgumentException("Invalid status code: " + code);
+    }
+    final HttpStatus[] codes = (HttpStatus[]) CODES.getOpaque();
+    final int index = HttpStatus.lookup(codes, code);
+    if (index >= 0) {
+      return codes[index];
+    } else {
+      return new HttpStatus(code, "");
+    }
   }
 
   public static Parse<HttpStatus> parse(Input input) {
@@ -350,9 +350,9 @@ final class ParseHttpStatus extends Parse<HttpStatus> {
         HttpStatus status = phraseTrie != null ? phraseTrie.value() : null;
         if (status == null) {
           final String phrase = phraseTrie != null ? phraseTrie.prefix() : Assume.nonNull(phraseBuilder).toString();
-          status = HttpStatus.create(code, phrase);
+          status = HttpStatus.of(code, phrase);
         } else if (code != status.code) {
-          status = HttpStatus.create(code, status.phrase);
+          status = HttpStatus.of(code, status.phrase);
         }
         return Parse.done(status);
       }

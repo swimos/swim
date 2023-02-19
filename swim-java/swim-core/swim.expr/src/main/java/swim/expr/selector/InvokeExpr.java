@@ -78,11 +78,11 @@ public final class InvokeExpr extends SelectorExpr implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(InvokeExpr.class);
+  private static final int HASH_SEED = Murmur3.seed(InvokeExpr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(InvokeExpr.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.scope.hashCode()), Arrays.hashCode(this.args)));
   }
 

@@ -106,11 +106,11 @@ public abstract class UriPattern implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UriPattern.class);
+  private static final int HASH_SEED = Murmur3.seed(UriPattern.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(UriPattern.hashSeed, this.toUri().hashCode()));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.toUri().hashCode()));
   }
 
   @Override

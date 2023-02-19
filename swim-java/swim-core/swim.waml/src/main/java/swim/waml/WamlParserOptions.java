@@ -78,12 +78,11 @@ public class WamlParserOptions implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(WamlParserOptions.class);
+  private static final int HASH_SEED = Murmur3.seed(WamlParserOptions.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(WamlParserOptions.hashSeed,
-        Murmur3.hash(this.exprsEnabled)));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, Murmur3.hash(this.exprsEnabled)));
   }
 
   @Override

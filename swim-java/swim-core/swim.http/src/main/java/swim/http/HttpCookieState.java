@@ -69,11 +69,11 @@ public final class HttpCookieState implements ToSource, ToString {
   }
 
   public HttpCookieState withParam(String key) {
-    return HttpCookieState.create(this.name, this.value, this.params.updated(key, null));
+    return HttpCookieState.of(this.name, this.value, this.params.updated(key, null));
   }
 
   public HttpCookieState withParam(String key, @Nullable String value) {
-    return HttpCookieState.create(this.name, this.value, this.params.updated(key, value));
+    return HttpCookieState.of(this.name, this.value, this.params.updated(key, value));
   }
 
   public Write<?> write(Output<?> output) {
@@ -98,18 +98,18 @@ public final class HttpCookieState implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpCookieState.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpCookieState.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HttpCookieState.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.name.hashCode()), this.value.hashCode()), this.params.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpCookieState", "create")
+    notation.beginInvoke("HttpCookieState", "of")
             .appendArgument(this.name)
             .appendArgument(this.value)
             .endInvoke();
@@ -133,13 +133,13 @@ public final class HttpCookieState implements ToSource, ToString {
     return output.get();
   }
 
-  public static HttpCookieState create(String name, String value,
-                                       ArrayMap<String, String> params) {
+  public static HttpCookieState of(String name, String value,
+                                   ArrayMap<String, String> params) {
     return new HttpCookieState(name, value, params);
   }
 
-  public static HttpCookieState create(String name, String value) {
-    return HttpCookieState.create(name, value, ArrayMap.empty());
+  public static HttpCookieState of(String name, String value) {
+    return HttpCookieState.of(name, value, ArrayMap.empty());
   }
 
   public static Parse<HttpCookieState> parse(Input input) {
@@ -291,9 +291,9 @@ final class ParseHttpCookieState extends Parse<HttpCookieState> {
           input.step();
           step = 8;
         } else if (input.isReady()) {
-          return Parse.done(HttpCookieState.create(nameBuilder.toString(),
-                                                   valueBuilder.toString(),
-                                                   params));
+          return Parse.done(HttpCookieState.of(nameBuilder.toString(),
+                                               valueBuilder.toString(),
+                                               params));
         }
       }
       if (step == 8) {

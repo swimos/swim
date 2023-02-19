@@ -384,11 +384,11 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(BlobRepr.class);
+  private static final int HASH_SEED = Murmur3.seed(BlobRepr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mixByteArray(BlobRepr.hashSeed, this.array, this.offset, this.size));
+    return Murmur3.mash(Murmur3.mixByteArray(HASH_SEED, this.array, this.offset, this.size));
   }
 
   @Override
@@ -427,11 +427,11 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
     return EMPTY;
   }
 
-  public static BlobRepr create() {
+  public static BlobRepr of() {
     return new BlobRepr(ALIASED_FLAG, Attrs.empty(), EMPTY_ARRAY, 0, 0);
   }
 
-  public static BlobRepr withCapacity(int initialCapacity) {
+  public static BlobRepr ofCapacity(int initialCapacity) {
     return new BlobRepr(0, Attrs.empty(), new byte[initialCapacity], 0, 0);
   }
 

@@ -766,7 +766,7 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
       notation.appendField("size", this.size);
       notation.appendKey("flags")
               .beginValue()
-              .append("0x").append(Integer.toHexString(flags))
+              .append("0x").append(Integer.toHexString(this.flags))
               .endValue();
       notation.appendKey("branches")
               .beginValue();

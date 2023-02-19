@@ -16,13 +16,12 @@ package swim.json.parser;
 
 import swim.annotations.Internal;
 import swim.annotations.Nullable;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.Term;
-import swim.util.Assume;
 import swim.json.JsonForm;
 import swim.json.JsonParser;
+import swim.util.Assume;
 
 @Internal
 public final class ParseJsonExpr<T> extends Parse<T> {

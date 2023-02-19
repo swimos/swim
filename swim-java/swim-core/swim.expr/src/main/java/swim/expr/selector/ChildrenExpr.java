@@ -18,8 +18,8 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.expr.ContextExpr;
-import swim.expr.GlobalExpr;
 import swim.expr.Evaluator;
+import swim.expr.GlobalExpr;
 import swim.expr.Term;
 import swim.expr.TermGenerator;
 import swim.util.Murmur3;
@@ -64,11 +64,11 @@ public final class ChildrenExpr extends SelectorExpr implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(ChildrenExpr.class);
+  private static final int HASH_SEED = Murmur3.seed(ChildrenExpr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(ChildrenExpr.hashSeed, this.scope.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.scope.hashCode()));
   }
 
   @Override

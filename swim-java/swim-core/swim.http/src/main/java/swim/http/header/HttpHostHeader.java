@@ -55,7 +55,7 @@ public final class HttpHostHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpHostHeader", "create")
+    notation.beginInvoke("HttpHostHeader", "of")
             .appendArgument(this.authority())
             .endInvoke();
   }
@@ -68,13 +68,17 @@ public final class HttpHostHeader extends HttpHeader {
     return new HttpHostHeader(name, value, null);
   }
 
-  public static HttpHostHeader create(String name, UriAuthority authority) {
+  public static HttpHostHeader of(String name, UriAuthority authority) {
     final String value = HttpHostHeader.writeValue(authority);
     return new HttpHostHeader(name, value, authority);
   }
 
-  public static HttpHostHeader create(UriAuthority authority) {
-    return HttpHostHeader.create(NAME, authority);
+  public static HttpHostHeader of(UriAuthority authority) {
+    return HttpHostHeader.of(NAME, authority);
+  }
+
+  public static HttpHostHeader of(String value) {
+    return HttpHostHeader.of(NAME, value);
   }
 
   private static UriAuthority parseValue(String value) {
@@ -127,8 +131,8 @@ final class HttpHostHeaderType implements HttpHeaderType<UriAuthority>, ToSource
   }
 
   @Override
-  public HttpHeader create(String name, UriAuthority authority) {
-    return HttpHostHeader.create(name, authority);
+  public HttpHeader of(String name, UriAuthority authority) {
+    return HttpHostHeader.of(name, authority);
   }
 
   @Override

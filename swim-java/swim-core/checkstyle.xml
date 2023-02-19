@@ -77,7 +77,10 @@
 
     <!-- Checks for modifiers -->
     <module name="ModifierOrder"/>
-    <module name="RedundantModifier"/>
+    <module name="RedundantModifier">
+      <!-- Don't check interface variables -->
+      <property name="tokens" value="METHOD_DEF, ANNOTATION_FIELD_DEF, INTERFACE_DEF, CTOR_DEF, CLASS_DEF, ENUM_DEF, RESOURCE, ANNOTATION_DEF, RECORD_DEF"/>
+    </module>
 
     <!-- Checks for this usage -->
     <module name="RequireThis">

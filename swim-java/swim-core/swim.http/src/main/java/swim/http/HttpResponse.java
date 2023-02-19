@@ -14,7 +14,6 @@
 
 package swim.http;
 
-import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -53,7 +52,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
   }
 
   public HttpResponse<T> withVersion(HttpVersion version) {
-    return HttpResponse.create(version, this.status, this.headers, this.payload);
+    return HttpResponse.of(version, this.status, this.headers, this.payload);
   }
 
   public HttpStatus status() {
@@ -61,7 +60,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
   }
 
   public HttpResponse<T> withStatus(HttpStatus status) {
-    return HttpResponse.create(this.version, status, this.headers, this.payload);
+    return HttpResponse.of(this.version, status, this.headers, this.payload);
   }
 
   @Override
@@ -76,7 +75,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
 
   @Override
   public HttpResponse<T> withHeaders(HttpHeaders headers) {
-    return HttpResponse.create(this.version, this.status, headers, this.payload);
+    return HttpResponse.of(this.version, this.status, headers, this.payload);
   }
 
   @Override
@@ -91,7 +90,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
 
   @Override
   public <T2> HttpResponse<T2> withPayload(HttpPayload<T2> payload) {
-    return HttpResponse.create(this.version, this.status, this.headers, payload);
+    return HttpResponse.of(this.version, this.status, this.headers, payload);
   }
 
   @Override
@@ -118,19 +117,19 @@ public final class HttpResponse<T> extends HttpMessage<T> {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpResponse.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpResponse.class);
 
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        HttpResponse.hashSeed, this.version.hashCode()), this.status.hashCode()),
+        HASH_SEED, this.version.hashCode()), this.status.hashCode()),
         this.headers.hashCode()), this.payload.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpResponse", "create")
+    notation.beginInvoke("HttpResponse", "of")
             .appendArgument(this.version)
             .appendArgument(this.status);
     for (HttpHeader header : this.headers) {
@@ -156,48 +155,40 @@ public final class HttpResponse<T> extends HttpMessage<T> {
     return output.get();
   }
 
-  public static <T> HttpResponse<T> create(HttpVersion version,
-                                           HttpStatus status,
-                                           HttpHeaders headers,
-                                           HttpPayload<T> payload) {
+  public static <T> HttpResponse<T> of(HttpVersion version, HttpStatus status,
+                                       HttpHeaders headers, HttpPayload<T> payload) {
     return new HttpResponse<T>(version, status, headers, payload);
   }
 
-  public static <T> HttpResponse<T> create(HttpVersion version,
-                                           HttpStatus status,
-                                           HttpHeaders headers) {
+  public static <T> HttpResponse<T> of(HttpVersion version, HttpStatus status,
+                                       HttpHeaders headers) {
     return new HttpResponse<T>(version, status, headers, HttpEmpty.payload());
   }
 
-  public static <T> HttpResponse<T> create(HttpVersion version,
-                                           HttpStatus status,
-                                           HttpHeader... headers) {
+  public static <T> HttpResponse<T> of(HttpVersion version, HttpStatus status,
+                                       HttpHeader... headers) {
     return new HttpResponse<T>(version, status, HttpHeaders.of(headers), HttpEmpty.payload());
   }
 
-  public static <T> HttpResponse<T> create(HttpVersion version,
-                                           HttpStatus status) {
+  public static <T> HttpResponse<T> of(HttpVersion version, HttpStatus status) {
     return new HttpResponse<T>(version, status, HttpHeaders.empty(), HttpEmpty.payload());
   }
 
-  public static <T> HttpResponse<T> create(HttpStatus status,
-                                           HttpHeaders headers,
-                                           HttpPayload<T> payload) {
+  public static <T> HttpResponse<T> of(HttpStatus status, HttpHeaders headers,
+                                       HttpPayload<T> payload) {
     return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, headers, payload);
   }
 
-  public static <T> HttpResponse<T> create(HttpStatus status,
-                                           HttpHeaders headers) {
+  public static <T> HttpResponse<T> of(HttpStatus status, HttpHeaders headers) {
     return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, headers, HttpEmpty.payload());
   }
 
-  public static <T> HttpResponse<T> create(HttpStatus status,
-                                           HttpHeader... headers) {
+  public static <T> HttpResponse<T> of(HttpStatus status, HttpHeader... headers) {
     return new HttpResponse<T>(HttpVersion.HTTP_1_1, status,
                                HttpHeaders.of(headers), HttpEmpty.payload());
   }
 
-  public static <T> HttpResponse<T> create(HttpStatus status) {
+  public static <T> HttpResponse<T> of(HttpStatus status) {
     return new HttpResponse<T>(HttpVersion.HTTP_1_1, status,
                                HttpHeaders.empty(), HttpEmpty.payload());
   }
@@ -336,10 +327,10 @@ final class ParseHttpResponse<T> extends Parse<HttpResponse<T>> {
       parseHeaders = Assume.nonNull(parseHeaders);
       if (input.isCont() && input.head() == '\n') {
         input.step();
-        return Parse.done(HttpResponse.create(parseVersion.getNonNull(),
-                                              parseStatus.getNonNull(),
-                                              parseHeaders.getNonNull(),
-                                              HttpEmpty.payload()));
+        return Parse.done(HttpResponse.of(parseVersion.getNonNull(),
+                                          parseStatus.getNonNull(),
+                                          parseHeaders.getNonNull(),
+                                          HttpEmpty.payload()));
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("line feed", input));
       }

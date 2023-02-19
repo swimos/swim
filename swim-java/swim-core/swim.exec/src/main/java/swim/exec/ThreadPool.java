@@ -589,7 +589,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
 
   @Override
   public void uncaughtException(Thread thread, Throwable exception) {
-    log.error("worker thread failed", exception);
+    this.log.error("worker thread failed", exception);
   }
 
   /**

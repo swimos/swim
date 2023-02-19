@@ -14,7 +14,6 @@
 
 package swim.expr;
 
-import java.util.Iterator;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.expr.selector.ChildExpr;

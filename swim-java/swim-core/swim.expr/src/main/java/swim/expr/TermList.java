@@ -17,7 +17,6 @@ package swim.expr;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.util.ArrayIterator;
 import swim.util.Notation;
 import swim.util.ToSource;
 

@@ -601,7 +601,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
               .endValue();
     }
 
-    HashTrieMap<String, SoftReference<Logger>> children = (HashTrieMap<String, SoftReference<Logger>>) CHILDREN.getOpaque(this);
+    final HashTrieMap<String, SoftReference<Logger>> children = (HashTrieMap<String, SoftReference<Logger>>) CHILDREN.getOpaque(this);
     if (notation.options().verbose() && !children.isEmpty()) {
       notation.appendKey("children")
               .beginValue()

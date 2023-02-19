@@ -57,11 +57,11 @@ public final class MinusExpr extends InfixExpr implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(MinusExpr.class);
+  private static final int HASH_SEED = Murmur3.seed(MinusExpr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(MinusExpr.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.lhs.hashCode()), this.rhs.hashCode()));
   }
 

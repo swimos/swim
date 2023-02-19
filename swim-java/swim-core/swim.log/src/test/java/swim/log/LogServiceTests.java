@@ -17,7 +17,6 @@ package swim.log;
 import org.junit.jupiter.api.Test;
 import swim.json.Json;
 import swim.util.Severity;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LogServiceTests {
 
@@ -29,7 +28,7 @@ public class LogServiceTests {
     int i = 0;
     while (i < 10000) {
       for (int j = 0; j < 1000; j += 1) {
-        service.publish(LogEvent.create("test", "", LogScope.root(), Severity.NOTICE, "Message " + i, null, null));
+        service.publish(LogEvent.of("test", "", LogScope.root(), Severity.NOTICE, "Message " + i, null, null));
         i += 1;
       }
       Thread.sleep(34L);

@@ -389,11 +389,11 @@ public final class TermRepr implements Repr, ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(TermRepr.class);
+  private static final int HASH_SEED = Murmur3.seed(TermRepr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(TermRepr.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.attrs.hashCode()), this.term.hashCode()));
   }
 

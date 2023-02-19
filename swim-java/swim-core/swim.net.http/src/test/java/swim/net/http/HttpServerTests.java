@@ -16,6 +16,7 @@ package swim.net.http;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
 import swim.codec.Text;
@@ -31,6 +32,7 @@ import swim.net.TransportDriver;
 public class HttpServerTests {
 
   @Test
+  @Tag("manual")
   public void testServer() {
     final CountDownLatch finishedLatch = new CountDownLatch(1);
 
@@ -52,9 +54,9 @@ public class HttpServerTests {
 
       @Override
       public void willWriteResponse() {
-        final HttpBody<String> payload = HttpBody.create("Hello, world!\n", Text.transcoder());
-        //final HttpChunked<String> payload = HttpChunked.create("Hello, world!\n", Text.transcoder());
-        final HttpResponse<String> message = HttpResponse.create(HttpStatus.OK, payload.headers(), payload);
+        final HttpBody<String> payload = HttpBody.of("Hello, world!\n", Text.transcoder());
+        //final HttpChunked<String> payload = HttpChunked.of("Hello, world!\n", Text.transcoder());
+        final HttpResponse<String> message = HttpResponse.of(HttpStatus.OK, payload.headers(), payload);
         this.writeResponseMessage(message.write());
         this.writeResponsePayload(payload.encode());
       }

@@ -97,11 +97,11 @@ public class TransportOptions implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(TransportOptions.class);
+  private static final int HASH_SEED = Murmur3.seed(TransportOptions.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(TransportOptions.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         Murmur3.hash(this.idleInterval)), Murmur3.hash(this.idleTimeout)));
   }
 

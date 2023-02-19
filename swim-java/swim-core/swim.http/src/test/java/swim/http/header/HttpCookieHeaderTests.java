@@ -28,34 +28,34 @@ public class HttpCookieHeaderTests {
   @Test
   public void parseCookieHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Cookie: foo=bar\r\n");
-    assertInstanceOf(HttpCookieHeader.class, headers.getHeader(HttpHeader.COOKIE));
-    assertEquals(HttpCookieHeader.create(HttpCookie.create("foo", "bar")), headers.getHeader(HttpHeader.COOKIE));
-    assertEquals("foo=bar", headers.get(HttpHeader.COOKIE));
-    assertEquals(FingerTrieList.of(HttpCookie.create("foo", "bar")), headers.getValue(HttpHeader.COOKIE));
+    assertInstanceOf(HttpCookieHeader.class, headers.getHeader(HttpCookieHeader.TYPE));
+    assertEquals(HttpCookieHeader.of(HttpCookie.of("foo", "bar")), headers.getHeader(HttpCookieHeader.TYPE));
+    assertEquals("foo=bar", headers.get(HttpCookieHeader.TYPE));
+    assertEquals(FingerTrieList.of(HttpCookie.of("foo", "bar")), headers.getValue(HttpCookieHeader.TYPE));
   }
 
   @Test
   public void parseCookieHeaders() {
-    assertParses(HttpCookieHeader.create(HttpCookie.create("foo", "bar")),
+    assertParses(HttpCookieHeader.of(HttpCookie.of("foo", "bar")),
                  "Cookie: foo=bar");
-    assertParses(HttpCookieHeader.create(HttpCookie.create("foo", ""), HttpCookie.create("bar", "baz")),
+    assertParses(HttpCookieHeader.of(HttpCookie.of("foo", ""), HttpCookie.of("bar", "baz")),
                  "Cookie: foo=; bar=baz");
-    assertParses(HttpCookieHeader.create(HttpCookie.create("foo", "bar"), HttpCookie.create("baz", "")),
+    assertParses(HttpCookieHeader.of(HttpCookie.of("foo", "bar"), HttpCookie.of("baz", "")),
                  "Cookie: foo=bar; baz=");
-    assertParses(HttpCookieHeader.create(HttpCookie.create("foo", "bar"), HttpCookie.create("baz", "qux")),
+    assertParses(HttpCookieHeader.of(HttpCookie.of("foo", "bar"), HttpCookie.of("baz", "qux")),
                  "Cookie: foo=bar; baz=qux");
   }
 
   @Test
   public void writeCookieHeaders() {
     assertWrites("Cookie: foo=bar",
-                 HttpCookieHeader.create(HttpCookie.create("foo", "bar")));
+                 HttpCookieHeader.of(HttpCookie.of("foo", "bar")));
     assertWrites("Cookie: foo=; bar=baz",
-                 HttpCookieHeader.create(HttpCookie.create("foo", ""), HttpCookie.create("bar", "baz")));
+                 HttpCookieHeader.of(HttpCookie.of("foo", ""), HttpCookie.of("bar", "baz")));
     assertWrites("Cookie: foo=bar; baz=",
-                 HttpCookieHeader.create(HttpCookie.create("foo", "bar"), HttpCookie.create("baz", "")));
+                 HttpCookieHeader.of(HttpCookie.of("foo", "bar"), HttpCookie.of("baz", "")));
     assertWrites("Cookie: foo=bar; baz=qux",
-                 HttpCookieHeader.create(HttpCookie.create("foo", "bar"), HttpCookie.create("baz", "qux")));
+                 HttpCookieHeader.of(HttpCookie.of("foo", "bar"), HttpCookie.of("baz", "qux")));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

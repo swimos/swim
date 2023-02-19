@@ -24,7 +24,6 @@ import swim.codec.WriteException;
 import swim.util.Assume;
 import swim.waml.WamlAttrForm;
 import swim.waml.WamlFieldForm;
-import swim.waml.WamlForm;
 import swim.waml.WamlObjectForm;
 import swim.waml.WamlWriter;
 

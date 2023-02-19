@@ -70,11 +70,11 @@ public final class HttpVersion implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpVersion.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpVersion.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpVersion.hashSeed, this.major), this.minor));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED, this.major), this.minor));
   }
 
   @Override
@@ -84,7 +84,7 @@ public final class HttpVersion implements ToSource, ToString {
       notation.append("HttpVersion").append('.').append("HTTP").append('_')
               .append(this.major).append('_').append(this.minor);
     } else {
-      notation.beginInvoke("HttpVersion", "create")
+      notation.beginInvoke("HttpVersion", "of")
               .appendArgument(this.major)
               .appendArgument(this.minor)
               .endInvoke();
@@ -106,7 +106,7 @@ public final class HttpVersion implements ToSource, ToString {
   public static final HttpVersion HTTP_1_1 = new HttpVersion(1, 1);
   public static final HttpVersion HTTP_1_0 = new HttpVersion(1, 0);
 
-  public static HttpVersion create(int major, int minor) {
+  public static HttpVersion of(int major, int minor) {
     if (major == 1 && minor == 1) {
       return HttpVersion.HTTP_1_1;
     } else if (major == 1 && minor == 0) {
@@ -226,7 +226,7 @@ final class ParseHttpVersion extends Parse<HttpVersion> {
         if (Base10.isDigit(c)) {
           input.step();
           minor = Base10.decodeDigit(c);
-          return Parse.done(HttpVersion.create(major, minor));
+          return Parse.done(HttpVersion.of(major, minor));
         } else {
           return Parse.error(Diagnostic.expected("minor version", input));
         }

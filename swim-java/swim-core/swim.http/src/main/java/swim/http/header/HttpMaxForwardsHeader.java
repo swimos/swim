@@ -51,7 +51,7 @@ public final class HttpMaxForwardsHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpMaxForwardsHeader", "create")
+    notation.beginInvoke("HttpMaxForwardsHeader", "of")
             .appendArgument(this.count())
             .endInvoke();
   }
@@ -64,7 +64,7 @@ public final class HttpMaxForwardsHeader extends HttpHeader {
     return new HttpMaxForwardsHeader(name, value, -1);
   }
 
-  public static HttpMaxForwardsHeader create(String name, int count) {
+  public static HttpMaxForwardsHeader of(String name, int count) {
     final String value = Integer.toString(count);
     if (count < 0) {
       throw new IllegalArgumentException(value);
@@ -72,8 +72,8 @@ public final class HttpMaxForwardsHeader extends HttpHeader {
     return new HttpMaxForwardsHeader(name, value, count);
   }
 
-  public static HttpMaxForwardsHeader create(int count) {
-    return HttpMaxForwardsHeader.create(NAME, count);
+  public static HttpMaxForwardsHeader of(int count) {
+    return HttpMaxForwardsHeader.of(NAME, count);
   }
 
   private static int parseValue(String value) {
@@ -131,8 +131,8 @@ final class HttpMaxForwardsHeaderType implements HttpHeaderType<Integer>, ToSour
   }
 
   @Override
-  public HttpHeader create(String name, Integer count) {
-    return HttpMaxForwardsHeader.create(name, count);
+  public HttpHeader of(String name, Integer count) {
+    return HttpMaxForwardsHeader.of(name, count);
   }
 
   @Override

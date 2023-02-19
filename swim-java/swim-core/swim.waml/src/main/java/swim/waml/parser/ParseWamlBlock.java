@@ -16,15 +16,10 @@ package swim.waml.parser;
 
 import swim.annotations.Internal;
 import swim.annotations.Nullable;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
-import swim.expr.Term;
 import swim.util.Assume;
-import swim.waml.Waml;
-import swim.waml.WamlForm;
 import swim.waml.WamlParser;
-import swim.waml.WamlStringForm;
 import swim.waml.WamlTupleForm;
 
 @Internal

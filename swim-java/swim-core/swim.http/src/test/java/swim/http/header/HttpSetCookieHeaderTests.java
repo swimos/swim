@@ -27,24 +27,24 @@ public class HttpSetCookieHeaderTests {
   @Test
   public void parseSetCookieHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Set-Cookie: foo=bar\r\n");
-    assertInstanceOf(HttpSetCookieHeader.class, headers.getHeader(HttpHeader.SET_COOKIE));
-    assertEquals(HttpSetCookieHeader.create(HttpCookieState.create("foo", "bar")), headers.getHeader(HttpHeader.SET_COOKIE));
-    assertEquals("foo=bar", headers.get(HttpHeader.SET_COOKIE));
-    assertEquals(HttpCookieState.create("foo", "bar"), headers.getValue(HttpHeader.SET_COOKIE));
+    assertInstanceOf(HttpSetCookieHeader.class, headers.getHeader(HttpSetCookieHeader.TYPE));
+    assertEquals(HttpSetCookieHeader.of(HttpCookieState.of("foo", "bar")), headers.getHeader(HttpSetCookieHeader.TYPE));
+    assertEquals("foo=bar", headers.get(HttpSetCookieHeader.TYPE));
+    assertEquals(HttpCookieState.of("foo", "bar"), headers.getValue(HttpSetCookieHeader.TYPE));
   }
 
   @Test
   public void parseSetCookieHeaders() {
-    assertParses(HttpSetCookieHeader.create(HttpCookieState.create("foo", "bar")), "Set-Cookie: foo=bar");
-    assertParses(HttpSetCookieHeader.create(HttpCookieState.create("foo", "bar").withParam("Domain", "example.com")),
+    assertParses(HttpSetCookieHeader.of(HttpCookieState.of("foo", "bar")), "Set-Cookie: foo=bar");
+    assertParses(HttpSetCookieHeader.of(HttpCookieState.of("foo", "bar").withParam("Domain", "example.com")),
                  "Set-Cookie: foo=bar; Domain=example.com");
   }
 
   @Test
   public void writeSetCookieHeaders() {
-    assertWrites("Set-Cookie: foo=bar", HttpSetCookieHeader.create(HttpCookieState.create("foo", "bar")));
+    assertWrites("Set-Cookie: foo=bar", HttpSetCookieHeader.of(HttpCookieState.of("foo", "bar")));
     assertWrites("Set-Cookie: foo=bar; Domain=example.com",
-                 HttpSetCookieHeader.create(HttpCookieState.create("foo", "bar").withParam("Domain", "example.com")));
+                 HttpSetCookieHeader.of(HttpCookieState.of("foo", "bar").withParam("Domain", "example.com")));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

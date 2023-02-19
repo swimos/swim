@@ -96,11 +96,11 @@ public class JsonWriterOptions extends ExprWriterOptions {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(JsonWriterOptions.class);
+  private static final int HASH_SEED = Murmur3.seed(JsonWriterOptions.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
         Murmur3.hash(this.whitespace)), Murmur3.hash(this.indentation)),
         Murmur3.hash(this.lineSeparator)), Murmur3.hash(this.identifierKeys)));
   }

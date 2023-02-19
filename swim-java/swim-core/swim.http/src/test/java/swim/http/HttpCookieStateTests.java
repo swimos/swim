@@ -20,64 +20,64 @@ public class HttpCookieStateTests {
 
   @Test
   public void parseCookieStates() {
-    assertParses(HttpCookieState.create("foo", "bar"), "foo=bar");
-    assertParses(HttpCookieState.create("foo", "baz.bar"), "foo=baz.bar");
-    assertParses(HttpCookieState.create("foo.bar", "baz.qux"), "foo.bar=baz.qux");
-    assertParses(HttpCookieState.create("foo", ""), "foo=");
-    assertParses(HttpCookieState.create("email", "foo@example.com"), "email=foo@example.com");
+    assertParses(HttpCookieState.of("foo", "bar"), "foo=bar");
+    assertParses(HttpCookieState.of("foo", "baz.bar"), "foo=baz.bar");
+    assertParses(HttpCookieState.of("foo.bar", "baz.qux"), "foo.bar=baz.qux");
+    assertParses(HttpCookieState.of("foo", ""), "foo=");
+    assertParses(HttpCookieState.of("email", "foo@example.com"), "email=foo@example.com");
   }
 
   @Test
   public void writeCookieStates() {
-    assertWrites("foo=bar", HttpCookieState.create("foo", "bar"));
-    assertWrites("foo=baz.bar", HttpCookieState.create("foo", "baz.bar"));
-    assertWrites("foo.bar=baz.qux", HttpCookieState.create("foo.bar", "baz.qux"));
-    assertWrites("foo=", HttpCookieState.create("foo", ""));
-    assertWrites("email=foo@example.com", HttpCookieState.create("email", "foo@example.com"));
+    assertWrites("foo=bar", HttpCookieState.of("foo", "bar"));
+    assertWrites("foo=baz.bar", HttpCookieState.of("foo", "baz.bar"));
+    assertWrites("foo.bar=baz.qux", HttpCookieState.of("foo.bar", "baz.qux"));
+    assertWrites("foo=", HttpCookieState.of("foo", ""));
+    assertWrites("email=foo@example.com", HttpCookieState.of("email", "foo@example.com"));
   }
 
   @Test
   public void parseCookieStatesWithParams() {
-    assertParses(HttpCookieState.create("foo", "bar").withParam("Path", "/"),
+    assertParses(HttpCookieState.of("foo", "bar").withParam("Path", "/"),
                  "foo=bar; Path=/");
-    assertParses(HttpCookieState.create("foo", "bar").withParam("Path", "/")
-                                                     .withParam("Domain", "example.com"),
+    assertParses(HttpCookieState.of("foo", "bar").withParam("Path", "/")
+                                                 .withParam("Domain", "example.com"),
                  "foo=bar; Path=/; Domain=example.com");
-    assertParses(HttpCookieState.create("foo", "bar").withParam("HttpOnly"),
+    assertParses(HttpCookieState.of("foo", "bar").withParam("HttpOnly"),
                  "foo=bar; HttpOnly");
-    assertParses(HttpCookieState.create("foo", "bar").withParam("Secure")
-                                                     .withParam("HttpOnly"),
+    assertParses(HttpCookieState.of("foo", "bar").withParam("Secure")
+                                                 .withParam("HttpOnly"),
                  "foo=bar; Secure; HttpOnly");
-    assertParses(HttpCookieState.create("foo", "bar").withParam("Expires", "Wed, 09 Jun 2021 10:18:14 GMT"),
+    assertParses(HttpCookieState.of("foo", "bar").withParam("Expires", "Wed, 09 Jun 2021 10:18:14 GMT"),
                  "foo=bar; Expires=Wed, 09 Jun 2021 10:18:14 GMT");
-    assertParses(HttpCookieState.create("foo", "bar").withParam("Path", "/")
-                                                     .withParam("Domain", "example.com")
-                                                     .withParam("Expires", "Wed, 09 Jun 2021 10:18:14 GMT")
-                                                     .withParam("Secure")
-                                                     .withParam("HttpOnly"),
+    assertParses(HttpCookieState.of("foo", "bar").withParam("Path", "/")
+                                                 .withParam("Domain", "example.com")
+                                                 .withParam("Expires", "Wed, 09 Jun 2021 10:18:14 GMT")
+                                                 .withParam("Secure")
+                                                 .withParam("HttpOnly"),
                  "foo=bar; Path=/; Domain=example.com; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Secure; HttpOnly");
   }
 
   @Test
   public void writeCookieStatesWithParams() {
     assertWrites("foo=bar; Path=/",
-                 HttpCookieState.create("foo", "bar").withParam("Path", "/"));
+                 HttpCookieState.of("foo", "bar").withParam("Path", "/"));
     assertWrites("foo=bar; Path=/; Domain=example.com",
-                 HttpCookieState.create("foo", "bar").withParam("Path", "/")
-                                                     .withParam("Domain", "example.com"));
+                 HttpCookieState.of("foo", "bar").withParam("Path", "/")
+                                                 .withParam("Domain", "example.com"));
     assertWrites("foo=bar; HttpOnly",
-                 HttpCookieState.create("foo", "bar").withParam("HttpOnly"));
+                 HttpCookieState.of("foo", "bar").withParam("HttpOnly"));
     assertWrites("foo=bar; Secure; HttpOnly",
-                 HttpCookieState.create("foo", "bar").withParam("Secure")
-                                                     .withParam("HttpOnly"));
+                 HttpCookieState.of("foo", "bar").withParam("Secure")
+                                                 .withParam("HttpOnly"));
     assertWrites("foo=bar; Expires=Wed, 09 Jun 2021 10:18:14 GMT",
-                 HttpCookieState.create("foo", "bar").withParam("Expires", "Wed, 09 Jun 2021 10:18:14 GMT"));
+                 HttpCookieState.of("foo", "bar").withParam("Expires", "Wed, 09 Jun 2021 10:18:14 GMT"));
     assertWrites("foo=bar; Path=/; Domain=example.com; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Secure; HttpOnly",
-                 HttpCookieState.create("foo", "bar").withParam("Path", "/")
-                                                     .withParam("Domain", "example.com")
-                                                     .withParam("Expires", "Wed, 09 Jun 2021 10:18:14 GMT")
-                                                     .withParam("Secure")
-                                                     .withParam("HttpOnly"));
+                 HttpCookieState.of("foo", "bar").withParam("Path", "/")
+                                                 .withParam("Domain", "example.com")
+                                                 .withParam("Expires", "Wed, 09 Jun 2021 10:18:14 GMT")
+                                                 .withParam("Secure")
+                                                 .withParam("HttpOnly"));
   }
 
   public static void assertParses(HttpCookieState expected, String string) {

@@ -422,7 +422,7 @@ final class Base64DecodedOutput<T> extends Output<T> {
         this.have = 3;
       } else if (c < 0) {
         if (!this.base64.isPadded()) {
-          base64.writeQuantum(this.output, this.p, this.q, '=', '=');
+          this.base64.writeQuantum(this.output, this.p, this.q, '=', '=');
           this.q = 0;
           this.p = 0;
           this.have = 0;
@@ -441,20 +441,20 @@ final class Base64DecodedOutput<T> extends Output<T> {
     } else if (this.have == 3) {
       if (this.r != '=') {
         if (this.base64.isDigit(c)) {
-          base64.writeQuantum(this.output, this.p, this.q, this.r, c);
+          this.base64.writeQuantum(this.output, this.p, this.q, this.r, c);
           this.r = 0;
           this.q = 0;
           this.p = 0;
           this.have = 0;
         } else if (c == '=') {
-          base64.writeQuantum(this.output, this.p, this.q, this.r, '=');
+          this.base64.writeQuantum(this.output, this.p, this.q, this.r, '=');
           this.r = 0;
           this.q = 0;
           this.p = 0;
           this.have = -1;
         } else if (c < 0) {
           if (!this.base64.isPadded()) {
-            base64.writeQuantum(this.output, this.p, this.q, this.r, '=');
+            this.base64.writeQuantum(this.output, this.p, this.q, this.r, '=');
             this.r = 0;
             this.q = 0;
             this.p = 0;
@@ -475,7 +475,7 @@ final class Base64DecodedOutput<T> extends Output<T> {
         }
       } else {
         if (c == '=') {
-          base64.writeQuantum(this.output, this.p, this.q, '=', '=');
+          this.base64.writeQuantum(this.output, this.p, this.q, '=', '=');
           this.r = 0;
           this.q = 0;
           this.p = 0;

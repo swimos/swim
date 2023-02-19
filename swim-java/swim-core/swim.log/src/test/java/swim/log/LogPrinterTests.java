@@ -17,20 +17,19 @@ package swim.log;
 import org.junit.jupiter.api.Test;
 import swim.json.Json;
 import swim.util.Severity;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LogPrinterTests {
 
   @Test
   public void testLogPrinter() {
     final LogPrinter log = new LogPrinter(Json.forType(LogEvent.class));
-    log.publish(LogEvent.create("test", "", LogScope.root(), Severity.INFO, "Hello, world!", null, null));
+    log.publish(LogEvent.of("test", "", LogScope.root(), Severity.INFO, "Hello, world!", null, null));
   }
 
   @Test
   public void testLogPrinterWriter() {
     final LogPrinter log = new LogPrinter(LogFormat.provider());
-    log.publish(LogEvent.create("test", "", LogScope.root(), Severity.INFO, "Hello, world!", "detail", null));
+    log.publish(LogEvent.of("test", "", LogScope.root(), Severity.INFO, "Hello, world!", "detail", null));
   }
 
 }

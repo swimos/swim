@@ -22,26 +22,26 @@ public class HttpProtocolTests {
   public void parseProducts() {
     assertParses(HttpProtocol.h2c(), "h2c");
     assertParses(HttpProtocol.websocket(), "websocket");
-    assertParses(HttpProtocol.create("foo"), "foo");
+    assertParses(HttpProtocol.of("foo"), "foo");
   }
 
   @Test
   public void writeProducts() {
     assertWrites("h2c", HttpProtocol.h2c());
     assertWrites("websocket", HttpProtocol.websocket());
-    assertWrites("foo", HttpProtocol.create("foo"));
+    assertWrites("foo", HttpProtocol.of("foo"));
   }
 
   @Test
   public void parseProductsWithVersions() {
-    assertParses(HttpProtocol.create("proto", "1.0"), "proto/1.0");
-    assertParses(HttpProtocol.create("foo", "bar"), "foo/bar");
+    assertParses(HttpProtocol.of("proto", "1.0"), "proto/1.0");
+    assertParses(HttpProtocol.of("foo", "bar"), "foo/bar");
   }
 
   @Test
   public void writeProductsWithVersions() {
-    assertWrites("proto/1.0", HttpProtocol.create("proto", "1.0"));
-    assertWrites("foo/bar", HttpProtocol.create("foo", "bar"));
+    assertWrites("proto/1.0", HttpProtocol.of("proto", "1.0"));
+    assertWrites("foo/bar", HttpProtocol.of("foo", "bar"));
   }
 
   public static void assertParses(HttpProtocol expected, String string) {

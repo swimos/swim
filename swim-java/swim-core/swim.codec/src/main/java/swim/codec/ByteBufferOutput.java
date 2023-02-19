@@ -100,7 +100,7 @@ public final class ByteBufferOutput extends Output<ByteBuffer> {
 
   private static final byte[] EMPTY_ARRAY = new byte[0];
 
-  public static ByteBufferOutput create(int capacity) {
+  public static ByteBufferOutput ofCapacity(int capacity) {
     return new ByteBufferOutput(new byte[capacity], capacity, true);
   }
 

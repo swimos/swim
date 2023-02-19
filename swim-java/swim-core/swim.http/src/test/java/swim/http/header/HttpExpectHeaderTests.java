@@ -26,20 +26,20 @@ public class HttpExpectHeaderTests {
   @Test
   public void parseExpectHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Expect: 100-continue\r\n");
-    assertInstanceOf(HttpExpectHeader.class, headers.getHeader(HttpHeader.EXPECT));
-    assertEquals(HttpExpectHeader.create("100-continue"), headers.getHeader(HttpHeader.EXPECT));
-    assertEquals("100-continue", headers.get(HttpHeader.EXPECT));
-    assertEquals("100-continue", headers.getValue(HttpHeader.EXPECT));
+    assertInstanceOf(HttpExpectHeader.class, headers.getHeader(HttpExpectHeader.TYPE));
+    assertEquals(HttpExpectHeader.of("100-continue"), headers.getHeader(HttpExpectHeader.TYPE));
+    assertEquals("100-continue", headers.get(HttpExpectHeader.TYPE));
+    assertEquals("100-continue", headers.getValue(HttpExpectHeader.TYPE));
   }
 
   @Test
   public void parseExpectHeaders() {
-    assertParses(HttpExpectHeader.create("100-continue"), "Expect: 100-continue");
+    assertParses(HttpExpectHeader.of("100-continue"), "Expect: 100-continue");
   }
 
   @Test
   public void writeExpectHeaders() {
-    assertWrites("Expect: 100-continue", HttpExpectHeader.create("100-continue"));
+    assertWrites("Expect: 100-continue", HttpExpectHeader.of("100-continue"));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

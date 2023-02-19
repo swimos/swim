@@ -18,7 +18,6 @@ import java.io.IOException;
 import javax.net.ssl.SSLEngine;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.util.Notation;
 import swim.util.ToSource;
 
 /**

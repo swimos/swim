@@ -26,26 +26,26 @@ public class HttpContentLengthHeaderTests {
   @Test
   public void parseContentLengthHeaderType() {
     final HttpHeaders headers = HttpHeaders.parse("Content-Length: 42\r\n");
-    assertInstanceOf(HttpContentLengthHeader.class, headers.getHeader(HttpHeader.CONTENT_LENGTH));
-    assertEquals(HttpContentLengthHeader.create(42L), headers.getHeader(HttpHeader.CONTENT_LENGTH));
-    assertEquals("42", headers.get(HttpHeader.CONTENT_LENGTH));
-    assertEquals(42L, headers.getValue(HttpHeader.CONTENT_LENGTH));
+    assertInstanceOf(HttpContentLengthHeader.class, headers.getHeader(HttpContentLengthHeader.TYPE));
+    assertEquals(HttpContentLengthHeader.of(42L), headers.getHeader(HttpContentLengthHeader.TYPE));
+    assertEquals("42", headers.get(HttpContentLengthHeader.TYPE));
+    assertEquals(42L, headers.getValue(HttpContentLengthHeader.TYPE));
   }
 
   @Test
   public void parseContentLengthHeaders() {
-    assertParses(HttpContentLengthHeader.create(0L), "Content-Length: 0");
-    assertParses(HttpContentLengthHeader.create(1L), "Content-Length: 1");
-    assertParses(HttpContentLengthHeader.create(10L), "content-length: 10");
-    assertParses(HttpContentLengthHeader.create(9223372036854775807L), "CONTENT-LENGTH: 9223372036854775807");
+    assertParses(HttpContentLengthHeader.of(0L), "Content-Length: 0");
+    assertParses(HttpContentLengthHeader.of(1L), "Content-Length: 1");
+    assertParses(HttpContentLengthHeader.of(10L), "content-length: 10");
+    assertParses(HttpContentLengthHeader.of(9223372036854775807L), "CONTENT-LENGTH: 9223372036854775807");
   }
 
   @Test
   public void writeContentLengthHeaders() {
-    assertWrites("Content-Length: 0", HttpContentLengthHeader.create(0L));
-    assertWrites("Content-Length: 1", HttpContentLengthHeader.create(1L));
-    assertWrites("Content-Length: 10", HttpContentLengthHeader.create(10L));
-    assertWrites("Content-Length: 9223372036854775807", HttpContentLengthHeader.create(9223372036854775807L));
+    assertWrites("Content-Length: 0", HttpContentLengthHeader.of(0L));
+    assertWrites("Content-Length: 1", HttpContentLengthHeader.of(1L));
+    assertWrites("Content-Length: 10", HttpContentLengthHeader.of(10L));
+    assertWrites("Content-Length: 9223372036854775807", HttpContentLengthHeader.of(9223372036854775807L));
   }
 
   public static void assertParses(HttpHeader expected, String string) {

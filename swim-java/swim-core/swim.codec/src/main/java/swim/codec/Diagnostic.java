@@ -14,14 +14,13 @@
 
 package swim.codec;
 
-import java.io.IOException;
 import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
-import swim.util.Severity;
 import swim.util.Notation;
+import swim.util.Severity;
 import swim.util.ToString;
 
 /**
@@ -436,37 +435,37 @@ public final class Diagnostic implements ToString {
 
   static final int CONTEXT_LINES = 2;
 
-  public static Diagnostic create(Input input, SourceLocation location, Severity severity,
-                                  @Nullable String message, @Nullable String note,
-                                  @Nullable Diagnostic cause) {
+  public static Diagnostic of(Input input, SourceLocation location, Severity severity,
+                              @Nullable String message, @Nullable String note,
+                              @Nullable Diagnostic cause) {
     input = input.clone();
     Objects.requireNonNull(location, "location");
     Objects.requireNonNull(severity, "severity");
     return new Diagnostic(input, location, severity, message, note, cause);
   }
 
-  public static Diagnostic create(Input input, SourceLocation location, Severity severity,
-                                  @Nullable String message, @Nullable String note) {
-    return Diagnostic.create(input, location, severity, message, note, null);
+  public static Diagnostic of(Input input, SourceLocation location, Severity severity,
+                              @Nullable String message, @Nullable String note) {
+    return Diagnostic.of(input, location, severity, message, note, null);
   }
 
-  public static Diagnostic create(Input input, SourceLocation location, Severity severity,
-                                  @Nullable String message, @Nullable Diagnostic cause) {
-    return Diagnostic.create(input, location, severity, message, null, cause);
+  public static Diagnostic of(Input input, SourceLocation location, Severity severity,
+                              @Nullable String message, @Nullable Diagnostic cause) {
+    return Diagnostic.of(input, location, severity, message, null, cause);
   }
 
-  public static Diagnostic create(Input input, SourceLocation location, Severity severity,
-                                  @Nullable String message) {
-    return Diagnostic.create(input, location, severity, message, null, null);
+  public static Diagnostic of(Input input, SourceLocation location, Severity severity,
+                              @Nullable String message) {
+    return Diagnostic.of(input, location, severity, message, null, null);
   }
 
-  public static Diagnostic create(Input input, SourceLocation location, Severity severity,
-                                  @Nullable Diagnostic cause) {
-    return Diagnostic.create(input, location, severity, null, null, cause);
+  public static Diagnostic of(Input input, SourceLocation location, Severity severity,
+                              @Nullable Diagnostic cause) {
+    return Diagnostic.of(input, location, severity, null, null, cause);
   }
 
-  public static Diagnostic create(Input input, SourceLocation location, Severity severity) {
-    return Diagnostic.create(input, location, severity, null, null, null);
+  public static Diagnostic of(Input input, SourceLocation location, Severity severity) {
+    return Diagnostic.of(input, location, severity, null, null, null);
   }
 
   public static Diagnostic message(@Nullable String message, Input input,
@@ -474,7 +473,7 @@ public final class Diagnostic implements ToString {
                                    @Nullable Diagnostic cause) {
     final SourcePosition position = input.position();
     final Input source = input.clone().seek(null);
-    return Diagnostic.create(source, position, severity, message, note, cause);
+    return Diagnostic.of(source, position, severity, message, note, cause);
   }
 
   public static Diagnostic message(@Nullable String message, Input input,
@@ -525,7 +524,7 @@ public final class Diagnostic implements ToString {
     }
     final SourcePosition position = input.position();
     final Input source = input.clone().seek(null);
-    return Diagnostic.create(source, position, severity, message, note, cause);
+    return Diagnostic.of(source, position, severity, message, note, cause);
   }
 
   public static Diagnostic unexpected(Input input, Severity severity,
@@ -573,7 +572,7 @@ public final class Diagnostic implements ToString {
     final String message = notation.toString();
     final SourcePosition position = input.position();
     final Input source = input.clone().seek(null);
-    return Diagnostic.create(source, position, severity, message, note, cause);
+    return Diagnostic.of(source, position, severity, message, note, cause);
   }
 
   public static Diagnostic expected(int expected, Input input, Severity severity,
@@ -620,7 +619,7 @@ public final class Diagnostic implements ToString {
     final String message = notation.toString();
     final SourcePosition position = input.position();
     final Input source = input.clone().seek(null);
-    return Diagnostic.create(source, position, severity, message, note, cause);
+    return Diagnostic.of(source, position, severity, message, note, cause);
   }
 
   public static Diagnostic expected(String expected, Input input, Severity severity,

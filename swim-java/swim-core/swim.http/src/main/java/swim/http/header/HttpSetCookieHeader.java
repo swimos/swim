@@ -49,7 +49,7 @@ public final class HttpSetCookieHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpSetCookieHeader", "create")
+    notation.beginInvoke("HttpSetCookieHeader", "of")
             .appendArgument(this.cookie())
             .endInvoke();
   }
@@ -62,13 +62,13 @@ public final class HttpSetCookieHeader extends HttpHeader {
     return new HttpSetCookieHeader(name, value, null);
   }
 
-  public static HttpSetCookieHeader create(String name, HttpCookieState cookie) {
+  public static HttpSetCookieHeader of(String name, HttpCookieState cookie) {
     final String value = cookie.toString();
     return new HttpSetCookieHeader(name, value, cookie);
   }
 
-  public static HttpSetCookieHeader create(HttpCookieState cookie) {
-    return HttpSetCookieHeader.create(NAME, cookie);
+  public static HttpSetCookieHeader of(HttpCookieState cookie) {
+    return HttpSetCookieHeader.of(NAME, cookie);
   }
 
 }
@@ -91,8 +91,8 @@ final class HttpSetCookieHeaderType implements HttpHeaderType<HttpCookieState>, 
   }
 
   @Override
-  public HttpHeader create(String name, HttpCookieState cookie) {
-    return HttpSetCookieHeader.create(name, cookie);
+  public HttpHeader of(String name, HttpCookieState cookie) {
+    return HttpSetCookieHeader.of(name, cookie);
   }
 
   @Override

@@ -16,8 +16,8 @@ package swim.repr;
 
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.net.InetAddress;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;

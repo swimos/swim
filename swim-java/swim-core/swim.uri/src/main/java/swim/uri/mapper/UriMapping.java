@@ -85,11 +85,11 @@ final class UriMapping<T> extends TerminalUriMapper<T> {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(UriMapping.class);
+  private static final int HASH_SEED = Murmur3.seed(UriMapping.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(UriMapping.hashSeed, this.value.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.value.hashCode()));
   }
 
 }

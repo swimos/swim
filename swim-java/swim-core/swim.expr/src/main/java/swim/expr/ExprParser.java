@@ -16,7 +16,6 @@ package swim.expr;
 
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.parser.ParseAdditiveExpr;

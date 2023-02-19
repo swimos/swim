@@ -57,7 +57,7 @@ public final class HttpAllowHeader extends HttpHeader {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpAllowHeader", "create")
+    notation.beginInvoke("HttpAllowHeader", "of")
             .appendArgument(this.methods())
             .endInvoke();
   }
@@ -70,17 +70,17 @@ public final class HttpAllowHeader extends HttpHeader {
     return new HttpAllowHeader(name, value, null);
   }
 
-  public static HttpAllowHeader create(String name, FingerTrieList<HttpMethod> methods) {
+  public static HttpAllowHeader of(String name, FingerTrieList<HttpMethod> methods) {
     final String value = HttpAllowHeader.writeValue(methods.iterator());
     return new HttpAllowHeader(name, value, methods);
   }
 
-  public static HttpAllowHeader create(FingerTrieList<HttpMethod> methods) {
-    return HttpAllowHeader.create(NAME, methods);
+  public static HttpAllowHeader of(FingerTrieList<HttpMethod> methods) {
+    return HttpAllowHeader.of(NAME, methods);
   }
 
-  public static HttpAllowHeader create(HttpMethod... methods) {
-    return HttpAllowHeader.create(NAME, FingerTrieList.of(methods));
+  public static HttpAllowHeader of(HttpMethod... methods) {
+    return HttpAllowHeader.of(NAME, FingerTrieList.of(methods));
   }
 
   private static FingerTrieList<HttpMethod> parseValue(String value) {
@@ -158,8 +158,8 @@ final class HttpAllowHeaderType implements HttpHeaderType<FingerTrieList<HttpMet
   }
 
   @Override
-  public HttpHeader create(String name, FingerTrieList<HttpMethod> methods) {
-    return HttpAllowHeader.create(name, methods);
+  public HttpHeader of(String name, FingerTrieList<HttpMethod> methods) {
+    return HttpAllowHeader.of(name, methods);
   }
 
   @Override

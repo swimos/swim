@@ -101,19 +101,19 @@ public final class HttpProduct implements ToSource, ToString {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpProduct.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpProduct.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        HttpProduct.hashSeed, this.name.hashCode()),
-        Objects.hashCode(this.version)), this.comments.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
+        this.name.hashCode()), Objects.hashCode(this.version)),
+        this.comments.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpProduct", "create")
+    notation.beginInvoke("HttpProduct", "of")
             .appendArgument(this.name);
     if (this.version != null) {
       notation.appendArgument(this.version);
@@ -138,21 +138,21 @@ public final class HttpProduct implements ToSource, ToString {
     return output.get();
   }
 
-  public static HttpProduct create(String name, @Nullable String version,
-                                   FingerTrieList<String> comments) {
+  public static HttpProduct of(String name, @Nullable String version,
+                               FingerTrieList<String> comments) {
     return new HttpProduct(name, version, comments);
   }
 
-  public static HttpProduct create(String name, @Nullable String version,
-                                   String... comments) {
+  public static HttpProduct of(String name, @Nullable String version,
+                               String... comments) {
     return new HttpProduct(name, version, FingerTrieList.of(comments));
   }
 
-  public static HttpProduct create(String name, @Nullable String version) {
+  public static HttpProduct of(String name, @Nullable String version) {
     return new HttpProduct(name, version);
   }
 
-  public static HttpProduct create(String name) {
+  public static HttpProduct of(String name) {
     return new HttpProduct(name);
   }
 
@@ -284,7 +284,7 @@ final class ParseHttpProduct extends Parse<HttpProduct> {
         } else if (input.isReady()) {
           final String name = nameBuilder.toString();
           final String version = versionBuilder != null ? versionBuilder.toString() : null;
-          return Parse.done(HttpProduct.create(name, version, comments));
+          return Parse.done(HttpProduct.of(name, version, comments));
         }
       }
       if (step == 6) {

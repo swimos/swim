@@ -57,11 +57,11 @@ public final class BitwiseAndExpr extends InfixExpr implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(BitwiseAndExpr.class);
+  private static final int HASH_SEED = Murmur3.seed(BitwiseAndExpr.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(BitwiseAndExpr.hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
         this.lhs.hashCode()), this.rhs.hashCode()));
   }
 

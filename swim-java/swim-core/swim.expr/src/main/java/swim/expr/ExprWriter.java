@@ -23,8 +23,8 @@ import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.expr.operator.CondExpr;
 import swim.expr.operator.InfixExpr;
-import swim.expr.operator.PrefixExpr;
 import swim.expr.operator.OperatorExpr;
+import swim.expr.operator.PrefixExpr;
 import swim.expr.selector.ChildExpr;
 import swim.expr.selector.ChildrenExpr;
 import swim.expr.selector.DescendantsExpr;
@@ -146,7 +146,7 @@ public class ExprWriter extends ExprLexer implements ToSource {
   }
 
   public Write<?> writeInvokeExpr(Output<?> output, TermForm<?> form,
-                                  Term scope, Term args[], int precedence) {
+                                  Term scope, Term[] args, int precedence) {
     return WriteInvokeExpr.write(output, this, form, scope, args, precedence, null, 0, 1);
   }
 

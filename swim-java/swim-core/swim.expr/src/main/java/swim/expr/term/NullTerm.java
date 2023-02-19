@@ -14,7 +14,6 @@
 
 package swim.expr.term;
 
-import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.expr.Term;

@@ -22,7 +22,6 @@ import swim.codec.Write;
 import swim.codec.Writer;
 import swim.expr.Evaluator;
 import swim.expr.FormatExpr;
-import swim.expr.Term;
 
 @Public
 @Since("5.0")

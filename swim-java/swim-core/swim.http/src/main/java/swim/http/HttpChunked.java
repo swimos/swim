@@ -62,7 +62,7 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   @Override
   public HttpHeaders headers() {
     final HttpHeaders headers = HttpHeaders.of();
-    headers.add(HttpContentTypeHeader.create(this.contentType()));
+    headers.add(HttpContentTypeHeader.of(this.contentType()));
     headers.add(HttpTransferEncodingHeader.chunked());
     return headers;
   }
@@ -72,7 +72,7 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   }
 
   public HttpChunked<T> withTrailers(HttpHeaders trailers) {
-    return HttpChunked.create(this.value, this.transcoder, trailers);
+    return HttpChunked.of(this.value, this.transcoder, trailers);
   }
 
   @Override
@@ -98,19 +98,19 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
     return false;
   }
 
-  private static final int hashSeed = Murmur3.seed(HttpChunked.class);
+  private static final int HASH_SEED = Murmur3.seed(HttpChunked.class);
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        HttpChunked.hashSeed, Objects.hashCode(this.value)),
-        this.transcoder.hashCode()), this.trailers.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
+        Objects.hashCode(this.value)), this.transcoder.hashCode()),
+        this.trailers.hashCode()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("HttpChunked", "create")
+    notation.beginInvoke("HttpChunked", "of")
             .appendArgument(this.value)
             .appendArgument(this.transcoder)
             .endInvoke();
@@ -126,12 +126,12 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
     return this.toSource();
   }
 
-  public static <T> HttpChunked<T> create(@Nullable T value, Transcoder<T> transcoder,
-                                          HttpHeaders trailers) {
+  public static <T> HttpChunked<T> of(@Nullable T value, Transcoder<T> transcoder,
+                                      HttpHeaders trailers) {
     return new HttpChunked<T>(value, transcoder, trailers);
   }
 
-  public static <T> HttpChunked<T> create(@Nullable T value, Transcoder<T> transcoder) {
+  public static <T> HttpChunked<T> of(@Nullable T value, Transcoder<T> transcoder) {
     return new HttpChunked<T>(value, transcoder, HttpHeaders.empty());
   }
 
@@ -291,8 +291,8 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
       parseTrailers = Assume.nonNull(parseTrailers);
       if (input.isCont() && input.head() == '\n') {
         input.step();
-        return Decode.done(HttpChunked.create(decodePayload.get(), transcoder,
-                                              parseTrailers.getNonNull()));
+        return Decode.done(HttpChunked.of(decodePayload.get(), transcoder,
+                                          parseTrailers.getNonNull()));
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("line feed", input));
       }

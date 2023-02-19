@@ -199,7 +199,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
           this.array = array;
           this.flags &= ~ALIASED_FLAG;
         }
-        array[i] = type.create(value);
+        array[i] = type.of(value);
         return header.value;
       }
     }
@@ -210,7 +210,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
       this.array = array;
       this.flags &= ~ALIASED_FLAG;
     }
-    array[n] = type.create(value);
+    array[n] = type.of(value);
     this.size = n + 1;
     return null;
   }
@@ -271,7 +271,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
       this.array = array;
       this.flags &= ~ALIASED_FLAG;
     }
-    array[n] = type.create(value);
+    array[n] = type.of(value);
     this.size = n + 1;
     return null;
   }
@@ -326,13 +326,13 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
       if (name.equalsIgnoreCase(header.name)) {
         final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n)];
         System.arraycopy(array, 0, newArray, 0, n);
-        newArray[i] = type.create(value);
+        newArray[i] = type.of(value);
         return new HttpHeaders(0, n, newArray);
       }
     }
     final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n + 1)];
     System.arraycopy(array, 0, newArray, 0, n);
-    newArray[n] = type.create(value);
+    newArray[n] = type.of(value);
     return new HttpHeaders(0, n + 1, newArray);
   }
 
@@ -481,7 +481,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
   }
 
   public HttpHeaders prependedAll(Collection<? extends HttpHeader> headers) {
-    int n = this.size;
+    final int n = this.size;
     final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(headers.size() + n)];
     int k = 0;
     for (HttpHeader header : headers) {
