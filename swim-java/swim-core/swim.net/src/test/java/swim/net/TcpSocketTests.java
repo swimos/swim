@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
 import swim.annotations.Nullable;
@@ -268,152 +269,149 @@ public class TcpSocketTests {
     }
   }
 
-  @Test
+  @RepeatedTest(100)
   public void testEcho() {
-    for (int i = 0; i < 100; i += 1) {
-      System.out.println("testEcho run " + (i + 1));
-      final CountDownLatch clientWriteLatch = new CountDownLatch(1);
-      final CountDownLatch serverReadLatch = new CountDownLatch(1);
-      final CountDownLatch serverWriteLatch = new CountDownLatch(1);
-      final CountDownLatch clientReadLatch = new CountDownLatch(1);
-      final CountDownLatch clientCloseLatch = new CountDownLatch(1);
-      final CountDownLatch serverCloseLatch = new CountDownLatch(1);
-      final String payload = "Hello, world!";
+    final CountDownLatch clientWriteLatch = new CountDownLatch(1);
+    final CountDownLatch serverReadLatch = new CountDownLatch(1);
+    final CountDownLatch serverWriteLatch = new CountDownLatch(1);
+    final CountDownLatch clientReadLatch = new CountDownLatch(1);
+    final CountDownLatch clientCloseLatch = new CountDownLatch(1);
+    final CountDownLatch serverCloseLatch = new CountDownLatch(1);
+    final String payload = "Hello, world!";
 
-      final TransportDriver driver = new TransportDriver();
-      final ThreadScheduler scheduler = new ThreadScheduler();
-      driver.setScheduler(scheduler);
+    final TransportDriver driver = new TransportDriver();
+    final ThreadScheduler scheduler = new ThreadScheduler();
+    driver.setScheduler(scheduler);
 
-      final AbstractNetSocket clientSocket = new AbstractNetSocket() {
-        @Nullable ByteBuffer writeBuffer;
-        @Nullable ByteBuffer readBuffer;
+    final AbstractNetSocket clientSocket = new AbstractNetSocket() {
+      @Nullable ByteBuffer writeBuffer;
+      @Nullable ByteBuffer readBuffer;
 
-        @Override
-        public void didOpen() {
-          try {
-            this.writeBuffer = ByteBuffer.wrap(payload.getBytes("UTF-8"));
-          } catch (UnsupportedEncodingException e) {
+      @Override
+      public void didOpen() {
+        try {
+          this.writeBuffer = ByteBuffer.wrap(payload.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+        }
+        this.readBuffer = ByteBuffer.allocate(1024);
+        this.requestRead();
+        this.requestWrite();
+      }
+
+      @Override
+      public void doRead() throws IOException {
+        this.readBuffer = Assume.nonNull(this.readBuffer);
+        final int count = this.read(this.readBuffer);
+        if (count >= 0) {
+          if (count != 0) {
+            this.requestWrite();
           }
-          this.readBuffer = ByteBuffer.allocate(1024);
           this.requestRead();
+        } else {
+          final String received = new String(this.readBuffer.array(), 0, this.readBuffer.position(), "UTF-8");
+          assertEquals(received, payload);
+          clientReadLatch.countDown();
+          this.doneReading();
+        }
+      }
+
+      @Override
+      public void doWrite() throws IOException {
+        this.writeBuffer = Assume.nonNull(this.writeBuffer);
+        this.write(this.writeBuffer);
+        if (this.writeBuffer.hasRemaining()) {
+          this.requestWrite();
+        } else {
+          clientWriteLatch.countDown();
+          this.doneWriting();
+        }
+      }
+
+      @Override
+      public void didClose() throws IOException {
+        clientCloseLatch.countDown();
+      }
+    };
+
+    final AbstractNetSocket serverSocket = new AbstractNetSocket() {
+      @Nullable ByteBuffer readBuffer;
+      @Nullable ByteBuffer writeBuffer;
+
+      @Override
+      public void didOpen() {
+        this.readBuffer = ByteBuffer.allocateDirect(1024);
+        this.writeBuffer = ByteBuffer.allocateDirect(1024);
+        this.requestRead();
+      }
+
+      @Override
+      public void doRead() throws IOException {
+        this.readBuffer = Assume.nonNull(this.readBuffer);
+        this.writeBuffer = Assume.nonNull(this.writeBuffer);
+        final int count = this.read(this.readBuffer);
+        if (count >= 0) {
+          if (count != 0) {
+            this.readBuffer.flip();
+            this.writeBuffer.put(this.readBuffer);
+            this.writeBuffer.flip();
+            this.readBuffer.compact();
+            this.requestWrite();
+          }
+          this.requestRead();
+        } else {
+          serverReadLatch.countDown();
+          this.doneReading();
           this.requestWrite();
         }
-
-        @Override
-        public void doRead() throws IOException {
-          this.readBuffer = Assume.nonNull(this.readBuffer);
-          final int count = this.read(this.readBuffer);
-          if (count >= 0) {
-            if (count != 0) {
-              this.requestWrite();
-            }
-            this.requestRead();
-          } else {
-            final String received = new String(this.readBuffer.array(), 0, this.readBuffer.position(), "UTF-8");
-            assertEquals(received, payload);
-            clientReadLatch.countDown();
-            this.doneReading();
-          }
-        }
-
-        @Override
-        public void doWrite() throws IOException {
-          this.writeBuffer = Assume.nonNull(this.writeBuffer);
-          this.write(this.writeBuffer);
-          if (this.writeBuffer.hasRemaining()) {
-            this.requestWrite();
-          } else {
-            clientWriteLatch.countDown();
-            this.doneWriting();
-          }
-        }
-
-        @Override
-        public void didClose() throws IOException {
-          clientCloseLatch.countDown();
-        }
-      };
-
-      final AbstractNetSocket serverSocket = new AbstractNetSocket() {
-        @Nullable ByteBuffer readBuffer;
-        @Nullable ByteBuffer writeBuffer;
-
-        @Override
-        public void didOpen() {
-          this.readBuffer = ByteBuffer.allocateDirect(1024);
-          this.writeBuffer = ByteBuffer.allocateDirect(1024);
-          this.requestRead();
-        }
-
-        @Override
-        public void doRead() throws IOException {
-          this.readBuffer = Assume.nonNull(this.readBuffer);
-          this.writeBuffer = Assume.nonNull(this.writeBuffer);
-          final int count = this.read(this.readBuffer);
-          if (count >= 0) {
-            if (count != 0) {
-              this.readBuffer.flip();
-              this.writeBuffer.put(this.readBuffer);
-              this.writeBuffer.flip();
-              this.readBuffer.compact();
-              this.requestWrite();
-            }
-            this.requestRead();
-          } else {
-            serverReadLatch.countDown();
-            this.doneReading();
-            this.requestWrite();
-          }
-        }
-
-        @Override
-        public void doWrite() throws IOException {
-          this.writeBuffer = Assume.nonNull(this.writeBuffer);
-          this.write(this.writeBuffer);
-          if (this.writeBuffer.hasRemaining()) {
-            this.requestWrite();
-          } else if (this.isDoneReading()) {
-            serverWriteLatch.countDown();
-            this.doneWriting();
-          }
-        }
-
-        @Override
-        public void didClose() throws IOException {
-          serverCloseLatch.countDown();
-        }
-      };
-
-      final AbstractNetListener serverListener = new AbstractNetListener() {
-        @Override
-        public void didListen() {
-          this.requestAccept();
-        }
-
-        @Override
-        public void doAccept() throws IOException {
-          this.accept(serverSocket);
-        }
-      };
-
-      try {
-        scheduler.start();
-        driver.start();
-
-        driver.bindTcpListener(serverListener).listen("127.0.0.1", 53556);
-        driver.bindTcpSocket(clientSocket).connect("127.0.0.1", 53556);
-        clientWriteLatch.await();
-        serverReadLatch.await();
-        serverWriteLatch.await();
-        clientReadLatch.await();
-        clientCloseLatch.await();
-        serverCloseLatch.await();
-      } catch (InterruptedException cause) {
-        throw new JUnitException("Interrupted", cause);
-      } finally {
-        driver.stop();
-        scheduler.stop();
       }
+
+      @Override
+      public void doWrite() throws IOException {
+        this.writeBuffer = Assume.nonNull(this.writeBuffer);
+        this.write(this.writeBuffer);
+        if (this.writeBuffer.hasRemaining()) {
+          this.requestWrite();
+        } else if (this.isDoneReading()) {
+          serverWriteLatch.countDown();
+          this.doneWriting();
+        }
+      }
+
+      @Override
+      public void didClose() throws IOException {
+        serverCloseLatch.countDown();
+      }
+    };
+
+    final AbstractNetListener serverListener = new AbstractNetListener() {
+      @Override
+      public void didListen() {
+        this.requestAccept();
+      }
+
+      @Override
+      public void doAccept() throws IOException {
+        this.accept(serverSocket);
+      }
+    };
+
+    try {
+      scheduler.start();
+      driver.start();
+
+      driver.bindTcpListener(serverListener).listen("127.0.0.1", 53556);
+      driver.bindTcpSocket(clientSocket).connect("127.0.0.1", 53556);
+      clientWriteLatch.await();
+      serverReadLatch.await();
+      serverWriteLatch.await();
+      clientReadLatch.await();
+      clientCloseLatch.await();
+      serverCloseLatch.await();
+    } catch (InterruptedException cause) {
+      throw new JUnitException("Interrupted", cause);
+    } finally {
+      driver.stop();
+      scheduler.stop();
     }
   }
 

@@ -27,8 +27,8 @@ import swim.http.HttpMethod;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
-import swim.http.header.HttpContentLengthHeader;
-import swim.http.header.HttpHostHeader;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.HostHeader;
 import swim.net.AbstractNetListener;
 import swim.net.TransportDriver;
 import swim.util.Assume;
@@ -51,7 +51,7 @@ public class HttpSocketTests {
       @Override
       public void willWriteRequest() {
         final HttpBody<String> payload = HttpBody.of("clientToServer", Text.transcoder());
-        final HttpHeaders headers = payload.headers().prepended(HttpHostHeader.of("localhost"));
+        final HttpHeaders headers = payload.headers().prepended(HostHeader.of("localhost"));
         final HttpRequest<?> request = HttpRequest.of(HttpMethod.POST, "/test", headers, payload);
         this.writeRequestMessage(request.write());
         this.writeRequestPayload(payload.encode());
@@ -70,7 +70,7 @@ public class HttpSocketTests {
       @Override
       public void willReadResponsePayload() {
         final HttpResponse<?> response = this.responseMessage().getNonNull();
-        final long contentLength = Assume.nonNull(response.headers().getValue(HttpContentLengthHeader.TYPE)).longValue();
+        final long contentLength = Assume.nonNull(response.headers().getValue(ContentLengthHeader.TYPE)).longValue();
         this.readResponsePayload(HttpBody.decode(Text.transcoder(), contentLength));
       }
 
@@ -119,7 +119,7 @@ public class HttpSocketTests {
       @Override
       public void willReadRequestPayload() {
         final HttpRequest<?> request = this.requestMessage().getNonNull();
-        final long contentLength = Assume.nonNull(request.headers().getValue(HttpContentLengthHeader.TYPE)).longValue();
+        final long contentLength = Assume.nonNull(request.headers().getValue(ContentLengthHeader.TYPE)).longValue();
         this.readRequestPayload(HttpBody.decode(Text.transcoder(), contentLength));
       }
 

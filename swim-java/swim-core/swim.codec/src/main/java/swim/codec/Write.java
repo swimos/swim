@@ -259,30 +259,35 @@ public abstract class Write<T> extends Encode<T> {
 
   /**
    * Throws a {@link WriteException} with the write error as its cause,
-   * if in the <em>error</em> state; otherwise does nothing.
+   * if in the <em>error</em> state; otherwise returns {@code this}.
    *
    * @throws WriteException with the write error as its cause,
    *         if in the <em>error</em> state.
    */
   @Override
-  public void checkError() {
+  public Write<T> checkError() {
     if (this.isError()) {
       throw new WriteException("Write failed", this.getError());
+    } else {
+      return this;
     }
   }
 
   /**
    * Throws a {@link WriteException} if not in the <em>done</em> state;
-   * otherwise does nothing. If in the <em>error</em> state, the write error
-   * will be included as the cause of the thrown {@code WriteException}.
+   * otherwise returns {@code this}. If in the <em>error</em> state,
+   * the write error will be included as the cause of the thrown
+   * {@code WriteException}.
    *
    * @throws WriteException if not in the <em>done</em> state.
    */
   @Override
-  public void checkDone() {
-    if (this.isError()) {
+  public Write<T> checkDone() {
+    if (this.isDone()) {
+      return this;
+    } else if (this.isError()) {
       throw new WriteException("Write failed", this.getError());
-    } else if (!this.isDone()) {
+    } else {
       throw new WriteException("Incomplete write");
     }
   }

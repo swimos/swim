@@ -76,16 +76,16 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
   }
 
   @Override
-  public int index() {
+  public int position() {
     return this.index;
   }
 
   @Override
-  public BinaryOutput index(int index) {
-    if (index < 0 || index > this.limit) {
-      throw new IndexOutOfBoundsException(Integer.toString(index));
+  public BinaryOutput position(int position) {
+    if (position < 0 || position > this.limit) {
+      throw new IllegalArgumentException(Integer.toString(position));
     }
-    this.index = index;
+    this.index = position;
     return this;
   }
 
@@ -97,7 +97,7 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
   @Override
   public BinaryOutput limit(int limit) {
     if (limit < 0 || limit > this.array.length) {
-      throw new IndexOutOfBoundsException(Integer.toString(limit));
+      throw new IllegalArgumentException(Integer.toString(limit));
     }
     this.limit = limit;
     return this;
@@ -109,23 +109,13 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
   }
 
   @Override
+  public boolean hasRemaining() {
+    return this.limit - this.index > 0;
+  }
+
+  @Override
   public int remaining() {
     return this.limit - this.index;
-  }
-
-  @Override
-  public byte[] array() {
-    return this.array;
-  }
-
-  @Override
-  public int arrayOffset() {
-    return 0;
-  }
-
-  @Override
-  public boolean has(int index) {
-    return 0 <= index && index < this.limit;
   }
 
   @Override
@@ -177,7 +167,44 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
   }
 
   @Override
-  public BinaryOutput move(int fromIndex, int toIndex, int length) {
+  public BinaryOutput step(int offset) {
+    final int index = this.index + offset;
+    if (index < 0 || index > this.limit) {
+      throw new IllegalArgumentException("Invalid step to " + index);
+    }
+    this.index = index;
+    return this;
+  }
+
+  @Override
+  public BinaryOutput flip() {
+    this.limit = this.index;
+    this.index = 0;
+    return this;
+  }
+
+  @Override
+  public BinaryOutput rewind() {
+    this.index = 0;
+    return this;
+  }
+
+  @Override
+  public BinaryOutput compact() {
+    System.arraycopy(this.array, this.index, this.array, 0, this.limit - this.index);
+    this.index = this.limit - this.index;
+    return this;
+  }
+
+  @Override
+  public BinaryOutput clear() {
+    this.index = 0;
+    this.limit = this.array.length;
+    return this;
+  }
+
+  @Override
+  public BinaryOutput shift(int fromIndex, int toIndex, int length) {
     if (length < 0) {
       throw new IndexOutOfBoundsException("length: " + length);
     } else if (fromIndex < 0) {
@@ -194,18 +221,38 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
   }
 
   @Override
-  public BinaryOutput step(int offset) {
-    final int index = this.index + offset;
-    if (index < 0 || index > this.limit) {
-      throw new IllegalStateException("Invalid step to " + index);
-    }
-    this.index = index;
-    return this;
+  public ByteBuffer get() {
+    return ByteBuffer.wrap(this.array, 0, this.index);
   }
 
   @Override
-  public ByteBuffer get() {
-    return ByteBuffer.wrap(this.array, 0, this.index);
+  public boolean hasArray() {
+    return true;
+  }
+
+  @Override
+  public byte[] array() {
+    return this.array;
+  }
+
+  @Override
+  public int arrayOffset() {
+    return 0;
+  }
+
+  @Override
+  public boolean hasByteBuffer() {
+    return false;
+  }
+
+  @Override
+  public ByteBuffer byteBuffer() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ByteBuffer asByteBuffer() {
+    return ByteBuffer.wrap(this.array, this.index, this.limit - this.index);
   }
 
   @Override

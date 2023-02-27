@@ -64,11 +64,11 @@ import swim.annotations.Since;
  *
  * <h3>Position tracking</h3>
  * <p>
- * The logical position of the current lookahead token is made available via
- * the {@link #position()} method, with convenience accessors for the byte
+ * The logical location of the current lookahead token is made available via
+ * the {@link #location()} method, with convenience accessors for the byte
  * {@linkplain #offset() offset}, one-based {@linkplain #line() line} number,
  * and one-based {@linkplain #column() column} in the current line. The
- * {@link #identifier()} method returns an optional name for the token stream.
+ * {@link #name()} method returns an optional name for the input source.
  *
  * <h3>Cloning</h3>
  * <p>
@@ -175,40 +175,42 @@ public abstract class Input {
    * Repositions the input to the given {@code position} and returns {@code this}.
    *
    * @throws UnsupportedOperationException if the input does not support seeking.
-   * @throws IllegalStateException if the input is unable to reposition
+   * @throws IllegalArgumentException if the input is unable to reposition
    *         to the given {@code position}.
    */
   public abstract Input seek(@Nullable SourcePosition position);
 
   /**
-   * Returns the optional identifier string for this input stream.
+   * Returns the logical location of the current lookahead token relative
+   * to the start of the stream.
    */
-  public abstract @Nullable String identifier();
+  public abstract SourcePosition location();
 
   /**
-   * Sets the optional {@code identifier} string for this input stream
-   * and returns {@code this}.
+   * Sets the logical location of the current lookahead to the given
+   * {@code location} and returns {@code this}.
    */
-  public abstract Input withIdentifier(@Nullable String identifier);
+  public abstract Input location(SourcePosition location);
 
   /**
-   * Returns the logical position of the current lookahead token relative to
-   * the start of the stream.
+   * Returns the canonical name of the input source,
+   * or {@code null} if the input is unnamed.
    */
-  public abstract SourcePosition position();
+  public @Nullable String name() {
+    return this.location().name();
+  }
 
   /**
-   * Sets the logical position of the input stream to the given {@code position},
-   * without actually seeking the stream, and returns {@code this}.
+   * Sets the canonical name of the input source and returns {@code this}.
    */
-  public abstract Input withPosition(SourcePosition position);
+  public abstract Input name(@Nullable String name);
 
   /**
    * Returns the byte offset of the current lookahead token
    * relative to the start of the stream.
    */
   public long offset() {
-    return this.position().offset();
+    return this.location().offset();
   }
 
   /**
@@ -216,7 +218,7 @@ public abstract class Input {
    * relative to the start of the stream.
    */
   public int line() {
-    return this.position().line();
+    return this.location().line();
   }
 
   /**
@@ -224,7 +226,7 @@ public abstract class Input {
    * relative to the current line in the stream.
    */
   public int column() {
-    return this.position().column();
+    return this.location().column();
   }
 
   /**

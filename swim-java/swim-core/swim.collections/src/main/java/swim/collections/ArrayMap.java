@@ -344,6 +344,14 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
     return Assume.conforms(EMPTY);
   }
 
+  public static <K, V> ArrayMap<K, V> of(@Nullable Object... keyValuePairs) {
+    Objects.requireNonNull(keyValuePairs);
+    if (keyValuePairs.length % 2 != 0) {
+      throw new IllegalArgumentException("Odd number of key-value pairs");
+    }
+    return new ArrayMap<K, V>(keyValuePairs);
+  }
+
 }
 
 final class ArrayMapEntryIterator<K, V> implements Iterator<Map.Entry<K, V>> {

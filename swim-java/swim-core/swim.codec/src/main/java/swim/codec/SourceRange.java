@@ -42,6 +42,23 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
   }
 
   @Override
+  public @Nullable String name() {
+    return this.start.name();
+  }
+
+  @SuppressWarnings("ReferenceEquality")
+  @Override
+  public SourceRange withName(@Nullable String name) {
+    final SourcePosition start = this.start.withName(name);
+    final SourcePosition end = this.end.withName(name);
+    if (start == this.start && end == this.end) {
+      return this;
+    } else {
+      return new SourceRange(start, end);
+    }
+  }
+
+  @Override
   public SourcePosition start() {
     return this.start;
   }
@@ -61,7 +78,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
       if (start == this.start && end == this.end) {
         return this;
       } else {
-        return SourceRange.of(start, end);
+        return new SourceRange(start, end);
       }
     } else if (other instanceof SourceRange) {
       final SourceRange that = (SourceRange) other;
@@ -70,7 +87,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
       if (start == this.start && end == this.end) {
         return this;
       } else {
-        return SourceRange.of(start, end);
+        return new SourceRange(start, end);
       }
     }
     throw new UnsupportedOperationException(other.toString());
@@ -84,7 +101,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
     if (start == this.start && end == this.end) {
       return this;
     } else {
-      return SourceRange.of(start, end);
+      return new SourceRange(start, end);
     }
   }
 
@@ -130,10 +147,13 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
     if (this.start.note != null) {
       output.append('(').append(this.start.note).append(')').append(' ');
     }
+    if (this.start.name != null) {
+      output.append(this.start.name).append(':');
+    }
     output.append(Integer.toString(this.start.line)).append(':')
-          .append(Integer.toString(this.start.column));
-    output.append('-');
-    output.append(Integer.toString(this.end.line)).append(':')
+          .append(Integer.toString(this.start.column))
+          .append('-')
+          .append(Integer.toString(this.end.line)).append(':')
           .append(Integer.toString(this.end.column));
     if (this.end.note != null) {
       output.append(' ').append('(').append(this.end.note).append(')');

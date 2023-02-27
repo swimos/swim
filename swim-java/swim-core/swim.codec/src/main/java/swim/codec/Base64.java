@@ -151,6 +151,10 @@ public abstract class Base64 {
     return new ParseBase64<byte[]>(this, new ByteArrayOutput());
   }
 
+  public byte[] parseByteArray(String string) {
+    return ParseBase64.parse(new StringInput(string), this, new ByteArrayOutput(), 0, 0, 0, 1).getNonNull();
+  }
+
   /**
    * Parses the base-64 (t-bit ASCII) encoded {@code input}, and writes the
    * decoded bytes to a growable buffer.
@@ -161,6 +165,10 @@ public abstract class Base64 {
 
   public Parse<ByteBuffer> parseByteBuffer() {
     return new ParseBase64<ByteBuffer>(this, new ByteBufferOutput());
+  }
+
+  public ByteBuffer parseByteBuffer(String string) {
+    return ParseBase64.parse(new StringInput(string), this, new ByteBufferOutput(), 0, 0, 0, 1).getNonNull();
   }
 
   /**

@@ -19,6 +19,7 @@ dependencies {
   api project(':swim-json')
   api project(':swim-waml')
   api project(':swim-http')
+  api project(':swim-ws')
   api project(':swim-log')
   api project(':swim-exec')
   api project(':swim-net')

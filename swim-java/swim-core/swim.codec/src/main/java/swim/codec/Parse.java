@@ -287,30 +287,35 @@ public abstract class Parse<T> extends Decode<T> {
 
   /**
    * Throws a {@link ParseException} with the parse error as its cause,
-   * if in the <em>error</em> state; otherwise does nothing.
+   * if in the <em>error</em> state; otherwise returns {@code this}.
    *
    * @throws ParseException with the parse error as its cause,
    *         if in the <em>error</em> state.
    */
   @Override
-  public void checkError() {
+  public Parse<T> checkError() {
     if (this.isError()) {
       throw new ParseException("Parse failed", this.getError());
+    } else {
+      return this;
     }
   }
 
   /**
    * Throws a {@link ParseException} if not in the <em>done</em> state;
-   * otherwise does nothing. If in the <em>error</em> state, the parse error
-   * will be included as the cause of the thrown {@code ParseException}.
+   * otherwise returns {@code this}. If in the <em>error</em> state,
+   * the parse error will be included as the cause of the thrown
+   * {@code ParseException}.
    *
    * @throws ParseException if not in the <em>done</em> state.
    */
   @Override
-  public void checkDone() {
-    if (this.isError()) {
+  public Parse<T> checkDone() {
+    if (this.isDone()) {
+      return this;
+    } else if (this.isError()) {
       throw new ParseException("Parse failed", this.getError());
-    } else if (!this.isDone()) {
+    } else {
       throw new ParseException("Incomplete parse");
     }
   }

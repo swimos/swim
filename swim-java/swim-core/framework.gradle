@@ -27,14 +27,17 @@ ext.includeSwimCore = { frameworkDir ->
   include 'swim-uri'
   project(':swim-uri').projectDir = file("${frameworkDir}/swim.uri")
 
-  include 'swim-waml'
-  project(':swim-waml').projectDir = file("${frameworkDir}/swim.waml")
-
   include 'swim-json'
   project(':swim-json').projectDir = file("${frameworkDir}/swim.json")
 
+  include 'swim-waml'
+  project(':swim-waml').projectDir = file("${frameworkDir}/swim.waml")
+
   include 'swim-http'
   project(':swim-http').projectDir = file("${frameworkDir}/swim.http")
+
+  include 'swim-ws'
+  project(':swim-ws').projectDir = file("${frameworkDir}/swim.ws")
 
   include 'swim-log'
   project(':swim-log').projectDir = file("${frameworkDir}/swim.log")

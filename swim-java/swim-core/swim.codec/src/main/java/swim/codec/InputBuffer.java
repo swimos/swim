@@ -14,6 +14,7 @@
 
 package swim.codec;
 
+import java.nio.ByteBuffer;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -32,35 +33,34 @@ public abstract class InputBuffer extends Input {
   @Override
   public abstract InputBuffer asLast(boolean last);
 
-  public abstract int index();
+  /**
+   * Returns the position in the buffer of the current lookahead token.
+   */
+  public abstract int position();
 
   /**
-   * Repositions the buffer to the given {@code index} and returns {@code this}.
+   * Repositions the buffer to the given {@code position} and returns {@code this}.
    *
-   * @throws IndexOutOfBoundsException if {@code index} is not between
+   * @throws IllegalArgumentException if {@code position} is not between
    *         zero and the buffer {@linkplain #limit() limit}, inclusive.
    */
-  public abstract InputBuffer index(int index);
+  public abstract InputBuffer position(int position);
 
   public abstract int limit();
 
   /**
    * Sets the endpoint of the buffer to the given {@code limit} and returns {@code this}.
    *
-   * @throws IndexOutOfBoundsException if {@code limit} is not between
+   * @throws IllegalArgumentException if {@code limit} is not between
    *         zero and the buffer {@linkplain #capacity() capacity}, inclusive.
    */
   public abstract InputBuffer limit(int limit);
 
   public abstract int capacity();
 
+  public abstract boolean hasRemaining();
+
   public abstract int remaining();
-
-  public abstract byte[] array();
-
-  public abstract int arrayOffset();
-
-  public abstract boolean has(int index);
 
   /**
    * Returns the value at the given buffer {@code index}.
@@ -84,7 +84,7 @@ public abstract class InputBuffer extends Input {
   /**
    * Advances the buffer position by {@code offset} tokens and returns {@code this}.
    *
-   * @throws IllegalStateException if the updated position is not between
+   * @throws IllegalArgumentException if the updated position is not between
    *         zero and the buffer {@linkplain #limit() limit}, inclusive.
    */
   public abstract InputBuffer step(int offset);
@@ -92,11 +92,40 @@ public abstract class InputBuffer extends Input {
   @Override
   public abstract InputBuffer seek(@Nullable SourcePosition position);
 
-  @Override
-  public abstract InputBuffer withIdentifier(@Nullable String identifier);
+  public abstract InputBuffer flip();
+
+  public abstract InputBuffer rewind();
+
+  public abstract InputBuffer compact();
+
+  public abstract InputBuffer clear();
+
+  /**
+   * Copies {@code length} bytes starting at position {@code fromIndex}
+   * to position {@code toIndex}
+   *
+   * @throws IndexOutOfBoundsException if any source or destination position
+   *         is not between zero and the buffer {@linkplain #limit() limit}.
+   */
+  public abstract InputBuffer shift(int fromIndex, int toIndex, int length);
 
   @Override
-  public abstract InputBuffer withPosition(SourcePosition position);
+  public abstract InputBuffer location(SourcePosition location);
+
+  @Override
+  public abstract InputBuffer name(@Nullable String name);
+
+  public abstract boolean hasArray();
+
+  public abstract byte[] array();
+
+  public abstract int arrayOffset();
+
+  public abstract boolean hasByteBuffer();
+
+  public abstract ByteBuffer byteBuffer();
+
+  public abstract ByteBuffer asByteBuffer();
 
   @Override
   public abstract InputBuffer clone();

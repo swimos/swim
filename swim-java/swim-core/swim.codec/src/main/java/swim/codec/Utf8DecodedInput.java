@@ -475,27 +475,27 @@ public final class Utf8DecodedInput extends DecodedInput {
   }
 
   @Override
-  public @Nullable String identifier() {
-    return this.input.identifier();
+  public SourcePosition location() {
+    return SourcePosition.of(this.offset, this.line, this.column);
   }
 
   @Override
-  public Utf8DecodedInput withIdentifier(@Nullable String identifier) {
-    this.input = this.input.withIdentifier(identifier);
+  public Utf8DecodedInput location(SourcePosition location) {
+    this.input = this.input.location(location);
+    this.offset = location.offset();
+    this.line = location.line();
+    this.column = location.column();
     return this;
   }
 
   @Override
-  public SourcePosition position() {
-    return SourcePosition.at(this.offset, this.line, this.column);
+  public @Nullable String name() {
+    return this.input.name();
   }
 
   @Override
-  public Utf8DecodedInput withPosition(SourcePosition position) {
-    this.input = this.input.withPosition(position);
-    this.offset = position.offset();
-    this.line = position.line();
-    this.column = position.column();
+  public Utf8DecodedInput name(@Nullable String name) {
+    this.input = this.input.name(name);
     return this;
   }
 

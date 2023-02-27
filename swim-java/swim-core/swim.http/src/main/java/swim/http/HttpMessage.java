@@ -27,7 +27,7 @@ import swim.util.ToString;
 public abstract class HttpMessage<T> implements ToSource, ToString {
 
   HttpMessage() {
-    // nop
+    // sealed
   }
 
   public abstract HttpVersion version();

@@ -158,8 +158,8 @@ public class TlsOptions implements ToSource {
   }
 
   /**
-   * Returns {@code true} if these {@code TlsOptions} can possibly equal some
-   * {@code other} object.
+   * Returns {@code true} if these {@code TlsOptions} can possibly equal
+   * some {@code other} object.
    */
   public boolean canEqual(Object other) {
     return other instanceof TlsOptions;

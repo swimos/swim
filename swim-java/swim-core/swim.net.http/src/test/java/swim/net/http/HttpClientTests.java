@@ -27,9 +27,9 @@ import swim.http.HttpMethod;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpTransferCoding;
-import swim.http.header.HttpContentLengthHeader;
-import swim.http.header.HttpHostHeader;
-import swim.http.header.HttpTransferEncodingHeader;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.HostHeader;
+import swim.http.header.TransferEncodingHeader;
 import swim.net.TransportDriver;
 import swim.util.Assume;
 
@@ -48,7 +48,7 @@ public class HttpClientTests {
 
       @Override
       public void willWriteRequest() {
-        final HttpRequest<?> request = HttpRequest.of(HttpMethod.GET, "/", HttpHostHeader.of("www.google.com"));
+        final HttpRequest<?> request = HttpRequest.of(HttpMethod.GET, "/", HostHeader.of("www.google.com"));
         this.writeRequestMessage(request.write());
         this.writeRequestPayload(request.payload().encode());
       }
@@ -61,11 +61,11 @@ public class HttpClientTests {
       @Override
       public void willReadResponsePayload() {
         final HttpResponse<?> response = this.responseMessage().getNonNull();
-        final FingerTrieList<HttpTransferCoding> transferCodings = response.headers().getValue(HttpTransferEncodingHeader.TYPE);
-        if (transferCodings != null && !transferCodings.isEmpty() && HttpTransferCoding.chunked().equals(transferCodings.head())) {
+        final FingerTrieList<HttpTransferCoding> transferCodings = response.headers().getValue(TransferEncodingHeader.TYPE);
+        if (transferCodings != null && !transferCodings.isEmpty() && Assume.nonNull(transferCodings.head()).isChunked()) {
           this.readResponsePayload(HttpChunked.decode(Text.transcoder()));
         } else {
-          final long contentLength = Assume.nonNull(response.headers().getValue(HttpContentLengthHeader.TYPE)).longValue();
+          final long contentLength = Assume.nonNull(response.headers().getValue(ContentLengthHeader.TYPE)).longValue();
           this.readResponsePayload(HttpBody.decode(Text.transcoder(), contentLength));
         }
       }

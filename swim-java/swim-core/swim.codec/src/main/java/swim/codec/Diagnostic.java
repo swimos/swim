@@ -156,9 +156,9 @@ public final class Diagnostic implements ToString {
                           SourcePosition start, int lineDigits) {
     Diagnostic.writeLineLeadArrow(notation, lineDigits);
     notation.append(' ');
-    final String identifier = input.identifier();
-    if (identifier != null) {
-      notation.append(identifier);
+    final String name = input.name();
+    if (name != null) {
+      notation.append(name);
     }
     notation.append(':').append(start.line).append(':').append(start.column);
     notation.append('\n');
@@ -172,7 +172,7 @@ public final class Diagnostic implements ToString {
                                            int contextLines, int lineDigits) {
     Diagnostic next = cause;
     final boolean sameCause = cause != null && cause.message == null
-                           && Objects.equals(input.identifier(), cause.input.identifier());
+                           && Objects.equals(input.name(), cause.input.name());
     final int causeOrder = sameCause ? (start.offset <= Assume.nonNull(cause).location.start().offset ? -1 : 1) : 0;
     if (causeOrder == 1) {
       cause = Assume.nonNull(cause);
@@ -471,9 +471,9 @@ public final class Diagnostic implements ToString {
   public static Diagnostic message(@Nullable String message, Input input,
                                    Severity severity, @Nullable String note,
                                    @Nullable Diagnostic cause) {
-    final SourcePosition position = input.position();
+    final SourcePosition location = input.location();
     final Input source = input.clone().seek(null);
-    return Diagnostic.of(source, position, severity, message, note, cause);
+    return Diagnostic.of(source, location, severity, message, note, cause);
   }
 
   public static Diagnostic message(@Nullable String message, Input input,
@@ -522,9 +522,9 @@ public final class Diagnostic implements ToString {
     } else {
       message = "Unexpected end of input";
     }
-    final SourcePosition position = input.position();
+    final SourcePosition location = input.location();
     final Input source = input.clone().seek(null);
-    return Diagnostic.of(source, position, severity, message, note, cause);
+    return Diagnostic.of(source, location, severity, message, note, cause);
   }
 
   public static Diagnostic unexpected(Input input, Severity severity,
@@ -570,9 +570,9 @@ public final class Diagnostic implements ToString {
       notation.append("end of input");
     }
     final String message = notation.toString();
-    final SourcePosition position = input.position();
+    final SourcePosition location = input.location();
     final Input source = input.clone().seek(null);
-    return Diagnostic.of(source, position, severity, message, note, cause);
+    return Diagnostic.of(source, location, severity, message, note, cause);
   }
 
   public static Diagnostic expected(int expected, Input input, Severity severity,
@@ -617,9 +617,9 @@ public final class Diagnostic implements ToString {
       notation.append("end of input");
     }
     final String message = notation.toString();
-    final SourcePosition position = input.position();
+    final SourcePosition location = input.location();
     final Input source = input.clone().seek(null);
-    return Diagnostic.of(source, position, severity, message, note, cause);
+    return Diagnostic.of(source, location, severity, message, note, cause);
   }
 
   public static Diagnostic expected(String expected, Input input, Severity severity,

@@ -211,7 +211,7 @@ final class ByteArrayTranscoder implements Translator<byte[]>, ToSource {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Binary", "byteBufferTranscoder");
+    notation.beginInvoke("Binary", "byteArrayTranscoder");
     if (!this.mediaType.equals(Binary.APPLICATION_OCTET_STREAM)) {
       notation.appendArgument(this.mediaType);
     }
@@ -255,7 +255,7 @@ final class ByteBufferTranscoder implements Translator<ByteBuffer>, ToSource {
   @Override
   public Encode<?> encode(OutputBuffer<?> output, @Nullable ByteBuffer value) {
     if (value != null) {
-      return Binary.encode(output, new BinaryInputBuffer(value));
+      return Binary.encode(output, new BinaryInputBuffer(value.duplicate()));
     } else {
       return Encode.done();
     }
@@ -269,7 +269,7 @@ final class ByteBufferTranscoder implements Translator<ByteBuffer>, ToSource {
   @Override
   public Write<?> write(Output<?> output, @Nullable ByteBuffer value) {
     if (value != null) {
-      return Binary.encode(output, new BinaryInputBuffer(value));
+      return Binary.encode(output, new BinaryInputBuffer(value.duplicate()));
     } else {
       return Write.done();
     }
@@ -278,7 +278,7 @@ final class ByteBufferTranscoder implements Translator<ByteBuffer>, ToSource {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Binary", "byteArrayTranscoder");
+    notation.beginInvoke("Binary", "byteBufferTranscoder");
     if (!this.mediaType.equals(Binary.APPLICATION_OCTET_STREAM)) {
       notation.appendArgument(this.mediaType);
     }

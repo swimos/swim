@@ -28,8 +28,8 @@ import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
 import swim.codec.Parse;
 import swim.codec.Transcoder;
-import swim.http.header.HttpContentTypeHeader;
-import swim.http.header.HttpTransferEncodingHeader;
+import swim.http.header.ContentTypeHeader;
+import swim.http.header.TransferEncodingHeader;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -62,8 +62,8 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   @Override
   public HttpHeaders headers() {
     final HttpHeaders headers = HttpHeaders.of();
-    headers.add(HttpContentTypeHeader.of(this.contentType()));
-    headers.add(HttpTransferEncodingHeader.chunked());
+    headers.add(ContentTypeHeader.of(this.contentType()));
+    headers.add(TransferEncodingHeader.CHUNKED);
     return headers;
   }
 
@@ -210,31 +210,24 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
       }
       if (step == 4) {
         parseHeader = Assume.nonNull(parseHeader);
-        final int inputStart = input.index();
+        final int inputStart = input.position();
         final int inputLimit = input.limit();
         final int inputRemaining = inputLimit - inputStart;
+        final boolean inputLast = input.isLast();
         final long chunkSize = parseHeader.getNonNull().size();
         final long chunkRemaining = chunkSize - offset;
-        final boolean inputLast = input.isLast();
-        if (chunkRemaining < inputRemaining) {
-          input.limit(inputStart + (int) chunkRemaining).asLast(chunkSize == 0);
-          if (decodePayload == null) {
-            decodePayload = transcoder.decode(input);
-          } else {
-            decodePayload = decodePayload.consume(input);
-          }
-          input.limit(inputLimit);
+        final int decodeSize = (int) Math.min((long) inputRemaining, chunkRemaining);
+
+        input.limit(inputStart + decodeSize).asLast(chunkSize == 0);
+        if (decodePayload == null) {
+          decodePayload = transcoder.decode(input);
         } else {
-          input.asLast(chunkSize == 0);
-          if (decodePayload == null) {
-            decodePayload = transcoder.decode(input);
-          } else {
-            decodePayload = decodePayload.consume(input);
-          }
+          decodePayload = decodePayload.consume(input);
         }
-        input.asLast(inputLast);
-        offset += (long) (input.index() - inputStart);
-        if (offset >= chunkSize) {
+        input.limit(inputLimit).asLast(inputLast);
+
+        offset += (long) (input.position() - inputStart);
+        if (offset == chunkSize) {
           parseHeader = null;
           offset = 0L;
           if (chunkSize > 0L) {
@@ -243,6 +236,8 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
             step = 7;
             break;
           }
+        } else if (decodePayload.isDone()) {
+          return Decode.error(new DecodeException("Undecoded payload data"));
         } else if (decodePayload.isError()) {
           return decodePayload.asError();
         }
@@ -299,8 +294,6 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
     }
     if (input.isError()) {
       return Decode.error(input.getError());
-    } else if (input.isLast()) {
-      return Decode.error(new DecodeException("Incomplete payload"));
     }
     return new DecodeHttpChunked<T>(transcoder, parseHeader, decodePayload,
                                     parseTrailers, offset, step);
@@ -328,31 +321,34 @@ final class EncodeHttpChunked<T> extends Encode<HttpChunked<T>> {
   static <T> Encode<HttpChunked<T>> encode(OutputBuffer<?> output, HttpChunked<T> payload,
                                            @Nullable Encode<?> encode, int step) {
     if (step == 1 && output.remaining() > 12) { // chunk
-      final int outputStart = output.index();
+      final int outputStart = output.position();
       final int outputEnd = output.limit();
       final boolean outputLast = output.isLast();
-      output.index(outputStart + 10); // chunk header
+      output.position(outputStart + 10); // chunk header
       output.limit(outputEnd - 2); // chunk footer
+
       output.asLast(false);
       if (encode == null) {
         encode = payload.transcoder.encode(output, payload.value);
       } else {
         encode = encode.produce(output);
       }
-      final int chunkSize = output.index() - outputStart - 10;
+
+      final int chunkSize = output.position() - outputStart - 10;
       output.limit(outputEnd).asLast(outputLast);
       if (chunkSize > 0) {
         output.write('\r').write('\n');
       } else if (encode.isCont()) {
-        output.index(outputStart);
+        output.position(outputStart);
         return new EncodeHttpChunked<T>(payload, encode, step);
       }
-      final int chunkEnd = output.index();
-      output.index(outputStart + 8).write('\r').write('\n');
+
+      final int chunkEnd = output.position();
+      output.position(outputStart + 8).write('\r').write('\n');
       int chunkStart = outputStart + 7;
       int x = chunkSize;
       do {
-        output.index(chunkStart).write(Base16.uppercase().encodeDigit(x & 0xF));
+        output.position(chunkStart).write(Base16.uppercase().encodeDigit(x & 0xF));
         x >>>= 4;
         if (x != 0) {
           chunkStart -= 1;
@@ -360,9 +356,11 @@ final class EncodeHttpChunked<T> extends Encode<HttpChunked<T>> {
           break;
         }
       } while (true);
+
       final int chunkLength = chunkEnd - chunkStart;
-      output.move(chunkStart, outputStart, chunkLength);
-      output.index(outputStart + chunkLength);
+      output.shift(chunkStart, outputStart, chunkLength);
+      output.position(outputStart + chunkLength);
+
       if (encode.isDone()) {
         if (chunkSize > 0) {
           step = 2;
@@ -399,7 +397,7 @@ final class EncodeHttpChunked<T> extends Encode<HttpChunked<T>> {
       return Encode.done(payload);
     }
     if (output.isDone()) {
-      return Encode.error(new EncodeException("Truncated write"));
+      return Encode.error(new EncodeException("Truncated encode"));
     } else if (output.isError()) {
       return Encode.error(output.getError());
     }

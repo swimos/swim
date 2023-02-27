@@ -29,7 +29,8 @@ javadoc {
                 'swim.repr',
                 'swim.uri',
                 'swim.util',
-                'swim.waml')
+                'swim.waml',
+                'swim.ws')
 
   // Google Analytics Tracking Code
   options.addBooleanOption("-allow-script-in-comments", true)

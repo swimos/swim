@@ -40,10 +40,8 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   protected final HttpClient client;
   protected final HttpOptions httpOptions;
   protected @Nullable NetSocketContext context;
-  protected ByteBuffer readBuffer;
-  protected ByteBuffer writeBuffer;
-  protected BinaryInputBuffer inputBuffer;
-  protected BinaryOutputBuffer outputBuffer;
+  protected BinaryOutputBuffer requestBuffer;
+  protected BinaryInputBuffer responseBuffer;
   final HttpClientRequester[] requesters;
   int requesterReadIndex;
   int requesterWriteIndex;
@@ -61,10 +59,8 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     this.context = null;
 
     // Initialize I/O buffers.
-    this.readBuffer = ByteBuffer.allocateDirect(httpOptions.readBufferSize());
-    this.writeBuffer = ByteBuffer.allocateDirect(httpOptions.writeBufferSize());
-    this.inputBuffer = new BinaryInputBuffer(this.readBuffer).asLast(false);
-    this.outputBuffer = new BinaryOutputBuffer(this.writeBuffer).asLast(false);
+    this.requestBuffer = BinaryOutputBuffer.allocateDirect(httpOptions.clientRequestBufferSize()).asLast(false);
+    this.responseBuffer = BinaryInputBuffer.allocateDirect(httpOptions.clientResponseBufferSize()).asLast(false);
 
     // Initialize the request pipeline.
     this.requesters = new HttpClientRequester[Math.max(2, httpOptions.clientPipelineLength())];

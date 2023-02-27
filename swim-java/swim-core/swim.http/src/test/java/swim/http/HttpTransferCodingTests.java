@@ -20,19 +20,19 @@ public class HttpTransferCodingTests {
 
   @Test
   public void parseTransferCodings() {
-    assertParses(HttpTransferCoding.chunked(), "chunked");
-    assertParses(HttpTransferCoding.compress(), "compress");
-    assertParses(HttpTransferCoding.deflate(), "deflate");
-    assertParses(HttpTransferCoding.gzip(), "gzip");
+    assertParses(HttpTransferCoding.CHUNKED, "chunked");
+    assertParses(HttpTransferCoding.COMPRESS, "compress");
+    assertParses(HttpTransferCoding.DEFLATE, "deflate");
+    assertParses(HttpTransferCoding.GZIP, "gzip");
     assertParses(HttpTransferCoding.of("enhance"), "enhance");
   }
 
   @Test
   public void writeTransferCodings() {
-    assertWrites("chunked", HttpTransferCoding.chunked());
-    assertWrites("compress", HttpTransferCoding.compress());
-    assertWrites("deflate", HttpTransferCoding.deflate());
-    assertWrites("gzip", HttpTransferCoding.gzip());
+    assertWrites("chunked", HttpTransferCoding.CHUNKED);
+    assertWrites("compress", HttpTransferCoding.COMPRESS);
+    assertWrites("deflate", HttpTransferCoding.DEFLATE);
+    assertWrites("gzip", HttpTransferCoding.GZIP);
     assertWrites("enhance", HttpTransferCoding.of("enhance"));
   }
 

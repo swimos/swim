@@ -285,7 +285,7 @@ public final class ParseSelectorExpr extends Parse<Term> {
         while (input.isCont()) {
           c = input.head();
           if (parser.isWhitespace(c)) {
-            input = input.step();
+            input.step();
           } else {
             break;
           }

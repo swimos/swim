@@ -453,6 +453,31 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return true;
   }
 
+  public boolean addAll(HttpHeaders headers) {
+    if ((this.flags & IMMUTABLE_FLAG) != 0) {
+      throw new UnsupportedOperationException("Immutable");
+    }
+    final int k = headers.size();
+    if (k == 0) {
+      return false;
+    }
+    int n = this.size;
+    HttpHeader[] array = this.array;
+    if (n + k > array.length || (this.flags & ALIASED_FLAG) != 0) {
+      final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n + k)];
+      System.arraycopy(array, 0, newArray, 0, n);
+      array = newArray;
+      this.array = array;
+      this.flags &= ~ALIASED_FLAG;
+    }
+    for (int i = 0; i < k; i += 1) {
+      array[n] = headers.get(i);
+      n += 1;
+    }
+    this.size = n;
+    return true;
+  }
+
   public HttpHeaders appended(HttpHeader header) {
     final int n = this.size;
     final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n + 1)];
@@ -472,6 +497,17 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return new HttpHeaders(0, n, newArray);
   }
 
+  public HttpHeaders appendedAll(HttpHeaders headers) {
+    int n = this.size;
+    final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n + headers.size())];
+    System.arraycopy(this.array, 0, newArray, 0, n);
+    for (int i = 0; i < n; i += 1) {
+      newArray[n] = headers.get(i);
+      n += 1;
+    }
+    return new HttpHeaders(0, n, newArray);
+  }
+
   public HttpHeaders prepended(HttpHeader header) {
     final int n = this.size;
     final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(1 + n)];
@@ -486,6 +522,18 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     int k = 0;
     for (HttpHeader header : headers) {
       newArray[k] = header;
+      k += 1;
+    }
+    System.arraycopy(this.array, 0, newArray, k, n);
+    return new HttpHeaders(0, k + n, newArray);
+  }
+
+  public HttpHeaders prependedAll(HttpHeaders headers) {
+    final int n = this.size;
+    final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(headers.size() + n)];
+    int k;
+    for (k = 0; k < n; k += 1) {
+      newArray[k] = headers.get(k);
       k += 1;
     }
     System.arraycopy(this.array, 0, newArray, k, n);
@@ -1093,7 +1141,7 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
             header = type.of(value);
           } else {
             final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
-            header = HttpHeader.of(name, value);
+            header = new HttpHeader(name, value);
           }
           if (headers == null) {
             headers = HttpHeaders.of();

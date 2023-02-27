@@ -43,10 +43,10 @@ public abstract class DecodedInput extends Input {
   }
 
   @Override
-  public abstract DecodedInput withIdentifier(@Nullable String identifier);
+  public abstract DecodedInput location(SourcePosition location);
 
   @Override
-  public abstract DecodedInput withPosition(SourcePosition position);
+  public abstract DecodedInput name(@Nullable String name);
 
   @Override
   public abstract DecodedInput clone();

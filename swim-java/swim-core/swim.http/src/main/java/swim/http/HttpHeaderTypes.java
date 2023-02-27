@@ -14,23 +14,24 @@
 
 package swim.http;
 
+import swim.annotations.Internal;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.http.header.HttpAcceptHeader;
-import swim.http.header.HttpAllowHeader;
-import swim.http.header.HttpConnectionHeader;
-import swim.http.header.HttpContentLengthHeader;
-import swim.http.header.HttpContentTypeHeader;
-import swim.http.header.HttpCookieHeader;
-import swim.http.header.HttpExpectHeader;
-import swim.http.header.HttpHostHeader;
-import swim.http.header.HttpMaxForwardsHeader;
-import swim.http.header.HttpOriginHeader;
-import swim.http.header.HttpServerHeader;
-import swim.http.header.HttpSetCookieHeader;
-import swim.http.header.HttpTransferEncodingHeader;
-import swim.http.header.HttpUpgradeHeader;
-import swim.http.header.HttpUserAgentHeader;
+import swim.http.header.AcceptHeader;
+import swim.http.header.AllowHeader;
+import swim.http.header.ConnectionHeader;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.ContentTypeHeader;
+import swim.http.header.CookieHeader;
+import swim.http.header.ExpectHeader;
+import swim.http.header.HostHeader;
+import swim.http.header.MaxForwardsHeader;
+import swim.http.header.OriginHeader;
+import swim.http.header.ServerHeader;
+import swim.http.header.SetCookieHeader;
+import swim.http.header.TransferEncodingHeader;
+import swim.http.header.UpgradeHeader;
+import swim.http.header.UserAgentHeader;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -38,27 +39,28 @@ import swim.util.ToSource;
 @Since("5.0")
 public final class HttpHeaderTypes implements HttpHeaderProvider, ToSource {
 
-  private HttpHeaderTypes() {
+  @Internal
+  public HttpHeaderTypes() {
     // nop
   }
 
   @Override
   public void registerHeaderTypes(HttpHeaderRegistry registry) {
-    registry.registerHeaderType(HttpAcceptHeader.TYPE);
-    registry.registerHeaderType(HttpAllowHeader.TYPE);
-    registry.registerHeaderType(HttpConnectionHeader.TYPE);
-    registry.registerHeaderType(HttpContentLengthHeader.TYPE);
-    registry.registerHeaderType(HttpContentTypeHeader.TYPE);
-    registry.registerHeaderType(HttpCookieHeader.TYPE);
-    registry.registerHeaderType(HttpExpectHeader.TYPE);
-    registry.registerHeaderType(HttpHostHeader.TYPE);
-    registry.registerHeaderType(HttpMaxForwardsHeader.TYPE);
-    registry.registerHeaderType(HttpOriginHeader.TYPE);
-    registry.registerHeaderType(HttpServerHeader.TYPE);
-    registry.registerHeaderType(HttpSetCookieHeader.TYPE);
-    registry.registerHeaderType(HttpTransferEncodingHeader.TYPE);
-    registry.registerHeaderType(HttpUpgradeHeader.TYPE);
-    registry.registerHeaderType(HttpUserAgentHeader.TYPE);
+    registry.registerHeaderType(AcceptHeader.TYPE);
+    registry.registerHeaderType(AllowHeader.TYPE);
+    registry.registerHeaderType(ConnectionHeader.TYPE);
+    registry.registerHeaderType(ContentLengthHeader.TYPE);
+    registry.registerHeaderType(ContentTypeHeader.TYPE);
+    registry.registerHeaderType(CookieHeader.TYPE);
+    registry.registerHeaderType(ExpectHeader.TYPE);
+    registry.registerHeaderType(HostHeader.TYPE);
+    registry.registerHeaderType(MaxForwardsHeader.TYPE);
+    registry.registerHeaderType(OriginHeader.TYPE);
+    registry.registerHeaderType(ServerHeader.TYPE);
+    registry.registerHeaderType(SetCookieHeader.TYPE);
+    registry.registerHeaderType(TransferEncodingHeader.TYPE);
+    registry.registerHeaderType(UpgradeHeader.TYPE);
+    registry.registerHeaderType(UserAgentHeader.TYPE);
   }
 
   @Override

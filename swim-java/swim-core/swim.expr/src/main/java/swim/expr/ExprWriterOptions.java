@@ -77,8 +77,8 @@ public class ExprWriterOptions implements ToSource {
   }
 
   /**
-   * Returns {@code true} if these options can possibly equal some
-   * {@code other} object.
+   * Returns {@code true} if these options can possibly equal
+   * some {@code other} object.
    */
   public boolean canEqual(Object other) {
     return other instanceof ExprWriterOptions;

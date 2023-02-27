@@ -33,16 +33,33 @@ import swim.util.ToString;
 @Since("5.0")
 public final class SourcePosition extends SourceLocation implements Comparable<SourcePosition>, ToMarkup, ToSource, ToString {
 
+  final @Nullable String name;
   final long offset;
   final int line;
   final int column;
   final @Nullable String note;
 
-  SourcePosition(long offset, int line, int column, @Nullable String note) {
+  SourcePosition(@Nullable String name, long offset,
+                 int line, int column, @Nullable String note) {
+    this.name = name;
     this.offset = offset;
     this.line = line;
     this.column = column;
     this.note = note;
+  }
+
+  @Override
+  public @Nullable String name() {
+    return this.name;
+  }
+
+  @Override
+  public SourcePosition withName(@Nullable String name) {
+    if (Objects.equals(name, this.name)) {
+      return this;
+    } else {
+      return new SourcePosition(name, this.offset, this.line, this.column, this.note);
+    }
   }
 
   /**
@@ -67,11 +84,22 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
   }
 
   /**
-   * Returns the note attached to the source position, or {@code null} if
-   * this position has no attached note.
+   * Returns the note attached to the source position,
+   * or {@code null} if this position has no attached note.
    */
   public @Nullable String note() {
     return this.note;
+  }
+
+  /**
+   * Returns a copy of this source position with the given {@code note}.
+   */
+  public SourcePosition withNote(@Nullable String note) {
+    if (Objects.equals(note, this.note)) {
+      return this;
+    } else {
+      return new SourcePosition(this.name, this.offset, this.line, this.column, note);
+    }
   }
 
   /**
@@ -142,7 +170,7 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
     if (offset == this.offset && line == this.line && column == this.column) {
       return this;
     } else {
-      return SourcePosition.at(offset, line, column, this.note);
+      return new SourcePosition(this.name, offset, line, column, this.note);
     }
   }
 
@@ -157,8 +185,11 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
       return true;
     } else if (other instanceof SourcePosition) {
       final SourcePosition that = (SourcePosition) other;
-      return this.offset == that.offset && this.line == that.line
-          && this.column == that.column && Objects.equals(this.note, that.note);
+      return Objects.equals(this.name, that.name)
+          && this.offset == that.offset
+          && this.line == that.line
+          && this.column == that.column
+          && Objects.equals(this.note, that.note);
     }
     return false;
   }
@@ -167,14 +198,18 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
-        Murmur3.hash(this.offset)), this.line), this.column), Murmur3.hash(this.note)));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        HASH_SEED, Objects.hashCode(this.name)), Murmur3.hash(this.offset)),
+        this.line), this.column), Objects.hashCode(this.note)));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("SourcePosition", "at");
+    notation.beginInvoke("SourcePosition", "of");
+    if (this.name != null) {
+      notation.appendArgument(this.name);
+    }
     notation.appendArgument(this.offset);
     notation.appendArgument(this.line);
     notation.appendArgument(this.column);
@@ -188,6 +223,9 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
   public void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginObject("SourcePosition");
+    if (this.name != null) {
+      notation.appendField("name", this.name);
+    }
     notation.appendField("offset", this.offset);
     notation.appendField("line", this.line);
     notation.appendField("column", this.column);
@@ -199,6 +237,9 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
 
   @Override
   public void writeString(Appendable output) throws IOException {
+    if (this.name != null) {
+      output.append(this.name).append(':');
+    }
     output.append(Integer.toString(this.line)).append(':')
           .append(Integer.toString(this.column));
     if (this.note != null) {
@@ -212,11 +253,23 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
   }
 
   /**
-   * Returns a {@code SourcePosition} at byte offset {@code 0}, line {@code 1},
-   * and column {@code 1}, with no attached note.
+   * Returns a new {@code SourcePosition} with the given source {@code name}
+   * at the given zero-based byte {@code offset}, one-based {@code line} number,
+   * and one-based {@code column} number, with the attached {@code note}.
    */
-  public static SourcePosition zero() {
-    return new SourcePosition(0L, 1, 1, null);
+  public static SourcePosition of(@Nullable String name, long offset,
+                                  int line, int column, @Nullable String note) {
+    return new SourcePosition(name, offset, line, column, note);
+  }
+
+  /**
+   * Returns a new {@code SourcePosition} with the given source {@code name}
+   * at the given zero-based byte {@code offset}, one-based {@code line} number,
+   * and one-based {@code column} number, with no attached note.
+   */
+  public static SourcePosition of(@Nullable String name, long offset,
+                                  int line, int column) {
+    return new SourcePosition(name, offset, line, column, null);
   }
 
   /**
@@ -224,8 +277,9 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
    * {@code offset}, one-based {@code line} number, and one-based
    * {@code column} number, with the attached {@code note}.
    */
-  public static SourcePosition at(long offset, int line, int column, @Nullable String note) {
-    return new SourcePosition(offset, line, column, note);
+  public static SourcePosition of(long offset, int line, int column,
+                                  @Nullable String note) {
+    return new SourcePosition(null, offset, line, column, note);
   }
 
   /**
@@ -233,8 +287,8 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
    * {@code offset}, one-based {@code line} number, and one-based
    * {@code column} number, with no attached note.
    */
-  public static SourcePosition at(long offset, int line, int column) {
-    return new SourcePosition(offset, line, column, null);
+  public static SourcePosition of(long offset, int line, int column) {
+    return new SourcePosition(null, offset, line, column, null);
   }
 
 }

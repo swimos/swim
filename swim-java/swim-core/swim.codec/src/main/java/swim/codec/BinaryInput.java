@@ -14,6 +14,7 @@
 
 package swim.codec;
 
+import java.nio.ByteBuffer;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -25,16 +26,16 @@ public final class BinaryInput extends InputBuffer {
   final byte[] array;
   int index;
   int limit;
-  @Nullable String identifier;
+  @Nullable String name;
   long offset;
   boolean last;
 
-  BinaryInput(byte[] array, int index, int limit, @Nullable String identifier,
+  BinaryInput(byte[] array, int index, int limit, @Nullable String name,
               long offset, boolean last) {
     this.array = array;
     this.index = index;
     this.limit = limit;
-    this.identifier = identifier;
+    this.name = name;
     this.offset = offset;
     this.last = last;
   }
@@ -79,17 +80,17 @@ public final class BinaryInput extends InputBuffer {
   }
 
   @Override
-  public int index() {
+  public int position() {
     return this.index;
   }
 
   @Override
-  public BinaryInput index(int index) {
-    if (index < 0 || index > this.limit) {
-      throw new IndexOutOfBoundsException(Integer.toString(index));
+  public BinaryInput position(int position) {
+    if (position < 0 || position > this.limit) {
+      throw new IllegalArgumentException(Integer.toString(position));
     }
-    this.offset += (long) (index - this.index);
-    this.index = index;
+    this.offset += (long) (position - this.index);
+    this.index = position;
     return this;
   }
 
@@ -101,7 +102,7 @@ public final class BinaryInput extends InputBuffer {
   @Override
   public BinaryInput limit(int limit) {
     if (limit < 0 || limit > this.array.length) {
-      throw new IndexOutOfBoundsException(Integer.toString(limit));
+      throw new IllegalArgumentException(Integer.toString(limit));
     }
     this.limit = limit;
     return this;
@@ -113,23 +114,13 @@ public final class BinaryInput extends InputBuffer {
   }
 
   @Override
+  public boolean hasRemaining() {
+    return this.limit - this.index > 0;
+  }
+
+  @Override
   public int remaining() {
     return this.limit - this.index;
-  }
-
-  @Override
-  public byte[] array() {
-    return this.array;
-  }
-
-  @Override
-  public int arrayOffset() {
-    return 0;
-  }
-
-  @Override
-  public boolean has(int index) {
-    return 0 <= index && index < this.limit;
   }
 
   @Override
@@ -179,7 +170,7 @@ public final class BinaryInput extends InputBuffer {
   public BinaryInput step(int offset) {
     final int index = this.index + offset;
     if (index < 0 || index > this.limit) {
-      throw new IllegalStateException("Invalid step to " + index);
+      throw new IllegalArgumentException("Invalid step to " + index);
     }
     this.index = index;
     this.offset += (long) offset;
@@ -191,7 +182,7 @@ public final class BinaryInput extends InputBuffer {
     if (position != null) {
       final long index = (long) this.index + (this.offset - position.offset());
       if (index < 0 || index > (long) this.limit) {
-        throw new IllegalStateException("Invalid seek to " + position);
+        throw new IllegalArgumentException("Invalid seek to " + position);
       }
       this.index = (int) index;
       this.offset = position.offset();
@@ -204,24 +195,71 @@ public final class BinaryInput extends InputBuffer {
   }
 
   @Override
-  public @Nullable String identifier() {
-    return this.identifier;
-  }
-
-  @Override
-  public BinaryInput withIdentifier(@Nullable String identifier) {
-    this.identifier = identifier;
+  public BinaryInput flip() {
+    this.limit = this.index;
+    this.index = 0;
     return this;
   }
 
   @Override
-  public SourcePosition position() {
-    return SourcePosition.at(this.offset, 0, 0);
+  public BinaryInput rewind() {
+    this.index = 0;
+    return this;
   }
 
   @Override
-  public BinaryInput withPosition(SourcePosition position) {
-    this.offset = position.offset();
+  public BinaryInput compact() {
+    System.arraycopy(this.array, this.index, this.array, 0, this.limit - this.index);
+    this.index = this.limit - this.index;
+    return this;
+  }
+
+  @Override
+  public BinaryInput clear() {
+    this.index = 0;
+    this.limit = this.array.length;
+    return this;
+  }
+
+  @Override
+  public BinaryInput shift(int fromIndex, int toIndex, int length) {
+    if (length < 0) {
+      throw new IndexOutOfBoundsException("length: " + length);
+    } else if (fromIndex < 0) {
+      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex);
+    } else if (fromIndex + length > this.limit) {
+      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + "; length: " + length);
+    } else if (toIndex < 0) {
+      throw new IndexOutOfBoundsException("toIndex: " + toIndex);
+    } else if (toIndex + length > this.limit) {
+      throw new IndexOutOfBoundsException("toIndex: " + toIndex + "; length: " + length);
+    }
+    System.arraycopy(this.array, fromIndex, this.array, toIndex, length);
+    return this;
+  }
+
+  @Override
+  public SourcePosition location() {
+    return SourcePosition.of(this.name, this.offset, 0, 0);
+  }
+
+  @Override
+  public BinaryInput location(SourcePosition location) {
+    if (location.name() != null) {
+      this.name = location.name();
+    }
+    this.offset = location.offset();
+    return this;
+  }
+
+  @Override
+  public @Nullable String name() {
+    return this.name;
+  }
+
+  @Override
+  public BinaryInput name(@Nullable String name) {
+    this.name = name;
     return this;
   }
 
@@ -241,9 +279,39 @@ public final class BinaryInput extends InputBuffer {
   }
 
   @Override
+  public boolean hasArray() {
+    return true;
+  }
+
+  @Override
+  public byte[] array() {
+    return this.array;
+  }
+
+  @Override
+  public int arrayOffset() {
+    return 0;
+  }
+
+  @Override
+  public boolean hasByteBuffer() {
+    return false;
+  }
+
+  @Override
+  public ByteBuffer byteBuffer() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ByteBuffer asByteBuffer() {
+    return ByteBuffer.wrap(this.array, this.index, this.limit - this.index);
+  }
+
+  @Override
   public BinaryInput clone() {
-    return new BinaryInput(this.array, this.index, this.limit, this.identifier,
-                           this.offset, this.last);
+    return new BinaryInput(this.array, this.index, this.limit,
+                           this.name, this.offset, this.last);
   }
 
   private static final byte[] EMPTY_ARRAY = new byte[0];

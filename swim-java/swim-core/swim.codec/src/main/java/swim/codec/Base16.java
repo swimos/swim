@@ -154,12 +154,28 @@ public final class Base16 {
     return ParseBase16.parse(input, new ByteArrayOutput(), 0, 1);
   }
 
+  public static Parse<byte[]> parseByteArray() {
+    return new ParseBase16<byte[]>(new ByteArrayOutput(), 0, 1);
+  }
+
+  public static byte[] parseByteArray(String string) {
+    return ParseBase16.parse(new StringInput(string), new ByteArrayOutput(), 0, 1).getNonNull();
+  }
+
   /**
    * Parses the base-16 (hexadecimal) encoded {@code input}, and writes the
    * decoded bytes to a growable buffer.
    */
   public static Parse<ByteBuffer> parseByteBuffer(Input input) {
     return ParseBase16.parse(input, new ByteBufferOutput(), 0, 1);
+  }
+
+  public static Parse<ByteBuffer> parseByteBuffer() {
+    return new ParseBase16<ByteBuffer>(new ByteBufferOutput(), 0, 1);
+  }
+
+  public static ByteBuffer parseByteBuffer(String string) {
+    return ParseBase16.parse(new StringInput(string), new ByteBufferOutput(), 0, 1).getNonNull();
   }
 
   /**

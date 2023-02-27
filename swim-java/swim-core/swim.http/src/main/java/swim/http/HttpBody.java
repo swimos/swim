@@ -25,8 +25,8 @@ import swim.codec.EncodeException;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
 import swim.codec.Transcoder;
-import swim.http.header.HttpContentLengthHeader;
-import swim.http.header.HttpContentTypeHeader;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.ContentTypeHeader;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -69,8 +69,8 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
   @Override
   public HttpHeaders headers() {
     final HttpHeaders headers = HttpHeaders.of();
-    headers.add(HttpContentTypeHeader.of(this.contentType()));
-    headers.add(HttpContentLengthHeader.of(this.contentLength()));
+    headers.add(ContentTypeHeader.of(this.contentType()));
+    headers.add(ContentLengthHeader.of(this.contentLength()));
     return headers;
   }
 
@@ -164,52 +164,31 @@ final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
   static <T> Decode<HttpBody<T>> decode(InputBuffer input, Transcoder<T> transcoder,
                                         @Nullable Decode<T> decodePayload,
                                         long contentLength, long offset) {
-    final int inputStart = input.index();
+    final int inputStart = input.position();
     final int inputLimit = input.limit();
-    int inputRemaining = inputLimit - inputStart;
-    long outputRemaining = contentLength - offset;
+    final int inputRemaining = inputLimit - inputStart;
     final boolean inputLast = input.isLast();
-    if (outputRemaining <= inputRemaining) {
-      input.limit(inputStart + (int) outputRemaining).asLast(true);
-      if (decodePayload == null) {
-        decodePayload = transcoder.decode(input);
-      } else {
-        decodePayload = decodePayload.consume(input);
-      }
-      input.limit(inputLimit);
+    final long bodyRemaining = contentLength - offset;
+    final int decodeSize = (int) Math.min((long) inputRemaining, bodyRemaining);
+
+    input.limit(inputStart + decodeSize).asLast(bodyRemaining <= (long) inputRemaining);
+    if (decodePayload == null) {
+      decodePayload = transcoder.decode(input);
     } else {
-      input.asLast(false);
-      if (decodePayload == null) {
-        decodePayload = transcoder.decode(input);
-      } else {
-        decodePayload = decodePayload.consume(input);
-      }
+      decodePayload = decodePayload.consume(input);
     }
-    input.asLast(inputLast);
-    final int inputEnd = input.index();
-    offset += inputEnd - inputStart;
-    inputRemaining = inputLimit - inputEnd;
-    outputRemaining = contentLength - offset;
-    if (decodePayload.isDone() && inputRemaining > 0 && outputRemaining > 0L) {
-      // Consume excess input.
-      final int inputExcess = (int) Math.min((long) inputRemaining, outputRemaining);
-      input.index(inputEnd + inputExcess);
-      offset += inputExcess;
-    }
-    if (decodePayload.isDone()) {
-      if (offset < contentLength) {
-        return Decode.error(new DecodeException("Buffer underflow"));
-      } else if (offset > contentLength) {
-        return Decode.error(new DecodeException("Buffer overflow"));
-      } else {
-        return Decode.done(HttpBody.of(decodePayload.get(), transcoder, contentLength));
-      }
+    input.limit(inputLimit).asLast(inputLast);
+
+    offset += (long) (input.position() - inputStart);
+    if (offset == contentLength) {
+      return Decode.done(HttpBody.of(decodePayload.get(), transcoder, contentLength));
+    } else if (decodePayload.isDone()) {
+      return Decode.error(new DecodeException("Undecoded payload data"));
     } else if (decodePayload.isError()) {
       return decodePayload.asError();
-    } else if (input.isError()) {
+    }
+    if (input.isError()) {
       return Decode.error(input.getError());
-    } else if (input.isLast()) {
-      return Decode.error(new DecodeException("Incomplete payload; read " + offset + " of " + contentLength + " bytes"));
     }
     return new DecodeHttpBody<T>(transcoder, decodePayload, contentLength, offset);
   }
@@ -236,12 +215,13 @@ final class EncodeHttpBody<T> extends Encode<HttpBody<T>> {
   static <T> Encode<HttpBody<T>> encode(OutputBuffer<?> output, HttpBody<T> payload,
                                         @Nullable Encode<?> encode, long offset) {
     final long contentLength = payload.contentLength();
-    final int outputStart = output.index();
+    final int outputStart = output.position();
     final int outputLimit = output.limit();
     final int outputRemaining = outputLimit - outputStart;
     final long inputRemaining = contentLength - offset;
+
     final boolean outputLast = output.isLast();
-    if (inputRemaining <= outputRemaining) {
+    if (inputRemaining <= (long) outputRemaining) {
       output.limit(outputStart + (int) inputRemaining).asLast(true);
       if (encode == null) {
         encode = payload.transcoder.encode(output, payload.value);
@@ -258,20 +238,15 @@ final class EncodeHttpBody<T> extends Encode<HttpBody<T>> {
       }
     }
     output.asLast(outputLast);
-    offset += output.index() - outputStart;
-    if (encode.isDone()) {
-      if (offset < contentLength) {
-        return Encode.error(new EncodeException("Buffer underflow"));
-      } else if (offset > contentLength) {
-        return Encode.error(new EncodeException("Buffer overflow"));
-      } else {
-        return Encode.done(payload);
-      }
+
+    offset += (long) (output.position() - outputStart);
+    if (offset == contentLength) {
+      return Encode.done(payload);
     } else if (encode.isError()) {
       return encode.asError();
     }
     if (output.isDone()) {
-      return Encode.error(new EncodeException("Truncated write"));
+      return Encode.error(new EncodeException("Truncated encode"));
     } else if (output.isError()) {
       return Encode.error(output.getError());
     }

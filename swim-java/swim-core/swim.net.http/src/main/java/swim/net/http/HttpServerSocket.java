@@ -40,10 +40,8 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   protected final HttpServer server;
   protected final HttpOptions httpOptions;
   protected @Nullable NetSocketContext context;
-  protected ByteBuffer readBuffer;
-  protected ByteBuffer writeBuffer;
-  protected BinaryInputBuffer inputBuffer;
-  protected BinaryOutputBuffer outputBuffer;
+  protected BinaryInputBuffer requestBuffer;
+  protected BinaryOutputBuffer responseBuffer;
   @Nullable HttpServerResponder requester;
   final HttpServerResponder[] responders;
   int responderReadIndex;
@@ -59,10 +57,8 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     this.context = null;
 
     // Initialize I/O buffers.
-    this.readBuffer = ByteBuffer.allocateDirect(httpOptions.readBufferSize());
-    this.writeBuffer = ByteBuffer.allocateDirect(httpOptions.writeBufferSize());
-    this.inputBuffer = new BinaryInputBuffer(this.readBuffer).asLast(false);
-    this.outputBuffer = new BinaryOutputBuffer(this.writeBuffer).asLast(false);
+    this.requestBuffer = BinaryInputBuffer.allocateDirect(httpOptions.serverRequestBufferSize()).asLast(false);
+    this.responseBuffer = BinaryOutputBuffer.allocateDirect(httpOptions.serverResponseBufferSize()).asLast(false);
 
     // Initialize the response pipeline.
     this.requester = null;

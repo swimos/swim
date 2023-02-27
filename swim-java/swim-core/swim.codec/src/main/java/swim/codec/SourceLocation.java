@@ -14,6 +14,7 @@
 
 package swim.codec;
 
+import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
@@ -34,6 +35,16 @@ public abstract class SourceLocation {
   }
 
   /**
+   * Returns the canonical name of the source into which this location points.
+   */
+  public abstract @Nullable String name();
+
+  /**
+   * Returns a copy of this source location with the given source {@code name}.
+   */
+  public abstract SourceLocation withName(@Nullable String name);
+
+  /**
    * Returns the first source position covered by this {@code SourceLocation}.
    */
   public abstract SourcePosition start();
@@ -45,13 +56,13 @@ public abstract class SourceLocation {
 
   /**
    * Returns a {@code SourceLocation} that includes all source locations
-   * covered by both this location, and some {@code other} location.
+   * covered by both this location and some {@code other} location.
    */
   public abstract SourceLocation union(SourceLocation other);
 
   /**
-   * Returns the position of this {@code SourceLocation} relative to the given
-   * {@code position}.
+   * Returns the position of this {@code SourceLocation} relative
+   * to the given {@code position}.
    */
   public abstract SourceLocation shift(SourcePosition position);
 

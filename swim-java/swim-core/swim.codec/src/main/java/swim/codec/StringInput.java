@@ -23,17 +23,17 @@ import swim.annotations.Since;
 public final class StringInput extends Input {
 
   String string;
-  @Nullable String identifier;
+  @Nullable String name;
   long offset;
   int line;
   int column;
   int index;
   boolean last;
 
-  StringInput(String string, @Nullable String identifier, long offset,
+  StringInput(String string, @Nullable String name, long offset,
               int line, int column, int index, boolean last) {
     this.string = string;
-    this.identifier = identifier;
+    this.name = name;
     this.offset = offset;
     this.line = line;
     this.column = column;
@@ -123,7 +123,7 @@ public final class StringInput extends Input {
     if (position != null) {
       final long index = (long) this.index + (this.offset - position.offset());
       if (index < 0L || index > this.string.length()) {
-        throw new IllegalStateException("Invalid seek to " + position);
+        throw new IllegalArgumentException("Invalid seek to " + position);
       }
       this.offset = position.offset();
       this.line = position.line();
@@ -145,26 +145,29 @@ public final class StringInput extends Input {
   }
 
   @Override
-  public @Nullable String identifier() {
-    return this.identifier;
+  public SourcePosition location() {
+    return SourcePosition.of(this.offset, this.line, this.column);
   }
 
   @Override
-  public StringInput withIdentifier(@Nullable String identifier) {
-    this.identifier = identifier;
+  public StringInput location(SourcePosition location) {
+    if (location.name() != null) {
+      this.name = location.name();
+    }
+    this.offset = location.offset();
+    this.line = location.line();
+    this.column = location.column();
     return this;
   }
 
   @Override
-  public SourcePosition position() {
-    return SourcePosition.at(this.offset, this.line, this.column);
+  public @Nullable String name() {
+    return this.name;
   }
 
   @Override
-  public StringInput withPosition(SourcePosition position) {
-    this.offset = position.offset();
-    this.line = position.line();
-    this.column = position.column();
+  public StringInput name(@Nullable String name) {
+    this.name = name;
     return this;
   }
 
@@ -185,7 +188,7 @@ public final class StringInput extends Input {
 
   @Override
   public StringInput clone() {
-    return new StringInput(this.string, this.identifier, this.offset,
+    return new StringInput(this.string, this.name, this.offset,
                            this.line, this.column, this.index, this.last);
   }
 

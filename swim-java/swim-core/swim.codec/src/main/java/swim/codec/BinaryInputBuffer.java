@@ -25,14 +25,14 @@ import swim.annotations.Since;
 public final class BinaryInputBuffer extends InputBuffer {
 
   final ByteBuffer buffer;
-  @Nullable String identifier;
+  @Nullable String name;
   long offset;
   boolean last;
 
-  BinaryInputBuffer(ByteBuffer buffer, @Nullable String identifier,
+  BinaryInputBuffer(ByteBuffer buffer, @Nullable String name,
                     long offset, boolean last) {
     this.buffer = buffer;
-    this.identifier = identifier;
+    this.name = name;
     this.offset = offset;
     this.last = last;
   }
@@ -73,13 +73,13 @@ public final class BinaryInputBuffer extends InputBuffer {
   }
 
   @Override
-  public int index() {
+  public int position() {
     return this.buffer.position();
   }
 
   @Override
-  public BinaryInputBuffer index(int index) {
-    this.buffer.position(index);
+  public BinaryInputBuffer position(int position) {
+    this.buffer.position(position);
     return this;
   }
 
@@ -100,23 +100,13 @@ public final class BinaryInputBuffer extends InputBuffer {
   }
 
   @Override
+  public boolean hasRemaining() {
+    return this.buffer.hasRemaining();
+  }
+
+  @Override
   public int remaining() {
     return this.buffer.remaining();
-  }
-
-  @Override
-  public byte[] array() {
-    return this.buffer.array();
-  }
-
-  @Override
-  public int arrayOffset() {
-    return this.buffer.arrayOffset();
-  }
-
-  @Override
-  public boolean has(int index) {
-    return 0 <= index && index < this.buffer.limit();
   }
 
   @Override
@@ -169,7 +159,7 @@ public final class BinaryInputBuffer extends InputBuffer {
   public BinaryInputBuffer step(int offset) {
     final int position = this.buffer.position() + offset;
     if (position < 0 || position > this.buffer.limit()) {
-      throw new IllegalStateException("Invalid step to " + position);
+      throw new IllegalArgumentException("Invalid step to " + position);
     }
     this.buffer.position(position);
     this.offset += (long) offset;
@@ -182,7 +172,7 @@ public final class BinaryInputBuffer extends InputBuffer {
     if (position != null) {
       final long offset = (long) buffer.position() + (this.offset - position.offset());
       if (offset < 0 || offset > (long) buffer.limit()) {
-        throw new IllegalStateException("Invalid seek to " + position);
+        throw new IllegalArgumentException("Invalid seek to " + position);
       }
       buffer.position((int) offset);
       this.offset = position.offset();
@@ -195,24 +185,78 @@ public final class BinaryInputBuffer extends InputBuffer {
   }
 
   @Override
-  public @Nullable String identifier() {
-    return this.identifier;
-  }
-
-  @Override
-  public BinaryInputBuffer withIdentifier(@Nullable String identifier) {
-    this.identifier = identifier;
+  public BinaryInputBuffer flip() {
+    this.buffer.flip();
     return this;
   }
 
   @Override
-  public SourcePosition position() {
-    return SourcePosition.at(this.offset, 0, 0);
+  public BinaryInputBuffer rewind() {
+    this.buffer.rewind();
+    return this;
   }
 
   @Override
-  public BinaryInputBuffer withPosition(SourcePosition position) {
-    this.offset = position.offset();
+  public BinaryInputBuffer compact() {
+    this.buffer.compact();
+    return this;
+  }
+
+  @Override
+  public BinaryInputBuffer clear() {
+    this.buffer.clear();
+    return this;
+  }
+
+  @Override
+  public BinaryInputBuffer shift(int fromIndex, int toIndex, int length) {
+    if (length < 0) {
+      throw new IndexOutOfBoundsException("length: " + length);
+    } else if (fromIndex < 0) {
+      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex);
+    } else if (fromIndex + length > this.buffer.limit()) {
+      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + "; length: " + length);
+    } else if (toIndex < 0) {
+      throw new IndexOutOfBoundsException("toIndex: " + toIndex);
+    } else if (toIndex + length > this.buffer.limit()) {
+      throw new IndexOutOfBoundsException("toIndex: " + toIndex + "; length: " + length);
+    }
+    if (this.buffer.hasArray()) {
+      final byte[] array = this.buffer.array();
+      System.arraycopy(array, fromIndex, array, toIndex, length);
+    } else {
+      final ByteBuffer dup = this.buffer.duplicate();
+      dup.position(fromIndex).limit(fromIndex + length);
+      final int position = this.buffer.position();
+      this.buffer.position(toIndex);
+      this.buffer.put(dup);
+      this.buffer.position(position);
+    }
+    return this;
+  }
+
+  @Override
+  public SourcePosition location() {
+    return SourcePosition.of(this.name, this.offset, 0, 0);
+  }
+
+  @Override
+  public BinaryInputBuffer location(SourcePosition location) {
+    if (location.name() != null) {
+      this.name = location.name();
+    }
+    this.offset = location.offset();
+    return this;
+  }
+
+  @Override
+  public @Nullable String name() {
+    return this.name;
+  }
+
+  @Override
+  public BinaryInputBuffer name(@Nullable String name) {
+    this.name = name;
     return this;
   }
 
@@ -232,8 +276,38 @@ public final class BinaryInputBuffer extends InputBuffer {
   }
 
   @Override
+  public boolean hasArray() {
+    return this.buffer.hasArray();
+  }
+
+  @Override
+  public byte[] array() {
+    return this.buffer.array();
+  }
+
+  @Override
+  public int arrayOffset() {
+    return this.buffer.arrayOffset();
+  }
+
+  @Override
+  public boolean hasByteBuffer() {
+    return true;
+  }
+
+  @Override
+  public ByteBuffer byteBuffer() {
+    return this.buffer;
+  }
+
+  @Override
+  public ByteBuffer asByteBuffer() {
+    return this.buffer;
+  }
+
+  @Override
   public BinaryInputBuffer clone() {
-    return new BinaryInputBuffer(this.buffer.duplicate(), this.identifier,
+    return new BinaryInputBuffer(this.buffer.duplicate(), this.name,
                                  this.offset, this.last);
   }
 
@@ -245,6 +319,22 @@ public final class BinaryInputBuffer extends InputBuffer {
 
   public static BinaryInputBuffer done() {
     return new BinaryInputBuffer(EMPTY_BUFFER, null, 0L, true);
+  }
+
+  public static BinaryInputBuffer allocate(int capacity) {
+    return new BinaryInputBuffer(ByteBuffer.allocate(capacity), null, 0L, true);
+  }
+
+  public static BinaryInputBuffer allocateDirect(int capacity) {
+    return new BinaryInputBuffer(ByteBuffer.allocateDirect(capacity), null, 0L, true);
+  }
+
+  public static BinaryInputBuffer wrap(byte[] array, int offset, int length) {
+    return new BinaryInputBuffer(ByteBuffer.wrap(array, offset, length), null, 0L, true);
+  }
+
+  public static BinaryInputBuffer wrap(byte[] array) {
+    return new BinaryInputBuffer(ByteBuffer.wrap(array), null, 0L, true);
   }
 
 }

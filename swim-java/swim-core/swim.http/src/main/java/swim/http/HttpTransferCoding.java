@@ -14,8 +14,11 @@
 
 package swim.http;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -28,6 +31,7 @@ import swim.codec.StringOutput;
 import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.collections.ArrayMap;
+import swim.collections.StringTrieMap;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -96,6 +100,24 @@ public final class HttpTransferCoding implements ToSource, ToString {
                                        null, null, 0, 0, 1);
   }
 
+  @SuppressWarnings("ReferenceEquality")
+  public HttpTransferCoding intern() {
+    if (!this.params.isEmpty()) {
+      throw new UnsupportedOperationException("Can't intern transfer-extension");
+    }
+    StringTrieMap<HttpTransferCoding> names = (StringTrieMap<HttpTransferCoding>) NAMES.getOpaque();
+    do {
+      final StringTrieMap<HttpTransferCoding> oldNames = names;
+      final StringTrieMap<HttpTransferCoding> newNames = oldNames.updated(this.name, this);
+      names = (StringTrieMap<HttpTransferCoding>) NAMES.compareAndExchangeRelease(oldNames, newNames);
+      if (names == oldNames) {
+        names = newNames;
+        break;
+      }
+    } while (true);
+    return this;
+  }
+
   @Override
   public boolean equals(@Nullable Object other) {
     if (this == other) {
@@ -141,55 +163,35 @@ public final class HttpTransferCoding implements ToSource, ToString {
     return output.get();
   }
 
-  private static final HttpTransferCoding CHUNKED = new HttpTransferCoding("chunked");
-
-  public static HttpTransferCoding chunked() {
-    return CHUNKED;
-  }
-
-  private static final HttpTransferCoding COMPRESS = new HttpTransferCoding("compress");
-
-  public static HttpTransferCoding compress() {
-    return COMPRESS;
-  }
-
-  private static final HttpTransferCoding DEFLATE = new HttpTransferCoding("deflate");
-
-  public static HttpTransferCoding deflate() {
-    return DEFLATE;
-  }
-
-  private static final HttpTransferCoding GZIP = new HttpTransferCoding("gzip");
-
-  public static HttpTransferCoding gzip() {
-    return GZIP;
-  }
-
   public static HttpTransferCoding of(String name, ArrayMap<String, String> params) {
-    if (params.isEmpty()) {
-      if ("chunked".equals(name)) {
-        return HttpTransferCoding.chunked();
-      } else if ("compress".equals(name)) {
-        return HttpTransferCoding.compress();
-      } else if ("deflate".equals(name)) {
-        return HttpTransferCoding.deflate();
-      } else if ("gzip".equals(name)) {
-        return HttpTransferCoding.gzip();
-      }
+    Objects.requireNonNull(name, "name");
+    Objects.requireNonNull(params, "params");
+    HttpTransferCoding transferCoding = ((StringTrieMap<HttpTransferCoding>) NAMES.getOpaque()).get(name);
+    if (transferCoding == null) {
+      transferCoding = new HttpTransferCoding(name, params);
+    } else if (!params.isEmpty()) {
+      transferCoding = new HttpTransferCoding(transferCoding.name, params);
     }
-    return new HttpTransferCoding(name, params);
+    return transferCoding;
   }
 
   public static HttpTransferCoding of(String name) {
-    return HttpTransferCoding.of(name, ArrayMap.<String, String>empty());
+    Objects.requireNonNull(name);
+    HttpTransferCoding transferCoding = ((StringTrieMap<HttpTransferCoding>) NAMES.getOpaque()).get(name);
+    if (transferCoding == null) {
+      transferCoding = new HttpTransferCoding(name, ArrayMap.empty());
+    }
+    return transferCoding;
   }
 
   public static Parse<HttpTransferCoding> parse(Input input) {
-    return ParseHttpTransferCoding.parse(input, null, null, null, ArrayMap.empty(), 1);
+    return ParseHttpTransferCoding.parse(input, (StringTrieMap<HttpTransferCoding>) NAMES.getOpaque(),
+                                         null, null, null, ArrayMap.empty(), 1);
   }
 
   public static Parse<HttpTransferCoding> parse() {
-    return new ParseHttpTransferCoding(null, null, null, ArrayMap.empty(), 1);
+    return new ParseHttpTransferCoding((StringTrieMap<HttpTransferCoding>) NAMES.getOpaque(),
+                                       null, null, null, ArrayMap.empty(), 1);
   }
 
   public static HttpTransferCoding parse(String string) {
@@ -203,20 +205,45 @@ public final class HttpTransferCoding implements ToSource, ToString {
     return parse.getNonNull();
   }
 
+  static StringTrieMap<HttpTransferCoding> names = StringTrieMap.caseInsensitive();
+
+  /**
+   * {@code VarHandle} for atomically accessing the static {@link #names} field.
+   */
+  static final VarHandle NAMES;
+
+  static {
+    // Initialize var handles.
+    final MethodHandles.Lookup lookup = MethodHandles.lookup();
+    try {
+      NAMES = lookup.findStaticVarHandle(HttpTransferCoding.class, "names", StringTrieMap.class);
+    } catch (ReflectiveOperationException cause) {
+      throw new ExceptionInInitializerError(cause);
+    }
+  }
+
+  public static final HttpTransferCoding CHUNKED = new HttpTransferCoding("chunked").intern();
+  public static final HttpTransferCoding COMPRESS = new HttpTransferCoding("compress").intern();
+  public static final HttpTransferCoding DEFLATE = new HttpTransferCoding("deflate").intern();
+  public static final HttpTransferCoding GZIP = new HttpTransferCoding("gzip").intern();
+
 }
 
 final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
 
+  final @Nullable StringTrieMap<HttpTransferCoding> nameTrie;
   final @Nullable StringBuilder nameBuilder;
   final @Nullable StringBuilder keyBuilder;
   final @Nullable StringBuilder valueBuilder;
   final ArrayMap<String, String> params;
   final int step;
 
-  ParseHttpTransferCoding(@Nullable StringBuilder nameBuilder,
+  ParseHttpTransferCoding(@Nullable StringTrieMap<HttpTransferCoding> nameTrie,
+                          @Nullable StringBuilder nameBuilder,
                           @Nullable StringBuilder keyBuilder,
                           @Nullable StringBuilder valueBuilder,
                           ArrayMap<String, String> params, int step) {
+    this.nameTrie = nameTrie;
     this.nameBuilder = nameBuilder;
     this.keyBuilder = keyBuilder;
     this.valueBuilder = valueBuilder;
@@ -226,12 +253,13 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
 
   @Override
   public Parse<HttpTransferCoding> consume(Input input) {
-    return ParseHttpTransferCoding.parse(input, this.nameBuilder,
+    return ParseHttpTransferCoding.parse(input, this.nameTrie, this.nameBuilder,
                                          this.keyBuilder, this.valueBuilder,
                                          this.params, this.step);
   }
 
   static Parse<HttpTransferCoding> parse(Input input,
+                                         @Nullable StringTrieMap<HttpTransferCoding> nameTrie,
                                          @Nullable StringBuilder nameBuilder,
                                          @Nullable StringBuilder keyBuilder,
                                          @Nullable StringBuilder valueBuilder,
@@ -243,8 +271,19 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input.step();
-          nameBuilder = new StringBuilder();
-          nameBuilder.appendCodePoint(c);
+          if (nameTrie != null) {
+            final StringTrieMap<HttpTransferCoding> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
+            if (subTrie != null) {
+              nameTrie = subTrie;
+            } else {
+              nameBuilder = new StringBuilder();
+              nameBuilder.appendCodePoint(c);
+              nameTrie = null;
+            }
+          } else {
+            nameBuilder = new StringBuilder();
+            nameBuilder.appendCodePoint(c);
+          }
           step = 2;
         } else {
           return Parse.error(Diagnostic.expected("transfer coding", input));
@@ -254,12 +293,22 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
       }
     }
     if (step == 2) {
-      nameBuilder = Assume.nonNull(nameBuilder);
       while (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input.step();
-          nameBuilder.appendCodePoint(c);
+          if (nameTrie != null) {
+            final StringTrieMap<HttpTransferCoding> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
+            if (subTrie != null) {
+              nameTrie = subTrie;
+            } else {
+              nameBuilder = new StringBuilder(nameTrie.prefix());
+              nameBuilder.appendCodePoint(c);
+              nameTrie = null;
+            }
+          } else {
+            Assume.nonNull(nameBuilder).appendCodePoint(c);
+          }
         } else {
           break;
         }
@@ -270,7 +319,6 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
     }
     do {
       if (step == 3) {
-        nameBuilder = Assume.nonNull(nameBuilder);
         while (input.isCont()) {
           c = input.head();
           if (Http.isSpace(c)) {
@@ -283,7 +331,14 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
           input.step();
           step = 4;
         } else if (input.isReady()) {
-          return Parse.done(HttpTransferCoding.of(nameBuilder.toString(), params));
+          HttpTransferCoding transferCoding = nameTrie != null ? nameTrie.value() : null;
+          if (transferCoding == null) {
+            final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
+            transferCoding = new HttpTransferCoding(name, params);
+          } else if (!params.isEmpty()) {
+            transferCoding = new HttpTransferCoding(transferCoding.name, params);
+          }
+          return Parse.done(transferCoding);
         }
       }
       if (step == 4) {
@@ -425,7 +480,7 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
     if (input.isError()) {
       return Parse.error(input.getError());
     }
-    return new ParseHttpTransferCoding(nameBuilder, keyBuilder,
+    return new ParseHttpTransferCoding(nameTrie, nameBuilder, keyBuilder,
                                        valueBuilder, params, step);
   }
 

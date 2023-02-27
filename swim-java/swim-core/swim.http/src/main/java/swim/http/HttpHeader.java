@@ -280,7 +280,7 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
             return Parse.done(type.of(value));
           } else {
             final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
-            return Parse.done(HttpHeader.of(name, value));
+            return Parse.done(new HttpHeader(name, value));
           }
         }
       }

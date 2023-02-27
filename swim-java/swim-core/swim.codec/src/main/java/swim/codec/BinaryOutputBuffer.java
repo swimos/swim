@@ -69,13 +69,13 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
   }
 
   @Override
-  public int index() {
+  public int position() {
     return this.buffer.position();
   }
 
   @Override
-  public BinaryOutputBuffer index(int index) {
-    this.buffer.position(index);
+  public BinaryOutputBuffer position(int position) {
+    this.buffer.position(position);
     return this;
   }
 
@@ -96,28 +96,18 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
   }
 
   @Override
+  public boolean hasRemaining() {
+    return this.buffer.hasRemaining();
+  }
+
+  @Override
   public int remaining() {
     return this.buffer.remaining();
   }
 
   @Override
-  public byte[] array() {
-    return this.buffer.array();
-  }
-
-  @Override
-  public int arrayOffset() {
-    return this.buffer.arrayOffset();
-  }
-
-  @Override
-  public boolean has(int index) {
-    return 0 <= index && index < this.buffer.limit();
-  }
-
-  @Override
   public int get(int index) {
-    if (0 < index || index >= this.buffer.limit()) {
+    if (index < 0 || index >= this.buffer.limit()) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
     return this.buffer.get(index) & 0xFF;
@@ -153,7 +143,41 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
   }
 
   @Override
-  public BinaryOutputBuffer move(int fromIndex, int toIndex, int length) {
+  public BinaryOutputBuffer step(int offset) {
+    final int position = this.buffer.position() + offset;
+    if (position < 0 || position > this.buffer.limit()) {
+      throw new IllegalArgumentException("Invalid step to " + position);
+    }
+    this.buffer.position(position);
+    return this;
+  }
+
+  @Override
+  public BinaryOutputBuffer flip() {
+    this.buffer.flip();
+    return this;
+  }
+
+  @Override
+  public BinaryOutputBuffer rewind() {
+    this.buffer.rewind();
+    return this;
+  }
+
+  @Override
+  public BinaryOutputBuffer compact() {
+    this.buffer.compact();
+    return this;
+  }
+
+  @Override
+  public BinaryOutputBuffer clear() {
+    this.buffer.clear();
+    return this;
+  }
+
+  @Override
+  public BinaryOutputBuffer shift(int fromIndex, int toIndex, int length) {
     if (length < 0) {
       throw new IndexOutOfBoundsException("length: " + length);
     } else if (fromIndex < 0) {
@@ -180,20 +204,40 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
   }
 
   @Override
-  public BinaryOutputBuffer step(int offset) {
-    final int position = this.buffer.position() + offset;
-    if (position < 0 || position > this.buffer.limit()) {
-      throw new IllegalStateException("Invalid step to " + position);
-    }
-    this.buffer.position(position);
-    return this;
-  }
-
-  @Override
   public ByteBuffer get() {
     final ByteBuffer dup = this.buffer.duplicate();
     dup.flip();
     return dup;
+  }
+
+  @Override
+  public boolean hasArray() {
+    return this.buffer.hasArray();
+  }
+
+  @Override
+  public byte[] array() {
+    return this.buffer.array();
+  }
+
+  @Override
+  public int arrayOffset() {
+    return this.buffer.arrayOffset();
+  }
+
+  @Override
+  public boolean hasByteBuffer() {
+    return true;
+  }
+
+  @Override
+  public ByteBuffer byteBuffer() {
+    return this.buffer;
+  }
+
+  @Override
+  public ByteBuffer asByteBuffer() {
+    return this.buffer;
   }
 
   @Override
@@ -209,6 +253,22 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
 
   public static BinaryOutputBuffer done() {
     return new BinaryOutputBuffer(EMPTY_BUFFER, true);
+  }
+
+  public static BinaryOutputBuffer allocate(int capacity) {
+    return new BinaryOutputBuffer(ByteBuffer.allocate(capacity), true);
+  }
+
+  public static BinaryOutputBuffer allocateDirect(int capacity) {
+    return new BinaryOutputBuffer(ByteBuffer.allocateDirect(capacity), true);
+  }
+
+  public static BinaryOutputBuffer wrap(byte[] array, int offset, int length) {
+    return new BinaryOutputBuffer(ByteBuffer.wrap(array, offset, length), true);
+  }
+
+  public static BinaryOutputBuffer wrap(byte[] array) {
+    return new BinaryOutputBuffer(ByteBuffer.wrap(array), true);
   }
 
 }

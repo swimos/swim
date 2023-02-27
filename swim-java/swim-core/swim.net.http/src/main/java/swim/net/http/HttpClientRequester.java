@@ -221,26 +221,26 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     }
 
     try {
-      // Encode the request message into the write buffer.
-      requestMessage = requestMessage.produce(this.socket.outputBuffer);
-      // Prepare to transfer data from the write buffer to the socket.
-      this.socket.writeBuffer.flip();
+      // Encode the request message into the request buffer.
+      requestMessage = requestMessage.produce(this.socket.requestBuffer);
+      // Prepare to transfer data from the request buffer to the socket.
+      this.socket.requestBuffer.flip();
       try {
-        // Write data from the write buffer to the socket.
-        this.socket.write(this.socket.writeBuffer);
+        // Write data from the request buffer to the socket.
+        this.socket.write(this.socket.requestBuffer.byteBuffer());
       } catch (ClosedChannelException cause) {
         // Finalize the request message encode.
         requestMessage = requestMessage.produce(BinaryOutputBuffer.done());
       }
     } finally {
-      // Prepare the write buffer for the next write.
-      this.socket.writeBuffer.compact();
+      // Prepare the request buffer for the next write.
+      this.socket.requestBuffer.compact();
       // Store the request message encode state.
       REQUEST_MESSAGE.setOpaque(this, requestMessage);
     }
 
-    if (this.socket.writeBuffer.position() != 0 || requestMessage.isCont()) {
-      // The write buffer has not been fully written to the socket,
+    if (this.socket.requestBuffer.position() != 0 || requestMessage.isCont()) {
+      // The request buffer has not been fully written to the socket,
       // and/or the request message is still being encoded;
       // yield until the socket is ready for more data.
       this.socket.requestWrite();
@@ -311,26 +311,26 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     }
 
     try {
-      // Encode the request payload into the write buffer.
-      requestPayload = requestPayload.produce(this.socket.outputBuffer);
-      // Prepare to transfer data from the write buffer to the socket.
-      this.socket.writeBuffer.flip();
+      // Encode the request payload into the request buffer.
+      requestPayload = requestPayload.produce(this.socket.requestBuffer);
+      // Prepare to transfer data from the request buffer to the socket.
+      this.socket.requestBuffer.flip();
       try {
-        // Write data from the write buffer to the socket.
-        this.socket.write(this.socket.writeBuffer);
+        // Write data from the request buffer to the socket.
+        this.socket.write(this.socket.requestBuffer.byteBuffer());
       } catch (ClosedChannelException cause) {
         // Finalize the request payload encode.
         requestPayload = requestPayload.produce(BinaryOutputBuffer.done());
       }
     } finally {
-      // Prepare the write buffer for the next write.
-      this.socket.writeBuffer.compact();
+      // Prepare the request buffer for the next write.
+      this.socket.requestBuffer.compact();
       // Store the request payload encode state.
       REQUEST_PAYLOAD.setOpaque(this, requestPayload);
     }
 
-    if (this.socket.writeBuffer.position() != 0) {
-      // The write buffer has not been fully written to the socket;
+    if (this.socket.requestBuffer.position() != 0) {
+      // The request buffer has not been fully written to the socket;
       // yield until the socket is ready for more data.
       this.socket.requestWrite();
     } else if (requestPayload.isCont()) {
@@ -564,19 +564,19 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     }
 
     try {
-      // Read data from the socket into the read buffer.
-      final int count = this.socket.read(this.socket.readBuffer);
+      // Read data from the socket into the response buffer.
+      final int count = this.socket.read(this.socket.responseBuffer.byteBuffer());
       if (count < 0) {
         // Signal that the end of input.
-        this.socket.inputBuffer.asLast(true);
+        this.socket.responseBuffer.asLast(true);
       }
-      // Prepare to consume data from the read buffer.
-      this.socket.readBuffer.flip();
-      // Decode the response message from the read buffer.
-      responseMessage = responseMessage.consume(this.socket.inputBuffer);
+      // Prepare to consume data from the response buffer.
+      this.socket.responseBuffer.flip();
+      // Decode the response message from the response buffer.
+      responseMessage = responseMessage.consume(this.socket.responseBuffer);
     } finally {
-      // Prepare the read buffer for the next read.
-      this.socket.readBuffer.compact();
+      // Prepare the response buffer for the next read.
+      this.socket.responseBuffer.compact();
       // Store the response message decode state.
       RESPONSE_MESSAGE.setOpaque(this, responseMessage);
     }
@@ -648,19 +648,19 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
     }
 
     try {
-      // Read data from the socket into the read buffer.
-      final int count = this.socket.read(this.socket.readBuffer);
+      // Read data from the socket into the response buffer.
+      final int count = this.socket.read(this.socket.responseBuffer.byteBuffer());
       if (count < 0) {
         // Signal that the end of input.
-        this.socket.inputBuffer.asLast(true);
+        this.socket.responseBuffer.asLast(true);
       }
-      // Prepare to consume data from the read buffer.
-      this.socket.readBuffer.flip();
-      // Decode the response payload from the read buffer.
-      responsePayload = responsePayload.consume(this.socket.inputBuffer);
+      // Prepare to consume data from the response buffer.
+      this.socket.responseBuffer.flip();
+      // Decode the response payload from the response buffer.
+      responsePayload = responsePayload.consume(this.socket.responseBuffer);
     } finally {
-      // Prepare the read buffer for the next read.
-      this.socket.readBuffer.compact();
+      // Prepare the response buffer for the next read.
+      this.socket.responseBuffer.compact();
       // Store the response payload decode state.
       RESPONSE_PAYLOAD.setOpaque(this, responsePayload);
     }

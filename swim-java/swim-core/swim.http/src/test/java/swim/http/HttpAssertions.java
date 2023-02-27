@@ -103,12 +103,12 @@ public final class HttpAssertions {
       assertTrue(decode.isCont());
       assertFalse(decode.isDone());
       assertFalse(decode.isError());
-      input.index(0).limit(i).asLast(false);
+      input.position(0).limit(i).asLast(false);
       decode = decode.consume(input);
       input.limit(n).asLast(true);
       decode = decode.consume(input);
       if (decode.isError()) {
-        throw new JUnitException("Decode failure", decode.getError());
+        throw new JUnitException("Decode failed", decode.getError());
       }
       assertFalse(decode.isCont());
       assertTrue(decode.isDone());

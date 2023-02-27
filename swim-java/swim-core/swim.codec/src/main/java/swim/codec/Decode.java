@@ -244,28 +244,33 @@ public abstract class Decode<T> {
 
   /**
    * Throws a {@link DecodeException} with the decode error as its cause,
-   * if in the <em>error</em> state; otherwise does nothing.
+   * if in the <em>error</em> state; otherwise returns {@code this}.
    *
    * @throws DecodeException with the decode error as its cause,
    *         if in the <em>error</em> state.
    */
-  public void checkError() {
+  public Decode<T> checkError() {
     if (this.isError()) {
       throw new DecodeException("Decode failed", this.getError());
+    } else {
+      return this;
     }
   }
 
   /**
    * Throws a {@link DecodeException} if not in the <em>done</em> state;
-   * otherwise does nothing. If in the <em>error</em> state, the decode error
-   * will be included as the cause of the thrown {@code DecodeException}.
+   * otherwise returns {@code this}. If in the <em>error</em> state,
+   * the decode error will be included as the cause of the thrown
+   * {@code DecodeException}.
    *
    * @throws DecodeException if not in the <em>done</em> state.
    */
-  public void checkDone() {
-    if (this.isError()) {
+  public Decode<T> checkDone() {
+    if (this.isDone()) {
+      return this;
+    } else if (this.isError()) {
       throw new DecodeException("Decode failed", this.getError());
-    } else if (!this.isDone()) {
+    } else {
       throw new DecodeException("Incomplete decode");
     }
   }

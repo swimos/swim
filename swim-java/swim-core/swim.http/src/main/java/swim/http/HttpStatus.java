@@ -350,9 +350,9 @@ final class ParseHttpStatus extends Parse<HttpStatus> {
         HttpStatus status = phraseTrie != null ? phraseTrie.value() : null;
         if (status == null) {
           final String phrase = phraseTrie != null ? phraseTrie.prefix() : Assume.nonNull(phraseBuilder).toString();
-          status = HttpStatus.of(code, phrase);
+          status = new HttpStatus(code, phrase);
         } else if (code != status.code) {
-          status = HttpStatus.of(code, status.phrase);
+          status = new HttpStatus(code, status.phrase);
         }
         return Parse.done(status);
       }

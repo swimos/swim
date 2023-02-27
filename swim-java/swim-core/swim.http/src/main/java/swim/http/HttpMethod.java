@@ -221,7 +221,6 @@ final class ParseHttpMethod extends Parse<HttpMethod> {
       }
     }
     if (step == 2) {
-      nameBuilder = Assume.nonNull(nameBuilder);
       while (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
@@ -246,7 +245,7 @@ final class ParseHttpMethod extends Parse<HttpMethod> {
         HttpMethod method = nameTrie != null ? nameTrie.value() : null;
         if (method == null) {
           final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
-          method = HttpMethod.of(name);
+          method = new HttpMethod(name);
         }
         return Parse.done(method);
       }

@@ -34,35 +34,34 @@ public abstract class OutputBuffer<T> extends Output<T> {
   @Override
   public abstract OutputBuffer<T> asLast(boolean last);
 
-  public abstract int index();
+  /**
+   * Returns the position in the buffer to which the next token will be written.
+   */
+  public abstract int position();
 
   /**
-   * Repositions the buffer to the given {@code index} and returns {@code this}.
+   * Repositions the buffer to the given {@code position} and returns {@code this}.
    *
-   * @throws IndexOutOfBoundsException if {@code index} is not between
+   * @throws IllegalArgumentException if {@code position} is not between
    *         zero and the buffer {@linkplain #limit() limit}, inclusive.
    */
-  public abstract OutputBuffer<T> index(int index);
+  public abstract OutputBuffer<T> position(int position);
 
   public abstract int limit();
 
   /**
    * Sets the endpoint of the buffer to the given {@code limit} and returns {@code this}.
    *
-   * @throws IndexOutOfBoundsException if {@code limit} is not between
+   * @throws IllegalArgumentException if {@code limit} is not between
    *         zero and the buffer {@linkplain #capacity() capacity}, inclusive.
    */
   public abstract OutputBuffer<T> limit(int limit);
 
   public abstract int capacity();
 
+  public abstract boolean hasRemaining();
+
   public abstract int remaining();
-
-  public abstract byte[] array();
-
-  public abstract int arrayOffset();
-
-  public abstract boolean has(int index);
 
   /**
    * Returns the value at the given buffer {@code index}.
@@ -88,21 +87,41 @@ public abstract class OutputBuffer<T> extends Output<T> {
   public abstract int write(ReadableByteChannel channel) throws IOException;
 
   /**
-   * Copies {@code length} bytes starting at position {@code fromIndex} to
-   * position {@code toIndex}
-   *
-   * @throws IndexOutOfBoundsException if any source or destination position is
-   *         not between zero and the buffer {@linkplain #limit() limit}, exclusive.
-   */
-  public abstract OutputBuffer<T> move(int fromIndex, int toIndex, int length);
-
-  /**
    * Advances the buffer position by {@code offset} tokens and returns {@code this}.
    *
-   * @throws IllegalStateException if the updated position is not between
+   * @throws IllegalArgumentException if the updated position is not between
    *         zero and the buffer {@linkplain #limit() limit}, inclusive.
    */
   public abstract OutputBuffer<T> step(int offset);
+
+  public abstract OutputBuffer<T> flip();
+
+  public abstract OutputBuffer<T> rewind();
+
+  public abstract OutputBuffer<T> compact();
+
+  public abstract OutputBuffer<T> clear();
+
+  /**
+   * Copies {@code length} bytes starting at position {@code fromIndex}
+   * to position {@code toIndex}
+   *
+   * @throws IndexOutOfBoundsException if any source or destination position
+   *         is not between zero and the buffer {@linkplain #limit() limit}.
+   */
+  public abstract OutputBuffer<T> shift(int fromIndex, int toIndex, int length);
+
+  public abstract boolean hasArray();
+
+  public abstract byte[] array();
+
+  public abstract int arrayOffset();
+
+  public abstract boolean hasByteBuffer();
+
+  public abstract ByteBuffer byteBuffer();
+
+  public abstract ByteBuffer asByteBuffer();
 
   @Override
   public OutputBuffer<T> clone() {
