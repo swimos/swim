@@ -87,6 +87,14 @@ public class WsEncoder implements ToSource {
     }
   }
 
+  public <T> Encode<WsFrame<T>> encodeContinuation(OutputBuffer<?> output, WsContinuationFrame<T> frame) {
+    return EncodeWsFrame.encode(output, this, frame.frame, frame.encodePayload, frame.offset);
+  }
+
+  public <T> Encode<WsFrame<T>> encodeContinuation(WsContinuationFrame<T> frame) {
+    return new EncodeWsFrame<T>(this, frame.frame, frame.encodePayload, frame.offset);
+  }
+
   public <T> Encode<WsFrame<T>> encodeTextFrame(OutputBuffer<?> output, WsFrame<T> frame) {
     return EncodeWsFrame.encode(output, this, frame, null, 0L);
   }
@@ -198,14 +206,14 @@ final class EncodeWsFrame<T> extends Encode<WsFrame<T>> {
     } else {
       maxHeaderSize = 10 + maskSize; // long length
     }
-    // Leave space at the start of the buffer for the frame header.
-    final int payloadStart = outputStart + maxHeaderSize;
-    output.position(payloadStart);
 
     // To avoid generating small message fragments and fragmented control frames,
     // check if the output buffer has sufficient available capacity to attempt
     // to encode a frame.
     if (outputRemaining >= maxHeaderSize + encoder.minPayloadCapacity()) {
+      // Leave space at the start of the buffer for the frame header.
+      final int payloadStart = outputStart + maxHeaderSize;
+      output.position(payloadStart);
       // Encode a payload fragment into the output buffer.
       final Encode<?> encodePayload;
       if (encode == null) {
@@ -307,6 +315,9 @@ final class EncodeWsFrame<T> extends Encode<WsFrame<T>> {
         if (encode.isDone()) {
           // The full message has been encoded.
           return Encode.done(frame);
+        } else {
+          // A message fragment was encoded.
+          return Encode.done(WsContinuationFrame.of((WsDataFrame<T>) frame, encode, offset));
         }
       }
     }

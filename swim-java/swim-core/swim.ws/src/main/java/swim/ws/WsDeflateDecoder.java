@@ -63,7 +63,7 @@ public class WsDeflateDecoder extends WsDecoder {
   }
 
   @Override
-  public <T> Decode<WsFrame<T>> decodeContinuationFrame(InputBuffer input, WsCodec<T> codec,
+  public <T> Decode<WsFrame<T>> decodeContinuationFrame(InputBuffer input, @Nullable WsCodec<T> codec,
                                                         int finRsvOp, WsOpcode frameType,
                                                         Transcoder<?> transcoder,
                                                         Decode<?> decodePayload) {
@@ -131,7 +131,7 @@ public class WsDeflateDecoder extends WsDecoder {
 final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
 
   final WsDeflateDecoder decoder;
-  final WsCodec<T> codec;
+  final @Nullable WsCodec<T> codec;
   final @Nullable WsOpcode frameType;
   final @Nullable Transcoder<?> transcoder;
   final @Nullable Decode<?> decodePayload;
@@ -141,7 +141,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
   final int maskingKey;
   final int step;
 
-  DecodeWsDeflateFrame(WsDeflateDecoder decoder, WsCodec<T> codec,
+  DecodeWsDeflateFrame(WsDeflateDecoder decoder, @Nullable WsCodec<T> codec,
                        @Nullable WsOpcode frameType, @Nullable Transcoder<?> transcoder,
                        @Nullable Decode<?> decodePayload, long offset, long length,
                        int finRsvOp, int maskingKey, int step) {
@@ -167,7 +167,8 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
   }
 
   static <T> Decode<WsFrame<T>> decode(InputBuffer input, WsDeflateDecoder decoder,
-                                       WsCodec<T> codec, @Nullable WsOpcode frameType,
+                                       @Nullable WsCodec<T> codec,
+                                       @Nullable WsOpcode frameType,
                                        @Nullable Transcoder<?> transcoder,
                                        @Nullable Decode<?> decodePayload,
                                        long offset, long length, int finRsvOp,
@@ -372,7 +373,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         inflateBuffer.flip();
         if (decodePayload == null) {
           try {
-            transcoder = codec.getPayloadTranscoder(WsOpcode.of(finRsvOp & 0xF));
+            transcoder = Assume.nonNull(codec).getPayloadTranscoder(WsOpcode.of(finRsvOp & 0xF));
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
               return Decode.error(new DecodeException("Unable to get payload transcoder", cause));
@@ -412,9 +413,8 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         if ((finRsvOp & 0x80) != 0) {
           if (frameType.code < 0x8) { // data frame
             try {
-              return Decode.done(codec.createDataFrame(
-                  frameType, Assume.conformsNullable(decodePayload.get()),
-                  Assume.conformsNonNull(transcoder)));
+              return Decode.done(decoder.dataFrame(frameType, Assume.conformsNullable(decodePayload.get()),
+                                                   Assume.conformsNonNull(transcoder)));
             } catch (Throwable cause) {
               if (Result.isNonFatal(cause)) {
                 return Decode.error(new DecodeException("Unable to construct data frame", cause));
@@ -424,9 +424,8 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
             }
           } else { // control frame
             try {
-              return Decode.done(Assume.conforms(codec.createControlFrame(
-                  frameType, Assume.conformsNullable(decodePayload.get()),
-                  Assume.nonNull(transcoder))));
+              return Decode.done(Assume.conforms(decoder.controlFrame(frameType, Assume.conformsNullable(decodePayload.get()),
+                                                                      Assume.nonNull(transcoder))));
             } catch (Throwable cause) {
               if (Result.isNonFatal(cause)) {
                 return Decode.error(new DecodeException("Unable to construct control frame", cause));

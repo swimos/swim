@@ -14,12 +14,10 @@
 
 package swim.ws;
 
-import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Binary;
 import swim.codec.Transcoder;
-import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -36,32 +34,6 @@ public interface WsCodec<T> {
       return this.getDataPayloadTranscoder(frameType);
     } else {
       return this.getControlPayloadTranscoder(frameType);
-    }
-  }
-
-  default <U extends T> WsDataFrame<T> createDataFrame(WsOpcode frameType, @Nullable U value,
-                                                       Transcoder<U> transcoder) {
-    switch (frameType) {
-      case TEXT:
-        return WsTextFrame.of(value, Assume.conforms(transcoder));
-      case BINARY:
-        return WsBinaryFrame.of(value, Assume.conforms(transcoder));
-      default:
-        throw new IllegalArgumentException("Unsupported data frame: " + frameType.name());
-    }
-  }
-
-  default <U> WsControlFrame<U> createControlFrame(WsOpcode frameType, @Nullable U value,
-                                                   Transcoder<U> transcoder) {
-    switch (frameType) {
-      case CLOSE:
-        return WsCloseFrame.of(value, transcoder);
-      case PING:
-        return WsPingFrame.of(value, transcoder);
-      case PONG:
-        return WsPongFrame.of(value, transcoder);
-      default:
-        throw new IllegalArgumentException("Unsupported control frame: " + frameType.name());
     }
   }
 

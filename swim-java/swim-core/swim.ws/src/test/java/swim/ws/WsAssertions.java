@@ -182,49 +182,25 @@ public final class WsAssertions {
       // Frame decoding mutates the input buffer,
       // so always decode a copy of the encoded data.
       final ByteBuffer buffer = ByteBuffer.allocate(n);
+      final BinaryInputBuffer input = new BinaryInputBuffer(buffer);
       buffer.put(encoded);
       encoded.rewind();
       buffer.rewind();
       decoder.reset();
 
-      final BinaryInputBuffer input = new BinaryInputBuffer(buffer);
-      Decode<WsFrame<T>> decodeFrame = decoder.decodeMessage(codec);
-      assertTrue(decodeFrame.isCont());
-      assertFalse(decodeFrame.isDone());
-      assertFalse(decodeFrame.isError());
-
       input.position(0).limit(i).asLast(false);
-      decodeFrame = decodeFrame.consume(input);
-      if (decodeFrame.isDone()) {
-        final WsFrame<T> frame = decodeFrame.get();
-        if (frame instanceof WsFragmentFrame<?>) {
-          final WsFragmentFrame<T> fragment = (WsFragmentFrame<T>) frame;
-          decodeFrame = decoder.decodeContinuation(codec, fragment.frameType(),
-                                                   fragment.transcoder(),
-                                                   fragment.decodePayload());
-        }
+      Decode<WsFrame<T>> decodeMessage = decoder.decodeMessage(input, codec).checkError();
+      while (decodeMessage.isDone() && decodeMessage.get() instanceof WsFragmentFrame<?>) {
+        decodeMessage = decoder.decodeContinuation(input, (WsFragmentFrame<T>) decodeMessage.getNonNull()).checkError();
       }
 
       input.limit(n).asLast(true);
-      decodeFrame = decodeFrame.consume(input);
-      if (decodeFrame.isDone()) {
-        final WsFrame<T> frame = decodeFrame.get();
-        if (frame instanceof WsFragmentFrame<?>) {
-          final WsFragmentFrame<T> fragment = (WsFragmentFrame<T>) frame;
-          decodeFrame = decoder.decodeContinuation(codec, fragment.frameType(),
-                                                   fragment.transcoder(),
-                                                   fragment.decodePayload());
-          decodeFrame = decodeFrame.consume(input);
-        }
+      decodeMessage = decodeMessage.consume(input).checkError();
+      while (decodeMessage.isDone() && decodeMessage.get() instanceof WsFragmentFrame<?>) {
+        decodeMessage = decoder.decodeContinuation(input, (WsFragmentFrame<T>) decodeMessage.getNonNull()).checkError();
       }
 
-      if (decodeFrame.isError()) {
-        throw new JUnitException("Decode failed", decodeFrame.getError());
-      }
-      assertFalse(decodeFrame.isCont());
-      assertTrue(decodeFrame.isDone());
-      assertFalse(decodeFrame.isError());
-      assertEquals(expected, decodeFrame.get());
+      assertEquals(expected, decodeMessage.get());
     }
   }
 
@@ -247,12 +223,11 @@ public final class WsAssertions {
     for (int i = 0; i < bufferSizes.length; i += 1) {
       final int bufferSize = bufferSizes[i];
       output.limit(Math.min(output.position() + bufferSize, output.capacity())).asLast(i == bufferSizes.length);
-      encodeMessage = encodeMessage.produce(output);
-      if (encodeMessage.isError()) {
-        throw new JUnitException("Encode failed", encodeMessage.getError());
+      encodeMessage = encodeMessage.produce(output).checkError();
+      while (encodeMessage.isDone() && encodeMessage.get() instanceof WsContinuationFrame<?>) {
+        encodeMessage = encoder.encodeContinuation(output, (WsContinuationFrame<?>) encodeMessage.getNonNull()).checkError();
       }
     }
-    assertTrue(encodeMessage.isDone());
     assertEquals(expected, encoded.flip());
   }
 
@@ -261,44 +236,44 @@ public final class WsAssertions {
     final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
     final BinaryOutputBuffer output = new BinaryOutputBuffer(buffer).asLast(false);
     final BinaryInputBuffer input = new BinaryInputBuffer(buffer).asLast(false);
-    Encode<?> encodeFrame = null;
-    Decode<? extends WsFrame<?>> decodeFrame = null;
+    Encode<?> encodeMessage = null;
+    Decode<? extends WsFrame<?>> decodeMessage = null;
     FingerTrieList<WsFrame<?>> decodeQueue = FingerTrieList.empty();
     int encodeIndex = 0;
     int decodeIndex = 0;
     do {
-      if (encodeFrame != null) {
-        encodeFrame = encodeFrame.produce(output).checkError();
+      if (encodeMessage != null && !encodeMessage.isDone()) {
+        encodeMessage = encodeMessage.produce(output).checkError();
       } else if (encodeIndex < messageCount) {
-        final WsFrame<?> message = messageSupplier.get();
-        decodeQueue = decodeQueue.appended(message);
-        encodeFrame = encoder.encodeMessage(output, message).checkError();
+        if (encodeMessage == null) {
+          final WsFrame<?> message = messageSupplier.get();
+          decodeQueue = decodeQueue.appended(message);
+          encodeMessage = encoder.encodeMessage(output, message).checkError();
+        } else {
+          encodeMessage = encoder.encodeContinuation(output, (WsContinuationFrame<?>) encodeMessage.getNonNull()).checkError();
+        }
       }
       buffer.flip();
-      if (decodeFrame != null && !decodeFrame.isDone()) {
-        decodeFrame = decodeFrame.consume(input).checkError();
+      if (decodeMessage != null && !decodeMessage.isDone()) {
+        decodeMessage = decodeMessage.consume(input).checkError();
       } else if (decodeIndex < messageCount) {
         final WsFrame<?> message = Assume.nonNull(decodeQueue.head());
-        final WsCodec<?> codec = WsCodec.of(message.transcoder(), message.transcoder());
-        if (decodeFrame == null) {
-          decodeFrame = decoder.decodeMessage(input, codec).checkError();
+        if (decodeMessage == null) {
+          final WsCodec<?> codec = WsCodec.of(message.transcoder(), message.transcoder());
+          decodeMessage = decoder.decodeMessage(input, codec).checkError();
         } else {
-          final WsFragmentFrame<?> fragment = (WsFragmentFrame<?>) decodeFrame.getNonNull();
-          decodeFrame = decoder.decodeContinuation(input, codec,
-                                                   fragment.frameType(),
-                                                   fragment.transcoder(),
-                                                   fragment.decodePayload()).checkError();
+          decodeMessage = decoder.decodeContinuation(input, (WsFragmentFrame<?>) decodeMessage.getNonNull()).checkError();
         }
       }
       buffer.compact();
-      if (encodeFrame != null && encodeFrame.isDone()) {
-        encodeFrame = null;
+      if (encodeMessage != null && encodeMessage.isDone() && !(encodeMessage.get() instanceof WsContinuationFrame<?>)) {
+        encodeMessage = null;
         encodeIndex += 1;
       }
-      if (decodeFrame != null && decodeFrame.isDone() && !(decodeFrame.get() instanceof WsFragmentFrame<?>)) {
+      if (decodeMessage != null && decodeMessage.isDone() && !(decodeMessage.get() instanceof WsFragmentFrame<?>)) {
         final WsFrame<?> message = Assume.nonNull(decodeQueue.head());
-        assertEquals(message, decodeFrame.get(), "message " + decodeIndex);
-        decodeFrame = null;
+        assertEquals(message, decodeMessage.get(), "message " + decodeIndex);
+        decodeMessage = null;
         decodeIndex += 1;
         decodeQueue = decodeQueue.tail();
       }

@@ -30,11 +30,11 @@ import swim.util.ToSource;
 @Since("5.0")
 public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource {
 
-  final @Nullable T value;
+  final @Nullable T payload;
   final Transcoder<T> transcoder;
 
-  WsPongFrame(@Nullable T value, Transcoder<T> transcoder) {
-    this.value = value;
+  WsPongFrame(@Nullable T payload, Transcoder<T> transcoder) {
+    this.payload = payload;
     this.transcoder = transcoder;
   }
 
@@ -45,13 +45,13 @@ public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource 
 
   @Override
   public @Nullable T get() {
-    return this.value;
+    return this.payload;
   }
 
   @Override
   public T getNonNull() {
-    if (this.value != null) {
-      return this.value;
+    if (this.payload != null) {
+      return this.payload;
     } else {
       throw new NullPointerException("Null websocket payload");
     }
@@ -68,7 +68,7 @@ public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource 
       return true;
     } else if (other instanceof WsPongFrame<?>) {
       final WsPongFrame<?> that = (WsPongFrame<?>) other;
-      return Objects.equals(this.value, that.value);
+      return Objects.equals(this.payload, that.payload);
     }
     return false;
   }
@@ -77,14 +77,14 @@ public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource 
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(HASH_SEED, Objects.hashCode(this.value)));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, Objects.hashCode(this.payload)));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("WsPongFrame", "of")
-            .appendArgument(this.value)
+            .appendArgument(this.payload)
             .appendArgument(this.transcoder)
             .endInvoke();
   }
@@ -98,23 +98,23 @@ public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource 
     return new WsPongFrame<T>(null, Binary.blankTranscoder());
   }
 
-  public static <T> WsPongFrame<T> of(@Nullable T value, Transcoder<T> transcoder) {
-    return new WsPongFrame<T>(value, transcoder);
+  public static <T> WsPongFrame<T> of(@Nullable T payload, Transcoder<T> transcoder) {
+    return new WsPongFrame<T>(payload, transcoder);
   }
 
-  public static WsPongFrame<String> of(@Nullable String value) {
-    return new WsPongFrame<String>(value, Text.transcoder());
+  public static WsPongFrame<String> of(@Nullable String payload) {
+    return new WsPongFrame<String>(payload, Text.transcoder());
   }
 
-  public static WsPongFrame<byte[]> of(byte @Nullable [] value) {
-    return new WsPongFrame<byte[]>(value, Binary.byteArrayTranscoder());
+  public static WsPongFrame<byte[]> of(byte @Nullable [] payload) {
+    return new WsPongFrame<byte[]>(payload, Binary.byteArrayTranscoder());
   }
 
-  public static WsPongFrame<ByteBuffer> of(@Nullable ByteBuffer value) {
-    if (value != null) {
-      value = value.duplicate();
+  public static WsPongFrame<ByteBuffer> of(@Nullable ByteBuffer payload) {
+    if (payload != null) {
+      payload = payload.duplicate();
     }
-    return new WsPongFrame<ByteBuffer>(value, Binary.byteBufferTranscoder());
+    return new WsPongFrame<ByteBuffer>(payload, Binary.byteBufferTranscoder());
   }
 
 }

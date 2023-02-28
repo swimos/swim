@@ -28,11 +28,11 @@ import swim.util.ToSource;
 @Since("5.0")
 public final class WsTextFrame<T> extends WsDataFrame<T> implements ToSource {
 
-  final @Nullable T value;
+  final @Nullable T payload;
   final Transcoder<T> transcoder;
 
-  WsTextFrame(@Nullable T value, Transcoder<T> transcoder) {
-    this.value = value;
+  WsTextFrame(@Nullable T payload, Transcoder<T> transcoder) {
+    this.payload = payload;
     this.transcoder = transcoder;
   }
 
@@ -43,13 +43,13 @@ public final class WsTextFrame<T> extends WsDataFrame<T> implements ToSource {
 
   @Override
   public @Nullable T get() {
-    return this.value;
+    return this.payload;
   }
 
   @Override
   public T getNonNull() {
-    if (this.value != null) {
-      return this.value;
+    if (this.payload != null) {
+      return this.payload;
     } else {
       throw new NullPointerException("Null websocket payload");
     }
@@ -66,7 +66,7 @@ public final class WsTextFrame<T> extends WsDataFrame<T> implements ToSource {
       return true;
     } else if (other instanceof WsTextFrame<?>) {
       final WsTextFrame<?> that = (WsTextFrame<?>) other;
-      return Objects.equals(this.value, that.value);
+      return Objects.equals(this.payload, that.payload);
     }
     return false;
   }
@@ -75,14 +75,14 @@ public final class WsTextFrame<T> extends WsDataFrame<T> implements ToSource {
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(HASH_SEED, Objects.hashCode(this.value)));
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, Objects.hashCode(this.payload)));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("WsTextFrame", "of")
-            .appendArgument(this.value)
+            .appendArgument(this.payload)
             .appendArgument(this.transcoder)
             .endInvoke();
   }
@@ -92,12 +92,12 @@ public final class WsTextFrame<T> extends WsDataFrame<T> implements ToSource {
     return this.toSource();
   }
 
-  public static <T> WsTextFrame<T> of(@Nullable T value, Transcoder<T> transcoder) {
-    return new WsTextFrame<T>(value, transcoder);
+  public static <T> WsTextFrame<T> of(@Nullable T payload, Transcoder<T> transcoder) {
+    return new WsTextFrame<T>(payload, transcoder);
   }
 
-  public static WsTextFrame<String> of(@Nullable String value) {
-    return new WsTextFrame<String>(value, Text.transcoder());
+  public static WsTextFrame<String> of(@Nullable String payload) {
+    return new WsTextFrame<String>(payload, Text.transcoder());
   }
 
 }

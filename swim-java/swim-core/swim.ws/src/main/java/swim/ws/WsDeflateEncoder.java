@@ -64,8 +64,14 @@ public class WsDeflateEncoder extends WsEncoder {
     return this.deflater;
   }
 
-  public final int flush() {
-    return this.flush;
+  @Override
+  public <T> Encode<WsFrame<T>> encodeContinuation(OutputBuffer<?> output, WsContinuationFrame<T> frame) {
+    return EncodeWsDeflateFrame.encode(output, this, frame.frame, frame.encodePayload, frame.offset);
+  }
+
+  @Override
+  public <T> Encode<WsFrame<T>> encodeContinuation(WsContinuationFrame<T> frame) {
+    return new EncodeWsDeflateFrame<T>(this, frame.frame, frame.encodePayload, frame.offset);
   }
 
   @Override
@@ -160,13 +166,13 @@ final class EncodeWsDeflateFrame<T> extends Encode<WsFrame<T>> {
     } else {
       maxHeaderSize = 10 + maskSize; // long length
     }
-    // Leave space at the start of the buffer for the frame header.
-    final int payloadStart = outputStart + maxHeaderSize;
-    output.position(payloadStart);
 
     // To avoid generating small message fragments, check if the output buffer
     // has sufficient available capacity to attempt to encode a frame.
     if (outputRemaining >= maxHeaderSize + encoder.minPayloadCapacity()) {
+      // Leave space at the start of the buffer for the frame header.
+      final int payloadStart = outputStart + maxHeaderSize;
+      output.position(payloadStart);
       // Encode a payload fragment into the deflate buffer.
       final BinaryOutputBuffer deflateBuffer = encoder.deflateBuffer;
       if (encode == null) {
@@ -292,6 +298,9 @@ final class EncodeWsDeflateFrame<T> extends Encode<WsFrame<T>> {
         if (fin) {
           // The full message has been encoded and deflated.
           return Encode.done(frame);
+        } else {
+          // A message fragment was encoded.
+          return Encode.done(WsContinuationFrame.of((WsDataFrame<T>) frame, encode, offset));
         }
       }
     }
