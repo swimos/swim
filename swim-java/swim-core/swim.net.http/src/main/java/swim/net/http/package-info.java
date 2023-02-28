@@ -13,9 +13,7 @@
 // limitations under the License.
 
 /**
- * HTTP client and server socket modems for pipelining and concurrently
- * transporting explicitly flow-controlled HTTP streams over a network
- * without blocking or intermediate buffering.
+ * HTTP transport implementation.
  */
 @Public
 @Since("5.0")

@@ -29,7 +29,7 @@ public interface HttpClientContext extends ConnectionContext {
    */
   HttpClient client();
 
-  HttpOptions httpOptions();
+  HttpOptions options();
 
   boolean connect(InetSocketAddress remoteAddress);
 

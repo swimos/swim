@@ -27,16 +27,14 @@ import swim.http.HttpMethod;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
-import swim.http.header.ContentLengthHeader;
 import swim.http.header.HostHeader;
 import swim.net.AbstractNetListener;
 import swim.net.TransportDriver;
-import swim.util.Assume;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpSocketTests {
 
-  void testRequestResponsePipeline(int requestCount, HttpOptions httpOptions) {
+  void testRequestResponsePipeline(int requestCount, HttpOptions options) {
     final CountDownLatch clientRequestLatch = new CountDownLatch(requestCount);
     final CountDownLatch clientResponseLatch = new CountDownLatch(requestCount);
     final CountDownLatch serverRequestLatch = new CountDownLatch(requestCount);
@@ -53,25 +51,12 @@ public class HttpSocketTests {
         final HttpBody<String> payload = HttpBody.of("clientToServer", Text.transcoder());
         final HttpHeaders headers = payload.headers().prepended(HostHeader.of("localhost"));
         final HttpRequest<?> request = HttpRequest.of(HttpMethod.POST, "/test", headers, payload);
-        this.writeRequestMessage(request.write());
-        this.writeRequestPayload(payload.encode());
+        this.writeRequest(request);
       }
 
       @Override
       public void didWriteRequest() {
         clientRequestLatch.countDown();
-      }
-
-      @Override
-      public void willReadResponseMessage() {
-        this.readResponseMessage(HttpResponse.parse());
-      }
-
-      @Override
-      public void willReadResponsePayload() {
-        final HttpResponse<?> response = this.responseMessage().getNonNull();
-        final long contentLength = Assume.nonNull(response.headers().getValue(ContentLengthHeader.TYPE)).longValue();
-        this.readResponsePayload(HttpBody.decode(Text.transcoder(), contentLength));
       }
 
       @Override
@@ -112,20 +97,8 @@ public class HttpSocketTests {
     class TestResponder extends AbstractHttpResponder {
 
       @Override
-      public void willReadRequestMessage() {
-        this.readRequestMessage(HttpRequest.parse());
-      }
-
-      @Override
-      public void willReadRequestPayload() {
-        final HttpRequest<?> request = this.requestMessage().getNonNull();
-        final long contentLength = Assume.nonNull(request.headers().getValue(ContentLengthHeader.TYPE)).longValue();
-        this.readRequestPayload(HttpBody.decode(Text.transcoder(), contentLength));
-      }
-
-      @Override
       public void didReadRequest() {
-        final HttpRequest<?> request = this.requestMessage().getNonNull();
+        final HttpRequest<?> request = this.request();
         assertEquals("/test", request.target());
         assertEquals("clientToServer", request.payload().get());
         serverRequestLatch.countDown();
@@ -135,8 +108,7 @@ public class HttpSocketTests {
       public void willWriteResponse() {
         final HttpBody<String> payload = HttpBody.of("serverToClient", Text.transcoder());
         final HttpResponse<String> response = HttpResponse.of(HttpStatus.OK, payload.headers(), payload);
-        this.writeResponseMessage(response.write());
-        this.writeResponsePayload(payload.encode());
+        this.writeResponse(response);
       }
 
       @Override
@@ -170,7 +142,7 @@ public class HttpSocketTests {
       @Override
       public void doAccept() throws IOException {
         final TestServer server = new TestServer();
-        final HttpServerSocket serverSocket = new HttpServerSocket(server, httpOptions);
+        final HttpServerSocket serverSocket = new HttpServerSocket(server, options);
         this.accept(serverSocket);
         this.requestAccept();
       }
@@ -185,7 +157,7 @@ public class HttpSocketTests {
       driver.bindTcpListener(listener).listen("127.0.0.1", 33556);
 
       final TestClient client = new TestClient();
-      final HttpClientSocket clientSocket = new HttpClientSocket(client, httpOptions);
+      final HttpClientSocket clientSocket = new HttpClientSocket(client, options);
       driver.bindTcpSocket(clientSocket).connect("127.0.0.1", 33556);
 
       clientRequestLatch.await();
@@ -214,16 +186,16 @@ public class HttpSocketTests {
   @Tag("benchmark")
   public void benchmarkRequestResponses() {
     final int requestCount = 1000000;
-    final HttpOptions httpOptions =
+    final HttpOptions options =
         HttpOptions.standard().clientPipelineLength(32)
                               .serverPipelineLength(32);
 
     System.out.println("Warming up ...");
-    this.testRequestResponsePipeline(requestCount, httpOptions);
+    this.testRequestResponsePipeline(requestCount, options);
 
     System.out.println("Benchmarking ...");
     final long t0 = System.currentTimeMillis();
-    this.testRequestResponsePipeline(requestCount, httpOptions);
+    this.testRequestResponsePipeline(requestCount, options);
     final long dt = System.currentTimeMillis() - t0;
     final long rate = Math.round((double) requestCount * 1000.0 / (double) dt);
     System.out.println("Processed " + requestCount + " requests in " + dt + "ms (" + rate + " requests per second)");

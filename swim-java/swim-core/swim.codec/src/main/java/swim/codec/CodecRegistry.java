@@ -107,7 +107,11 @@ public class CodecRegistry implements ToSource {
   }
 
   protected void loadIntrinsics() {
-    // hook
+    this.addCodec(Binary.APPLICATION_OCTET_STREAM, Binary.BYTE_BUFFER_CODEC);
+
+    this.addCodec(Text.TEXT_PLAIN, Text.CODEC);
+    this.addCodec(Text.TEXT_PLAIN.withParam("charset", "utf-8"), Text.CODEC);
+    this.addCodec(Text.TEXT_PLAIN.withParam("charset", "UTF-8"), Text.CODEC);
   }
 
   protected void loadExtensions() {

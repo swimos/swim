@@ -38,7 +38,7 @@ import swim.net.TcpEndpoint;
 public class HttpClientSocket implements NetSocket, FlowContext, HttpClientContext {
 
   protected final HttpClient client;
-  protected final HttpOptions httpOptions;
+  protected final HttpOptions options;
   protected @Nullable NetSocketContext context;
   protected BinaryOutputBuffer requestBuffer;
   protected BinaryInputBuffer responseBuffer;
@@ -50,23 +50,23 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   int responderWriteIndex;
   Log log;
 
-  public HttpClientSocket(HttpClient client, HttpOptions httpOptions) {
+  public HttpClientSocket(HttpClient client, HttpOptions options) {
     // Initialize socket parameters.
     this.client = client;
-    this.httpOptions = httpOptions;
+    this.options = options;
 
     // Initialize socket context.
     this.context = null;
 
     // Initialize I/O buffers.
-    this.requestBuffer = BinaryOutputBuffer.allocateDirect(httpOptions.clientRequestBufferSize()).asLast(false);
-    this.responseBuffer = BinaryInputBuffer.allocateDirect(httpOptions.clientResponseBufferSize()).asLast(false);
+    this.requestBuffer = BinaryOutputBuffer.allocateDirect(options.clientRequestBufferSize()).asLast(false);
+    this.responseBuffer = BinaryInputBuffer.allocateDirect(options.clientResponseBufferSize()).asLast(false);
 
     // Initialize the request pipeline.
-    this.requesters = new HttpClientRequester[Math.max(2, httpOptions.clientPipelineLength())];
+    this.requesters = new HttpClientRequester[Math.max(2, options.clientPipelineLength())];
     this.requesterReadIndex = 0;
     this.requesterWriteIndex = 0;
-    this.responders = new HttpClientRequester[Math.max(2, httpOptions.clientPipelineLength())];
+    this.responders = new HttpClientRequester[Math.max(2, options.clientPipelineLength())];
     this.responderReadIndex = 0;
     this.responderWriteIndex = 0;
 
@@ -113,8 +113,8 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   }
 
   @Override
-  public final HttpOptions httpOptions() {
-    return this.httpOptions;
+  public final HttpOptions options() {
+    return this.options;
   }
 
   @Override

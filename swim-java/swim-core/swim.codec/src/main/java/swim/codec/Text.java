@@ -14,9 +14,11 @@
 
 package swim.codec;
 
+import java.lang.reflect.Type;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -33,14 +35,16 @@ public final class Text {
 
   static final MediaType TEXT_PLAIN = MediaType.of("text", "plain");
 
-  static final TextTranscoder TRANSCODER = new TextTranscoder(TEXT_PLAIN, UtfErrorMode.fatal());
+  static final MediaType TEXT_PLAIN_UTF8 = TEXT_PLAIN.withParam("charset", "utf-8");
+
+  static final TextTranscoder TRANSCODER = new TextTranscoder(TEXT_PLAIN_UTF8, UtfErrorMode.fatal());
 
   public static Translator<String> transcoder() {
     return TRANSCODER;
   }
 
   public static Translator<String> transcoder(MediaType mediaType) {
-    if (TEXT_PLAIN.equals(mediaType)) {
+    if (TEXT_PLAIN_UTF8.equals(mediaType)) {
       return TRANSCODER;
     } else {
       return new TextTranscoder(mediaType, UtfErrorMode.fatal());
@@ -51,15 +55,29 @@ public final class Text {
     if (errorMode == UtfErrorMode.fatal()) {
       return TRANSCODER;
     } else {
-      return new TextTranscoder(TEXT_PLAIN, errorMode);
+      return new TextTranscoder(TEXT_PLAIN_UTF8, errorMode);
     }
   }
 
   public static Translator<String> transcoder(MediaType mediaType, UtfErrorMode errorMode) {
-    if (TEXT_PLAIN.equals(mediaType) && errorMode == UtfErrorMode.fatal()) {
+    if (TEXT_PLAIN_UTF8.equals(mediaType) && errorMode == UtfErrorMode.fatal()) {
       return TRANSCODER;
     } else {
       return new TextTranscoder(mediaType, errorMode);
+    }
+  }
+
+  static final TextCodec CODEC = new TextCodec(TRANSCODER);
+
+  public static Codec codec() {
+    return CODEC;
+  }
+
+  public static Codec codec(Transcoder<String> transcoder) {
+    if (TRANSCODER.equals(transcoder)) {
+      return CODEC;
+    } else {
+      return new TextCodec(transcoder);
     }
   }
 
@@ -216,13 +234,52 @@ final class TextTranscoder implements Translator<String>, ToSource {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("Text", "transcoder");
-    if (!this.mediaType.equals(Text.TEXT_PLAIN)) {
+    if (!this.mediaType.equals(Text.TEXT_PLAIN_UTF8)) {
       notation.appendArgument(this.mediaType);
     }
     if (!this.errorMode.equals(UtfErrorMode.fatal())) {
       notation.appendArgument(this.errorMode);
     }
     notation.endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+}
+
+final class TextCodec implements Codec, ToSource {
+
+  final Transcoder<String> transcoder;
+
+  TextCodec(Transcoder<String> transcoder) {
+    this.transcoder = transcoder;
+  }
+
+  @Override
+  public MediaType mediaType() {
+    return this.transcoder.mediaType();
+  }
+
+  @Override
+  public <T> @Nullable Transcoder<T> getTranscoder(Type javaType) {
+    if (javaType instanceof Class<?>) {
+      final Class<?> javaClass = (Class<?>) javaType;
+      if (javaClass.isAssignableFrom(String.class)) {
+        return Assume.conforms(this.transcoder);
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("Text", "codec")
+            .appendArgument(this.transcoder)
+            .endInvoke();
   }
 
   @Override

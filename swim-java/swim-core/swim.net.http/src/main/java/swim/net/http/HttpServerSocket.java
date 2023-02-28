@@ -38,7 +38,7 @@ import swim.net.TcpEndpoint;
 public class HttpServerSocket implements NetSocket, FlowContext, HttpServerContext {
 
   protected final HttpServer server;
-  protected final HttpOptions httpOptions;
+  protected final HttpOptions options;
   protected @Nullable NetSocketContext context;
   protected BinaryInputBuffer requestBuffer;
   protected BinaryOutputBuffer responseBuffer;
@@ -48,21 +48,21 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   int responderWriteIndex;
   Log log;
 
-  public HttpServerSocket(HttpServer server, HttpOptions httpOptions) {
+  public HttpServerSocket(HttpServer server, HttpOptions options) {
     // Initialize socket parameters.
     this.server = server;
-    this.httpOptions = httpOptions;
+    this.options = options;
 
     // Initialize socket context.
     this.context = null;
 
     // Initialize I/O buffers.
-    this.requestBuffer = BinaryInputBuffer.allocateDirect(httpOptions.serverRequestBufferSize()).asLast(false);
-    this.responseBuffer = BinaryOutputBuffer.allocateDirect(httpOptions.serverResponseBufferSize()).asLast(false);
+    this.requestBuffer = BinaryInputBuffer.allocateDirect(options.serverRequestBufferSize()).asLast(false);
+    this.responseBuffer = BinaryOutputBuffer.allocateDirect(options.serverResponseBufferSize()).asLast(false);
 
     // Initialize the response pipeline.
     this.requester = null;
-    this.responders = new HttpServerResponder[Math.max(2, httpOptions.serverPipelineLength())];
+    this.responders = new HttpServerResponder[Math.max(2, options.serverPipelineLength())];
     this.responderReadIndex = 0;
     this.responderWriteIndex = 0;
 
@@ -109,8 +109,8 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   }
 
   @Override
-  public final HttpOptions httpOptions() {
-    return this.httpOptions;
+  public final HttpOptions options() {
+    return this.options;
   }
 
   @Override

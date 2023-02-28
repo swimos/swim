@@ -3,7 +3,7 @@ plugins {
   id 'SwimCorePublish'
 }
 
-description = 'WebSocket frame model and wire protocol codec that incrementally decodes and encodes fragmented WebSocket streams without intermediate buffering'
+description = 'WebSocket frame model and wire protocol codec'
 ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.ws'
 ext.moduleName = 'swim.ws'
 

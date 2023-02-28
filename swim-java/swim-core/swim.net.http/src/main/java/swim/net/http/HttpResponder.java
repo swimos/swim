@@ -17,6 +17,13 @@ package swim.net.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Decode;
+import swim.codec.Encode;
+import swim.codec.InputBuffer;
+import swim.codec.OutputBuffer;
+import swim.http.HttpPayload;
+import swim.http.HttpRequest;
+import swim.http.HttpResponse;
 
 @Public
 @Since("5.0")
@@ -27,11 +34,19 @@ public interface HttpResponder {
   void setResponderContext(@Nullable HttpResponderContext responderContext);
 
   default void willReadRequest() {
-    // hook
+    final HttpResponderContext context = this.responderContext();
+    if (context == null) {
+      throw new IllegalStateException("Unbound responder");
+    }
+    context.readRequest();
   }
 
   default void willReadRequestMessage() {
     // hook
+  }
+
+  default Decode<? extends HttpRequest<?>> decodeRequestMessage(InputBuffer input) {
+    return HttpRequest.parse(input);
   }
 
   default void didReadRequestMessage() {
@@ -40,6 +55,14 @@ public interface HttpResponder {
 
   default void willReadRequestPayload() {
     // hook
+  }
+
+  default Decode<? extends HttpPayload<?>> decodeRequestPayload(InputBuffer input) {
+    final HttpResponderContext context = this.responderContext();
+    if (context == null) {
+      throw new IllegalStateException("Unbound responder");
+    }
+    return context.request().decodePayload(input);
   }
 
   default void didReadRequestPayload() {
@@ -58,12 +81,28 @@ public interface HttpResponder {
     // hook
   }
 
+  default Encode<? extends HttpResponse<?>> encodeResponseMessage(OutputBuffer<?> output) {
+    final HttpResponderContext context = this.responderContext();
+    if (context == null) {
+      throw new IllegalStateException("Unbound responder");
+    }
+    return context.response().write(output);
+  }
+
   default void didWriteResponseMessage() {
     // hook
   }
 
   default void willWriteResponsePayload() {
     // hook
+  }
+
+  default Encode<? extends HttpPayload<?>> encodeResponsePayload(OutputBuffer<?> output) {
+    final HttpResponderContext context = this.responderContext();
+    if (context == null) {
+      throw new IllegalStateException("Unbound responder");
+    }
+    return context.response().payload().encode(output);
   }
 
   default void didWriteResponsePayload() {

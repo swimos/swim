@@ -30,7 +30,7 @@ public interface HttpResponderContext extends ConnectionContext {
 
   HttpResponder responder();
 
-  HttpOptions httpOptions();
+  HttpOptions options();
 
   boolean isOpening();
 
@@ -38,9 +38,9 @@ public interface HttpResponderContext extends ConnectionContext {
 
   boolean isDoneReading();
 
-  boolean readRequestMessage(Decode<? extends HttpRequest<?>> decodeMessage);
+  boolean readRequest();
 
-  boolean readRequestPayload(Decode<? extends HttpPayload<?>> decodePayload);
+  HttpRequest<?> request();
 
   Decode<? extends HttpRequest<?>> requestMessage();
 
@@ -50,9 +50,9 @@ public interface HttpResponderContext extends ConnectionContext {
 
   boolean isDoneWriting();
 
-  boolean writeResponseMessage(Encode<? extends HttpResponse<?>> encodeMessage);
+  boolean writeResponse(HttpResponse<?> response);
 
-  boolean writeResponsePayload(Encode<? extends HttpPayload<?>> encodePayload);
+  HttpResponse<?> response();
 
   Encode<? extends HttpResponse<?>> responseMessage();
 

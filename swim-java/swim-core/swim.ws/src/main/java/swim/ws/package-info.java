@@ -13,8 +13,7 @@
 // limitations under the License.
 
 /**
- * WebSocket frame model and wire protocol codec that incrementally decodes
- * and encodes fragmented WebSocket streams without intermediate buffering.
+ * WebSocket frame model and wire protocol codec.
  */
 @Public
 @Since("5.0")

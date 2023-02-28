@@ -83,11 +83,6 @@ public final class HttpRequest<T> extends HttpMessage<T> {
   }
 
   @Override
-  public @Nullable HttpHeader getHeader(String name) {
-    return this.headers.getHeader(name);
-  }
-
-  @Override
   public HttpRequest<T> withHeaders(HttpHeaders headers) {
     return HttpRequest.of(this.method, this.target, this.version,
                           headers, this.payload);

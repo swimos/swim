@@ -18,20 +18,16 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
+import swim.codec.Decode;
+import swim.codec.InputBuffer;
 import swim.codec.Text;
-import swim.collections.FingerTrieList;
 import swim.exec.ThreadScheduler;
-import swim.http.HttpBody;
-import swim.http.HttpChunked;
 import swim.http.HttpMethod;
+import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
-import swim.http.HttpTransferCoding;
-import swim.http.header.ContentLengthHeader;
 import swim.http.header.HostHeader;
-import swim.http.header.TransferEncodingHeader;
 import swim.net.TransportDriver;
-import swim.util.Assume;
 
 public class HttpClientTests {
 
@@ -48,26 +44,12 @@ public class HttpClientTests {
 
       @Override
       public void willWriteRequest() {
-        final HttpRequest<?> request = HttpRequest.of(HttpMethod.GET, "/", HostHeader.of("www.google.com"));
-        this.writeRequestMessage(request.write());
-        this.writeRequestPayload(request.payload().encode());
+        this.writeRequest(HttpRequest.of(HttpMethod.GET, "/", HostHeader.of("www.google.com")));
       }
 
       @Override
-      public void willReadResponseMessage() {
-        this.readResponseMessage(HttpResponse.parse());
-      }
-
-      @Override
-      public void willReadResponsePayload() {
-        final HttpResponse<?> response = this.responseMessage().getNonNull();
-        final FingerTrieList<HttpTransferCoding> transferCodings = response.headers().getValue(TransferEncodingHeader.TYPE);
-        if (transferCodings != null && !transferCodings.isEmpty() && Assume.nonNull(transferCodings.head()).isChunked()) {
-          this.readResponsePayload(HttpChunked.decode(Text.transcoder()));
-        } else {
-          final long contentLength = Assume.nonNull(response.headers().getValue(ContentLengthHeader.TYPE)).longValue();
-          this.readResponsePayload(HttpBody.decode(Text.transcoder(), contentLength));
-        }
+      public Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input) {
+        return this.response().decodePayload(input, Text.transcoder());
       }
 
       @Override

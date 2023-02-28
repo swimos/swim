@@ -22,8 +22,6 @@ import org.junit.platform.commons.JUnitException;
 import swim.codec.Text;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
-import swim.http.HttpEmpty;
-import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
 import swim.net.AbstractNetListener;
@@ -43,22 +41,11 @@ public class HttpServerTests {
     class TestResponder extends AbstractHttpResponder {
 
       @Override
-      public void willReadRequestMessage() {
-        this.readRequestMessage(HttpRequest.parse());
-      }
-
-      @Override
-      public void willReadRequestPayload() {
-        this.readRequestPayload(HttpEmpty.decode());
-      }
-
-      @Override
       public void willWriteResponse() {
         final HttpBody<String> payload = HttpBody.of("Hello, world!\n", Text.transcoder());
         //final HttpChunked<String> payload = HttpChunked.of("Hello, world!\n", Text.transcoder());
-        final HttpResponse<String> message = HttpResponse.of(HttpStatus.OK, payload.headers(), payload);
-        this.writeResponseMessage(message.write());
-        this.writeResponsePayload(payload.encode());
+        final HttpResponse<String> response = HttpResponse.of(HttpStatus.OK, payload.headers(), payload);
+        this.writeResponse(response);
       }
 
     }

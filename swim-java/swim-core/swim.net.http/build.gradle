@@ -3,7 +3,7 @@ plugins {
   id 'SwimCorePublish'
 }
 
-description = 'HTTP client and server socket modems for pipelining and concurrently transporting explicitly flow-controlled HTTP streams over a network without blocking or intermediate buffering'
+description = 'HTTP transport implementation'
 ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.net.http'
 ext.moduleName = 'swim.net.http'
 
@@ -12,9 +12,9 @@ dependencies {
   api project(':swim-util')
   api project(':swim-collections')
   api project(':swim-codec')
+  implementation project(':swim-repr')
   api project(':swim-uri')
   api project(':swim-http')
-  implementation project(':swim-repr')
   api project(':swim-log')
   api project(':swim-exec')
   api project(':swim-net')

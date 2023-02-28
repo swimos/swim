@@ -41,12 +41,12 @@ public abstract class AbstractHttpClient implements HttpClient {
     this.context = context;
   }
 
-  public HttpOptions httpOptions() {
+  public HttpOptions options() {
     final HttpClientContext context = this.context;
     if (context != null) {
-      return context.httpOptions();
+      return context.options();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -55,7 +55,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.connect(remoteAddress);
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -64,7 +64,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.connect(address, port);
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -73,7 +73,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.isConnecting();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -82,7 +82,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.isOpening();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -91,7 +91,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.isOpen();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -100,7 +100,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.localAddress();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -109,7 +109,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.remoteAddress();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -118,7 +118,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.sslSession();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -127,7 +127,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.isRequesting();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -136,7 +136,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.isResponding();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -145,7 +145,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.enqueueRequester(requester);
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -154,7 +154,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       context.become(socket);
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -163,7 +163,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.isDoneReading();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -172,7 +172,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.doneReading();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -181,7 +181,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.isDoneWriting();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -190,7 +190,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       return context.doneWriting();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 
@@ -204,7 +204,7 @@ public abstract class AbstractHttpClient implements HttpClient {
     if (context != null) {
       context.close();
     } else {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("Unbound client");
     }
   }
 

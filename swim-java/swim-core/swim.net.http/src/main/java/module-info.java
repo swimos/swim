@@ -16,9 +16,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * HTTP client and server socket modems for pipelining and concurrently
- * transporting explicitly flow-controlled HTTP streams over a network
- * without blocking or intermediate buffering.
+ * HTTP transport implementation.
  */
 @Public
 @Since("5.0")
@@ -28,9 +26,9 @@ module swim.net.http {
   requires transitive swim.collections;
   requires transitive swim.util;
   requires transitive swim.codec;
+  requires swim.repr;
   requires transitive swim.uri;
   requires transitive swim.http;
-  requires swim.repr;
   requires transitive swim.log;
   requires transitive swim.exec;
   requires transitive swim.net;

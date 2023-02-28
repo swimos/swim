@@ -28,7 +28,7 @@ public interface HttpServerContext extends ConnectionContext {
    */
   HttpServer server();
 
-  HttpOptions httpOptions();
+  HttpOptions options();
 
   /**
    * Returns {@code true} if the network channel is currently performing

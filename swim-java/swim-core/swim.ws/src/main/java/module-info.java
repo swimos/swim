@@ -16,8 +16,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * WebSocket frame model and wire protocol codec that incrementally decodes
- * and encodes fragmented WebSocket streams without intermediate buffering.
+ * WebSocket frame model and wire protocol codec.
  */
 @Public
 @Since("5.0")
