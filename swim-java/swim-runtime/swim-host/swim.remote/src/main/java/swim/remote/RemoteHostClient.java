@@ -114,9 +114,10 @@ public class RemoteHostClient extends RemoteHost {
 
   @Override
   protected void reconnect() {
-    //if (this.uplinks.isEmpty()) {
-    //  close();
-    //}
+    if (RemoteHost.DOWNLINKS.get(this).isEmpty() && RemoteHost.UPLINKS.get(this).isEmpty()) {
+      close();
+      return;
+    }
     if (this.reconnectTimer != null && this.reconnectTimer.isScheduled()) {
       return;
     }
