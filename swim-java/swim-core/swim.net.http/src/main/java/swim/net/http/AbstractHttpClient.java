@@ -43,168 +43,114 @@ public abstract class AbstractHttpClient implements HttpClient {
 
   public HttpOptions options() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.options();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound client");
     }
+    return context.options();
   }
 
   public boolean connect(InetSocketAddress remoteAddress) {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.connect(remoteAddress);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound client");
     }
+    return context.connect(remoteAddress);
   }
 
   public boolean connect(String address, int port) {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.connect(address, port);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound client");
     }
+    return context.connect(address, port);
   }
 
   public boolean isConnecting() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.isConnecting();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null && context.isConnecting();
   }
 
   public boolean isOpening() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.isOpening();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null && context.isOpening();
   }
 
   public boolean isOpen() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.isOpen();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null && context.isOpen();
   }
 
   public @Nullable InetSocketAddress localAddress() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.localAddress();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null ? context.localAddress() : null;
   }
 
   public @Nullable InetSocketAddress remoteAddress() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.remoteAddress();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null ? context.remoteAddress() : null;
   }
 
   public @Nullable SSLSession sslSession() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.sslSession();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null ? context.sslSession() : null;
   }
 
   public boolean isRequesting() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.isRequesting();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null && context.isRequesting();
   }
 
   public boolean isResponding() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.isResponding();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null && context.isResponding();
   }
 
   protected boolean enqueueRequester(HttpRequester requester) {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.enqueueRequester(requester);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound client");
     }
+    return context.enqueueRequester(requester);
   }
 
   protected void become(NetSocket socket) {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      context.become(socket);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound client");
     }
+    context.become(socket);
   }
 
-  protected boolean isDoneReading() {
+  public boolean isDoneReading() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.isDoneReading();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null && context.isDoneReading();
   }
 
   protected boolean doneReading() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.doneReading();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound client");
     }
+    return context.doneReading();
   }
 
-  protected boolean isDoneWriting() {
+  public boolean isDoneWriting() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.isDoneWriting();
-    } else {
-      throw new IllegalStateException("Unbound client");
-    }
+    return context != null && context.isDoneWriting();
   }
 
   protected boolean doneWriting() {
     final HttpClientContext context = this.context;
-    if (context != null) {
-      return context.doneWriting();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound client");
     }
-  }
-
-  @Override
-  public void doTimeout(@Nullable HttpRequesterContext handler) {
-    this.close();
+    return context.doneWriting();
   }
 
   public void close() {
     final HttpClientContext context = this.context;
     if (context != null) {
       context.close();
-    } else {
-      throw new IllegalStateException("Unbound client");
     }
   }
 

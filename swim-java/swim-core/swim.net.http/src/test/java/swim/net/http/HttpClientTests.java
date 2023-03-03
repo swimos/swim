@@ -28,6 +28,7 @@ import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.header.HostHeader;
 import swim.net.TransportDriver;
+import swim.util.Result;
 
 public class HttpClientTests {
 
@@ -48,13 +49,13 @@ public class HttpClientTests {
       }
 
       @Override
-      public Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input) {
-        return this.response().decodePayload(input, Text.transcoder());
+      public Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input, HttpResponse<?> response) {
+        return response.decodePayload(input, Text.transcoder());
       }
 
       @Override
-      public void didReadResponse() {
-        final HttpResponse<?> response = this.responseMessage().getNonNull();
+      public void didReadResponse(Result<HttpResponse<?>> result) {
+        final HttpResponse<?> response = result.getNonNull();
         System.out.println(response);
         System.out.println(response.payload());
       }
@@ -70,7 +71,7 @@ public class HttpClientTests {
       }
 
       @Override
-      public void didWriteRequest(HttpRequesterContext handler) {
+      public void didWriteRequest(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
         if (!this.isRequesting()) {
           this.doneWriting();
         }

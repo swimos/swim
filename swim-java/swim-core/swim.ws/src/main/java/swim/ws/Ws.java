@@ -30,19 +30,19 @@ public final class Ws {
 
   static final WsCodec<Object> JAVA_CODEC = WsCodec.of(Text.transcoder(), Binary.byteBufferTranscoder());
 
-  static WsCodec<Object> javaCodec() {
+  public static WsCodec<Object> javaCodec() {
     return JAVA_CODEC;
   }
 
   static final WsCodec<String> STRING_CODEC = WsCodec.of(Text.transcoder(), Text.transcoder());
 
-  static WsCodec<String> stringCodec() {
+  public static WsCodec<String> stringCodec() {
     return STRING_CODEC;
   }
 
   static final WsCodec<ByteBuffer> BYTE_BUFFER_CODEC = WsCodec.of(Binary.byteBufferTranscoder(), Binary.byteBufferTranscoder());
 
-  static WsCodec<ByteBuffer> byteBufferCodec() {
+  public static WsCodec<ByteBuffer> byteBufferCodec() {
     return BYTE_BUFFER_CODEC;
   }
 

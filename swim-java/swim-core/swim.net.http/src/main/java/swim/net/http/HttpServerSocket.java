@@ -26,12 +26,15 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutputBuffer;
+import swim.http.HttpRequest;
+import swim.http.HttpResponse;
 import swim.log.Log;
 import swim.log.LogScope;
 import swim.net.FlowContext;
 import swim.net.NetSocket;
 import swim.net.NetSocketContext;
 import swim.net.TcpEndpoint;
+import swim.util.Result;
 
 @Public
 @Since("5.0")
@@ -333,20 +336,20 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     this.server.willReadRequestMessage(handler);
   }
 
-  protected void didReadRequestMessage(HttpResponderContext handler) {
-    this.server.didReadRequestMessage(handler);
+  protected void didReadRequestMessage(Result<HttpRequest<?>> request, HttpResponderContext handler) {
+    this.server.didReadRequestMessage(request, handler);
   }
 
-  protected void willReadRequestPayload(HttpResponderContext handler) {
-    this.server.willReadRequestPayload(handler);
+  protected void willReadRequestPayload(HttpRequest<?> request, HttpResponderContext handler) {
+    this.server.willReadRequestPayload(request, handler);
   }
 
-  protected void didReadRequestPayload(HttpResponderContext handler) {
-    this.server.didReadRequestPayload(handler);
+  protected void didReadRequestPayload(Result<HttpRequest<?>> request, HttpResponderContext handler) {
+    this.server.didReadRequestPayload(request, handler);
   }
 
-  protected void didReadRequest(HttpResponderContext handler) {
-    this.server.didReadRequest(handler);
+  protected void didReadRequest(Result<HttpRequest<?>> request, HttpResponderContext handler) {
+    this.server.didReadRequest(request, handler);
   }
 
   @Override
@@ -509,20 +512,20 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     this.server.willWriteResponseMessage(handler);
   }
 
-  protected void didWriteResponseMessage(HttpResponderContext handler) {
-    this.server.didWriteResponseMessage(handler);
+  protected void didWriteResponseMessage(Result<HttpResponse<?>> response, HttpResponderContext handler) {
+    this.server.didWriteResponseMessage(response, handler);
   }
 
-  protected void willWriteResponsePayload(HttpResponderContext handler) {
-    this.server.willWriteResponsePayload(handler);
+  protected void willWriteResponsePayload(HttpResponse<?> response, HttpResponderContext handler) {
+    this.server.willWriteResponsePayload(response, handler);
   }
 
-  protected void didWriteResponsePayload(HttpResponderContext handler) {
-    this.server.didWriteResponsePayload(handler);
+  protected void didWriteResponsePayload(Result<HttpResponse<?>> response, HttpResponderContext handler) {
+    this.server.didWriteResponsePayload(response, handler);
   }
 
-  protected void didWriteResponse(HttpResponderContext handler) {
-    this.server.didWriteResponse(handler);
+  protected void didWriteResponse(Result<HttpResponse<?>> response, HttpResponderContext handler) {
+    this.server.didWriteResponse(response, handler);
   }
 
   @Override

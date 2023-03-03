@@ -54,11 +54,7 @@ public abstract class AbstractTimer implements Timer {
    */
   public @Nullable TimerScheduler scheduler() {
     final TimerContext context = this.context;
-    if (context != null) {
-      return context.scheduler();
-    } else {
-      return null;
-    }
+    return context != null ? context.scheduler() : null;
   }
 
   /**
@@ -84,11 +80,10 @@ public abstract class AbstractTimer implements Timer {
    */
   public boolean debounce(long delay) {
     final TimerContext context = this.context;
-    if (context != null) {
-      return context.debounce(delay);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound timer");
     }
+    return context.debounce(delay);
   }
 
   /**
@@ -103,11 +98,10 @@ public abstract class AbstractTimer implements Timer {
    */
   public boolean throttle(long delay) {
     final TimerContext context = this.context;
-    if (context != null) {
-      return context.throttle(delay);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound timer");
     }
+    return context.throttle(delay);
   }
 
   /**
@@ -120,11 +114,7 @@ public abstract class AbstractTimer implements Timer {
    */
   public boolean cancel() {
     final TimerContext context = this.context;
-    if (context != null) {
-      return context.cancel();
-    } else {
-      return false;
-    }
+    return context != null && context.cancel();
   }
 
 }

@@ -14,7 +14,6 @@
 
 package swim.util;
 
-import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -28,43 +27,43 @@ public class ResultTests {
 
   @Test
   public void emptySameAsNull() {
-    assertSame(Result.empty(), Result.success(null));
+    assertSame(Result.empty(), Result.ok(null));
   }
 
   @Test
-  public void emptyIsSuccess() {
+  public void emptyIsOk() {
     final Result<String> result = Result.empty();
-    assertTrue(result.isSuccess());
+    assertTrue(result.isOk());
   }
 
   @Test
-  public void successIsSuccess() {
-    final Result<String> result = Result.success("foo");
-    assertTrue(result.isSuccess());
+  public void okIsOk() {
+    final Result<String> result = Result.ok("foo");
+    assertTrue(result.isOk());
   }
 
   @Test
-  public void failureIsNotSuccess() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    assertFalse(result.isSuccess());
+  public void errorIsNotOk() {
+    final Result<String> result = Result.error(new RuntimeException());
+    assertFalse(result.isOk());
   }
 
   @Test
-  public void emptyIsNotFailure() {
+  public void emptyIsNotError() {
     final Result<String> result = Result.empty();
-    assertFalse(result.isFailure());
+    assertFalse(result.isError());
   }
 
   @Test
-  public void successIsNotFailure() {
-    final Result<String> result = Result.success("foo");
-    assertFalse(result.isFailure());
+  public void okIsNotError() {
+    final Result<String> result = Result.ok("foo");
+    assertFalse(result.isError());
   }
 
   @Test
-  public void failureIsFailure() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    assertTrue(result.isFailure());
+  public void errorIsError() {
+    final Result<String> result = Result.error(new RuntimeException());
+    assertTrue(result.isError());
   }
 
   @Test
@@ -74,57 +73,57 @@ public class ResultTests {
   }
 
   @Test
-  public void successGetReturnsValue() {
-    final Result<String> result = Result.success("foo");
+  public void okGetReturnsValue() {
+    final Result<String> result = Result.ok("foo");
     assertEquals("foo", result.get());
   }
 
   @Test
-  public void failureGetThrows() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    assertThrows(NoSuchElementException.class, () -> result.get());
+  public void errorGetThrows() {
+    final Result<String> result = Result.error(new RuntimeException());
+    assertThrows(IllegalStateException.class, () -> result.get());
   }
 
   @Test
   public void emptyGetErrorThrows() {
     final Result<String> result = Result.empty();
-    assertThrows(NoSuchElementException.class, () -> result.getError());
+    assertThrows(IllegalStateException.class, () -> result.getError());
   }
 
   @Test
-  public void successGetErrorThrows() {
-    final Result<String> result = Result.success("foo");
-    assertThrows(NoSuchElementException.class, () -> result.getError());
+  public void okGetErrorThrows() {
+    final Result<String> result = Result.ok("foo");
+    assertThrows(IllegalStateException.class, () -> result.getError());
   }
 
   @Test
-  public void failureGetErrorReturnsError() {
-    final RuntimeException error = new RuntimeException();
-    final Result<String> result = Result.failure(error);
-    assertSame(error, result.getError());
+  public void errorGetErrorReturnsError() {
+    final RuntimeException exception = new RuntimeException();
+    final Result<String> result = Result.error(exception);
+    assertSame(exception, result.getError());
   }
 
   @Test
-  public void successGetOrReturnsValue() {
-    final Result<String> result = Result.success("foo");
+  public void okGetOrReturnsValue() {
+    final Result<String> result = Result.ok("foo");
     assertEquals("foo", result.getOr("bar"));
   }
 
   @Test
-  public void failureGetOrReturnsOther() {
-    final Result<String> result = Result.failure(new RuntimeException());
+  public void errorGetOrReturnsOther() {
+    final Result<String> result = Result.error(new RuntimeException());
     assertEquals("bar", result.getOr("bar"));
   }
 
   @Test
-  public void successGetOrElseReturnsValue() {
-    final Result<String> result = Result.success("foo");
+  public void okGetOrElseReturnsValue() {
+    final Result<String> result = Result.ok("foo");
     assertEquals("foo", result.getOrElse(() -> "bar"));
   }
 
   @Test
-  public void failureGetOrElseReturnsOther() {
-    final Result<String> result = Result.failure(new RuntimeException());
+  public void errorGetOrElseReturnsOther() {
+    final Result<String> result = Result.error(new RuntimeException());
     assertEquals("bar", result.getOrElse(() -> "bar"));
   }
 
@@ -141,301 +140,301 @@ public class ResultTests {
   }
 
   @Test
-  public void successContainsValueIsTrue() {
-    final Result<String> result = Result.success("foo");
+  public void okContainsValueIsTrue() {
+    final Result<String> result = Result.ok("foo");
     assertTrue(result.contains("foo"));
   }
 
   @Test
-  public void successContainOtherValueIsFalse() {
-    final Result<String> result = Result.success("foo");
+  public void okContainOtherValueIsFalse() {
+    final Result<String> result = Result.ok("foo");
     assertFalse(result.contains("bar"));
   }
 
   @Test
-  public void successContainsNullIsFalse() {
-    final Result<String> result = Result.success("foo");
+  public void okContainsNullIsFalse() {
+    final Result<String> result = Result.ok("foo");
     assertFalse(result.contains(null));
   }
 
   @Test
-  public void failureContainsErrorIsFalse() {
-    final RuntimeException error = new RuntimeException();
-    final Result<String> result = Result.failure(error);
-    assertFalse(result.contains(error));
+  public void errorContainsErrorIsFalse() {
+    final RuntimeException exception = new RuntimeException();
+    final Result<String> result = Result.error(exception);
+    assertFalse(result.contains(exception));
   }
 
   @Test
-  public void failuresContainValueIsFalse() {
-    final Result<String> result = Result.failure(new RuntimeException());
+  public void errorContainValueIsFalse() {
+    final Result<String> result = Result.error(new RuntimeException());
     assertFalse(result.contains("foo"));
   }
 
   @Test
-  public void failureContainsNullIsFalse() {
-    final Result<String> result = Result.failure(new RuntimeException());
+  public void errorContainsNullIsFalse() {
+    final Result<String> result = Result.error(new RuntimeException());
     assertFalse(result.contains(null));
   }
 
   @Test
-  public void successMapToSuccess() {
-    final Result<Integer> result = Result.success(1);
-    assertEquals(Result.success("1"), result.map(value -> value.toString()));
+  public void okMapToOk() {
+    final Result<Integer> result = Result.ok(1);
+    assertEquals(Result.ok("1"), result.map(value -> value.toString()));
   }
 
   @Test
-  public void successMapNonFatalThrowsToFailure() {
-    final RuntimeException error = new RuntimeException();
-    final Result<Integer> result = Result.success(1);
-    assertEquals(Result.failure(error), result.map(value -> {
-      throw error;
+  public void okMapNonFatalThrowsToError() {
+    final RuntimeException exception = new RuntimeException();
+    final Result<Integer> result = Result.ok(1);
+    assertEquals(Result.error(exception), result.map(value -> {
+      throw exception;
     }));
   }
 
   @Test
-  public void successMapFatalThrowsPropagate() {
-    final UnknownError error = new UnknownError() { };
-    final Result<Integer> result = Result.success(1);
-    assertThrows(error.getClass(), () -> result.map(value -> {
-      throw error;
+  public void okMapFatalThrowsPropagate() {
+    final UnknownError exception = new UnknownError() { };
+    final Result<Integer> result = Result.ok(1);
+    assertThrows(exception.getClass(), () -> result.map(value -> {
+      throw exception;
     }));
   }
 
   @Test
-  public void failureMapToSelf() {
-    final Result<Integer> result = Result.failure(new RuntimeException());
+  public void errorMapToSelf() {
+    final Result<Integer> result = Result.error(new RuntimeException());
     assertSame(result, result.map(value -> value.toString()));
   }
 
   @Test
-  public void successFlatMapToSuccess() {
-    final Result<Integer> result = Result.success(1);
-    final Result<String> success = Result.success("1");
-    assertEquals(success, result.flatMap(value -> success));
+  public void okFlatMapToOk() {
+    final Result<Integer> result = Result.ok(1);
+    final Result<String> ok = Result.ok("1");
+    assertEquals(ok, result.flatMap(value -> ok));
   }
 
   @Test
-  public void successFlatMapToFailure() {
-    final Result<Integer> result = Result.success(1);
-    final Result<String> failure = Result.failure(new RuntimeException());
-    assertEquals(failure, result.flatMap(value -> failure));
+  public void okFlatMapToError() {
+    final Result<Integer> result = Result.ok(1);
+    final Result<String> error = Result.error(new RuntimeException());
+    assertEquals(error, result.flatMap(value -> error));
   }
 
   @Test
-  public void successFlatMapNonFatalThrowsToFailure() {
+  public void okFlatMapNonFatalThrowsToError() {
     final RuntimeException error = new RuntimeException();
-    final Result<Integer> result = Result.success(1);
-    assertEquals(Result.failure(error), result.flatMap(value -> {
+    final Result<Integer> result = Result.ok(1);
+    assertEquals(Result.error(error), result.flatMap(value -> {
       throw error;
     }));
   }
 
   @Test
-  public void successFlatMapFatalThrowsPropagate() {
+  public void okFlatMapFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
-    final Result<Integer> result = Result.success(1);
+    final Result<Integer> result = Result.ok(1);
     assertThrows(error.getClass(), () -> result.flatMap(value -> {
       throw error;
     }));
   }
 
   @Test
-  public void failureFlatMapToSelf() {
-    final Result<Integer> result = Result.failure(new RuntimeException());
-    assertSame(result, result.flatMap(value -> Result.success(value.toString())));
+  public void errorFlatMapToSelf() {
+    final Result<Integer> result = Result.error(new RuntimeException());
+    assertSame(result, result.flatMap(value -> Result.ok(value.toString())));
   }
 
   @Test
-  public void successMapFailureToSelf() {
-    final Result<String> result = Result.success("foo");
-    assertSame(result, result.mapFailure(error -> error));
+  public void okMapErrorToSelf() {
+    final Result<String> result = Result.ok("foo");
+    assertSame(result, result.mapError(error -> error));
   }
 
   @Test
-  public void failureMapFailureToFailure() {
+  public void errorMapErrorToError() {
     final RuntimeException error = new RuntimeException();
-    final Result<String> result = Result.failure(error);
+    final Result<String> result = Result.error(error);
     final RuntimeException newError = new RuntimeException(error);
-    assertEquals(Result.failure(newError), result.mapFailure(oldError -> newError));
+    assertEquals(Result.error(newError), result.mapError(oldError -> newError));
   }
 
   @Test
-  public void failureMapFailureNonFatalThrowsToFailure() {
+  public void errorMapErrorNonFatalThrowsToError() {
     final RuntimeException error = new RuntimeException();
-    final Result<Integer> result = Result.failure(new RuntimeException());
-    assertEquals(Result.failure(error), result.mapFailure(value -> {
+    final Result<Integer> result = Result.error(new RuntimeException());
+    assertEquals(Result.error(error), result.mapError(value -> {
       throw error;
     }));
   }
 
   @Test
-  public void failureMapFailureFatalThrowsPropagate() {
+  public void errorMapErrorFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
-    final Result<Integer> result = Result.failure(new RuntimeException());
-    assertThrows(error.getClass(), () -> result.mapFailure(value -> {
+    final Result<Integer> result = Result.error(new RuntimeException());
+    assertThrows(error.getClass(), () -> result.mapError(value -> {
       throw error;
     }));
   }
 
   @Test
-  public void successRecoverToSelf() {
-    final Result<String> result = Result.success("foo");
+  public void okRecoverToSelf() {
+    final Result<String> result = Result.ok("foo");
     assertSame(result, result.recover(error -> "bar"));
   }
 
   @Test
-  public void failureRecoverToSuccess() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    assertEquals(Result.success("foo"), result.recover(error -> "foo"));
+  public void errorRecoverToOk() {
+    final Result<String> result = Result.error(new RuntimeException());
+    assertEquals(Result.ok("foo"), result.recover(error -> "foo"));
   }
 
   @Test
-  public void failureRecoverNonFatalThrowsToFailure() {
+  public void errorRecoverNonFatalThrowsToError() {
     final RuntimeException error = new RuntimeException();
-    final Result<Integer> result = Result.failure(new RuntimeException());
-    assertEquals(Result.failure(error), result.recover(value -> {
+    final Result<Integer> result = Result.error(new RuntimeException());
+    assertEquals(Result.error(error), result.recover(value -> {
       throw error;
     }));
   }
 
   @Test
-  public void failureRecoverFatalThrowsPropagate() {
+  public void errorRecoverFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
-    final Result<Integer> result = Result.failure(new RuntimeException());
+    final Result<Integer> result = Result.error(new RuntimeException());
     assertThrows(error.getClass(), () -> result.recover(value -> {
       throw error;
     }));
   }
 
   @Test
-  public void successRecoverWithToSelf() {
-    final Result<String> result = Result.success("foo");
-    assertSame(result, result.recoverWith(error -> Result.success("bar")));
+  public void okRecoverWithToSelf() {
+    final Result<String> result = Result.ok("foo");
+    assertSame(result, result.recoverWith(error -> Result.ok("bar")));
   }
 
   @Test
-  public void failureRecoverWithSuccess() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    final Result<String> success = Result.success("foo");
-    assertSame(success, result.recoverWith(error -> success));
+  public void errorRecoverWithOk() {
+    final Result<String> result = Result.error(new RuntimeException());
+    final Result<String> ok = Result.ok("foo");
+    assertSame(ok, result.recoverWith(error -> ok));
   }
 
   @Test
-  public void failureRecoverWithFailure() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    final Result<String> failure = Result.failure(new RuntimeException());
-    assertSame(failure, result.recoverWith(error -> failure));
+  public void errorRecoverWithError() {
+    final Result<String> result = Result.error(new RuntimeException());
+    final Result<String> error = Result.error(new RuntimeException());
+    assertSame(error, result.recoverWith(e -> error));
   }
 
   @Test
-  public void failureRecoverWithNonFatalThrowsToFailure() {
+  public void errorRecoverWithNonFatalThrowsToError() {
     final RuntimeException error = new RuntimeException();
-    final Result<Integer> result = Result.failure(new RuntimeException());
-    assertEquals(Result.failure(error), result.recoverWith(value -> {
+    final Result<Integer> result = Result.error(new RuntimeException());
+    assertEquals(Result.error(error), result.recoverWith(value -> {
       throw error;
     }));
   }
 
   @Test
-  public void failureRecoverWithFatalThrowsPropagate() {
+  public void errorRecoverWithFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
-    final Result<Integer> result = Result.failure(new RuntimeException());
+    final Result<Integer> result = Result.error(new RuntimeException());
     assertThrows(error.getClass(), () -> result.recoverWith(value -> {
       throw error;
     }));
   }
 
   @Test
-  public void successOrSuccessReturnsSelf() {
-    final Result<String> result = Result.success("foo");
-    assertSame(result, result.or(Result.success("bar")));
+  public void okOrOkReturnsSelf() {
+    final Result<String> result = Result.ok("foo");
+    assertSame(result, result.or(Result.ok("bar")));
   }
 
   @Test
-  public void successOrFailureReturnsSelf() {
-    final Result<String> result = Result.success("foo");
-    assertSame(result, result.or(Result.failure(new RuntimeException())));
+  public void okOrErrorReturnsSelf() {
+    final Result<String> result = Result.ok("foo");
+    assertSame(result, result.or(Result.error(new RuntimeException())));
   }
 
   @Test
-  public void failureOrSuccessReturnsSuccess() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    final Result<String> success = Result.success("bar");
-    assertSame(success, result.or(success));
+  public void errorOrOkReturnsOk() {
+    final Result<String> result = Result.error(new RuntimeException());
+    final Result<String> ok = Result.ok("bar");
+    assertSame(ok, result.or(ok));
   }
 
   @Test
-  public void failureOrFailureReturnsFaulre() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    final Result<String> failure = Result.failure(new RuntimeException());
-    assertSame(failure, result.or(failure));
+  public void errorOrErrorReturnsFaulre() {
+    final Result<String> result = Result.error(new RuntimeException());
+    final Result<String> error = Result.error(new RuntimeException());
+    assertSame(error, result.or(error));
   }
 
   @Test
-  public void successOrElseSuccessReturnsSelf() {
-    final Result<String> result = Result.success("foo");
-    assertSame(result, result.orElse(() -> Result.success("bar")));
+  public void okOrElseOkReturnsSelf() {
+    final Result<String> result = Result.ok("foo");
+    assertSame(result, result.orElse(() -> Result.ok("bar")));
   }
 
   @Test
-  public void successOrElseFailureReturnsSelf() {
-    final Result<String> result = Result.success("foo");
-    assertSame(result, result.orElse(() -> Result.failure(new RuntimeException())));
+  public void okOrElseErrorReturnsSelf() {
+    final Result<String> result = Result.ok("foo");
+    assertSame(result, result.orElse(() -> Result.error(new RuntimeException())));
   }
 
   @Test
-  public void failureOrElseSuccessReturnsSuccess() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    final Result<String> success = Result.success("bar");
-    assertSame(success, result.orElse(() -> success));
+  public void errorOrElseOkReturnsOk() {
+    final Result<String> result = Result.error(new RuntimeException());
+    final Result<String> ok = Result.ok("bar");
+    assertSame(ok, result.orElse(() -> ok));
   }
 
   @Test
-  public void failureOrElseFailureReturnsFaulre() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    final Result<String> failure = Result.failure(new RuntimeException());
-    assertSame(failure, result.orElse(() -> failure));
+  public void errorOrElseErrorReturnsFaulre() {
+    final Result<String> result = Result.error(new RuntimeException());
+    final Result<String> error = Result.error(new RuntimeException());
+    assertSame(error, result.orElse(() -> error));
   }
 
   @Test
-  public void failureOrElseNonFatalThrowsReturnsFailure() {
+  public void errorOrElseNonFatalThrowsReturnsError() {
     final RuntimeException error = new RuntimeException();
-    final Result<Integer> result = Result.failure(new RuntimeException());
-    assertEquals(Result.failure(error), result.orElse(() -> {
+    final Result<Integer> result = Result.error(new RuntimeException());
+    assertEquals(Result.error(error), result.orElse(() -> {
       throw error;
     }));
   }
 
   @Test
-  public void failureOrElseFatalThrowsPropagate() {
+  public void errorOrElseFatalThrowsPropagate() {
     final UnknownError error = new UnknownError() { };
-    final Result<Integer> result = Result.failure(new RuntimeException());
+    final Result<Integer> result = Result.error(new RuntimeException());
     assertThrows(error.getClass(), () -> result.orElse(() -> {
       throw error;
     }));
   }
 
   @Test
-  public void successAsFailureIsFailure() {
-    final Result<String> result = Result.success("foo");
-    assertInstanceOf(IllegalStateException.class, result.asFailure().getError());
+  public void okAsErrorIsError() {
+    final Result<String> result = Result.ok("foo");
+    assertInstanceOf(IllegalStateException.class, result.asError().getError());
   }
 
   @Test
-  public void failureAsFailureIsSelf() {
-    final Result<String> result = Result.failure(new RuntimeException());
-    assertSame(result, result.asFailure());
+  public void errorAsErrorIsSelf() {
+    final Result<String> result = Result.error(new RuntimeException());
+    assertSame(result, result.asError());
   }
 
   @Test
-  public void resultOfSuccess() {
-    assertEquals(Result.success("foo"), Result.of(() -> "foo"));
+  public void resultOfOk() {
+    assertEquals(Result.ok("foo"), Result.of(() -> "foo"));
   }
 
   @Test
-  public void resultOfFailure() {
+  public void resultOfError() {
     final RuntimeException error = new RuntimeException();
-    assertEquals(Result.failure(error), Result.of(() -> {
+    assertEquals(Result.error(error), Result.of(() -> {
       throw error;
     }));
   }

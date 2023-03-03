@@ -157,11 +157,10 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   @Override
   public final TransportContext getTransportContext() {
     final TransportContext context = this.context;
-    if (context != null) {
-      return context;
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound transport");
     }
+    return context;
   }
 
   @Override

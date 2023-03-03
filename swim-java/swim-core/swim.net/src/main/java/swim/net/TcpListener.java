@@ -140,11 +140,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   @Override
   public final TransportContext getTransportContext() {
     final TransportContext context = this.context;
-    if (context != null) {
-      return context;
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound transport");
     }
+    return context;
   }
 
   @Override

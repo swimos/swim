@@ -17,7 +17,10 @@ package swim.net.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.http.HttpRequest;
+import swim.http.HttpResponse;
 import swim.net.NetSocket;
+import swim.util.Result;
 
 @Public
 @Since("5.0")
@@ -68,19 +71,19 @@ public interface HttpClient {
     // hook
   }
 
-  default void didWriteRequestMessage(HttpRequesterContext handler) {
+  default void didWriteRequestMessage(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
     // hook
   }
 
-  default void willWriteRequestPayload(HttpRequesterContext handler) {
+  default void willWriteRequestPayload(HttpRequest<?> request, HttpRequesterContext handler) {
     // hook
   }
 
-  default void didWriteRequestPayload(HttpRequesterContext handler) {
+  default void didWriteRequestPayload(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
     // hook
   }
 
-  default void didWriteRequest(HttpRequesterContext handler) {
+  default void didWriteRequest(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
     // hook
   }
 
@@ -92,19 +95,19 @@ public interface HttpClient {
     // hook
   }
 
-  default void didReadResponseMessage(HttpRequesterContext handler) {
+  default void didReadResponseMessage(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
     // hook
   }
 
-  default void willReadResponsePayload(HttpRequesterContext handler) {
+  default void willReadResponsePayload(HttpResponse<?> response, HttpRequesterContext handler) {
     // hook
   }
 
-  default void didReadResponsePayload(HttpRequesterContext handler) {
+  default void didReadResponsePayload(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
     // hook
   }
 
-  default void didReadResponse(HttpRequesterContext handler) {
+  default void didReadResponse(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
     // hook
   }
 
@@ -128,11 +131,13 @@ public interface HttpClient {
 
   /**
    * Callback invoked by the network transport when the socket has timed out
-   * due to inactivity. No default action is taken by the network transport
-   * other than to inform the socket of the timeout.
+   * due to inactivity. The default implementation closes the socket.
    */
   default void doTimeout(@Nullable HttpRequesterContext handler) {
-    // hook
+    final HttpClientContext context = this.clientContext();
+    if (context != null) {
+      context.close();
+    }
   }
 
   /**

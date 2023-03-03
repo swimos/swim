@@ -108,10 +108,14 @@ public interface NetSocket {
 
   /**
    * Callback invoked by the network transport when the socket has timed out
-   * due to inactivity. No automated action is taken by the network transport
-   * other than to inform the socket of the timeout.
+   * due to inactivity. The default implementation closes the socket.
    */
-  void doTimeout() throws IOException;
+  default void doTimeout() throws IOException {
+    final NetSocketContext context = this.socketContext();
+    if (context != null) {
+      context.close();
+    }
+  }
 
   /**
    * Lifecycle callback invoked by the network transport prior to closing

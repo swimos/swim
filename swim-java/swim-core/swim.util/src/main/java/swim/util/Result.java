@@ -14,7 +14,6 @@
 
 package swim.util;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -27,66 +26,65 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * A container for the result of an operation; either a success value
- * of type {@code T}, or a failure with a {@code Throwable} error.
- * {@code Result} objects are used to model the return values of functions,
- * including exceptional returns.
+ * The result of an operation; either an <em>ok</em> value of type {@code T},
+ * or a {@code Throwable} <em>error</em>. Results are used to model the return
+ * values of functions, including exceptional returns.
  *
- * <h2>Successes</h2>
+ * <h3>Ok results</h3>
  * <p>
- * A <em>success</em> is a result that contains an arbitrary nullable
- * value of type {@code T}. Successful results are constructed via the {@link
- * #success(Object) Result.success(T)} factory method. All {@code null}
- * results are represented by the singleton {@link #empty() empty} result.
+ * An <em>ok</em> result wraps an arbitrary nullable value of type {@code T}.
+ * Ok results are constructed via the {@link #ok(Object) Result.ok(T)} factory
+ * method. All {@code null}-valued results are represented by the singleton
+ * {@link #empty() Result.empty()} result.
  * <p>
- * The {@link #isSuccess()} method returns {@code true} if, and only if,
- * the result is a success. The resulting value can be obtained via the
- * {@link #get()} method. The {@link #getOr(Object) getOr(T)} method can be
- * used to unwrap resulting value, or return a default value if the result
- * is a failure. Alternatively, the {@link #getOrElse(Supplier)} method can
- * be used to unwrap a resulting value, or return the evaluation of a {@code
- * Supplier} function if the result is a failure.
+ * The {@link #isOk()} method returns {@code true} if and only if the result
+ * wraps a nullable value of type {@code T}; the resulting value can be
+ * obtained by calling the {@link #get()} method. The {@link #getOr(Object)
+ * getOr(T)} method can be used to unwrap a resulting value if the result
+ * is ok, or return a default value if the result is an error. Alternatively,
+ * the {@link #getOrElse(Supplier)} method can be used to unwrap a resulting
+ * value if the result is ok, or return the evaluation of a {@code Supplier}
+ * function if the result is an error.
  *
- * <h2>Failures</h2>
+ * <h3>Error results</h3>
  * <p>
- * A <em>failure</em> is a result that contains a non-null {@code Throwable}
- * exception. Failed results are constructed via the {@link #failure(Throwable)
- * Result.failure(Throwable)} factory method.
+ * An <em>error</em> result wraps a non-null {@code Throwable} exception.
+ * Error results are constructed via the {@link #error(Throwable)
+ * Result.error(Throwable)} factory method.
  * <p>
- * The {@link #isFailure()} method returns {@code true} if, and only if,
- * the result is a failure. The resulting {@code Throwable} error can be
- * obtained via the {@link #getError()} method.
+ * The {@link #isError()} method returns {@code true} if and only if the result
+ * is an error; the underlying {@code Throwable} error can be obtained by
+ * calling the {@link #getError()} method.
  * <p>
- * {@code Result} uses an internal flag to discriminate between successes
- * and failures, so no ambiguity arises from constructing a success result
+ * {@code Result} uses an internal flag to discriminate between ok results
+ * and error results, so no ambiguity arises from constructing an ok result
  * containing an instance of {@code Throwable}.
  *
- * <h2>Conversions</h2>
+ * <h3>Conversions</h3>
  * <p>
- * The {@link #success()} method converts a result to an {@link Optional}
- * containing the resulting value, if the result is a success. The {@link
- * #failure()} method converts a result to an {@code Optional} containing
- * the resulting error, if the result is a failure. And the {@link #stream()}
- * method converts a result to a {@link Stream} containing just the resulting
- * value, if the result is a success.
+ * The {@link #ok()} method converts a {@code Result} to an {@link Optional}
+ * containing the resulting value or an empty optional. The {@link #error()}
+ * method converts a {@code Result} to an {@code Optional} containing
+ * the resulting error or an empty optional. The {@link #stream()} method
+ * converts a {@code Result} to a {@link Stream} containing just the resulting
+ * value or an empty stream.
  *
- * <h2>Combinators</h2>
+ * <h3>Combinators</h3>
  * <p>
  * Results can be {@linkplain #map(Function) mapped}, {@linkplain
- * #flatMap(Function) flat mapped}, {@linkplain #mapFailure(Function)
- * failure mapped}, {@linkplain #recover(Function) recovered}, {@linkplain
- * #recoverWith(Function) partially recovered}, and more.
+ * #flatMap(Function) flat mapped}, {@linkplain #mapError(Function)
+ * error mapped}, {@linkplain #recover(Function) recovered}, and
+ * {@linkplain #recoverWith(Function) partially recovered}.
  * <p>
- * The {@link #of(Supplier) Result.of(Supplier)} factory method returns
- * the result produced by a {@code Supplier} function, wrapping any
- * {@linkplain #isNonFatal(Throwable) non-fatal exceptions} thrown
- * in the process.
+ * The {@link #of(Supplier) Result.of(Supplier)} factory method returns the
+ * result of invoking a {@code Supplier} function, wrapping any {@linkplain
+ * #isNonFatal(Throwable) non-fatal exceptions} thrown by the function.
  *
- * <h2>Exceptions</h2>
+ * <h3>Exceptions</h3>
  * <p>
  * Except as otherwise noted, all {@linkplain #isNonFatal(Throwable)
  * non-fatal exceptions} thrown by combinator functions are caught and
- * returned as failure results. Fatal exceptions thrown by combinator
+ * returned as error results. Fatal exceptions thrown by combinator
  * functions always propagate to the caller.
  */
 @Public
@@ -94,96 +92,96 @@ import swim.annotations.Since;
 public final class Result<T> implements ToMarkup, ToSource {
 
   /**
-   * Either the nullable resulting value of type {@code T},
-   * if the {@code FAILURE_FLAG} bit is clear, or a non-null
-   * {@code Throwable} error, if the {@code FAILURE_FLAG} bit is set.
+   * Either the nullable resulting value of type {@code T}
+   * if the {@code ERROR_FLAG} bit is clear, or a non-null
+   * {@code Throwable} error if the {@code ERROR_FLAG} bit is set.
    */
-  private final @Nullable Object value;
+  final @Nullable Object value;
 
   /**
-   * A bitfield containing a {@code FAILURE_FLAG} bit that discriminates
-   * between successes and failures.
+   * A bitfield containing the {@code ERROR_FLAG} bit that discriminates
+   * between ok results and error results.
    */
-  private final int flags;
+  final int flags;
 
   /**
    * Constructs a new result with the given {@code value} and {@code flags}.
-   * If the {@code FAILURE_FLAG} bit is clear, then {@code value}
-   * <strong>must</strong> contain a nullable instanceof type {@code T}.
-   * If the {@code FAILURE_FLAG} bit is set, then {@code value}
-   * <strong>must</strong> contain a non-null instanceof {@code Throwable}.
+   * If the {@code ERROR_FLAG} bit is clear, then {@code value}
+   * <strong>must</strong> be a nullable instanceof type {@code T}.
+   * If the {@code ERROR_FLAG} bit is set, then {@code value}
+   * <strong>must</strong> be a non-null instance of {@code Throwable}.
    * <p>
-   * All other flag bits are reserved, and <strong>must</strong> be clear.
+   * All other flag bits are reserved and <strong>must</strong> be clear.
    */
   private Result(@Nullable Object value, int flags) {
-    // assert((flags & ~FAILURE_FLAG) == 0);
-    // if ((flags & FAILURE_FLAG) != 0) assert(value instanceof Throwable);
+    // assert (flags & ~ERROR_FLAG) == 0;
+    // if ((flags & ERROR_FLAG) != 0) assert value instanceof Throwable;
     this.value = value;
     this.flags = flags;
   }
 
   /**
-   * Returns {@code true} if this is result is a <em>success</em>,
-   * otherwise returns {@code false}. If {@code true}, the resulting
-   * value can be obtained via the {@link #get()} method.
+   * Returns {@code true} if this is an <em>ok</em> result that wraps
+   * a nullable value of type {@code T}; otherwise returns {@code false}.
+   * If {@code true}, the resulting value can be obtained by calling
+   * the {@link #get()} method.
    */
-  public boolean isSuccess() {
-    return (this.flags & FAILURE_FLAG) == 0;
+  public boolean isOk() {
+    return (this.flags & ERROR_FLAG) == 0;
   }
 
   /**
-   * Returns {@code true} if this result is a <em>failure</em>,
-   * otherwise returns {@code false}. If {@code true}, the resulting
-   * error can be obtained via the {@link #getError()} method.
+   * Returns {@code true} if this is an <em>error</em> result that wraps
+   * a {@code Throwable} exception; otherwise returns {@code false}.
+   * If {@code true}, the resulting error can be obtained by calling
+   * the {@link #getError()} method.
    */
-  public boolean isFailure() {
-    return (this.flags & FAILURE_FLAG) != 0;
+  public boolean isError() {
+    return (this.flags & ERROR_FLAG) != 0;
   }
 
   /**
-   * Returns the resulting value, if this result {@linkplain #isSuccess()
-   * is a success}, otherwise throws {@link NoSuchElementException}.
+   * Returns the resulting value, if this is an {@linkplain #isOk() ok result};
+   * otherwise throws {@link IllegalStateException}.
    *
-   * @throws NoSuchElementException if this result {@linkplain #isFailure()
-   *         is a failure}.
+   * @throws IllegalStateException if this is an {@linkplain #isError() error result}.
    */
   @CheckReturnValue
   public @Nullable T get() {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       return Assume.conformsNullable(this.value);
     } else {
-      throw new NoSuchElementException("Failed result", (Throwable) this.value);
+      throw new IllegalStateException("Error result", (Throwable) this.value);
     }
   }
 
   /**
-   * Returns the resulting value, if this result {@linkplain #isSuccess()
-   * is a success} and the result value is non-{@code null}.
+   * Returns the resulting value, if this is an {@linkplain #isOk() ok result}
+   * and the resulting value is non-{@code null}.
    *
-   * @throws NoSuchElementException if this result {@linkplain #isFailure()
-   *         is a failure}.
-   * @throws NullPointerException if the result value is {@code null}.
+   * @throws IllegalStateException if this is an {@linkplain #isError() error result}.
+   * @throws NullPointerException if the resulting value is {@code null}.
    */
   @CheckReturnValue
   public @NonNull T getNonNull() {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       if (this.value != null) {
         return Assume.conforms(this.value);
       } else {
         throw new NullPointerException("Null result");
       }
     } else {
-      throw new NoSuchElementException("Failed result", (Throwable) this.value);
+      throw new IllegalStateException("Error result", (Throwable) this.value);
     }
   }
 
   /**
-   * Returns the resulting value, if this result {@linkplain #isSuccess()
-   * is a success}, otherwise returns some {@code other} value.
+   * Returns the resulting value, if this is an {@linkplain #isOk() ok result};
+   * otherwise returns some {@code other} value.
    */
   @CheckReturnValue
   public @Nullable T getOr(@Nullable T other) {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       return Assume.conformsNullable(this.value);
     } else {
       return other;
@@ -191,13 +189,13 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns the resulting value, if this result {@linkplain #isSuccess()
-   * is a success} and the result value is non-{@code null},
-   * otherwise returns some {@code other} value.
+   * Returns the resulting value, if this is an {@linkplain #isOk() ok result}
+   * and the resulting value is non-{@code null}; otherwise returns some
+   * {@code other} value.
    */
   @CheckReturnValue
-  public @NonNull T getOrNonNull(@NonNull T other) {
-    if (this.isSuccess() && this.value != null) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
+    if (this.isOk() && this.value != null) {
       return Assume.conforms(this.value);
     } else {
       return other;
@@ -205,13 +203,12 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns the resulting value, if this result {@linkplain #isSuccess()
-   * is a success}, otherwise returns the value produced by the given
-   * {@code supplier} function.
+   * Returns the resulting value, if this is an {@linkplain #isOk() ok result};
+   * otherwise returns the result of invoking a {@code supplier} function.
    */
   @CheckReturnValue
   public @Nullable T getOrElse(Supplier<? extends T> supplier) {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       return Assume.conformsNullable(this.value);
     } else {
       return supplier.get();
@@ -219,40 +216,40 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns the resulting error, if this result {@linkplain #isFailure()
-   * is a failure}, otherwise throws {@link NoSuchElementException}.
+   * Returns the resulting error, if this is an {@linkplain #isError()
+   * error result}; otherwise throws an {@link IllegalStateException}.
    *
-   * @throws NoSuchElementException if this result {@linkplain #isSuccess()
-   *         is a success}.
+   * @throws IllegalStateException if this is an {@linkplain #isOk() ok result}.
    */
   @CheckReturnValue
   public Throwable getError() {
-    if (this.isFailure()) {
+    if (this.isError()) {
       return (Throwable) Assume.nonNull(this.value);
     } else {
-      throw new NoSuchElementException("Successful result");
+      throw new IllegalStateException("Ok result");
     }
   }
 
   /**
-   * Returns {@code true} if this result {@linkplain #isSuccess() is a success},
-   * and the resulting value is equal to the given {@code value}; otherwise
-   * returns {@code false}.
+   * Returns {@code true} if this is an {@linkplain #isOk() ok result}
+   * and the resulting value is equal to the given {@code value};
+   * otherwise returns {@code false}.
    */
+  @CheckReturnValue
   public boolean contains(@Nullable Object value) {
-    return this.isSuccess() && Objects.equals(value, this.value);
+    return this.isOk() && Objects.equals(value, this.value);
   }
 
   /**
-   * Returns an {@code Optional} containing the resulting value,
-   * if this result {@linkplain #isSuccess() is a success};
-   * otherwise returns an empty {@code Optional}. Note that,
-   * because optionals cannot contain {@code null} values,
-   * both null results and failure results convert to
-   * an empty {@code Optional}.
+   * Returns an {@code Optional} containing the resulting value, if this
+   * is an {@linkplain #isOk() ok result}; otherwise returns an empty
+   * {@code Optional}. Note that because optionals cannot contain
+   * {@code null} values, both {@code null} results and error results
+   * convert to an empty @code Optional}.
    */
-  public Optional<T> success() {
-    if (this.isSuccess()) {
+  @CheckReturnValue
+  public Optional<T> ok() {
+    if (this.isOk()) {
       return Optional.ofNullable(Assume.conformsNullable(this.value));
     } else {
       return Optional.empty();
@@ -260,12 +257,13 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns an {@code Optional} containing the resulting error,
-   * if this result {@linkplain #isFailure() is a failure};
-   * otherwise returns an empty {@code Optional}.
+   * Returns an {@code Optional} containing the resulting error, if this
+   * is an {@linkplain #isError() error result}; otherwise returns an empty
+   * {@code Optional}.
    */
-  public Optional<Throwable> failure() {
-    if (this.isFailure()) {
+  @CheckReturnValue
+  public Optional<Throwable> error() {
+    if (this.isError()) {
       return Optional.of((Throwable) Assume.nonNull(this.value));
     } else {
       return Optional.empty();
@@ -273,12 +271,12 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns a {@code Stream} containing just the resulting value,
-   * if this result {@linkplain #isSuccess() is a success},
-   * otherwise returns an empty {@code Stream}.
+   * Returns a {@code Stream} containing just the resulting value, if this is an
+   * {@linkplain #isOk() ok result}; otherwise returns an empty {@code Stream}.
    */
+  @CheckReturnValue
   public Stream<T> stream() {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       return Stream.of(Assume.conformsNullable(this.value));
     } else {
       return Stream.empty();
@@ -286,20 +284,21 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * If this result is a success, returns the transformation of the resulting
-   * value by the given {@code mapper} function in a new success result;
-   * otherwise returns this failure result. If {@code mapper} throws a
-   * {@linkplain #isNonFatal(Throwable) non-fatal exception}, a failure
-   * result containing the caught exception is returned. Fatal exceptions
-   * thrown by {@code mapper} propagate to the caller.
+   * Returns the ok result of applying a {@code mapper} function to the
+   * resulting value, if this is an {@linkplain #isOk() ok result};
+   * otherwise returns this error result. Returns am error result
+   * containing any {@linkplain #isNonFatal(Throwable) non-fatal exception}
+   * thrown by the {@code mapper} function; fatal exceptions thrown by the
+   * {@code mapper} function propagate to the caller.
    */
+  @CheckReturnValue
   public <U> Result<U> map(Function<? super T, ? extends U> mapper) {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       try {
-        return Result.success(mapper.apply(Assume.conformsNullable(this.value)));
+        return Result.ok(mapper.apply(Assume.conformsNullable(this.value)));
       } catch (Throwable error) {
         if (Result.isNonFatal(error)) {
-          return Result.failure(error);
+          return Result.error(error);
         } else {
           throw error;
         }
@@ -310,20 +309,21 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * If this result is a success, returns the transformation of the resulting
-   * value by the given result-returning {@code mapper} function; otherwise
-   * returns this failure result. If {@code mapper} throws a {@linkplain
-   * #isNonFatal(Throwable) non-fatal exception}, a failure result containing
-   * the caught exception is returned. Fatal exceptions thrown by {@code mapper}
-   * propagate to the caller.
+   * Returns the result of applying a {@code Result}-returning {@code mapper}
+   * function to the resulting value, if this is an {@linkplain #isOk()
+   * ok result}; otherwise returns this error result. Returns am error result
+   * containing any {@linkplain #isNonFatal(Throwable) non-fatal exception}
+   * thrown by the {@code mapper} function; fatal exceptions thrown by the
+   * {@code mapper} function propagate to the caller.
    */
+  @CheckReturnValue
   public <U> Result<U> flatMap(Function<? super T, ? extends Result<? extends U>> mapper) {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       try {
         return Assume.conforms(mapper.apply(Assume.conformsNullable(this.value)));
       } catch (Throwable error) {
         if (Result.isNonFatal(error)) {
-          return Result.failure(error);
+          return Result.error(error);
         } else {
           throw error;
         }
@@ -334,22 +334,23 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * If this result is a failure, returns the transformation of the resulting
-   * error by the given {@code mapper} function in a new failure result;
-   * otherwise returns this success result. If {@code mapper} throws a
-   * {@linkplain #isNonFatal(Throwable) non-fatal exception}, a failure
-   * result containing the caught exception is returned. Fatal exceptions
-   * thrown by {@code mapper} propagate to the caller.
+   * Returns the error result of applying a {@code mapper} function to the
+   * resulting error, if this is an {@linkplain #isError() error result};
+   * otherwise returns this ok result. Returns am error result containing
+   * any {@linkplain #isNonFatal(Throwable) non-fatal exception} thrown
+   * by the {@code mapper} function; fatal exceptions thrown by the
+   * {@code mapper} function propagate to the caller.
    */
-  public Result<T> mapFailure(Function<? super Throwable, ? extends Throwable> mapper) {
-    if (this.isSuccess()) {
+  @CheckReturnValue
+  public Result<T> mapError(Function<? super Throwable, ? extends Throwable> mapper) {
+    if (this.isOk()) {
       return this;
     } else {
       try {
-        return Result.failure(mapper.apply((Throwable) this.value));
+        return Result.error(mapper.apply((Throwable) this.value));
       } catch (Throwable error) {
         if (Result.isNonFatal(error)) {
-          return Result.failure(error);
+          return Result.error(error);
         } else {
           throw error;
         }
@@ -358,22 +359,23 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * If this result is a failure, returns the transformation of the resulting
-   * error by the given {@code recovery} function in a new success result;
-   * otherwise returns this success result. If {@code recovery} throws a
-   * {@linkplain #isNonFatal(Throwable) non-fatal exception}, a failure
-   * result containing the caught exception is returned. Fatal exceptions
-   * thrown by {@code recovery} propagate to the caller.
+   * Returns the ok result of applying a {@code recovery} function to the
+   * resulting error, if this is an {@linkplain #isError() error result};
+   * otherwise returns this ok result. Returns am error result containing
+   * any {@linkplain #isNonFatal(Throwable) non-fatal exception} thrown
+   * by the {@code recovery} function; fatal exceptions thrown by the
+   * {@code recovery} function propagate to the caller.
    */
+  @CheckReturnValue
   public Result<T> recover(Function<? super Throwable, ? extends T> recovery) {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       return this;
     } else {
       try {
-        return Result.success(recovery.apply((Throwable) this.value));
+        return Result.ok(recovery.apply((Throwable) this.value));
       } catch (Throwable error) {
         if (Result.isNonFatal(error)) {
-          return Result.failure(error);
+          return Result.error(error);
         } else {
           throw error;
         }
@@ -382,22 +384,23 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * If this result is a failure, returns the transformation of the resulting
-   * error by the given result-returning {@code recovery} function; otherwise
-   * returns this success result. If {@code recovery} throws a {@linkplain
-   * #isNonFatal(Throwable) non-fatal exception}, a failure result containing
-   * the caught exception is returned. Fatal exceptions thrown by {@code
-   * recovery} propagate to the caller.
+   * Returns the result of applying a {@code Result}-returning {@code recovery}
+   * function to the resulting error, if this is an {@linkplain #isError()
+   * error result}; otherwise returns this ok result. Returns am error result
+   * containing any {@linkplain #isNonFatal(Throwable) non-fatal exception}
+   * thrown by the {@code recovery} function; fatal exceptions thrown by the
+   * {@code recovery} function propagate to the caller.
    */
+  @CheckReturnValue
   public Result<T> recoverWith(Function<? super Throwable, ? extends Result<? extends T>> recovery) {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       return this;
     } else {
       try {
         return Assume.conforms(recovery.apply((Throwable) this.value));
       } catch (Throwable error) {
         if (Result.isNonFatal(error)) {
-          return Result.failure(error);
+          return Result.error(error);
         } else {
           throw error;
         }
@@ -406,11 +409,12 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns this result, if it's a success; otherwise returns
-   * some {@code other} result.
+   * Returns this result, if it's an {@linkplain #isOk() ok result};
+   * otherwise returns some {@code other} result.
    */
+  @CheckReturnValue
   public Result<T> or(Result<? extends T> other) {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       return this;
     } else {
       return Assume.conforms(other);
@@ -418,21 +422,23 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns this result, if it's a success; otherwise returns the result
-   * produced by the given {@code supplier} function. If {@code supplier}
-   * throws a {@linkplain #isNonFatal(Throwable) non-fatal exception},
-   * a failure result containing the caught exception is returned.
-   * Fatal exceptions thrown by {@code supplier} propagate to the caller.
+   * Returns this result, if it's an {@linkplain #isOk() ok result};
+   * otherwise returns the result of invoking a {@code Result}-returning
+   * {@code supplier} function. Returns am error result containing any
+   * {@linkplain #isNonFatal(Throwable) non-fatal exception} thrown by
+   * the {@code supplier} function; fatal exceptions thrown by the
+   * {@code supplier} function propagate to the caller.
    */
+  @CheckReturnValue
   public Result<T> orElse(Supplier<? extends Result<? extends T>> supplier) {
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       return this;
     } else {
       try {
         return Assume.conforms(supplier.get());
       } catch (Throwable error) {
         if (Result.isNonFatal(error)) {
-          return Result.failure(error);
+          return Result.error(error);
         } else {
           throw error;
         }
@@ -440,11 +446,12 @@ public final class Result<T> implements ToMarkup, ToSource {
     }
   }
 
-  public <U> Result<U> asFailure() {
-    if (this.isFailure()) {
+  @CheckReturnValue
+  public <U> Result<U> asError() {
+    if (this.isError()) {
       return Assume.conforms(this);
     } else {
-      return Result.failure(new IllegalStateException("Successful result"));
+      return Result.error(new IllegalStateException("Ok result"));
     }
   }
 
@@ -452,9 +459,9 @@ public final class Result<T> implements ToMarkup, ToSource {
    * Returns {@code true} if some {@code other} object is equal to this result.
    * The other object is considered equal to this result if:
    * <ul>
-   * <li>both instances are successes, and the resulting values are either
-   * both {@code null}, or {@link Object#equals(Object) equal} to each other.
-   * <li>both instances are failures, and the resulting errors are
+   * <li>both instances are ok, and the resulting values are either both
+   * {@code null}, or are {@link Object#equals(Object) equal} to each other.
+   * <li>both instances are errors, and the resulting errors are
    * {@link Object#equals(Object) equal} to each other.
    * </ul>
    */
@@ -471,9 +478,8 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * If this result is a success, returns the hash code of the non-null
-   * resulting value, or {@code 0} if the resulting value is null;
-   * if this result is a failure, returns the hash code of the resulting
+   * Returns the hash code of the resulting value, if this is an {@linkplain
+   * #isOk() ok result}; otherwise returns the hash code of the resulting
    * error xor {@code 1}.
    */
   @Override
@@ -484,21 +490,25 @@ public final class Result<T> implements ToMarkup, ToSource {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       if (this.value == null) {
         notation.beginInvoke("Result", "empty").endInvoke();
       } else {
-        notation.beginInvoke("Result", "success").appendArgument(this.value).endInvoke();
+        notation.beginInvoke("Result", "ok")
+                .appendArgument(this.value)
+                .endInvoke();
       }
     } else {
-      notation.beginInvoke("Result", "failure").appendArgument(this.value).endInvoke();
+      notation.beginInvoke("Result", "error")
+              .appendArgument(this.value)
+              .endInvoke();
     }
   }
 
   @Override
   public void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
-    if (this.isSuccess()) {
+    if (this.isOk()) {
       notation.green();
     } else {
       notation.red();
@@ -516,9 +526,9 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Bit flag used to discriminate between successes and failures.
+   * Bit flag used to discriminate between ok results and error results.
    */
-  private static final int FAILURE_FLAG = 1 << 0;
+  private static final int ERROR_FLAG = 1 << 0;
 
   /**
    * Singleton instance used to represent all {@code null} results.
@@ -526,19 +536,21 @@ public final class Result<T> implements ToMarkup, ToSource {
   private static final Result<Object> EMPTY = new Result<Object>(null, 0);
 
   /**
-   * Returns a success result containing a {@code null} value.
-   * Returns a singleton instance used to represent all null results.
+   * Returns an ok result containing a {@code null} value.
+   * Always returns the same singleton instance.
    */
+  @CheckReturnValue
   public static <T> Result<T> empty() {
     return Assume.conforms(EMPTY);
   }
 
   /**
-   * Returns a success result containing a nullable {@code value}.
+   * Returns an ok result containing a nullable {@code value}.
    * If {@code value} is {@code null}, the singleton {@linkplain #empty()
    * empty result} is returned.
    */
-  public static <T> Result<T> success(@Nullable T value) {
+  @CheckReturnValue
+  public static <T> Result<T> ok(@Nullable T value) {
     if (value != null) {
       return new Result<T>(value, 0);
     } else {
@@ -547,26 +559,28 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns a failure result containing a non-null {@code error}.
+   * Returns an error result containing a non-null {@code error}.
    */
-  public static <T> Result<T> failure(Throwable error) {
+  @CheckReturnValue
+  public static <T> Result<T> error(Throwable error) {
     Objects.requireNonNull(error);
-    return new Result<T>(error, FAILURE_FLAG);
+    return new Result<T>(error, ERROR_FLAG);
   }
 
   /**
-   * Returns a success result containing the value produced by the given
-   * {@code supplier} function. If {@code supplier} throws a {@linkplain
-   * #isNonFatal(Throwable) non-fatal exception}, a failure result
-   * containing the caught exception is returned. Fatal exceptions
-   * thrown by {@code supplier} propagate to the caller.
+   * Returns the result of invoking a {@code supplier} function.
+   * Returns am error result containing any {@linkplain #isNonFatal(Throwable)
+   * non-fatal exception} thrown by the {@code supplier} function;
+   * fatal exceptions thrown by the {@code supplier} function
+   * propagate to the caller.
    */
+  @CheckReturnValue
   public static <T> Result<T> of(Supplier<T> supplier) {
     try {
-      return Result.success(supplier.get());
+      return Result.ok(supplier.get());
     } catch (Throwable error) {
       if (Result.isNonFatal(error)) {
-        return Result.failure(error);
+        return Result.error(error);
       } else {
         throw error;
       }
@@ -574,9 +588,10 @@ public final class Result<T> implements ToMarkup, ToSource {
   }
 
   /**
-   * Returns {@code true} if {@code error} is a recoverable exception,
+   * Returns {@code true} if {@code error} is a recoverable exception;
    * otherwise returns {@code false} if {@code error} is a fatal exception.
    */
+  @CheckReturnValue
   public static boolean isNonFatal(Throwable error) {
     return !(error instanceof InterruptedException
           || error instanceof LinkageError

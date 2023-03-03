@@ -17,7 +17,12 @@ package swim.net.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.http.HttpRequest;
+import swim.http.HttpResponse;
+import swim.http.HttpStatus;
+import swim.http.header.ConnectionHeader;
 import swim.net.NetSocket;
+import swim.util.Result;
 
 @Public
 @Since("5.0")
@@ -60,19 +65,19 @@ public interface HttpServer {
     // hook
   }
 
-  default void didReadRequestMessage(HttpResponderContext handler) {
+  default void didReadRequestMessage(Result<HttpRequest<?>> request, HttpResponderContext handler) {
     // hook
   }
 
-  default void willReadRequestPayload(HttpResponderContext handler) {
+  default void willReadRequestPayload(HttpRequest<?> request, HttpResponderContext handler) {
     // hook
   }
 
-  default void didReadRequestPayload(HttpResponderContext handler) {
+  default void didReadRequestPayload(Result<HttpRequest<?>> request, HttpResponderContext handler) {
     // hook
   }
 
-  default void didReadRequest(HttpResponderContext handler) {
+  default void didReadRequest(Result<HttpRequest<?>> request, HttpResponderContext handler) {
     // hook
   }
 
@@ -84,19 +89,19 @@ public interface HttpServer {
     // hook
   }
 
-  default void didWriteResponseMessage(HttpResponderContext handler) {
+  default void didWriteResponseMessage(Result<HttpResponse<?>> response, HttpResponderContext handler) {
     // hook
   }
 
-  default void willWriteResponsePayload(HttpResponderContext handler) {
+  default void willWriteResponsePayload(HttpResponse<?> response, HttpResponderContext handler) {
     // hook
   }
 
-  default void didWriteResponsePayload(HttpResponderContext handler) {
+  default void didWriteResponsePayload(Result<HttpResponse<?>> response, HttpResponderContext handler) {
     // hook
   }
 
-  default void didWriteResponse(HttpResponderContext handler) {
+  default void didWriteResponse(Result<HttpResponse<?>> response, HttpResponderContext handler) {
     // hook
   }
 
@@ -120,11 +125,38 @@ public interface HttpServer {
 
   /**
    * Callback invoked by the network transport when the socket has timed out
-   * due to inactivity. No default action is taken by the network transport
-   * other than to inform the socket of the timeout.
+   * due to inactivity. The default implementation attempts to complete any
+   * stalled requests with an error response before closing the connection.
    */
   default void doTimeout(@Nullable HttpResponderContext handler) {
-    // hook
+    final HttpServerContext context = this.serverContext();
+    if (context == null) {
+      return;
+    }
+    if (handler == null) {
+      // No active requests; close the idle connection.
+      context.close();
+      return;
+    }
+
+    final HttpResponse<?> response;
+    if (!handler.isDoneReading()) {
+      // Stalled request; try to respond with 408 Request Timeout.
+      response = HttpResponse.of(HttpStatus.REQUEST_TIMEOUT,
+                                 ConnectionHeader.CLOSE);
+    } else {
+      // Stalled response; try to respond with 503 Service Unavailable.
+      response = HttpResponse.of(HttpStatus.SERVICE_UNAVAILABLE,
+                                 ConnectionHeader.CLOSE);
+    }
+    if (handler.writeResponse(response)) {
+      // Successfully enqueued the error response; don't close the socket.
+      // Another timeout will eventually trigger if the error response is
+      // unable to be transmitted.
+    } else {
+      // A response was already underway; close the apparently dead connection.
+      context.close();
+    }
   }
 
   /**

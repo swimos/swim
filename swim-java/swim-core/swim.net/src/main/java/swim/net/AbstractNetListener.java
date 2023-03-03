@@ -50,38 +50,28 @@ public abstract class AbstractNetListener implements NetListener {
 
   public @Nullable Scheduler scheduler() {
     final NetListenerContext context = this.context;
-    if (context != null) {
-      return context.scheduler();
-    } else {
-      throw new IllegalStateException("Unbound listener");
-    }
+    return context != null ? context.scheduler() : null;
   }
 
   public @Nullable InetSocketAddress localAddress() {
     final NetListenerContext context = this.context;
-    if (context != null) {
-      return context.localAddress();
-    } else {
-      throw new IllegalStateException("Unbound listener");
-    }
+    return context != null ? context.localAddress() : null;
   }
 
   protected boolean requestAccept() {
     final NetListenerContext context = this.context;
-    if (context != null) {
-      return context.requestAccept();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound listener");
     }
+    return context.requestAccept();
   }
 
   protected boolean cancelAccept() {
     final NetListenerContext context = this.context;
-    if (context != null) {
-      return context.cancelAccept();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound listener");
     }
+    return context.cancelAccept();
   }
 
   @Override
@@ -91,19 +81,16 @@ public abstract class AbstractNetListener implements NetListener {
 
   protected @Nullable NetSocketRef accept(NetSocket socket) throws IOException {
     final NetListenerContext context = this.context;
-    if (context != null) {
-      return context.accept(socket);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound listener");
     }
+    return context.accept(socket);
   }
 
   public void close() {
     final NetListenerContext context = this.context;
     if (context != null) {
       context.close();
-    } else {
-      throw new IllegalStateException("Unbound listener");
     }
   }
 

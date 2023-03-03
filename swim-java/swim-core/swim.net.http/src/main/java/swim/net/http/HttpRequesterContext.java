@@ -16,13 +16,11 @@ package swim.net.http;
 
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Decode;
-import swim.codec.Encode;
-import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.net.ConnectionContext;
 import swim.net.NetSocket;
+import swim.util.Result;
 
 @Public
 @Since("5.0")
@@ -42,11 +40,7 @@ public interface HttpRequesterContext extends ConnectionContext {
 
   boolean writeRequest(HttpRequest<?> request);
 
-  HttpRequest<?> request();
-
-  Encode<? extends HttpRequest<?>> requestMessage();
-
-  Encode<? extends HttpPayload<?>> requestPayload();
+  Result<HttpRequest<?>> request();
 
   boolean isReading();
 
@@ -54,11 +48,7 @@ public interface HttpRequesterContext extends ConnectionContext {
 
   boolean readResponse();
 
-  HttpResponse<?> response();
-
-  Decode<? extends HttpResponse<?>> responseMessage();
-
-  Decode<? extends HttpPayload<?>> responsePayload();
+  Result<HttpResponse<?>> response();
 
   void become(HttpRequester requester);
 

@@ -176,7 +176,7 @@ public abstract class Encode<T> {
    * is non-{@code null}; otherwise returns some {@code other} value.
    */
   @CheckReturnValue
-  public @NonNull T getOrNonNull(@NonNull T other) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
     if (this.isDone()) {
       final T value = this.get();
       if (value != null) {
@@ -270,10 +270,10 @@ public abstract class Encode<T> {
 
   public Result<T> toResult() {
     try {
-      return Result.success(this.get());
+      return Result.ok(this.get());
     } catch (Throwable error) {
       if (Result.isNonFatal(error)) {
-        return Result.failure(error);
+        return Result.error(error);
       } else {
         throw error;
       }
@@ -354,7 +354,7 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
 
   @Override
   public Result<T> toResult() {
-    return Result.success(this.value);
+    return Result.ok(this.value);
   }
 
   @Override
@@ -420,7 +420,7 @@ final class EncodeError<T> extends Encode<T> implements ToSource {
 
   @Override
   public Result<T> toResult() {
-    return Result.failure(this.error);
+    return Result.error(this.error);
   }
 
   @Override

@@ -43,141 +43,93 @@ public abstract class AbstractHttpServer implements HttpServer {
 
   public HttpOptions options() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.options();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound server");
     }
+    return context.options();
   }
 
   public boolean isOpening() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.isOpening();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null && context.isOpening();
   }
 
   public boolean isOpen() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.isOpen();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null && context.isOpen();
   }
 
   public @Nullable InetSocketAddress localAddress() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.localAddress();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null ? context.localAddress() : null;
   }
 
   public @Nullable InetSocketAddress remoteAddress() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.remoteAddress();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null ? context.remoteAddress() : null;
   }
 
   public @Nullable SSLSession sslSession() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.sslSession();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null ? context.sslSession() : null;
   }
 
   public boolean isRequesting() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.isRequesting();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null && context.isRequesting();
   }
 
   public boolean isResponding() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.isResponding();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null && context.isResponding();
   }
 
   protected boolean enqueueRequester(HttpResponder responder) {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.enqueueRequester(responder);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound server");
     }
+    return context.enqueueRequester(responder);
   }
 
   protected void become(NetSocket socket) {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      context.become(socket);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound server");
     }
+    context.become(socket);
   }
 
-  protected boolean isDoneReading() {
+  public boolean isDoneReading() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.isDoneReading();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null && context.isDoneReading();
   }
 
   protected boolean doneReading() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.doneReading();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound server");
     }
+    return context.doneReading();
   }
 
-  protected boolean isDoneWriting() {
+  public boolean isDoneWriting() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.isDoneWriting();
-    } else {
-      throw new IllegalStateException("Unbound server");
-    }
+    return context != null && context.isDoneWriting();
   }
 
   protected boolean doneWriting() {
     final HttpServerContext context = this.context;
-    if (context != null) {
-      return context.doneWriting();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound server");
     }
-  }
-
-  @Override
-  public void doTimeout(@Nullable HttpResponderContext handler) {
-    this.close();
+    return context.doneWriting();
   }
 
   public void close() {
     final HttpServerContext context = this.context;
     if (context != null) {
       context.close();
-    } else {
-      throw new IllegalStateException("Unbound server");
     }
   }
 

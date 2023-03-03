@@ -22,10 +22,12 @@ import org.junit.platform.commons.JUnitException;
 import swim.codec.Text;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
+import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
 import swim.net.AbstractNetListener;
 import swim.net.TransportDriver;
+import swim.util.Result;
 
 public class HttpServerTests {
 
@@ -58,7 +60,7 @@ public class HttpServerTests {
       }
 
       @Override
-      public void didReadRequest(HttpResponderContext handler) {
+      public void didReadRequest(Result<HttpRequest<?>> request, HttpResponderContext handler) {
         this.enqueueRequester(new TestResponder());
       }
 

@@ -26,12 +26,15 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutputBuffer;
+import swim.http.HttpRequest;
+import swim.http.HttpResponse;
 import swim.log.Log;
 import swim.log.LogScope;
 import swim.net.FlowContext;
 import swim.net.NetSocket;
 import swim.net.NetSocketContext;
 import swim.net.TcpEndpoint;
+import swim.util.Result;
 
 @Public
 @Since("5.0")
@@ -432,20 +435,20 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     this.client.willWriteRequestMessage(handler);
   }
 
-  protected void didWriteRequestMessage(HttpRequesterContext handler) {
-    this.client.didWriteRequestMessage(handler);
+  protected void didWriteRequestMessage(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
+    this.client.didWriteRequestMessage(request, handler);
   }
 
-  protected void willWriteRequestPayload(HttpRequesterContext handler) {
-    this.client.willWriteRequestPayload(handler);
+  protected void willWriteRequestPayload(HttpRequest<?> request, HttpRequesterContext handler) {
+    this.client.willWriteRequestPayload(request, handler);
   }
 
-  protected void didWriteRequestPayload(HttpRequesterContext handler) {
-    this.client.didWriteRequestPayload(handler);
+  protected void didWriteRequestPayload(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
+    this.client.didWriteRequestPayload(request, handler);
   }
 
-  protected void didWriteRequest(HttpRequesterContext handler) {
-    this.client.didWriteRequest(handler);
+  protected void didWriteRequest(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
+    this.client.didWriteRequest(request, handler);
   }
 
   @Override
@@ -608,20 +611,20 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     this.client.willReadResponseMessage(handler);
   }
 
-  protected void didReadResponseMessage(HttpRequesterContext handler) {
-    this.client.didReadResponseMessage(handler);
+  protected void didReadResponseMessage(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
+    this.client.didReadResponseMessage(response, handler);
   }
 
-  protected void willReadResponsePayload(HttpRequesterContext handler) {
-    this.client.willReadResponsePayload(handler);
+  protected void willReadResponsePayload(HttpResponse<?> response, HttpRequesterContext handler) {
+    this.client.willReadResponsePayload(response, handler);
   }
 
-  protected void didReadResponsePayload(HttpRequesterContext handler) {
-    this.client.didReadResponsePayload(handler);
+  protected void didReadResponsePayload(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
+    this.client.didReadResponsePayload(response, handler);
   }
 
-  protected void didReadResponse(HttpRequesterContext handler) {
-    this.client.didReadResponse(handler);
+  protected void didReadResponse(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
+    this.client.didReadResponse(response, handler);
   }
 
   @Override

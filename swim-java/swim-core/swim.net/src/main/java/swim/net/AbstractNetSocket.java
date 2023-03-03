@@ -52,110 +52,71 @@ public abstract class AbstractNetSocket implements NetSocket {
 
   public @Nullable Scheduler scheduler() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.scheduler();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null ? context.scheduler() : null;
   }
 
   public boolean isClient() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isClient();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isClient();
   }
 
   public boolean isServer() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isServer();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isServer();
   }
 
   public boolean isConnecting() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isConnecting();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isConnecting();
   }
 
   public boolean isOpening() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isOpening();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isOpening();
   }
 
   public boolean isOpen() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isOpen();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isOpen();
   }
 
   public @Nullable InetSocketAddress localAddress() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.localAddress();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null ? context.localAddress() : null;
   }
 
   public @Nullable InetSocketAddress remoteAddress() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.remoteAddress();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null ? context.remoteAddress() : null;
   }
 
   public @Nullable SSLSession sslSession() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.sslSession();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null ? context.sslSession() : null;
   }
 
   protected void become(NetSocket socket) {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      context.become(socket);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
+    context.become(socket);
   }
 
   protected boolean requestRead() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.requestRead();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
+    return context.requestRead();
   }
 
   protected boolean cancelRead() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.cancelRead();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
+    return context.cancelRead();
   }
 
   @Override
@@ -165,29 +126,26 @@ public abstract class AbstractNetSocket implements NetSocket {
 
   protected int read(ByteBuffer readBuffer) throws IOException {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.read(readBuffer);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
+    return context.read(readBuffer);
   }
 
   protected boolean requestWrite() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.requestWrite();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
+    return context.requestWrite();
   }
 
   protected boolean cancelWrite() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.cancelWrite();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
+    return context.cancelWrite();
   }
 
   @Override
@@ -197,60 +155,42 @@ public abstract class AbstractNetSocket implements NetSocket {
 
   protected int write(ByteBuffer writeBuffer) throws IOException {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.write(writeBuffer);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
-  }
-
-  @Override
-  public void doTimeout() throws IOException {
-    this.close();
+    return context.write(writeBuffer);
   }
 
   public boolean isDoneReading() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isDoneReading();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isDoneReading();
   }
 
   protected boolean doneReading() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.doneReading();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
+    return context.doneReading();
   }
 
   public boolean isDoneWriting() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isDoneWriting();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isDoneWriting();
   }
 
   protected boolean doneWriting() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.doneWriting();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound socket");
     }
+    return context.doneWriting();
   }
 
   public void close() {
     final NetSocketContext context = this.context;
     if (context != null) {
       context.close();
-    } else {
-      throw new IllegalStateException("Unbound socket");
     }
   }
 

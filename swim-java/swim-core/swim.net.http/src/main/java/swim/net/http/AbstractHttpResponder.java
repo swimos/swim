@@ -19,12 +19,10 @@ import javax.net.ssl.SSLSession;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Decode;
-import swim.codec.Encode;
-import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.net.NetSocket;
+import swim.util.Result;
 
 @Public
 @Since("5.0")
@@ -48,190 +46,109 @@ public abstract class AbstractHttpResponder implements HttpResponder {
 
   public HttpOptions options() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.options();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound responder");
     }
+    return context.options();
   }
 
   public boolean isOpening() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.isOpening();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null && context.isOpening();
   }
 
   public boolean isOpen() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.isOpen();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null && context.isOpen();
   }
 
   public @Nullable InetSocketAddress localAddress() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.localAddress();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null ? context.localAddress() : null;
   }
 
   public @Nullable InetSocketAddress remoteAddress() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.remoteAddress();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null ? context.remoteAddress() : null;
   }
 
   public @Nullable SSLSession sslSession() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.sslSession();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null ? context.sslSession() : null;
   }
 
   public boolean isReading() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.isReading();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null && context.isReading();
   }
 
   public boolean isDoneReading() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.isDoneReading();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null && context.isDoneReading();
   }
 
   protected boolean readRequest() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.readRequest();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound responder");
     }
+    return context.readRequest();
   }
 
-  protected HttpRequest<?> request() {
+  public Result<HttpRequest<?>> request() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.request();
-    } else {
-      throw new IllegalStateException("Unbound responder");
+    if (context == null) {
+      return Result.error(new IllegalStateException("Unbound responder"));
     }
-  }
-
-  public Decode<? extends HttpRequest<?>> requestMessage() {
-    final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.requestMessage();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
-  }
-
-  public Decode<? extends HttpPayload<?>> requestPayload() {
-    final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.requestPayload();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context.request();
   }
 
   public boolean isWriting() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.isWriting();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null && context.isWriting();
   }
 
   public boolean isDoneWriting() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.isDoneWriting();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context != null && context.isDoneWriting();
   }
 
   protected boolean writeResponse(HttpResponse<?> response) {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.writeResponse(response);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound responder");
     }
+    return context.writeResponse(response);
   }
 
-  protected HttpResponse<?> response() {
+  public Result<HttpResponse<?>> response() {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.response();
-    } else {
-      throw new IllegalStateException("Unbound responder");
+    if (context == null) {
+      return Result.error(new IllegalStateException("Unbound responder"));
     }
-  }
-
-  public Encode<? extends HttpResponse<?>> responseMessage() {
-    final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.responseMessage();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
-  }
-
-  public Encode<? extends HttpPayload<?>> responsePayload() {
-    final HttpResponderContext context = this.context;
-    if (context != null) {
-      return context.responsePayload();
-    } else {
-      throw new IllegalStateException("Unbound responder");
-    }
+    return context.response();
   }
 
   protected void become(HttpResponder responder) {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      context.become(responder);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound responder");
     }
+    context.become(responder);
   }
 
   protected void become(NetSocket socket) {
     final HttpResponderContext context = this.context;
-    if (context != null) {
-      context.become(socket);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound responder");
     }
+    context.become(socket);
   }
 
   public void close() {
     final HttpResponderContext context = this.context;
     if (context != null) {
       context.close();
-    } else {
-      throw new IllegalStateException("Unbound responder");
     }
   }
 

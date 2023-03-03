@@ -54,11 +54,7 @@ public abstract class AbstractTask implements Task {
    */
   public @Nullable TaskScheduler scheduler() {
     final TaskContext context = this.context;
-    if (context != null) {
-      return context.scheduler();
-    } else {
-      return null;
-    }
+    return context != null ? context.scheduler() : null;
   }
 
   /**
@@ -80,11 +76,10 @@ public abstract class AbstractTask implements Task {
    */
   public boolean schedule() {
     final TaskContext context = this.context;
-    if (context != null) {
-      return context.schedule();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound task");
     }
+    return context.schedule();
   }
 
   /**
@@ -97,11 +92,7 @@ public abstract class AbstractTask implements Task {
    */
   public boolean cancel() {
     final TaskContext context = this.context;
-    if (context != null) {
-      return context.cancel();
-    } else {
-      return false;
-    }
+    return context != null && context.cancel();
   }
 
 }

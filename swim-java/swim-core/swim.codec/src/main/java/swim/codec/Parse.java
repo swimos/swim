@@ -236,7 +236,7 @@ public abstract class Parse<T> extends Decode<T> {
    */
   @CheckReturnValue
   @Override
-  public @NonNull T getOrNonNull(@NonNull T other) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
     if (this.isDone()) {
       final T value = this.get();
       if (value != null) {
@@ -323,10 +323,10 @@ public abstract class Parse<T> extends Decode<T> {
   @Override
   public Result<T> toResult() {
     try {
-      return Result.success(this.get());
+      return Result.ok(this.get());
     } catch (Throwable error) {
       if (Result.isNonFatal(error)) {
-        return Result.failure(error);
+        return Result.error(error);
       } else {
         throw error;
       }
@@ -417,7 +417,7 @@ final class ParseDone<T> extends Parse<T> implements ToSource {
 
   @Override
   public Result<T> toResult() {
-    return Result.success(this.value);
+    return Result.ok(this.value);
   }
 
   @Override
@@ -478,7 +478,7 @@ final class ParseError<T> extends Parse<T> implements ToSource {
 
   @Override
   public Result<T> toResult() {
-    return Result.failure(this.error);
+    return Result.error(this.error);
   }
 
   @Override

@@ -19,12 +19,10 @@ import javax.net.ssl.SSLSession;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Decode;
-import swim.codec.Encode;
-import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.net.NetSocket;
+import swim.util.Result;
 
 @Public
 @Since("5.0")
@@ -48,199 +46,114 @@ public abstract class AbstractHttpRequester implements HttpRequester {
 
   public HttpOptions options() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.options();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound requester");
     }
+    return context.options();
   }
 
   public boolean isConnecting() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.isConnecting();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null && context.isConnecting();
   }
 
   public boolean isOpening() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.isOpening();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null && context.isOpening();
   }
 
   public boolean isOpen() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.isOpen();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null && context.isOpen();
   }
 
   public @Nullable InetSocketAddress localAddress() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.localAddress();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null ? context.localAddress() : null;
   }
 
   public @Nullable InetSocketAddress remoteAddress() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.remoteAddress();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null ? context.remoteAddress() : null;
   }
 
   public @Nullable SSLSession sslSession() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.sslSession();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null ? context.sslSession() : null;
   }
 
   public boolean isWriting() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.isWriting();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null && context.isWriting();
   }
 
   public boolean isDoneWriting() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.isDoneWriting();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null && context.isDoneWriting();
   }
 
   protected boolean writeRequest(HttpRequest<?> request) {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.writeRequest(request);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound requester");
     }
+    return context.writeRequest(request);
   }
 
-  protected HttpRequest<?> request() {
+  public Result<HttpRequest<?>> request() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.request();
-    } else {
-      throw new IllegalStateException("Unbound requester");
+    if (context == null) {
+      return Result.error(new IllegalStateException("Unbound requester"));
     }
-  }
-
-  public Encode<? extends HttpRequest<?>> requestMessage() {
-    final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.requestMessage();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
-  }
-
-  public Encode<? extends HttpPayload<?>> requestPayload() {
-    final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.requestPayload();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context.request();
   }
 
   public boolean isReading() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.isReading();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null && context.isReading();
   }
 
   public boolean isDoneReading() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.isDoneReading();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context != null && context.isDoneReading();
   }
 
   protected boolean readResponse() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.readResponse();
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound requester");
     }
+    return context.readResponse();
   }
 
-  protected HttpResponse<?> response() {
+  public Result<HttpResponse<?>> response() {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.response();
-    } else {
-      throw new IllegalStateException("Unbound requester");
+    if (context == null) {
+      return Result.error(new IllegalStateException("Unbound requester"));
     }
-  }
-
-  public Decode<? extends HttpResponse<?>> responseMessage() {
-    final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.responseMessage();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
-  }
-
-  public Decode<? extends HttpPayload<?>> responsePayload() {
-    final HttpRequesterContext context = this.context;
-    if (context != null) {
-      return context.responsePayload();
-    } else {
-      throw new IllegalStateException("Unbound requester");
-    }
+    return context.response();
   }
 
   protected void become(HttpRequester requester) {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      context.become(requester);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound requester");
     }
+    context.become(requester);
   }
 
   protected void become(NetSocket socket) {
     final HttpRequesterContext context = this.context;
-    if (context != null) {
-      context.become(socket);
-    } else {
+    if (context == null) {
       throw new IllegalStateException("Unbound requester");
     }
+    context.become(socket);
   }
 
   public void close() {
     final HttpRequesterContext context = this.context;
     if (context != null) {
       context.close();
-    } else {
-      throw new IllegalStateException("Unbound requester");
     }
   }
 

@@ -30,6 +30,7 @@ import swim.http.HttpStatus;
 import swim.http.header.HostHeader;
 import swim.net.AbstractNetListener;
 import swim.net.TransportDriver;
+import swim.util.Result;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpSocketTests {
@@ -55,13 +56,13 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void didWriteRequest() {
+      public void didWriteRequest(Result<HttpRequest<?>> request) {
         clientRequestLatch.countDown();
       }
 
       @Override
-      public void didReadResponse() {
-        final HttpResponse<?> response = this.responseMessage().getNonNull();
+      public void didReadResponse(Result<HttpResponse<?>> result) {
+        final HttpResponse<?> response = result.getNonNull();
         assertEquals(HttpStatus.OK, response.status());
         assertEquals("serverToClient", response.payload().get());
         clientResponseLatch.countDown();
@@ -77,14 +78,14 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void didWriteRequest(HttpRequesterContext handler) {
+      public void didWriteRequest(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
         if (clientRequestLatch.getCount() != 0L) {
           this.enqueueRequester(new TestRequester());
         }
       }
 
       @Override
-      public void didReadResponse(HttpRequesterContext handler) {
+      public void didReadResponse(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
         if (clientRequestLatch.getCount() != 0L) {
           this.enqueueRequester(new TestRequester());
         } else {
@@ -97,8 +98,8 @@ public class HttpSocketTests {
     class TestResponder extends AbstractHttpResponder {
 
       @Override
-      public void didReadRequest() {
-        final HttpRequest<?> request = this.request();
+      public void didReadRequest(Result<HttpRequest<?>> result) {
+        final HttpRequest<?> request = result.getNonNull();
         assertEquals("/test", request.target());
         assertEquals("clientToServer", request.payload().get());
         serverRequestLatch.countDown();
@@ -112,7 +113,7 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void didWriteResponse() {
+      public void didWriteResponse(Result<HttpResponse<?>> response) {
         serverResponseLatch.countDown();
       }
 
@@ -126,7 +127,7 @@ public class HttpSocketTests {
       }
 
       @Override
-      public void didReadRequest(HttpResponderContext handler) {
+      public void didReadRequest(Result<HttpRequest<?>> request, HttpResponderContext handler) {
         this.enqueueRequester(new TestResponder());
       }
 

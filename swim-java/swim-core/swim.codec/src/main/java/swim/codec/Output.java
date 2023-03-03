@@ -206,7 +206,7 @@ public abstract class Output<T> implements Flushable {
    * is non-{@code null}; otherwise returns some {@code other} value.
    */
   @CheckReturnValue
-  public @NonNull T getOrNonNull(@NonNull T other) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
     try {
       final T value = this.get();
       if (value != null) {
@@ -245,10 +245,10 @@ public abstract class Output<T> implements Flushable {
 
   public Result<T> toResult() {
     try {
-      return Result.success(this.get());
+      return Result.ok(this.get());
     } catch (Throwable error) {
       if (Result.isNonFatal(error)) {
-        return Result.failure(error);
+        return Result.error(error);
       } else {
         throw error;
       }
