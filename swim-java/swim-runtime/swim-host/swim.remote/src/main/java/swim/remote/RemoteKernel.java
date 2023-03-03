@@ -30,6 +30,7 @@ public class RemoteKernel extends KernelProxy {
 
   final double kernelPriority;
   WarpSettings warpSettings;
+  boolean autoClose = false;
 
   public RemoteKernel(double kernelPriority, WarpSettings warpSettings) {
     this.kernelPriority = kernelPriority;
@@ -64,11 +65,17 @@ public class RemoteKernel extends KernelProxy {
     return this.warpSettings;
   }
 
+  public void setAutoClose(boolean autoClose) {
+    this.autoClose = autoClose;
+  }
+
   @Override
   public HostBinding createHost(HostAddress hostAddress) {
     if (hostAddress.hostUri().host().isDefined() && !"swim".equals(hostAddress.partKey().stringValue(null))) {
       final IpInterface endpoint = this.kernelWrapper().unwrapKernel(IpInterface.class);
-      return new RemoteHostClient(hostAddress.hostUri(), endpoint, this.warpSettings());
+      RemoteHostClient client = new RemoteHostClient(hostAddress.hostUri(), endpoint, this.warpSettings());
+      client.setAutoClose(this.autoClose);
+      return client;
     }
     return super.createHost(hostAddress);
   }
@@ -78,7 +85,9 @@ public class RemoteKernel extends KernelProxy {
     final Uri hostUri = hostDef.hostUri();
     if (hostUri != null && hostUri.host().isDefined() && !"swim".equals(part.partKey().stringValue(null))) {
       final IpInterface endpoint = this.kernelWrapper().unwrapKernel(IpInterface.class);
-      return new RemoteHostClient(hostUri, endpoint, this.warpSettings());
+      RemoteHostClient client = new RemoteHostClient(hostUri, endpoint, this.warpSettings());
+      client.setAutoClose(autoClose);
+      return client;
     }
     return super.createHost(part, hostDef);
   }
