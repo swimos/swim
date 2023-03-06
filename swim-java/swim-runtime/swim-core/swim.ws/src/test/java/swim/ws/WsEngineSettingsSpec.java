@@ -40,7 +40,8 @@ public class WsEngineSettingsSpec {
                             Slot.of("serverNoContextTakeover", true),
                             Slot.of("clientNoContextTakeover", true),
                             Slot.of("serverMaxWindowBits", 11),
-                            Slot.of("clientMaxWindowBits", 13)),
+                            Slot.of("clientMaxWindowBits", 13),
+                            Slot.of("autoClose", true)),
                   WsEngineSettings.standard()
                                   .maxFrameSize(2048)
                                   .maxMessageSize(4096)
@@ -49,7 +50,8 @@ public class WsEngineSettingsSpec {
                                   .serverNoContextTakeover(true)
                                   .clientNoContextTakeover(true)
                                   .serverMaxWindowBits(11)
-                                  .clientMaxWindowBits(13));
+                                  .clientMaxWindowBits(13)
+                                  .autoClose(true));
   }
 
   @Test
@@ -62,7 +64,8 @@ public class WsEngineSettingsSpec {
                                                               .serverNoContextTakeover(true)
                                                               .clientNoContextTakeover(true)
                                                               .serverMaxWindowBits(11)
-                                                              .clientMaxWindowBits(15);
+                                                              .clientMaxWindowBits(15)
+                                                              .autoClose(true);
 
     final FingerTrieSeq<WebSocketExtension> requestExtensions = FingerTrieSeq.of(WebSocketExtension.permessageDeflate(false, false, 10, 10));
     final FingerTrieSeq<WebSocketExtension> responseExtensions = wsEngineSettings.acceptExtensions(requestExtensions);
@@ -89,7 +92,8 @@ public class WsEngineSettingsSpec {
                                                               .serverNoContextTakeover(true)
                                                               .clientNoContextTakeover(true)
                                                               .serverMaxWindowBits(15)
-                                                              .clientMaxWindowBits(15);
+                                                              .clientMaxWindowBits(15)
+                                                              .autoClose(true);
 
     try {
       final FingerTrieSeq<WebSocketExtension> requestExtensions = FingerTrieSeq.of(WebSocketExtension.permessageDeflate(false, false, 15, 1));

@@ -44,7 +44,8 @@ public class WsSettingsSpec {
                                     Slot.of("serverNoContextTakeover", true),
                                     Slot.of("clientNoContextTakeover", true),
                                     Slot.of("serverMaxWindowBits", 11),
-                                    Slot.of("clientMaxWindowBits", 13))),
+                                    Slot.of("clientMaxWindowBits", 13),
+                                    Slot.of("autoClose", true))),
                 WsSettings.standard().maxFrameSize(2048)
                                      .maxMessageSize(4096)
                                      .serverCompressionLevel(7)
@@ -52,7 +53,8 @@ public class WsSettingsSpec {
                                      .serverNoContextTakeover(true)
                                      .clientNoContextTakeover(true)
                                      .serverMaxWindowBits(11)
-                                     .clientMaxWindowBits(13));
+                                     .clientMaxWindowBits(13)
+                                     .autoClose(true));
   }
 
   @Test

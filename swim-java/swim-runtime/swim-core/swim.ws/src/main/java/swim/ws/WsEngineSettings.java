@@ -40,11 +40,12 @@ public class WsEngineSettings implements Debug {
   protected final boolean clientNoContextTakeover;
   protected final int serverMaxWindowBits;
   protected final int clientMaxWindowBits;
+  protected final boolean autoClose;
 
   public WsEngineSettings(int maxFrameSize, int maxMessageSize,
                           int serverCompressionLevel, int clientCompressionLevel,
                           boolean serverNoContextTakeover, boolean clientNoContextTakeover,
-                          int serverMaxWindowBits, int clientMaxWindowBits) {
+                          int serverMaxWindowBits, int clientMaxWindowBits, boolean autoClose) {
     this.maxFrameSize = maxFrameSize;
     this.maxMessageSize = maxMessageSize;
     this.serverCompressionLevel = serverCompressionLevel;
@@ -53,6 +54,7 @@ public class WsEngineSettings implements Debug {
     this.clientNoContextTakeover = clientNoContextTakeover;
     this.serverMaxWindowBits = serverMaxWindowBits;
     this.clientMaxWindowBits = clientMaxWindowBits;
+    this.autoClose = autoClose;
   }
 
   public final int maxFrameSize() {
@@ -63,7 +65,7 @@ public class WsEngineSettings implements Debug {
     return this.copy(maxFrameSize, this.maxMessageSize,
                      this.serverCompressionLevel, this.clientCompressionLevel,
                      this.serverNoContextTakeover, this.clientNoContextTakeover,
-                     this.serverMaxWindowBits, this.clientMaxWindowBits);
+                     this.serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public final int maxMessageSize() {
@@ -74,7 +76,7 @@ public class WsEngineSettings implements Debug {
     return this.copy(this.maxFrameSize, maxMessageSize,
                      this.serverCompressionLevel, this.clientCompressionLevel,
                      this.serverNoContextTakeover, this.clientNoContextTakeover,
-                     this.serverMaxWindowBits, this.clientMaxWindowBits);
+                     this.serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public final int serverCompressionLevel() {
@@ -85,7 +87,7 @@ public class WsEngineSettings implements Debug {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      serverCompressionLevel, this.clientCompressionLevel,
                      this.serverNoContextTakeover, this.clientNoContextTakeover,
-                     this.serverMaxWindowBits, this.clientMaxWindowBits);
+                     this.serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public final int clientCompressionLevel() {
@@ -96,14 +98,14 @@ public class WsEngineSettings implements Debug {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.serverCompressionLevel, clientCompressionLevel,
                      this.serverNoContextTakeover, this.clientNoContextTakeover,
-                     this.serverMaxWindowBits, this.clientMaxWindowBits);
+                     this.serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public WsEngineSettings compressionLevel(int serverCompressionLevel, int clientCompressionLevel) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      serverCompressionLevel, clientCompressionLevel,
                      this.serverNoContextTakeover, this.clientNoContextTakeover,
-                     this.serverMaxWindowBits, this.clientMaxWindowBits);
+                     this.serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public final boolean serverNoContextTakeover() {
@@ -114,7 +116,7 @@ public class WsEngineSettings implements Debug {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.serverCompressionLevel, this.clientCompressionLevel,
                      serverNoContextTakeover, this.clientNoContextTakeover,
-                     this.serverMaxWindowBits, this.clientMaxWindowBits);
+                     this.serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public final boolean clientNoContextTakeover() {
@@ -125,7 +127,7 @@ public class WsEngineSettings implements Debug {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.serverCompressionLevel, this.clientCompressionLevel,
                      this.serverNoContextTakeover, clientNoContextTakeover,
-                     this.serverMaxWindowBits, this.clientMaxWindowBits);
+                     this.serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public final int serverMaxWindowBits() {
@@ -136,7 +138,7 @@ public class WsEngineSettings implements Debug {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.serverCompressionLevel, this.clientCompressionLevel,
                      this.serverNoContextTakeover, this.clientNoContextTakeover,
-                     serverMaxWindowBits, this.clientMaxWindowBits);
+                     serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public final int clientMaxWindowBits() {
@@ -147,7 +149,18 @@ public class WsEngineSettings implements Debug {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.serverCompressionLevel, this.clientCompressionLevel,
                      this.serverNoContextTakeover, this.clientNoContextTakeover,
-                     this.serverMaxWindowBits, clientMaxWindowBits);
+                     this.serverMaxWindowBits, clientMaxWindowBits, this.autoClose);
+  }
+
+  public WsEngineSettings autoClose(boolean autoClose) {
+    return this.copy(this.maxFrameSize, this.maxMessageSize,
+         this.serverCompressionLevel, this.clientCompressionLevel,
+         this.serverNoContextTakeover, this.clientNoContextTakeover,
+         this.serverMaxWindowBits, this.clientMaxWindowBits, autoClose);
+  }
+
+  public final boolean autoClose() {
+    return this.autoClose;
   }
 
   public FingerTrieSeq<WebSocketExtension> extensions() {
@@ -256,11 +269,11 @@ public class WsEngineSettings implements Debug {
   protected WsEngineSettings copy(int maxFrameSize, int maxMessageSize,
                                   int serverCompressionLevel, int clientCompressionLevel,
                                   boolean serverNoContextTakeover, boolean clientNoContextTakeover,
-                                  int serverMaxWindowBits, int clientMaxWindowBits) {
+                                  int serverMaxWindowBits, int clientMaxWindowBits, boolean autoClose) {
     return new WsEngineSettings(maxFrameSize, maxMessageSize,
                                 serverCompressionLevel, clientCompressionLevel,
                                 serverNoContextTakeover, clientNoContextTakeover,
-                                serverMaxWindowBits, clientMaxWindowBits);
+                                serverMaxWindowBits, clientMaxWindowBits, autoClose);
   }
 
   public boolean canEqual(Object other) {
@@ -281,7 +294,8 @@ public class WsEngineSettings implements Debug {
           && this.serverNoContextTakeover == that.serverNoContextTakeover
           && this.clientNoContextTakeover == that.clientNoContextTakeover
           && this.serverMaxWindowBits == that.serverMaxWindowBits
-          && this.clientMaxWindowBits == that.clientMaxWindowBits;
+          && this.clientMaxWindowBits == that.clientMaxWindowBits
+          && this.autoClose == that.autoClose;
     }
     return false;
   }
@@ -293,11 +307,11 @@ public class WsEngineSettings implements Debug {
     if (WsEngineSettings.hashSeed == 0) {
       WsEngineSettings.hashSeed = Murmur3.seed(WsEngineSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         WsEngineSettings.hashSeed, this.maxFrameSize), this.maxMessageSize),
         this.serverCompressionLevel), this.clientCompressionLevel),
         Murmur3.hash(this.serverNoContextTakeover)), Murmur3.hash(this.clientNoContextTakeover)),
-        this.serverMaxWindowBits), this.clientMaxWindowBits));
+        this.serverMaxWindowBits), this.clientMaxWindowBits), Murmur3.hash(this.autoClose)));
   }
 
   @Override
@@ -310,7 +324,8 @@ public class WsEngineSettings implements Debug {
                    .write('.').write("serverNoContextTakeover").write('(').debug(this.serverNoContextTakeover).write(')')
                    .write('.').write("clientNoContextTakeover").write('(').debug(this.clientNoContextTakeover).write(')')
                    .write('.').write("serverMaxWindowBits").write('(').debug(this.serverMaxWindowBits).write(')')
-                   .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')');
+                   .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')')
+                   .write('.').write("autoClose").write('(').debug(this.autoClose).write(')');
     return output;
   }
 
@@ -369,10 +384,12 @@ public class WsEngineSettings implements Debug {
         clientMaxWindowBits = 15;
       }
 
+      final boolean autoClose = Boolean.parseBoolean(System.getProperty("swim.ws.client.auto.close"));
+
       WsEngineSettings.standard = new WsEngineSettings(maxFrameSize, maxMessageSize,
                                                        serverCompressionLevel, clientCompressionLevel,
                                                        serverNoContextTakeover, clientNoContextTakeover,
-                                                       serverMaxWindowBits, clientMaxWindowBits);
+                                                       serverMaxWindowBits, clientMaxWindowBits, autoClose);
     }
     return WsEngineSettings.standard;
   }
@@ -446,6 +463,9 @@ final class WsEngineSettingsForm extends Form<WsEngineSettings> {
       if (settings.clientMaxWindowBits != standard.clientMaxWindowBits) {
         record.slot("clientMaxWindowBits", settings.clientMaxWindowBits);
       }
+      if (settings.autoClose != standard.autoClose) {
+        record.slot("autoClose", settings.autoClose);
+      }
       return record;
     } else {
       return Item.extant();
@@ -464,8 +484,9 @@ final class WsEngineSettingsForm extends Form<WsEngineSettings> {
     final boolean clientNoContextTakeover = value.get("clientNoContextTakeover").booleanValue(standard.clientNoContextTakeover);
     final int serverMaxWindowBits = value.get("serverMaxWindowBits").intValue(standard.serverMaxWindowBits);
     final int clientMaxWindowBits = value.get("clientMaxWindowBits").intValue(standard.clientMaxWindowBits);
+    final boolean autoClose = value.get("autoClose").booleanValue(standard.autoClose);
     return new WsEngineSettings(maxFrameSize, maxMessageSize, serverCompressionLevel, clientCompressionLevel,
-                                serverNoContextTakeover, clientNoContextTakeover, serverMaxWindowBits, clientMaxWindowBits);
+         serverNoContextTakeover, clientNoContextTakeover, serverMaxWindowBits, clientMaxWindowBits, autoClose);
   }
 
 }
