@@ -37,9 +37,9 @@ public class WsSettings extends WsEngineSettings {
   public WsSettings(HttpSettings httpSettings, int maxFrameSize, int maxMessageSize,
                     int serverCompressionLevel, int clientCompressionLevel,
                     boolean serverNoContextTakeover, boolean clientNoContextTakeover,
-                    int serverMaxWindowBits, int clientMaxWindowBits) {
+                    int serverMaxWindowBits, int clientMaxWindowBits, boolean autoClose) {
     super(maxFrameSize, maxMessageSize, serverCompressionLevel, clientCompressionLevel,
-          serverNoContextTakeover, clientNoContextTakeover, serverMaxWindowBits, clientMaxWindowBits);
+         serverNoContextTakeover, clientNoContextTakeover, serverMaxWindowBits, clientMaxWindowBits, autoClose);
     this.httpSettings = httpSettings;
   }
 
@@ -51,7 +51,7 @@ public class WsSettings extends WsEngineSettings {
     return this.copy(httpSettings, this.maxFrameSize, this.maxMessageSize,
                      this.serverCompressionLevel, this.clientCompressionLevel,
                      this.serverNoContextTakeover, this.clientNoContextTakeover,
-                     this.serverMaxWindowBits, this.clientMaxWindowBits);
+                     this.serverMaxWindowBits, this.clientMaxWindowBits, this.autoClose);
   }
 
   public final IpSettings ipSettings() {
@@ -82,7 +82,7 @@ public class WsSettings extends WsEngineSettings {
     return this.copy(engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
                      engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
                      engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
-                     engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
+                     engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits(), engineSettings.autoClose());
   }
 
   @Override
@@ -131,6 +131,11 @@ public class WsSettings extends WsEngineSettings {
   }
 
   @Override
+  public WsSettings autoClose(boolean autoClose) {
+    return (WsSettings) super.autoClose(autoClose);
+  }
+
+  @Override
   public Value toValue() {
     return WsSettings.form().mold(this).toValue();
   }
@@ -138,22 +143,22 @@ public class WsSettings extends WsEngineSettings {
   protected WsSettings copy(HttpSettings httpSettings, int maxFrameSize, int maxMessageSize,
                             int serverCompressionLevel, int clientCompressionLevel,
                             boolean serverNoContextTakeover, boolean clientNoContextTakeover,
-                            int serverMaxWindowBits, int clientMaxWindowBits) {
+                            int serverMaxWindowBits, int clientMaxWindowBits, boolean autoClose) {
     return new WsSettings(httpSettings, maxFrameSize, maxMessageSize,
                           serverCompressionLevel, clientCompressionLevel,
                           serverNoContextTakeover, clientNoContextTakeover,
-                          serverMaxWindowBits, clientMaxWindowBits);
+                          serverMaxWindowBits, clientMaxWindowBits, autoClose);
   }
 
   @Override
   protected WsSettings copy(int maxFrameSize, int maxMessageSize,
                             int serverCompressionLevel, int clientCompressionLevel,
                             boolean serverNoContextTakeover, boolean clientNoContextTakeover,
-                            int serverMaxWindowBits, int clientMaxWindowBits) {
+                            int serverMaxWindowBits, int clientMaxWindowBits, boolean autoClose) {
     return this.copy(this.httpSettings, maxFrameSize, maxMessageSize,
                      serverCompressionLevel, clientCompressionLevel,
                      serverNoContextTakeover, clientNoContextTakeover,
-                     serverMaxWindowBits, clientMaxWindowBits);
+                     serverMaxWindowBits, clientMaxWindowBits, autoClose);
   }
 
   public boolean canEqual(Object other) {
@@ -175,7 +180,8 @@ public class WsSettings extends WsEngineSettings {
           && this.serverNoContextTakeover == that.serverNoContextTakeover
           && this.clientNoContextTakeover == that.clientNoContextTakeover
           && this.serverMaxWindowBits == that.serverMaxWindowBits
-          && this.clientMaxWindowBits == that.clientMaxWindowBits;
+          && this.clientMaxWindowBits == that.clientMaxWindowBits
+          && this.autoClose == that.autoClose;
     }
     return false;
   }
@@ -187,11 +193,11 @@ public class WsSettings extends WsEngineSettings {
     if (WsSettings.hashSeed == 0) {
       WsSettings.hashSeed = Murmur3.seed(WsSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(WsSettings.hashSeed, this.httpSettings.hashCode()),
         this.maxFrameSize), this.maxMessageSize), this.serverCompressionLevel), this.clientCompressionLevel),
         Murmur3.hash(this.serverNoContextTakeover)), Murmur3.hash(this.clientNoContextTakeover)),
-        this.serverMaxWindowBits), this.clientMaxWindowBits));
+        this.serverMaxWindowBits), this.clientMaxWindowBits), Murmur3.hash(this.autoClose)));
   }
 
   @Override
@@ -205,7 +211,8 @@ public class WsSettings extends WsEngineSettings {
                    .write('.').write("serverNoContextTakeover").write('(').debug(this.serverNoContextTakeover).write(')')
                    .write('.').write("clientNoContextTakeover").write('(').debug(this.clientNoContextTakeover).write(')')
                    .write('.').write("serverMaxWindowBits").write('(').debug(this.serverMaxWindowBits).write(')')
-                   .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')');
+                   .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')')
+                   .write('.').write("autoClose").write('(').debug(this.autoClose).write(')');
     return output;
   }
 
@@ -217,7 +224,7 @@ public class WsSettings extends WsEngineSettings {
       WsSettings.standard = new WsSettings(HttpSettings.standard(), engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
                                            engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
                                            engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
-                                           engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
+                                           engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits(), engineSettings.autoClose());
     }
     return WsSettings.standard;
   }
@@ -307,6 +314,9 @@ final class WsSettingsForm extends Form<WsSettings> {
       if (settings.clientMaxWindowBits() != standard.clientMaxWindowBits()) {
         ws.slot("clientMaxWindowBits", settings.clientMaxWindowBits());
       }
+      if (settings.autoClose() != standard.autoClose()) {
+        ws.slot("autoClose", settings.autoClose());
+      }
       return Record.of(ws).concat(HttpSettings.form().mold(settings.httpSettings));
     } else {
       return Item.extant();
@@ -326,6 +336,7 @@ final class WsSettingsForm extends Form<WsSettings> {
     boolean clientNoContextTakeover = standard.clientNoContextTakeover();
     int serverMaxWindowBits = standard.serverMaxWindowBits();
     int clientMaxWindowBits = standard.clientMaxWindowBits();
+    boolean autoClose = standard.autoClose();
     for (Item member : value) {
       if (member.getAttr("ws").isDefined() || member.getAttr("websocket").isDefined()) {
         maxFrameSize = member.get("maxFrameSize").intValue(maxFrameSize);
@@ -336,12 +347,14 @@ final class WsSettingsForm extends Form<WsSettings> {
         clientNoContextTakeover = member.get("clientNoContextTakeover").booleanValue(clientNoContextTakeover);
         serverMaxWindowBits = member.get("serverMaxWindowBits").intValue(serverMaxWindowBits);
         clientMaxWindowBits = member.get("clientMaxWindowBits").intValue(clientMaxWindowBits);
+        autoClose = member.get("autoClose").booleanValue(autoClose);
+
       }
     }
     return new WsSettings(httpSettings, maxFrameSize, maxMessageSize,
                           serverCompressionLevel, clientCompressionLevel,
                           serverNoContextTakeover, clientNoContextTakeover,
-                          serverMaxWindowBits, clientMaxWindowBits);
+                          serverMaxWindowBits, clientMaxWindowBits, autoClose);
   }
 
 }

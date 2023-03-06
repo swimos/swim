@@ -47,7 +47,6 @@ public class RemoteHostClient extends RemoteHost {
   HttpClient client;
   TimerRef reconnectTimer;
   double reconnectTimeout;
-  boolean autoClose = false;
 
   public RemoteHostClient(Uri baseUri, IpInterface endpoint, WarpSettings warpSettings) {
     super(Uri.empty(), baseUri);
@@ -65,10 +64,6 @@ public class RemoteHostClient extends RemoteHost {
   @Override
   public void setHostContext(HostContext hostContext) {
     super.setHostContext(hostContext);
-  }
-
-  public void setAutoClose(boolean autoClose) {
-    this.autoClose = autoClose;
   }
 
   public void connect() {
@@ -119,7 +114,7 @@ public class RemoteHostClient extends RemoteHost {
 
   @Override
   protected void reconnect() {
-    if (this.autoClose) {
+    if (this.warpSettings.wsSettings().autoClose()) {
       if (RemoteHost.DOWNLINKS.get(this).isEmpty() && RemoteHost.UPLINKS.get(this).isEmpty()) {
         close();
         return;
