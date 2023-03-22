@@ -97,4 +97,13 @@ ext.includeSwimCore = { frameworkDir ->
 
   include 'swim-web'
   project(':swim-web').projectDir = file("${frameworkDir}/swim.web")
+
+  include 'swim-config'
+  project(':swim-config').projectDir = file("${frameworkDir}/swim.config")
+
+  include 'swim-config-annotation-processor'
+  project(':swim-config-annotation-processor').projectDir = file("${frameworkDir}/swim.config.annotation.processor")
+
+  include 'swim-config-annotation-processor-tests'
+  project(':swim-config-annotation-processor-tests').projectDir = file("${frameworkDir}/swim.config.annotation.processor.tests")
 }
