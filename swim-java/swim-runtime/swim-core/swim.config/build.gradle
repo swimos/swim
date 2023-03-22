@@ -1,0 +1,15 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Utilities for configuring components'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.config'
+ext.moduleName = 'swim.config'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-collections')
+  implementation project(path: ':swim-structure')
+}
