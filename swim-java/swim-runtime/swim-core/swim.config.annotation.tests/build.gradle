@@ -4,14 +4,14 @@ plugins {
 }
 
 description = 'Annotation processor to generate config classes.'
-ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.config.annotation.processor.tests'
-ext.moduleName = 'swim.config.annotation.processor.tests'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime/swim-core/swim.config.annotation.tests'
+ext.moduleName = 'swim.config.annotation.tests'
 
 dependencies {
   api project(":swim-config")
   api project(":swim-structure")
-  compileOnly project(":swim-config-annotation-processor")
-  annotationProcessor project(":swim-config-annotation-processor")
+  compileOnly project(":swim-config-annotation")
+  annotationProcessor project(":swim-config-annotation")
 }
 
 tasks.withType(JavaCompile) {
