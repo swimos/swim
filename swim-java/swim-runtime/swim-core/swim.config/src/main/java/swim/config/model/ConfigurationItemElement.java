@@ -10,6 +10,8 @@ public class ConfigurationItemElement extends AbstractConfigurationElement {
 
   List<String> validations = new ArrayList<>();
 
+  List<String> recommendations = new ArrayList<>();
+
   public String name() {
     return this.name;
   }
@@ -32,5 +34,13 @@ public class ConfigurationItemElement extends AbstractConfigurationElement {
 
   public void validations(List<String> validations) {
     this.validations = validations;
+  }
+
+  public List<String> recommendations() {
+    return this.recommendations;
+  }
+
+  public void recommendations(List<String> recommendations) {
+    this.recommendations = recommendations;
   }
 }

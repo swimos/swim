@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-@SupportedAnnotationTypes({"swim.config.Config", "swim.config.Adapter"}) //
+@SupportedAnnotationTypes({"swim.config.annotation.Config", "swim.config.annotation.Adapter"}) //
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class ConfigAnnotationProcessor extends AbstractProcessor {
 
@@ -35,12 +35,12 @@ public class ConfigAnnotationProcessor extends AbstractProcessor {
 
     Optional<? extends TypeElement> adapterElement = annotations.stream()
         .filter(a -> a.getQualifiedName()
-            .contentEquals("swim.config.Adapter"))
+            .contentEquals("swim.config.annotation.Adapter"))
         .findFirst();
 
     Optional<? extends TypeElement> configElement = annotations.stream()
         .filter(a -> a.getQualifiedName()
-            .contentEquals("swim.config.Config"))
+            .contentEquals("swim.config.annotation.Config"))
         .findFirst();
 
     if(adapterElement.isEmpty() || configElement.isEmpty()) {
