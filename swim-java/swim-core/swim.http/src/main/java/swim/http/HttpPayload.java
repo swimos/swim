@@ -30,6 +30,11 @@ public abstract class HttpPayload<T> {
     // sealed
   }
 
+  /**
+   * Returns {@code true} if this payload is delimited by the end of the stream.
+   */
+  public abstract boolean isCloseDelimited();
+
   public abstract @Nullable T get();
 
   public abstract Transcoder<T> transcoder();
@@ -38,7 +43,13 @@ public abstract class HttpPayload<T> {
     return this.transcoder().mediaType();
   }
 
-  public abstract HttpHeaders headers();
+  public abstract HttpHeaders injectHeaders(HttpHeaders headers);
+
+  public HttpHeaders headers() {
+    return this.injectHeaders(HttpHeaders.of());
+  }
+
+  public abstract HttpHeaders trailers();
 
   public abstract Encode<? extends HttpPayload<T>> encode(OutputBuffer<?> output);
 

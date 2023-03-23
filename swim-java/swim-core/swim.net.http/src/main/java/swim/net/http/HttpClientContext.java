@@ -17,19 +17,15 @@ package swim.net.http;
 import java.net.InetSocketAddress;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.net.ConnectionContext;
-import swim.net.NetSocket;
 
 @Public
 @Since("5.0")
-public interface HttpClientContext extends ConnectionContext {
+public interface HttpClientContext extends HttpSocketContext {
 
   /**
    * Returns the bound HTTP client.
    */
   HttpClient client();
-
-  HttpOptions options();
 
   boolean connect(InetSocketAddress remoteAddress);
 
@@ -60,23 +56,5 @@ public interface HttpClientContext extends ConnectionContext {
   boolean isResponding();
 
   boolean enqueueRequester(HttpRequester requester);
-
-  /**
-   * Rebinds the network connection to use a new {@code socket} handler.
-   */
-  void become(NetSocket socket);
-
-  boolean isDoneReading();
-
-  boolean doneReading();
-
-  boolean isDoneWriting();
-
-  boolean doneWriting();
-
-  /**
-   * Closes the network socket.
-   */
-  void close();
 
 }

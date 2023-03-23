@@ -19,7 +19,7 @@ import swim.util.ToSource;
 
 final class WsDeflateServerEngine extends WsDeflateEngine implements ToSource {
 
-  WsDeflateServerEngine(WsEngineOptions options) {
+  WsDeflateServerEngine(WsOptions options) {
     super(options);
   }
 
@@ -34,7 +34,7 @@ final class WsDeflateServerEngine extends WsDeflateEngine implements ToSource {
   }
 
   @Override
-  public WsEngine acceptOptions(WsEngineOptions options) {
+  public WsEngine acceptOptions(WsOptions options) {
     if (options.clientMaxWindowBits == 0) {
       options = options.clientMaxWindowBits(this.options.clientMaxWindowBits);
     }
@@ -44,7 +44,7 @@ final class WsDeflateServerEngine extends WsDeflateEngine implements ToSource {
                      .clientMaxWindowBits(Math.min(options.clientMaxWindowBits, this.options.clientMaxWindowBits));
     if (options.serverCompressionLevel == 0 || options.serverMaxWindowBits != 15) {
       // java.util.zip doesn't support configurable sliding window.sizes.
-      return Ws.clientEngine();
+      return Ws.serverEngine();
     } else if (!this.options.equals(options)) {
       return Ws.deflateServerEngine(options);
     } else {

@@ -55,6 +55,26 @@ public final class HttpStatus implements ToSource, ToString {
     return this.phrase;
   }
 
+  public boolean isInformational() {
+    return this.code >= 100 && this.code < 199;
+  }
+
+  public boolean isSuccessful() {
+    return this.code >= 200 && this.code < 299;
+  }
+
+  public boolean isRedirection() {
+    return this.code >= 300 && this.code < 399;
+  }
+
+  public boolean isClientError() {
+    return this.code >= 400 && this.code < 499;
+  }
+
+  public boolean isServerError() {
+    return this.code >= 500 && this.code < 599;
+  }
+
   public Write<?> write(Output<?> output) {
     return WriteHttpStatus.write(output, this.code, this.phrase, 0, 1);
   }

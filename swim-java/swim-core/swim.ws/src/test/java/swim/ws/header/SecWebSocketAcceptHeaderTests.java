@@ -15,6 +15,7 @@
 package swim.ws.header;
 
 import org.junit.jupiter.api.Test;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import swim.ws.WsAssertions;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class SecWebSocketAcceptHeaderTests {
 
   @Test
-  public void parseSecWebSocketAcceptHeaderType() {
+  public void parseSecWebSocketAcceptHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n");
     assertInstanceOf(SecWebSocketAcceptHeader.class, headers.getHeader(SecWebSocketAcceptHeader.TYPE));
     assertEquals(SecWebSocketAcceptHeader.of("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),

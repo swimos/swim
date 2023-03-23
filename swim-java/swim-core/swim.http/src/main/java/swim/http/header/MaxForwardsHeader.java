@@ -14,14 +14,17 @@
 
 package swim.http.header;
 
+import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base10;
 import swim.codec.Diagnostic;
 import swim.codec.ParseException;
 import swim.codec.StringInput;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -36,7 +39,7 @@ public final class MaxForwardsHeader extends HttpHeader {
     this.count = count;
   }
 
-  public int count() {
+  public int count() throws HttpException {
     if (this.count < 0) {
       this.count = MaxForwardsHeader.parseValue(this.value);
     }
@@ -52,13 +55,13 @@ public final class MaxForwardsHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("MaxForwardsHeader", "of")
-            .appendArgument(this.count())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Max-Forwards";
 
-  public static final HttpHeaderType<Integer> TYPE = new MaxForwardsHeaderType();
+  public static final HttpHeaderType<MaxForwardsHeader, Integer> TYPE = new MaxForwardsHeaderType();
 
   public static MaxForwardsHeader of(String name, String value) {
     return new MaxForwardsHeader(name, value, -1);
@@ -76,20 +79,26 @@ public final class MaxForwardsHeader extends HttpHeader {
     return MaxForwardsHeader.of(NAME, count);
   }
 
-  private static int parseValue(String value) {
+  public static MaxForwardsHeader of(String value) {
+    return MaxForwardsHeader.of(NAME, value);
+  }
+
+  private static int parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
-    int count = 0;
     int c = 0;
+    int count = 0;
     if (input.isCont()) {
       c = input.head();
       if (Base10.isDigit(c)) {
         input.step();
         count = Base10.decodeDigit(c);
       } else {
-        throw new ParseException(Diagnostic.expected("digit", input));
+        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Max-Forwards: " + value,
+                                new ParseException(Diagnostic.expected("digit", input)));
       }
     } else if (input.isDone()) {
-      throw new ParseException(Diagnostic.expected("digit", input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Max-Forwards: " + value,
+                              new ParseException(Diagnostic.expected("digit", input)));
     }
     while (input.isCont()) {
       c = input.head();
@@ -97,23 +106,23 @@ public final class MaxForwardsHeader extends HttpHeader {
         input.step();
         count = 10 * count + Base10.decodeDigit(c);
         if (count < 0) {
-          throw new ParseException(Diagnostic.message("max-forwards overflow", input));
+          throw new HttpException(HttpStatus.PAYLOAD_TOO_LARGE, "Overflow Max-Forwards: " + value);
         }
       } else {
         break;
       }
     }
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Max-Forwards: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Max-Forwards: " + value);
     }
     return count;
   }
 
 }
 
-final class MaxForwardsHeaderType implements HttpHeaderType<Integer>, ToSource {
+final class MaxForwardsHeaderType implements HttpHeaderType<MaxForwardsHeader, Integer>, ToSource {
 
   @Override
   public String name() {
@@ -121,18 +130,27 @@ final class MaxForwardsHeaderType implements HttpHeaderType<Integer>, ToSource {
   }
 
   @Override
-  public Integer getValue(HttpHeader header) {
-    return ((MaxForwardsHeader) header).count();
+  public Integer getValue(MaxForwardsHeader header) throws HttpException {
+    return header.count();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public MaxForwardsHeader of(String name, String value) {
     return MaxForwardsHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, Integer count) {
+  public MaxForwardsHeader of(String name, Integer count) {
     return MaxForwardsHeader.of(name, count);
+  }
+
+  @Override
+  public @Nullable MaxForwardsHeader cast(HttpHeader header) {
+    if (header instanceof MaxForwardsHeader) {
+      return (MaxForwardsHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

@@ -19,6 +19,8 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.collections.FingerTrieList;
+import swim.http.HttpException;
+import swim.http.HttpStatus;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -28,7 +30,7 @@ import swim.util.ToSource;
  */
 @Public
 @Since("5.0")
-public class WsEngineOptions implements ToSource {
+public class WsOptions implements ToSource {
 
   protected final int maxFrameSize;
   protected final int maxMessageSize;
@@ -41,11 +43,11 @@ public class WsEngineOptions implements ToSource {
   protected final int deflateBufferSize;
   protected final int inflateBufferSize;
 
-  public WsEngineOptions(int maxFrameSize, int maxMessageSize,
-                         int clientCompressionLevel, int serverCompressionLevel,
-                         boolean clientNoContextTakeover, boolean serverNoContextTakeover,
-                         int clientMaxWindowBits, int serverMaxWindowBits,
-                         int deflateBufferSize, int inflateBufferSize) {
+  public WsOptions(int maxFrameSize, int maxMessageSize,
+                   int clientCompressionLevel, int serverCompressionLevel,
+                   boolean clientNoContextTakeover, boolean serverNoContextTakeover,
+                   int clientMaxWindowBits, int serverMaxWindowBits,
+                   int deflateBufferSize, int inflateBufferSize) {
     this.maxFrameSize = maxFrameSize;
     this.maxMessageSize = maxMessageSize;
     this.clientCompressionLevel = clientCompressionLevel;
@@ -62,7 +64,7 @@ public class WsEngineOptions implements ToSource {
     return this.maxFrameSize;
   }
 
-  public WsEngineOptions maxFrameSize(int maxFrameSize) {
+  public WsOptions maxFrameSize(int maxFrameSize) {
     return this.copy(maxFrameSize, this.maxMessageSize,
                      this.clientCompressionLevel, this.serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -74,7 +76,7 @@ public class WsEngineOptions implements ToSource {
     return this.maxMessageSize;
   }
 
-  public WsEngineOptions maxMessageSize(int maxMessageSize) {
+  public WsOptions maxMessageSize(int maxMessageSize) {
     return this.copy(this.maxFrameSize, maxMessageSize,
                      this.clientCompressionLevel, this.serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -86,7 +88,7 @@ public class WsEngineOptions implements ToSource {
     return this.clientCompressionLevel;
   }
 
-  public WsEngineOptions clientCompressionLevel(int clientCompressionLevel) {
+  public WsOptions clientCompressionLevel(int clientCompressionLevel) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      clientCompressionLevel, this.serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -98,7 +100,7 @@ public class WsEngineOptions implements ToSource {
     return this.serverCompressionLevel;
   }
 
-  public WsEngineOptions serverCompressionLevel(int serverCompressionLevel) {
+  public WsOptions serverCompressionLevel(int serverCompressionLevel) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.clientCompressionLevel, serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -106,7 +108,7 @@ public class WsEngineOptions implements ToSource {
                      this.deflateBufferSize, this.inflateBufferSize);
   }
 
-  public WsEngineOptions compressionLevel(int clientCompressionLevel, int serverCompressionLevel) {
+  public WsOptions compressionLevel(int clientCompressionLevel, int serverCompressionLevel) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      clientCompressionLevel, serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -118,7 +120,7 @@ public class WsEngineOptions implements ToSource {
     return this.clientNoContextTakeover;
   }
 
-  public WsEngineOptions clientNoContextTakeover(boolean clientNoContextTakeover) {
+  public WsOptions clientNoContextTakeover(boolean clientNoContextTakeover) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.clientCompressionLevel, this.serverCompressionLevel,
                      clientNoContextTakeover, this.serverNoContextTakeover,
@@ -130,7 +132,7 @@ public class WsEngineOptions implements ToSource {
     return this.serverNoContextTakeover;
   }
 
-  public WsEngineOptions serverNoContextTakeover(boolean serverNoContextTakeover) {
+  public WsOptions serverNoContextTakeover(boolean serverNoContextTakeover) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.clientCompressionLevel, this.serverCompressionLevel,
                      this.clientNoContextTakeover, serverNoContextTakeover,
@@ -142,7 +144,7 @@ public class WsEngineOptions implements ToSource {
     return this.clientMaxWindowBits;
   }
 
-  public WsEngineOptions clientMaxWindowBits(int clientMaxWindowBits) {
+  public WsOptions clientMaxWindowBits(int clientMaxWindowBits) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.clientCompressionLevel, this.serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -154,7 +156,7 @@ public class WsEngineOptions implements ToSource {
     return this.serverMaxWindowBits;
   }
 
-  public WsEngineOptions serverMaxWindowBits(int serverMaxWindowBits) {
+  public WsOptions serverMaxWindowBits(int serverMaxWindowBits) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.clientCompressionLevel, this.serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -166,7 +168,7 @@ public class WsEngineOptions implements ToSource {
     return this.deflateBufferSize;
   }
 
-  public WsEngineOptions deflateBufferSize(int deflateBufferSize) {
+  public WsOptions deflateBufferSize(int deflateBufferSize) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.clientCompressionLevel, this.serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -178,7 +180,7 @@ public class WsEngineOptions implements ToSource {
     return this.inflateBufferSize;
   }
 
-  public WsEngineOptions inflateBufferSize(int inflateBufferSize) {
+  public WsOptions inflateBufferSize(int inflateBufferSize) {
     return this.copy(this.maxFrameSize, this.maxMessageSize,
                      this.clientCompressionLevel, this.serverCompressionLevel,
                      this.clientNoContextTakeover, this.serverNoContextTakeover,
@@ -191,12 +193,13 @@ public class WsEngineOptions implements ToSource {
     if (this.serverCompressionLevel != 0 && this.clientCompressionLevel != 0) {
       extensions = extensions.appended(WsExtension.permessageDeflate(this.serverNoContextTakeover,
                                                                      this.clientNoContextTakeover,
-                                                                     this.serverMaxWindowBits, 0));
+                                                                     this.serverMaxWindowBits,
+                                                                     this.clientMaxWindowBits));
     }
     return extensions;
   }
 
-  public WsEngineOptions extensions(FingerTrieList<WsExtension> extensions) {
+  public WsOptions extensions(FingerTrieList<WsExtension> extensions) throws HttpException {
     for (WsExtension extension : extensions) {
       final String name = extension.name();
       if (("permessage-deflate".equals(name) || "x-webkit-deflate-frame".equals(name))
@@ -216,10 +219,10 @@ public class WsEngineOptions implements ToSource {
             try {
               serverMaxWindowBits = Integer.parseInt(value);
             } catch (NumberFormatException cause) {
-              throw new IllegalArgumentException("Invalid permessage-deflate " + name + " parameter: " + key + "=" + value, cause);
+              throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid " + name + " parameter: " + key + "=" + value, cause);
             }
             if (serverMaxWindowBits < 8 || serverMaxWindowBits > 15) {
-              throw new IllegalArgumentException("Invalid permessage-deflate " + name + " parameter: " + key + "=" + value);
+              throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid " + name + " parameter: " + key + "=" + value);
             }
           } else if ("client_max_window_bits".equals(key)) {
             if (value == null) {
@@ -228,14 +231,14 @@ public class WsEngineOptions implements ToSource {
               try {
                 clientMaxWindowBits = Integer.parseInt(value);
               } catch (NumberFormatException error) {
-                throw new IllegalArgumentException("Invalid permessage-deflate " + name + " parameter: " + key + "=" + value);
+                throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid " + name + " parameter: " + key + "=" + value);
               }
               if (clientMaxWindowBits < 8 || clientMaxWindowBits > 15) {
-                throw new IllegalArgumentException("Invalid permessage-deflate " + name + " parameter: " + key + "=" + value);
+                throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid " + name + " parameter: " + key + "=" + value);
               }
             }
           } else {
-            throw new IllegalArgumentException("Unknown permessage-deflate " + name + " parameter: " + key + "=" + value);
+            throw new HttpException(HttpStatus.BAD_REQUEST, "Unknown " + name + " parameter: " + key + "=" + value);
           }
         }
         return this.copy(this.maxFrameSize, this.maxMessageSize,
@@ -250,28 +253,28 @@ public class WsEngineOptions implements ToSource {
                      this.deflateBufferSize, this.inflateBufferSize);
   }
 
-  protected WsEngineOptions copy(int maxFrameSize, int maxMessageSize,
-                                 int clientCompressionLevel, int serverCompressionLevel,
-                                 boolean clientNoContextTakeover, boolean serverNoContextTakeover,
-                                 int clientMaxWindowBits, int serverMaxWindowBits,
-                                 int deflateBufferSize, int inflateBufferSize) {
-    return new WsEngineOptions(maxFrameSize, maxMessageSize,
-                               clientCompressionLevel, serverCompressionLevel,
-                               clientNoContextTakeover, serverNoContextTakeover,
-                               clientMaxWindowBits, serverMaxWindowBits,
-                               deflateBufferSize, inflateBufferSize);
+  protected WsOptions copy(int maxFrameSize, int maxMessageSize,
+                           int clientCompressionLevel, int serverCompressionLevel,
+                           boolean clientNoContextTakeover, boolean serverNoContextTakeover,
+                           int clientMaxWindowBits, int serverMaxWindowBits,
+                           int deflateBufferSize, int inflateBufferSize) {
+    return new WsOptions(maxFrameSize, maxMessageSize,
+                         clientCompressionLevel, serverCompressionLevel,
+                         clientNoContextTakeover, serverNoContextTakeover,
+                         clientMaxWindowBits, serverMaxWindowBits,
+                         deflateBufferSize, inflateBufferSize);
   }
 
   public boolean canEqual(Object other) {
-    return other instanceof WsEngineOptions;
+    return other instanceof WsOptions;
   }
 
   @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsEngineOptions) {
-      final WsEngineOptions that = (WsEngineOptions) other;
+    } else if (other instanceof WsOptions) {
+      final WsOptions that = (WsOptions) other;
       return that.canEqual(this)
           && this.maxFrameSize == that.maxFrameSize
           && this.maxMessageSize == that.maxMessageSize
@@ -287,7 +290,7 @@ public class WsEngineOptions implements ToSource {
     return false;
   }
 
-  private static final int HASH_SEED = Murmur3.seed(WsEngineOptions.class);
+  private static final int HASH_SEED = Murmur3.seed(WsOptions.class);
 
   @Override
   public int hashCode() {
@@ -304,7 +307,7 @@ public class WsEngineOptions implements ToSource {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("WsEngineOptions", "standard").endInvoke()
+    notation.beginInvoke("WsOptions", "standard").endInvoke()
             .beginInvoke("maxFrameSize").appendArgument(this.maxFrameSize).endInvoke()
             .beginInvoke("maxMessageSize").appendArgument(this.maxMessageSize).endInvoke()
             .beginInvoke("clientCompressionLevel").appendArgument(this.clientCompressionLevel).endInvoke()
@@ -322,10 +325,10 @@ public class WsEngineOptions implements ToSource {
     return this.toSource();
   }
 
-  private static @Nullable WsEngineOptions standard;
+  private static @Nullable WsOptions standard;
 
-  public static WsEngineOptions standard() {
-    if (WsEngineOptions.standard == null) {
+  public static WsOptions standard() {
+    if (WsOptions.standard == null) {
       int maxFrameSize;
       try {
         maxFrameSize = Integer.parseInt(System.getProperty("swim.ws.max.frame.size"));
@@ -386,29 +389,29 @@ public class WsEngineOptions implements ToSource {
         inflateBufferSize = 4 * 1024;
       }
 
-      WsEngineOptions.standard = new WsEngineOptions(maxFrameSize, maxMessageSize,
-                                                     clientCompressionLevel, serverCompressionLevel,
-                                                     clientNoContextTakeover, serverNoContextTakeover,
-                                                     clientMaxWindowBits, serverMaxWindowBits,
-                                                     deflateBufferSize, inflateBufferSize);
+      WsOptions.standard = new WsOptions(maxFrameSize, maxMessageSize,
+                                         clientCompressionLevel, serverCompressionLevel,
+                                         clientNoContextTakeover, serverNoContextTakeover,
+                                         clientMaxWindowBits, serverMaxWindowBits,
+                                         deflateBufferSize, inflateBufferSize);
     }
-    return WsEngineOptions.standard;
+    return WsOptions.standard;
   }
 
-  public static WsEngineOptions noCompression() {
-    return WsEngineOptions.standard().compressionLevel(0, 0);
+  public static WsOptions noCompression() {
+    return WsOptions.standard().compressionLevel(0, 0);
   }
 
-  public static WsEngineOptions defaultCompression() {
-    return WsEngineOptions.standard().compressionLevel(-1, -1);
+  public static WsOptions defaultCompression() {
+    return WsOptions.standard().compressionLevel(-1, -1);
   }
 
-  public static WsEngineOptions fastestCompression() {
-    return WsEngineOptions.standard().compressionLevel(1, 1);
+  public static WsOptions fastestCompression() {
+    return WsOptions.standard().compressionLevel(1, 1);
   }
 
-  public static WsEngineOptions bestCompression() {
-    return WsEngineOptions.standard().compressionLevel(9, 9);
+  public static WsOptions bestCompression() {
+    return WsOptions.standard().compressionLevel(9, 9);
   }
 
 }

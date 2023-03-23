@@ -21,7 +21,7 @@ import swim.annotations.Since;
 @Since("5.0")
 public abstract class WsDeflateEngine extends WsEngine {
 
-  WsDeflateEngine(WsEngineOptions options) {
+  WsDeflateEngine(WsOptions options) {
     super(options);
   }
 

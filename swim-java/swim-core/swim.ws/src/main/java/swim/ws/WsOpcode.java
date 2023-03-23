@@ -23,27 +23,29 @@ import swim.util.ToSource;
 @Since("5.0")
 public enum WsOpcode implements ToSource {
 
-  CONTINUATION(0x0),
-  TEXT(0x1),
-  BINARY(0x2),
-  RESERVED_3(0x3),
-  RESERVED_4(0x4),
-  RESERVED_5(0x5),
-  RESERVED_6(0x6),
-  RESERVED_7(0x7),
-  CLOSE(0x8),
-  PING(0x9),
-  PONG(0xA),
-  RESERVED_B(0xB),
-  RESERVED_C(0xC),
-  RESERVED_D(0xD),
-  RESERVED_E(0xE),
-  RESERVED_F(0xF);
+  CONTINUATION(0x0, "continuation"),
+  TEXT(0x1, "text"),
+  BINARY(0x2, "binary"),
+  RESERVED_3(0x3, "0x3"),
+  RESERVED_4(0x4, "0x4"),
+  RESERVED_5(0x5, "0x5"),
+  RESERVED_6(0x6, "0x6"),
+  RESERVED_7(0x7, "0x7"),
+  CLOSE(0x8, "close"),
+  PING(0x9, "ping"),
+  PONG(0xA, "pong"),
+  RESERVED_B(0xB, "0xB"),
+  RESERVED_C(0xC, "0xC"),
+  RESERVED_D(0xD, "0xD"),
+  RESERVED_E(0xE, "0xE"),
+  RESERVED_F(0xF, "0xF");
 
   final int code;
+  final String string;
 
-  WsOpcode(int code) {
+  WsOpcode(int code, String string) {
     this.code = code;
+    this.string = string;
   }
 
   public int code() {
@@ -94,7 +96,7 @@ public enum WsOpcode implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return this.string;
   }
 
   public static WsOpcode of(int code) {

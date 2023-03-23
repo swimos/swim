@@ -18,15 +18,16 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpProduct;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -42,7 +43,7 @@ public final class ServerHeader extends HttpHeader {
     this.products = products;
   }
 
-  public FingerTrieList<HttpProduct> products() {
+  public FingerTrieList<HttpProduct> products() throws HttpException {
     if (this.products == null) {
       this.products = ServerHeader.parseValue(this.value);
     }
@@ -58,13 +59,13 @@ public final class ServerHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("ServerHeader", "of")
-            .appendArgument(this.products())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Server";
 
-  public static final HttpHeaderType<FingerTrieList<HttpProduct>> TYPE = new ServerHeaderType();
+  public static final HttpHeaderType<ServerHeader, FingerTrieList<HttpProduct>> TYPE = new ServerHeaderType();
 
   public static ServerHeader of(String name, String value) {
     return new ServerHeader(name, value, null);
@@ -83,10 +84,14 @@ public final class ServerHeader extends HttpHeader {
     return ServerHeader.of(NAME, FingerTrieList.of(products));
   }
 
-  private static FingerTrieList<HttpProduct> parseValue(String value) {
+  public static ServerHeader of(String value) {
+    return ServerHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<HttpProduct> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
-    FingerTrieList<HttpProduct> products = FingerTrieList.empty();
     int c = 0;
+    FingerTrieList<HttpProduct> products = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -97,16 +102,22 @@ public final class ServerHeader extends HttpHeader {
         }
       }
       if (input.isCont() && Http.isTokenChar(c)) {
-        final HttpProduct product = HttpProduct.parse(input).getNonNull();
-        products = products.appended(product);
+        final Parse<HttpProduct> parseProduct = HttpProduct.parse(input);
+        if (parseProduct.isDone()) {
+          products = products.appended(parseProduct.getNonNull());
+        } else if (parseProduct.isError()) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Server: " + value, parseProduct.getError());
+        } else {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Server: " + value);
+        }
         continue;
       }
       break;
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Server: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Server: " + value);
     }
     return products;
   }
@@ -126,7 +137,7 @@ public final class ServerHeader extends HttpHeader {
 
 }
 
-final class ServerHeaderType implements HttpHeaderType<FingerTrieList<HttpProduct>>, ToSource {
+final class ServerHeaderType implements HttpHeaderType<ServerHeader, FingerTrieList<HttpProduct>>, ToSource {
 
   @Override
   public String name() {
@@ -134,18 +145,27 @@ final class ServerHeaderType implements HttpHeaderType<FingerTrieList<HttpProduc
   }
 
   @Override
-  public FingerTrieList<HttpProduct> getValue(HttpHeader header) {
-    return ((ServerHeader) header).products();
+  public FingerTrieList<HttpProduct> getValue(ServerHeader header) throws HttpException {
+    return header.products();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public ServerHeader of(String name, String value) {
     return ServerHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<HttpProduct> products) {
+  public ServerHeader of(String name, FingerTrieList<HttpProduct> products) {
     return ServerHeader.of(name, products);
+  }
+
+  @Override
+  public @Nullable ServerHeader cast(HttpHeader header) {
+    if (header instanceof ServerHeader) {
+      return (ServerHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

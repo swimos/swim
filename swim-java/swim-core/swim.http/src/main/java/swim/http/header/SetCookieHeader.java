@@ -17,9 +17,13 @@ package swim.http.header;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Parse;
+import swim.codec.StringInput;
 import swim.http.HttpCookieState;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -34,9 +38,9 @@ public final class SetCookieHeader extends HttpHeader {
     this.cookie = cookie;
   }
 
-  public HttpCookieState cookie() {
+  public HttpCookieState cookie() throws HttpException {
     if (this.cookie == null) {
-      this.cookie = HttpCookieState.parse(this.value);
+      this.cookie = SetCookieHeader.parseValue(this.value);
     }
     return this.cookie;
   }
@@ -50,13 +54,13 @@ public final class SetCookieHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("SetCookieHeader", "of")
-            .appendArgument(this.cookie())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Set-Cookie";
 
-  public static final HttpHeaderType<HttpCookieState> TYPE = new SetCookieHeaderType();
+  public static final HttpHeaderType<SetCookieHeader, HttpCookieState> TYPE = new SetCookieHeaderType();
 
   public static SetCookieHeader of(String name, String value) {
     return new SetCookieHeader(name, value, null);
@@ -71,9 +75,25 @@ public final class SetCookieHeader extends HttpHeader {
     return SetCookieHeader.of(NAME, cookie);
   }
 
+  public static SetCookieHeader of(String value) {
+    return SetCookieHeader.of(NAME, value);
+  }
+
+  private static HttpCookieState parseValue(String value) throws HttpException {
+    final StringInput input = new StringInput(value);
+    final Parse<HttpCookieState> parseCookieState = HttpCookieState.parse(input);
+    if (parseCookieState.isDone()) {
+      return parseCookieState.getNonNull();
+    } else if (parseCookieState.isError()) {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Set-Cookie: " + value, parseCookieState.getError());
+    } else {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Set-Cookie: " + value);
+    }
+  }
+
 }
 
-final class SetCookieHeaderType implements HttpHeaderType<HttpCookieState>, ToSource {
+final class SetCookieHeaderType implements HttpHeaderType<SetCookieHeader, HttpCookieState>, ToSource {
 
   @Override
   public String name() {
@@ -81,18 +101,27 @@ final class SetCookieHeaderType implements HttpHeaderType<HttpCookieState>, ToSo
   }
 
   @Override
-  public HttpCookieState getValue(HttpHeader header) {
-    return ((SetCookieHeader) header).cookie();
+  public HttpCookieState getValue(SetCookieHeader header) throws HttpException {
+    return header.cookie();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public SetCookieHeader of(String name, String value) {
     return SetCookieHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, HttpCookieState cookie) {
+  public SetCookieHeader of(String name, HttpCookieState cookie) {
     return SetCookieHeader.of(name, cookie);
+  }
+
+  @Override
+  public @Nullable SetCookieHeader cast(HttpHeader header) {
+    if (header instanceof SetCookieHeader) {
+      return (SetCookieHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

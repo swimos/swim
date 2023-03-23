@@ -95,11 +95,11 @@ public class LogPrinter implements LogHandler {
       for (int i = 0; i < lineSeparator.length(); i = lineSeparator.offsetByCodePoints(i, 1)) {
         this.output.write(lineSeparator.codePointAt(i));
       }
-    } catch (Throwable error) {
-      if (Result.isNonFatal(error)) {
-        error.printStackTrace();
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        cause.printStackTrace();
       } else {
-        throw error;
+        throw cause;
       }
     }
   }

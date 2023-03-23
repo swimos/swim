@@ -360,12 +360,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
           if (Result.isNonFatal(cause)) {
             // Initiate transport close.
             status = this.readerRequestClose(status);
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.log.errorStatus("willConnect callback failed", this.socket, cause);
             // Abort and close the socket.
             return status;
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
@@ -391,12 +391,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.readerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("failed to connect socket", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -523,12 +523,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.readerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("failed to establish connection", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -558,12 +558,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
             if (Result.isNonFatal(cause)) {
               // Initiate transport close.
               status = this.readerRequestClose(status);
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.errorStatus("willOpen callback failed", this.socket, cause);
               // Abort and close the socket.
               return status;
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -637,12 +637,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.readerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doOpeningRead failed", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -699,12 +699,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.writerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doOpeningWrite failed", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -782,7 +782,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
             // Abort and close the socket.
             return status;
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
@@ -814,10 +814,10 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   }
 
   protected void didOpen() throws IOException {
+    this.log.infoConfig("opened socket", this);
+
     // Invoke socket lifecycle callback.
     this.socket.didOpen();
-
-    this.log.infoConfig("opened socket", this);
   }
 
   @Override
@@ -890,7 +890,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -919,7 +919,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -936,7 +936,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -958,10 +958,10 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   }
 
   protected void didBecome(NetSocket newSocket, NetSocket oldSocket) {
+    this.log.traceEntity("became socket", newSocket);
+
     // Tell the old socket that the transport has become the new socket.
     oldSocket.didBecome(newSocket);
-
-    this.log.traceEntity("became socket", newSocket);
   }
 
   @Override
@@ -1137,12 +1137,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.readerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doRead failed", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1341,12 +1341,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.writerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doWrite failed", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1433,12 +1433,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.readerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doTimeout failed", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1537,12 +1537,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.readerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doCloseInbound failed", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1561,7 +1561,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   protected void doCloseInbound() throws IOException {
     this.log.debugEntity("close inbound", this.socket);
 
-    this.getTransportContext().requestRead();
+    this.channel.shutdownInput();
   }
 
   @Override
@@ -1647,7 +1647,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1708,12 +1708,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.readerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doClosingRead failed", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1782,12 +1782,12 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       if (Result.isNonFatal(cause)) {
         // Initiate transport close.
         status = this.writerRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doClosingWrite failed", this.socket, cause);
         // Abort and close the socket.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1908,10 +1908,10 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       this.log.warningStatus("willClose callback failed", this.socket, cause);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception and continue closing.
+        // Report the non-fatal exception and continue closing.
         this.log.errorStatus("willClose callback failed", this.socket, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1921,10 +1921,10 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       this.getTransportContext().cancel();
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception and continue closing.
+        // Report the non-fatal exception and continue closing.
         this.log.errorStatus("failed to cancel transport", this.socket, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1961,10 +1961,10 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       this.log.warningStatus("didClose callback failed", this.socket, cause);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception and continue closing.
+        // Report the non-fatal exception and continue closing.
         this.log.errorStatus("didClose callback failed", this.socket, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1981,10 +1981,10 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   }
 
   protected void didClose() throws IOException {
+    this.log.info("closed socket");
+
     // Invoke socket lifecycle callback.
     this.socket.didClose();
-
-    this.log.info("closed socket");
   }
 
   @Override

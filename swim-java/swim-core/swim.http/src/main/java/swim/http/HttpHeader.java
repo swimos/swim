@@ -127,7 +127,7 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
   }
 
   public static HttpHeader of(String name, String value) {
-    final HttpHeaderType<?> type = HttpHeader.registry().getHeaderType(name);
+    final HttpHeaderType<?, ?> type = HttpHeader.registry().getHeaderType(name);
     if (type != null) {
       return type.of(name, value);
     } else {
@@ -170,12 +170,12 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
 
 final class ParseHttpHeader extends Parse<HttpHeader> {
 
-  final @Nullable StringTrieMap<HttpHeaderType<?>> nameTrie;
+  final @Nullable StringTrieMap<HttpHeaderType<?, ?>> nameTrie;
   final @Nullable StringBuilder nameBuilder;
   final @Nullable StringBuilder valueBuilder;
   final int step;
 
-  ParseHttpHeader(@Nullable StringTrieMap<HttpHeaderType<?>> nameTrie,
+  ParseHttpHeader(@Nullable StringTrieMap<HttpHeaderType<?, ?>> nameTrie,
                   @Nullable StringBuilder nameBuilder,
                   @Nullable StringBuilder valueBuilder, int step) {
     this.nameTrie = nameTrie;
@@ -191,7 +191,7 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
   }
 
   static Parse<HttpHeader> parse(Input input,
-                                 @Nullable StringTrieMap<HttpHeaderType<?>> nameTrie,
+                                 @Nullable StringTrieMap<HttpHeaderType<?, ?>> nameTrie,
                                  @Nullable StringBuilder nameBuilder,
                                  @Nullable StringBuilder valueBuilder, int step) {
     int c = 0;
@@ -201,7 +201,7 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
         if (Http.isTokenChar(c)) {
           input.step();
           if (nameTrie != null) {
-            final StringTrieMap<HttpHeaderType<?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
+            final StringTrieMap<HttpHeaderType<?, ?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
             if (subTrie != null) {
               nameTrie = subTrie;
             } else {
@@ -227,7 +227,7 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
         if (Http.isTokenChar(c)) {
           input.step();
           if (nameTrie != null) {
-            final StringTrieMap<HttpHeaderType<?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
+            final StringTrieMap<HttpHeaderType<?, ?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
             if (subTrie != null) {
               nameTrie = subTrie;
             } else {
@@ -274,7 +274,7 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
           input.step();
           step = 5;
         } else if (input.isReady()) {
-          final HttpHeaderType<?> type = nameTrie != null ? nameTrie.value() : null;
+          final HttpHeaderType<?, ?> type = nameTrie != null ? nameTrie.value() : null;
           final String value = valueBuilder != null ? valueBuilder.toString() : "";
           if (type != null) {
             return Parse.done(type.of(value));

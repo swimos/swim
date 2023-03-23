@@ -37,6 +37,11 @@ public final class HttpEmpty<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
+  public boolean isCloseDelimited() {
+    return false;
+  }
+
+  @Override
   public @Nullable T get() {
     return null;
   }
@@ -47,7 +52,12 @@ public final class HttpEmpty<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
-  public HttpHeaders headers() {
+  public HttpHeaders injectHeaders(HttpHeaders headers) {
+    return headers;
+  }
+
+  @Override
+  public HttpHeaders trailers() {
     return HttpHeaders.empty();
   }
 

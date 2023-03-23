@@ -27,6 +27,16 @@ public class ParseException extends DecodeException {
 
   private final @Nullable Diagnostic diagnostic;
 
+  public ParseException(@Nullable Diagnostic diagnostic, @Nullable String message, @Nullable Throwable cause) {
+    super(message, cause);
+    this.diagnostic = diagnostic;
+  }
+
+  public ParseException(@Nullable Diagnostic diagnostic, @Nullable String message) {
+    super(message);
+    this.diagnostic = diagnostic;
+  }
+
   public ParseException(@Nullable Diagnostic diagnostic, @Nullable Throwable cause) {
     super(cause);
     this.diagnostic = diagnostic;
@@ -63,10 +73,13 @@ public class ParseException extends DecodeException {
 
   @Override
   public @Nullable String getMessage() {
-    if (this.diagnostic != null) {
+    final String message = super.getMessage();
+    if (message != null) {
+      return message;
+    } else if (this.diagnostic != null) {
       return this.diagnostic.message();
     } else {
-      return super.getMessage();
+      return null;
     }
   }
 

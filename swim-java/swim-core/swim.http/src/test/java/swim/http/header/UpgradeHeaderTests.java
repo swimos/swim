@@ -17,6 +17,7 @@ package swim.http.header;
 import org.junit.jupiter.api.Test;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import swim.http.HttpUpgrade;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class UpgradeHeaderTests {
 
   @Test
-  public void parseUpgradeHeaderType() {
+  public void parseUpgradeHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Upgrade: websocket\r\n");
     assertInstanceOf(UpgradeHeader.class, headers.getHeader(UpgradeHeader.TYPE));
     assertEquals(UpgradeHeader.of(HttpUpgrade.WEBSOCKET),

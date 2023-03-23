@@ -23,7 +23,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateUnmaskedEmptyTextFrame() {
-    assertEncodes(WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression()),
+    assertEncodes(WsTestDeflateEncoder.server(WsOptions.defaultCompression()),
                   Base16.parseByteBuffer("C10100"),
                   WsTextFrame.of(""),
                   7);
@@ -31,7 +31,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateMaskedEmptyTextFrame() {
-    assertEncodes(WsTestDeflateEncoder.client(0x37FA213D, WsEngineOptions.defaultCompression()),
+    assertEncodes(WsTestDeflateEncoder.client(0x37FA213D, WsOptions.defaultCompression()),
                   Base16.parseByteBuffer("C18137FA213D37"),
                   WsTextFrame.of(""),
                   11);
@@ -39,7 +39,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateUnmaskedEmptyBinaryFrame() {
-    assertEncodes(WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression()),
+    assertEncodes(WsTestDeflateEncoder.server(WsOptions.defaultCompression()),
                   Base16.parseByteBuffer("C20100"),
                   WsBinaryFrame.of(ByteBuffer.allocate(0)),
                   7);
@@ -47,7 +47,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateMaskedEmptyBinaryFrame() {
-    assertEncodes(WsTestDeflateEncoder.client(0x37FA213D, WsEngineOptions.defaultCompression()),
+    assertEncodes(WsTestDeflateEncoder.client(0x37FA213D, WsOptions.defaultCompression()),
                   Base16.parseByteBuffer("C28137FA213D37"),
                   WsBinaryFrame.of(ByteBuffer.allocate(0)),
                   11);
@@ -55,7 +55,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateUnmaskedTextFrames() {
-    assertEncodes(WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression()),
+    assertEncodes(WsTestDeflateEncoder.server(WsOptions.defaultCompression()),
                   Base16.parseByteBuffer("C107F248CDC9C90700"),
                   WsTextFrame.of("Hello"),
                   13);
@@ -63,7 +63,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateMaskedTextFrames() {
-    assertEncodes(WsTestDeflateEncoder.client(0x37FA213D, WsEngineOptions.defaultCompression()),
+    assertEncodes(WsTestDeflateEncoder.client(0x37FA213D, WsOptions.defaultCompression()),
                   Base16.parseByteBuffer("C18737FA213DC5B2ECF4FEFD21"),
                   WsTextFrame.of("Hello"),
                   17);
@@ -71,7 +71,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateUnmaskedTextFragments() {
-    assertEncodes(WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression()),
+    assertEncodes(WsTestDeflateEncoder.server(WsOptions.defaultCompression()),
                   Base16.parseByteBuffer("411C72747276717573F7F0F4F2F6F1F5F30F080C0A0E090D0B8F888C4A4C801A4A4E494D4BCFC8CCCACEC9CDCB2F282C2A2E292D2BAFA8AC0200"),
                   WsTextFrame.of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"),
                   30, 32);
@@ -79,7 +79,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateMaskedTextFragments() {
-    assertEncodes(WsTestDeflateEncoder.client(0x37FA213D, WsEngineOptions.defaultCompression()),
+    assertEncodes(WsTestDeflateEncoder.client(0x37FA213D, WsOptions.defaultCompression()),
                   Base16.parseByteBuffer("419C37FA213D458E534B468F52CAC70ED3CBC60FD2323FF62B333EF72AB2BF766B71809A37FA213D7DB468707C35E9F1FD34E8F0FCD509111DD408101C55899135FA"),
                   WsTextFrame.of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"),
                   34, 36);
@@ -87,7 +87,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateUnmaskedSharedWindow() {
-    final WsTestDeflateEncoder encoder = WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression());
+    final WsTestDeflateEncoder encoder = WsTestDeflateEncoder.server(WsOptions.defaultCompression());
     assertEncodes(encoder, Base16.parseByteBuffer("C107F248CDC9C90700"), WsTextFrame.of("Hello"), 128);
     assertEncodes(encoder, Base16.parseByteBuffer("C105F200110000"), WsTextFrame.of("Hello"), 128);
     assertEncodes(encoder, Base16.parseByteBuffer("C10402130000"), WsTextFrame.of("Hello"), 128);
@@ -96,7 +96,7 @@ public class WsDeflateEncoderTests {
 
   @Test
   public void deflateMaskedSharedWindow() {
-    final WsDeflateEncoder encoder = WsTestDeflateEncoder.client(0x37FA213D, WsEngineOptions.defaultCompression());
+    final WsDeflateEncoder encoder = WsTestDeflateEncoder.client(0x37FA213D, WsOptions.defaultCompression());
     assertEncodes(encoder, Base16.parseByteBuffer("C18737FA213DC5B2ECF4FEFD21"), WsTextFrame.of("Hello"), 128);
     assertEncodes(encoder, Base16.parseByteBuffer("C18537FA213DC5FA303D37"), WsTextFrame.of("Hello"), 128);
     assertEncodes(encoder, Base16.parseByteBuffer("C18437FA213D35E9213D"), WsTextFrame.of("Hello"), 128);

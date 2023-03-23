@@ -69,9 +69,9 @@ public class TlsListener extends TcpListener {
     this.getTransportContext().dispatcher().bindTransport(transport);
     socket.setSocketContext(transport);
 
-    transport.open();
+    this.log.infoEntity("accept socket", transport);
 
-    this.log.infoEntity("accepted socket", transport);
+    transport.open();
 
     return transport;
   }

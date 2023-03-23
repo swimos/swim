@@ -27,6 +27,8 @@ public abstract class WsFrame<T> {
     // sealed
   }
 
+  public abstract boolean fin();
+
   public abstract WsOpcode frameType();
 
   public abstract @Nullable Object get();

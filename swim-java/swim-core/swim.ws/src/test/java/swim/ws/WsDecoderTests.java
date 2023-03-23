@@ -199,7 +199,7 @@ public class WsDecoderTests {
     final ByteBuffer frame = ByteBuffer.allocate(headerSize + payloadSize);
     frame.put(0, (byte) 0x82);
     frame.put(1, (byte) payloadSize);
-    Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(Ws.javaCodec());
+    Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(WsTestCodec.javaCodec());
     decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
     assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
   }
@@ -221,7 +221,7 @@ public class WsDecoderTests {
       final int maskByte = maskingKey >>> maskShift & 0xFF;
       frame.put(headerSize + i, (byte) maskByte);
     }
-    Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(Ws.javaCodec());
+    Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(WsTestCodec.javaCodec());
     decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
     assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
   }
@@ -235,7 +235,7 @@ public class WsDecoderTests {
     frame.put(1, (byte) 126);
     frame.put(2, (byte) (payloadSize >>> 8));
     frame.put(3, (byte) payloadSize);
-    Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(Ws.javaCodec());
+    Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(WsTestCodec.javaCodec());
     decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
     assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
   }
@@ -259,7 +259,7 @@ public class WsDecoderTests {
       final int maskByte = maskingKey >>> maskShift & 0xFF;
       frame.put(headerSize + i, (byte) maskByte);
     }
-    Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(Ws.javaCodec());
+    Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(WsTestCodec.javaCodec());
     decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
     assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
   }
@@ -273,7 +273,7 @@ public class WsDecoderTests {
     frame.put(1, (byte) 126);
     frame.put(2, (byte) (payloadSize >>> 8));
     frame.put(3, (byte) payloadSize);
-    Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(Ws.javaCodec());
+    Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(WsTestCodec.javaCodec());
     decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
     assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
   }
@@ -297,7 +297,7 @@ public class WsDecoderTests {
       final int maskByte = maskingKey >>> maskShift & 0xFF;
       frame.put(headerSize + i, (byte) maskByte);
     }
-    Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(Ws.javaCodec());
+    Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(WsTestCodec.javaCodec());
     decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
     assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
   }
@@ -317,7 +317,7 @@ public class WsDecoderTests {
     frame.put(7, (byte) (payloadSize >>> 16));
     frame.put(8, (byte) (payloadSize >>> 8));
     frame.put(9, (byte) payloadSize);
-    Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(Ws.javaCodec());
+    Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(WsTestCodec.javaCodec());
     decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
     assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
   }
@@ -347,7 +347,7 @@ public class WsDecoderTests {
       final int maskByte = maskingKey >>> maskShift & 0xFF;
       frame.put(headerSize + i, (byte) maskByte);
     }
-    Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(Ws.javaCodec());
+    Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(WsTestCodec.javaCodec());
     decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
     assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
   }

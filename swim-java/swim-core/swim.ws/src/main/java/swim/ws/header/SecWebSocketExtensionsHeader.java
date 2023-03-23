@@ -18,14 +18,15 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 import swim.ws.WsExtension;
@@ -42,7 +43,7 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
     this.extensions = extensions;
   }
 
-  public FingerTrieList<WsExtension> extensions() {
+  public FingerTrieList<WsExtension> extensions() throws HttpException {
     if (this.extensions == null) {
       this.extensions = SecWebSocketExtensionsHeader.parseValue(this.value);
     }
@@ -58,13 +59,13 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("SecWebSocketExtensionsHeader", "of")
-            .appendArgument(this.extensions())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Sec-WebSocket-Extensions";
 
-  public static final HttpHeaderType<FingerTrieList<WsExtension>> TYPE = new SecWebSocketExtensionsHeaderType();
+  public static final HttpHeaderType<SecWebSocketExtensionsHeader, FingerTrieList<WsExtension>> TYPE = new SecWebSocketExtensionsHeaderType();
 
   public static SecWebSocketExtensionsHeader of(String name, String value) {
     return new SecWebSocketExtensionsHeader(name, value, null);
@@ -83,10 +84,14 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
     return SecWebSocketExtensionsHeader.of(NAME, FingerTrieList.of(extensions));
   }
 
-  private static FingerTrieList<WsExtension> parseValue(String value) {
-    FingerTrieList<WsExtension> extensions = FingerTrieList.empty();
+  public static SecWebSocketExtensionsHeader of(String value) {
+    return SecWebSocketExtensionsHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<WsExtension> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
+    FingerTrieList<WsExtension> extensions = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -97,8 +102,14 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
         }
       }
       if (input.isCont() && Http.isTokenChar(c)) {
-        final WsExtension extension = WsExtension.parse(input).getNonNull();
-        extensions = extensions.appended(extension);
+        final Parse<WsExtension> parseExtension = WsExtension.parse(input);
+        if (parseExtension.isDone()) {
+          extensions = extensions.appended(parseExtension.getNonNull());
+        } else if (parseExtension.isError()) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Extensions: " + value, parseExtension.getError());
+        } else {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Extensions: " + value);
+        }
       } else {
         break;
       }
@@ -118,9 +129,9 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Extensions: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Extensions: " + value);
     }
     return extensions;
   }
@@ -140,7 +151,7 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
 
 }
 
-final class SecWebSocketExtensionsHeaderType implements HttpHeaderType<FingerTrieList<WsExtension>>, ToSource {
+final class SecWebSocketExtensionsHeaderType implements HttpHeaderType<SecWebSocketExtensionsHeader, FingerTrieList<WsExtension>>, ToSource {
 
   @Override
   public String name() {
@@ -148,18 +159,27 @@ final class SecWebSocketExtensionsHeaderType implements HttpHeaderType<FingerTri
   }
 
   @Override
-  public FingerTrieList<WsExtension> getValue(HttpHeader header) {
-    return ((SecWebSocketExtensionsHeader) header).extensions();
+  public FingerTrieList<WsExtension> getValue(SecWebSocketExtensionsHeader header) throws HttpException {
+    return header.extensions();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public SecWebSocketExtensionsHeader of(String name, String value) {
     return SecWebSocketExtensionsHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<WsExtension> extensions) {
+  public SecWebSocketExtensionsHeader of(String name, FingerTrieList<WsExtension> extensions) {
     return SecWebSocketExtensionsHeader.of(name, extensions);
+  }
+
+  @Override
+  public @Nullable SecWebSocketExtensionsHeader cast(HttpHeader header) {
+    if (header instanceof SecWebSocketExtensionsHeader) {
+      return (SecWebSocketExtensionsHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

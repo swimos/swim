@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import swim.codec.MediaRange;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class AcceptHeaderTests {
 
   @Test
-  public void parseAcceptHeaderType() {
+  public void parseAcceptHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Accept: */*\r\n");
     assertInstanceOf(AcceptHeader.class, headers.getHeader(AcceptHeader.TYPE));
     assertEquals(AcceptHeader.of(MediaRange.of("*", "*")),

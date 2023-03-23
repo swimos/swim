@@ -50,6 +50,11 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
+  public boolean isCloseDelimited() {
+    return false;
+  }
+
+  @Override
   public @Nullable T get() {
     return this.value;
   }
@@ -60,13 +65,13 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
-  public HttpHeaders headers() {
-    final HttpHeaders headers = HttpHeaders.of();
-    headers.add(ContentTypeHeader.of(this.contentType()));
-    headers.add(TransferEncodingHeader.CHUNKED);
+  public HttpHeaders injectHeaders(HttpHeaders headers) {
+    headers.put(ContentTypeHeader.of(this.contentType()));
+    headers.put(TransferEncodingHeader.CHUNKED);
     return headers;
   }
 
+  @Override
   public HttpHeaders trailers() {
     return this.trailers;
   }

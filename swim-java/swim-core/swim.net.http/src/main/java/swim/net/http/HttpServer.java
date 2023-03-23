@@ -17,6 +17,7 @@ package swim.net.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.http.HttpException;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
@@ -57,52 +58,56 @@ public interface HttpServer {
     // hook
   }
 
-  default void willReadRequest(HttpResponderContext handler) {
+  default void willReadRequest(HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void willReadRequestMessage(HttpResponderContext handler) {
+  default void willReadRequestMessage(HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void didReadRequestMessage(Result<HttpRequest<?>> request, HttpResponderContext handler) {
+  default void didReadRequestMessage(Result<HttpRequest<?>> requestResult, HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void willReadRequestPayload(HttpRequest<?> request, HttpResponderContext handler) {
+  default void willReadRequestPayload(HttpRequest<?> request, HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void didReadRequestPayload(Result<HttpRequest<?>> request, HttpResponderContext handler) {
+  default void didReadRequestPayload(Result<HttpRequest<?>> requestResult, HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void didReadRequest(Result<HttpRequest<?>> request, HttpResponderContext handler) {
+  default void didReadRequest(Result<HttpRequest<?>> requestResult, HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void willWriteResponse(HttpResponderContext handler) {
+  default void willWriteResponse(HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void willWriteResponseMessage(HttpResponderContext handler) {
+  default void willWriteResponseMessage(HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void didWriteResponseMessage(Result<HttpResponse<?>> response, HttpResponderContext handler) {
+  default void didWriteResponseMessage(Result<HttpResponse<?>> responseResult, HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void willWriteResponsePayload(HttpResponse<?> response, HttpResponderContext handler) {
+  default void willWriteResponsePayload(HttpResponse<?> response, HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void didWriteResponsePayload(Result<HttpResponse<?>> response, HttpResponderContext handler) {
+  default void didWriteResponsePayload(Result<HttpResponse<?>> responseResult, HttpResponderContext handler) throws HttpException {
     // hook
   }
 
-  default void didWriteResponse(Result<HttpResponse<?>> response, HttpResponderContext handler) {
+  default void didWriteResponse(Result<HttpResponse<?>> responseResult, HttpResponderContext handler) throws HttpException {
     // hook
+  }
+
+  default void handleServerError(Throwable error, HttpResponderContext handler) {
+    handler.writeResponse(HttpResponse.error(error));
   }
 
   /**

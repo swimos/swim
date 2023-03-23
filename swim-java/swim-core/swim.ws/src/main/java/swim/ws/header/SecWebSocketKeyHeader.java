@@ -16,18 +16,20 @@ package swim.ws.header;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base64;
 import swim.codec.ByteArrayOutput;
-import swim.codec.Diagnostic;
 import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -36,32 +38,43 @@ import swim.util.ToSource;
 public final class SecWebSocketKeyHeader extends HttpHeader {
 
   byte @Nullable [] key;
+  byte @Nullable [] digest;
 
   SecWebSocketKeyHeader(String name, String value, byte @Nullable [] key) {
     super(name, value);
     this.key = key;
   }
 
-  public byte[] key() {
+  public byte[] key() throws HttpException {
     if (this.key == null) {
       this.key = SecWebSocketKeyHeader.parseValue(this.value);
     }
     return this.key;
   }
 
-  public SecWebSocketAcceptHeader accept() {
-    final ByteArrayOutput output = ByteArrayOutput.ofCapacity(60);
-    Base64.standard().writeByteArray(output, this.key());
-    final String seed = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    for (int i = 0; i < seed.length(); i += 1) {
-      output.write((byte) seed.charAt(i));
+  public byte[] digest() throws HttpException {
+    if (this.digest == null) {
+      final ByteArrayOutput output = ByteArrayOutput.ofCapacity(60);
+      Base64.standard().writeByteArray(output, this.key());
+      final String seed = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+      for (int i = 0; i < seed.length(); i += 1) {
+        output.write((byte) seed.charAt(i));
+      }
+      try {
+        this.digest = MessageDigest.getInstance("SHA-1").digest(output.get());
+      } catch (NoSuchAlgorithmException cause) {
+        throw new UnsupportedOperationException(cause);
+      }
     }
-    try {
-      final byte[] digest = MessageDigest.getInstance("SHA-1").digest(output.get());
-      return SecWebSocketAcceptHeader.of(digest);
-    } catch (NoSuchAlgorithmException cause) {
-      throw new UnsupportedOperationException(cause);
-    }
+    return this.digest;
+  }
+
+  public SecWebSocketAcceptHeader accept() throws HttpException {
+    return SecWebSocketAcceptHeader.of(this.digest());
+  }
+
+  public boolean validate(byte[] digest) throws HttpException {
+    return Arrays.equals(this.digest(), digest);
   }
 
   @Override
@@ -79,7 +92,7 @@ public final class SecWebSocketKeyHeader extends HttpHeader {
 
   public static final String NAME = "Sec-WebSocket-Key";
 
-  public static final HttpHeaderType<byte[]> TYPE = new SecWebSocketKeyHeaderType();
+  public static final HttpHeaderType<SecWebSocketKeyHeader, byte[]> TYPE = new SecWebSocketKeyHeaderType();
 
   public static SecWebSocketKeyHeader of(String name, String value) {
     return new SecWebSocketKeyHeader(name, value, null);
@@ -104,15 +117,16 @@ public final class SecWebSocketKeyHeader extends HttpHeader {
     return SecWebSocketKeyHeader.of(NAME, key);
   }
 
-  private static byte[] parseValue(String value) {
+  private static byte[] parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
-    Parse<byte[]> parse = Base64.standard().parseByteArray(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
+    final Parse<byte[]> parseKey = Base64.standard().parseByteArray(input);
+    if (parseKey.isDone()) {
+      return parseKey.getNonNull();
+    } else if (parseKey.isError()) {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Key: " + value, parseKey.getError());
+    } else {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Key: " + value);
     }
-    return parse.getNonNull();
   }
 
   private static String writeValue(byte[] key) {
@@ -123,7 +137,7 @@ public final class SecWebSocketKeyHeader extends HttpHeader {
 
 }
 
-final class SecWebSocketKeyHeaderType implements HttpHeaderType<byte[]>, ToSource {
+final class SecWebSocketKeyHeaderType implements HttpHeaderType<SecWebSocketKeyHeader, byte[]>, ToSource {
 
   @Override
   public String name() {
@@ -131,18 +145,27 @@ final class SecWebSocketKeyHeaderType implements HttpHeaderType<byte[]>, ToSourc
   }
 
   @Override
-  public byte[] getValue(HttpHeader header) {
-    return ((SecWebSocketKeyHeader) header).key();
+  public byte[] getValue(SecWebSocketKeyHeader header) throws HttpException {
+    return header.key();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public SecWebSocketKeyHeader of(String name, String value) {
     return SecWebSocketKeyHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, byte[] key) {
+  public SecWebSocketKeyHeader of(String name, byte[] key) {
     return SecWebSocketKeyHeader.of(name, key);
+  }
+
+  @Override
+  public @Nullable SecWebSocketKeyHeader cast(HttpHeader header) {
+    if (header instanceof SecWebSocketKeyHeader) {
+      return (SecWebSocketKeyHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

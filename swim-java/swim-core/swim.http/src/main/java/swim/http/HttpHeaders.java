@@ -80,7 +80,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return false;
   }
 
-  public boolean containsKey(HttpHeaderType<?> type) {
+  public boolean containsKey(HttpHeaderType<?, ?> type) {
     Objects.requireNonNull(type);
     return this.containsKey((Object) type.name());
   }
@@ -112,7 +112,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return null;
   }
 
-  public @Nullable String get(HttpHeaderType<?> type) {
+  public @Nullable String get(HttpHeaderType<?, ?> type) {
     Objects.requireNonNull(type, "type");
     return this.get((Object) type.name());
   }
@@ -128,18 +128,22 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return null;
   }
 
-  public @Nullable HttpHeader getHeader(HttpHeaderType<?> type) {
+  public <H extends HttpHeader> @Nullable H getHeader(HttpHeaderType<H, ?> type) {
     Objects.requireNonNull(type, "type");
-    return this.getHeader(type.name());
+    final HttpHeader header = this.getHeader(type.name());
+    return header != null ? type.cast(header) : null;
   }
 
-  public <V> @Nullable V getValue(HttpHeaderType<V> type) {
+  public <H extends HttpHeader, V> @Nullable V getValue(HttpHeaderType<H, V> type) throws HttpException {
     Objects.requireNonNull(type, "type");
     final String name = type.name();
     for (int i = 0; i < this.size; i += 1) {
       final HttpHeader header = this.array[i];
       if (name.equalsIgnoreCase(header.name)) {
-        return type.getValue(header);
+        final H typedHeader = type.cast(header);
+        if (typedHeader != null) {
+          return type.getValue(typedHeader);
+        }
       }
     }
     return null;
@@ -155,8 +159,8 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     final int n = this.size;
     HttpHeader[] array = this.array;
     for (int i = 0; i < n; i += 1) {
-      final HttpHeader header = array[i];
-      if (name.equalsIgnoreCase(header.name)) {
+      final HttpHeader oldHeader = array[i];
+      if (name.equalsIgnoreCase(oldHeader.name)) {
         if ((this.flags & ALIASED_FLAG) != 0) {
           final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n)];
           System.arraycopy(array, 0, newArray, 0, n);
@@ -164,8 +168,8 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
           this.array = array;
           this.flags &= ~ALIASED_FLAG;
         }
-        array[i] = header.withValue(value);
-        return header.value;
+        array[i] = oldHeader.withValue(value);
+        return oldHeader.value;
       }
     }
     if (n + 1 > array.length || (this.flags & ALIASED_FLAG) != 0) {
@@ -180,7 +184,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return null;
   }
 
-  public <V> @Nullable String put(HttpHeaderType<V> type, V value) {
+  public <V> @Nullable String put(HttpHeaderType<?, V> type, V value) {
     Objects.requireNonNull(type, "type");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
@@ -190,8 +194,8 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     final String name = type.name();
     HttpHeader[] array = this.array;
     for (int i = 0; i < n; i += 1) {
-      final HttpHeader header = array[i];
-      if (name.equalsIgnoreCase(header.name)) {
+      final HttpHeader oldHeader = array[i];
+      if (name.equalsIgnoreCase(oldHeader.name)) {
         if ((this.flags & ALIASED_FLAG) != 0) {
           final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n)];
           System.arraycopy(array, 0, newArray, 0, n);
@@ -200,7 +204,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
           this.flags &= ~ALIASED_FLAG;
         }
         array[i] = type.of(value);
-        return header.value;
+        return oldHeader.value;
       }
     }
     if (n + 1 > array.length || (this.flags & ALIASED_FLAG) != 0) {
@@ -211,6 +215,40 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
       this.flags &= ~ALIASED_FLAG;
     }
     array[n] = type.of(value);
+    this.size = n + 1;
+    return null;
+  }
+
+  public @Nullable HttpHeader put(HttpHeader header) {
+    Objects.requireNonNull(header, "header");
+    if ((this.flags & IMMUTABLE_FLAG) != 0) {
+      throw new UnsupportedOperationException("Immutable");
+    }
+    final int n = this.size;
+    final String name = header.name();
+    HttpHeader[] array = this.array;
+    for (int i = 0; i < n; i += 1) {
+      final HttpHeader oldHeader = array[i];
+      if (name.equalsIgnoreCase(oldHeader.name)) {
+        if ((this.flags & ALIASED_FLAG) != 0) {
+          final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n)];
+          System.arraycopy(array, 0, newArray, 0, n);
+          array = newArray;
+          this.array = array;
+          this.flags &= ~ALIASED_FLAG;
+        }
+        array[i] = header;
+        return oldHeader;
+      }
+    }
+    if (n + 1 > array.length || (this.flags & ALIASED_FLAG) != 0) {
+      final HttpHeader[] newArray = new HttpHeader[HttpHeaders.expand(n + 1)];
+      System.arraycopy(array, 0, newArray, 0, n);
+      array = newArray;
+      this.array = array;
+      this.flags &= ~ALIASED_FLAG;
+    }
+    array[n] = header;
     this.size = n + 1;
     return null;
   }
@@ -249,7 +287,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return null;
   }
 
-  public <V> @Nullable String putIfAbsent(HttpHeaderType<V> type, V value) {
+  public <V> @Nullable String putIfAbsent(HttpHeaderType<?, V> type, V value) {
     Objects.requireNonNull(type, "type");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
@@ -285,7 +323,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     }
   }
 
-  public <V> HttpHeaders let(HttpHeaderType<V> type, V value) {
+  public <V> HttpHeaders let(HttpHeaderType<?, V> type, V value) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.updated(type, value);
     } else {
@@ -315,7 +353,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return new HttpHeaders(0, n + 1, newArray);
   }
 
-  public <V> HttpHeaders updated(HttpHeaderType<V> type, V value) {
+  public <V> HttpHeaders updated(HttpHeaderType<?, V> type, V value) {
     Objects.requireNonNull(type, "type");
     Objects.requireNonNull(value, "value");
     final int n = this.size;
@@ -373,7 +411,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return null;
   }
 
-  public @Nullable String remove(HttpHeaderType<?> type) {
+  public @Nullable String remove(HttpHeaderType<?, ?> type) {
     Objects.requireNonNull(type, "type");
     return this.remove((Object) type.name());
   }
@@ -397,7 +435,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     return this.clone();
   }
 
-  public <V> HttpHeaders removed(HttpHeaderType<V> type) {
+  public HttpHeaders removed(HttpHeaderType<?, ?> type) {
     Objects.requireNonNull(type, "type");
     return this.removed(type.name());
   }
@@ -971,16 +1009,16 @@ final class HttpHeadersValues extends AbstractCollection<String> {
 
 final class ParseHttpHeaders extends Parse<HttpHeaders> {
 
-  final @Nullable StringTrieMap<HttpHeaderType<?>> headerTypes;
+  final @Nullable StringTrieMap<HttpHeaderType<?, ?>> headerTypes;
   final @Nullable HttpHeaders headers;
-  final @Nullable StringTrieMap<HttpHeaderType<?>> nameTrie;
+  final @Nullable StringTrieMap<HttpHeaderType<?, ?>> nameTrie;
   final @Nullable StringBuilder nameBuilder;
   final @Nullable StringBuilder valueBuilder;
   final int step;
 
-  ParseHttpHeaders(@Nullable StringTrieMap<HttpHeaderType<?>> headerTypes,
+  ParseHttpHeaders(@Nullable StringTrieMap<HttpHeaderType<?, ?>> headerTypes,
                    @Nullable HttpHeaders headers,
-                   @Nullable StringTrieMap<HttpHeaderType<?>> nameTrie,
+                   @Nullable StringTrieMap<HttpHeaderType<?, ?>> nameTrie,
                    @Nullable StringBuilder nameBuilder,
                    @Nullable StringBuilder valueBuilder, int step) {
     this.headerTypes = headerTypes;
@@ -998,9 +1036,9 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
   }
 
   static Parse<HttpHeaders> parse(Input input,
-                                  @Nullable StringTrieMap<HttpHeaderType<?>> headerTypes,
+                                  @Nullable StringTrieMap<HttpHeaderType<?, ?>> headerTypes,
                                   @Nullable HttpHeaders headers,
-                                  @Nullable StringTrieMap<HttpHeaderType<?>> nameTrie,
+                                  @Nullable StringTrieMap<HttpHeaderType<?, ?>> nameTrie,
                                   @Nullable StringBuilder nameBuilder,
                                   @Nullable StringBuilder valueBuilder,  int step) {
     int c = 0;
@@ -1011,7 +1049,7 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
           if (Http.isTokenChar(c)) {
             input.step();
             if (headerTypes != null) {
-              final StringTrieMap<HttpHeaderType<?>> subTrie = headerTypes.getBranch(headerTypes.normalized(c));
+              final StringTrieMap<HttpHeaderType<?, ?>> subTrie = headerTypes.getBranch(headerTypes.normalized(c));
               if (subTrie != null) {
                 nameTrie = subTrie;
               } else {
@@ -1043,7 +1081,7 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
           if (Http.isTokenChar(c)) {
             input.step();
             if (nameTrie != null) {
-              final StringTrieMap<HttpHeaderType<?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
+              final StringTrieMap<HttpHeaderType<?, ?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
               if (subTrie != null) {
                 nameTrie = subTrie;
               } else {
@@ -1134,7 +1172,7 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
           step = 6;
           continue;
         } else if (input.isReady()) {
-          final HttpHeaderType<?> type = nameTrie != null ? nameTrie.value() : null;
+          final HttpHeaderType<?, ?> type = nameTrie != null ? nameTrie.value() : null;
           final String value = valueBuilder != null ? valueBuilder.toString() : "";
           final HttpHeader header;
           if (type != null) {

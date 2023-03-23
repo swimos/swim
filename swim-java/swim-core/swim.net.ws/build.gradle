@@ -1,0 +1,23 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'WebSocket transport implementation'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.net.ws'
+ext.moduleName = 'swim.net.ws'
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-codec')
+  implementation project(':swim-repr')
+  api project(':swim-uri')
+  api project(':swim-http')
+  api project(':swim-ws')
+  api project(':swim-log')
+  api project(':swim-exec')
+  api project(':swim-net')
+  api project(':swim-net-http')
+}

@@ -21,6 +21,7 @@ import swim.codec.Decode;
 import swim.codec.Encode;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
+import swim.http.HttpException;
 import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -34,39 +35,39 @@ public interface HttpRequester {
 
   void setRequesterContext(@Nullable HttpRequesterContext requesterContext);
 
-  default void willWriteRequest() {
+  default void willWriteRequest() throws HttpException {
     // hook
   }
 
-  default void willWriteRequestMessage() {
+  default void willWriteRequestMessage() throws HttpException {
     // hook
   }
 
-  default Encode<? extends HttpRequest<?>> encodeRequestMessage(OutputBuffer<?> output, HttpRequest<?> request) {
+  default Encode<? extends HttpRequest<?>> encodeRequestMessage(OutputBuffer<?> output, HttpRequest<?> request) throws HttpException {
     return request.write(output);
   }
 
-  default void didWriteRequestMessage(Result<HttpRequest<?>> request) {
+  default void didWriteRequestMessage(Result<HttpRequest<?>> requestResult) throws HttpException {
     // hook
   }
 
-  default void willWriteRequestPayload(HttpRequest<?> request) {
+  default void willWriteRequestPayload(HttpRequest<?> request) throws HttpException {
     // hook
   }
 
-  default Encode<? extends HttpPayload<?>> encodeRequestPayload(OutputBuffer<?> output, HttpRequest<?> request) {
+  default Encode<? extends HttpPayload<?>> encodeRequestPayload(OutputBuffer<?> output, HttpRequest<?> request) throws HttpException {
     return request.payload().encode(output);
   }
 
-  default void didWriteRequestPayload(Result<HttpRequest<?>> request) {
+  default void didWriteRequestPayload(Result<HttpRequest<?>> requestResult) throws HttpException {
     // hook
   }
 
-  default void didWriteRequest(Result<HttpRequest<?>> request) {
+  default void didWriteRequest(Result<HttpRequest<?>> requestResult) throws HttpException {
     // hook
   }
 
-  default void willReadResponse() {
+  default void willReadResponse() throws HttpException {
     final HttpRequesterContext context = this.requesterContext();
     if (context == null) {
       throw new IllegalStateException("Unbound requester");
@@ -74,31 +75,35 @@ public interface HttpRequester {
     context.readResponse();
   }
 
-  default void willReadResponseMessage() {
+  default void willReadResponseMessage() throws HttpException {
     // hook
   }
 
-  default Decode<? extends HttpResponse<?>> decodeResponseMessage(InputBuffer input) {
+  default Decode<? extends HttpResponse<?>> decodeResponseMessage(InputBuffer input) throws HttpException {
     return HttpResponse.parse(input);
   }
 
-  default void didReadResponseMessage(Result<HttpResponse<?>> response) {
+  default void didReadResponseMessage(Result<HttpResponse<?>> responseResult) throws HttpException {
     // hook
   }
 
-  default void willReadResponsePayload(HttpResponse<?> response) {
+  default void willReadResponsePayload(HttpResponse<?> response) throws HttpException {
     // hook
   }
 
-  default Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input, HttpResponse<?> response) {
-    return response.decodePayload(input);
+  default Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input, HttpResponse<?> response) throws HttpException {
+    final HttpRequesterContext context = this.requesterContext();
+    if (context == null) {
+      throw new IllegalStateException("Unbound requester");
+    }
+    return response.decodePayload(input, context.request());
   }
 
-  default void didReadResponsePayload(Result<HttpResponse<?>> response) {
+  default void didReadResponsePayload(Result<HttpResponse<?>> responseResult) throws HttpException {
     // hook
   }
 
-  default void didReadResponse(Result<HttpResponse<?>> response) {
+  default void didReadResponse(Result<HttpResponse<?>> responseResult) throws HttpException {
     // hook
   }
 

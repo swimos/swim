@@ -15,8 +15,8 @@
 package swim.http.header;
 
 import org.junit.jupiter.api.Test;
-import swim.codec.ParseException;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import swim.uri.UriAuthority;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class HostHeaderTests {
 
   @Test
-  public void parseHostHeaderType() {
+  public void parseHostHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Host: www.example.com\r\n");
     assertInstanceOf(HostHeader.class, headers.getHeader(HostHeader.TYPE));
     assertEquals(HostHeader.of(UriAuthority.parse("www.example.com")),
@@ -71,7 +71,7 @@ public class HostHeaderTests {
   @Test
   public void parseHostHeadersWithSchemesFails() {
     final HostHeader header = (HostHeader) HttpHeader.parse("Host: http://www.example.com");
-    assertThrows(ParseException.class, () -> {
+    assertThrows(HttpException.class, () -> {
       header.authority();
     });
   }
@@ -79,7 +79,7 @@ public class HostHeaderTests {
   @Test
   public void parseHostHeadersWithPathsFails() {
     final HostHeader header = (HostHeader) HttpHeader.parse("Host: www.example.com/");
-    assertThrows(ParseException.class, () -> {
+    assertThrows(HttpException.class, () -> {
       header.authority();
     });
   }

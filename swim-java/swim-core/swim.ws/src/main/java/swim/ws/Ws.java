@@ -14,11 +14,8 @@
 
 package swim.ws;
 
-import java.nio.ByteBuffer;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Binary;
-import swim.codec.Text;
 
 @Public
 @Since("5.0")
@@ -26,24 +23,6 @@ public final class Ws {
 
   private Ws() {
     // static
-  }
-
-  static final WsCodec<Object> JAVA_CODEC = WsCodec.of(Text.transcoder(), Binary.byteBufferTranscoder());
-
-  public static WsCodec<Object> javaCodec() {
-    return JAVA_CODEC;
-  }
-
-  static final WsCodec<String> STRING_CODEC = WsCodec.of(Text.transcoder(), Text.transcoder());
-
-  public static WsCodec<String> stringCodec() {
-    return STRING_CODEC;
-  }
-
-  static final WsCodec<ByteBuffer> BYTE_BUFFER_CODEC = WsCodec.of(Binary.byteBufferTranscoder(), Binary.byteBufferTranscoder());
-
-  public static WsCodec<ByteBuffer> byteBufferCodec() {
-    return BYTE_BUFFER_CODEC;
   }
 
   public static WsDecoder clientDecoder() {
@@ -70,31 +49,31 @@ public final class Ws {
     return WsServerEngine.ENGINE;
   }
 
-  public static WsDeflateDecoder deflateClientDecoder(WsEngineOptions options) {
+  public static WsDeflateDecoder deflateClientDecoder(WsOptions options) {
     return new WsDeflateDecoder(false, options);
   }
 
-  public static WsDeflateDecoder deflateServerDecoder(WsEngineOptions options) {
+  public static WsDeflateDecoder deflateServerDecoder(WsOptions options) {
     return new WsDeflateDecoder(true, options);
   }
 
-  public static WsDeflateEncoder deflateClientEncoder(WsEngineOptions options) {
+  public static WsDeflateEncoder deflateClientEncoder(WsOptions options) {
     return new WsDeflateEncoder(true, options);
   }
 
-  public static WsDeflateEncoder deflateServerEncoder(WsEngineOptions options) {
+  public static WsDeflateEncoder deflateServerEncoder(WsOptions options) {
     return new WsDeflateEncoder(false, options);
   }
 
-  public static WsDeflateEngine deflateClientEngine(WsEngineOptions options) {
+  public static WsDeflateEngine deflateClientEngine(WsOptions options) {
     return new WsDeflateClientEngine(options);
   }
 
-  public static WsDeflateEngine deflateServerEngine(WsEngineOptions options) {
+  public static WsDeflateEngine deflateServerEngine(WsOptions options) {
     return new WsDeflateServerEngine(options);
   }
 
-  public static WsEngine clientEngine(WsEngineOptions options) {
+  public static WsEngine clientEngine(WsOptions options) {
     if (options.clientCompressionLevel == 0 || options.clientMaxWindowBits != 15) {
       // java.util.zip doesn't support configurable sliding window.sizes.
       return Ws.clientEngine();
@@ -103,7 +82,7 @@ public final class Ws {
     }
   }
 
-  public static WsEngine serverEngine(WsEngineOptions options) {
+  public static WsEngine serverEngine(WsOptions options) {
     if (options.serverCompressionLevel == 0 || options.serverMaxWindowBits != 15) {
       // java.util.zip doesn't support configurable sliding window.sizes.
       return Ws.serverEngine();

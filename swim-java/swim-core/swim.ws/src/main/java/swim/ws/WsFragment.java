@@ -25,16 +25,21 @@ import swim.util.ToSource;
 
 @Public
 @Since("5.0")
-public final class WsFragmentFrame<T> extends WsFrame<T> implements ToSource {
+public final class WsFragment<T> extends WsFrame<T> implements ToSource {
 
   final WsOpcode frameType;
   final Transcoder<T> transcoder;
   final Decode<T> decodePayload;
 
-  WsFragmentFrame(WsOpcode frameType, Transcoder<T> transcoder, Decode<T> decodePayload) {
+  WsFragment(WsOpcode frameType, Transcoder<T> transcoder, Decode<T> decodePayload) {
     this.frameType = frameType;
     this.transcoder = transcoder;
     this.decodePayload = decodePayload;
+  }
+
+  @Override
+  public boolean fin() {
+    return false;
   }
 
   @Override
@@ -65,8 +70,8 @@ public final class WsFragmentFrame<T> extends WsFrame<T> implements ToSource {
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsFragmentFrame<?>) {
-      final WsFragmentFrame<?> that = (WsFragmentFrame<?>) other;
+    } else if (other instanceof WsFragment<?>) {
+      final WsFragment<?> that = (WsFragment<?>) other;
       return this.frameType.equals(that.frameType)
           && this.transcoder.equals(that.transcoder)
           && this.decodePayload.equals(that.decodePayload);
@@ -74,7 +79,7 @@ public final class WsFragmentFrame<T> extends WsFrame<T> implements ToSource {
     return false;
   }
 
-  private static final int HASH_SEED = Murmur3.seed(WsFragmentFrame.class);
+  private static final int HASH_SEED = Murmur3.seed(WsFragment.class);
 
   @Override
   public int hashCode() {
@@ -86,7 +91,7 @@ public final class WsFragmentFrame<T> extends WsFrame<T> implements ToSource {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("WsFragmentFrame", "of")
+    notation.beginInvoke("WsFragment", "of")
             .appendArgument(this.frameType)
             .appendArgument(this.transcoder)
             .appendArgument(this.decodePayload)
@@ -98,10 +103,9 @@ public final class WsFragmentFrame<T> extends WsFrame<T> implements ToSource {
     return this.toSource();
   }
 
-  public static <T> WsFragmentFrame<T> of(WsOpcode frameType,
-                                          Transcoder<T> transcoder,
-                                          Decode<T> decodePayload) {
-    return new WsFragmentFrame<T>(frameType, transcoder, decodePayload);
+  public static <T> WsFragment<T> of(WsOpcode frameType, Transcoder<T> transcoder,
+                                     Decode<T> decodePayload) {
+    return new WsFragment<T>(frameType, transcoder, decodePayload);
   }
 
 }

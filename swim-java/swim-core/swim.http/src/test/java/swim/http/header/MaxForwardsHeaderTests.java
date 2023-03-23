@@ -16,6 +16,7 @@ package swim.http.header;
 
 import org.junit.jupiter.api.Test;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class MaxForwardsHeaderTests {
 
   @Test
-  public void parseMaxForwardsHeaderType() {
+  public void parseMaxForwardsHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Max-Forwards: 42\r\n");
     assertInstanceOf(MaxForwardsHeader.class, headers.getHeader(MaxForwardsHeader.TYPE));
     assertEquals(MaxForwardsHeader.of(42),

@@ -18,15 +18,16 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
 import swim.codec.MediaRange;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -42,7 +43,7 @@ public final class AcceptHeader extends HttpHeader {
     this.mediaRanges = mediaRanges;
   }
 
-  public FingerTrieList<MediaRange> mediaRanges() {
+  public FingerTrieList<MediaRange> mediaRanges() throws HttpException {
     if (this.mediaRanges == null) {
       this.mediaRanges = AcceptHeader.parseValue(this.value);
     }
@@ -58,13 +59,13 @@ public final class AcceptHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("AcceptHeader", "of")
-            .appendArgument(this.mediaRanges())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Accept";
 
-  public static final HttpHeaderType<FingerTrieList<MediaRange>> TYPE = new AcceptHeaderType();
+  public static final HttpHeaderType<AcceptHeader, FingerTrieList<MediaRange>> TYPE = new AcceptHeaderType();
 
   public static AcceptHeader of(String name, String value) {
     return new AcceptHeader(name, value, null);
@@ -83,10 +84,14 @@ public final class AcceptHeader extends HttpHeader {
     return AcceptHeader.of(NAME, FingerTrieList.of(mediaRanges));
   }
 
-  private static FingerTrieList<MediaRange> parseValue(String value) {
-    FingerTrieList<MediaRange> mediaRanges = FingerTrieList.empty();
+  public static AcceptHeader of(String value) {
+    return AcceptHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<MediaRange> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
+    FingerTrieList<MediaRange> mediaRanges = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -97,8 +102,14 @@ public final class AcceptHeader extends HttpHeader {
         }
       }
       if (input.isCont() && Http.isTokenChar(c)) {
-        final MediaRange mediaRange = MediaRange.parse(input).getNonNull();
-        mediaRanges = mediaRanges.appended(mediaRange);
+        final Parse<MediaRange> parseMediaRange = MediaRange.parse(input);
+        if (parseMediaRange.isDone()) {
+          mediaRanges = mediaRanges.appended(parseMediaRange.getNonNull());
+        } else if (parseMediaRange.isError()) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Accept: " + value, parseMediaRange.getError());
+        } else {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Accept: " + value);
+        }
       } else {
         break;
       }
@@ -118,9 +129,9 @@ public final class AcceptHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Accept: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Accept: " + value);
     }
     return mediaRanges;
   }
@@ -140,7 +151,7 @@ public final class AcceptHeader extends HttpHeader {
 
 }
 
-final class AcceptHeaderType implements HttpHeaderType<FingerTrieList<MediaRange>>, ToSource {
+final class AcceptHeaderType implements HttpHeaderType<AcceptHeader, FingerTrieList<MediaRange>>, ToSource {
 
   @Override
   public String name() {
@@ -148,18 +159,27 @@ final class AcceptHeaderType implements HttpHeaderType<FingerTrieList<MediaRange
   }
 
   @Override
-  public FingerTrieList<MediaRange> getValue(HttpHeader header) {
-    return ((AcceptHeader) header).mediaRanges();
+  public FingerTrieList<MediaRange> getValue(AcceptHeader header) throws HttpException {
+    return header.mediaRanges();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public AcceptHeader of(String name, String value) {
     return AcceptHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<MediaRange> mediaRanges) {
+  public AcceptHeader of(String name, FingerTrieList<MediaRange> mediaRanges) {
     return AcceptHeader.of(name, mediaRanges);
+  }
+
+  @Override
+  public @Nullable AcceptHeader cast(HttpHeader header) {
+    if (header instanceof AcceptHeader) {
+      return (AcceptHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

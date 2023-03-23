@@ -278,10 +278,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
           this.log.warningStatus("willListen callback failed", this.listener, cause);
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.log.errorStatus("willListen callback failed", this.listener, cause);
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
@@ -307,12 +307,12 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       if (Result.isNonFatal(cause)) {
         // Initiate listener close.
         status = this.acceptorRequestClose(status);
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("failed to bind server socket", this.listener, cause);
         // Continue closing the listener.
         return status;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -336,10 +336,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
           this.log.warningStatus("didListen callback failed", this.listener, cause);
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.log.errorStatus("didListen callback failed", this.listener, cause);
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
@@ -376,10 +376,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   }
 
   protected void didListen() throws IOException {
+    this.log.infoConfig("opened listener", this);
+
     // Invoke listener lifecycle callback.
     this.listener.didListen();
-
-    this.log.infoConfig("opened listener", this);
   }
 
   @Override
@@ -519,10 +519,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       this.log.warningStatus("doAccept failed", this.listener, cause);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("doAccept failed", this.listener, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -552,9 +552,9 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     this.getTransportContext().dispatcher().bindTransport(transport);
     socket.setSocketContext(transport);
 
-    transport.open();
+    this.log.infoEntity("accept socket", transport);
 
-    this.log.infoEntity("accepted socket", transport);
+    transport.open();
 
     return transport;
   }
@@ -670,10 +670,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
           this.log.warningStatus("willClose callback failed", this.listener, cause);
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.log.errorStatus("willClose callback failed", this.listener, cause);
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
@@ -690,10 +690,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       this.getTransportContext().cancel();
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("failed to cancel transport", this.listener, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -724,10 +724,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
           this.log.warningStatus("willClose callback failed", this.listener, cause);
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.log.errorStatus("willClose callback failed", this.listener, cause);
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
@@ -754,10 +754,10 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   }
 
   protected void didClose() throws IOException {
+    this.log.info("closed listener");
+
     // Invoke listener lifecycle callback.
     this.listener.didClose();
-
-    this.log.info("closed listener");
   }
 
   @Override

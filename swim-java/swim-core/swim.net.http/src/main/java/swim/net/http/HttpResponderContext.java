@@ -28,6 +28,8 @@ public interface HttpResponderContext extends ConnectionContext {
 
   HttpResponder responder();
 
+  HttpServerContext serverContext();
+
   HttpOptions options();
 
   boolean isOpening();
@@ -38,7 +40,7 @@ public interface HttpResponderContext extends ConnectionContext {
 
   boolean readRequest();
 
-  Result<HttpRequest<?>> request();
+  Result<HttpRequest<?>> requestResult();
 
   boolean isWriting();
 
@@ -46,7 +48,7 @@ public interface HttpResponderContext extends ConnectionContext {
 
   boolean writeResponse(HttpResponse<?> response);
 
-  Result<HttpResponse<?>> response();
+  Result<HttpResponse<?>> responseResult();
 
   void become(HttpResponder responder);
 

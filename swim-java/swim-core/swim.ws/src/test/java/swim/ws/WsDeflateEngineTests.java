@@ -23,8 +23,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeUnmaskedMessages() {
-    final WsEncoder encoder = WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateClientDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = WsTestDeflateEncoder.server(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateClientDecoder(WsOptions.defaultCompression());
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("Hello"));
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("HelloHello"));
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("HelloHelloHello"));
@@ -33,8 +33,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeMaskedMessages() {
-    final WsEncoder encoder = WsTestDeflateEncoder.client(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateServerDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = WsTestDeflateEncoder.client(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateServerDecoder(WsOptions.defaultCompression());
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("Hello"));
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("HelloHello"));
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("HelloHelloHello"));
@@ -43,8 +43,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeUnmaskedMessageSequences() {
-    final WsEncoder encoder = WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateClientDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = WsTestDeflateEncoder.server(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateClientDecoder(WsOptions.defaultCompression());
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("Hello"), WsTextFrame.of("Hello"));
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("Hello"), WsTextFrame.of("Hello"), WsTextFrame.of("Hello"));
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("Hello"), WsTextFrame.of("Hello"), WsTextFrame.of("Hello"), WsTextFrame.of("Hello"));
@@ -52,8 +52,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeMaskedMessageSequences() {
-    final WsEncoder encoder = WsTestDeflateEncoder.client(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateServerDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = WsTestDeflateEncoder.client(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateServerDecoder(WsOptions.defaultCompression());
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("Hello"), WsTextFrame.of("Hello"));
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("Hello"), WsTextFrame.of("Hello"), WsTextFrame.of("Hello"));
     assertTranscodes(encoder, decoder, 4096, WsTextFrame.of("Hello"), WsTextFrame.of("Hello"), WsTextFrame.of("Hello"), WsTextFrame.of("Hello"));
@@ -61,8 +61,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeUnmaskedFragmentedMessages() {
-    final WsEncoder encoder = WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateClientDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = WsTestDeflateEncoder.server(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateClientDecoder(WsOptions.defaultCompression());
     for (int bufferSize = 16; bufferSize <= 128; bufferSize *= 2) {
       assertTranscodes(encoder, decoder, bufferSize, WsTextFrame.of("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
       assertTranscodes(encoder, decoder, bufferSize, WsTextFrame.of("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."));
@@ -71,8 +71,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeMaskedFragmentedMessages() {
-    final WsEncoder encoder = WsTestDeflateEncoder.client(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateServerDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = WsTestDeflateEncoder.client(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateServerDecoder(WsOptions.defaultCompression());
     for (int bufferSize = 16; bufferSize <= 128; bufferSize *= 2) {
       assertTranscodes(encoder, decoder, bufferSize, WsTextFrame.of("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
       assertTranscodes(encoder, decoder, bufferSize, WsTextFrame.of("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."));
@@ -81,8 +81,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeUnmaskedFragmentedMessageSequences() {
-    final WsEncoder encoder = WsTestDeflateEncoder.server(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateClientDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = WsTestDeflateEncoder.server(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateClientDecoder(WsOptions.defaultCompression());
     for (int bufferSize = 16; bufferSize <= 128; bufferSize *= 2) {
       assertTranscodes(encoder, decoder, bufferSize, WsTextFrame.of("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."),
                                                      WsTextFrame.of("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."));
@@ -91,8 +91,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeMaskedFragmentedMessageSequences() {
-    final WsEncoder encoder = WsTestDeflateEncoder.client(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateServerDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = WsTestDeflateEncoder.client(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateServerDecoder(WsOptions.defaultCompression());
     for (int bufferSize = 16; bufferSize <= 128; bufferSize *= 2) {
       assertTranscodes(encoder, decoder, bufferSize, WsTextFrame.of("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."),
                                                      WsTextFrame.of("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."));
@@ -101,8 +101,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeUnmaskedShortRandomHighEntropyFrames() {
-    final WsEncoder encoder = Ws.deflateServerEncoder(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateClientDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = Ws.deflateServerEncoder(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateClientDecoder(WsOptions.defaultCompression());
     final int bufferSize = 4096;
     final int entropy = 0xFF;
     final int minMessageSize = 0;
@@ -114,8 +114,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeMaskedShortRandomHighEntropyFrames() {
-    final WsEncoder encoder = Ws.deflateClientEncoder(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateServerDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = Ws.deflateClientEncoder(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateServerDecoder(WsOptions.defaultCompression());
     final int bufferSize = 4096;
     final int entropy = 0xFF;
     final int minMessageSize = 0;
@@ -127,8 +127,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeUnmaskedShortRandomLowEntopyFrames() {
-    final WsEncoder encoder = Ws.deflateServerEncoder(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateClientDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = Ws.deflateServerEncoder(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateClientDecoder(WsOptions.defaultCompression());
     final int bufferSize = 4096;
     final int entropy = 0x78;
     final int minMessageSize = 0;
@@ -140,8 +140,8 @@ public class WsDeflateEngineTests {
 
   @Test
   public void transcodeMaskedShortRandomLowEntopyFrames() {
-    final WsEncoder encoder = Ws.deflateClientEncoder(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateServerDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = Ws.deflateClientEncoder(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateServerDecoder(WsOptions.defaultCompression());
     final int bufferSize = 4096;
     final int entropy = 0x78;
     final int minMessageSize = 0;
@@ -154,8 +154,8 @@ public class WsDeflateEngineTests {
   @Test
   @Tag("slow")
   public void transcodeUnmaskedLongRandomHighEntropyFrames() {
-    final WsEncoder encoder = Ws.deflateServerEncoder(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateClientDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = Ws.deflateServerEncoder(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateClientDecoder(WsOptions.defaultCompression());
     final int bufferSize = 1 << 18;
     final int entropy = 0xFF;
     final int minMessageSize = 1 << 15;
@@ -168,8 +168,8 @@ public class WsDeflateEngineTests {
   @Test
   @Tag("slow")
   public void transcodeMaskedLongRandomHighEntropyFrames() {
-    final WsEncoder encoder = Ws.deflateClientEncoder(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateServerDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = Ws.deflateClientEncoder(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateServerDecoder(WsOptions.defaultCompression());
     final int bufferSize = 1 << 18;
     final int entropy = 0xFF;
     final int minMessageSize = 1 << 15;
@@ -182,8 +182,8 @@ public class WsDeflateEngineTests {
   @Test
   @Tag("slow")
   public void transcodeUnmaskedLongRandomLowEntropyFrames() {
-    final WsEncoder encoder = Ws.deflateServerEncoder(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateClientDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = Ws.deflateServerEncoder(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateClientDecoder(WsOptions.defaultCompression());
     final int bufferSize = 1 << 18;
     final int entropy = 0x78;
     final int minMessageSize = 1 << 15;
@@ -196,8 +196,8 @@ public class WsDeflateEngineTests {
   @Test
   @Tag("slow")
   public void transcodeMaskedLongRandomLowEntropyFrames() {
-    final WsEncoder encoder = Ws.deflateClientEncoder(WsEngineOptions.defaultCompression());
-    final WsDecoder decoder = Ws.deflateServerDecoder(WsEngineOptions.defaultCompression());
+    final WsEncoder encoder = Ws.deflateClientEncoder(WsOptions.defaultCompression());
+    final WsDecoder decoder = Ws.deflateServerDecoder(WsOptions.defaultCompression());
     final int bufferSize = 1 << 18;
     final int entropy = 0x78;
     final int minMessageSize = 1 << 15;

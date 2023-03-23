@@ -18,14 +18,15 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.http.HttpUpgrade;
 import swim.util.Assume;
 import swim.util.Notation;
@@ -43,7 +44,7 @@ public final class UpgradeHeader extends HttpHeader {
     this.upgrades = upgrades;
   }
 
-  public FingerTrieList<HttpUpgrade> upgrades() {
+  public FingerTrieList<HttpUpgrade> upgrades() throws HttpException {
     if (this.upgrades == null) {
       this.upgrades = UpgradeHeader.parseValue(this.value);
     }
@@ -51,11 +52,15 @@ public final class UpgradeHeader extends HttpHeader {
   }
 
   public boolean supports(HttpUpgrade upgrade) {
-    final FingerTrieList<HttpUpgrade> upgrades = this.upgrades();
-    for (int i = 0, n = upgrades.size(); i < n; i += 1) {
-      if (upgrade.matches(Assume.nonNull(upgrades.get(i)))) {
-        return true;
+    try {
+      final FingerTrieList<HttpUpgrade> upgrades = this.upgrades();
+      for (int i = 0, n = upgrades.size(); i < n; i += 1) {
+        if (upgrade.matches(Assume.nonNull(upgrades.get(i)))) {
+          return true;
+        }
       }
+    } catch (HttpException cause) {
+      // ignore
     }
     return false;
   }
@@ -69,13 +74,13 @@ public final class UpgradeHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("UpgradeHeader", "of")
-            .appendArgument(this.upgrades())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Upgrade";
 
-  public static final HttpHeaderType<FingerTrieList<HttpUpgrade>> TYPE = new UpgradeHeaderType();
+  public static final HttpHeaderType<UpgradeHeader, FingerTrieList<HttpUpgrade>> TYPE = new UpgradeHeaderType();
 
   public static final UpgradeHeader H2C = new UpgradeHeader(NAME, HttpUpgrade.H2C.protocol(), FingerTrieList.of(HttpUpgrade.H2C));
 
@@ -98,10 +103,14 @@ public final class UpgradeHeader extends HttpHeader {
     return UpgradeHeader.of(NAME, FingerTrieList.of(upgrades));
   }
 
-  private static FingerTrieList<HttpUpgrade> parseValue(String value) {
-    FingerTrieList<HttpUpgrade> upgrades = FingerTrieList.empty();
+  public static UpgradeHeader of(String value) {
+    return UpgradeHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<HttpUpgrade> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
+    FingerTrieList<HttpUpgrade> upgrades = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -112,8 +121,14 @@ public final class UpgradeHeader extends HttpHeader {
         }
       }
       if (input.isCont() && Http.isTokenChar(c)) {
-        final HttpUpgrade upgrade = HttpUpgrade.parse(input).getNonNull();
-        upgrades = upgrades.appended(upgrade);
+        final Parse<HttpUpgrade> parseUpgrade = HttpUpgrade.parse(input);
+        if (parseUpgrade.isDone()) {
+          upgrades = upgrades.appended(parseUpgrade.getNonNull());
+        } else if (parseUpgrade.isError()) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Upgrade: " + value, parseUpgrade.getError());
+        } else {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Upgrade: " + value);
+        }
       } else {
         break;
       }
@@ -133,9 +148,9 @@ public final class UpgradeHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Upgrade: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Upgrade: " + value);
     }
     return upgrades;
   }
@@ -155,7 +170,7 @@ public final class UpgradeHeader extends HttpHeader {
 
 }
 
-final class UpgradeHeaderType implements HttpHeaderType<FingerTrieList<HttpUpgrade>>, ToSource {
+final class UpgradeHeaderType implements HttpHeaderType<UpgradeHeader, FingerTrieList<HttpUpgrade>>, ToSource {
 
   @Override
   public String name() {
@@ -163,18 +178,27 @@ final class UpgradeHeaderType implements HttpHeaderType<FingerTrieList<HttpUpgra
   }
 
   @Override
-  public FingerTrieList<HttpUpgrade> getValue(HttpHeader header) {
-    return ((UpgradeHeader) header).upgrades();
+  public FingerTrieList<HttpUpgrade> getValue(UpgradeHeader header) throws HttpException {
+    return header.upgrades();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public UpgradeHeader of(String name, String value) {
     return UpgradeHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<HttpUpgrade> upgrades) {
+  public UpgradeHeader of(String name, FingerTrieList<HttpUpgrade> upgrades) {
     return UpgradeHeader.of(name, upgrades);
+  }
+
+  @Override
+  public @Nullable UpgradeHeader cast(HttpHeader header) {
+    if (header instanceof UpgradeHeader) {
+      return (UpgradeHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

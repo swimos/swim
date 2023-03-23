@@ -17,6 +17,7 @@ package swim.http.header;
 import org.junit.jupiter.api.Test;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import swim.http.HttpProduct;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class ServerHeaderTests {
 
   @Test
-  public void parseServerHeaderType() {
+  public void parseServerHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Server: swim/5.0\r\n");
     assertInstanceOf(ServerHeader.class, headers.getHeader(ServerHeader.TYPE));
     assertEquals(ServerHeader.of(HttpProduct.of("swim", "5.0")),

@@ -21,6 +21,7 @@ import swim.codec.Decode;
 import swim.codec.Encode;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
+import swim.http.HttpException;
 import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -34,7 +35,7 @@ public interface HttpResponder {
 
   void setResponderContext(@Nullable HttpResponderContext responderContext);
 
-  default void willReadRequest() {
+  default void willReadRequest() throws HttpException {
     final HttpResponderContext context = this.responderContext();
     if (context == null) {
       throw new IllegalStateException("Unbound responder");
@@ -42,63 +43,75 @@ public interface HttpResponder {
     context.readRequest();
   }
 
-  default void willReadRequestMessage() {
+  default void willReadRequestMessage() throws HttpException {
     // hook
   }
 
-  default Decode<? extends HttpRequest<?>> decodeRequestMessage(InputBuffer input) {
+  default Decode<? extends HttpRequest<?>> decodeRequestMessage(InputBuffer input) throws HttpException {
     return HttpRequest.parse(input);
   }
 
-  default void didReadRequestMessage(Result<HttpRequest<?>> request) {
+  default void didReadRequestMessage(Result<HttpRequest<?>> requestResult) throws HttpException {
+    if (requestResult.isError()) {
+      final HttpResponderContext context = this.responderContext();
+      if (context == null) {
+        throw new IllegalStateException("Unbound responder");
+      }
+      context.writeResponse(HttpResponse.error(requestResult.getError()));
+    }
+  }
+
+  default void willReadRequestPayload(HttpRequest<?> request) throws HttpException {
     // hook
   }
 
-  default void willReadRequestPayload(HttpRequest<?> request) {
-    // hook
-  }
-
-  default Decode<? extends HttpPayload<?>> decodeRequestPayload(InputBuffer input, HttpRequest<?> request) {
+  default Decode<? extends HttpPayload<?>> decodeRequestPayload(InputBuffer input, HttpRequest<?> request) throws HttpException {
     return request.decodePayload(input);
   }
 
-  default void didReadRequestPayload(Result<HttpRequest<?>> request) {
+  default void didReadRequestPayload(Result<HttpRequest<?>> requestResult) throws HttpException {
+    if (requestResult.isError()) {
+      final HttpResponderContext context = this.responderContext();
+      if (context == null) {
+        throw new IllegalStateException("Unbound responder");
+      }
+      context.writeResponse(HttpResponse.error(requestResult.getError()));
+    }
+  }
+
+  default void didReadRequest(Result<HttpRequest<?>> requestResult) throws HttpException {
     // hook
   }
 
-  default void didReadRequest(Result<HttpRequest<?>> request) {
+  default void willWriteResponse() throws HttpException {
     // hook
   }
 
-  default void willWriteResponse() {
+  default void willWriteResponseMessage() throws HttpException {
     // hook
   }
 
-  default void willWriteResponseMessage() {
-    // hook
-  }
-
-  default Encode<? extends HttpResponse<?>> encodeResponseMessage(OutputBuffer<?> output, HttpResponse<?> response) {
+  default Encode<? extends HttpResponse<?>> encodeResponseMessage(OutputBuffer<?> output, HttpResponse<?> response) throws HttpException {
     return response.write(output);
   }
 
-  default void didWriteResponseMessage(Result<HttpResponse<?>> response) {
+  default void didWriteResponseMessage(Result<HttpResponse<?>> responseResult) throws HttpException {
     // hook
   }
 
-  default void willWriteResponsePayload(HttpResponse<?> response) {
+  default void willWriteResponsePayload(HttpResponse<?> response) throws HttpException {
     // hook
   }
 
-  default Encode<? extends HttpPayload<?>> encodeResponsePayload(OutputBuffer<?> output, HttpResponse<?> response) {
+  default Encode<? extends HttpPayload<?>> encodeResponsePayload(OutputBuffer<?> output, HttpResponse<?> response) throws HttpException {
     return response.payload().encode(output);
   }
 
-  default void didWriteResponsePayload(Result<HttpResponse<?>> response) {
+  default void didWriteResponsePayload(Result<HttpResponse<?>> responseResult) throws HttpException {
     // hook
   }
 
-  default void didWriteResponse(Result<HttpResponse<?>> response) {
+  default void didWriteResponse(Result<HttpResponse<?>> responseResult) throws HttpException {
     // hook
   }
 

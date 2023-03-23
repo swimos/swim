@@ -286,14 +286,14 @@ public class TransportDriver implements TransportService, NetEndpoint {
             this.didStart();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("didStart callback failed", cause);
               // Stop the service on lifecycle callback failure.
               this.stop();
               // Reload service status after stop.
               status = (int) STATUS.getOpaque(this);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -336,14 +336,14 @@ public class TransportDriver implements TransportService, NetEndpoint {
             this.willStart();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("willStart callback failed", cause);
               // Stop the service on lifecycle callback failure.
               this.stop();
               // Reload service status after stop.
               status = (int) STATUS.getOpaque(this);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -427,10 +427,10 @@ public class TransportDriver implements TransportService, NetEndpoint {
             this.didStop();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("didStop callback failed", cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -476,10 +476,10 @@ public class TransportDriver implements TransportService, NetEndpoint {
             this.willStop();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("willStop callback failed", cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -904,10 +904,10 @@ final class TransportHandle implements TransportContext {
       this.transport.dispatchAccept();
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.service.log.errorStatus("dispatchAccept callback failed", this.transport, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -945,10 +945,10 @@ final class TransportHandle implements TransportContext {
       this.transport.dispatchConnect();
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.service.log.errorStatus("dispatchConnect callback failed", this.transport, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -986,10 +986,10 @@ final class TransportHandle implements TransportContext {
       this.transport.dispatchRead();
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.service.log.errorStatus("dispatchRead callback failed", this.transport, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1027,10 +1027,10 @@ final class TransportHandle implements TransportContext {
       this.transport.dispatchWrite();
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.service.log.errorStatus("dispatchWrite callback failed", this.transport, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1042,10 +1042,10 @@ final class TransportHandle implements TransportContext {
       this.transport.dispatchTimeout();
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.service.log.errorStatus("dispatchTimeout callback failed", this.transport, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1054,10 +1054,10 @@ final class TransportHandle implements TransportContext {
       this.service.didTimeoutTransport(this.transport);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.service.log.errorStatus("didTimeoutTransport callback failed", this.transport, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1073,10 +1073,10 @@ final class TransportHandle implements TransportContext {
       this.transport.dispatchClose();
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.service.log.errorStatus("dispatchClose callback failed", this.transport, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1317,12 +1317,12 @@ final class DriverThread extends Thread {
         this.closeTransports();
       } catch (Throwable cause) {
         if (Result.isNonFatal(cause)) {
-          // Report non-fatal exception.
+          // Report the non-fatal exception.
           service.log.fatal("selector thread failed", cause);
           // Shut down all registered transports.
           this.closeTransports();
         } else {
-          // Rethrow fatal exception.
+          // Rethrow the fatal exception.
           throw cause;
         }
       } finally {

@@ -34,7 +34,7 @@ public class HttpHeaderRegistry implements ToSource {
 
   HttpHeaderProvider[] providers;
 
-  StringTrieMap<HttpHeaderType<?>> headerTypes;
+  StringTrieMap<HttpHeaderType<?, ?>> headerTypes;
 
   public HttpHeaderRegistry() {
     this.providers = new HttpHeaderProvider[0];
@@ -106,8 +106,8 @@ public class HttpHeaderRegistry implements ToSource {
     }
   }
 
-  public StringTrieMap<HttpHeaderType<?>> headerTypes() {
-    return (StringTrieMap<HttpHeaderType<?>>) HEADER_TYPES.getOpaque(this);
+  public StringTrieMap<HttpHeaderType<?, ?>> headerTypes() {
+    return (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.getOpaque(this);
   }
 
   protected void registerHeaderTypes() {
@@ -118,20 +118,20 @@ public class HttpHeaderRegistry implements ToSource {
   }
 
   @SuppressWarnings("ReferenceEquality")
-  public void registerHeaderType(HttpHeaderType<?> headerType) {
-    StringTrieMap<HttpHeaderType<?>> headerTypes = (StringTrieMap<HttpHeaderType<?>>) HEADER_TYPES.getOpaque(this);
+  public void registerHeaderType(HttpHeaderType<?, ?> headerType) {
+    StringTrieMap<HttpHeaderType<?, ?>> headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.getOpaque(this);
     do {
-      final StringTrieMap<HttpHeaderType<?>> oldHeaderTypes = headerTypes;
-      final StringTrieMap<HttpHeaderType<?>> newHeaderTypes = oldHeaderTypes.updated(headerType.name(), headerType);
-      headerTypes = (StringTrieMap<HttpHeaderType<?>>) HEADER_TYPES.compareAndExchangeRelease(this, oldHeaderTypes, newHeaderTypes);
+      final StringTrieMap<HttpHeaderType<?, ?>> oldHeaderTypes = headerTypes;
+      final StringTrieMap<HttpHeaderType<?, ?>> newHeaderTypes = oldHeaderTypes.updated(headerType.name(), headerType);
+      headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.compareAndExchangeRelease(this, oldHeaderTypes, newHeaderTypes);
       if (headerTypes == oldHeaderTypes) {
         break;
       }
     } while (true);
   }
 
-  public @Nullable HttpHeaderType<?> getHeaderType(String headerName) {
-    final StringTrieMap<HttpHeaderType<?>> headerTypes = (StringTrieMap<HttpHeaderType<?>>) HEADER_TYPES.getOpaque(this);
+  public @Nullable HttpHeaderType<?, ?> getHeaderType(String headerName) {
+    final StringTrieMap<HttpHeaderType<?, ?>> headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.getOpaque(this);
     return headerTypes.get(headerName);
   }
 

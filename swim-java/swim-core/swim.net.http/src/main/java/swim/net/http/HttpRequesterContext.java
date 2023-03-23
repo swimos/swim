@@ -28,6 +28,8 @@ public interface HttpRequesterContext extends ConnectionContext {
 
   HttpRequester requester();
 
+  HttpClientContext clientContext();
+
   HttpOptions options();
 
   boolean isConnecting();
@@ -40,7 +42,9 @@ public interface HttpRequesterContext extends ConnectionContext {
 
   boolean writeRequest(HttpRequest<?> request);
 
-  Result<HttpRequest<?>> request();
+  HttpRequest<?> request();
+
+  Result<HttpRequest<?>> requestResult();
 
   boolean isReading();
 
@@ -48,7 +52,7 @@ public interface HttpRequesterContext extends ConnectionContext {
 
   boolean readResponse();
 
-  Result<HttpResponse<?>> response();
+  Result<HttpResponse<?>> responseResult();
 
   void become(HttpRequester requester);
 

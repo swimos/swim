@@ -50,6 +50,11 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
+  public boolean isCloseDelimited() {
+    return false;
+  }
+
+  @Override
   public @Nullable T get() {
     return this.value;
   }
@@ -67,11 +72,15 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
-  public HttpHeaders headers() {
-    final HttpHeaders headers = HttpHeaders.of();
-    headers.add(ContentTypeHeader.of(this.contentType()));
-    headers.add(ContentLengthHeader.of(this.contentLength()));
+  public HttpHeaders injectHeaders(HttpHeaders headers) {
+    headers.put(ContentTypeHeader.of(this.contentType()));
+    headers.put(ContentLengthHeader.of(this.contentLength()));
     return headers;
+  }
+
+  @Override
+  public HttpHeaders trailers() {
+    return HttpHeaders.empty();
   }
 
   @Override

@@ -60,7 +60,7 @@ public class HttpServerTests {
       }
 
       @Override
-      public void didReadRequest(Result<HttpRequest<?>> request, HttpResponderContext handler) {
+      public void didReadRequest(Result<HttpRequest<?>> requestResult, HttpResponderContext handler) {
         this.enqueueRequester(new TestResponder());
       }
 

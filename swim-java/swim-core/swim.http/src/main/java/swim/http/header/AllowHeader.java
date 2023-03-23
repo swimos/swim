@@ -18,15 +18,16 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpMethod;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -42,7 +43,7 @@ public final class AllowHeader extends HttpHeader {
     this.methods = methods;
   }
 
-  public FingerTrieList<HttpMethod> methods() {
+  public FingerTrieList<HttpMethod> methods() throws HttpException {
     if (this.methods == null) {
       this.methods = AllowHeader.parseValue(this.value);
     }
@@ -58,13 +59,13 @@ public final class AllowHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("AllowHeader", "of")
-            .appendArgument(this.methods())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Allow";
 
-  public static final HttpHeaderType<FingerTrieList<HttpMethod>> TYPE = new AllowHeaderType();
+  public static final HttpHeaderType<AllowHeader, FingerTrieList<HttpMethod>> TYPE = new AllowHeaderType();
 
   public static AllowHeader of(String name, String value) {
     return new AllowHeader(name, value, null);
@@ -83,10 +84,14 @@ public final class AllowHeader extends HttpHeader {
     return AllowHeader.of(NAME, FingerTrieList.of(methods));
   }
 
-  private static FingerTrieList<HttpMethod> parseValue(String value) {
-    FingerTrieList<HttpMethod> methods = FingerTrieList.empty();
+  public static AllowHeader of(String value) {
+    return AllowHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<HttpMethod> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
+    FingerTrieList<HttpMethod> methods = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -97,8 +102,14 @@ public final class AllowHeader extends HttpHeader {
         }
       }
       if (input.isCont() && Http.isTokenChar(c)) {
-        final HttpMethod method = HttpMethod.parse(input).getNonNull();
-        methods = methods.appended(method);
+        final Parse<HttpMethod> parseMethod = HttpMethod.parse(input);
+        if (parseMethod.isDone()) {
+          methods = methods.appended(parseMethod.getNonNull());
+        } else if (parseMethod.isError()) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Allow: " + value, parseMethod.getError());
+        } else {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Allow: " + value);
+        }
       } else {
         break;
       }
@@ -118,9 +129,9 @@ public final class AllowHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Allow: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Allow: " + value);
     }
     return methods;
   }
@@ -140,7 +151,7 @@ public final class AllowHeader extends HttpHeader {
 
 }
 
-final class AllowHeaderType implements HttpHeaderType<FingerTrieList<HttpMethod>>, ToSource {
+final class AllowHeaderType implements HttpHeaderType<AllowHeader, FingerTrieList<HttpMethod>>, ToSource {
 
   @Override
   public String name() {
@@ -148,18 +159,27 @@ final class AllowHeaderType implements HttpHeaderType<FingerTrieList<HttpMethod>
   }
 
   @Override
-  public FingerTrieList<HttpMethod> getValue(HttpHeader header) {
-    return ((AllowHeader) header).methods();
+  public FingerTrieList<HttpMethod> getValue(AllowHeader header) throws HttpException {
+    return header.methods();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public AllowHeader of(String name, String value) {
     return AllowHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<HttpMethod> methods) {
+  public AllowHeader of(String name, FingerTrieList<HttpMethod> methods) {
     return AllowHeader.of(name, methods);
+  }
+
+  @Override
+  public @Nullable AllowHeader cast(HttpHeader header) {
+    if (header instanceof AllowHeader) {
+      return (AllowHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

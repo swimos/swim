@@ -15,9 +15,9 @@
 package swim.http.header;
 
 import org.junit.jupiter.api.Test;
-import swim.codec.ParseException;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import swim.uri.Uri;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class OriginHeaderTests {
 
   @Test
-  public void parseOriginHeaderType() {
+  public void parseOriginHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Origin: http://www.example.com\r\n");
     assertInstanceOf(OriginHeader.class, headers.getHeader(OriginHeader.TYPE));
     assertEquals(OriginHeader.of(Uri.parse("http://www.example.com")),
@@ -76,7 +76,7 @@ public class OriginHeaderTests {
   @Test
   public void parseOriginHeadersWithTrailingNullFails() {
     final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: http://www.example.com null");
-    assertThrows(ParseException.class, () -> {
+    assertThrows(HttpException.class, () -> {
       header.origins();
     });
   }
@@ -84,7 +84,7 @@ public class OriginHeaderTests {
   @Test
   public void parseOriginHeadersWithNoSchemeFails() {
     final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: www.example.com");
-    assertThrows(ParseException.class, () -> {
+    assertThrows(HttpException.class, () -> {
       header.origins();
     });
   }
@@ -92,7 +92,7 @@ public class OriginHeaderTests {
   @Test
   public void parseOriginHeadersWithPathsFails() {
     final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: http://www.example.com/");
-    assertThrows(ParseException.class, () -> {
+    assertThrows(HttpException.class, () -> {
       header.origins();
     });
   }

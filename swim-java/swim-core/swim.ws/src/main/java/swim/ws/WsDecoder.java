@@ -23,7 +23,6 @@ import swim.codec.InputBuffer;
 import swim.codec.Transcoder;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.Result;
 import swim.util.ToSource;
 
 @Public
@@ -48,17 +47,18 @@ public class WsDecoder implements ToSource {
     return new DecodeWsMessage<T>(this, codec, null, null, null);
   }
 
-  public <T> Decode<WsFrame<T>> decodeContinuation(InputBuffer input, WsFragmentFrame<T> frame) {
-    return DecodeWsMessage.decode(input, this, null, frame.frameType,
-                                  frame.transcoder, frame.decodePayload);
+  public <T> Decode<WsFrame<T>> decodeContinuation(InputBuffer input, WsCodec<T> codec,
+                                                   WsFragment<T> frament) {
+    return DecodeWsMessage.decode(input, this, codec, frament.frameType,
+                                  frament.transcoder, frament.decodePayload);
   }
 
-  public <T> Decode<WsFrame<T>> decodeContinuation(WsFragmentFrame<T> frame) {
-    return new DecodeWsMessage<T>(this, null, frame.frameType,
-                                  frame.transcoder, frame.decodePayload);
+  public <T> Decode<WsFrame<T>> decodeContinuation(WsCodec<T> codec, WsFragment<T> fragment) {
+    return new DecodeWsMessage<T>(this, codec, fragment.frameType,
+                                  fragment.transcoder, fragment.decodePayload);
   }
 
-  public <T> Decode<WsFrame<T>> decodeFinRsvOp(InputBuffer input, @Nullable WsCodec<T> codec,
+  public <T> Decode<WsFrame<T>> decodeFinRsvOp(InputBuffer input, WsCodec<T> codec,
                                                int finRsvOp, @Nullable WsOpcode frameType,
                                                @Nullable Transcoder<?> transcoder,
                                                @Nullable Decode<?> decodePayload) {
@@ -70,21 +70,21 @@ public class WsDecoder implements ToSource {
                                             Assume.nonNull(transcoder),
                                             Assume.nonNull(decodePayload));
       case TEXT:
-        return this.decodeTextFrame(input, Assume.nonNull(codec), finRsvOp);
+        return this.decodeTextFrame(input, codec, finRsvOp);
       case BINARY:
-        return this.decodeBinaryFrame(input, Assume.nonNull(codec), finRsvOp);
+        return this.decodeBinaryFrame(input, codec, finRsvOp);
       case CLOSE:
-        return this.decodeCloseFrame(input, Assume.nonNull(codec), finRsvOp);
+        return this.decodeCloseFrame(input, codec, finRsvOp);
       case PING:
-        return this.decodePingFrame(input, Assume.nonNull(codec), finRsvOp);
+        return this.decodePingFrame(input, codec, finRsvOp);
       case PONG:
-        return this.decodePongFrame(input, Assume.nonNull(codec), finRsvOp);
+        return this.decodePongFrame(input, codec, finRsvOp);
       default:
         return Decode.error(new DecodeException("Unsupported opcode: " + opcode.name()));
     }
   }
 
-  public <T> Decode<WsFrame<T>> decodeContinuationFrame(InputBuffer input, @Nullable WsCodec<T> codec,
+  public <T> Decode<WsFrame<T>> decodeContinuationFrame(InputBuffer input, WsCodec<T> codec,
                                                         int finRsvOp, WsOpcode frameType,
                                                         Transcoder<?> transcoder,
                                                         Decode<?> decodePayload) {
@@ -111,20 +111,18 @@ public class WsDecoder implements ToSource {
     return DecodeWsFrame.decode(input, this, codec, WsOpcode.PONG, null, null, 0L, 0L, 0, 0, 1);
   }
 
-  public <T> WsDataFrame<T> dataFrame(WsOpcode frameType, @Nullable T payload,
-                                      Transcoder<T> transcoder) {
+  public <T> WsDataFrame<T> dataFrame(WsOpcode frameType, @Nullable T payload, Transcoder<T> transcoder) throws WsException {
     switch (frameType) {
       case TEXT:
         return WsTextFrame.of(payload, Assume.conforms(transcoder));
       case BINARY:
         return WsBinaryFrame.of(payload, Assume.conforms(transcoder));
       default:
-        throw new IllegalArgumentException("Unsupported data frame: " + frameType.name());
+        throw new WsException(WsStatus.of(1002), "Unsupported data frame type: " + frameType.toString());
     }
   }
 
-  public <T> WsControlFrame<T> controlFrame(WsOpcode frameType, @Nullable T payload,
-                                            Transcoder<T> transcoder) {
+  public <T> WsControlFrame<T> controlFrame(WsOpcode frameType, @Nullable T payload, Transcoder<T> transcoder) throws WsException {
     switch (frameType) {
       case CLOSE:
         return WsCloseFrame.of(payload, transcoder);
@@ -133,7 +131,7 @@ public class WsDecoder implements ToSource {
       case PONG:
         return WsPongFrame.of(payload, transcoder);
       default:
-        throw new IllegalArgumentException("Unsupported control frame: " + frameType.name());
+        throw new WsException(WsStatus.of(1002), "Unsupported control frame type: " + frameType.toString());
     }
   }
 
@@ -169,12 +167,12 @@ public class WsDecoder implements ToSource {
 final class DecodeWsMessage<T> extends Decode<WsFrame<T>> {
 
   final WsDecoder decoder;
-  final @Nullable WsCodec<T> codec;
+  final WsCodec<T> codec;
   final @Nullable WsOpcode frameType;
   final @Nullable Transcoder<?> transcoder;
   final @Nullable Decode<?> decodePayload;
 
-  DecodeWsMessage(WsDecoder decoder, @Nullable WsCodec<T> codec, @Nullable WsOpcode frameType,
+  DecodeWsMessage(WsDecoder decoder, WsCodec<T> codec, @Nullable WsOpcode frameType,
                   @Nullable Transcoder<?> transcoder, @Nullable Decode<?> decodePayload) {
     this.decoder = decoder;
     this.codec = codec;
@@ -190,14 +188,20 @@ final class DecodeWsMessage<T> extends Decode<WsFrame<T>> {
   }
 
   static <T> Decode<WsFrame<T>> decode(InputBuffer input, WsDecoder decoder,
-                                       @Nullable WsCodec<T> codec,
-                                       @Nullable WsOpcode frameType,
+                                       WsCodec<T> codec, @Nullable WsOpcode frameType,
                                        @Nullable Transcoder<?> transcoder,
                                        @Nullable Decode<?> decodePayload) {
     if (input.isCont()) {
       final int finRsvOp = input.head();
-      return Assume.conforms(decoder.decodeFinRsvOp(input, codec, finRsvOp, frameType,
-                                                    transcoder, decodePayload));
+      final WsOpcode opcode = WsOpcode.of(finRsvOp & 0xF);
+      if (decodePayload != null && opcode.isData()) {
+        return Decode.error(new DecodeException("Interleaved message"));
+      } else if (opcode.isControl()) {
+        return decoder.decodeFinRsvOp(input, codec, finRsvOp, frameType, null, null);
+      } else {
+        return decoder.decodeFinRsvOp(input, codec, finRsvOp, frameType,
+                                      transcoder, decodePayload);
+      }
     } else if (input.isDone()) {
       return Decode.error(new DecodeException("Expected websocket frame"));
     } else if (input.isError()) {
@@ -211,7 +215,7 @@ final class DecodeWsMessage<T> extends Decode<WsFrame<T>> {
 final class DecodeWsFrame<T> extends Decode<WsFrame<T>> {
 
   final WsDecoder decoder;
-  final @Nullable WsCodec<T> codec;
+  final WsCodec<T> codec;
   final @Nullable WsOpcode frameType;
   final @Nullable Transcoder<?> transcoder;
   final @Nullable Decode<?> decodePayload;
@@ -221,7 +225,7 @@ final class DecodeWsFrame<T> extends Decode<WsFrame<T>> {
   final int maskingKey;
   final int step;
 
-  DecodeWsFrame(WsDecoder decoder, @Nullable WsCodec<T> codec, @Nullable WsOpcode frameType,
+  DecodeWsFrame(WsDecoder decoder, WsCodec<T> codec, @Nullable WsOpcode frameType,
                 @Nullable Transcoder<?> transcoder, @Nullable Decode<?> decodePayload,
                 long offset, long length, int finRsvOp, int maskingKey, int step) {
     this.decoder = decoder;
@@ -245,8 +249,7 @@ final class DecodeWsFrame<T> extends Decode<WsFrame<T>> {
   }
 
   static <T> Decode<WsFrame<T>> decode(InputBuffer input, WsDecoder decoder,
-                                       @Nullable WsCodec<T> codec,
-                                       @Nullable WsOpcode frameType,
+                                       WsCodec<T> codec, @Nullable WsOpcode frameType,
                                        @Nullable Transcoder<?> transcoder,
                                        @Nullable Decode<?> decodePayload,
                                        long offset, long length, int finRsvOp,
@@ -435,13 +438,9 @@ final class DecodeWsFrame<T> extends Decode<WsFrame<T>> {
       input.asLast((finRsvOp & 0x80) != 0 && frameRemaining <= (long) inputRemaining);
       if (decodePayload == null) {
         try {
-          transcoder = Assume.nonNull(codec).getPayloadTranscoder(WsOpcode.of(finRsvOp & 0xF));
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            return Decode.error(new DecodeException("Unable to get payload transcoder", cause));
-          } else {
-            throw cause;
-          }
+          transcoder = codec.getPayloadTranscoder(WsOpcode.of(finRsvOp & 0xF));
+        } catch (WsException cause) {
+          return Decode.error(cause);
         }
         decodePayload = transcoder.decode(input);
       } else {
@@ -456,28 +455,20 @@ final class DecodeWsFrame<T> extends Decode<WsFrame<T>> {
             try {
               return Decode.done(decoder.dataFrame(frameType, Assume.conformsNullable(decodePayload.get()),
                                                    Assume.conformsNonNull(transcoder)));
-            } catch (Throwable cause) {
-              if (Result.isNonFatal(cause)) {
-                return Decode.error(new DecodeException("Unable to construct data frame", cause));
-              } else {
-                throw cause;
-              }
+            } catch (WsException cause) {
+              return Decode.error(cause);
             }
           } else { // control frame
             try {
               return Decode.done(Assume.conforms(decoder.controlFrame(frameType, Assume.conformsNullable(decodePayload.get()),
                                                                       Assume.nonNull(transcoder))));
-            } catch (Throwable cause) {
-              if (Result.isNonFatal(cause)) {
-                return Decode.error(new DecodeException("Unable to construct control frame", cause));
-              } else {
-                throw cause;
-              }
+            } catch (WsException cause) {
+              return Decode.error(cause);
             }
           }
         } else if ((finRsvOp & 0xF) < 0x8) { // fragment frame
-          return Decode.done(WsFragmentFrame.of(frameType, Assume.conformsNonNull(transcoder),
-                                                Assume.conforms(decodePayload)));
+          return Decode.done(WsFragment.of(frameType, Assume.conformsNonNull(transcoder),
+                                           Assume.conforms(decodePayload)));
         } else {
           return Decode.error(new DecodeException("Fragmented control frame"));
         }

@@ -22,6 +22,7 @@ import swim.codec.Decode;
 import swim.codec.InputBuffer;
 import swim.codec.Text;
 import swim.exec.ThreadScheduler;
+import swim.http.HttpException;
 import swim.http.HttpMethod;
 import swim.http.HttpPayload;
 import swim.http.HttpRequest;
@@ -49,13 +50,13 @@ public class HttpClientTests {
       }
 
       @Override
-      public Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input, HttpResponse<?> response) {
-        return response.decodePayload(input, Text.transcoder());
+      public Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input, HttpResponse<?> response) throws HttpException {
+        return response.decodePayload(input, this.request(), Text.transcoder());
       }
 
       @Override
-      public void didReadResponse(Result<HttpResponse<?>> result) {
-        final HttpResponse<?> response = result.getNonNull();
+      public void didReadResponse(Result<HttpResponse<?>> responseResult) {
+        final HttpResponse<?> response = responseResult.getNonNull();
         System.out.println(response);
         System.out.println(response.payload());
       }
@@ -71,7 +72,7 @@ public class HttpClientTests {
       }
 
       @Override
-      public void didWriteRequest(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
+      public void didWriteRequest(Result<HttpRequest<?>> requestResult, HttpRequesterContext handler) {
         if (!this.isRequesting()) {
           this.doneWriting();
         }

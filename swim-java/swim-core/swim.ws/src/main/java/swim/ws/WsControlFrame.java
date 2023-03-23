@@ -28,6 +28,11 @@ public abstract class WsControlFrame<T> extends WsFrame<Object> {
   }
 
   @Override
+  public boolean fin() {
+    return true;
+  }
+
+  @Override
   public abstract @Nullable T get();
 
   @Override

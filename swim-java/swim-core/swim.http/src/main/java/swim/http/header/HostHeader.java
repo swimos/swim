@@ -18,11 +18,12 @@ import java.io.IOException;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
 import swim.codec.ParseException;
 import swim.codec.StringInput;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.uri.UriAuthority;
 import swim.uri.UriHost;
 import swim.uri.UriPort;
@@ -40,7 +41,7 @@ public final class HostHeader extends HttpHeader {
     this.authority = authority;
   }
 
-  public UriAuthority authority() {
+  public UriAuthority authority() throws HttpException {
     if (this.authority == null) {
       this.authority = HostHeader.parseValue(this.value);
     }
@@ -56,13 +57,13 @@ public final class HostHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("HostHeader", "of")
-            .appendArgument(this.authority())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Host";
 
-  public static final HttpHeaderType<UriAuthority> TYPE = new HostHeaderType();
+  public static final HttpHeaderType<HostHeader, UriAuthority> TYPE = new HostHeaderType();
 
   public static HostHeader of(String name, String value) {
     return new HostHeader(name, value, null);
@@ -81,18 +82,27 @@ public final class HostHeader extends HttpHeader {
     return HostHeader.of(NAME, value);
   }
 
-  private static UriAuthority parseValue(String value) {
+  private static UriAuthority parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
-    final UriHost host = UriHost.parse(input);
+    final UriHost host;
+    try {
+      host = UriHost.parse(input);
+    } catch (ParseException cause) {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Host: " + value, cause);
+    }
     UriPort port = null;
     if (input.isCont() && input.head() == ':') {
       input.step();
-      port = UriPort.parse(input);
+      try {
+        port = UriPort.parse(input);
+      } catch (ParseException cause) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Host: " + value, cause);
+      }
     }
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Host: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Host: " + value);
     }
     return UriAuthority.of(null, host, port);
   }
@@ -113,7 +123,7 @@ public final class HostHeader extends HttpHeader {
 
 }
 
-final class HostHeaderType implements HttpHeaderType<UriAuthority>, ToSource {
+final class HostHeaderType implements HttpHeaderType<HostHeader, UriAuthority>, ToSource {
 
   @Override
   public String name() {
@@ -121,18 +131,27 @@ final class HostHeaderType implements HttpHeaderType<UriAuthority>, ToSource {
   }
 
   @Override
-  public UriAuthority getValue(HttpHeader header) {
-    return ((HostHeader) header).authority();
+  public UriAuthority getValue(HostHeader header) throws HttpException {
+    return header.authority();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public HostHeader of(String name, String value) {
     return HostHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, UriAuthority authority) {
+  public HostHeader of(String name, UriAuthority authority) {
     return HostHeader.of(name, authority);
+  }
+
+  @Override
+  public @Nullable HostHeader cast(HttpHeader header) {
+    if (header instanceof HostHeader) {
+      return (HostHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

@@ -18,15 +18,15 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
-import swim.codec.ParseException;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -42,7 +42,7 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
     this.subprotocols = subprotocols;
   }
 
-  public FingerTrieList<String> subprotocols() {
+  public FingerTrieList<String> subprotocols() throws HttpException {
     if (this.subprotocols == null) {
       this.subprotocols = SecWebSocketProtocolHeader.parseValue(this.value);
     }
@@ -58,13 +58,13 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("SecWebSocketProtocolHeader", "of")
-            .appendArgument(this.subprotocols())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Sec-WebSocket-Protocol";
 
-  public static final HttpHeaderType<FingerTrieList<String>> TYPE = new SecWebSocketProtocolHeaderType();
+  public static final HttpHeaderType<SecWebSocketProtocolHeader, FingerTrieList<String>> TYPE = new SecWebSocketProtocolHeaderType();
 
   public static SecWebSocketProtocolHeader of(String name, String value) {
     return new SecWebSocketProtocolHeader(name, value, null);
@@ -79,10 +79,14 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
     return SecWebSocketProtocolHeader.of(NAME, subprotocols);
   }
 
-  private static FingerTrieList<String> parseValue(String value) {
-    FingerTrieList<String> subprotocols = FingerTrieList.empty();
+  public static SecWebSocketProtocolHeader of(String value) {
+    return SecWebSocketProtocolHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<String> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
+    FingerTrieList<String> subprotocols = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -129,9 +133,9 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Protocol: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Protocol: " + value);
     }
     return subprotocols;
   }
@@ -161,7 +165,7 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
 
 }
 
-final class SecWebSocketProtocolHeaderType implements HttpHeaderType<FingerTrieList<String>>, ToSource {
+final class SecWebSocketProtocolHeaderType implements HttpHeaderType<SecWebSocketProtocolHeader, FingerTrieList<String>>, ToSource {
 
   @Override
   public String name() {
@@ -169,18 +173,27 @@ final class SecWebSocketProtocolHeaderType implements HttpHeaderType<FingerTrieL
   }
 
   @Override
-  public FingerTrieList<String> getValue(HttpHeader header) {
-    return ((SecWebSocketProtocolHeader) header).subprotocols();
+  public FingerTrieList<String> getValue(SecWebSocketProtocolHeader header) throws HttpException {
+    return header.subprotocols();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public SecWebSocketProtocolHeader of(String name, String value) {
     return SecWebSocketProtocolHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<String> subprotocols) {
+  public SecWebSocketProtocolHeader of(String name, FingerTrieList<String> subprotocols) {
     return SecWebSocketProtocolHeader.of(name, subprotocols);
+  }
+
+  @Override
+  public @Nullable SecWebSocketProtocolHeader cast(HttpHeader header) {
+    if (header instanceof SecWebSocketProtocolHeader) {
+      return (SecWebSocketProtocolHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

@@ -19,14 +19,17 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Diagnostic;
+import swim.codec.Parse;
 import swim.codec.ParseException;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
 import swim.http.HttpCookie;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -42,7 +45,7 @@ public final class CookieHeader extends HttpHeader {
     this.cookies = cookies;
   }
 
-  public FingerTrieList<HttpCookie> cookies() {
+  public FingerTrieList<HttpCookie> cookies() throws HttpException {
     if (this.cookies == null) {
       this.cookies = CookieHeader.parseValue(this.value);
     }
@@ -58,13 +61,13 @@ public final class CookieHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("CookieHeader", "of")
-            .appendArgument(this.cookies())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Cookie";
 
-  public static final HttpHeaderType<FingerTrieList<HttpCookie>> TYPE = new CookieHeaderType();
+  public static final HttpHeaderType<CookieHeader, FingerTrieList<HttpCookie>> TYPE = new CookieHeaderType();
 
   public static CookieHeader of(String name, String value) {
     return new CookieHeader(name, value, null);
@@ -83,13 +86,23 @@ public final class CookieHeader extends HttpHeader {
     return CookieHeader.of(NAME, FingerTrieList.of(cookies));
   }
 
-  private static FingerTrieList<HttpCookie> parseValue(String value) {
-    FingerTrieList<HttpCookie> cookies = FingerTrieList.empty();
+  public static CookieHeader of(String value) {
+    return CookieHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<HttpCookie> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
+    FingerTrieList<HttpCookie> cookies = FingerTrieList.empty();
     do {
       if (input.isCont() && Http.isTokenChar(input.head())) {
-        final HttpCookie cookie = HttpCookie.parse(input).getNonNull();
-        cookies = cookies.appended(cookie);
+        final Parse<HttpCookie> parseCookie = HttpCookie.parse(input);
+        if (parseCookie.isDone()) {
+          cookies = cookies.appended(parseCookie.getNonNull());
+        } else if (parseCookie.isError()) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value, parseCookie.getError());
+        } else {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value);
+        }
       } else {
         break;
       }
@@ -102,13 +115,14 @@ public final class CookieHeader extends HttpHeader {
         input.step();
         continue;
       } else {
-        throw new ParseException(Diagnostic.expected(' ', input));
+        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value,
+                                new ParseException(Diagnostic.expected(' ', input)));
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value);
     }
     return cookies;
   }
@@ -128,7 +142,7 @@ public final class CookieHeader extends HttpHeader {
 
 }
 
-final class CookieHeaderType implements HttpHeaderType<FingerTrieList<HttpCookie>>, ToSource {
+final class CookieHeaderType implements HttpHeaderType<CookieHeader, FingerTrieList<HttpCookie>>, ToSource {
 
   @Override
   public String name() {
@@ -136,18 +150,27 @@ final class CookieHeaderType implements HttpHeaderType<FingerTrieList<HttpCookie
   }
 
   @Override
-  public FingerTrieList<HttpCookie> getValue(HttpHeader header) {
-    return ((CookieHeader) header).cookies();
+  public FingerTrieList<HttpCookie> getValue(CookieHeader header) throws HttpException {
+    return header.cookies();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public CookieHeader of(String name, String value) {
     return CookieHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<HttpCookie> cookies) {
+  public CookieHeader of(String name, FingerTrieList<HttpCookie> cookies) {
     return CookieHeader.of(name, cookies);
+  }
+
+  @Override
+  public @Nullable CookieHeader cast(HttpHeader header) {
+    if (header instanceof CookieHeader) {
+      return (CookieHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

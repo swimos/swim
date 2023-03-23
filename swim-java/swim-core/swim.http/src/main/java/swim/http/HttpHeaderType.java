@@ -14,27 +14,30 @@
 
 package swim.http;
 
+import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
 @Public
 @Since("5.0")
-public interface HttpHeaderType<V> {
+public interface HttpHeaderType<H extends HttpHeader, V> {
 
   String name();
 
-  V getValue(HttpHeader header);
+  V getValue(H header) throws HttpException;
 
-  HttpHeader of(String name, String value);
+  H of(String name, String value);
 
-  default HttpHeader of(String value) {
+  default H of(String value) {
     return this.of(this.name(), value);
   }
 
-  HttpHeader of(String name, V value);
+  H of(String name, V value);
 
-  default HttpHeader of(V value) {
+  default H of(V value) {
     return this.of(this.name(), value);
   }
+
+  @Nullable H cast(HttpHeader header);
 
 }

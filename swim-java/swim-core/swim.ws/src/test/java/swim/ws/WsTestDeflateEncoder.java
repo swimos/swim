@@ -18,7 +18,7 @@ final class WsTestDeflateEncoder extends WsDeflateEncoder {
 
   final int maskingKey;
 
-  WsTestDeflateEncoder(boolean masked, int maskingKey, WsEngineOptions options) {
+  WsTestDeflateEncoder(boolean masked, int maskingKey, WsOptions options) {
     super(masked, options);
     this.maskingKey = maskingKey;
   }
@@ -33,15 +33,15 @@ final class WsTestDeflateEncoder extends WsDeflateEncoder {
     return 0;
   }
 
-  static WsTestDeflateEncoder client(int maskingKey, WsEngineOptions options) {
+  static WsTestDeflateEncoder client(int maskingKey, WsOptions options) {
     return new WsTestDeflateEncoder(true, maskingKey, options);
   }
 
-  static WsTestDeflateEncoder client(WsEngineOptions options) {
+  static WsTestDeflateEncoder client(WsOptions options) {
     return new WsTestDeflateEncoder(true, 0, options);
   }
 
-  static WsTestDeflateEncoder server(WsEngineOptions options) {
+  static WsTestDeflateEncoder server(WsOptions options) {
     return new WsTestDeflateEncoder(false, 0, options);
   }
 

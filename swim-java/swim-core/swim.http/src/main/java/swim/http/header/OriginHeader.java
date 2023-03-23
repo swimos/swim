@@ -24,8 +24,10 @@ import swim.codec.ParseException;
 import swim.codec.StringInput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
 import swim.uri.UriHost;
@@ -46,7 +48,7 @@ public final class OriginHeader extends HttpHeader {
     this.origins = origins;
   }
 
-  public FingerTrieList<Uri> origins() {
+  public FingerTrieList<Uri> origins() throws HttpException {
     if (this.origins == null) {
       this.origins = OriginHeader.parseValue(this.value);
     }
@@ -62,13 +64,13 @@ public final class OriginHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("OriginHeader", "of")
-            .appendArgument(this.origins())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Origin";
 
-  public static final HttpHeaderType<FingerTrieList<Uri>> TYPE = new OriginHeaderType();
+  public static final HttpHeaderType<OriginHeader, FingerTrieList<Uri>> TYPE = new OriginHeaderType();
 
   public static OriginHeader empty() {
     return new OriginHeader(NAME, "null", FingerTrieList.empty());
@@ -91,7 +93,11 @@ public final class OriginHeader extends HttpHeader {
     return OriginHeader.of(NAME, FingerTrieList.of(origins));
   }
 
-  private static FingerTrieList<Uri> parseValue(String value) {
+  public static OriginHeader of(String value) {
+    return OriginHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<Uri> parseValue(String value) throws HttpException {
     FingerTrieList<Uri> origins = FingerTrieList.empty();
     if (!"null".equals(value)) {
       final StringInput input = new StringInput(value);
@@ -100,23 +106,35 @@ public final class OriginHeader extends HttpHeader {
         if (input.isCont() && input.head() == ':') {
           input.step();
         } else if (input.isReady()) {
-          throw new ParseException(Diagnostic.expected(':', input));
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value,
+                                  new ParseException(Diagnostic.expected(':', input)));
         }
         if (input.isCont() && input.head() == '/') {
           input.step();
         } else if (input.isReady()) {
-          throw new ParseException(Diagnostic.expected('/', input));
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value,
+                                  new ParseException(Diagnostic.expected('/', input)));
         }
         if (input.isCont() && input.head() == '/') {
           input.step();
         } else if (input.isReady()) {
-          throw new ParseException(Diagnostic.expected('/', input));
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value,
+                                  new ParseException(Diagnostic.expected('/', input)));
         }
-        final UriHost host = UriHost.parse(input);
+        final UriHost host;
+        try {
+          host = UriHost.parse(input);
+        } catch (ParseException cause) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value, cause);
+        }
         UriPort port = null;
         if (input.isCont() && input.head() == ':') {
           input.step();
-          port = UriPort.parse(input);
+          try {
+            port = UriPort.parse(input);
+          } catch (ParseException cause) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value, cause);
+          }
         }
         final UriAuthority authority = UriAuthority.of(null, host, port);
         final Uri origin = Uri.of(scheme, authority, null, null, null);
@@ -137,9 +155,9 @@ public final class OriginHeader extends HttpHeader {
         break;
       } while (true);
       if (input.isError()) {
-        throw new ParseException(input.getError());
+        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value, input.getError());
       } else if (!input.isDone()) {
-        throw new ParseException(Diagnostic.unexpected(input));
+        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value);
       }
     }
     return origins;
@@ -174,7 +192,7 @@ public final class OriginHeader extends HttpHeader {
 
 }
 
-final class OriginHeaderType implements HttpHeaderType<FingerTrieList<Uri>>, ToSource {
+final class OriginHeaderType implements HttpHeaderType<OriginHeader, FingerTrieList<Uri>>, ToSource {
 
   @Override
   public String name() {
@@ -182,18 +200,27 @@ final class OriginHeaderType implements HttpHeaderType<FingerTrieList<Uri>>, ToS
   }
 
   @Override
-  public FingerTrieList<Uri> getValue(HttpHeader header) {
-    return ((OriginHeader) header).origins();
+  public FingerTrieList<Uri> getValue(OriginHeader header) throws HttpException {
+    return header.origins();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public OriginHeader of(String name, String value) {
     return OriginHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<Uri> origins) {
+  public OriginHeader of(String name, FingerTrieList<Uri> origins) {
     return OriginHeader.of(name, origins);
+  }
+
+  @Override
+  public @Nullable OriginHeader cast(HttpHeader header) {
+    if (header instanceof OriginHeader) {
+      return (OriginHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

@@ -87,11 +87,11 @@ public class WsEncoder implements ToSource {
     }
   }
 
-  public <T> Encode<WsFrame<T>> encodeContinuation(OutputBuffer<?> output, WsContinuationFrame<T> frame) {
+  public <T> Encode<WsFrame<T>> encodeContinuation(OutputBuffer<?> output, WsContinuation<T> frame) {
     return EncodeWsFrame.encode(output, this, frame.frame, frame.encodePayload, frame.offset);
   }
 
-  public <T> Encode<WsFrame<T>> encodeContinuation(WsContinuationFrame<T> frame) {
+  public <T> Encode<WsFrame<T>> encodeContinuation(WsContinuation<T> frame) {
     return new EncodeWsFrame<T>(this, frame.frame, frame.encodePayload, frame.offset);
   }
 
@@ -317,7 +317,7 @@ final class EncodeWsFrame<T> extends Encode<WsFrame<T>> {
           return Encode.done(frame);
         } else {
           // A message fragment was encoded.
-          return Encode.done(WsContinuationFrame.of((WsDataFrame<T>) frame, encode, offset));
+          return Encode.done(WsContinuation.of((WsDataFrame<T>) frame, encode, offset));
         }
       }
     }

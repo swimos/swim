@@ -26,6 +26,7 @@ javadoc {
                 'swim.log',
                 'swim.net',
                 'swim.net.http',
+                'swim.net.ws',
                 'swim.repr',
                 'swim.uri',
                 'swim.util',

@@ -520,13 +520,13 @@ final class EncodeChannel extends Encode<Object> {
         // swallow
       }
       return Encode.error(error);
-    } catch (Throwable error) {
+    } catch (Throwable cause) {
       try {
         input.close();
       } catch (IOException ignore) {
         // swallow
       }
-      throw error;
+      throw cause;
     }
   }
 

@@ -112,4 +112,15 @@ public final class WsCloseFrame<T> extends WsControlFrame<T> implements ToSource
     return WsCloseFrame.of(WsStatus.of(code));
   }
 
+  public static WsCloseFrame<WsStatus> error(Throwable error) {
+    WsStatus status = null;
+    if (error instanceof WsException) {
+      status = ((WsException) error).getStatus();
+    }
+    if (status == null) {
+      status = WsStatus.of(1011, error.getMessage());
+    }
+    return WsCloseFrame.of(status);
+  }
+
 }

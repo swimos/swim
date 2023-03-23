@@ -17,6 +17,7 @@ package swim.http.header;
 import org.junit.jupiter.api.Test;
 import swim.codec.MediaType;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class ContentTypeHeaderTests {
 
   @Test
-  public void parseContentTypeHeaderType() {
+  public void parseContentTypeHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Content-Type: application/json\r\n");
     assertInstanceOf(ContentTypeHeader.class, headers.getHeader(ContentTypeHeader.TYPE));
     assertEquals(ContentTypeHeader.of(MediaType.of("application", "json")),

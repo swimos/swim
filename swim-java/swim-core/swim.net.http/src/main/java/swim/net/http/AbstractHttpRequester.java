@@ -44,6 +44,14 @@ public abstract class AbstractHttpRequester implements HttpRequester {
     this.context = context;
   }
 
+  public HttpClientContext clientContext() {
+    final HttpRequesterContext context = this.context;
+    if (context == null) {
+      throw new IllegalStateException("Unbound requester");
+    }
+    return context.clientContext();
+  }
+
   public HttpOptions options() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
@@ -100,12 +108,20 @@ public abstract class AbstractHttpRequester implements HttpRequester {
     return context.writeRequest(request);
   }
 
-  public Result<HttpRequest<?>> request() {
+  public HttpRequest<?> request() {
+    final HttpRequesterContext context = this.context;
+    if (context == null) {
+      throw new IllegalStateException("Unbound requester");
+    }
+    return context.request();
+  }
+
+  public Result<HttpRequest<?>> requestResult() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
       return Result.error(new IllegalStateException("Unbound requester"));
     }
-    return context.request();
+    return context.requestResult();
   }
 
   public boolean isReading() {
@@ -126,12 +142,12 @@ public abstract class AbstractHttpRequester implements HttpRequester {
     return context.readResponse();
   }
 
-  public Result<HttpResponse<?>> response() {
+  public Result<HttpResponse<?>> responseResult() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
       return Result.error(new IllegalStateException("Unbound requester"));
     }
-    return context.response();
+    return context.responseResult();
   }
 
   protected void become(HttpRequester requester) {

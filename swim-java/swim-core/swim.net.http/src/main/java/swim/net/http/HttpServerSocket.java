@@ -26,6 +26,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutputBuffer;
+import swim.http.HttpException;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.log.Log;
@@ -34,6 +35,7 @@ import swim.net.FlowContext;
 import swim.net.NetSocket;
 import swim.net.NetSocketContext;
 import swim.net.TcpEndpoint;
+import swim.util.Assume;
 import swim.util.Result;
 
 @Public
@@ -42,13 +44,14 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
 
   protected final HttpServer server;
   protected final HttpOptions options;
+  protected BinaryInputBuffer readBuffer;
+  protected BinaryOutputBuffer writeBuffer;
   protected @Nullable NetSocketContext context;
-  protected BinaryInputBuffer requestBuffer;
-  protected BinaryOutputBuffer responseBuffer;
   @Nullable HttpServerResponder requester;
   final HttpServerResponder[] responders;
   int responderReadIndex;
   int responderWriteIndex;
+  int status;
   Log log;
 
   public HttpServerSocket(HttpServer server, HttpOptions options) {
@@ -56,18 +59,23 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     this.server = server;
     this.options = options;
 
+    // Initialize I/O buffers.
+    this.readBuffer = BinaryInputBuffer.allocateDirect(options.serverRequestBufferSize()).asLast(false);
+    this.writeBuffer = BinaryOutputBuffer.allocateDirect(options.serverResponseBufferSize()).asLast(false);
+
     // Initialize socket context.
     this.context = null;
 
-    // Initialize I/O buffers.
-    this.requestBuffer = BinaryInputBuffer.allocateDirect(options.serverRequestBufferSize()).asLast(false);
-    this.responseBuffer = BinaryOutputBuffer.allocateDirect(options.serverResponseBufferSize()).asLast(false);
+    // Initialize the request pipeline.
+    this.requester = null;
 
     // Initialize the response pipeline.
-    this.requester = null;
     this.responders = new HttpServerResponder[Math.max(2, options.serverPipelineLength())];
     this.responderReadIndex = 0;
     this.responderWriteIndex = 0;
+
+    // Initialize status.
+    this.status = 0;
 
     // Initialize the server log.
     this.log = this.initLog();
@@ -117,6 +125,16 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   }
 
   @Override
+  public final BinaryInputBuffer readBuffer() {
+    return this.readBuffer;
+  }
+
+  @Override
+  public final BinaryOutputBuffer writeBuffer() {
+    return this.writeBuffer;
+  }
+
+  @Override
   public final @Nullable NetSocketContext socketContext() {
     return this.context;
   }
@@ -135,71 +153,43 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   @Override
   public final boolean isClient() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isClient();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isClient();
   }
 
   @Override
   public final boolean isServer() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isServer();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isServer();
   }
 
   @Override
   public final boolean isOpening() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isOpening();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isOpening();
   }
 
   @Override
   public final boolean isOpen() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isOpen();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null && context.isOpen();
   }
 
   @Override
   public final @Nullable InetSocketAddress localAddress() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.localAddress();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null ? context.localAddress() : null;
   }
 
   @Override
   public final @Nullable InetSocketAddress remoteAddress() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.remoteAddress();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null ? context.remoteAddress() : null;
   }
 
   @Override
   public final @Nullable SSLSession sslSession() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.sslSession();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return context != null ? context.sslSession() : null;
   }
 
   @Override
@@ -213,9 +203,9 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
 
   @Override
   public void didOpen() throws IOException {
-    this.server.didOpen();
-
     this.log.infoConfig("opened socket", this);
+
+    this.server.didOpen();
   }
 
   @Override
@@ -254,46 +244,33 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     if (REQUESTER.compareAndExchangeRelease(this, handler, null) != handler) {
       throw new IllegalStateException("Inconsistent request pipeline");
     }
-
-    if (this.isDoneReading() && !this.isDoneWriting()) {
-      // The socket is done reading, but not done writing;
-      // check if the responder queue is empty.
-      if ((int) RESPONDER_READ_INDEX.getOpaque(this) == (int) RESPONDER_WRITE_INDEX.getAcquire(this)) {
-        // The responder queue is empty, and the socket is done reading;
-        // no more responses can be generated, so we're also done writing.
-        this.doneWriting();
-      }
-    }
   }
 
   @Override
   public boolean requestRead() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.requestRead();
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    return context.requestRead();
   }
 
   @Override
   public boolean cancelRead() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.cancelRead();
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    return context.cancelRead();
   }
 
   @Override
   public boolean triggerRead() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.triggerRead();
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    return context.triggerRead();
   }
 
   @Override
@@ -302,6 +279,16 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     LogScope.push("read");
     try {
       HttpServerResponder handler = this.requester();
+
+      // Read data from the socket into the read buffer.
+      final int count = this.read(this.readBuffer.byteBuffer());
+      if (count < 0) {
+        // Signal the end of input.
+        this.readBuffer.asLast(true);
+      }
+      // Prepare to consume data from the read buffer.
+      this.readBuffer.flip();
+
       while (handler != null) {
         // Delegate the read operation to the current request handler.
         handler.doRead();
@@ -313,7 +300,23 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
           break;
         }
       }
+
+      if (this.isDoneReading()) {
+        // Close the socket for reading.
+        Assume.nonNull(this.context).doneReading();
+        if (!this.isDoneWriting()) {
+          // The socket is done reading, but not done writing;
+          // check if the responder queue is empty.
+          if ((int) RESPONDER_READ_INDEX.getOpaque(this) == (int) RESPONDER_WRITE_INDEX.getAcquire(this)) {
+            // The responder queue is empty, and the socket is done reading;
+            // no more responses can be generated, so we're also done writing.
+            this.doneWriting();
+          }
+        }
+      }
     } finally {
+      // Prepare the read buffer for the next read.
+      this.readBuffer.compact();
       LogScope.pop();
       LogScope.setCurrent(scope);
     }
@@ -321,35 +324,118 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
 
   int read(ByteBuffer readBuffer) throws IOException {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.read(readBuffer);
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    return context.read(readBuffer);
   }
 
   protected void willReadRequest(HttpResponderContext handler) {
-    this.server.willReadRequest(handler);
+    try {
+      // Invoke willReadRequest server callback.
+      this.server.willReadRequest(handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("willReadRequest callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("willReadRequest callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
   protected void willReadRequestMessage(HttpResponderContext handler) {
-    this.server.willReadRequestMessage(handler);
+    try {
+      // Invoke willReadRequestMessage server callback.
+      this.server.willReadRequestMessage(handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("willReadRequestMessage callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("willReadRequestMessage callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
-  protected void didReadRequestMessage(Result<HttpRequest<?>> request, HttpResponderContext handler) {
-    this.server.didReadRequestMessage(request, handler);
+  protected void didReadRequestMessage(Result<HttpRequest<?>> requestResult, HttpResponderContext handler) {
+    try {
+      // Invoke didReadRequestMessage server callback.
+      this.server.didReadRequestMessage(requestResult, handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("didReadRequestMessage callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("didReadRequestMessage callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
   protected void willReadRequestPayload(HttpRequest<?> request, HttpResponderContext handler) {
-    this.server.willReadRequestPayload(request, handler);
+    try {
+      // Invoke willReadRequestPayload server callback.
+      this.server.willReadRequestPayload(request, handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("willReadRequestPayload callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("willReadRequestPayload callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
-  protected void didReadRequestPayload(Result<HttpRequest<?>> request, HttpResponderContext handler) {
-    this.server.didReadRequestPayload(request, handler);
+  protected void didReadRequestPayload(Result<HttpRequest<?>> requestResult, HttpResponderContext handler) {
+    try {
+      // Invoke didReadRequestPayload server callback.
+      this.server.didReadRequestPayload(requestResult, handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("didReadRequestPayload callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("didReadRequestPayload callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
-  protected void didReadRequest(Result<HttpRequest<?>> request, HttpResponderContext handler) {
-    this.server.didReadRequest(request, handler);
+  protected void didReadRequest(Result<HttpRequest<?>> requestResult, HttpResponderContext handler) {
+    try {
+      // Invoke didReadRequest server callback.
+      this.server.didReadRequest(requestResult, handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("didReadRequest callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("didReadRequest callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
   @Override
@@ -445,31 +531,28 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   @Override
   public boolean requestWrite() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.requestWrite();
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    return context.requestWrite();
   }
 
   @Override
   public boolean cancelWrite() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.cancelWrite();
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    return context.cancelWrite();
   }
 
   @Override
   public boolean triggerWrite() {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.triggerWrite();
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    return context.triggerWrite();
   }
 
   @Override
@@ -478,7 +561,8 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     LogScope.push("write");
     try {
       HttpServerResponder handler = this.responder();
-      while (handler != null) {
+
+      while (handler != null && !this.isDoneWriting()) {
         // Delegate the write operation to the current response handler.
         handler.doWrite();
         // Start handling the next response, if the current response handler changed.
@@ -489,7 +573,24 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
           break;
         }
       }
+
+      // Prepare to transfer data from the write buffer to the socket.
+      this.writeBuffer.flip();
+      if (this.writeBuffer.hasRemaining()) {
+        // Write data from the write buffer to the socket.
+        this.write(this.writeBuffer.byteBuffer());
+      }
+      if (this.writeBuffer.position() != 0) {
+        // The write buffer has not been fully written to the socket;
+        // yield until the socket is ready to write more data.
+        this.requestWrite();
+      } else if (this.isDoneWriting()) {
+        // Close the socket for writing.
+        Assume.nonNull(this.context).doneWriting();
+      }
     } finally {
+      // Prepare the write buffer for the next write.
+      this.writeBuffer.compact();
       LogScope.pop();
       LogScope.setCurrent(scope);
     }
@@ -497,45 +598,144 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
 
   int write(ByteBuffer writeBuffer) throws IOException {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.write(writeBuffer);
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    return context.write(writeBuffer);
   }
 
   protected void willWriteResponse(HttpResponderContext handler) {
-    this.server.willWriteResponse(handler);
+    try {
+      // Invoke willWriteResponse server callback.
+      this.server.willWriteResponse(handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("willWriteResponse callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("willWriteResponse callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
   protected void willWriteResponseMessage(HttpResponderContext handler) {
-    this.server.willWriteResponseMessage(handler);
+    try {
+      // Invoke willWriteResponseMessage server callback.
+      this.server.willWriteResponseMessage(handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("willWriteResponseMessage callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("willWriteResponseMessage callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
-  protected void didWriteResponseMessage(Result<HttpResponse<?>> response, HttpResponderContext handler) {
-    this.server.didWriteResponseMessage(response, handler);
+  protected void didWriteResponseMessage(Result<HttpResponse<?>> responseResult, HttpResponderContext handler) {
+    try {
+      // Invoke didWriteResponseMessage server callback.
+      this.server.didWriteResponseMessage(responseResult, handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("didWriteResponseMessage callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("didWriteResponseMessage callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
   protected void willWriteResponsePayload(HttpResponse<?> response, HttpResponderContext handler) {
-    this.server.willWriteResponsePayload(response, handler);
+    try {
+      // Invoke willWriteResponsePayload server callback.
+      this.server.willWriteResponsePayload(response, handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("willWriteResponsePayload callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("willWriteResponsePayload callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
-  protected void didWriteResponsePayload(Result<HttpResponse<?>> response, HttpResponderContext handler) {
-    this.server.didWriteResponsePayload(response, handler);
+  protected void didWriteResponsePayload(Result<HttpResponse<?>> responseResult, HttpResponderContext handler) {
+    try {
+      // Invoke didWriteResponsePayload server callback.
+      this.server.didWriteResponsePayload(responseResult, handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("didWriteResponsePayload callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("didWriteResponsePayload callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
-  protected void didWriteResponse(Result<HttpResponse<?>> response, HttpResponderContext handler) {
-    this.server.didWriteResponse(response, handler);
+  protected void didWriteResponse(Result<HttpResponse<?>> responseResult, HttpResponderContext handler) {
+    try {
+      // Invoke didWriteResponse server callback.
+      this.server.didWriteResponse(responseResult, handler);
+    } catch (HttpException cause) {
+      // Report the exception.
+      this.log.warningStatus("didWriteResponse callback failed", this.server, cause);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorStatus("didWriteResponse callback failed", this.server, cause);
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
+  }
+
+  protected void handleServerError(Throwable error, HttpResponderContext handler) {
+    try {
+      // Invoke handleServerError delegate.
+      this.server.handleServerError(error, handler);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        // Report the non-fatal exception.
+        this.log.errorEntity("handleServerError delegate failed", this.server, cause);
+        // Last ditch attempt to write an error response.
+        handler.writeResponse(HttpResponse.error(error));
+      } else {
+        // Rethrow the fatal exception.
+        throw cause;
+      }
+    }
   }
 
   @Override
   public void become(NetSocket socket) {
     final NetSocketContext context = this.context;
-    if (context != null) {
-      context.become(socket);
-    } else {
-      throw new IllegalStateException("Unbound socket");
+    if (context == null) {
+      throw new IllegalStateException("Unbound server");
     }
+    context.become(socket);
   }
 
   @Override
@@ -547,49 +747,65 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
 
   @Override
   public void didBecome(NetSocket socket) {
-    this.server.didBecome(socket);
-
     this.log.traceEntity("became socket", socket);
+
+    this.server.didBecome(socket);
   }
 
   @Override
   public final boolean isDoneReading() {
-    final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isDoneReading();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return ((int) STATUS.getOpaque(this) & READ_DONE) != 0;
   }
 
   @Override
   public boolean doneReading() {
-    final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.doneReading();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    int status = (int) STATUS.getOpaque(this);
+    do {
+      final int oldStatus = status;
+      final int newStatus = status | READ_DONE;
+      status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
+      if (status == oldStatus) {
+        status = newStatus;
+        if ((oldStatus & READ_DONE) == 0) {
+          // Trigger a read to close the socket for reading.
+          this.triggerRead();
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        // CAS failed; try again.
+        continue;
+      }
+    } while (true);
   }
 
   @Override
   public final boolean isDoneWriting() {
-    final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.isDoneWriting();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    return ((int) STATUS.getOpaque(this) & WRITE_DONE) != 0;
   }
 
   @Override
   public boolean doneWriting() {
-    final NetSocketContext context = this.context;
-    if (context != null) {
-      return context.doneWriting();
-    } else {
-      throw new IllegalStateException("Unbound socket");
-    }
+    int status = (int) STATUS.getOpaque(this);
+    do {
+      final int oldStatus = status;
+      final int newStatus = status | WRITE_DONE;
+      status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
+      if (status == oldStatus) {
+        status = newStatus;
+        if ((oldStatus & WRITE_DONE) == 0) {
+          // Trigger a write to close the socket for writing.
+          this.triggerWrite();
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        // CAS failed; try again.
+        continue;
+      }
+    } while (true);
   }
 
   @Override
@@ -606,8 +822,6 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     final NetSocketContext context = this.context;
     if (context != null) {
       context.close();
-    } else {
-      throw new IllegalStateException("Unbound socket");
     }
   }
 
@@ -622,12 +836,15 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
 
   @Override
   public void didClose() throws IOException {
+    this.log.info("closed socket");
+
     // TODO: didClose responders
 
     this.server.didClose();
-
-    this.log.info("closed socket");
   }
+
+  static final int READ_DONE = 1 << 0;
+  static final int WRITE_DONE = 1 << 1;
 
   /**
    * {@code VarHandle} for atomically accessing the {@link #requester} field.
@@ -650,6 +867,11 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
    */
   static final VarHandle RESPONDER_WRITE_INDEX;
 
+  /**
+   * {@code VarHandle} for atomically accessing the {@link #status} field.
+   */
+  static final VarHandle STATUS;
+
   static {
     // Initialize var handles.
     RESPONDER_ARRAY = MethodHandles.arrayElementVarHandle(HttpServerResponder.class.arrayType());
@@ -658,6 +880,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       REQUESTER = lookup.findVarHandle(HttpServerSocket.class, "requester", HttpServerResponder.class);
       RESPONDER_READ_INDEX = lookup.findVarHandle(HttpServerSocket.class, "responderReadIndex", Integer.TYPE);
       RESPONDER_WRITE_INDEX = lookup.findVarHandle(HttpServerSocket.class, "responderWriteIndex", Integer.TYPE);
+      STATUS = lookup.findVarHandle(HttpServerSocket.class, "status", Integer.TYPE);
     } catch (ReflectiveOperationException cause) {
       throw new ExceptionInInitializerError(cause);
     }

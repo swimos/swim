@@ -30,12 +30,12 @@ import swim.util.Notation;
 @Since("5.0")
 public class WsDeflateEncoder extends WsEncoder {
 
-  protected final WsEngineOptions options;
+  protected final WsOptions options;
   protected final BinaryOutputBuffer deflateBuffer;
   protected final Deflater deflater;
   protected final int flush;
 
-  protected WsDeflateEncoder(boolean masked, WsEngineOptions options) {
+  protected WsDeflateEncoder(boolean masked, WsOptions options) {
     super(masked);
     this.options = options;
     this.deflateBuffer = BinaryOutputBuffer.allocate(options.deflateBufferSize()).asLast(false);
@@ -56,7 +56,7 @@ public class WsDeflateEncoder extends WsEncoder {
     }
   }
 
-  public final WsEngineOptions options() {
+  public final WsOptions options() {
     return this.options;
   }
 
@@ -65,12 +65,12 @@ public class WsDeflateEncoder extends WsEncoder {
   }
 
   @Override
-  public <T> Encode<WsFrame<T>> encodeContinuation(OutputBuffer<?> output, WsContinuationFrame<T> frame) {
+  public <T> Encode<WsFrame<T>> encodeContinuation(OutputBuffer<?> output, WsContinuation<T> frame) {
     return EncodeWsDeflateFrame.encode(output, this, frame.frame, frame.encodePayload, frame.offset);
   }
 
   @Override
-  public <T> Encode<WsFrame<T>> encodeContinuation(WsContinuationFrame<T> frame) {
+  public <T> Encode<WsFrame<T>> encodeContinuation(WsContinuation<T> frame) {
     return new EncodeWsDeflateFrame<T>(this, frame.frame, frame.encodePayload, frame.offset);
   }
 
@@ -300,7 +300,7 @@ final class EncodeWsDeflateFrame<T> extends Encode<WsFrame<T>> {
           return Encode.done(frame);
         } else {
           // A message fragment was encoded.
-          return Encode.done(WsContinuationFrame.of((WsDataFrame<T>) frame, encode, offset));
+          return Encode.done(WsContinuation.of((WsDataFrame<T>) frame, encode, offset));
         }
       }
     }

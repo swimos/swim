@@ -17,6 +17,7 @@ package swim.http.header;
 import org.junit.jupiter.api.Test;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class ConnectionHeaderTests {
 
   @Test
-  public void parseConnectionHeaderType() {
+  public void parseConnectionHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Connection: Upgrade\r\n");
     assertInstanceOf(ConnectionHeader.class, headers.getHeader(ConnectionHeader.TYPE));
     assertEquals(ConnectionHeader.of(FingerTrieList.of("Upgrade")),

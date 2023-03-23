@@ -26,8 +26,10 @@ import swim.codec.StringOutput;
 import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -43,7 +45,7 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
     this.versions = versions;
   }
 
-  public FingerTrieList<Integer> versions() {
+  public FingerTrieList<Integer> versions() throws HttpException {
     if (this.versions == null) {
       this.versions = SecWebSocketVersionHeader.parseValue(this.value);
     }
@@ -59,13 +61,13 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("SecWebSocketVersionHeader", "of")
-            .appendArgument(this.versions())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Sec-WebSocket-Version";
 
-  public static final HttpHeaderType<FingerTrieList<Integer>> TYPE = new SecWebSocketVersionHeaderType();
+  public static final HttpHeaderType<SecWebSocketVersionHeader, FingerTrieList<Integer>> TYPE = new SecWebSocketVersionHeaderType();
 
   public static final SecWebSocketVersionHeader VERSION_13 = new SecWebSocketVersionHeader(NAME, "13", FingerTrieList.of(13));
 
@@ -86,11 +88,15 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
     return SecWebSocketVersionHeader.of(NAME, FingerTrieList.of(versions));
   }
 
-  private static FingerTrieList<Integer> parseValue(String value) {
-    FingerTrieList<Integer> versions = FingerTrieList.empty();
+  public static SecWebSocketVersionHeader of(String value) {
+    return SecWebSocketVersionHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<Integer> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
-    int version = 0;
     int c = 0;
+    FingerTrieList<Integer> versions = FingerTrieList.empty();
+    int version = 0;
     do {
       while (input.isCont()) {
         c = input.head();
@@ -105,10 +111,12 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
           input.step();
           version = Base10.decodeDigit(c);
         } else {
-          throw new ParseException(Diagnostic.expected("websocket version", input));
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Version: " + value,
+                                  new ParseException(Diagnostic.expected("digit", input)));
         }
       } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("websocket version", input));
+        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Version: " + value,
+                                new ParseException(Diagnostic.expected("digit", input)));
       } else {
         break;
       }
@@ -119,7 +127,7 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
             input.step();
             version = 10 * version + Base10.decodeDigit(c);
             if (version > 255) {
-              throw new ParseException(Diagnostic.message("websocket version overflow", input));
+              throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid Sec-WebSocket-Version: " + value);
             }
           } else {
             break;
@@ -144,9 +152,9 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Version: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Version: " + value);
     }
     return versions;
   }
@@ -175,7 +183,7 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
 
 }
 
-final class SecWebSocketVersionHeaderType implements HttpHeaderType<FingerTrieList<Integer>>, ToSource {
+final class SecWebSocketVersionHeaderType implements HttpHeaderType<SecWebSocketVersionHeader, FingerTrieList<Integer>>, ToSource {
 
   @Override
   public String name() {
@@ -183,18 +191,27 @@ final class SecWebSocketVersionHeaderType implements HttpHeaderType<FingerTrieLi
   }
 
   @Override
-  public FingerTrieList<Integer> getValue(HttpHeader header) {
-    return ((SecWebSocketVersionHeader) header).versions();
+  public FingerTrieList<Integer> getValue(SecWebSocketVersionHeader header) throws HttpException {
+    return header.versions();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public SecWebSocketVersionHeader of(String name, String value) {
     return SecWebSocketVersionHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<Integer> versions) {
+  public SecWebSocketVersionHeader of(String name, FingerTrieList<Integer> versions) {
     return SecWebSocketVersionHeader.of(name, versions);
+  }
+
+  @Override
+  public @Nullable SecWebSocketVersionHeader cast(HttpHeader header) {
+    if (header instanceof SecWebSocketVersionHeader) {
+      return (SecWebSocketVersionHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

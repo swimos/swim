@@ -17,6 +17,7 @@ package swim.net.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.http.HttpException;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.net.NetSocket;
@@ -63,51 +64,51 @@ public interface HttpClient {
     // hook
   }
 
-  default void willWriteRequest(HttpRequesterContext handler) {
+  default void willWriteRequest(HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void willWriteRequestMessage(HttpRequesterContext handler) {
+  default void willWriteRequestMessage(HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void didWriteRequestMessage(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
+  default void didWriteRequestMessage(Result<HttpRequest<?>> requestResult, HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void willWriteRequestPayload(HttpRequest<?> request, HttpRequesterContext handler) {
+  default void willWriteRequestPayload(HttpRequest<?> request, HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void didWriteRequestPayload(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
+  default void didWriteRequestPayload(Result<HttpRequest<?>> requestResult, HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void didWriteRequest(Result<HttpRequest<?>> request, HttpRequesterContext handler) {
+  default void didWriteRequest(Result<HttpRequest<?>> requestResult, HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void willReadResponse(HttpRequesterContext handler) {
+  default void willReadResponse(HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void willReadResponseMessage(HttpRequesterContext handler) {
+  default void willReadResponseMessage(HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void didReadResponseMessage(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
+  default void didReadResponseMessage(Result<HttpResponse<?>> responseResult, HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void willReadResponsePayload(HttpResponse<?> response, HttpRequesterContext handler) {
+  default void willReadResponsePayload(HttpResponse<?> response, HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void didReadResponsePayload(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
+  default void didReadResponsePayload(Result<HttpResponse<?>> responseResult, HttpRequesterContext handler) throws HttpException {
     // hook
   }
 
-  default void didReadResponse(Result<HttpResponse<?>> response, HttpRequesterContext handler) {
+  default void didReadResponse(Result<HttpResponse<?>> responseResult, HttpRequesterContext handler) throws HttpException {
     // hook
   }
 

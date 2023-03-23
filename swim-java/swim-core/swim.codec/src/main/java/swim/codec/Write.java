@@ -296,11 +296,11 @@ public abstract class Write<T> extends Encode<T> {
   public Result<T> toResult() {
     try {
       return Result.ok(this.get());
-    } catch (Throwable error) {
-      if (Result.isNonFatal(error)) {
-        return Result.error(error);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        return Result.error(cause);
       } else {
-        throw error;
+        throw cause;
       }
     }
   }

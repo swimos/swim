@@ -94,8 +94,8 @@ public final class WsStatus implements ToSource {
     return this.toSource();
   }
 
-  public static WsStatus of(int code, String reason) {
-    return new WsStatus(code, reason);
+  public static WsStatus of(int code, @Nullable String reason) {
+    return new WsStatus(code, reason != null ? reason : "");
   }
 
   public static WsStatus of(int code) {

@@ -19,7 +19,7 @@ import swim.util.ToSource;
 
 final class WsDeflateClientEngine extends WsDeflateEngine implements ToSource {
 
-  WsDeflateClientEngine(WsEngineOptions options) {
+  WsDeflateClientEngine(WsOptions options) {
     super(options);
   }
 
@@ -34,7 +34,7 @@ final class WsDeflateClientEngine extends WsDeflateEngine implements ToSource {
   }
 
   @Override
-  public WsEngine acceptOptions(WsEngineOptions options) {
+  public WsEngine acceptOptions(WsOptions options) {
     if (options.clientMaxWindowBits == 0) {
       options = options.clientMaxWindowBits(this.options.clientMaxWindowBits);
     }

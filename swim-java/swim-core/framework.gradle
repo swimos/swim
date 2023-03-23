@@ -50,4 +50,7 @@ ext.includeSwimCore = { frameworkDir ->
 
   include 'swim-net-http'
   project(':swim-net-http').projectDir = file("${frameworkDir}/swim.net.http")
+
+  include 'swim-net-ws'
+  project(':swim-net-ws').projectDir = file("${frameworkDir}/swim.net.ws")
 }

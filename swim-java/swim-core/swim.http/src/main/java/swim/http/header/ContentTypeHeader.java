@@ -18,8 +18,12 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.MediaType;
+import swim.codec.Parse;
+import swim.codec.StringInput;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -34,9 +38,9 @@ public final class ContentTypeHeader extends HttpHeader {
     this.mediaType = mediaType;
   }
 
-  public MediaType mediaType() {
+  public MediaType mediaType() throws HttpException {
     if (this.mediaType == null) {
-      this.mediaType = MediaType.parse(this.value);
+      this.mediaType = ContentTypeHeader.parseValue(this.value);
     }
     return this.mediaType;
   }
@@ -50,13 +54,13 @@ public final class ContentTypeHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("ContentTypeHeader", "of")
-            .appendArgument(this.mediaType())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Content-Type";
 
-  public static final HttpHeaderType<MediaType> TYPE = new ContentTypeHeaderType();
+  public static final HttpHeaderType<ContentTypeHeader, MediaType> TYPE = new ContentTypeHeaderType();
 
   public static ContentTypeHeader of(String name, String value) {
     return new ContentTypeHeader(name, value, null);
@@ -75,9 +79,21 @@ public final class ContentTypeHeader extends HttpHeader {
     return ContentTypeHeader.of(NAME, value);
   }
 
+  private static MediaType parseValue(String value) throws HttpException {
+    final StringInput input = new StringInput(value);
+    final Parse<MediaType> parseMediaType = MediaType.parse(input);
+    if (parseMediaType.isDone()) {
+      return parseMediaType.getNonNull();
+    } else if (parseMediaType.isError()) {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Content-Type: " + value, parseMediaType.getError());
+    } else {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Content-Type: " + value);
+    }
+  }
+
 }
 
-final class ContentTypeHeaderType implements HttpHeaderType<MediaType>, ToSource {
+final class ContentTypeHeaderType implements HttpHeaderType<ContentTypeHeader, MediaType>, ToSource {
 
   @Override
   public String name() {
@@ -85,18 +101,27 @@ final class ContentTypeHeaderType implements HttpHeaderType<MediaType>, ToSource
   }
 
   @Override
-  public MediaType getValue(HttpHeader header) {
-    return ((ContentTypeHeader) header).mediaType();
+  public MediaType getValue(ContentTypeHeader header) throws HttpException {
+    return header.mediaType();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public ContentTypeHeader of(String name, String value) {
     return ContentTypeHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, MediaType mediaType) {
+  public ContentTypeHeader of(String name, MediaType mediaType) {
     return ContentTypeHeader.of(name, mediaType);
+  }
+
+  @Override
+  public @Nullable ContentTypeHeader cast(HttpHeader header) {
+    if (header instanceof ContentTypeHeader) {
+      return (ContentTypeHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

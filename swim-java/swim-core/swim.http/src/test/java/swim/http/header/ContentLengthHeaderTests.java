@@ -16,6 +16,7 @@ package swim.http.header;
 
 import org.junit.jupiter.api.Test;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class ContentLengthHeaderTests {
 
   @Test
-  public void parseContentLengthHeaderType() {
+  public void parseContentLengthHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Content-Length: 42\r\n");
     assertInstanceOf(ContentLengthHeader.class, headers.getHeader(ContentLengthHeader.TYPE));
     assertEquals(ContentLengthHeader.of(42L),

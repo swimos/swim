@@ -17,15 +17,25 @@ package swim.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Binary;
+import swim.codec.BinaryInputBuffer;
+import swim.codec.Codec;
+import swim.codec.Decode;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
+import swim.codec.InputBuffer;
 import swim.codec.Output;
 import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Text;
+import swim.codec.Transcoder;
 import swim.codec.Write;
 import swim.codec.WriteException;
+import swim.collections.FingerTrieList;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.ContentTypeHeader;
+import swim.http.header.TransferEncodingHeader;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -102,6 +112,99 @@ public final class HttpRequest<T> extends HttpMessage<T> {
   public <T2> HttpRequest<T2> withPayload(HttpPayload<T2> payload) {
     return HttpRequest.of(this.method, this.target, this.version,
                           this.headers, payload);
+  }
+
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input, Transcoder<T2> transcoder) throws HttpException {
+    final HttpHeaders headers = this.headers();
+    ContentLengthHeader contentLength = null;
+    TransferEncodingHeader transferEncoding = null;
+    for (int i = 0, n = headers.size(); i < n; i += 1) {
+      final HttpHeader header = headers.get(i);
+      if (header instanceof ContentLengthHeader) {
+        if (contentLength != null) {
+          // RFC 7230 § 3.3.3 Item 4
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Conflicting Content-Length");
+        }
+        contentLength = (ContentLengthHeader) header;
+      } else if (header instanceof TransferEncodingHeader) {
+        transferEncoding = (TransferEncodingHeader) header;
+      }
+    }
+
+    if (transferEncoding != null) {
+      // RFC 7230 § 3.3.3 Item 3
+      final FingerTrieList<HttpTransferCoding> transferCodings = transferEncoding.codings();
+      if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, "Unsupported Transfer-Encoding: " + transferEncoding.value());
+      }
+      return HttpChunked.decode(input, transcoder);
+    }
+
+    if (contentLength != null) {
+      // RFC 7230 § 3.3.3 Item 5
+      return HttpBody.decode(input, transcoder, contentLength.length());
+    }
+
+    // RFC 7230 § 3.3.3 Item 6
+    return HttpEmpty.decode(input);
+  }
+
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input) throws HttpException {
+    final HttpHeaders headers = this.headers();
+    ContentTypeHeader contentType = null;
+    ContentLengthHeader contentLength = null;
+    TransferEncodingHeader transferEncoding = null;
+    for (int i = 0, n = headers.size(); i < n; i += 1) {
+      final HttpHeader header = headers.get(i);
+      if (header instanceof ContentTypeHeader) {
+        contentType = (ContentTypeHeader) header;
+      } else if (header instanceof ContentLengthHeader) {
+        if (contentLength != null) {
+          // RFC 7230 § 3.3.3 Item 4
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Conflicting Content-Length");
+        }
+        contentLength = (ContentLengthHeader) header;
+      } else if (header instanceof TransferEncodingHeader) {
+        transferEncoding = (TransferEncodingHeader) header;
+      }
+    }
+
+    Codec codec = null;
+    if (contentType != null) {
+      codec = Codec.registry().getCodec(contentType.mediaType());
+    }
+    Transcoder<T2> transcoder = null;
+    if (codec != null) {
+      transcoder = codec.getTranscoder(Object.class);
+    }
+    if (transcoder == null) {
+      transcoder = Assume.conforms(Binary.byteBufferTranscoder());
+    }
+
+    if (transferEncoding != null) {
+      // RFC 7230 § 3.3.3 Item 3
+      final FingerTrieList<HttpTransferCoding> transferCodings = transferEncoding.codings();
+      if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, "Unsupported Transfer-Encoding: " + transferEncoding.value());
+      }
+      return HttpChunked.decode(input, transcoder);
+    }
+
+    if (contentLength != null) {
+      // RFC 7230 § 3.3.3 Item 5
+      return HttpBody.decode(input, transcoder, contentLength.length());
+    }
+
+    // RFC 7230 § 3.3.3 Item 6
+    return HttpEmpty.decode(input);
+  }
+
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(Transcoder<T2> transcoder) throws HttpException {
+    return this.decodePayload(BinaryInputBuffer.empty(), transcoder);
+  }
+
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload() throws HttpException {
+    return this.decodePayload(BinaryInputBuffer.empty());
   }
 
   @Override

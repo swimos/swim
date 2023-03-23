@@ -18,15 +18,15 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
-import swim.codec.ParseException;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -42,7 +42,7 @@ public final class ConnectionHeader extends HttpHeader {
     this.options = options;
   }
 
-  public FingerTrieList<String> options() {
+  public FingerTrieList<String> options() throws HttpException {
     if (this.options == null) {
       this.options = ConnectionHeader.parseValue(this.value);
     }
@@ -50,11 +50,15 @@ public final class ConnectionHeader extends HttpHeader {
   }
 
   public boolean contains(String option) {
-    final FingerTrieList<String> options = this.options();
-    for (int i = 0, n = options.size(); i < n; i += 1) {
-      if (option.equalsIgnoreCase(options.get(i))) {
-        return true;
+    try {
+      final FingerTrieList<String> options = this.options();
+      for (int i = 0, n = options.size(); i < n; i += 1) {
+        if (option.equalsIgnoreCase(options.get(i))) {
+          return true;
+        }
       }
+    } catch (HttpException cause) {
+      // ignore
     }
     return false;
   }
@@ -68,13 +72,13 @@ public final class ConnectionHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("ConnectionHeader", "of")
-            .appendArgument(this.options())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Connection";
 
-  public static final HttpHeaderType<FingerTrieList<String>> TYPE = new ConnectionHeaderType();
+  public static final HttpHeaderType<ConnectionHeader, FingerTrieList<String>> TYPE = new ConnectionHeaderType();
 
   public static final ConnectionHeader CLOSE = new ConnectionHeader(NAME, "close", FingerTrieList.of("close"));
 
@@ -93,10 +97,14 @@ public final class ConnectionHeader extends HttpHeader {
     return ConnectionHeader.of(NAME, options);
   }
 
-  private static FingerTrieList<String> parseValue(String value) {
-    FingerTrieList<String> options = FingerTrieList.empty();
+  public static ConnectionHeader of(String value) {
+    return ConnectionHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<String> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
+    FingerTrieList<String> options = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -143,9 +151,9 @@ public final class ConnectionHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Connection: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Connection: " + value);
     }
     return options;
   }
@@ -175,7 +183,7 @@ public final class ConnectionHeader extends HttpHeader {
 
 }
 
-final class ConnectionHeaderType implements HttpHeaderType<FingerTrieList<String>>, ToSource {
+final class ConnectionHeaderType implements HttpHeaderType<ConnectionHeader, FingerTrieList<String>>, ToSource {
 
   @Override
   public String name() {
@@ -183,18 +191,27 @@ final class ConnectionHeaderType implements HttpHeaderType<FingerTrieList<String
   }
 
   @Override
-  public FingerTrieList<String> getValue(HttpHeader header) {
-    return ((ConnectionHeader) header).options();
+  public FingerTrieList<String> getValue(ConnectionHeader header) throws HttpException {
+    return header.options();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public ConnectionHeader of(String name, String value) {
     return ConnectionHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<String> options) {
+  public ConnectionHeader of(String name, FingerTrieList<String> options) {
     return ConnectionHeader.of(name, options);
+  }
+
+  @Override
+  public @Nullable ConnectionHeader cast(HttpHeader header) {
+    if (header instanceof ConnectionHeader) {
+      return (ConnectionHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

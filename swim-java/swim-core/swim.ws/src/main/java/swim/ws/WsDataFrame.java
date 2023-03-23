@@ -28,6 +28,11 @@ public abstract class WsDataFrame<T> extends WsFrame<T> {
   }
 
   @Override
+  public boolean fin() {
+    return true;
+  }
+
+  @Override
   public abstract @Nullable T get();
 
   @Override

@@ -19,7 +19,7 @@ import swim.util.ToSource;
 
 final class WsClientEngine extends WsEngine implements ToSource {
 
-  WsClientEngine(WsEngineOptions options) {
+  WsClientEngine(WsOptions options) {
     super(options);
   }
 
@@ -44,6 +44,6 @@ final class WsClientEngine extends WsEngine implements ToSource {
     return this.toSource();
   }
 
-  static final WsClientEngine ENGINE = new WsClientEngine(WsEngineOptions.noCompression());
+  static final WsClientEngine ENGINE = new WsClientEngine(WsOptions.noCompression());
 
 }

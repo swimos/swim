@@ -296,11 +296,11 @@ public final class Result<T> implements ToMarkup, ToSource {
     if (this.isOk()) {
       try {
         return Result.ok(mapper.apply(Assume.conformsNullable(this.value)));
-      } catch (Throwable error) {
-        if (Result.isNonFatal(error)) {
-          return Result.error(error);
+      } catch (Throwable cause) {
+        if (Result.isNonFatal(cause)) {
+          return Result.error(cause);
         } else {
-          throw error;
+          throw cause;
         }
       }
     } else {
@@ -321,11 +321,11 @@ public final class Result<T> implements ToMarkup, ToSource {
     if (this.isOk()) {
       try {
         return Assume.conforms(mapper.apply(Assume.conformsNullable(this.value)));
-      } catch (Throwable error) {
-        if (Result.isNonFatal(error)) {
-          return Result.error(error);
+      } catch (Throwable cause) {
+        if (Result.isNonFatal(cause)) {
+          return Result.error(cause);
         } else {
-          throw error;
+          throw cause;
         }
       }
     } else {
@@ -348,11 +348,11 @@ public final class Result<T> implements ToMarkup, ToSource {
     } else {
       try {
         return Result.error(mapper.apply((Throwable) this.value));
-      } catch (Throwable error) {
-        if (Result.isNonFatal(error)) {
-          return Result.error(error);
+      } catch (Throwable cause) {
+        if (Result.isNonFatal(cause)) {
+          return Result.error(cause);
         } else {
-          throw error;
+          throw cause;
         }
       }
     }
@@ -373,11 +373,11 @@ public final class Result<T> implements ToMarkup, ToSource {
     } else {
       try {
         return Result.ok(recovery.apply((Throwable) this.value));
-      } catch (Throwable error) {
-        if (Result.isNonFatal(error)) {
-          return Result.error(error);
+      } catch (Throwable cause) {
+        if (Result.isNonFatal(cause)) {
+          return Result.error(cause);
         } else {
-          throw error;
+          throw cause;
         }
       }
     }
@@ -398,11 +398,11 @@ public final class Result<T> implements ToMarkup, ToSource {
     } else {
       try {
         return Assume.conforms(recovery.apply((Throwable) this.value));
-      } catch (Throwable error) {
-        if (Result.isNonFatal(error)) {
-          return Result.error(error);
+      } catch (Throwable cause) {
+        if (Result.isNonFatal(cause)) {
+          return Result.error(cause);
         } else {
-          throw error;
+          throw cause;
         }
       }
     }
@@ -436,11 +436,11 @@ public final class Result<T> implements ToMarkup, ToSource {
     } else {
       try {
         return Assume.conforms(supplier.get());
-      } catch (Throwable error) {
-        if (Result.isNonFatal(error)) {
-          return Result.error(error);
+      } catch (Throwable cause) {
+        if (Result.isNonFatal(cause)) {
+          return Result.error(cause);
         } else {
-          throw error;
+          throw cause;
         }
       }
     }
@@ -578,11 +578,11 @@ public final class Result<T> implements ToMarkup, ToSource {
   public static <T> Result<T> of(Supplier<T> supplier) {
     try {
       return Result.ok(supplier.get());
-    } catch (Throwable error) {
-      if (Result.isNonFatal(error)) {
-        return Result.error(error);
+    } catch (Throwable cause) {
+      if (Result.isNonFatal(cause)) {
+        return Result.error(cause);
       } else {
-        throw error;
+        throw cause;
       }
     }
   }

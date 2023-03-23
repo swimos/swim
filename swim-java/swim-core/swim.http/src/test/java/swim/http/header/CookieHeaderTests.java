@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
 import swim.http.HttpCookie;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class CookieHeaderTests {
 
   @Test
-  public void parseCookieHeaderType() {
+  public void parseCookieHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Cookie: foo=bar\r\n");
     assertInstanceOf(CookieHeader.class, headers.getHeader(CookieHeader.TYPE));
     assertEquals(CookieHeader.of(HttpCookie.of("foo", "bar")),

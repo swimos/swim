@@ -246,14 +246,14 @@ public class TimerWheel implements TimerService {
             this.didStart();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("didStart callback failed", cause);
               // Stop the service on lifecycle callback failure.
               this.stop();
               // Reload service status after stop.
               status = (int) STATUS.getOpaque(this);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -296,14 +296,14 @@ public class TimerWheel implements TimerService {
             this.willStart();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("willStart callback failed", cause);
               // Stop the service on lifecycle callback failure.
               this.stop();
               // Reload service status after stop.
               status = (int) STATUS.getOpaque(this);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -376,10 +376,10 @@ public class TimerWheel implements TimerService {
             this.didStop();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("didStop callback failed", cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -425,10 +425,10 @@ public class TimerWheel implements TimerService {
             this.willStop();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("willStop callback failed", cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -562,10 +562,10 @@ public class TimerWheel implements TimerService {
       this.willScheduleTimer(delayMillis, handle);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("willScheduleTimer callback failed", handle, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -575,10 +575,10 @@ public class TimerWheel implements TimerService {
         ((TimerFunction) handle.timer).willSchedule(delayMillis);
       } catch (Throwable cause) {
         if (Result.isNonFatal(cause)) {
-          // Report non-fatal exception.
+          // Report the non-fatal exception.
           this.log.errorStatus("willSchedule callback failed", handle, cause);
         } else {
-          // Rethrow fatal exception.
+          // Rethrow the fatal exception.
           throw cause;
         }
       }
@@ -635,10 +635,10 @@ public class TimerWheel implements TimerService {
         this.willScheduleTimer(delayMillis, handle);
       } catch (Throwable cause) {
         if (Result.isNonFatal(cause)) {
-          // Report non-fatal exception.
+          // Report the non-fatal exception.
           this.log.errorStatus("willScheduleTimer callback failed", handle, cause);
         } else {
-          // Rethrow fatal exception.
+          // Rethrow the fatal exception.
           throw cause;
         }
       }
@@ -648,10 +648,10 @@ public class TimerWheel implements TimerService {
           ((TimerFunction) handle.timer).willSchedule(delayMillis);
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.log.errorStatus("willSchedule callback failed", handle, cause);
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
@@ -805,11 +805,11 @@ public class TimerWheel implements TimerService {
       // `handle.timer()` should never throw; but in case it does,
       // don't let it take down the timer thread.
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.error("Invalid timer handle: " + handle, cause);
         return;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -825,10 +825,10 @@ public class TimerWheel implements TimerService {
       this.willRunTimer(handle);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("willRunTimer callback failed", handle, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -850,16 +850,16 @@ public class TimerWheel implements TimerService {
           return;
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.log.errorStatus("didAbortTimer callback failed", handle, cause);
             return;
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw exception;
       }
     }
@@ -869,10 +869,10 @@ public class TimerWheel implements TimerService {
       this.didRunTimer(handle);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("didRunTimer callback failed", handle, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -1114,10 +1114,10 @@ final class TimerHandle implements TimerContext, LogEntity {
             ((TimerFunction) handle.timer).didCancel();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.service.log.errorStatus("didCancel callback failed", handle, cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -1127,10 +1127,10 @@ final class TimerHandle implements TimerContext, LogEntity {
           this.service.didCancelTimer(handle);
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.service.log.errorStatus("didCancelTimer callback failed", handle, cause);
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
@@ -1519,10 +1519,10 @@ final class TimerThread extends Thread {
       } while (true);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         service.log.fatal("timer thread failed", cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     } finally {

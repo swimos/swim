@@ -17,6 +17,7 @@ package swim.http.header;
 import org.junit.jupiter.api.Test;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import swim.http.HttpTransferCoding;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class TransferEncodingHeaderTests {
 
   @Test
-  public void parseTransferEncodingHeaderType() {
+  public void parseTransferEncodingHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Transfer-Encoding: chunked\r\n");
     assertInstanceOf(TransferEncodingHeader.class, headers.getHeader(TransferEncodingHeader.TYPE));
     assertEquals(TransferEncodingHeader.of(HttpTransferCoding.CHUNKED),

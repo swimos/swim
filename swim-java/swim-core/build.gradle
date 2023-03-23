@@ -24,6 +24,8 @@ dependencies {
   api project(':swim-exec')
   api project(':swim-net')
   api project(':swim-net-http')
+  api project(':swim-net-ws')
+
 }
 
 javadoc {

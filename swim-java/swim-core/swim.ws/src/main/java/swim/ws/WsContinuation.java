@@ -25,16 +25,21 @@ import swim.util.ToSource;
 
 @Public
 @Since("5.0")
-public final class WsContinuationFrame<T> extends WsFrame<T> implements ToSource {
+public final class WsContinuation<T> extends WsFrame<T> implements ToSource {
 
   final WsDataFrame<T> frame;
   final Encode<?> encodePayload;
   final long offset;
 
-  WsContinuationFrame(WsDataFrame<T> frame, Encode<?> encodePayload, long offset) {
+  WsContinuation(WsDataFrame<T> frame, Encode<?> encodePayload, long offset) {
     this.frame = frame;
     this.encodePayload = encodePayload;
     this.offset = offset;
+  }
+
+  @Override
+  public boolean fin() {
+    return false;
   }
 
   @Override
@@ -73,8 +78,8 @@ public final class WsContinuationFrame<T> extends WsFrame<T> implements ToSource
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsContinuationFrame<?>) {
-      final WsContinuationFrame<?> that = (WsContinuationFrame<?>) other;
+    } else if (other instanceof WsContinuation<?>) {
+      final WsContinuation<?> that = (WsContinuation<?>) other;
       return this.frame.equals(that.frame)
           && this.encodePayload.equals(that.encodePayload)
           && this.offset == that.offset;
@@ -82,7 +87,7 @@ public final class WsContinuationFrame<T> extends WsFrame<T> implements ToSource
     return false;
   }
 
-  private static final int HASH_SEED = Murmur3.seed(WsContinuationFrame.class);
+  private static final int HASH_SEED = Murmur3.seed(WsContinuation.class);
 
   @Override
   public int hashCode() {
@@ -94,7 +99,7 @@ public final class WsContinuationFrame<T> extends WsFrame<T> implements ToSource
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("WsContinuationFrame", "of")
+    notation.beginInvoke("WsContinuation", "of")
             .appendArgument(this.frame)
             .appendArgument(this.encodePayload)
             .appendArgument(this.offset)
@@ -106,10 +111,10 @@ public final class WsContinuationFrame<T> extends WsFrame<T> implements ToSource
     return this.toSource();
   }
 
-  public static <T> WsContinuationFrame<T> of(WsDataFrame<T> frame,
-                                              Encode<?> encodePayload,
-                                              long offset) {
-    return new WsContinuationFrame<T>(frame, encodePayload, offset);
+  public static <T> WsContinuation<T> of(WsDataFrame<T> frame,
+                                         Encode<?> encodePayload,
+                                         long offset) {
+    return new WsContinuation<T>(frame, encodePayload, offset);
   }
 
 }

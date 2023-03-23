@@ -14,6 +14,7 @@
 
 package swim.http.header;
 
+import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.http.HttpHeader;
@@ -44,7 +45,7 @@ public final class ExpectHeader extends HttpHeader {
 
   public static final String NAME = "Expect";
 
-  public static final HttpHeaderType<String> TYPE = new ExpectHeaderType();
+  public static final HttpHeaderType<ExpectHeader, String> TYPE = new ExpectHeaderType();
 
   public static ExpectHeader of(String name, String value) {
     return new ExpectHeader(name, value);
@@ -56,7 +57,7 @@ public final class ExpectHeader extends HttpHeader {
 
 }
 
-final class ExpectHeaderType implements HttpHeaderType<String>, ToSource {
+final class ExpectHeaderType implements HttpHeaderType<ExpectHeader, String>, ToSource {
 
   @Override
   public String name() {
@@ -64,18 +65,27 @@ final class ExpectHeaderType implements HttpHeaderType<String>, ToSource {
   }
 
   @Override
-  public String getValue(HttpHeader header) {
-    return ((ExpectHeader) header).value();
+  public String getValue(ExpectHeader header) {
+    return header.value();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public ExpectHeader of(String name, String value) {
     return ExpectHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String value) {
+  public ExpectHeader of(String value) {
     return this.of(this.name(), value);
+  }
+
+  @Override
+  public @Nullable ExpectHeader cast(HttpHeader header) {
+    if (header instanceof ExpectHeader) {
+      return (ExpectHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

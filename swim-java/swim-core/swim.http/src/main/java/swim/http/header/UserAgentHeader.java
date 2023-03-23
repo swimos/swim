@@ -18,15 +18,16 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpProduct;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -42,7 +43,7 @@ public final class UserAgentHeader extends HttpHeader {
     this.products = products;
   }
 
-  public FingerTrieList<HttpProduct> products() {
+  public FingerTrieList<HttpProduct> products() throws HttpException {
     if (this.products == null) {
       this.products = UserAgentHeader.parseValue(this.value);
     }
@@ -58,13 +59,13 @@ public final class UserAgentHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("UserAgentHeader", "of")
-            .appendArgument(this.products())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "User-Agent";
 
-  public static final HttpHeaderType<FingerTrieList<HttpProduct>> TYPE = new UserAgentHeaderType();
+  public static final HttpHeaderType<UserAgentHeader, FingerTrieList<HttpProduct>> TYPE = new UserAgentHeaderType();
 
   public static UserAgentHeader of(String name, String value) {
     return new UserAgentHeader(name, value, null);
@@ -83,10 +84,14 @@ public final class UserAgentHeader extends HttpHeader {
     return UserAgentHeader.of(NAME, FingerTrieList.of(products));
   }
 
-  private static FingerTrieList<HttpProduct> parseValue(String value) {
+  public static UserAgentHeader of(String value) {
+    return UserAgentHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<HttpProduct> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
-    FingerTrieList<HttpProduct> products = FingerTrieList.empty();
     int c = 0;
+    FingerTrieList<HttpProduct> products = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -97,16 +102,22 @@ public final class UserAgentHeader extends HttpHeader {
         }
       }
       if (input.isCont() && Http.isTokenChar(c)) {
-        final HttpProduct product = HttpProduct.parse(input).getNonNull();
-        products = products.appended(product);
+        final Parse<HttpProduct> parseProduct = HttpProduct.parse(input);
+        if (parseProduct.isDone()) {
+          products = products.appended(parseProduct.getNonNull());
+        } else if (parseProduct.isError()) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed User-Agent: " + value, parseProduct.getError());
+        } else {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed User-Agent: " + value);
+        }
         continue;
       }
       break;
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed User-Agent: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed User-Agent: " + value);
     }
     return products;
   }
@@ -126,7 +137,7 @@ public final class UserAgentHeader extends HttpHeader {
 
 }
 
-final class UserAgentHeaderType implements HttpHeaderType<FingerTrieList<HttpProduct>>, ToSource {
+final class UserAgentHeaderType implements HttpHeaderType<UserAgentHeader, FingerTrieList<HttpProduct>>, ToSource {
 
   @Override
   public String name() {
@@ -134,18 +145,27 @@ final class UserAgentHeaderType implements HttpHeaderType<FingerTrieList<HttpPro
   }
 
   @Override
-  public FingerTrieList<HttpProduct> getValue(HttpHeader header) {
-    return ((UserAgentHeader) header).products();
+  public FingerTrieList<HttpProduct> getValue(UserAgentHeader header) throws HttpException {
+    return header.products();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public UserAgentHeader of(String name, String value) {
     return UserAgentHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<HttpProduct> products) {
+  public UserAgentHeader of(String name, FingerTrieList<HttpProduct> products) {
     return UserAgentHeader.of(name, products);
+  }
+
+  @Override
+  public @Nullable UserAgentHeader cast(HttpHeader header) {
+    if (header instanceof UserAgentHeader) {
+      return (UserAgentHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

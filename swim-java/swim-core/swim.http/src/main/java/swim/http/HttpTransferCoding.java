@@ -103,7 +103,7 @@ public final class HttpTransferCoding implements ToSource, ToString {
   @SuppressWarnings("ReferenceEquality")
   public HttpTransferCoding intern() {
     if (!this.params.isEmpty()) {
-      throw new UnsupportedOperationException("Can't intern transfer-extension");
+      throw new UnsupportedOperationException("Can't intern parameterized transfer-coding");
     }
     StringTrieMap<HttpTransferCoding> names = (StringTrieMap<HttpTransferCoding>) NAMES.getOpaque();
     do {

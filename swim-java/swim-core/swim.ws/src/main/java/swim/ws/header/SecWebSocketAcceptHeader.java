@@ -18,12 +18,13 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base64;
-import swim.codec.Diagnostic;
 import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -38,7 +39,7 @@ public final class SecWebSocketAcceptHeader extends HttpHeader {
     this.digest = digest;
   }
 
-  public byte[] digest() {
+  public byte[] digest() throws HttpException {
     if (this.digest == null) {
       this.digest = SecWebSocketAcceptHeader.parseValue(this.value);
     }
@@ -60,7 +61,7 @@ public final class SecWebSocketAcceptHeader extends HttpHeader {
 
   public static final String NAME = "Sec-WebSocket-Accept";
 
-  public static final HttpHeaderType<byte[]> TYPE = new SecWebSocketAcceptHeaderType();
+  public static final HttpHeaderType<SecWebSocketAcceptHeader, byte[]> TYPE = new SecWebSocketAcceptHeaderType();
 
   public static SecWebSocketAcceptHeader of(String name, String value) {
     return new SecWebSocketAcceptHeader(name, value, null);
@@ -79,15 +80,16 @@ public final class SecWebSocketAcceptHeader extends HttpHeader {
     return SecWebSocketAcceptHeader.of(NAME, value);
   }
 
-  private static byte[] parseValue(String value) {
+  private static byte[] parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
-    Parse<byte[]> parse = Base64.standard().parseByteArray(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
+    final Parse<byte[]> parseDigest = Base64.standard().parseByteArray(input);
+    if (parseDigest.isDone()) {
+      return parseDigest.getNonNull();
+    } else if (parseDigest.isError()) {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Accept: " + value, parseDigest.getError());
+    } else {
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Accept: " + value);
     }
-    return parse.getNonNull();
   }
 
   private static String writeValue(byte[] digest) {
@@ -98,7 +100,7 @@ public final class SecWebSocketAcceptHeader extends HttpHeader {
 
 }
 
-final class SecWebSocketAcceptHeaderType implements HttpHeaderType<byte[]>, ToSource {
+final class SecWebSocketAcceptHeaderType implements HttpHeaderType<SecWebSocketAcceptHeader, byte[]>, ToSource {
 
   @Override
   public String name() {
@@ -106,18 +108,27 @@ final class SecWebSocketAcceptHeaderType implements HttpHeaderType<byte[]>, ToSo
   }
 
   @Override
-  public byte[] getValue(HttpHeader header) {
-    return ((SecWebSocketAcceptHeader) header).digest();
+  public byte[] getValue(SecWebSocketAcceptHeader header) throws HttpException {
+    return header.digest();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public SecWebSocketAcceptHeader of(String name, String value) {
     return SecWebSocketAcceptHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, byte[] digest) {
+  public SecWebSocketAcceptHeader of(String name, byte[] digest) {
     return SecWebSocketAcceptHeader.of(name, digest);
+  }
+
+  @Override
+  public @Nullable SecWebSocketAcceptHeader cast(HttpHeader header) {
+    if (header instanceof SecWebSocketAcceptHeader) {
+      return (SecWebSocketAcceptHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

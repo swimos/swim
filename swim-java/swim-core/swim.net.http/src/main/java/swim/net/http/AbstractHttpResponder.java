@@ -44,6 +44,14 @@ public abstract class AbstractHttpResponder implements HttpResponder {
     this.context = context;
   }
 
+  public HttpServerContext serverContext() {
+    final HttpResponderContext context = this.context;
+    if (context == null) {
+      throw new IllegalStateException("Unbound responder");
+    }
+    return context.serverContext();
+  }
+
   public HttpOptions options() {
     final HttpResponderContext context = this.context;
     if (context == null) {
@@ -95,12 +103,12 @@ public abstract class AbstractHttpResponder implements HttpResponder {
     return context.readRequest();
   }
 
-  public Result<HttpRequest<?>> request() {
+  public Result<HttpRequest<?>> requestResult() {
     final HttpResponderContext context = this.context;
     if (context == null) {
       return Result.error(new IllegalStateException("Unbound responder"));
     }
-    return context.request();
+    return context.requestResult();
   }
 
   public boolean isWriting() {
@@ -121,12 +129,12 @@ public abstract class AbstractHttpResponder implements HttpResponder {
     return context.writeResponse(response);
   }
 
-  public Result<HttpResponse<?>> response() {
+  public Result<HttpResponse<?>> responseResult() {
     final HttpResponderContext context = this.context;
     if (context == null) {
       return Result.error(new IllegalStateException("Unbound responder"));
     }
-    return context.response();
+    return context.responseResult();
   }
 
   protected void become(HttpResponder responder) {

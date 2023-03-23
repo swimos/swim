@@ -18,14 +18,15 @@ import java.util.Iterator;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Diagnostic;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
+import swim.http.HttpStatus;
 import swim.http.HttpTransferCoding;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -42,7 +43,7 @@ public final class TransferEncodingHeader extends HttpHeader {
     this.codings = codings;
   }
 
-  public FingerTrieList<HttpTransferCoding> codings() {
+  public FingerTrieList<HttpTransferCoding> codings() throws HttpException {
     if (this.codings == null) {
       this.codings = TransferEncodingHeader.parseValue(this.value);
     }
@@ -58,13 +59,13 @@ public final class TransferEncodingHeader extends HttpHeader {
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("TransferEncodingHeader", "of")
-            .appendArgument(this.codings())
+            .appendArgument(this.value)
             .endInvoke();
   }
 
   public static final String NAME = "Transfer-Encoding";
 
-  public static final HttpHeaderType<FingerTrieList<HttpTransferCoding>> TYPE = new TransferEncodingHeaderType();
+  public static final HttpHeaderType<TransferEncodingHeader, FingerTrieList<HttpTransferCoding>> TYPE = new TransferEncodingHeaderType();
 
   public static final TransferEncodingHeader CHUNKED = new TransferEncodingHeader(NAME, HttpTransferCoding.CHUNKED.name(), FingerTrieList.of(HttpTransferCoding.CHUNKED));
 
@@ -85,10 +86,14 @@ public final class TransferEncodingHeader extends HttpHeader {
     return TransferEncodingHeader.of(NAME, FingerTrieList.of(codings));
   }
 
-  private static FingerTrieList<HttpTransferCoding> parseValue(String value) {
-    FingerTrieList<HttpTransferCoding> codings = FingerTrieList.empty();
+  public static TransferEncodingHeader of(String value) {
+    return TransferEncodingHeader.of(NAME, value);
+  }
+
+  private static FingerTrieList<HttpTransferCoding> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
+    FingerTrieList<HttpTransferCoding> codings = FingerTrieList.empty();
     do {
       while (input.isCont()) {
         c = input.head();
@@ -99,8 +104,14 @@ public final class TransferEncodingHeader extends HttpHeader {
         }
       }
       if (input.isCont() && Http.isTokenChar(c)) {
-        final HttpTransferCoding coding = HttpTransferCoding.parse(input).getNonNull();
-        codings = codings.appended(coding);
+        final Parse<HttpTransferCoding> parseCoding = HttpTransferCoding.parse(input);
+        if (parseCoding.isDone()) {
+          codings = codings.appended(parseCoding.getNonNull());
+        } else if (parseCoding.isError()) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Transfer-Encoding: " + value, parseCoding.getError());
+        } else {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Transfer-Encoding: " + value);
+        }
       } else {
         break;
       }
@@ -120,9 +131,9 @@ public final class TransferEncodingHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Transfer-Encoding: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new ParseException(Diagnostic.unexpected(input));
+      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Transfer-Encoding: " + value);
     }
     return codings;
   }
@@ -142,7 +153,7 @@ public final class TransferEncodingHeader extends HttpHeader {
 
 }
 
-final class TransferEncodingHeaderType implements HttpHeaderType<FingerTrieList<HttpTransferCoding>>, ToSource {
+final class TransferEncodingHeaderType implements HttpHeaderType<TransferEncodingHeader, FingerTrieList<HttpTransferCoding>>, ToSource {
 
   @Override
   public String name() {
@@ -150,18 +161,27 @@ final class TransferEncodingHeaderType implements HttpHeaderType<FingerTrieList<
   }
 
   @Override
-  public FingerTrieList<HttpTransferCoding> getValue(HttpHeader header) {
-    return ((TransferEncodingHeader) header).codings();
+  public FingerTrieList<HttpTransferCoding> getValue(TransferEncodingHeader header) throws HttpException {
+    return header.codings();
   }
 
   @Override
-  public HttpHeader of(String name, String value) {
+  public TransferEncodingHeader of(String name, String value) {
     return TransferEncodingHeader.of(name, value);
   }
 
   @Override
-  public HttpHeader of(String name, FingerTrieList<HttpTransferCoding> codings) {
+  public TransferEncodingHeader of(String name, FingerTrieList<HttpTransferCoding> codings) {
     return TransferEncodingHeader.of(name, codings);
+  }
+
+  @Override
+  public @Nullable TransferEncodingHeader cast(HttpHeader header) {
+    if (header instanceof TransferEncodingHeader) {
+      return (TransferEncodingHeader) header;
+    } else {
+      return null;
+    }
   }
 
   @Override

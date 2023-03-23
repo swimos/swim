@@ -185,14 +185,14 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
             this.didStart();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("didStart callback failed", cause);
               // Stop the service on lifecycle callback failure.
               this.stop();
               // Reload service status after stop.
               status = (int) STATUS.getOpaque(this);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -235,14 +235,14 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
             this.willStart();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("willStart callback failed", cause);
               // Stop the service on lifecycle callback failure.
               this.stop();
               // Reload service status after stop.
               status = (int) STATUS.getOpaque(this);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -325,10 +325,10 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
             this.didStop();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("didStop callback failed", cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -374,10 +374,10 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
             this.willStop();
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.log.error("willStop callback failed", cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -498,11 +498,11 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
       // `handle.task()` should never throw; but in case it does,
       // don't let it take down the worker thread.
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.error("Invalid task handle: " + handle, cause);
         return;
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -518,10 +518,10 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
       this.willRunTask(handle);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("willRunTask callback failed", handle, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -537,16 +537,16 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
           return;
         } catch (Throwable cause) {
           if (Result.isNonFatal(cause)) {
-            // Report non-fatal exception.
+            // Report the non-fatal exception.
             this.log.errorStatus("didAbortTask callback failed", handle, cause);
             return;
           } else {
-            // Rethrow fatal exception.
+            // Rethrow the fatal exception.
             throw cause;
           }
         }
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw exception;
       }
     }
@@ -556,10 +556,10 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
       this.didRunTask(handle);
     } catch (Throwable cause) {
       if (Result.isNonFatal(cause)) {
-        // Report non-fatal exception.
+        // Report the non-fatal exception.
         this.log.errorStatus("didRunTask callback failed", handle, cause);
       } else {
-        // Rethrow fatal exception.
+        // Rethrow the fatal exception.
         throw cause;
       }
     }
@@ -711,10 +711,10 @@ class TaskHandle implements TaskContext, Runnable, LogEntity {
             this.service.willScheduleTask(this);
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.service.log.error("willScheduleTask callback failed", cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -724,10 +724,10 @@ class TaskHandle implements TaskContext, Runnable, LogEntity {
               ((TaskFunction) this.task).willSchedule();
             } catch (Throwable cause) {
               if (Result.isNonFatal(cause)) {
-                // Report non-fatal exception.
+                // Report the non-fatal exception.
                 this.service.log.error("willSchedule callback failed", cause);
               } else {
-                // Rethrow fatal exception.
+                // Rethrow the fatal exception.
                 throw cause;
               }
             }
@@ -772,10 +772,10 @@ class TaskHandle implements TaskContext, Runnable, LogEntity {
             this.service.didCancelTask(this);
           } catch (Throwable cause) {
             if (Result.isNonFatal(cause)) {
-              // Report non-fatal exception.
+              // Report the non-fatal exception.
               this.service.log.error("didCancelTask callback failed", cause);
             } else {
-              // Rethrow fatal exception.
+              // Rethrow the fatal exception.
               throw cause;
             }
           }
@@ -785,10 +785,10 @@ class TaskHandle implements TaskContext, Runnable, LogEntity {
               ((TaskFunction) this.task).didCancel();
             } catch (Throwable cause) {
               if (Result.isNonFatal(cause)) {
-                // Report non-fatal exception.
+                // Report the non-fatal exception.
                 this.service.log.error("didCancel callback failed", cause);
               } else {
-                // Rethrow fatal exception.
+                // Rethrow the fatal exception.
                 throw cause;
               }
             }

@@ -17,6 +17,7 @@ package swim.http.header;
 import org.junit.jupiter.api.Test;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
+import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
 import swim.http.HttpMethod;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class AllowHeaderTests {
 
   @Test
-  public void parseAllowHeaderType() {
+  public void parseAllowHeaderType() throws HttpException {
     final HttpHeaders headers = HttpHeaders.parse("Allow: GET\r\n");
     assertInstanceOf(AllowHeader.class, headers.getHeader(AllowHeader.TYPE));
     assertEquals(AllowHeader.of(HttpMethod.GET),

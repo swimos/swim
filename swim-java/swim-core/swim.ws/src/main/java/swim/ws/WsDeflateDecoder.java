@@ -27,18 +27,17 @@ import swim.codec.InputBuffer;
 import swim.codec.Transcoder;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.Result;
 
 @Public
 @Since("5.0")
 public class WsDeflateDecoder extends WsDecoder {
 
-  protected final WsEngineOptions options;
+  protected final WsOptions options;
   protected final BinaryInputBuffer inflateBuffer;
   protected final Inflater inflater;
   protected boolean decompressing;
 
-  protected WsDeflateDecoder(boolean masked, WsEngineOptions options) {
+  protected WsDeflateDecoder(boolean masked, WsOptions options) {
     super(masked);
     this.options = options;
     this.inflateBuffer = BinaryInputBuffer.allocate(options.inflateBufferSize()).asLast(false);
@@ -46,7 +45,7 @@ public class WsDeflateDecoder extends WsDecoder {
     this.decompressing = false;
   }
 
-  public final WsEngineOptions options() {
+  public final WsOptions options() {
     return this.options;
   }
 
@@ -63,7 +62,7 @@ public class WsDeflateDecoder extends WsDecoder {
   }
 
   @Override
-  public <T> Decode<WsFrame<T>> decodeContinuationFrame(InputBuffer input, @Nullable WsCodec<T> codec,
+  public <T> Decode<WsFrame<T>> decodeContinuationFrame(InputBuffer input, WsCodec<T> codec,
                                                         int finRsvOp, WsOpcode frameType,
                                                         Transcoder<?> transcoder,
                                                         Decode<?> decodePayload) {
@@ -131,7 +130,7 @@ public class WsDeflateDecoder extends WsDecoder {
 final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
 
   final WsDeflateDecoder decoder;
-  final @Nullable WsCodec<T> codec;
+  final WsCodec<T> codec;
   final @Nullable WsOpcode frameType;
   final @Nullable Transcoder<?> transcoder;
   final @Nullable Decode<?> decodePayload;
@@ -141,7 +140,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
   final int maskingKey;
   final int step;
 
-  DecodeWsDeflateFrame(WsDeflateDecoder decoder, @Nullable WsCodec<T> codec,
+  DecodeWsDeflateFrame(WsDeflateDecoder decoder, WsCodec<T> codec,
                        @Nullable WsOpcode frameType, @Nullable Transcoder<?> transcoder,
                        @Nullable Decode<?> decodePayload, long offset, long length,
                        int finRsvOp, int maskingKey, int step) {
@@ -167,8 +166,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
   }
 
   static <T> Decode<WsFrame<T>> decode(InputBuffer input, WsDeflateDecoder decoder,
-                                       @Nullable WsCodec<T> codec,
-                                       @Nullable WsOpcode frameType,
+                                       WsCodec<T> codec, @Nullable WsOpcode frameType,
                                        @Nullable Transcoder<?> transcoder,
                                        @Nullable Decode<?> decodePayload,
                                        long offset, long length, int finRsvOp,
@@ -373,13 +371,9 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         inflateBuffer.flip();
         if (decodePayload == null) {
           try {
-            transcoder = Assume.nonNull(codec).getPayloadTranscoder(WsOpcode.of(finRsvOp & 0xF));
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              return Decode.error(new DecodeException("Unable to get payload transcoder", cause));
-            } else {
-              throw cause;
-            }
+            transcoder = codec.getPayloadTranscoder(WsOpcode.of(finRsvOp & 0xF));
+          } catch (WsException cause) {
+            return Decode.error(cause);
           }
           decodePayload = transcoder.decode(inflateBuffer);
         } else {
@@ -415,28 +409,20 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
             try {
               return Decode.done(decoder.dataFrame(frameType, Assume.conformsNullable(decodePayload.get()),
                                                    Assume.conformsNonNull(transcoder)));
-            } catch (Throwable cause) {
-              if (Result.isNonFatal(cause)) {
-                return Decode.error(new DecodeException("Unable to construct data frame", cause));
-              } else {
-                throw cause;
-              }
+            } catch (WsException cause) {
+              return Decode.error(cause);
             }
           } else { // control frame
             try {
               return Decode.done(Assume.conforms(decoder.controlFrame(frameType, Assume.conformsNullable(decodePayload.get()),
                                                                       Assume.nonNull(transcoder))));
-            } catch (Throwable cause) {
-              if (Result.isNonFatal(cause)) {
-                return Decode.error(new DecodeException("Unable to construct control frame", cause));
-              } else {
-                throw cause;
-              }
+            } catch (WsException cause) {
+              return Decode.error(cause);
             }
           }
         } else if ((finRsvOp & 0xF) < 0x8) { // fragment frame
-          return Decode.done(WsFragmentFrame.of(frameType, Assume.conformsNonNull(transcoder),
-                                                Assume.conforms(decodePayload)));
+          return Decode.done(WsFragment.of(frameType, Assume.conformsNonNull(transcoder),
+                                           Assume.conforms(decodePayload)));
         } else {
           return Decode.error(new DecodeException("Fragmented control frame"));
         }

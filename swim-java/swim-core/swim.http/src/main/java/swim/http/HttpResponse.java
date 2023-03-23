@@ -17,14 +17,25 @@ package swim.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Binary;
+import swim.codec.BinaryInputBuffer;
+import swim.codec.Codec;
+import swim.codec.Decode;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
+import swim.codec.InputBuffer;
 import swim.codec.Output;
 import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
+import swim.codec.Text;
+import swim.codec.Transcoder;
 import swim.codec.Write;
 import swim.codec.WriteException;
+import swim.collections.FingerTrieList;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.ContentTypeHeader;
+import swim.http.header.TransferEncodingHeader;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -86,6 +97,127 @@ public final class HttpResponse<T> extends HttpMessage<T> {
   @Override
   public <T2> HttpResponse<T2> withPayload(HttpPayload<T2> payload) {
     return HttpResponse.of(this.version, this.status, this.headers, payload);
+  }
+
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input, HttpRequest<?> request, Transcoder<T2> transcoder) throws HttpException {
+    // RFC 7230 § 3.3.3 Item 1
+    if (request.method().equals(HttpMethod.HEAD)
+        || this.status().isInformational()
+        || this.status().code() == HttpStatus.NO_CONTENT.code()
+        || this.status().code() == HttpStatus.NOT_MODIFIED.code()) {
+      return HttpEmpty.decode(input);
+    }
+
+    // RFC 7230 § 3.3.3 Item 2
+    if (request.method().equals(HttpMethod.CONNECT)
+        && this.status().isSuccessful()) {
+      return HttpEmpty.decode(input);
+    }
+
+    final HttpHeaders headers = this.headers();
+    ContentLengthHeader contentLength = null;
+    TransferEncodingHeader transferEncoding = null;
+    for (int i = 0, n = headers.size(); i < n; i += 1) {
+      final HttpHeader header = headers.get(i);
+      if (header instanceof ContentLengthHeader) {
+        if (contentLength != null) {
+          // RFC 7230 § 3.3.3 Item 4
+          throw new HttpException(HttpStatus.BAD_GATEWAY, "Conflicting Content-Length");
+        }
+        contentLength = (ContentLengthHeader) header;
+      } else if (header instanceof TransferEncodingHeader) {
+        transferEncoding = (TransferEncodingHeader) header;
+      }
+    }
+
+    if (transferEncoding != null) {
+      // RFC 7230 § 3.3.3 Item 3
+      final FingerTrieList<HttpTransferCoding> transferCodings = transferEncoding.codings();
+      if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
+        throw new HttpException(HttpStatus.BAD_GATEWAY, "Unsupported Transfer-Encoding: " + transferEncoding.value());
+      }
+      return HttpChunked.decode(input, transcoder);
+    }
+
+    if (contentLength != null) {
+      // RFC 7230 § 3.3.3 Item 5
+      return HttpBody.decode(input, transcoder, contentLength.length());
+    }
+
+    // RFC 7230 § 3.3.3 Item 7
+    return HttpUnsized.decode(input, transcoder);
+  }
+
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input, HttpRequest<?> request) throws HttpException {
+    // RFC 7230 § 3.3.3 Item 1
+    if (request.method().equals(HttpMethod.HEAD)
+        || this.status().isInformational()
+        || this.status().code() == HttpStatus.NO_CONTENT.code()
+        || this.status().code() == HttpStatus.NOT_MODIFIED.code()) {
+      return HttpEmpty.decode(input);
+    }
+
+    // RFC 7230 § 3.3.3 Item 2
+    if (request.method().equals(HttpMethod.CONNECT)
+        && this.status().isSuccessful()) {
+      return HttpEmpty.decode(input);
+    }
+
+    final HttpHeaders headers = this.headers();
+    ContentTypeHeader contentType = null;
+    ContentLengthHeader contentLength = null;
+    TransferEncodingHeader transferEncoding = null;
+    for (int i = 0, n = headers.size(); i < n; i += 1) {
+      final HttpHeader header = headers.get(i);
+      if (header instanceof ContentTypeHeader) {
+        contentType = (ContentTypeHeader) header;
+      } else if (header instanceof ContentLengthHeader) {
+        if (contentLength != null) {
+          // RFC 7230 § 3.3.3 Item 4
+          throw new HttpException(HttpStatus.BAD_GATEWAY, "Conflicting Content-Length");
+        }
+        contentLength = (ContentLengthHeader) header;
+      } else if (header instanceof TransferEncodingHeader) {
+        transferEncoding = (TransferEncodingHeader) header;
+      }
+    }
+
+    Codec codec = null;
+    if (contentType != null) {
+      codec = Codec.registry().getCodec(contentType.mediaType());
+    }
+    Transcoder<T2> transcoder = null;
+    if (codec != null) {
+      transcoder = codec.getTranscoder(Object.class);
+    }
+    if (transcoder == null) {
+      transcoder = Assume.conforms(Binary.byteBufferTranscoder());
+    }
+
+    if (transferEncoding != null) {
+      // RFC 7230 § 3.3.3 Item 3
+      final FingerTrieList<HttpTransferCoding> transferCodings = transferEncoding.codings();
+      if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
+        throw new HttpException(HttpStatus.BAD_GATEWAY, "Unsupported Transfer-Encoding: " + transferEncoding.value());
+      }
+      return HttpChunked.decode(input, transcoder);
+    }
+
+    if (contentLength != null) {
+      // RFC 7230 § 3.3.3 Item 5
+      return HttpBody.decode(input, transcoder, contentLength.length());
+    }
+
+    // RFC 7230 § 3.3.3 Item 7
+    return HttpUnsized.decode(input, transcoder);
+  }
+
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(HttpRequest<?> request, Transcoder<T2> transcoder) throws HttpException {
+    return this.decodePayload(BinaryInputBuffer.empty(), request, transcoder);
+  }
+
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(HttpRequest<?> request) throws HttpException {
+    return this.decodePayload(BinaryInputBuffer.empty(), request);
   }
 
   @Override
@@ -186,6 +318,26 @@ public final class HttpResponse<T> extends HttpMessage<T> {
   public static <T> HttpResponse<T> of(HttpStatus status) {
     return new HttpResponse<T>(HttpVersion.HTTP_1_1, status,
                                HttpHeaders.empty(), HttpEmpty.payload());
+  }
+
+  public static HttpResponse<?> error(Throwable error) {
+    HttpStatus status = null;
+    if (error instanceof HttpException) {
+      status = ((HttpException) error).getStatus();
+    }
+    if (status == null) {
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    final HttpPayload<?> payload;
+    final String message = error.getMessage();
+    if (message != null) {
+      payload = HttpBody.of(message, Text.transcoder());
+    } else {
+      payload = HttpEmpty.payload();
+    }
+
+    return HttpResponse.of(status, payload.headers(), payload);
   }
 
   public static <T> Parse<HttpResponse<T>> parse(Input input, @Nullable HttpHeaderRegistry headerRegistry) {
