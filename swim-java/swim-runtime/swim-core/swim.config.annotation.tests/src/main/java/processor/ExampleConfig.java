@@ -3,6 +3,7 @@ package processor;
 import swim.config.Configurable;
 import swim.config.annotation.Config;
 import swim.config.annotation.Ignore;
+import swim.config.annotation.Sensitive;
 import swim.config.annotation.validator.ContainsKey;
 import swim.config.annotation.validator.Required;
 import swim.config.annotation.validator.ValidPort;
@@ -79,6 +80,12 @@ public interface ExampleConfig extends Configurable {
    */
   Value relaySchema();
 
+  /**
+   * <p>This is a password and it should not be logged.</p>
+   * @return
+   */
+  @Sensitive
+  String password();
 
   @Ignore
   default int weirdCalculation() {

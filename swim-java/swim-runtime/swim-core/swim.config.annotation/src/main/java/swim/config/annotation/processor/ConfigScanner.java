@@ -7,12 +7,17 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
+import com.github.javaparser.ast.expr.ConditionalExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.SuperExpr;
@@ -35,6 +40,7 @@ import swim.config.ConfigError;
 import swim.config.ConfigException;
 import swim.config.Configurable;
 import swim.config.annotation.Ignore;
+import swim.config.annotation.Sensitive;
 import swim.config.annotation.validator.Validators;
 import swim.config.model.AbstractConfigurationElement;
 import swim.config.model.ConfigurationElement;
@@ -385,85 +391,40 @@ class ConfigScanner extends ElementScanner9<Void, Void> {
     );
     method.setBody(blockStmt);
 
+
+    Sensitive sensitive = e.getAnnotation(Sensitive.class);
+    Expression debugExpression;
+
+    if (null != sensitive) {
+      debugExpression = new ConditionalExpr()
+          .setCondition(
+              new BinaryExpr(
+                  new NullLiteralExpr(),
+                  fieldAccessExpr,
+                  BinaryExpr.Operator.NOT_EQUALS
+              )
+          )
+          .setThenExpr(new StringLiteralExpr("************"))
+          .setElseExpr(new StringLiteralExpr("null"));
+      this.debugBody.addOrphanComment(
+          new LineComment(String.format("%s is sensitive, redacting.", e.getSimpleName()))
+      );
+    } else {
+      debugExpression = fieldAccessExpr;
+    }
+
     this.debugBody.addStatement(
         new MethodCallExpr(
             new NameExpr("formatter"),
             "add"
         )
             .addArgument(methodNameLiteral)
-            .addArgument(fieldAccessExpr)
+            .addArgument(debugExpression)
     );
 
     Validators.addValidation(validateBody, e, methodNameLiteral, fieldAccessExpr);
     List<String> docs = Validators.addDocs(e);
     configItem.validations(docs);
-
-
-//    for (AnnotationMirror annotationMirror : e.getAnnotationMirrors()) {
-//      TypeMirror typeMirror = annotationMirror.getAnnotationType().asElement().asType();
-//      Class attributeClass;
-//      try {
-//        attributeClass = Class.forName(typeMirror.toString());
-//      } catch (ClassNotFoundException ex) {
-//        throw new RuntimeException(ex);
-//      }
-//
-//      NameExpr validatorName = this.validatorAttributeToNameLookup.computeIfAbsent(attributeClass, a -> {
-//        ValidatorImplementation validator = (ValidatorImplementation) attributeClass.getAnnotation(ValidatorImplementation.class);
-//        Class<?> enclosingClass = validator.value().getEnclosingClass();
-//
-//        ClassOrInterfaceType validatorType;
-//        if (null != enclosingClass) {
-//          this.compilationUnit.addImport(enclosingClass);
-//          validatorType = new ClassOrInterfaceType(
-//              String.format("%s.%s", enclosingClass.getSimpleName(), validator.value().getSimpleName())
-//          );
-//        } else {
-//          this.compilationUnit.addImport(validator.value());
-//          validatorType = new ClassOrInterfaceType(validator.value().getSimpleName());
-//        }
-//
-//        String variableName = Character.toLowerCase(attributeClass.getSimpleName().charAt(0)) + attributeClass.getSimpleName().substring(1) + "Validator";
-//        VariableDeclarationExpr varValidator = new VariableDeclarationExpr(
-//            new VariableDeclarator(
-//                validatorType,
-//                variableName,
-//                new ObjectCreationExpr()
-//                    .setType(validatorType)
-//            )
-//        );
-//        this.validateBody.addStatement(varValidator);
-//        return new NameExpr(variableName);
-//      });
-//      ClassOrInterfaceType attributeType = new ClassOrInterfaceType(attributeClass.getSimpleName());
-//
-//      String attributeVariableName = String.format("%s%s", e.getSimpleName(), attributeClass.getSimpleName());
-//
-//      VariableDeclarationExpr varAttribute = new VariableDeclarationExpr(
-//          new VariableDeclarator(
-//              attributeType,
-//              attributeVariableName,
-//              new MethodCallExpr("attribute")
-//                  .addArgument(new ClassExpr(this.interfaceType))
-//                  .addArgument(methodNameLiteral)
-//                  .addArgument(new ClassExpr(attributeType))
-//          )
-//      );
-//      NameExpr attributeNameExpr = new NameExpr(attributeVariableName);
-//      this.validateBody.addStatement(varAttribute);
-//      this.validateBody.addStatement(
-//          new MethodCallExpr(
-//              validatorName,
-//              "validate"
-//          ).addArgument(new NameExpr("errors"))
-//              .addArgument(attributeNameExpr)
-//              .addArgument(methodNameLiteral)
-//              .addArgument(fieldAccessExpr)
-//      );
-//
-//
-//    }
-
 
     if (e.isDefault()) {
       IfStmt ifDoesNotContain = addIfValueDoesNotContain(this.configureBody, e.getSimpleName().toString());
