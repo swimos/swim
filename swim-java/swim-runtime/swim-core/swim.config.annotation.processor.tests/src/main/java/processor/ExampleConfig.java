@@ -86,14 +86,4 @@ public interface ExampleConfig extends Configurable {
   }
 
   List<String> elements();
-
-  /**
-   * <p>This example uses an enum and recommendations of values will be provided.</p>
-   *
-   * @return
-   */
-  default TestLocation testLocation() {
-    return TestLocation.Local;
-  }
-
 }
