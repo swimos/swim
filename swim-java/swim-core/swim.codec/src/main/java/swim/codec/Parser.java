@@ -14,7 +14,7 @@
 
 package swim.codec;
 
-import swim.annotations.Nullable;
+import java.util.Objects;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
@@ -34,15 +34,10 @@ public interface Parser<T> extends Decoder<T> {
     return this.parse(StringInput.empty());
   }
 
-  default @Nullable T parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<T> parse = this.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.get();
+  default Parse<T> parse(String string) {
+    Objects.requireNonNull(string);
+    final StringInput input = new StringInput(string);
+    return this.parse(input).complete(input);
   }
 
 }

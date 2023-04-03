@@ -19,7 +19,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.JUnitException;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpRequest;
 import swim.net.AbstractNetListener;
@@ -44,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class WebSocketTests {
 
   @Test
-  public void testWebSocketConnection() {
+  public void testWebSocketConnection() throws InterruptedException {
     final HttpOptions httpOptions = HttpOptions.standard();
     final WsEngine clientEngine = Ws.clientEngine();
     final WsEngine serverEngine = Ws.serverEngine();
@@ -172,8 +171,6 @@ public class WebSocketTests {
 
       clientCloseLatch.await();
       serverCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -182,7 +179,7 @@ public class WebSocketTests {
 
   public long testThroughput(int messageCount, int clientCount,
                              HttpOptions httpOptions, WsEngine clientEngine,
-                             WsEngine serverEngine, String payload) {
+                             WsEngine serverEngine, String payload) throws InterruptedException {
     final Semaphore messageSemaphore = new Semaphore(messageCount);
     final CountDownLatch clientCloseLatch = new CountDownLatch(clientCount);
     final CountDownLatch serverCloseLatch = new CountDownLatch(clientCount);
@@ -201,7 +198,7 @@ public class WebSocketTests {
         } else if (frame instanceof WsCloseFrame<?>) {
           clientCloseLatch.countDown();
         } else {
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
         }
       }
 
@@ -247,7 +244,7 @@ public class WebSocketTests {
         } else if (frame instanceof WsCloseFrame<?>) {
           serverCloseLatch.countDown();
         } else {
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
         }
       }
 
@@ -316,8 +313,6 @@ public class WebSocketTests {
       serverCloseLatch.await();
 
       return System.currentTimeMillis() - t0;
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -326,7 +321,7 @@ public class WebSocketTests {
 
   @Test
   @Tag("benchmark")
-  public void benchmarkWebSocketThroughput() {
+  public void benchmarkWebSocketThroughput() throws InterruptedException {
     final int messageCount = 1000000;
     final int clientCount = 2;
     final HttpOptions httpOptions = HttpOptions.standard();
@@ -345,7 +340,7 @@ public class WebSocketTests {
 
   @Test
   @Tag("benchmark")
-  public void benchmarkWebSocketPermessageDeflateThroughput() {
+  public void benchmarkWebSocketPermessageDeflateThroughput() throws InterruptedException {
     final int messageCount = 1000000;
     final int clientCount = Runtime.getRuntime().availableProcessors();
     final HttpOptions httpOptions = HttpOptions.standard();

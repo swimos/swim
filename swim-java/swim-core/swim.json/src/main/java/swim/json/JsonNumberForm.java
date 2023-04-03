@@ -21,26 +21,31 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.NumberTermForm;
 
+/**
+ * A transcoder between JSON number literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code JsonNumberForm}
+ */
 @Public
 @Since("5.0")
 public interface JsonNumberForm<T> extends JsonForm<T>, NumberTermForm<T> {
 
   @Override
-  default JsonNumberForm<T> numberForm() {
+  default JsonNumberForm<? extends T> numberForm() throws JsonException {
     return this;
   }
 
   @Override
-  @Nullable T integerValue(long value);
+  @Nullable T integerValue(long value) throws JsonException;
 
   @Override
-  @Nullable T hexadecimalValue(long value, int digits);
+  @Nullable T hexadecimalValue(long value, int digits) throws JsonException;
 
   @Override
-  @Nullable T bigIntegerValue(String value);
+  @Nullable T bigIntegerValue(String value) throws JsonException;
 
   @Override
-  @Nullable T decimalValue(String value);
+  @Nullable T decimalValue(String value) throws JsonException;
 
   @Override
   default Parse<T> parse(Input input, JsonParser parser) {

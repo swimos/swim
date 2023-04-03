@@ -123,11 +123,11 @@ public final class UpgradeHeader extends HttpHeader {
       if (input.isCont() && Http.isTokenChar(c)) {
         final Parse<HttpUpgrade> parseUpgrade = HttpUpgrade.parse(input);
         if (parseUpgrade.isDone()) {
-          upgrades = upgrades.appended(parseUpgrade.getNonNull());
+          upgrades = upgrades.appended(parseUpgrade.getNonNullUnchecked());
         } else if (parseUpgrade.isError()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Upgrade: " + value, parseUpgrade.getError());
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Upgrade: " + value, parseUpgrade.getError());
         } else {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Upgrade: " + value);
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Upgrade: " + value);
         }
       } else {
         break;
@@ -148,9 +148,9 @@ public final class UpgradeHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Upgrade: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Upgrade: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Upgrade: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Upgrade: " + value);
     }
     return upgrades;
   }
@@ -163,7 +163,7 @@ public final class UpgradeHeader extends HttpHeader {
         output.write(',').write(' ');
       }
       upgrade = upgrades.next();
-      upgrade.write(output).checkDone();
+      upgrade.write(output).assertDone();
     } while (upgrades.hasNext());
     return output.get();
   }

@@ -56,9 +56,9 @@ public class FormatExprTests {
   }
 
   @Test
-  public void evaluateFormatExprs() {
+  public void evaluateFormatExprs() throws TermException {
     final Term context = Term.from(new FormatContext("Hello", new AudienceContext("there", "world")));
-    final FormatExpr expr = FormatExpr.parse("{greeting}, {audience.second}!");
+    final FormatExpr expr = FormatExpr.parse("{greeting}, {audience.second}!").getNonNullUnchecked();
     final Evaluator evaluator = new Evaluator();
     final Term result = evaluator.evaluateInContext(expr, context);
     assertEquals("Hello, world!", result.stringValue());

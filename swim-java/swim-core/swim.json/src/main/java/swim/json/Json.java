@@ -23,7 +23,6 @@ import swim.codec.Output;
 import swim.codec.Parse;
 import swim.codec.Write;
 import swim.repr.Repr;
-import swim.util.Assume;
 
 /**
  * Factory for constructing JSON parsers and writers.
@@ -42,22 +41,12 @@ public final class Json {
     return CODEC;
   }
 
-  public static <T> JsonForm<T> forType(Type javaType) {
-    final JsonForm<T> jsonForm = Json.codec().forType(javaType);
-    if (jsonForm != null) {
-      return jsonForm;
-    } else {
-      throw new IllegalArgumentException("No json form for type: " + javaType);
-    }
+  public static <T> JsonForm<T> form(Type javaType) throws JsonFormException {
+    return Json.codec().getJsonForm(javaType);
   }
 
-  public static <T> JsonForm<T> forValue(@Nullable T value) {
-    final JsonForm<T> jsonForm = Json.codec().forValue(value);
-    if (jsonForm != null) {
-      return jsonForm;
-    } else {
-      throw new IllegalArgumentException("No json form for value: " + value);
-    }
+  public static <T> JsonForm<T> form(@Nullable T value) throws JsonFormException {
+    return Json.codec().getJsonForm(value);
   }
 
   public static JsonParser parser(@Nullable JsonParserOptions options) {
@@ -75,58 +64,50 @@ public final class Json {
   }
 
   public static <T> Parse<T> parse(Type javaType, Input input, @Nullable JsonParserOptions options) {
-    final JsonForm<T> jsonForn = Json.codec().forType(javaType);
-    if (jsonForn != null) {
-      return jsonForn.parse(input, Json.parser(options));
-    } else {
-      return Parse.error(new IllegalArgumentException("No json form for type: " + javaType));
+    try {
+      return Json.codec().<T>getJsonForm(javaType).parse(input, Json.parser(options));
+    } catch (JsonFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parse(Type javaType, Input input) {
-    final JsonForm<T> jsonForn = Json.codec().forType(javaType);
-    if (jsonForn != null) {
-      return jsonForn.parse(input, Json.parser());
-    } else {
-      return Parse.error(new IllegalArgumentException("No json form for type: " + javaType));
+    try {
+      return Json.codec().<T>getJsonForm(javaType).parse(input, Json.parser());
+    } catch (JsonFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parse(Type javaType, @Nullable JsonParserOptions options) {
-    final JsonForm<T> jsonForn = Json.codec().forType(javaType);
-    if (jsonForn != null) {
-      return jsonForn.parse(Json.parser(options));
-    } else {
-      return Parse.error(new IllegalArgumentException("No json form for type: " + javaType));
+    try {
+      return Json.codec().<T>getJsonForm(javaType).parse(Json.parser(options));
+    } catch (JsonFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parse(Type javaType) {
-    final JsonForm<T> jsonForn = Json.codec().forType(javaType);
-    if (jsonForn != null) {
-      return jsonForn.parse(Json.parser());
-    } else {
-      return Parse.error(new IllegalArgumentException("No json form for type: " + javaType));
+    try {
+      return Json.codec().<T>getJsonForm(javaType).parse(Json.parser());
+    } catch (JsonFormException cause) {
+      return Parse.error(cause);
     }
   }
 
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <T> @Nullable T parse(Type javaType, String json, @Nullable JsonParserOptions options) {
-    final JsonForm<T> jsonForn = Json.codec().forType(javaType);
-    if (jsonForn != null) {
-      return jsonForn.parse(json, Json.parser(options));
-    } else {
-      throw new IllegalArgumentException("No json form for type: " + javaType);
+  public static <T> Parse<T> parse(Type javaType, String json, @Nullable JsonParserOptions options) {
+    try {
+      return Json.codec().<T>getJsonForm(javaType).parse(json, Json.parser(options));
+    } catch (JsonFormException cause) {
+      return Parse.error(cause);
     }
   }
 
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <T> @Nullable T parse(Type javaType, String json) {
-    final JsonForm<T> jsonForn = Json.codec().forType(javaType);
-    if (jsonForn != null) {
-      return jsonForn.parse(json, Json.parser());
-    } else {
-      throw new IllegalArgumentException("No json form for type: " + javaType);
+  public static <T> Parse<T> parse(Type javaType, String json) {
+    try {
+      return Json.codec().<T>getJsonForm(javaType).parse(json, Json.parser());
+    } catch (JsonFormException cause) {
+      return Parse.error(cause);
     }
   }
 
@@ -146,12 +127,12 @@ public final class Json {
     return JsonReprs.reprForm().parse(Json.parser());
   }
 
-  public static Repr parse(String json, @Nullable JsonParserOptions options) {
-    return Assume.nonNull(JsonReprs.reprForm().parse(json, Json.parser(options)));
+  public static Parse<Repr> parse(String json, @Nullable JsonParserOptions options) {
+    return JsonReprs.reprForm().parse(json, Json.parser(options));
   }
 
-  public static Repr parse(String json) {
-    return Assume.nonNull(JsonReprs.reprForm().parse(json, Json.parser()));
+  public static Parse<Repr> parse(String json) {
+    return JsonReprs.reprForm().parse(json, Json.parser());
   }
 
   static JsonWriter writer(@Nullable JsonWriterOptions options) {
@@ -169,56 +150,50 @@ public final class Json {
   }
 
   public static Write<?> write(Output<?> output, @Nullable Object value, @Nullable JsonWriterOptions options) {
-    final JsonForm<Object> jsonForn = Json.codec().forValue(value);
-    if (jsonForn != null) {
-      return jsonForn.write(output, value, Json.writer(options));
-    } else {
-      return Write.error(new IllegalArgumentException("No json form for value: " + value));
+    try {
+      return Json.codec().getJsonForm(value).write(output, value, Json.writer(options));
+    } catch (JsonFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> write(Output<?> output, @Nullable Object value) {
-    final JsonForm<Object> jsonForn = Json.codec().forValue(value);
-    if (jsonForn != null) {
-      return jsonForn.write(output, value, Json.writer());
-    } else {
-      return Write.error(new IllegalArgumentException("No json form for value: " + value));
+    try {
+      return Json.codec().getJsonForm(value).write(output, value, Json.writer());
+    } catch (JsonFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> write(@Nullable Object value, @Nullable JsonWriterOptions options) {
-    final JsonForm<Object> jsonForn = Json.codec().forValue(value);
-    if (jsonForn != null) {
-      return jsonForn.write(value, Json.writer(options));
-    } else {
-      return Write.error(new IllegalArgumentException("No json form for value: " + value));
+    try {
+      return Json.codec().getJsonForm(value).write(value, Json.writer(options));
+    } catch (JsonFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> write(@Nullable Object value) {
-    final JsonForm<Object> jsonForn = Json.codec().forValue(value);
-    if (jsonForn != null) {
-      return jsonForn.write(value, Json.writer());
-    } else {
-      return Write.error(new IllegalArgumentException("No json form for value: " + value));
+    try {
+      return Json.codec().getJsonForm(value).write(value, Json.writer());
+    } catch (JsonFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static String toString(@Nullable Object value, @Nullable JsonWriterOptions options) {
-    final JsonForm<Object> jsonForn = Json.codec().forValue(value);
-    if (jsonForn != null) {
-      return jsonForn.toString(value, Json.writer(options));
-    } else {
-      throw new IllegalArgumentException("No json form for value: " + value);
+    try {
+      return Json.codec().getJsonForm(value).toString(value, Json.writer(options));
+    } catch (JsonFormException cause) {
+      throw new IllegalArgumentException(cause);
     }
   }
 
   public static String toString(@Nullable Object value) {
-    final JsonForm<Object> jsonForn = Json.codec().forValue(value);
-    if (jsonForn != null) {
-      return jsonForn.toString(value, Json.writer());
-    } else {
-      throw new IllegalArgumentException("No json form for value: " + value);
+    try {
+      return Json.codec().getJsonForm(value).toString(value, Json.writer());
+    } catch (JsonFormException cause) {
+      throw new IllegalArgumentException(cause);
     }
   }
 

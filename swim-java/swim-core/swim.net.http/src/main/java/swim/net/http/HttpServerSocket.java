@@ -242,7 +242,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   void dequeueRequester(HttpServerResponder handler) {
     // Try to clear the current request handler, synchronizing with concurrent enqueues.
     if (REQUESTER.compareAndExchangeRelease(this, handler, null) != handler) {
-      throw new IllegalStateException("Inconsistent request pipeline");
+      throw new IllegalStateException("inconsistent request pipeline");
     }
   }
 
@@ -250,7 +250,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   public boolean requestRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.requestRead();
   }
@@ -259,7 +259,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   public boolean cancelRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.cancelRead();
   }
@@ -268,7 +268,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   public boolean triggerRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.triggerRead();
   }
@@ -325,7 +325,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   int read(ByteBuffer readBuffer) throws IOException {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.read(readBuffer);
   }
@@ -500,13 +500,13 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     int writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
     if (readIndex == writeIndex) {
       // The responder queue is empty.
-      throw new IllegalStateException("Inconsistent response pipeline");
+      throw new IllegalStateException("inconsistent response pipeline");
     }
 
     // Clear the current response handler, if it's the head of the responder queue.
     if (RESPONDER_ARRAY.compareAndExchange(this.responders, readIndex, handler, null) != handler) {
       // The response handler was not the head of the responder queue.
-      throw new IllegalStateException("Inconsistent response pipeline");
+      throw new IllegalStateException("inconsistent response pipeline");
     }
     // Increment the read index to free up the dequeued response handler's old slot.
     final int newReadIndex = (readIndex + 1) % this.responders.length;
@@ -532,7 +532,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   public boolean requestWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.requestWrite();
   }
@@ -541,7 +541,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   public boolean cancelWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.cancelWrite();
   }
@@ -550,7 +550,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   public boolean triggerWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.triggerWrite();
   }
@@ -599,7 +599,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   int write(ByteBuffer writeBuffer) throws IOException {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.write(writeBuffer);
   }
@@ -733,7 +733,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   public void become(NetSocket socket) {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     context.become(socket);
   }

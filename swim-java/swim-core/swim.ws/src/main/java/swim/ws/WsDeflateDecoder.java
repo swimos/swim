@@ -177,14 +177,14 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         final WsOpcode opcode = WsOpcode.of(finRsvOp & 0xF);
         if (opcode != WsOpcode.CONTINUATION && (finRsvOp & 0x40) == 0) {
-          return Decode.error(new DecodeException("Expected compressed message"));
+          return Decode.error(new DecodeException("expected compressed message"));
         }
         if (frameType == null) {
           frameType = opcode;
         }
         step = 2;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Expected finRsvOp"));
+        return Decode.error(new DecodeException("expected finRsvOp"));
       }
     }
     if (step == 2) { // mask-len byte
@@ -193,9 +193,9 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         final boolean masked = (maskLen & 0x80) != 0;
         if (masked && !decoder.masked) {
-          return Decode.error(new DecodeException("Masked server frame"));
+          return Decode.error(new DecodeException("masked server frame"));
         } else if (!masked && decoder.masked) {
-          return Decode.error(new DecodeException("Unmasked client frame"));
+          return Decode.error(new DecodeException("unmasked client frame"));
         }
         final int len = maskLen & 0x7F;
         if (len == 126) { // short length
@@ -207,7 +207,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
           step = decoder.masked ? 13 : 17;
         }
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Expected mask-length"));
+        return Decode.error(new DecodeException("expected mask-length"));
       }
     }
     if (step == 3) { // short length byte 0
@@ -216,7 +216,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 4;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Expected short length"));
+        return Decode.error(new DecodeException("expected short length"));
       }
     }
     if (step == 4) { // short length byte 1
@@ -225,7 +225,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = decoder.masked ? 13 : 17;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete short length"));
+        return Decode.error(new DecodeException("incomplete short length"));
       }
     }
     if (step == 5) { // long length byte 0
@@ -234,7 +234,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 6;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Expected long length"));
+        return Decode.error(new DecodeException("expected long length"));
       }
     }
     if (step == 6) { // long length byte 1
@@ -243,7 +243,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 7;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete long length"));
+        return Decode.error(new DecodeException("incomplete long length"));
       }
     }
     if (step == 7) { // long length byte 2
@@ -252,7 +252,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 8;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete long length"));
+        return Decode.error(new DecodeException("incomplete long length"));
       }
     }
     if (step == 8) { // long length byte 3
@@ -261,7 +261,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 9;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete long length"));
+        return Decode.error(new DecodeException("incomplete long length"));
       }
     }
     if (step == 9) { // long length byte 4
@@ -270,7 +270,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 10;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete long length"));
+        return Decode.error(new DecodeException("incomplete long length"));
       }
     }
     if (step == 10) { // long length byte 5
@@ -279,7 +279,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 11;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete long length"));
+        return Decode.error(new DecodeException("incomplete long length"));
       }
     }
     if (step == 11) { // long length byte 6
@@ -288,7 +288,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 12;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete long length"));
+        return Decode.error(new DecodeException("incomplete long length"));
       }
     }
     if (step == 12) { // long length byte 7
@@ -297,7 +297,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = decoder.masked ? 13 : 17;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete long length"));
+        return Decode.error(new DecodeException("incomplete long length"));
       }
     }
     if (step == 13) { // masking key byte 0
@@ -306,7 +306,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 14;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Expected masking key"));
+        return Decode.error(new DecodeException("expected masking key"));
       }
     }
     if (step == 14) { // masking key byte 1
@@ -315,7 +315,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 15;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete masking key"));
+        return Decode.error(new DecodeException("incomplete masking key"));
       }
     }
     if (step == 15) { // masking key byte 2
@@ -324,7 +324,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 16;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete masking key"));
+        return Decode.error(new DecodeException("incomplete masking key"));
       }
     }
     if (step == 16) { // masking key byte 3
@@ -333,7 +333,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         input.step();
         step = 17;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Incomplete masking key"));
+        return Decode.error(new DecodeException("incomplete masking key"));
       }
     }
     if (step == 17) { // payload
@@ -363,7 +363,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         try {
           decoder.inflater.inflate(inflateBuffer.byteBuffer());
         } catch (DataFormatException cause) {
-          return Decode.error(new DecodeException("Inflate error", cause));
+          return Decode.error(new DecodeException("inflate error", cause));
         }
         input.position(inputBuffer.position());
 
@@ -386,6 +386,9 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         break;
       } while (true);
       input.limit(inputLimit);
+      if (decodePayload.isError()) {
+        return decodePayload.asError();
+      }
 
       if ((finRsvOp & 0x80) != 0 && frameRemaining <= (long) inputRemaining) {
         // Inject the implicit empty block.
@@ -393,7 +396,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         try {
           decoder.inflater.inflate(inflateBuffer.byteBuffer());
         } catch (DataFormatException cause) {
-          return Decode.error(new DecodeException("Inflate error", cause));
+          return Decode.error(new DecodeException("inflate error", cause));
         }
 
         // Decode the final input.
@@ -405,31 +408,32 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
       offset += (long) (input.position() - inputStart);
       if (offset == length) {
         if ((finRsvOp & 0x80) != 0) {
-          if (frameType.code < 0x8) { // data frame
+          if (decodePayload.isDone()) {
+            final WsFrame<?> frame;
             try {
-              return Decode.done(decoder.dataFrame(frameType, Assume.conformsNullable(decodePayload.get()),
-                                                   Assume.conformsNonNull(transcoder)));
+              final Object payload = decodePayload.getUnchecked();
+              if (frameType.code < 0x8) { // data frame
+                frame = decoder.dataFrame(frameType, Assume.conformsNullable(payload),
+                                          Assume.conformsNonNull(transcoder));
+              } else { // control frame
+                frame = decoder.controlFrame(frameType, Assume.conformsNullable(payload),
+                                             Assume.nonNull(transcoder));
+              }
             } catch (WsException cause) {
               return Decode.error(cause);
             }
-          } else { // control frame
-            try {
-              return Decode.done(Assume.conforms(decoder.controlFrame(frameType, Assume.conformsNullable(decodePayload.get()),
-                                                                      Assume.nonNull(transcoder))));
-            } catch (WsException cause) {
-              return Decode.error(cause);
-            }
+            return Decode.done(Assume.conforms(frame));
+          } else {
+            return Decode.error(new DecodeException("truncated payload"));
           }
         } else if ((finRsvOp & 0xF) < 0x8) { // fragment frame
           return Decode.done(WsFragment.of(frameType, Assume.conformsNonNull(transcoder),
                                            Assume.conforms(decodePayload)));
         } else {
-          return Decode.error(new DecodeException("Fragmented control frame"));
+          return Decode.error(new DecodeException("fragmented control frame"));
         }
       } else if (decodePayload.isDone()) {
-        return Decode.error(new DecodeException("Undecoded payload data"));
-      } else if (decodePayload.isError()) {
-        return decodePayload.asError();
+        return Decode.error(new DecodeException("undecoded payload data"));
       }
     }
     if (input.isError()) {

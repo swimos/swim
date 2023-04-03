@@ -133,7 +133,7 @@ public abstract class WsEngine {
   public HttpResponse<?> handshakeResponse(HttpRequest<?> request, HttpHeaders responseHeaders) throws HttpException {
     final SecWebSocketKeyHeader key = request.headers().getHeader(SecWebSocketKeyHeader.TYPE);
     if (key == null) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Missing " + SecWebSocketKeyHeader.NAME);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "missing " + SecWebSocketKeyHeader.NAME);
     }
 
     final HttpHeaders headers = HttpHeaders.of();

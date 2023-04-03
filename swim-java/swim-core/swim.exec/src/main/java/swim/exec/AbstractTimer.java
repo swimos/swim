@@ -81,7 +81,7 @@ public abstract class AbstractTimer implements Timer {
   public boolean debounce(long delay) {
     final TimerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound timer");
+      throw new IllegalStateException("unbound timer");
     }
     return context.debounce(delay);
   }
@@ -99,7 +99,7 @@ public abstract class AbstractTimer implements Timer {
   public boolean throttle(long delay) {
     final TimerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound timer");
+      throw new IllegalStateException("unbound timer");
     }
     return context.throttle(delay);
   }

@@ -123,13 +123,13 @@ public final class HttpCookieState implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -150,15 +150,9 @@ public final class HttpCookieState implements ToSource, ToString {
     return new ParseHttpCookieState(null, null, ArrayMap.empty(), null, null, 1);
   }
 
-  public static HttpCookieState parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpCookieState> parse = HttpCookieState.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpCookieState> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpCookieState.parse(input).complete(input);
   }
 
 }
@@ -200,34 +194,23 @@ final class ParseHttpCookieState extends Parse<HttpCookieState> {
                                       int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          nameBuilder = new StringBuilder();
-          nameBuilder.appendCodePoint(c);
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("cookie name", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        nameBuilder = new StringBuilder();
+        nameBuilder.appendCodePoint(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("cookie name", input));
       }
     }
     if (step == 2) {
-      nameBuilder = Assume.nonNull(nameBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          nameBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        Assume.nonNull(nameBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isCont() && c == '=') {
-        input.step();
         valueBuilder = new StringBuilder();
+        input.step();
         step = 3;
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected('=', input));
@@ -246,15 +229,9 @@ final class ParseHttpCookieState extends Parse<HttpCookieState> {
       }
     }
     if (step == 4) {
-      valueBuilder = Assume.nonNull(valueBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isCookieChar(c)) {
-          input.step();
-          valueBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && Http.isCookieChar(c = input.head())) {
+        Assume.nonNull(valueBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
         step = 5;
@@ -269,15 +246,9 @@ final class ParseHttpCookieState extends Parse<HttpCookieState> {
       }
     }
     if (step == 6) {
-      valueBuilder = Assume.nonNull(valueBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isCookieChar(c)) {
-          input.step();
-          valueBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && Http.isCookieChar(c = input.head())) {
+        Assume.nonNull(valueBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
         step = 7;
@@ -285,14 +256,12 @@ final class ParseHttpCookieState extends Parse<HttpCookieState> {
     }
     do {
       if (step == 7) {
-        nameBuilder = Assume.nonNull(nameBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
         if (input.isCont() && input.head() == ';') {
           input.step();
           step = 8;
         } else if (input.isReady()) {
-          return Parse.done(HttpCookieState.of(nameBuilder.toString(),
-                                               valueBuilder.toString(),
+          return Parse.done(HttpCookieState.of(Assume.nonNull(nameBuilder).toString(),
+                                               Assume.nonNull(valueBuilder).toString(),
                                                params));
         }
       }
@@ -305,56 +274,39 @@ final class ParseHttpCookieState extends Parse<HttpCookieState> {
         }
       }
       if (step == 9) {
-        if (input.isCont()) {
-          c = input.head();
-          if (c >= 0x20 && c <= 0x7E && c != ';' && c != '=') {
-            input.step();
-            keyBuilder = new StringBuilder();
-            keyBuilder.appendCodePoint(c);
-            step = 10;
-          } else {
-            step = 10;
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && (c = input.head()) >= 0x20 && c <= 0x7E && c != ';' && c != '=') {
+          keyBuilder = new StringBuilder();
+          keyBuilder.appendCodePoint(c);
+          input.step();
+          step = 10;
+        } else if (input.isReady()) {
           step = 10;
         }
       }
       if (step == 10) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (c >= 0x20 && c <= 0x7E && c != ';' && c != '=') {
-            input.step();
-            keyBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && (c = input.head()) >= 0x20 && c <= 0x7E && c != ';' && c != '=') {
+          Assume.nonNull(keyBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont() && c == '=') {
-          input.step();
           valBuilder = new StringBuilder();
+          input.step();
           step = 11;
         } else if (input.isReady()) {
-          params = params.updated(keyBuilder.toString(), null);
+          params = params.updated(Assume.nonNull(keyBuilder).toString(), null);
           keyBuilder = null;
           step = 7;
           continue;
         }
       }
       if (step == 11) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        valBuilder = Assume.nonNull(valBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (c >= 0x20 && c <= 0x7E && c != ';') {
-            input.step();
-            valBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && (c = input.head()) >= 0x20 && c <= 0x7E && c != ';') {
+          Assume.nonNull(valBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isReady()) {
-          params = params.updated(keyBuilder.toString(), valBuilder.toString());
+          params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                  Assume.nonNull(valBuilder).toString());
           keyBuilder = null;
           valBuilder = null;
           step = 7;
@@ -411,7 +363,7 @@ final class WriteHttpCookieState extends Write<Object> {
     int c = 0;
     if (step == 1) {
       if (name.length() == 0) {
-        return Write.error(new WriteException("Blank cookie name"));
+        return Write.error(new WriteException("blank cookie name"));
       }
       while (index < name.length() && output.isCont()) {
         c = name.codePointAt(index);
@@ -419,7 +371,7 @@ final class WriteHttpCookieState extends Write<Object> {
           output.write(c);
           index = name.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid cookie name: " + name));
+          return Write.error(new WriteException("invalid cookie name: " + name));
         }
       }
       if (index >= name.length()) {
@@ -438,7 +390,7 @@ final class WriteHttpCookieState extends Write<Object> {
           output.write(c);
           index = value.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid cookie value: " + value));
+          return Write.error(new WriteException("invalid cookie value: " + value));
         }
       }
       if (index >= value.length()) {
@@ -472,7 +424,7 @@ final class WriteHttpCookieState extends Write<Object> {
             output.write(c);
             index = key.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid param key: " + key));
+            return Write.error(new WriteException("invalid param key: " + key));
           }
         }
         if (index >= key.length()) {
@@ -498,7 +450,7 @@ final class WriteHttpCookieState extends Write<Object> {
             output.write(c);
             index = val.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid param value: " + val));
+            return Write.error(new WriteException("invalid param value: " + val));
           }
         }
         if (index >= val.length()) {
@@ -512,7 +464,7 @@ final class WriteHttpCookieState extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

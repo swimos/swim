@@ -104,11 +104,11 @@ public final class AllowHeader extends HttpHeader {
       if (input.isCont() && Http.isTokenChar(c)) {
         final Parse<HttpMethod> parseMethod = HttpMethod.parse(input);
         if (parseMethod.isDone()) {
-          methods = methods.appended(parseMethod.getNonNull());
+          methods = methods.appended(parseMethod.getNonNullUnchecked());
         } else if (parseMethod.isError()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Allow: " + value, parseMethod.getError());
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Allow: " + value, parseMethod.getError());
         } else {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Allow: " + value);
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Allow: " + value);
         }
       } else {
         break;
@@ -129,9 +129,9 @@ public final class AllowHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Allow: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Allow: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Allow: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Allow: " + value);
     }
     return methods;
   }
@@ -144,7 +144,7 @@ public final class AllowHeader extends HttpHeader {
         output.write(',').write(' ');
       }
       method = methods.next();
-      method.write(output).checkDone();
+      method.write(output).assertDone();
     } while (methods.hasNext());
     return output.get();
   }

@@ -104,20 +104,20 @@ public final class UserAgentHeader extends HttpHeader {
       if (input.isCont() && Http.isTokenChar(c)) {
         final Parse<HttpProduct> parseProduct = HttpProduct.parse(input);
         if (parseProduct.isDone()) {
-          products = products.appended(parseProduct.getNonNull());
+          products = products.appended(parseProduct.getNonNullUnchecked());
         } else if (parseProduct.isError()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed User-Agent: " + value, parseProduct.getError());
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed User-Agent: " + value, parseProduct.getError());
         } else {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed User-Agent: " + value);
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed User-Agent: " + value);
         }
         continue;
       }
       break;
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed User-Agent: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed User-Agent: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed User-Agent: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed User-Agent: " + value);
     }
     return products;
   }
@@ -130,7 +130,7 @@ public final class UserAgentHeader extends HttpHeader {
         output.write(' ');
       }
       product = products.next();
-      product.write(output).checkDone();
+      product.write(output).assertDone();
     }
     return output.get();
   }

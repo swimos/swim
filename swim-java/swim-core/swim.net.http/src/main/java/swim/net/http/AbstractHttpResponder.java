@@ -47,7 +47,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   public HttpServerContext serverContext() {
     final HttpResponderContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound responder");
+      throw new IllegalStateException("unbound responder");
     }
     return context.serverContext();
   }
@@ -55,7 +55,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   public HttpOptions options() {
     final HttpResponderContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound responder");
+      throw new IllegalStateException("unbound responder");
     }
     return context.options();
   }
@@ -98,7 +98,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   protected boolean readRequest() {
     final HttpResponderContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound responder");
+      throw new IllegalStateException("unbound responder");
     }
     return context.readRequest();
   }
@@ -106,7 +106,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   public Result<HttpRequest<?>> requestResult() {
     final HttpResponderContext context = this.context;
     if (context == null) {
-      return Result.error(new IllegalStateException("Unbound responder"));
+      return Result.error(new IllegalStateException("unbound responder"));
     }
     return context.requestResult();
   }
@@ -124,7 +124,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   protected boolean writeResponse(HttpResponse<?> response) {
     final HttpResponderContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound responder");
+      throw new IllegalStateException("unbound responder");
     }
     return context.writeResponse(response);
   }
@@ -132,7 +132,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   public Result<HttpResponse<?>> responseResult() {
     final HttpResponderContext context = this.context;
     if (context == null) {
-      return Result.error(new IllegalStateException("Unbound responder"));
+      return Result.error(new IllegalStateException("unbound responder"));
     }
     return context.responseResult();
   }
@@ -140,7 +140,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   protected void become(HttpResponder responder) {
     final HttpResponderContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound responder");
+      throw new IllegalStateException("unbound responder");
     }
     context.become(responder);
   }
@@ -148,7 +148,7 @@ public abstract class AbstractHttpResponder implements HttpResponder {
   protected void become(NetSocket socket) {
     final HttpResponderContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound responder");
+      throw new IllegalStateException("unbound responder");
     }
     context.become(socket);
   }

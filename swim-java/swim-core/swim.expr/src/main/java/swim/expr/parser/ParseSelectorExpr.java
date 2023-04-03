@@ -23,6 +23,7 @@ import swim.expr.ExprParser;
 import swim.expr.NumberTermForm;
 import swim.expr.StringTermForm;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.expr.TermForm;
 import swim.expr.selector.ChildExpr;
 import swim.expr.selector.ChildrenExpr;
@@ -74,13 +75,8 @@ public final class ParseSelectorExpr extends Parse<Term> {
     int c = 0;
     do {
       if (step == 1) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == ':') {
@@ -100,8 +96,8 @@ public final class ParseSelectorExpr extends Parse<Term> {
             input.step();
             step = 8;
           } else if (c == '(') {
-            input.step();
             argsBuilder = new ArrayBuilder<Term, Term[]>(Term.class);
+            input.step();
             step = 10;
           } else {
             return Parse.done(term);
@@ -111,79 +107,65 @@ public final class ParseSelectorExpr extends Parse<Term> {
         }
       }
       if (step == 2) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && parser.isIdentifierStartChar(c)) {
-          input.step();
           stringBuilder = new StringBuilder().appendCodePoint(c);
+          input.step();
           step = 3;
         } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("identifier", input));
         }
       }
       if (step == 3) {
-        stringBuilder = Assume.nonNull(stringBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isIdentifierChar(c)) {
-            input.step();
-            ((StringBuilder) stringBuilder).appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isIdentifierChar(c = input.head())) {
+          ((StringBuilder) Assume.nonNull(stringBuilder)).appendCodePoint(c);
+          input.step();
         }
         if (input.isReady()) {
-          term = new MemberExpr(term, ((StringBuilder) stringBuilder).toString());
+          term = new MemberExpr(term, ((StringBuilder) Assume.nonNull(stringBuilder)).toString());
           stringBuilder = null;
           step = 1;
           continue;
         }
       }
       if (step == 4) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (parser.isIdentifierStartChar(c)) {
-            final StringTermForm<Object, Object> stringForm = Assume.conformsNullable(form.stringForm());
-            if (stringForm != null) {
-              input.step();
+            try {
+              final StringTermForm<Object, Object> stringForm = Assume.conforms(form.stringForm());
               stringBuilder = stringForm.stringBuilder();
               stringBuilder = stringForm.appendCodePoint(stringBuilder, c);
-              step = 5;
-            } else {
-              return Parse.error(Diagnostic.message("unexpected string", input));
+            } catch (TermException cause) {
+              return Parse.diagnostic(input, cause);
             }
+            input.step();
+            step = 5;
           } else if (c == '0') {
-            final NumberTermForm<Object> numberForm = Assume.conformsNullable(form.numberForm());
-            if (numberForm != null) {
-              input.step();
-              term = new ChildExpr(term, numberForm.intoTerm(numberForm.integerValue(0L)));
-              step = 1;
-              continue;
-            } else {
-              return Parse.error(Diagnostic.message("unexpected number", input));
+            final Term keyTerm;
+            try {
+              final NumberTermForm<Object> numberForm = Assume.conforms(form.numberForm());
+              keyTerm = numberForm.intoTerm(numberForm.integerValue(0L));
+            } catch (TermException cause) {
+              return Parse.diagnostic(input, cause);
             }
+            term = new ChildExpr(term, keyTerm);
+            input.step();
+            step = 1;
+            continue;
           } else if (c >= '1' && c <= '9') {
-            final NumberTermForm<Object> numberForm = Assume.conformsNullable(form.numberForm());
-            if (numberForm != null) {
-              input.step();
-              index = c - '0';
-              step = 6;
-            } else {
-              return Parse.error(Diagnostic.message("unexpected number", input));
+            try {
+              form.numberForm(); // ensure numbers are supported
+            } catch (TermException cause) {
+              return Parse.diagnostic(input, cause);
             }
+            index = c - '0';
+            input.step();
+            step = 6;
           } else if (c == '*') {
             input.step();
             step = 7;
@@ -195,42 +177,52 @@ public final class ParseSelectorExpr extends Parse<Term> {
         }
       }
       if (step == 5) {
-        stringBuilder = Assume.nonNull(stringBuilder);
-        final StringTermForm<Object, Object> stringForm = Assume.conformsNonNull(form.stringForm());
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isIdentifierChar(c)) {
-            input.step();
-            stringBuilder = stringForm.appendCodePoint(stringBuilder, c);
-          } else {
-            break;
+        final StringTermForm<Object, Object> stringForm;
+        try {
+          stringForm = Assume.conforms(form.stringForm());
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+        while (input.isCont() && parser.isIdentifierChar(c = input.head())) {
+          try {
+            stringBuilder = stringForm.appendCodePoint(Assume.nonNull(stringBuilder), c);
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
           }
+          input.step();
         }
         if (input.isReady()) {
-          term = new ChildExpr(term, stringForm.intoTerm(stringForm.buildString(stringBuilder)));
+          final Term keyTerm;
+          try {
+            keyTerm = stringForm.intoTerm(stringForm.buildString(Assume.nonNull(stringBuilder)));
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
+          }
+          term = new ChildExpr(term, keyTerm);
           stringBuilder = null;
           step = 1;
           continue;
         }
       }
       if (step == 6) {
-        while (input.isCont()) {
-          c = input.head();
-          if (c >= '0' && c <= '9') {
-            final int newIndex = 10 * index + (c - '0');
-            if (newIndex / index >= 10) {
-              input.step();
-              index = newIndex;
-            } else {
-              return Parse.error(Diagnostic.message("index overflow", input));
-            }
+        while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+          final int newIndex = 10 * index + (c - '0');
+          if (newIndex / index >= 10) {
+            index = newIndex;
+            input.step();
           } else {
-            break;
+            return Parse.error(Diagnostic.message("index overflow", input));
           }
         }
         if (input.isReady()) {
-          final NumberTermForm<Object> numberForm = Assume.conformsNonNull(form.numberForm());
-          term = new ChildExpr(term, numberForm.intoTerm(numberForm.integerValue((long) index)));
+          final Term keyTerm;
+          try {
+            final NumberTermForm<Object> numberForm = Assume.conforms(form.numberForm());
+            keyTerm = numberForm.intoTerm(numberForm.integerValue((long) index));
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
+          }
+          term = new ChildExpr(term, keyTerm);
           index = 0;
           step = 1;
           continue;
@@ -238,8 +230,8 @@ public final class ParseSelectorExpr extends Parse<Term> {
       }
       if (step == 7) {
         if (input.isCont() && input.head() == '*') {
-          input.step();
           term = new DescendantsExpr(term);
+          input.step();
           step = 1;
           continue;
         } else if (input.isReady()) {
@@ -261,19 +253,13 @@ public final class ParseSelectorExpr extends Parse<Term> {
         }
       }
       if (step == 9) {
-        parseArg = Assume.nonNull(parseArg);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == ']') {
-          input.step();
-          term = new ChildExpr(term, parseArg.getNonNull());
+          term = new ChildExpr(term, Assume.nonNull(parseArg).getNonNullUnchecked());
           parseArg = null;
+          input.step();
           step = 1;
           continue;
         } else if (input.isReady()) {
@@ -281,20 +267,14 @@ public final class ParseSelectorExpr extends Parse<Term> {
         }
       }
       if (step == 10) {
-        argsBuilder = Assume.nonNull(argsBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isWhitespace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == ')') {
-            input.step();
-            term = new InvokeExpr(term, argsBuilder.build());
+            term = new InvokeExpr(term, Assume.nonNull(argsBuilder).build());
             argsBuilder = null;
+            input.step();
             step = 1;
             continue;
           } else {
@@ -305,14 +285,13 @@ public final class ParseSelectorExpr extends Parse<Term> {
         }
       }
       if (step == 11) {
-        argsBuilder = Assume.nonNull(argsBuilder);
         if (parseArg == null) {
           parseArg = parser.parseExpr(input, form);
         } else {
           parseArg = parseArg.consume(input);
         }
         if (parseArg.isDone()) {
-          argsBuilder.add(parseArg.getNonNull());
+          Assume.nonNull(argsBuilder).add(parseArg.getNonNullUnchecked());
           parseArg = null;
           step = 12;
         } else if (parseArg.isError()) {
@@ -320,14 +299,8 @@ public final class ParseSelectorExpr extends Parse<Term> {
         }
       }
       if (step == 12) {
-        argsBuilder = Assume.nonNull(argsBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isWhitespace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == ',') {
@@ -335,13 +308,13 @@ public final class ParseSelectorExpr extends Parse<Term> {
             step = 11;
             continue;
           } else if (c == ')') {
-            input.step();
-            term = new InvokeExpr(term, argsBuilder.build());
+            term = new InvokeExpr(term, Assume.nonNull(argsBuilder).build());
             argsBuilder = null;
+            input.step();
             step = 1;
             continue;
           } else {
-            return Parse.error(Diagnostic.expected(')', input));
+            return Parse.error(Diagnostic.expected("',' or ')'", input));
           }
         } else if (input.isDone()) {
           return Parse.error(Diagnostic.expected(')', input));

@@ -134,7 +134,7 @@ public enum WsOpcode implements ToSource {
       case 0xF:
         return RESERVED_F;
       default:
-        throw new IllegalArgumentException("Invalid websocket opcode: " + code);
+        throw new IllegalArgumentException("invalid websocket opcode: " + code);
     }
   }
 

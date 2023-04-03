@@ -57,7 +57,7 @@ public class TermRegistry implements TermForm<Object>, ToSource {
     do {
       int index = providers.length - 1;
       while (index >= 0) {
-        if (provider.priority() < providers[index].priority()) {
+        if (provider.priority() > providers[index].priority()) {
           index -= 1;
         } else {
           index += 1;
@@ -92,39 +92,42 @@ public class TermRegistry implements TermForm<Object>, ToSource {
     final ServiceLoader<TermProvider> serviceLoader = ServiceLoader.load(TermProvider.class, TermRegistry.class.getClassLoader());
     final Iterator<ServiceLoader.Provider<TermProvider>> serviceProviders = serviceLoader.stream().iterator();
     while (serviceProviders.hasNext()) {
-      final ServiceLoader.Provider<TermProvider> serviceProvider = serviceProviders.next();
-      final Class<? extends TermProvider> providerClass = serviceProvider.type();
-      TermProvider provider = null;
+      this.loadExtension(serviceProviders.next());
+    }
+  }
 
-      // public static TermProvider provider(TermRegistry registry);
+  void loadExtension(ServiceLoader.Provider<TermProvider> serviceProvider) {
+    final Class<? extends TermProvider> providerClass = serviceProvider.type();
+    TermProvider provider = null;
+
+    // public static TermProvider provider(TermRegistry registry);
+    try {
+      final Method method = providerClass.getDeclaredMethod("provider", TermRegistry.class);
+      if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
+          && TermProvider.class.isAssignableFrom(method.getReturnType())) {
+        provider = (TermProvider) method.invoke(null, this);
+      }
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    if (provider == null) {
+      // public static TermProvider provider();
       try {
-        final Method method = providerClass.getDeclaredMethod("provider", TermRegistry.class);
+        final Method method = providerClass.getDeclaredMethod("provider");
         if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
             && TermProvider.class.isAssignableFrom(method.getReturnType())) {
-          provider = (TermProvider) method.invoke(null, this);
+          provider = (TermProvider) method.invoke(null);
         }
       } catch (ReflectiveOperationException cause) {
-        // swallow
+        // ignore
       }
-
-      if (provider == null) {
-        // public static TermProvider provider();
-        try {
-          final Method method = providerClass.getDeclaredMethod("provider");
-          if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-              && TermProvider.class.isAssignableFrom(method.getReturnType())) {
-            provider = (TermProvider) method.invoke(null);
-          }
-        } catch (ReflectiveOperationException cause) {
-          // swallow
-        }
-      }
-
-      if (provider == null) {
-        provider = serviceProvider.get();
-      }
-      this.addProvider(provider);
     }
+
+    if (provider == null) {
+      provider = serviceProvider.get();
+    }
+    this.addProvider(provider);
   }
 
   @SuppressWarnings("ReferenceEquality")
@@ -140,25 +143,35 @@ public class TermRegistry implements TermForm<Object>, ToSource {
     } while (true);
   }
 
-  protected @Nullable TermForm<?> resolveTermForm(Type javaType) {
+  protected TermForm<?> resolveTermForm(Type javaType) throws TermFormException {
     if (javaType == Object.class) {
       return this;
     }
 
+    // Keep track of the highest priority resolve error.
+    TermFormException error = null;
+
     final TermProvider[] providers = (TermProvider[]) PROVIDERS.getOpaque(this);
     for (int i = 0; i < providers.length; i += 1) {
       final TermProvider provider = providers[i];
-      final TermForm<?> termForm = provider.resolveTermForm(javaType);
-      if (termForm != null) {
-        return termForm;
+      try {
+        final TermForm<?> termForm = provider.resolveTermForm(javaType);
+        if (termForm != null) {
+          return termForm;
+        }
+      } catch (TermFormException cause) {
+        if (error == null) {
+          error = cause;
+        }
       }
     }
 
-    return null;
+    // Treat the highest priority resolve error as the cause of the exception.
+    throw new TermFormException("no term form for " + javaType, error);
   }
 
   @SuppressWarnings("ReferenceEquality")
-  public <T> @Nullable TermForm<T> forType(Type javaType) {
+  public <T> TermForm<T> getTermForm(Type javaType) throws TermFormException {
     if (javaType instanceof WildcardType) {
       final Type[] upperBounds = ((WildcardType) javaType).getUpperBounds();
       if (upperBounds != null && upperBounds.length != 0) {
@@ -184,10 +197,7 @@ public class TermRegistry implements TermForm<Object>, ToSource {
         return oldTermForm;
       } else {
         if (newTermForm == null) {
-          newTermForm = Assume.conformsNullable(this.resolveTermForm(javaType));
-          if (newTermForm == null) {
-            return null;
-          }
+          newTermForm = Assume.conforms(this.resolveTermForm(javaType));
         }
         final HashTrieMap<Type, TermForm<?>> oldMappings = mappings;
         final HashTrieMap<Type, TermForm<?>> newMappings = oldMappings.updated(javaType, newTermForm);
@@ -199,21 +209,20 @@ public class TermRegistry implements TermForm<Object>, ToSource {
     } while (true);
   }
 
-  public <T> @Nullable TermForm<T> forValue(@Nullable T value) {
+  public <T> TermForm<T> getTermForm(@Nullable T value) throws TermFormException {
     if (value == null) {
       return Assume.conforms(JavaTerms.nullForm());
     } else {
-      return this.forType(value.getClass());
+      return this.getTermForm(value.getClass());
     }
   }
 
   @Override
-  public Term intoTerm(@Nullable Object value) {
-    final TermForm<Object> termForm = this.forValue(value);
-    if (termForm != null) {
-      return termForm.intoTerm(value);
+  public Term intoTerm(@Nullable Object value) throws TermException {
+    if (value instanceof Term) {
+      return (Term) value;
     } else {
-      throw new IllegalArgumentException("No term form for value: " + value);
+      return this.getTermForm(value).intoTerm(value);
     }
   }
 
@@ -227,18 +236,18 @@ public class TermRegistry implements TermForm<Object>, ToSource {
   }
 
   @Override
-  public @Nullable StringTermForm<?, String> stringForm() {
-    return JavaTerms.stringForm();
+  public IdentifierTermForm<String> identifierForm() throws TermException {
+    return JavaTerms.identifierForm();
   }
 
   @Override
-  public @Nullable NumberTermForm<Number> numberForm() {
+  public NumberTermForm<Number> numberForm() throws TermException {
     return JavaTerms.numberForm();
   }
 
   @Override
-  public @Nullable IdentifierTermForm<String> identifierForm() {
-    return JavaTerms.identifierForm();
+  public StringTermForm<?, String> stringForm() throws TermException {
+    return JavaTerms.stringForm();
   }
 
   @Override

@@ -48,7 +48,7 @@ public final class ReflectionTerms implements TermProvider, ToSource {
   }
 
   @Override
-  public @Nullable TermForm<?> resolveTermForm(Type javaType) {
+  public @Nullable TermForm<?> resolveTermForm(Type javaType) throws TermFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -90,38 +90,47 @@ public final class ReflectionTerms implements TermProvider, ToSource {
     return new ReflectionTerms(registry, GENERIC_PRIORITY);
   }
 
-  public static <T> @Nullable TermForm<T> reflectionForm(TermRegistry registry, Class<?> javaClass) {
+  public static <T> TermForm<T> reflectionForm(TermRegistry registry, Class<?> javaClass) throws TermFormException {
     final LinkedHashMap<String, ReflectionTermMember> members = new LinkedHashMap<String, ReflectionTermMember>();
     ReflectionTerms.reflectFields(registry, javaClass, members);
     return new ReflectionTermForm<T>(javaClass, members);
   }
 
-  static void reflectFields(TermRegistry registry, @Nullable Class<?> javaClass, Map<String, ReflectionTermMember> members) {
-    if (javaClass != null) {
-      ReflectionTerms.reflectFields(registry, javaClass.getSuperclass(), members);
-      final Field[] fields = javaClass.getDeclaredFields();
-      for (int i = 0; i < fields.length; i += 1) {
-        ReflectionTerms.reflectField(registry, fields[i], members);
-      }
+  static void reflectFields(TermRegistry registry, @Nullable Class<?> javaClass, Map<String, ReflectionTermMember> members) throws TermFormException {
+    if (javaClass == null) {
+      return;
+    }
+    ReflectionTerms.reflectFields(registry, javaClass.getSuperclass(), members);
+    final Field[] fields = javaClass.getDeclaredFields();
+    for (int i = 0; i < fields.length; i += 1) {
+      ReflectionTerms.reflectField(registry, fields[i], members);
     }
   }
 
-  static void reflectField(TermRegistry registry, Field field, Map<String, ReflectionTermMember> members) {
+  static void reflectField(TermRegistry registry, Field field, Map<String, ReflectionTermMember> members) throws TermFormException {
     final int modifiers = field.getModifiers();
-    if ((modifiers & (Modifier.STATIC | Modifier.TRANSIENT)) == 0) {
-      if ((modifiers & (Modifier.FINAL | Modifier.PRIVATE | Modifier.PROTECTED)) != 0 || modifiers == 0) {
-        field.setAccessible(true);
-      }
-      final TermForm<Object> termForm = registry.forType(field.getGenericType());
-      if (termForm != null) {
-        final TermKey keyAnnotation = field.getAnnotation(TermKey.class);
-        String fieldKey = keyAnnotation != null ? keyAnnotation.value() : null;
-        if (fieldKey == null || fieldKey.length() == 0) {
-          fieldKey = field.getName();
-        }
-        members.put(fieldKey, new ReflectionTermMember(termForm, field));
-      }
+    if ((modifiers & (Modifier.STATIC | Modifier.TRANSIENT)) != 0) {
+      return;
     }
+    if ((modifiers & (Modifier.FINAL | Modifier.PRIVATE | Modifier.PROTECTED)) != 0 || modifiers == 0) {
+      field.setAccessible(true);
+    }
+
+    final TermForm<Object> termForm;
+    try {
+      termForm = registry.getTermForm(field.getGenericType());
+    } catch (TermFormException cause) {
+      throw new TermFormException("unsupported type " + field.getGenericType()
+                                + " for field " + field.getName()
+                                + " of class " + field.getDeclaringClass().getName(), cause);
+    }
+
+    final TermProperty propertyAnnotation = field.getAnnotation(TermProperty.class);
+    String propertyName = propertyAnnotation != null ? propertyAnnotation.value() : null;
+    if (propertyName == null || propertyName.length() == 0) {
+      propertyName = field.getName();
+    }
+    members.put(propertyName, new ReflectionTermMember(termForm, field));
   }
 
 }
@@ -192,18 +201,18 @@ final class ReflectionTerm<T> implements Term, ToSource {
   @Override
   public @Nullable Term getChild(Evaluator evaluator, Term keyExpr) {
     if (this.object != null) {
-      try {
-        final Term keyTerm = keyExpr.evaluate(evaluator);
-        final String key = keyTerm.isValidString() ? keyTerm.stringValue() : null;
-        if (key != null) {
+      final Term keyTerm = keyExpr.evaluate(evaluator);
+      final String key = keyTerm.isValidString() ? keyTerm.stringValue() : null;
+      if (key != null) {
+        try {
           final ReflectionTermMember member = this.form.members.get(key);
           if (member != null) {
             final Object value = member.field.get(this.object);
             return member.form.intoTerm(value);
           }
+        } catch (ReflectiveOperationException | TermException cause) {
+          // ignore
         }
-      } catch (ReflectiveOperationException cause) {
-        // swallow
       }
     }
     return Term.super.getChild(evaluator, keyExpr);
@@ -301,7 +310,7 @@ final class ReflectionTerm<T> implements Term, ToSource {
         try {
           final Object value = member.field.get(this.object);
           return member.form.intoTerm(value);
-        } catch (ReflectiveOperationException cause) {
+        } catch (ReflectiveOperationException | TermException cause) {
           continue;
         }
       } while (true);

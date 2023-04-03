@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import swim.annotations.CheckReturnValue;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
@@ -125,8 +126,8 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
   public BinaryOutputBuffer write(int token) {
     try {
       this.buffer.put((byte) token);
-    } catch (BufferOverflowException e) {
-      throw new IllegalStateException("Buffer full");
+    } catch (BufferOverflowException cause) {
+      throw new IllegalStateException("output " + (this.last ? "done" : "full"));
     }
     return this;
   }
@@ -144,11 +145,17 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
 
   @Override
   public BinaryOutputBuffer step(int offset) {
-    final int position = this.buffer.position() + offset;
-    if (position < 0 || position > this.buffer.limit()) {
-      throw new IllegalArgumentException("Invalid step to " + position);
+    final int index = this.buffer.position() + offset;
+    if (index < 0) {
+      throw new IllegalArgumentException("step from index " + this.buffer.position()
+                                       + " with offset " + offset
+                                       + " would underflow");
+    } else if (index > this.buffer.limit()) {
+      throw new IllegalArgumentException("step from index " + this.buffer.position()
+                                        + " with offset " + offset
+                                        + " would overflow limit " + this.buffer.limit());
     }
-    this.buffer.position(position);
+    this.buffer.position(index);
     return this;
   }
 
@@ -179,15 +186,19 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
   @Override
   public BinaryOutputBuffer shift(int fromIndex, int toIndex, int length) {
     if (length < 0) {
-      throw new IndexOutOfBoundsException("length: " + length);
+      throw new IndexOutOfBoundsException("negative shift length: " + length);
     } else if (fromIndex < 0) {
-      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex);
-    } else if (fromIndex + length > this.buffer.limit()) {
-      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + "; length: " + length);
+      throw new IndexOutOfBoundsException("shift from negative index: " + fromIndex);
     } else if (toIndex < 0) {
-      throw new IndexOutOfBoundsException("toIndex: " + toIndex);
+      throw new IndexOutOfBoundsException("shift to negative index: " + toIndex);
+    } else if (fromIndex + length > this.buffer.limit()) {
+      throw new IndexOutOfBoundsException("shift from index " + fromIndex
+                                        + " with length " + length
+                                        + " would overflow limit " + this.buffer.limit());
     } else if (toIndex + length > this.buffer.limit()) {
-      throw new IndexOutOfBoundsException("toIndex: " + toIndex + "; length: " + length);
+      throw new IndexOutOfBoundsException("shift to index " + toIndex
+                                        + " with length " + length
+                                        + " would overflow limit " + this.buffer.limit());
     }
     if (this.buffer.hasArray()) {
       final byte[] array = this.buffer.array();
@@ -203,11 +214,30 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
     return this;
   }
 
+  @CheckReturnValue
   @Override
   public ByteBuffer get() {
     final ByteBuffer dup = this.buffer.duplicate();
     dup.flip();
     return dup;
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getNonNull() {
+    return this.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getUnchecked() {
+    return this.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getNonNullUnchecked() {
+    return this.get();
   }
 
   @Override

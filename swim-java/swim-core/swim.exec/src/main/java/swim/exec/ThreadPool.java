@@ -146,7 +146,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
           if ((status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -209,7 +209,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
               || (status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -271,7 +271,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
         // The service is concurrently stopping, or has permanently stopped.
         break;
       } else {
-        throw new AssertionError(Integer.toString((status & STATE_MASK))); // unreachable
+        throw new AssertionError("unreachable");
       }
     } while (true);
     if (interrupted) {
@@ -347,7 +347,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
               || (status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -387,7 +387,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
             try {
               // Wait for the thread pool to terminate.
               this.pool.awaitTermination(100, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -412,7 +412,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
           continue;
         }
       } else {
-        throw new AssertionError(Integer.toString((status & STATE_MASK))); // unreachable
+        throw new AssertionError("unreachable");
       }
     } while (true);
     if (interrupted) {
@@ -499,7 +499,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
       // don't let it take down the worker thread.
       if (Result.isNonFatal(cause)) {
         // Report the non-fatal exception.
-        this.log.error("Invalid task handle: " + handle, cause);
+        this.log.error("invalid task handle: " + handle, cause);
         return;
       } else {
         // Rethrow the fatal exception.
@@ -509,7 +509,7 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
     if (task == null) {
       // `handle.task()` should never be null; but if it is,
       // don't let it take down the worker thread.
-      this.log.error("Unbound task handle: " + handle);
+      this.log.error("unbound task handle: " + handle);
       return;
     }
 

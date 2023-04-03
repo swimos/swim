@@ -322,9 +322,9 @@ public class WamlJavaParserTests {
 
   public enum TestEnum {
     ONE,
-    @WamlKey("two")
+    @WamlTag("two")
     TWO,
-    @WamlKey("three")
+    @WamlTag("three")
     THREE,
     FOUR;
   }
@@ -376,11 +376,11 @@ public class WamlJavaParserTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestObject")
-                           .appendArgument(this.a)
-                           .appendArgument(this.b)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestObject")
+                          .appendArgument(this.a)
+                          .appendArgument(this.b)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -428,11 +428,11 @@ public class WamlJavaParserTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestPoint2")
-                           .appendArgument(this.x)
-                           .appendArgument(this.y)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestPoint2")
+                          .appendArgument(this.x)
+                          .appendArgument(this.y)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -471,12 +471,12 @@ public class WamlJavaParserTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestPoint3")
-                           .appendArgument(this.x)
-                           .appendArgument(this.y)
-                           .appendArgument(this.z)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestPoint3")
+                          .appendArgument(this.x)
+                          .appendArgument(this.y)
+                          .appendArgument(this.z)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -515,7 +515,7 @@ public class WamlJavaParserTests {
 
   public static void assertParseFails(WamlForm<?> valueForm, final String waml) {
     assertThrows(ParseException.class, () -> {
-      valueForm.parse(waml, Waml.parser(WamlParserOptions.standard()));
+      valueForm.parse(waml, Waml.parser(WamlParserOptions.standard())).checkDone();
     });
   }
 

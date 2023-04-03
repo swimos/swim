@@ -46,7 +46,7 @@ public interface ToMarkup {
     try {
       this.writeMarkup(output);
     } catch (IOException cause) {
-      throw new RuntimeException(cause);
+      throw new RuntimeException(cause); // never actually throws
     }
     return output.toString();
   }

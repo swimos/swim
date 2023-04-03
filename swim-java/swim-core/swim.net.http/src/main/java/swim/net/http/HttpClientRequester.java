@@ -296,7 +296,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -395,7 +395,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -583,7 +583,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
   public HttpRequest<?> request() {
     final HttpRequest<?> request = (HttpRequest<?>) REQUEST.getOpaque(this);
     if (request == null) {
-      throw new IllegalStateException("Request pending");
+      throw new IllegalStateException("request pending");
     }
     return request;
   }
@@ -725,7 +725,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
           // Reset the response decode state.
           DECODE.setOpaque(this, null);
           // Store the successfully decoded response message.
-          final HttpResponse<?> response = decode.getNonNull();
+          final HttpResponse<?> response = decode.getNonNullUnchecked();
           final Result<HttpResponse<?>> decoded = Result.ok(response);
           DECODED.setOpaque(this, decoded);
           // Complete the response message.
@@ -770,7 +770,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -821,7 +821,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
           DECODE.setOpaque(this, null);
           // Attach the response payload to the response message
           // and store the fully decoded response.
-          response = response.withPayload(decode.getNonNull());
+          response = response.withPayload(decode.getNonNullUnchecked());
           final Result<HttpResponse<?>> decoded = Result.ok(response);
           DECODED.setOpaque(this, decoded);
           // Complete the response payload.
@@ -878,7 +878,7 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -1093,14 +1093,14 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
 
   @Nullable Object toLogRequest(HttpRequest<?> request) {
     final TupleRepr detail = TupleRepr.of();
-    detail.put("method", Repr.from(request.method().name()));
-    detail.put("target", Repr.from(request.target()));
+    detail.put("method", Repr.of(request.method().name()));
+    detail.put("target", Repr.of(request.target()));
     return detail;
   }
 
   @Nullable Object toLogResponse(HttpResponse<?> response) {
     final TupleRepr detail = TupleRepr.of();
-    detail.put("status", Repr.from(response.status().toString()));
+    detail.put("status", Repr.of(response.status().toString()));
     return detail;
   }
 
@@ -1158,11 +1158,11 @@ final class HttpClientRequester implements HttpRequesterContext, InputFuture, Ou
   static final Result<HttpResponse<?>> RESPONSE_PENDING;
 
   static {
-    final IllegalStateException requestPending = new IllegalStateException("Request pending");
+    final IllegalStateException requestPending = new IllegalStateException("request pending");
     requestPending.setStackTrace(new StackTraceElement[0]);
     REQUEST_PENDING = Result.error(requestPending);
 
-    final IllegalStateException responsePending = new IllegalStateException("Response pending");
+    final IllegalStateException responsePending = new IllegalStateException("response pending");
     responsePending.setStackTrace(new StackTraceElement[0]);
     RESPONSE_PENDING = Result.error(responsePending);
   }

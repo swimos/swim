@@ -42,7 +42,7 @@ public final class WriteIdentifierTerm extends Write<Object> {
                                     String identifier, int index) {
     int c;
     if (identifier.length() == 0) {
-      return Write.error(new WriteException("Blank Identifier"));
+      return Write.error(new WriteException("blank Identifier"));
     }
     if (index == 0 && output.isCont()) {
       c = identifier.codePointAt(0);
@@ -57,14 +57,14 @@ public final class WriteIdentifierTerm extends Write<Object> {
         output.write(c);
         index = identifier.offsetByCodePoints(index, 1);
       } else {
-        return Write.error(new WriteException("Invalid identifier"));
+        return Write.error(new WriteException("invalid identifier"));
       }
     }
     if (index >= identifier.length()) {
       return Write.done();
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

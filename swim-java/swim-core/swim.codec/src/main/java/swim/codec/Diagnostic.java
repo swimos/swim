@@ -515,12 +515,11 @@ public final class Diagnostic implements ToString {
                                       @Nullable Diagnostic cause) {
     final String message;
     if (input.isCont()) {
-      final Notation notation = new Notation();
-      notation.append("Unexpected").append(' ');
-      notation.appendSourceCodePoint(input.head());
-      message = notation.toString();
+      message = Notation.of("unexpected ")
+                        .appendSourceCodePoint(input.head())
+                        .toString();
     } else {
-      message = "Unexpected end of input";
+      message = "unexpected end of input";
     }
     final SourcePosition location = input.location();
     final Input source = input.clone().seek(null);
@@ -560,10 +559,10 @@ public final class Diagnostic implements ToString {
 
   public static Diagnostic expected(int expected, Input input, Severity severity,
                                     @Nullable String note, @Nullable Diagnostic cause) {
-    final Notation notation = new Notation();
-    notation.append("Expected").append(' ');
-    notation.appendSourceCodePoint(expected);
-    notation.append(", ").append("but found").append(' ');
+    final Notation notation = Notation.of();
+    notation.append("expected ")
+            .appendSourceCodePoint(expected)
+            .append(", but found ");
     if (input.isCont()) {
       notation.appendSourceCodePoint(input.head());
     } else {
@@ -608,9 +607,10 @@ public final class Diagnostic implements ToString {
 
   public static Diagnostic expected(String expected, Input input, Severity severity,
                                     @Nullable String note, @Nullable Diagnostic cause) {
-    final Notation notation = new Notation();
-    notation.append("Expected").append(' ').append(expected)
-            .append(", ").append("but found").append(' ');
+    final Notation notation = Notation.of();
+    notation.append("expected ")
+            .append(expected)
+            .append(", but found ");
     if (input.isCont()) {
       notation.appendSourceCodePoint(input.head());
     } else {

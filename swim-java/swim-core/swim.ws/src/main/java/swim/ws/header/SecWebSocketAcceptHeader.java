@@ -84,17 +84,17 @@ public final class SecWebSocketAcceptHeader extends HttpHeader {
     final StringInput input = new StringInput(value);
     final Parse<byte[]> parseDigest = Base64.standard().parseByteArray(input);
     if (parseDigest.isDone()) {
-      return parseDigest.getNonNull();
+      return parseDigest.getNonNullUnchecked();
     } else if (parseDigest.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Accept: " + value, parseDigest.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Accept: " + value, parseDigest.getError());
     } else {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Accept: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Accept: " + value);
     }
   }
 
   private static String writeValue(byte[] digest) {
     final StringOutput output = new StringOutput();
-    Base64.standard().writeByteArray(output, digest).checkDone();
+    Base64.standard().writeByteArray(output, digest).assertDone();
     return output.get();
   }
 

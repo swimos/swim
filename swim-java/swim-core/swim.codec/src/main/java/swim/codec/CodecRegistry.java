@@ -21,7 +21,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.ServiceLoader;
-import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.collections.HashTrieMap;
@@ -42,55 +41,6 @@ public class CodecRegistry implements ToSource {
 
   public final HashTrieMap<MediaType, Codec> codecs() {
     return this.codecs;
-  }
-
-  public @Nullable Codec getCodec(MediaType mediaType) {
-    final HashTrieMap<MediaType, Codec> codecs = (HashTrieMap<MediaType, Codec>) CODECS.getOpaque(this);
-    return codecs.get(mediaType);
-  }
-
-  public @Nullable Codec getCodec(String mediaType) {
-    return this.getCodec(MediaType.parse(mediaType));
-  }
-
-  public <T> @Nullable Transcoder<T> getTranscoder(MediaType mediaType, Type javaType) {
-    final Codec codec = this.getCodec(mediaType);
-    if (codec != null) {
-      return codec.getTranscoder(javaType);
-    } else {
-      return null;
-    }
-  }
-
-  public <T> @Nullable Transcoder<T> getTranscoder(String mediaType, Type javaType) {
-    return this.getTranscoder(MediaType.parse(mediaType), javaType);
-  }
-
-  public @Nullable Format getFormat(MediaType mediaType) {
-    final HashTrieMap<MediaType, Codec> codecs = (HashTrieMap<MediaType, Codec>) CODECS.getOpaque(this);
-    final Codec codec = codecs.get(mediaType);
-    if (codec instanceof Format) {
-      return (Format) codec;
-    } else {
-      return null;
-    }
-  }
-
-  public @Nullable Format getFormat(String mediaType) {
-    return this.getFormat(MediaType.parse(mediaType));
-  }
-
-  public <T> @Nullable Translator<T> getTranslator(MediaType mediaType, Type javaType) {
-    final Format format = this.getFormat(mediaType);
-    if (format != null) {
-      return format.getTranslator(javaType);
-    } else {
-      return null;
-    }
-  }
-
-  public <T> @Nullable Translator<T> getTranslator(String mediaType, Type javaType) {
-    return this.getTranslator(MediaType.parse(mediaType), javaType);
   }
 
   @SuppressWarnings("ReferenceEquality")
@@ -118,48 +68,199 @@ public class CodecRegistry implements ToSource {
     final ServiceLoader<Codec> serviceLoader = ServiceLoader.load(Codec.class, CodecRegistry.class.getClassLoader());
     final Iterator<ServiceLoader.Provider<Codec>> serviceProviders = serviceLoader.stream().iterator();
     while (serviceProviders.hasNext()) {
-      final ServiceLoader.Provider<Codec> serviceProvider = serviceProviders.next();
-      final Class<? extends Codec> codecClass = serviceProvider.type();
-      final CodecType codecTypeAnnotation = codecClass.getAnnotation(CodecType.class);
-      if (codecTypeAnnotation != null) {
-        final String[] mediaTypes = codecTypeAnnotation.value();
-        if (mediaTypes != null && mediaTypes.length != 0) {
-          Codec codec = null;
+      this.loadExtension(serviceProviders.next());
+    }
+  }
 
-          // public static Codec provider(CodecRegistry registry);
-          try {
-            final Method method = codecClass.getDeclaredMethod("provider", CodecRegistry.class);
-            if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-                && Codec.class.isAssignableFrom(method.getReturnType())) {
-              codec = (Codec) method.invoke(null, this);
-            }
-          } catch (ReflectiveOperationException cause) {
-            // swallow
-          }
+  void loadExtension(ServiceLoader.Provider<Codec> serviceProvider) {
+    final Class<? extends Codec> codecClass = serviceProvider.type();
+    final CodecType codecTypeAnnotation = codecClass.getAnnotation(CodecType.class);
+    if (codecTypeAnnotation == null) {
+      return;
+    }
 
-          if (codec == null) {
-            // public static Codec provider();
-            try {
-              final Method method = codecClass.getDeclaredMethod("provider");
-              if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-                  && Codec.class.isAssignableFrom(method.getReturnType())) {
-                codec = (Codec) method.invoke(null);
-              }
-            } catch (ReflectiveOperationException cause) {
-              // swallow
-            }
-          }
+    final String[] mediaTypes = codecTypeAnnotation.value();
+    if (mediaTypes == null || mediaTypes.length == 0) {
+      return;
+    }
 
-          if (codec == null) {
-            codec = serviceProvider.get();
-          }
+    Codec codec = null;
 
-          for (int i = 0; i < mediaTypes.length; i += 1) {
-            final MediaType mediaType = MediaType.parse(mediaTypes[i]);
-            this.addCodec(mediaType, codec);
-          }
-        }
+    // public static Codec provider(CodecRegistry registry);
+    try {
+      final Method method = codecClass.getDeclaredMethod("provider", CodecRegistry.class);
+      if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
+          && Codec.class.isAssignableFrom(method.getReturnType())) {
+        codec = (Codec) method.invoke(null, this);
       }
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    if (codec == null) {
+      // public static Codec provider();
+      try {
+        final Method method = codecClass.getDeclaredMethod("provider");
+        if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
+            && Codec.class.isAssignableFrom(method.getReturnType())) {
+          codec = (Codec) method.invoke(null);
+        }
+      } catch (ReflectiveOperationException cause) {
+        // ignore
+      }
+    }
+
+    if (codec == null) {
+      codec = serviceProvider.get();
+    }
+
+    for (int i = 0; i < mediaTypes.length; i += 1) {
+      final MediaType mediaType;
+      try {
+        mediaType = MediaType.parse(mediaTypes[i]).getNonNull();
+      } catch (ParseException cause) {
+        System.err.println(Notation.of("invalid media type ")
+                                   .appendSource(mediaTypes[i])
+                                   .append(" for codec ")
+                                   .append(codecClass.getName())
+                                   .toString());
+        continue;
+      }
+      this.addCodec(mediaType, codec);
+    }
+  }
+
+  public Codec getCodec(MediaType mediaType) throws CodecException {
+    final HashTrieMap<MediaType, Codec> codecs = (HashTrieMap<MediaType, Codec>) CODECS.getOpaque(this);
+    final Codec codec = codecs.get(mediaType);
+    if (codec != null) {
+      return codec;
+    } else {
+      throw new CodecException("no codec for media type: " + mediaType);
+    }
+  }
+
+  public Codec getCodec(String mediaType) throws CodecException {
+    return this.getCodec(MediaType.parse(mediaType).getNonNullUnchecked());
+  }
+
+  public <T> Transcoder<T> getTranscoder(MediaType mediaType, Type javaType)
+      throws CodecException, TranscoderException {
+    final Codec codec = this.getCodec(mediaType);
+    return codec.getTranscoder(javaType);
+  }
+
+  public <T> Transcoder<T> getTranscoder(String mediaType, Type javaType)
+      throws CodecException, TranscoderException {
+    return this.getTranscoder(MediaType.parse(mediaType).getNonNullUnchecked(), javaType);
+  }
+
+  public Format getFormat(MediaType mediaType) throws FormatException {
+    final HashTrieMap<MediaType, Codec> codecs = (HashTrieMap<MediaType, Codec>) CODECS.getOpaque(this);
+    final Codec codec = codecs.get(mediaType);
+    if (codec instanceof Format) {
+      return (Format) codec;
+    } else {
+      throw new FormatException("no format for media type: " + mediaType);
+    }
+  }
+
+  public Format getFormat(String mediaType) throws FormatException {
+    return this.getFormat(MediaType.parse(mediaType).getNonNullUnchecked());
+  }
+
+  public <T> Translator<T> getTranslator(MediaType mediaType, Type javaType)
+      throws FormatException, TranslatorException {
+    final Format format = this.getFormat(mediaType);
+    return format.getTranslator(javaType);
+  }
+
+  public <T> Translator<T> getTranslator(String mediaType, Type javaType)
+      throws FormatException, TranslatorException {
+    return this.getTranslator(MediaType.parse(mediaType).getNonNullUnchecked(), javaType);
+  }
+
+  public <T> Decode<T> decode(MediaType mediaType, Type javaType, InputBuffer input) {
+    try {
+      return this.<T>getTranscoder(mediaType, javaType).decode(input);
+    } catch (CodecException cause) {
+      return Decode.error(cause);
+    }
+  }
+
+  public <T> Decode<T> decode(MediaType mediaType, Type javaType) {
+    try {
+      return this.<T>getTranscoder(mediaType, javaType).decode();
+    } catch (CodecException cause) {
+      return Decode.error(cause);
+    }
+  }
+
+  public <T> Encode<?> encode(MediaType mediaType, OutputBuffer<?> output, T value) {
+    try {
+      return this.<T>getTranscoder(mediaType, value.getClass()).encode(output, value);
+    } catch (CodecException cause) {
+      return Encode.error(cause);
+    }
+  }
+
+  public <T> Encode<?> encode(MediaType mediaType, T value) {
+    try {
+      return this.<T>getTranscoder(mediaType, value.getClass()).encode(value);
+    } catch (CodecException cause) {
+      return Encode.error(cause);
+    }
+  }
+
+  public <T> Parse<T> parse(MediaType mediaType, Type javaType, Input input) {
+    try {
+      return this.<T>getTranslator(mediaType, javaType).parse(input);
+    } catch (FormatException | TranslatorException cause) {
+      return Parse.error(cause);
+    }
+  }
+
+  public <T> Parse<T> parse(MediaType mediaType, Type javaType) {
+    try {
+      return this.<T>getTranslator(mediaType, javaType).parse();
+    } catch (FormatException | TranslatorException cause) {
+      return Parse.error(cause);
+    }
+  }
+
+  public <T> Parse<T> parse(MediaType mediaType, Type javaType, String string) {
+    try {
+      return this.<T>getTranslator(mediaType, javaType).parse(string);
+    } catch (FormatException | TranslatorException cause) {
+      return Parse.error(cause);
+    }
+  }
+
+  public <T> Write<?> write(MediaType mediaType, Output<?> output, T value) {
+    try {
+      return this.<T>getTranslator(mediaType, value.getClass()).write(output, value);
+    } catch (FormatException | TranslatorException cause) {
+      return Write.error(cause);
+    }
+  }
+
+  public <T> Write<?> write(MediaType mediaType, T value) {
+    try {
+      return this.<T>getTranslator(mediaType, value.getClass()).write(value);
+    } catch (FormatException | TranslatorException cause) {
+      return Write.error(cause);
+    }
+  }
+
+  public <T> String toString(MediaType mediaType, T value) {
+    try {
+      return this.<T>getTranslator(mediaType, value.getClass()).toString(value);
+    } catch (FormatException cause) {
+      throw new IllegalArgumentException("no format for media type: " + mediaType);
+    } catch (TranslatorException cause) {
+      throw new IllegalArgumentException(Notation.of("no ").append(mediaType)
+                                                 .append(" translator for value: ")
+                                                 .appendSource(value).toString());
     }
   }
 

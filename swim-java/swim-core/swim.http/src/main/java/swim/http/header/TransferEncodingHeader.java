@@ -106,11 +106,11 @@ public final class TransferEncodingHeader extends HttpHeader {
       if (input.isCont() && Http.isTokenChar(c)) {
         final Parse<HttpTransferCoding> parseCoding = HttpTransferCoding.parse(input);
         if (parseCoding.isDone()) {
-          codings = codings.appended(parseCoding.getNonNull());
+          codings = codings.appended(parseCoding.getNonNullUnchecked());
         } else if (parseCoding.isError()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Transfer-Encoding: " + value, parseCoding.getError());
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Transfer-Encoding: " + value, parseCoding.getError());
         } else {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Transfer-Encoding: " + value);
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Transfer-Encoding: " + value);
         }
       } else {
         break;
@@ -131,9 +131,9 @@ public final class TransferEncodingHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Transfer-Encoding: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Transfer-Encoding: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Transfer-Encoding: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Transfer-Encoding: " + value);
     }
     return codings;
   }
@@ -146,7 +146,7 @@ public final class TransferEncodingHeader extends HttpHeader {
         output.write(',').write(' ');
       }
       coding = codings.next();
-      coding.write(output).checkDone();
+      coding.write(output).assertDone();
     } while (codings.hasNext());
     return output.get();
   }

@@ -22,13 +22,13 @@ import swim.annotations.Since;
 @Since("5.0")
 public interface JsonFieldForm<K, V, B> {
 
-  JsonForm<K> keyForm();
+  JsonForm<K> keyForm() throws JsonException;
 
-  JsonForm<V> valueForm();
+  JsonForm<V> valueForm() throws JsonException;
 
-  B updateField(B builder, K key, @Nullable V value);
+  B updateField(B builder, K key, @Nullable V value) throws JsonException;
 
-  default <T> @Nullable JsonObjectForm<K, V, B, T> refineForm(JsonObjectForm<K, V, B, T> form, K key, @Nullable V value) {
+  default <T> @Nullable JsonObjectForm<K, V, B, T> refineForm(JsonObjectForm<K, V, B, T> form, K key, @Nullable V value) throws JsonException {
     return null;
   }
 

@@ -49,12 +49,12 @@ public final class WsFragment<T> extends WsFrame<T> implements ToSource {
 
   @Override
   public @Nullable T get() {
-    return this.decodePayload.get();
+    return this.decodePayload.getUnchecked();
   }
 
   @Override
   public T getNonNull() {
-    return this.decodePayload.getNonNull();
+    return this.decodePayload.getNonNullUnchecked();
   }
 
   @Override

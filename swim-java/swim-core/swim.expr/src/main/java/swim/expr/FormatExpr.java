@@ -20,13 +20,13 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryOutputBuffer;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Output;
 import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Write;
+import swim.codec.WriteException;
 import swim.util.ArrayIterator;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -50,9 +50,13 @@ public final class FormatExpr implements Expr, ToSource {
 
   @Override
   public Term evaluate(Evaluator evaluator) {
-    final StringOutput output = new StringOutput();
-    this.writeFormat(output, evaluator).checkDone();
-    return Term.of(output.toString());
+    try {
+      final StringOutput output = new StringOutput();
+      this.writeFormat(output, evaluator).checkDone();
+      return Term.of(output.toString());
+    } catch (WriteException cause) {
+      return Term.trap();
+    }
   }
 
   public Write<?> writeFormat(Output<?> output, Evaluator evaluator) {
@@ -118,7 +122,11 @@ public final class FormatExpr implements Expr, ToSource {
     for (int i = 0; i < parts.length; i += 1) {
       final Object part = parts[i];
       if (!(part instanceof String) && !(part instanceof Term)) {
-        throw new IllegalArgumentException("Part " + i + " is not a String or Term: " + part);
+        throw new IllegalArgumentException(Notation.of("format part ")
+                                                   .append(i)
+                                                   .append(" is not a string or term: ")
+                                                   .appendSource(part)
+                                                   .toString());
       }
     }
     return new FormatExpr(parts);
@@ -132,15 +140,9 @@ public final class FormatExpr implements Expr, ToSource {
     return Expr.parser().parseFormatExpr(StringInput.empty(), Term.registry());
   }
 
-  public static FormatExpr parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<FormatExpr> parse = Expr.parser().parseFormatExpr(input, Term.registry());
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<FormatExpr> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return FormatExpr.parse(input).complete(input);
   }
 
 }

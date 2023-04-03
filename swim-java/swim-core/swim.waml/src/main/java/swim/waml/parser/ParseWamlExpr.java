@@ -19,6 +19,7 @@ import swim.annotations.Nullable;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.waml.WamlForm;
 import swim.waml.WamlParser;
@@ -51,8 +52,13 @@ public final class ParseWamlExpr<T> extends Parse<T> {
       parseExpr = parseExpr.consume(input);
     }
     if (parseExpr.isDone()) {
-      final Term term = parseExpr.getNonNull();
-      final T value = form.fromTerm(term);
+      final Term term = parseExpr.getNonNullUnchecked();
+      final T value;
+      try {
+        value = form.fromTerm(term);
+      } catch (TermException cause) {
+        return Parse.diagnostic(input, cause);
+      }
       if (term == value) {
         return Assume.conforms(parseExpr);
       } else {

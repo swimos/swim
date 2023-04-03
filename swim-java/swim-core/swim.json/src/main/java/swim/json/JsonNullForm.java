@@ -20,16 +20,21 @@ import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
 
+/**
+ * A transcoder between JSON null literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code JsonNullForm}
+ */
 @Public
 @Since("5.0")
 public interface JsonNullForm<T> extends JsonForm<T> {
 
   @Override
-  default JsonNullForm<T> nullForm() {
+  default JsonNullForm<? extends T> nullForm() throws JsonException {
     return this;
   }
 
-  @Nullable T nullValue();
+  @Nullable T nullValue() throws JsonException;
 
   @Override
   default Parse<T> parse(Input input, JsonParser parser) {

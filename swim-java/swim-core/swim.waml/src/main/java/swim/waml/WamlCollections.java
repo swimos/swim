@@ -31,6 +31,7 @@ import swim.annotations.Since;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -53,7 +54,7 @@ public final class WamlCollections implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) {
+  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -67,11 +68,13 @@ public final class WamlCollections implements WamlProvider, ToSource {
     } else {
       return null;
     }
+
     if (List.class.isAssignableFrom(javaClass)) {
       return WamlCollections.listForm(this.codec, javaClass, javaType);
     } else if (Map.class.isAssignableFrom(javaClass)) {
       return WamlCollections.mapForm(this.codec, javaClass, javaType);
     }
+
     return null;
   }
 
@@ -120,7 +123,7 @@ public final class WamlCollections implements WamlProvider, ToSource {
     return new WamlCollections.ListForm<E, T>(constructor, elementForm);
   }
 
-  public static <E, T extends List<E>> @Nullable WamlArrayForm<E, T, T> listForm(WamlCodec codec, Class<?> listClass, Type listType) {
+  public static <E, T extends List<E>> @Nullable WamlArrayForm<E, T, T> listForm(WamlCodec codec, Class<?> listClass, Type listType) throws WamlFormException {
     do {
       Type[] typeArguments = null;
       if (listType instanceof ParameterizedType) {
@@ -134,15 +137,11 @@ public final class WamlCollections implements WamlProvider, ToSource {
       if (listType == List.class) {
         final WamlForm<E> elementForm;
         if (typeArguments != null && typeArguments.length == 1) {
-          elementForm = codec.forType(typeArguments[0]);
+          elementForm = codec.getWamlForm(typeArguments[0]);
         } else {
           elementForm = Assume.conforms(codec);
         }
-        if (elementForm != null) {
-          return WamlCollections.listForm(listClass, elementForm);
-        } else {
-          return null;
-        }
+        return WamlCollections.listForm(listClass, elementForm);
       } else if (listType instanceof Class<?>) {
         final Class<?> baseClass = (Class<?>) listType;
         final Type[] interfaceTypes = baseClass.getGenericInterfaces();
@@ -183,7 +182,7 @@ public final class WamlCollections implements WamlProvider, ToSource {
     return new WamlCollections.MapForm<K, V, T>(constructor, keyForm, valueForm);
   }
 
-  public static <K, V, T extends Map<K, V>> @Nullable WamlObjectForm<K, V, T, T> mapForm(WamlCodec codec, Class<?> mapClass, Type mapType) {
+  public static <K, V, T extends Map<K, V>> @Nullable WamlObjectForm<K, V, T, T> mapForm(WamlCodec codec, Class<?> mapClass, Type mapType) throws WamlFormException {
     do {
       Type[] typeArguments = null;
       if (mapType instanceof ParameterizedType) {
@@ -203,21 +202,17 @@ public final class WamlCollections implements WamlProvider, ToSource {
             if (bounds.length == 1 && bounds[0] == Object.class) {
               keyForm = Assume.conforms(WamlJava.keyForm());
             } else {
-              keyForm = codec.forType(typeArguments[0]);
+              keyForm = codec.getWamlForm(typeArguments[0]);
             }
           } else {
-            keyForm = codec.forType(typeArguments[0]);
+            keyForm = codec.getWamlForm(typeArguments[0]);
           }
-          valueForm = codec.forType(typeArguments[1]);
+          valueForm = codec.getWamlForm(typeArguments[1]);
         } else {
           keyForm = Assume.conforms(WamlJava.keyForm());
           valueForm = Assume.conforms(codec);
         }
-        if (keyForm != null && valueForm != null) {
-          return WamlCollections.mapForm(mapClass, keyForm, valueForm);
-        } else {
-          return null;
-        }
+        return WamlCollections.mapForm(mapClass, keyForm, valueForm);
       } else if (mapType instanceof Class<?>) {
         final Class<?> baseClass = (Class<?>) mapType;
         final Type[] interfaceTypes = baseClass.getGenericInterfaces();
@@ -251,11 +246,11 @@ public final class WamlCollections implements WamlProvider, ToSource {
     }
 
     @Override
-    public T arrayBuilder() {
+    public T arrayBuilder() throws WamlException {
       try {
         return this.constructor.newInstance();
       } catch (ReflectiveOperationException cause) {
-        throw new UnsupportedOperationException(cause);
+        throw new WamlException("unable to construct array builder", cause);
       }
     }
 
@@ -280,7 +275,7 @@ public final class WamlCollections implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable T value) {
+    public Term intoTerm(@Nullable T value) throws TermException {
       return Term.from(value);
     }
 
@@ -333,11 +328,11 @@ public final class WamlCollections implements WamlProvider, ToSource {
     }
 
     @Override
-    public T objectBuilder() {
+    public T objectBuilder() throws WamlException {
       try {
         return this.constructor.newInstance();
       } catch (ReflectiveOperationException cause) {
-        throw new UnsupportedOperationException(cause);
+        throw new WamlException("unable to construct object builder", cause);
       }
     }
 
@@ -362,7 +357,7 @@ public final class WamlCollections implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable T value) {
+    public Term intoTerm(@Nullable T value) throws TermException {
       return Term.from(value);
     }
 

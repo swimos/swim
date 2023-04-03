@@ -489,7 +489,7 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
       branch0 = branch0.updatedBranch(b1, branch1);
       return this.updatedBranch(b0, branch0);
     } else { // surrogate or invalid code point
-      throw new IllegalArgumentException("Invalid code point: U+" + Integer.toHexString(c));
+      throw new IllegalArgumentException("invalid code point: U+" + Integer.toHexString(c));
     }
   }
 
@@ -662,7 +662,7 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
         return this.updatedBranch(b0, branch0);
       }
     } else { // surrogate or invalid code point
-      throw new IllegalArgumentException("Invalid code point: U+" + Integer.toHexString(c));
+      throw new IllegalArgumentException("invalid code point: U+" + Integer.toHexString(c));
     }
   }
 
@@ -718,8 +718,8 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map<?, ?>) {
-      return this.entrySet().equals(((Map<?, ?>) other).entrySet());
+    } else if (other instanceof Map<?, ?> that) {
+      return this.entrySet().equals(that.entrySet());
     }
     return false;
   }

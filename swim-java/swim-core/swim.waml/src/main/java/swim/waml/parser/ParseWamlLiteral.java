@@ -21,6 +21,7 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.ContextExpr;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.expr.selector.ChildrenExpr;
 import swim.expr.selector.DescendantsExpr;
 import swim.util.Assume;
@@ -53,13 +54,8 @@ public final class ParseWamlLiteral extends Parse<Term> {
                                   @Nullable Parse<?> parseValue, int step) {
     int c = 0;
     if (step == 1) {
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isSpace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isSpace(c = input.head())) {
+        input.step();
       }
       if (input.isCont()) {
         if (c == '%') {
@@ -91,8 +87,13 @@ public final class ParseWamlLiteral extends Parse<Term> {
         parseValue = parseValue.consume(input);
       }
       if (parseValue.isDone()) {
-        final Object value = parseValue.get();
-        final Term term = Assume.<WamlForm<Object>>conforms(form).intoTerm(value);
+        final Object value = parseValue.getUnchecked();
+        final Term term;
+        try {
+          term = Assume.<WamlForm<Object>>conforms(form).intoTerm(value);
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
         if (value == term) {
           return Assume.conforms(parseValue);
         } else {

@@ -22,17 +22,22 @@ import swim.codec.Parse;
 import swim.expr.ExprParser;
 import swim.expr.IdentifierTermForm;
 
+/**
+ * A transcoder between JSON identifier literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code JsonIdentifierForm}
+ */
 @Public
 @Since("5.0")
 public interface JsonIdentifierForm<T> extends JsonForm<T>, IdentifierTermForm<T> {
 
   @Override
-  default JsonIdentifierForm<T> identifierForm() {
+  default JsonIdentifierForm<? extends T> identifierForm() throws JsonException {
     return this;
   }
 
   @Override
-  @Nullable T identifierValue(String value, ExprParser parser);
+  @Nullable T identifierValue(String value, ExprParser parser) throws JsonException;
 
   @Override
   default Parse<T> parse(Input input, JsonParser parser) {

@@ -86,7 +86,7 @@ public class WamlExprParserTests {
                  "@hello() test");
     assertParses(TermRepr.of(ContextExpr.child(Repr.of("test"))).withAttr("hello", Repr.of("world")),
                  "@hello(\"world\") test");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("test"))).withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(TermRepr.of(ContextExpr.child(Repr.of("test"))).withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\") test");
   }
 
@@ -112,31 +112,31 @@ public class WamlExprParserTests {
 
   @Test
   public void parseExprsInMarkup() {
-    assertParses(ArrayRepr.of("Hello, ", ContextExpr.child(Repr.of("audience")), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), TermRepr.of(ContextExpr.child(Repr.of("audience"))), Repr.of("!")),
                  "<<Hello, {audience}!>>");
   }
 
   @Test
   public void parseArrayOperands() {
-    assertParses(TermRepr.of(PlusExpr.of(ArrayRepr.of(1, 2), ArrayRepr.of(3, 4))),
+    assertParses(TermRepr.of(PlusExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), ArrayRepr.of(Repr.of(3), Repr.of(4)))),
                  "[1, 2] + [3, 4]");
   }
 
   @Test
   public void parseAttributedArrayOperands() {
-    assertParses(TermRepr.of(PlusExpr.of(ArrayRepr.of(1, 2).withAttr("vec"), ArrayRepr.of(3, 4).withAttr("vec"))),
+    assertParses(TermRepr.of(PlusExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)).withAttr("vec"), ArrayRepr.of(Repr.of(3), Repr.of(4)).withAttr("vec"))),
                  "@vec [1, 2] + @vec [3, 4]");
   }
 
   @Test
   public void parseObjectOperands() {
-    assertParses(TermRepr.of(PlusExpr.of(ObjectRepr.of("x", 1, "y", 2), ObjectRepr.of("x", 3, "y", 4))),
+    assertParses(TermRepr.of(PlusExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), ObjectRepr.of("x", Repr.of(3), "y", Repr.of(4)))),
                  "{x: 1, y: 2} + {x: 3, y: 4}");
   }
 
   @Test
   public void parseOAttributedbjectOperands() {
-    assertParses(TermRepr.of(PlusExpr.of(ObjectRepr.of("x", 1, "y", 2).withAttr("vec"), ObjectRepr.of("x", 3, "y", 4).withAttr("vec"))),
+    assertParses(TermRepr.of(PlusExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)).withAttr("vec"), ObjectRepr.of("x", Repr.of(3), "y", Repr.of(4)).withAttr("vec"))),
                  "@vec {x: 1, y: 2} + @vec {x: 3, y: 4}");
   }
 
@@ -156,67 +156,67 @@ public class WamlExprParserTests {
 
   @Test
   public void parseArrayKeyLookups() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ArrayRepr.of(1, 2))),
+    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  "foo[[1, 2]]");
   }
 
   @Test
   public void parseObjectKeyLookups() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ObjectRepr.of("x", 1, "y", 2))),
+    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  "foo[{x: 1, y: 2}]");
   }
 
   @Test
   public void parseLiteralInvokeArgs() {
-    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("foo")), ArrayRepr.of(1, 2), ObjectRepr.of("x", 1, "y", 2))),
+    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("foo")), ArrayRepr.of(Repr.of(1), Repr.of(2)), ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  "foo([1, 2], {x: 1, y: 2})");
   }
 
   @Test
   public void parseLiteralMemberExprs() {
-    assertParses(TermRepr.of(MemberExpr.of(ArrayRepr.of(1, 2), "length")),
+    assertParses(TermRepr.of(MemberExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), "length")),
                  "[1, 2]::length");
-    assertParses(TermRepr.of(MemberExpr.of(ObjectRepr.of("x", 1, "y", 2), "size")),
+    assertParses(TermRepr.of(MemberExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), "size")),
                  "{x: 1, y: 2}::size");
   }
 
   @Test
   public void parseLiteralChildExprs() {
-    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of("world!"))),
+    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of("world!"))),
                  "[1, 2][\"world!\"]");
-    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), GlobalExpr.child(Repr.of("id")))),
+    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), GlobalExpr.child(Repr.of("id")))),
                  "{x: 1, y: 2}[$id]");
   }
 
   @Test
   public void parseLiteralFieldExprs() {
-    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of("length"))),
+    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of("length"))),
                  "[1, 2].length");
-    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), Repr.of("x"))),
+    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Repr.of("x"))),
                  "{x: 1, y: 2}.x");
   }
 
   @Test
   public void parseLiteralIndexExprs() {
-    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of(0))),
+    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of(0))),
                  "[1, 2].0");
-    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), Repr.of(1))),
+    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Repr.of(1))),
                  "{x: 1, y: 2}.1");
   }
 
   @Test
   public void parseLiteralChildrenExprs() {
-    assertParses(TermRepr.of(ChildrenExpr.of(ArrayRepr.of(1, 2))),
+    assertParses(TermRepr.of(ChildrenExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  "[1, 2].*");
-    assertParses(TermRepr.of(ChildrenExpr.of(ObjectRepr.of("x", 1, "y", 2))),
+    assertParses(TermRepr.of(ChildrenExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  "{x: 1, y: 2}.*");
   }
 
   @Test
   public void parseLiteralDescendantsExprs() {
-    assertParses(TermRepr.of(DescendantsExpr.of(ArrayRepr.of(1, 2))),
+    assertParses(TermRepr.of(DescendantsExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  "[1, 2].**");
-    assertParses(TermRepr.of(DescendantsExpr.of(ObjectRepr.of("x", 1, "y", 2))),
+    assertParses(TermRepr.of(DescendantsExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  "{x: 1, y: 2}.**");
   }
 

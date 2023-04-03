@@ -73,156 +73,156 @@ public class JsonExprWriterTests {
   @Test
   public void writeArrayOperands() {
     assertWrites("[1, 2] + [3, 4]",
-                 TermRepr.of(PlusExpr.of(ArrayRepr.of(1, 2), ArrayRepr.of(3, 4))),
+                 TermRepr.of(PlusExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), ArrayRepr.of(Repr.of(3), Repr.of(4)))),
                  JsonWriterOptions.readable());
     assertWrites("[1,2]+[3,4]",
-                 TermRepr.of(PlusExpr.of(ArrayRepr.of(1, 2), ArrayRepr.of(3, 4))),
+                 TermRepr.of(PlusExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), ArrayRepr.of(Repr.of(3), Repr.of(4)))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeObjectOperands() {
     assertWrites("{x: 1, y: 2} + {x: 3, y: 4}",
-                 TermRepr.of(PlusExpr.of(ObjectRepr.of("x", 1, "y", 2), ObjectRepr.of("x", 3, "y", 4))),
+                 TermRepr.of(PlusExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), ObjectRepr.of("x", Repr.of(3), "y", Repr.of(4)))),
                  JsonWriterOptions.readable());
     assertWrites("{\"x\":1,\"y\":2}+{\"x\":3,\"y\":4}",
-                 TermRepr.of(PlusExpr.of(ObjectRepr.of("x", 1, "y", 2), ObjectRepr.of("x", 3, "y", 4))),
+                 TermRepr.of(PlusExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), ObjectRepr.of("x", Repr.of(3), "y", Repr.of(4)))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeArrayKeyLookups() {
     assertWrites("foo[[1, 2]]",
-                 TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ArrayRepr.of(1, 2))),
+                 TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  JsonWriterOptions.readable());
     assertWrites("foo[[1,2]]",
-                 TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ArrayRepr.of(1, 2))),
+                 TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeObjectKeyLookups() {
     assertWrites("foo[{x: 1, y: 2}]",
-                 TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ObjectRepr.of("x", 1, "y", 2))),
+                 TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  JsonWriterOptions.readable());
     assertWrites("foo[{\"x\":1,\"y\":2}]",
-                 TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ObjectRepr.of("x", 1, "y", 2))),
+                 TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeLiteralInvokeArgs() {
     assertWrites("foo([1, 2], {x: 1, y: 2})",
-                 TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("foo")), ArrayRepr.of(1, 2), ObjectRepr.of("x", 1, "y", 2))),
+                 TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("foo")), ArrayRepr.of(Repr.of(1), Repr.of(2)), ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  JsonWriterOptions.readable());
     assertWrites("foo([1,2],{\"x\":1,\"y\":2})",
-                 TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("foo")), ArrayRepr.of(1, 2), ObjectRepr.of("x", 1, "y", 2))),
+                 TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("foo")), ArrayRepr.of(Repr.of(1), Repr.of(2)), ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeLiteralMemberExprs() {
     assertWrites("[1, 2]::length",
-                 TermRepr.of(MemberExpr.of(ArrayRepr.of(1, 2), "length")),
+                 TermRepr.of(MemberExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), "length")),
                  JsonWriterOptions.readable());
     assertWrites("[1,2]::length",
-                 TermRepr.of(MemberExpr.of(ArrayRepr.of(1, 2), "length")),
+                 TermRepr.of(MemberExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), "length")),
                  JsonWriterOptions.compact());
     assertWrites("{x: 1, y: 2}::size",
-                 TermRepr.of(MemberExpr.of(ObjectRepr.of("x", 1, "y", 2), "size")),
+                 TermRepr.of(MemberExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), "size")),
                  JsonWriterOptions.readable());
     assertWrites("{\"x\":1,\"y\":2}::size",
-                 TermRepr.of(MemberExpr.of(ObjectRepr.of("x", 1, "y", 2), "size")),
+                 TermRepr.of(MemberExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), "size")),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeLiteralChildExprs() {
     assertWrites("[1, 2][\"world!\"]",
-                 TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of("world!"))),
+                 TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of("world!"))),
                  JsonWriterOptions.readable());
     assertWrites("[1,2][\"world!\"]",
-                 TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of("world!"))),
+                 TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of("world!"))),
                  JsonWriterOptions.compact());
     assertWrites("{x: 1, y: 2}[$id]",
-                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), GlobalExpr.child(Repr.of("id")))),
+                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), GlobalExpr.child(Repr.of("id")))),
                  JsonWriterOptions.readable());
     assertWrites("{\"x\":1,\"y\":2}[$id]",
-                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), GlobalExpr.child(Repr.of("id")))),
+                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), GlobalExpr.child(Repr.of("id")))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeLiteralFieldExprs() {
     assertWrites("[1, 2].length",
-                 TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of("length"))),
+                 TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of("length"))),
                  JsonWriterOptions.readable());
     assertWrites("[1,2].length",
-                 TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of("length"))),
+                 TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of("length"))),
                  JsonWriterOptions.compact());
     assertWrites("{x: 1, y: 2}.x",
-                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), Repr.of("x"))),
+                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Repr.of("x"))),
                  JsonWriterOptions.readable());
     assertWrites("{\"x\":1,\"y\":2}.x",
-                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), Repr.of("x"))),
+                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Repr.of("x"))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeLiteralIndexExprs() {
     assertWrites("[1, 2].0",
-                 TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of(0))),
+                 TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of(0))),
                  JsonWriterOptions.readable());
     assertWrites("[1,2].0",
-                 TermRepr.of(ChildExpr.of(ArrayRepr.of(1, 2), Repr.of(0))),
+                 TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of(0))),
                  JsonWriterOptions.compact());
     assertWrites("{x: 1, y: 2}.1",
-                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), Repr.of(1))),
+                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Repr.of(1))),
                  JsonWriterOptions.readable());
     assertWrites("{\"x\":1,\"y\":2}.1",
-                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", 1, "y", 2), Repr.of(1))),
+                 TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Repr.of(1))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeLiteralChildrenExprs() {
     assertWrites("[1, 2].*",
-                 TermRepr.of(ChildrenExpr.of(ArrayRepr.of(1, 2))),
+                 TermRepr.of(ChildrenExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  JsonWriterOptions.readable());
     assertWrites("[1,2].*",
-                 TermRepr.of(ChildrenExpr.of(ArrayRepr.of(1, 2))),
+                 TermRepr.of(ChildrenExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  JsonWriterOptions.compact());
     assertWrites("{x: 1, y: 2}.*",
-                 TermRepr.of(ChildrenExpr.of(ObjectRepr.of("x", 1, "y", 2))),
+                 TermRepr.of(ChildrenExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  JsonWriterOptions.readable());
     assertWrites("{\"x\":1,\"y\":2}.*",
-                 TermRepr.of(ChildrenExpr.of(ObjectRepr.of("x", 1, "y", 2))),
+                 TermRepr.of(ChildrenExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeLiteralDescendantsExprs() {
     assertWrites("[1, 2].**",
-                 TermRepr.of(DescendantsExpr.of(ArrayRepr.of(1, 2))),
+                 TermRepr.of(DescendantsExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  JsonWriterOptions.readable());
     assertWrites("[1,2].**",
-                 TermRepr.of(DescendantsExpr.of(ArrayRepr.of(1, 2))),
+                 TermRepr.of(DescendantsExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  JsonWriterOptions.compact());
     assertWrites("{x: 1, y: 2}.**",
-                 TermRepr.of(DescendantsExpr.of(ObjectRepr.of("x", 1, "y", 2))),
+                 TermRepr.of(DescendantsExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  JsonWriterOptions.readable());
     assertWrites("{\"x\":1,\"y\":2}.**",
-                 TermRepr.of(DescendantsExpr.of(ObjectRepr.of("x", 1, "y", 2))),
+                 TermRepr.of(DescendantsExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  JsonWriterOptions.compact());
   }
 
   public static void assertWrites(String expected, Repr value, JsonWriterOptions options) {
-    JsonAssertions.assertWrites(expected, () -> Json.forType(Repr.class).write(value, Json.writer(options)));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(options)));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    JsonAssertions.assertWrites(expected, () -> Json.forType(Repr.class).write(value, Json.writer(JsonWriterOptions.readable())));
-    JsonAssertions.assertWrites(expected, () -> Json.forType(Repr.class).write(value, Json.writer(JsonWriterOptions.compact())));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(JsonWriterOptions.readable())));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(JsonWriterOptions.compact())));
   }
 
 }

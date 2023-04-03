@@ -15,7 +15,7 @@
 package swim.json;
 
 import org.junit.jupiter.api.Test;
-import swim.util.Assume;
+import swim.codec.ParseException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,19 +25,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class JsonThrowablesTests {
 
   @Test
-  public void parseStackTraceElements() {
+  public void parseStackTraceElements() throws ParseException {
     assertEquals(new StackTraceElement("com.foo.loader", "foo", "9.0", "com.foo.Main", "run", "Main.java", 101),
-                 Json.parse(StackTraceElement.class, "{\"loader\":\"com.foo.loader\",\"module\":\"foo\",\"version\":\"9.0\",\"class\":\"com.foo.Main\",\"method\":\"run\",\"file\":\"Main.java\",\"line\":101}"));
+                 Json.parse(StackTraceElement.class, "{\"loader\":\"com.foo.loader\",\"module\":\"foo\",\"version\":\"9.0\",\"class\":\"com.foo.Main\",\"method\":\"run\",\"file\":\"Main.java\",\"line\":101}").getNonNull());
     assertEquals(new StackTraceElement("com.foo.loader", "foo", "9.0", "com.foo.Main", "run", "Main.java", -1),
-                 Json.parse(StackTraceElement.class, "{\"loader\":\"com.foo.loader\",\"module\":\"foo\",\"version\":\"9.0\",\"class\":\"com.foo.Main\",\"method\":\"run\",\"file\":\"Main.java\"}"));
+                 Json.parse(StackTraceElement.class, "{\"loader\":\"com.foo.loader\",\"module\":\"foo\",\"version\":\"9.0\",\"class\":\"com.foo.Main\",\"method\":\"run\",\"file\":\"Main.java\"}").getNonNull());
     assertEquals(new StackTraceElement("com.foo.loader", "foo", "9.0", "com.foo.Main", "run", null, -1),
-                 Json.parse(StackTraceElement.class, "{\"loader\":\"com.foo.loader\",\"module\":\"foo\",\"version\":\"9.0\",\"class\":\"com.foo.Main\",\"method\":\"run\"}"));
+                 Json.parse(StackTraceElement.class, "{\"loader\":\"com.foo.loader\",\"module\":\"foo\",\"version\":\"9.0\",\"class\":\"com.foo.Main\",\"method\":\"run\"}").getNonNull());
     assertEquals(new StackTraceElement("com.foo.loader", null, null, "com.foo.bar.App", "run", "App.java", 12),
-                 Json.parse(StackTraceElement.class, "{\"loader\":\"com.foo.loader\",\"class\":\"com.foo.bar.App\",\"method\":\"run\",\"file\":\"App.java\",\"line\":12}"));
+                 Json.parse(StackTraceElement.class, "{\"loader\":\"com.foo.loader\",\"class\":\"com.foo.bar.App\",\"method\":\"run\",\"file\":\"App.java\",\"line\":12}").getNonNull());
     assertEquals(new StackTraceElement(null, "acme", "2.1", "org.acme.Lib", "test", "Lib.java", 80),
-                 Json.parse(StackTraceElement.class, "{\"module\":\"acme\",\"version\":\"2.1\",\"class\":\"org.acme.Lib\",\"method\":\"test\",\"file\":\"Lib.java\",\"line\":80}"));
+                 Json.parse(StackTraceElement.class, "{\"module\":\"acme\",\"version\":\"2.1\",\"class\":\"org.acme.Lib\",\"method\":\"test\",\"file\":\"Lib.java\",\"line\":80}").getNonNull());
     assertEquals(new StackTraceElement(null, null, null, "MyClass", "mash", "MyClass.java", 9),
-                 Json.parse(StackTraceElement.class, "{\"class\":\"MyClass\",\"method\":\"mash\",\"file\":\"MyClass.java\",\"line\":9}"));
+                 Json.parse(StackTraceElement.class, "{\"class\":\"MyClass\",\"method\":\"mash\",\"file\":\"MyClass.java\",\"line\":9}").getNonNull());
   }
 
   @Test
@@ -57,11 +57,11 @@ public class JsonThrowablesTests {
   }
 
   @Test
-  public void transcodeThrowables() {
+  public void transcodeThrowables() throws ParseException {
     final Throwable cause0 = new UnsupportedOperationException();
     final Throwable throwable0 = new RuntimeException("whoops", cause0);
     final String jsonString = Json.toString(throwable0);
-    final Throwable throwable1 = Assume.nonNull(Json.parse(Throwable.class, jsonString));
+    final Throwable throwable1 = Json.<Throwable>parse(Throwable.class, jsonString).getNonNull();
     final Throwable cause1 = throwable1.getCause();
 
     assertInstanceOf(RuntimeException.class, throwable1);

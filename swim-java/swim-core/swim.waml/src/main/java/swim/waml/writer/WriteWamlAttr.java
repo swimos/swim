@@ -68,7 +68,7 @@ public final class WriteWamlAttr<A> extends Write<Object> {
     if (step == 2) {
       int c;
       if (name.length() == 0) {
-        return Write.error(new WriteException("Blank identifier"));
+        return Write.error(new WriteException("blank identifier"));
       }
       if (index == 0 && output.isCont()) {
         c = name.codePointAt(0);
@@ -83,7 +83,7 @@ public final class WriteWamlAttr<A> extends Write<Object> {
           output.write(c);
           index = name.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid identifier"));
+          return Write.error(new WriteException("invalid identifier"));
         }
       }
       if (index >= name.length()) {
@@ -204,7 +204,7 @@ public final class WriteWamlAttr<A> extends Write<Object> {
       return Write.done();
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

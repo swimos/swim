@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.JUnitException;
 import swim.annotations.Nullable;
 import swim.exec.ThreadScheduler;
 import swim.util.Assume;
@@ -29,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TcpSocketTests {
 
   @Test
-  public void testConnectFailure() {
+  public void testConnectFailure() throws InterruptedException {
     final CountDownLatch clientCloseLatch = new CountDownLatch(1);
 
     final TransportDriver driver = new TransportDriver();
@@ -49,8 +48,6 @@ public class TcpSocketTests {
 
       driver.bindTcpSocket(clientSocket).connect("127.0.0.1", 53556);
       clientCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -58,7 +55,7 @@ public class TcpSocketTests {
   }
 
   @Test
-  public void testConnect() {
+  public void testConnect() throws InterruptedException {
     final CountDownLatch clientOpenLatch = new CountDownLatch(1);
     final CountDownLatch serverOpenLatch = new CountDownLatch(1);
     final CountDownLatch serverBindLatch = new CountDownLatch(1);
@@ -103,8 +100,6 @@ public class TcpSocketTests {
       driver.bindTcpSocket(clientSocket).connect("127.0.0.1", 53556);
       serverOpenLatch.await();
       clientOpenLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -112,7 +107,7 @@ public class TcpSocketTests {
   }
 
   @Test
-  public void testClientCloseOnConnect() {
+  public void testClientCloseOnConnect() throws InterruptedException {
     final CountDownLatch clientOpenLatch = new CountDownLatch(1);
     final CountDownLatch clientCloseLatch = new CountDownLatch(1);
     final CountDownLatch serverOpenLatch = new CountDownLatch(1);
@@ -182,8 +177,6 @@ public class TcpSocketTests {
       clientCloseLatch.await();
       serverOpenLatch.await();
       serverCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -191,7 +184,7 @@ public class TcpSocketTests {
   }
 
   @Test
-  public void testServerCloseOnConnect() {
+  public void testServerCloseOnConnect() throws InterruptedException {
     final CountDownLatch clientOpenLatch = new CountDownLatch(1);
     final CountDownLatch clientCloseLatch = new CountDownLatch(1);
     final CountDownLatch serverOpenLatch = new CountDownLatch(1);
@@ -261,8 +254,6 @@ public class TcpSocketTests {
       clientCloseLatch.await();
       serverOpenLatch.await();
       serverCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -270,7 +261,7 @@ public class TcpSocketTests {
   }
 
   @RepeatedTest(100)
-  public void testEcho() {
+  public void testEcho() throws InterruptedException {
     final CountDownLatch clientWriteLatch = new CountDownLatch(1);
     final CountDownLatch serverReadLatch = new CountDownLatch(1);
     final CountDownLatch serverWriteLatch = new CountDownLatch(1);
@@ -291,7 +282,8 @@ public class TcpSocketTests {
       public void didOpen() {
         try {
           this.writeBuffer = ByteBuffer.wrap(payload.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException cause) {
+          throw new AssertionError(cause);
         }
         this.readBuffer = ByteBuffer.allocate(1024);
         this.requestRead();
@@ -407,8 +399,6 @@ public class TcpSocketTests {
       clientReadLatch.await();
       clientCloseLatch.await();
       serverCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();

@@ -36,7 +36,7 @@ public interface Writer<T> extends Encoder<T> {
 
   default String toString(@Nullable T value) {
     final StringOutput output = new StringOutput();
-    this.write(output, value).checkDone();
+    this.write(output, value).assertDone();
     return output.get();
   }
 

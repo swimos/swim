@@ -58,7 +58,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   @Override
   public void setAttrs(Attrs attrs) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.attrs = attrs;
   }
@@ -207,7 +207,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final TupleShape shape = this.shape;
     final Repr[] slots = this.slots;
@@ -245,7 +245,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final TupleShape shape = this.shape;
     final Repr[] slots = this.slots;
@@ -312,7 +312,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   public Repr set(int index, Repr value) {
     Objects.requireNonNull(value);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     if (index < 0 || index >= this.shape.size) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
@@ -325,7 +325,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   public boolean add(Repr value) {
     Objects.requireNonNull(value);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final TupleShape shape = this.shape;
     final Repr[] slots = this.slots;
@@ -346,7 +346,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   public boolean addAll(Collection<? extends Repr> values) {
     Objects.requireNonNull(values);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int k = values.size();
     if (k == 0) {
@@ -384,7 +384,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   @Override
   public @Nullable Repr remove(@Nullable Object key) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final TupleShape shape = this.shape;
     if (shape.size == 0 || !(key instanceof String)) {
@@ -467,7 +467,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
 
   public Repr remove(int index) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final TupleShape shape = this.shape;
     if (index < 0 || index >= shape.size) {
@@ -509,7 +509,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
 
   public TupleRepr removed(int index) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final TupleShape shape = this.shape;
     if (index < 0 || index >= shape.size) {
@@ -543,7 +543,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   @Override
   public void clear() {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.shape = TupleShape.empty();
     this.slots = EMPTY_SLOTS;
@@ -692,35 +692,33 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
     return new TupleRepr(0, Attrs.empty(), TupleShape.empty(), EMPTY_SLOTS);
   }
 
-  public static TupleRepr of(@Nullable String key, @Nullable Object value) {
-    final Repr[] slots = new Repr[] {Repr.from(value)};
+  public static TupleRepr of(@Nullable String key, Repr value) {
+    final Repr[] slots = new Repr[] {value};
     final TupleShape shape = TupleShape.empty().getChild(key);
     return new TupleRepr(0, Attrs.empty(), shape, slots);
   }
 
-  public static TupleRepr of(@Nullable String key0, @Nullable Object value0,
-                             @Nullable String key1, @Nullable Object value1) {
-    final Repr[] slots = new Repr[] {Repr.from(value0), Repr.from(value1)};
+  public static TupleRepr of(@Nullable String key0, Repr value0,
+                             @Nullable String key1, Repr value1) {
+    final Repr[] slots = new Repr[] {value0, value1};
     final TupleShape shape = TupleShape.empty().getChild(key0).getChild(key1);
     return new TupleRepr(0, Attrs.empty(), shape, slots);
   }
 
-  public static TupleRepr of(@Nullable String key0, @Nullable Object value0,
-                             @Nullable String key1, @Nullable Object value1,
-                             @Nullable String key2, @Nullable Object value2) {
-    final Repr[] slots = new Repr[] {Repr.from(value0), Repr.from(value1),
-                                     Repr.from(value2)};
+  public static TupleRepr of(@Nullable String key0, Repr value0,
+                             @Nullable String key1, Repr value1,
+                             @Nullable String key2, Repr value2) {
+    final Repr[] slots = new Repr[] {value0, value1, value2};
     final TupleShape shape = TupleShape.empty().getChild(key0).getChild(key1)
                                                .getChild(key2);
     return new TupleRepr(0, Attrs.empty(), shape, slots);
   }
 
-  public static TupleRepr of(@Nullable String key0, @Nullable Object value0,
-                             @Nullable String key1, @Nullable Object value1,
-                             @Nullable String key2, @Nullable Object value2,
-                             @Nullable String key3, @Nullable Object value3) {
-    final Repr[] slots = new Repr[] {Repr.from(value0), Repr.from(value1),
-                                     Repr.from(value2), Repr.from(value3)};
+  public static TupleRepr of(@Nullable String key0, Repr value0,
+                             @Nullable String key1, Repr value1,
+                             @Nullable String key2, Repr value2,
+                             @Nullable String key3, Repr value3) {
+    final Repr[] slots = new Repr[] {value0, value1, value2, value3};
     final TupleShape shape = TupleShape.empty().getChild(key0).getChild(key1)
                                                .getChild(key2).getChild(key3);
     return new TupleRepr(0, Attrs.empty(), shape, slots);
@@ -730,13 +728,13 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
     Objects.requireNonNull(keyValuePairs);
     final int n = keyValuePairs.length;
     if (n % 2 != 0) {
-      throw new IllegalArgumentException("Odd number of key-value pairs");
+      throw new IllegalArgumentException("odd number of key-value pairs");
     }
     final Repr[] slots = new Repr[n >>> 1];
     TupleShape shape = TupleShape.empty();
     for (int i = 0; i < n; i += 2) {
       shape = shape.getChild((String) keyValuePairs[i]);
-      slots[shape.size - 1] = Repr.from(keyValuePairs[i + 1]);
+      slots[shape.size - 1] = (Repr) keyValuePairs[i + 1];
     }
     return new TupleRepr(0, Attrs.empty(), shape, slots);
   }

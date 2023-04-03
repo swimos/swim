@@ -104,11 +104,11 @@ public final class AcceptHeader extends HttpHeader {
       if (input.isCont() && Http.isTokenChar(c)) {
         final Parse<MediaRange> parseMediaRange = MediaRange.parse(input);
         if (parseMediaRange.isDone()) {
-          mediaRanges = mediaRanges.appended(parseMediaRange.getNonNull());
+          mediaRanges = mediaRanges.appended(parseMediaRange.getNonNullUnchecked());
         } else if (parseMediaRange.isError()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Accept: " + value, parseMediaRange.getError());
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Accept: " + value, parseMediaRange.getError());
         } else {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Accept: " + value);
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Accept: " + value);
         }
       } else {
         break;
@@ -129,9 +129,9 @@ public final class AcceptHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Accept: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Accept: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Accept: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Accept: " + value);
     }
     return mediaRanges;
   }
@@ -144,7 +144,7 @@ public final class AcceptHeader extends HttpHeader {
         output.write(',').write(' ');
       }
       mediaRange = mediaRanges.next();
-      mediaRange.write(output).checkDone();
+      mediaRange.write(output).assertDone();
     } while (mediaRanges.hasNext());
     return output.get();
   }

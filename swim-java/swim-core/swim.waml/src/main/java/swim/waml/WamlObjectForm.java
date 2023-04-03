@@ -19,23 +19,33 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
+import swim.util.Notation;
 
+/**
+ * A transcoder between WAML object literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlObjectForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlObjectForm<K, V, B, T> extends WamlForm<T> {
 
   @Override
-  default WamlObjectForm<?, ?, ?, T> objectForm() {
+  default WamlObjectForm<?, ?, ?, ? extends T> objectForm() throws WamlException {
     return this;
   }
 
-  WamlForm<K> keyForm();
+  WamlForm<K> keyForm() throws WamlException;
 
-  @Nullable WamlFieldForm<K, V, B> getFieldForm(K key);
+  default WamlFieldForm<K, V, B> getFieldForm(K key) throws WamlException {
+    throw new WamlException(Notation.of("unsupported field: ")
+                                    .appendSource(key)
+                                    .toString());
+  }
 
-  B objectBuilder();
+  B objectBuilder() throws WamlException;
 
-  @Nullable T buildObject(B builder);
+  @Nullable T buildObject(B builder) throws WamlException;
 
   @Override
   default Parse<T> parse(Input input, WamlParser parser) {

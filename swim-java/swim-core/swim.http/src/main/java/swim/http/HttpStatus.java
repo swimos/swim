@@ -154,13 +154,13 @@ public final class HttpStatus implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -182,7 +182,7 @@ public final class HttpStatus implements ToSource, ToString {
 
   public static HttpStatus of(int code, @Nullable String phrase) {
     if (code < 0 || code >= 1000) {
-      throw new IllegalArgumentException("Invalid status code: " + code);
+      throw new IllegalArgumentException("invalid status code: " + code);
     }
     final HttpStatus[] codes = (HttpStatus[]) CODES.getOpaque();
     final int index = HttpStatus.lookup(codes, code);
@@ -197,7 +197,7 @@ public final class HttpStatus implements ToSource, ToString {
 
   public static HttpStatus of(int code) {
     if (code < 0 || code >= 1000) {
-      throw new IllegalArgumentException("Invalid status code: " + code);
+      throw new IllegalArgumentException("invalid status code: " + code);
     }
     final HttpStatus[] codes = (HttpStatus[]) CODES.getOpaque();
     final int index = HttpStatus.lookup(codes, code);
@@ -216,15 +216,9 @@ public final class HttpStatus implements ToSource, ToString {
     return new ParseHttpStatus(0, (StringTrieMap<HttpStatus>) PHRASES.getOpaque(), null, 1);
   }
 
-  public static HttpStatus parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpStatus> parse = HttpStatus.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpStatus> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpStatus.parse(input).complete(input);
   }
 
   static HttpStatus[] codes = new HttpStatus[0];
@@ -321,21 +315,32 @@ final class ParseHttpStatus extends Parse<HttpStatus> {
                                  @Nullable StringTrieMap<HttpStatus> phraseTrie,
                                  @Nullable StringBuilder phraseBuilder, int step) {
     int c = 0;
-    while (step <= 3) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Base10.isDigit(c)) {
-          input.step();
-          code = 10 * code + Base10.decodeDigit(c);
-          step += 1;
-          continue;
-        } else {
-          return Parse.error(Diagnostic.expected("status code", input));
-        }
-      } else if (input.isDone()) {
+    if (step == 1) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        code = Base10.decodeDigit(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("status code", input));
       }
-      break;
+    }
+    if (step == 2) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        code = 10 * code + Base10.decodeDigit(c);
+        input.step();
+        step = 3;
+      } else if (input.isReady()) {
+        return Parse.error(Diagnostic.expected("status code", input));
+      }
+    }
+    if (step == 3) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        code = 10 * code + Base10.decodeDigit(c);
+        input.step();
+        step = 4;
+      } else if (input.isReady()) {
+        return Parse.error(Diagnostic.expected("status code", input));
+      }
     }
     if (step == 4) {
       if (input.isCont() && input.head() == ' ') {
@@ -346,30 +351,28 @@ final class ParseHttpStatus extends Parse<HttpStatus> {
       }
     }
     if (step == 5) {
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isPhraseChar(c)) {
-          input.step();
-          if (phraseTrie != null) {
-            final StringTrieMap<HttpStatus> subTrie = phraseTrie.getBranch(phraseTrie.normalized(c));
-            if (subTrie != null) {
-              phraseTrie = subTrie;
-            } else {
-              phraseBuilder = new StringBuilder(phraseTrie.prefix());
-              phraseBuilder.appendCodePoint(c);
-              phraseTrie = null;
-            }
+      while (input.isCont() && Http.isPhraseChar(c = input.head())) {
+        if (phraseTrie != null) {
+          final StringTrieMap<HttpStatus> subTrie =
+              phraseTrie.getBranch(phraseTrie.normalized(c));
+          if (subTrie != null) {
+            phraseTrie = subTrie;
           } else {
-            Assume.nonNull(phraseBuilder).appendCodePoint(c);
+            phraseBuilder = new StringBuilder(phraseTrie.prefix());
+            phraseBuilder.appendCodePoint(c);
+            phraseTrie = null;
           }
         } else {
-          break;
+          Assume.nonNull(phraseBuilder).appendCodePoint(c);
         }
+        input.step();
       }
       if (input.isReady()) {
         HttpStatus status = phraseTrie != null ? phraseTrie.value() : null;
         if (status == null) {
-          final String phrase = phraseTrie != null ? phraseTrie.prefix() : Assume.nonNull(phraseBuilder).toString();
+          final String phrase = phraseTrie != null
+                              ? phraseTrie.prefix()
+                              : Assume.nonNull(phraseBuilder).toString();
           status = new HttpStatus(code, phrase);
         } else if (code != status.code) {
           status = new HttpStatus(code, status.phrase);
@@ -409,7 +412,7 @@ final class WriteHttpStatus extends Write<Object> {
                              int index, int step) {
     if (step == 1 && output.isCont()) {
       if (code / 1000 != 0) {
-        return Write.error(new WriteException("Invalid status code: " + code));
+        return Write.error(new WriteException("invalid status code: " + code));
       }
       output.write(Base10.encodeDigit(code / 100 % 10));
       step = 2;
@@ -433,7 +436,7 @@ final class WriteHttpStatus extends Write<Object> {
           output.write(c);
           index = phrase.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid phrase: " + phrase));
+          return Write.error(new WriteException("invalid phrase: " + phrase));
         }
       }
       if (index >= phrase.length()) {
@@ -441,7 +444,7 @@ final class WriteHttpStatus extends Write<Object> {
       }
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

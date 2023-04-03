@@ -30,6 +30,7 @@ import swim.annotations.Since;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -52,7 +53,7 @@ public final class JsonReflections implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -94,12 +95,12 @@ public final class JsonReflections implements JsonProvider, ToSource {
     return new JsonReflections(codec, GENERIC_PRIORITY);
   }
 
-  public static <T> @Nullable JsonObjectForm<String, Object, T, T> reflectionForm(JsonCodec codec, Class<?> javaClass) {
+  public static <T> @Nullable JsonObjectForm<String, Object, T, T> reflectionForm(JsonCodec codec, Class<?> javaClass) throws JsonFormException {
     final Constructor<T> constructor;
     try {
       constructor = Assume.conforms(javaClass.getDeclaredConstructor());
     } catch (NoSuchMethodException cause) {
-      return null;
+      throw new JsonFormException("missing default constructor", cause);
     }
     constructor.setAccessible(true);
     final LinkedHashMap<String, JsonReflectionFieldForm<Object, T>> fieldForms = new LinkedHashMap<String, JsonReflectionFieldForm<Object, T>>();
@@ -107,7 +108,7 @@ public final class JsonReflections implements JsonProvider, ToSource {
     return new JsonReflectionForm<T>(codec, constructor, fieldForms, null);
   }
 
-  static <T> void reflectFields(JsonCodec codec, @Nullable Class<?> javaClass, Map<String, JsonReflectionFieldForm<Object, T>> fieldForms) {
+  static <T> void reflectFields(JsonCodec codec, @Nullable Class<?> javaClass, Map<String, JsonReflectionFieldForm<Object, T>> fieldForms) throws JsonFormException {
     if (javaClass != null) {
       JsonReflections.reflectFields(codec, javaClass.getSuperclass(), fieldForms);
       final Field[] fields = javaClass.getDeclaredFields();
@@ -117,20 +118,20 @@ public final class JsonReflections implements JsonProvider, ToSource {
     }
   }
 
-  static <T> void reflectField(JsonCodec codec, Field field, Map<String, JsonReflectionFieldForm<Object, T>> fieldForms) {
+  static <T> void reflectField(JsonCodec codec, Field field, Map<String, JsonReflectionFieldForm<Object, T>> fieldForms) throws JsonFormException {
     final int modifiers = field.getModifiers();
     if ((modifiers & (Modifier.STATIC | Modifier.TRANSIENT)) == 0) {
       if ((modifiers & (Modifier.FINAL | Modifier.PRIVATE | Modifier.PROTECTED)) != 0 || modifiers == 0) {
         field.setAccessible(true);
       }
-      final JsonForm<Object> valueForm = codec.forType(field.getGenericType());
+      final JsonForm<Object> valueForm = codec.getJsonForm(field.getGenericType());
       if (valueForm != null) {
-        final JsonKey keyAnnotation = field.getAnnotation(JsonKey.class);
-        String fieldKey = keyAnnotation != null ? keyAnnotation.value() : null;
-        if (fieldKey == null || fieldKey.length() == 0) {
-          fieldKey = field.getName();
+        final JsonProperty propertyAnnotation = field.getAnnotation(JsonProperty.class);
+        String propertyName = propertyAnnotation != null ? propertyAnnotation.value() : null;
+        if (propertyName == null || propertyName.length() == 0) {
+          propertyName = field.getName();
         }
-        fieldForms.put(fieldKey, new JsonReflectionFieldForm<Object, T>(field, valueForm));
+        fieldForms.put(propertyName, new JsonReflectionFieldForm<Object, T>(field, valueForm));
       }
     }
   }
@@ -165,11 +166,11 @@ final class JsonReflectionForm<T> implements JsonObjectForm<String, Object, T, T
 
   @Override
   public T updateField(T builder, String key, @Nullable Object value) {
-    return builder; // unreachable
+    return builder; // nop
   }
 
   @Override
-  public @Nullable JsonForm<T> taggedForm(String tag) {
+  public JsonForm<T> taggedForm(String tag) {
     if (Objects.equals(this.tag, tag)) {
       return this;
     } else {
@@ -179,23 +180,23 @@ final class JsonReflectionForm<T> implements JsonObjectForm<String, Object, T, T
   }
 
   @Override
-  public @Nullable JsonFieldForm<String, Object, T> getFieldForm(String key) {
+  public JsonFieldForm<String, Object, T> getFieldForm(String key) throws JsonException {
     final JsonFieldForm<String, Object, T> fieldForm = this.fieldForms.get(key);
     if (fieldForm != null) {
       return fieldForm;
     } else if (this.tag != null && "type".equals(key)) {
       return this;
     } else {
-      return null;
+      return JsonObjectForm.super.getFieldForm(key);
     }
   }
 
   @Override
-  public T objectBuilder() {
+  public T objectBuilder() throws JsonException {
     try {
       return this.constructor.newInstance();
     } catch (ReflectiveOperationException cause) {
-      throw new UnsupportedOperationException(cause);
+      throw new JsonException("unable to construct object builder", cause);
     }
   }
 
@@ -214,7 +215,7 @@ final class JsonReflectionForm<T> implements JsonObjectForm<String, Object, T, T
   }
 
   @Override
-  public Term intoTerm(@Nullable T value) {
+  public Term intoTerm(@Nullable T value) throws TermException {
     return Term.from(value);
   }
 
@@ -299,11 +300,17 @@ final class JsonReflectionFieldForm<V, B> implements JsonFieldForm<String, V, B>
   }
 
   @Override
-  public B updateField(B builder, String key, @Nullable V value) {
+  public B updateField(B builder, String key, @Nullable V value) throws JsonException {
     try {
       this.field.set(builder, value);
     } catch (IllegalAccessException cause) {
-      throw new UnsupportedOperationException(cause);
+      throw new JsonException(Notation.of("unable to set field ")
+                                      .append(this.field.getName())
+                                      .append(" of class ")
+                                      .append(this.field.getDeclaringClass().getName())
+                                      .append(" to value ")
+                                      .appendSource(value)
+                                      .toString(), cause);
     }
     return builder;
   }

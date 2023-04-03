@@ -46,7 +46,7 @@ public interface ToSource {
     try {
       this.writeSource(output);
     } catch (IOException cause) {
-      throw new RuntimeException(cause);
+      throw new RuntimeException(cause); // never actually throws
     }
     return output.toString();
   }

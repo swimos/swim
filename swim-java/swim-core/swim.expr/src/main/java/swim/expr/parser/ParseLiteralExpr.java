@@ -20,10 +20,8 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.ContextExpr;
 import swim.expr.ExprParser;
-import swim.expr.IdentifierTermForm;
-import swim.expr.NumberTermForm;
-import swim.expr.StringTermForm;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.expr.TermForm;
 import swim.expr.selector.ChildrenExpr;
 import swim.expr.selector.DescendantsExpr;
@@ -50,13 +48,8 @@ public final class ParseLiteralExpr extends Parse<Term> {
                                   TermForm<?> form, int step) {
     int c = 0;
     if (step == 1) {
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isSpace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isSpace(c = input.head())) {
+        input.step();
       }
       if (input.isCont()) {
         if (c == '%') {
@@ -66,26 +59,23 @@ public final class ParseLiteralExpr extends Parse<Term> {
         } else if (c == '*') {
           input.step();
           step = 2;
-        } else if (c == '"') {
-          final StringTermForm<?, ?> stringForm = form.stringForm();
-          if (stringForm != null) {
-            return parser.parseStringTerm(input, stringForm);
-          } else {
-            return Parse.error(Diagnostic.message("unexpected string", input));
+        } else if (parser.isIdentifierStartChar(c)) {
+          try {
+            return parser.parseIdentifierTerm(input, form.identifierForm());
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
           }
         } else if (c == '-' || (c >= '0' && c <= '9')) {
-          final NumberTermForm<?> numberForm = form.numberForm();
-          if (numberForm != null) {
-            return parser.parseNumberTerm(input, numberForm);
-          } else {
-            return Parse.error(Diagnostic.message("unexpected number", input));
+          try {
+            return parser.parseNumberTerm(input, form.numberForm());
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
           }
-        } else if (parser.isIdentifierStartChar(c)) {
-          final IdentifierTermForm<?> identifierForm = form.identifierForm();
-          if (identifierForm != null) {
-            return parser.parseIdentifierTerm(input, identifierForm);
-          } else {
-            return Parse.error(Diagnostic.message("unexpected identifier", input));
+        } else if (c == '"') {
+          try {
+            return parser.parseStringTerm(input, form.stringForm());
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
           }
         } else {
           return Parse.error(Diagnostic.expected("literal", input));

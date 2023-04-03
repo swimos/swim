@@ -26,16 +26,20 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base16;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
-import swim.codec.ParseException;
+import swim.codec.OutputException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Notation;
@@ -368,6 +372,7 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
     }
   }
 
+  @IntoForm
   @Override
   public abstract String toString();
 
@@ -399,7 +404,7 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
     Objects.requireNonNull(keyValuePairs);
     final int n = keyValuePairs.length;
     if (n % 2 != 0) {
-      throw new IllegalArgumentException("Odd number of key-value pairs");
+      throw new IllegalArgumentException("odd number of key-value pairs");
     }
     final UriQueryBuilder builder = new UriQueryBuilder();
     for (int i = 0; i < n; i += 2) {
@@ -419,193 +424,46 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
     }
   }
 
-  public static UriQuery parse(String part) {
+  @FromForm
+  public static @Nullable UriQuery from(String value) {
+    return UriQuery.parse(value).getOr(null);
+  }
+
+  public static Parse<UriQuery> parse(Input input, UriQueryBuilder builder) {
+    return ParseUriQuery.parse(input, builder, null, null, 0, 1);
+  }
+
+  public static Parse<UriQuery> parse(Input input) {
+    return ParseUriQuery.parse(input, null, null, null, 0, 1);
+  }
+
+  public static Parse<UriQuery> parse(String part) {
     Objects.requireNonNull(part);
-    final CacheMap<String, UriQuery> cache = UriQuery.cache();
-    UriQuery query = cache.get(part);
-    if (query == null) {
-      final Input input = new StringInput(part);
-      query = UriQuery.parse(input);
-      if (input.isCont()) {
-        throw new ParseException(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        throw new ParseException(input.getError());
+    final CacheMap<String, Parse<UriQuery>> cache = UriQuery.cache();
+    Parse<UriQuery> parseQuery = cache.get(part);
+    if (parseQuery == null) {
+      final StringInput input = new StringInput(part);
+      parseQuery = UriQuery.parse(input).complete(input);
+      if (parseQuery.isDone()) {
+        parseQuery = cache.put(part, parseQuery);
       }
-      query = cache.put(part, query);
     }
-    return query;
+    return parseQuery;
   }
 
-  public static UriQuery parse(Input input) {
-    final UriQueryBuilder builder = new UriQueryBuilder();
-    do {
-      UriQuery.parseParam(input, builder);
-      if (input.isCont() && input.head() == '&') {
-        input.step();
-        continue;
-      } else if (input.isReady()) {
-        return builder.build();
-      }
-    } while (true);
-  }
+  private static final ThreadLocal<CacheMap<String, Parse<UriQuery>>> CACHE =
+      new ThreadLocal<CacheMap<String, Parse<UriQuery>>>();
 
-  static void parseParam(Input input, UriQueryBuilder builder) {
-    final String key = UriQuery.parseKey(input);
-    if (input.isCont() && input.head() == '=') {
-      input.step();
-      final String value = UriQuery.parseValue(input);
-      if (input.isReady()) {
-        builder.addParam(key, value);
-        return;
-      }
-    } else if (input.isReady()) {
-      builder.addParam(key);
-      return;
-    }
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  static String parseKey(Input input) {
-    final Utf8DecodedOutput<String> output = new Utf8DecodedOutput<String>(new StringOutput());
-    int c = 0;
-    do {
-      while (input.isCont()) {
-        c = input.head();
-        if (Uri.isParamChar(c)) {
-          input.step();
-          output.write(c);
-        } else {
-          break;
-        }
-      }
-      if (input.isCont() && c == '%') {
-        input.step();
-      } else if (input.isReady()) {
-        return output.getNonNull();
-      } else {
-        break;
-      }
-      int c1 = 0;
-      if (input.isCont()) {
-        c1 = input.head();
-        if (Base16.isDigit(c1)) {
-          input.step();
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-      int c2 = 0;
-      if (input.isCont()) {
-        c2 = input.head();
-        if (Base16.isDigit(c2)) {
-          input.step();
-          output.write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c2));
-          continue;
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-    } while (true);
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  static String parseValue(Input input) {
-    final Utf8DecodedOutput<String> output = new Utf8DecodedOutput<String>(new StringOutput());
-    int c = 0;
-    do {
-      while (input.isCont()) {
-        c = input.head();
-        if (Uri.isParamChar(c) || c == '=') {
-          input.step();
-          output.write(c);
-        } else {
-          break;
-        }
-      }
-      if (input.isCont() && c == '%') {
-        input.step();
-      } else if (input.isReady()) {
-        return output.getNonNull();
-      } else {
-        break;
-      }
-      int c1 = 0;
-      if (input.isCont()) {
-        c1 = input.head();
-        if (Base16.isDigit(c1)) {
-          input.step();
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-      int c2 = 0;
-      if (input.isCont()) {
-        c2 = input.head();
-        if (Base16.isDigit(c2)) {
-          input.step();
-          output.write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c2));
-          continue;
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-    } while (true);
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  public static UriQuery fromJsonString(String value) {
-    return UriQuery.parse(value);
-  }
-
-  public static String toJsonString(UriQuery query) {
-    return query.toString();
-  }
-
-  public static UriQuery fromWamlString(String value) {
-    return UriQuery.parse(value);
-  }
-
-  public static String toWamlString(UriQuery query) {
-    return query.toString();
-  }
-
-  private static final ThreadLocal<CacheMap<String, UriQuery>> CACHE = new ThreadLocal<CacheMap<String, UriQuery>>();
-
-  private static CacheMap<String, UriQuery> cache() {
-    CacheMap<String, UriQuery> cache = CACHE.get();
+  private static CacheMap<String, Parse<UriQuery>> cache() {
+    CacheMap<String, Parse<UriQuery>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.uri.query.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 256;
       }
-      cache = new LruCacheMap<String, UriQuery>(cacheSize);
+      cache = new LruCacheMap<String, Parse<UriQuery>>(cacheSize);
       CACHE.set(cache);
     }
     return cache;
@@ -950,6 +808,152 @@ final class UriQueryValues extends AbstractCollection<String> {
   @Override
   public Iterator<String> iterator() {
     return this.query.valueIterator();
+  }
+
+}
+
+final class ParseUriQuery extends Parse<UriQuery> {
+
+  final @Nullable UriQueryBuilder builder;
+  final @Nullable Utf8DecodedOutput<String> keyOutput;
+  final @Nullable Utf8DecodedOutput<String> valueOutput;
+  final int c1;
+  final int step;
+
+  ParseUriQuery(@Nullable UriQueryBuilder builder,
+                @Nullable Utf8DecodedOutput<String> keyOutput,
+                @Nullable Utf8DecodedOutput<String> valueOutput,
+                int c1, int step) {
+    this.builder = builder;
+    this.keyOutput = keyOutput;
+    this.valueOutput = valueOutput;
+    this.c1 = c1;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<UriQuery> consume(Input input) {
+    return ParseUriQuery.parse(input, this.builder, this.keyOutput,
+                                this.valueOutput, this.c1, this.step);
+  }
+
+  static Parse<UriQuery> parse(Input input, @Nullable UriQueryBuilder builder,
+                                @Nullable Utf8DecodedOutput<String> keyOutput,
+                                @Nullable Utf8DecodedOutput<String> valueOutput,
+                                int c1, int step) {
+    int c = 0;
+    do {
+      if (step == 1) {
+        if (input.isReady() && keyOutput == null) {
+          keyOutput = new Utf8DecodedOutput<String>(new StringOutput());
+        }
+        while (input.isCont() && Uri.isParamChar(c = input.head())) {
+          Assume.nonNull(keyOutput).write(c);
+          input.step();
+        }
+        if (input.isCont() && (c == '%' || c == '=')) {
+          input.step();
+          if (c == '%') {
+            step = 2;
+          } else { // c == '='
+            step = 4;
+          }
+        } else if (input.isReady()) {
+          if (builder == null) {
+            builder = new UriQueryBuilder();
+          }
+          try {
+            builder.addParam(Assume.nonNull(keyOutput).getNonNull());
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
+          }
+          if (input.isCont() && c == '&') {
+            keyOutput = null;
+            input.step();
+            continue;
+          } else {
+            return Parse.done(builder.build());
+          }
+        }
+      }
+      if (step == 2) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          c1 = c;
+          input.step();
+          step = 3;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 3) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          Assume.nonNull(keyOutput).write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c));
+          c1 = 0;
+          input.step();
+          step = 1;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 4) {
+        if (input.isReady() && valueOutput == null) {
+          valueOutput = new Utf8DecodedOutput<String>(new StringOutput());
+        }
+        while (input.isCont() && (Uri.isParamChar(c = input.head()) || c == '=')) {
+          Assume.nonNull(valueOutput).write(c);
+          input.step();
+        }
+        if (input.isCont() && c == '%') {
+          input.step();
+          step = 5;
+        } else if (input.isReady()) {
+          if (builder == null) {
+            builder = new UriQueryBuilder();
+          }
+          try {
+            builder.addParam(Assume.nonNull(keyOutput).getNonNull(),
+                             Assume.nonNull(valueOutput).getNonNull());
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
+          }
+          if (input.isCont() && c == '&') {
+            keyOutput = null;
+            valueOutput = null;
+            input.step();
+            step = 1;
+            continue;
+          } else {
+            return Parse.done(builder.build());
+          }
+        }
+      }
+      if (step == 5) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          c1 = c;
+          input.step();
+          step = 6;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 6) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          Assume.nonNull(valueOutput).write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c));
+          c1 = 0;
+          input.step();
+          step = 4;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      break;
+    } while (true);
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriQuery(builder, keyOutput, valueOutput, c1, step);
   }
 
 }

@@ -35,13 +35,13 @@
  *
  * NameChar ::=  NameStartChar | '-' | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
  *
- * MarkupChar ::= Char - ('<' | '>' | '@' | '\\')
+ * MarkupChar ::= Char - ('&lt;' | '&gt;' | '@' | '\\')
  *
  * StringChar ::= Char - ('\b' | '\f' | '\n' | '\r')
  *
  * HexDigit ::= [0-9A-Fa-f]
  *
- * CharEscape ::= '\\' ('"' | '\'' | '/' | '<' | '>' | '@' | '[' | '\\' | ']' | '{' | '}' | 'b' | 'f' | 'n' | 'r' | 't' | 'u' HexDigit{4})
+ * CharEscape ::= '\\' ('"' | '\'' | '/' | '&lt;' | '&gt;' | '@' | '[' | '\\' | ']' | '{' | '}' | 'b' | 'f' | 'n' | 'r' | 't' | 'u' HexDigit{4})
  *
  * Comment ::= '#' [^\n]*
  *
@@ -75,7 +75,7 @@
  *
  * MarkupEscape ::= '{' WS* (Repr SP* ((',' | NL) WS* Repr)* SP* ','?)? WS* '}'
  *
- * Markup ::= '<' '<' (MarkupChar* | Attr Markup? | Markup | MarkupEscape | CharEscape)* '>' '>'
+ * Markup ::= '&lt;' '&lt;' (MarkupChar* | Attr Markup? | Markup | MarkupEscape | CharEscape)* '&gt;' '&gt;'
  *
  * Composite ::= Tuple | Object | Array | Markup
  *

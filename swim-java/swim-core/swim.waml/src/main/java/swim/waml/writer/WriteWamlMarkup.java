@@ -24,6 +24,7 @@ import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.util.Assume;
 import swim.waml.WamlAttrForm;
+import swim.waml.WamlException;
 import swim.waml.WamlMarkupForm;
 import swim.waml.WamlWriter;
 
@@ -81,9 +82,11 @@ public final class WriteWamlMarkup<N> extends Write<Object> {
           if (attrs.hasNext()) {
             final Map.Entry<String, ?> attr = attrs.next();
             final String name = attr.getKey();
-            final WamlAttrForm<Object, ?> attrForm = Assume.conformsNullable(form.getAttrForm(name));
-            if (attrForm == null) {
-              return Write.error(new WriteException("Unsupported attribute: " + name));
+            final WamlAttrForm<Object, ?> attrForm;
+            try {
+              attrForm = Assume.conforms(form.getAttrForm(name));
+            } catch (WamlException cause) {
+              return Write.error(cause);
             }
             write = writer.writeAttr(output, attrForm, name, attr.getValue());
           } else {
@@ -134,14 +137,18 @@ public final class WriteWamlMarkup<N> extends Write<Object> {
       if (step == 5) {
         if (nodes.hasNext()) {
           node = nodes.next();
-          text = form.asText(node);
-          if (text != null) {
-            node = null;
-            step = 6;
-          } else if (form.nodeForm().isInline(node)) {
-            step = 13;
-          } else {
-            step = 14;
+          try {
+            text = form.asText(node);
+            if (text != null) {
+              node = null;
+              step = 6;
+            } else if (form.nodeForm().isInline(node)) {
+              step = 13;
+            } else {
+              step = 14;
+            }
+          } catch (WamlException cause) {
+            return Write.error(cause);
           }
         } else {
           step = 19;
@@ -221,7 +228,11 @@ public final class WriteWamlMarkup<N> extends Write<Object> {
       }
       if (step == 13) {
         if (write == null) {
-          write = form.nodeForm().writeInline(output, node, writer);
+          try {
+            write = form.nodeForm().writeInline(output, node, writer);
+          } catch (WamlException cause) {
+            return Write.error(cause);
+          }
         } else {
           write = write.produce(output);
         }
@@ -240,7 +251,11 @@ public final class WriteWamlMarkup<N> extends Write<Object> {
       }
       if (step == 15) {
         if (write == null) {
-          write = form.nodeForm().write(output, node, writer);
+          try {
+            write = form.nodeForm().write(output, node, writer);
+          } catch (WamlException cause) {
+            return Write.error(cause);
+          }
         } else {
           write = write.produce(output);
         }
@@ -248,14 +263,18 @@ public final class WriteWamlMarkup<N> extends Write<Object> {
           write = null;
           if (nodes.hasNext()) {
             node = nodes.next();
-            text = form.asText(node);
-            if (text != null) {
-              node = null;
-              step = 18;
-            } else if (form.nodeForm().isInline(node)) {
-              step = 18;
-            } else {
-              step = 16;
+            try {
+              text = form.asText(node);
+              if (text != null) {
+                node = null;
+                step = 18;
+              } else if (form.nodeForm().isInline(node)) {
+                step = 18;
+              } else {
+                step = 16;
+              }
+            } catch (WamlException cause) {
+              return Write.error(cause);
             }
           } else {
             node = null;
@@ -303,7 +322,7 @@ public final class WriteWamlMarkup<N> extends Write<Object> {
       return Write.done();
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

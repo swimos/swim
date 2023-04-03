@@ -20,22 +20,27 @@ import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
 
+/**
+ * A transcoder between WAML array literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlArrayForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlArrayForm<E, B, T> extends WamlForm<T> {
 
   @Override
-  default WamlArrayForm<?, ?, T> arrayForm() {
+  default WamlArrayForm<?, ?, ? extends T> arrayForm() throws WamlException {
     return this;
   }
 
-  WamlForm<E> elementForm();
+  WamlForm<E> elementForm() throws WamlException;
 
-  B arrayBuilder();
+  B arrayBuilder() throws WamlException;
 
-  B appendElement(B builder, @Nullable E element);
+  B appendElement(B builder, @Nullable E element) throws WamlException;
 
-  @Nullable T buildArray(B builder);
+  @Nullable T buildArray(B builder) throws WamlException;
 
   @Override
   default Parse<T> parse(Input input, WamlParser parser) {

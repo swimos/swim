@@ -93,11 +93,11 @@ public final class MaxForwardsHeader extends HttpHeader {
         input.step();
         count = Base10.decodeDigit(c);
       } else {
-        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Max-Forwards: " + value,
+        throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Max-Forwards: " + value,
                                 new ParseException(Diagnostic.expected("digit", input)));
       }
     } else if (input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Max-Forwards: " + value,
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Max-Forwards: " + value,
                               new ParseException(Diagnostic.expected("digit", input)));
     }
     while (input.isCont()) {
@@ -113,9 +113,9 @@ public final class MaxForwardsHeader extends HttpHeader {
       }
     }
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Max-Forwards: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Max-Forwards: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Max-Forwards: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Max-Forwards: " + value);
     }
     return count;
   }

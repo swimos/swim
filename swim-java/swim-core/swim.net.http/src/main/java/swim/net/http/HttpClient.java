@@ -114,7 +114,7 @@ public interface HttpClient {
 
   /**
    * Lifecycle callback invoked by the network transport before it
-   * {@link NetSocketContext#become(NetSocket) becomes} a new
+   * {@link HttpClientContext#become(NetSocket) becomes} a new
    * {@code socket} implementation.
    */
   default void willBecome(NetSocket socket) {
@@ -123,7 +123,7 @@ public interface HttpClient {
 
   /**
    * Lifecycle callback invoked by the network transport after it has
-   * {@link NetSocketContext#become(NetSocket) become} a new
+   * {@link HttpClientContext#become(NetSocket) become} a new
    * {@code socket} implementation.
    */
   default void didBecome(NetSocket socket) {

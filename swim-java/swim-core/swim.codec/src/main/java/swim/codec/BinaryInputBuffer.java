@@ -129,7 +129,7 @@ public final class BinaryInputBuffer extends InputBuffer {
   public int head() {
     final int position = this.buffer.position();
     if (position >= this.buffer.limit()) {
-      throw new IllegalStateException();
+      throw new IllegalStateException("input " + (this.last ? "done" : "empty"));
     }
     return this.buffer.get(position) & 0xFF;
   }
@@ -149,37 +149,48 @@ public final class BinaryInputBuffer extends InputBuffer {
     try {
       this.buffer.get();
       this.offset += 1L;
-    } catch (BufferUnderflowException e) {
-      throw new IllegalStateException("Invalid step");
+    } catch (BufferUnderflowException cause) {
+      throw new IllegalStateException("input " + (this.last ? "done" : "empty"));
     }
     return this;
   }
 
   @Override
   public BinaryInputBuffer step(int offset) {
-    final int position = this.buffer.position() + offset;
-    if (position < 0 || position > this.buffer.limit()) {
-      throw new IllegalArgumentException("Invalid step to " + position);
+    final int index = this.buffer.position() + offset;
+    if (index < 0) {
+      throw new IllegalArgumentException("step from index " + this.buffer.position()
+                                       + " with offset " + offset
+                                       + " would underflow");
+    } else if (index > this.buffer.limit()) {
+      throw new IllegalArgumentException("step from index " + this.buffer.position()
+                                        + " with offset " + offset
+                                        + " would overflow limit " + this.buffer.limit());
     }
-    this.buffer.position(position);
+    this.buffer.position(index);
     this.offset += (long) offset;
     return this;
   }
 
   @Override
   public BinaryInputBuffer seek(@Nullable SourcePosition position) {
-    final ByteBuffer buffer = this.buffer;
     if (position != null) {
-      final long offset = (long) buffer.position() + (this.offset - position.offset());
-      if (offset < 0 || offset > (long) buffer.limit()) {
-        throw new IllegalArgumentException("Invalid seek to " + position);
+      final long index = (long) this.buffer.position() + (this.offset - position.offset());
+      if (index < 0) {
+        throw new IllegalArgumentException("seek from index " + this.buffer.position()
+                                         + " to index " + position.offset()
+                                         + " would underflow");
+      } else if (index > (long) this.buffer.limit()) {
+        throw new IllegalArgumentException("seek from index " + this.buffer.position()
+                                         + " to index " + position.offset()
+                                         + " would overflow limit: " + this.buffer.limit());
       }
-      buffer.position((int) offset);
+      this.buffer.position((int) index);
       this.offset = position.offset();
       return this;
     } else {
-      this.offset -= (long) buffer.position();
-      buffer.position(0);
+      this.offset -= (long) this.buffer.position();
+      this.buffer.position(0);
       return this;
     }
   }
@@ -211,15 +222,19 @@ public final class BinaryInputBuffer extends InputBuffer {
   @Override
   public BinaryInputBuffer shift(int fromIndex, int toIndex, int length) {
     if (length < 0) {
-      throw new IndexOutOfBoundsException("length: " + length);
+      throw new IndexOutOfBoundsException("negative shift length: " + length);
     } else if (fromIndex < 0) {
-      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex);
-    } else if (fromIndex + length > this.buffer.limit()) {
-      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + "; length: " + length);
+      throw new IndexOutOfBoundsException("shift from negative index: " + fromIndex);
     } else if (toIndex < 0) {
-      throw new IndexOutOfBoundsException("toIndex: " + toIndex);
+      throw new IndexOutOfBoundsException("shift to negative index: " + toIndex);
+    } else if (fromIndex + length > this.buffer.limit()) {
+      throw new IndexOutOfBoundsException("shift from index " + fromIndex
+                                        + " with length " + length
+                                        + " would overflow limit " + this.buffer.limit());
     } else if (toIndex + length > this.buffer.limit()) {
-      throw new IndexOutOfBoundsException("toIndex: " + toIndex + "; length: " + length);
+      throw new IndexOutOfBoundsException("shift to index " + toIndex
+                                        + " with length " + length
+                                        + " would overflow limit " + this.buffer.limit());
     }
     if (this.buffer.hasArray()) {
       final byte[] array = this.buffer.array();

@@ -92,34 +92,34 @@ public class WamlReprWriterTests {
   @Test
   public void writeNonEmptyBlobs() {
     assertWrites("@blob \"AAAA\"",
-                 BlobRepr.fromBase64("AAAA"),
+                 BlobRepr.parseBase64("AAAA").getNonNullUnchecked(),
                  WamlWriterOptions.readable());
     assertWrites("@blob\"AAAA\"",
-                 BlobRepr.fromBase64("AAAA"),
+                 BlobRepr.parseBase64("AAAA").getNonNullUnchecked(),
                  WamlWriterOptions.compact());
     assertWrites("@blob \"AAA=\"",
-                 BlobRepr.fromBase64("AAA="),
+                 BlobRepr.parseBase64("AAA=").getNonNullUnchecked(),
                  WamlWriterOptions.readable());
     assertWrites("@blob\"AAA=\"",
-                 BlobRepr.fromBase64("AAA="),
+                 BlobRepr.parseBase64("AAA=").getNonNullUnchecked(),
                  WamlWriterOptions.compact());
     assertWrites("@blob \"AA==\"",
-                 BlobRepr.fromBase64("AA=="),
+                 BlobRepr.parseBase64("AA==").getNonNullUnchecked(),
                  WamlWriterOptions.readable());
     assertWrites("@blob\"AA==\"",
-                 BlobRepr.fromBase64("AA=="),
+                 BlobRepr.parseBase64("AA==").getNonNullUnchecked(),
                  WamlWriterOptions.compact());
     assertWrites("@blob \"ABCDabcd12/+\"",
-                 BlobRepr.fromBase64("ABCDabcd12/+"),
+                 BlobRepr.parseBase64("ABCDabcd12/+").getNonNullUnchecked(),
                  WamlWriterOptions.readable());
     assertWrites("@blob\"ABCDabcd12/+\"",
-                 BlobRepr.fromBase64("ABCDabcd12/+"),
+                 BlobRepr.parseBase64("ABCDabcd12/+").getNonNullUnchecked(),
                  WamlWriterOptions.compact());
     assertWrites("@blob \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+\"",
-                 BlobRepr.fromBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+"),
+                 BlobRepr.parseBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+").getNonNullUnchecked(),
                  WamlWriterOptions.readable());
     assertWrites("@blob\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+\"",
-                 BlobRepr.fromBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+"),
+                 BlobRepr.parseBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+").getNonNullUnchecked(),
                  WamlWriterOptions.compact());
   }
 
@@ -132,26 +132,26 @@ public class WamlReprWriterTests {
   @Test
   public void writeUnaryArrays() {
     assertWrites("[1]",
-                 ArrayRepr.of(1));
+                 ArrayRepr.of(Repr.of(1)));
   }
 
   @Test
   public void writeNonEmptyArrays() {
     assertWrites("[1, 2, \"3\", true]",
-                 ArrayRepr.of(1, 2, "3", true),
+                 ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of("3"), Repr.of(true)),
                  WamlWriterOptions.readable());
     assertWrites("[1,2,\"3\",true]",
-                 ArrayRepr.of(1, 2, "3", true),
+                 ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of("3"), Repr.of(true)),
                  WamlWriterOptions.compact());
   }
 
   @Test
   public void writeNestedArrays() {
     assertWrites("[[1, 2], [3, 4]]",
-                 ArrayRepr.of(ArrayRepr.of(1, 2), ArrayRepr.of(3, 4)),
+                 ArrayRepr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), ArrayRepr.of(Repr.of(3), Repr.of(4))),
                  WamlWriterOptions.readable());
     assertWrites("[[1,2],[3,4]]",
-                 ArrayRepr.of(ArrayRepr.of(1, 2), ArrayRepr.of(3, 4)),
+                 ArrayRepr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), ArrayRepr.of(Repr.of(3), Repr.of(4))),
                  WamlWriterOptions.compact());
   }
 
@@ -164,13 +164,13 @@ public class WamlReprWriterTests {
   @Test
   public void writeNonEmptyMarkup() {
     assertWrites("<<Hello, world!>>",
-                 ArrayRepr.of("Hello, world!").asMarkup());
+                 ArrayRepr.of(Repr.of("Hello, world!")).asMarkup());
   }
 
   @Test
   public void writeNestedMarkup() {
     assertWrites("<<Hello, <<world>>!>>",
-                 ArrayRepr.of("Hello, ", ArrayRepr.of("world").asMarkup(), "!").asMarkup());
+                 ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).asMarkup(), Repr.of("!")).asMarkup());
   }
 
   @Test
@@ -182,30 +182,30 @@ public class WamlReprWriterTests {
   @Test
   public void writeUnaryObjects() {
     assertWrites("{a: 1}",
-                 ObjectRepr.of("a", 1),
+                 ObjectRepr.of("a", Repr.of(1)),
                  WamlWriterOptions.readable());
     assertWrites("{a:1}",
-                 ObjectRepr.of("a", 1),
+                 ObjectRepr.of("a", Repr.of(1)),
                  WamlWriterOptions.compact());
   }
 
   @Test
   public void writeNonEmptyObjects() {
     assertWrites("{a: 1, b: 2, c: \"3\", d: true}",
-                 ObjectRepr.of("a", 1, "b", 2, "c", "3", "d", true),
+                 ObjectRepr.of("a", Repr.of(1), "b", Repr.of(2), "c", Repr.of("3"), "d", Repr.of(true)),
                  WamlWriterOptions.readable());
     assertWrites("{a:1,b:2,c:\"3\",d:true}",
-                 ObjectRepr.of("a", 1, "b", 2, "c", "3", "d", true),
+                 ObjectRepr.of("a", Repr.of(1), "b", Repr.of(2), "c", Repr.of("3"), "d", Repr.of(true)),
                  WamlWriterOptions.compact());
   }
 
   @Test
   public void writeNestedObjects() {
     assertWrites("{a: {b: 2, c: \"3\"}, d: {e: true}}",
-                 ObjectRepr.of("a", ObjectRepr.of("b", 2, "c", "3"), "d", ObjectRepr.of("e", true)),
+                 ObjectRepr.of("a", ObjectRepr.of("b", Repr.of(2), "c", Repr.of("3")), "d", ObjectRepr.of("e", Repr.of(true))),
                  WamlWriterOptions.readable());
     assertWrites("{a:{b:2,c:\"3\"},d:{e:true}}",
-                 ObjectRepr.of("a", ObjectRepr.of("b", 2, "c", "3"), "d", ObjectRepr.of("e", true)),
+                 ObjectRepr.of("a", ObjectRepr.of("b", Repr.of(2), "c", Repr.of("3")), "d", ObjectRepr.of("e", Repr.of(true))),
                  WamlWriterOptions.compact());
   }
 
@@ -244,20 +244,20 @@ public class WamlReprWriterTests {
   @Test
   public void writeAttrsWithMultipleParams() {
     assertWrites("@answer(42, true)",
-                 Repr.unit().withAttr("answer", TupleRepr.of(null, 42, null, true)),
+                 Repr.unit().withAttr("answer", TupleRepr.of(null, Repr.of(42), null, Repr.of(true))),
                  WamlWriterOptions.readable());
     assertWrites("@answer(42,true)",
-                 Repr.unit().withAttr("answer", TupleRepr.of(null, 42, null, true)),
+                 Repr.unit().withAttr("answer", TupleRepr.of(null, Repr.of(42), null, Repr.of(true))),
                  WamlWriterOptions.compact());
   }
 
   @Test
   public void writeAttrsWithNamedParams() {
     assertWrites("@answer(number: 42)",
-                 Repr.unit().withAttr("answer", TupleRepr.of("number", 42)),
+                 Repr.unit().withAttr("answer", TupleRepr.of("number", Repr.of(42))),
                  WamlWriterOptions.readable());
     assertWrites("@answer(number:42)",
-                 Repr.unit().withAttr("answer", TupleRepr.of("number", 42)),
+                 Repr.unit().withAttr("answer", TupleRepr.of("number", Repr.of(42))),
                  WamlWriterOptions.compact());
   }
 
@@ -368,78 +368,78 @@ public class WamlReprWriterTests {
   @Test
   public void writeMarkupInAttributeParameters() {
     assertWrites("@msg(<<Hello, @em<<world>>!>>)",
-                 Repr.unit().withAttr("msg", ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em").asMarkup(), "!").asMarkup()));
+                 Repr.unit().withAttr("msg", ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em").asMarkup(), Repr.of("!")).asMarkup()));
   }
 
   @Test
   public void writeNestedAttributedMarkup() {
     assertWrites("<<Hello, @em<<world>>!>>",
-                 ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em").asMarkup(), "!").asMarkup());
+                 ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em").asMarkup(), Repr.of("!")).asMarkup());
     assertWrites("<<Hello, @em(class: \"subject\")<<world>>!>>",
-                 ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em", TupleRepr.of("class", "subject")).asMarkup(), "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em", TupleRepr.of("class", Repr.of("subject"))).asMarkup(), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.readable());
     assertWrites("<<Hello, @em(class:\"subject\")<<world>>!>>",
-                 ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em", TupleRepr.of("class", "subject")).asMarkup(), "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em", TupleRepr.of("class", Repr.of("subject"))).asMarkup(), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.compact());
     assertWrites("<<X @p<<Y @q<<Z>>.>>.>>",
-                 ArrayRepr.of("X ", ArrayRepr.of("Y ", ArrayRepr.of("Z").withAttr("q").asMarkup(), ".").withAttr("p").asMarkup(), ".").asMarkup());
+                 ArrayRepr.of(Repr.of("X "), ArrayRepr.of(Repr.of("Y "), ArrayRepr.of(Repr.of("Z")).withAttr("q").asMarkup(), Repr.of(".")).withAttr("p").asMarkup(), Repr.of(".")).asMarkup());
   }
 
   @Test
   public void writeMarkupEmbeddedValues() {
     assertWrites("<<Hello, {6}>>",
-                 ArrayRepr.of("Hello, ", 6).asMarkup());
+                 ArrayRepr.of(Repr.of("Hello, "), Repr.of(6)).asMarkup());
     assertWrites("<<Hello, {6}!>>",
-                 ArrayRepr.of("Hello, ", 6, "!").asMarkup());
+                 ArrayRepr.of(Repr.of("Hello, "), Repr.of(6), Repr.of("!")).asMarkup());
     assertWrites("<<Hello, {6, 7}!>>",
-                 ArrayRepr.of("Hello, ", 6, 7, "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), Repr.of(6), Repr.of(7), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.readable());
     assertWrites("<<Hello, {6,7}!>>",
-                 ArrayRepr.of("Hello, ", 6, 7, "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), Repr.of(6), Repr.of(7), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.compact());
   }
 
   @Test
   public void writeMarkupEmbeddedObjects() {
     assertWrites("<<Hello, {{}}!>>",
-                 ArrayRepr.of("Hello, ", ObjectRepr.empty(), "!").asMarkup());
+                 ArrayRepr.of(Repr.of("Hello, "), ObjectRepr.empty(), Repr.of("!")).asMarkup());
     assertWrites("<<Hello, {{a: 1}}!>>",
-                 ArrayRepr.of("Hello, ", ObjectRepr.of("a", 1), "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), ObjectRepr.of("a", Repr.of(1)), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.readable());
     assertWrites("<<Hello, {{a:1}}!>>",
-                 ArrayRepr.of("Hello, ", ObjectRepr.of("a", 1), "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), ObjectRepr.of("a", Repr.of(1)), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.compact());
     assertWrites("<<Hello, {{a: 1, b: 2}}!>>",
-                 ArrayRepr.of("Hello, ", ObjectRepr.of("a", 1, "b", 2), "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), ObjectRepr.of("a", Repr.of(1), "b", Repr.of(2)), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.readable());
     assertWrites("<<Hello, {{a:1,b:2}}!>>",
-                 ArrayRepr.of("Hello, ", ObjectRepr.of("a", 1, "b", 2), "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), ObjectRepr.of("a", Repr.of(1), "b", Repr.of(2)), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.compact());
   }
 
   @Test
   public void writeMarkupEmbeddedAttributedValues() {
     assertWrites("<<Hello, {@number 6}!>>",
-                 ArrayRepr.of("Hello, ", NumberRepr.of(6).withAttr("number"), "!").asMarkup());
+                 ArrayRepr.of(Repr.of("Hello, "), NumberRepr.of(6).withAttr("number"), Repr.of("!")).asMarkup());
   }
 
   @Test
   public void writeMarkupEmbeddedAttributedObjects() {
     assertWrites("<<Hello, {@choice {a: \"Earth\", b: \"Mars\"}}!>>",
-                 ArrayRepr.of("Hello, ", ObjectRepr.of("a", "Earth", "b", "Mars").withAttr("choice"), "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), ObjectRepr.of("a", Repr.of("Earth"), "b", Repr.of("Mars")).withAttr("choice"), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.readable());
     assertWrites("<<Hello, {@choice{a:\"Earth\",b:\"Mars\"}}!>>",
-                 ArrayRepr.of("Hello, ", ObjectRepr.of("a", "Earth", "b", "Mars").withAttr("choice"), "!").asMarkup(),
+                 ArrayRepr.of(Repr.of("Hello, "), ObjectRepr.of("a", Repr.of("Earth"), "b", Repr.of("Mars")).withAttr("choice"), Repr.of("!")).asMarkup(),
                  WamlWriterOptions.compact());
   }
 
   public static void assertWrites(String expected, Repr value, WamlWriterOptions options) {
-    WamlAssertions.assertWrites(expected, () -> Waml.forType(Repr.class).write(value, Waml.writer(options)));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(options)));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    WamlAssertions.assertWrites(expected, () -> Waml.forType(Repr.class).write(value, Waml.writer(WamlWriterOptions.readable())));
-    WamlAssertions.assertWrites(expected, () -> Waml.forType(Repr.class).write(value, Waml.writer(WamlWriterOptions.compact())));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.readable())));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.compact())));
   }
 
 }

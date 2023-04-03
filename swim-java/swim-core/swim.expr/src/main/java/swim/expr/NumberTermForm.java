@@ -18,21 +18,63 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A {@code TermForm} that converts numbers to values of type {@code T}.
+ *
+ * @param <T> the type of values converted by this {@code NumberTermForm}
+ */
 @Public
 @Since("5.0")
 public interface NumberTermForm<T> extends TermForm<T> {
 
   @Override
-  default NumberTermForm<T> numberForm() {
+  default NumberTermForm<? extends T> numberForm() throws TermException {
     return this;
   }
 
-  @Nullable T integerValue(long value);
+  /**
+   * Converts the given {@code integer} to a value of type {@code T}.
+   *
+   * @param integer the integer to convert to a value of type {@code T}
+   * @return a value of type {@code T} representing the given {@code integer}
+   * @throws TermException if unable to convert the given {@code integer}
+   *         to a valid value of type {@code T}
+   */
+  @Nullable T integerValue(long integer) throws TermException;
 
-  @Nullable T hexadecimalValue(long value, int digits);
+  /**
+   * Converts the given {@code integer} to a value of type {@code T}, where
+   * {@code integer} was parsed from an {@code k}-digit hexadecimal literal.
+   *
+   * @param integer the integer to convert to a value of type {@code T}
+   * @param k the number of digits in the hexadecimal literal from which
+   *        {@code integer} was parsed
+   * @return a value of type {@code T} representing the given {@code integer}
+   * @throws TermException if unable to convert the given {@code integer}
+   *         to a valid value of type {@code T}
+   */
+  @Nullable T hexadecimalValue(long integer, int k) throws TermException;
 
-  @Nullable T bigIntegerValue(String value);
+  /**
+   * Converts the given {@code integer} string to a value of type {@code T}.
+   *
+   * @param integer the base-10 string to convert to a value of type {@code T}
+   * @return a value of type {@code T} representing the given
+   *         {@code integer} string
+   * @throws TermException if unable to convert the given {@code integer}
+   *         string to a valid value of type {@code T}
+   */
+  @Nullable T bigIntegerValue(String integer) throws TermException;
 
-  @Nullable T decimalValue(String value);
+  /**
+   * Converts the given {@code decimal} string to a value of type {@code T}.
+   *
+   * @param decimal the decimal string to convert to a value of type {@code T}
+   * @return a value of type {@code T} representing the given
+   *         {@code decimal} string
+   * @throws TermException if unable to convert the given {@code decimal}
+   *         string to a valid value of type {@code T}
+   */
+  @Nullable T decimalValue(String decimal) throws TermException;
 
 }

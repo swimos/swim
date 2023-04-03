@@ -26,6 +26,7 @@ import swim.codec.WriteException;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -48,7 +49,7 @@ public final class JsonUnions implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -90,7 +91,7 @@ public final class JsonUnions implements JsonProvider, ToSource {
     return new JsonUnions(codec, GENERIC_PRIORITY);
   }
 
-  public static <T> JsonForm<T> unionForm(JsonCodec codec, @Nullable Class<?> unionClass, Class<?>... variantClasses) {
+  public static <T> JsonForm<T> unionForm(JsonCodec codec, @Nullable Class<?> unionClass, Class<?>... variantClasses) throws JsonFormException {
     HashTrieMap<String, JsonForm<? extends T>> tagForms = HashTrieMap.empty();
     HashTrieMap<Class<?>, JsonForm<? extends T>> classForms = HashTrieMap.empty();
     for (int i = 0; i < variantClasses.length; i += 1) {
@@ -108,17 +109,18 @@ public final class JsonUnions implements JsonProvider, ToSource {
         }
         CREATING.set(creating.added(unionClass));
         try {
-          classForm = codec.forType(variantClass);
+          classForm = codec.getJsonForm(variantClass);
         } finally {
           CREATING.set(creating);
         }
       } else {
-        classForm = codec.forType(variantClass);
+        classForm = codec.getJsonForm(variantClass);
       }
       if (classForm != null) {
-        final JsonForm<? extends T> taggedForm = classForm.taggedForm(tag);
-        if (taggedForm != null) {
-          classForm = taggedForm;
+        try {
+          classForm = classForm.taggedForm(tag);
+        } catch (JsonException cause) {
+          // Permit unions with untagged types.
         }
         tagForms = tagForms.updated(tag, classForm);
         classForms = classForms.updated(variantClass, classForm);
@@ -127,7 +129,7 @@ public final class JsonUnions implements JsonProvider, ToSource {
     return new JsonUnionForm<T>(codec, unionClass, tagForms, classForms);
   }
 
-  public static <T> @Nullable JsonForm<T> unionForm(JsonCodec codec, Class<?> javaClass) {
+  public static <T> @Nullable JsonForm<T> unionForm(JsonCodec codec, Class<?> javaClass) throws JsonFormException {
     final JsonUnion unionAnnotation = javaClass.getAnnotation(JsonUnion.class);
     if (unionAnnotation != null) {
       // Prevent recursive creation.
@@ -188,11 +190,11 @@ class JsonUnionForm<T> implements JsonFieldForm<String, Object, Object>, JsonObj
   }
 
   @Override
-  public @Nullable JsonFieldForm<String, Object, Object> getFieldForm(String key) {
+  public JsonFieldForm<String, Object, Object> getFieldForm(String key) throws JsonException {
     if ("type".equals(key)) {
       return this;
     } else {
-      return null;
+      return JsonObjectForm.super.getFieldForm(key);
     }
   }
 
@@ -219,14 +221,14 @@ class JsonUnionForm<T> implements JsonFieldForm<String, Object, Object>, JsonObj
           valueClass = valueClass.getSuperclass();
         }
       } while (valueClass != null);
-      return Write.error(new WriteException("Unsupported value: " + value));
+      return Write.error(new WriteException("unsupported value: " + value));
     } else {
       return writer.writeNull(output);
     }
   }
 
   @Override
-  public Term intoTerm(@Nullable T value) {
+  public Term intoTerm(@Nullable T value) throws TermException {
     return Term.from(value);
   }
 

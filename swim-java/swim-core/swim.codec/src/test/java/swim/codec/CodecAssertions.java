@@ -33,26 +33,26 @@ public final class CodecAssertions {
   }
 
   static String describeParser(String string, int split, int offset) {
-    final Notation notation = new Notation();
+    final Notation notation = Notation.of();
     if (offset < split) {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, offset));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(offset, split));
-      notation.append(" + ");
-      notation.appendSource(string.substring(split));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, offset))
+              .append("; remaining: ")
+              .appendSource(string.substring(offset, split))
+              .append(" + ")
+              .appendSource(string.substring(split));
     } else if (offset > split) {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, split));
-      notation.append(" + ");
-      notation.appendSource(string.substring(split, offset));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(offset));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, split))
+              .append(" + ")
+              .appendSource(string.substring(split, offset))
+              .append("; remaining: ")
+              .appendSource(string.substring(offset));
     } else {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, split));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(split));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, split))
+              .append("; remaining: ")
+              .appendSource(string.substring(split));
     }
     return notation.toString();
   }
@@ -69,7 +69,7 @@ public final class CodecAssertions {
       parse = parse.consume(input);
 
       if (parse.isDone()) {
-        final Object actual = parse.get();
+        final Object actual = parse.getUnchecked();
         if (!Objects.equals(expected, actual)) {
           assertEquals(expected, actual, CodecAssertions.describeParser(string, split, (int) input.offset()));
         }
@@ -95,7 +95,7 @@ public final class CodecAssertions {
       output.limit(output.capacity()).asLast(true);
       write = write.produce(output);
       if (write.isError()) {
-        throw new JUnitException("Write failed", write.getError());
+        throw new JUnitException("write failed", write.getError());
       }
       assertFalse(write.isCont());
       assertTrue(write.isDone());

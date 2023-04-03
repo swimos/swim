@@ -254,7 +254,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       this.socket.requestRead();
     } else if (decode.isDone()) {
       // Successfully parsed the request message.
-      final HttpRequest<?> request = decode.getNonNull();
+      final HttpRequest<?> request = decode.getNonNullUnchecked();
       // Check the request requires closing the connection upon completion.
       final int flags = request.isClosing() ? REQUEST_CLOSE : 0;
       // Transition to the decode payload state.
@@ -317,7 +317,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -368,7 +368,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
           DECODE.setOpaque(this, null);
           // Attach the request payload to the request message
           // and store the fully decoded request.
-          request = request.withPayload(decode.getNonNull());
+          request = request.withPayload(decode.getNonNullUnchecked());
           final Result<HttpRequest<?>> decoded = Result.ok(request);
           DECODED.setOpaque(this, decoded);
           // Complete the request payload.
@@ -420,7 +420,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -760,7 +760,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -864,7 +864,7 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -1116,11 +1116,11 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
   static final Result<HttpResponse<?>> RESPONSE_PENDING;
 
   static {
-    final IllegalStateException requestPending = new IllegalStateException("Request pending");
+    final IllegalStateException requestPending = new IllegalStateException("request pending");
     requestPending.setStackTrace(new StackTraceElement[0]);
     REQUEST_PENDING = Result.error(requestPending);
 
-    final IllegalStateException responsePending = new IllegalStateException("Response pending");
+    final IllegalStateException responsePending = new IllegalStateException("response pending");
     responsePending.setStackTrace(new StackTraceElement[0]);
     RESPONSE_PENDING = Result.error(responsePending);
   }

@@ -158,8 +158,9 @@ public final class Base16 {
     return new ParseBase16<byte[]>(new ByteArrayOutput(), 0, 1);
   }
 
-  public static byte[] parseByteArray(String string) {
-    return ParseBase16.parse(new StringInput(string), new ByteArrayOutput(), 0, 1).getNonNull();
+  public static Parse<byte[]> parseByteArray(String string) {
+    final StringInput input = new StringInput(string);
+    return Base16.parseByteArray(input).complete(input);
   }
 
   /**
@@ -174,8 +175,9 @@ public final class Base16 {
     return new ParseBase16<ByteBuffer>(new ByteBufferOutput(), 0, 1);
   }
 
-  public static ByteBuffer parseByteBuffer(String string) {
-    return ParseBase16.parse(new StringInput(string), new ByteBufferOutput(), 0, 1).getNonNull();
+  public static Parse<ByteBuffer> parseByteBuffer(String string) {
+    final StringInput input = new StringInput(string);
+    return Base16.parseByteBuffer(input).complete(input);
   }
 
   /**
@@ -201,10 +203,9 @@ public final class Base16 {
     } else if (c >= 'a' && c <= 'f') {
       return 10 + (c - 'a');
     } else {
-      final Notation notation = new Notation();
-      notation.append("Invalid base-16 digit: ");
-      notation.appendSourceCodePoint(c);
-      throw new IllegalArgumentException(notation.toString());
+      throw new IllegalArgumentException(Notation.of("invalid base-16 digit: ")
+                                                 .appendSourceCodePoint(c)
+                                                 .toString());
     }
   }
 
@@ -241,33 +242,27 @@ final class ParseBase16<T> extends Parse<T> {
     int c;
     do {
       if (step == 1) {
-        if (input.isCont()) {
-          c = input.head();
-          if (Base16.isDigit(c)) {
-            input.step();
-            p = c;
-            step = 2;
-          } else {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          p = c;
+          input.step();
+          step = 2;
+        } else if (input.isReady()) {
+          try {
             return Parse.done(output.get());
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
           }
-        } else if (input.isDone()) {
-          return Parse.done(output.get());
         }
       }
       if (step == 2) {
-        if (input.isCont()) {
-          c = input.head();
-          if (Base16.isDigit(c)) {
-            input.step();
-            Base16.writeQuantum(output, p, c);
-            p = 0;
-            step = 1;
-            continue;
-          } else {
-            return Parse.error(Diagnostic.expected("base16 digit", input));
-          }
-        } else if (input.isDone()) {
-          return Parse.error(Diagnostic.expected("base16 digit", input));
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          Base16.writeQuantum(output, p, c);
+          p = 0;
+          input.step();
+          step = 1;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("base-16 digit", input));
         }
       }
       break;
@@ -319,7 +314,7 @@ final class WriteBase16 extends Write<Object> {
     if (index == limit) {
       return Write.done();
     } else if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }
@@ -385,7 +380,7 @@ final class WriteBase16Integer extends Write<Object> {
       }
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

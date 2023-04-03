@@ -311,7 +311,7 @@ public interface NumberRepr extends Repr, Comparable<NumberRepr> {
         } else {
           return NumberRepr.of(longValue);
         }
-      } catch (NumberFormatException e1) {
+      } catch (NumberFormatException cause1) {
         try {
           final double doubleValue = Double.parseDouble(value);
           if ((float) doubleValue == doubleValue) {
@@ -319,7 +319,7 @@ public interface NumberRepr extends Repr, Comparable<NumberRepr> {
           } else {
             return NumberRepr.of(doubleValue);
           }
-        } catch (NumberFormatException e2) {
+        } catch (NumberFormatException cause2) {
           return NumberRepr.of(new BigInteger(value));
         }
       }

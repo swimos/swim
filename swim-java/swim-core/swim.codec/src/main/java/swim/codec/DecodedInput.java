@@ -70,7 +70,7 @@ final class ParseDecodedInput<T> extends Parse<T> {
 
   @CheckReturnValue
   @Override
-  public @Nullable T get() {
+  public @Nullable T get() throws ParseException {
     return this.parse.get();
   }
 

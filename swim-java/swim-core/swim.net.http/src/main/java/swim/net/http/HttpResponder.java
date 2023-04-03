@@ -38,7 +38,7 @@ public interface HttpResponder {
   default void willReadRequest() throws HttpException {
     final HttpResponderContext context = this.responderContext();
     if (context == null) {
-      throw new IllegalStateException("Unbound responder");
+      throw new IllegalStateException("unbound responder");
     }
     context.readRequest();
   }
@@ -55,7 +55,7 @@ public interface HttpResponder {
     if (requestResult.isError()) {
       final HttpResponderContext context = this.responderContext();
       if (context == null) {
-        throw new IllegalStateException("Unbound responder");
+        throw new IllegalStateException("unbound responder");
       }
       context.writeResponse(HttpResponse.error(requestResult.getError()));
     }
@@ -73,7 +73,7 @@ public interface HttpResponder {
     if (requestResult.isError()) {
       final HttpResponderContext context = this.responderContext();
       if (context == null) {
-        throw new IllegalStateException("Unbound responder");
+        throw new IllegalStateException("unbound responder");
       }
       context.writeResponse(HttpResponse.error(requestResult.getError()));
     }

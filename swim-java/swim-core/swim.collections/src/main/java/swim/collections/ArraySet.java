@@ -213,17 +213,14 @@ public final class ArraySet<T> implements UpdatableSet<T>, ToMarkup, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Set<?>) {
-      final Set<?> that = (Set<?>) other;
-      if (this.size() == that.size()) {
-        final Iterator<?> those = that.iterator();
-        while (those.hasNext()) {
-          if (!this.contains(those.next())) {
-            return false;
-          }
+    } else if (other instanceof Set<?> that && this.size() == that.size()) {
+      final Iterator<?> those = that.iterator();
+      while (those.hasNext()) {
+        if (!this.contains(those.next())) {
+          return false;
         }
-        return true;
       }
+      return true;
     }
     return false;
   }

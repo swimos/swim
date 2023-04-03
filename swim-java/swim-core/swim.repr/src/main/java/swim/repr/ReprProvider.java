@@ -19,20 +19,47 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A resolver of {@code ReprForm} instances from Java types.
+ *
+ * @see ReprForm
+ * @see ReprRegistry
+ */
 @Public
 @Since("5.0")
 public interface ReprProvider {
 
+  /**
+   * Returns the precedence of this provider relative to all other providers
+   * registered with a {@link ReprRegistry} instance. Higher priority providers
+   * are consulted before lower priority providers when resolving Java types
+   * to {@code ReprForm} instances.
+   *
+   * @return the priority of this provider; the greater the numeric value,
+   *         the higher the priority
+   */
   default int priority() {
     return DEFAULT_PRIORITY;
   }
 
-  @Nullable ReprForm<?> resolveReprForm(Type javaType);
+  /**
+   * Returns a {@code ReprForm} that converts between instances of
+   * the given {@code javaType} and {@code Repr} instances.
+   *
+   * @param javaType the type of {@code ReprForm} to resolve
+   * @return a {@code ReprForm<T>} whose type parameter {@code T} conforms
+   *         to the given {@code javaType}, or {@code null} if this provider
+   *         can't resolve the given {@code javaType}
+   * @throws ReprFormException if this provider could have resolved the given
+   *         {@code javaType}, but was unable to do so because of a potentially
+   *         inadvertent error
+   */
+  @Nullable ReprForm<?> resolveReprForm(Type javaType) throws ReprFormException;
 
-  static final int BUILTIN_PRIORITY = -100;
+  static final int BUILTIN_PRIORITY = 100;
 
   static final int DEFAULT_PRIORITY = 0;
 
-  static final int GENERIC_PRIORITY = 100;
+  static final int GENERIC_PRIORITY = -100;
 
 }

@@ -71,20 +71,14 @@ public final class ParseCondExpr extends Parse<Term> {
       }
     }
     if (step == 2) {
-      parseIf = Assume.nonNull(parseIf);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isSpace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isSpace(c = input.head())) {
+        input.step();
       }
       if (input.isCont() && c == '?') {
         input.step();
         step = 3;
       } else if (input.isReady()) {
-        return parseIf;
+        return Assume.nonNull(parseIf);
       }
     }
     if (step == 3) {
@@ -100,13 +94,8 @@ public final class ParseCondExpr extends Parse<Term> {
       }
     }
     if (step == 4) {
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isSpace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isSpace(c = input.head())) {
+        input.step();
       }
       if (input.isCont() && c == ':') {
         input.step();
@@ -116,17 +105,15 @@ public final class ParseCondExpr extends Parse<Term> {
       }
     }
     if (step == 5) {
-      parseIf = Assume.nonNull(parseIf);
-      parseThen = Assume.nonNull(parseThen);
       if (parseElse == null) {
         parseElse = parser.parseCondExpr(input, form);
       } else {
         parseElse = parseElse.consume(input);
       }
       if (parseElse.isDone()) {
-        return Parse.done(new CondExpr(parseIf.getNonNull(),
-                                       parseThen.getNonNull(),
-                                       parseElse.getNonNull()));
+        return Parse.done(new CondExpr(Assume.nonNull(parseIf).getNonNullUnchecked(),
+                                       Assume.nonNull(parseThen).getNonNullUnchecked(),
+                                       parseElse.getNonNullUnchecked()));
       } else if (parseElse.isError()) {
         return parseElse.asError();
       }

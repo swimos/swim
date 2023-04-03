@@ -14,6 +14,7 @@
 
 package swim.repr;
 
+import swim.annotations.CheckReturnValue;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Output;
@@ -68,8 +69,27 @@ public final class BlobReprOutput extends Output<BlobRepr> {
     return this;
   }
 
+  @CheckReturnValue
   @Override
   public BlobRepr get() {
+    return this.blob;
+  }
+
+  @CheckReturnValue
+  @Override
+  public BlobRepr getNonNull() {
+    return this.blob;
+  }
+
+  @CheckReturnValue
+  @Override
+  public BlobRepr getUnchecked() {
+    return this.blob;
+  }
+
+  @CheckReturnValue
+  @Override
+  public BlobRepr getNonNullUnchecked() {
     return this.blob;
   }
 

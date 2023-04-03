@@ -24,11 +24,11 @@ import swim.codec.Transcoder;
 public interface WsCodec<T> {
 
   default Transcoder<? extends T> getTextPayloadTranscoder() throws WsException {
-    throw new WsException(WsStatus.of(1003), "Unsupported text frame");
+    throw new WsException(WsStatus.of(1003), "unsupported text frame");
   }
 
   default Transcoder<? extends T> getBinaryPayloadTranscoder() throws WsException {
-    throw new WsException(WsStatus.of(1003), "Unsupported binary frame");
+    throw new WsException(WsStatus.of(1003), "unsupported binary frame");
   }
 
   default Transcoder<?> getPayloadTranscoder(WsOpcode frameType) throws WsException {
@@ -43,7 +43,7 @@ public interface WsCodec<T> {
       case PONG:
         return Binary.byteBufferTranscoder();
       default:
-        throw new WsException(WsStatus.of(1003), "Unsupported frame type: " + frameType.toString());
+        throw new WsException(WsStatus.of(1003), "unsupported frame type: " + frameType.toString());
     }
   }
 

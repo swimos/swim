@@ -23,7 +23,6 @@ import swim.codec.Output;
 import swim.codec.Parse;
 import swim.codec.Write;
 import swim.repr.Repr;
-import swim.util.Assume;
 
 /**
  * Factory for constructing WAML parsers and writers.
@@ -42,22 +41,12 @@ public final class Waml {
     return CODEC;
   }
 
-  public static <T> WamlForm<T> forType(Type javaType) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm;
-    } else {
-      throw new IllegalArgumentException("No waml form for type: " + javaType);
-    }
+  public static <T> WamlForm<T> form(Type javaType) throws WamlFormException {
+    return Waml.codec().getWamlForm(javaType);
   }
 
-  public static <T> WamlForm<T> forValue(@Nullable T value) {
-    final WamlForm<T> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm;
-    } else {
-      throw new IllegalArgumentException("No waml form for value: " + value);
-    }
+  public static <T> WamlForm<T> form(@Nullable T value) throws WamlFormException {
+    return Waml.codec().getWamlForm(value);
   }
 
   public static WamlParser parser(@Nullable WamlParserOptions options) {
@@ -75,58 +64,50 @@ public final class Waml {
   }
 
   public static <T> Parse<T> parse(Type javaType, Input input, @Nullable WamlParserOptions options) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parse(input, Waml.parser(options));
-    } else {
-      return Parse.error(new IllegalArgumentException("No waml form for type: " + javaType));
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parse(input, Waml.parser(options));
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parse(Type javaType, Input input) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parse(input, Waml.parser());
-    } else {
-      return Parse.error(new IllegalArgumentException("No waml form for type: " + javaType));
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parse(input, Waml.parser());
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parse(Type javaType, @Nullable WamlParserOptions options) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parse(Waml.parser(options));
-    } else {
-      return Parse.error(new IllegalArgumentException("No waml form for type: " + javaType));
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parse(Waml.parser(options));
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parse(Type javaType) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parse(Waml.parser());
-    } else {
-      return Parse.error(new IllegalArgumentException("No waml form for type: " + javaType));
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parse(Waml.parser());
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <T> @Nullable T parse(Type javaType, String json, @Nullable WamlParserOptions options) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parse(json, Waml.parser(options));
-    } else {
-      throw new IllegalArgumentException("No waml form for type: " + javaType);
+  public static <T> Parse<T> parse(Type javaType, String waml, @Nullable WamlParserOptions options) {
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parse(waml, Waml.parser(options));
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <T> @Nullable T parse(Type javaType, String json) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parse(json, Waml.parser());
-    } else {
-      throw new IllegalArgumentException("No waml form for type: " + javaType);
+  public static <T> Parse<T> parse(Type javaType, String waml) {
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parse(waml, Waml.parser());
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
@@ -146,67 +127,59 @@ public final class Waml {
     return WamlReprs.reprForm().parse(Waml.parser());
   }
 
-  public static Repr parse(String json, @Nullable WamlParserOptions options) {
-    return Assume.nonNull(WamlReprs.reprForm().parse(json, Waml.parser(options)));
+  public static Parse<Repr> parse(String waml, @Nullable WamlParserOptions options) {
+    return WamlReprs.reprForm().parse(waml, Waml.parser(options));
   }
 
-  public static Repr parse(String json) {
-    return Assume.nonNull(WamlReprs.reprForm().parse(json, Waml.parser()));
+  public static Parse<Repr> parse(String waml) {
+    return WamlReprs.reprForm().parse(waml, Waml.parser());
   }
 
   public static <T> Parse<T> parseBlock(Type javaType, Input input, @Nullable WamlParserOptions options) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parseBlock(input, Waml.parser(options));
-    } else {
-      return Parse.error(new IllegalArgumentException("No waml form for type: " + javaType));
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parseBlock(input, Waml.parser(options));
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parseBlock(Type javaType, Input input) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parseBlock(input, Waml.parser());
-    } else {
-      return Parse.error(new IllegalArgumentException("No waml form for type: " + javaType));
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parseBlock(input, Waml.parser());
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parseBlock(Type javaType, @Nullable WamlParserOptions options) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parseBlock(Waml.parser(options));
-    } else {
-      return Parse.error(new IllegalArgumentException("No waml form for type: " + javaType));
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parseBlock(Waml.parser(options));
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
   public static <T> Parse<T> parseBlock(Type javaType) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parseBlock(Waml.parser());
-    } else {
-      return Parse.error(new IllegalArgumentException("No waml form for type: " + javaType));
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parseBlock(Waml.parser());
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <T> @Nullable T parseBlock(Type javaType, String json, @Nullable WamlParserOptions options) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parseBlock(json, Waml.parser(options));
-    } else {
-      throw new IllegalArgumentException("No waml form for type: " + javaType);
+  public static <T> Parse<T> parseBlock(Type javaType, String waml, @Nullable WamlParserOptions options) {
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parseBlock(waml, Waml.parser(options));
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <T> @Nullable T parseBlock(Type javaType, String json) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm.parseBlock(json, Waml.parser());
-    } else {
-      throw new IllegalArgumentException("No waml form for type: " + javaType);
+  public static <T> Parse<T> parseBlock(Type javaType, String waml) {
+    try {
+      return Waml.codec().<T>getWamlForm(javaType).parseBlock(waml, Waml.parser());
+    } catch (WamlFormException cause) {
+      return Parse.error(cause);
     }
   }
 
@@ -226,12 +199,12 @@ public final class Waml {
     return WamlReprs.reprForm().parseBlock(Waml.parser());
   }
 
-  public static Repr parseBlock(String json, @Nullable WamlParserOptions options) {
-    return Assume.nonNull(WamlReprs.reprForm().parseBlock(json, Waml.parser(options)));
+  public static Parse<Repr> parseBlock(String waml, @Nullable WamlParserOptions options) {
+    return WamlReprs.reprForm().parseBlock(waml, Waml.parser(options));
   }
 
-  public static Repr parseBlock(String json) {
-    return Assume.nonNull(WamlReprs.reprForm().parseBlock(json, Waml.parser()));
+  public static Parse<Repr> parseBlock(String waml) {
+    return WamlReprs.reprForm().parseBlock(waml, Waml.parser());
   }
 
   static WamlWriter writer(@Nullable WamlWriterOptions options) {
@@ -249,110 +222,98 @@ public final class Waml {
   }
 
   public static Write<?> write(Output<?> output, @Nullable Object value, @Nullable WamlWriterOptions options) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.write(output, value, Waml.writer(options));
-    } else {
-      return Write.error(new IllegalArgumentException("No waml form for value: " + value));
+    try {
+      return Waml.codec().getWamlForm(value).write(output, value, Waml.writer(options));
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> write(Output<?> output, @Nullable Object value) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.write(output, value, Waml.writer());
-    } else {
-      return Write.error(new IllegalArgumentException("No waml form for value: " + value));
+    try {
+      return Waml.codec().getWamlForm(value).write(output, value, Waml.writer());
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> write(@Nullable Object value, @Nullable WamlWriterOptions options) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.write(value, Waml.writer(options));
-    } else {
-      return Write.error(new IllegalArgumentException("No waml form for value: " + value));
+    try {
+      return Waml.codec().getWamlForm(value).write(value, Waml.writer(options));
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> write(@Nullable Object value) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.write(value, Waml.writer());
-    } else {
-      return Write.error(new IllegalArgumentException("No waml form for value: " + value));
+    try {
+      return Waml.codec().getWamlForm(value).write(value, Waml.writer());
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static String toString(@Nullable Object value, @Nullable WamlWriterOptions options) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.toString(value, Waml.writer(options));
-    } else {
-      throw new IllegalArgumentException("No waml form for value: " + value);
+    try {
+      return Waml.codec().getWamlForm(value).toString(value, Waml.writer(options));
+    } catch (WamlFormException cause) {
+      throw new IllegalArgumentException(cause);
     }
   }
 
   public static String toString(@Nullable Object value) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.toString(value, Waml.writer());
-    } else {
-      throw new IllegalArgumentException("No waml form for value: " + value);
+    try {
+      return Waml.codec().getWamlForm(value).toString(value, Waml.writer());
+    } catch (WamlFormException cause) {
+      throw new IllegalArgumentException(cause);
     }
   }
 
   public static Write<?> writeBlock(Output<?> output, @Nullable Object value, @Nullable WamlWriterOptions options) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.writeBlock(output, value, Waml.writer(options));
-    } else {
-      return Write.error(new IllegalArgumentException("No waml form for value: " + value));
+    try {
+      return Waml.codec().getWamlForm(value).writeBlock(output, value, Waml.writer(options));
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> writeBlock(Output<?> output, @Nullable Object value) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.writeBlock(output, value, Waml.writer());
-    } else {
-      return Write.error(new IllegalArgumentException("No waml form for value: " + value));
+    try {
+      return Waml.codec().getWamlForm(value).writeBlock(output, value, Waml.writer());
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> writeBlock(@Nullable Object value, @Nullable WamlWriterOptions options) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.writeBlock(value, Waml.writer(options));
-    } else {
-      return Write.error(new IllegalArgumentException("No waml form for value: " + value));
+    try {
+      return Waml.codec().getWamlForm(value).writeBlock(value, Waml.writer(options));
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static Write<?> writeBlock(@Nullable Object value) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.writeBlock(value, Waml.writer());
-    } else {
-      return Write.error(new IllegalArgumentException("No waml form for value: " + value));
+    try {
+      return Waml.codec().getWamlForm(value).writeBlock(value, Waml.writer());
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   public static String toBlockString(@Nullable Object value, @Nullable WamlWriterOptions options) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.toBlockString(value, Waml.writer(options));
-    } else {
-      throw new IllegalArgumentException("No waml form for value: " + value);
+    try {
+      return Waml.codec().getWamlForm(value).toBlockString(value, Waml.writer(options));
+    } catch (WamlFormException cause) {
+      throw new IllegalArgumentException(cause);
     }
   }
 
   public static String toBlockString(@Nullable Object value) {
-    final WamlForm<Object> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm.toBlockString(value, Waml.writer());
-    } else {
-      throw new IllegalArgumentException("No waml form for value: " + value);
+    try {
+      return Waml.codec().getWamlForm(value).toBlockString(value, Waml.writer());
+    } catch (WamlFormException cause) {
+      throw new IllegalArgumentException(cause);
     }
   }
 

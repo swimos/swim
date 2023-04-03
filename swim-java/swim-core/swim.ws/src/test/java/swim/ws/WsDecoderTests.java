@@ -28,168 +28,168 @@ public class WsDecoderTests {
   public void decodeUnmaskedEmptyTextFrame() {
     assertDecodes(Ws.clientDecoder(),
                   WsTextFrame.of(""),
-                  Base16.parseByteBuffer("8100"));
+                  Base16.parseByteBuffer("8100").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedEmptyTextFrame() {
     assertDecodes(Ws.serverDecoder(),
                   WsTextFrame.of(""),
-                  Base16.parseByteBuffer("818037FA213D"));
+                  Base16.parseByteBuffer("818037FA213D").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedEmptyBinaryFrame() {
     assertDecodes(Ws.clientDecoder(),
                   WsBinaryFrame.of(ByteBuffer.allocate(0)),
-                  Base16.parseByteBuffer("8200"));
+                  Base16.parseByteBuffer("8200").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedEmptyBinaryFrame() {
     assertDecodes(Ws.serverDecoder(),
                   WsBinaryFrame.of(ByteBuffer.allocate(0)),
-                  Base16.parseByteBuffer("828037FA213D"));
+                  Base16.parseByteBuffer("828037FA213D").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedTextFrame() {
     assertDecodes(Ws.clientDecoder(),
                   WsTextFrame.of("Hello"),
-                  Base16.parseByteBuffer("810548656C6C6F"));
+                  Base16.parseByteBuffer("810548656C6C6F").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedTextFrame() {
     assertDecodes(Ws.serverDecoder(),
                   WsTextFrame.of("Hello"),
-                  Base16.parseByteBuffer("818537FA213D7F9F4D5158"));
+                  Base16.parseByteBuffer("818537FA213D7F9F4D5158").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedBinaryFrame() {
     assertDecodes(Ws.clientDecoder(),
-                  WsBinaryFrame.of(Base16.parseByteBuffer("FACEFEED")),
-                  Base16.parseByteBuffer("8204FACEFEED"));
+                  WsBinaryFrame.of(Base16.parseByteBuffer("FACEFEED").getNonNullUnchecked()),
+                  Base16.parseByteBuffer("8204FACEFEED").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedBinaryFrame() {
     assertDecodes(Ws.serverDecoder(),
-                  WsBinaryFrame.of(Base16.parseByteBuffer("FACEFEED")),
-                  Base16.parseByteBuffer("828437FA213DCD34DFD0"));
+                  WsBinaryFrame.of(Base16.parseByteBuffer("FACEFEED").getNonNullUnchecked()),
+                  Base16.parseByteBuffer("828437FA213DCD34DFD0").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedTextFragments() {
     assertDecodes(Ws.clientDecoder(),
                   WsTextFrame.of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"),
-                  Base16.parseByteBuffer("011A4142434445464748494A4B4C4D4E4F505152535455565758595A801A6162636465666768696A6B6C6D6E6F707172737475767778797A"));
+                  Base16.parseByteBuffer("011A4142434445464748494A4B4C4D4E4F505152535455565758595A801A6162636465666768696A6B6C6D6E6F707172737475767778797A").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedTextFragments() {
     assertDecodes(Ws.serverDecoder(),
                   WsTextFrame.of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"),
-                  Base16.parseByteBuffer("019A37FA213D76B8627972BC66757EB06A717AB46E6D66A8726962AC76656EA0809A37FA213D56984259529C46555E904A515A944E4D46885249428C56454E80"));
+                  Base16.parseByteBuffer("019A37FA213D76B8627972BC66757EB06A717AB46E6D66A8726962AC76656EA0809A37FA213D56984259529C46555E904A515A944E4D46885249428C56454E80").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedEmptyPingFrame() {
     assertDecodes(Ws.clientDecoder(),
                   WsPingFrame.of(ByteBuffer.allocate(0)),
-                  Base16.parseByteBuffer("8900"));
+                  Base16.parseByteBuffer("8900").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedEmptyPingFrame() {
     assertDecodes(Ws.serverDecoder(),
                   WsPingFrame.of(ByteBuffer.allocate(0)),
-                  Base16.parseByteBuffer("898037FA213D"));
+                  Base16.parseByteBuffer("898037FA213D").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedEmptyPongFrame() {
     assertDecodes(Ws.clientDecoder(),
                   WsPongFrame.of(ByteBuffer.allocate(0)),
-                  Base16.parseByteBuffer("8A00"));
+                  Base16.parseByteBuffer("8A00").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedEmptyPongFrame() {
     assertDecodes(Ws.serverDecoder(),
                   WsPongFrame.of(ByteBuffer.allocate(0)),
-                  Base16.parseByteBuffer("8A8037FA213D"));
+                  Base16.parseByteBuffer("8A8037FA213D").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedPingFrame() {
     assertDecodes(Ws.clientDecoder(),
-                  WsPingFrame.of(Base16.parseByteBuffer("6563686f")),
-                  Base16.parseByteBuffer("89046563686F"));
+                  WsPingFrame.of(Base16.parseByteBuffer("6563686f").getNonNullUnchecked()),
+                  Base16.parseByteBuffer("89046563686F").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedPingFrame() {
     assertDecodes(Ws.serverDecoder(),
-                  WsPingFrame.of(Base16.parseByteBuffer("6563686f")),
-                  Base16.parseByteBuffer("898437FA213D52994952"));
+                  WsPingFrame.of(Base16.parseByteBuffer("6563686f").getNonNullUnchecked()),
+                  Base16.parseByteBuffer("898437FA213D52994952").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedPongFrame() {
     assertDecodes(Ws.clientDecoder(),
-                  WsPongFrame.of(Base16.parseByteBuffer("6563686f")),
-                  Base16.parseByteBuffer("8A046563686F"));
+                  WsPongFrame.of(Base16.parseByteBuffer("6563686f").getNonNullUnchecked()),
+                  Base16.parseByteBuffer("8A046563686F").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedPongFrame() {
     assertDecodes(Ws.serverDecoder(),
-                  WsPongFrame.of(Base16.parseByteBuffer("6563686f")),
-                  Base16.parseByteBuffer("8A8437FA213D52994952"));
+                  WsPongFrame.of(Base16.parseByteBuffer("6563686f").getNonNullUnchecked()),
+                  Base16.parseByteBuffer("8A8437FA213D52994952").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedEmptyCloseFrame() {
     assertDecodes(Ws.clientDecoder(),
                   WsCloseFrame.empty(),
-                  Base16.parseByteBuffer("8800"));
+                  Base16.parseByteBuffer("8800").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedEmptyCloseFrame() {
     assertDecodes(Ws.serverDecoder(),
                   WsCloseFrame.empty(),
-                  Base16.parseByteBuffer("888037FA213D"));
+                  Base16.parseByteBuffer("888037FA213D").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedCloseFrameWithStatusCode() {
     assertDecodes(Ws.clientDecoder(),
                   WsCloseFrame.of(1000),
-                  Base16.parseByteBuffer("880203E8"));
+                  Base16.parseByteBuffer("880203E8").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedCloseFrameWithStatusCode() {
     assertDecodes(Ws.serverDecoder(),
                   WsCloseFrame.of(1000),
-                  Base16.parseByteBuffer("888237FA213D3412"));
+                  Base16.parseByteBuffer("888237FA213D3412").getNonNullUnchecked());
   }
 
   @Test
   public void decodeUnmaskedCloseFrameWithStatusCodeAndReason() {
     assertDecodes(Ws.clientDecoder(),
                   WsCloseFrame.of(1001, "going away"),
-                  Base16.parseByteBuffer("880C03E9676F696E672061776179"));
+                  Base16.parseByteBuffer("880C03E9676F696E672061776179").getNonNullUnchecked());
   }
 
   @Test
   public void decodeMaskedCloseFrameWithStatusCodeAndReason() {
     assertDecodes(Ws.serverDecoder(),
                   WsCloseFrame.of(1001, "going away"),
-                  Base16.parseByteBuffer("888C37FA213D341346525E94461D568D4044"));
+                  Base16.parseByteBuffer("888C37FA213D341346525E94461D568D4044").getNonNullUnchecked());
   }
 
   @Test
@@ -200,8 +200,8 @@ public class WsDecoderTests {
     frame.put(0, (byte) 0x82);
     frame.put(1, (byte) payloadSize);
     Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(WsTestCodec.javaCodec());
-    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
-    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
+    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).assertDone();
+    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.getUnchecked());
   }
 
   @Test
@@ -222,8 +222,8 @@ public class WsDecoderTests {
       frame.put(headerSize + i, (byte) maskByte);
     }
     Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(WsTestCodec.javaCodec());
-    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
-    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
+    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).assertDone();
+    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.getUnchecked());
   }
 
   @Test
@@ -236,8 +236,8 @@ public class WsDecoderTests {
     frame.put(2, (byte) (payloadSize >>> 8));
     frame.put(3, (byte) payloadSize);
     Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(WsTestCodec.javaCodec());
-    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
-    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
+    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).assertDone();
+    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.getUnchecked());
   }
 
   @Test
@@ -260,8 +260,8 @@ public class WsDecoderTests {
       frame.put(headerSize + i, (byte) maskByte);
     }
     Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(WsTestCodec.javaCodec());
-    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
-    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
+    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).assertDone();
+    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.getUnchecked());
   }
 
   @Test
@@ -274,8 +274,8 @@ public class WsDecoderTests {
     frame.put(2, (byte) (payloadSize >>> 8));
     frame.put(3, (byte) payloadSize);
     Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(WsTestCodec.javaCodec());
-    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
-    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
+    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).assertDone();
+    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.getUnchecked());
   }
 
   @Test
@@ -298,8 +298,8 @@ public class WsDecoderTests {
       frame.put(headerSize + i, (byte) maskByte);
     }
     Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(WsTestCodec.javaCodec());
-    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
-    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
+    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).assertDone();
+    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.getUnchecked());
   }
 
   @Test
@@ -318,8 +318,8 @@ public class WsDecoderTests {
     frame.put(8, (byte) (payloadSize >>> 8));
     frame.put(9, (byte) payloadSize);
     Decode<WsFrame<Object>> decodeFrame = Ws.clientDecoder().decodeMessage(WsTestCodec.javaCodec());
-    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
-    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
+    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).assertDone();
+    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.getUnchecked());
   }
 
   @Test
@@ -348,8 +348,8 @@ public class WsDecoderTests {
       frame.put(headerSize + i, (byte) maskByte);
     }
     Decode<WsFrame<Object>> decodeFrame = Ws.serverDecoder().decodeMessage(WsTestCodec.javaCodec());
-    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).checkDone();
-    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.get());
+    decodeFrame = decodeFrame.consume(new BinaryInputBuffer(frame)).assertDone();
+    assertEquals(WsBinaryFrame.of(ByteBuffer.allocate(payloadSize)), decodeFrame.getUnchecked());
   }
 
 }

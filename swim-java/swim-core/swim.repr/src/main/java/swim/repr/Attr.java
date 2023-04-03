@@ -53,7 +53,7 @@ public final class Attr implements Term, Map.Entry<String, Repr>, ToSource {
   public Repr setValue(Repr value) {
     Objects.requireNonNull(value);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final Repr oldValue = this.value;
     this.value = value;

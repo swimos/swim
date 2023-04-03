@@ -25,7 +25,7 @@ public class DiagnosticTests {
 
   @Test
   public void testOneLineMarkAtStart() {
-    final Input input = new StringInput(String.format("Hello, world!%n")).name("input");
+    final StringInput input = new StringInput(String.format("Hello, world!%n")).name("input");
     final SourcePosition position = SourcePosition.of(0L, 1, 1);
     final Diagnostic diagnostic = Diagnostic.of(input, position, Severity.DEBUG);
     printDiagnostic(diagnostic);
@@ -38,7 +38,7 @@ public class DiagnosticTests {
 
   @Test
   public void testOneLineMarkAtNewline() {
-    final Input input = new StringInput(String.format("Hello, world!%n")).name("input");
+    final StringInput input = new StringInput(String.format("Hello, world!%n")).name("input");
     final SourcePosition position = SourcePosition.of(13L, 1, 14);
     final Diagnostic diagnostic = Diagnostic.of(input, position, Severity.DEBUG);
     printDiagnostic(diagnostic);
@@ -51,7 +51,7 @@ public class DiagnosticTests {
 
   @Test
   public void testOneLineMark() {
-    final Input input = new StringInput(String.format("Hello, world!%n")).name("input");
+    final StringInput input = new StringInput(String.format("Hello, world!%n")).name("input");
     final SourcePosition position = SourcePosition.of(5L, 1, 6);
     final Diagnostic diagnostic = Diagnostic.of(input, position, Severity.INFO);
     printDiagnostic(diagnostic);
@@ -64,7 +64,7 @@ public class DiagnosticTests {
 
   @Test
   public void testOneLineMarkWithNote() {
-    final Input input = new StringInput(String.format("Hello, world!%n")).name("input");
+    final StringInput input = new StringInput(String.format("Hello, world!%n")).name("input");
     final SourcePosition position = SourcePosition.of(5L, 1, 6, "comma");
     final Diagnostic diagnostic = Diagnostic.of(input, position, Severity.NOTICE.withLabel("note"), null, "optional punctuation");
     printDiagnostic(diagnostic);
@@ -79,7 +79,7 @@ public class DiagnosticTests {
 
   @Test
   public void testOneLineMarkNoNewline() {
-    final Input input = new StringInput("Hello, world!").name("input");
+    final StringInput input = new StringInput("Hello, world!").name("input");
     final SourcePosition position = SourcePosition.of(5L, 1, 6);
     final Diagnostic diagnostic = Diagnostic.of(input, position, Severity.WARNING);
     printDiagnostic(diagnostic);
@@ -92,7 +92,7 @@ public class DiagnosticTests {
 
   @Test
   public void testOneLineSpan() {
-    final Input input = new StringInput(String.format("Hello, wordl!%n")).name("input");
+    final StringInput input = new StringInput(String.format("Hello, wordl!%n")).name("input");
     final SourceRange range = SourceRange.of(SourcePosition.of(7L, 1, 8), SourcePosition.of(11L, 1, 12));
     final Diagnostic diagnostic = Diagnostic.of(input, range, Severity.WARNING);
     printDiagnostic(diagnostic);
@@ -105,7 +105,7 @@ public class DiagnosticTests {
 
   @Test
   public void testOneLineSpanWithMessageAndNotes() {
-    final Input input = new StringInput(String.format("Hello, wordl!%n")).name("input");
+    final StringInput input = new StringInput(String.format("Hello, wordl!%n")).name("input");
     final SourceRange range = SourceRange.of(SourcePosition.of(7L, 1, 8), SourcePosition.of(11L, 1, 12, "did you mean 'world'?"));
     final Diagnostic diagnostic = Diagnostic.of(input, range, Severity.WARNING, "check your spelling");
     printDiagnostic(diagnostic);
@@ -119,7 +119,7 @@ public class DiagnosticTests {
 
   @Test
   public void testOneLineNumberPadding() {
-    final Input input = new StringInput(String.format("\n\n\n\n\n\n\n\n\nHello, world!%n")).name("input");
+    final StringInput input = new StringInput(String.format("\n\n\n\n\n\n\n\n\nHello, world!%n")).name("input");
     final SourcePosition position = SourcePosition.of(14L, 10, 6);
     final Diagnostic diagnostic = Diagnostic.of(input, position, Severity.WARNING);
     printDiagnostic(diagnostic);
@@ -132,8 +132,8 @@ public class DiagnosticTests {
 
   @Test
   public void testTwoLineSpan() {
-    final Input input = new StringInput(String.format("@test {\"%n"
-                                          + "}\"%n")).name("input");
+    final StringInput input = new StringInput(String.format("@test {\"%n"
+                                                          + "}\"%n")).name("input");
     final SourceRange range = SourceRange.of(SourcePosition.of(6L, 1, 7), SourcePosition.of(10L, 2, 2));
     final Diagnostic diagnostic = Diagnostic.of(input, range, Severity.ERROR);
     printDiagnostic(diagnostic);
@@ -148,8 +148,8 @@ public class DiagnosticTests {
 
   @Test
   public void testTwoLineSpanWithMessageAndNotes() {
-    final Input input = new StringInput(String.format("@test {\"%n"
-                                          + "}\"%n")).name("input");
+    final StringInput input = new StringInput(String.format("@test {\"%n"
+                                                          + "}\"%n")).name("input");
     final SourceRange range = SourceRange.of(SourcePosition.of(6L, 1, 7, "opened here"), SourcePosition.of(10L, 2, 2, "implicitly closed"));
     final Diagnostic diagnostic = Diagnostic.of(input, range, Severity.ERROR, "unclosed block", "check delimiter ordering");
     printDiagnostic(diagnostic);
@@ -176,7 +176,7 @@ public class DiagnosticTests {
     inputBuilder.println("  d: 4");
     inputBuilder.println("  e: 5");
     inputBuilder.println("]");
-    final Input input = new StringInput(inputWriter.toString()).name("input");
+    final StringInput input = new StringInput(inputWriter.toString()).name("input");
     final SourceRange range = SourceRange.of(SourcePosition.of(6L, 1, 7), SourcePosition.of(43L, 7, 1));
     final Diagnostic diagnostic = Diagnostic.of(input, range, Severity.ERROR);
     printDiagnostic(diagnostic);
@@ -205,7 +205,7 @@ public class DiagnosticTests {
     inputBuilder.println("  d: 4");
     inputBuilder.println("  e: 5");
     inputBuilder.println("]");
-    final Input input = new StringInput(inputWriter.toString()).name("input");
+    final StringInput input = new StringInput(inputWriter.toString()).name("input");
     final SourceRange range = SourceRange.of(SourcePosition.of(6L, 1, 7, "opened here"), SourcePosition.of(43L, 7, 1, "implicitly closed"));
     final Diagnostic diagnostic = Diagnostic.of(input, range, Severity.ERROR);
     printDiagnostic(diagnostic);
@@ -237,7 +237,7 @@ public class DiagnosticTests {
     inputBuilder.println("  g: 7");
     inputBuilder.println("  h: 8");
     inputBuilder.println("]");
-    final Input input = new StringInput(inputWriter.toString()).name("input");
+    final StringInput input = new StringInput(inputWriter.toString()).name("input");
     final SourceRange range = SourceRange.of(SourcePosition.of(6L, 1, 7), SourcePosition.of(64L, 10, 1));
     final Diagnostic diagnostic = Diagnostic.of(input, range, Severity.ERROR);
     printDiagnostic(diagnostic);
@@ -269,7 +269,7 @@ public class DiagnosticTests {
     inputBuilder.println("  g: 7");
     inputBuilder.println("  h: 8");
     inputBuilder.println("]");
-    final Input input = new StringInput(inputWriter.toString()).name("input");
+    final StringInput input = new StringInput(inputWriter.toString()).name("input");
     final SourceRange range = SourceRange.of(SourcePosition.of(6L, 1, 7, "opened here"), SourcePosition.of(64L, 10, 1, "implicitly closed"));
     final Diagnostic diagnostic = Diagnostic.of(input, range, Severity.ERROR);
     printDiagnostic(diagnostic);
@@ -296,7 +296,7 @@ public class DiagnosticTests {
     inputBuilder.println("  bar: 2");
     inputBuilder.println("  foo: 3");
     inputBuilder.println("]");
-    final Input input = new StringInput(inputWriter.toString()).name("input");
+    final StringInput input = new StringInput(inputWriter.toString()).name("input");
     final SourceRange range0 = SourceRange.of(SourcePosition.of(10L, 2, 3), SourcePosition.of(12L, 2, 5, "first use"));
     final Diagnostic cause = Diagnostic.of(input, range0, Severity.NOTICE.withLabel("note"));
     final SourceRange range1 = SourceRange.of(SourcePosition.of(28L, 4, 3), SourcePosition.of(30L, 4, 5, "second use"));
@@ -322,7 +322,7 @@ public class DiagnosticTests {
     inputBuilder.println("  bar: 2");
     inputBuilder.println("  foo: 3");
     inputBuilder.println("]");
-    final Input input = new StringInput(inputWriter.toString()).name("input");
+    final StringInput input = new StringInput(inputWriter.toString()).name("input");
     final SourceRange range0 = SourceRange.of(SourcePosition.of(28L, 4, 3), SourcePosition.of(30L, 4, 5, "clobbered here"));
     final Diagnostic cause = Diagnostic.of(input, range0, Severity.NOTICE.withLabel("note"));
     final SourceRange range1 = SourceRange.of(SourcePosition.of(10L, 2, 3), SourcePosition.of(12L, 2, 5, "defined here"));
@@ -348,7 +348,7 @@ public class DiagnosticTests {
     inputBuilder.println("  bar: 2");
     inputBuilder.println("  foo: 3");
     inputBuilder.println("]");
-    final Input input = new StringInput(inputWriter.toString()).name("input");
+    final StringInput input = new StringInput(inputWriter.toString()).name("input");
     final SourceRange range0 = SourceRange.of(SourcePosition.of(10L, 2, 3), SourcePosition.of(12L, 2, 5, "first use"));
     final Diagnostic cause = Diagnostic.of(input, range0, Severity.NOTICE.withLabel("note"), "clobbered field");
     final SourceRange range1 = SourceRange.of(SourcePosition.of(28L, 4, 3), SourcePosition.of(30L, 4, 5, "second use"));

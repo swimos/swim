@@ -16,19 +16,20 @@ package swim.log;
 
 import org.junit.jupiter.api.Test;
 import swim.json.Json;
+import swim.json.JsonFormException;
 import swim.util.Severity;
 
 public class LogServiceTests {
 
   @Test
-  public void testLogService() throws InterruptedException {
-    final LogPrinter log = new LogPrinter(Json.forType(LogEvent.class));
+  public void testLogService() throws JsonFormException, InterruptedException {
+    final LogPrinter log = new LogPrinter(Json.form(LogEvent.class));
     final LogService service = new LogService(log, 1024);
     service.start();
     int i = 0;
     while (i < 10000) {
       for (int j = 0; j < 1000; j += 1) {
-        service.publish(LogEvent.of("test", "", LogScope.root(), Severity.NOTICE, "Message " + i, null, null));
+        service.publish(LogEvent.of("test", "", LogScope.root(), Severity.NOTICE, "message " + i, null, null));
         i += 1;
       }
       Thread.sleep(34L);

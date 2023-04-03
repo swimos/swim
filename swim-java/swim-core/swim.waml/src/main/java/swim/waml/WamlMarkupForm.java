@@ -20,26 +20,31 @@ import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
 
+/**
+ * A transcoder between WAML markup literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlMarkupForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlMarkupForm<N, B, T> extends WamlForm<T> {
 
   @Override
-  default WamlMarkupForm<?, ?, T> markupForm() {
+  default WamlMarkupForm<?, ?, ? extends T> markupForm() throws WamlException {
     return this;
   }
 
-  WamlForm<N> nodeForm();
+  WamlForm<N> nodeForm() throws WamlException;
 
-  @Nullable String asText(@Nullable N node);
+  @Nullable String asText(@Nullable N node) throws WamlException;
 
-  B markupBuilder();
+  B markupBuilder() throws WamlException;
 
-  B appendNode(B builder, @Nullable N node);
+  B appendNode(B builder, @Nullable N node) throws WamlException;
 
-  B appendText(B builder, String text);
+  B appendText(B builder, String text) throws WamlException;
 
-  @Nullable T buildMarkup(B builder);
+  @Nullable T buildMarkup(B builder) throws WamlException;
 
   @Override
   default Parse<T> parse(Input input, WamlParser parser) {

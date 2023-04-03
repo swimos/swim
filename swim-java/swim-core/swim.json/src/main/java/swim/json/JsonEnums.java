@@ -25,6 +25,7 @@ import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.collections.HashTrieMap;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -45,7 +46,7 @@ public final class JsonEnums implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -59,9 +60,11 @@ public final class JsonEnums implements JsonProvider, ToSource {
     } else {
       return null;
     }
+
     if (Enum.class.isAssignableFrom(javaClass)) {
       return JsonEnums.enumForm(Assume.conforms(javaClass));
     }
+
     return null;
   }
 
@@ -94,7 +97,7 @@ public final class JsonEnums implements JsonProvider, ToSource {
     return PROVIDER;
   }
 
-  public static <E extends Enum<E>> JsonStringForm<?, E> enumForm(Class<E> enumClass) {
+  public static <E extends Enum<E>> JsonStringForm<?, E> enumForm(Class<E> enumClass) throws JsonFormException {
     HashTrieMap<String, E> constants = HashTrieMap.empty();
     HashTrieMap<E, String> identifiers = HashTrieMap.empty();
     final E[] enumConstants = enumClass.getEnumConstants();
@@ -103,15 +106,15 @@ public final class JsonEnums implements JsonProvider, ToSource {
       String identifier = constant.name();
       try {
         final Field field = enumClass.getDeclaredField(identifier);
-        final JsonKey keyAnnotation = field.getAnnotation(JsonKey.class);
-        if (keyAnnotation != null) {
-          final String key = keyAnnotation.value();
-          if (key != null && key.length() != 0) {
-            identifier = keyAnnotation.value();
+        final JsonTag tagAnnotation = field.getAnnotation(JsonTag.class);
+        if (tagAnnotation != null) {
+          final String tag = tagAnnotation.value();
+          if (tag != null && tag.length() != 0) {
+            identifier = tag;
           }
         }
       } catch (NoSuchFieldException cause) {
-        // ignore
+        throw new JsonFormException("missing enum constant field: " + identifier, cause);
       }
       constants = constants.updated(identifier, constant);
       identifiers = identifiers.updated(constant, identifier);
@@ -156,7 +159,7 @@ final class JsonEnumForm<E extends Enum<E>> implements JsonStringForm<StringBuil
       if (identifier != null) {
         return writer.writeString(output, identifier);
       } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
+        return Write.error(new WriteException("unsupported value: " + value));
       }
     } else {
       return writer.writeNull(output);
@@ -164,7 +167,7 @@ final class JsonEnumForm<E extends Enum<E>> implements JsonStringForm<StringBuil
   }
 
   @Override
-  public Term intoTerm(@Nullable E value) {
+  public Term intoTerm(@Nullable E value) throws TermException {
     return Term.from(value);
   }
 

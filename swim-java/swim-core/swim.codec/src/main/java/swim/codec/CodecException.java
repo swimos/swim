@@ -19,11 +19,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * Thrown when a codec operation encounters an error.
+ * Thrown when a codec error occurs.
  */
 @Public
 @Since("5.0")
-public class CodecException extends RuntimeException {
+public class CodecException extends Exception {
 
   public CodecException(@Nullable String message, @Nullable Throwable cause) {
     super(message, cause);

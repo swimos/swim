@@ -26,6 +26,7 @@ import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.collections.HashTrieMap;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -46,7 +47,7 @@ public final class WamlEnums implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) {
+  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -60,9 +61,11 @@ public final class WamlEnums implements WamlProvider, ToSource {
     } else {
       return null;
     }
+
     if (Enum.class.isAssignableFrom(javaClass)) {
       return WamlEnums.enumForm(Assume.conforms(javaClass));
     }
+
     return null;
   }
 
@@ -95,7 +98,7 @@ public final class WamlEnums implements WamlProvider, ToSource {
     return PROVIDER;
   }
 
-  public static <E extends Enum<E>> WamlStringForm<?, E> enumForm(Class<E> enumClass) {
+  public static <E extends Enum<E>> WamlStringForm<?, E> enumForm(Class<E> enumClass) throws WamlFormException {
     HashTrieMap<String, E> constants = HashTrieMap.empty();
     HashTrieMap<E, String> identifiers = HashTrieMap.empty();
     final E[] enumConstants = enumClass.getEnumConstants();
@@ -104,15 +107,15 @@ public final class WamlEnums implements WamlProvider, ToSource {
       String identifier = constant.name();
       try {
         final Field field = enumClass.getDeclaredField(identifier);
-        final WamlKey keyAnnotation = field.getAnnotation(WamlKey.class);
-        if (keyAnnotation != null) {
-          final String key = keyAnnotation.value();
-          if (key != null && key.length() != 0) {
-            identifier = keyAnnotation.value();
+        final WamlTag tagAnnotation = field.getAnnotation(WamlTag.class);
+        if (tagAnnotation != null) {
+          final String tag = tagAnnotation.value();
+          if (tag != null && tag.length() != 0) {
+            identifier = tag;
           }
         }
       } catch (NoSuchFieldException cause) {
-        // ignore
+        throw new WamlFormException("missing enum constant field: " + identifier, cause);
       }
       constants = constants.updated(identifier, constant);
       identifiers = identifiers.updated(constant, identifier);
@@ -157,7 +160,7 @@ final class WamlEnumForm<E extends Enum<E>> implements WamlStringForm<StringBuil
       if (identifier != null) {
         return writer.writeString(output, this, identifier, Collections.emptyIterator());
       } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
+        return Write.error(new WriteException("unsupported value: " + value));
       }
     } else {
       return writer.writeUnit(output, this, Collections.emptyIterator());
@@ -165,7 +168,7 @@ final class WamlEnumForm<E extends Enum<E>> implements WamlStringForm<StringBuil
   }
 
   @Override
-  public Term intoTerm(@Nullable E value) {
+  public Term intoTerm(@Nullable E value) throws TermException {
     return Term.from(value);
   }
 

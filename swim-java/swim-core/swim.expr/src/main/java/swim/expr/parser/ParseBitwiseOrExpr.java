@@ -67,37 +67,31 @@ public final class ParseBitwiseOrExpr extends Parse<Term> {
     }
     do {
       if (step == 2) {
-        parseLhs = Assume.nonNull(parseLhs);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '|') {
           final Input lookahead = input.clone();
           lookahead.step();
           if (lookahead.isCont() && lookahead.head() == '|') {
-            return parseLhs;
+            return Assume.nonNull(parseLhs);
           } else if (!lookahead.isEmpty()) {
             input.step();
             step = 3;
           }
         } else if (input.isReady()) {
-          return parseLhs;
+          return Assume.nonNull(parseLhs);
         }
       }
       if (step == 3) {
-        parseLhs = Assume.nonNull(parseLhs);
         if (parseRhs == null) {
           parseRhs = parser.parseBitwiseXorExpr(input, form);
         } else {
           parseRhs = parseRhs.consume(input);
         }
         if (parseRhs.isDone()) {
-          parseLhs = Parse.done(new BitwiseOrExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+          parseLhs = Parse.done(new BitwiseOrExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                                  parseRhs.getNonNullUnchecked()));
           parseRhs = null;
           step = 2;
           continue;

@@ -21,6 +21,7 @@ import swim.annotations.Nullable;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.codec.WriteException;
+import swim.json.JsonException;
 import swim.json.JsonFieldForm;
 import swim.json.JsonObjectForm;
 import swim.json.JsonWriter;
@@ -74,11 +75,12 @@ public final class WriteJsonObject<K, V> extends Write<Object> {
             final Map.Entry<K, V> field = fields.next();
             final K key = field.getKey();
             value = field.getValue();
-            fieldForm = form.getFieldForm(key);
-            if (fieldForm == null) {
-              return Write.error(new WriteException("Unsupported field: " + key));
+            try {
+              fieldForm = form.getFieldForm(key);
+              write = fieldForm.keyForm().write(output, key, writer);
+            } catch (JsonException cause) {
+              return Write.error(cause);
             }
-            write = fieldForm.keyForm().write(output, key, writer);
           } else {
             step = 8;
             break;
@@ -110,7 +112,11 @@ public final class WriteJsonObject<K, V> extends Write<Object> {
       if (step == 5) {
         fieldForm = Assume.nonNull(fieldForm);
         if (write == null) {
-          write = fieldForm.valueForm().write(output, value, writer);
+          try {
+            write = fieldForm.valueForm().write(output, value, writer);
+          } catch (JsonException cause) {
+            return Write.error(cause);
+          }
         } else {
           write = write.produce(output);
         }
@@ -151,7 +157,7 @@ public final class WriteJsonObject<K, V> extends Write<Object> {
       return Write.done();
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

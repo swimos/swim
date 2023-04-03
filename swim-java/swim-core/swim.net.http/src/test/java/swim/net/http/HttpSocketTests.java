@@ -19,7 +19,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.JUnitException;
 import swim.codec.Text;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
@@ -36,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpSocketTests {
 
-  long testRequestResponsePipeline(int requestCount, int clientCount, HttpOptions options) {
+  long testRequestResponsePipeline(int requestCount, int clientCount, HttpOptions options) throws InterruptedException {
     final Semaphore requestSemaphore = new Semaphore(requestCount);
     final CountDownLatch clientCloseLatch = new CountDownLatch(clientCount);
 
@@ -174,8 +173,6 @@ public class HttpSocketTests {
       clientCloseLatch.await();
 
       return System.currentTimeMillis() - t0;
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -183,18 +180,18 @@ public class HttpSocketTests {
   }
 
   @Test
-  public void testSingleRequestResponse() {
+  public void testSingleRequestResponse() throws InterruptedException {
     this.testRequestResponsePipeline(1, 1, HttpOptions.standard());
   }
 
   @Test
-  public void testPipelinedRequestResponse() {
+  public void testPipelinedRequestResponse() throws InterruptedException {
     this.testRequestResponsePipeline(1000, 1, HttpOptions.standard());
   }
 
   @Test
   @Tag("benchmark")
-  public void benchmarkRequestResponses() {
+  public void benchmarkRequestResponses() throws InterruptedException {
     final int requestCount = 1000000;
     final int clientCount = Runtime.getRuntime().availableProcessors();
     final HttpOptions options =

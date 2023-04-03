@@ -39,11 +39,11 @@ public final class SwimTerms implements TermProvider, ToSource {
   }
 
   @Override
-  public @Nullable TermForm<?> resolveTermForm(Type javaType) {
+  public @Nullable TermForm<?> resolveTermForm(Type javaType) throws TermFormException {
     if (javaType instanceof Class<?>) {
       final Class<?> javaClass = (Class<?>) javaType;
       if (Severity.class.isAssignableFrom(javaClass)) {
-        return SEVERITY_FORM;
+        return SwimTerms.severityForm();
       }
     }
     return null;
@@ -78,10 +78,8 @@ public final class SwimTerms implements TermProvider, ToSource {
     return PROVIDER;
   }
 
-  private static final SwimTerms.SeverityForm SEVERITY_FORM = new SwimTerms.SeverityForm();
-
   public static TermForm<Severity> severityForm() {
-    return SEVERITY_FORM;
+    return SwimTerms.SeverityForm.INSTANCE;
   }
 
   static final class SeverityForm implements TermForm<Severity>, ToSource {
@@ -89,7 +87,7 @@ public final class SwimTerms implements TermProvider, ToSource {
     @Override
     public Term intoTerm(@Nullable Severity value) {
       if (value == null) {
-        return Term.from(null);
+        return Term.of();
       }
       return SeverityTerm.of(value);
     }
@@ -109,6 +107,8 @@ public final class SwimTerms implements TermProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final SwimTerms.SeverityForm INSTANCE = new SwimTerms.SeverityForm();
 
   }
 

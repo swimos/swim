@@ -25,9 +25,9 @@ import swim.annotations.Since;
  * Network socket context that manages asynchronous I/O operations for a
  * non-blocking NIO network channel. A {@code NetSocketContext} is implicitly
  * bound to a {@link NetSocket}, providing the {@code NetSocket} with the
- * ability to modify its {@link FlowControl} state, access its read and write
- * buffers, to {@link #become(NetSocket) become} a different kind of {@code
- * NetSocket}, and to close the socket.
+ * ability to modify its flow control state, access its read and write
+ * buffers, to {@link #become(NetSocket) become} a different kind of
+ * {@code NetSocket}, and to close the socket.
  */
 @Public
 @Since("5.0")

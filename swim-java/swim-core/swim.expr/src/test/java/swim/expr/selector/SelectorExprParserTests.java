@@ -216,7 +216,7 @@ public class SelectorExprParserTests {
 
   public static void assertParseFails(final String string) {
     assertThrows(ParseException.class, () -> {
-      Expr.parse(string);
+      Expr.parse(string).checkDone();
     });
   }
 

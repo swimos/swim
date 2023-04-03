@@ -19,7 +19,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Binary;
 import swim.codec.BinaryInputBuffer;
-import swim.codec.Codec;
+import swim.codec.CodecException;
 import swim.codec.Decode;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
@@ -122,7 +122,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
       if (header instanceof ContentLengthHeader) {
         if (contentLength != null) {
           // RFC 7230 § 3.3.3 Item 4
-          throw new HttpException(HttpStatus.BAD_GATEWAY, "Conflicting Content-Length");
+          throw new HttpException(HttpStatus.BAD_GATEWAY, "conflicting Content-Length");
         }
         contentLength = (ContentLengthHeader) header;
       } else if (header instanceof TransferEncodingHeader) {
@@ -134,7 +134,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
       // RFC 7230 § 3.3.3 Item 3
       final FingerTrieList<HttpTransferCoding> transferCodings = transferEncoding.codings();
       if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
-        throw new HttpException(HttpStatus.BAD_GATEWAY, "Unsupported Transfer-Encoding: " + transferEncoding.value());
+        throw new HttpException(HttpStatus.BAD_GATEWAY, "unsupported Transfer-Encoding: " + transferEncoding.value());
       }
       return HttpChunked.decode(input, transcoder);
     }
@@ -174,7 +174,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
       } else if (header instanceof ContentLengthHeader) {
         if (contentLength != null) {
           // RFC 7230 § 3.3.3 Item 4
-          throw new HttpException(HttpStatus.BAD_GATEWAY, "Conflicting Content-Length");
+          throw new HttpException(HttpStatus.BAD_GATEWAY, "conflicting Content-Length");
         }
         contentLength = (ContentLengthHeader) header;
       } else if (header instanceof TransferEncodingHeader) {
@@ -182,15 +182,14 @@ public final class HttpResponse<T> extends HttpMessage<T> {
       }
     }
 
-    Codec codec = null;
+    Transcoder<T2> transcoder;
     if (contentType != null) {
-      codec = Codec.registry().getCodec(contentType.mediaType());
-    }
-    Transcoder<T2> transcoder = null;
-    if (codec != null) {
-      transcoder = codec.getTranscoder(Object.class);
-    }
-    if (transcoder == null) {
+      try {
+        transcoder = Transcoder.get(contentType.mediaType(), Object.class);
+      } catch (CodecException cause) {
+        transcoder = Assume.conforms(Binary.byteBufferTranscoder());
+      }
+    } else {
       transcoder = Assume.conforms(Binary.byteBufferTranscoder());
     }
 
@@ -198,7 +197,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
       // RFC 7230 § 3.3.3 Item 3
       final FingerTrieList<HttpTransferCoding> transferCodings = transferEncoding.codings();
       if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
-        throw new HttpException(HttpStatus.BAD_GATEWAY, "Unsupported Transfer-Encoding: " + transferEncoding.value());
+        throw new HttpException(HttpStatus.BAD_GATEWAY, "unsupported Transfer-Encoding: " + transferEncoding.value());
       }
       return HttpChunked.decode(input, transcoder);
     }
@@ -272,13 +271,13 @@ public final class HttpResponse<T> extends HttpMessage<T> {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -356,15 +355,9 @@ public final class HttpResponse<T> extends HttpMessage<T> {
     return HttpResponse.parse(HttpHeader.registry());
   }
 
-  public static <T> HttpResponse<T> parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpResponse<T>> parse = HttpResponse.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static <T> Parse<HttpResponse<T>> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpResponse.<T>parse(input).complete(input);
   }
 
 }
@@ -469,14 +462,11 @@ final class ParseHttpResponse<T> extends Parse<HttpResponse<T>> {
       }
     }
     if (step == 8) {
-      parseVersion = Assume.nonNull(parseVersion);
-      parseStatus = Assume.nonNull(parseStatus);
-      parseHeaders = Assume.nonNull(parseHeaders);
       if (input.isCont() && input.head() == '\n') {
         input.step();
-        return Parse.done(HttpResponse.of(parseVersion.getNonNull(),
-                                          parseStatus.getNonNull(),
-                                          parseHeaders.getNonNull(),
+        return Parse.done(HttpResponse.of(Assume.nonNull(parseVersion).getNonNullUnchecked(),
+                                          Assume.nonNull(parseStatus).getNonNullUnchecked(),
+                                          Assume.nonNull(parseHeaders).getNonNullUnchecked(),
                                           HttpEmpty.payload()));
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("line feed", input));
@@ -570,7 +560,7 @@ final class WriteHttpResponse<T> extends Write<HttpResponse<T>> {
       return Write.done(response);
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

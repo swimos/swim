@@ -127,13 +127,13 @@ public final class HttpUpgrade implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -165,15 +165,9 @@ public final class HttpUpgrade implements ToSource, ToString {
     return new ParseHttpUpgrade((StringTrieMap<HttpUpgrade>) PROTOCOLS.getOpaque(), null, null, 1);
   }
 
-  public static HttpUpgrade parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpUpgrade> parse = HttpUpgrade.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpUpgrade> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpUpgrade.parse(input).complete(input);
   }
 
   static StringTrieMap<HttpUpgrade> protocols = StringTrieMap.caseInsensitive();
@@ -226,51 +220,43 @@ final class ParseHttpUpgrade extends Parse<HttpUpgrade> {
                                   @Nullable StringBuilder versionBuilder, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          if (protocolTrie != null) {
-            final StringTrieMap<HttpUpgrade> subTrie = protocolTrie.getBranch(protocolTrie.normalized(c));
-            if (subTrie != null) {
-              protocolTrie = subTrie;
-            } else {
-              protocolBuilder = new StringBuilder();
-              protocolBuilder.appendCodePoint(c);
-              protocolTrie = null;
-            }
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        if (protocolTrie != null) {
+          final StringTrieMap<HttpUpgrade> subTrie =
+              protocolTrie.getBranch(protocolTrie.normalized(c));
+          if (subTrie != null) {
+            protocolTrie = subTrie;
           } else {
             protocolBuilder = new StringBuilder();
             protocolBuilder.appendCodePoint(c);
+            protocolTrie = null;
           }
-          step = 2;
         } else {
-          return Parse.error(Diagnostic.expected("upgrade protocol", input));
+          protocolBuilder = new StringBuilder();
+          protocolBuilder.appendCodePoint(c);
         }
-      } else if (input.isDone()) {
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("upgrade protocol", input));
       }
     }
     if (step == 2) {
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          if (protocolTrie != null) {
-            final StringTrieMap<HttpUpgrade> subTrie = protocolTrie.getBranch(protocolTrie.normalized(c));
-            if (subTrie != null) {
-              protocolTrie = subTrie;
-            } else {
-              protocolBuilder = new StringBuilder(protocolTrie.prefix());
-              protocolBuilder.appendCodePoint(c);
-              protocolTrie = null;
-            }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        if (protocolTrie != null) {
+          final StringTrieMap<HttpUpgrade> subTrie =
+              protocolTrie.getBranch(protocolTrie.normalized(c));
+          if (subTrie != null) {
+            protocolTrie = subTrie;
           } else {
-            Assume.nonNull(protocolBuilder).appendCodePoint(c);
+            protocolBuilder = new StringBuilder(protocolTrie.prefix());
+            protocolBuilder.appendCodePoint(c);
+            protocolTrie = null;
           }
         } else {
-          break;
+          Assume.nonNull(protocolBuilder).appendCodePoint(c);
         }
+        input.step();
       }
       if (input.isCont() && c == '/') {
         input.step();
@@ -278,45 +264,38 @@ final class ParseHttpUpgrade extends Parse<HttpUpgrade> {
       } else if (input.isReady()) {
         HttpUpgrade upgrade = protocolTrie != null ? protocolTrie.value() : null;
         if (upgrade == null) {
-          final String protocol = protocolTrie != null ? protocolTrie.prefix() : Assume.nonNull(protocolBuilder).toString();
+          final String protocol = protocolTrie != null
+                                ? protocolTrie.prefix()
+                                : Assume.nonNull(protocolBuilder).toString();
           upgrade = new HttpUpgrade(protocol);
         }
         return Parse.done(upgrade);
       }
     }
     if (step == 3) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          versionBuilder = new StringBuilder();
-          versionBuilder.appendCodePoint(c);
-          step = 4;
-        } else {
-          return Parse.error(Diagnostic.expected("upgrade protocol version", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        versionBuilder = new StringBuilder();
+        versionBuilder.appendCodePoint(c);
+        input.step();
+        step = 4;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("upgrade protocol version", input));
       }
     }
     if (step == 4) {
-      versionBuilder = Assume.nonNull(versionBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          versionBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        Assume.nonNull(versionBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
         HttpUpgrade upgrade = protocolTrie != null ? protocolTrie.value() : null;
         if (upgrade == null) {
-          final String protocol = protocolTrie != null ? protocolTrie.prefix() : Assume.nonNull(protocolBuilder).toString();
-          upgrade = new HttpUpgrade(protocol, versionBuilder.toString());
+          final String protocol = protocolTrie != null
+                                ? protocolTrie.prefix()
+                                : Assume.nonNull(protocolBuilder).toString();
+          upgrade = new HttpUpgrade(protocol, Assume.nonNull(versionBuilder).toString());
         } else {
-          upgrade = new HttpUpgrade(upgrade.protocol, versionBuilder.toString());
+          upgrade = new HttpUpgrade(upgrade.protocol, Assume.nonNull(versionBuilder).toString());
         }
         return Parse.done(upgrade);
       }
@@ -354,7 +333,7 @@ final class WriteHttpUpgrade extends Write<Object> {
     int c = 0;
     if (step == 1) {
       if (protocol.length() == 0) {
-        return Write.error(new WriteException("Blank upgrade protocol"));
+        return Write.error(new WriteException("blank upgrade protocol"));
       }
       while (index < protocol.length() && output.isCont()) {
         c = protocol.codePointAt(index);
@@ -362,7 +341,7 @@ final class WriteHttpUpgrade extends Write<Object> {
           output.write(c);
           index = protocol.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid upgrade protocol: " + protocol));
+          return Write.error(new WriteException("invalid upgrade protocol: " + protocol));
         }
       }
       if (index >= protocol.length()) {
@@ -381,7 +360,7 @@ final class WriteHttpUpgrade extends Write<Object> {
     if (step == 3) {
       version = Assume.nonNull(version);
       if (version.length() == 0) {
-        return Write.error(new WriteException("Blank upgrade protocol version"));
+        return Write.error(new WriteException("blank upgrade protocol version"));
       }
       while (index < version.length() && output.isCont()) {
         c = version.codePointAt(index);
@@ -389,7 +368,7 @@ final class WriteHttpUpgrade extends Write<Object> {
           output.write(c);
           index = version.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid upgrade protocol version: " + version));
+          return Write.error(new WriteException("invalid upgrade protocol version: " + version));
         }
       }
       if (index >= version.length()) {
@@ -398,7 +377,7 @@ final class WriteHttpUpgrade extends Write<Object> {
       }
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

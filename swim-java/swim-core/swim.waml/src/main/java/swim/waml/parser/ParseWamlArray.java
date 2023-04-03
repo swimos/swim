@@ -21,6 +21,7 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
 import swim.waml.WamlArrayForm;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
 import swim.waml.WamlParser;
 
@@ -72,7 +73,7 @@ public final class ParseWamlArray<E, B, T> extends Parse<T> {
           parseAttr = parseAttr.consume(input);
         }
         if (parseAttr.isDone()) {
-          form = Assume.conforms(parseAttr.getNonNull());
+          form = Assume.conforms(parseAttr.getNonNullUnchecked());
           parseAttr = null;
           step = 3;
         } else if (parseAttr.isError()) {
@@ -80,13 +81,8 @@ public final class ParseWamlArray<E, B, T> extends Parse<T> {
         }
       }
       if (step == 3) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '@') {
           step = 2;
@@ -99,10 +95,14 @@ public final class ParseWamlArray<E, B, T> extends Parse<T> {
     } while (true);
     if (step == 4) {
       if (input.isCont() && input.head() == '[') {
-        input.step();
         if (builder == null) {
-          builder = form.arrayBuilder();
+          try {
+            builder = form.arrayBuilder();
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         }
+        input.step();
         step = 5;
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected('[', input));
@@ -110,19 +110,19 @@ public final class ParseWamlArray<E, B, T> extends Parse<T> {
     }
     do {
       if (step == 5) {
-        builder = Assume.nonNull(builder);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isWhitespace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == ']') {
+            final T array;
+            try {
+              array = form.buildArray(Assume.nonNull(builder));
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            return Parse.done(form.buildArray(builder));
+            return Parse.done(array);
           } else if (c == '#') {
             input.step();
             step = 8;
@@ -134,14 +134,21 @@ public final class ParseWamlArray<E, B, T> extends Parse<T> {
         }
       }
       if (step == 6) {
-        builder = Assume.nonNull(builder);
         if (parseElement == null) {
-          parseElement = parser.parseExpr(input, form.elementForm());
+          try {
+            parseElement = parser.parseExpr(input, form.elementForm());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         } else {
           parseElement = parseElement.consume(input);
         }
         if (parseElement.isDone()) {
-          builder = form.appendElement(builder, parseElement.get());
+          try {
+            builder = form.appendElement(Assume.nonNull(builder), parseElement.getUnchecked());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
+          }
           parseElement = null;
           step = 7;
         } else if (parseElement.isError()) {
@@ -149,14 +156,8 @@ public final class ParseWamlArray<E, B, T> extends Parse<T> {
         }
       }
       if (step == 7) {
-        builder = Assume.nonNull(builder);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == ',' || parser.isNewline(c)) {
@@ -167,8 +168,14 @@ public final class ParseWamlArray<E, B, T> extends Parse<T> {
             input.step();
             step = 8;
           } else if (c == ']') {
+            final T array;
+            try {
+              array = form.buildArray(Assume.nonNull(builder));
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            return Parse.done(form.buildArray(builder));
+            return Parse.done(array);
           } else {
             return Parse.error(Diagnostic.expected("']', ',' or newline", input));
           }

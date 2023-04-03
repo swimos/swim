@@ -147,7 +147,7 @@ final class EncodeWsDeflateFrame<T> extends Encode<WsFrame<T>> {
     // Only compress data frames.
     final WsOpcode frameType = frame.frameType();
     if (frameType.isControl()) {
-      return Encode.error(new EncodeException("Unexpected control frame"));
+      return Encode.error(new EncodeException("unexpected control frame"));
     }
 
     // Capture the usable bounds of the output buffer.
@@ -305,7 +305,7 @@ final class EncodeWsDeflateFrame<T> extends Encode<WsFrame<T>> {
       }
     }
     if (output.isDone()) {
-      return Encode.error(new EncodeException("Truncated encode"));
+      return Encode.error(new EncodeException("truncated encode"));
     } else if (output.isError()) {
       return Encode.error(output.getError());
     }

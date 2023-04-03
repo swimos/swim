@@ -15,6 +15,7 @@
 package swim.ws.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.collections.FingerTrieList;
 import swim.http.HttpException;
 import swim.http.HttpHeader;
@@ -26,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class SecWebSocketVersionHeaderTests {
 
   @Test
-  public void parseSecWebSocketVersionHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Version: 13\r\n");
+  public void parseSecWebSocketVersionHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Version: 13\r\n").getNonNull();
     assertInstanceOf(SecWebSocketVersionHeader.class, headers.getHeader(SecWebSocketVersionHeader.TYPE));
     assertEquals(SecWebSocketVersionHeader.of(13),
                  headers.getHeader(SecWebSocketVersionHeader.TYPE));

@@ -22,6 +22,7 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
 import swim.waml.WamlAttrForm;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
 import swim.waml.WamlParser;
 
@@ -71,68 +72,52 @@ public final class ParseWamlAttr<T> extends Parse<WamlForm<T>> {
       }
     }
     if (step == 2) {
-      if (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierStartChar(c)) {
-          input.step();
-          if (nameBuilder == null) {
-            nameBuilder = new StringBuilder();
-          }
-          nameBuilder.appendCodePoint(c);
-          step = 3;
-        } else if (c == '"') {
-          input.step();
-          if (nameBuilder == null) {
-            nameBuilder = new StringBuilder();
-          }
-          step = 4;
-        } else {
-          return Parse.error(Diagnostic.expected("attribute name", input));
+      if (input.isCont() && (parser.isIdentifierStartChar(c = input.head()) || c == '"')) {
+        if (nameBuilder == null) {
+          nameBuilder = new StringBuilder();
         }
-      } else if (input.isDone()) {
+        if (c == '"') {
+          input.step();
+          step = 4;
+        } else { // parser.isIdentifierStartChar(c)
+          nameBuilder.appendCodePoint(c);
+          input.step();
+          step = 3;
+        }
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("attribute name", input));
       }
     }
     if (step == 3) {
-      nameBuilder = Assume.nonNull(nameBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierChar(c)) {
-          input.step();
-          nameBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isIdentifierChar(c = input.head())) {
+        Assume.nonNull(nameBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
-        final String name = nameBuilder.toString();
-        attrForm = Assume.conformsNullable(form.getAttrForm(name));
-        if (attrForm == null) {
-          return Parse.error(Diagnostic.message("unexpected attribute: " + name, input));
+        final String name = Assume.nonNull(nameBuilder).toString();
+        try {
+          attrForm = Assume.conforms(form.getAttrForm(name));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
         }
         step = 10;
       }
     }
-    name: do {
+    do {
       if (step == 4) {
-        nameBuilder = Assume.nonNull(nameBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (c >= 0x20 && c != '"' && c != '\\') {
-            input.step();
-            nameBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && (c = input.head()) >= 0x20 && c != '"' && c != '\\') {
+          Assume.nonNull(nameBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont()) {
           if (c == '"') {
-            input.step();
-            final String name = nameBuilder.toString();
-            attrForm = Assume.conformsNullable(form.getAttrForm(name));
-            if (attrForm == null) {
-              return Parse.error(Diagnostic.message("unexpected attribute: " + name, input));
+            final String name = Assume.nonNull(nameBuilder).toString();
+            try {
+              attrForm = Assume.conforms(form.getAttrForm(name));
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
             }
+            input.step();
             step = 10;
             break;
           } else if (c == '\\') {
@@ -146,37 +131,37 @@ public final class ParseWamlAttr<T> extends Parse<WamlForm<T>> {
         }
       }
       if (step == 5) {
-        nameBuilder = Assume.nonNull(nameBuilder);
         if (input.isCont()) {
           c = input.head();
-          if (c == '"' || c == '\'' || c == '/' || c == '<' || c == '>' || c == '@' || c == '[' || c == '\\' || c == ']' || c == '{' || c == '}') {
+          if (c == '"' || c == '\'' || c == '/' || c == '<' || c == '>' || c == '@' ||
+              c == '[' || c == '\\' || c == ']' || c == '{' || c == '}') {
+            Assume.nonNull(nameBuilder).appendCodePoint(c);
             input.step();
-            nameBuilder.appendCodePoint(c);
             step = 4;
             continue;
           } else if (c == 'b') {
+            Assume.nonNull(nameBuilder).append('\b');
             input.step();
-            nameBuilder.append('\b');
             step = 4;
             continue;
           } else if (c == 'f') {
+            Assume.nonNull(nameBuilder).append('\f');
             input.step();
-            nameBuilder.append('\f');
             step = 4;
             continue;
           } else if (c == 'n') {
+            Assume.nonNull(nameBuilder).append('\n');
             input.step();
-            nameBuilder.append('\n');
             step = 4;
             continue;
           } else if (c == 'r') {
+            Assume.nonNull(nameBuilder).append('\r');
             input.step();
-            nameBuilder.append('\r');
             step = 4;
             continue;
           } else if (c == 't') {
+            Assume.nonNull(nameBuilder).append('\t');
             input.step();
-            nameBuilder.append('\t');
             step = 4;
             continue;
           } else if (c == 'u') {
@@ -189,83 +174,85 @@ public final class ParseWamlAttr<T> extends Parse<WamlForm<T>> {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
-      if (step >= 6 && step < 10) {
-        nameBuilder = Assume.nonNull(nameBuilder);
-        do {
-          if (input.isCont()) {
-            c = input.head();
-            if (Base16.isDigit(c)) {
-              input.step();
-              escape = 16 * escape + Base16.decodeDigit(c);
-              if (step <= 8) {
-                step += 1;
-                continue;
-              } else {
-                nameBuilder.appendCodePoint(escape);
-                escape = 0;
-                step = 4;
-                continue name;
-              }
-            } else {
-              return Parse.error(Diagnostic.expected("hex digit", input));
-            }
-          } else if (input.isDone()) {
-            return Parse.error(Diagnostic.expected("hex digit", input));
-          }
-          break;
-        } while (true);
+      if (step == 6) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = Base16.decodeDigit(c);
+          input.step();
+          step = 7;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 7) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          input.step();
+          step = 8;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 8) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          input.step();
+          step = 9;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 9) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          Assume.nonNull(nameBuilder).appendCodePoint(escape);
+          escape = 0;
+          input.step();
+          step = 4;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
       }
       break;
     } while (true);
     if (step == 10) {
-      nameBuilder = Assume.nonNull(nameBuilder);
-      attrForm = Assume.nonNull(attrForm);
       if (input.isCont() && input.head() == '(') {
         input.step();
         step = 11;
       } else if (input.isReady()) {
-        final String name = nameBuilder.toString();
-        return Parse.done(attrForm.refineForm(form, name));
+        final String name = Assume.nonNull(nameBuilder).toString();
+        try {
+          return Parse.done(Assume.nonNull(attrForm).refineForm(form, name));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 11) {
-      while (input.isCont() && parser.isWhitespace(input.head())) {
-        input.step();
-      }
-      if (input.isReady()) {
-        step = 12;
-      }
-    }
-    if (step == 12) {
-      attrForm = Assume.nonNull(attrForm);
       if (parseArgs == null) {
-        parseArgs = parser.parseBlock(input, attrForm.argsForm());
+        parseArgs = parser.parseBlock(input, Assume.nonNull(attrForm).argsForm());
       } else {
         parseArgs = parseArgs.consume(input);
       }
       if (parseArgs.isDone()) {
-        step = 13;
+        step = 12;
       } else if (parseArgs.isError()) {
         return parseArgs.asError();
       }
     }
-    if (step == 13) {
-      nameBuilder = Assume.nonNull(nameBuilder);
-      attrForm = Assume.nonNull(attrForm);
-      parseArgs = Assume.nonNull(parseArgs);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isWhitespace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+    if (step == 12) {
+      while (input.isCont() && parser.isWhitespace(c = input.head())) {
+        input.step();
       }
       if (input.isCont() && c == ')') {
         input.step();
-        final String name = nameBuilder.toString();
-        final Object args = parseArgs.get();
-        return Parse.done(attrForm.refineForm(form, name, args));
+        final String name = Assume.nonNull(nameBuilder).toString();
+        final Object args = Assume.nonNull(parseArgs).getUnchecked();
+        try {
+          return Parse.done(Assume.nonNull(attrForm).refineForm(form, name, args));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected(')', input));
       }

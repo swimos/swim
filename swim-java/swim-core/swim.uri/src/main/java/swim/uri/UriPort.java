@@ -16,13 +16,15 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base10;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
@@ -89,6 +91,7 @@ public final class UriPort implements Comparable<UriPort>, ToSource, ToString {
     output.append(Integer.toString(this.number));
   }
 
+  @IntoForm
   @Override
   public String toString() {
     return Integer.toString(this.number);
@@ -111,78 +114,77 @@ public final class UriPort implements Comparable<UriPort>, ToSource, ToString {
     }
   }
 
-  public static UriPort parse(String part) {
+  @FromForm
+  public static @Nullable UriPort from(String value) {
+    return UriPort.parse(value).getOr(null);
+  }
+
+  public static Parse<UriPort> parse(Input input) {
+    return ParseUriPort.parse(input, 0);
+  }
+
+  public static Parse<UriPort> parse(String part) {
     Objects.requireNonNull(part);
-    final CacheMap<String, UriPort> cache = UriPort.cache();
-    UriPort port = cache.get(part);
-    if (port == null) {
-      final Input input = new StringInput(part);
-      port = UriPort.parse(input);
-      if (input.isCont()) {
-        throw new ParseException(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        throw new ParseException(input.getError());
-      }
-      port = cache.put(part, port);
-    }
-    return port;
-  }
-
-  public static UriPort parse(Input input) {
-    int number = 0;
-    int c = 0;
-    while (input.isCont()) {
-      c = input.head();
-      if (Base10.isDigit(c)) {
-        input.step();
-        number = 10 * number + Base10.decodeDigit(c);
-        if (number < 0) {
-          throw new ParseException(Diagnostic.message("port overflow", input));
-        }
-      } else {
-        break;
+    final CacheMap<String, Parse<UriPort>> cache = UriPort.cache();
+    Parse<UriPort> parsePort = cache.get(part);
+    if (parsePort == null) {
+      final StringInput input = new StringInput(part);
+      parsePort = UriPort.parse(input).complete(input);
+      if (parsePort.isDone()) {
+        parsePort = cache.put(part, parsePort);
       }
     }
-    if (input.isReady()) {
-      return UriPort.number(number);
-    }
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
+    return parsePort;
   }
 
-  public static UriPort fromJsonString(String value) {
-    return UriPort.parse(value);
-  }
+  private static @Nullable CacheMap<String, Parse<UriPort>> cache;
 
-  public static String toJsonString(UriPort port) {
-    return port.toString();
-  }
-
-  public static UriPort fromWamlString(String value) {
-    return UriPort.parse(value);
-  }
-
-  public static String toWamlString(UriPort port) {
-    return port.toString();
-  }
-
-  private static @Nullable CacheMap<String, UriPort> cache;
-
-  static CacheMap<String, UriPort> cache() {
+  static CacheMap<String, Parse<UriPort>> cache() {
     // Global cache is used in lieu of thread-local cache due to small number
     // of frequently used ports.
     if (UriPort.cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.uri.port.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 64;
       }
-      UriPort.cache = new LruCacheMap<String, UriPort>(cacheSize);
+      UriPort.cache = new LruCacheMap<String, Parse<UriPort>>(cacheSize);
     }
     return UriPort.cache;
+  }
+
+}
+
+final class ParseUriPort extends Parse<UriPort> {
+
+  final int number;
+
+  ParseUriPort(int number) {
+    this.number = number;
+  }
+
+  @Override
+  public Parse<UriPort> consume(Input input) {
+    return ParseUriPort.parse(input, this.number);
+  }
+
+  static Parse<UriPort> parse(Input input, int number) {
+    int c = 0;
+    while (input.isCont() && Base10.isDigit(c = input.head())) {
+      number = 10 * number + Base10.decodeDigit(c);
+      if (number > 65535) {
+        return Parse.error(Diagnostic.message("port overflow", input));
+      }
+      input.step();
+    }
+    if (input.isReady()) {
+      return Parse.done(UriPort.number(number));
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriPort(number);
   }
 
 }

@@ -94,15 +94,15 @@ public class JsonReprWriterTests {
   @Test
   public void writeNonEmptyBobs() {
     assertWrites("\"AAAA\"",
-                 BlobRepr.fromBase64("AAAA"));
+                 BlobRepr.parseBase64("AAAA").getNonNullUnchecked());
     assertWrites("\"AAA=\"",
-                 BlobRepr.fromBase64("AAA="));
+                 BlobRepr.parseBase64("AAA=").getNonNullUnchecked());
     assertWrites("\"AA==\"",
-                 BlobRepr.fromBase64("AA=="));
+                 BlobRepr.parseBase64("AA==").getNonNullUnchecked());
     assertWrites("\"ABCDabcd12/+\"",
-                 BlobRepr.fromBase64("ABCDabcd12/+"));
+                 BlobRepr.parseBase64("ABCDabcd12/+").getNonNullUnchecked());
     assertWrites("\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+\"",
-                 BlobRepr.fromBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+"));
+                 BlobRepr.parseBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+").getNonNullUnchecked());
   }
 
   @Test
@@ -114,26 +114,26 @@ public class JsonReprWriterTests {
   @Test
   public void writeUnaryArrays() {
     assertWrites("[1]",
-                 ArrayRepr.of(1));
+                 ArrayRepr.of(Repr.of(1)));
   }
 
   @Test
   public void writeNonEmptyArrays() {
     assertWrites("[1, 2, \"3\", true]",
-                 ArrayRepr.of(1, 2, "3", true),
+                 ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of("3"), Repr.of(true)),
                  JsonWriterOptions.readable());
     assertWrites("[1,2,\"3\",true]",
-                 ArrayRepr.of(1, 2, "3", true),
+                 ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of("3"), Repr.of(true)),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeNestedArrays() {
     assertWrites("[1, [2, 3], 4]",
-                 ArrayRepr.of(1, ArrayRepr.of(2, 3), 4),
+                 ArrayRepr.of(Repr.of(1), ArrayRepr.of(Repr.of(2), Repr.of(3)), Repr.of(4)),
                  JsonWriterOptions.readable());
     assertWrites("[1,[2,3],4]",
-                 ArrayRepr.of(1, ArrayRepr.of(2, 3), 4),
+                 ArrayRepr.of(Repr.of(1), ArrayRepr.of(Repr.of(2), Repr.of(3)), Repr.of(4)),
                  JsonWriterOptions.compact());
   }
 
@@ -146,40 +146,40 @@ public class JsonReprWriterTests {
   @Test
   public void writeUnaryObjects() {
     assertWrites("{a: 1}",
-                 ObjectRepr.of("a", 1),
+                 ObjectRepr.of("a", Repr.of(1)),
                  JsonWriterOptions.readable());
     assertWrites("{\"a\":1}",
-                 ObjectRepr.of("a", 1),
+                 ObjectRepr.of("a", Repr.of(1)),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeNonEmptyObjects() {
     assertWrites("{a: 1, b: \"2\"}",
-                 ObjectRepr.of("a", 1, "b", "2"),
+                 ObjectRepr.of("a", Repr.of(1), "b", Repr.of("2")),
                  JsonWriterOptions.readable());
     assertWrites("{\"a\":1,\"b\":\"2\"}",
-                 ObjectRepr.of("a", 1, "b", "2"),
+                 ObjectRepr.of("a", Repr.of(1), "b", Repr.of("2")),
                  JsonWriterOptions.compact());
   }
 
   @Test
   public void writeNestedObjects() {
     assertWrites("{a: {b: 2}}",
-                 ObjectRepr.of("a", ObjectRepr.of("b", 2)),
+                 ObjectRepr.of("a", ObjectRepr.of("b", Repr.of(2))),
                  JsonWriterOptions.readable());
     assertWrites("{\"a\":{\"b\":2}}",
-                 ObjectRepr.of("a", ObjectRepr.of("b", 2)),
+                 ObjectRepr.of("a", ObjectRepr.of("b", Repr.of(2))),
                  JsonWriterOptions.compact());
   }
 
   public static void assertWrites(String expected, Repr value, JsonWriterOptions options) {
-    JsonAssertions.assertWrites(expected, () -> Json.forType(Repr.class).write(value, Json.writer(options)));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(options)));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    JsonAssertions.assertWrites(expected, () -> Json.forType(Repr.class).write(value, Json.writer(JsonWriterOptions.readable())));
-    JsonAssertions.assertWrites(expected, () -> Json.forType(Repr.class).write(value, Json.writer(JsonWriterOptions.compact())));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(JsonWriterOptions.readable())));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(JsonWriterOptions.compact())));
   }
 
 }

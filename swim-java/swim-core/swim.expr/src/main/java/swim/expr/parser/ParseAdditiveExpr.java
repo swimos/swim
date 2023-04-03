@@ -72,33 +72,26 @@ public final class ParseAdditiveExpr extends Parse<Term> {
     }
     do {
       if (step == 2) {
-        parseLhs = Assume.nonNull(parseLhs);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == '+') {
-            input.step();
             operator = "+";
+            input.step();
             step = 3;
           } else if (c == '-') {
-            input.step();
             operator = "-";
+            input.step();
             step = 3;
           } else {
-            return parseLhs;
+            return Assume.nonNull(parseLhs);
           }
         } else if (input.isDone()) {
-          return parseLhs;
+          return Assume.nonNull(parseLhs);
         }
       }
       if (step == 3) {
-        parseLhs = Assume.nonNull(parseLhs);
         if (parseRhs == null) {
           parseRhs = parser.parseMultiplicativeExpr(input, form);
         } else {
@@ -106,9 +99,11 @@ public final class ParseAdditiveExpr extends Parse<Term> {
         }
         if (parseRhs.isDone()) {
           if ("+".equals(operator)) {
-            parseLhs = Parse.done(new PlusExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+            parseLhs = Parse.done(new PlusExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                               parseRhs.getNonNullUnchecked()));
           } else if ("-".equals(operator)) {
-            parseLhs = Parse.done(new MinusExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+            parseLhs = Parse.done(new MinusExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                                parseRhs.getNonNullUnchecked()));
           } else {
             return Parse.error(Diagnostic.message(operator, input));
           }
@@ -125,8 +120,7 @@ public final class ParseAdditiveExpr extends Parse<Term> {
     if (input.isError()) {
       return Parse.error(input.getError());
     }
-    return new ParseAdditiveExpr(parser, form, parseLhs,
-                                 operator, parseRhs, step);
+    return new ParseAdditiveExpr(parser, form, parseLhs, operator, parseRhs, step);
   }
 
 }

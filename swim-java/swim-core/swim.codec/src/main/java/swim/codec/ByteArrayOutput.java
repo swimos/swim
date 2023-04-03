@@ -14,6 +14,7 @@
 
 package swim.codec;
 
+import swim.annotations.CheckReturnValue;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
@@ -83,6 +84,7 @@ public final class ByteArrayOutput extends Output<byte[]> {
     return this;
   }
 
+  @CheckReturnValue
   @Override
   public byte[] get() {
     final int n = this.size;
@@ -95,6 +97,24 @@ public final class ByteArrayOutput extends Output<byte[]> {
       this.array = newArray;
       return newArray;
     }
+  }
+
+  @CheckReturnValue
+  @Override
+  public byte[] getNonNull() {
+    return this.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public byte[] getUnchecked() {
+    return this.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public byte[] getNonNullUnchecked() {
+    return this.get();
   }
 
   @Override

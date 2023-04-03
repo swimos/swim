@@ -18,15 +18,34 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A {@code TermForm} that converts identifiers to values of type {@code T}.
+ *
+ * @param <T> the type of values converted by this {@code IdentifierTermForm}
+ */
 @Public
 @Since("5.0")
 public interface IdentifierTermForm<T> extends TermForm<T> {
 
   @Override
-  default IdentifierTermForm<T> identifierForm() {
+  default IdentifierTermForm<? extends T> identifierForm() throws TermException {
     return this;
   }
 
-  @Nullable T identifierValue(String value, ExprParser parser);
+  /**
+   * Converts the given {@code identifier} string to a value of type {@code T}.
+   * The provided {@code parser} can be used to vary the interpretation of
+   * identifiers based on the particular expression language being parsed.
+   *
+   * @param identifier the identifier string to convert to a value
+   *        of type {@code T}
+   * @param parser the expression language for which identifiers
+   *        should be interpreted
+   * @return a value of type {@code T} representing the given
+   *         {@code identifier} string
+   * @throws TermException if unable to convert the given {@code identifier}
+   *         string to a valid value of type {@code T}
+   */
+  @Nullable T identifierValue(String identifier, ExprParser parser) throws TermException;
 
 }

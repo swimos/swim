@@ -249,16 +249,16 @@ public class JsonReprParserTests {
 
   @Test
   public void parseNonEmptyArrays() {
-    assertParses(ArrayRepr.of(ObjectRepr.empty(), ArrayRepr.empty(), "", 0, true, false, null),
+    assertParses(ArrayRepr.of(ObjectRepr.empty(), ArrayRepr.empty(), Repr.of(""), Repr.of(0), Repr.of(true), Repr.of(false), Repr.unit()),
                  "[{},[],\"\",0,true,false,null]");
   }
 
   @Test
   public void parseArraysWithWhitespace() {
     assertParses(ArrayRepr.empty(),
-                 " [ ] ");
-    assertParses(ArrayRepr.of(1, 2),
-                 " [ 1 , 2 ] ");
+                 "[ ]");
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2)),
+                 "[ 1 , 2 ]");
   }
 
   @Test
@@ -271,73 +271,73 @@ public class JsonReprParserTests {
   public void parseNonEmptyObjects() {
     assertParses(ObjectRepr.of("object", ObjectRepr.empty(),
                                "array", ArrayRepr.empty(),
-                               "string", "",
-                               "number", 0,
-                               "true", true,
-                               "false", false,
-                               "null", null),
+                               "string", Repr.of(""),
+                               "number", Repr.of(0),
+                               "true", Repr.of(true),
+                               "false", Repr.of(false),
+                               "null", Repr.unit()),
                  "{\"object\":{},\"array\":[],\"string\":\"\",\"number\":0,\"true\":true,\"false\":false,\"null\":null}");
   }
 
   @Test
   public void parseObjectsWithIdentifierKeys() {
-    assertParses(ObjectRepr.of("test", null),
+    assertParses(ObjectRepr.of("test", Repr.unit()),
                  "{test:null}");
   }
 
   @Test
   public void parseObjectsWithUnicodeIdentifierKeys() {
-    assertParses(ObjectRepr.of("À", null), "{À:null}"); // U+C0
-    assertParses(ObjectRepr.of("Ö", null), "{Ö:null}"); // U+D6
-    assertParses(ObjectRepr.of("Ø", null), "{Ø:null}"); // U+D8
-    assertParses(ObjectRepr.of("ö", null), "{ö:null}"); // U+F6
-    assertParses(ObjectRepr.of("ø", null), "{ø:null}"); // U+F8
-    assertParses(ObjectRepr.of("˿", null), "{˿:null}"); // U+2FF
-    assertParses(ObjectRepr.of("Ͱ", null), "{Ͱ:null}"); // U+370
-    assertParses(ObjectRepr.of("ͽ", null), "{ͽ:null}"); // U+37D
-    assertParses(ObjectRepr.of("Ϳ", null), "{Ϳ:null}"); // U+37F
-    assertParses(ObjectRepr.of("῿", null), "{῿:null}"); // U+1FFF
-    assertParses(ObjectRepr.of("⁰", null), "{⁰:null}"); // U+2070
-    assertParses(ObjectRepr.of("↏", null), "{↏:null}"); // U+218F
-    assertParses(ObjectRepr.of("Ⰰ", null), "{Ⰰ:null}"); // U+2C00
-    assertParses(ObjectRepr.of("⿯", null), "{⿯:null}"); // U+2FEF
-    assertParses(ObjectRepr.of("、", null), "{、:null}"); // U+3001
-    assertParses(ObjectRepr.of("퟿", null), "{퟿:null}"); // U+D7FF
-    assertParses(ObjectRepr.of("豈", null), "{豈:null}"); // U+F900
-    assertParses(ObjectRepr.of("﷏", null), "{﷏:null}"); // U+FDCF
-    assertParses(ObjectRepr.of("ﷰ", null), "{ﷰ:null}"); // U+FDF0
-    //assertParses(ObjectRepr.of("𐀀", null), "{𐀀:null}"); // U+10000
-    //assertParses(ObjectRepr.of("󯿿", null), "{󯿿:null}"); // U+EFFFF
+    assertParses(ObjectRepr.of("À", Repr.unit()), "{À:null}"); // U+C0
+    assertParses(ObjectRepr.of("Ö", Repr.unit()), "{Ö:null}"); // U+D6
+    assertParses(ObjectRepr.of("Ø", Repr.unit()), "{Ø:null}"); // U+D8
+    assertParses(ObjectRepr.of("ö", Repr.unit()), "{ö:null}"); // U+F6
+    assertParses(ObjectRepr.of("ø", Repr.unit()), "{ø:null}"); // U+F8
+    assertParses(ObjectRepr.of("˿", Repr.unit()), "{˿:null}"); // U+2FF
+    assertParses(ObjectRepr.of("Ͱ", Repr.unit()), "{Ͱ:null}"); // U+370
+    assertParses(ObjectRepr.of("ͽ", Repr.unit()), "{ͽ:null}"); // U+37D
+    assertParses(ObjectRepr.of("Ϳ", Repr.unit()), "{Ϳ:null}"); // U+37F
+    assertParses(ObjectRepr.of("῿", Repr.unit()), "{῿:null}"); // U+1FFF
+    assertParses(ObjectRepr.of("⁰", Repr.unit()), "{⁰:null}"); // U+2070
+    assertParses(ObjectRepr.of("↏", Repr.unit()), "{↏:null}"); // U+218F
+    assertParses(ObjectRepr.of("Ⰰ", Repr.unit()), "{Ⰰ:null}"); // U+2C00
+    assertParses(ObjectRepr.of("⿯", Repr.unit()), "{⿯:null}"); // U+2FEF
+    assertParses(ObjectRepr.of("、", Repr.unit()), "{、:null}"); // U+3001
+    assertParses(ObjectRepr.of("퟿", Repr.unit()), "{퟿:null}"); // U+D7FF
+    assertParses(ObjectRepr.of("豈", Repr.unit()), "{豈:null}"); // U+F900
+    assertParses(ObjectRepr.of("﷏", Repr.unit()), "{﷏:null}"); // U+FDCF
+    assertParses(ObjectRepr.of("ﷰ", Repr.unit()), "{ﷰ:null}"); // U+FDF0
+    //assertParses(ObjectRepr.of("𐀀", Repr.unit()), "{𐀀:null}"); // U+10000
+    //assertParses(ObjectRepr.of("󯿿", Repr.unit()), "{󯿿:null}"); // U+EFFFF
 
-    assertParses(ObjectRepr.of("_À", null), "{_À:null}"); // U+C0
-    assertParses(ObjectRepr.of("_Ö", null), "{_Ö:null}"); // U+D6
-    assertParses(ObjectRepr.of("_Ø", null), "{_Ø:null}"); // U+D8
-    assertParses(ObjectRepr.of("_ö", null), "{_ö:null}"); // U+F6
-    assertParses(ObjectRepr.of("_ø", null), "{_ø:null}"); // U+F8
-    assertParses(ObjectRepr.of("_˿", null), "{_˿:null}"); // U+2FF
-    assertParses(ObjectRepr.of("_Ͱ", null), "{_Ͱ:null}"); // U+370
-    assertParses(ObjectRepr.of("_ͽ", null), "{_ͽ:null}"); // U+37D
-    assertParses(ObjectRepr.of("_Ϳ", null), "{_Ϳ:null}"); // U+37F
-    assertParses(ObjectRepr.of("_῿", null), "{_῿:null}"); // U+1FFF
-    assertParses(ObjectRepr.of("_⁰", null), "{_⁰:null}"); // U+2070
-    assertParses(ObjectRepr.of("_↏", null), "{_↏:null}"); // U+218F
-    assertParses(ObjectRepr.of("_Ⰰ", null), "{_Ⰰ:null}"); // U+2C00
-    assertParses(ObjectRepr.of("_⿯", null), "{_⿯:null}"); // U+2FEF
-    assertParses(ObjectRepr.of("_、", null), "{_、:null}"); // U+3001
-    assertParses(ObjectRepr.of("_퟿", null), "{_퟿:null}"); // U+D7FF
-    assertParses(ObjectRepr.of("_豈", null), "{_豈:null}"); // U+F900
-    assertParses(ObjectRepr.of("_﷏", null), "{_﷏:null}"); // U+FDCF
-    assertParses(ObjectRepr.of("_ﷰ", null), "{_ﷰ:null}"); // U+FDF0
-    //assertParses(ObjectRepr.of"_𐀀", null), "{_𐀀:null}"); // U+10000
-    //assertParses(ObjectRepr.of"_󯿿", null), "{_󯿿:null}"); // U+EFFFF
+    assertParses(ObjectRepr.of("_À", Repr.unit()), "{_À:null}"); // U+C0
+    assertParses(ObjectRepr.of("_Ö", Repr.unit()), "{_Ö:null}"); // U+D6
+    assertParses(ObjectRepr.of("_Ø", Repr.unit()), "{_Ø:null}"); // U+D8
+    assertParses(ObjectRepr.of("_ö", Repr.unit()), "{_ö:null}"); // U+F6
+    assertParses(ObjectRepr.of("_ø", Repr.unit()), "{_ø:null}"); // U+F8
+    assertParses(ObjectRepr.of("_˿", Repr.unit()), "{_˿:null}"); // U+2FF
+    assertParses(ObjectRepr.of("_Ͱ", Repr.unit()), "{_Ͱ:null}"); // U+370
+    assertParses(ObjectRepr.of("_ͽ", Repr.unit()), "{_ͽ:null}"); // U+37D
+    assertParses(ObjectRepr.of("_Ϳ", Repr.unit()), "{_Ϳ:null}"); // U+37F
+    assertParses(ObjectRepr.of("_῿", Repr.unit()), "{_῿:null}"); // U+1FFF
+    assertParses(ObjectRepr.of("_⁰", Repr.unit()), "{_⁰:null}"); // U+2070
+    assertParses(ObjectRepr.of("_↏", Repr.unit()), "{_↏:null}"); // U+218F
+    assertParses(ObjectRepr.of("_Ⰰ", Repr.unit()), "{_Ⰰ:null}"); // U+2C00
+    assertParses(ObjectRepr.of("_⿯", Repr.unit()), "{_⿯:null}"); // U+2FEF
+    assertParses(ObjectRepr.of("_、", Repr.unit()), "{_、:null}"); // U+3001
+    assertParses(ObjectRepr.of("_퟿", Repr.unit()), "{_퟿:null}"); // U+D7FF
+    assertParses(ObjectRepr.of("_豈", Repr.unit()), "{_豈:null}"); // U+F900
+    assertParses(ObjectRepr.of("_﷏", Repr.unit()), "{_﷏:null}"); // U+FDCF
+    assertParses(ObjectRepr.of("_ﷰ", Repr.unit()), "{_ﷰ:null}"); // U+FDF0
+    //assertParses(ObjectRepr.of"_𐀀", Repr.unit()), "{_𐀀:null}"); // U+10000
+    //assertParses(ObjectRepr.of"_󯿿", Repr.unit()), "{_󯿿:null}"); // U+EFFFF
   }
 
   @Test
   public void parseObjectsWithWhitespace() {
     assertParses(ObjectRepr.empty(),
-                 " { } ");
-    assertParses(ObjectRepr.of("a", 1, "b", 2),
-                 " { \"a\" : 1 , \"b\" : 2 } ");
+                 "{ }");
+    assertParses(ObjectRepr.of("a", Repr.of(1), "b", Repr.of(2)),
+                 "{ \"a\" : 1 , \"b\" : 2 }");
   }
 
   @Test
@@ -431,12 +431,11 @@ public class JsonReprParserTests {
 
   public static void assertParses(Repr expected, String json) {
     JsonAssertions.assertParses(Json.parse(), expected, json);
-    JsonAssertions.assertParses(Json.parse(), expected, " " + json + " ");
   }
 
   public static void assertParseFails(final String json) {
     assertThrows(ParseException.class, () -> {
-      Json.parse(json);
+      Json.parse(json).checkDone();
     });
   }
 

@@ -14,17 +14,16 @@
 
 package swim.codec;
 
-import java.io.IOException;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * Thrown when decoding or encoding invalid Unicode code unit sequences.
+ * Thrown when decoding invalid Unicode code unit sequences.
  */
 @Public
 @Since("5.0")
-public class UtfException extends IOException {
+public class UtfException extends InputException {
 
   public UtfException(@Nullable String message, @Nullable Throwable cause) {
     super(message, cause);

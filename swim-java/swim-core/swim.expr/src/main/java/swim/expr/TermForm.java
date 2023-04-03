@@ -14,47 +14,78 @@
 
 package swim.expr;
 
-import java.lang.reflect.Type;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A conversion between {@code Term} instances and values of type {@code T}.
+ *
+ * @param <T> the type of values converted by this {@code TermForm}
+ *
+ * @see TermRegistry
+ */
 @Public
 @Since("5.0")
 public interface TermForm<T> {
 
-  Term intoTerm(@Nullable T value);
+  /**
+   * Converts a given {@code value} to a {@code Term} instance.
+   *
+   * @param value the value of type {@code T} to convert into
+   *        a {@code Term} instance
+   * @return a {@code Term} instance representing the given {@code value}
+   * @throws TermException if the conversion fails
+   */
+  Term intoTerm(@Nullable T value) throws TermException;
 
-  @Nullable T fromTerm(Term term);
+  /**
+   * Converts a given {@code term} to a value of type {@code T}.
+   *
+   * @param term the {@code Term} instance to convert into
+   *        a value of type {@code T}
+   * @return a value of type {@code T} extracted from the given {@code term}
+   * @throws TermException if the conversion fails
+   */
+  @Nullable T fromTerm(Term term) throws TermException;
 
-  default @Nullable StringTermForm<?, ? extends T> stringForm() {
-    return null;
+  /**
+   * Returns a {@code StringTermForm} for constructing values
+   * of type {@code T} from character sequences.
+   *
+   * @return a {@code StringTermForm} that constructs values
+   *         of type {@code T} from character sequences
+   * @throws TermException if constructing values of type
+   *         {@code T} from character sequences is not supported
+   */
+  default StringTermForm<?, ? extends T> stringForm() throws TermException {
+    throw new TermFormException("string not supported");
   }
 
-  default @Nullable NumberTermForm<? extends T> numberForm() {
-    return null;
+  /**
+   * Returns a {@code NumberTermForm} for constructing values
+   * of type {@code T} from numeric literals.
+   *
+   * @return a {@code NumberTermForm} that constructs values
+   *         of type {@code T} from numeric literals
+   * @throws TermException if constructing values of type
+   *         {@code T} from numeric literals is not supported
+   */
+  default NumberTermForm<? extends T> numberForm() throws TermException {
+    throw new TermFormException("number not supported");
   }
 
-  default @Nullable IdentifierTermForm<? extends T> identifierForm() {
-    return null;
-  }
-
-  static <T> TermForm<T> forType(Type javaType) {
-    final TermForm<T> termForm = Term.registry().forType(javaType);
-    if (termForm != null) {
-      return termForm;
-    } else {
-      throw new IllegalArgumentException("No term form for type: " + javaType);
-    }
-  }
-
-  static <T> TermForm<T> forValue(@Nullable T value) {
-    final TermForm<T> termForm = Term.registry().forValue(value);
-    if (termForm != null) {
-      return termForm;
-    } else {
-      throw new IllegalArgumentException("No term form for value: " + value);
-    }
+  /**
+   * Returns an {@code IdentifierTermForm} for constructing values
+   * of type {@code T} from identifier literals.
+   *
+   * @return an {@code IdentifierTermForm} that converts constructs
+   *         values of type {@code T} from identifier literals
+   * @throws TermException if constructing values of type
+   *         {@code T} from identifier literals is not supported
+   */
+  default IdentifierTermForm<? extends T> identifierForm() throws TermException {
+    throw new TermFormException("identifier not supported");
   }
 
 }

@@ -25,6 +25,7 @@ import swim.codec.BinaryInput;
 import swim.codec.BinaryInputBuffer;
 import swim.codec.InputBuffer;
 import swim.codec.Output;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8EncodedOutput;
@@ -59,7 +60,7 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
   @Override
   public void setAttrs(Attrs attrs) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.attrs = attrs;
   }
@@ -118,7 +119,7 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
 
   public BlobRepr setByte(int index, byte value) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     if (index < 0 || index >= n) {
@@ -139,7 +140,7 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
 
   public BlobRepr addByte(byte value) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     byte[] array = this.array;
@@ -162,7 +163,7 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
 
   public BlobRepr addByteArray(byte[] bytes, int offset, int size) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     byte[] array = this.array;
@@ -185,7 +186,7 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
 
   public void clear() {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.array = EMPTY_ARRAY;
     this.offset = 0;
@@ -292,7 +293,7 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
 
   public String toBase16(Base16 base16) {
     final StringOutput output = new StringOutput();
-    this.writeBase16(output, base16).checkDone();
+    this.writeBase16(output, base16).assertDone();
     return output.get();
   }
 
@@ -314,7 +315,7 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
 
   public String toBase64(Base64 base64) {
     final StringOutput output = new StringOutput();
-    this.writeBase64(output, base64).checkDone();
+    this.writeBase64(output, base64).assertDone();
     return output.get();
   }
 
@@ -397,12 +398,14 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
     if (this.size == 0) {
       notation.beginInvoke("BlobRepr", "empty").endInvoke();
     } else {
-      notation.beginInvoke("BlobRepr", "fromBase16")
+      notation.beginInvoke("BlobRepr", "parseBase16")
               .beginArgument()
               .append('"');
-      this.writeBase16(StringOutput.from(output)).checkDone();
+      this.writeBase16(StringOutput.from(output)).assertDone();
       notation.append('"')
               .endArgument()
+              .endInvoke()
+              .beginInvoke("getNonNull")
               .endInvoke();
     }
     if (!this.attrs.isEmpty()) {
@@ -449,38 +452,37 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
   }
 
   public static BlobRepr from(ByteBuffer buffer) {
-    final int size = buffer.remaining();
     if (buffer.hasArray()) {
       return new BlobRepr(ALIASED_FLAG, Attrs.empty(), buffer.array(),
                           buffer.arrayOffset(), buffer.remaining());
     } else {
+      final int size = buffer.remaining();
       final byte[] array = new byte[size];
-      buffer.get(array);
+      buffer.get(0, array, 0, size);
       return new BlobRepr(0, Attrs.empty(), array, 0, size);
     }
-  }
-
-  public static BlobRepr fromBase16(String string) {
-    return Base16.parse(new StringInput(string), new BlobReprOutput()).getNonNull();
-  }
-
-  public static BlobRepr fromBase64(String string, Base64 base64) {
-    return base64.parse(new StringInput(string), new BlobReprOutput()).getNonNull();
-  }
-
-  public static BlobRepr fromBase64(String string) {
-    return fromBase64(string, Base64.standard());
   }
 
   public static BlobRepr fromUtf8(String string) {
     final Utf8EncodedOutput<BlobRepr> output = new Utf8EncodedOutput<BlobRepr>(new BlobReprOutput());
     int i = 0;
-    final int n = string.length();
-    while (i < n) {
+    while (i < string.length()) {
       output.write(string.codePointAt(i));
       i = string.offsetByCodePoints(i, 1);
     }
-    return output.getNonNull();
+    return output.getNonNullUnchecked();
+  }
+
+  public static Parse<BlobRepr> parseBase16(String string) {
+    return Base16.parse(new StringInput(string), new BlobReprOutput());
+  }
+
+  public static Parse<BlobRepr> parseBase64(String string, Base64 base64) {
+    return base64.parse(new StringInput(string), new BlobReprOutput());
+  }
+
+  public static Parse<BlobRepr> parseBase64(String string) {
+    return Base64.standard().parse(new StringInput(string), new BlobReprOutput());
   }
 
   static int expand(int n) {

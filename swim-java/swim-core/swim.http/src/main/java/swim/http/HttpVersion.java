@@ -93,13 +93,13 @@ public final class HttpVersion implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -126,15 +126,9 @@ public final class HttpVersion implements ToSource, ToString {
     return new ParseHttpVersion(0, 0, 1);
   }
 
-  public static HttpVersion parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpVersion> parse = HttpVersion.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpVersion> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpVersion.parse(input).complete(input);
   }
 
 }
@@ -199,16 +193,11 @@ final class ParseHttpVersion extends Parse<HttpVersion> {
       }
     }
     if (step == 6) {
-      if (input.isReady()) {
-        c = input.head();
-        if (Base10.isDigit(c)) {
-          input.step();
-          major = Base10.decodeDigit(c);
-          step = 7;
-        } else {
-          return Parse.error(Diagnostic.expected("major version", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        major = Base10.decodeDigit(c);
+        input.step();
+        step = 7;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("major version", input));
       }
     }
@@ -221,16 +210,11 @@ final class ParseHttpVersion extends Parse<HttpVersion> {
       }
     }
     if (step == 8) {
-      if (input.isReady()) {
-        c = input.head();
-        if (Base10.isDigit(c)) {
-          input.step();
-          minor = Base10.decodeDigit(c);
-          return Parse.done(HttpVersion.of(major, minor));
-        } else {
-          return Parse.error(Diagnostic.expected("minor version", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        minor = Base10.decodeDigit(c);
+        input.step();
+        return Parse.done(HttpVersion.of(major, minor));
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("minor version", input));
       }
     }
@@ -293,7 +277,7 @@ final class WriteHttpVersion extends Write<Object> {
       return Write.done();
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

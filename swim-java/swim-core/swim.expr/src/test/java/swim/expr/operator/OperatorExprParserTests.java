@@ -556,7 +556,7 @@ public class OperatorExprParserTests {
 
   public static void assertParseFails(final String string) {
     assertThrows(ParseException.class, () -> {
-      Expr.parse(string);
+      Expr.parse(string).checkDone();
     });
   }
 

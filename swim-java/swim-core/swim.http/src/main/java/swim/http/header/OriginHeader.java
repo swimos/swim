@@ -102,38 +102,43 @@ public final class OriginHeader extends HttpHeader {
     if (!"null".equals(value)) {
       final StringInput input = new StringInput(value);
       do {
-        final UriScheme scheme = UriScheme.parse(input);
+        final UriScheme scheme;
+        try {
+          scheme = UriScheme.parse(input).getNonNull();
+        } catch (ParseException cause) {
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Origin: " + value, cause);
+        }
         if (input.isCont() && input.head() == ':') {
           input.step();
         } else if (input.isReady()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value,
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Origin: " + value,
                                   new ParseException(Diagnostic.expected(':', input)));
         }
         if (input.isCont() && input.head() == '/') {
           input.step();
         } else if (input.isReady()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value,
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Origin: " + value,
                                   new ParseException(Diagnostic.expected('/', input)));
         }
         if (input.isCont() && input.head() == '/') {
           input.step();
         } else if (input.isReady()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value,
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Origin: " + value,
                                   new ParseException(Diagnostic.expected('/', input)));
         }
         final UriHost host;
         try {
-          host = UriHost.parse(input);
+          host = UriHost.parse(input).getNonNull();
         } catch (ParseException cause) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value, cause);
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Origin: " + value, cause);
         }
         UriPort port = null;
         if (input.isCont() && input.head() == ':') {
           input.step();
           try {
-            port = UriPort.parse(input);
+            port = UriPort.parse(input).getNonNull();
           } catch (ParseException cause) {
-            throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value, cause);
+            throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Origin: " + value, cause);
           }
         }
         final UriAuthority authority = UriAuthority.of(null, host, port);
@@ -155,9 +160,9 @@ public final class OriginHeader extends HttpHeader {
         break;
       } while (true);
       if (input.isError()) {
-        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value, input.getError());
+        throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Origin: " + value, input.getError());
       } else if (!input.isDone()) {
-        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Origin: " + value);
+        throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Origin: " + value);
       }
     }
     return origins;
@@ -183,7 +188,7 @@ public final class OriginHeader extends HttpHeader {
         } while (origins.hasNext());
         return output.toString();
       } catch (IOException cause) {
-        throw new RuntimeException(cause); // never actually throws
+        throw new AssertionError(cause); // never actually throws
       }
     } else {
       return "null";

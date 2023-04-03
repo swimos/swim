@@ -128,13 +128,13 @@ public final class HttpProduct implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -164,15 +164,9 @@ public final class HttpProduct implements ToSource, ToString {
     return new ParseHttpProduct(null, null, null, FingerTrieList.empty(), 0, 1);
   }
 
-  public static HttpProduct parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpProduct> parse = HttpProduct.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpProduct> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpProduct.parse(input).complete(input);
   }
 
 }
@@ -213,30 +207,19 @@ final class ParseHttpProduct extends Parse<HttpProduct> {
                                   int level, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          nameBuilder = new StringBuilder();
-          nameBuilder.appendCodePoint(c);
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("product name", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        nameBuilder = new StringBuilder();
+        nameBuilder.appendCodePoint(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("product name", input));
       }
     }
     if (step == 2) {
-      nameBuilder = Assume.nonNull(nameBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          nameBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        Assume.nonNull(nameBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isCont() && c == '/') {
         input.step();
@@ -246,30 +229,19 @@ final class ParseHttpProduct extends Parse<HttpProduct> {
       }
     }
     if (step == 3) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          versionBuilder = new StringBuilder();
-          versionBuilder.appendCodePoint(c);
-          step = 4;
-        } else {
-          return Parse.error(Diagnostic.expected("product version", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        versionBuilder = new StringBuilder();
+        versionBuilder.appendCodePoint(c);
+        input.step();
+        step = 4;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("product version", input));
       }
     }
     if (step == 4) {
-      versionBuilder = Assume.nonNull(versionBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          versionBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        Assume.nonNull(versionBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
         step = 5;
@@ -277,66 +249,50 @@ final class ParseHttpProduct extends Parse<HttpProduct> {
     }
     do {
       if (step == 5) {
-        nameBuilder = Assume.nonNull(nameBuilder);
         if (input.isCont() && Http.isSpace(input.head())) {
           input.step();
           step = 6;
         } else if (input.isReady()) {
-          final String name = nameBuilder.toString();
+          final String name = Assume.nonNull(nameBuilder).toString();
           final String version = versionBuilder != null ? versionBuilder.toString() : null;
           return Parse.done(HttpProduct.of(name, version, comments));
         }
       }
       if (step == 6) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isSpace(c = input.head())) {
+          input.step();
         }
-        if (input.isCont()) {
-          if (c == '(') {
-            input.step();
-            commentBuilder = new StringBuilder();
-            level = 1;
-            step = 7;
-          } else {
-            step = 5;
-            continue;
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && c == '(') {
+          commentBuilder = new StringBuilder();
+          level = 1;
+          input.step();
+          step = 7;
+        } else if (input.isReady()) {
           step = 5;
           continue;
         }
       }
       if (step == 7) {
-        commentBuilder = Assume.nonNull(commentBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isCommentChar(c)) {
-            input.step();
-            commentBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isCommentChar(c = input.head())) {
+          Assume.nonNull(commentBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont()) {
           if (c == '(') {
-            input.step();
-            commentBuilder.append('(');
+            Assume.nonNull(commentBuilder).append('(');
             level += 1;
+            input.step();
             continue;
           } else if (c == ')') {
-            input.step();
             level -= 1;
             if (level > 0) {
-              commentBuilder.append(')');
+              Assume.nonNull(commentBuilder).append(')');
+              input.step();
               continue;
             } else {
-              comments = comments.appended(commentBuilder.toString());
+              comments = comments.appended(Assume.nonNull(commentBuilder).toString());
               commentBuilder = null;
+              input.step();
               step = 5;
               continue;
             }
@@ -351,18 +307,12 @@ final class ParseHttpProduct extends Parse<HttpProduct> {
         }
       }
       if (step == 8) {
-        commentBuilder = Assume.nonNull(commentBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isEscapeChar(c)) {
-            input.step();
-            commentBuilder.appendCodePoint(c);
-            step = 7;
-            continue;
-          } else {
-            return Parse.error(Diagnostic.expected("escape character", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isEscapeChar(c = input.head())) {
+          Assume.nonNull(commentBuilder).appendCodePoint(c);
+          input.step();
+          step = 7;
+          continue;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
@@ -416,7 +366,7 @@ final class WriteHttpProduct extends Write<Object> {
     int c = 0;
     if (step == 1) {
       if (name.length() == 0) {
-        return Write.error(new WriteException("Blank product name"));
+        return Write.error(new WriteException("blank product name"));
       }
       while (index < name.length() && output.isCont()) {
         c = name.codePointAt(index);
@@ -424,7 +374,7 @@ final class WriteHttpProduct extends Write<Object> {
           output.write(c);
           index = name.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid product name: " + name));
+          return Write.error(new WriteException("invalid product name: " + name));
         }
       }
       if (index >= name.length()) {
@@ -443,7 +393,7 @@ final class WriteHttpProduct extends Write<Object> {
     if (step == 3) {
       version = Assume.nonNull(version);
       if (version.length() == 0) {
-        return Write.error(new WriteException("Blank product version"));
+        return Write.error(new WriteException("blank product version"));
       }
       while (index < version.length() && output.isCont()) {
         c = version.codePointAt(index);
@@ -451,7 +401,7 @@ final class WriteHttpProduct extends Write<Object> {
           output.write(c);
           index = version.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid product version: " + version));
+          return Write.error(new WriteException("invalid product version: " + version));
         }
       }
       if (index >= version.length()) {
@@ -496,7 +446,7 @@ final class WriteHttpProduct extends Write<Object> {
             step = 7;
             break;
           } else {
-            return Write.error(new WriteException("Invalid comment: " + comment));
+            return Write.error(new WriteException("invalid comment: " + comment));
           }
         }
         if (index >= comment.length() && level == 1) {
@@ -504,7 +454,7 @@ final class WriteHttpProduct extends Write<Object> {
           index = 0;
           step = 8;
         } else if (index >= comment.length() || level == 0) {
-          return Write.error(new WriteException("Unbalanced parentheses: " + comment));
+          return Write.error(new WriteException("unbalanced parentheses: " + comment));
         }
       }
       if (step == 7 && output.isCont()) {
@@ -522,7 +472,7 @@ final class WriteHttpProduct extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

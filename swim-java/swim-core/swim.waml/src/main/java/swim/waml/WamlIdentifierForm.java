@@ -22,17 +22,22 @@ import swim.codec.Parse;
 import swim.expr.ExprParser;
 import swim.expr.IdentifierTermForm;
 
+/**
+ * A transcoder between WAML identifier literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlIdentifierForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlIdentifierForm<T> extends WamlForm<T>, IdentifierTermForm<T> {
 
   @Override
-  default WamlIdentifierForm<T> identifierForm() {
+  default WamlIdentifierForm<? extends T> identifierForm() throws WamlException {
     return this;
   }
 
   @Override
-  @Nullable T identifierValue(String value, ExprParser parser);
+  @Nullable T identifierValue(String value, ExprParser parser) throws WamlException;
 
   @Override
   default Parse<T> parse(Input input, WamlParser parser) {

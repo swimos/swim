@@ -121,17 +121,17 @@ public final class SecWebSocketKeyHeader extends HttpHeader {
     final StringInput input = new StringInput(value);
     final Parse<byte[]> parseKey = Base64.standard().parseByteArray(input);
     if (parseKey.isDone()) {
-      return parseKey.getNonNull();
+      return parseKey.getNonNullUnchecked();
     } else if (parseKey.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Key: " + value, parseKey.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Key: " + value, parseKey.getError());
     } else {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Key: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Key: " + value);
     }
   }
 
   private static String writeValue(byte[] key) {
     final StringOutput output = new StringOutput();
-    Base64.standard().writeByteArray(output, key).checkDone();
+    Base64.standard().writeByteArray(output, key).assertDone();
     return output.get();
   }
 

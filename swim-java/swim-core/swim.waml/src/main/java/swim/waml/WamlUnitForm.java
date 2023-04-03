@@ -20,16 +20,21 @@ import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
 
+/**
+ * A transcoder between WAML unit literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlUnitForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlUnitForm<T> extends WamlForm<T> {
 
   @Override
-  default WamlUnitForm<T> unitForm() {
+  default WamlUnitForm<? extends T> unitForm() throws WamlException {
     return this;
   }
 
-  @Nullable T unitValue();
+  @Nullable T unitValue() throws WamlException;
 
   @Override
   default Parse<T> parse(Input input, WamlParser parser) {
@@ -38,7 +43,11 @@ public interface WamlUnitForm<T> extends WamlForm<T> {
 
   @Override
   default Parse<T> parseBlock(Input input, WamlParser parser) {
-    return Parse.done(this.unitValue());
+    try {
+      return Parse.done(this.unitValue());
+    } catch (WamlException cause) {
+      return Parse.diagnostic(input, cause);
+    }
   }
 
 }

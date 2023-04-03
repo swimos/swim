@@ -17,7 +17,6 @@ package swim.net.http;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.JUnitException;
 import swim.codec.Decode;
 import swim.codec.InputBuffer;
 import swim.codec.Text;
@@ -35,7 +34,7 @@ public class HttpClientTests {
 
   @Test
   @Tag("manual")
-  public void testClient() {
+  public void testClient() throws InterruptedException {
     final CountDownLatch finishedLatch = new CountDownLatch(1);
 
     final TransportDriver driver = new TransportDriver();
@@ -93,8 +92,6 @@ public class HttpClientTests {
       final HttpClientSocket socket = new HttpClientSocket(client, HttpOptions.standard());
       driver.bindTcpSocket(socket).connect("www.google.com", 80);
       finishedLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();

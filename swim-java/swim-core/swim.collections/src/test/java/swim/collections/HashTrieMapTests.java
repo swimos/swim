@@ -235,13 +235,11 @@ public class HashTrieMapTests {
       xs = xs.updated(UUID.randomUUID().toString(), i);
       i++;
     }
-    System.out.println("map size " + xs.size());
     assertEquals(xs.size(), limit, "map size not same as expected");
     int count = 0;
     for (Map.Entry<String, Integer> unused : xs) {
       count += 1;
     }
-    System.out.println("count " + count);
     assertEquals(count, limit, "map iteration size not same as expected");
   }
 

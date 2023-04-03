@@ -69,7 +69,7 @@ public final class ParseWamlTuple<T> extends Parse<T> {
           parseAttr = parseAttr.consume(input);
         }
         if (parseAttr.isDone()) {
-          form = Assume.conforms(parseAttr.getNonNull());
+          form = Assume.conforms(parseAttr.getNonNullUnchecked());
           parseAttr = null;
           step = 3;
         } else if (parseAttr.isError()) {
@@ -77,13 +77,8 @@ public final class ParseWamlTuple<T> extends Parse<T> {
         }
       }
       if (step == 3) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '@') {
           step = 2;
@@ -103,38 +98,24 @@ public final class ParseWamlTuple<T> extends Parse<T> {
       }
     }
     if (step == 5) {
-      while (input.isCont() && parser.isWhitespace(input.head())) {
-        input.step();
-      }
-      if (input.isReady()) {
-        step = 6;
-      }
-    }
-    if (step == 6) {
       if (parseBlock == null) {
         parseBlock = parser.parseBlock(input, form);
       } else {
         parseBlock = parseBlock.consume(input);
       }
       if (parseBlock.isDone()) {
-        step = 7;
+        step = 6;
       } else if (parseBlock.isError()) {
         return parseBlock.asError();
       }
     }
-    if (step == 7) {
-      parseBlock = Assume.nonNull(parseBlock);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isWhitespace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+    if (step == 6) {
+      while (input.isCont() && parser.isWhitespace(c = input.head())) {
+        input.step();
       }
       if (input.isCont() && c == ')') {
         input.step();
-        return Assume.conforms(parseBlock);
+        return Assume.conformsNonNull(parseBlock);
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected(')', input));
       }

@@ -19,7 +19,9 @@ import swim.annotations.Nullable;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
 import swim.waml.WamlParser;
 import swim.waml.WamlTupleForm;
@@ -46,23 +48,25 @@ public final class ParseWamlGroup extends Parse<Term> {
   public static Parse<Term> parse(Input input, WamlParser parser, WamlForm<?> form,
                                   @Nullable Parse<?> parseBlock) {
     if (parseBlock == null) {
-      final WamlTupleForm<?, ?, ?, ?> tupleForm;
-      if (form instanceof WamlTupleForm<?, ?, ?, ?>) {
-        tupleForm = (WamlTupleForm<?, ?, ?, ?>) form;
-      } else {
-        tupleForm = form.tupleForm();
+      if (!(form instanceof WamlTupleForm<?, ?, ?, ?>)) {
+        try {
+          form = form.tupleForm();
+        } catch (WamlException cause) {
+          // Only nullary and unary tuples will be parsed.
+        }
       }
-      if (tupleForm != null) {
-        parseBlock = parser.parseBlock(input, tupleForm);
-      } else {
-        parseBlock = parser.parseBlock(input, form);
-      }
+      parseBlock = parser.parseBlock(input, form);
     } else {
       parseBlock = parseBlock.consume(input);
     }
     if (parseBlock.isDone()) {
-      final Object value = parseBlock.get();
-      final Term term = Assume.<WamlForm<Object>>conforms(form).intoTerm(value);
+      final Object value = parseBlock.getUnchecked();
+      final Term term;
+      try {
+        term = Assume.<WamlForm<Object>>conforms(form).intoTerm(value);
+      } catch (TermException cause) {
+        return Parse.diagnostic(input, cause);
+      }
       if (value == term) {
         return Assume.conforms(parseBlock);
       } else {

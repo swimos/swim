@@ -16,16 +16,20 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base16;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
-import swim.codec.ParseException;
+import swim.codec.OutputException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
@@ -102,6 +106,7 @@ public final class UriFragment extends UriPart implements Comparable<UriFragment
     }
   }
 
+  @IntoForm
   @Override
   public String toString() {
     return this.toString(null);
@@ -121,109 +126,115 @@ public final class UriFragment extends UriPart implements Comparable<UriFragment
     }
   }
 
-  public static UriFragment parse(String part) {
+  @FromForm
+  public static @Nullable UriFragment from(String value) {
+    return UriFragment.parse(value).getOr(null);
+  }
+
+  public static Parse<UriFragment> parse(Input input) {
+    return ParseUriFragment.parse(input, null, 0, 1);
+  }
+
+  public static Parse<UriFragment> parse(String part) {
     Objects.requireNonNull(part);
-    final CacheMap<String, UriFragment> cache = UriFragment.cache();
-    UriFragment fragment = cache.get(part);
-    if (fragment == null) {
-      final Input input = new StringInput(part);
-      fragment = UriFragment.parse(input);
-      if (input.isCont()) {
-        throw new ParseException(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        throw new ParseException(input.getError());
+    final CacheMap<String, Parse<UriFragment>> cache = UriFragment.cache();
+    Parse<UriFragment> parseFragment = cache.get(part);
+    if (parseFragment == null) {
+      final StringInput input = new StringInput(part);
+      parseFragment = UriFragment.parse(input).complete(input);
+      if (parseFragment.isDone()) {
+        parseFragment = cache.put(part, parseFragment);
       }
-      fragment = cache.put(part, fragment);
     }
-    return fragment;
+    return parseFragment;
   }
 
-  public static UriFragment parse(Input input) {
-    final Utf8DecodedOutput<String> output = new Utf8DecodedOutput<String>(new StringOutput());
-    int c = 0;
-    do {
-      while (input.isCont()) {
-        c = input.head();
-        if (Uri.isFragmentChar(c)) {
-          input.step();
-          output.write(c);
-        } else {
-          break;
-        }
-      }
-      if (input.isCont() && c == '%') {
-        input.step();
-      } else if (input.isReady()) {
-        return UriFragment.identifier(output.get());
-      } else {
-        break;
-      }
-      int c1 = 0;
-      if (input.isCont()) {
-        c1 = input.head();
-        if (Base16.isDigit(c1)) {
-          input.step();
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-      int c2 = 0;
-      if (input.isCont()) {
-        c2 = input.head();
-        if (Base16.isDigit(c2)) {
-          input.step();
-          output.write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c2));
-          continue;
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-    } while (true);
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
+  private static final ThreadLocal<CacheMap<String, Parse<UriFragment>>> CACHE =
+      new ThreadLocal<CacheMap<String, Parse<UriFragment>>>();
 
-  public static UriFragment fromJsonString(String value) {
-    return UriFragment.parse(value);
-  }
-
-  public static String toJsonString(UriFragment fragment) {
-    return fragment.toString();
-  }
-
-  public static UriFragment fromWamlString(String value) {
-    return UriFragment.parse(value);
-  }
-
-  public static String toWamlString(UriFragment fragment) {
-    return fragment.toString();
-  }
-
-  private static final ThreadLocal<CacheMap<String, UriFragment>> CACHE = new ThreadLocal<CacheMap<String, UriFragment>>();
-
-  private static CacheMap<String, UriFragment> cache() {
-    CacheMap<String, UriFragment> cache = CACHE.get();
+  private static CacheMap<String, Parse<UriFragment>> cache() {
+    CacheMap<String, Parse<UriFragment>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.uri.fragment.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 128;
       }
-      cache = new LruCacheMap<String, UriFragment>(cacheSize);
+      cache = new LruCacheMap<String, Parse<UriFragment>>(cacheSize);
       CACHE.set(cache);
     }
     return cache;
+  }
+
+}
+
+final class ParseUriFragment extends Parse<UriFragment> {
+
+  final @Nullable Utf8DecodedOutput<String> output;
+  final int c1;
+  final int step;
+
+  ParseUriFragment(@Nullable Utf8DecodedOutput<String> output, int c1, int step) {
+    this.output = output;
+    this.c1 = c1;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<UriFragment> consume(Input input) {
+    return ParseUriFragment.parse(input, this.output, this.c1, this.step);
+  }
+
+  static Parse<UriFragment> parse(Input input, @Nullable Utf8DecodedOutput<String> output,
+                                  int c1, int step) {
+    int c = 0;
+    if (input.isReady() && output == null) {
+      output = new Utf8DecodedOutput<String>(new StringOutput());
+    }
+    do {
+      if (step == 1) {
+        while (input.isCont() && Uri.isFragmentChar(c = input.head())) {
+          Assume.nonNull(output).write(c);
+          input.step();
+        }
+        if (input.isCont() && c == '%') {
+          input.step();
+          step = 2;
+        } else if (input.isReady()) {
+          try {
+            return Parse.done(UriFragment.identifier(Assume.nonNull(output).get()));
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
+          }
+        }
+      }
+      if (step == 2) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          c1 = c;
+          input.step();
+          step = 3;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 3) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          Assume.nonNull(output).write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c));
+          c1 = 0;
+          input.step();
+          step = 1;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      break;
+    } while (true);
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriFragment(output, c1, step);
   }
 
 }

@@ -20,6 +20,8 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Objects;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -27,10 +29,12 @@ import swim.codec.Base10;
 import swim.codec.Base16;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
-import swim.codec.ParseException;
+import swim.codec.OutputException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
@@ -88,6 +92,7 @@ public abstract class UriHost implements Comparable<UriHost>, ToSource, ToString
     return Murmur3.seed(this.toString());
   }
 
+  @IntoForm
   @Override
   public abstract String toString();
 
@@ -133,183 +138,42 @@ public abstract class UriHost implements Comparable<UriHost>, ToSource, ToString
     }
   }
 
-  public static UriHost parse(String part) {
+  @FromForm
+  public static @Nullable UriHost from(String value) {
+    return UriHost.parse(value).getOr(null);
+  }
+
+  public static Parse<UriHost> parse(Input input) {
+    return ParseUriHost.parse(input);
+  }
+
+  public static Parse<UriHost> parse(String part) {
     Objects.requireNonNull(part);
-    final CacheMap<String, UriHost> cache = UriHost.cache();
-    UriHost host = cache.get(part);
-    if (host == null) {
-      final Input input = new StringInput(part);
-      host = UriHost.parse(input);
-      if (input.isCont()) {
-        throw new ParseException(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        throw new ParseException(input.getError());
-      }
-      host = cache.put(part, host);
-    }
-    return host;
-  }
-
-  public static UriHost parse(Input input) {
-    if (input.isCont()) {
-      if (input.head() == '[') {
-        return UriHost.parseHostLiteral(input);
-      } else {
-        return UriHost.parseHostAddress(input);
-      }
-    } else if (input.isDone()) {
-      return UriHost.name("");
-    }
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  private static UriHost parseHostAddress(Input input) {
-    final Utf8DecodedOutput<String> output = new Utf8DecodedOutput<String>(new StringOutput());
-    int c = 0;
-    int x = 0;
-    int i = 1;
-    do {
-      while (input.isCont()) {
-        c = input.head();
-        if (Base10.isDigit(c)) {
-          input.step();
-          output.write(c);
-          x = 10 * x + Base10.decodeDigit(c);
-        } else {
-          break;
-        }
-      }
-      if (input.isCont()) {
-        if (c == '.' && i < 4 && x <= 255) {
-          input.step();
-          output.write(c);
-          x = 0;
-          i += 1;
-          continue;
-        } else if (!Uri.isHostChar(c) && c != '%' && i == 4 && x <= 255) {
-          return UriHost.ipv4(output.get());
-        }
-      } else if (input.isReady()) {
-        if (i == 4 && x <= 255) {
-          return UriHost.ipv4(output.get());
-        } else {
-          return UriHost.name(output.get());
-        }
-      }
-      break;
-    } while (i <= 4);
-    do {
-      while (input.isCont()) {
-        c = input.head();
-        if (Uri.isHostChar(c)) {
-          input.step();
-          output.write(Character.toLowerCase(c));
-        } else {
-          break;
-        }
-      }
-      if (input.isCont() && c == '%') {
-        input.step();
-      } else if (input.isReady()) {
-        return UriHost.name(output.get());
-      } else {
-        break;
-      }
-      int c1 = 0;
-      if (input.isCont()) {
-        c1 = input.head();
-        if (Base16.isDigit(c1)) {
-          input.step();
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-      int c2 = 0;
-      if (input.isCont()) {
-        c2 = input.head();
-        if (Base16.isDigit(c2)) {
-          input.step();
-          output.write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c2));
-          continue;
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-    } while (true);
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  private static UriHost parseHostLiteral(Input input) {
-    final StringBuilder builder = new StringBuilder();
-    int c = 0;
-    if (input.isCont() && input.head() == '[') {
-      input.step();
-    } else if (input.isDone() || input.isError()) {
-      throw new ParseException(Diagnostic.expected('[', input));
-    }
-    while (input.isCont()) {
-      c = input.head();
-      if (Uri.isHostChar(c) || c == ':') {
-        input.step();
-        builder.appendCodePoint(Character.toLowerCase(c));
-      } else {
-        break;
+    final CacheMap<String, Parse<UriHost>> cache = UriHost.cache();
+    Parse<UriHost> parseHost = cache.get(part);
+    if (parseHost == null) {
+      final StringInput input = new StringInput(part);
+      parseHost = UriHost.parse(input).complete(input);
+      if (parseHost.isDone()) {
+        parseHost = cache.put(part, parseHost);
       }
     }
-    if (input.isCont() && c == ']') {
-      input.step();
-      return UriHost.ipv6(builder.toString());
-    } else if (input.isReady()) {
-      throw new ParseException(Diagnostic.expected(']', input));
-    }
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
+    return parseHost;
   }
 
-  public static UriHost fromJsonString(String value) {
-    return UriHost.parse(value);
-  }
+  private static final ThreadLocal<CacheMap<String, Parse<UriHost>>> CACHE =
+      new ThreadLocal<CacheMap<String, Parse<UriHost>>>();
 
-  public static String toJsonString(UriHost host) {
-    return host.toString();
-  }
-
-  public static UriHost fromWamlString(String value) {
-    return UriHost.parse(value);
-  }
-
-  public static String toWamlString(UriHost host) {
-    return host.toString();
-  }
-
-  private static final ThreadLocal<CacheMap<String, UriHost>> CACHE = new ThreadLocal<CacheMap<String, UriHost>>();
-
-  private static CacheMap<String, UriHost> cache() {
-    CacheMap<String, UriHost> cache = CACHE.get();
+  private static CacheMap<String, Parse<UriHost>> cache() {
+    CacheMap<String, Parse<UriHost>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.uri.host.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 64;
       }
-      cache = new LruCacheMap<String, UriHost>(cacheSize);
+      cache = new LruCacheMap<String, Parse<UriHost>>(cacheSize);
       CACHE.set(cache);
     }
     return cache;
@@ -483,6 +347,250 @@ final class UriHostUndefined extends UriHost {
   @Override
   public String toString() {
     return "";
+  }
+
+}
+
+final class ParseUriHost extends Parse<UriHost> {
+
+  @Override
+  public Parse<UriHost> consume(Input input) {
+    return ParseUriHost.parse(input);
+  }
+
+  static Parse<UriHost> parse(Input input) {
+    if (input.isCont()) {
+      if (input.head() == '[') {
+        return ParseUriHostLiteral.parse(input, null, 1);
+      } else {
+        return ParseUriHostAddress.parse(input, null, 0, 0, 1);
+      }
+    } else if (input.isDone()) {
+      return Parse.done(UriHost.name(""));
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriHost();
+  }
+
+}
+
+final class ParseUriHostAddress extends Parse<UriHost> {
+
+  final @Nullable Utf8DecodedOutput<String> output;
+  final int c1;
+  final int x;
+  final int step;
+
+  ParseUriHostAddress(@Nullable Utf8DecodedOutput<String> output,
+                      int c1, int x, int step) {
+    this.output = output;
+    this.c1 = c1;
+    this.x = x;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<UriHost> consume(Input input) {
+    return ParseUriHostAddress.parse(input, this.output, this.c1, this.x, this.step);
+  }
+
+  static Parse<UriHost> parse(Input input, @Nullable Utf8DecodedOutput<String> output,
+                              int c1, int x, int step) {
+    int c = 0;
+    if (input.isReady() && output == null) {
+      output = new Utf8DecodedOutput<String>(new StringOutput());
+    }
+    if (step == 1) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        x = Base10.decodeDigit(c);
+        Assume.nonNull(output).write(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
+        step = 9;
+      }
+    }
+    if (step == 2) {
+      while (input.isCont() && Base10.isDigit(c = input.head()) && x <= 255) {
+        x = 10 * x + Base10.decodeDigit(c);
+        Assume.nonNull(output).write(c);
+        input.step();
+      }
+      if (input.isCont() && c == '.' && x <= 255) {
+        Assume.nonNull(output).write(c);
+        input.step();
+        step = 3;
+      } else if (input.isReady()) {
+        step = 9;
+      }
+    }
+    if (step == 3) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        x = Base10.decodeDigit(c);
+        Assume.nonNull(output).write(c);
+        input.step();
+        step = 4;
+      } else if (input.isReady()) {
+        step = 9;
+      }
+    }
+    if (step == 4) {
+      while (input.isCont() && Base10.isDigit(c = input.head()) && x <= 255) {
+        x = 10 * x + Base10.decodeDigit(c);
+        Assume.nonNull(output).write(c);
+        input.step();
+      }
+      if (input.isCont() && c == '.' && x <= 255) {
+        Assume.nonNull(output).write(c);
+        input.step();
+        step = 5;
+      } else if (input.isReady()) {
+        step = 9;
+      }
+    }
+    if (step == 5) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        x = Base10.decodeDigit(c);
+        Assume.nonNull(output).write(c);
+        input.step();
+        step = 6;
+      } else if (input.isReady()) {
+        step = 9;
+      }
+    }
+    if (step == 6) {
+      while (input.isCont() && Base10.isDigit(c = input.head()) && x <= 255) {
+        x = 10 * x + Base10.decodeDigit(c);
+        Assume.nonNull(output).write(c);
+        input.step();
+      }
+      if (input.isCont() && c == '.' && x <= 255) {
+        Assume.nonNull(output).write(c);
+        input.step();
+        step = 7;
+      } else if (input.isReady()) {
+        step = 9;
+      }
+    }
+    if (step == 7) {
+      if (input.isCont() && Base10.isDigit(c = input.head())) {
+        x = Base10.decodeDigit(c);
+        Assume.nonNull(output).write(c);
+        input.step();
+        step = 8;
+      } else if (input.isReady()) {
+        step = 9;
+      }
+    }
+    if (step == 8) {
+      while (input.isCont() && Base10.isDigit(c = input.head()) && x <= 255) {
+        x = 10 * x + Base10.decodeDigit(c);
+        Assume.nonNull(output).write(c);
+        input.step();
+      }
+      if (input.isCont() && (Uri.isHostChar(c) || c != '%' || c > 255)) {
+        step = 9;
+      } else if (input.isReady()) {
+        try {
+          return Parse.done(UriHost.ipv4(Assume.nonNull(output).get()));
+        } catch (OutputException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+      }
+    }
+    do {
+      if (step == 9) {
+        while (input.isCont() && Uri.isHostChar(c = input.head())) {
+          Assume.nonNull(output).write(Character.toLowerCase(c));
+          input.step();
+        }
+        if (input.isCont() && c == '%') {
+          input.step();
+          step = 10;
+        } else if (input.isReady()) {
+          try {
+            return Parse.done(UriHost.name(Assume.nonNull(output).get()));
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
+          }
+        }
+      }
+      if (step == 10) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          c1 = c;
+          input.step();
+          step = 11;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 11) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          Assume.nonNull(output).write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c));
+          c1 = 0;
+          input.step();
+          step = 9;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      break;
+    } while (true);
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriHostAddress(output, c1, x, step);
+  }
+
+}
+
+final class ParseUriHostLiteral extends Parse<UriHost> {
+
+  final @Nullable StringBuilder builder;
+  final int step;
+
+  ParseUriHostLiteral(@Nullable StringBuilder builder, int step) {
+    this.builder = builder;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<UriHost> consume(Input input) {
+    return ParseUriHostLiteral.parse(input, this.builder, this.step);
+  }
+
+  static Parse<UriHost> parse(Input input, @Nullable StringBuilder builder, int step) {
+    int c = 0;
+    if (step == 1) {
+      if (input.isCont() && input.head() == '[') {
+        if (builder == null) {
+          builder = new StringBuilder();
+        }
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
+        return Parse.error(Diagnostic.expected('[', input));
+      }
+    }
+    if (step == 2) {
+      while (input.isCont() && ((c = input.head()) == ':' || Uri.isHostChar(c))) {
+        Assume.nonNull(builder).appendCodePoint(Character.toLowerCase(c));
+        input.step();
+      }
+      if (input.isCont() && c == ']') {
+        input.step();
+        return Parse.done(UriHost.ipv6(Assume.nonNull(builder).toString()));
+      } else if (input.isReady()) {
+        return Parse.error(Diagnostic.expected(']', input));
+      }
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriHostLiteral(builder, step);
   }
 
 }

@@ -219,10 +219,10 @@ public class WsOptions implements ToSource {
             try {
               serverMaxWindowBits = Integer.parseInt(value);
             } catch (NumberFormatException cause) {
-              throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid " + name + " parameter: " + key + "=" + value, cause);
+              throw new HttpException(HttpStatus.BAD_REQUEST, "invalid " + name + " parameter: " + key + "=" + value, cause);
             }
             if (serverMaxWindowBits < 8 || serverMaxWindowBits > 15) {
-              throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid " + name + " parameter: " + key + "=" + value);
+              throw new HttpException(HttpStatus.BAD_REQUEST, "invalid " + name + " parameter: " + key + "=" + value);
             }
           } else if ("client_max_window_bits".equals(key)) {
             if (value == null) {
@@ -230,15 +230,15 @@ public class WsOptions implements ToSource {
             } else {
               try {
                 clientMaxWindowBits = Integer.parseInt(value);
-              } catch (NumberFormatException error) {
-                throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid " + name + " parameter: " + key + "=" + value);
+              } catch (NumberFormatException cause) {
+                throw new HttpException(HttpStatus.BAD_REQUEST, "invalid " + name + " parameter: " + key + "=" + value);
               }
               if (clientMaxWindowBits < 8 || clientMaxWindowBits > 15) {
-                throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid " + name + " parameter: " + key + "=" + value);
+                throw new HttpException(HttpStatus.BAD_REQUEST, "invalid " + name + " parameter: " + key + "=" + value);
               }
             }
           } else {
-            throw new HttpException(HttpStatus.BAD_REQUEST, "Unknown " + name + " parameter: " + key + "=" + value);
+            throw new HttpException(HttpStatus.BAD_REQUEST, "unknown " + name + " parameter: " + key + "=" + value);
           }
         }
         return this.copy(this.maxFrameSize, this.maxMessageSize,
@@ -332,28 +332,28 @@ public class WsOptions implements ToSource {
       int maxFrameSize;
       try {
         maxFrameSize = Integer.parseInt(System.getProperty("swim.ws.max.frame.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         maxFrameSize = 16 * 1024 * 1024;
       }
 
       int maxMessageSize;
       try {
         maxMessageSize = Integer.parseInt(System.getProperty("swim.ws.max.message.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         maxMessageSize = 16 * 1024 * 1024;
       }
 
       int clientCompressionLevel;
       try {
         clientCompressionLevel = Integer.parseInt(System.getProperty("swim.ws.client.compression.level"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         clientCompressionLevel = 0;
       }
 
       int serverCompressionLevel;
       try {
         serverCompressionLevel = Integer.parseInt(System.getProperty("swim.ws.server.compression.level"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         serverCompressionLevel = 0;
       }
 
@@ -364,28 +364,28 @@ public class WsOptions implements ToSource {
       int clientMaxWindowBits;
       try {
         clientMaxWindowBits = Integer.parseInt(System.getProperty("swim.ws.client.max.window.bits"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         clientMaxWindowBits = 15;
       }
 
       int serverMaxWindowBits;
       try {
         serverMaxWindowBits = Integer.parseInt(System.getProperty("swim.ws.server.max.window.bits"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         serverMaxWindowBits = 15;
       }
 
       int deflateBufferSize;
       try {
         deflateBufferSize = Integer.parseInt(System.getProperty("swim.ws.deflate.buffer.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         deflateBufferSize = 4 * 1024;
       }
 
       int inflateBufferSize;
       try {
         inflateBufferSize = Integer.parseInt(System.getProperty("swim.ws.inflate.buffer.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         inflateBufferSize = 4 * 1024;
       }
 

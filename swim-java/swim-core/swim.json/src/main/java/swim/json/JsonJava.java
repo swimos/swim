@@ -33,14 +33,15 @@ import swim.codec.Base64;
 import swim.codec.ByteBufferOutput;
 import swim.codec.Input;
 import swim.codec.Output;
+import swim.codec.OutputException;
 import swim.codec.Parse;
-import swim.codec.ParseException;
 import swim.codec.StringOutput;
 import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.expr.ContextExpr;
 import swim.expr.ExprParser;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.expr.selector.ChildExpr;
 import swim.util.ArrayBuilder;
 import swim.util.ArrayIterator;
@@ -68,7 +69,7 @@ public final class JsonJava implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     if (javaType instanceof GenericArrayType) {
       return JsonJava.arrayForm(this.codec, ((GenericArrayType) javaType).getGenericComponentType());
     } else if (javaType instanceof Class<?>) {
@@ -76,35 +77,35 @@ public final class JsonJava implements JsonProvider, ToSource {
       if (javaClass.isArray()) {
         return JsonJava.arrayForm(this.codec, javaClass.getComponentType());
       } else if (javaClass == Void.TYPE) {
-        return VOID_FORM;
+        return JsonJava.voidForm();
       } else if (javaClass == Boolean.class || javaClass == Boolean.TYPE) {
-        return BOOLEAN_FORM;
+        return JsonJava.booleanForm();
       } else if (javaClass == Byte.class || javaClass == Byte.TYPE) {
-        return BYTE_FORM;
-      } else if (javaClass == Short.class || javaClass == Short.TYPE) {
-        return SHORT_FORM;
-      } else if (javaClass == Integer.class || javaClass == Integer.TYPE) {
-        return INT_FORM;
-      } else if (javaClass == Long.class || javaClass == Long.TYPE) {
-        return LONG_FORM;
-      } else if (javaClass == Float.class || javaClass == Float.TYPE) {
-        return FLOAT_FORM;
-      } else if (javaClass == Double.class || javaClass == Double.TYPE) {
-        return DOUBLE_FORM;
+        return JsonJava.byteForm();
       } else if (javaClass == Character.class || javaClass == Character.TYPE) {
-        return CHAR_FORM;
+        return JsonJava.charForm();
+      } else if (javaClass == Short.class || javaClass == Short.TYPE) {
+        return JsonJava.shortForm();
+      } else if (javaClass == Integer.class || javaClass == Integer.TYPE) {
+        return JsonJava.intForm();
+      } else if (javaClass == Long.class || javaClass == Long.TYPE) {
+        return JsonJava.longForm();
+      } else if (javaClass == Float.class || javaClass == Float.TYPE) {
+        return JsonJava.floatForm();
+      } else if (javaClass == Double.class || javaClass == Double.TYPE) {
+        return JsonJava.doubleForm();
       } else if (javaClass == String.class) {
-        return STRING_FORM;
+        return JsonJava.stringForm();
       } else if (Number.class.isAssignableFrom(javaClass)) {
-        return NUMBER_FORM;
+        return JsonJava.numberForm();
       } else if (ByteBuffer.class.isAssignableFrom(javaClass)) {
-        return BYTE_BUFFER_FORM;
+        return JsonJava.byteBufferForm();
       } else if (Instant.class.isAssignableFrom(javaClass)) {
-        return INSTANT_FORM;
+        return JsonJava.instantForm();
       } else if (InetAddress.class.isAssignableFrom(javaClass)) {
-        return INET_ADDRESS_FORM;
+        return JsonJava.inetAddressForm();
       } else if (InetSocketAddress.class.isAssignableFrom(javaClass)) {
-        return INET_SOCKET_ADDRESS_FORM;
+        return JsonJava.inetSocketAddressForm();
       }
     }
     return null;
@@ -134,120 +135,84 @@ public final class JsonJava implements JsonProvider, ToSource {
     return new JsonJava(codec, BUILTIN_PRIORITY);
   }
 
-  private static final JsonJava.VoidForm VOID_FORM = new JsonJava.VoidForm();
-
   public static JsonUndefinedForm<Void> voidForm() {
-    return VOID_FORM;
+    return JsonJava.VoidForm.INSTANCE;
   }
-
-  private static final JsonJava.NullForm NULL_FORM = new JsonJava.NullForm();
 
   public static JsonNullForm<Object> nullForm() {
-    return NULL_FORM;
+    return JsonJava.NullForm.INSTANCE;
   }
-
-  private static final JsonJava.BooleanForm BOOLEAN_FORM = new JsonJava.BooleanForm();
-
-  public static JsonForm<Boolean> booleanForm() {
-    return BOOLEAN_FORM;
-  }
-
-  private static final JsonJava.ByteForm BYTE_FORM = new JsonJava.ByteForm();
-
-  public static JsonNumberForm<Byte> byteForm() {
-    return BYTE_FORM;
-  }
-
-  private static final JsonJava.ShortForm SHORT_FORM = new JsonJava.ShortForm();
-
-  public static JsonNumberForm<Short> shortForm() {
-    return SHORT_FORM;
-  }
-
-  private static final JsonJava.IntForm INT_FORM = new JsonJava.IntForm();
-
-  public static JsonNumberForm<Integer> intForm() {
-    return INT_FORM;
-  }
-
-  private static final JsonJava.LongForm LONG_FORM = new JsonJava.LongForm();
-
-  public static JsonNumberForm<Long> longForm() {
-    return LONG_FORM;
-  }
-
-  private static final JsonJava.FloatForm FLOAT_FORM = new JsonJava.FloatForm();
-
-  public static JsonNumberForm<Float> floatForm() {
-    return FLOAT_FORM;
-  }
-
-  private static final JsonJava.DoubleForm DOUBLE_FORM = new JsonJava.DoubleForm();
-
-  public static JsonNumberForm<Double> doubleForm() {
-    return DOUBLE_FORM;
-  }
-
-  private static final JsonJava.CharForm CHAR_FORM = new JsonJava.CharForm();
-
-  public static JsonForm<Character> charForm() {
-    return CHAR_FORM;
-  }
-
-  private static final JsonJava.NumberForm NUMBER_FORM = new JsonJava.NumberForm();
-
-  public static JsonNumberForm<Number> numberForm() {
-    return NUMBER_FORM;
-  }
-
-  private static final JsonJava.IdentifierForm IDENTIFIER_FORM = new JsonJava.IdentifierForm();
 
   public static JsonIdentifierForm<Object> identifierForm() {
-    return IDENTIFIER_FORM;
+    return JsonJava.IdentifierForm.INSTANCE;
   }
 
-  private static final JsonJava.StringForm STRING_FORM = new JsonJava.StringForm();
+  public static JsonForm<Boolean> booleanForm() {
+    return JsonJava.BooleanForm.INSTANCE;
+  }
+
+  public static JsonNumberForm<Byte> byteForm() {
+    return JsonJava.ByteForm.INSTANCE;
+  }
+
+  public static JsonForm<Character> charForm() {
+    return JsonJava.CharForm.INSTANCE;
+  }
+
+  public static JsonNumberForm<Short> shortForm() {
+    return JsonJava.ShortForm.INSTANCE;
+  }
+
+  public static JsonNumberForm<Integer> intForm() {
+    return JsonJava.IntForm.INSTANCE;
+  }
+
+  public static JsonNumberForm<Long> longForm() {
+    return JsonJava.LongForm.INSTANCE;
+  }
+
+  public static JsonNumberForm<Float> floatForm() {
+    return JsonJava.FloatForm.INSTANCE;
+  }
+
+  public static JsonNumberForm<Double> doubleForm() {
+    return JsonJava.DoubleForm.INSTANCE;
+  }
+
+  public static JsonNumberForm<Number> numberForm() {
+    return JsonJava.NumberForm.INSTANCE;
+  }
 
   public static JsonStringForm<?, String> stringForm() {
-    return STRING_FORM;
+    return JsonJava.StringForm.INSTANCE;
   }
-
-  private static final JsonJava.KeyForm KEY_FORM = new JsonJava.KeyForm();
 
   public static JsonForm<String> keyForm() {
-    return KEY_FORM;
+    return JsonJava.KeyForm.INSTANCE;
   }
-
-  private static final JsonJava.ByteBufferForm BYTE_BUFFER_FORM = new JsonJava.ByteBufferForm();
 
   public static JsonForm<ByteBuffer> byteBufferForm() {
-    return BYTE_BUFFER_FORM;
+    return JsonJava.ByteBufferForm.INSTANCE;
   }
-
-  private static final JsonJava.InstantForm INSTANT_FORM = new JsonJava.InstantForm();
 
   public static JsonForm<Instant> instantForm() {
-    return INSTANT_FORM;
+    return JsonJava.InstantForm.INSTANCE;
   }
-
-  private static final JsonJava.InetAddressForm INET_ADDRESS_FORM = new JsonJava.InetAddressForm();
 
   public static JsonForm<InetAddress> inetAddressForm() {
-    return INET_ADDRESS_FORM;
+    return JsonJava.InetAddressForm.INSTANCE;
   }
 
-  private static final JsonJava.InetSocketAddressForm INET_SOCKET_ADDRESS_FORM = new JsonJava.InetSocketAddressForm();
-
   public static JsonForm<InetSocketAddress> inetSocketAddressForm() {
-    return INET_SOCKET_ADDRESS_FORM;
+    return JsonJava.InetSocketAddressForm.INSTANCE;
   }
 
   public static <E, A> JsonArrayForm<E, ?, A> arrayForm(Class<?> componentClass, JsonForm<E> componentForm) {
     return new JsonJava.ArrayForm<E, A>(componentClass, componentForm);
   }
 
-  public static <E, A> @Nullable JsonArrayForm<E, ?, A> arrayForm(JsonCodec codec, Type componentType) {
-    final JsonForm<E> componentForm = codec.forType(componentType);
+  public static <E, A> @Nullable JsonArrayForm<E, ?, A> arrayForm(JsonCodec codec, Type componentType) throws JsonFormException {
+    final JsonForm<E> componentForm = codec.getJsonForm(componentType);
     if (componentForm != null) {
       if (componentType instanceof WildcardType) {
         final Type[] upperBounds = ((WildcardType) componentType).getUpperBounds();
@@ -275,7 +240,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     return null;
   }
 
-  private static final ThreadLocal<CacheSet<String>> STRING_CACHE = new ThreadLocal<CacheSet<String>>();
+  private static final ThreadLocal<CacheSet<String>> STRING_CACHE =
+      new ThreadLocal<CacheSet<String>>();
 
   public static CacheSet<String> stringCache() {
     CacheSet<String> stringCache = STRING_CACHE.get();
@@ -283,7 +249,7 @@ public final class JsonJava implements JsonProvider, ToSource {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.json.string.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 512;
       }
       stringCache = new LruCacheSet<String>(cacheSize);
@@ -292,7 +258,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     return stringCache;
   }
 
-  private static final ThreadLocal<CacheSet<String>> KEY_CACHE = new ThreadLocal<CacheSet<String>>();
+  private static final ThreadLocal<CacheSet<String>> KEY_CACHE =
+      new ThreadLocal<CacheSet<String>>();
 
   public static CacheSet<String> keyCache() {
     CacheSet<String> keyCache = KEY_CACHE.get();
@@ -300,7 +267,7 @@ public final class JsonJava implements JsonProvider, ToSource {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.json.key.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 512;
       }
       keyCache = new LruCacheSet<String>(cacheSize);
@@ -322,7 +289,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Void value) {
+    public Term intoTerm(@Nullable Void value) throws TermException {
       return Term.from(value);
     }
 
@@ -342,6 +309,8 @@ public final class JsonJava implements JsonProvider, ToSource {
       return this.toSource();
     }
 
+    static final JsonJava.VoidForm INSTANCE = new JsonJava.VoidForm();
+
   }
 
   static final class NullForm implements JsonNullForm<Object>, ToSource {
@@ -357,7 +326,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Object value) {
+    public Term intoTerm(@Nullable Object value) throws TermException {
       return Term.from(value);
     }
 
@@ -376,6 +345,81 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.NullForm INSTANCE = new JsonJava.NullForm();
+
+  }
+
+  static final class IdentifierForm implements JsonIdentifierForm<Object>, ToSource {
+
+    @Override
+    public @Nullable Object identifierValue(String value, ExprParser parser) throws JsonException {
+      switch (value) {
+        case "undefined":
+          return null;
+        case "null":
+          return null;
+        case "false":
+          return Boolean.FALSE;
+        case "true":
+          return Boolean.TRUE;
+        default:
+          if (parser instanceof JsonParser && ((JsonParser) parser).options().exprsEnabled()) {
+            return new ChildExpr(ContextExpr.of(), Term.of(value));
+          } else {
+            throw new JsonException("unsupported identifier: " + value);
+          }
+      }
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Object value, JsonWriter writer) {
+      if (value == null) {
+        return writer.writeNull(output);
+      } else if (value instanceof Boolean) {
+        return writer.writeBoolean(output, ((Boolean) value).booleanValue());
+      } else {
+        return writer.writeIdentifier(output, value.toString());
+      }
+    }
+
+    @Override
+    public Term intoTerm(@Nullable Object value) throws TermException {
+      return Term.from(value);
+    }
+
+    @Override
+    public @Nullable Object fromTerm(Term term) {
+      if (term.isValidBoolean()) {
+        return Boolean.valueOf(term.booleanValue());
+      } else if (term.isValidString()) {
+        final String string = term.stringValue();
+        if (Json.parser().isIdentifier(string)) {
+          return string;
+        }
+      } else if (term instanceof ChildExpr) {
+        final ChildExpr childExpr = (ChildExpr) term;
+        final Term scope = childExpr.scope();
+        final Term key = childExpr.key();
+        if (ContextExpr.of().equals(scope) && key.isValidString()) {
+          return key.stringValue();
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JsonJava", "identifierForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JsonJava.IdentifierForm INSTANCE = new JsonJava.IdentifierForm();
 
   }
 
@@ -425,7 +469,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Boolean value) {
+    public Term intoTerm(@Nullable Boolean value) throws TermException {
       return Term.from(value);
     }
 
@@ -448,6 +492,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.BooleanForm INSTANCE = new JsonJava.BooleanForm();
 
   }
 
@@ -483,7 +529,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Byte value) {
+    public Term intoTerm(@Nullable Byte value) throws TermException {
       return Term.from(value);
     }
 
@@ -506,6 +552,68 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.ByteForm INSTANCE = new JsonJava.ByteForm();
+
+  }
+
+  static final class CharForm implements JsonNumberForm<Character>, ToSource {
+
+    @Override
+    public Character integerValue(long value) {
+      return Character.valueOf((char) value);
+    }
+
+    @Override
+    public Character hexadecimalValue(long value, int digits) {
+      return Character.valueOf((char) value);
+    }
+
+    @Override
+    public Character bigIntegerValue(String value) {
+      return Character.valueOf((char) new BigInteger(value).intValue());
+    }
+
+    @Override
+    public Character decimalValue(String value) {
+      return Character.valueOf((char) Double.parseDouble(value));
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Character value, JsonWriter writer) {
+      if (value != null) {
+        return writer.writeNumber(output, (int) value.charValue());
+      } else {
+        return writer.writeNull(output);
+      }
+    }
+
+    @Override
+    public Term intoTerm(@Nullable Character value) throws TermException {
+      return Term.from(value);
+    }
+
+    @Override
+    public @Nullable Character fromTerm(Term term) {
+      if (term.isValidChar()) {
+        return Character.valueOf(term.charValue());
+      } else {
+        return null;
+      }
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JsonJava", "charForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JsonJava.CharForm INSTANCE = new JsonJava.CharForm();
 
   }
 
@@ -541,7 +649,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Short value) {
+    public Term intoTerm(@Nullable Short value) throws TermException {
       return Term.from(value);
     }
 
@@ -564,6 +672,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.ShortForm INSTANCE = new JsonJava.ShortForm();
 
   }
 
@@ -599,7 +709,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Integer value) {
+    public Term intoTerm(@Nullable Integer value) throws TermException {
       return Term.from(value);
     }
 
@@ -622,6 +732,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.IntForm INSTANCE = new JsonJava.IntForm();
 
   }
 
@@ -657,7 +769,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Long value) {
+    public Term intoTerm(@Nullable Long value) throws TermException {
       return Term.from(value);
     }
 
@@ -680,6 +792,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.LongForm INSTANCE = new JsonJava.LongForm();
 
   }
 
@@ -719,7 +833,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Float value) {
+    public Term intoTerm(@Nullable Float value) throws TermException {
       return Term.from(value);
     }
 
@@ -742,6 +856,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.FloatForm INSTANCE = new JsonJava.FloatForm();
 
   }
 
@@ -781,7 +897,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Double value) {
+    public Term intoTerm(@Nullable Double value) throws TermException {
       return Term.from(value);
     }
 
@@ -805,63 +921,7 @@ public final class JsonJava implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-  }
-
-  static final class CharForm implements JsonNumberForm<Character>, ToSource {
-
-    @Override
-    public Character integerValue(long value) {
-      return Character.valueOf((char) value);
-    }
-
-    @Override
-    public Character hexadecimalValue(long value, int digits) {
-      return Character.valueOf((char) value);
-    }
-
-    @Override
-    public Character bigIntegerValue(String value) {
-      return Character.valueOf((char) new BigInteger(value).intValue());
-    }
-
-    @Override
-    public Character decimalValue(String value) {
-      return Character.valueOf((char) Double.parseDouble(value));
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable Character value, JsonWriter writer) {
-      if (value != null) {
-        return writer.writeNumber(output, (int) value.charValue());
-      } else {
-        return writer.writeNull(output);
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Character value) {
-      return Term.from(value);
-    }
-
-    @Override
-    public @Nullable Character fromTerm(Term term) {
-      if (term.isValidChar()) {
-        return Character.valueOf(term.charValue());
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonJava", "charForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
+    static final JsonJava.DoubleForm INSTANCE = new JsonJava.DoubleForm();
 
   }
 
@@ -915,12 +975,12 @@ public final class JsonJava implements JsonProvider, ToSource {
       } else if (value instanceof BigInteger) {
         return writer.writeNumber(output, (BigInteger) value);
       } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
+        return Write.error(new WriteException("unsupported value: " + value));
       }
     }
 
     @Override
-    public Term intoTerm(@Nullable Number value) {
+    public Term intoTerm(@Nullable Number value) throws TermException {
       return Term.from(value);
     }
 
@@ -944,76 +1004,7 @@ public final class JsonJava implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-  }
-
-  static final class IdentifierForm implements JsonIdentifierForm<Object>, ToSource {
-
-    @Override
-    public @Nullable Object identifierValue(String value, ExprParser parser) {
-      switch (value) {
-        case "undefined":
-          return null;
-        case "null":
-          return null;
-        case "false":
-          return Boolean.FALSE;
-        case "true":
-          return Boolean.TRUE;
-        default:
-          if (parser instanceof JsonParser && ((JsonParser) parser).options().exprsEnabled()) {
-            return new ChildExpr(ContextExpr.of(), Term.from(value));
-          } else {
-            throw new ParseException("Unexpected identifier: " + value);
-          }
-      }
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable Object value, JsonWriter writer) {
-      if (value == null) {
-        return writer.writeNull(output);
-      } else if (value instanceof Boolean) {
-        return writer.writeBoolean(output, ((Boolean) value).booleanValue());
-      } else {
-        return writer.writeIdentifier(output, value.toString());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Object value) {
-      return Term.from(value);
-    }
-
-    @Override
-    public @Nullable Object fromTerm(Term term) {
-      if (term.isValidBoolean()) {
-        return Boolean.valueOf(term.booleanValue());
-      } else if (term.isValidString()) {
-        final String string = term.stringValue();
-        if (Json.parser().isIdentifier(string)) {
-          return string;
-        }
-      } else if (term instanceof ChildExpr) {
-        final ChildExpr childExpr = (ChildExpr) term;
-        final Term scope = childExpr.scope();
-        final Term key = childExpr.key();
-        if (ContextExpr.of().equals(scope) && key.isValidString()) {
-          return key.stringValue();
-        }
-      }
-      return null;
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonJava", "identifierForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
+    static final JsonJava.NumberForm INSTANCE = new JsonJava.NumberForm();
 
   }
 
@@ -1045,7 +1036,7 @@ public final class JsonJava implements JsonProvider, ToSource {
 
     @Override
     public Term intoTerm(@Nullable String value) {
-      return Term.from(value);
+      return Term.of(value);
     }
 
     @Override
@@ -1067,6 +1058,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.StringForm INSTANCE = new JsonJava.StringForm();
 
   }
 
@@ -1110,7 +1103,7 @@ public final class JsonJava implements JsonProvider, ToSource {
 
     @Override
     public Term intoTerm(@Nullable String value) {
-      return Term.from(value);
+      return Term.of(value);
     }
 
     @Override
@@ -1133,6 +1126,8 @@ public final class JsonJava implements JsonProvider, ToSource {
       return this.toSource();
     }
 
+    static final JsonJava.KeyForm INSTANCE = new JsonJava.KeyForm();
+
   }
 
   static final class ByteBufferForm implements JsonStringForm<Output<ByteBuffer>, ByteBuffer>, ToSource {
@@ -1144,15 +1139,18 @@ public final class JsonJava implements JsonProvider, ToSource {
 
     @Override
     public Output<ByteBuffer> appendCodePoint(Output<ByteBuffer> builder, int c) {
-      return builder.write(c);
+      if (builder.isCont()) {
+        builder.write(c);
+      }
+      return builder;
     }
 
     @Override
-    public @Nullable ByteBuffer buildString(Output<ByteBuffer> builder) {
+    public @Nullable ByteBuffer buildString(Output<ByteBuffer> builder) throws JsonException {
       try {
         return builder.get();
-      } catch (IllegalStateException cause) {
-        throw new ParseException(cause.getMessage(), cause);
+      } catch (OutputException cause) {
+        throw new JsonException("malformed base-64 string", cause);
       }
     }
 
@@ -1160,7 +1158,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     public Write<?> write(Output<?> output, @Nullable ByteBuffer value, JsonWriter writer) {
       if (value != null) {
         final StringOutput stringOutput = new StringOutput();
-        Base64.standard().writeByteBuffer(stringOutput, value).checkDone();
+        Base64.standard().writeByteBuffer(stringOutput, value).assertDone();
         return writer.writeString(output, stringOutput.get());
       } else {
         return writer.writeNull(output);
@@ -1168,7 +1166,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable ByteBuffer value) {
+    public Term intoTerm(@Nullable ByteBuffer value) throws TermException {
       return Term.from(value);
     }
 
@@ -1187,6 +1185,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.ByteBufferForm INSTANCE = new JsonJava.ByteBufferForm();
 
   }
 
@@ -1242,7 +1242,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Instant value) {
+    public Term intoTerm(@Nullable Instant value) throws TermException {
       return Term.from(value);
     }
 
@@ -1262,6 +1262,8 @@ public final class JsonJava implements JsonProvider, ToSource {
       return this.toSource();
     }
 
+    static final JsonJava.InstantForm INSTANCE = new JsonJava.InstantForm();
+
   }
 
   static final class InetAddressForm implements JsonStringForm<StringBuilder, InetAddress>, ToSource {
@@ -1277,13 +1279,12 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public @Nullable InetAddress buildString(StringBuilder builder) {
+    public @Nullable InetAddress buildString(StringBuilder builder) throws JsonException {
       try {
         return InetAddress.getByName(builder.toString());
-      } catch (UnknownHostException | SecurityException e) {
-        // ignore
+      } catch (UnknownHostException | SecurityException cause) {
+        throw new JsonException(cause);
       }
-      return null;
     }
 
     @Override
@@ -1296,7 +1297,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable InetAddress value) {
+    public Term intoTerm(@Nullable InetAddress value) throws TermException {
       return Term.from(value);
     }
 
@@ -1316,6 +1317,8 @@ public final class JsonJava implements JsonProvider, ToSource {
       return this.toSource();
     }
 
+    static final JsonJava.InetAddressForm INSTANCE = new JsonJava.InetAddressForm();
+
   }
 
   static final class InetSocketAddressForm implements JsonStringForm<StringBuilder, InetSocketAddress>, ToSource {
@@ -1331,7 +1334,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public @Nullable InetSocketAddress buildString(StringBuilder builder) {
+    public @Nullable InetSocketAddress buildString(StringBuilder builder) throws JsonException {
       final String address = builder.toString();
       final int colonIndex = address.indexOf(':');
       if (colonIndex >= 0) {
@@ -1339,8 +1342,8 @@ public final class JsonJava implements JsonProvider, ToSource {
           final String host = address.substring(0, colonIndex);
           final int port = Integer.parseInt(address.substring(colonIndex + 1));
           return InetSocketAddress.createUnresolved(host, port);
-        } catch (IllegalArgumentException e) {
-          // ignore
+        } catch (IllegalArgumentException cause) {
+          throw new JsonException(cause);
         }
       }
       return null;
@@ -1368,7 +1371,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable InetSocketAddress value) {
+    public Term intoTerm(@Nullable InetSocketAddress value) throws TermException {
       return Term.from(value);
     }
 
@@ -1387,6 +1390,8 @@ public final class JsonJava implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonJava.InetSocketAddressForm INSTANCE = new JsonJava.InetSocketAddressForm();
 
   }
 
@@ -1431,7 +1436,7 @@ public final class JsonJava implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable A value) {
+    public Term intoTerm(@Nullable A value) throws TermException {
       return Term.from(value);
     }
 

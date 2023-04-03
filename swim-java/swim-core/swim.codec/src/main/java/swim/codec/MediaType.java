@@ -14,6 +14,7 @@
 
 package swim.codec;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -137,14 +138,18 @@ public final class MediaType implements ToSource, ToString {
   }
 
   @Override
-  public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+  public void writeString(Appendable output) throws IOException {
+    try {
+      this.write(StringOutput.from(output)).checkDone();
+    } catch (WriteException cause) {
+      throw new IOException("write failed", cause);
+    }
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output); // swallow write errors to ensure toString never fails
     return output.get();
   }
 
@@ -165,34 +170,31 @@ public final class MediaType implements ToSource, ToString {
     return new ParseMediaType(null, null, ArrayMap.empty(), null, null, 1);
   }
 
-  public static MediaType parse(String string) {
+  public static Parse<MediaType> parse(String string) {
     Objects.requireNonNull(string);
-    final CacheMap<String, MediaType> cache = MediaType.cache();
-    MediaType mediaType = cache.get(string);
-    if (mediaType == null) {
-      final Input input = new StringInput(string);
-      Parse<MediaType> parse = MediaType.parse(input);
-      if (input.isCont() && !parse.isError()) {
-        parse = Parse.error(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        parse = Parse.error(input.getError());
+    final CacheMap<String, Parse<MediaType>> cache = MediaType.cache();
+    Parse<MediaType> parseMediaType = cache.get(string);
+    if (parseMediaType == null) {
+      final StringInput input = new StringInput(string);
+      parseMediaType = MediaType.parse(input).complete(input);
+      if (parseMediaType.isDone()) {
+        parseMediaType = cache.put(string, parseMediaType);
       }
-      mediaType = cache.put(string, parse.getNonNull());
     }
-    return mediaType;
+    return parseMediaType;
   }
 
-  private static @Nullable CacheMap<String, MediaType> cache;
+  private static @Nullable CacheMap<String, Parse<MediaType>> cache;
 
-  static CacheMap<String, MediaType> cache() {
+  static CacheMap<String, Parse<MediaType>> cache() {
     if (MediaType.cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.codec.media.type.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 64;
       }
-      MediaType.cache = new LruCacheMap<String, MediaType>(cacheSize);
+      MediaType.cache = new LruCacheMap<String, Parse<MediaType>>(cacheSize);
     }
     return MediaType.cache;
   }
@@ -284,30 +286,19 @@ final class ParseMediaType extends Parse<MediaType> {
                                 @Nullable StringBuilder valueBuilder, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (MediaType.isTokenChar(c)) {
-          input.step();
-          typeBuilder = new StringBuilder();
-          typeBuilder.appendCodePoint(c);
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("media type", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+        typeBuilder = new StringBuilder();
+        typeBuilder.appendCodePoint(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("media type", input));
       }
     }
     if (step == 2) {
-      typeBuilder = Assume.nonNull(typeBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (MediaType.isTokenChar(c)) {
-          input.step();
-          typeBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+        Assume.nonNull(typeBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isCont() && c == '/') {
         input.step();
@@ -317,30 +308,19 @@ final class ParseMediaType extends Parse<MediaType> {
       }
     }
     if (step == 3) {
-      if (input.isCont()) {
-        c = input.head();
-        if (MediaType.isTokenChar(c)) {
-          input.step();
-          subtypeBuilder = new StringBuilder();
-          subtypeBuilder.appendCodePoint(c);
-          step = 4;
-        } else {
-          return Parse.error(Diagnostic.expected("media subtype", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+        subtypeBuilder = new StringBuilder();
+        subtypeBuilder.appendCodePoint(c);
+        input.step();
+        step = 4;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("media subtype", input));
       }
     }
     if (step == 4) {
-      subtypeBuilder = Assume.nonNull(subtypeBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (MediaType.isTokenChar(c)) {
-          input.step();
-          subtypeBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+        Assume.nonNull(subtypeBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
         step = 5;
@@ -348,57 +328,35 @@ final class ParseMediaType extends Parse<MediaType> {
     }
     do {
       if (step == 5) {
-        typeBuilder = Assume.nonNull(typeBuilder);
-        subtypeBuilder = Assume.nonNull(subtypeBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == ';') {
           input.step();
           step = 6;
         } else if (input.isReady()) {
-          return Parse.done(MediaType.of(typeBuilder.toString(),
-                                         subtypeBuilder.toString(),
+          return Parse.done(MediaType.of(Assume.nonNull(typeBuilder).toString(),
+                                         Assume.nonNull(subtypeBuilder).toString(),
                                          params));
         }
       }
       if (step == 6) {
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isSpace(c = input.head())) {
+          input.step();
         }
-        if (input.isCont()) {
-          if (MediaType.isTokenChar(c)) {
-            keyBuilder = new StringBuilder();
-            input.step();
-            keyBuilder.appendCodePoint(c);
-            step = 7;
-          } else {
-            return Parse.error(Diagnostic.expected("param name", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && MediaType.isTokenChar(c)) {
+          keyBuilder = new StringBuilder();
+          keyBuilder.appendCodePoint(c);
+          input.step();
+          step = 7;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("param name", input));
         }
       }
       if (step == 7) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isTokenChar(c)) {
-            input.step();
-            keyBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+          Assume.nonNull(keyBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont() && c == '=') {
           input.step();
@@ -421,34 +379,22 @@ final class ParseMediaType extends Parse<MediaType> {
         }
       }
       if (step == 9) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (MediaType.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 10;
-          } else {
-            return Parse.error(Diagnostic.expected("param value", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 10;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("param value", input));
         }
       }
       if (step == 10) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isReady()) {
-          params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+          params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                  Assume.nonNull(valueBuilder).toString());
           keyBuilder = null;
           valueBuilder = null;
           step = 5;
@@ -456,48 +402,34 @@ final class ParseMediaType extends Parse<MediaType> {
         }
       }
       if (step == 11) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isQuotedChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isQuotedChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
-        if (input.isCont()) {
+        if (input.isCont() && (c == '"' || c == '\\')) {
           if (c == '"') {
-            input.step();
-            params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+            params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                    Assume.nonNull(valueBuilder).toString());
             keyBuilder = null;
             valueBuilder = null;
+            input.step();
             step = 5;
             continue;
-          } else if (c == '\\') {
+          } else { // c == '\\'
             input.step();
             step = 12;
-          } else {
-            return Parse.error(Diagnostic.unexpected(input));
           }
-        } else if (input.isDone()) {
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 12) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (MediaType.isEscapeChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 11;
-            continue;
-          } else {
-            return Parse.error(Diagnostic.expected("escape character", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && MediaType.isEscapeChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 11;
+          continue;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
@@ -551,7 +483,7 @@ final class WriteMediaType extends Write<Object> {
     int c = 0;
     if (step == 1) {
       if (type.length() == 0) {
-        return Write.error(new WriteException("Blank media type"));
+        return Write.error(new WriteException("blank media type"));
       }
       while (index < type.length() && output.isCont()) {
         c = type.codePointAt(index);
@@ -559,7 +491,7 @@ final class WriteMediaType extends Write<Object> {
           output.write(c);
           index = type.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid media type: " + type));
+          return Write.error(new WriteException("invalid media type: " + type));
         }
       }
       if (index >= type.length()) {
@@ -573,7 +505,7 @@ final class WriteMediaType extends Write<Object> {
     }
     if (step == 3) {
       if (subtype.length() == 0) {
-        return Write.error(new WriteException("Blank media subtype"));
+        return Write.error(new WriteException("blank media subtype"));
       }
       while (index < subtype.length() && output.isCont()) {
         c = subtype.codePointAt(index);
@@ -581,7 +513,7 @@ final class WriteMediaType extends Write<Object> {
           output.write(c);
           index = subtype.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid media subtype: " + subtype));
+          return Write.error(new WriteException("invalid media subtype: " + subtype));
         }
       }
       if (index >= subtype.length()) {
@@ -610,7 +542,7 @@ final class WriteMediaType extends Write<Object> {
       if (step == 6) {
         key = Assume.nonNull(key);
         if (key.length() == 0) {
-          return Write.error(new WriteException("Blank param key"));
+          return Write.error(new WriteException("blank param key"));
         }
         while (index < key.length() && output.isCont()) {
           c = key.codePointAt(index);
@@ -618,7 +550,7 @@ final class WriteMediaType extends Write<Object> {
             output.write(c);
             index = key.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid param key: " + key));
+            return Write.error(new WriteException("invalid param key: " + key));
           }
         }
         if (index >= key.length()) {
@@ -627,9 +559,8 @@ final class WriteMediaType extends Write<Object> {
         }
       }
       if (step == 7 && output.isCont()) {
-        value = Assume.nonNull(value);
         output.write('=');
-        if (MediaType.isToken(value)) {
+        if (MediaType.isToken(Assume.nonNull(value))) {
           step = 8;
         } else {
           step = 9;
@@ -667,7 +598,7 @@ final class WriteMediaType extends Write<Object> {
               escape = c;
               step = 11;
             } else {
-              return Write.error(new WriteException("Invalid param value: " + value));
+              return Write.error(new WriteException("invalid param value: " + value));
             }
             continue;
           } else {
@@ -694,7 +625,7 @@ final class WriteMediaType extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

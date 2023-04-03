@@ -16,7 +16,9 @@ package swim.codec;
 
 import java.io.Flushable;
 import java.io.IOException;
+import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -95,8 +97,8 @@ public final class StringOutput extends Output<String> implements Appendable {
         } else {
           this.output.append((char) 0xFFFD); // invalid code point
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -107,8 +109,8 @@ public final class StringOutput extends Output<String> implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(c);
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -119,8 +121,8 @@ public final class StringOutput extends Output<String> implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(csq);
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -131,8 +133,8 @@ public final class StringOutput extends Output<String> implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(csq, start, end);
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -143,14 +145,57 @@ public final class StringOutput extends Output<String> implements Appendable {
     if (this.error == null && this.output instanceof Flushable) {
       try {
         ((Flushable) this.output).flush();
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
   }
 
+  @CheckReturnValue
   @Override
   public String get() {
+    return this.output.toString();
+  }
+
+  @CheckReturnValue
+  @Override
+  public String getNonNull() {
+    return this.output.toString();
+  }
+
+  @CheckReturnValue
+  @Override
+  public String getUnchecked() {
+    return this.output.toString();
+  }
+
+  @CheckReturnValue
+  @Override
+  public String getNonNullUnchecked() {
+    return this.output.toString();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable String getOr(@Nullable String defaultValue) {
+    return this.output.toString();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull String getNonNullOr(@NonNull String defaultValue) {
+    return this.output.toString();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable String getOrElse(Supplier<? extends String> supplier) {
+    return this.output.toString();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull String getNonNullOrElse(Supplier<? extends String> supplier) {
     return this.output.toString();
   }
 

@@ -26,7 +26,9 @@ import swim.codec.BinaryInputBuffer;
 import swim.codec.BinaryOutput;
 import swim.codec.BinaryOutputBuffer;
 import swim.codec.Decode;
+import swim.codec.DecodeException;
 import swim.codec.Encode;
+import swim.codec.EncodeException;
 import swim.codec.InputBuffer;
 import swim.codec.Parse;
 import swim.codec.StringInput;
@@ -48,26 +50,26 @@ public final class WsAssertions {
   }
 
   static String describeParser(String string, int split, int offset) {
-    final Notation notation = new Notation();
+    final Notation notation = Notation.of();
     if (offset < split) {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, offset));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(offset, split));
-      notation.append(" + ");
-      notation.appendSource(string.substring(split));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, offset))
+              .append("; remaining: ")
+              .appendSource(string.substring(offset, split))
+              .append(" + ")
+              .appendSource(string.substring(split));
     } else if (offset > split) {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, split));
-      notation.append(" + ");
-      notation.appendSource(string.substring(split, offset));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(offset));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, split))
+              .append(" + ")
+              .appendSource(string.substring(split, offset))
+              .append("; remaining: ")
+              .appendSource(string.substring(offset));
     } else {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, split));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(split));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, split))
+              .append("; remaining: ")
+              .appendSource(string.substring(split));
     }
     return notation.toString();
   }
@@ -84,7 +86,7 @@ public final class WsAssertions {
       parse = parse.consume(input);
 
       if (parse.isDone()) {
-        final Object actual = parse.get();
+        final Object actual = parse.getUnchecked();
         if (!Objects.equals(expected, actual)) {
           assertEquals(expected, actual, WsAssertions.describeParser(string, split, (int) input.offset()));
         }
@@ -112,12 +114,12 @@ public final class WsAssertions {
       input.limit(n).asLast(true);
       decode = decode.consume(input);
       if (decode.isError()) {
-        throw new JUnitException("Decode failed", decode.getError());
+        throw new JUnitException("decode failed", decode.getError());
       }
       assertFalse(decode.isCont());
       assertTrue(decode.isDone());
       assertFalse(decode.isError());
-      assertEquals(expected, decode.get());
+      assertEquals(expected, decode.getUnchecked());
     }
   }
 
@@ -134,7 +136,7 @@ public final class WsAssertions {
       output.limit(output.capacity()).asLast(true);
       write = write.produce(output);
       if (write.isError()) {
-        throw new JUnitException("Write failure", write.getError());
+        throw new JUnitException("write failed", write.getError());
       }
       assertFalse(write.isCont());
       assertTrue(write.isDone());
@@ -157,18 +159,19 @@ public final class WsAssertions {
       encode = encode.produce(output);
     }
     if (encode.isError()) {
-      throw new JUnitException("Encode failure", encode.getError());
+      throw new JUnitException("encode failed", encode.getError());
     }
     assertFalse(encode.isCont());
     assertTrue(encode.isDone());
     actual.flip();
     if (!actual.equals(expected)) {
-      final Notation notation = new Notation();
-      notation.append("expected ");
-      notation.append(new String(expected.array(), expected.arrayOffset(), expected.remaining(), Charset.forName("UTF-8")));
-      notation.append(", but found ");
-      notation.append(new String(actual.array(), actual.arrayOffset(), actual.remaining(), Charset.forName("UTF-8")));
-      fail(notation.toString());
+      fail(Notation.of().append("expected ")
+                        .append(new String(expected.array(), expected.arrayOffset(),
+                                           expected.remaining(), Charset.forName("UTF-8")))
+                        .append(", but found ")
+                        .append(new String(actual.array(), actual.arrayOffset(),
+                                           actual.remaining(), Charset.forName("UTF-8")))
+                        .toString());
     }
   }
 
@@ -188,19 +191,23 @@ public final class WsAssertions {
       buffer.rewind();
       decoder.reset();
 
-      input.position(0).limit(i).asLast(false);
-      Decode<WsFrame<T>> decodeMessage = decoder.decodeMessage(input, codec).checkError();
-      while (decodeMessage.isDone() && decodeMessage.get() instanceof WsFragment<?>) {
-        decodeMessage = decoder.decodeContinuation(input, codec, (WsFragment<T>) decodeMessage.getNonNull()).checkError();
-      }
+      try {
+        input.position(0).limit(i).asLast(false);
+        Decode<WsFrame<T>> decodeMessage = decoder.decodeMessage(input, codec).checkError();
+        while (decodeMessage.isDone() && decodeMessage.get() instanceof WsFragment<?>) {
+          decodeMessage = decoder.decodeContinuation(input, codec, (WsFragment<T>) decodeMessage.getNonNull()).checkError();
+        }
 
-      input.limit(n).asLast(true);
-      decodeMessage = decodeMessage.consume(input).checkError();
-      while (decodeMessage.isDone() && decodeMessage.get() instanceof WsFragment<?>) {
-        decodeMessage = decoder.decodeContinuation(input, codec, (WsFragment<T>) decodeMessage.getNonNull()).checkError();
-      }
+        input.limit(n).asLast(true);
+        decodeMessage = decodeMessage.consume(input).checkError();
+        while (decodeMessage.isDone() && decodeMessage.get() instanceof WsFragment<?>) {
+          decodeMessage = decoder.decodeContinuation(input, codec, (WsFragment<T>) decodeMessage.getNonNull()).checkError();
+        }
 
-      assertEquals(expected, decodeMessage.get());
+        assertEquals(expected, decodeMessage.get());
+      } catch (DecodeException cause) {
+        throw new JUnitException("decode failed", cause);
+      }
     }
   }
 
@@ -219,16 +226,20 @@ public final class WsAssertions {
     }
     final ByteBuffer encoded = ByteBuffer.allocate(bufferTotal);
     final BinaryOutputBuffer output = new BinaryOutputBuffer(encoded);
-    Encode<?> encodeMessage = encoder.encodeMessage(frame);
-    for (int i = 0; i < bufferSizes.length; i += 1) {
-      final int bufferSize = bufferSizes[i];
-      output.limit(Math.min(output.position() + bufferSize, output.capacity())).asLast(i == bufferSizes.length);
-      encodeMessage = encodeMessage.produce(output).checkError();
-      while (encodeMessage.isDone() && encodeMessage.get() instanceof WsContinuation<?>) {
-        encodeMessage = encoder.encodeContinuation(output, (WsContinuation<?>) encodeMessage.getNonNull()).checkError();
+    try {
+      Encode<?> encodeMessage = encoder.encodeMessage(frame);
+      for (int i = 0; i < bufferSizes.length; i += 1) {
+        final int bufferSize = bufferSizes[i];
+        output.limit(Math.min(output.position() + bufferSize, output.capacity())).asLast(i == bufferSizes.length);
+        encodeMessage = encodeMessage.produce(output).checkError();
+        while (encodeMessage.isDone() && encodeMessage.get() instanceof WsContinuation<?>) {
+          encodeMessage = encoder.encodeContinuation(output, (WsContinuation<?>) encodeMessage.getNonNull()).checkError();
+        }
       }
+      assertEquals(expected, encoded.flip());
+    } catch (EncodeException cause) {
+      throw new JUnitException("encode failed", cause);
     }
-    assertEquals(expected, encoded.flip());
   }
 
   static void assertTranscodes(WsEncoder encoder, WsDecoder decoder, int bufferSize,
@@ -243,38 +254,46 @@ public final class WsAssertions {
     int encodeIndex = 0;
     int decodeIndex = 0;
     do {
-      if (encodeMessage != null && !encodeMessage.isDone()) {
-        encodeMessage = encodeMessage.produce(output).checkError();
-      } else if (encodeIndex < messageCount) {
-        if (encodeMessage == null) {
-          final WsFrame<?> message = messageSupplier.get();
-          decodeQueue = decodeQueue.appended(message);
-          encodeMessage = encoder.encodeMessage(output, message).checkError();
-        } else {
-          encodeMessage = encoder.encodeContinuation(output, (WsContinuation<?>) encodeMessage.getNonNull()).checkError();
+      try {
+        if (encodeMessage != null && !encodeMessage.isDone()) {
+          encodeMessage = encodeMessage.produce(output).checkError();
+        } else if (encodeIndex < messageCount) {
+          if (encodeMessage == null) {
+            final WsFrame<?> message = messageSupplier.get();
+            decodeQueue = decodeQueue.appended(message);
+            encodeMessage = encoder.encodeMessage(output, message).checkError();
+          } else {
+            encodeMessage = encoder.encodeContinuation(output, (WsContinuation<?>) encodeMessage.getNonNull()).checkError();
+          }
         }
+      } catch (EncodeException cause) {
+        throw new JUnitException("encode failed", cause);
       }
       buffer.flip();
-      if (decodeMessage != null && !decodeMessage.isDone()) {
-        decodeMessage = decodeMessage.consume(input).checkError();
-      } else if (decodeIndex < messageCount) {
-        final WsFrame<?> message = Assume.nonNull(decodeQueue.head());
-        if (decodeMessage == null) {
-          codec = WsTestCodec.of(message.transcoder(), message.transcoder());
-          decodeMessage = decoder.decodeMessage(input, codec).checkError();
-        } else {
-          decodeMessage = decoder.decodeContinuation(input, Assume.conformsNonNull(codec),
-                                                     (WsFragment<?>) decodeMessage.getNonNull()).checkError();
+      try {
+        if (decodeMessage != null && !decodeMessage.isDone()) {
+          decodeMessage = decodeMessage.consume(input).checkError();
+        } else if (decodeIndex < messageCount) {
+          final WsFrame<?> message = Assume.nonNull(decodeQueue.head());
+          if (decodeMessage == null) {
+            codec = WsTestCodec.of(message.transcoder(), message.transcoder());
+            decodeMessage = decoder.decodeMessage(input, codec).checkError();
+          } else {
+            decodeMessage = decoder.decodeContinuation(input, Assume.conformsNonNull(codec),
+                                                       (WsFragment<?>) decodeMessage.getNonNull()).checkError();
+          }
         }
+      } catch (DecodeException cause) {
+        throw new JUnitException("decode failed", cause);
       }
       buffer.compact();
-      if (encodeMessage != null && encodeMessage.isDone() && !(encodeMessage.get() instanceof WsContinuation<?>)) {
+      if (encodeMessage != null && encodeMessage.isDone() && !(encodeMessage.getUnchecked() instanceof WsContinuation<?>)) {
         encodeMessage = null;
         encodeIndex += 1;
       }
-      if (decodeMessage != null && decodeMessage.isDone() && !(decodeMessage.get() instanceof WsFragment<?>)) {
+      if (decodeMessage != null && decodeMessage.isDone() && !(decodeMessage.getUnchecked() instanceof WsFragment<?>)) {
         final WsFrame<?> message = Assume.nonNull(decodeQueue.head());
-        assertEquals(message, decodeMessage.get(), "message " + decodeIndex);
+        assertEquals(message, decodeMessage.getUnchecked(), "message " + decodeIndex);
         decodeMessage = null;
         decodeIndex += 1;
         decodeQueue = decodeQueue.tail();

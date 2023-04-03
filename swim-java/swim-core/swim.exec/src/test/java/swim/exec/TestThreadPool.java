@@ -34,10 +34,10 @@ public class TestThreadPool extends ThreadPool {
   public void await(CountDownLatch latch, int millis) {
     try {
       if (!latch.await(millis, TimeUnit.MILLISECONDS)) {
-        throw new JUnitException("Await timeout");
+        throw new JUnitException("await timeout");
       }
-    } catch (InterruptedException error) {
-      throw new JUnitException("Interrupted", error);
+    } catch (InterruptedException cause) {
+      throw new JUnitException("interrupted", cause);
     }
   }
 
@@ -48,10 +48,10 @@ public class TestThreadPool extends ThreadPool {
   public void await(CyclicBarrier barrier, int millis) {
     try {
       barrier.await(millis, TimeUnit.MILLISECONDS);
-    } catch (TimeoutException error) {
-      throw new JUnitException("Await timeout", error);
-    } catch (BrokenBarrierException | InterruptedException error) {
-      throw new JUnitException("Interrupted", error);
+    } catch (TimeoutException cause) {
+      throw new JUnitException("await timeout", cause);
+    } catch (BrokenBarrierException | InterruptedException cause) {
+      throw new JUnitException("interrupted", cause);
     }
   }
 

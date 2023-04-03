@@ -30,6 +30,7 @@ import swim.annotations.Since;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -52,7 +53,7 @@ public final class JsonCollections implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -66,11 +67,13 @@ public final class JsonCollections implements JsonProvider, ToSource {
     } else {
       return null;
     }
+
     if (List.class.isAssignableFrom(javaClass)) {
       return JsonCollections.listForm(this.codec, javaClass, javaType);
     } else if (Map.class.isAssignableFrom(javaClass)) {
       return JsonCollections.mapForm(this.codec, javaClass, javaType);
     }
+
     return null;
   }
 
@@ -119,7 +122,7 @@ public final class JsonCollections implements JsonProvider, ToSource {
     return new JsonCollections.ListForm<E, T>(constructor, elementForm);
   }
 
-  public static <E, T extends List<E>> @Nullable JsonArrayForm<E, T, T> listForm(JsonCodec codec, Class<?> listClass, Type listType) {
+  public static <E, T extends List<E>> @Nullable JsonArrayForm<E, T, T> listForm(JsonCodec codec, Class<?> listClass, Type listType) throws JsonFormException {
     do {
       Type[] typeArguments = null;
       if (listType instanceof ParameterizedType) {
@@ -133,15 +136,11 @@ public final class JsonCollections implements JsonProvider, ToSource {
       if (listType == List.class) {
         final JsonForm<E> elementForm;
         if (typeArguments != null && typeArguments.length == 1) {
-          elementForm = codec.forType(typeArguments[0]);
+          elementForm = codec.getJsonForm(typeArguments[0]);
         } else {
           elementForm = Assume.conforms(codec);
         }
-        if (elementForm != null) {
-          return JsonCollections.listForm(listClass, elementForm);
-        } else {
-          return null;
-        }
+        return JsonCollections.listForm(listClass, elementForm);
       } else if (listType instanceof Class<?>) {
         final Class<?> baseClass = (Class<?>) listType;
         final Type[] interfaceTypes = baseClass.getGenericInterfaces();
@@ -182,7 +181,7 @@ public final class JsonCollections implements JsonProvider, ToSource {
     return new JsonCollections.MapForm<K, V, T>(constructor, keyForm, valueForm);
   }
 
-  public static <K, V, T extends Map<K, V>> @Nullable JsonObjectForm<K, V, T, T> mapForm(JsonCodec codec, Class<?> mapClass, Type mapType) {
+  public static <K, V, T extends Map<K, V>> @Nullable JsonObjectForm<K, V, T, T> mapForm(JsonCodec codec, Class<?> mapClass, Type mapType) throws JsonFormException {
     do {
       Type[] typeArguments = null;
       if (mapType instanceof ParameterizedType) {
@@ -202,21 +201,17 @@ public final class JsonCollections implements JsonProvider, ToSource {
             if (bounds.length == 1 && bounds[0] == Object.class) {
               keyForm = Assume.conforms(JsonJava.keyForm());
             } else {
-              keyForm = codec.forType(typeArguments[0]);
+              keyForm = codec.getJsonForm(typeArguments[0]);
             }
           } else {
-            keyForm = codec.forType(typeArguments[0]);
+            keyForm = codec.getJsonForm(typeArguments[0]);
           }
-          valueForm = codec.forType(typeArguments[1]);
+          valueForm = codec.getJsonForm(typeArguments[1]);
         } else {
           keyForm = Assume.conforms(JsonJava.keyForm());
           valueForm = Assume.conforms(codec);
         }
-        if (keyForm != null && valueForm != null) {
-          return JsonCollections.mapForm(mapClass, keyForm, valueForm);
-        } else {
-          return null;
-        }
+        return JsonCollections.mapForm(mapClass, keyForm, valueForm);
       } else if (mapType instanceof Class<?>) {
         final Class<?> baseClass = (Class<?>) mapType;
         final Type[] interfaceTypes = baseClass.getGenericInterfaces();
@@ -250,11 +245,11 @@ public final class JsonCollections implements JsonProvider, ToSource {
     }
 
     @Override
-    public T arrayBuilder() {
+    public T arrayBuilder() throws JsonException {
       try {
         return this.constructor.newInstance();
       } catch (ReflectiveOperationException cause) {
-        throw new UnsupportedOperationException(cause);
+        throw new JsonException("unable to construct array builder", cause);
       }
     }
 
@@ -279,7 +274,7 @@ public final class JsonCollections implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable T value) {
+    public Term intoTerm(@Nullable T value) throws TermException {
       return Term.from(value);
     }
 
@@ -332,11 +327,11 @@ public final class JsonCollections implements JsonProvider, ToSource {
     }
 
     @Override
-    public T objectBuilder() {
+    public T objectBuilder() throws JsonException {
       try {
         return this.constructor.newInstance();
       } catch (ReflectiveOperationException cause) {
-        throw new UnsupportedOperationException(cause);
+        throw new JsonException("unable to construct object builder", cause);
       }
     }
 
@@ -361,7 +356,7 @@ public final class JsonCollections implements JsonProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable T value) {
+    public Term intoTerm(@Nullable T value) throws TermException {
       return Term.from(value);
     }
 

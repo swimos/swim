@@ -15,6 +15,7 @@
 package swim.http.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
 import swim.http.HttpException;
@@ -28,70 +29,74 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class OriginHeaderTests {
 
   @Test
-  public void parseOriginHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Origin: http://www.example.com\r\n");
+  public void parseOriginHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Origin: http://www.example.com\r\n").getNonNull();
     assertInstanceOf(OriginHeader.class, headers.getHeader(OriginHeader.TYPE));
-    assertEquals(OriginHeader.of(Uri.parse("http://www.example.com")),
+    assertEquals(OriginHeader.of(Uri.parse("http://www.example.com").getNonNull()),
                  headers.getHeader(OriginHeader.TYPE));
     assertEquals("http://www.example.com",
                  headers.get(OriginHeader.TYPE));
-    assertEquals(FingerTrieList.of(Uri.parse("http://www.example.com")),
+    assertEquals(FingerTrieList.of(Uri.parse("http://www.example.com").getNonNull()),
                  headers.getValue(OriginHeader.TYPE));
   }
 
   @Test
-  public void parseOriginHeaders() {
-    assertParses(OriginHeader.of(Uri.parse("http://www.example.com")),
+  public void parseOriginHeaders() throws ParseException {
+    assertParses(OriginHeader.of(Uri.parse("http://www.example.com").getNonNull()),
                  "Origin: http://www.example.com");
-    assertParses(OriginHeader.of(Uri.parse("https://www.example.com:443")),
+    assertParses(OriginHeader.of(Uri.parse("https://www.example.com:443").getNonNull()),
                  "Origin: https://www.example.com:443");
-    assertParses(OriginHeader.of(Uri.parse("http://example1.com"), Uri.parse("http://example2.com")),
+    assertParses(OriginHeader.of(Uri.parse("http://example1.com").getNonNull(),
+                                 Uri.parse("http://example2.com").getNonNull()),
                  "Origin: http://example1.com http://example2.com");
-    assertParses(OriginHeader.of(Uri.parse("http://example1.com:8080"), Uri.parse("http://example2.com:8081")),
+    assertParses(OriginHeader.of(Uri.parse("http://example1.com:8080").getNonNull(),
+                                 Uri.parse("http://example2.com:8081").getNonNull()),
                  "Origin: http://example1.com:8080 http://example2.com:8081");
     assertParses(OriginHeader.empty(),
                  "Origin: null");
   }
 
   @Test
-  public void writeOriginHeaders() {
+  public void writeOriginHeaders() throws ParseException {
     assertWrites("Origin: http://www.example.com",
-                 OriginHeader.of(Uri.parse("http://www.example.com")));
+                 OriginHeader.of(Uri.parse("http://www.example.com").getNonNull()));
     assertWrites("Origin: https://www.example.com:443",
-                 OriginHeader.of(Uri.parse("https://www.example.com:443")));
+                 OriginHeader.of(Uri.parse("https://www.example.com:443").getNonNull()));
     assertWrites("Origin: http://example1.com http://example2.com",
-                 OriginHeader.of(Uri.parse("http://example1.com"), Uri.parse("http://example2.com")));
+                 OriginHeader.of(Uri.parse("http://example1.com").getNonNull(),
+                                 Uri.parse("http://example2.com").getNonNull()));
     assertWrites("Origin: http://example1.com:8080 http://example2.com:8081",
-                 OriginHeader.of(Uri.parse("http://example1.com:8080"), Uri.parse("http://example2.com:8081")));
+                 OriginHeader.of(Uri.parse("http://example1.com:8080").getNonNull(),
+                                 Uri.parse("http://example2.com:8081").getNonNull()));
     assertWrites("Origin: null",
                  OriginHeader.empty());
   }
 
   @Test
-  public void writeOriginHeadersOmittingPath() {
+  public void writeOriginHeadersOmittingPath() throws ParseException {
     assertWrites("Origin: http://www.example.com",
-                 OriginHeader.of(Uri.parse("http://www.example.com/")));
+                 OriginHeader.of(Uri.parse("http://www.example.com/").getNonNull()));
   }
 
   @Test
-  public void parseOriginHeadersWithTrailingNullFails() {
-    final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: http://www.example.com null");
+  public void parseOriginHeadersWithTrailingNullFails() throws ParseException {
+    final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: http://www.example.com null").getNonNull();
     assertThrows(HttpException.class, () -> {
       header.origins();
     });
   }
 
   @Test
-  public void parseOriginHeadersWithNoSchemeFails() {
-    final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: www.example.com");
+  public void parseOriginHeadersWithNoSchemeFails() throws ParseException {
+    final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: www.example.com").getNonNull();
     assertThrows(HttpException.class, () -> {
       header.origins();
     });
   }
 
   @Test
-  public void parseOriginHeadersWithPathsFails() {
-    final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: http://www.example.com/");
+  public void parseOriginHeadersWithPathsFails() throws ParseException {
+    final OriginHeader header = (OriginHeader) HttpHeader.parse("Origin: http://www.example.com/").getNonNull();
     assertThrows(HttpException.class, () -> {
       header.origins();
     });

@@ -20,7 +20,6 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
-import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
 import swim.http.HttpException;
@@ -151,9 +150,9 @@ public final class ConnectionHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Connection: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Connection: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Connection: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Connection: " + value);
     }
     return options;
   }
@@ -167,14 +166,14 @@ public final class ConnectionHeader extends HttpHeader {
       }
       option = options.next();
       if (option.length() == 0) {
-        throw new WriteException("Blank connection option");
+        throw new IllegalArgumentException("blank connection option");
       }
       for (int i = 0; i < option.length(); i = option.offsetByCodePoints(i, 1)) {
         final int c = option.codePointAt(i);
         if (Http.isTokenChar(c)) {
           output.write(c);
         } else {
-          throw new WriteException("Invalid connection option: " + option);
+          throw new IllegalArgumentException("invalid connection option: " + option);
         }
       }
     } while (options.hasNext());

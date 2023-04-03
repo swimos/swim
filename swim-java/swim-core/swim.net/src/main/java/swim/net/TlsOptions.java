@@ -23,6 +23,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.MissingResourceException;
 import java.util.Objects;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -215,7 +216,7 @@ public class TlsOptions implements ToSource {
       TlsClientAuth clientAuth;
       try {
         clientAuth = TlsClientAuth.parse(System.getProperty("swim.net.tls.client.auth"));
-      } catch (IllegalArgumentException swallow) {
+      } catch (IllegalArgumentException cause) {
         clientAuth = TlsClientAuth.NONE;
       }
       Collection<String> protocols;
@@ -230,127 +231,120 @@ public class TlsOptions implements ToSource {
       } catch (NullPointerException cause) {
         cipherSuites = null;
       }
-      TlsOptions.standard = TlsOptions.of(clientAuth, protocols, cipherSuites);
+      try {
+        TlsOptions.standard = TlsOptions.of(clientAuth, protocols, cipherSuites);
+      } catch (IOException | GeneralSecurityException cause) {
+        throw new RuntimeException("unable to initialize standard TLS options", cause);
+      }
     }
     return TlsOptions.standard;
   }
 
   public static @Nullable TlsOptions of(TlsClientAuth clientAuth,
                                         @Nullable Collection<String> protocols,
-                                        @Nullable Collection<String> cipherSuites) {
-    try {
-      final String tlsProtocol = System.getProperty("swim.net.tls.protocol", "TLS");
-      final String tlsProvider = System.getProperty("swim.net.tls.provider");
-      final String tlsRandom = System.getProperty("swim.net.tls.random");
-      final SecureRandom random;
-      if (tlsRandom != null) {
-        random = SecureRandom.getInstance(tlsRandom);
-      } else {
-        random = new SecureRandom();
-      }
-      final SSLContext sslContext;
-      if (tlsProvider != null) {
-        sslContext = SSLContext.getInstance(tlsProtocol, tlsProvider);
-      } else {
-        sslContext = SSLContext.getInstance(tlsProtocol);
-      }
-      final KeyManager[] keyManagers = TlsOptions.loadKeyManagers();
-      final TrustManager[] trustManagers = TlsOptions.loadTrustManagers();
-      sslContext.init(keyManagers, trustManagers, random);
-      return new TlsOptions(sslContext, clientAuth, protocols, cipherSuites);
-    } catch (GeneralSecurityException cause) {
-      return null;
+                                        @Nullable Collection<String> cipherSuites)
+      throws IOException, GeneralSecurityException {
+    final String tlsProtocol = System.getProperty("swim.net.tls.protocol", "TLS");
+    final String tlsProvider = System.getProperty("swim.net.tls.provider");
+    final String tlsRandom = System.getProperty("swim.net.tls.random");
+    final SecureRandom random;
+    if (tlsRandom != null) {
+      random = SecureRandom.getInstance(tlsRandom);
+    } else {
+      random = new SecureRandom();
     }
+    final SSLContext sslContext;
+    if (tlsProvider != null) {
+      sslContext = SSLContext.getInstance(tlsProtocol, tlsProvider);
+    } else {
+      sslContext = SSLContext.getInstance(tlsProtocol);
+    }
+    final KeyManager[] keyManagers = TlsOptions.loadKeyManagers();
+    final TrustManager[] trustManagers = TlsOptions.loadTrustManagers();
+    sslContext.init(keyManagers, trustManagers, random);
+    return new TlsOptions(sslContext, clientAuth, protocols, cipherSuites);
   }
 
-  static KeyManager @Nullable [] loadKeyManagers() {
+  static KeyManager @Nullable [] loadKeyManagers() throws IOException, GeneralSecurityException {
     final String path = System.getProperty("swim.net.tls.keystore.path");
     final String resource = System.getProperty("swim.net.tls.keystore.resource");
-    if (path != null || resource != null) {
-      final String type = System.getProperty("swim.net.tls.keystore.type", KeyStore.getDefaultType());
-      final String provider = System.getProperty("swim.net.tls.keystore.provider");
-      final String password = System.getProperty("swim.net.tls.keystore.password");
-      final char[] passwordChars = password != null ? password.toCharArray() : null;
-      InputStream inputStream = null;
-      try {
-        final KeyStore keyStore;
-        final KeyManagerFactory keyManagerFactory;
-        if (provider != null) {
-          keyStore = KeyStore.getInstance(type, provider);
-          keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm(), provider);
-        } else {
-          keyStore = KeyStore.getInstance(type);
-          keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        }
-        if (path != null) {
-          inputStream = new FileInputStream(path);
-        } else if (resource != null) {
-          inputStream = ClassLoader.getSystemResourceAsStream(resource);
-          if (inputStream == null) {
-            throw new RuntimeException("Missing swim.net.tls.keystore.resource: " + resource);
-          }
-        }
-        keyStore.load(inputStream, passwordChars);
-        keyManagerFactory.init(keyStore, passwordChars);
-        return keyManagerFactory.getKeyManagers();
-      } catch (GeneralSecurityException | IOException cause) {
-        throw new RuntimeException(cause);
-      } finally {
-        try {
-          if (inputStream != null) {
-            inputStream.close();
-          }
-        } catch (IOException cause) {
-          // swallow
+    if (path == null && resource == null) {
+      return null;
+    }
+
+    final String type = System.getProperty("swim.net.tls.keystore.type", KeyStore.getDefaultType());
+    final String provider = System.getProperty("swim.net.tls.keystore.provider");
+    final String password = System.getProperty("swim.net.tls.keystore.password");
+    final char[] passwordChars = password != null ? password.toCharArray() : null;
+    final KeyStore keyStore;
+    final KeyManagerFactory keyManagerFactory;
+    if (provider != null) {
+      keyStore = KeyStore.getInstance(type, provider);
+      keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm(), provider);
+    } else {
+      keyStore = KeyStore.getInstance(type);
+      keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+    }
+
+    InputStream inputStream = null;
+    try {
+      if (path != null) {
+        inputStream = new FileInputStream(path);
+      } else if (resource != null) {
+        inputStream = ClassLoader.getSystemResourceAsStream(resource);
+        if (inputStream == null) {
+          throw new MissingResourceException("missing swim.net.tls.keystore.resource: " + resource, null, resource);
         }
       }
+      keyStore.load(inputStream, passwordChars);
+    } finally {
+      if (inputStream != null) {
+        inputStream.close();
+      }
     }
-    return null;
+    keyManagerFactory.init(keyStore, passwordChars);
+    return keyManagerFactory.getKeyManagers();
   }
 
-  static TrustManager @Nullable [] loadTrustManagers() {
+  static TrustManager @Nullable [] loadTrustManagers() throws IOException, GeneralSecurityException {
     final String path = System.getProperty("swim.net.tls.truststore.path");
     final String resource = System.getProperty("swim.net.tls.truststore.resource");
-    if (path != null || resource != null) {
-      final String type = System.getProperty("swim.net.tls.truststore.type", KeyStore.getDefaultType());
-      final String provider = System.getProperty("swim.net.tls.truststore.provider");
-      final String password = System.getProperty("swim.net.tls.truststore.password");
-      final char[] passwordChars = password != null ? password.toCharArray() : null;
-      InputStream inputStream = null;
-      try {
-        final KeyStore trustStore;
-        final TrustManagerFactory trustManagerFactory;
-        if (provider != null) {
-          trustStore = KeyStore.getInstance(type, provider);
-          trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm(), provider);
-        } else {
-          trustStore = KeyStore.getInstance(type);
-          trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        }
-        if (path != null) {
-          inputStream = new FileInputStream(path);
-        } else if (resource != null) {
-          inputStream = ClassLoader.getSystemResourceAsStream(resource);
-          if (inputStream == null) {
-            throw new RuntimeException("Missing swim.net.tls.truststore.resource: " + resource);
-          }
-        }
-        trustStore.load(inputStream, passwordChars);
-        trustManagerFactory.init(trustStore);
-        return trustManagerFactory.getTrustManagers();
-      } catch (GeneralSecurityException | IOException cause) {
-        throw new RuntimeException(cause);
-      } finally {
-        try {
-          if (inputStream != null) {
-            inputStream.close();
-          }
-        } catch (IOException cause) {
-          // swallow
+    if (path == null && resource == null) {
+      return null;
+    }
+
+    final String type = System.getProperty("swim.net.tls.truststore.type", KeyStore.getDefaultType());
+    final String provider = System.getProperty("swim.net.tls.truststore.provider");
+    final String password = System.getProperty("swim.net.tls.truststore.password");
+    final char[] passwordChars = password != null ? password.toCharArray() : null;
+    final KeyStore trustStore;
+    final TrustManagerFactory trustManagerFactory;
+    if (provider != null) {
+      trustStore = KeyStore.getInstance(type, provider);
+      trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm(), provider);
+    } else {
+      trustStore = KeyStore.getInstance(type);
+      trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    }
+
+    InputStream inputStream = null;
+    try {
+      if (path != null) {
+        inputStream = new FileInputStream(path);
+      } else if (resource != null) {
+        inputStream = ClassLoader.getSystemResourceAsStream(resource);
+        if (inputStream == null) {
+          throw new MissingResourceException("missing swim.net.tls.truststore.resource: " + resource, null, resource);
         }
       }
+      trustStore.load(inputStream, passwordChars);
+    } finally {
+      if (inputStream != null) {
+        inputStream.close();
+      }
     }
-    return null;
+    trustManagerFactory.init(trustStore);
+    return trustManagerFactory.getTrustManagers();
   }
 
 }

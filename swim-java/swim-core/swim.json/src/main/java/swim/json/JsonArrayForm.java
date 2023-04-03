@@ -20,22 +20,27 @@ import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
 
+/**
+ * A transcoder between JSON array literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code JsonArrayForm}
+ */
 @Public
 @Since("5.0")
 public interface JsonArrayForm<E, B, T> extends JsonForm<T> {
 
   @Override
-  default JsonArrayForm<?, ?, T> arrayForm() {
+  default JsonArrayForm<?, ?, ? extends T> arrayForm() throws JsonException {
     return this;
   }
 
-  JsonForm<E> elementForm();
+  JsonForm<E> elementForm() throws JsonException;
 
-  B arrayBuilder();
+  B arrayBuilder() throws JsonException;
 
-  B appendElement(B builder, @Nullable E element);
+  B appendElement(B builder, @Nullable E element) throws JsonException;
 
-  @Nullable T buildArray(B builder);
+  @Nullable T buildArray(B builder) throws JsonException;
 
   @Override
   default Parse<T> parse(Input input, JsonParser parser) {

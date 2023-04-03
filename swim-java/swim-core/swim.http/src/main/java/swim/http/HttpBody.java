@@ -66,7 +66,11 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
 
   public long contentLength() {
     if (this.contentLength < 0) {
-      this.contentLength = this.transcoder.sizeOf(this.value);
+      try {
+        this.contentLength = this.transcoder.sizeOf(this.value);
+      } catch (EncodeException cause) {
+        throw new AssertionError("indeterminate Content-Length", cause);
+      }
     }
     return this.contentLength;
   }
@@ -187,14 +191,19 @@ final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
       decodePayload = decodePayload.consume(input);
     }
     input.limit(inputLimit).asLast(inputLast);
+    if (decodePayload.isError()) {
+      return decodePayload.asError();
+    }
 
     offset += (long) (input.position() - inputStart);
     if (offset == contentLength) {
-      return Decode.done(HttpBody.of(decodePayload.get(), transcoder, contentLength));
+      if (decodePayload.isDone()) {
+        return Decode.done(HttpBody.of(decodePayload.getUnchecked(), transcoder, contentLength));
+      } else {
+        return Decode.error(new DecodeException("truncated payload"));
+      }
     } else if (decodePayload.isDone()) {
-      return Decode.error(new DecodeException("Undecoded payload data"));
-    } else if (decodePayload.isError()) {
-      return decodePayload.asError();
+      return Decode.error(new DecodeException("undecoded payload data"));
     }
     if (input.isError()) {
       return Decode.error(input.getError());
@@ -255,7 +264,7 @@ final class EncodeHttpBody<T> extends Encode<HttpBody<T>> {
       return encode.asError();
     }
     if (output.isDone()) {
-      return Encode.error(new EncodeException("Truncated encode"));
+      return Encode.error(new EncodeException("truncated encode"));
     } else if (output.isError()) {
       return Encode.error(output.getError());
     }

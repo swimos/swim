@@ -20,49 +20,46 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * Non-blocking token stream reader with single token lookahead.
- * {@code Input} enable incremental, interruptible parsing of network
- * protocols and data formats.
+ * A non-blocking chunked input stream. {@code Input} facilitates
+ * interruptible parsing of network protocols and data formats.
  *
- * <h3>Input tokens</h3>
+ * <h2>Input tokens</h2>
  * <p>
- * Input tokens are modeled as primitive {@code int}s, typically representing
- * Unicode code points or raw octets. Each {@code Input} implementation
- * specifies the semantics of its tokens. The {@link #head()} method peeks
- * at the current lookahead token without consuming it. The {@link #step()}
- * method advances the input to the next state.
- *
- * <h3>Input states</h3>
+ * Input tokens are modeled as primitive {@code int} values, commonly
+ * representing Unicode code points, or raw octets. The semantics of
+ * input tokens is specified by individual {@code Input} subclasses.
  * <p>
- * {@code Input} is always in one of four states: <em>cont</em>inue,
- * <em>empty</em>, <em>done</em>, or <em>error</em>. The <em>cont</em> state
- * indicates that a lookahead token is immediately available. The <em>empty</em>
- * state indicates that no additional tokens are available at this time, but
- * that additional tokens may become available in the future. The <em>done</em>
- * state indicates that no additional tokens will ever become available.
- * The <em>error</em> state indicates that the stream has failed with an error,
- * and an exception can be obtained by invoking the {@link #getError()} method.
- * {@link #isCont()} returns {@code true} when in the <em>cont</em> state;
- * {@link #isEmpty()} returns {@code true} when in the <em>empty</em> state;
- * {@link #isDone()} returns {@code true} when in the <em>done</em> state; and
- * {@link #isError()} returns {@code true} when in the <em>error</em> state.
+ * The {@link #head()} method peeks at the current lookahead token,
+ * without consuming it. The {@link #step()} method advances the input
+ * to the next state.
  *
- * <h3>Non-blocking semantics</h3>
+ * <h2>Input states</h2>
+ * <p>
+ * An {@code Input} instance is always in one—and only one—of the following
+ * four <em>input states</em>:
+ * <ul>
+ * <li>{@link #isCont() input-cont}: an input token is available
+ *     at the {@link #head()} of the input stream
+ * <li>{@link #isEmpty() input-empty}: the input stream has reached
+ *     the end of the current input chunk
+ * <li>{@link #isDone() input-done}: the input stream has reached
+ *     the end of the last input chunk
+ * <li>{@link #isError() input-error}: the input stream terminated
+ *     with an {@linkplain #getError() input error}
+ * </ul>
+ *
+ * <h2>Input chunks</h2>
  * <p>
  * {@code Input} methods never block. An input stream that would otherwise
- * need to block awaiting additional tokens instead enters the <em>empty</em>
- * state, signaling the input consumer to asynchronously wait for future tokens
- * before continuing. If no additional tokens will ever become available,
- * the input stream enters the <em>done</em> state, signaling the input
- * consumer to terminate.
- * <p>
- * {@link #isLast()} returns {@code true} if the input will enter the
- * <em>done</em> state after all immediately available tokens have been
- * consumed. {@code isLast()} returns {@code false} if the input will
- * enter the <em>empty</em> state after all immediately available tokens
- * have been consumed.
+ * need to block awaiting additional input instead enters the {@code input-empty}
+ * state, signaling the input consumer to asynchronously wait for additional
+ * input before continuing. If no additional input will ever become available,
+ * the input stream enters the {@code input-done} state, signaling the input
+ * consumer to terminate. The {@link #isLast()} method indicates whether the
+ * input stream will enter the {@code input-empty} state or the {@code input-done}
+ * state when it reaches the end of the current input chunk.
  *
- * <h3>Position tracking</h3>
+ * <h2>Position tracking</h2>
  * <p>
  * The logical location of the current lookahead token is made available via
  * the {@link #location()} method, with convenience accessors for the byte
@@ -70,144 +67,202 @@ import swim.annotations.Since;
  * and one-based {@linkplain #column() column} in the current line. The
  * {@link #name()} method returns an optional name for the input source.
  *
- * <h3>Cloning</h3>
+ * <h2>Cloning</h2>
  * <p>
  * An input stream may be {@linkplain #clone() cloned} to provide an
- * independently mutable position into a shared token stream. Not all
+ * independently mutable position into a shared input chunk. Not all
  * {@code Input} implementations support cloning.
  *
  * @see Parser
+ * @see InputBuffer
  */
 @Public
 @Since("5.0")
 public abstract class Input {
 
+  /**
+   * Constructs a new {@code Input} instance.
+   */
   protected Input() {
     // nop
   }
 
   /**
-   * Returns {@code true} when a {@link #head() lookahead} token is
-   * immediately available (the input is in the <em>cont</em> state).
+   * Returns {@code true} when in the {@code input-cont} state, with an
+   * input token available at the {@link #head()} of the input stream
+   *
+   * @return whether or not this {@code Input} instance is
+   *         in the {@code input-cont} state
    */
   public abstract boolean isCont();
 
   /**
-   * Returns {@code true} when no lookahead token is currently available,
-   * but additional input may be available in the future (the input is in
-   * the <em>empty</em> state).
+   * Returns {@code true} when in the {@code input-done} state,
+   * having reached the end of the current input chunk.
+   *
+   * @return whether or not this {@code Input} instance is
+   *         in the {@code input-done} state
    */
   public abstract boolean isEmpty();
 
   /**
-   * Returns {@code true} when no lookahead token is currently available,
-   * and no additional input will ever become available because the input
-   * is in the <em>done</em> state).
+   * Returns {@code true} when in the {@code input-done} state,
+   * having reached the end of the last input chunk.
+   *
+   * @return whether or not this {@code Input} instance is
+   *         in the {@code input-done} state
    */
   public abstract boolean isDone();
 
   /**
-   * Returns {@code true} when no lookahead token is currently available,
-   * and no additional input will ever become available because the input
-   * is in the <em>error</em> state. When {@code true}, {@link #getError()}
-   * will return the input exception.
+   * Returns {@code true} when in the {@code input-error} state,
+   * having terminated with an {@linkplain #getError() input error}.
+   *
+   * @return whether or not this {@code Input} instance is
+   *         in the {@code input-error} state
    */
   public abstract boolean isError();
 
   /**
-   * Returns {@code true} if in either the <em>cont</em> or <em>done<em> state,
-   * indicating that parsing can potentially make further progress.
+   * Returns {@code true} when in either the {@code input-cont} state
+   * or the {@code input-done} state, indicating that parsing can
+   * potentially make further progress.
+   *
+   * @return whether or not this {@code Input} instance is in either the
+   *         {@code input-cont} state or the {@code input-done} state
    */
   public boolean isReady() {
     return this.isCont() || this.isDone();
   }
 
   /**
-   * Returns {@code true} if in either the <em>empty</em> or <em>error<em> state,
-   * indicating that parsing can't make further progress at this time.
+   * Returns {@code true} when in either the {@code input-empty} state
+   * or the {@code input-error} state, indicating that parsing can't
+   * make further progress at this time.
+   *
+   * @return whether or not this {@code Input} instance is in either the
+   *         {@code input-empty} state or the {@code input-error} state
    */
   public boolean isBreak() {
     return this.isEmpty() || this.isError();
   }
 
   /**
-   * Returns {@code true} if the input will enter the <em>done</em> state
-   * after all available tokens have been consumed, indicating that no
-   * additional input will be made available in the future. Returns {@code
-   * false} if the input will enter the <em>empty</em> state after all
-   * available tokens have been consumed, indicating that an additional
-   * batch of input may be made available in the future.
+   * Returns {@code true} if this input stream will enter the
+   * {@code input-done} state when it reaches the end of the current
+   * input chunk; otherwise returns {@code false} if the input stream
+   * will enter the {@code input-empty} state when it reaches the end
+   * of the current input chunk.
+   *
+   * @return whether this input stream will enter the {@code input-done}
+   *         state or the {@code input-empty} state when it reaches the end
+   *         of the current input chunk
    */
   public abstract boolean isLast();
 
   /**
-   * Sets the {@link #isLast() last} flag and returns this input. If {@code
-   * last} is set to {@code true}, the input will enter the <em>done</em> state
-   * after all available tokens have been consumed, indicating that no
-   * additional input will be made available in the future. If {@code last} is
-   * set to {@code false}, the input will enter the <em>empty</em> state after
-   * all available tokens have been consumed, indicating that an additional
-   * batch of input may be made available in the future.
+   * Sets the {@link #isLast()} flag to {@code last} and returns {@code this}.
+   * If {@code last} is {@code true}, the input stream will enter the
+   * {@code input-done} state when it reaches the end of the current
+   * input chunk; if {@code last} is {@code false}, the input stream
+   * will enter the {@code input-empty} state when it reaches the end
+   * of the current input chunk.
+   *
+   * @param last whether the input stream should enter the {@code input-done}
+   *        state or the {@code input-empty} state when it reaches the end
+   *        of the current input chunk
+   * @return {@code this}
    */
   public abstract Input asLast(boolean last);
 
   /**
-   * Returns the current lookahead token, if in the <em>cont</em> state.
+   * Returns the current lookahead token, if in the {@code input-cont} state.
    *
-   * @throws IllegalStateException if not in the <em>cont</em> state.
+   * @return the current lookahead token, if available
+   * @throws IllegalStateException if not in the {@code input-cont} state
    */
   public abstract int head();
 
   /**
-   * Returns the {@code k}-th lookahead token, if available; returns {@code -1}
-   * if fewer than {@code k + 1} lookahead tokens are available.
+   * Returns the {@code k}-th lookahead token, if available; otherwise returns
+   * {@code -1} if fewer than {@code k + 1} lookahead tokens are available in
+   * the current input chunk, or if the input stream doesn't support
+   * multi-token lookahead.
+   *
+   * @param k the offset from the current position in the input chunk
+   *        of the token to return
+   * @return the input token {@code k} steps forward in the input chunk,
+   *         or {@code -1} if the lookahead token is not available
    */
   public abstract int lookahead(int k);
 
   /**
-   * Advances the input to the next state and returns {@code this}.
+   * Consumes the current lookahead token, advances the input stream
+   * to the next state, and returns {@code this}.
    *
-   * @throws IllegalStateException if not in the <em>cont</em> state.
+   * @return {@code this}
+   * @throws IllegalStateException if not in the {@code input-cont} state
    */
   public abstract Input step();
 
   /**
-   * Repositions the input to the given {@code position} and returns {@code this}.
+   * Sets the current position of this {@code Input} instance to the given
+   * {@code position} in the input stream and returns {@code this}.
    *
-   * @throws UnsupportedOperationException if the input does not support seeking.
-   * @throws IllegalArgumentException if the input is unable to reposition
-   *         to the given {@code position}.
+   * @param position the position in the input stream from which
+   *        input tokens should be consumed
+   * @return {@code this}
+   * @throws UnsupportedOperationException if the input stream
+   *         does not support seeking
+   * @throws IllegalArgumentException when attempting to seek
+   *         to an invalid source {@code position}
    */
   public abstract Input seek(@Nullable SourcePosition position);
 
   /**
-   * Returns the logical location of the current lookahead token relative
-   * to the start of the stream.
+   * Returns the logical location of the current lookahead token
+   * in the input stream.
+   *
+   * @return the source position of the current lookahead token
+   *         in the input stream
    */
   public abstract SourcePosition location();
 
   /**
-   * Sets the logical location of the current lookahead to the given
-   * {@code location} and returns {@code this}.
+   * Sets the logical location of the current lookahead token to the given
+   * {@code location} in the input stream and returns {@code this}.
+   * This method does not seek the stream; it's used to offset
+   * source positions of continued input chunks.
+   *
+   * @param location the source position of the current lookahead token
+   *        in the input stream
+   * @return {@code this}
    */
   public abstract Input location(SourcePosition location);
 
   /**
-   * Returns the canonical name of the input source,
-   * or {@code null} if the input is unnamed.
+   * Returns a name for the source of this input stream,
+   * or {@code null} if the input source is unnamed.
+   *
+   * @return the name of the source of this input stream
    */
   public @Nullable String name() {
     return this.location().name();
   }
 
   /**
-   * Sets the canonical name of the input source and returns {@code this}.
+   * Sets the name of the source of this input stream and returns {@code this}.
+   *
+   * @param name the name to use for the source of this input stream
+   * @return {@code this}
    */
   public abstract Input name(@Nullable String name);
 
   /**
    * Returns the byte offset of the current lookahead token
-   * relative to the start of the stream.
+   * relative to the start of the input stream.
+   *
+   * @return the byte offset of the current location in the input stream
    */
   public long offset() {
     return this.location().offset();
@@ -215,7 +270,9 @@ public abstract class Input {
 
   /**
    * Returns the one-based line number of the current lookahead token
-   * relative to the start of the stream.
+   * relative to the start of the input stream.
+   *
+   * @return the line number of the current location in the input stream
    */
   public int line() {
     return this.location().line();
@@ -223,28 +280,34 @@ public abstract class Input {
 
   /**
    * Returns the one-based column number of the current lookahead token
-   * relative to the current line in the stream.
+   * relative to the current line in the input stream.
+   *
+   * @return the column number of the current location in the input stream
    */
   public int column() {
     return this.location().column();
   }
 
   /**
-   * Returns the input error, if in the <em>error</em> state,
-   * otherwise throws {@link IllegalStateException}.
+   * Returns the input error, if in the {@code input-error} state;
+   * otherwise throws an unchecked exception.
    *
-   * @throws IllegalStateException if not in the <em>error</em> state.
+   * @return the input error, if present
+   * @throws IllegalStateException if not in the {@code input-error} state
    */
   @CheckReturnValue
   public Throwable getError() {
-    throw new IllegalStateException();
+    throw new IllegalStateException("no input error");
   }
 
   /**
-   * Returns an independently positioned view into the input stream,
-   * initialized with identical state to this input.
+   * Returns an independently positioned view of the input stream,
+   * initialized with identical state to this {@code Input} instance.
    *
-   * @throws UnsupportedOperationException if this input can't be cloned.
+   * @return a new {@code Input} instance that is independent
+   *         of this input stream
+   * @throws UnsupportedOperationException if this input stream
+   *         can't be cloned
    */
   @Override
   public abstract Input clone();

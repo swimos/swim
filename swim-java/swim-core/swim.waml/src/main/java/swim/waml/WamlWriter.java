@@ -64,7 +64,7 @@ public class WamlWriter extends ExprWriter {
     } else if (form instanceof WamlForm<?>) {
       return Assume.<WamlForm<Object>>conforms(form).write(output, term, this);
     } else {
-      return Write.error(new WriteException("Unsupported term: " + term));
+      return Write.error(new WriteException("unsupported term: " + term));
     }
   }
 

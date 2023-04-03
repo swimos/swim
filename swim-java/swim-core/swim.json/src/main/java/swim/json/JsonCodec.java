@@ -34,11 +34,14 @@ import swim.codec.Input;
 import swim.codec.MediaType;
 import swim.codec.Output;
 import swim.codec.Parse;
+import swim.codec.Translator;
+import swim.codec.TranslatorException;
 import swim.codec.Write;
-import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
 import swim.collections.HashTrieMap;
 import swim.expr.Term;
+import swim.expr.TermException;
+import swim.expr.TermFormException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -69,7 +72,7 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
     do {
       int index = providers.length - 1;
       while (index >= 0) {
-        if (provider.priority() < providers[index].priority()) {
+        if (provider.priority() > providers[index].priority()) {
           index -= 1;
         } else {
           index += 1;
@@ -95,11 +98,10 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
     // Builtin providers
     this.addProvider(JsonJava.provider(this));
     this.addProvider(JsonReprs.provider());
-    this.addProvider(JsonTerms.provider());
 
     // Generic providers
     this.addProvider(JsonDeclarations.provider(this));
-    this.addProvider(JsonConversions.provider());
+    this.addProvider(JsonConversions.provider(this));
     this.addProvider(JsonUnions.provider(this));
     this.addProvider(JsonEnums.provider());
     this.addProvider(JsonThrowables.provider());
@@ -111,39 +113,42 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
     final ServiceLoader<JsonProvider> serviceLoader = ServiceLoader.load(JsonProvider.class, JsonCodec.class.getClassLoader());
     final Iterator<ServiceLoader.Provider<JsonProvider>> serviceProviders = serviceLoader.stream().iterator();
     while (serviceProviders.hasNext()) {
-      final ServiceLoader.Provider<JsonProvider> serviceProvider = serviceProviders.next();
-      final Class<? extends JsonProvider> providerClass = serviceProvider.type();
-      JsonProvider provider = null;
+      this.loadExtension(serviceProviders.next());
+    }
+  }
 
-      // public static JsonProvider provider(JsonCodec codec);
+  void loadExtension(ServiceLoader.Provider<JsonProvider> serviceProvider) {
+    final Class<? extends JsonProvider> providerClass = serviceProvider.type();
+    JsonProvider provider = null;
+
+    // public static JsonProvider provider(JsonCodec codec);
+    try {
+      final Method method = providerClass.getDeclaredMethod("provider", JsonCodec.class);
+      if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
+          && JsonProvider.class.isAssignableFrom(method.getReturnType())) {
+        provider = (JsonProvider) method.invoke(null, this);
+      }
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    if (provider == null) {
+      // public static JsonProvider provider();
       try {
-        final Method method = providerClass.getDeclaredMethod("provider", JsonCodec.class);
+        final Method method = providerClass.getDeclaredMethod("provider");
         if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
             && JsonProvider.class.isAssignableFrom(method.getReturnType())) {
-          provider = (JsonProvider) method.invoke(null, this);
+          provider = (JsonProvider) method.invoke(null);
         }
       } catch (ReflectiveOperationException cause) {
-        // swallow
+        // ignore
       }
-
-      if (provider == null) {
-        // public static JsonProvider provider();
-        try {
-          final Method method = providerClass.getDeclaredMethod("provider");
-          if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-              && JsonProvider.class.isAssignableFrom(method.getReturnType())) {
-            provider = (JsonProvider) method.invoke(null);
-          }
-        } catch (ReflectiveOperationException cause) {
-          // swallow
-        }
-      }
-
-      if (provider == null) {
-        provider = serviceProvider.get();
-      }
-      this.addProvider(provider);
     }
+
+    if (provider == null) {
+      provider = serviceProvider.get();
+    }
+    this.addProvider(provider);
   }
 
   @SuppressWarnings("ReferenceEquality")
@@ -159,25 +164,35 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
     } while (true);
   }
 
-  protected @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  protected JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     if (javaType == Object.class) {
       return this;
     }
 
+    // Keep track of the highest priority resolve error.
+    JsonFormException error = null;
+
     final JsonProvider[] providers = (JsonProvider[]) PROVIDERS.getOpaque(this);
     for (int i = 0; i < providers.length; i += 1) {
       final JsonProvider provider = providers[i];
-      final JsonForm<?> jsonForm = provider.resolveJsonForm(javaType);
-      if (jsonForm != null) {
-        return jsonForm;
+      try {
+        final JsonForm<?> jsonForm = provider.resolveJsonForm(javaType);
+        if (jsonForm != null) {
+          return jsonForm;
+        }
+      } catch (JsonFormException cause) {
+        if (error == null) {
+          error = cause;
+        }
       }
     }
 
-    return null;
+    // Treat the highest priority resolve error as the cause of the exception.
+    throw new JsonFormException("no json form for " + javaType, error);
   }
 
   @SuppressWarnings("ReferenceEquality")
-  public <T> @Nullable JsonForm<T> forType(Type javaType) {
+  public <T> JsonForm<T> getJsonForm(Type javaType) throws JsonFormException {
     if (javaType instanceof WildcardType) {
       final Type[] upperBounds = ((WildcardType) javaType).getUpperBounds();
       if (upperBounds != null && upperBounds.length != 0) {
@@ -203,10 +218,7 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
         return oldJsonForm;
       } else {
         if (newJsonForm == null) {
-          newJsonForm = Assume.conformsNullable(this.resolveJsonForm(javaType));
-          if (newJsonForm == null) {
-            return null;
-          }
+          newJsonForm = Assume.conforms(this.resolveJsonForm(javaType));
         }
         final HashTrieMap<Type, JsonForm<?>> oldMappings = mappings;
         final HashTrieMap<Type, JsonForm<?>> newMappings = oldMappings.updated(javaType, newJsonForm);
@@ -218,22 +230,12 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
     } while (true);
   }
 
-  public <T> @Nullable JsonForm<T> forValue(@Nullable T value) {
+  public <T> JsonForm<T> getJsonForm(@Nullable T value) throws JsonFormException {
     if (value == null) {
       return Assume.conforms(JsonJava.nullForm());
     } else {
-      return this.forType(value.getClass());
+      return this.getJsonForm(value.getClass());
     }
-  }
-
-  @Override
-  public MediaType mediaType() {
-    return APPLICATION_JSON;
-  }
-
-  @Override
-  public <T> @Nullable JsonForm<T> getTranslator(Type javaType) {
-    return this.forType(javaType);
   }
 
   @Override
@@ -247,13 +249,13 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
   }
 
   @Override
-  public JsonNumberForm<Number> numberForm() {
-    return JsonJava.numberForm();
+  public JsonIdentifierForm<Object> identifierForm() {
+    return JsonJava.identifierForm();
   }
 
   @Override
-  public JsonIdentifierForm<Object> identifierForm() {
-    return JsonJava.identifierForm();
+  public JsonNumberForm<Number> numberForm() {
+    return JsonJava.numberForm();
   }
 
   @Override
@@ -262,22 +264,26 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
   }
 
   @Override
-  public @Nullable JsonArrayForm<?, ?, List<Object>> arrayForm() {
-    final JsonForm<List<Object>> listForm = this.forType(List.class);
-    if (listForm instanceof JsonArrayForm<?, ?, ?>) {
-      return (JsonArrayForm<?, ?, List<Object>>) listForm;
-    } else {
-      return null;
-    }
+  public JsonArrayForm<?, ?, List<Object>> arrayForm() throws JsonException {
+    return Assume.conforms(this.getJsonForm(List.class));
   }
 
   @Override
-  public @Nullable JsonObjectForm<?, ?, ?, Map<Object, Object>> objectForm() {
-    final JsonForm<Map<Object, Object>> mapForm = this.forType(Map.class);
-    if (mapForm instanceof JsonObjectForm<?, ?, ?, ?>) {
-      return (JsonObjectForm<?, ?, ?, Map<Object, Object>>) mapForm;
-    } else {
-      return null;
+  public JsonObjectForm<?, ?, ?, Map<Object, Object>> objectForm() throws JsonException {
+    return Assume.conforms(this.getJsonForm(Map.class));
+  }
+
+  @Override
+  public MediaType mediaType() {
+    return APPLICATION_JSON;
+  }
+
+  @Override
+  public <T> Translator<T> getTranslator(Type javaType) throws TranslatorException {
+    try {
+      return this.getJsonForm(javaType);
+    } catch (JsonFormException cause) {
+      throw new TranslatorException(cause);
     }
   }
 
@@ -288,28 +294,22 @@ public class JsonCodec implements JsonForm<Object>, Format, ToSource {
 
   @Override
   public Write<?> write(Output<?> output, @Nullable Object value, JsonWriter writer) {
-    if (value != null) {
-      final JsonForm<Object> valueForm = this.forValue(value);
-      if (valueForm != null) {
-        return valueForm.write(output, value, writer);
-      } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
-      }
-    } else {
-      return writer.writeNull(output);
+    try {
+      return this.getJsonForm(value).write(output, value, writer);
+    } catch (JsonFormException cause) {
+      return Write.error(cause);
     }
   }
 
   @Override
-  public Term intoTerm(@Nullable Object value) {
+  public Term intoTerm(@Nullable Object value) throws TermException {
     if (value instanceof Term) {
       return (Term) value;
     } else {
-      final JsonForm<Object> jsonForm = this.forValue(value);
-      if (jsonForm != null) {
-        return jsonForm.intoTerm(value);
-      } else {
-        return Term.from(value);
+      try {
+        return this.getJsonForm(value).intoTerm(value);
+      } catch (JsonFormException cause) {
+        throw new TermFormException(cause);
       }
     }
   }

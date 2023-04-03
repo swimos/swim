@@ -77,14 +77,8 @@ public final class ParseComparisonExpr extends Parse<Term> {
       }
     }
     if (step == 2) {
-      parseLhs = Assume.nonNull(parseLhs);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isSpace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isSpace(c = input.head())) {
+        input.step();
       }
       if (input.isCont()) {
         if (c == '!') {
@@ -100,10 +94,10 @@ public final class ParseComparisonExpr extends Parse<Term> {
           input.step();
           step = 6;
         } else {
-          return parseLhs;
+          return Assume.nonNull(parseLhs);
         }
       } else if (input.isDone()) {
-        return parseLhs;
+        return Assume.nonNull(parseLhs);
       }
     }
     if (step == 3) {
@@ -152,7 +146,6 @@ public final class ParseComparisonExpr extends Parse<Term> {
       }
     }
     if (step == 6) {
-      parseLhs = Assume.nonNull(parseLhs);
       if (input.isCont()) {
         c = input.head();
         if (c == '=') {
@@ -160,7 +153,7 @@ public final class ParseComparisonExpr extends Parse<Term> {
           operator = "==";
           step = 7;
         } else if (c == '>') {
-          return parseLhs;
+          return Assume.nonNull(parseLhs);
         } else {
           operator = "=";
           step = 7;
@@ -170,7 +163,6 @@ public final class ParseComparisonExpr extends Parse<Term> {
       }
     }
     if (step == 7) {
-      parseLhs = Assume.nonNull(parseLhs);
       if (parseRhs == null) {
         parseRhs = parser.parseAdditiveExpr(input, form);
       } else {
@@ -178,17 +170,23 @@ public final class ParseComparisonExpr extends Parse<Term> {
       }
       if (parseRhs.isDone()) {
         if ("<".equals(operator)) {
-          return Parse.done(new LtExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+          return Parse.done(new LtExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                       parseRhs.getNonNullUnchecked()));
         } else if ("<=".equals(operator)) {
-          return Parse.done(new LeExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+          return Parse.done(new LeExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                       parseRhs.getNonNullUnchecked()));
         } else if ("==".equals(operator)) {
-          return Parse.done(new EqExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+          return Parse.done(new EqExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                       parseRhs.getNonNullUnchecked()));
         } else if ("!=".equals(operator)) {
-          return Parse.done(new NeExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+          return Parse.done(new NeExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                       parseRhs.getNonNullUnchecked()));
         } else if (">=".equals(operator)) {
-          return Parse.done(new GeExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+          return Parse.done(new GeExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                       parseRhs.getNonNullUnchecked()));
         } else if (">".equals(operator)) {
-          return Parse.done(new GtExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+          return Parse.done(new GtExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                       parseRhs.getNonNullUnchecked()));
         } else {
           return Parse.error(Diagnostic.message(operator, input));
         }
@@ -199,8 +197,7 @@ public final class ParseComparisonExpr extends Parse<Term> {
     if (input.isError()) {
       return Parse.error(input.getError());
     }
-    return new ParseComparisonExpr(parser, form, parseLhs,
-                                   operator, parseRhs, step);
+    return new ParseComparisonExpr(parser, form, parseLhs, operator, parseRhs, step);
   }
 
 }

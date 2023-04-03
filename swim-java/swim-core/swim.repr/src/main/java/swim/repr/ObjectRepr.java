@@ -66,7 +66,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   @Override
   public void setAttrs(Attrs attrs) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.attrs = attrs;
   }
@@ -250,7 +250,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size < 0) {
       return this.putHashed(key, value, false);
@@ -266,7 +266,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size < 0) {
       return this.putHashed(key, value, true);
@@ -540,7 +540,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   @Override
   public @Nullable Repr remove(@Nullable Object key) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size == 0 || !(key instanceof String)) {
       return null;
@@ -849,7 +849,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   @Override
   public void clear() {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.shape = ObjectShape.empty();
     this.slots = null;
@@ -1290,55 +1290,47 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   }
 
   public static ObjectRepr of() {
-    return new ObjectRepr(0, 0, Attrs.empty(), ObjectShape.empty(),
-                          null, null, null);
+    return new ObjectRepr(0, 0, Attrs.empty(), ObjectShape.empty(), null, null, null);
   }
 
-  public static ObjectRepr of(String key, @Nullable Object value) {
-    value = Repr.from(value);
+  public static ObjectRepr of(String key, Repr value) {
     final ObjectShape shape = ObjectShape.empty().getChild(key);
     return new ObjectRepr(0, 1, Attrs.empty(), shape, value, null, null);
   }
 
-  public static ObjectRepr of(String key0, @Nullable Object value0,
-                              String key1, @Nullable Object value1) {
-    value0 = Repr.from(value0);
-    value1 = Repr.from(value1);
+  public static ObjectRepr of(String key0, Repr value0,
+                              String key1, Repr value1) {
     final ObjectShape shape = ObjectShape.empty().getChild(key0).getChild(key1);
     return new ObjectRepr(0, 2, Attrs.empty(), shape, value0, value1, null);
   }
 
-  public static ObjectRepr of(String key0, @Nullable Object value0,
-                              String key1, @Nullable Object value1,
-                              String key2, @Nullable Object value2) {
-    value0 = Repr.from(value0);
-    value1 = Repr.from(value1);
-    value2 = Repr.from(value2);
+  public static ObjectRepr of(String key0, Repr value0,
+                              String key1, Repr value1,
+                              String key2, Repr value2) {
     final ObjectShape shape = ObjectShape.empty().getChild(key0).getChild(key1)
                                                  .getChild(key2);
     return new ObjectRepr(0, 3, Attrs.empty(), shape, value0, value1, value2);
   }
 
-  public static ObjectRepr of(String key0, @Nullable Object value0,
-                              String key1, @Nullable Object value1,
-                              String key2, @Nullable Object value2,
-                              String key3, @Nullable Object value3) {
-    final Repr[] slots = new Repr[] {Repr.from(value0), Repr.from(value1),
-                                     Repr.from(value2), Repr.from(value3)};
+  public static ObjectRepr of(String key0, Repr value0,
+                              String key1, Repr value1,
+                              String key2, Repr value2,
+                              String key3, Repr value3) {
+    final Repr[] slots = new Repr[] {value0, value1, value2, value3};
     final ObjectShape shape = ObjectShape.empty().getChild(key0).getChild(key1)
                                                  .getChild(key2).getChild(key3);
     return new ObjectRepr(0, 4, Attrs.empty(), shape, slots, null, null);
   }
 
-  public static ObjectRepr of(@Nullable Object... keyValuePairs) {
+  public static ObjectRepr of(Object... keyValuePairs) {
     Objects.requireNonNull(keyValuePairs);
     final int n = keyValuePairs.length;
     if (n % 2 != 0) {
-      throw new IllegalArgumentException("Odd number of key-value pairs");
+      throw new IllegalArgumentException("odd number of key-value pairs");
     }
     final ObjectRepr object = ObjectRepr.of();
     for (int i = 0; i < n; i += 2) {
-      object.put((String) keyValuePairs[i], Repr.from(keyValuePairs[i + 1]));
+      object.put((String) keyValuePairs[i], (Repr) keyValuePairs[i + 1]);
     }
     return object;
   }

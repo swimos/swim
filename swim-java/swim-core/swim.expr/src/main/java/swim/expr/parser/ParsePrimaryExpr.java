@@ -50,13 +50,8 @@ public final class ParsePrimaryExpr extends Parse<Term> {
                                   @Nullable Parse<Term> parseExpr, int step) {
     int c = 0;
     if (step == 1) {
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isSpace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isSpace(c = input.head())) {
+        input.step();
       }
       if (input.isCont() && c == '(') {
         input.step();
@@ -98,13 +93,8 @@ public final class ParsePrimaryExpr extends Parse<Term> {
       }
     }
     if (step == 5) {
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isWhitespace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isWhitespace(c = input.head())) {
+        input.step();
       }
       if (input.isCont() && c == ')') {
         input.step();
@@ -114,23 +104,13 @@ public final class ParsePrimaryExpr extends Parse<Term> {
       }
     }
     if (step == 6) {
-      parseExpr = Assume.nonNull(parseExpr);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isSpace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isSpace(c = input.head())) {
+        input.step();
       }
-      if (input.isCont()) {
-        if (c == ':' || c == '.' || c == '[' || c == '(') {
-          return parser.parseSelectorExpr(input, form, parseExpr.getNonNull());
-        } else {
-          return parseExpr;
-        }
-      } else if (input.isDone()) {
-        return parseExpr;
+      if (input.isCont() && (c == ':' || c == '.' || c == '[' || c == '(')) {
+        return parser.parseSelectorExpr(input, form, Assume.nonNull(parseExpr).getNonNullUnchecked());
+      } else if (input.isReady()) {
+        return Assume.nonNull(parseExpr);
       }
     }
     if (input.isError()) {

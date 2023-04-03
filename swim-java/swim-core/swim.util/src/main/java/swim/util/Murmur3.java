@@ -174,7 +174,7 @@ public final class Murmur3 {
     } else if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
       return Murmur3.mixByteArrayLE(code, array, offset, size);
     } else {
-      throw new AssertionError();
+      throw new AssertionError("unreachable");
     }
   }
 
@@ -238,7 +238,7 @@ public final class Murmur3 {
     } else if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
       return Murmur3.mixStringLE(code, string);
     } else {
-      throw new AssertionError();
+      throw new AssertionError("unreachable");
     }
   }
 

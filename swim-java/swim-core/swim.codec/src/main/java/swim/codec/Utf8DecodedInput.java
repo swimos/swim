@@ -14,7 +14,6 @@
 
 package swim.codec;
 
-import java.io.IOException;
 import swim.annotations.CheckReturnValue;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -35,11 +34,11 @@ public final class Utf8DecodedInput extends DecodedInput {
   int c3;
   int have;
   int state;
-  @Nullable IOException error;
+  @Nullable InputException error;
 
   Utf8DecodedInput(Input input, UtfErrorMode errorMode, long offset,
                    int line, int column, int c1, int c2, int c3, int have,
-                   int state, @Nullable IOException error) {
+                   int state, @Nullable InputException error) {
     this.input = input;
     this.errorMode = errorMode;
     this.offset = offset;
@@ -114,10 +113,10 @@ public final class Utf8DecodedInput extends DecodedInput {
       } else {
         c1 = -1;
       }
-      if (c1 == 0 && this.errorMode.isNonZero()) { // invalid NUL byte
+      if (c1 == 0 && this.errorMode.isNonZero()) { // unsupported NUL byte
         this.have = 1;
         this.state = ERROR_STATE;
-        this.error = new UtfException("Invalid NUL byte");
+        this.error = new InputException("unsupported NUL byte");
       } else if (c1 >= 0 && c1 <= 0x7F) { // U+0000..U+007F
         this.have = 1;
         this.state = c1;
@@ -286,7 +285,13 @@ public final class Utf8DecodedInput extends DecodedInput {
   public int head() {
     final int state = this.state();
     if (state < 0) {
-      throw new IllegalStateException();
+      if (state == EMPTY_STATE) {
+        throw new IllegalStateException("input empty");
+      } else if (state == DONE_STATE) {
+        throw new IllegalStateException("input done");
+      } else {
+        throw new IllegalStateException("input error", this.error);
+      }
     }
     return state;
   }
@@ -426,7 +431,13 @@ public final class Utf8DecodedInput extends DecodedInput {
   public Utf8DecodedInput step() {
     final int state = this.state();
     if (state < 0) {
-      throw new IllegalStateException("Invalid step");
+      if (state == EMPTY_STATE) {
+        throw new IllegalStateException("input empty");
+      } else if (state == DONE_STATE) {
+        throw new IllegalStateException("input done");
+      } else {
+        throw new IllegalStateException("input error", this.error);
+      }
     }
     this.offset += (long) this.have;
     if (state == '\n') {
@@ -542,41 +553,41 @@ public final class Utf8DecodedInput extends DecodedInput {
 
   private static String invalid(int c1) {
     final StringOutput output = new StringOutput();
-    output.append("Invalid UTF-8 code unit: ");
-    Base16.uppercase().writeIntLiteral(output, c1, 2).checkDone();
+    output.append("invalid UTF-8 code unit: ");
+    Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     return output.get();
   }
 
   private static String invalid(int c1, int c2) {
     final StringOutput output = new StringOutput();
-    output.append("Invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(output, c1, 2).checkDone();
+    output.append("invalid UTF-8 code unit sequence: ");
+    Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c2, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).assertDone();
     return output.get();
   }
 
   private static String invalid(int c1, int c2, int c3) {
     final StringOutput output = new StringOutput();
-    output.append("Invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(output, c1, 2).checkDone();
+    output.append("invalid UTF-8 code unit sequence: ");
+    Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c2, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c3, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c3, 2).assertDone();
     return output.get();
   }
 
   private static String invalid(int c1, int c2, int c3, int c4) {
     final StringOutput output = new StringOutput();
-    output.append("Invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(output, c1, 2).checkDone();
+    output.append("invalid UTF-8 code unit sequence: ");
+    Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c2, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c3, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c3, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c4, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c4, 2).assertDone();
     return output.get();
   }
 

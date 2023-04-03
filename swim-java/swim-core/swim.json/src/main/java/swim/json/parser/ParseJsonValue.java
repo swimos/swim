@@ -18,13 +18,9 @@ import swim.annotations.Internal;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
-import swim.json.JsonArrayForm;
+import swim.json.JsonException;
 import swim.json.JsonForm;
-import swim.json.JsonIdentifierForm;
-import swim.json.JsonNumberForm;
-import swim.json.JsonObjectForm;
 import swim.json.JsonParser;
-import swim.json.JsonStringForm;
 
 @Internal
 public final class ParseJsonValue<T> extends Parse<T> {
@@ -42,58 +38,47 @@ public final class ParseJsonValue<T> extends Parse<T> {
     return ParseJsonValue.parse(input, this.parser, this.form);
   }
 
-  public static <T> Parse<T> parse(Input input, JsonParser parser, JsonForm<? extends T> form) {
-    int c = 0;
-    while (input.isCont()) {
-      c = input.head();
-      if (parser.isWhitespace(c)) {
-        input.step();
-      } else {
-        break;
-      }
-    }
+  public static <T> Parse<T> parse(Input input, JsonParser parser,
+                                   JsonForm<? extends T> form) {
     if (input.isCont()) {
-      if (c == '{') {
-        final JsonObjectForm<?, ?, ?, ? extends T> objectForm = form.objectForm();
-        if (objectForm != null) {
-          return parser.parseObject(input, objectForm);
-        } else {
-          return Parse.error(Diagnostic.message("unexpected object", input));
-        }
-      } else if (c == '[') {
-        final JsonArrayForm<?, ?, ? extends T> arrayForm = form.arrayForm();
-        if (arrayForm != null) {
-          return parser.parseArray(input, arrayForm);
-        } else {
-          return Parse.error(Diagnostic.message("unexpected array", input));
-        }
-      } else if (c == '"') {
-        final JsonStringForm<?, ? extends T> stringForm = form.stringForm();
-        if (stringForm != null) {
-          return parser.parseString(input, stringForm);
-        } else {
-          return Parse.error(Diagnostic.message("unexpected string", input));
+      final int c = input.head();
+      if (parser.isIdentifierStartChar(c)) {
+        try {
+          return parser.parseIdentifier(input, form.identifierForm());
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
         }
       } else if (c == '-' || (c >= '0' && c <= '9')) {
-        final JsonNumberForm<? extends T> numberForm = form.numberForm();
-        if (numberForm != null) {
-          return parser.parseNumber(input, numberForm);
-        } else {
-          return Parse.error(Diagnostic.message("unexpected number", input));
+        try {
+          return parser.parseNumber(input, form.numberForm());
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
         }
-      } else if (parser.isIdentifierStartChar(c)) {
-        final JsonIdentifierForm<? extends T> identifierForm = form.identifierForm();
-        if (identifierForm != null) {
-          return parser.parseIdentifier(input, identifierForm);
-        } else {
-          return Parse.error(Diagnostic.message("unexpected identifier", input));
+      } else if (c == '"') {
+        try {
+          return parser.parseString(input, form.stringForm());
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+      } else if (c == '[') {
+        try {
+          return parser.parseArray(input, form.arrayForm());
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+      } else if (c == '{') {
+        try {
+          return parser.parseObject(input, form.objectForm());
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
         }
       } else {
         return Parse.error(Diagnostic.expected("value", input));
       }
     } else if (input.isDone()) {
       return Parse.error(Diagnostic.expected("value", input));
-    } else if (input.isError()) {
+    }
+    if (input.isError()) {
       return Parse.error(input.getError());
     }
     return new ParseJsonValue<T>(parser, form);

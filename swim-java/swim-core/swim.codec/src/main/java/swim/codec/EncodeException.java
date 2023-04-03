@@ -19,7 +19,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * Thrown when an encoding invalid output.
+ * Thrown when encoding invalid output.
  */
 @Public
 @Since("5.0")

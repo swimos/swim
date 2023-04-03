@@ -164,7 +164,7 @@ public class Utf8DecodedOutputTests {
       assertFalse(output.isError());
       output.write(codeUnits[i] & 0xFF);
     }
-    assertEquals(new StringBuilder().appendCodePoint(codePoint).toString(), output.get());
+    assertEquals(new StringBuilder().appendCodePoint(codePoint).toString(), output.getUnchecked());
   }
 
   static void decodeMaximalSubpartOfIllFormedCodeUnitSequence(byte[] codeUnits) {
@@ -185,7 +185,7 @@ public class Utf8DecodedOutputTests {
       assertFalse(output.isError());
       output.write(codeUnits[i] & 0xFF);
     }
-    assertEquals(expected, output.get());
+    assertEquals(expected, output.getUnchecked());
 
     // Decode complete code unit sequence with failure.
     output = new Utf8DecodedOutput<String>(new StringOutput(), UtfErrorMode.fatal());
@@ -218,7 +218,7 @@ public class Utf8DecodedOutputTests {
       assertFalse(output.isError());
       output.write(codeUnits[i] & 0xFF);
     }
-    assertEquals(expected, output.get());
+    assertEquals(expected, output.getUnchecked());
   }
 
   static byte[] byteArray(int... xs) {

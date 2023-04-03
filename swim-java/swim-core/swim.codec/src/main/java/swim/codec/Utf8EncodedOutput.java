@@ -14,9 +14,10 @@
 
 package swim.codec;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.NoSuchElementException;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -31,11 +32,11 @@ public final class Utf8EncodedOutput<T> extends EncodedOutput<T> {
   int c3;
   int c4;
   int index;
-  @Nullable IOException error;
+  @Nullable OutputException error;
 
   Utf8EncodedOutput(Output<T> output, UtfErrorMode errorMode,
                     int c2, int c3, int c4, int index,
-                    @Nullable IOException error) {
+                    @Nullable OutputException error) {
     this.output = output;
     this.errorMode = errorMode;
     this.c2 = c2;
@@ -86,6 +87,10 @@ public final class Utf8EncodedOutput<T> extends EncodedOutput<T> {
 
   @Override
   public Utf8EncodedOutput<T> write(int c) {
+    if (this.error != null) {
+      throw new IllegalStateException("output error", this.error);
+    }
+
     int c1 = 0;
     int c2 = this.c2;
     int c3 = this.c3;
@@ -111,7 +116,7 @@ public final class Utf8EncodedOutput<T> extends EncodedOutput<T> {
         }
         index += 1;
       } else {
-        this.error = new IOException("Unable to flush buffered code units");
+        this.error = new OutputException("unable to flush buffered code units");
         return this;
       }
     }
@@ -136,7 +141,7 @@ public final class Utf8EncodedOutput<T> extends EncodedOutput<T> {
       index = 0;
     } else { // surrogate or invalid code point
       if (this.errorMode.isFatal()) {
-        this.error = new UtfException("Invalid code point: U+" + Integer.toHexString(c));
+        this.error = new OutputException("invalid code point: U+" + Integer.toHexString(c));
         return this;
       } else {
         return this.write(this.errorMode.replacementChar());
@@ -209,12 +214,43 @@ public final class Utf8EncodedOutput<T> extends EncodedOutput<T> {
     return this;
   }
 
+  @CheckReturnValue
   @Override
-  public @Nullable T get() {
+  public @Nullable T get() throws OutputException {
     if (this.error == null) {
       return this.output.get();
     } else {
-      throw new IllegalStateException("Output error", this.error);
+      throw this.error;
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNull() throws OutputException {
+    if (this.error == null) {
+      return this.output.getNonNull();
+    } else {
+      throw this.error;
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getUnchecked() {
+    if (this.error == null) {
+      return this.output.getUnchecked();
+    } else {
+      throw new NoSuchElementException("output error", this.error);
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullUnchecked() {
+    if (this.error == null) {
+      return this.output.getNonNullUnchecked();
+    } else {
+      throw new NoSuchElementException("output error", this.error);
     }
   }
 

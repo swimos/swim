@@ -72,10 +72,10 @@ public class ThreadSchedulerTests {
                   }
                 } while (true);
                 barrier.await();
-              } catch (InterruptedException e) {
+              } catch (InterruptedException cause) {
                 interrupted = true;
-              } catch (BrokenBarrierException e) {
-                // swallow
+              } catch (BrokenBarrierException cause) {
+                throw new AssertionError(cause);
               } finally {
                 scheduler.stop();
                 exitLatch.countDown();
@@ -107,7 +107,7 @@ public class ThreadSchedulerTests {
       System.out.println("Scheduled " + timerCount + " timers every " + adt1 + "ms (" + arate1 + "/s) on average from " + threadCount + " threads over " + iterations + " iterations");
       System.out.println("Executed " + timerCount + " timers every " + adt2 + "ms (" + arate2 + "/s) on average from " + threadCount + " threads over " + iterations + " iterations");
     } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
+      throw new JUnitException("interrupted", cause);
     }
   }
 

@@ -21,7 +21,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * Non-blocking token stream buffer.
+ * A non-blocking chunked output buffer.
  */
 @Public
 @Since("5.0")

@@ -17,6 +17,7 @@ package swim.codec;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import swim.annotations.CheckReturnValue;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
@@ -138,7 +139,7 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
   public BinaryOutput write(int token) {
     final int index = this.index;
     if (index >= this.limit) {
-      throw new IllegalStateException("Buffer full");
+      throw new IllegalStateException("output " + (this.last ? "done" : "full"));
     }
     this.array[index] = (byte) token;
     this.index = index + 1;
@@ -169,8 +170,14 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
   @Override
   public BinaryOutput step(int offset) {
     final int index = this.index + offset;
-    if (index < 0 || index > this.limit) {
-      throw new IllegalArgumentException("Invalid step to " + index);
+    if (index < 0) {
+      throw new IllegalArgumentException("step from index " + this.index
+                                       + " with offset " + offset
+                                       + " would underflow");
+    } else if (index > this.limit) {
+      throw new IllegalArgumentException("step from index " + this.index
+                                        + " with offset " + offset
+                                        + " would overflow limit " + this.limit);
     }
     this.index = index;
     return this;
@@ -206,23 +213,46 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
   @Override
   public BinaryOutput shift(int fromIndex, int toIndex, int length) {
     if (length < 0) {
-      throw new IndexOutOfBoundsException("length: " + length);
+      throw new IndexOutOfBoundsException("negative shift length: " + length);
     } else if (fromIndex < 0) {
-      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex);
-    } else if (fromIndex + length > this.limit) {
-      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + "; length: " + length);
+      throw new IndexOutOfBoundsException("shift from negative index: " + fromIndex);
     } else if (toIndex < 0) {
-      throw new IndexOutOfBoundsException("toIndex: " + toIndex);
+      throw new IndexOutOfBoundsException("shift to negative index: " + toIndex);
+    } else if (fromIndex + length > this.limit) {
+      throw new IndexOutOfBoundsException("shift from index " + fromIndex
+                                        + " with length " + length
+                                        + " would overflow limit " + this.limit);
     } else if (toIndex + length > this.limit) {
-      throw new IndexOutOfBoundsException("toIndex: " + toIndex + "; length: " + length);
+      throw new IndexOutOfBoundsException("shift to index " + toIndex
+                                        + " with length " + length
+                                        + " would overflow limit " + this.limit);
     }
     System.arraycopy(this.array, fromIndex, this.array, toIndex, length);
     return this;
   }
 
+  @CheckReturnValue
   @Override
   public ByteBuffer get() {
     return ByteBuffer.wrap(this.array, 0, this.index);
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getNonNull() {
+    return this.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getUnchecked() {
+    return this.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getNonNullUnchecked() {
+    return this.get();
   }
 
   @Override

@@ -14,6 +14,7 @@
 
 package swim.expr;
 
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -32,6 +33,7 @@ import swim.expr.term.DoubleTerm;
 import swim.expr.term.FloatTerm;
 import swim.expr.term.IntTerm;
 import swim.expr.term.LongTerm;
+import swim.expr.term.NullTerm;
 import swim.expr.term.ShortTerm;
 import swim.expr.term.StringTerm;
 import swim.util.Assume;
@@ -404,6 +406,10 @@ public interface Term {
     return TrapTerm.of();
   }
 
+  static Term of() {
+    return NullTerm.of();
+  }
+
   static Term of(boolean value) {
     return BooleanTerm.of(value);
   }
@@ -440,11 +446,11 @@ public interface Term {
     if (value != null) {
       return StringTerm.of(value);
     } else {
-      return Term.registry().intoTerm(value);
+      return NullTerm.of();
     }
   }
 
-  static Term from(@Nullable Object value) {
+  static Term from(@Nullable Object value) throws TermException {
     if (value instanceof Term) {
       return (Term) value;
     } else {
@@ -454,6 +460,14 @@ public interface Term {
 
   static TermRegistry registry() {
     return TermRegistry.REGISTRY;
+  }
+
+  static <T> TermForm<T> form(Type javaType) throws TermFormException {
+    return Term.registry().getTermForm(javaType);
+  }
+
+  static <T> TermForm<T> form(@Nullable T value) throws TermFormException {
+    return Term.registry().getTermForm(value);
   }
 
 }

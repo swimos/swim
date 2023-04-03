@@ -61,7 +61,7 @@ public abstract class AbstractNetListener implements NetListener {
   protected boolean requestAccept() {
     final NetListenerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound listener");
+      throw new IllegalStateException("unbound listener");
     }
     return context.requestAccept();
   }
@@ -69,7 +69,7 @@ public abstract class AbstractNetListener implements NetListener {
   protected boolean cancelAccept() {
     final NetListenerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound listener");
+      throw new IllegalStateException("unbound listener");
     }
     return context.cancelAccept();
   }
@@ -82,7 +82,7 @@ public abstract class AbstractNetListener implements NetListener {
   protected @Nullable NetSocketRef accept(NetSocket socket) throws IOException {
     final NetListenerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound listener");
+      throw new IllegalStateException("unbound listener");
     }
     return context.accept(socket);
   }

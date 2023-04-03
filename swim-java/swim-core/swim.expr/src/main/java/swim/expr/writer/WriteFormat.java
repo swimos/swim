@@ -70,7 +70,7 @@ public final class WriteFormat extends Write<Object> {
           } else if (part instanceof Term) {
             step = 3;
           } else {
-            return Write.error(new WriteException("Unexpected part: " + part));
+            return Write.error(new WriteException("unsupported format part: " + part));
           }
         } else {
           return Write.done();
@@ -107,7 +107,7 @@ public final class WriteFormat extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

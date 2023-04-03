@@ -97,11 +97,11 @@ public final class CookieHeader extends HttpHeader {
       if (input.isCont() && Http.isTokenChar(input.head())) {
         final Parse<HttpCookie> parseCookie = HttpCookie.parse(input);
         if (parseCookie.isDone()) {
-          cookies = cookies.appended(parseCookie.getNonNull());
+          cookies = cookies.appended(parseCookie.getNonNullUnchecked());
         } else if (parseCookie.isError()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value, parseCookie.getError());
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Cookie: " + value, parseCookie.getError());
         } else {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value);
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Cookie: " + value);
         }
       } else {
         break;
@@ -115,14 +115,14 @@ public final class CookieHeader extends HttpHeader {
         input.step();
         continue;
       } else {
-        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value,
+        throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Cookie: " + value,
                                 new ParseException(Diagnostic.expected(' ', input)));
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Cookie: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Cookie: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Cookie: " + value);
     }
     return cookies;
   }
@@ -135,7 +135,7 @@ public final class CookieHeader extends HttpHeader {
         output.write(';').write(' ');
       }
       cookie = cookies.next();
-      cookie.write(output).checkDone();
+      cookie.write(output).assertDone();
     } while (cookies.hasNext());
     return output.get();
   }

@@ -14,11 +14,22 @@
 
 package swim.codec;
 
+import java.lang.reflect.Type;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
 @Public
 @Since("5.0")
 public interface Translator<T> extends Transcoder<T>, Parser<T>, Writer<T> {
+
+  static <T> Translator<T> get(MediaType mediaType, Type javaType)
+      throws FormatException, TranslatorException {
+    return Codec.registry().getTranslator(mediaType, javaType);
+  }
+
+  static <T> Translator<T> get(String mediaType, Type javaType)
+      throws FormatException, TranslatorException {
+    return Codec.registry().getTranslator(mediaType, javaType);
+  }
 
 }

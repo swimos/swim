@@ -154,7 +154,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     Objects.requireNonNull(name, "name");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     HttpHeader[] array = this.array;
@@ -188,7 +188,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     Objects.requireNonNull(type, "type");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     final String name = type.name();
@@ -222,7 +222,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
   public @Nullable HttpHeader put(HttpHeader header) {
     Objects.requireNonNull(header, "header");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     final String name = header.name();
@@ -265,7 +265,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     Objects.requireNonNull(name, "name");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     HttpHeader[] array = this.array;
@@ -291,7 +291,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
     Objects.requireNonNull(type, "type");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     final String name = type.name();
@@ -383,7 +383,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
   @Override
   public @Nullable String remove(@Nullable Object key) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     if (n != 0 && key instanceof String) {
@@ -450,7 +450,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
 
   public boolean add(HttpHeader header) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     HttpHeader[] array = this.array;
@@ -468,7 +468,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
 
   public boolean addAll(Collection<? extends HttpHeader> headers) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int k = headers.size();
     if (k == 0) {
@@ -493,7 +493,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
 
   public boolean addAll(HttpHeaders headers) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int k = headers.size();
     if (k == 0) {
@@ -580,7 +580,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
 
   public HttpHeader remove(int index) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     if (index < 0 || index >= n) {
@@ -618,7 +618,7 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
   @Override
   public void clear() {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.array = EMPTY_ARRAY;
     this.size = 0;
@@ -731,13 +731,13 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -766,7 +766,10 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
   }
 
   public static Parse<HttpHeaders> parse(Input input, @Nullable HttpHeaderRegistry headerRegistry) {
-    return ParseHttpHeaders.parse(input, headerRegistry != null ? headerRegistry.headerTypes() : null, null, null, null, null, 1);
+    final StringTrieMap<HttpHeaderType<?, ?>> headerTypes = headerRegistry != null
+                                                          ? headerRegistry.headerTypes()
+                                                          : null;
+    return ParseHttpHeaders.parse(input, headerTypes, null, null, null, null, 1);
   }
 
   public static Parse<HttpHeaders> parse(Input input) {
@@ -774,22 +777,19 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
   }
 
   public static Parse<HttpHeaders> parse(@Nullable HttpHeaderRegistry headerRegistry) {
-    return new ParseHttpHeaders(headerRegistry != null ? headerRegistry.headerTypes() : null, null, null, null, null, 1);
+    final StringTrieMap<HttpHeaderType<?, ?>> headerTypes = headerRegistry != null
+                                                          ? headerRegistry.headerTypes()
+                                                          : null;
+    return new ParseHttpHeaders(headerTypes, null, null, null, null, 1);
   }
 
   public static Parse<HttpHeaders> parse() {
     return HttpHeaders.parse(HttpHeader.registry());
   }
 
-  public static HttpHeaders parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpHeaders> parse = HttpHeaders.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpHeaders> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpHeaders.parse(input).complete(input);
   }
 
   static int expand(int n) {
@@ -1044,31 +1044,24 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
     int c = 0;
     do {
       if (step == 1) {
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            if (headerTypes != null) {
-              final StringTrieMap<HttpHeaderType<?, ?>> subTrie = headerTypes.getBranch(headerTypes.normalized(c));
-              if (subTrie != null) {
-                nameTrie = subTrie;
-              } else {
-                nameBuilder = new StringBuilder();
-                nameBuilder.appendCodePoint(c);
-                nameTrie = null;
-              }
+        if (input.isCont() && Http.isTokenChar(c = input.head())) {
+          if (headerTypes != null) {
+            final StringTrieMap<HttpHeaderType<?, ?>> subTrie =
+                headerTypes.getBranch(headerTypes.normalized(c));
+            if (subTrie != null) {
+              nameTrie = subTrie;
             } else {
               nameBuilder = new StringBuilder();
               nameBuilder.appendCodePoint(c);
+              nameTrie = null;
             }
-            step = 2;
           } else {
-            if (headers == null) {
-              headers = HttpHeaders.of();
-            }
-            return Parse.done(headers);
+            nameBuilder = new StringBuilder();
+            nameBuilder.appendCodePoint(c);
           }
-        } else if (input.isDone()) {
+          input.step();
+          step = 2;
+        } else if (input.isReady()) {
           if (headers == null) {
             headers = HttpHeaders.of();
           }
@@ -1076,25 +1069,21 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
         }
       }
       if (step == 2) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            if (nameTrie != null) {
-              final StringTrieMap<HttpHeaderType<?, ?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
-              if (subTrie != null) {
-                nameTrie = subTrie;
-              } else {
-                nameBuilder = new StringBuilder(nameTrie.prefix());
-                nameBuilder.appendCodePoint(c);
-                nameTrie = null;
-              }
+        while (input.isCont() && Http.isTokenChar(c = input.head())) {
+          if (nameTrie != null) {
+            final StringTrieMap<HttpHeaderType<?, ?>> subTrie =
+                nameTrie.getBranch(nameTrie.normalized(c));
+            if (subTrie != null) {
+              nameTrie = subTrie;
             } else {
-              Assume.nonNull(nameBuilder).appendCodePoint(c);
+              nameBuilder = new StringBuilder(nameTrie.prefix());
+              nameBuilder.appendCodePoint(c);
+              nameTrie = null;
             }
           } else {
-            break;
+            Assume.nonNull(nameBuilder).appendCodePoint(c);
           }
+          input.step();
         }
         if (input.isCont()) {
           step = 3;
@@ -1111,17 +1100,12 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
         }
       }
       if (step == 5) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isFieldChar(c)) {
-            input.step();
-            if (valueBuilder == null) {
-              valueBuilder = new StringBuilder();
-            }
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
+        while (input.isCont() && Http.isFieldChar(c = input.head())) {
+          if (valueBuilder == null) {
+            valueBuilder = new StringBuilder();
           }
+          valueBuilder.appendCodePoint(c);
+          input.step();
         }
         if (input.isCont() && Http.isSpace(c)) {
           input.step();
@@ -1131,13 +1115,8 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
         }
       }
       if (step == 6) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && Http.isFieldChar(c)) {
           if (valueBuilder != null) {
@@ -1178,7 +1157,9 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
           if (type != null) {
             header = type.of(value);
           } else {
-            final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
+            final String name = nameTrie != null
+                              ? nameTrie.prefix()
+                              : Assume.nonNull(nameBuilder).toString();
             header = new HttpHeader(name, value);
           }
           if (headers == null) {
@@ -1244,7 +1225,7 @@ final class WriteHttpHeaders extends Write<Object> {
           }
         }
         if (name.length() == 0) {
-          return Write.error(new WriteException("Blank header name"));
+          return Write.error(new WriteException("blank header name"));
         }
         while (index < name.length() && output.isCont()) {
           c = name.codePointAt(index);
@@ -1252,7 +1233,7 @@ final class WriteHttpHeaders extends Write<Object> {
             output.write(c);
             index = name.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid header name: " + name));
+            return Write.error(new WriteException("invalid header name: " + name));
           }
         }
         if (index >= name.length()) {
@@ -1261,9 +1242,8 @@ final class WriteHttpHeaders extends Write<Object> {
         }
       }
       if (step == 2 && output.isCont()) {
-        value = Assume.nonNull(value);
         output.write(':');
-        if (value.isEmpty()) {
+        if (Assume.nonNull(value).isEmpty()) {
           step = 5;
         } else {
           step = 3;
@@ -1281,7 +1261,7 @@ final class WriteHttpHeaders extends Write<Object> {
             output.write(c);
             index = value.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid header value: " + value));
+            return Write.error(new WriteException("invalid header value: " + value));
           }
         }
         if (index >= value.length()) {
@@ -1303,7 +1283,7 @@ final class WriteHttpHeaders extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

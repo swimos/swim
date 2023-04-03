@@ -116,13 +116,13 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -136,7 +136,10 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
   }
 
   public static Parse<HttpHeader> parse(Input input, @Nullable HttpHeaderRegistry headerRegistry) {
-    return ParseHttpHeader.parse(input, headerRegistry != null ? headerRegistry.headerTypes() : null, null, null, 1);
+    final StringTrieMap<HttpHeaderType<?, ?>> headerTypes = headerRegistry != null
+                                                          ? headerRegistry.headerTypes()
+                                                          : null;
+    return ParseHttpHeader.parse(input, headerTypes, null, null, 1);
   }
 
   public static Parse<HttpHeader> parse(Input input) {
@@ -144,22 +147,19 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
   }
 
   public static Parse<HttpHeader> parse(@Nullable HttpHeaderRegistry headerRegistry) {
-    return new ParseHttpHeader(headerRegistry != null ? headerRegistry.headerTypes() : null, null, null, 1);
+    final StringTrieMap<HttpHeaderType<?, ?>> headerTypes = headerRegistry != null
+                                                          ? headerRegistry.headerTypes()
+                                                          : null;
+    return new ParseHttpHeader(headerTypes, null, null, 1);
   }
 
   public static Parse<HttpHeader> parse() {
     return HttpHeader.parse(HttpHeader.registry());
   }
 
-  public static HttpHeader parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpHeader> parse = HttpHeader.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpHeader> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpHeader.parse(input).complete(input);
   }
 
   public static HttpHeaderRegistry registry() {
@@ -196,51 +196,43 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
                                  @Nullable StringBuilder valueBuilder, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          if (nameTrie != null) {
-            final StringTrieMap<HttpHeaderType<?, ?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
-            if (subTrie != null) {
-              nameTrie = subTrie;
-            } else {
-              nameBuilder = new StringBuilder();
-              nameBuilder.appendCodePoint(c);
-              nameTrie = null;
-            }
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        if (nameTrie != null) {
+          final StringTrieMap<HttpHeaderType<?, ?>> subTrie =
+              nameTrie.getBranch(nameTrie.normalized(c));
+          if (subTrie != null) {
+            nameTrie = subTrie;
           } else {
             nameBuilder = new StringBuilder();
             nameBuilder.appendCodePoint(c);
+            nameTrie = null;
           }
-          step = 2;
         } else {
-          return Parse.error(Diagnostic.expected("header name", input));
+          nameBuilder = new StringBuilder();
+          nameBuilder.appendCodePoint(c);
         }
-      } else if (input.isDone()) {
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("header name", input));
       }
     }
     if (step == 2) {
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          if (nameTrie != null) {
-            final StringTrieMap<HttpHeaderType<?, ?>> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
-            if (subTrie != null) {
-              nameTrie = subTrie;
-            } else {
-              nameBuilder = new StringBuilder(nameTrie.prefix());
-              nameBuilder.appendCodePoint(c);
-              nameTrie = null;
-            }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        if (nameTrie != null) {
+          final StringTrieMap<HttpHeaderType<?, ?>> subTrie =
+              nameTrie.getBranch(nameTrie.normalized(c));
+          if (subTrie != null) {
+            nameTrie = subTrie;
           } else {
-            Assume.nonNull(nameBuilder).appendCodePoint(c);
+            nameBuilder = new StringBuilder(nameTrie.prefix());
+            nameBuilder.appendCodePoint(c);
+            nameTrie = null;
           }
         } else {
-          break;
+          Assume.nonNull(nameBuilder).appendCodePoint(c);
         }
+        input.step();
       }
       if (input.isCont()) {
         step = 3;
@@ -258,17 +250,12 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
     }
     do {
       if (step == 4) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isFieldChar(c)) {
-            input.step();
-            if (valueBuilder == null) {
-              valueBuilder = new StringBuilder();
-            }
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
+        while (input.isCont() && Http.isFieldChar(c = input.head())) {
+          if (valueBuilder == null) {
+            valueBuilder = new StringBuilder();
           }
+          valueBuilder.appendCodePoint(c);
+          input.step();
         }
         if (input.isCont() && Http.isSpace(c)) {
           input.step();
@@ -279,19 +266,16 @@ final class ParseHttpHeader extends Parse<HttpHeader> {
           if (type != null) {
             return Parse.done(type.of(value));
           } else {
-            final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
+            final String name = nameTrie != null
+                              ? nameTrie.prefix()
+                              : Assume.nonNull(nameBuilder).toString();
             return Parse.done(new HttpHeader(name, value));
           }
         }
       }
       if (step == 5) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && Http.isFieldChar(c)) {
           if (valueBuilder != null) {
@@ -339,7 +323,7 @@ final class WriteHttpHeader extends Write<Object> {
     int c = 0;
     if (step == 1) {
       if (name.length() == 0) {
-        return Write.error(new WriteException("Blank header name"));
+        return Write.error(new WriteException("blank header name"));
       }
       while (index < name.length() && output.isCont()) {
         c = name.codePointAt(index);
@@ -347,7 +331,7 @@ final class WriteHttpHeader extends Write<Object> {
           output.write(c);
           index = name.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid header name: " + name));
+          return Write.error(new WriteException("invalid header name: " + name));
         }
       }
       if (index >= name.length()) {
@@ -374,7 +358,7 @@ final class WriteHttpHeader extends Write<Object> {
           output.write(c);
           index = value.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid header value: " + value));
+          return Write.error(new WriteException("invalid header value: " + value));
         }
       }
       if (index >= value.length()) {
@@ -382,7 +366,7 @@ final class WriteHttpHeader extends Write<Object> {
       }
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

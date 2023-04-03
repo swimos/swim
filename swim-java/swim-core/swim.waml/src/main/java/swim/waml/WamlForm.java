@@ -14,12 +14,11 @@
 
 package swim.waml;
 
-import java.lang.reflect.Type;
+import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryOutput;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.MediaType;
 import swim.codec.Output;
@@ -29,56 +28,160 @@ import swim.codec.StringOutput;
 import swim.codec.Translator;
 import swim.codec.Write;
 import swim.expr.TermForm;
+import swim.util.Notation;
 
+/**
+ * A transcoder between serialized WAML and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlForm}
+ *
+ * @see WamlCodec
+ */
 @Public
 @Since("5.0")
 public interface WamlForm<T> extends TermForm<T>, Translator<T> {
 
-  default @Nullable WamlAttrForm<?, ? extends T> getAttrForm(String name) {
-    return null;
+  default WamlAttrForm<?, ? extends T> getAttrForm(String name) throws WamlException {
+    throw new WamlFormException(Notation.of("unsupported attr: ")
+                                        .appendSource(name)
+                                        .toString());
   }
 
-  default @Nullable WamlForm<T> taggedForm(String tag) {
-    return null;
+  /**
+   * Returns a {@code WamlForm} that injects a {@code tag} attribute
+   * into serialized WAML values.
+   *
+   * @param tag the name of the attribute to inject into
+   *        serialized WAML values
+   * @return a {@code WamlForm} that tags serialized WAML values
+   *         with a distinguishing attribute
+   * @throws WamlException if values of type {@code T} cannot be
+   *         serialized to WAML values with an injected {@code tag} attribute
+   */
+  default WamlForm<T> taggedForm(String tag) throws WamlException {
+    throw new WamlFormException(Notation.of("unsupported tag: ")
+                                        .appendSource(tag)
+                                        .toString());
   }
 
-  default @Nullable WamlUndefinedForm<? extends T> undefinedForm() {
-    return null;
+  /**
+   * Returns a {@code WamlUndefinedForm} for transcoding WAML
+   * undefined literals to values of type {@code T}.
+   *
+   * @return a {@code WamlUndefinedForm} that transcodes values
+   *         of type {@code T} to WAML undefined literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML undefined literals is not supported
+   */
+  default WamlUndefinedForm<? extends T> undefinedForm() throws WamlException {
+    throw new WamlFormException("undefined not supported");
   }
 
-  default @Nullable WamlUnitForm<? extends T> unitForm() {
-    return null;
+  /**
+   * Returns a {@code WamlUnitForm} for transcoding WAML
+   * unit literals to values of type {@code T}.
+   *
+   * @return a {@code WamlUnitForm} that transcodes values
+   *         of type {@code T} to WAML unit literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML unit literals is not supported
+   */
+  default WamlUnitForm<? extends T> unitForm() throws WamlException {
+    throw new WamlFormException("unit not supported");
   }
 
+  /**
+   * Returns a {@code WamlIdentifierForm} for transcoding WAML
+   * identifier literals to values of type {@code T}.
+   *
+   * @return a {@code WamlIdentifierForm} that transcodes values
+   *         of type {@code T} to WAML identifier literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML identifier literals is not supported
+   */
   @Override
-  default @Nullable WamlNumberForm<? extends T> numberForm() {
-    return null;
+  default WamlIdentifierForm<? extends T> identifierForm() throws WamlException {
+    throw new WamlFormException("identifier not supported");
   }
 
+  /**
+   * Returns a {@code WamlNumberForm} for transcoding WAML
+   * number literals to values of type {@code T}.
+   *
+   * @return a {@code WamlNumberForm} that transcodes values
+   *         of type {@code T} to WAML number literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML number literals is not supported
+   */
   @Override
-  default @Nullable WamlIdentifierForm<? extends T> identifierForm() {
-    return null;
+  default WamlNumberForm<? extends T> numberForm() throws WamlException {
+    throw new WamlFormException("number not supported");
   }
 
+  /**
+   * Returns a {@code WamlStringForm} for transcoding WAML
+   * string literals to values of type {@code T}.
+   *
+   * @return a {@code WamlStringForm} that transcodes values
+   *         of type {@code T} to WAML string literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML string literals is not supported
+   */
   @Override
-  default @Nullable WamlStringForm<?, ? extends T> stringForm() {
-    return null;
+  default WamlStringForm<?, ? extends T> stringForm() throws WamlException {
+    throw new WamlFormException("string not supported");
   }
 
-  default @Nullable WamlArrayForm<?, ?, ? extends T> arrayForm() {
-    return null;
+  /**
+   * Returns a {@code WamlArrayForm} for transcoding WAML
+   * array literals to values of type {@code T}.
+   *
+   * @return a {@code WamlArrayForm} that transcodes values
+   *         of type {@code T} to WAML array literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML array literals is not supported
+   */
+  default WamlArrayForm<?, ?, ? extends T> arrayForm() throws WamlException {
+    throw new WamlFormException("array not supported");
   }
 
-  default @Nullable WamlMarkupForm<?, ?, ? extends T> markupForm() {
-    return null;
+  /**
+   * Returns a {@code WamlMarkupForm} for transcoding WAML
+   * markup literals to values of type {@code T}.
+   *
+   * @return a {@code WamlMarkupForm} that transcodes values
+   *         of type {@code T} to WAML markup literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML markup literals is not supported
+   */
+  default WamlMarkupForm<?, ?, ? extends T> markupForm() throws WamlException {
+    throw new WamlFormException("markup not supported");
   }
 
-  default @Nullable WamlObjectForm<?, ?, ?, ? extends T> objectForm() {
-    return null;
+  /**
+   * Returns a {@code WamlObjectForm} for transcoding WAML
+   * object literals to values of type {@code T}.
+   *
+   * @return a {@code WamlObjectForm} that transcodes values
+   *         of type {@code T} to WAML object literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML object literals is not supported
+   */
+  default WamlObjectForm<?, ?, ?, ? extends T> objectForm() throws WamlException {
+    throw new WamlFormException("object not supported");
   }
 
-  default @Nullable WamlTupleForm<?, ?, ?, ? extends T> tupleForm() {
-    return null;
+  /**
+   * Returns a {@code WamlTupleForm} for transcoding WAML
+   * tuple literals to values of type {@code T}.
+   *
+   * @return a {@code WamlTupleForm} that transcodes values
+   *         of type {@code T} to WAML tuple literals
+   * @throws WamlException if transcoding values of type {@code T}
+   *         to WAML tuple literals is not supported
+   */
+  default WamlTupleForm<?, ?, ?, ? extends T> tupleForm() throws WamlException {
+    throw new WamlFormException("tuple not supported");
   }
 
   @Override
@@ -102,27 +205,24 @@ public interface WamlForm<T> extends TermForm<T>, Translator<T> {
     return this.parse(Waml.parser());
   }
 
-  default @Nullable T parse(String waml, WamlParser parser) {
-    final Input input = new StringInput(waml);
+  default Parse<T> parse(String waml, WamlParser parser) {
+    Objects.requireNonNull(waml, "waml");
+    Objects.requireNonNull(parser, "parser");
+    final StringInput input = new StringInput(waml);
     while (input.isCont() && parser.isWhitespace(input.head())) {
       input.step();
     }
-    Parse<T> parse = this.parse(input, parser);
-    if (parse.isDone()) {
+    final Parse<T> parseWaml = this.parse(input, parser);
+    if (parseWaml.isDone()) {
       while (input.isCont() && parser.isWhitespace(input.head())) {
         input.step();
       }
     }
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.get();
+    return parseWaml.complete(input);
   }
 
   @Override
-  default @Nullable T parse(String waml) {
+  default Parse<T> parse(String waml) {
     return this.parse(waml, Waml.parser());
   }
 
@@ -142,26 +242,23 @@ public interface WamlForm<T> extends TermForm<T>, Translator<T> {
     return this.parseBlock(Waml.parser());
   }
 
-  default @Nullable T parseBlock(String waml, WamlParser parser) {
-    final Input input = new StringInput(waml);
+  default Parse<T> parseBlock(String waml, WamlParser parser) {
+    Objects.requireNonNull(waml, "waml");
+    Objects.requireNonNull(parser, "parser");
+    final StringInput input = new StringInput(waml);
     while (input.isCont() && parser.isWhitespace(input.head())) {
       input.step();
     }
-    Parse<T> parse = this.parseBlock(input, parser);
-    if (parse.isDone()) {
+    final Parse<T> parseWaml = this.parseBlock(input, parser);
+    if (parseWaml.isDone()) {
       while (input.isCont() && parser.isWhitespace(input.head())) {
         input.step();
       }
     }
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.get();
+    return parseWaml.complete(input);
   }
 
-  default @Nullable T parseBlock(String waml) {
+  default Parse<T> parseBlock(String waml) {
     return this.parseBlock(waml, Waml.parser());
   }
 
@@ -183,7 +280,7 @@ public interface WamlForm<T> extends TermForm<T>, Translator<T> {
 
   default String toString(@Nullable T value, WamlWriter writer) {
     final StringOutput output = new StringOutput();
-    this.write(output, value, writer).checkDone();
+    this.write(output, value, writer).assertDone();
     return output.get();
   }
 
@@ -210,7 +307,7 @@ public interface WamlForm<T> extends TermForm<T>, Translator<T> {
 
   default String toBlockString(@Nullable T value, WamlWriter writer) {
     final StringOutput output = new StringOutput();
-    this.writeBlock(output, value, writer).checkDone();
+    this.writeBlock(output, value, writer).assertDone();
     return output.get();
   }
 
@@ -224,24 +321,6 @@ public interface WamlForm<T> extends TermForm<T>, Translator<T> {
 
   default Write<?> writeInline(Output<?> output, @Nullable T value, WamlWriter writer) {
     return this.write(output, value, writer);
-  }
-
-  static <T> WamlForm<T> forType(Type javaType) {
-    final WamlForm<T> wamlForm = Waml.codec().forType(javaType);
-    if (wamlForm != null) {
-      return wamlForm;
-    } else {
-      throw new IllegalArgumentException("No waml form for type: " + javaType);
-    }
-  }
-
-  static <T> WamlForm<T> forValue(@Nullable T value) {
-    final WamlForm<T> wamlForm = Waml.codec().forValue(value);
-    if (wamlForm != null) {
-      return wamlForm;
-    } else {
-      throw new IllegalArgumentException("No waml form for value: " + value);
-    }
   }
 
 }

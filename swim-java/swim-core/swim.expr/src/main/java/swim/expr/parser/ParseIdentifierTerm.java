@@ -22,6 +22,7 @@ import swim.codec.Parse;
 import swim.expr.ExprParser;
 import swim.expr.IdentifierTermForm;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 
 @Internal
@@ -51,33 +52,27 @@ public final class ParseIdentifierTerm<T> extends Parse<Term> {
                                       @Nullable StringBuilder builder, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierStartChar(c)) {
-          input.step();
-          builder = new StringBuilder();
-          builder.appendCodePoint(c);
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("identifier", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && parser.isIdentifierStartChar(c = input.head())) {
+        builder = new StringBuilder();
+        builder.appendCodePoint(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("identifier", input));
       }
     }
     if (step == 2) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierChar(c)) {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isIdentifierChar(c = input.head())) {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
-        return Parse.done(form.intoTerm(form.identifierValue(builder.toString(), parser)));
+        final String identifier = Assume.nonNull(builder).toString();
+        try {
+          return Parse.done(form.intoTerm(form.identifierValue(identifier, parser)));
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (input.isError()) {

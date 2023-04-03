@@ -33,7 +33,7 @@ import swim.annotations.Since;
  * specific callbacks on {@code Transport} instances when a transport's
  * {@link #channel()} is ready to perform the associated I/O operations.
  *
- * <h3>Read scheduling</h3>
+ * <h2>Read scheduling</h2>
  * <p>
  * When a transport is ready to perform a read operation, it invokes
  * {@link TransportContext#requestRead()}. Once the transport channel
@@ -46,7 +46,7 @@ import swim.annotations.Since;
  * the number of times {@link TransportContext#cancelRead()} returns {@code
  * true}, until I/O scheduling is {@linkplain TransportRef#cancel() cancelled}.
  *
- * <h3>Write scheduling</h3>
+ * <h2>Write scheduling</h2>
  * <p>
  * When a transport is ready to perform a write operation, it invokes
  * {@link TransportContext#requestWrite()}. Once the transport channel
@@ -59,7 +59,7 @@ import swim.annotations.Since;
  * the number of times {@link TransportContext#cancelWrite()} returns {@code
  * true}, until I/O scheduling is {@linkplain TransportRef#cancel() cancelled}.
  *
- * <h3>Connect scheduling</h3>
+ * <h2>Connect scheduling</h2>
  * <p>
  * When a transport is ready to finish opening an outgoing connection,
  * it invokes {@link TransportContext#requestConnect()}. Once the transport
@@ -72,7 +72,7 @@ import swim.annotations.Since;
  * the number of times {@link TransportContext#cancelConnect()} returns {@code
  * true}, until I/O scheduling is {@linkplain TransportRef#cancel() cancelled}.
  *
- * <h3>Accept scheduling</h3>
+ * <h2>Accept scheduling</h2>
  * <p>
  * When a transport is ready to accept a new incoming connection, it invokes
  * {@link TransportContext#requestAccept()}. Once the transport channel has

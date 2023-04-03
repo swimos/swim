@@ -16,14 +16,11 @@ package swim.waml.parser;
 
 import swim.annotations.Internal;
 import swim.annotations.Nullable;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
-import swim.waml.WamlArrayForm;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
-import swim.waml.WamlMarkupForm;
 import swim.waml.WamlParser;
-import swim.waml.WamlUnitForm;
 
 @Internal
 public final class ParseWamlInline<T> extends Parse<T> {
@@ -68,7 +65,7 @@ public final class ParseWamlInline<T> extends Parse<T> {
         parseAttr = parseAttr.consume(input);
       }
       if (parseAttr.isDone()) {
-        form = parseAttr.getNonNull();
+        form = parseAttr.getNonNullUnchecked();
         parseAttr = null;
         step = 3;
       } else if (parseAttr.isError()) {
@@ -79,33 +76,29 @@ public final class ParseWamlInline<T> extends Parse<T> {
       if (input.isCont()) {
         c = input.head();
         if (c == '[') {
-          final WamlArrayForm<?, ?, ? extends T> arrayForm = form.arrayForm();
-          if (arrayForm != null) {
-            return parser.parseArray(input, arrayForm);
-          } else {
-            return Parse.error(Diagnostic.message("unexpected array", input));
+          try {
+            return parser.parseArray(input, form.arrayForm());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
           }
         } else if (c == '<') {
-          final WamlMarkupForm<?, ?, ? extends T> markupForm = form.markupForm();
-          if (markupForm != null) {
-            return parser.parseMarkup(input, markupForm);
-          } else {
-            return Parse.error(Diagnostic.message("unexpected markup", input));
+          try {
+            return parser.parseMarkup(input, form.markupForm());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
           }
         } else {
-          final WamlUnitForm<? extends T> unitForm = form.unitForm();
-          if (unitForm != null) {
-            return Parse.done(unitForm.unitValue());
-          } else {
-            return Parse.error(Diagnostic.message("unexpected unit", input));
+          try {
+            return Parse.done(form.unitForm().unitValue());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
           }
         }
       } else if (input.isDone()) {
-        final WamlUnitForm<? extends T> unitForm = form.unitForm();
-        if (unitForm != null) {
-          return Parse.done(unitForm.unitValue());
-        } else {
-          return Parse.error(Diagnostic.message("unexpected unit", input));
+        try {
+          return Parse.done(form.unitForm().unitValue());
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
         }
       }
     }

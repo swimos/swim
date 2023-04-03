@@ -25,6 +25,7 @@ import swim.codec.InputBuffer;
 import swim.codec.MediaType;
 import swim.codec.Output;
 import swim.codec.OutputBuffer;
+import swim.codec.OutputException;
 import swim.codec.StringOutput;
 import swim.codec.Text;
 import swim.codec.Transcoder;
@@ -152,7 +153,7 @@ final class DecodeWsStatus extends Decode<WsStatus> {
         input.step();
         step = 3;
       } else if (input.isDone()) {
-        return Decode.error(new DecodeException("Invalid websocket close code"));
+        return Decode.error(new DecodeException("invalid websocket close code"));
       }
     }
     if (step == 3) {
@@ -162,13 +163,17 @@ final class DecodeWsStatus extends Decode<WsStatus> {
       while (input.isCont()) {
         reasonOutput.write(input.head());
         if (reasonOutput.isError()) {
-          return Decode.error(new DecodeException("Invalid websocket close reason",
+          return Decode.error(new DecodeException("invalid websocket close reason",
                                                   reasonOutput.getError()));
         }
         input.step();
       }
       if (input.isDone()) {
-        return Decode.done(new WsStatus(code, reasonOutput.getNonNull()));
+        try {
+          return Decode.done(new WsStatus(code, reasonOutput.getNonNull()));
+        } catch (OutputException cause) {
+          return Decode.error(cause);
+        }
       }
     }
     if (input.isError()) {
@@ -222,7 +227,7 @@ final class EncodeWsStatus extends Encode<Object> {
       }
     }
     if (output.isDone()) {
-      return Encode.error(new EncodeException("Truncated encode"));
+      return Encode.error(new EncodeException("truncated encode"));
     } else if (output.isError()) {
       return Encode.error(output.getError());
     }

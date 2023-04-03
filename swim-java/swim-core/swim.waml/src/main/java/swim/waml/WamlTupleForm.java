@@ -20,30 +20,35 @@ import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
 
+/**
+ * A transcoder between WAML tuple literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlTupleForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlTupleForm<L, P, B, T> extends WamlForm<T> {
 
   @Override
-  default WamlTupleForm<?, ?, ?, T> tupleForm() {
+  default WamlTupleForm<?, ?, ?, ? extends T> tupleForm() throws WamlException {
     return this;
   }
 
-  WamlForm<L> labelForm();
+  WamlForm<L> labelForm() throws WamlException;
 
-  WamlForm<P> paramForm();
+  WamlForm<P> paramForm() throws WamlException;
 
-  @Nullable T emptyTuple();
+  @Nullable T emptyTuple() throws WamlException;
 
-  @Nullable T unaryTuple(@Nullable P param);
+  @Nullable T unaryTuple(@Nullable P param) throws WamlException;
 
-  B tupleBuilder();
+  B tupleBuilder() throws WamlException;
 
-  B appendParam(B builder, @Nullable P param);
+  B appendParam(B builder, @Nullable P param) throws WamlException;
 
-  B appendParam(B builder, @Nullable P label, @Nullable P param);
+  B appendParam(B builder, @Nullable P label, @Nullable P param) throws WamlException;
 
-  @Nullable T buildTuple(B builder);
+  @Nullable T buildTuple(B builder) throws WamlException;
 
   @Override
   default Parse<T> parse(Input input, WamlParser parser) {

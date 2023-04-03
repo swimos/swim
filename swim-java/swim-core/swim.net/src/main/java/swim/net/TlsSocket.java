@@ -40,6 +40,7 @@ import swim.log.Log;
 import swim.repr.ArrayRepr;
 import swim.repr.BlobRepr;
 import swim.repr.Repr;
+import swim.repr.ReprException;
 import swim.repr.TupleRepr;
 import swim.util.Severity;
 
@@ -193,7 +194,7 @@ public class TlsSocket extends TcpSocket {
                 this.close();
                 break;
               default:
-                throw new AssertionError(); // unreachable
+                throw new AssertionError("unreachable");
             }
             if (count < 0) {
               this.sslEngine.closeInbound();
@@ -270,7 +271,7 @@ public class TlsSocket extends TcpSocket {
                 this.requestOpeningWrite();
                 break;
               default:
-                throw new AssertionError(); // unreachable
+                throw new AssertionError("unreachable");
             }
           } catch (ClosedChannelException cause) {
             // Initiate socket close.
@@ -340,7 +341,7 @@ public class TlsSocket extends TcpSocket {
                 this.close();
                 break;
               default:
-                throw new AssertionError(); // unreachable
+                throw new AssertionError("unreachable");
             }
             if (count < 0) {
               this.sslEngine.closeInbound();
@@ -379,7 +380,7 @@ public class TlsSocket extends TcpSocket {
       case BUFFER_OVERFLOW:
         break;
       default:
-        throw new AssertionError(); // unreachable
+        throw new AssertionError("unreachable");
     }
     if (count >= 0 || this.recvBuffer.position() != 0) {
       return result.bytesProduced();
@@ -437,7 +438,7 @@ public class TlsSocket extends TcpSocket {
                 this.requestOpeningWrite();
                 break;
               default:
-                throw new AssertionError(); // unreachable
+                throw new AssertionError("unreachable");
             }
           } catch (ClosedChannelException cause) {
             // Initiate socket close.
@@ -492,7 +493,7 @@ public class TlsSocket extends TcpSocket {
         this.close();
         break;
       default:
-        throw new AssertionError(); // unreachable
+        throw new AssertionError("unreachable");
     }
     return result.bytesConsumed();
   }
@@ -575,7 +576,7 @@ public class TlsSocket extends TcpSocket {
                 this.close();
                 break;
               default:
-                throw new AssertionError(); // unreachable
+                throw new AssertionError("unreachable");
             }
             if (count < 0) {
               this.sslEngine.closeInbound();
@@ -664,7 +665,7 @@ public class TlsSocket extends TcpSocket {
                 this.requestClosingWrite();
                 break;
               default:
-                throw new AssertionError(); // unreachable
+                throw new AssertionError("unreachable");
             }
           } catch (ClosedChannelException cause) {
             // Initiate socket close.
@@ -692,8 +693,16 @@ public class TlsSocket extends TcpSocket {
     final SSLEngine sslEngine = this.sslEngine;
     final SSLSession sslSession = sslEngine.getSession();
     final TupleRepr context = TupleRepr.of();
-    context.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
-    context.put("remoteAddress", Repr.from(this.remoteAddress));
+    try {
+      context.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
+    } catch (ReprException cause) {
+      // ignore
+    }
+    try {
+      context.put("remoteAddress", Repr.from(this.remoteAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
 
     context.put("protocol", Repr.of(sslSession.getProtocol()));
     context.put("cipherSuite", Repr.of(sslSession.getCipherSuite()));
@@ -710,7 +719,7 @@ public class TlsSocket extends TcpSocket {
         for (int i = 0; i < localCertificates.length; i += 1) {
           try {
             certificateBlobs.add(BlobRepr.wrap(localCertificates[i].getEncoded()));
-          } catch (CertificateEncodingException e) {
+          } catch (CertificateEncodingException cause) {
             certificateBlobs.add(Repr.unit());
           }
         }
@@ -723,7 +732,7 @@ public class TlsSocket extends TcpSocket {
       if (remotePrincipal != null) {
         context.put("remotePrincipal", Repr.of(remotePrincipal.getName()));
       }
-    } catch (SSLPeerUnverifiedException e) {
+    } catch (SSLPeerUnverifiedException cause) {
       // ignore
     }
     if (LOG_CERTIFICATES) {
@@ -734,13 +743,13 @@ public class TlsSocket extends TcpSocket {
           for (int i = 0; i < remoteCertificates.length; i += 1) {
             try {
               certificateBlobs.add(BlobRepr.wrap(remoteCertificates[i].getEncoded()));
-            } catch (CertificateEncodingException e) {
+            } catch (CertificateEncodingException cause) {
               certificateBlobs.add(Repr.unit());
             }
           }
           context.put("localCertificates", certificateBlobs);
         }
-      } catch (SSLPeerUnverifiedException e) {
+      } catch (SSLPeerUnverifiedException cause) {
         // ignore
       }
     }
@@ -750,7 +759,7 @@ public class TlsSocket extends TcpSocket {
       if (applicationProtocol != null && applicationProtocol.length() != 0) {
         context.put("applicationProtocol", Repr.of(applicationProtocol));
       }
-    } catch (UnsupportedOperationException e) {
+    } catch (UnsupportedOperationException cause) {
       // ignore
     }
 
@@ -759,7 +768,7 @@ public class TlsSocket extends TcpSocket {
       if (handshakeApplicationProtocol != null) {
         context.put("handshakeApplicationProtocol", Repr.of(handshakeApplicationProtocol));
       }
-    } catch (UnsupportedOperationException e) {
+    } catch (UnsupportedOperationException cause) {
       // ignore
     }
 
@@ -768,22 +777,22 @@ public class TlsSocket extends TcpSocket {
 
     try {
       context.put("recvBufferSize", Repr.of(socket.getReceiveBufferSize()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     try {
       context.put("sendBufferSize", Repr.of(socket.getSendBufferSize()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     try {
       context.put("keepAlive", Repr.of(socket.getKeepAlive()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     try {
       context.put("noDelay", Repr.of(socket.getTcpNoDelay()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
 
@@ -794,8 +803,16 @@ public class TlsSocket extends TcpSocket {
   public @Nullable Object toLogStatus(Severity level) {
     final Socket socket = this.channel.socket();
     final TupleRepr context = TupleRepr.of();
-    context.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
-    context.put("remoteAddress", Repr.from(this.remoteAddress));
+    try {
+      context.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
+    } catch (ReprException cause) {
+      // ignore
+    }
+    try {
+      context.put("remoteAddress", Repr.from(this.remoteAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
     if (this.channel.isConnectionPending()) {
       context.put("connecting", Repr.of(true));
     }

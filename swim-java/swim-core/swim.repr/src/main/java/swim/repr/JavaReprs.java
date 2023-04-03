@@ -44,39 +44,39 @@ public final class JavaReprs implements ReprProvider, ToSource {
   }
 
   @Override
-  public @Nullable ReprForm<?> resolveReprForm(Type javaType) {
+  public @Nullable ReprForm<?> resolveReprForm(Type javaType) throws ReprFormException {
     if (javaType instanceof Class<?>) {
       final Class<?> javaClass = (Class<?>) javaType;
       if (javaClass == Boolean.class || javaClass == Boolean.TYPE) {
-        return BOOLEAN_FORM;
+        return JavaReprs.booleanForm();
       } else if (javaClass == Byte.class || javaClass == Byte.TYPE) {
-        return BYTE_FORM;
-      } else if (javaClass == Short.class || javaClass == Short.TYPE) {
-        return SHORT_FORM;
-      } else if (javaClass == Integer.class || javaClass == Integer.TYPE) {
-        return INT_FORM;
-      } else if (javaClass == Long.class || javaClass == Long.TYPE) {
-        return LONG_FORM;
-      } else if (javaClass == Float.class || javaClass == Float.TYPE) {
-        return FLOAT_FORM;
-      } else if (javaClass == Double.class || javaClass == Double.TYPE) {
-        return DOUBLE_FORM;
+        return JavaReprs.byteForm();
       } else if (javaClass == Character.class || javaClass == Character.TYPE) {
-        return CHAR_FORM;
+        return JavaReprs.charForm();
+      } else if (javaClass == Short.class || javaClass == Short.TYPE) {
+        return JavaReprs.shortForm();
+      } else if (javaClass == Integer.class || javaClass == Integer.TYPE) {
+        return JavaReprs.intForm();
+      } else if (javaClass == Long.class || javaClass == Long.TYPE) {
+        return JavaReprs.longForm();
+      } else if (javaClass == Float.class || javaClass == Float.TYPE) {
+        return JavaReprs.floatForm();
+      } else if (javaClass == Double.class || javaClass == Double.TYPE) {
+        return JavaReprs.doubleForm();
       } else if (BigInteger.class.isAssignableFrom(javaClass)) {
-        return BIG_INTEGER_FORM;
+        return JavaReprs.bigIntegerForm();
       } else if (Number.class.isAssignableFrom(javaClass)) {
-        return NUMBER_FORM;
+        return JavaReprs.numberForm();
       } else if (javaClass == String.class) {
-        return STRING_FORM;
+        return JavaReprs.stringForm();
       } else if (ByteBuffer.class.isAssignableFrom(javaClass)) {
-        return BYTE_BUFFER_FORM;
+        return JavaReprs.byteBufferForm();
       } else if (Instant.class.isAssignableFrom(javaClass)) {
-        return INSTANT_FORM;
+        return JavaReprs.instantForm();
       } else if (InetAddress.class.isAssignableFrom(javaClass)) {
-        return INET_ADDRESS_FORM;
+        return JavaReprs.inetAddressForm();
       } else if (InetSocketAddress.class.isAssignableFrom(javaClass)) {
-        return INET_SOCKET_ADDRESS_FORM;
+        return JavaReprs.inetSocketAddressForm();
       }
     }
     return null;
@@ -111,100 +111,68 @@ public final class JavaReprs implements ReprProvider, ToSource {
     return PROVIDER;
   }
 
-  private static final JavaReprs.NullForm NULL_FORM = new JavaReprs.NullForm();
-
   public static ReprForm<Object> nullForm() {
-    return NULL_FORM;
+    return JavaReprs.NullForm.INSTANCE;
   }
-
-  private static final JavaReprs.BooleanForm BOOLEAN_FORM = new JavaReprs.BooleanForm();
 
   public static ReprForm<Boolean> booleanForm() {
-    return BOOLEAN_FORM;
+    return JavaReprs.BooleanForm.INSTANCE;
   }
-
-  private static final JavaReprs.ByteForm BYTE_FORM = new JavaReprs.ByteForm();
 
   public static ReprForm<Byte> byteForm() {
-    return BYTE_FORM;
+    return JavaReprs.ByteForm.INSTANCE;
   }
-
-  private static final JavaReprs.ShortForm SHORT_FORM = new JavaReprs.ShortForm();
-
-  public static ReprForm<Short> shortForm() {
-    return SHORT_FORM;
-  }
-
-  private static final JavaReprs.IntForm INT_FORM = new JavaReprs.IntForm();
-
-  public static ReprForm<Integer> intForm() {
-    return INT_FORM;
-  }
-
-  private static final JavaReprs.LongForm LONG_FORM = new JavaReprs.LongForm();
-
-  public static ReprForm<Long> longForm() {
-    return LONG_FORM;
-  }
-
-  private static final JavaReprs.FloatForm FLOAT_FORM = new JavaReprs.FloatForm();
-
-  public static ReprForm<Float> floatForm() {
-    return FLOAT_FORM;
-  }
-
-  private static final JavaReprs.DoubleForm DOUBLE_FORM = new JavaReprs.DoubleForm();
-
-  public static ReprForm<Double> doubleForm() {
-    return DOUBLE_FORM;
-  }
-
-  private static final JavaReprs.CharForm CHAR_FORM = new JavaReprs.CharForm();
 
   public static ReprForm<Character> charForm() {
-    return CHAR_FORM;
+    return JavaReprs.CharForm.INSTANCE;
   }
 
-  private static final JavaReprs.BigIntegerForm BIG_INTEGER_FORM = new JavaReprs.BigIntegerForm();
+  public static ReprForm<Short> shortForm() {
+    return JavaReprs.ShortForm.INSTANCE;
+  }
+
+  public static ReprForm<Integer> intForm() {
+    return JavaReprs.IntForm.INSTANCE;
+  }
+
+  public static ReprForm<Long> longForm() {
+    return JavaReprs.LongForm.INSTANCE;
+  }
+
+  public static ReprForm<Float> floatForm() {
+    return JavaReprs.FloatForm.INSTANCE;
+  }
+
+  public static ReprForm<Double> doubleForm() {
+    return JavaReprs.DoubleForm.INSTANCE;
+  }
 
   public static ReprForm<BigInteger> bigIntegerForm() {
-    return BIG_INTEGER_FORM;
+    return JavaReprs.BigIntegerForm.INSTANCE;
   }
-
-  private static final JavaReprs.NumberForm NUMBER_FORM = new JavaReprs.NumberForm();
 
   public static ReprForm<Number> numberForm() {
-    return NUMBER_FORM;
+    return JavaReprs.NumberForm.INSTANCE;
   }
-
-  private static final JavaReprs.StringForm STRING_FORM = new JavaReprs.StringForm();
 
   public static ReprForm<String> stringForm() {
-    return STRING_FORM;
+    return JavaReprs.StringForm.INSTANCE;
   }
-
-  private static final JavaReprs.ByteBufferForm BYTE_BUFFER_FORM = new JavaReprs.ByteBufferForm();
 
   public static ReprForm<ByteBuffer> byteBufferForm() {
-    return BYTE_BUFFER_FORM;
+    return JavaReprs.ByteBufferForm.INSTANCE;
   }
-
-  private static final JavaReprs.InstantForm INSTANT_FORM = new JavaReprs.InstantForm();
 
   public static ReprForm<Instant> instantForm() {
-    return INSTANT_FORM;
+    return JavaReprs.InstantForm.INSTANCE;
   }
-
-  private static final JavaReprs.InetAddressForm INET_ADDRESS_FORM = new JavaReprs.InetAddressForm();
 
   public static ReprForm<InetAddress> inetAddressForm() {
-    return INET_ADDRESS_FORM;
+    return JavaReprs.InetAddressForm.INSTANCE;
   }
 
-  private static final JavaReprs.InetSocketAddressForm INET_SOCKET_ADDRESS_FORM = new JavaReprs.InetSocketAddressForm();
-
   public static ReprForm<InetSocketAddress> inetSocketAddressForm() {
-    return INET_SOCKET_ADDRESS_FORM;
+    return JavaReprs.InetSocketAddressForm.INSTANCE;
   }
 
   static final class NullForm implements ReprForm<Object>, ToSource {
@@ -229,6 +197,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JavaReprs.NullForm INSTANCE = new JavaReprs.NullForm();
 
   }
 
@@ -261,6 +231,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
       return this.toSource();
     }
 
+    static final JavaReprs.BooleanForm INSTANCE = new JavaReprs.BooleanForm();
+
   }
 
   static final class ByteForm implements ReprForm<Byte>, ToSource {
@@ -292,160 +264,7 @@ public final class JavaReprs implements ReprProvider, ToSource {
       return this.toSource();
     }
 
-  }
-
-  static final class ShortForm implements ReprForm<Short>, ToSource {
-
-    @Override
-    public Repr intoRepr(@Nullable Short value) {
-      if (value == null) {
-        return Repr.undefined();
-      }
-      return IntRepr.of((int) value.shortValue());
-    }
-
-    @Override
-    public @Nullable Short fromRepr(Repr repr) {
-      if (repr.isValidShort()) {
-        return Short.valueOf(repr.shortValue());
-      }
-      return null;
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JavaReprs", "shortForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-  }
-
-  static final class IntForm implements ReprForm<Integer>, ToSource {
-
-    @Override
-    public Repr intoRepr(@Nullable Integer value) {
-      if (value == null) {
-        return Repr.undefined();
-      }
-      return IntRepr.of(value.intValue());
-    }
-
-    @Override
-    public @Nullable Integer fromRepr(Repr repr) {
-      if (repr.isValidInt()) {
-        return Integer.valueOf(repr.intValue());
-      }
-      return null;
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JavaReprs", "intForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-  }
-
-  static final class LongForm implements ReprForm<Long>, ToSource {
-
-    @Override
-    public Repr intoRepr(@Nullable Long value) {
-      if (value == null) {
-        return Repr.undefined();
-      }
-      return LongRepr.of(value.longValue());
-    }
-
-    @Override
-    public @Nullable Long fromRepr(Repr repr) {
-      if (repr.isValidLong()) {
-        return Long.valueOf(repr.longValue());
-      }
-      return null;
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JavaReprs", "longForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-  }
-
-  static final class FloatForm implements ReprForm<Float>, ToSource {
-
-    @Override
-    public Repr intoRepr(@Nullable Float value) {
-      if (value == null) {
-        return Repr.undefined();
-      }
-      return FloatRepr.of(value.floatValue());
-    }
-
-    @Override
-    public @Nullable Float fromRepr(Repr repr) {
-      if (repr.isValidFloat()) {
-        return Float.valueOf(repr.floatValue());
-      }
-      return null;
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JavaReprs", "floatForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-  }
-
-  static final class DoubleForm implements ReprForm<Double>, ToSource {
-
-    @Override
-    public Repr intoRepr(@Nullable Double value) {
-      if (value == null) {
-        return Repr.undefined();
-      }
-      return DoubleRepr.of(value.doubleValue());
-    }
-
-    @Override
-    public @Nullable Double fromRepr(Repr repr) {
-      if (repr.isValidDouble()) {
-        return Double.valueOf(repr.doubleValue());
-      }
-      return null;
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JavaReprs", "doubleForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
+    static final JavaReprs.ByteForm INSTANCE = new JavaReprs.ByteForm();
 
   }
 
@@ -478,6 +297,173 @@ public final class JavaReprs implements ReprProvider, ToSource {
       return this.toSource();
     }
 
+    static final JavaReprs.CharForm INSTANCE = new JavaReprs.CharForm();
+
+  }
+
+  static final class ShortForm implements ReprForm<Short>, ToSource {
+
+    @Override
+    public Repr intoRepr(@Nullable Short value) {
+      if (value == null) {
+        return Repr.undefined();
+      }
+      return IntRepr.of((int) value.shortValue());
+    }
+
+    @Override
+    public @Nullable Short fromRepr(Repr repr) {
+      if (repr.isValidShort()) {
+        return Short.valueOf(repr.shortValue());
+      }
+      return null;
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JavaReprs", "shortForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JavaReprs.ShortForm INSTANCE = new JavaReprs.ShortForm();
+
+  }
+
+  static final class IntForm implements ReprForm<Integer>, ToSource {
+
+    @Override
+    public Repr intoRepr(@Nullable Integer value) {
+      if (value == null) {
+        return Repr.undefined();
+      }
+      return IntRepr.of(value.intValue());
+    }
+
+    @Override
+    public @Nullable Integer fromRepr(Repr repr) {
+      if (repr.isValidInt()) {
+        return Integer.valueOf(repr.intValue());
+      }
+      return null;
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JavaReprs", "intForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JavaReprs.IntForm INSTANCE = new JavaReprs.IntForm();
+
+  }
+
+  static final class LongForm implements ReprForm<Long>, ToSource {
+
+    @Override
+    public Repr intoRepr(@Nullable Long value) {
+      if (value == null) {
+        return Repr.undefined();
+      }
+      return LongRepr.of(value.longValue());
+    }
+
+    @Override
+    public @Nullable Long fromRepr(Repr repr) {
+      if (repr.isValidLong()) {
+        return Long.valueOf(repr.longValue());
+      }
+      return null;
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JavaReprs", "longForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JavaReprs.LongForm INSTANCE = new JavaReprs.LongForm();
+
+  }
+
+  static final class FloatForm implements ReprForm<Float>, ToSource {
+
+    @Override
+    public Repr intoRepr(@Nullable Float value) {
+      if (value == null) {
+        return Repr.undefined();
+      }
+      return FloatRepr.of(value.floatValue());
+    }
+
+    @Override
+    public @Nullable Float fromRepr(Repr repr) {
+      if (repr.isValidFloat()) {
+        return Float.valueOf(repr.floatValue());
+      }
+      return null;
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JavaReprs", "floatForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JavaReprs.FloatForm INSTANCE = new JavaReprs.FloatForm();
+
+  }
+
+  static final class DoubleForm implements ReprForm<Double>, ToSource {
+
+    @Override
+    public Repr intoRepr(@Nullable Double value) {
+      if (value == null) {
+        return Repr.undefined();
+      }
+      return DoubleRepr.of(value.doubleValue());
+    }
+
+    @Override
+    public @Nullable Double fromRepr(Repr repr) {
+      if (repr.isValidDouble()) {
+        return Double.valueOf(repr.doubleValue());
+      }
+      return null;
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JavaReprs", "doubleForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JavaReprs.DoubleForm INSTANCE = new JavaReprs.DoubleForm();
+
   }
 
   static final class BigIntegerForm implements ReprForm<BigInteger>, ToSource {
@@ -509,12 +495,14 @@ public final class JavaReprs implements ReprProvider, ToSource {
       return this.toSource();
     }
 
+    static final JavaReprs.BigIntegerForm INSTANCE = new JavaReprs.BigIntegerForm();
+
   }
 
   static final class NumberForm implements ReprForm<Number>, ToSource {
 
     @Override
-    public Repr intoRepr(@Nullable Number value) {
+    public Repr intoRepr(@Nullable Number value) throws ReprException {
       if (value == null) {
         return Repr.undefined();
       } else if (value instanceof Byte || value instanceof Short || value instanceof Integer) {
@@ -528,7 +516,7 @@ public final class JavaReprs implements ReprProvider, ToSource {
       } else if (value instanceof BigInteger) {
         return BigIntegerRepr.of((BigInteger) value);
       } else {
-        throw new IllegalArgumentException("Unsupported value: " + value);
+        throw new ReprException("unsupported value: " + value);
       }
     }
 
@@ -550,6 +538,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JavaReprs.NumberForm INSTANCE = new JavaReprs.NumberForm();
 
   }
 
@@ -582,6 +572,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
       return this.toSource();
     }
 
+    static final JavaReprs.StringForm INSTANCE = new JavaReprs.StringForm();
+
   }
 
   static final class ByteBufferForm implements ReprForm<ByteBuffer>, ToSource {
@@ -612,6 +604,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JavaReprs.ByteBufferForm INSTANCE = new JavaReprs.ByteBufferForm();
 
   }
 
@@ -646,6 +640,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
       return this.toSource();
     }
 
+    static final JavaReprs.InstantForm INSTANCE = new JavaReprs.InstantForm();
+
   }
 
   static final class InetAddressForm implements ReprForm<InetAddress>, ToSource {
@@ -659,18 +655,18 @@ public final class JavaReprs implements ReprProvider, ToSource {
     }
 
     @Override
-    public @Nullable InetAddress fromRepr(Repr repr) {
+    public @Nullable InetAddress fromRepr(Repr repr) throws ReprException {
       if (repr.isValidString()) {
         try {
           return InetAddress.getByName(repr.stringValue());
-        } catch (UnknownHostException | SecurityException e) {
-          // ignore
+        } catch (UnknownHostException | SecurityException cause) {
+          throw new ReprException(cause);
         }
       } else if (repr instanceof BlobRepr) {
         try {
           return InetAddress.getByAddress(((BlobRepr) repr).asByteArray());
-        } catch (UnknownHostException e) {
-          // ignore
+        } catch (UnknownHostException cause) {
+          throw new ReprException(cause);
         }
       }
       return null;
@@ -686,6 +682,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JavaReprs.InetAddressForm INSTANCE = new JavaReprs.InetAddressForm();
 
   }
 
@@ -712,7 +710,7 @@ public final class JavaReprs implements ReprProvider, ToSource {
     }
 
     @Override
-    public @Nullable InetSocketAddress fromRepr(Repr repr) {
+    public @Nullable InetSocketAddress fromRepr(Repr repr) throws ReprException {
       if (repr.isValidString()) {
         final String address = repr.stringValue();
         final int colonIndex = address.indexOf(':');
@@ -721,8 +719,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
             final String host = address.substring(0, colonIndex);
             final int port = Integer.parseInt(address.substring(colonIndex + 1));
             return InetSocketAddress.createUnresolved(host, port);
-          } catch (IllegalArgumentException e) {
-            // ignore
+          } catch (IllegalArgumentException cause) {
+            throw new ReprException(cause);
           }
         }
       }
@@ -739,6 +737,8 @@ public final class JavaReprs implements ReprProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JavaReprs.InetSocketAddressForm INSTANCE = new JavaReprs.InetSocketAddressForm();
 
   }
 

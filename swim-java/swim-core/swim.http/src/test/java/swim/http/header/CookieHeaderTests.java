@@ -15,6 +15,7 @@
 package swim.http.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
 import swim.http.HttpCookie;
@@ -27,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class CookieHeaderTests {
 
   @Test
-  public void parseCookieHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Cookie: foo=bar\r\n");
+  public void parseCookieHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Cookie: foo=bar\r\n").getNonNull();
     assertInstanceOf(CookieHeader.class, headers.getHeader(CookieHeader.TYPE));
     assertEquals(CookieHeader.of(HttpCookie.of("foo", "bar")),
                  headers.getHeader(CookieHeader.TYPE));

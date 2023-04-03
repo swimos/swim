@@ -268,14 +268,14 @@ final class ByteArrayCodec implements Codec, ToSource {
   }
 
   @Override
-  public <T> @Nullable Transcoder<T> getTranscoder(Type javaType) {
+  public <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException {
     if (javaType instanceof Class<?>) {
       final Class<?> javaClass = (Class<?>) javaType;
       if (javaClass.isAssignableFrom(Byte.TYPE.arrayType())) {
         return Assume.conforms(this.transcoder);
       }
     }
-    return null;
+    throw new TranscoderException("no byte array transcoder for type: " + javaType);
   }
 
   @Override
@@ -374,14 +374,14 @@ final class ByteBufferCodec implements Codec, ToSource {
   }
 
   @Override
-  public <T> @Nullable Transcoder<T> getTranscoder(Type javaType) {
+  public <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException {
     if (javaType instanceof Class<?>) {
       final Class<?> javaClass = (Class<?>) javaType;
       if (javaClass.isAssignableFrom(ByteBuffer.class)) {
         return Assume.conforms(this.transcoder);
       }
     }
-    return null;
+    throw new TranscoderException("no byte buffer transcoder for type: " + javaType);
   }
 
   @Override
@@ -415,11 +415,11 @@ final class DecodeBinary<T> extends Parse<T> {
       input.step();
     }
     if (input.isDone()) {
-      return Parse.done(output.get());
+      return Parse.done(output.getUnchecked());
     } else if (input.isError()) {
       return Parse.error(input.getError());
     } else if (output.isDone()) {
-      return Parse.error(new ParseException("Incomplete parse"));
+      return Parse.error(new ParseException("incomplete parse"));
     } else if (output.isError()) {
       return Parse.error(output.getError());
     }
@@ -432,11 +432,11 @@ final class DecodeBinary<T> extends Parse<T> {
       input.step();
     }
     if (input.isDone()) {
-      return Parse.done(output.get());
+      return Parse.done(output.getUnchecked());
     } else if (input.isError()) {
       return Parse.error(input.getError());
     } else if (output.isDone()) {
-      return Parse.error(new ParseException("Incomplete parse"));
+      return Parse.error(new ParseException("incomplete parse"));
     } else if (output.isError()) {
       return Parse.error(output.getError());
     }
@@ -465,7 +465,7 @@ final class EncodeBinary<T> extends Write<T> {
     } else if (input.isError()) {
       return Write.error(input.getError());
     } else if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }
@@ -482,7 +482,7 @@ final class EncodeBinary<T> extends Write<T> {
     } else if (input.isError()) {
       return Write.error(input.getError());
     } else if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }
@@ -513,18 +513,18 @@ final class EncodeChannel extends Encode<Object> {
       } else {
         return this;
       }
-    } catch (IOException error) {
+    } catch (IOException cause) {
       try {
         input.close();
-      } catch (IOException ignore) {
-        // swallow
+      } catch (IOException swallow) {
+        // ignore
       }
-      return Encode.error(error);
+      return Encode.error(cause);
     } catch (Throwable cause) {
       try {
         input.close();
-      } catch (IOException ignore) {
-        // swallow
+      } catch (IOException swallow) {
+        // ignore
       }
       throw cause;
     }

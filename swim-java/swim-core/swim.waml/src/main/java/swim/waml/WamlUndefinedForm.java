@@ -20,16 +20,21 @@ import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
 
+/**
+ * A transcoder between WAML undefined literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlUndefinedForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlUndefinedForm<T> extends WamlForm<T> {
 
   @Override
-  default WamlUndefinedForm<T> undefinedForm() {
+  default WamlUndefinedForm<? extends T> undefinedForm() throws WamlException {
     return this;
   }
 
-  @Nullable T undefinedValue();
+  @Nullable T undefinedValue() throws WamlException;
 
   @Override
   default Parse<T> parse(Input input, WamlParser parser) {

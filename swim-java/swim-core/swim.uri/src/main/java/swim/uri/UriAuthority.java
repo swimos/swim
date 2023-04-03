@@ -16,13 +16,17 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
+import swim.codec.Parse;
 import swim.codec.ParseException;
 import swim.codec.StringInput;
+import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
@@ -70,7 +74,13 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
   }
 
   public UriAuthority withUserPart(String userPart) {
-    return this.withUser(UriUser.parse(userPart));
+    try {
+      return this.withUser(UriUser.parse(userPart).getNonNull());
+    } catch (ParseException cause) {
+      throw new IllegalArgumentException(Notation.of("malformed user part: ")
+                                                 .appendSource(userPart)
+                                                 .toString(), cause);
+    }
   }
 
   public UriAuthority withUserNamePass(@Nullable String userName,
@@ -112,7 +122,13 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
   }
 
   public UriAuthority withHostPart(String hostPart) {
-    return this.withHost(UriHost.parse(hostPart));
+    try {
+      return this.withHost(UriHost.parse(hostPart).getNonNull());
+    } catch (ParseException cause) {
+      throw new IllegalArgumentException(Notation.of("malformed host part: ")
+                                                 .appendSource(hostPart)
+                                                 .toString(), cause);
+    }
   }
 
   public String hostAddress() {
@@ -161,7 +177,13 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
   }
 
   public UriAuthority withPortPart(String portPart) {
-    return this.withPort(UriPort.parse(portPart));
+    try {
+      return this.withPort(UriPort.parse(portPart).getNonNull());
+    } catch (ParseException cause) {
+      throw new IllegalArgumentException(Notation.of("malformed port part: ")
+                                                 .appendSource(portPart)
+                                                 .toString(), cause);
+    }
   }
 
   public int portNumber() {
@@ -251,6 +273,7 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
     }
   }
 
+  @IntoForm
   @Override
   public String toString() {
     if (this.string == null) {
@@ -323,91 +346,147 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
     return UriAuthority.port(UriPort.number(portNumber));
   }
 
-  public static UriAuthority parse(String part) {
+  @FromForm
+  public static @Nullable UriAuthority from(String value) {
+    return UriAuthority.parse(value).getOr(null);
+  }
+
+  public static Parse<UriAuthority> parse(Input input) {
+    return ParseUriAuthority.parse(input, null, null, null, 1);
+  }
+
+  public static Parse<UriAuthority> parse(String part) {
     Objects.requireNonNull(part);
-    final CacheMap<String, UriAuthority> cache = UriAuthority.cache();
-    UriAuthority authority = cache.get(part);
-    if (authority == null) {
-      final Input input = new StringInput(part);
-      authority = UriAuthority.parse(input);
-      if (input.isCont()) {
-        throw new ParseException(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        throw new ParseException(input.getError());
-      }
-      if (!authority.user.isDefined()) { // don't cache user info
-        authority = cache.put(part, authority);
-      }
-    }
-    return authority;
-  }
-
-  public static UriAuthority parse(Input input) {
-    UriUser user = null;
-    final UriHost host;
-    UriPort port = null;
-    int c = 0;
-    if (input.isCont()) {
-      final Input lookahead = input.clone();
-      while (lookahead.isCont()) {
-        c = lookahead.head();
-        if (c != '@' && c != '/') {
-          lookahead.step();
-        } else {
-          break;
-        }
-      }
-      if (lookahead.isCont() && c == '@') {
-        user = UriUser.parse(input);
-        if (input.isCont() && input.head() == '@') {
-          input.step();
-        } else if (input.isReady()) {
-          throw new ParseException(Diagnostic.expected('@', input));
+    final CacheMap<String, Parse<UriAuthority>> cache = UriAuthority.cache();
+    Parse<UriAuthority> parseAuthority = cache.get(part);
+    if (parseAuthority == null) {
+      final StringInput input = new StringInput(part);
+      parseAuthority = UriAuthority.parse(input).complete(input);
+      if (parseAuthority.isDone()) {
+        // Don't cache user info.
+        if (!parseAuthority.getNonNullUnchecked().user.isDefined()) {
+          parseAuthority = cache.put(part, parseAuthority);
         }
       }
     }
-    host = UriHost.parse(input);
-    if (input.isCont() && input.head() == ':') {
-      input.step();
-      port = UriPort.parse(input);
-    }
-    if (input.isReady()) {
-      return UriAuthority.of(user, host, port);
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
+    return parseAuthority;
   }
 
-  public static UriAuthority fromJsonString(String value) {
-    return UriAuthority.parse(value);
-  }
+  private static final ThreadLocal<CacheMap<String, Parse<UriAuthority>>> CACHE =
+      new ThreadLocal<CacheMap<String, Parse<UriAuthority>>>();
 
-  public static String toJsonString(UriAuthority authority) {
-    return authority.toString();
-  }
-
-  public static UriAuthority fromWamlString(String value) {
-    return UriAuthority.parse(value);
-  }
-
-  public static String toWamlString(UriAuthority authority) {
-    return authority.toString();
-  }
-
-  private static final ThreadLocal<CacheMap<String, UriAuthority>> CACHE = new ThreadLocal<CacheMap<String, UriAuthority>>();
-
-  private static CacheMap<String, UriAuthority> cache() {
-    CacheMap<String, UriAuthority> cache = CACHE.get();
+  private static CacheMap<String, Parse<UriAuthority>> cache() {
+    CacheMap<String, Parse<UriAuthority>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.uri.authority.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 128;
       }
-      cache = new LruCacheMap<String, UriAuthority>(cacheSize);
+      cache = new LruCacheMap<String, Parse<UriAuthority>>(cacheSize);
       CACHE.set(cache);
     }
     return cache;
+  }
+
+}
+
+final class ParseUriAuthority extends Parse<UriAuthority> {
+
+  final @Nullable Parse<UriUser> parseUser;
+  final @Nullable Parse<UriHost> parseHost;
+  final @Nullable Parse<UriPort> parsePort;
+  final int step;
+
+  ParseUriAuthority(@Nullable Parse<UriUser> parseUser,
+                    @Nullable Parse<UriHost> parseHost,
+                    @Nullable Parse<UriPort> parsePort, int step) {
+    this.parseUser = parseUser;
+    this.parseHost = parseHost;
+    this.parsePort = parsePort;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<UriAuthority> consume(Input input) {
+    return ParseUriAuthority.parse(input, this.parseUser, this.parseHost,
+                                   this.parsePort, this.step);
+  }
+
+  static Parse<UriAuthority> parse(Input input, @Nullable Parse<UriUser> parseUser,
+                                   @Nullable Parse<UriHost> parseHost,
+                                   @Nullable Parse<UriPort> parsePort, int step) {
+    int c = 0;
+    if (step == 1) {
+      if (input.isCont()) {
+        final Input lookahead = input.clone();
+        while (lookahead.isCont() && (c = lookahead.head()) != '@' && c != '/') {
+          lookahead.step();
+        }
+        if (lookahead.isCont() && c == '@') {
+          step = 2;
+        } else {
+          step = 3;
+        }
+      } else if (input.isDone()) {
+        step = 3;
+      }
+    }
+    if (step == 2) {
+      if (parseUser == null) {
+        parseUser = UriUser.parse(input);
+      } else {
+        parseUser = parseUser.consume(input);
+      }
+      if (parseUser.isDone()) {
+        if (input.isCont() && input.head() == '@') {
+          input.step();
+          step = 3;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected('@', input));
+        }
+      } else if (parseUser.isError()) {
+        return parseUser.asError();
+      }
+    }
+    if (step == 3) {
+      if (parseHost == null) {
+        parseHost = UriHost.parse(input);
+      } else {
+        parseHost = parseHost.consume(input);
+      }
+      if (parseHost.isDone()) {
+        if (input.isCont() && input.head() == ':') {
+          input.step();
+          step = 4;
+        } else if (input.isReady()) {
+          return Parse.done(UriAuthority.of(parseUser != null ? parseUser.getUnchecked() : null,
+                                            parseHost.getUnchecked(),
+                                            null));
+        }
+      } else if (parseHost.isError()) {
+        return parseHost.asError();
+      }
+    }
+    if (step == 4) {
+      if (parsePort == null) {
+        parsePort = UriPort.parse(input);
+      } else {
+        parsePort = parsePort.consume(input);
+      }
+      if (parsePort.isDone()) {
+        return Parse.done(UriAuthority.of(parseUser != null ? parseUser.getUnchecked() : null,
+                                          Assume.nonNull(parseHost).getUnchecked(),
+                                          parsePort.getUnchecked()));
+      } else if (parsePort.isError()) {
+        return parsePort.asError();
+      }
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriAuthority(parseUser, parseHost, parsePort, step);
   }
 
 }

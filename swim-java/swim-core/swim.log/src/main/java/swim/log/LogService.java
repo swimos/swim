@@ -41,7 +41,7 @@ public class LogService implements LogHandler {
 
   public LogService(LogHandler handler, int queueLength) {
     if (queueLength < 2) {
-      throw new IllegalArgumentException("Invalid log event queue length: " + Integer.toString(queueLength));
+      throw new IllegalArgumentException("invalid log event queue length: " + Integer.toString(queueLength));
     }
 
     // Round the queue length up to the next power of two.
@@ -98,7 +98,7 @@ public class LogService implements LogHandler {
               || (status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -132,7 +132,7 @@ public class LogService implements LogHandler {
         // The service is concurrently stopping, or has permanently stopped.
         break;
       } else {
-        throw new AssertionError(Integer.toString((status & STATE_MASK))); // unreachable
+        throw new AssertionError("unreachable");
       }
     } while (true);
     if (interrupted) {
@@ -164,7 +164,7 @@ public class LogService implements LogHandler {
               || (status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -193,7 +193,7 @@ public class LogService implements LogHandler {
             try {
               // Wait for the timer thread to exit.
               this.thread.join(100);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -205,7 +205,7 @@ public class LogService implements LogHandler {
           continue;
         }
       } else {
-        throw new AssertionError(Integer.toString((status & STATE_MASK))); // unreachable
+        throw new AssertionError("unreachable");
       }
     } while (true);
     if (interrupted) {
@@ -454,7 +454,7 @@ final class LogThread extends Thread {
           // Wait for another event.
           try {
             service.await();
-          } catch (InterruptedException e) {
+          } catch (InterruptedException cause) {
             // Don't terminate the thread until the queue has been drained.
           }
         }

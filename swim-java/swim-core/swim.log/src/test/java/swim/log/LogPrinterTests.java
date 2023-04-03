@@ -16,13 +16,14 @@ package swim.log;
 
 import org.junit.jupiter.api.Test;
 import swim.json.Json;
+import swim.json.JsonFormException;
 import swim.util.Severity;
 
 public class LogPrinterTests {
 
   @Test
-  public void testLogPrinter() {
-    final LogPrinter log = new LogPrinter(Json.forType(LogEvent.class));
+  public void testLogPrinter() throws JsonFormException {
+    final LogPrinter log = new LogPrinter(Json.form(LogEvent.class));
     log.publish(LogEvent.of("test", "", LogScope.root(), Severity.INFO, "Hello, world!", null, null));
   }
 

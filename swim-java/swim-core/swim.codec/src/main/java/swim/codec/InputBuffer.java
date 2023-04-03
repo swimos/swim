@@ -20,7 +20,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * Non-blocking token stream buffer.
+ * A non-blocking chunked input buffer.
  */
 @Public
 @Since("5.0")

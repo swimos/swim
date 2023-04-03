@@ -14,65 +14,243 @@
 
 package swim.waml;
 
+import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
+import swim.codec.ParseException;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WamlConversionsTests {
 
-  public static class TestArticle {
+  public static class StringWrapper {
 
-    String name;
+    String value;
 
-    TestArticle(String name) {
-      this.name = name;
+    StringWrapper(String value) {
+      this.value = value;
     }
 
     @Override
     public boolean equals(@Nullable Object other) {
-      if (other instanceof TestArticle) {
-        final TestArticle that = (TestArticle) other;
-        return Objects.equals(this.name, that.name);
+      if (other instanceof StringWrapper that) {
+        return Objects.equals(this.value, that.value);
       }
       return false;
     }
 
     @Override
     public int hashCode() {
-      return Murmur3.mash(Murmur3.mix(Murmur3.seed(TestArticle.class),
-          Objects.hashCode(this.name)));
+      return Murmur3.mash(Murmur3.mix(Murmur3.seed(StringWrapper.class),
+          Objects.hashCode(this.value)));
     }
 
     @Override
     public String toString() {
-      final Notation notation = new Notation();
-      notation.append("new TestArticle(").appendSource(this.name).append(")");
-      return notation.toString();
+      return Notation.of().beginInvokeNew("StringWrapper")
+                          .appendArgument(this.value)
+                          .toString();
     }
 
-    public static TestArticle fromWamlString(String value) {
-      return new TestArticle(value);
+    @FromWaml
+    public static StringWrapper fromJson(String value) {
+      return new StringWrapper(value);
     }
 
-    public static String toWamlString(TestArticle article) {
-      return article.name;
+    @IntoWaml
+    public static String intoJson(StringWrapper wrapper) {
+      return wrapper.value;
     }
 
   }
 
   @Test
-  public void parseUsingStringFactoryForm() {
-    assertEquals(new TestArticle("foo bar"),
-                 Waml.parse(TestArticle.class, "\"foo bar\""));
+  public void parseStringWrapper() throws ParseException {
+    assertEquals(new StringWrapper("foo"),
+                 Waml.parse(StringWrapper.class, "\"foo\"").getNonNull());
   }
 
   @Test
-  public void writeUsingStringFactoryForm() {
-    assertEquals("\"foo bar\"",
-                 Waml.toString(new TestArticle("foo bar")));
+  public void writeStringWrapper() {
+    assertEquals("\"foo\"",
+                 Waml.toString(new StringWrapper("foo")));
+  }
+
+  public static class IntWrapper {
+
+    int value;
+
+    IntWrapper(int value) {
+      this.value = value;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+      if (other instanceof IntWrapper that) {
+        return this.value == that.value;
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return Murmur3.mash(Murmur3.mix(Murmur3.seed(IntWrapper.class),
+          Murmur3.hash(this.value)));
+    }
+
+    @Override
+    public String toString() {
+      return Notation.of().beginInvokeNew("IntWrapper")
+                          .appendArgument(this.value)
+                          .toString();
+    }
+
+    @FromWaml
+    public static IntWrapper fromJson(int value) {
+      return new IntWrapper(value);
+    }
+
+    @IntoWaml
+    public static int intoJson(IntWrapper wrapper) {
+      return wrapper.value;
+    }
+
+  }
+
+  @Test
+  public void parseIntWrapper() throws ParseException {
+    assertEquals(new IntWrapper(42),
+                 Waml.parse(IntWrapper.class, "42").getNonNull());
+  }
+
+  @Test
+  public void writeIntWrapper() {
+    assertEquals("42",
+                 Waml.toString(new IntWrapper(42)));
+  }
+
+  public static class ListWrapper {
+
+    List<Number> value;
+
+    ListWrapper(List<Number> value) {
+      this.value = value;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+      if (other instanceof ListWrapper that) {
+        return Objects.equals(this.value, that.value);
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return Murmur3.mash(Murmur3.mix(Murmur3.seed(ListWrapper.class),
+          Objects.hashCode(this.value)));
+    }
+
+    @Override
+    public String toString() {
+      return Notation.of().beginInvokeNew("ListWrapper")
+                          .appendArgument(this.value)
+                          .toString();
+    }
+
+    @IntoWaml
+    public List<Number> intoJson() {
+      return this.value;
+    }
+
+    @FromWaml
+    public static ListWrapper fromJson(List<Number> value) {
+      return new ListWrapper(value);
+    }
+
+  }
+
+  @Test
+  public void parseListWrapper() throws ParseException {
+    assertEquals(new ListWrapper(List.of(3, 3.14, 4)),
+                 Waml.parse(ListWrapper.class, "[3, 3.14, 4]").getNonNull());
+    assertEquals(new ListWrapper(List.of(3, 3.14, 4)),
+                 Waml.parse(ListWrapper.class, "[3,3.14,4]").getNonNull());
+  }
+
+  @Test
+  public void writeListWrapper() {
+    assertEquals("[3, 3.14, 4]",
+                 Waml.toString(new ListWrapper(List.of(3, 3.14, 4)),
+                 WamlWriterOptions.readable()));
+    assertEquals("[3,3.14,4]",
+                 Waml.toString(new ListWrapper(List.of(3, 3.14, 4)),
+                 WamlWriterOptions.compact()));
+  }
+
+  public static class OpaqueWrapper {
+
+    @Nullable Object value;
+
+    OpaqueWrapper(@Nullable Object value) {
+      this.value = value;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+      if (other instanceof OpaqueWrapper that) {
+        return Objects.equals(this.value, that.value);
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return Murmur3.mash(Murmur3.mix(Murmur3.seed(OpaqueWrapper.class),
+          Objects.hashCode(this.value)));
+    }
+
+    @Override
+    public String toString() {
+      return Notation.of().beginInvokeNew("OpaqueWrapper")
+                          .appendArgument(this.value)
+                          .toString();
+    }
+
+    @FromForm
+    public static OpaqueWrapper fromJson(@Nullable Object value) {
+      return new OpaqueWrapper(value);
+    }
+
+    @IntoForm
+    public static @Nullable Object intoJson(OpaqueWrapper wrapper) {
+      return wrapper.value;
+    }
+
+  }
+
+  @Test
+  public void parseOpaqueWrapper() throws ParseException {
+    assertEquals(new OpaqueWrapper(null),
+                 Waml.parse(OpaqueWrapper.class, "()").getNonNull());
+    assertEquals(new OpaqueWrapper(42),
+                 Waml.parse(OpaqueWrapper.class, "42").getNonNull());
+    assertEquals(new OpaqueWrapper("foo"),
+                 Waml.parse(OpaqueWrapper.class, "\"foo\"").getNonNull());
+  }
+
+  @Test
+  public void writeOpaqueWrapper() {
+    assertEquals("()",
+                 Waml.toString(new OpaqueWrapper(null)));
+    assertEquals("42",
+                 Waml.toString(new OpaqueWrapper(42)));
+    assertEquals("\"foo\"",
+                 Waml.toString(new OpaqueWrapper("foo")));
   }
 
 }

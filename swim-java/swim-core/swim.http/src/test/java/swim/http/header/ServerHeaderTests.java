@@ -15,6 +15,7 @@
 package swim.http.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.collections.FingerTrieList;
 import swim.http.HttpAssertions;
 import swim.http.HttpException;
@@ -27,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class ServerHeaderTests {
 
   @Test
-  public void parseServerHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Server: swim/5.0\r\n");
+  public void parseServerHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Server: swim/5.0\r\n").getNonNull();
     assertInstanceOf(ServerHeader.class, headers.getHeader(ServerHeader.TYPE));
     assertEquals(ServerHeader.of(HttpProduct.of("swim", "5.0")),
                  headers.getHeader(ServerHeader.TYPE));

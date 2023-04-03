@@ -20,16 +20,21 @@ import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
 
+/**
+ * A transcoder between JSON undefined literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code JsonUndefinedForm}
+ */
 @Public
 @Since("5.0")
 public interface JsonUndefinedForm<T> extends JsonForm<T> {
 
   @Override
-  default JsonUndefinedForm<T> undefinedForm() {
+  default JsonUndefinedForm<? extends T> undefinedForm() throws JsonException {
     return this;
   }
 
-  @Nullable T undefinedValue();
+  @Nullable T undefinedValue() throws JsonException;
 
   @Override
   default Parse<T> parse(Input input, JsonParser parser) {

@@ -16,16 +16,20 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base16;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
-import swim.codec.ParseException;
+import swim.codec.OutputException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -138,6 +142,7 @@ public final class UriUser implements ToSource, ToString {
     }
   }
 
+  @IntoForm
   @Override
   public String toString() {
     return this.toString(null);
@@ -168,160 +173,139 @@ public final class UriUser implements ToSource, ToString {
     }
   }
 
-  public static UriUser parse(String part) {
+  @FromForm
+  public static @Nullable UriUser from(String value) {
+    return UriUser.parse(value).getOr(null);
+  }
+
+  public static Parse<UriUser> parse(Input input) {
+    return ParseUriUser.parse(input, null, null, 0, 1);
+  }
+
+  public static Parse<UriUser> parse(String part) {
     Objects.requireNonNull(part);
-    final Input input = new StringInput(part);
-    final UriUser user = UriUser.parse(input);
-    if (input.isCont()) {
-      throw new ParseException(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    return user;
+    final StringInput input = new StringInput(part);
+    return UriUser.parse(input).complete(input);
   }
 
-  public static UriUser parse(Input input) {
-    final String name = UriUser.parseName(input);
-    final String pass;
-    if (input.isCont() && input.head() == ':') {
-      input.step();
-      pass = UriUser.parsePass(input);
-    } else {
-      pass = null;
-    }
-    if (input.isReady()) {
-      return UriUser.namePass(name, pass);
-    }
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
+}
+
+final class ParseUriUser extends Parse<UriUser> {
+
+  final @Nullable Utf8DecodedOutput<String> nameOutput;
+  final @Nullable Utf8DecodedOutput<String> passOutput;
+  final int c1;
+  final int step;
+
+  ParseUriUser(@Nullable Utf8DecodedOutput<String> nameOutput,
+               @Nullable Utf8DecodedOutput<String> passOutput,
+               int c1, int step) {
+    this.nameOutput = nameOutput;
+    this.passOutput = passOutput;
+    this.c1 = c1;
+    this.step = step;
   }
 
-  private static String parseName(Input input) {
-    final Utf8DecodedOutput<String> nameOutput = new Utf8DecodedOutput<String>(new StringOutput());
+  @Override
+  public Parse<UriUser> consume(Input input) {
+    return ParseUriUser.parse(input, this.nameOutput,
+                              this.passOutput, this.c1, this.step);
+  }
+
+  static Parse<UriUser> parse(Input input, @Nullable Utf8DecodedOutput<String> nameOutput,
+                              @Nullable Utf8DecodedOutput<String> passOutput,
+                              int c1, int step) {
     int c = 0;
     do {
-      while (input.isCont()) {
-        c = input.head();
-        if (Uri.isUserChar(c)) {
+      if (step == 1) {
+        if (input.isReady() && nameOutput == null) {
+          nameOutput = new Utf8DecodedOutput<String>(new StringOutput());
+        }
+        while (input.isCont() && Uri.isUserChar(c = input.head())) {
+          Assume.nonNull(nameOutput).write(c);
           input.step();
-          nameOutput.write(c);
-        } else {
-          break;
+        }
+        if (input.isCont() && (c == '%' || c == ':')) {
+          input.step();
+          if (c == '%') {
+            step = 2;
+          } else { // c == ':'
+            step = 4;
+          }
+        } else if (input.isReady()) {
+          try {
+            return Parse.done(UriUser.name(Assume.nonNull(nameOutput).get()));
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         }
       }
-      if (input.isCont() && c == '%') {
-        input.step();
-      } else if (input.isReady()) {
-        return nameOutput.getNonNull();
-      } else {
-        break;
-      }
-      int c1 = 0;
-      if (input.isCont()) {
-        c1 = input.head();
-        if (Base16.isDigit(c1)) {
+      if (step == 2) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          c1 = c;
           input.step();
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
+          step = 3;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
         }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
       }
-      int c2 = 0;
-      if (input.isCont()) {
-        c2 = input.head();
-        if (Base16.isDigit(c2)) {
+      if (step == 3) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          Assume.nonNull(nameOutput).write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c));
+          c1 = 0;
           input.step();
-          nameOutput.write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c2));
+          step = 1;
           continue;
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
         }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
       }
+      if (step == 4) {
+        if (input.isReady() && passOutput == null) {
+          passOutput = new Utf8DecodedOutput<String>(new StringOutput());
+        }
+        while (input.isCont() && Uri.isUserInfoChar(c = input.head())) {
+          Assume.nonNull(passOutput).write(c);
+          input.step();
+        }
+        if (input.isCont() && c == '%') {
+          input.step();
+          step = 5;
+        } else if (input.isReady()) {
+          try {
+            return Parse.done(UriUser.namePass(Assume.nonNull(nameOutput).get(),
+                                               Assume.nonNull(passOutput).get()));
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
+          }
+        }
+      }
+      if (step == 5) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          c1 = c;
+          input.step();
+          step = 6;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 6) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          Assume.nonNull(passOutput).write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c));
+          c1 = 0;
+          input.step();
+          step = 4;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      break;
     } while (true);
     if (input.isError()) {
-      throw new ParseException(input.getError());
+      return Parse.error(input.getError());
     }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  private static String parsePass(Input input) {
-    final Utf8DecodedOutput<String> passOutput = new Utf8DecodedOutput<String>(new StringOutput());
-    do {
-      int c = 0;
-      while (input.isCont()) {
-        c = input.head();
-        if (Uri.isUserInfoChar(c)) {
-          input.step();
-          passOutput.write(c);
-        } else {
-          break;
-        }
-      }
-      if (input.isCont() && c == '%') {
-        input.step();
-      } else if (input.isReady()) {
-        return passOutput.getNonNull();
-      } else {
-        break;
-      }
-      int c1 = 0;
-      if (input.isCont()) {
-        c1 = input.head();
-        if (Base16.isDigit(c1)) {
-          input.step();
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-      int c2 = 0;
-      if (input.isCont()) {
-        c2 = input.head();
-        if (Base16.isDigit(c2)) {
-          input.step();
-          passOutput.write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c2));
-          continue;
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-    } while (true);
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  public static UriUser fromJsonString(String value) {
-    return UriUser.parse(value);
-  }
-
-  public static String toJsonString(UriUser user) {
-    return user.toString();
-  }
-
-  public static UriUser fromWamlString(String value) {
-    return UriUser.parse(value);
-  }
-
-  public static String toWamlString(UriUser user) {
-    return user.toString();
+    return new ParseUriUser(nameOutput, passOutput, c1, step);
   }
 
 }

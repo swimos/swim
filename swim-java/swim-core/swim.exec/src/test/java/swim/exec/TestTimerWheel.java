@@ -31,10 +31,10 @@ public class TestTimerWheel extends TimerWheel {
   public void await(CountDownLatch latch, int millis) {
     try {
       if (!latch.await(millis, TimeUnit.MILLISECONDS)) {
-        throw new JUnitException("Await timeout");
+        throw new JUnitException("await timeout");
       }
-    } catch (InterruptedException error) {
-      throw new JUnitException("Interrupted", error);
+    } catch (InterruptedException cause) {
+      throw new JUnitException("interrupted", cause);
     }
   }
 

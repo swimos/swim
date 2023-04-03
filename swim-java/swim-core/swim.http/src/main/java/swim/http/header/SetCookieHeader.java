@@ -83,11 +83,11 @@ public final class SetCookieHeader extends HttpHeader {
     final StringInput input = new StringInput(value);
     final Parse<HttpCookieState> parseCookieState = HttpCookieState.parse(input);
     if (parseCookieState.isDone()) {
-      return parseCookieState.getNonNull();
+      return parseCookieState.getNonNullUnchecked();
     } else if (parseCookieState.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Set-Cookie: " + value, parseCookieState.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Set-Cookie: " + value, parseCookieState.getError());
     } else {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Set-Cookie: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Set-Cookie: " + value);
     }
   }
 

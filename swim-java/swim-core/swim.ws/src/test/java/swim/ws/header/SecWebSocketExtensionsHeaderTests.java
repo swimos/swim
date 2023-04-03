@@ -15,6 +15,7 @@
 package swim.ws.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.collections.ArrayMap;
 import swim.collections.FingerTrieList;
 import swim.http.HttpException;
@@ -28,8 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class SecWebSocketExtensionsHeaderTests {
 
   @Test
-  public void parseSecWebSocketExtensionsHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Extensions: permessage-deflate\r\n");
+  public void parseSecWebSocketExtensionsHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Extensions: permessage-deflate\r\n").getNonNull();
     assertInstanceOf(SecWebSocketExtensionsHeader.class, headers.getHeader(SecWebSocketExtensionsHeader.TYPE));
     assertEquals(SecWebSocketExtensionsHeader.of(WsExtension.permessageDeflate(false, false, 15, 15)),
                  headers.getHeader(SecWebSocketExtensionsHeader.TYPE));

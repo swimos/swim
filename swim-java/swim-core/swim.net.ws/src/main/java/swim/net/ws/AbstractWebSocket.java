@@ -47,7 +47,7 @@ public abstract class AbstractWebSocket implements WebSocket {
   public WsOptions options() {
     final WebSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket");
+      throw new IllegalStateException("unbound websocket");
     }
     return context.options();
   }
@@ -55,7 +55,7 @@ public abstract class AbstractWebSocket implements WebSocket {
   public HttpRequest<?> handshakeRequest() {
     final WebSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket");
+      throw new IllegalStateException("unbound websocket");
     }
     return context.handshakeRequest();
   }
@@ -63,7 +63,7 @@ public abstract class AbstractWebSocket implements WebSocket {
   public HttpResponse<?> handshakeResponse() {
     final WebSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket");
+      throw new IllegalStateException("unbound websocket");
     }
     return context.handshakeResponse();
   }
@@ -101,7 +101,7 @@ public abstract class AbstractWebSocket implements WebSocket {
   protected boolean readFrame() {
     final WebSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket");
+      throw new IllegalStateException("unbound websocket");
     }
     return context.readFrame();
   }
@@ -109,7 +109,7 @@ public abstract class AbstractWebSocket implements WebSocket {
   protected boolean writeFrame(WsFrame<?> frame) {
     final WebSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket");
+      throw new IllegalStateException("unbound websocket");
     }
     return context.writeFrame(frame);
   }
@@ -117,7 +117,7 @@ public abstract class AbstractWebSocket implements WebSocket {
   protected boolean writeContinuation() {
     final WebSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket");
+      throw new IllegalStateException("unbound websocket");
     }
     return context.writeContinuation();
   }

@@ -51,7 +51,7 @@ public class WsEncoder implements ToSource {
     final WsOpcode frameType = frame.frameType();
     switch (frameType) {
       case CONTINUATION:
-        return Encode.error(new EncodeException("Unexpected fragment frame"));
+        return Encode.error(new EncodeException("unexpected fragment frame"));
       case TEXT:
         return this.encodeTextFrame(output, frame);
       case BINARY:
@@ -63,7 +63,7 @@ public class WsEncoder implements ToSource {
       case PONG:
         return this.encodePongFrame(output, frame);
       default:
-        return Encode.error(new EncodeException("Unsupported frame type: " + frameType.name()));
+        return Encode.error(new EncodeException("unsupported frame type: " + frameType.name()));
     }
   }
 
@@ -71,7 +71,7 @@ public class WsEncoder implements ToSource {
     final WsOpcode frameType = frame.frameType();
     switch (frameType) {
       case CONTINUATION:
-        return Encode.error(new EncodeException("Unexpected fragment frame"));
+        return Encode.error(new EncodeException("unexpected fragment frame"));
       case TEXT:
         return this.encodeTextFrame(frame);
       case BINARY:
@@ -83,7 +83,7 @@ public class WsEncoder implements ToSource {
       case PONG:
         return this.encodePongFrame(frame);
       default:
-        return Encode.error(new EncodeException("Unsupported frame type: " + frameType.name()));
+        return Encode.error(new EncodeException("unsupported frame type: " + frameType.name()));
     }
   }
 
@@ -258,7 +258,7 @@ final class EncodeWsFrame<T> extends Encode<WsFrame<T>> {
         // Control frame didn't fit in the buffer;
         // discard the frame and wait for more buffer capacity.
         if (output.isLast() || outputStart == 0) {
-          return Encode.error(new EncodeException("Oversized control frame"));
+          return Encode.error(new EncodeException("oversized control frame"));
         }
       } else if (payloadSize == 0 && !encodePayload.isDone()) {
         // Don't write empty fragments.
@@ -322,7 +322,7 @@ final class EncodeWsFrame<T> extends Encode<WsFrame<T>> {
       }
     }
     if (output.isDone()) {
-      return Encode.error(new EncodeException("Truncated encode"));
+      return Encode.error(new EncodeException("truncated encode"));
     } else if (output.isError()) {
       return Encode.error(output.getError());
     }

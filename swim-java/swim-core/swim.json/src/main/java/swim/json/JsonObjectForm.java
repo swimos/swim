@@ -19,23 +19,33 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Input;
 import swim.codec.Parse;
+import swim.util.Notation;
 
+/**
+ * A transcoder between JSON object literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code JsonObjectForm}
+ */
 @Public
 @Since("5.0")
 public interface JsonObjectForm<K, V, B, T> extends JsonForm<T> {
 
   @Override
-  default JsonObjectForm<?, ?, ?, T> objectForm() {
+  default JsonObjectForm<?, ?, ?, ? extends T> objectForm() throws JsonException {
     return this;
   }
 
-  JsonForm<K> keyForm();
+  JsonForm<K> keyForm() throws JsonException;
 
-  @Nullable JsonFieldForm<K, V, B> getFieldForm(K key);
+  default JsonFieldForm<K, V, B> getFieldForm(K key) throws JsonException {
+    throw new JsonException(Notation.of("unsupported field: ")
+                                    .appendSource(key)
+                                    .toString());
+  }
 
-  B objectBuilder();
+  B objectBuilder() throws JsonException;
 
-  @Nullable T buildObject(B builder);
+  @Nullable T buildObject(B builder) throws JsonException;
 
   @Override
   default Parse<T> parse(Input input, JsonParser parser) {

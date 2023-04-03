@@ -257,13 +257,13 @@ public class WamlReprParserTests {
 
   @Test
   public void parseNonEmptyBlobs() {
-    assertParses(BlobRepr.fromBase64("AAAA"),
+    assertParses(BlobRepr.parseBase64("AAAA").getNonNullUnchecked(),
                  "@blob \"AAAA\"");
-    assertParses(BlobRepr.fromBase64("AAA="),
+    assertParses(BlobRepr.parseBase64("AAA=").getNonNullUnchecked(),
                  "@blob \"AAA=\"");
-    assertParses(BlobRepr.fromBase64("AA=="),
+    assertParses(BlobRepr.parseBase64("AA==").getNonNullUnchecked(),
                  "@blob \"AA==\"");
-    assertParses(BlobRepr.fromBase64("ABCDabcd12/+"),
+    assertParses(BlobRepr.parseBase64("ABCDabcd12/+").getNonNullUnchecked(),
                  "@blob \"ABCDabcd12/+\"");
   }
 
@@ -275,13 +275,13 @@ public class WamlReprParserTests {
 
   @Test
   public void parseNonEmptyArrays() {
-    assertParses(ArrayRepr.of(1, 2, "3", true),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of("3"), Repr.of(true)),
                  "[1,2,\"3\",true]");
   }
 
   @Test
   public void parseNestedArrays() {
-    assertParses(ArrayRepr.of(ArrayRepr.of(1, 2), ArrayRepr.of(3, 4)),
+    assertParses(ArrayRepr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), ArrayRepr.of(Repr.of(3), Repr.of(4))),
                  "[[1,2],[3,4]]");
   }
 
@@ -301,13 +301,13 @@ public class WamlReprParserTests {
 
   @Test
   public void parseNonEmptyMarkup() {
-    assertParses(ArrayRepr.of("test"),
+    assertParses(ArrayRepr.of(Repr.of("test")),
                  "<<test>>");
   }
 
   @Test
   public void parseNestedMarkup() {
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world"), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")), Repr.of("!")),
                  "<<Hello, <<world>>!>>");
   }
 
@@ -319,13 +319,13 @@ public class WamlReprParserTests {
 
   @Test
   public void parseNonEmptyObjects() {
-    assertParses(ObjectRepr.of("a", 1, "b", true),
+    assertParses(ObjectRepr.of("a", Repr.of(1), "b", Repr.of(true)),
                  "{a:1,b:true}");
   }
 
   @Test
   public void parseNestedObjects() {
-    assertParses(ObjectRepr.of("a", ObjectRepr.of("b", 1, "c", 2), "d", ObjectRepr.of("e", 3, "f", 4)),
+    assertParses(ObjectRepr.of("a", ObjectRepr.of("b", Repr.of(1), "c", Repr.of(2)), "d", ObjectRepr.of("e", Repr.of(3), "f", Repr.of(4))),
                  "{a:{b:1,c:2},d:{e:3,f:4}}");
   }
 
@@ -339,74 +339,74 @@ public class WamlReprParserTests {
 
   @Test
   public void parseUnaryArraysWithTrailingCommas() {
-    assertParses(ArrayRepr.of(1),
+    assertParses(ArrayRepr.of(Repr.of(1)),
                  "[1,]");
   }
 
   @Test
   public void parseCommaSeparateArrays() {
-    assertParses(ArrayRepr.of(1, 2, 3, 4),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of(3), Repr.of(4)),
                  "[ 1, 2,3 ,4 ]");
   }
 
   @Test
   public void parseCommaSeparateArraysWithTrailingCommas() {
-    assertParses(ArrayRepr.of(1, 2, 3, 4),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of(3), Repr.of(4)),
                  "[  1, 2,3 ,4, ]");
   }
 
   @Test
   public void parseNewlineSeparatedArrays() {
-    assertParses(ArrayRepr.of(1, 2, 3, 4),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of(3), Repr.of(4)),
                  "[\n1\n 2\n3 \n4  ]");
   }
 
   @Test
   public void parseNewlineSeparatedArraysWithTrailingNewlines() {
-    assertParses(ArrayRepr.of(1, 2, 3, 4),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of(3), Repr.of(4)),
                  "[ \n 1\n 2\n3 \n4\n ]");
   }
 
   @Test
   public void parseArraysWithMixedSeparators() {
-    assertParses(ArrayRepr.of(1, 2, 3, 4),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of(3), Repr.of(4)),
                  "[1, 2\n3 ,\n 4  ]");
   }
 
   @Test
   public void parseCommaNewlineSeparatedArrays() {
-    assertParses(ArrayRepr.of(1, 2, 3),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of(3)),
                  "[\n 1,\n 2,\n3 \n]");
   }
 
   @Test
   public void parseHeterogeneousObjects() {
-    assertParses(ObjectRepr.of("unit", null, "object", ObjectRepr.empty(), "array", ArrayRepr.empty(), "markup", ArrayRepr.empty(), "blob", BlobRepr.fromBase64("AA=="),
-                               "integer", 0, "decimal", 0.0, "t", true, "f", false),
+    assertParses(ObjectRepr.of("unit", Repr.unit(), "object", ObjectRepr.empty(), "array", ArrayRepr.empty(), "markup", ArrayRepr.empty(), "blob", BlobRepr.parseBase64("AA==").getNonNullUnchecked(),
+                               "integer", Repr.of(0), "decimal", Repr.of(0.0), "t", Repr.of(true), "f", Repr.of(false)),
                  "{\n  unit: ()\n  object: {}\n  array: []\n  markup: <<>>\n  blob:  @blob \"AA==\"\n  integer: 0\n  decimal: 0.0\n  t: true\n  f:false\n}");
   }
 
   @Test
   public void parseLeadingCommentsInArrays() {
-    assertParses(ArrayRepr.of(1, 2),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2)),
                  "[#comment\n1\n#comment\n2]");
   }
 
   @Test
   public void parseLeadingCommentsInObjects() {
-    assertParses(ObjectRepr.of("a", 1, "b", 2),
+    assertParses(ObjectRepr.of("a", Repr.of(1), "b", Repr.of(2)),
                  "{#comment\na:1\n#comment\nb:2}");
   }
 
   @Test
   public void parseTrailingCommentsInArrays() {
-    assertParses(ArrayRepr.of(1, 2),
+    assertParses(ArrayRepr.of(Repr.of(1), Repr.of(2)),
                  "[1#comment\n2#comment\n]");
   }
 
   @Test
   public void parseTrailingCommentsInObjects() {
-    assertParses(ObjectRepr.of("a", 1, "b", 2),
+    assertParses(ObjectRepr.of("a", Repr.of(1), "b", Repr.of(2)),
                  "{a:1#comment\nb:2#comment\n}");
   }
 
@@ -442,23 +442,23 @@ public class WamlReprParserTests {
                  "@hello(\"world\")");
     assertParses(Repr.unit().withAttr("hello", NumberRepr.of(42)),
                  "@hello(42)");
-    assertParses(Repr.unit().withAttr("hello", ArrayRepr.of("world")),
+    assertParses(Repr.unit().withAttr("hello", ArrayRepr.of(Repr.of("world"))),
                  "@hello(<<world>>)");
   }
 
   @Test
   public void parseSingleAttributesWithMultipleParameters() {
-    assertParses(Repr.unit().withAttr("hello", TupleRepr.of(null, "world", null, BlobRepr.fromBase64("AA=="), null, 42, null, true)),
+    assertParses(Repr.unit().withAttr("hello", TupleRepr.of(null, Repr.of("world"), null, BlobRepr.parseBase64("AA==").getNonNullUnchecked(), null, Repr.of(42), null, Repr.of(true))),
                  "@hello(\"world\", @blob \"AA==\", 42, true)");
-    assertParses(Repr.unit().withAttr("hello", TupleRepr.of(null, "world", null, BlobRepr.fromBase64("AA=="), null, 42, null, true)),
+    assertParses(Repr.unit().withAttr("hello", TupleRepr.of(null, Repr.of("world"), null, BlobRepr.parseBase64("AA==").getNonNullUnchecked(), null, Repr.of(42), null, Repr.of(true))),
                  "@hello(\"world\"\n@blob \"AA==\"\n42\ntrue)");
   }
 
   @Test
   public void parseSingleAttributesWithNamedParameters() {
-    assertParses(Repr.unit().withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(Repr.unit().withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\")");
-    assertParses(Repr.unit().withAttr("hello", TupleRepr.of("name", "world", "blob", BlobRepr.fromBase64("AA=="), "number", 42, null, false)),
+    assertParses(Repr.unit().withAttr("hello", TupleRepr.of("name", Repr.of("world"), "blob", BlobRepr.parseBase64("AA==").getNonNullUnchecked(), "number", Repr.of(42), null, Repr.of(false))),
                  "@hello(name: \"world\", blob: @blob \"AA==\", number: 42, false)");
   }
 
@@ -490,7 +490,7 @@ public class WamlReprParserTests {
 
   @Test
   public void parseMultipleAttributesWithComplexParameters() {
-    assertParses(Repr.unit().withAttr("hello", TupleRepr.of(null, "world", null, 42)).withAttr("test", TupleRepr.of("name", "parse", "pending", false)),
+    assertParses(Repr.unit().withAttr("hello", TupleRepr.of(null, Repr.of("world"), null, Repr.of(42))).withAttr("test", TupleRepr.of("name", Repr.of("parse"), "pending", Repr.of(false))),
                  "@hello(\"world\", 42) @test(name: \"parse\", pending: false)");
   }
 
@@ -502,7 +502,7 @@ public class WamlReprParserTests {
                  "@hello() false");
     assertParses(BooleanRepr.of(true).withAttr("hello", StringRepr.of("world")),
                  "@hello(\"world\") true");
-    assertParses(BooleanRepr.of(false).withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(BooleanRepr.of(false).withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\") false");
   }
 
@@ -514,7 +514,7 @@ public class WamlReprParserTests {
                  "@hello() -42");
     assertParses(NumberRepr.of(42.0).withAttr("hello", StringRepr.of("world")),
                  "@hello(\"world\") 42.0");
-    assertParses(NumberRepr.of(-42.0).withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(NumberRepr.of(-42.0).withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\") -42.0");
   }
 
@@ -526,7 +526,7 @@ public class WamlReprParserTests {
                  "@hello() \"\"");
     assertParses(StringRepr.empty().withAttr("hello", StringRepr.of("world")),
                  "@hello(\"world\") \"\"");
-    assertParses(StringRepr.empty().withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(StringRepr.empty().withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\") \"\"");
   }
 
@@ -538,7 +538,7 @@ public class WamlReprParserTests {
                  "@hello() @blob() \"\"");
     assertParses(BlobRepr.empty().withAttr("hello", StringRepr.of("world")),
                  "@hello(\"world\") @blob \"\"");
-    assertParses(BlobRepr.empty().withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(BlobRepr.empty().withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\") @blob \"\"");
   }
 
@@ -550,7 +550,7 @@ public class WamlReprParserTests {
                  "@hello() []");
     assertParses(ArrayRepr.of().withAttr("hello", StringRepr.of("world")),
                  "@hello(\"world\") []");
-    assertParses(ArrayRepr.of().withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(ArrayRepr.of().withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\") []");
   }
 
@@ -562,7 +562,7 @@ public class WamlReprParserTests {
                  "@hello() <<>>");
     assertParses(ArrayRepr.of().withAttr("hello", StringRepr.of("world")),
                  "@hello(\"world\") <<>>");
-    assertParses(ArrayRepr.of().withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(ArrayRepr.of().withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\") <<>>");
   }
 
@@ -574,118 +574,118 @@ public class WamlReprParserTests {
                  "@hello() {}");
     assertParses(ObjectRepr.of().withAttr("hello", StringRepr.of("world")),
                  "@hello(\"world\") {}");
-    assertParses(ObjectRepr.of().withAttr("hello", TupleRepr.of("name", "world")),
+    assertParses(ObjectRepr.of().withAttr("hello", TupleRepr.of("name", Repr.of("world"))),
                  "@hello(name: \"world\") {}");
   }
 
   @Test
   public void parseMarkupWithUnescapedAngleBrackets() {
-    assertParses(ArrayRepr.of("<"),
+    assertParses(ArrayRepr.of(Repr.of("<")),
                  "<<<>>");
-    assertParses(ArrayRepr.of("< "),
+    assertParses(ArrayRepr.of(Repr.of("< ")),
                  "<<< >>");
-    assertParses(ArrayRepr.of("> "),
+    assertParses(ArrayRepr.of(Repr.of("> ")),
                  "<<> >>");
-    assertParses(ArrayRepr.of(" < "),
+    assertParses(ArrayRepr.of(Repr.of(" < ")),
                  "<< < >>");
-    assertParses(ArrayRepr.of(" > "),
+    assertParses(ArrayRepr.of(Repr.of(" > ")),
                  "<< > >>");
-    assertParses(ArrayRepr.of("><"),
+    assertParses(ArrayRepr.of(Repr.of("><")),
                  "<<><>>");
-    assertParses(ArrayRepr.of(" <> "),
+    assertParses(ArrayRepr.of(Repr.of(" <> ")),
                  "<< <> >>");
-    assertParses(ArrayRepr.of(" >< "),
+    assertParses(ArrayRepr.of(Repr.of(" >< ")),
                  "<< >< >>");
-    assertParses(ArrayRepr.of(" < > "),
+    assertParses(ArrayRepr.of(Repr.of(" < > ")),
                  "<< < > >>");
-    assertParses(ArrayRepr.of(" > < "),
+    assertParses(ArrayRepr.of(Repr.of(" > < ")),
                  "<< > < >>");
-    assertParses(ArrayRepr.of(" <p></p> "),
+    assertParses(ArrayRepr.of(Repr.of(" <p></p> ")),
                  "<< <p></p> >>");
   }
 
   @Test
   public void parseMarkupWithEscapes() {
-    assertParses(ArrayRepr.of("\"'/<>@\\{}\b\f\n\r\t"),
+    assertParses(ArrayRepr.of(Repr.of("\"'/<>@\\{}\b\f\n\r\t")),
                  "<<\\\"\\'\\/\\<\\>\\@\\\\\\{\\}\\b\\f\\n\\r\\t>>");
   }
 
   @Test
   public void parseMarkupWithEmbeddedNodes() {
-    assertParses(ArrayRepr.of("Hello", Repr.unit(), "world!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello"), Repr.unit(), Repr.of("world!")),
                  "<<Hello{()}world!>>");
-    assertParses(ArrayRepr.of("A: ", "answer", "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.of("answer"), Repr.of(".")),
                  "<<A: {\"answer\"}.>>");
-    assertParses(ArrayRepr.of("A: ", BlobRepr.fromBase64("AA=="), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), BlobRepr.parseBase64("AA==").getNonNullUnchecked(), Repr.of(".")),
                  "<<A: {@blob\"AA==\"}.>>");
-    assertParses(ArrayRepr.of("A: ", 42, "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.of(42), Repr.of(".")),
                  "<<A: {42}.>>");
-    assertParses(ArrayRepr.of("A: ", true, "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.of(true), Repr.of(".")),
                  "<<A: {true}.>>");
-    assertParses(ArrayRepr.of("A: ", false, "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.of(false), Repr.of(".")),
                  "<<A: {false}.>>");
-    assertParses(ArrayRepr.of("A: ", ObjectRepr.of("answer", 0.0), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), ObjectRepr.of("answer", Repr.of(0.0)), Repr.of(".")),
                  "<<A: {{answer:0.0}}.>>");
   }
 
   @Test
   public void parseMarkupWithEmbeddedSingleAttributes() {
-    assertParses(ArrayRepr.of("A: ", Repr.unit().withAttr("answer"), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.unit().withAttr("answer"), Repr.of(".")),
                  "<<A: @answer.>>");
-    assertParses(ArrayRepr.of("A: ", Repr.unit().withAttr("answer"), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.unit().withAttr("answer"), Repr.of(".")),
                  "<<A: @answer().>>");
-    assertParses(ArrayRepr.of("A: ", Repr.unit().withAttr("answer", StringRepr.of("secret")), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.unit().withAttr("answer", StringRepr.of("secret")), Repr.of(".")),
                  "<<A: @answer(\"secret\").>>");
-    assertParses(ArrayRepr.of("A: ", Repr.unit().withAttr("answer", TupleRepr.of("number", 42, null, true)), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.unit().withAttr("answer", TupleRepr.of("number", Repr.of(42), null, Repr.of(true))), Repr.of(".")),
                  "<<A: @answer(number: 42, true).>>");
   }
 
   @Test
   public void parseMarkupWithEmbeddedSequentialAttributes() {
-    assertParses(ArrayRepr.of("A: ", Repr.unit().withAttr("good"), " ", Repr.unit().withAttr("answer"), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.unit().withAttr("good"), Repr.of(" "), Repr.unit().withAttr("answer"), Repr.of(".")),
                  "<<A: @good @answer.>>");
-    assertParses(ArrayRepr.of("A: ", Repr.unit().withAttr("good"), Repr.unit().withAttr("answer"), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.unit().withAttr("good"), Repr.unit().withAttr("answer"), Repr.of(".")),
                  "<<A: @good@answer.>>");
-    assertParses(ArrayRepr.of("A: ", Repr.unit().withAttr("good"), " ", Repr.unit().withAttr("answer"), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.unit().withAttr("good"), Repr.of(" "), Repr.unit().withAttr("answer"), Repr.of(".")),
                  "<<A: @good() @answer().>>");
-    assertParses(ArrayRepr.of("A: ", Repr.unit().withAttr("good"), Repr.unit().withAttr("answer"), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), Repr.unit().withAttr("good"), Repr.unit().withAttr("answer"), Repr.of(".")),
                  "<<A: @good()@answer().>>");
   }
 
   @Test
   public void parseMarkupWithEmbeddedAttributedMarkup() {
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em"), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em"), Repr.of("!")),
                  "<<Hello, @em<<world>>!>>");
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em"), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em"), Repr.of("!")),
                  "<<Hello, @em()<<world>>!>>");
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em", StringRepr.of("italic")), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em", StringRepr.of("italic")), Repr.of("!")),
                  "<<Hello, @em(\"italic\")<<world>>!>>");
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em", TupleRepr.of("class", "subject", "style", "italic")), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em", TupleRepr.of("class", Repr.of("subject"), "style", Repr.of("italic"))), Repr.of("!")),
                  "<<Hello, @em(class:\"subject\",style:\"italic\")<<world>>!>>");
   }
 
   @Test
   public void parseMarkupWithEmbeddedAttributeArrays() {
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em"), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em"), Repr.of("!")),
                  "<<Hello, @em[\"world\"]!>>");
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em"), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em"), Repr.of("!")),
                  "<<Hello, @em()[\"world\"]!>>");
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em", StringRepr.of("italic")), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em", StringRepr.of("italic")), Repr.of("!")),
                  "<<Hello, @em(\"italic\")[\"world\"]!>>");
-    assertParses(ArrayRepr.of("Hello, ", ArrayRepr.of("world").withAttr("em", TupleRepr.of("class", "subject", "style", "italic")), "!"),
+    assertParses(ArrayRepr.of(Repr.of("Hello, "), ArrayRepr.of(Repr.of("world")).withAttr("em", TupleRepr.of("class", Repr.of("subject"), "style", Repr.of("italic"))), Repr.of("!")),
                  "<<Hello, @em(class:\"subject\",style:\"italic\")[\"world\"]!>>");
   }
 
   @Test
   public void parseMarkupWithEmbeddedAttributedValues() {
-    assertParses(ArrayRepr.of("A: ", NumberRepr.of(42).withAttr("answer"), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), NumberRepr.of(42).withAttr("answer"), Repr.of(".")),
                  "<<A: {@answer 42}.>>");
-    assertParses(ArrayRepr.of("A: ", NumberRepr.of(42).withAttr("answer"), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), NumberRepr.of(42).withAttr("answer"), Repr.of(".")),
                  "<<A: {@answer() 42}.>>");
-    assertParses(ArrayRepr.of("A: ", NumberRepr.of(42).withAttr("answer", StringRepr.of("secret")), "."),
+    assertParses(ArrayRepr.of(Repr.of("A: "), NumberRepr.of(42).withAttr("answer", StringRepr.of("secret")), Repr.of(".")),
                  "<<A: {@answer(\"secret\") 42}.>>");
-    assertParses(ArrayRepr.of("A: ", BooleanRepr.of(true).withAttr("answer", TupleRepr.of("number", 42, null,
-                 "secret")), "."), "<<A: {@answer(number: 42, \"secret\") true}.>>");
+    assertParses(ArrayRepr.of(Repr.of("A: "), BooleanRepr.of(true).withAttr("answer", TupleRepr.of("number", Repr.of(42), null, Repr.of("secret"))), Repr.of(".")),
+                 "<<A: {@answer(number: 42, \"secret\") true}.>>");
   }
 
   @Test
@@ -827,10 +827,10 @@ public class WamlReprParserTests {
 
   public static void assertParseFails(final String waml) {
     assertThrows(ParseException.class, () -> {
-      Waml.parse(waml, WamlParserOptions.standard());
+      Waml.parse(waml, WamlParserOptions.standard()).checkDone();
     });
     assertThrows(ParseException.class, () -> {
-      Waml.parse(waml, WamlParserOptions.expressions());
+      Waml.parse(waml, WamlParserOptions.expressions()).checkDone();
     });
   }
 

@@ -264,7 +264,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   public boolean requestRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket stream");
+      throw new IllegalStateException("unbound websocket stream");
     }
     return context.requestRead();
   }
@@ -273,7 +273,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   public boolean cancelRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket stream");
+      throw new IllegalStateException("unbound websocket stream");
     }
     return context.cancelRead();
   }
@@ -282,7 +282,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   public boolean triggerRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket stream");
+      throw new IllegalStateException("unbound websocket stream");
     }
     return context.triggerRead();
   }
@@ -417,7 +417,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       }
     } else if (decode.isDone()) {
       // Unwrap the successfully decoded frame.
-      final WsFrame<?> frame = decode.getNonNull();
+      final WsFrame<?> frame = decode.getNonNullUnchecked();
       // Transition to the decode ready or decode close state.
       do {
         final int oldStatus = status;
@@ -476,7 +476,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -485,7 +485,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   int read(ByteBuffer readBuffer) throws IOException {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket stream");
+      throw new IllegalStateException("unbound websocket stream");
     }
     return context.read(readBuffer);
   }
@@ -556,7 +556,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   public boolean writeContinuation() {
     final WsContinuation<?> continuation = (WsContinuation<?>) CONTINUATION.getOpaque(this);
     if (continuation == null) {
-      throw new IllegalStateException("No continuation frame");
+      throw new IllegalStateException("no continuation frame");
     }
     return this.writeFrame(continuation);
   }
@@ -574,7 +574,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   public boolean requestWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket stream");
+      throw new IllegalStateException("unbound websocket stream");
     }
     return context.requestWrite();
   }
@@ -583,7 +583,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   public boolean cancelWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket stream");
+      throw new IllegalStateException("unbound websocket stream");
     }
     return context.cancelWrite();
   }
@@ -592,7 +592,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   public boolean triggerWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket stream");
+      throw new IllegalStateException("unbound websocket stream");
     }
     return context.triggerWrite();
   }
@@ -718,7 +718,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       }
     } else if (encode.isDone()) {
       // Unwrap the successfully encoded frame.
-      final WsFrame<?> frame = encode.getNonNull();
+      final WsFrame<?> frame = encode.getNonNullUnchecked();
       // Transition to the encode ready or encode close state.
       do {
         final int oldStatus = status;
@@ -777,7 +777,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
         }
       } while (true);
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return status;
@@ -786,7 +786,7 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
   int write(ByteBuffer writeBuffer) throws IOException {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket stream");
+      throw new IllegalStateException("unbound websocket stream");
     }
     return context.write(writeBuffer);
   }

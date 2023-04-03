@@ -20,6 +20,8 @@ import java.lang.ref.SoftReference;
 import java.util.Map;
 import java.util.Objects;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -81,7 +83,7 @@ public final class LogScope implements Term, ToMarkup, ToSource {
   public LogScope getChild(String key) {
     Objects.requireNonNull(key);
     if (key.length() == 0) {
-      throw new IllegalArgumentException("Blank scope key");
+      throw new IllegalArgumentException("blank scope key");
     }
 
     // Get or create the child scope.
@@ -206,6 +208,7 @@ public final class LogScope implements Term, ToMarkup, ToSource {
     notation.endInvoke();
   }
 
+  @IntoForm
   @Override
   public String toString() {
     return this.path;
@@ -271,11 +274,12 @@ public final class LogScope implements Term, ToMarkup, ToSource {
     return scope;
   }
 
+  @FromForm
   public static LogScope parse(String path) {
     Objects.requireNonNull(path);
     final int length = path.length();
     if (length == 0) {
-      throw new IllegalArgumentException("Blank scope path");
+      throw new IllegalArgumentException("blank scope path");
     }
     LogScope scope = ROOT;
     int dotIndex = -1;
@@ -284,18 +288,18 @@ public final class LogScope implements Term, ToMarkup, ToSource {
       final int c = index < length ? path.codePointAt(index) : -1;
       if (c == '.' || c == -1) {
         if (index == dotIndex + 1) {
-          throw new IllegalArgumentException(new Notation().append("Empty identifier in scope path: ")
-                                                           .appendSource(path)
-                                                           .toString());
+          throw new IllegalArgumentException(Notation.of("empty identifier in scope path: ")
+                                                     .appendSource(path)
+                                                     .toString());
         }
         scope = scope.getChild(path.substring(dotIndex + 1, index));
         dotIndex = index;
       } else if (!Logger.isIdentifierChar(c)) {
-        throw new IllegalArgumentException(new Notation().append("Invalid identifier character (")
-                                                         .appendSourceCodePoint(c)
-                                                         .append(") in scope path: ")
-                                                         .appendSource(path)
-                                                         .toString());
+        throw new IllegalArgumentException(Notation.of("invalid identifier character (")
+                                                   .appendSourceCodePoint(c)
+                                                   .append(") in scope path: ")
+                                                   .appendSource(path)
+                                                   .toString());
       }
       if (index < length) {
         index = path.offsetByCodePoints(index, 1);
@@ -304,22 +308,6 @@ public final class LogScope implements Term, ToMarkup, ToSource {
       }
     } while (true);
     return scope;
-  }
-
-  public static LogScope fromJsonString(String value) {
-    return LogScope.parse(value);
-  }
-
-  public static String toJsonString(LogScope scope) {
-    return scope.toString();
-  }
-
-  public static LogScope fromWamlString(String value) {
-    return LogScope.parse(value);
-  }
-
-  public static String toWamlString(LogScope scope) {
-    return scope.toString();
   }
 
   static final long PURGE_INTERVAL = 1000L;

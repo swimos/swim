@@ -23,6 +23,7 @@ import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.util.Assume;
 import swim.waml.WamlAttrForm;
+import swim.waml.WamlException;
 import swim.waml.WamlFieldForm;
 import swim.waml.WamlObjectForm;
 import swim.waml.WamlWriter;
@@ -74,9 +75,11 @@ public final class WriteWamlObject<K, V> extends Write<Object> {
           if (attrs.hasNext()) {
             final Map.Entry<String, ?> attr = attrs.next();
             final String name = attr.getKey();
-            final WamlAttrForm<Object, ?> attrForm = Assume.conformsNullable(form.getAttrForm(name));
-            if (attrForm == null) {
-              return Write.error(new WriteException("Unsupported attribute: " + name));
+            final WamlAttrForm<Object, ?> attrForm;
+            try {
+              attrForm = Assume.conforms(form.getAttrForm(name));
+            } catch (WamlException cause) {
+              return Write.error(cause);
             }
             write = writer.writeAttr(output, attrForm, name, attr.getValue());
           } else {
@@ -126,9 +129,10 @@ public final class WriteWamlObject<K, V> extends Write<Object> {
             final Map.Entry<K, V> field = fields.next();
             final K key = field.getKey();
             value = field.getValue();
-            fieldForm = form.getFieldForm(key);
-            if (fieldForm == null) {
-              return Write.error(new WriteException("Unsupported field: " + key));
+            try {
+              fieldForm = form.getFieldForm(key);
+            } catch (WamlException cause) {
+              return Write.error(cause);
             }
             write = fieldForm.keyForm().write(output, key, writer);
           } else {
@@ -203,7 +207,7 @@ public final class WriteWamlObject<K, V> extends Write<Object> {
       return Write.done();
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

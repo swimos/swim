@@ -207,7 +207,7 @@ public class TimerWheel implements TimerService {
           if ((status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -270,7 +270,7 @@ public class TimerWheel implements TimerService {
               || (status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -320,7 +320,7 @@ public class TimerWheel implements TimerService {
         // The service is concurrently stopping, or has permanently stopped.
         break;
       } else {
-        throw new AssertionError(Integer.toString((status & STATE_MASK))); // unreachable
+        throw new AssertionError("unreachable");
       }
     } while (true);
     if (interrupted) {
@@ -398,7 +398,7 @@ public class TimerWheel implements TimerService {
               || (status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -439,7 +439,7 @@ public class TimerWheel implements TimerService {
             try {
               // Wait for the timer thread to exit.
               this.thread.join(100);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -451,7 +451,7 @@ public class TimerWheel implements TimerService {
           continue;
         }
       } else {
-        throw new AssertionError(Integer.toString((status & STATE_MASK))); // unreachable
+        throw new AssertionError("unreachable");
       }
     } while (true);
     if (interrupted) {
@@ -524,7 +524,7 @@ public class TimerWheel implements TimerService {
    */
   final boolean debounce(long delayMillis, TimerHandle handle) {
     if (delayMillis < 0L) {
-      throw new IllegalArgumentException("Negative timer delay: " + Long.toString(delayMillis));
+      throw new IllegalArgumentException("negative timer delay: " + delayMillis);
     }
 
     // Ensure the service has started.
@@ -600,7 +600,7 @@ public class TimerWheel implements TimerService {
    */
   final boolean throttle(long delayMillis, TimerHandle handle) {
     if (delayMillis < 0L) {
-      throw new IllegalArgumentException("Negative timer delay: " + Long.toString(delayMillis));
+      throw new IllegalArgumentException("negative timer delay: " + delayMillis);
     }
 
     // Ensure the service has started.
@@ -806,7 +806,7 @@ public class TimerWheel implements TimerService {
       // don't let it take down the timer thread.
       if (Result.isNonFatal(cause)) {
         // Report the non-fatal exception.
-        this.log.error("Invalid timer handle: " + handle, cause);
+        this.log.error("invalid timer handle: " + handle, cause);
         return;
       } else {
         // Rethrow the fatal exception.
@@ -816,7 +816,7 @@ public class TimerWheel implements TimerService {
     if (timer == null) {
       // `handle.timer()` should never be null; but if it is,
       // don't let it take down the timer thread.
-      this.log.error("Unbound timer handle: " + handle);
+      this.log.error("unbound timer handle: " + handle);
       return;
     }
 
@@ -1002,7 +1002,7 @@ public class TimerWheel implements TimerService {
     int tickMillis;
     try {
       tickMillis = Integer.parseInt(System.getProperty("swim.exec.timer.wheel.tick.millis"));
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException cause) {
       tickMillis = 100;
     }
     TICK_MILLIS = tickMillis;
@@ -1011,7 +1011,7 @@ public class TimerWheel implements TimerService {
     int tickCount;
     try {
       tickCount = Integer.parseInt(System.getProperty("swim.exec.timer.wheel.tick.count"));
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException cause) {
       tickCount = 512;
     }
     TICK_COUNT = tickCount;
@@ -1367,7 +1367,7 @@ final class TimerThread extends Thread {
         // until the deadline for the target tick.
         try {
           service.sleep(sleepMillis);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException cause) {
           // Interrupted while waiting for the target tick; re-check service status.
           final int status = (int) TimerWheel.STATUS.getOpaque(service);
           // Check if the service has exited the started state.

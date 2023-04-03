@@ -103,7 +103,7 @@ public final class HttpTransferCoding implements ToSource, ToString {
   @SuppressWarnings("ReferenceEquality")
   public HttpTransferCoding intern() {
     if (!this.params.isEmpty()) {
-      throw new UnsupportedOperationException("Can't intern parameterized transfer-coding");
+      throw new UnsupportedOperationException("can't intern parameterized transfer-coding");
     }
     StringTrieMap<HttpTransferCoding> names = (StringTrieMap<HttpTransferCoding>) NAMES.getOpaque();
     do {
@@ -153,13 +153,13 @@ public final class HttpTransferCoding implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -194,15 +194,9 @@ public final class HttpTransferCoding implements ToSource, ToString {
                                        null, null, null, ArrayMap.empty(), 1);
   }
 
-  public static HttpTransferCoding parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpTransferCoding> parse = HttpTransferCoding.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpTransferCoding> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpTransferCoding.parse(input).complete(input);
   }
 
   static StringTrieMap<HttpTransferCoding> names = StringTrieMap.caseInsensitive();
@@ -267,51 +261,43 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
                                          int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          if (nameTrie != null) {
-            final StringTrieMap<HttpTransferCoding> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
-            if (subTrie != null) {
-              nameTrie = subTrie;
-            } else {
-              nameBuilder = new StringBuilder();
-              nameBuilder.appendCodePoint(c);
-              nameTrie = null;
-            }
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        if (nameTrie != null) {
+          final StringTrieMap<HttpTransferCoding> subTrie =
+              nameTrie.getBranch(nameTrie.normalized(c));
+          if (subTrie != null) {
+            nameTrie = subTrie;
           } else {
             nameBuilder = new StringBuilder();
             nameBuilder.appendCodePoint(c);
+            nameTrie = null;
           }
-          step = 2;
         } else {
-          return Parse.error(Diagnostic.expected("transfer coding", input));
+          nameBuilder = new StringBuilder();
+          nameBuilder.appendCodePoint(c);
         }
-      } else if (input.isDone()) {
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("transfer coding", input));
       }
     }
     if (step == 2) {
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          if (nameTrie != null) {
-            final StringTrieMap<HttpTransferCoding> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
-            if (subTrie != null) {
-              nameTrie = subTrie;
-            } else {
-              nameBuilder = new StringBuilder(nameTrie.prefix());
-              nameBuilder.appendCodePoint(c);
-              nameTrie = null;
-            }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        if (nameTrie != null) {
+          final StringTrieMap<HttpTransferCoding> subTrie =
+              nameTrie.getBranch(nameTrie.normalized(c));
+          if (subTrie != null) {
+            nameTrie = subTrie;
           } else {
-            Assume.nonNull(nameBuilder).appendCodePoint(c);
+            nameBuilder = new StringBuilder(nameTrie.prefix());
+            nameBuilder.appendCodePoint(c);
+            nameTrie = null;
           }
         } else {
-          break;
+          Assume.nonNull(nameBuilder).appendCodePoint(c);
         }
+        input.step();
       }
       if (input.isReady()) {
         step = 3;
@@ -319,13 +305,8 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
     }
     do {
       if (step == 3) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == ';') {
           input.step();
@@ -333,7 +314,9 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
         } else if (input.isReady()) {
           HttpTransferCoding transferCoding = nameTrie != null ? nameTrie.value() : null;
           if (transferCoding == null) {
-            final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
+            final String name = nameTrie != null
+                              ? nameTrie.prefix()
+                              : Assume.nonNull(nameBuilder).toString();
             transferCoding = new HttpTransferCoding(name, params);
           } else if (!params.isEmpty()) {
             transferCoding = new HttpTransferCoding(transferCoding.name, params);
@@ -342,37 +325,22 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
         }
       }
       if (step == 4) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isSpace(c = input.head())) {
+          input.step();
         }
-        if (input.isCont()) {
-          if (Http.isTokenChar(c)) {
-            keyBuilder = new StringBuilder();
-            input.step();
-            keyBuilder.appendCodePoint(c);
-            step = 5;
-          } else {
-            return Parse.error(Diagnostic.expected("param name", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isTokenChar(c)) {
+          keyBuilder = new StringBuilder();
+          keyBuilder.appendCodePoint(c);
+          input.step();
+          step = 5;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("param name", input));
         }
       }
       if (step == 5) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            keyBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(keyBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont() && c == '=') {
           input.step();
@@ -395,34 +363,22 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
         }
       }
       if (step == 7) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 8;
-          } else {
-            return Parse.error(Diagnostic.expected("param value", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 8;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("param value", input));
         }
       }
       if (step == 8) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isReady()) {
-          params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+          params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                  Assume.nonNull(valueBuilder).toString());
           keyBuilder = null;
           valueBuilder = null;
           step = 3;
@@ -430,23 +386,17 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
         }
       }
       if (step == 9) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isQuotedChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isQuotedChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont()) {
           if (c == '"') {
-            input.step();
-            params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+            params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                    Assume.nonNull(valueBuilder).toString());
             keyBuilder = null;
             valueBuilder = null;
+            input.step();
             step = 3;
             continue;
           } else if (c == '\\') {
@@ -460,18 +410,12 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
         }
       }
       if (step == 10) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isEscapeChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 9;
-            continue;
-          } else {
-            return Parse.error(Diagnostic.expected("escape character", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isEscapeChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 9;
+          continue;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
@@ -522,7 +466,7 @@ final class WriteHttpTransferCoding extends Write<Object> {
     int c = 0;
     if (step == 1) {
       if (name.length() == 0) {
-        return Write.error(new WriteException("Blank transfer coding"));
+        return Write.error(new WriteException("blank transfer coding"));
       }
       while (index < name.length() && output.isCont()) {
         c = name.codePointAt(index);
@@ -530,7 +474,7 @@ final class WriteHttpTransferCoding extends Write<Object> {
           output.write(c);
           index = name.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid transfer coding: " + name));
+          return Write.error(new WriteException("invalid transfer coding: " + name));
         }
       }
       if (index >= name.length()) {
@@ -559,7 +503,7 @@ final class WriteHttpTransferCoding extends Write<Object> {
       if (step == 4) {
         key = Assume.nonNull(key);
         if (key.length() == 0) {
-          return Write.error(new WriteException("Blank param key"));
+          return Write.error(new WriteException("blank param key"));
         }
         while (index < key.length() && output.isCont()) {
           c = key.codePointAt(index);
@@ -567,7 +511,7 @@ final class WriteHttpTransferCoding extends Write<Object> {
             output.write(c);
             index = key.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid param key: " + key));
+            return Write.error(new WriteException("invalid param key: " + key));
           }
         }
         if (index >= key.length()) {
@@ -576,9 +520,8 @@ final class WriteHttpTransferCoding extends Write<Object> {
         }
       }
       if (step == 5 && output.isCont()) {
-        value = Assume.nonNull(value);
         output.write('=');
-        if (Http.isToken(value)) {
+        if (Http.isToken(Assume.nonNull(value))) {
           step = 6;
         } else {
           step = 7;
@@ -616,7 +559,7 @@ final class WriteHttpTransferCoding extends Write<Object> {
               escape = c;
               step = 9;
             } else {
-              return Write.error(new WriteException("Invalid param value: " + value));
+              return Write.error(new WriteException("invalid param value: " + value));
             }
             continue;
           } else {
@@ -643,7 +586,7 @@ final class WriteHttpTransferCoding extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

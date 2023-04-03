@@ -26,6 +26,6 @@ public interface WamlFieldForm<K, V, B> {
 
   WamlForm<V> valueForm();
 
-  B updateField(B builder, K key, @Nullable V value);
+  B updateField(B builder, K key, @Nullable V value) throws WamlException;
 
 }

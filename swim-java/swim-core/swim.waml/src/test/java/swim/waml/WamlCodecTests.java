@@ -16,44 +16,48 @@ package swim.waml;
 
 import org.junit.jupiter.api.Test;
 import swim.codec.Codec;
+import swim.codec.CodecException;
 import swim.codec.Format;
+import swim.codec.MediaType;
+import swim.codec.Transcoder;
+import swim.codec.Translator;
 import swim.repr.Repr;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WamlCodecTests {
 
   @Test
-  public void loadWamlCodec() {
-    assertEquals(Waml.codec(), Codec.getCodec("application/x-waml"));
+  public void loadWamlCodec() throws CodecException {
+    assertEquals(Waml.codec(), Codec.get(MediaType.parse("application/x-waml").getNonNull()));
   }
 
   @Test
-  public void loadWamlReprTranscoder() {
-    assertEquals(Waml.codec().forType(Repr.class),
-                 Codec.getTranscoder("application/x-waml", Repr.class));
+  public void loadWamlReprTranscoder() throws CodecException, WamlException {
+    assertEquals(Waml.codec().getWamlForm(Repr.class),
+                 Transcoder.get(MediaType.parse("application/x-waml").getNonNull(), Repr.class));
   }
 
   @Test
-  public void loadWamlJavaTranscoder() {
-    assertEquals(Waml.codec().forType(Object.class),
-                 Codec.getTranscoder("application/x-waml", Object.class));
+  public void loadWamlJavaTranscoder() throws CodecException, WamlException {
+    assertEquals(Waml.codec().getWamlForm(Object.class),
+                 Transcoder.get(MediaType.parse("application/x-waml").getNonNull(), Object.class));
   }
 
   @Test
-  public void loadWamlFormat() {
-    assertEquals(Waml.codec(), Format.getFormat("application/x-waml"));
+  public void loadWamlFormat() throws CodecException {
+    assertEquals(Waml.codec(), Format.get(MediaType.parse("application/x-waml").getNonNull()));
   }
 
   @Test
-  public void loadWamlReprTranslator() {
-    assertEquals(Waml.codec().forType(Repr.class),
-                 Format.getTranslator("application/x-waml", Repr.class));
+  public void loadWamlReprTranslator() throws CodecException, WamlException {
+    assertEquals(Waml.codec().getWamlForm(Repr.class),
+                 Translator.get(MediaType.parse("application/x-waml").getNonNull(), Repr.class));
   }
 
   @Test
-  public void loadWamlJavaTranslator() {
-    assertEquals(Waml.codec().forType(Object.class),
-                 Format.getTranslator("application/x-waml", Object.class));
+  public void loadWamlJavaTranslator() throws CodecException, WamlException {
+    assertEquals(Waml.codec().getWamlForm(Object.class),
+                 Translator.get(MediaType.parse("application/x-waml").getNonNull(), Object.class));
   }
 
 }

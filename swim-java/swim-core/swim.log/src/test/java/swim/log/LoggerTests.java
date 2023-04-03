@@ -24,7 +24,7 @@ public class LoggerTests {
     //System.setProperty("log.foo.level", "trace");
     Log.forTopic("foo.bar");
     //Log.forTopic("foo").subscribe(new LogPrinter().threshold(Severity.TRACE));
-    Log.forTopic("foo.bar.baz").debug("Testing 1 2 3");
+    Log.forTopic("foo.bar.baz").debug("testing 1 2 3");
     System.out.println(Logger.root().toMarkup(swim.util.NotationOptions.debug()));
   }
 

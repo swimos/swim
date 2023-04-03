@@ -15,6 +15,7 @@
 package swim.codec;
 
 import java.nio.ByteBuffer;
+import swim.annotations.CheckReturnValue;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
@@ -84,9 +85,28 @@ public final class ByteBufferOutput extends Output<ByteBuffer> {
     return this;
   }
 
+  @CheckReturnValue
   @Override
   public ByteBuffer get() {
     return ByteBuffer.wrap(this.array, 0, this.size);
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getNonNull() {
+    return this.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getUnchecked() {
+    return this.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public ByteBuffer getNonNullUnchecked() {
+    return this.get();
   }
 
   @Override

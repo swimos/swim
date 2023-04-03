@@ -144,7 +144,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
   public void setTransportOptions(TransportOptions transportOptions) {
     final boolean configured = this.tryTransportOptions(transportOptions);
     if (!configured) {
-      throw new IllegalStateException("Can't configure transport driver once started");
+      throw new IllegalStateException("can't configure transport driver once started");
     }
   }
 
@@ -172,7 +172,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
   public void setScheduler(@Nullable Scheduler scheduler) {
     final boolean configured = this.tryScheduler(scheduler);
     if (!configured) {
-      throw new IllegalStateException("Can't configure transport driver once started");
+      throw new IllegalStateException("can't configure transport driver once started");
     }
   }
 
@@ -247,7 +247,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
           if ((status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -310,7 +310,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
               || (status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -360,7 +360,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
         // The service is concurrently stopping, or has permanently stopped.
         break;
       } else {
-        throw new AssertionError(Integer.toString((status & STATE_MASK))); // unreachable
+        throw new AssertionError("unreachable");
       }
     } while (true);
     if (interrupted) {
@@ -449,7 +449,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
               || (status & STATE_MASK) == CONFIG_LOCK) {
             try {
               this.wait(100L);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -490,7 +490,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
             try {
               // Wait for the selector thread to exit.
               this.thread.join(100);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException cause) {
               // Defer thread interrupt.
               interrupted = true;
             }
@@ -502,7 +502,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
           continue;
         }
       } else {
-        throw new AssertionError(Integer.toString((status & STATE_MASK))); // unreachable
+        throw new AssertionError("unreachable");
       }
     } while (true);
     if (interrupted) {
@@ -550,7 +550,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
       // Register the transport channel with the selector.
       selectionKey = transport.channel().register((Selector) SELECTOR.getOpaque(this), 0);
     } catch (ClosedChannelException cause) {
-      throw new IllegalStateException("Transport channel closed", cause);
+      throw new IllegalStateException("transport channel closed", cause);
     }
     // Create a handle to bind the transport to the service.
     final TransportHandle handle = new TransportHandle(this, transport, selectionKey);
@@ -602,7 +602,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
   public void setTcpOptions(@Nullable TcpOptions tcpOptions) {
     final boolean configured = this.tryTcpOptions(tcpOptions);
     if (!configured) {
-      throw new IllegalStateException("Can't configure transport driver once started");
+      throw new IllegalStateException("can't configure transport driver once started");
     }
   }
 
@@ -620,7 +620,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
       channel.configureBlocking(false);
       this.tcpOptions().configure(channel.socket());
     } catch (IOException cause) {
-      throw new UnsupportedOperationException("Unable to initialize socket channel", cause);
+      throw new UnsupportedOperationException("unable to initialize socket channel", cause);
     }
     return new TcpSocket(channel, socket);
   }
@@ -642,7 +642,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
       channel.configureBlocking(false);
       channel.socket().setReuseAddress(true);
     } catch (IOException cause) {
-      throw new UnsupportedOperationException("Unable to initialize server socket channel", cause);
+      throw new UnsupportedOperationException("unable to initialize server socket channel", cause);
     }
     return new TcpListener(channel, listener, this.tcpOptions());
   }
@@ -690,7 +690,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
   public void setTlsOptions(@Nullable TlsOptions tlsOptions) {
     final boolean configured = this.tryTlsOptions(tlsOptions);
     if (!configured) {
-      throw new IllegalStateException("Can't configure transport driver once started");
+      throw new IllegalStateException("can't configure transport driver once started");
     }
   }
 
@@ -715,7 +715,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
       channel.configureBlocking(false);
       this.tcpOptions().configure(channel.socket());
     } catch (IOException cause) {
-      throw new UnsupportedOperationException("Unable to initialize socket channel", cause);
+      throw new UnsupportedOperationException("unable to initialize socket channel", cause);
     }
     return new TlsSocket(channel, socket, sslEngine);
   }
@@ -742,7 +742,7 @@ public class TransportDriver implements TransportService, NetEndpoint {
       channel.configureBlocking(false);
       channel.socket().setReuseAddress(true);
     } catch (IOException cause) {
-      throw new UnsupportedOperationException("Unable to initialize server socket channel", cause);
+      throw new UnsupportedOperationException("unable to initialize server socket channel", cause);
     }
     return new TlsListener(channel, listener, this.tcpOptions(), tlsOptions);
   }

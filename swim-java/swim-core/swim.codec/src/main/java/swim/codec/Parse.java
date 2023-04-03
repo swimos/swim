@@ -14,6 +14,8 @@
 
 package swim.codec;
 
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
 import swim.annotations.NonNull;
@@ -21,106 +23,161 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
+import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.Result;
 import swim.util.ToSource;
 
 /**
- * An object representing how to continue parsing from future {@linkplain
- * Input input chunks}. {@code Parse} enables efficient, interruptible
- * parsing of network protocols and data formats, without intermediate
- * buffer copying.
+ * The state of an interruptible parse operation. A {@code Parse} instance
+ * {@linkplain #consume(Input) consumes} an {@linkplain Input input} chunk,
+ * returning a new {@code Parse} instance representing the continuation of
+ * the parse operation. Parsing continues chunk by chunk until a {@code Parse}
+ * instance in a terminal state is reached. This approach enables efficient,
+ * interruptible parsing of composite network protocols and data formats
+ * without blocking or intermediate buffering.
  *
- * <h3>Input tokens</h3>
- * <p>
- * {@code Parse} reads tokens from an {@code Input} reader. Input tokens are
- * modeled as primitive {@code int} values, commonly representing Unicode code
- * points or raw octets. Each {@code Parse} subclass specifies the semantic
- * type of input tokens it consumes.
+ * {@code Parse} instances sequentially consume input chunks token by token.
+ * This enables {@code Parse} instances to consume incrementally decoded input,
+ * such as {@linkplain Utf8DecodedInput UTF-8 decoded input}, without having
+ * to first decode the input to a separate buffer. For this reason, the
+ * {@code Parse} interface is commonly used to implement text format parsers,
+ * whereas the parent {@link Decode} interface is often used to implement
+ * binary format decoders.
  *
- * <h3>Parse states</h3>
+ * <h2>Input tokens</h2>
  * <p>
- * {@code Parse} is always in one of three states: <em>cont</em>inue,
- * <em>done</em>, or <em>error</em>. The <em>cont</em> state indicates that
- * parsing is ready to {@linkplain #consume(Input) consume} more input;
- * the <em>done</em> state indicates that parsing completed successfully,
- * and that the {@link #get()} method will return the parse result;
- * the <em>error</em> state indicates that parsing failed, and that the
- * {@link #getError()} method will return the parse exception.
- * {@code Parse} subclasses default to the <em>cont</em> state.
+ * {@code Parse} instances sequentially consume tokens from an {@link Input}
+ * chunk. Input tokens are modeled as primitive {@code int} values, commonly
+ * representing Unicode code points, or raw octets. The expected semantics of
+ * input tokens is specified by individual {@code Parse} subclasses.
  *
- * <h3>Consuming input</h3>
+ * <h2>Parse states</h2>
  * <p>
- * The {@link #consume(Input)} method incrementally parses as much
- * {@code Input} as it can before returning a new {@code Parse} instance
- * that represents the continuation of how to parse future {@code Input}.
- * The {@code Input} passed to {@code consume} is only guaranteed to be valid
- * for the duration of the method call; references to the provided
- * {@code Input} should not be retained.
+ * A {@code Parse} instance is always in one—and only one—of the following
+ * three <em>parse states</em>:
+ * <ul>
+ * <li>{@link #isCont() parse-cont}: the parse operation is ready
+ *     to {@linkplain #consume(Input) consume} more input
+ * <li>{@link #isDone() parse-done}: the parse operation terminated
+ *     with a {@linkplain #get() parsed value}
+ * <li>{@link #isError() parse-error}: the parse operation terminated
+ *     with a {@linkplain #getError() parse error}
+ * </ul>
+ * <p>
+ * {@code Parse} subclasses default to the {@code parse-cont} state.
+ * {@link Parse#done(Object) Parse.done(T)} returns an instance in the
+ * {@code parse-done} state. {@link Parse#error(Throwable)} returns an
+ * instance in the {@code parse-error} state.
  *
- * <h3>Parse results</h3>
+ * <h2>Consuming input</h2>
  * <p>
- * A successful parse sequence yields a parse result of type {@code T},
- * which can be obtained by calling the {@link #get()} method. {@code get} is
- * only guaranteed to return a result when in the <em>done</em> state; though
- * subclasses may optionally return partial results in other states. A failed
- * parse wraps a parsing error, which can be obtained by calling the
- * {@link #getError()} method. {@code getError} is only guaranteed to return
- * an error when in the <em>error</em> state.
+ * The {@link #consume(Input)} method parses a single input chunk and returns
+ * a new {@code Parse} instance representing the updated state of the parse
+ * operation. Any returned {@code Parse} instance in the {@code parse-cont}
+ * state should eventually be called to {@code consume} an additional input
+ * chunk. If the end of input is reached, {@code consume} should be called
+ * with input in the {@link Input#isDone() input-done} state. The parse
+ * operation terminates when {@code consume} returns a {@code Parse} instance
+ * in either the {@code parse-done} state or the {@code parse-error} state.
  *
- * <h3>Continuations</h3>
+ * <h2>Parse results</h2>
  * <p>
- * {@code Parse} instances represents a continuation of how to parse future
- * {@code Input}. Rather than parsing fully buffered input in one go,
- * {@code Parse} parses chunk at a time, returning a new {@code Parse}
- * instance after each consumed chunk that knows how to parse future chunks.
- * This approach enables non-blocking, incremental parsing that can be
- * interrupted whenever an {@code Input} reader runs out of immediately
- * available tokens. Parsing terminates when a {@code Parse} instance is
- * returned in either the <em>done</em> state or the <em>error</em> state.
- * {@link Parse#done(Object)} returns a {@code Parse} instance in the
- * <em>done</em> state. {@link Parse#error(Throwable)} returns a
- * {@code Parse} instance in the <em>error</em> state.
+ * A successful parse operation wraps a <em>parsed value</em> of type
+ * {@code T}, which can be obtained by calling a member of the {@code get}
+ * family of methods:
+ * <ul>
+ * <li>{@link #get()}: returns the parsed value, if available;
+ *     otherwise throws an exception
+ * <li>{@link #getNonNull()}: returns the parsed value, if available
+ *     and not {@code null}; otherwise throws an exception
+ * <li>{@link #getUnchecked()}: returns the parsed value, if available;
+ *     otherwise throws an unchecked exception
+ * <li>{@link #getNonNullUnchecked()}: returns the parsed value, if available
+ *     and not {@code null}; otherwise throws an unchecked exception
+ * <li>{@link #getOr(Object) getOr(T)}: returns the parsed value, if available;
+ *     otherwise returns a default value
+ * <li>{@link #getNonNullOr(Object) getNonNullOr(T)}: returns the parsed value,
+ *     if available and not {@code null}; otherwise returns a default value
+ * <li>{@link #getOrElse(Supplier)}: returns the parsed value, if available;
+ *     otherwise returns a value supplied by a function
+ * <li>{@link #getNonNullOrElse(Supplier)}: returns the parsed value,
+ *     if available and not {@code null}, otherwise returns a value
+ *     supplied by a function
+ * </ul>
+ * <p>
+ * A failed parse operation wraps a throwable <em>parse error</em>,
+ * which can be obtained by calling the {@link #getError()} method.
  *
- * <h3>Iteratees</h3>
+ * <h2>Parse continuations</h2>
  * <p>
- * {@code Parse} is an <a href="https://en.wikipedia.org/wiki/Iteratee">
- * Iteratee</a>. Though unlike purely functional iteratees, {@code Parse}
- * mutably iterates over its {@code Input}, rather than allocating an object
- * for each incremental input continuation. This internal mutability minimizes
- * garbage collector memory pressure, without violating the functional Iteratee
- * contract, provided that {@code consume} takes exclusive ownership of its
- * {@code Input} when invoked, and returns ownership of the {@code Input} in
- * a state that's consistent with the returned {@code Parse} continuation.
+ * Think of a {@code Parse} instance in the {@code parse-cont} state as
+ * capturing the call stack of a parse operation at the point where it ran
+ * out of available input. When {@code consume} is subsequently called with
+ * new input, the call stack is reconstructed, and parsing continues where
+ * it left off. The stack is captured by returning a {@code Parse} instance
+ * containing the state of each parse frame as the stack unwinds. The stack is
+ * restored by invoking {@code consume} on any nested {@code Parse} instances
+ * that were captured when the parse operation was previously interrupted.
  *
- * <h3>Immutability</h3>
+ * <h2>Backpressure propagation</h2>
  * <p>
- * {@code Parse} instances should be immutable, when possible. Specifically,
- * an invocation of {@code consume} should not alter the behavior of future
- * calls to {@code consume} on the same {@code Parse} instance. {@code Parse}
- * should only mutate its internal state when it's essential to do so, such as
- * for critical performance optimizations.
+ * {@code Parse} subclasses can optionally propagate backpressure by
+ * overriding the {@link #backoff(InputFuture)} method. Backpressure-aware
+ * parsers invoke {@code backoff} with an {@code InputFuture} after every
+ * call to {@code consume}. If {@code backoff} returns {@code true}, the
+ * parser will not invoke {@code consume} again until the {@code Parse}
+ * instance calls {@link InputFuture#requestInput()}. Returning {@code false}
+ * from {@code backoff} indicates that the {@code Parse} instance is currently
+ * ready to consume more input.
  *
- * <h3>Backtracking</h3>
+ * <h2>Immutability</h2>
  * <p>
- * Parsing can internally {@link Input#clone() clone} its {@code Input},
- * and speculatively consume tokens from the cloned input, backtracking to
- * the original input if the speculative parsing fails. Though keep in mind
- * that, because {@code Input} is only valid for the duration of the call to
- * {@code consume}, input that needs to be preserved between {@code consume}
- * invocations must be internally buffered.
+ * {@code Parse} instances should be immutable whenever possible.
+ * Specifically, an invocation of {@code consume} should not alter the behavior
+ * of subsequent calls to {@code consume} on the same {@code Parse} instance.
+ * A {@code Parse} instance should only mutate its internal state when it's
+ * essential to do so, such as for critical performance optimizations.
+ *
+ * <h2>Backtracking</h2>
+ * <p>
+ * A {@code Parse} implementation can internally {@link Input#clone() clone}
+ * its input and then speculatively consume tokens from the cloned input.
+ * If speculative parsing of the cloned input fails, an alternate parsing
+ * path can be resumed from the original input. Keep in mind that, because
+ * input is only valid for the duration of the call to {@code consume},
+ * {@code Parse} implementations cannot backtrack to a preceding input chunk.
+ *
+ * <h2>Relationship to iteratees</h2>
+ * <p>
+ * The {@code Parse} interface is similar to the
+ * <a href="https://en.wikipedia.org/wiki/Iteratee">Iteratee</a> pattern.
+ * Though unlike purely functional iteratees, {@code Parse} instances mutably
+ * iterate over their input. This internal mutability improves efficiency
+ * without inhibiting composition, provided that {@code consume} takes
+ * ownership of its input when invoked, and leaves the input in a state
+ * that's consistent with the returned {@code Parse} continuation.
+ *
+ * @see Input
+ * @see Parser
  */
 @Public
 @Since("5.0")
 public abstract class Parse<T> extends Decode<T> {
 
+  /**
+   * Constructs a {@code Parse} instance in the {@code parse-cont} state.
+   */
   protected Parse() {
     // nop
   }
 
   /**
-   * Returns {@code true} when in the <em>cont</em> state and able to
-   * {@linkplain #consume(Input) consume} more input.
+   * Returns {@code true} when in the {@code parse-cont} state,
+   * ready to {@linkplain #consume(Input) consume} more input.
+   *
+   * @return whether or not this {@code Parse} instance is
+   *         in the {@code parse-cont} state
    */
   @Override
   public boolean isCont() {
@@ -128,8 +185,11 @@ public abstract class Parse<T> extends Decode<T> {
   }
 
   /**
-   * Returns {@code true} when in the <em>done</em> state; future calls to
-   * {@link #get()} will return the parse result.
+   * Returns {@code true} when in the {@code parse-done} state,
+   * having terminated with a {@linkplain #get() parsed value}.
+   *
+   * @return whether or not this {@code Parse} instance is
+   *         in the {@code parse-done} state
    */
   @Override
   public boolean isDone() {
@@ -137,8 +197,11 @@ public abstract class Parse<T> extends Decode<T> {
   }
 
   /**
-   * Returns {@code true} when in the <em>error</em> state; future calls to
-   * {@link #getError()} will return the parse error.
+   * Returns {@code true} when in the {@code parse-error} state,
+   * having terminated with a {@linkplain #getError() parse error}.
+   *
+   * @return whether or not this {@code Parse} instance is
+   *         in the {@code parse-error} state
    */
   @Override
   public boolean isError() {
@@ -146,14 +209,16 @@ public abstract class Parse<T> extends Decode<T> {
   }
 
   /**
-   * Incrementally parses as much {@code input} as possible before returning
-   * a new {@code Parse} instance that represents the continuation of how to
-   * parse future {@code Input}. If {@link Input#isLast() input.isLast()} is
-   * {@code true}, then {@code consume} <em>must</em> return a terminated
-   * {@code Parse} instance in either the <em>done</em> state or the
-   * <em>error</em> state. The given {@code input} is only guaranteed to be
-   * valid for the duration of the method call; references the {@code input}
-   * should not be retained.
+   * Parses an {@code input} chunk and returns a new {@code Parse} instance
+   * representing the updated state of the parse operation. If the input
+   * enters the {@link Input#isDone() input-done} state, then {@code consume}
+   * <em>must</em> return a terminated {@code Parse} instance in either the
+   * {@code parse-done} state or the {@code parse-error} state. The given
+   * {@code input} is only guaranteed to be valid for the duration of the
+   * method call; references to {@code input} should not be retained.
+   *
+   * @param input the input to consume
+   * @return the continuation of the parse operation
    */
   public abstract Parse<T> consume(Input input);
 
@@ -163,11 +228,73 @@ public abstract class Parse<T> extends Decode<T> {
   }
 
   /**
+   * Ensures that a value has been successfully parsed,
+   * and the end of {@code input} has been reached.
+   * The following conditions are sequentially evaluated:
+   * <ul>
+   * <li>When in the {@code parse-error} state, returns {@code this}
+   *     so as to not clobber prior parse errors.
+   * <li>If the {@code input} is in the {@link Input#isError()
+   *     input-error} state, returns the input exception wrapped
+   *     in a new {@code Parse} error.
+   * <li>If the {@code input} is in the {@link Input#isCont()
+   *     input-cont} state, returns a new {@code Parse} error
+   *     indicating that the input was not fully consumed.
+   * <li>When in the {@code parse-cont} state, returns a new
+   *     {@code Parse} error indicating an unexpected end of input.
+   * <li>Otherwise returns {@code this}, having reached the end of input
+   *     in the {@code parse-done} state.
+   * </ul>
+   *
+   * @param input the input whose end should have been reached
+   * @return {@code this} if in the {@code parse-done} state, having
+   *         reached the end of {@code input}; otherwise returns a
+   *         {@code Parse} instance in the {@code parse-error} state
+   */
+  public Parse<T> complete(Input input) {
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    } else if (input.isCont()) {
+      return Parse.error(Diagnostic.message("unconsumed input", input));
+    } else {
+      return Parse.error(Diagnostic.unexpected(input));
+    }
+  }
+
+  @Override
+  public Parse<T> complete(InputBuffer input) {
+    return this.complete((Input) input);
+  }
+
+  /**
    * Provides an opportunity for the {@code Parse} instance to propagate
    * backpressure to the caller. Returns {@code true} if the {@code Parse}
    * instance will invoke {@link InputFuture#requestInput() future.requestInput()}
    * when it's ready to consume more input; otherwise returns {@code false}
    * if the {@code Parse} instance is currently ready to consume more input.
+   * The default implementation returns {@code false}.
+   * <p>
+   * After {@code backoff} returns {@code true}, but before {@code
+   * future.requestInput()} is called, the {@code Parse} instance enters the
+   * implicit {@code parse-backoff} state. Once in the {@code parse-backoff}
+   * state, it is responsibility of the {@code Parse} instance to ensure that
+   * {@code future.requestInput()} eventually gets called.
+   * <p>
+   * Parse backoff is advisory. A parser may invoke {@code consume}
+   * at any time. Even backpressure-aware parsers may disregard the
+   * {@code parse-backoff} state and invoke {@code consume} with a
+   * terminated input in order to terminate a parse operation.
+   * <p>
+   * Consider the example of a proxy translator that parses one input,
+   * and writes another output. There's no point invoking {@code consume}
+   * on the parse end of the translator if the write end's output is full.
+   * Such a translator can wait for output capacity to become available
+   * before calling {@code future.requestInput()}.
+   *
+   * @param future an input future that will trigger an invocation of
+   *        {@code consume} after its {@code requestInput} method is called
+   * @return whether or not the parser should wait to invoke {@code consume}
+   *         until after {@code future.requestInput()} is called
    */
   @Override
   public boolean backoff(InputFuture future) {
@@ -175,169 +302,302 @@ public abstract class Parse<T> extends Decode<T> {
   }
 
   /**
-   * Returns the parse result, if in the <em>done</em> state.
-   * Subclasses may optionally return a result in other states.
+   * Returns the parsed value, if in the {@code parse-done} state;
+   * otherwise throws an exception. Subclasses may optionally return
+   * a value in other states.
    *
-   * @throws ParseException with the parse error as its cause,
-   *         if in the <em>error</em> state.
-   * @throws IllegalStateException if in neither the <em>done</em> state
-   *         nor the <em>error</em> state.
+   * @return the parsed value, if available
+   * @throws ParseException if in the {@code parse-error} state
+   * @throws IllegalStateException if in the {@code parse-cont} state
    */
   @CheckReturnValue
   @Override
-  public @Nullable T get() {
-    throw new IllegalStateException("Incomplete parse");
+  public @Nullable T get() throws ParseException {
+    throw new IllegalStateException("incomplete parse");
   }
 
   /**
-   * Returns the parse result, if in the <em>done</em> state and the result
-   * is non-{@code null}.
+   * Returns the parsed value, if in the {@code parse-done} state and
+   * the parsed value is not {@code null}; otherwise throws an exception.
+   * Subclasses may optionally return a non-{@code null} value in other states.
+   * The default implementation delegates to {@link #get()},
+   * {@code null}-checking its return value.
    *
-   * @throws ParseException with the parse error as its cause,
-   *         if in the <em>error</em> state.
-   * @throws NullPointerException if the parse result is {@code null}.
-   * @throws IllegalStateException if in neither the <em>done</em> state
-   *         nor the <em>error</em> state.
+   * @return the parsed value, if available and not {@code null}
+   * @throws ParseException if in the {@code parse-error} state
+   * @throws IllegalStateException if in the {@code parse-cont} state
+   * @throws NullPointerException if the parsed value is {@code null}
    */
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNull() {
-    if (this.isDone()) {
-      final T value = this.get();
-      if (value != null) {
-        return value;
-      } else {
-        throw new NullPointerException("Null parse result");
-      }
-    } else if (this.isError()) {
-      throw new ParseException("Parse failed", this.getError());
+  public @NonNull T getNonNull() throws ParseException {
+    final T value = this.get();
+    if (value != null) {
+      return value;
     } else {
-      throw new IllegalStateException("Incomplete parse");
+      throw new NullPointerException("parsed value is null");
     }
   }
 
   /**
-   * Returns the parse result, if in the <em>done</em> state;
-   * otherwise returns some {@code other} value.
+   * Returns the parsed value, if in the {@code parse-done} state;
+   * otherwise throws an unchecked exception. Subclasses may optionally
+   * return a value in other states. The default implementation delegates
+   * to {@link #get()}, catching any {@code ParseException} and rethrowing
+   * it as the cause of a {@code NoSuchElementException}.
+   *
+   * @return the parsed value, if available
+   * @throws NoSuchElementException if in the {@code parse-error} state
+   * @throws IllegalStateException if in the {@code parse-cont} state
    */
   @CheckReturnValue
   @Override
-  public @Nullable T getOr(@Nullable T other) {
-    if (this.isDone()) {
+  public @Nullable T getUnchecked() {
+    try {
       return this.get();
-    } else {
-      return other;
+    } catch (ParseException cause) {
+      throw new NoSuchElementException("parse error", cause);
     }
   }
 
   /**
-   * Returns the parse result, if in the <em>done</em> state and the result
-   * is non-{@code null}; otherwise returns some {@code other} value.
+   * Returns the parsed value, if in the {@code parse-done} state and
+   * the parsed value is not {@code null}; otherwise throws an unchecked
+   * exception. Subclasses may optionally return a non-{@code null} value
+   * in other states. The default implementation delegates to
+   * {@link #getNonNull()}, catching any {@code ParseException}
+   * and rethrowing it as the cause of a {@code NoSuchElementException}.
+   *
+   * @return the parsed value, if available and not {@code null}
+   * @throws NoSuchElementException if in the {@code parse-error} state
+   * @throws IllegalStateException if in the {@code parse-cont} state
+   * @throws NullPointerException if the parsed value is {@code null}
    */
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T other) {
-    if (this.isDone()) {
-      final T value = this.get();
-      if (value != null) {
-        return value;
-      }
+  public @NonNull T getNonNullUnchecked() {
+    try {
+      return this.getNonNull();
+    } catch (ParseException cause) {
+      throw new NoSuchElementException("parse error", cause);
     }
-    return other;
   }
 
   /**
-   * Returns the parse result, if in the <em>done</em> state; otherwise
-   * returns the value produced by the given {@code supplier} function.
+   * Returns the parsed value, if in the {@code parse-done} state;
+   * otherwise returns the given {@code defaultValue}. The default
+   * implementation delegates to {@link #get()}, catching any
+   * {@code ParseException} or {@code IllegalStateException}
+   * to instead return {@code defaultValue}.
+   *
+   * @param defaultValue returned when a parsed value is not available
+   * @return either the parsed value, or the {@code defaultValue}
+   */
+  @CheckReturnValue
+  @Override
+  public @Nullable T getOr(@Nullable T defaultValue) {
+    try {
+      return this.get();
+    } catch (ParseException | IllegalStateException cause) {
+      return defaultValue;
+    }
+  }
+
+  /**
+   * Returns the parsed value, if in the {@code parse-done} state and
+   * the parsed value is not {@code null}; otherwise returns the given
+   * non-{@code null} {@code defaultValue}. The default implementation
+   * delegates to {@link #getNonNull()}, catching any {@code ParseException},
+   * {@code IllegalStateException}, or {@code NullPointerException}
+   * to instead {@code null}-check and return the {@code defaultValue}.
+   *
+   * @param defaultValue non-{@code null} value returned when
+   *        the parsed value is {@code null} or not available
+   * @return either the non-{@code null} parsed value,
+   *         or the non-{@code null} {@code defaultValue}
+   * @throws NullPointerException if the parsed value and
+   *         the {@code defaultValue} are both {@code null}
+   */
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+    try {
+      return this.getNonNull();
+    } catch (ParseException | IllegalStateException | NullPointerException cause) {
+      if (defaultValue != null) {
+        return defaultValue;
+      } else {
+        throw new NullPointerException("default value is null");
+      }
+    }
+  }
+
+  /**
+   * Returns the parsed value, if in the {@code parse-done} state;
+   * otherwise returns the value returned by the given {@code supplier}
+   * function. The default implementation delegates to {@link #get()},
+   * catching any {@code ParseException} or {@code IllegalStateException}
+   * to instead return the value returned by the {@code supplier} function.
+   *
+   * @param supplier invoked to obtain a return value when
+   *        a parsed value is not available
+   * @return either the parsed value, or the value returned
+   *         by the {@code supplier} function
    */
   @CheckReturnValue
   @Override
   public @Nullable T getOrElse(Supplier<? extends T> supplier) {
-    if (this.isDone()) {
+    try {
       return this.get();
-    } else {
+    } catch (ParseException | IllegalStateException cause) {
       return supplier.get();
     }
   }
 
   /**
-   * Returns the parse error, if in the <em>error</em> state;
-   * otherwise throws {@link IllegalStateException}.
+   * Returns the parsed value, if in the {@code parse-done} state and
+   * the parsed value is not {@code null}; otherwise returns the
+   * non-{@code null} value returned by the given {@code supplier} function.
+   * The default implementation delegates to {@link #getNonNull()},
+   * catching any {@code ParseException}, {@code IllegalStateException},
+   * or {@code NullPointerException} to instead {@code null}-check and
+   * return the value returned by the {@code supplier} function.
    *
-   * @throws IllegalStateException if not in the <em>error</em> state.
+   * @param supplier invoked to obtain a non-{@code null} return value
+   *        when the parsed value is {@code null} or not available
+   * @return either the non-{@code null} parsed value, or the
+   *         non-{@code null} value returned by the {@code supplier} function
+   * @throws NullPointerException if the parsed value and the value returned
+   *         by the {@code supplier} function are both {@code null}
    */
   @CheckReturnValue
   @Override
-  public Throwable getError() {
-    throw new IllegalStateException("No parse error");
-  }
-
-  /**
-   * Casts this {@code Parse} to a different result type if in the
-   * <em>error</em> state; otherwise throws {@link IllegalStateException}.
-   * Parses in the <em>error</em> state are bi-variant with respect to the
-   * result type since they never return a parse result.
-   *
-   * @throws IllegalStateException if not in the <em>error</em> state.
-   */
-  @Override
-  public <T2> Parse<T2> asError() {
-    throw new IllegalStateException("No parse error");
-  }
-
-  /**
-   * Throws a {@link ParseException} with the parse error as its cause,
-   * if in the <em>error</em> state; otherwise returns {@code this}.
-   *
-   * @throws ParseException with the parse error as its cause,
-   *         if in the <em>error</em> state.
-   */
-  @Override
-  public Parse<T> checkError() {
-    if (this.isError()) {
-      throw new ParseException("Parse failed", this.getError());
-    } else {
-      return this;
-    }
-  }
-
-  /**
-   * Throws a {@link ParseException} if not in the <em>done</em> state;
-   * otherwise returns {@code this}. If in the <em>error</em> state,
-   * the parse error will be included as the cause of the thrown
-   * {@code ParseException}.
-   *
-   * @throws ParseException if not in the <em>done</em> state.
-   */
-  @Override
-  public Parse<T> checkDone() {
-    if (this.isDone()) {
-      return this;
-    } else if (this.isError()) {
-      throw new ParseException("Parse failed", this.getError());
-    } else {
-      throw new ParseException("Incomplete parse");
-    }
-  }
-
-  @Override
-  public Result<T> toResult() {
+  public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
     try {
-      return Result.ok(this.get());
-    } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        return Result.error(cause);
+      return this.getNonNull();
+    } catch (ParseException | IllegalStateException | NullPointerException cause) {
+      final T value = supplier.get();
+      if (value != null) {
+        return value;
       } else {
-        throw cause;
+        throw new NullPointerException("supplied value is null");
       }
     }
   }
 
+  /**
+   * Returns the parse error, if in the {@code parse-error} state;
+   * otherwise throws an unchecked exception.
+   *
+   * @return the parse error, if present
+   * @throws IllegalStateException if not in the {@code parse-error} state
+   */
+  @CheckReturnValue
+  @Override
+  public Throwable getError() {
+    throw new IllegalStateException("no parse error");
+  }
+
+  /**
+   * Casts this {@code Parse} instance to a different parsed value type,
+   * if in the {@code parse-error} state; otherwise throws an unchecked
+   * exception. {@code Parse} instances in the {@code parse-error} state
+   * are bi-variant with respect to their parsed value type since they
+   * never actually return a parsed value.
+   * <p>
+   * If not already in the {@code parse-error} state, returns a new
+   * {@code Parse} instance in the {@code parse-error} state that
+   * wraps an {@code IllegalStateException}.
+   *
+   * @return {@code this}, if in the {@code parse-error} state
+   */
+  @Override
+  public <T2> Parse<T2> asError() {
+    return Parse.error(new IllegalStateException("incomplete parse"));
+  }
+
+  /**
+   * Throws a checked exception if in the {@code parse-error} state,
+   * otherwise returns {@code this}. If in the {@code parse-error} state
+   * and the parse error is an instance of {@code ParseException},
+   * the parse error is rethrown; otherwise a new {@code ParseException}
+   * is thrown with the parse error as its cause.
+   *
+   * @return {@code this}, if not in the {@code parse-error} state
+   * @throws ParseException if in the {@code parse-error} state
+   */
+  @Override
+  public Parse<T> checkError() throws ParseException {
+    return this;
+  }
+
+  /**
+   * Throws a checked exception if not in the {@code parse-done} state,
+   * otherwise returns {@code this}. If in the {@code parse-error} state
+   * and the parse error is an instance of {@code ParseException},
+   * the parse error is rethrown; otherwise a new {@code ParseException}
+   * is thrown with the parse error as its cause. If in the
+   * {@code parse-cont} state, a new {@code ParseException}
+   * is thrown to indicate an incomplete parse.
+   *
+   * @return {@code this}, if in the {@code parse-done} state
+   * @throws ParseException if not in the {@code parse-done} state
+   */
+  @Override
+  public Parse<T> checkDone() throws ParseException {
+    throw new ParseException("incomplete parse");
+  }
+
+  /**
+   * Throws an {@link AssertionError} if not in the {@code parse-done} state,
+   * otherwise returns {@code this}. The {@code AssertionError} will set the
+   * parse error as its cause, if in the {@code parse-error} state.
+   *
+   * @return {@code this}, if in the {@code parse-done} state
+   * @throws AssertionError if not in the {@code parse-done} state
+   */
+  @Override
+  public Parse<T> assertDone() {
+    throw new AssertionError("incomplete parse");
+  }
+
+  /**
+   * Converts this {@code Parse} instance to a {@link Result}. {@code Parse}
+   * states map to {@code Result} states according to the following rules:
+   * <ul>
+   * <li>Returns an {@link Result#ok(Object) ok result} containing
+   *     the decoded value when in the {@code parse-done} state
+   * <li>Returns an {@link Result#error(Throwable) error result} wrapping
+   *     the parse error when in the {@code parse-error} state
+   * <li>Returns an {@code error result} wrapping an
+   *     {@code IllegalStateException} when in the {@code parse-cont} state
+   * </ul>
+   *
+   * @return the result of this parse operation
+   */
+  @CheckReturnValue
+  @Override
+  public Result<T> toResult() {
+    try {
+      return Result.ok(this.get());
+    } catch (ParseException | IllegalStateException cause) {
+      return Result.error(cause);
+    }
+  }
+
+  /**
+   * Singleton {@code Parse} instance in the {@code parse-done} state
+   * containing a {@code null} parsed value.
+   */
   private static final Parse<Object> DONE = new ParseDone<Object>(null);
 
   /**
-   * Returns a {@code Parse} instance in the <em>done</em> state that wraps
-   * a {@code null} parse result.
+   * Returns a {@code Parse} instance in the {@code parse-done} state
+   * containing a {@code null} parsed value. Always returns the same
+   * singleton {@code Parse} instance.
+   *
+   * @return a singleton {@code Parse} instance in the {@code parse-done}
+   *         state containing a {@code null} parsed value
    */
   @CheckReturnValue
   public static <T> Parse<T> done() {
@@ -345,42 +605,99 @@ public abstract class Parse<T> extends Decode<T> {
   }
 
   /**
-   * Returns a {@code Parse} instance in the <em>done</em> state that wraps
-   * the given parse {@code result}.
+   * Returns a {@code Parse} instance in the {@code parse-done} state
+   * containing the given parsed {@code value}. If {@code value} is
+   * {@code null}, returns the singleton {@link Parse#done()} instance.
+   *
+   * @param value the parsed value to be contained by
+   *        the returned {@code Parse} instance
+   * @return a {@code Parse} instance in the {@code parse-done} state
+   *         containing the parsed {@code value}
    */
   @CheckReturnValue
-  public static <T> Parse<T> done(@Nullable T result) {
-    if (result == null) {
-      return Parse.done();
+  public static <T> Parse<T> done(@Nullable T value) {
+    if (value != null) {
+      return new ParseDone<T>(value);
     } else {
-      return new ParseDone<T>(result);
+      return Assume.conforms(DONE);
     }
   }
 
   /**
-   * Returns a {@code Parse} instance in the <em>error</em> state that wraps
-   * the given parse {@code error}.
+   * Returns a {@code Parse} instance in the {@code parse-error} state
+   * that wraps the given parse {@code error}.
+   *
+   * @param error the parse error to be wrapped by
+   *        the returned {@code Parse} instance
+   * @return a {@code Parse} instance in the {@code parse-error} state
+   *         that wraps the parse {@code error}
    */
   @CheckReturnValue
   public static <T> Parse<T> error(Throwable error) {
+    Objects.requireNonNull(error);
     return new ParseError<T>(error);
   }
 
   /**
-   * Returns a {@code Parse} instance in the <em>error</em> state that wraps
-   * a {@link ParseException} with the given {@code diagnostic}.
+   * Returns a {@code Parse} instance in the {@code parse-error} state
+   * whose parse error is a new {@link ParseException} containing
+   * the given {@code diagnostic}.
+   *
+   * @param diagnostic the diagnostic to be contained by a new
+   *        {@code ParseException} that will serve as the parse error
+   *        of the returned {@code Parse} instance
+   * @return a {@code Parse} instance in the {@code parse-error} state
+   *         whose parse error is a new {@code ParseException} containing
+   *         the {@code diagnostic}
    */
   @CheckReturnValue
   public static <T> Parse<T> error(Diagnostic diagnostic) {
+    Objects.requireNonNull(diagnostic, "diagnostic");
     return Parse.error(new ParseException(diagnostic));
   }
 
   /**
-   * Returns a {@code Parse} instance in the <em>error</em> state that wraps
-   * a {@link ParseException} with the given {@code diagnostic} and {@code cause}.
+   * Returns a {@code Parse} instance in the {@code parse-error} state
+   * whose parse error is a new {@link ParseException} containing
+   * the given {@code diagnostic} and throwable {@code cause}.
+   *
+   * @param diagnostic the diagnostic to be contained by a new
+   *        {@code ParseException} that will serve as the parse error
+   *        of the returned {@code Parse} instance
+   * @param cause the cause of the {@code ParseException} that will serve
+   *        as the parse error of the returned {@code Parse} instance
+   * @return a {@code Parse} instance in the {@code parse-error} state
+   *         whose parse error is a new {@code ParseException} containing
+   *         the {@code diagnostic} and throwable {@code cause}
    */
   @CheckReturnValue
   public static <T> Parse<T> error(Diagnostic diagnostic, @Nullable Throwable cause) {
+    Objects.requireNonNull(diagnostic, "diagnostic");
+    Objects.requireNonNull(cause, "cause");
+    return Parse.error(new ParseException(diagnostic, cause));
+  }
+
+  /**
+   * Returns a {@code Parse} instance in the {@code parse-error} state
+   * whose parse error is a new {@link ParseException} containing a new
+   * {@link Diagnostic} attached to the given {@code input} with a message
+   * derived from the given throwable {@code cause}.
+   *
+   * @param input the {@code Input} whose current position is the location
+   *        of the parse error
+   * @param cause the cause of the {@code ParseException} that will serve
+   *        as the parse error of the returned {@code Parse} instance,
+   *        and whose message will server as the diagnostic message
+   * @return a {@code Parse} instance in the {@code parse-error} state
+   *         whose parse error is a new {@code ParseException} containing
+   *         a {@code diagnostic} derived from the given {@code input}
+   *         and throwable {@code cause}
+   */
+  @CheckReturnValue
+  public static <T> Parse<T> diagnostic(Input input, Throwable cause) {
+    Objects.requireNonNull(input, "input");
+    Objects.requireNonNull(cause, "cause");
+    final Diagnostic diagnostic = Diagnostic.message(cause.getMessage(), input);
     return Parse.error(new ParseException(diagnostic, cause));
   }
 
@@ -409,15 +726,117 @@ final class ParseDone<T> extends Parse<T> implements ToSource {
     return this;
   }
 
+  @Override
+  public Parse<T> complete(Input input) {
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    } else if (input.isCont()) {
+      return Parse.error(Diagnostic.message("unconsumed input", input));
+    } else {
+      return this;
+    }
+  }
+
   @CheckReturnValue
   @Override
   public @Nullable T get() {
     return this.value;
   }
 
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNull() {
+    if (this.value != null) {
+      return this.value;
+    } else {
+      throw new NullPointerException("parsed value is null");
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getUnchecked() {
+    return this.value;
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullUnchecked() {
+    if (this.value != null) {
+      return this.value;
+    } else {
+      throw new NullPointerException("parsed value is null");
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getOr(@Nullable T defaultValue) {
+    return this.value;
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+    if (this.value != null) {
+      return this.value;
+    } else if (defaultValue != null) {
+      return defaultValue;
+    } else {
+      throw new NullPointerException("default value is null");
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getOrElse(Supplier<? extends T> supplier) {
+    return this.value;
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
+    if (this.value != null) {
+      return this.value;
+    } else {
+      final T value = supplier.get();
+      if (value != null) {
+        return value;
+      } else {
+        throw new NullPointerException("supplied value is null");
+      }
+    }
+  }
+
+  @Override
+  public Parse<T> checkDone() {
+    return this;
+  }
+
+  @Override
+  public Parse<T> assertDone() {
+    return this;
+  }
+
+  @CheckReturnValue
   @Override
   public Result<T> toResult() {
     return Result.ok(this.value);
+  }
+
+  @Override
+  public boolean equals(@Nullable Object other) {
+    if (other instanceof ParseDone<?> that) {
+      return Objects.equals(this.value, that.value);
+    }
+    return false;
+  }
+
+  private static final int HASH_SEED = Murmur3.seed(ParseDone.class);
+
+  @Override
+  public int hashCode() {
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, Objects.hashCode(this.value)));
   }
 
   @Override
@@ -460,10 +879,74 @@ final class ParseError<T> extends Parse<T> implements ToSource {
     return this;
   }
 
+  @Override
+  public Parse<T> complete(Input input) {
+    return this;
+  }
+
   @CheckReturnValue
   @Override
-  public @Nullable T get() {
-    throw new ParseException("Parse failed", this.error);
+  public @Nullable T get() throws ParseException {
+    if (this.error instanceof ParseException) {
+      throw (ParseException) this.error;
+    } else {
+      throw new ParseException("parse failed", this.error);
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNull() throws ParseException {
+    if (this.error instanceof ParseException) {
+      throw (ParseException) this.error;
+    } else {
+      throw new ParseException("parse failed", this.error);
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getUnchecked() {
+    throw new NoSuchElementException("parse failed", this.error);
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullUnchecked() {
+    throw new NoSuchElementException("parse failed", this.error);
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getOr(@Nullable T defaultValue) {
+    return defaultValue;
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+    if (defaultValue != null) {
+      return defaultValue;
+    } else {
+      throw new NullPointerException("default value is null");
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getOrElse(Supplier<? extends T> supplier) {
+    return supplier.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
+    final T value = supplier.get();
+    if (value != null) {
+      return value;
+    } else {
+      throw new NullPointerException("supplied value is null");
+    }
   }
 
   @Override
@@ -477,8 +960,47 @@ final class ParseError<T> extends Parse<T> implements ToSource {
   }
 
   @Override
+  public Parse<T> checkError() throws ParseException {
+    if (this.error instanceof ParseException) {
+      throw (ParseException) this.error;
+    } else {
+      throw new ParseException("parse failed", this.error);
+    }
+  }
+
+  @Override
+  public Parse<T> checkDone() throws ParseException {
+    if (this.error instanceof ParseException) {
+      throw (ParseException) this.error;
+    } else {
+      throw new ParseException("parse failed", this.error);
+    }
+  }
+
+  @Override
+  public Parse<T> assertDone() {
+    throw new AssertionError("parse failed", this.error);
+  }
+
+  @CheckReturnValue
+  @Override
   public Result<T> toResult() {
     return Result.error(this.error);
+  }
+
+  @Override
+  public boolean equals(@Nullable Object other) {
+    if (other instanceof ParseError<?> that) {
+      return this.error.equals(that.error);
+    }
+    return false;
+  }
+
+  private static final int HASH_SEED = Murmur3.seed(ParseError.class);
+
+  @Override
+  public int hashCode() {
+    return Murmur3.mash(Murmur3.mix(HASH_SEED, this.error.hashCode()));
   }
 
   @Override

@@ -30,7 +30,7 @@ import swim.annotations.Since;
  * or a {@code Throwable} <em>error</em>. Results are used to model the return
  * values of functions, including exceptional returns.
  *
- * <h3>Ok results</h3>
+ * <h2>Ok results</h2>
  * <p>
  * An <em>ok</em> result wraps an arbitrary nullable value of type {@code T}.
  * Ok results are constructed via the {@link #ok(Object) Result.ok(T)} factory
@@ -46,7 +46,7 @@ import swim.annotations.Since;
  * value if the result is ok, or return the evaluation of a {@code Supplier}
  * function if the result is an error.
  *
- * <h3>Error results</h3>
+ * <h2>Error results</h2>
  * <p>
  * An <em>error</em> result wraps a non-null {@code Throwable} exception.
  * Error results are constructed via the {@link #error(Throwable)
@@ -60,7 +60,7 @@ import swim.annotations.Since;
  * and error results, so no ambiguity arises from constructing an ok result
  * containing an instance of {@code Throwable}.
  *
- * <h3>Conversions</h3>
+ * <h2>Conversions</h2>
  * <p>
  * The {@link #ok()} method converts a {@code Result} to an {@link Optional}
  * containing the resulting value or an empty optional. The {@link #error()}
@@ -69,7 +69,7 @@ import swim.annotations.Since;
  * converts a {@code Result} to a {@link Stream} containing just the resulting
  * value or an empty stream.
  *
- * <h3>Combinators</h3>
+ * <h2>Combinators</h2>
  * <p>
  * Results can be {@linkplain #map(Function) mapped}, {@linkplain
  * #flatMap(Function) flat mapped}, {@linkplain #mapError(Function)
@@ -80,7 +80,7 @@ import swim.annotations.Since;
  * result of invoking a {@code Supplier} function, wrapping any {@linkplain
  * #isNonFatal(Throwable) non-fatal exceptions} thrown by the function.
  *
- * <h3>Exceptions</h3>
+ * <h2>Exceptions</h2>
  * <p>
  * Except as otherwise noted, all {@linkplain #isNonFatal(Throwable)
  * non-fatal exceptions} thrown by combinator functions are caught and
@@ -151,7 +151,7 @@ public final class Result<T> implements ToMarkup, ToSource {
     if (this.isOk()) {
       return Assume.conformsNullable(this.value);
     } else {
-      throw new IllegalStateException("Error result", (Throwable) this.value);
+      throw new IllegalStateException("error result", (Throwable) this.value);
     }
   }
 
@@ -168,10 +168,10 @@ public final class Result<T> implements ToMarkup, ToSource {
       if (this.value != null) {
         return Assume.conforms(this.value);
       } else {
-        throw new NullPointerException("Null result");
+        throw new NullPointerException("null result");
       }
     } else {
-      throw new IllegalStateException("Error result", (Throwable) this.value);
+      throw new IllegalStateException("error result", (Throwable) this.value);
     }
   }
 
@@ -204,7 +204,7 @@ public final class Result<T> implements ToMarkup, ToSource {
 
   /**
    * Returns the resulting value, if this is an {@linkplain #isOk() ok result};
-   * otherwise returns the result of invoking a {@code supplier} function.
+   * otherwise returns the value produced by the given {@code supplier} function.
    */
   @CheckReturnValue
   public @Nullable T getOrElse(Supplier<? extends T> supplier) {
@@ -212,6 +212,28 @@ public final class Result<T> implements ToMarkup, ToSource {
       return Assume.conformsNullable(this.value);
     } else {
       return supplier.get();
+    }
+  }
+
+  /**
+   * Returns the resulting value, if this is an {@linkplain #isOk() ok result}
+   * and the resulting value is non-{@code null}; otherwise returns the
+   * non-{@code null} value produced by the given {@code supplier} function.
+   *
+   * @throws NullPointerException if the resulting value and the value produced
+   *         by the {@code supplier} function are both {@code null}.
+   */
+  @CheckReturnValue
+  public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
+    if (this.isOk()) {
+      return Assume.conformsNonNull(this.value);
+    } else {
+      final T value = supplier.get();
+      if (value != null) {
+        return value;
+      } else {
+        throw new NullPointerException("null supplier result");
+      }
     }
   }
 
@@ -226,7 +248,7 @@ public final class Result<T> implements ToMarkup, ToSource {
     if (this.isError()) {
       return (Throwable) Assume.nonNull(this.value);
     } else {
-      throw new IllegalStateException("Ok result");
+      throw new IllegalStateException("ok result");
     }
   }
 
@@ -451,7 +473,7 @@ public final class Result<T> implements ToMarkup, ToSource {
     if (this.isError()) {
       return Assume.conforms(this);
     } else {
-      return Result.error(new IllegalStateException("Ok result"));
+      return Result.error(new IllegalStateException("ok result"));
     }
   }
 
@@ -469,8 +491,7 @@ public final class Result<T> implements ToMarkup, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Result) {
-      final Result<?> that = (Result<?>) other;
+    } else if (other instanceof Result<?> that) {
       return this.flags == that.flags
           && Objects.equals(this.value, that.value);
     }
@@ -563,7 +584,7 @@ public final class Result<T> implements ToMarkup, ToSource {
    */
   @CheckReturnValue
   public static <T> Result<T> error(Throwable error) {
-    Objects.requireNonNull(error);
+    Objects.requireNonNull(error, "error");
     return new Result<T>(error, ERROR_FLAG);
   }
 

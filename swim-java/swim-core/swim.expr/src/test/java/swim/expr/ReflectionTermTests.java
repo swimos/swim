@@ -58,18 +58,18 @@ public class ReflectionTermTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("Point")
-                           .appendArgument(this.x)
-                           .appendArgument(this.y)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("Point")
+                          .appendArgument(this.x)
+                          .appendArgument(this.y)
+                          .endInvoke()
+                          .toString();
     }
 
   }
 
   @Test
-  public void evaluateChildSelectors() {
-    final TermForm<Point> termForm = TermForm.forType(Point.class);
+  public void evaluateChildSelectors() throws TermException {
+    final TermForm<Point> termForm = Term.form(Point.class);
     final Term point = termForm.intoTerm(new Point(2, 3));
     final Expr expr = ChildExpr.of(point, Term.of("x"));
     final TermGenerator generator = expr.generator();
@@ -79,8 +79,8 @@ public class ReflectionTermTests {
   }
 
   @Test
-  public void evaluateChildMethods() {
-    final TermForm<Point> termForm = TermForm.forType(Point.class);
+  public void evaluateChildMethods() throws TermException {
+    final TermForm<Point> termForm = Term.form(Point.class);
     final Term point = termForm.intoTerm(new Point(2, 3));
     final Expr expr = InvokeExpr.of(MemberExpr.of(point, "child"), Term.of("x"));
     final TermGenerator generator = expr.generator();
@@ -90,10 +90,10 @@ public class ReflectionTermTests {
   }
 
   @Test
-  public void filterChildren() {
-    final TermForm<Point> termForm = TermForm.forType(Point.class);
+  public void filterChildren() throws TermException {
+    final TermForm<Point> termForm = Term.form(Point.class);
     final Term point = termForm.intoTerm(new Point(2, 3));
-    final Term expr = Expr.parse("%::filter(x == 1 + 1 && y == 6 / 2)");
+    final Term expr = Expr.parse("%::filter(x == 1 + 1 && y == 6 / 2)").getNonNullUnchecked();
     final TermGenerator generator = expr.generator();
     final Evaluator evaluator = new Evaluator(Term.trap(), point);
     assertEquals(point, generator.evaluateNext(evaluator));

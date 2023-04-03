@@ -23,7 +23,6 @@ import swim.codec.Diagnostic;
 import swim.codec.ParseException;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
-import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
 import swim.http.HttpException;
@@ -111,11 +110,11 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
           input.step();
           version = Base10.decodeDigit(c);
         } else {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Version: " + value,
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Version: " + value,
                                   new ParseException(Diagnostic.expected("digit", input)));
         }
       } else if (input.isDone()) {
-        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Version: " + value,
+        throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Version: " + value,
                                 new ParseException(Diagnostic.expected("digit", input)));
       } else {
         break;
@@ -152,9 +151,9 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Version: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Version: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Version: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Version: " + value);
     }
     return versions;
   }
@@ -168,7 +167,7 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
       }
       version = versions.next().intValue();
       if (version < 0 || version > 255) {
-        throw new WriteException("Invalid websocket version: " + version);
+        throw new IllegalArgumentException("invalid websocket version: " + version);
       }
       if (version >= 100) {
         output.write(Base10.encodeDigit(version / 100));

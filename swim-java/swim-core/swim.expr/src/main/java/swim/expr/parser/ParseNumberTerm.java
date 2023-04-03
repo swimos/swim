@@ -22,6 +22,7 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.NumberTermForm;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 
 @Internal
@@ -56,96 +57,84 @@ public final class ParseNumberTerm<T> extends Parse<Term> {
                                       long value, int digits, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
+      if (input.isCont() && ((c = input.head()) == '-' || (c >= '0' && c <= '9'))) {
         if (c == '-') {
-          input.step();
           sign = -1;
-          step = 2;
-        } else if (c >= '0' && c <= '9') {
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("number", input));
+          input.step();
         }
-      } else if (input.isDone()) {
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("number", input));
       }
     }
     if (step == 2) {
-      if (input.isCont()) {
-        c = input.head();
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
         if (c == '0') {
           input.step();
           step = 5;
-        } else if (c >= '1' && c <= '9') {
-          input.step();
+        } else { // c >= '1' && c <= '9'
           value = (long) (sign * (c - '0'));
+          input.step();
           step = 3;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
         }
-      } else if (input.isDone()) {
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 3) {
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          final long newValue = 10L * value + (long) (sign * (c - '0'));
-          if (newValue / value >= 10L) {
-            input.step();
-            value = newValue;
-          } else {
-            builder = new StringBuilder();
-            builder.append(value);
-            step = 4;
-            break;
-          }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        final long newValue = 10L * value + (long) (sign * (c - '0'));
+        if (newValue / value >= 10L) {
+          value = newValue;
+          input.step();
         } else {
-          step = 5;
+          builder = new StringBuilder();
+          builder.append(value);
           break;
         }
       }
-      if (input.isDone()) {
-        return Parse.done(form.intoTerm(form.integerValue(value)));
+      if (input.isCont()) {
+        if (c >= '0' && c <= '9') {
+          step = 4;
+        } else {
+          step = 5;
+        }
+      } else if (input.isDone()) {
+        try {
+          return Parse.done(form.intoTerm(form.integerValue(value)));
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 4) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
-      if (input.isCont()) {
+      if (input.isCont() && (c == '.' || c == 'E' || c == 'e')) {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
         if (c == '.') {
-          input.step();
-          builder.appendCodePoint(c);
           step = 7;
-        } else if (c == 'E' || c == 'e') {
-          input.step();
-          builder.appendCodePoint(c);
+        } else { // c == 'E' || c == 'e'
           step = 9;
-        } else {
-          return Parse.done(form.intoTerm(form.bigIntegerValue(builder.toString())));
         }
-      } else if (input.isDone()) {
-        return Parse.done(form.intoTerm(form.bigIntegerValue(builder.toString())));
+      } else if (input.isReady()) {
+        try {
+          return Parse.done(form.intoTerm(form.bigIntegerValue(Assume.nonNull(builder).toString())));
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 5) {
-      if (input.isCont()) {
-        c = input.head();
-        if (c == 'x' && sign > 0 && value == 0L) {
+      if (input.isCont() && (((c = input.head()) == 'x' && sign > 0 && value == 0L)
+                            || c == '.' || c == 'E' || c == 'e')) {
+        if (c == 'x') {
           input.step();
           step = 6;
-        } else if (c == '.') {
-          input.step();
+        } else { // c == '.' || c == 'E' || c == 'e'
           builder = new StringBuilder();
           if (sign < 0 && value == 0L) {
             builder.append('-').append('0');
@@ -153,84 +142,70 @@ public final class ParseNumberTerm<T> extends Parse<Term> {
             builder.append(value);
           }
           builder.appendCodePoint(c);
-          step = 7;
-        } else if (c == 'E' || c == 'e') {
           input.step();
-          builder = new StringBuilder();
-          if (sign < 0 && value == 0L) {
-            builder.append('-').append('0');
-          } else {
-            builder.append(value);
+          if (c == '.') {
+            step = 7;
+          } else { // c == 'E' || c == 'e'
+            step = 9;
           }
-          builder.appendCodePoint(c);
-          step = 9;
-        } else {
-          return Parse.done(form.intoTerm(form.integerValue(value)));
         }
-      } else if (input.isDone()) {
-        return Parse.done(form.intoTerm(form.integerValue(value)));
+      } else if (input.isReady()) {
+        try {
+          return Parse.done(form.intoTerm(form.integerValue(value)));
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 6) {
-      while (input.isCont()) {
-        c = input.head();
-        if (Base16.isDigit(c)) {
-          input.step();
-          value = (value << 4) | (long) Base16.decodeDigit(c);
-          digits += 1;
-        } else {
-          break;
-        }
+      while (input.isCont() && Base16.isDigit(c = input.head())) {
+        value = (value << 4) | (long) Base16.decodeDigit(c);
+        digits += 1;
+        input.step();
       }
       if (input.isReady()) {
         if (digits > 0) {
-          return Parse.done(form.intoTerm(form.hexadecimalValue(value, digits)));
+          try {
+            return Parse.done(form.intoTerm(form.hexadecimalValue(value, digits)));
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         } else {
           return Parse.error(Diagnostic.expected("hex digit", input));
         }
       }
     }
     if (step == 7) {
-      builder = Assume.nonNull(builder);
-      if (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-          step = 8;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
+        step = 8;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 8) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isCont() && (c == 'E' || c == 'e')) {
+        Assume.nonNull(builder).appendCodePoint(c);
         input.step();
-        builder.appendCodePoint(c);
         step = 9;
       } else if (input.isReady()) {
-        return Parse.done(form.intoTerm(form.decimalValue(builder.toString())));
+        try {
+          return Parse.done(form.intoTerm(form.decimalValue(Assume.nonNull(builder).toString())));
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 9) {
-      builder = Assume.nonNull(builder);
       if (input.isCont()) {
-        c = input.head();
-        if (c == '+' || c == '-') {
+        if ((c = input.head()) == '+' || c == '-') {
+          Assume.nonNull(builder).appendCodePoint(c);
           input.step();
-          builder.appendCodePoint(c);
         }
         step = 10;
       } else if (input.isDone()) {
@@ -238,33 +213,25 @@ public final class ParseNumberTerm<T> extends Parse<Term> {
       }
     }
     if (step == 10) {
-      builder = Assume.nonNull(builder);
-      if (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-          step = 11;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
+        step = 11;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 11) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
-        return Parse.done(form.intoTerm(form.decimalValue(builder.toString())));
+        try {
+          return Parse.done(form.intoTerm(form.decimalValue(Assume.nonNull(builder).toString())));
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (input.isError()) {

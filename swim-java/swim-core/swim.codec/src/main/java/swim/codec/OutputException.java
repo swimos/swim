@@ -19,7 +19,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * Thrown when writing invalid {@link Output}.
+ * Thrown when writing invalid output.
  */
 @Public
 @Since("5.0")

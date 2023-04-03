@@ -60,7 +60,7 @@ public interface WebSocket extends WsCodec<Object> {
   default void willReadFrame() throws WsException {
     final WebSocketContext context = this.webSocketContext();
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket");
+      throw new IllegalStateException("unbound websocket");
     }
     context.readFrame();
   }
@@ -76,7 +76,7 @@ public interface WebSocket extends WsCodec<Object> {
   default void didWriteFrame(Result<? extends WsFrame<?>> frameResult) throws WsException {
     final WebSocketContext context = this.webSocketContext();
     if (context == null) {
-      throw new IllegalStateException("Unbound websocket");
+      throw new IllegalStateException("unbound websocket");
     }
 
     if (frameResult.isOk()) {

@@ -47,7 +47,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   public HttpClientContext clientContext() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     return context.clientContext();
   }
@@ -55,7 +55,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   public HttpOptions options() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     return context.options();
   }
@@ -103,7 +103,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   protected boolean writeRequest(HttpRequest<?> request) {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     return context.writeRequest(request);
   }
@@ -111,7 +111,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   public HttpRequest<?> request() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     return context.request();
   }
@@ -119,7 +119,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   public Result<HttpRequest<?>> requestResult() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      return Result.error(new IllegalStateException("Unbound requester"));
+      return Result.error(new IllegalStateException("unbound requester"));
     }
     return context.requestResult();
   }
@@ -137,7 +137,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   protected boolean readResponse() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     return context.readResponse();
   }
@@ -145,7 +145,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   public Result<HttpResponse<?>> responseResult() {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      return Result.error(new IllegalStateException("Unbound requester"));
+      return Result.error(new IllegalStateException("unbound requester"));
     }
     return context.responseResult();
   }
@@ -153,7 +153,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   protected void become(HttpRequester requester) {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     context.become(requester);
   }
@@ -161,7 +161,7 @@ public abstract class AbstractHttpRequester implements HttpRequester {
   protected void become(NetSocket socket) {
     final HttpRequesterContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     context.become(socket);
   }

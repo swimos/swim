@@ -57,30 +57,25 @@ public final class ParsePrefixExpr extends Parse<Term> {
                                   @Nullable Parse<Term> parseRhs, int step) {
     int c = 0;
     if (step == 1) {
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isSpace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isSpace(c = input.head())) {
+        input.step();
       }
       if (input.isCont()) {
         if (c == '!') {
-          input.step();
           operator = "!";
+          input.step();
           step = 2;
         } else if (c == '~') {
-          input.step();
           operator = "~";
+          input.step();
           step = 2;
         } else if (c == '-') {
-          input.step();
           operator = "-";
+          input.step();
           step = 2;
         } else if (c == '+') {
-          input.step();
           operator = "+";
+          input.step();
           step = 2;
         } else {
           return parser.parsePrimaryExpr(input, form);
@@ -97,22 +92,22 @@ public final class ParsePrefixExpr extends Parse<Term> {
       }
       if (parseRhs.isDone()) {
         if ("!".equals(operator)) {
-          return Parse.done(new NotExpr(parseRhs.getNonNull()));
+          return Parse.done(new NotExpr(parseRhs.getNonNullUnchecked()));
         } else if ("~".equals(operator)) {
-          return Parse.done(new BitwiseNotExpr(parseRhs.getNonNull()));
+          return Parse.done(new BitwiseNotExpr(parseRhs.getNonNullUnchecked()));
         } else if ("-".equals(operator)) {
-          final Term rhs = parseRhs.getNonNull();
+          final Term rhs = parseRhs.getNonNullUnchecked();
           if (rhs.isValidNumber()) {
             return Parse.done(rhs.negative());
           } else {
-            return Parse.done(new NegativeExpr(parseRhs.getNonNull()));
+            return Parse.done(new NegativeExpr(parseRhs.getNonNullUnchecked()));
           }
         } else if ("+".equals(operator)) {
-          final Term rhs = parseRhs.getNonNull();
+          final Term rhs = parseRhs.getNonNullUnchecked();
           if (rhs.isValidNumber()) {
             return Parse.done(rhs.positive());
           } else {
-            return Parse.done(new PositiveExpr(parseRhs.getNonNull()));
+            return Parse.done(new PositiveExpr(parseRhs.getNonNullUnchecked()));
           }
         } else {
           return Parse.error(Diagnostic.message(operator, input));

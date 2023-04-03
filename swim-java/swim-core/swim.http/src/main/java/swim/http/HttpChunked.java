@@ -219,7 +219,7 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
         final int inputLimit = input.limit();
         final int inputRemaining = inputLimit - inputStart;
         final boolean inputLast = input.isLast();
-        final long chunkSize = parseHeader.getNonNull().size();
+        final long chunkSize = parseHeader.getNonNullUnchecked().size();
         final long chunkRemaining = chunkSize - offset;
         final int decodeSize = (int) Math.min((long) inputRemaining, chunkRemaining);
 
@@ -230,6 +230,9 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
           decodePayload = decodePayload.consume(input);
         }
         input.limit(inputLimit).asLast(inputLast);
+        if (decodePayload.isError()) {
+          return decodePayload.asError();
+        }
 
         offset += (long) (input.position() - inputStart);
         if (offset == chunkSize) {
@@ -242,9 +245,7 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
             break;
           }
         } else if (decodePayload.isDone()) {
-          return Decode.error(new DecodeException("Undecoded payload data"));
-        } else if (decodePayload.isError()) {
-          return decodePayload.asError();
+          return Decode.error(new DecodeException("undecoded payload data"));
         }
       }
       if (step == 5) {
@@ -291,8 +292,8 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
       parseTrailers = Assume.nonNull(parseTrailers);
       if (input.isCont() && input.head() == '\n') {
         input.step();
-        return Decode.done(HttpChunked.of(decodePayload.get(), transcoder,
-                                          parseTrailers.getNonNull()));
+        return Decode.done(HttpChunked.of(decodePayload.getUnchecked(), transcoder,
+                                          parseTrailers.getNonNullUnchecked()));
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("line feed", input));
       }
@@ -402,7 +403,7 @@ final class EncodeHttpChunked<T> extends Encode<HttpChunked<T>> {
       return Encode.done(payload);
     }
     if (output.isDone()) {
-      return Encode.error(new EncodeException("Truncated encode"));
+      return Encode.error(new EncodeException("truncated encode"));
     } else if (output.isError()) {
       return Encode.error(output.getError());
     }

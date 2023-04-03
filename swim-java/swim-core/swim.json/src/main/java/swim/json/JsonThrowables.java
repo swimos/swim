@@ -19,6 +19,7 @@ import java.lang.reflect.Type;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -26,6 +27,7 @@ import swim.codec.Output;
 import swim.codec.Write;
 import swim.collections.HashTrieMap;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -46,13 +48,13 @@ public final class JsonThrowables implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     if (javaType instanceof Class<?>) {
       final Class<?> javaClass = (Class<?>) javaType;
       if (StackTraceElement.class.isAssignableFrom(javaClass)) {
-        return STACK_TRACE_ELEMENT_FORM;
+        return JsonThrowables.stackTraceElementForm();
       } else if (Throwable.class.isAssignableFrom(javaClass)) {
-        return THROWABLE_FORM;
+        return JsonThrowables.throwableForm();
       }
     }
     return null;
@@ -87,18 +89,12 @@ public final class JsonThrowables implements JsonProvider, ToSource {
     return PROVIDER;
   }
 
-  private static final JsonStackTraceElementForm STACK_TRACE_ELEMENT_FORM = new JsonStackTraceElementForm();
-
   public static JsonForm<StackTraceElement> stackTraceElementForm() {
-    return STACK_TRACE_ELEMENT_FORM;
+    return JsonStackTraceElementForm.INSTANCE;
   }
 
-  static final JsonForm<StackTraceElement[]> STACK_TRACE_ELEMENT_ARRAY_FORM = JsonJava.arrayForm(StackTraceElement.class, STACK_TRACE_ELEMENT_FORM);
-
-  private static final JsonThrowableForm THROWABLE_FORM = new JsonThrowableForm();
-
   public static JsonForm<Throwable> throwableForm() {
-    return THROWABLE_FORM;
+    return JsonThrowableForm.INSTANCE;
   }
 
 }
@@ -111,8 +107,13 @@ final class JsonStackTraceElementForm implements JsonObjectForm<String, Object, 
   }
 
   @Override
-  public @Nullable JsonFieldForm<String, Object, StackTraceElement> getFieldForm(String key) {
-    return Assume.conformsNullable(FIELDS.get(key));
+  public JsonFieldForm<String, Object, StackTraceElement> getFieldForm(String key) throws JsonException {
+    final JsonFieldForm<String, Object, StackTraceElement> field = Assume.conformsNullable(FIELDS.get(key));
+    if (field != null) {
+      return field;
+    } else {
+      return JsonObjectForm.super.getFieldForm(key);
+    }
   }
 
   @Override
@@ -135,7 +136,7 @@ final class JsonStackTraceElementForm implements JsonObjectForm<String, Object, 
   }
 
   @Override
-  public Term intoTerm(@Nullable StackTraceElement value) {
+  public Term intoTerm(@Nullable StackTraceElement value) throws TermException {
     return Term.from(value);
   }
 
@@ -169,6 +170,11 @@ final class JsonStackTraceElementForm implements JsonObjectForm<String, Object, 
     fields = fields.updated("native", new JsonStackTraceElementForm.IsNativeField());
     FIELDS = fields;
   }
+
+  static final JsonStackTraceElementForm INSTANCE = new JsonStackTraceElementForm();
+
+  static final JsonForm<StackTraceElement[]> ARRAY_FORM =
+      JsonJava.arrayForm(StackTraceElement.class, INSTANCE);
 
   static final class ClassLoaderNameField implements JsonFieldForm<String, String, StackTraceElement> {
 
@@ -476,7 +482,7 @@ final class JsonStackTraceElementForm implements JsonObjectForm<String, Object, 
             return new SimpleImmutableEntry<String, Object>("native", this.element.isNativeMethod());
           }
         default:
-          throw new UnsupportedOperationException();
+          throw new NoSuchElementException();
       }
     }
 
@@ -492,8 +498,13 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
   }
 
   @Override
-  public @Nullable JsonFieldForm<String, Object, Throwable> getFieldForm(String key) {
-    return Assume.conformsNullable(FIELDS.get(key));
+  public JsonFieldForm<String, Object, Throwable> getFieldForm(String key) throws JsonException {
+    final JsonFieldForm<String, Object, Throwable> field = Assume.conformsNullable(FIELDS.get(key));
+    if (field != null) {
+      return field;
+    } else {
+      return JsonObjectForm.super.getFieldForm(key);
+    }
   }
 
   @Override
@@ -516,7 +527,7 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
   }
 
   @Override
-  public Term intoTerm(@Nullable Throwable value) {
+  public Term intoTerm(@Nullable Throwable value) throws TermException {
     return Term.from(value);
   }
 
@@ -547,6 +558,8 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
     FIELDS = fields;
   }
 
+  static final JsonThrowableForm INSTANCE = new JsonThrowableForm();
+
   static final class ClassField implements JsonFieldForm<String, String, Throwable> {
 
     @Override
@@ -560,15 +573,15 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
     }
 
     @Override
-    public Throwable updateField(Throwable throwable, String key, @Nullable String className) {
+    public Throwable updateField(Throwable throwable, String key, @Nullable String className) throws JsonException {
       final Class<?> throwableClass;
       try {
         throwableClass = Class.forName(className);
-        if (!Throwable.class.isAssignableFrom(throwableClass)) {
-          return throwable;
-        }
-      } catch (ReflectiveOperationException error) {
-        return throwable; // swallow
+      } catch (ReflectiveOperationException cause) {
+        throw new JsonException("unknown throwable class: " + className, cause);
+      }
+      if (!Throwable.class.isAssignableFrom(throwableClass)) {
+        throw new JsonException("non-throwable class: " + className);
       }
 
       try {
@@ -577,8 +590,8 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
         final Throwable newThrowable = (Throwable) constructor.newInstance(throwable.getMessage(), throwable.getCause());
         newThrowable.setStackTrace(throwable.getStackTrace());
         return newThrowable;
-      } catch (ReflectiveOperationException error) {
-        // swallow
+      } catch (ReflectiveOperationException cause) {
+        // ignore
       }
 
       try {
@@ -587,8 +600,8 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
         final Throwable newThrowable = (Throwable) constructor.newInstance(throwable.getMessage());
         newThrowable.setStackTrace(throwable.getStackTrace());
         return newThrowable;
-      } catch (ReflectiveOperationException error) {
-        // swallow
+      } catch (ReflectiveOperationException cause) {
+        // ignore
       }
 
       try {
@@ -597,8 +610,8 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
         final Throwable newThrowable = (Throwable) constructor.newInstance(throwable.getCause());
         newThrowable.setStackTrace(throwable.getStackTrace());
         return newThrowable;
-      } catch (ReflectiveOperationException error) {
-        // swallow
+      } catch (ReflectiveOperationException cause) {
+        // ignore
       }
 
       try {
@@ -607,11 +620,11 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
         final Throwable newThrowable = (Throwable) constructor.newInstance();
         newThrowable.setStackTrace(throwable.getStackTrace());
         return newThrowable;
-      } catch (ReflectiveOperationException error) {
-        // swallow
+      } catch (ReflectiveOperationException cause) {
+        // ignore
       }
 
-      return throwable; // unable to instantiate specialized throwable
+      throw new JsonException("unable to construct throwable class: " + className);
     }
 
   }
@@ -629,7 +642,7 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
     }
 
     @Override
-    public Throwable updateField(Throwable throwable, String key, @Nullable String message) {
+    public Throwable updateField(Throwable throwable, String key, @Nullable String message) throws JsonException {
       final Class<?> throwableClass = throwable.getClass();
 
       try {
@@ -638,8 +651,8 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
         final Throwable newThrowable = (Throwable) constructor.newInstance(message, throwable.getCause());
         newThrowable.setStackTrace(throwable.getStackTrace());
         return newThrowable;
-      } catch (ReflectiveOperationException error) {
-        // swallow
+      } catch (ReflectiveOperationException cause) {
+        // ignore
       }
 
       try {
@@ -648,11 +661,11 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
         final Throwable newThrowable = (Throwable) constructor.newInstance(message);
         newThrowable.setStackTrace(throwable.getStackTrace());
         return newThrowable;
-      } catch (ReflectiveOperationException error) {
-        // swallow
+      } catch (ReflectiveOperationException cause) {
+        // ignore
       }
 
-      return throwable; // unable to instantiate throwable with message
+      throw new JsonException("unable to set message for throwable class: " + throwableClass.getName());
     }
 
   }
@@ -666,7 +679,7 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
 
     @Override
     public JsonForm<StackTraceElement[]> valueForm() {
-      return JsonThrowables.STACK_TRACE_ELEMENT_ARRAY_FORM;
+      return JsonStackTraceElementForm.ARRAY_FORM;
     }
 
     @Override
@@ -690,7 +703,7 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
     }
 
     @Override
-    public Throwable updateField(Throwable throwable, String key, @Nullable Throwable cause) {
+    public Throwable updateField(Throwable throwable, String key, @Nullable Throwable cause) throws JsonException {
       final Class<?> throwableClass = throwable.getClass();
 
       try {
@@ -700,16 +713,16 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
         newThrowable.setStackTrace(throwable.getStackTrace());
         return newThrowable;
       } catch (ReflectiveOperationException error) {
-        // swallow
+        // ignore
       }
 
       try {
         throwable.initCause(cause);
       } catch (IllegalStateException error) {
-        // swallow
+        // ignore
       }
 
-      return throwable;
+      throw new JsonException("unable to set cause for throwable class: " + throwableClass.getName());
     }
 
   }
@@ -776,7 +789,7 @@ final class JsonThrowableForm implements JsonObjectForm<String, Object, Throwabl
             return new SimpleImmutableEntry<String, Object>("cause", this.throwable.getCause());
           }
         default:
-          throw new UnsupportedOperationException();
+          throw new NoSuchElementException();
       }
     }
 

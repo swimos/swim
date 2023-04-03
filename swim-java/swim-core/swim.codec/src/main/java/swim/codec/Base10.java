@@ -139,10 +139,9 @@ public final class Base10 {
     if (c >= '0' && c <= '9') {
       return c - '0';
     } else {
-      final Notation notation = new Notation();
-      notation.append("Invalid decimal digit: ");
-      notation.appendSourceCodePoint(c);
-      throw new IllegalArgumentException(notation.toString());
+      throw new IllegalArgumentException(Notation.of("invalid decimal digit: ")
+                                                 .appendSourceCodePoint(c)
+                                                 .toString());
     }
   }
 
@@ -154,7 +153,7 @@ public final class Base10 {
     if (b >= 0 && b <= 9) {
       return (char) ('0' + b);
     } else {
-      throw new IllegalArgumentException("Invalid decimal byte: " + Integer.toString(b));
+      throw new IllegalArgumentException("invalid binary-coded decimal: " + Integer.toString(b));
     }
   }
 
@@ -204,46 +203,38 @@ final class ParseInt extends Parse<Integer> {
   static Parse<Integer> parse(Input input, int sign, int value, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        if (input.head() == '-') {
-          input.step();
+      if (input.isCont() && ((c = input.head()) == '-' || (c >= '0' && c <= '9'))) {
+        if (c == '-') {
           sign = -1;
+          input.step();
         }
         step = 2;
-      } else if (input.isDone()) {
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("number", input));
       }
     }
     if (step == 2) {
-      if (input.isCont()) {
-        c = input.head();
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
         if (c == '0') {
           input.step();
           return Parse.done(value);
-        } else if (c >= '1' && c <= '9') {
+        } else { // c >= '1' && c <= '9'
           input.step();
           value = sign * (c - '0');
           step = 3;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
         }
-      } else if (input.isDone()) {
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 3) {
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          final int newValue = 10 * value + sign * (c - '0');
-          if (newValue / value >= 10) {
-            input.step();
-            value = newValue;
-          } else {
-            return Parse.error(Diagnostic.message("int overflow", input));
-          }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        final int newValue = 10 * value + sign * (c - '0');
+        if (newValue / value >= 10) {
+          value = newValue;
+          input.step();
         } else {
-          break;
+          return Parse.error(Diagnostic.message("int overflow", input));
         }
       }
       if (input.isReady()) {
@@ -279,46 +270,38 @@ final class ParseLong extends Parse<Long> {
   static Parse<Long> parse(Input input, int sign, long value, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        if (input.head() == '-') {
-          input.step();
+      if (input.isCont() && ((c = input.head()) == '-' || (c >= '0' && c <= '9'))) {
+        if (c == '-') {
           sign = -1;
+          input.step();
         }
         step = 2;
-      } else if (input.isDone()) {
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("number", input));
       }
     }
     if (step == 2) {
-      if (input.isCont()) {
-        c = input.head();
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
         if (c == '0') {
           input.step();
           return Parse.done(value);
-        } else if (c >= '1' && c <= '9') {
-          input.step();
+        } else { // c >= '1' && c <= '9'
           value = (long) (sign * (c - '0'));
+          input.step();
           step = 3;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
         }
-      } else if (input.isDone()) {
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 3) {
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          final long newValue = 10L * value + (long) (sign * (c - '0'));
-          if (newValue / value >= 10L) {
-            input.step();
-            value = newValue;
-          } else {
-            return Parse.error(Diagnostic.message("long overflow", input));
-          }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        final long newValue = 10L * value + (long) (sign * (c - '0'));
+        if (newValue / value >= 10L) {
+          value = newValue;
+          input.step();
         } else {
-          break;
+          return Parse.error(Diagnostic.message("long overflow", input));
         }
       }
       if (input.isReady()) {
@@ -361,58 +344,49 @@ final class ParseNumber extends Parse<Number> {
                              int sign, long value, int digits, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
+      if (input.isCont() && ((c = input.head()) == '-' || (c >= '0' && c <= '9'))) {
         if (c == '-') {
-          input.step();
           sign = -1;
-          step = 2;
-        } else if (c >= '0' && c <= '9') {
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("number", input));
+          input.step();
         }
-      } else if (input.isDone()) {
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("number", input));
       }
     }
     if (step == 2) {
-      if (input.isCont()) {
-        c = input.head();
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
         if (c == '0') {
           input.step();
           step = 5;
-        } else if (c >= '1' && c <= '9') {
-          input.step();
+        } else { // c >= '1' && c <= '9'
           value = (long) (sign * (c - '0'));
+          input.step();
           step = 3;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
         }
-      } else if (input.isDone()) {
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 3) {
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          final long newValue = 10L * value + (long) (sign * (c - '0'));
-          if (newValue / value >= 10L) {
-            input.step();
-            value = newValue;
-          } else {
-            builder = new StringBuilder();
-            builder.append(value);
-            step = 4;
-            break;
-          }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        final long newValue = 10L * value + (long) (sign * (c - '0'));
+        if (newValue / value >= 10L) {
+          value = newValue;
+          input.step();
         } else {
-          step = 5;
+          builder = new StringBuilder();
+          builder.append(value);
           break;
         }
       }
-      if (input.isDone()) {
+      if (input.isCont()) {
+        if (c >= '0' && c <= '9') {
+          step = 4;
+        } else {
+          step = 5;
+        }
+      } else if (input.isDone()) {
         if (value == (long) (int) value) {
           return Parse.done(Integer.valueOf((int) value));
         } else {
@@ -421,63 +395,38 @@ final class ParseNumber extends Parse<Number> {
       }
     }
     if (step == 4) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
-      if (input.isCont()) {
+      if (input.isCont() && (c == '.' || c == 'E' || c == 'e')) {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
         if (c == '.') {
-          input.step();
-          builder.appendCodePoint(c);
           step = 6;
-        } else if (c == 'E' || c == 'e') {
-          input.step();
-          builder.appendCodePoint(c);
+        } else { // c == 'E' || c == 'e'
           step = 8;
-        } else {
-          return Parse.done(new BigInteger(builder.toString()));
         }
-      } else if (input.isDone()) {
-        return Parse.done(new BigInteger(builder.toString()));
+      } else if (input.isReady()) {
+        return Parse.done(new BigInteger(Assume.nonNull(builder).toString()));
       }
     }
     if (step == 5) {
-      if (input.isCont()) {
-        c = input.head();
-        if (c == '.') {
-          input.step();
-          builder = new StringBuilder();
-          if (sign < 0 && value == 0L) {
-            builder.append('-').append('0');
-          } else {
-            builder.append(value);
-          }
-          builder.appendCodePoint(c);
-          step = 6;
-        } else if (c == 'E' || c == 'e') {
-          input.step();
-          builder = new StringBuilder();
-          if (sign < 0 && value == 0L) {
-            builder.append('-').append('0');
-          } else {
-            builder.append(value);
-          }
-          builder.appendCodePoint(c);
-          step = 8;
+      if (input.isCont() && ((c = input.head()) == '.' || c == 'E' || c == 'e')) {
+        builder = new StringBuilder();
+        if (sign < 0 && value == 0L) {
+          builder.append('-').append('0');
         } else {
-          if (value == (long) (int) value) {
-            return Parse.done(Integer.valueOf((int) value));
-          } else {
-            return Parse.done(Long.valueOf(value));
-          }
+          builder.append(value);
         }
-      } else if (input.isDone()) {
+        builder.appendCodePoint(c);
+        input.step();
+        if (c == '.') {
+          step = 6;
+        } else { // c == 'E' || c == 'e'
+          step = 8;
+        }
+      } else if (input.isReady()) {
         if (value == (long) (int) value) {
           return Parse.done(Integer.valueOf((int) value));
         } else {
@@ -486,50 +435,36 @@ final class ParseNumber extends Parse<Number> {
       }
     }
     if (step == 6) {
-      builder = Assume.nonNull(builder);
-      if (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-          step = 7;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
+        step = 7;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 7) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isCont() && (c == 'E' || c == 'e')) {
+        Assume.nonNull(builder).appendCodePoint(c);
         input.step();
-        builder.appendCodePoint(c);
         step = 8;
       } else if (input.isReady()) {
         try {
-          return Parse.done(Double.valueOf(Double.parseDouble(builder.toString())));
+          return Parse.done(Double.valueOf(Double.parseDouble(Assume.nonNull(builder).toString())));
         } catch (NumberFormatException cause) {
-          return Parse.done(new BigDecimal(builder.toString()));
+          return Parse.done(new BigDecimal(Assume.nonNull(builder).toString()));
         }
       }
     }
     if (step == 8) {
-      builder = Assume.nonNull(builder);
       if (input.isCont()) {
-        c = input.head();
-        if (c == '+' || c == '-') {
+        if ((c = input.head()) == '+' || c == '-') {
+          Assume.nonNull(builder).appendCodePoint(c);
           input.step();
-          builder.appendCodePoint(c);
         }
         step = 9;
       } else if (input.isDone()) {
@@ -537,36 +472,24 @@ final class ParseNumber extends Parse<Number> {
       }
     }
     if (step == 9) {
-      builder = Assume.nonNull(builder);
-      if (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-          step = 10;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
+        step = 10;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 10) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
         try {
-          return Parse.done(Double.valueOf(Double.parseDouble(builder.toString())));
+          return Parse.done(Double.valueOf(Double.parseDouble(Assume.nonNull(builder).toString())));
         } catch (NumberFormatException cause) {
-          return Parse.done(new BigDecimal(builder.toString()));
+          return Parse.done(new BigDecimal(Assume.nonNull(builder).toString()));
         }
       }
     }
@@ -631,7 +554,7 @@ final class WriteLong extends Write<Object> {
       }
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

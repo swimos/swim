@@ -18,12 +18,15 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base16;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
+import swim.codec.Parse;
 import swim.codec.ParseException;
 import swim.codec.StringInput;
 import swim.util.CacheMap;
@@ -86,7 +89,13 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
   }
 
   public Uri withSchemePart(String schemePart) {
-    return this.withScheme(UriScheme.parse(schemePart));
+    try {
+      return this.withScheme(UriScheme.parse(schemePart).getNonNull());
+    } catch (ParseException cause) {
+      throw new IllegalArgumentException(Notation.of("malformed scheme part: ")
+                                                 .appendSource(schemePart)
+                                                 .toString(), cause);
+    }
   }
 
   public @Nullable String schemeName() {
@@ -115,7 +124,13 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
   }
 
   public Uri withAuthorityPart(String authorityPart) {
-    return this.withAuthority(UriAuthority.parse(authorityPart));
+    try {
+      return this.withAuthority(UriAuthority.parse(authorityPart).getNonNull());
+    } catch (ParseException cause) {
+      throw new IllegalArgumentException(Notation.of("malformed authority part: ")
+                                                 .appendSource(authorityPart)
+                                                 .toString(), cause);
+    }
   }
 
   public UriUser user() {
@@ -245,7 +260,13 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
   }
 
   public Uri withPathPart(String pathPart) {
-    return this.withPath(UriPath.parse(pathPart));
+    try {
+      return this.withPath(UriPath.parse(pathPart).getNonNull());
+    } catch (ParseException cause) {
+      throw new IllegalArgumentException(Notation.of("malformed path part: ")
+                                                 .appendSource(pathPart)
+                                                 .toString(), cause);
+    }
   }
 
   public String pathName() {
@@ -330,7 +351,13 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
   }
 
   public Uri withQueryPart(String queryPart) {
-    return this.withQuery(UriQuery.parse(queryPart));
+    try {
+      return this.withQuery(UriQuery.parse(queryPart).getNonNull());
+    } catch (ParseException cause) {
+      throw new IllegalArgumentException(Notation.of("malformed query part: ")
+                                                 .appendSource(queryPart)
+                                                 .toString(), cause);
+    }
   }
 
   public Uri updatedQuery(@Nullable String key, String value) {
@@ -391,7 +418,13 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
   }
 
   public Uri withFragmentPart(String fragmentPart) {
-    return this.withFragment(UriFragment.parse(fragmentPart));
+    try {
+      return this.withFragment(UriFragment.parse(fragmentPart).getNonNull());
+    } catch (ParseException cause) {
+      throw new IllegalArgumentException(Notation.of("malformed fragment part: ")
+                                                 .appendSource(fragmentPart)
+                                                 .toString(), cause);
+    }
   }
 
   public @Nullable String fragmentIdentifier() {
@@ -596,6 +629,7 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
     }
   }
 
+  @IntoForm
   @Override
   public String toString() {
     if (this.string == null) {
@@ -731,117 +765,45 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
     return Uri.of(null, null, null, null, UriFragment.identifier(identifier));
   }
 
-  public static Uri parse(String string) {
+  @FromForm
+  public static @Nullable Uri from(String value) {
+    return Uri.parse(value).getOr(null);
+  }
+
+  public static Parse<Uri> parse(Input input) {
+    return ParseUri.parse(input, null, null, null, null, null, 1);
+  }
+
+  public static Parse<Uri> parse(String string) {
     Objects.requireNonNull(string);
-    final CacheMap<String, Uri> cache = Uri.cache();
-    Uri uri = cache.get(string);
-    if (uri == null) {
-      final Input input = new StringInput(string);
-      uri = Uri.parse(input);
-      if (input.isCont()) {
-        throw new ParseException(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        throw new ParseException(input.getError());
-      }
-      if (!uri.authority.user.isDefined()) { // don't cache user info
-        uri = cache.put(string, uri);
-      }
-    }
-    return uri;
-  }
-
-  public static Uri parse(Input input) {
-    UriScheme scheme = null;
-    UriAuthority authority = null;
-    UriPath path = null;
-    UriQuery query = null;
-    UriFragment fragment = null;
-    int c = 0;
-    if (input.isCont()) {
-      final Input lookahead = input.clone();
-      while (lookahead.isCont()) {
-        c = lookahead.head();
-        if (Uri.isSchemeChar(c)) {
-          lookahead.step();
-        } else {
-          break;
-        }
-      }
-      if (lookahead.isCont() && c == ':') {
-        scheme = UriScheme.parse(input);
-        if (input.isCont() && input.head() == ':') {
-          input.step();
-        } else if (input.isReady()) {
-          throw new ParseException(Diagnostic.expected(':', input));
+    final CacheMap<String, Parse<Uri>> cache = Uri.cache();
+    Parse<Uri> parseUri = cache.get(string);
+    if (parseUri == null) {
+      final StringInput input = new StringInput(string);
+      parseUri = Uri.parse(input).complete(input);
+      if (parseUri.isDone()) {
+        // Don't cache user info.
+        if (!parseUri.getNonNullUnchecked().authority.user.isDefined()) {
+          parseUri = cache.put(string, parseUri);
         }
       }
     }
-    if (input.isCont()) {
-      c = input.head();
-      if (c == '/') {
-        input.step();
-        if (input.isCont() && input.head() == '/') {
-          input.step();
-          authority = UriAuthority.parse(input);
-          if (input.isCont()) {
-            c = input.head();
-            if (c != '?' && c != '#') {
-              path = UriPath.parse(input, null);
-            }
-          }
-        } else if (input.isCont()) {
-          final UriPathBuilder pathBuilder = new UriPathBuilder();
-          pathBuilder.addSlash();
-          path = UriPath.parse(input, pathBuilder);
-        } else if (input.isReady()) {
-          path = UriPath.slash();
-        }
-      } else if (c != '?' && c != '#') {
-        path = UriPath.parse(input, null);
-      }
-    }
-    if (input.isCont() && input.head() == '?') {
-      input.step();
-      query = UriQuery.parse(input);
-    }
-    if (input.isCont() && input.head() == '#') {
-      input.step();
-      fragment = UriFragment.parse(input);
-    }
-    if (input.isReady()) {
-      return Uri.of(scheme, authority, path, query, fragment);
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
+    return parseUri;
   }
 
-  public static Uri fromJsonString(String value) {
-    return Uri.parse(value);
-  }
+  private static final ThreadLocal<CacheMap<String, Parse<Uri>>> CACHE =
+      new ThreadLocal<CacheMap<String, Parse<Uri>>>();
 
-  public static String toJsonString(Uri uri) {
-    return uri.toString();
-  }
-
-  public static Uri fromWamlString(String value) {
-    return Uri.parse(value);
-  }
-
-  public static String toWamlString(Uri uri) {
-    return uri.toString();
-  }
-
-  private static final ThreadLocal<CacheMap<String, Uri>> CACHE = new ThreadLocal<CacheMap<String, Uri>>();
-
-  private static CacheMap<String, Uri> cache() {
-    CacheMap<String, Uri> cache = CACHE.get();
+  private static CacheMap<String, Parse<Uri>> cache() {
+    CacheMap<String, Parse<Uri>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.uri.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 1024;
       }
-      cache = new LruCacheMap<String, Uri>(cacheSize);
+      cache = new LruCacheMap<String, Parse<Uri>>(cacheSize);
       CACHE.set(cache);
     }
     return cache;
@@ -945,6 +907,205 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
     output.append('%')
           .append(Base16.lowercase().encodeDigit(c >>> 4 & 0xF))
           .append(Base16.lowercase().encodeDigit(c & 0xF));
+  }
+
+}
+
+final class ParseUri extends Parse<Uri> {
+
+  final @Nullable Parse<UriScheme> parseScheme;
+  final @Nullable Parse<UriAuthority> parseAuthority;
+  final @Nullable Parse<UriPath> parsePath;
+  final @Nullable Parse<UriQuery> parseQuery;
+  final @Nullable Parse<UriFragment> parseFragment;
+  final int step;
+
+  ParseUri(@Nullable Parse<UriScheme> parseScheme,
+           @Nullable Parse<UriAuthority> parseAuthority,
+           @Nullable Parse<UriPath> parsePath,
+           @Nullable Parse<UriQuery> parseQuery,
+           @Nullable Parse<UriFragment> parseFragment,
+           int step) {
+    this.parseScheme = parseScheme;
+    this.parseAuthority = parseAuthority;
+    this.parsePath = parsePath;
+    this.parseQuery = parseQuery;
+    this.parseFragment = parseFragment;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<Uri> consume(Input input) {
+    return ParseUri.parse(input, this.parseScheme, this.parseAuthority,
+                          this.parsePath, this.parseQuery,
+                          this.parseFragment, this.step);
+  }
+
+  static Parse<Uri> parse(Input input, @Nullable Parse<UriScheme> parseScheme,
+                           @Nullable Parse<UriAuthority> parseAuthority,
+                           @Nullable Parse<UriPath> parsePath,
+                           @Nullable Parse<UriQuery> parseQuery,
+                           @Nullable Parse<UriFragment> parseFragment,
+                           int step) {
+    int c = 0;
+    if (step == 1) {
+      if (input.isCont()) {
+        final Input lookahead = input.clone();
+        while (lookahead.isCont() && Uri.isSchemeChar(c = lookahead.head())) {
+          lookahead.step();
+        }
+        if (lookahead.isCont() && c == ':') {
+          step = 2;
+        } else {
+          step = 3;
+        }
+      } else if (input.isDone()) {
+        step = 3;
+      }
+    }
+    if (step == 2) {
+      if (parseScheme == null) {
+        parseScheme = UriScheme.parse(input);
+      } else {
+        parseScheme = parseScheme.consume(input);
+      }
+      if (parseScheme.isDone()) {
+        if (input.isCont() && input.head() == ':') {
+          input.step();
+          step = 3;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected(':', input));
+        }
+      } else if (parseScheme.isError()) {
+        return parseScheme.asError();
+      }
+    }
+    if (step == 3) {
+      if (input.isCont()) {
+        c = input.head();
+        if (c == '/') {
+          input.step();
+          step = 4;
+        } else if (c == '?') {
+          input.step();
+          step = 7;
+        } else if (c == '#') {
+          input.step();
+          step = 8;
+        } else {
+          step = 6;
+        }
+      } else if (input.isDone()) {
+        return Parse.done(Uri.of(parseScheme != null ? parseScheme.getUnchecked() : null,
+                                 null, null, null, null));
+      }
+    }
+    if (step == 4) {
+      if (input.isCont()) {
+        if (input.head() == '/') {
+          input.step();
+          step = 5;
+        } else {
+          final UriPathBuilder pathBuilder = new UriPathBuilder();
+          pathBuilder.addSlash();
+          parsePath = UriPath.parse(input, pathBuilder);
+          step = 6;
+        }
+      } else if (input.isDone()) {
+        return Parse.done(Uri.of(parseScheme != null ? parseScheme.getUnchecked() : null,
+                                 null, UriPath.slash(), null, null));
+      }
+    }
+    if (step == 5) {
+      if (parseAuthority == null) {
+        parseAuthority = UriAuthority.parse(input);
+      } else {
+        parseAuthority = parseAuthority.consume(input);
+      }
+      if (parseAuthority.isDone()) {
+        if (input.isCont()) {
+          c = input.head();
+          if (c == '?') {
+            input.step();
+            step = 7;
+          } else if (c == '#') {
+            input.step();
+            step = 8;
+          } else {
+            step = 6;
+          }
+        } else if (input.isDone()) {
+          return Parse.done(Uri.of(parseScheme != null ? parseScheme.getUnchecked() : null,
+                                   parseAuthority.getUnchecked(), null, null, null));
+        }
+      } else if (parseAuthority.isError()) {
+        return parseAuthority.asError();
+      }
+    }
+    if (step == 6) {
+      if (parsePath == null) {
+        parsePath = UriPath.parse(input);
+      } else {
+        parsePath = parsePath.consume(input);
+      }
+      if (parsePath.isDone()) {
+        if (input.isCont() && ((c = input.head()) == '?' || c == '#')) {
+          input.step();
+          if (c == '?') {
+            step = 7;
+          } else { // c == '#'
+            step = 8;
+          }
+        } else if (input.isReady()) {
+          return Parse.done(Uri.of(parseScheme != null ? parseScheme.getUnchecked() : null,
+                                   parseAuthority != null ? parseAuthority.getUnchecked() : null,
+                                   parsePath.getUnchecked(), null, null));
+        }
+      } else if (parsePath.isError()) {
+        return parsePath.asError();
+      }
+    }
+    if (step == 7) {
+      if (parseQuery == null) {
+        parseQuery = UriQuery.parse(input);
+      } else {
+        parseQuery = parseQuery.consume(input);
+      }
+      if (parseQuery.isDone()) {
+        if (input.isCont() && input.head() == '#') {
+          input.step();
+          step = 8;
+        } else if (input.isReady()) {
+          return Parse.done(Uri.of(parseScheme != null ? parseScheme.getUnchecked() : null,
+                                   parseAuthority != null ? parseAuthority.getUnchecked() : null,
+                                   parsePath != null ? parsePath.getUnchecked() : null,
+                                   parseQuery.getUnchecked(), null));
+        }
+      } else if (parseQuery.isError()) {
+        return parseQuery.asError();
+      }
+    }
+    if (step == 8) {
+      if (parseFragment == null) {
+        parseFragment = UriFragment.parse(input);
+      } else {
+        parseFragment = parseFragment.consume(input);
+      }
+      if (parseFragment.isDone()) {
+        return Parse.done(Uri.of(parseScheme != null ? parseScheme.getUnchecked() : null,
+                                 parseAuthority != null ? parseAuthority.getUnchecked() : null,
+                                 parsePath != null ? parsePath.getUnchecked() : null,
+                                 parseQuery != null ? parseQuery.getUnchecked() : null,
+                                 parseFragment.getUnchecked()));
+      } else if (parseFragment.isError()) {
+        return parseFragment.asError();
+      }
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUri(parseScheme, parseAuthority, parsePath,
+                        parseQuery, parseFragment, step);
   }
 
 }

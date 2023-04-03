@@ -21,6 +21,9 @@ import swim.annotations.Internal;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Input;
+import swim.codec.Parse;
+import swim.codec.StringInput;
 import swim.uri.pattern.TerminalUriPattern;
 import swim.uri.pattern.UriSchemePattern;
 import swim.util.Murmur3;
@@ -77,23 +80,11 @@ public abstract class UriPattern implements ToSource, ToString {
 
   public abstract Map<String, String> unapply(Uri uri, Map<String, String> defaults);
 
-  public Map<String, String> unapply(String uri, Map<String, String> defaults) {
-    return this.unapply(Uri.parse(uri), defaults);
-  }
-
   public Map<String, String> unapply(Uri uri) {
     return this.unapply(uri, new HashMap<String, String>());
   }
 
-  public Map<String, String> unapply(String uri) {
-    return this.unapply(Uri.parse(uri), new HashMap<String, String>());
-  }
-
   public abstract boolean matches(Uri uri);
-
-  public boolean matches(String uri) {
-    return this.matches(Uri.parse(uri));
-  }
 
   @Override
   public boolean equals(@Nullable Object other) {
@@ -147,8 +138,45 @@ public abstract class UriPattern implements ToSource, ToString {
                                     pattern.path(), pattern.query(), pattern.fragment());
   }
 
-  public static UriPattern parse(String pattern) {
-    return UriPattern.from(Uri.parse(pattern));
+  public static Parse<UriPattern> parse(Input input) {
+    return ParseUriPattern.parse(input, null);
+  }
+
+  public static Parse<UriPattern> parse(String pattern) {
+    final StringInput input = new StringInput(pattern);
+    return UriPattern.parse(input).complete(input);
+  }
+
+}
+
+final class ParseUriPattern extends Parse<UriPattern> {
+
+  final @Nullable Parse<Uri> parseUri;
+
+  ParseUriPattern(@Nullable Parse<Uri> parseUri) {
+    this.parseUri = parseUri;
+  }
+
+  @Override
+  public Parse<UriPattern> consume(Input input) {
+    return ParseUriPattern.parse(input, this.parseUri);
+  }
+
+  static Parse<UriPattern> parse(Input input, @Nullable Parse<Uri> parseUri) {
+    if (parseUri == null) {
+      parseUri = Uri.parse(input);
+    } else {
+      parseUri = parseUri.consume(input);
+    }
+    if (parseUri.isDone()) {
+      return Parse.done(UriPattern.from(parseUri.getNonNullUnchecked()));
+    } else if (parseUri.isError()) {
+      return parseUri.asError();
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriPattern(parseUri);
   }
 
 }

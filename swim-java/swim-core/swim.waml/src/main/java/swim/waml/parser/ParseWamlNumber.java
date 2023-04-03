@@ -21,6 +21,7 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
 import swim.waml.WamlNumberForm;
 import swim.waml.WamlParser;
@@ -80,7 +81,7 @@ public final class ParseWamlNumber<T> extends Parse<T> {
           parseAttr = parseAttr.consume(input);
         }
         if (parseAttr.isDone()) {
-          form = Assume.conforms(parseAttr.getNonNull());
+          form = Assume.conforms(parseAttr.getNonNullUnchecked());
           parseAttr = null;
           step = 3;
         } else if (parseAttr.isError()) {
@@ -88,13 +89,8 @@ public final class ParseWamlNumber<T> extends Parse<T> {
         }
       }
       if (step == 3) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '@') {
           step = 2;
@@ -106,103 +102,84 @@ public final class ParseWamlNumber<T> extends Parse<T> {
       break;
     } while (true);
     if (step == 4) {
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isWhitespace(c)) {
-          input.step();
-        } else {
-          break;
-        }
-      }
-      if (input.isCont()) {
+      if (input.isCont() && ((c = input.head()) == '-' || (c >= '0' && c <= '9'))) {
         if (c == '-') {
-          input.step();
           sign = -1;
-          step = 5;
-        } else if (c >= '0' && c <= '9') {
-          step = 5;
-        } else {
-          return Parse.error(Diagnostic.expected("number", input));
+          input.step();
         }
-      } else if (input.isDone()) {
+        step = 5;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("number", input));
       }
     }
     if (step == 5) {
-      if (input.isCont()) {
-        c = input.head();
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
         if (c == '0') {
           input.step();
           step = 8;
-        } else if (c >= '1' && c <= '9') {
-          input.step();
+        } else { // c >= '1' && c <= '9'
           value = (long) (sign * (c - '0'));
+          input.step();
           step = 6;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
         }
-      } else if (input.isDone()) {
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 6) {
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          final long newValue = 10L * value + (long) (sign * (c - '0'));
-          if (newValue / value >= 10L) {
-            input.step();
-            value = newValue;
-          } else {
-            builder = new StringBuilder();
-            builder.append(value);
-            step = 7;
-            break;
-          }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        final long newValue = 10L * value + (long) (sign * (c - '0'));
+        if (newValue / value >= 10L) {
+          value = newValue;
+          input.step();
         } else {
-          step = 8;
+          builder = new StringBuilder();
+          builder.append(value);
           break;
         }
       }
-      if (input.isDone()) {
-        return Parse.done(form.integerValue(value));
+      if (input.isCont()) {
+        if (c >= '0' && c <= '9') {
+          step = 7;
+        } else {
+          step = 8;
+        }
+      } else if (input.isDone()) {
+        try {
+          return Parse.done(form.integerValue(value));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 7) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
-      if (input.isCont()) {
+      if (input.isCont() && (c == '.' || c == 'E' || c == 'e')) {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
         if (c == '.') {
-          input.step();
-          builder.appendCodePoint(c);
           step = 10;
-        } else if (c == 'E' || c == 'e') {
-          input.step();
-          builder.appendCodePoint(c);
+        } else { // c == 'E' || c == 'e'
           step = 12;
-        } else {
-          return Parse.done(form.bigIntegerValue(builder.toString()));
         }
-      } else if (input.isDone()) {
-        return Parse.done(form.bigIntegerValue(builder.toString()));
+      } else if (input.isReady()) {
+        try {
+          return Parse.done(form.bigIntegerValue(Assume.nonNull(builder).toString()));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 8) {
-      if (input.isCont()) {
-        c = input.head();
-        if (c == 'x' && sign > 0 && value == 0L) {
+      if (input.isCont() && (((c = input.head()) == 'x' && sign > 0 && value == 0L)
+                            || c == '.' || c == 'E' || c == 'e')) {
+        if (c == 'x') {
           input.step();
           step = 9;
-        } else if (c == '.') {
-          input.step();
+        } else { // c == '.' || c == 'E' || c == 'e'
           builder = new StringBuilder();
           if (sign < 0 && value == 0L) {
             builder.append('-').append('0');
@@ -210,84 +187,70 @@ public final class ParseWamlNumber<T> extends Parse<T> {
             builder.append(value);
           }
           builder.appendCodePoint(c);
-          step = 10;
-        } else if (c == 'E' || c == 'e') {
           input.step();
-          builder = new StringBuilder();
-          if (sign < 0 && value == 0L) {
-            builder.append('-').append('0');
-          } else {
-            builder.append(value);
+          if (c == '.') {
+            step = 10;
+          } else { // c == 'E' || c == 'e'
+            step = 12;
           }
-          builder.appendCodePoint(c);
-          step = 12;
-        } else {
-          return Parse.done(form.integerValue(value));
         }
-      } else if (input.isDone()) {
-        return Parse.done(form.integerValue(value));
+      } else if (input.isReady()) {
+        try {
+          return Parse.done(form.integerValue(value));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 9) {
-      while (input.isCont()) {
-        c = input.head();
-        if (Base16.isDigit(c)) {
-          input.step();
-          value = (value << 4) | (long) Base16.decodeDigit(c);
-          digits += 1;
-        } else {
-          break;
-        }
+      while (input.isCont() && Base16.isDigit(c = input.head())) {
+        value = (value << 4) | (long) Base16.decodeDigit(c);
+        digits += 1;
+        input.step();
       }
       if (input.isReady()) {
         if (digits > 0) {
-          return Parse.done(form.hexadecimalValue(value, digits));
+          try {
+            return Parse.done(form.hexadecimalValue(value, digits));
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         } else {
           return Parse.error(Diagnostic.expected("hex digit", input));
         }
       }
     }
     if (step == 10) {
-      builder = Assume.nonNull(builder);
-      if (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-          step = 11;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
+        step = 11;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 11) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isCont() && (c == 'E' || c == 'e')) {
+        Assume.nonNull(builder).appendCodePoint(c);
         input.step();
-        builder.appendCodePoint(c);
         step = 12;
       } else if (input.isReady()) {
-        return Parse.done(form.decimalValue(builder.toString()));
+        try {
+          return Parse.done(form.decimalValue(Assume.nonNull(builder).toString()));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (step == 12) {
-      builder = Assume.nonNull(builder);
       if (input.isCont()) {
-        c = input.head();
-        if (c == '+' || c == '-') {
+        if ((c = input.head()) == '+' || c == '-') {
+          Assume.nonNull(builder).appendCodePoint(c);
           input.step();
-          builder.appendCodePoint(c);
         }
         step = 13;
       } else if (input.isDone()) {
@@ -295,33 +258,25 @@ public final class ParseWamlNumber<T> extends Parse<T> {
       }
     }
     if (step == 13) {
-      builder = Assume.nonNull(builder);
-      if (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-          step = 14;
-        } else {
-          return Parse.error(Diagnostic.expected("digit", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
+        step = 14;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 14) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
-        return Parse.done(form.decimalValue(builder.toString()));
+        try {
+          return Parse.done(form.decimalValue(Assume.nonNull(builder).toString()));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (input.isError()) {

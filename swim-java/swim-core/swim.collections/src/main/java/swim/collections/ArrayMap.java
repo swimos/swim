@@ -288,8 +288,8 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map<?, ?>) {
-      return this.entrySet().equals(((Map<?, ?>) other).entrySet());
+    } else if (other instanceof Map<?, ?> that) {
+      return this.entrySet().equals(that.entrySet());
     }
     return false;
   }
@@ -347,7 +347,7 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
   public static <K, V> ArrayMap<K, V> of(@Nullable Object... keyValuePairs) {
     Objects.requireNonNull(keyValuePairs);
     if (keyValuePairs.length % 2 != 0) {
-      throw new IllegalArgumentException("Odd number of key-value pairs");
+      throw new IllegalArgumentException("odd number of key-value pairs");
     }
     return new ArrayMap<K, V>(keyValuePairs);
   }

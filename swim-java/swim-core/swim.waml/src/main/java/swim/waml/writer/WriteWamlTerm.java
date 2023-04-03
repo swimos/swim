@@ -24,6 +24,7 @@ import swim.codec.WriteException;
 import swim.expr.Term;
 import swim.util.Assume;
 import swim.waml.WamlAttrForm;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
 import swim.waml.WamlWriter;
 
@@ -64,9 +65,11 @@ public final class WriteWamlTerm extends Write<Object> {
           if (attrs.hasNext()) {
             final Map.Entry<String, ?> attr = attrs.next();
             final String name = attr.getKey();
-            final WamlAttrForm<Object, ?> attrForm = Assume.conformsNullable(form.getAttrForm(name));
-            if (attrForm == null) {
-              return Write.error(new WriteException("Unsupported attribute: " + name));
+            final WamlAttrForm<Object, ?> attrForm;
+            try {
+              attrForm = Assume.conforms(form.getAttrForm(name));
+            } catch (WamlException cause) {
+              return Write.error(cause);
             }
             write = writer.writeAttr(output, attrForm, name, attr.getValue());
           } else {
@@ -110,7 +113,7 @@ public final class WriteWamlTerm extends Write<Object> {
       return Assume.conforms(writer.writeTerm(output, form, term));
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

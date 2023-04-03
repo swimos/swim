@@ -295,9 +295,9 @@ public class JsonJavaParserTests {
 
   public enum TestEnum {
     ONE,
-    @JsonKey("two")
+    @JsonTag("two")
     TWO,
-    @JsonKey("three")
+    @JsonTag("three")
     THREE,
     FOUR;
   }
@@ -349,11 +349,11 @@ public class JsonJavaParserTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestObject")
-                           .appendArgument(this.a)
-                           .appendArgument(this.b)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestObject")
+                          .appendArgument(this.a)
+                          .appendArgument(this.b)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -401,11 +401,11 @@ public class JsonJavaParserTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestPoint2")
-                           .appendArgument(this.x)
-                           .appendArgument(this.y)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestPoint2")
+                          .appendArgument(this.x)
+                          .appendArgument(this.y)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -444,12 +444,12 @@ public class JsonJavaParserTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestPoint3")
-                           .appendArgument(this.x)
-                           .appendArgument(this.y)
-                           .appendArgument(this.z)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestPoint3")
+                          .appendArgument(this.x)
+                          .appendArgument(this.y)
+                          .appendArgument(this.z)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -484,12 +484,11 @@ public class JsonJavaParserTests {
 
   public static void assertParses(@Nullable Object expected, String json) {
     JsonAssertions.assertParses(Json.parse(Object.class), expected, json);
-    JsonAssertions.assertParses(Json.parse(Object.class), expected, " " + json + " ");
   }
 
   public static void assertParseFails(JsonForm<?> valueForm, final String json) {
     assertThrows(ParseException.class, () -> {
-      valueForm.parse(json);
+      valueForm.parse(json).checkDone();
     });
   }
 

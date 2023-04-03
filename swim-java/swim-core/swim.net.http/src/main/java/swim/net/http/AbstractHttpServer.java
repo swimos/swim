@@ -44,7 +44,7 @@ public abstract class AbstractHttpServer implements HttpServer {
   public HttpOptions options() {
     final HttpServerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.options();
   }
@@ -87,7 +87,7 @@ public abstract class AbstractHttpServer implements HttpServer {
   protected boolean enqueueRequester(HttpResponder responder) {
     final HttpServerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.enqueueRequester(responder);
   }
@@ -95,7 +95,7 @@ public abstract class AbstractHttpServer implements HttpServer {
   protected void become(NetSocket socket) {
     final HttpServerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     context.become(socket);
   }
@@ -108,7 +108,7 @@ public abstract class AbstractHttpServer implements HttpServer {
   protected boolean doneReading() {
     final HttpServerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.doneReading();
   }
@@ -121,7 +121,7 @@ public abstract class AbstractHttpServer implements HttpServer {
   protected boolean doneWriting() {
     final HttpServerContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound server");
+      throw new IllegalStateException("unbound server");
     }
     return context.doneWriting();
   }

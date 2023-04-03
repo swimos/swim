@@ -29,6 +29,7 @@ import swim.codec.WriteException;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -51,7 +52,7 @@ public final class WamlUnions implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) {
+  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -93,7 +94,7 @@ public final class WamlUnions implements WamlProvider, ToSource {
     return new WamlUnions(codec, GENERIC_PRIORITY);
   }
 
-  public static <T> WamlForm<T> unionForm(WamlCodec codec, @Nullable Class<?> unionClass, Class<?>[] variantClasses) {
+  public static <T> WamlForm<T> unionForm(WamlCodec codec, @Nullable Class<?> unionClass, Class<?>[] variantClasses) throws WamlFormException {
     HashTrieMap<String, WamlForm<? extends T>> tagForms = HashTrieMap.empty();
     HashTrieMap<Class<?>, WamlForm<? extends T>> classForms = HashTrieMap.empty();
     for (int i = 0; i < variantClasses.length; i += 1) {
@@ -111,17 +112,18 @@ public final class WamlUnions implements WamlProvider, ToSource {
         }
         CREATING.set(creating.added(unionClass));
         try {
-          classForm = codec.forType(variantClass);
+          classForm = codec.getWamlForm(variantClass);
         } finally {
           CREATING.set(creating);
         }
       } else {
-        classForm = codec.forType(variantClass);
+        classForm = codec.getWamlForm(variantClass);
       }
       if (classForm != null) {
-        final WamlForm<? extends T> taggedForm = classForm.taggedForm(tag);
-        if (taggedForm != null) {
-          classForm = taggedForm;
+        try {
+          classForm = classForm.taggedForm(tag);
+        } catch (WamlException cause) {
+          // Permit unions with untagged types.
         }
         tagForms = tagForms.updated(tag, classForm);
         classForms = classForms.updated(variantClass, classForm);
@@ -130,7 +132,7 @@ public final class WamlUnions implements WamlProvider, ToSource {
     return new WamlUnionForm<T>(codec, unionClass, tagForms, classForms);
   }
 
-  public static <T> @Nullable WamlForm<T> unionForm(WamlCodec codec, Class<?> javaClass) {
+  public static <T> @Nullable WamlForm<T> unionForm(WamlCodec codec, Class<?> javaClass) throws WamlFormException {
     final WamlUnion unionAnnotation = javaClass.getAnnotation(WamlUnion.class);
     if (unionAnnotation != null) {
       // Prevent recursive creation.
@@ -166,12 +168,12 @@ class WamlUnionForm<T> implements WamlForm<T>, ToSource {
   }
 
   @Override
-  public @Nullable WamlAttrForm<?, ? extends T> getAttrForm(String name) {
+  public WamlAttrForm<?, ? extends T> getAttrForm(String name) throws WamlException {
     final WamlForm<? extends T> classForm = this.tagForms.get(name);
     if (classForm != null) {
       return classForm.getAttrForm(name);
     } else {
-      return null;
+      return WamlForm.super.getAttrForm(name);
     }
   }
 
@@ -192,14 +194,14 @@ class WamlUnionForm<T> implements WamlForm<T>, ToSource {
           valueClass = valueClass.getSuperclass();
         }
       } while (valueClass != null);
-      return Write.error(new WriteException("Unsupported value: " + value));
+      return Write.error(new WriteException("unsupported value: " + value));
     } else {
       return writer.writeUnit(output, this, Collections.emptyIterator());
     }
   }
 
   @Override
-  public Term intoTerm(@Nullable T value) {
+  public Term intoTerm(@Nullable T value) throws TermException {
     return Term.from(value);
   }
 

@@ -14,12 +14,11 @@
 
 package swim.json;
 
-import java.lang.reflect.Type;
+import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryOutput;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.MediaType;
 import swim.codec.Output;
@@ -29,44 +28,128 @@ import swim.codec.StringOutput;
 import swim.codec.Translator;
 import swim.codec.Write;
 import swim.expr.TermForm;
+import swim.util.Notation;
 
+/**
+ * A transcoder between serialized JSON and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code JsonForm}
+ *
+ * @see JsonCodec
+ */
 @Public
 @Since("5.0")
 public interface JsonForm<T> extends TermForm<T>, Translator<T> {
 
-  default @Nullable JsonForm<T> taggedForm(String tag) {
-    return null;
+  /**
+   * Returns a {@code JsonForm} that injects a {@code type} field
+   * with the given {@code tag} value into serialized JSON objects.
+   *
+   * @param tag the value of the {@code type} field to inject into
+   *        serialized JSON objects
+   * @return a {@code JsonForm} that tags serialized JSON objects
+   *         with a distinguishing field
+   * @throws JsonException if values of type {@code T} cannot be
+   *         serialized to JSON objects with an injected {@code type} field
+   */
+  default JsonForm<T> taggedForm(String tag) throws JsonException {
+    throw new JsonFormException(Notation.of("unsupported tag: ")
+                                        .appendSource(tag)
+                                        .toString());
   }
 
-  default @Nullable JsonUndefinedForm<? extends T> undefinedForm() {
-    return null;
+  /**
+   * Returns a {@code JsonUndefinedForm} for transcoding JSON
+   * undefined literals to values of type {@code T}.
+   *
+   * @return a {@code JsonUndefinedForm} that transcodes values
+   *         of type {@code T} to JSON undefined literals
+   * @throws JsonException if transcoding values of type {@code T}
+   *         to JSON undefined literals is not supported
+   */
+  default JsonUndefinedForm<? extends T> undefinedForm() throws JsonException {
+    throw new JsonFormException("undefined not supported");
   }
 
-  default @Nullable JsonNullForm<? extends T> nullForm() {
-    return null;
+  /**
+   * Returns a {@code JsonNullForm} for transcoding JSON
+   * null literals to values of type {@code T}.
+   *
+   * @return a {@code JsonNullForm} that transcodes values
+   *         of type {@code T} to JSON null literals
+   * @throws JsonException if transcoding values of type {@code T}
+   *         to JSON null literals is not supported
+   */
+  default JsonNullForm<? extends T> nullForm() throws JsonException {
+    throw new JsonFormException("null not supported");
   }
 
+  /**
+   * Returns a {@code JsonIdentifierForm} for transcoding JSON
+   * identifier literals to values of type {@code T}.
+   *
+   * @return a {@code JsonIdentifierForm} that transcodes values
+   *         of type {@code T} to JSON identifier literals
+   * @throws JsonException if transcoding values of type {@code T}
+   *         to JSON identifier literals is not supported
+   */
   @Override
-  default @Nullable JsonNumberForm<? extends T> numberForm() {
-    return null;
+  default JsonIdentifierForm<? extends T> identifierForm() throws JsonException {
+    throw new JsonFormException("identifier not supported");
   }
 
+  /**
+   * Returns a {@code JsonNumberForm} for transcoding JSON
+   * number literals to values of type {@code T}.
+   *
+   * @return a {@code JsonNumberForm} that transcodes values
+   *         of type {@code T} to JSON number literals
+   * @throws JsonException if transcoding values of type {@code T}
+   *         to JSON number literals is not supported
+   */
   @Override
-  default @Nullable JsonIdentifierForm<? extends T> identifierForm() {
-    return null;
+  default JsonNumberForm<? extends T> numberForm() throws JsonException {
+    throw new JsonFormException("number not supported");
   }
 
+  /**
+   * Returns a {@code JsonStringForm} for transcoding JSON
+   * string literals to values of type {@code T}.
+   *
+   * @return a {@code JsonStringForm} that transcodes values
+   *         of type {@code T} to JSON string literals
+   * @throws JsonException if transcoding values of type {@code T}
+   *         to JSON string literals is not supported
+   */
   @Override
-  default @Nullable JsonStringForm<?, ? extends T> stringForm() {
-    return null;
+  default JsonStringForm<?, ? extends T> stringForm() throws JsonException {
+    throw new JsonFormException("string not supported");
   }
 
-  default @Nullable JsonArrayForm<?, ?, ? extends T> arrayForm() {
-    return null;
+  /**
+   * Returns a {@code JsonArrayForm} for transcoding JSON
+   * array literals to values of type {@code T}.
+   *
+   * @return a {@code JsonArrayForm} that transcodes values
+   *         of type {@code T} to JSON array literals
+   * @throws JsonException if transcoding values of type {@code T}
+   *         to JSON array literals is not supported
+   */
+  default JsonArrayForm<?, ?, ? extends T> arrayForm() throws JsonException {
+    throw new JsonFormException("array not supported");
   }
 
-  default @Nullable JsonObjectForm<?, ?, ?, ? extends T> objectForm() {
-    return null;
+  /**
+   * Returns a {@code JsonObjectForm} for transcoding JSON
+   * object literals to values of type {@code T}.
+   *
+   * @return a {@code JsonObjectForm} that transcodes values
+   *         of type {@code T} to JSON object literals
+   * @throws JsonException if transcoding values of type {@code T}
+   *         to JSON object literals is not supported
+   */
+  default JsonObjectForm<?, ?, ?, ? extends T> objectForm() throws JsonException {
+    throw new JsonFormException("object not supported");
   }
 
   @Override
@@ -90,27 +173,24 @@ public interface JsonForm<T> extends TermForm<T>, Translator<T> {
     return this.parse(Json.parser());
   }
 
-  default @Nullable T parse(String json, JsonParser parser) {
-    final Input input = new StringInput(json);
+  default Parse<T> parse(String json, JsonParser parser) {
+    Objects.requireNonNull(json, "json");
+    Objects.requireNonNull(parser, "parser");
+    final StringInput input = new StringInput(json);
     while (input.isCont() && parser.isWhitespace(input.head())) {
       input.step();
     }
-    Parse<T> parse = this.parse(input, parser);
-    if (parse.isDone()) {
+    final Parse<T> parseJson = this.parse(input, parser);
+    if (parseJson.isDone()) {
       while (input.isCont() && parser.isWhitespace(input.head())) {
         input.step();
       }
     }
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.get();
+    return parseJson.complete(input);
   }
 
   @Override
-  default @Nullable T parse(String json) {
+  default Parse<T> parse(String json) {
     return this.parse(json, Json.parser());
   }
 
@@ -132,31 +212,13 @@ public interface JsonForm<T> extends TermForm<T>, Translator<T> {
 
   default String toString(@Nullable T value, JsonWriter writer) {
     final StringOutput output = new StringOutput();
-    this.write(output, value, writer).checkDone();
+    this.write(output, value, writer).assertDone();
     return output.get();
   }
 
   @Override
   default String toString(@Nullable T value) {
     return this.toString(value, Json.writer());
-  }
-
-  static <T> JsonForm<T> forType(Type javaType) {
-    final JsonForm<T> jsonForm = Json.codec().forType(javaType);
-    if (jsonForm != null) {
-      return jsonForm;
-    } else {
-      throw new IllegalArgumentException("No json form for type: " + javaType);
-    }
-  }
-
-  static <T> JsonForm<T> forValue(@Nullable T value) {
-    final JsonForm<T> jsonForm = Json.codec().forValue(value);
-    if (jsonForm != null) {
-      return jsonForm;
-    } else {
-      throw new IllegalArgumentException("No json form for value: " + value);
-    }
   }
 
 }

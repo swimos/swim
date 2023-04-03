@@ -19,20 +19,47 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A resolver of {@code JsonForm} instances from Java types.
+ *
+ * @see JsonForm
+ * @see JsonCodec
+ */
 @Public
 @Since("5.0")
 public interface JsonProvider {
 
+  /**
+   * Returns the precedence of this provider relative to all other providers
+   * registered with a {@link JsonCodec} instance. Higher priority providers
+   * are consulted before lower priority providers when resolving Java types
+   * to {@code JsonForm} instances.
+   *
+   * @return the priority of this provider; the greater the numeric value,
+   *         the higher the priority
+   */
   default int priority() {
     return DEFAULT_PRIORITY;
   }
 
-  @Nullable JsonForm<?> resolveJsonForm(Type javaType);
+  /**
+   * Returns a {@code JsonForm} that transcodes JSON
+   * to instances of the given {@code javaType}.
+   *
+   * @param javaType the type of {@code JsonForm} to resolve
+   * @return a {@code JsonForm<T>} whose type parameter {@code T} conforms
+   *         to the given {@code javaType}, or {@code null} if this provider
+   *         can't resolve the given {@code javaType}
+   * @throws JsonFormException if this provider could have resolved the given
+   *         {@code javaType}, but was unable to do so because of a potentially
+   *         inadvertent error
+   */
+  @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException;
 
-  static final int BUILTIN_PRIORITY = -100;
+  static final int BUILTIN_PRIORITY = 100;
 
   static final int DEFAULT_PRIORITY = 0;
 
-  static final int GENERIC_PRIORITY = 100;
+  static final int GENERIC_PRIORITY = -100;
 
 }

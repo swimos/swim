@@ -90,7 +90,7 @@ public class LogPrinter implements LogHandler {
       while (write.isCont()) {
         write = write.produce(this.output);
       }
-      write.checkDone();
+      write.assertDone();
       final String lineSeparator = System.lineSeparator();
       for (int i = 0; i < lineSeparator.length(); i = lineSeparator.offsetByCodePoints(i, 1)) {
         this.output.write(lineSeparator.codePointAt(i));

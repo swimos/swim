@@ -14,17 +14,33 @@
 
 package swim.waml;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import swim.annotations.Nullable;
+import swim.annotations.Public;
+import swim.annotations.Since;
 
-@Documented
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface WamlKey {
+/**
+ * Thrown when unable to resolve a {@code WamlForm}.
+ */
+@Public
+@Since("5.0")
+public class WamlFormException extends WamlException {
 
-  String value() default "";
+  public WamlFormException(@Nullable String message, @Nullable Throwable cause) {
+    super(message, cause);
+  }
+
+  public WamlFormException(@Nullable String message) {
+    super(message);
+  }
+
+  public WamlFormException(@Nullable Throwable cause) {
+    super(cause);
+  }
+
+  public WamlFormException() {
+    super();
+  }
+
+  private static final long serialVersionUID = 1L;
 
 }

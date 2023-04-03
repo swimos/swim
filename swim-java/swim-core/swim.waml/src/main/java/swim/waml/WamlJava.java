@@ -42,14 +42,15 @@ import swim.codec.Base64;
 import swim.codec.ByteBufferOutput;
 import swim.codec.Input;
 import swim.codec.Output;
+import swim.codec.OutputException;
 import swim.codec.Parse;
-import swim.codec.ParseException;
 import swim.codec.StringOutput;
 import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.expr.ContextExpr;
 import swim.expr.ExprParser;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.expr.selector.ChildExpr;
 import swim.util.ArrayBuilder;
 import swim.util.ArrayIterator;
@@ -77,7 +78,7 @@ public final class WamlJava implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) {
+  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
     if (javaType instanceof GenericArrayType) {
       return WamlJava.arrayForm(this.codec, ((GenericArrayType) javaType).getGenericComponentType());
     } else if (javaType instanceof Class<?>) {
@@ -85,35 +86,35 @@ public final class WamlJava implements WamlProvider, ToSource {
       if (javaClass.isArray()) {
         return WamlJava.arrayForm(this.codec, javaClass.getComponentType());
       } else if (javaClass == Void.TYPE) {
-        return VOID_FORM;
+        return WamlJava.voidForm();
       } else if (javaClass == Boolean.class || javaClass == Boolean.TYPE) {
-        return BOOLEAN_FORM;
+        return WamlJava.booleanForm();
       } else if (javaClass == Byte.class || javaClass == Byte.TYPE) {
-        return BYTE_FORM;
-      } else if (javaClass == Short.class || javaClass == Short.TYPE) {
-        return SHORT_FORM;
-      } else if (javaClass == Integer.class || javaClass == Integer.TYPE) {
-        return INT_FORM;
-      } else if (javaClass == Long.class || javaClass == Long.TYPE) {
-        return LONG_FORM;
-      } else if (javaClass == Float.class || javaClass == Float.TYPE) {
-        return FLOAT_FORM;
-      } else if (javaClass == Double.class || javaClass == Double.TYPE) {
-        return DOUBLE_FORM;
+        return WamlJava.byteForm();
       } else if (javaClass == Character.class || javaClass == Character.TYPE) {
-        return CHAR_FORM;
+        return WamlJava.charForm();
+      } else if (javaClass == Short.class || javaClass == Short.TYPE) {
+        return WamlJava.shortForm();
+      } else if (javaClass == Integer.class || javaClass == Integer.TYPE) {
+        return WamlJava.intForm();
+      } else if (javaClass == Long.class || javaClass == Long.TYPE) {
+        return WamlJava.longForm();
+      } else if (javaClass == Float.class || javaClass == Float.TYPE) {
+        return WamlJava.floatForm();
+      } else if (javaClass == Double.class || javaClass == Double.TYPE) {
+        return WamlJava.doubleForm();
       } else if (javaClass == String.class) {
-        return STRING_FORM;
+        return WamlJava.stringForm();
       } else if (Number.class.isAssignableFrom(javaClass)) {
-        return NUMBER_FORM;
+        return WamlJava.numberForm();
       } else if (ByteBuffer.class.isAssignableFrom(javaClass)) {
-        return BYTE_BUFFER_FORM;
+        return WamlJava.byteBufferForm();
       } else if (Instant.class.isAssignableFrom(javaClass)) {
-        return INSTANT_FORM;
+        return WamlJava.instantForm();
       } else if (InetAddress.class.isAssignableFrom(javaClass)) {
-        return INET_ADDRESS_FORM;
+        return WamlJava.inetAddressForm();
       } else if (InetSocketAddress.class.isAssignableFrom(javaClass)) {
-        return INET_SOCKET_ADDRESS_FORM;
+        return WamlJava.inetSocketAddressForm();
       }
     }
     return null;
@@ -143,126 +144,88 @@ public final class WamlJava implements WamlProvider, ToSource {
     return new WamlJava(codec, BUILTIN_PRIORITY);
   }
 
-  private static final WamlJava.VoidForm VOID_FORM = new WamlJava.VoidForm();
-
   public static WamlUndefinedForm<Void> voidForm() {
-    return VOID_FORM;
+    return WamlJava.VoidForm.INSTANCE;
   }
-
-  private static final WamlJava.NullForm NULL_FORM = new WamlJava.NullForm();
 
   public static WamlUnitForm<Object> nullForm() {
-    return NULL_FORM;
+    return WamlJava.NullForm.INSTANCE;
   }
-
-  private static final WamlJava.BooleanForm BOOLEAN_FORM = new WamlJava.BooleanForm();
-
-  public static WamlIdentifierForm<Boolean> booleanForm() {
-    return BOOLEAN_FORM;
-  }
-
-  private static final WamlJava.ByteForm BYTE_FORM = new WamlJava.ByteForm();
-
-  public static WamlNumberForm<Byte> byteForm() {
-    return BYTE_FORM;
-  }
-
-  private static final WamlJava.ShortForm SHORT_FORM = new WamlJava.ShortForm();
-
-  public static WamlNumberForm<Short> shortForm() {
-    return SHORT_FORM;
-  }
-
-  private static final WamlJava.IntForm INT_FORM = new WamlJava.IntForm();
-
-  public static WamlNumberForm<Integer> intForm() {
-    return INT_FORM;
-  }
-
-  private static final WamlJava.LongForm LONG_FORM = new WamlJava.LongForm();
-
-  public static WamlNumberForm<Long> longForm() {
-    return LONG_FORM;
-  }
-
-  private static final WamlJava.FloatForm FLOAT_FORM = new WamlJava.FloatForm();
-
-  public static WamlNumberForm<Float> floatForm() {
-    return FLOAT_FORM;
-  }
-
-  private static final WamlJava.DoubleForm DOUBLE_FORM = new WamlJava.DoubleForm();
-
-  public static WamlNumberForm<Double> doubleForm() {
-    return DOUBLE_FORM;
-  }
-
-  private static final WamlJava.CharForm CHAR_FORM = new WamlJava.CharForm();
-
-  public static WamlForm<Character> charForm() {
-    return CHAR_FORM;
-  }
-
-  private static final WamlJava.NumberForm NUMBER_FORM = new WamlJava.NumberForm();
-
-  public static WamlNumberForm<Number> numberForm() {
-    return NUMBER_FORM;
-  }
-
-  private static final WamlJava.IdentifierForm IDENTIFIER_FORM = new WamlJava.IdentifierForm();
 
   public static WamlIdentifierForm<Object> identifierForm() {
-    return IDENTIFIER_FORM;
+    return WamlJava.IdentifierForm.INSTANCE;
   }
 
-  private static final WamlJava.StringForm STRING_FORM = new WamlJava.StringForm();
+  public static WamlIdentifierForm<Boolean> booleanForm() {
+    return WamlJava.BooleanForm.INSTANCE;
+  }
+
+  public static WamlNumberForm<Byte> byteForm() {
+    return WamlJava.ByteForm.INSTANCE;
+  }
+
+  public static WamlForm<Character> charForm() {
+    return WamlJava.CharForm.INSTANCE;
+  }
+
+  public static WamlNumberForm<Short> shortForm() {
+    return WamlJava.ShortForm.INSTANCE;
+  }
+
+  public static WamlNumberForm<Integer> intForm() {
+    return WamlJava.IntForm.INSTANCE;
+  }
+
+  public static WamlNumberForm<Long> longForm() {
+    return WamlJava.LongForm.INSTANCE;
+  }
+
+  public static WamlNumberForm<Float> floatForm() {
+    return WamlJava.FloatForm.INSTANCE;
+  }
+
+  public static WamlNumberForm<Double> doubleForm() {
+    return WamlJava.DoubleForm.INSTANCE;
+  }
+
+  public static WamlNumberForm<Number> numberForm() {
+    return WamlJava.NumberForm.INSTANCE;
+  }
 
   public static WamlStringForm<?, String> stringForm() {
-    return STRING_FORM;
+    return WamlJava.StringForm.INSTANCE;
   }
-
-  private static final WamlJava.KeyForm KEY_FORM = new WamlJava.KeyForm();
 
   public static WamlForm<String> keyForm() {
-    return KEY_FORM;
+    return WamlJava.KeyForm.INSTANCE;
   }
-
-  private static final WamlJava.BlobAttrForm BLOB_ATTR_FORM = new WamlJava.BlobAttrForm();
 
   public static WamlAttrForm<Object, ByteBuffer> blobAttrForm() {
-    return BLOB_ATTR_FORM;
+    return WamlJava.BlobAttrForm.INSTANCE;
   }
-
-  private static final WamlJava.ByteBufferForm BYTE_BUFFER_FORM = new WamlJava.ByteBufferForm();
 
   public static WamlStringForm<?, ByteBuffer> byteBufferForm() {
-    return BYTE_BUFFER_FORM;
+    return WamlJava.ByteBufferForm.INSTANCE;
   }
-
-  private static final WamlJava.InstantForm INSTANT_FORM = new WamlJava.InstantForm();
 
   public static WamlForm<Instant> instantForm() {
-    return INSTANT_FORM;
+    return WamlJava.InstantForm.INSTANCE;
   }
-
-  private static final WamlJava.InetAddressForm INET_ADDRESS_FORM = new WamlJava.InetAddressForm();
 
   public static WamlForm<InetAddress> inetAddressForm() {
-    return INET_ADDRESS_FORM;
+    return WamlJava.InetAddressForm.INSTANCE;
   }
 
-  private static final WamlJava.InetSocketAddressForm INET_SOCKET_ADDRESS_FORM = new WamlJava.InetSocketAddressForm();
-
   public static WamlForm<InetSocketAddress> inetSocketAddressForm() {
-    return INET_SOCKET_ADDRESS_FORM;
+    return WamlJava.InetSocketAddressForm.INSTANCE;
   }
 
   public static <E, A> WamlArrayForm<E, ?, A> arrayForm(Class<?> componentClass, WamlForm<E> componentForm) {
     return new WamlJava.ArrayForm<E, A>(componentClass, componentForm);
   }
 
-  public static <E, A> @Nullable WamlArrayForm<E, ?, A> arrayForm(WamlCodec codec, Type componentType) {
-    final WamlForm<E> componentForm = codec.forType(componentType);
+  public static <E, A> @Nullable WamlArrayForm<E, ?, A> arrayForm(WamlCodec codec, Type componentType) throws WamlFormException {
+    final WamlForm<E> componentForm = codec.getWamlForm(componentType);
     if (componentForm != null) {
       if (componentType instanceof WildcardType) {
         final Type[] upperBounds = ((WildcardType) componentType).getUpperBounds();
@@ -298,7 +261,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     return new WamlJava.TupleForm(paramForm);
   }
 
-  private static final ThreadLocal<CacheSet<String>> STRING_CACHE = new ThreadLocal<CacheSet<String>>();
+  private static final ThreadLocal<CacheSet<String>> STRING_CACHE =
+      new ThreadLocal<CacheSet<String>>();
 
   public static CacheSet<String> stringCache() {
     CacheSet<String> stringCache = STRING_CACHE.get();
@@ -306,7 +270,7 @@ public final class WamlJava implements WamlProvider, ToSource {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.waml.string.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 512;
       }
       stringCache = new LruCacheSet<String>(cacheSize);
@@ -315,7 +279,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     return stringCache;
   }
 
-  private static final ThreadLocal<CacheSet<String>> KEY_CACHE = new ThreadLocal<CacheSet<String>>();
+  private static final ThreadLocal<CacheSet<String>> KEY_CACHE =
+      new ThreadLocal<CacheSet<String>>();
 
   public static CacheSet<String> keyCache() {
     CacheSet<String> keyCache = KEY_CACHE.get();
@@ -323,7 +288,7 @@ public final class WamlJava implements WamlProvider, ToSource {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.waml.key.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 512;
       }
       keyCache = new LruCacheSet<String>(cacheSize);
@@ -350,7 +315,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Void value) {
+    public Term intoTerm(@Nullable Void value) throws TermException {
       return Term.from(value);
     }
 
@@ -370,6 +335,8 @@ public final class WamlJava implements WamlProvider, ToSource {
       return this.toSource();
     }
 
+    static final WamlJava.VoidForm INSTANCE = new WamlJava.VoidForm();
+
   }
 
   static final class NullForm implements WamlUnitForm<Object>, ToSource {
@@ -385,7 +352,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Object value) {
+    public Term intoTerm(@Nullable Object value) throws TermException {
       return Term.from(value);
     }
 
@@ -404,6 +371,81 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.NullForm INSTANCE = new WamlJava.NullForm();
+
+  }
+
+  static final class IdentifierForm implements WamlIdentifierForm<Object>, ToSource {
+
+    @Override
+    public @Nullable Object identifierValue(String value, ExprParser parser) throws WamlException {
+      switch (value) {
+        case "undefined":
+          return null;
+        case "null":
+          return null;
+        case "false":
+          return Boolean.FALSE;
+        case "true":
+          return Boolean.TRUE;
+        default:
+          if (parser instanceof WamlParser && ((WamlParser) parser).options().exprsEnabled()) {
+            return new ChildExpr(ContextExpr.of(), Term.of(value));
+          } else {
+            return value;
+          }
+      }
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Object value, WamlWriter writer) {
+      if (value == null) {
+        return writer.writeIdentifier(output, this, "null", Collections.emptyIterator());
+      } else if (value instanceof Boolean) {
+        return writer.writeIdentifier(output, this, ((Boolean) value).booleanValue() ? "true" : "false", Collections.emptyIterator());
+      } else {
+        return writer.writeIdentifier(output, this, value.toString(), Collections.emptyIterator());
+      }
+    }
+
+    @Override
+    public Term intoTerm(@Nullable Object value) throws TermException {
+      return Term.from(value);
+    }
+
+    @Override
+    public @Nullable Object fromTerm(Term term) {
+      if (term.isValidBoolean()) {
+        return Boolean.valueOf(term.booleanValue());
+      } else if (term.isValidString()) {
+        final String string = term.stringValue();
+        if (Waml.parser().isIdentifier(string)) {
+          return string;
+        }
+      } else if (term instanceof ChildExpr) {
+        final ChildExpr childExpr = (ChildExpr) term;
+        final Term scope = childExpr.scope();
+        final Term key = childExpr.key();
+        if (ContextExpr.of().equals(scope) && key.isValidString()) {
+          return key.stringValue();
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("WamlJava", "identifierForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final WamlJava.IdentifierForm INSTANCE = new WamlJava.IdentifierForm();
 
   }
 
@@ -453,7 +495,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Boolean value) {
+    public Term intoTerm(@Nullable Boolean value) throws TermException {
       return Term.from(value);
     }
 
@@ -476,6 +518,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.BooleanForm INSTANCE = new WamlJava.BooleanForm();
 
   }
 
@@ -511,7 +555,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Byte value) {
+    public Term intoTerm(@Nullable Byte value) throws TermException {
       return Term.from(value);
     }
 
@@ -534,6 +578,68 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.ByteForm INSTANCE = new WamlJava.ByteForm();
+
+  }
+
+  static final class CharForm implements WamlNumberForm<Character>, ToSource {
+
+    @Override
+    public Character integerValue(long value) {
+      return Character.valueOf((char) value);
+    }
+
+    @Override
+    public Character hexadecimalValue(long value, int digits) {
+      return Character.valueOf((char) value);
+    }
+
+    @Override
+    public Character bigIntegerValue(String value) {
+      return Character.valueOf((char) new BigInteger(value).intValue());
+    }
+
+    @Override
+    public Character decimalValue(String value) {
+      return Character.valueOf((char) Double.parseDouble(value));
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Character value, WamlWriter writer) {
+      if (value != null) {
+        return writer.writeNumber(output, this, (int) value.charValue(), Collections.emptyIterator());
+      } else {
+        return writer.writeUnit(output, this, Collections.emptyIterator());
+      }
+    }
+
+    @Override
+    public Term intoTerm(@Nullable Character value) throws TermException {
+      return Term.from(value);
+    }
+
+    @Override
+    public @Nullable Character fromTerm(Term term) {
+      if (term.isValidChar()) {
+        return Character.valueOf(term.charValue());
+      } else {
+        return null;
+      }
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("WamlJava", "charForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final WamlJava.CharForm INSTANCE = new WamlJava.CharForm();
 
   }
 
@@ -569,7 +675,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Short value) {
+    public Term intoTerm(@Nullable Short value) throws TermException {
       return Term.from(value);
     }
 
@@ -592,6 +698,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.ShortForm INSTANCE = new WamlJava.ShortForm();
 
   }
 
@@ -627,7 +735,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Integer value) {
+    public Term intoTerm(@Nullable Integer value) throws TermException {
       return Term.from(value);
     }
 
@@ -650,6 +758,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.IntForm INSTANCE = new WamlJava.IntForm();
 
   }
 
@@ -685,7 +795,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Long value) {
+    public Term intoTerm(@Nullable Long value) throws TermException {
       return Term.from(value);
     }
 
@@ -708,6 +818,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.LongForm INSTANCE = new WamlJava.LongForm();
 
   }
 
@@ -747,7 +859,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Float value) {
+    public Term intoTerm(@Nullable Float value) throws TermException {
       return Term.from(value);
     }
 
@@ -770,6 +882,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.FloatForm INSTANCE = new WamlJava.FloatForm();
 
   }
 
@@ -809,7 +923,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Double value) {
+    public Term intoTerm(@Nullable Double value) throws TermException {
       return Term.from(value);
     }
 
@@ -833,63 +947,7 @@ public final class WamlJava implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-  }
-
-  static final class CharForm implements WamlNumberForm<Character>, ToSource {
-
-    @Override
-    public Character integerValue(long value) {
-      return Character.valueOf((char) value);
-    }
-
-    @Override
-    public Character hexadecimalValue(long value, int digits) {
-      return Character.valueOf((char) value);
-    }
-
-    @Override
-    public Character bigIntegerValue(String value) {
-      return Character.valueOf((char) new BigInteger(value).intValue());
-    }
-
-    @Override
-    public Character decimalValue(String value) {
-      return Character.valueOf((char) Double.parseDouble(value));
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable Character value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeNumber(output, this, (int) value.charValue(), Collections.emptyIterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Character value) {
-      return Term.from(value);
-    }
-
-    @Override
-    public @Nullable Character fromTerm(Term term) {
-      if (term.isValidChar()) {
-        return Character.valueOf(term.charValue());
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlJava", "charForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
+    static final WamlJava.DoubleForm INSTANCE = new WamlJava.DoubleForm();
 
   }
 
@@ -943,12 +1001,12 @@ public final class WamlJava implements WamlProvider, ToSource {
       } else if (value instanceof BigInteger) {
         return writer.writeNumber(output, this, (BigInteger) value, Collections.emptyIterator());
       } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
+        return Write.error(new WriteException("unsupported value: " + value));
       }
     }
 
     @Override
-    public Term intoTerm(@Nullable Number value) {
+    public Term intoTerm(@Nullable Number value) throws TermException {
       return Term.from(value);
     }
 
@@ -972,76 +1030,7 @@ public final class WamlJava implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-  }
-
-  static final class IdentifierForm implements WamlIdentifierForm<Object>, ToSource {
-
-    @Override
-    public @Nullable Object identifierValue(String value, ExprParser parser) {
-      switch (value) {
-        case "undefined":
-          return null;
-        case "null":
-          return null;
-        case "false":
-          return Boolean.FALSE;
-        case "true":
-          return Boolean.TRUE;
-        default:
-          if (parser instanceof WamlParser && ((WamlParser) parser).options().exprsEnabled()) {
-            return new ChildExpr(ContextExpr.of(), Term.from(value));
-          } else {
-            return value;
-          }
-      }
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable Object value, WamlWriter writer) {
-      if (value == null) {
-        return writer.writeIdentifier(output, this, "null", Collections.emptyIterator());
-      } else if (value instanceof Boolean) {
-        return writer.writeIdentifier(output, this, ((Boolean) value).booleanValue() ? "true" : "false", Collections.emptyIterator());
-      } else {
-        return writer.writeIdentifier(output, this, value.toString(), Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Object value) {
-      return Term.from(value);
-    }
-
-    @Override
-    public @Nullable Object fromTerm(Term term) {
-      if (term.isValidBoolean()) {
-        return Boolean.valueOf(term.booleanValue());
-      } else if (term.isValidString()) {
-        final String string = term.stringValue();
-        if (Waml.parser().isIdentifier(string)) {
-          return string;
-        }
-      } else if (term instanceof ChildExpr) {
-        final ChildExpr childExpr = (ChildExpr) term;
-        final Term scope = childExpr.scope();
-        final Term key = childExpr.key();
-        if (ContextExpr.of().equals(scope) && key.isValidString()) {
-          return key.stringValue();
-        }
-      }
-      return null;
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlJava", "identifierForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
+    static final WamlJava.NumberForm INSTANCE = new WamlJava.NumberForm();
 
   }
 
@@ -1072,7 +1061,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable String value) {
+    public Term intoTerm(@Nullable String value) throws TermException {
       return Term.from(value);
     }
 
@@ -1095,6 +1084,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.StringForm INSTANCE = new WamlJava.StringForm();
 
   }
 
@@ -1137,7 +1128,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable String value) {
+    public Term intoTerm(@Nullable String value) throws TermException {
       return Term.from(value);
     }
 
@@ -1160,6 +1151,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.KeyForm INSTANCE = new WamlJava.KeyForm();
 
   }
 
@@ -1198,12 +1191,14 @@ public final class WamlJava implements WamlProvider, ToSource {
       return this.toSource();
     }
 
+    static final WamlJava.BlobAttrForm INSTANCE = new WamlJava.BlobAttrForm();
+
   }
 
   static final class ByteBufferForm implements WamlStringForm<Output<ByteBuffer>, ByteBuffer>, ToSource {
 
     @Override
-    public @Nullable WamlAttrForm<?, ? extends ByteBuffer> getAttrForm(String name) {
+    public WamlAttrForm<?, ? extends ByteBuffer> getAttrForm(String name) throws WamlException {
       if ("blob".equals(name)) {
         return WamlJava.blobAttrForm();
       } else {
@@ -1222,11 +1217,11 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public @Nullable ByteBuffer buildString(Output<ByteBuffer> builder) {
+    public @Nullable ByteBuffer buildString(Output<ByteBuffer> builder) throws WamlException {
       try {
         return builder.get();
-      } catch (IllegalStateException cause) {
-        throw new ParseException(cause.getMessage(), cause);
+      } catch (OutputException cause) {
+        throw new WamlException("malformed base-64 string", cause);
       }
     }
 
@@ -1234,7 +1229,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     public Write<?> write(Output<?> output, @Nullable ByteBuffer value, WamlWriter writer) {
       if (value != null) {
         final StringOutput stringOutput = new StringOutput();
-        Base64.standard().writeByteBuffer(stringOutput, value).checkDone();
+        Base64.standard().writeByteBuffer(stringOutput, value).assertDone();
         return writer.writeString(output, this, stringOutput.get(), new WamlJava.ByteBufferForm.AttrIterator());
       } else {
         return writer.writeUnit(output, this, Collections.emptyIterator());
@@ -1242,7 +1237,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable ByteBuffer value) {
+    public Term intoTerm(@Nullable ByteBuffer value) throws TermException {
       return Term.from(value);
     }
 
@@ -1261,6 +1256,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.ByteBufferForm INSTANCE = new WamlJava.ByteBufferForm();
 
     static final class AttrIterator implements Iterator<Map.Entry<String, Object>> {
 
@@ -1341,7 +1338,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable Instant value) {
+    public Term intoTerm(@Nullable Instant value) throws TermException {
       return Term.from(value);
     }
 
@@ -1361,6 +1358,8 @@ public final class WamlJava implements WamlProvider, ToSource {
       return this.toSource();
     }
 
+    static final WamlJava.InstantForm INSTANCE = new WamlJava.InstantForm();
+
   }
 
   static final class InetAddressForm implements WamlStringForm<StringBuilder, InetAddress>, ToSource {
@@ -1376,13 +1375,12 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public @Nullable InetAddress buildString(StringBuilder builder) {
+    public @Nullable InetAddress buildString(StringBuilder builder) throws WamlException {
       try {
         return InetAddress.getByName(builder.toString());
-      } catch (UnknownHostException | SecurityException e) {
-        // ignore
+      } catch (UnknownHostException | SecurityException cause) {
+        throw new WamlException(cause);
       }
-      return null;
     }
 
     @Override
@@ -1395,7 +1393,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable InetAddress value) {
+    public Term intoTerm(@Nullable InetAddress value) throws TermException {
       return Term.from(value);
     }
 
@@ -1415,6 +1413,8 @@ public final class WamlJava implements WamlProvider, ToSource {
       return this.toSource();
     }
 
+    static final WamlJava.InetAddressForm INSTANCE = new WamlJava.InetAddressForm();
+
   }
 
   static final class InetSocketAddressForm implements WamlStringForm<StringBuilder, InetSocketAddress>, ToSource {
@@ -1430,7 +1430,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public @Nullable InetSocketAddress buildString(StringBuilder builder) {
+    public @Nullable InetSocketAddress buildString(StringBuilder builder) throws WamlException {
       final String address = builder.toString();
       final int colonIndex = address.indexOf(':');
       if (colonIndex >= 0) {
@@ -1438,8 +1438,8 @@ public final class WamlJava implements WamlProvider, ToSource {
           final String host = address.substring(0, colonIndex);
           final int port = Integer.parseInt(address.substring(colonIndex + 1));
           return InetSocketAddress.createUnresolved(host, port);
-        } catch (IllegalArgumentException e) {
-          // ignore
+        } catch (IllegalArgumentException cause) {
+          throw new WamlException(cause);
         }
       }
       return null;
@@ -1467,7 +1467,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable InetSocketAddress value) {
+    public Term intoTerm(@Nullable InetSocketAddress value) throws TermException {
       return Term.from(value);
     }
 
@@ -1486,6 +1486,8 @@ public final class WamlJava implements WamlProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final WamlJava.InetSocketAddressForm INSTANCE = new WamlJava.InetSocketAddressForm();
 
   }
 
@@ -1530,7 +1532,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable A value) {
+    public Term intoTerm(@Nullable A value) throws TermException {
       return Term.from(value);
     }
 
@@ -1615,7 +1617,7 @@ public final class WamlJava implements WamlProvider, ToSource {
     }
 
     @Override
-    public Term intoTerm(@Nullable List<Object> value) {
+    public Term intoTerm(@Nullable List<Object> value) throws TermException {
       return Term.from(value);
     }
 
@@ -1691,11 +1693,11 @@ public final class WamlJava implements WamlProvider, ToSource {
 
     @Override
     public Write<?> write(Output<?> output, @Nullable Object value, WamlWriter writer) {
-      return Write.error(new WriteException("No serialization for " + value));
+      return Write.error(new WriteException("no serialization for " + value));
     }
 
     @Override
-    public Term intoTerm(@Nullable Object value) {
+    public Term intoTerm(@Nullable Object value) throws TermException {
       return Term.from(value);
     }
 

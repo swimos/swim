@@ -58,7 +58,7 @@ public class JsonWriter extends ExprWriter {
     } else if (form instanceof JsonForm<?>) {
       return Assume.<JsonForm<Object>>conforms(form).write(output, term, this);
     } else {
-      return Write.error(new WriteException("Unsupported term: " + term));
+      return Write.error(new WriteException("unsupported term: " + term));
     }
   }
 

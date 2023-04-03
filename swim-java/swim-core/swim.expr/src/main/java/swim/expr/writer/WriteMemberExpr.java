@@ -103,7 +103,7 @@ public final class WriteMemberExpr extends Write<Object> {
     if (step == 6) {
       int c;
       if (key.length() == 0) {
-        return Write.error(new WriteException("Blank identifier"));
+        return Write.error(new WriteException("blank identifier"));
       }
       if (index == 0 && output.isCont()) {
         c = key.codePointAt(0);
@@ -118,7 +118,7 @@ public final class WriteMemberExpr extends Write<Object> {
           output.write(c);
           index = key.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid identifier"));
+          return Write.error(new WriteException("invalid identifier"));
         }
       }
       if (index >= key.length()) {
@@ -126,7 +126,7 @@ public final class WriteMemberExpr extends Write<Object> {
       }
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

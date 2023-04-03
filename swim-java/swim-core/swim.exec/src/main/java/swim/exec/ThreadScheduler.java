@@ -75,7 +75,7 @@ public class ThreadScheduler extends ThreadPool implements SchedulerService {
   public void setTimerService(TimerService timerService) {
     final boolean configured = this.tryTimerService(timerService);
     if (!configured) {
-      throw new IllegalStateException("Can't configure task service once started");
+      throw new IllegalStateException("can't configure task service once started");
     }
   }
 

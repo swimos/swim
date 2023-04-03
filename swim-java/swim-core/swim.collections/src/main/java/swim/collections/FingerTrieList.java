@@ -504,18 +504,15 @@ public final class FingerTrieList<T> implements UpdatableList<T>, ToMarkup, ToSo
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof List<?>) {
-      final List<?> that = (List<?>) other;
-      if (this.size() == that.size()) {
-        final Iterator<T> these = this.iterator();
-        final Iterator<?> those = that.iterator();
-        while (these.hasNext() && those.hasNext()) {
-          if (!Objects.equals(these.next(), those.next())) {
-            return false;
-          }
+    } else if (other instanceof List<?> that && this.size() == that.size()) {
+      final Iterator<T> these = this.iterator();
+      final Iterator<?> those = that.iterator();
+      while (these.hasNext() && those.hasNext()) {
+        if (!Objects.equals(these.next(), those.next())) {
+          return false;
         }
-        return true;
       }
+      return true;
     }
     return false;
   }

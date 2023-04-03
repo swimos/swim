@@ -70,7 +70,7 @@ public interface HttpRequester {
   default void willReadResponse() throws HttpException {
     final HttpRequesterContext context = this.requesterContext();
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     context.readResponse();
   }
@@ -94,7 +94,7 @@ public interface HttpRequester {
   default Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input, HttpResponse<?> response) throws HttpException {
     final HttpRequesterContext context = this.requesterContext();
     if (context == null) {
-      throw new IllegalStateException("Unbound requester");
+      throw new IllegalStateException("unbound requester");
     }
     return response.decodePayload(input, context.request());
   }

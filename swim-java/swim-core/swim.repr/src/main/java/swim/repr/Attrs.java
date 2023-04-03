@@ -186,7 +186,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size < 0) {
       return this.putHashed(key, value, false);
@@ -202,7 +202,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size < 0) {
       return this.putHashed(key, value, true);
@@ -474,7 +474,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   @Override
   public @Nullable Repr remove(@Nullable Object key) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size == 0 || !(key instanceof String)) {
       return null;
@@ -778,7 +778,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   @Override
   public void clear() {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.shape = AttrsShape.empty();
     this.slots = null;
@@ -1247,51 +1247,44 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     return new Attrs(0, 0, AttrsShape.empty(), null, null, null);
   }
 
-  public static Attrs of(String key, @Nullable Object value) {
-    value = Repr.from(value);
+  public static Attrs of(String key, Repr value) {
     final AttrsShape shape = AttrsShape.empty().getChild(key);
     return new Attrs(0, 1, shape, value, null, null);
   }
 
-  public static Attrs of(String key0, @Nullable Object value0,
-                         String key1, @Nullable Object value1) {
-    value0 = Repr.from(value0);
-    value1 = Repr.from(value1);
+  public static Attrs of(String key0, Repr value0,
+                         String key1, Repr value1) {
     final AttrsShape shape = AttrsShape.empty().getChild(key0).getChild(key1);
     return new Attrs(0, 2, shape, value0, value1, null);
   }
 
-  public static Attrs of(String key0, @Nullable Object value0,
-                         String key1, @Nullable Object value1,
-                         String key2, @Nullable Object value2) {
-    value0 = Repr.from(value0);
-    value1 = Repr.from(value1);
-    value2 = Repr.from(value2);
+  public static Attrs of(String key0, Repr value0,
+                         String key1, Repr value1,
+                         String key2, Repr value2) {
     final AttrsShape shape = AttrsShape.empty().getChild(key0).getChild(key1)
                                                  .getChild(key2);
     return new Attrs(0, 3, shape, value0, value1, value2);
   }
 
-  public static Attrs of(String key0, @Nullable Object value0,
-                         String key1, @Nullable Object value1,
-                         String key2, @Nullable Object value2,
-                         String key3, @Nullable Object value3) {
-    final Repr[] slots = new Repr[] {Repr.from(value0), Repr.from(value1),
-                                     Repr.from(value2), Repr.from(value3)};
+  public static Attrs of(String key0, Repr value0,
+                         String key1, Repr value1,
+                         String key2, Repr value2,
+                         String key3, Repr value3) {
+    final Repr[] slots = new Repr[] {value0, value1, value2, value3};
     final AttrsShape shape = AttrsShape.empty().getChild(key0).getChild(key1)
-                                                 .getChild(key2).getChild(key3);
+                                               .getChild(key2).getChild(key3);
     return new Attrs(0, 4, shape, slots, null, null);
   }
 
-  public static Attrs of(@Nullable Object... keyValuePairs) {
+  public static Attrs of(Object... keyValuePairs) {
     Objects.requireNonNull(keyValuePairs);
     final int n = keyValuePairs.length;
     if (n % 2 != 0) {
-      throw new IllegalArgumentException("Odd number of key-value pairs");
+      throw new IllegalArgumentException("odd number of key-value pairs");
     }
     final Attrs attrs = Attrs.of();
     for (int i = 0; i < n; i += 2) {
-      attrs.put((String) keyValuePairs[i], Repr.from(keyValuePairs[i + 1]));
+      attrs.put((String) keyValuePairs[i], (Repr) keyValuePairs[i + 1]);
     }
     return attrs;
   }

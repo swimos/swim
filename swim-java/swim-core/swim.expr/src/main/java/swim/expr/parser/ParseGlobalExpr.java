@@ -24,6 +24,7 @@ import swim.expr.GlobalExpr;
 import swim.expr.NumberTermForm;
 import swim.expr.StringTermForm;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.expr.TermForm;
 import swim.expr.selector.ChildExpr;
 import swim.expr.selector.ChildrenExpr;
@@ -69,27 +70,28 @@ public final class ParseGlobalExpr extends Parse<Term> {
       if (input.isCont()) {
         c = input.head();
         if (parser.isIdentifierStartChar(c)) {
-          input.step();
-          final StringTermForm<Object, Object> stringForm = Assume.conformsNullable(form.stringForm());
-          if (stringForm != null) {
+          try {
+            final StringTermForm<Object, Object> stringForm = Assume.conforms(form.stringForm());
             builder = stringForm.stringBuilder();
             builder = stringForm.appendCodePoint(builder, c);
-            step = 3;
-          } else {
-            return Parse.error(Diagnostic.message("unexpected identifier", input));
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
           }
+          input.step();
+          step = 3;
         } else if (c == '0') {
-          input.step();
-          final NumberTermForm<Object> numberForm = Assume.conformsNullable(form.numberForm());
-          if (numberForm != null) {
-            final Term indexTerm = numberForm.intoTerm(numberForm.integerValue(0));
-            return Parse.done(new ChildExpr(GlobalExpr.of(), indexTerm));
-          } else {
-            return Parse.error(Diagnostic.message("unexpected number", input));
+          final Term indexTerm;
+          try {
+            final NumberTermForm<Object> numberForm = Assume.conforms(form.numberForm());
+            indexTerm = numberForm.intoTerm(numberForm.integerValue(0));
+          } catch (TermException cause) {
+            return Parse.diagnostic(input, cause);
           }
-        } else if (c >= '1' && c <= '9') {
           input.step();
+          return Parse.done(new ChildExpr(GlobalExpr.of(), indexTerm));
+        } else if (c >= '1' && c <= '9') {
           index = c - '0';
+          input.step();
           step = 4;
         } else if (c == '*') {
           input.step();
@@ -102,45 +104,49 @@ public final class ParseGlobalExpr extends Parse<Term> {
       }
     }
     if (step == 3) {
-      builder = Assume.nonNull(builder);
-      final StringTermForm<Object, Object> stringForm = Assume.conformsNonNull(form.stringForm());
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierChar(c)) {
-          input.step();
-          builder = stringForm.appendCodePoint(builder, c);
-        } else {
-          break;
+      final StringTermForm<Object, Object> stringForm;
+      try {
+        stringForm = Assume.conforms(form.stringForm());
+      } catch (TermException cause) {
+        return Parse.diagnostic(input, cause);
+      }
+      while (input.isCont() && parser.isIdentifierChar(c = input.head())) {
+        try {
+          builder = stringForm.appendCodePoint(Assume.nonNull(builder), c);
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
         }
+        input.step();
       }
       if (input.isReady()) {
-        final Term keyTerm = stringForm.intoTerm(stringForm.buildString(builder));
+        final Term keyTerm;
+        try {
+          keyTerm = stringForm.intoTerm(stringForm.buildString(Assume.nonNull(builder)));
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
+        }
         return Parse.done(new ChildExpr(GlobalExpr.of(), keyTerm));
       }
     }
     if (step == 4) {
-      while (input.isCont()) {
-        c = input.head();
-        if (c >= '0' && c <= '9') {
-          final int newIndex = 10 * index + (c - '0');
-          if (newIndex / index >= 10L) {
-            input.step();
-            index = newIndex;
-          } else {
-            return Parse.error(Diagnostic.message("index overflow", input));
-          }
+      while (input.isCont() && (c = input.head()) >= '0' && c <= '9') {
+        final int newIndex = 10 * index + (c - '0');
+        if (newIndex / index >= 10L) {
+          index = newIndex;
+          input.step();
         } else {
-          break;
+          return Parse.error(Diagnostic.message("index overflow", input));
         }
       }
       if (input.isReady()) {
-        final NumberTermForm<Object> numberForm = Assume.conformsNullable(form.numberForm());
-        if (numberForm != null) {
-          final Term indexTerm = numberForm.intoTerm(numberForm.integerValue(index));
-          return Parse.done(new ChildExpr(GlobalExpr.of(), indexTerm));
-        } else {
-          return Parse.error(Diagnostic.message("unexpected number", input));
+        final Term indexTerm;
+        try {
+          final NumberTermForm<Object> numberForm = Assume.conforms(form.numberForm());
+          indexTerm = numberForm.intoTerm(numberForm.integerValue(index));
+        } catch (TermException cause) {
+          return Parse.diagnostic(input, cause);
         }
+        return Parse.done(new ChildExpr(GlobalExpr.of(), indexTerm));
       }
     }
     if (step == 5) {

@@ -14,11 +14,21 @@
 
 package swim.json;
 
+import java.lang.annotation.Annotation;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaConversionException;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Objects;
+import java.util.function.Function;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -28,20 +38,21 @@ import swim.codec.Parse;
 import swim.codec.Write;
 import swim.expr.ExprParser;
 import swim.expr.Term;
-import swim.repr.ArrayRepr;
-import swim.repr.ObjectRepr;
-import swim.repr.Repr;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
+import swim.util.Result;
 import swim.util.ToSource;
 
 @Public
 @Since("5.0")
 public final class JsonConversions implements JsonProvider, ToSource {
 
+  final JsonCodec codec;
   final int priority;
 
-  private JsonConversions(int priority) {
+  private JsonConversions(JsonCodec codec, int priority) {
+    this.codec = codec;
     this.priority = priority;
   }
 
@@ -51,7 +62,7 @@ public final class JsonConversions implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -66,11 +77,7 @@ public final class JsonConversions implements JsonProvider, ToSource {
       return null;
     }
 
-    JsonForm<?> form = JsonConversions.stringConversionForm(javaClass);
-    if (form == null) {
-      form = JsonConversions.reprConversionForm(javaClass);
-    }
-    return form;
+    return JsonConversions.valueForm(this.codec, javaClass);
   }
 
   @Override
@@ -88,317 +95,968 @@ public final class JsonConversions implements JsonProvider, ToSource {
     return this.toSource();
   }
 
-  private static final JsonConversions PROVIDER = new JsonConversions(GENERIC_PRIORITY);
+  public static JsonConversions provider(JsonCodec codec, int priority) {
+    return new JsonConversions(codec, priority);
+  }
 
-  public static JsonConversions provider(int priority) {
-    if (priority == GENERIC_PRIORITY) {
-      return PROVIDER;
+  public static JsonConversions provider(JsonCodec codec) {
+    return new JsonConversions(codec, GENERIC_PRIORITY);
+  }
+
+  public static <X, T> JsonUndefinedForm<T> undefinedForm(JsonUndefinedForm<X> interForm,
+                                                          Function<X, T> fromJson,
+                                                          Function<T, X> intoJson) {
+    return new JsonConversions.UndefinedForm<X, T>(null, null, interForm, fromJson, intoJson);
+  }
+
+  public static <X, T> JsonNullForm<T> nullForm(JsonNullForm<X> interForm,
+                                                Function<X, T> fromJson,
+                                                Function<T, X> intoJson) {
+    return new JsonConversions.NullForm<X, T>(null, null, interForm, fromJson, intoJson);
+  }
+
+  public static <X, T> JsonIdentifierForm<T> identifierForm(JsonIdentifierForm<X> interForm,
+                                                            Function<X, T> fromJson,
+                                                            Function<T, X> intoJson) {
+    return new JsonConversions.IdentifierForm<X, T>(null, null, interForm, fromJson, intoJson);
+  }
+
+  public static <X, T> JsonNumberForm<T> numberForm(JsonNumberForm<X> interForm,
+                                                    Function<X, T> fromJson,
+                                                    Function<T, X> intoJson) {
+    return new JsonConversions.NumberForm<X, T>(null, null, interForm, fromJson, intoJson);
+  }
+
+  public static <X, B, T> JsonStringForm<B, T> stringForm(JsonStringForm<B, X> interForm,
+                                                          Function<X, T> fromJson,
+                                                          Function<T, X> intoJson) {
+    return new JsonConversions.StringForm<X, B, T>(null, null, interForm, fromJson, intoJson);
+  }
+
+  public static <X, E, B, T> JsonArrayForm<E, B, T> arrayForm(JsonArrayForm<E, B, X> interForm,
+                                                              Function<X, T> fromJson,
+                                                              Function<T, X> intoJson) {
+    return new JsonConversions.ArrayForm<X, E, B, T>(null, null, interForm, fromJson, intoJson);
+  }
+
+  public static <X, K, V, B, T> JsonObjectForm<K, V, B, T> objectForm(JsonObjectForm<K, V, B, X> interForm,
+                                                                      Function<X, T> fromJson,
+                                                                      Function<T, X> intoJson) {
+    return new JsonConversions.ObjectForm<X, K, V, B, T>(null, null, interForm, fromJson, intoJson);
+  }
+
+  public static <X, T> JsonForm<T> valueForm(JsonForm<X> interForm,
+                                             Function<X, T> fromJson,
+                                             Function<T, X> intoJson) {
+    return new JsonConversions.ValueForm<X, T>(null, null, interForm, fromJson, intoJson);
+  }
+
+  public static @Nullable JsonForm<?> valueForm(JsonCodec codec, Class<?> javaClass) throws JsonFormException {
+    // @FromJson public static T <fromJson>(X value).
+    Method fromJsonMethod = null;
+    // Parameter type X of fromJsonMethod.
+    Class<?> fromInterClass = null;
+    // The marker annotation attached to fromJsonMethod.
+    Annotation fromJsonAnnotation = null;
+
+    // @IntoJson public static X <intoJson>(T object).
+    Method intoJsonMethod = null;
+    // Return type X of intoJsonMethod.
+    Class<?> intoInterClass = null;
+    // The marker annotation attached to intoJsonMethod.
+    Annotation intoJsonAnnotation = null;
+
+    // Search all methods declared on javaClass for conversion annotations;
+    // methods defined on super classes are deliberately ignored to prevent
+    // inadvertent conversion of child classes using base class methods.
+    final Method[] declaredMethods = javaClass.getDeclaredMethods();
+    for (int i = 0, n = declaredMethods.length; i < n; i += 1) {
+      final Method method = declaredMethods[i];
+
+      // Check for @FromJson a annotation.
+      Annotation fromAnnotation = method.getAnnotation(FromJson.class);
+      if (fromAnnotation == null) {
+        // No @FromJson annotation; check for a @FromForm annotation.
+        final FromForm formFormAnnotation = method.getAnnotation(FromForm.class);
+        if (formFormAnnotation != null) {
+          // Check for media type restrictions on the @FromForm annotation.
+          final String[] mediaTypes = formFormAnnotation.mediaTypes();
+          if (mediaTypes == null || mediaTypes.length == 0) {
+            // No media type restrictions on the @FromForm annotation.
+            fromAnnotation = formFormAnnotation;
+          } else {
+            // Check if `json` or `application/json` is an enabled media type.
+            final String mediaType = codec.mediaType().toString();
+            for (int j = 0; j < mediaTypes.length; j += 1) {
+              if ("json".equals(mediaTypes[j]) || mediaType.equals(mediaTypes[j])) {
+                // JSON is supported by the @FromForm annotation.
+                fromAnnotation = formFormAnnotation;
+                break;
+              }
+            }
+          }
+        }
+      }
+      // Check if the method is annotated as a fromJson conversion.
+      if (fromAnnotation != null) {
+        if (fromJsonMethod != null) {
+          throw new JsonFormException("duplicate " + fromAnnotation
+                                    + " method " + method.getName()
+                                    + " of class " + javaClass.getName());
+        }
+        if ((method.getModifiers() & Modifier.PUBLIC) == 0) {
+          throw new JsonFormException("non-public " + fromAnnotation
+                                    + " method " + method.getName()
+                                    + " of class " + javaClass.getName());
+        }
+        if ((method.getModifiers() & Modifier.STATIC) == 0) {
+          throw new JsonFormException("non-static " + fromAnnotation
+                                    + " method " + method.getName()
+                                    + " of class " + javaClass.getName());
+        }
+        if (method.getParameterCount() != 1) {
+          throw new JsonFormException("exactly 1 argument required"
+                                    + " for " + fromAnnotation
+                                    + " method " + method.getName()
+                                    + " of class " + javaClass.getName());
+        }
+        final Class<?> returnType = method.getReturnType();
+        if (!javaClass.isAssignableFrom(returnType)) {
+          throw new JsonFormException("return type " + returnType
+                                    + " of " + fromAnnotation
+                                    + " method " + method.getName()
+                                    + " not assignable to enclosing class " + javaClass.getName());
+        }
+        // Method is a valid fromJson conversion.
+        fromJsonMethod = method;
+        fromInterClass = method.getParameterTypes()[0];
+        fromJsonAnnotation = fromAnnotation;
+      }
+
+      // Check for a @IntoJson annotation.
+      Annotation intoAnnotation = method.getAnnotation(IntoJson.class);
+      if (intoAnnotation == null) {
+        // No @IntoJson annotation; check for a @IntoForm annotation.
+        final IntoForm intoFormAnnotation = method.getAnnotation(IntoForm.class);
+        if (intoFormAnnotation != null) {
+          // Check for media type restrictions on the @IntoForm annotation.
+          final String[] mediaTypes = intoFormAnnotation.mediaTypes();
+          if (mediaTypes == null || mediaTypes.length == 0) {
+            // No media type restrictions on the @IntoForm annotation.
+            intoAnnotation = intoFormAnnotation;
+          } else {
+            // Check if `json` or `application/json` is an enabled media type.
+            final String mediaType = codec.mediaType().toString();
+            for (int j = 0; j < mediaTypes.length; j += 1) {
+              if ("json".equals(mediaTypes[j]) || mediaType.equals(mediaTypes[j])) {
+                // JSON is supported by the @IntoForm annotation.
+                intoAnnotation = intoFormAnnotation;
+                break;
+              }
+            }
+          }
+        }
+      }
+      // Check if the method is annotated as an intoJson conversion.
+      if (intoAnnotation != null) {
+        if (intoJsonMethod != null) {
+          throw new JsonFormException("duplicate " + intoAnnotation
+                                    + " method " + method.getName()
+                                    + " of class " + javaClass.getName());
+        }
+        if ((method.getModifiers() & Modifier.PUBLIC) == 0) {
+          throw new JsonFormException("non-public " + intoAnnotation
+                                    + " method " + method.getName()
+                                    + " of class " + javaClass.getName());
+        }
+        if ((method.getModifiers() & Modifier.STATIC) != 0) {
+          if (method.getParameterCount() != 1) {
+            throw new JsonFormException("exactly 1 argument required"
+                                      + " for " + intoAnnotation
+                                      + " static method " + method.getName()
+                                      + " of class " + javaClass.getName());
+          }
+          final Class<?> parameterType = method.getParameterTypes()[0];
+          if (!parameterType.isAssignableFrom(javaClass)) {
+            throw new JsonFormException("argument type " + parameterType
+                                      + " of " + intoAnnotation
+                                      + " method " + method.getName()
+                                      + " not assignable from enclosing class " + javaClass.getName());
+          }
+        } else {
+          if (method.getParameterCount() != 0) {
+            throw new JsonFormException("no arguments allowed"
+                                      + " for " + intoAnnotation
+                                      + " instance method " + method.getName()
+                                      + " of class " + javaClass.getName());
+          }
+        }
+        // Method is a valid intoJson conversion.
+        intoJsonMethod = method;
+        intoInterClass = method.getReturnType();
+        intoJsonAnnotation = intoAnnotation;
+      }
+    }
+
+    // Check if matching conversion methods were found.
+    if (fromJsonMethod != null && intoJsonMethod == null) {
+      // Report likely inadvertent absence of corresponding @IntoJson method
+      throw new JsonFormException("missing @IntoJson method"
+                                + " corresponding to " + fromJsonAnnotation
+                                + " method " + fromJsonMethod.getName()
+                                + " of class " + javaClass.getName());
+    } else if (fromJsonMethod == null && intoJsonMethod != null) {
+      // Report likely inadvertent absence of corresponding @FromJson method
+      throw new JsonFormException("missing @FromJson method"
+                                + " corresponding to " + intoJsonAnnotation
+                                + " method " + intoJsonMethod.getName()
+                                + " of class " + javaClass.getName());
+    } else if (fromJsonMethod == null && intoJsonMethod == null) {
+      // Don't suggest any errors when neither conversion method was found.
+      return null;
+    }
+
+    // A pair of conversion methods was found.
+    fromJsonMethod = Assume.nonNull(fromJsonMethod);
+    fromInterClass = Assume.nonNull(fromInterClass);
+    fromJsonAnnotation = Assume.nonNull(fromJsonAnnotation);
+    intoJsonMethod = Assume.nonNull(intoJsonMethod);
+    intoInterClass = Assume.nonNull(intoInterClass);
+    intoJsonAnnotation = Assume.nonNull(intoJsonAnnotation);
+
+    // Verify that the interchange types of both conversion methods match.
+    if (!intoInterClass.isAssignableFrom(fromInterClass)) {
+      throw new JsonFormException("return type " + fromInterClass.getName()
+                                + " of " + fromJsonAnnotation
+                                + " method " + fromJsonMethod.getName()
+                                + " not assignable to argument type " + intoInterClass.getName()
+                                + " of " + intoJsonAnnotation
+                                + " method " + intoJsonMethod.getName()
+                                + " for class " + javaClass.getName());
+    }
+
+    // Resolve the JsonForm of the interchange type.
+    final Type interType = intoJsonMethod.getGenericReturnType();
+    final JsonForm<?> interForm;
+    try {
+      interForm = codec.getJsonForm(interType);
+    } catch (JsonFormException cause) {
+      throw new JsonFormException("no json form for interchange type " + interType
+                                + " inferred for class " + javaClass.getName());
+    }
+
+    // Get the boxed class of any primitive interchange type,
+    // as required to implement the Function interface.
+    final Class<?> interClass;
+    if (interType == Boolean.TYPE) {
+      interClass = Boolean.class;
+    } else if (interType == Byte.TYPE) {
+      interClass = Byte.class;
+    } else if (interType == Character.TYPE) {
+      interClass = Character.class;
+    } else if (interType == Short.TYPE) {
+      interClass = Short.class;
+    } else if (interType == Integer.TYPE) {
+      interClass = Integer.class;
+    } else if (interType == Long.TYPE) {
+      interClass = Long.class;
+    } else if (interType == Float.TYPE) {
+      interClass = Float.class;
+    } else if (interType == Double.TYPE) {
+      interClass = Double.class;
     } else {
-      return new JsonConversions(priority);
+      interClass = intoInterClass;
     }
-  }
 
-  public static JsonConversions provider() {
-    return PROVIDER;
-  }
+    // Generate a lambda functions that delegates to each conversion method;
+    // generated lambdas outperform Method and MethodHandle invocation.
+    final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
-  public static @Nullable JsonForm<?> stringConversionForm(Class<?> javaClass) {
+    // Construct a lambda Function that delegates to the fromJson method.
+    // First unreflect the fromJson Method to get a direct MethodHandle.
+    final MethodHandle fromJsonMethodHandle;
     try {
-      // public static T fromJsonString(String value);
-      final Method fromJsonStringMethod = javaClass.getDeclaredMethod("fromJsonString", String.class);
-      // public static String toJsonString(T object);
-      final Method toJsonStringMethod = javaClass.getDeclaredMethod("toJsonString", javaClass);
-      if ((fromJsonStringMethod.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-          && javaClass.isAssignableFrom(fromJsonStringMethod.getReturnType())
-          && (toJsonStringMethod.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-          && String.class.isAssignableFrom(toJsonStringMethod.getReturnType())) {
-        return new JsonStringConversionForm<Object>(fromJsonStringMethod, toJsonStringMethod);
+      fromJsonMethodHandle = lookup.unreflect(fromJsonMethod);
+    } catch (IllegalAccessException cause) {
+      throw new JsonFormException(cause);
+    }
+    // Define the dynamic method type to which the fromJson lambda should conform.
+    final MethodType fromJsonMethodType = MethodType.methodType(javaClass, interClass);
+    final CallSite fromJsonCallSite;
+    try {
+      // Generate the fromJson lambda bootstrap call site.
+      fromJsonCallSite = LambdaMetafactory.metafactory(lookup,
+          LAMBDA_METHOD_NAME, LAMBDA_FACTORY_TYPE, LAMBDA_METHOD_TYPE,
+          fromJsonMethodHandle, fromJsonMethodType);
+    } catch (LambdaConversionException cause) {
+      throw new JsonFormException(cause);
+    }
+    final Function<?, ?> fromJson;
+    try {
+      // Capture the fromJson lambda.
+      fromJson = (Function<?, ?>) fromJsonCallSite.getTarget().invokeExact();
+    } catch (Throwable cause) {
+      throw new JsonFormException(cause);
+    }
+
+    // Construct a lambda Function that delegates to the intoJson method.
+    // First unreflect the intoJson Method to get a direct MethodHandle.
+    final MethodHandle intoJsonMethodHandle;
+    try {
+      intoJsonMethodHandle = lookup.unreflect(intoJsonMethod);
+    } catch (IllegalAccessException cause) {
+      throw new JsonFormException(cause);
+    }
+    // Define the dynamic method type to which the intoJson lambda should conform.
+    final MethodType intoJsonMethodType = MethodType.methodType(interClass, javaClass);
+    final CallSite intoJsonCallSite;
+    try {
+      // Generate the intoJson lambda bootstrap call site.
+      intoJsonCallSite = LambdaMetafactory.metafactory(lookup,
+          LAMBDA_METHOD_NAME, LAMBDA_FACTORY_TYPE, LAMBDA_METHOD_TYPE,
+          intoJsonMethodHandle, intoJsonMethodType);
+    } catch (LambdaConversionException cause) {
+      throw new JsonFormException(cause);
+    }
+    final Function<?, ?> intoJson;
+    try {
+      // Capture the intoJson lambda.
+      intoJson = (Function<?, ?>) intoJsonCallSite.getTarget().invokeExact();
+    } catch (Throwable cause) {
+      throw new JsonFormException(cause);
+    }
+
+    // Construct a new conversion form that delegates to the underlying
+    // interchange form, and converts interchange values to instances of
+    // the javaClass using the synthesized conversion lambdas.
+    return new JsonConversions.ValueForm<Object, Object>(codec,
+        Assume.conforms(javaClass), Assume.conforms(interForm),
+        Assume.conforms(fromJson), Assume.conforms(intoJson));
+  }
+
+  static final String LAMBDA_METHOD_NAME = "apply";
+  static final MethodType LAMBDA_FACTORY_TYPE = MethodType.methodType(Function.class);
+  static final MethodType LAMBDA_METHOD_TYPE = MethodType.methodType(Object.class, Object.class);
+
+  abstract static class ConversionForm<X, T> implements JsonForm<T> {
+
+    final @Nullable JsonCodec codec;
+    final @Nullable Class<T> javaClass;
+    final JsonForm<X> interForm;
+    final Function<X, T> fromJson;
+    final Function<T, X> intoJson;
+
+    ConversionForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonForm<X> interForm,
+                   Function<X, T> fromJson, Function<T, X> intoJson) {
+      this.codec = codec;
+      this.javaClass = javaClass;
+      this.interForm = interForm;
+      this.fromJson = fromJson;
+      this.intoJson = intoJson;
+    }
+
+    @Override
+    public JsonUndefinedForm<? extends T> undefinedForm() throws JsonException {
+      return new JsonConversions.UndefinedForm<X, T>(
+          this.codec, this.javaClass, Assume.conforms(this.interForm.undefinedForm()),
+          this.fromJson, this.intoJson);
+    }
+
+    @Override
+    public JsonNullForm<? extends T> nullForm() throws JsonException {
+      return new JsonConversions.NullForm<X, T>(
+          this.codec, this.javaClass, Assume.conforms(this.interForm.nullForm()),
+          this.fromJson, this.intoJson);
+    }
+
+    @Override
+    public JsonIdentifierForm<? extends T> identifierForm() throws JsonException {
+      return new JsonConversions.IdentifierForm<X, T>(
+          this.codec, this.javaClass, Assume.conforms(this.interForm.identifierForm()),
+          this.fromJson, this.intoJson);
+    }
+
+    @Override
+    public JsonNumberForm<? extends T> numberForm() throws JsonException {
+      return new JsonConversions.NumberForm<X, T>(
+          this.codec, this.javaClass, Assume.conforms(this.interForm.numberForm()),
+          this.fromJson, this.intoJson);
+    }
+
+    @Override
+    public JsonStringForm<?, ? extends T> stringForm() throws JsonException {
+      return new JsonConversions.StringForm<X, Object, T>(
+          this.codec, this.javaClass, Assume.conforms(this.interForm.stringForm()),
+          this.fromJson, this.intoJson);
+    }
+
+    @Override
+    public JsonArrayForm<?, ?, ? extends T> arrayForm() throws JsonException {
+      return new JsonConversions.ArrayForm<X, Object, Object, T>(
+          this.codec, this.javaClass, Assume.conforms(this.interForm.arrayForm()),
+          this.fromJson, this.intoJson);
+    }
+
+    @Override
+    public JsonObjectForm<?, ?, ?, ? extends T> objectForm() throws JsonException {
+      return new JsonConversions.ObjectForm<X, Object, Object, Object, T>(
+          this.codec, this.javaClass, Assume.conforms(this.interForm.objectForm()),
+          this.fromJson, this.intoJson);
+    }
+
+    @Nullable T fromJson(@Nullable X value) throws JsonException {
+      try {
+        return this.fromJson.apply(value);
+      } catch (Throwable cause) {
+        if (Result.isNonFatal(cause) && !(cause instanceof JsonException)) {
+          throw new JsonException(cause);
+        } else {
+          throw cause;
+        }
       }
-    } catch (ReflectiveOperationException cause) {
-      // ignore
     }
-    return null;
-  }
 
-  public static @Nullable JsonForm<?> reprConversionForm(Class<?> javaClass) {
-    try {
-      // public static T fromJsonRepr(Repr repr);
-      final Method fromJsonReprMethod = javaClass.getDeclaredMethod("fromJsonRepr", Repr.class);
-      // public static Repr toJsonRepr(T object);
-      final Method toJsonReprMethod = javaClass.getDeclaredMethod("toJsonRepr", javaClass);
-      if ((fromJsonReprMethod.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-          && !javaClass.isAssignableFrom(fromJsonReprMethod.getReturnType())
-          && (toJsonReprMethod.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-          && Repr.class.isAssignableFrom(toJsonReprMethod.getReturnType())) {
-        return new JsomReprConversionForm<Object>(fromJsonReprMethod, toJsonReprMethod);
+    @Nullable X intoJson(@Nullable T object) throws JsonException {
+      try {
+        return this.intoJson.apply(object);
+      } catch (Throwable cause) {
+        if (Result.isNonFatal(cause) && !(cause instanceof JsonException)) {
+          throw new JsonException(cause);
+        } else {
+          throw cause;
+        }
       }
-    } catch (ReflectiveOperationException cause) {
-      // ignore
     }
-    return null;
-  }
 
-}
-
-final class JsonStringConversionForm<T> implements JsonStringForm<StringBuilder, T>, ToSource {
-
-  final Method fromJsonStringMethod;
-  final Method toJsonStringMethod;
-
-  JsonStringConversionForm(Method fromJsonStringMethod, Method toJsonStringMethod) {
-    this.fromJsonStringMethod = fromJsonStringMethod;
-    this.toJsonStringMethod = toJsonStringMethod;
-  }
-
-  @Override
-  public StringBuilder stringBuilder() {
-    return new StringBuilder();
-  }
-
-  @Override
-  public StringBuilder appendCodePoint(StringBuilder builder, int c) {
-    return builder.appendCodePoint(c);
-  }
-
-  @Override
-  public @Nullable T buildString(StringBuilder builder) {
-    try {
-      return Assume.conformsNullable(this.fromJsonStringMethod.invoke(null, builder.toString()));
-    } catch (ReflectiveOperationException cause) {
-      throw new UnsupportedOperationException(cause);
+    @Override
+    public Parse<T> parse(Input input, JsonParser parser) {
+      final Parse<X> parseValue = this.interForm.parse(input, parser);
+      if (parseValue.isDone()) {
+        try {
+          return Parse.done(this.fromJson(parseValue.getUnchecked()));
+        } catch (JsonException cause) {
+          return Parse.error(cause);
+        }
+      } else {
+        return parseValue.asError();
+      }
     }
-  }
 
-  @Override
-  public Write<?> write(Output<?> output, @Nullable T object, JsonWriter writer) {
-    try {
-      return writer.writeString(output, (String) this.toJsonStringMethod.invoke(null, object));
-    } catch (ReflectiveOperationException cause) {
-      throw new UnsupportedOperationException(cause);
+    @Override
+    public Write<?> write(Output<?> output, @Nullable T object, JsonWriter writer) {
+      try {
+        return this.interForm.write(output, this.intoJson(object), writer);
+      } catch (JsonException cause) {
+        return Write.error(cause);
+      }
     }
-  }
 
-  @Override
-  public Term intoTerm(@Nullable T value) {
-    return Term.from(value);
-  }
-
-  @Override
-  public @Nullable T fromTerm(Term term) {
-    return Assume.conformsNullable(term.objectValue(this.fromJsonStringMethod.getDeclaringClass()));
-  }
-
-  @Override
-  public void writeSource(Appendable output) {
-    final Notation notation = Notation.from(output);
-    notation.beginInvoke("JsonConversions", "stringConversionForm")
-            .appendArgument(this.fromJsonStringMethod.getDeclaringClass())
-            .endInvoke();
-  }
-
-  @Override
-  public String toString() {
-    return this.toSource();
-  }
-
-}
-
-final class JsomReprConversionForm<T> implements JsonUndefinedForm<T>, JsonNullForm<T>, JsonNumberForm<T>, JsonIdentifierForm<T>, JsonStringForm<StringBuilder, T>, JsonArrayForm<Repr, ArrayRepr, T>, JsonFieldForm<String, Repr, ObjectRepr>, JsonObjectForm<String, Repr, ObjectRepr, T>, ToSource {
-
-  final Method fromJsonReprMethod;
-  final Method toJsonReprMethod;
-
-  JsomReprConversionForm(Method fromJsonReprMethod, Method toJsonReprMethod) {
-    this.fromJsonReprMethod = fromJsonReprMethod;
-    this.toJsonReprMethod = toJsonReprMethod;
-  }
-
-  @Nullable T fromJsonRepr(Repr repr) {
-    try {
-      return Assume.conformsNullable(this.fromJsonReprMethod.invoke(null, repr));
-    } catch (ReflectiveOperationException cause) {
-      throw new UnsupportedOperationException(cause);
+    @Override
+    public Term intoTerm(@Nullable T object) throws TermException {
+      return this.interForm.intoTerm(this.intoJson(object));
     }
-  }
 
-  Repr toJsonRepr(@Nullable T object) {
-    try {
-      return (Repr) this.toJsonReprMethod.invoke(null, object);
-    } catch (ReflectiveOperationException cause) {
-      throw new UnsupportedOperationException(cause);
+    @Override
+    public @Nullable T fromTerm(Term term) throws TermException {
+      return this.fromJson(this.interForm.fromTerm(term));
     }
+
   }
 
-  @Override
-  public JsonUndefinedForm<T> undefinedForm() {
-    return this;
+  static final class UndefinedForm<X, T> extends JsonConversions.ConversionForm<X, T> implements JsonUndefinedForm<T>, ToSource {
+
+    UndefinedForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonUndefinedForm<X> interForm,
+                  Function<X, T> fromJson, Function<T, X> intoJson) {
+      super(codec, javaClass, interForm, fromJson, intoJson);
+    }
+
+    @Override
+    public JsonUndefinedForm<? extends T> undefinedForm() throws JsonException {
+      return this;
+    }
+
+    @Override
+    public @Nullable T undefinedValue() throws JsonException {
+      return this.fromJson(((JsonUndefinedForm<X>) this.interForm).undefinedValue());
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      if (this.codec != null && this.javaClass != null) {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.codec)
+                .appendArgument(this.javaClass)
+                .endInvoke()
+                .beginInvoke("undefinedForm")
+                .endInvoke();
+      } else {
+        notation.beginInvoke("JsonConversions", "undefinedForm")
+                .appendArgument(this.interForm)
+                .appendArgument(this.fromJson)
+                .appendArgument(this.intoJson)
+                .endInvoke();
+      }
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
   }
 
-  @Override
-  public JsonNullForm<T> nullForm() {
-    return this;
+  static final class NullForm<X, T> extends JsonConversions.ConversionForm<X, T> implements JsonNullForm<T>, ToSource {
+
+    NullForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonNullForm<X> interForm,
+             Function<X, T> fromJson, Function<T, X> intoJson) {
+      super(codec, javaClass, interForm, fromJson, intoJson);
+    }
+
+    @Override
+    public JsonNullForm<? extends T> nullForm() throws JsonException {
+      return this;
+    }
+
+    @Override
+    public @Nullable T nullValue() throws JsonException {
+      return this.fromJson(((JsonNullForm<X>) this.interForm).nullValue());
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      if (this.codec != null && this.javaClass != null) {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.codec)
+                .appendArgument(this.javaClass)
+                .endInvoke()
+                .beginInvoke("nullForm")
+                .endInvoke();
+      } else {
+        notation.beginInvoke("JsonConversions", "nullForm")
+                .appendArgument(this.interForm)
+                .appendArgument(this.fromJson)
+                .appendArgument(this.intoJson)
+                .endInvoke();
+      }
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
   }
 
-  @Override
-  public JsonNumberForm<T> numberForm() {
-    return this;
+  static final class IdentifierForm<X, T> extends JsonConversions.ConversionForm<X, T> implements JsonIdentifierForm<T>, ToSource {
+
+    IdentifierForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonIdentifierForm<X> interForm,
+                   Function<X, T> fromJson, Function<T, X> intoJson) {
+      super(codec, javaClass, interForm, fromJson, intoJson);
+    }
+
+    @Override
+    public JsonIdentifierForm<? extends T> identifierForm() throws JsonException {
+      return this;
+    }
+
+    @Override
+    public @Nullable T identifierValue(String value, ExprParser parser) throws JsonException {
+      return this.fromJson(((JsonIdentifierForm<X>) this.interForm).identifierValue(value, parser));
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      if (this.codec != null && this.javaClass != null) {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.codec)
+                .appendArgument(this.javaClass)
+                .endInvoke()
+                .beginInvoke("identifierForm")
+                .endInvoke();
+      } else {
+        notation.beginInvoke("JsonConversions", "identifierForm")
+                .appendArgument(this.interForm)
+                .appendArgument(this.fromJson)
+                .appendArgument(this.intoJson)
+                .endInvoke();
+      }
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
   }
 
-  @Override
-  public JsonIdentifierForm<T> identifierForm() {
-    return this;
+  static final class NumberForm<X, T> extends JsonConversions.ConversionForm<X, T> implements JsonNumberForm<T>, ToSource {
+
+    NumberForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonNumberForm<X> interForm,
+               Function<X, T> fromJson, Function<T, X> intoJson) {
+      super(codec, javaClass, interForm, fromJson, intoJson);
+    }
+
+    @Override
+    public JsonNumberForm<? extends T> numberForm() throws JsonException {
+      return this;
+    }
+
+    @Override
+    public @Nullable T integerValue(long value) throws JsonException {
+      return this.fromJson(((JsonNumberForm<X>) this.interForm).integerValue(value));
+    }
+
+    @Override
+    public @Nullable T hexadecimalValue(long value, int digits) throws JsonException {
+      return this.fromJson(((JsonNumberForm<X>) this.interForm).hexadecimalValue(value, digits));
+    }
+
+    @Override
+    public @Nullable T bigIntegerValue(String value) throws JsonException {
+      return this.fromJson(((JsonNumberForm<X>) this.interForm).bigIntegerValue(value));
+    }
+
+    @Override
+    public @Nullable T decimalValue(String value) throws JsonException {
+      return this.fromJson(((JsonNumberForm<X>) this.interForm).decimalValue(value));
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      if (this.codec != null && this.javaClass != null) {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.codec)
+                .appendArgument(this.javaClass)
+                .endInvoke()
+                .beginInvoke("numberForm")
+                .endInvoke();
+      } else {
+        notation.beginInvoke("JsonConversions", "numberForm")
+                .appendArgument(this.interForm)
+                .appendArgument(this.fromJson)
+                .appendArgument(this.intoJson)
+                .endInvoke();
+      }
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
   }
 
-  @Override
-  public JsonStringForm<?, T> stringForm() {
-    return this;
+  static final class StringForm<X, B, T> extends JsonConversions.ConversionForm<X, T> implements JsonStringForm<B, T>, ToSource {
+
+    StringForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonStringForm<B, X> interForm,
+               Function<X, T> fromJson, Function<T, X> intoJson) {
+      super(codec, javaClass, interForm, fromJson, intoJson);
+    }
+
+    @Override
+    public JsonStringForm<?, ? extends T> stringForm() throws JsonException {
+      return this;
+    }
+
+    @Override
+    public B stringBuilder() throws JsonException {
+      return Assume.<JsonStringForm<B, X>>conforms(this.interForm).stringBuilder();
+    }
+
+    @Override
+    public B appendCodePoint(B builder, int c) throws JsonException {
+      return Assume.<JsonStringForm<B, X>>conforms(this.interForm).appendCodePoint(builder, c);
+    }
+
+    @Override
+    public @Nullable T buildString(B builder) throws JsonException {
+      return this.fromJson(Assume.<JsonStringForm<B, X>>conforms(this.interForm).buildString(builder));
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      if (this.codec != null && this.javaClass != null) {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.codec)
+                .appendArgument(this.javaClass)
+                .endInvoke()
+                .beginInvoke("stringForm")
+                .endInvoke();
+      } else {
+        notation.beginInvoke("JsonConversions", "stringForm")
+                .appendArgument(this.interForm)
+                .appendArgument(this.fromJson)
+                .appendArgument(this.intoJson)
+                .endInvoke();
+      }
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
   }
 
-  @Override
-  public JsonArrayForm<?, ?, T> arrayForm() {
-    return this;
+  static final class ArrayForm<X, E, B, T> extends JsonConversions.ConversionForm<X, T> implements JsonArrayForm<E, B, T>, ToSource {
+
+    ArrayForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonArrayForm<E, B, X> interForm,
+              Function<X, T> fromJson, Function<T, X> intoJson) {
+      super(codec, javaClass, interForm, fromJson, intoJson);
+    }
+
+    @Override
+    public JsonArrayForm<?, ?, ? extends T> arrayForm() throws JsonException {
+      return this;
+    }
+
+    @Override
+    public JsonForm<E> elementForm() throws JsonException {
+      return Assume.<JsonArrayForm<E, B, X>>conforms(this.interForm).elementForm();
+    }
+
+    @Override
+    public B arrayBuilder() throws JsonException {
+      return Assume.<JsonArrayForm<E, B, X>>conforms(this.interForm).arrayBuilder();
+    }
+
+    @Override
+    public B appendElement(B builder, @Nullable E element) throws JsonException {
+      return Assume.<JsonArrayForm<E, B, X>>conforms(this.interForm).appendElement(builder, element);
+    }
+
+    @Override
+    public @Nullable T buildArray(B builder) throws JsonException {
+      return this.fromJson(Assume.<JsonArrayForm<E, B, X>>conforms(this.interForm).buildArray(builder));
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      if (this.codec != null && this.javaClass != null) {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.codec)
+                .appendArgument(this.javaClass)
+                .endInvoke()
+                .beginInvoke("arrayForm")
+                .endInvoke();
+      } else {
+        notation.beginInvoke("JsonConversions", "arrayForm")
+                .appendArgument(this.interForm)
+                .appendArgument(this.fromJson)
+                .appendArgument(this.intoJson)
+                .endInvoke();
+      }
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
   }
 
-  @Override
-  public JsonObjectForm<?, ?, ?, T> objectForm() {
-    return this;
+  static final class ObjectForm<X, K, V, B, T> extends JsonConversions.ConversionForm<X, T> implements JsonObjectForm<K, V, B, T>, ToSource {
+
+    ObjectForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonObjectForm<K, V, B, X> interForm,
+               Function<X, T> fromJson, Function<T, X> intoJson) {
+      super(codec, javaClass, interForm, fromJson, intoJson);
+    }
+
+    @Override
+    public JsonObjectForm<?, ?, ?, ? extends T> objectForm() throws JsonException {
+      return this;
+    }
+
+    @Override
+    public JsonForm<K> keyForm() throws JsonException {
+      return Assume.<JsonObjectForm<K, V, B, X>>conforms(this.interForm).keyForm();
+    }
+
+    @Override
+    public JsonFieldForm<K, V, B> getFieldForm(K key) throws JsonException {
+      return Assume.<JsonObjectForm<K, V, B, X>>conforms(this.interForm).getFieldForm(key);
+    }
+
+    @Override
+    public B objectBuilder() throws JsonException {
+      return Assume.<JsonObjectForm<K, V, B, X>>conforms(this.interForm).objectBuilder();
+    }
+
+    @Override
+    public @Nullable T buildObject(B builder) throws JsonException {
+      return this.fromJson(Assume.<JsonObjectForm<K, V, B, X>>conforms(this.interForm).buildObject(builder));
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      if (this.codec != null && this.javaClass != null) {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.codec)
+                .appendArgument(this.javaClass)
+                .endInvoke()
+                .beginInvoke("objectForm")
+                .endInvoke();
+      } else {
+        notation.beginInvoke("JsonConversions", "objectForm")
+                .appendArgument(this.interForm)
+                .appendArgument(this.fromJson)
+                .appendArgument(this.intoJson)
+                .endInvoke();
+      }
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
   }
 
-  @Override
-  public @Nullable T undefinedValue() {
-    return this.fromJsonRepr(Repr.undefined());
-  }
+  static final class ValueForm<X, T> extends JsonConversions.ConversionForm<X, T> implements ToSource {
 
-  @Override
-  public @Nullable T nullValue() {
-    return this.fromJsonRepr(Repr.unit());
-  }
+    @Nullable JsonUndefinedForm<? extends T> undefinedForm;
+    @Nullable JsonNullForm<? extends T> nullForm;
+    @Nullable JsonIdentifierForm<? extends T> identifierForm;
+    @Nullable JsonNumberForm<? extends T> numberForm;
+    @Nullable JsonStringForm<?, ? extends T> stringForm;
+    @Nullable JsonArrayForm<?, ?, ? extends T> arrayForm;
+    @Nullable JsonObjectForm<?, ?, ?, ? extends T> objectForm;
 
-  @Override
-  public @Nullable T integerValue(long value) {
-    return this.fromJsonRepr(Assume.nonNull(JsonReprs.numberForm().integerValue(value)));
-  }
+    ValueForm(@Nullable JsonCodec codec, @Nullable Class<T> javaClass, JsonForm<X> interForm,
+              Function<X, T> fromJson, Function<T, X> intoJson) {
+      super(codec, javaClass, interForm, fromJson, intoJson);
+      this.undefinedForm = null;
+      this.nullForm = null;
+      this.identifierForm = null;
+      this.numberForm = null;
+      this.stringForm = null;
+      this.arrayForm = null;
+      this.objectForm = null;
+    }
 
-  @Override
-  public @Nullable T hexadecimalValue(long value, int digits) {
-    return this.fromJsonRepr(Assume.nonNull(JsonReprs.numberForm().hexadecimalValue(value, digits)));
-  }
+    @Override
+    public JsonUndefinedForm<? extends T> undefinedForm() throws JsonException {
+      JsonUndefinedForm<? extends T> undefinedForm = (JsonUndefinedForm<? extends T>) UNDEFINED_FORM.getOpaque(this);
+      if (undefinedForm == null) {
+        UNDEFINED_FORM.compareAndExchangeRelease(this, null, super.undefinedForm());
+        undefinedForm = (JsonUndefinedForm<? extends T>) UNDEFINED_FORM.getAcquire(this);
+      }
+      return undefinedForm;
+    }
 
-  @Override
-  public @Nullable T bigIntegerValue(String value) {
-    return this.fromJsonRepr(Assume.nonNull(JsonReprs.numberForm().bigIntegerValue(value)));
-  }
+    @Override
+    public JsonNullForm<? extends T> nullForm() throws JsonException {
+      JsonNullForm<? extends T> nullForm = (JsonNullForm<? extends T>) NULL_FORM.getOpaque(this);
+      if (nullForm == null) {
+        NULL_FORM.compareAndExchangeRelease(this, null, super.nullForm());
+        nullForm = (JsonNullForm<? extends T>) NULL_FORM.getAcquire(this);
+      }
+      return nullForm;
+    }
 
-  @Override
-  public @Nullable T decimalValue(String value) {
-    return this.fromJsonRepr(Assume.nonNull(JsonReprs.numberForm().decimalValue(value)));
-  }
+    @Override
+    public JsonIdentifierForm<? extends T> identifierForm() throws JsonException {
+      JsonIdentifierForm<? extends T> identifierForm = (JsonIdentifierForm<? extends T>) IDENTIFIER_FORM.getOpaque(this);
+      if (identifierForm == null) {
+        IDENTIFIER_FORM.compareAndExchangeRelease(this, null, super.identifierForm());
+        identifierForm = (JsonIdentifierForm<? extends T>) IDENTIFIER_FORM.getAcquire(this);
+      }
+      return identifierForm;
+    }
 
-  @Override
-  public @Nullable T identifierValue(String value, ExprParser parser) {
-    return this.fromJsonRepr(Assume.nonNull(JsonReprs.identifierForm().identifierValue(value, parser)));
-  }
+    @Override
+    public JsonNumberForm<? extends T> numberForm() throws JsonException {
+      JsonNumberForm<? extends T> numberForm = (JsonNumberForm<? extends T>) NUMBER_FORM.getOpaque(this);
+      if (numberForm == null) {
+        NUMBER_FORM.compareAndExchangeRelease(this, null, super.numberForm());
+        numberForm = (JsonNumberForm<? extends T>) NUMBER_FORM.getAcquire(this);
+      }
+      return numberForm;
+    }
 
-  @Override
-  public StringBuilder stringBuilder() {
-    return new StringBuilder();
-  }
+    @Override
+    public JsonStringForm<?, ? extends T> stringForm() throws JsonException {
+      JsonStringForm<?, ? extends T> stringForm = (JsonStringForm<?, ? extends T>) STRING_FORM.getOpaque(this);
+      if (stringForm == null) {
+        STRING_FORM.compareAndExchangeRelease(this, null, super.stringForm());
+        stringForm = (JsonStringForm<?, ? extends T>) STRING_FORM.getAcquire(this);
+      }
+      return stringForm;
+    }
 
-  @Override
-  public StringBuilder appendCodePoint(StringBuilder builder, int c) {
-    return builder.appendCodePoint(c);
-  }
+    @Override
+    public JsonArrayForm<?, ?, ? extends T> arrayForm() throws JsonException {
+      JsonArrayForm<?, ?, ? extends T> arrayForm = (JsonArrayForm<?, ?, ? extends T>) ARRAY_FORM.getOpaque(this);
+      if (arrayForm == null) {
+        ARRAY_FORM.compareAndExchangeRelease(this, null, super.arrayForm());
+        arrayForm = (JsonArrayForm<?, ?, ? extends T>) ARRAY_FORM.getAcquire(this);
+      }
+      return arrayForm;
+    }
 
-  @Override
-  public @Nullable T buildString(StringBuilder builder) {
-    return this.fromJsonRepr(Assume.nonNull(JsonReprs.stringForm().buildString(builder)));
-  }
+    @Override
+    public JsonObjectForm<?, ?, ?, ? extends T> objectForm() throws JsonException {
+      JsonObjectForm<?, ?, ?, ? extends T> objectForm = (JsonObjectForm<?, ?, ?, ? extends T>) OBJECT_FORM.getOpaque(this);
+      if (objectForm == null) {
+        OBJECT_FORM.compareAndExchangeRelease(this, null, super.objectForm());
+        objectForm = (JsonObjectForm<?, ?, ?, ? extends T>) OBJECT_FORM.getAcquire(this);
+      }
+      return objectForm;
+    }
 
-  @Override
-  public JsonForm<Repr> elementForm() {
-    return JsonReprs.reprForm();
-  }
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      if (this.codec != null && this.javaClass != null) {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.codec)
+                .appendArgument(this.javaClass)
+                .endInvoke();
+      } else {
+        notation.beginInvoke("JsonConversions", "valueForm")
+                .appendArgument(this.interForm)
+                .appendArgument(this.fromJson)
+                .appendArgument(this.intoJson)
+                .endInvoke();
+      }
+    }
 
-  @Override
-  public ArrayRepr arrayBuilder() {
-    return ArrayRepr.of();
-  }
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
 
-  @Override
-  public ArrayRepr appendElement(ArrayRepr builder, @Nullable Repr element) {
-    Objects.requireNonNull(element);
-    builder.add(element);
-    return builder;
-  }
+    static final VarHandle UNDEFINED_FORM;
+    static final VarHandle NULL_FORM;
+    static final VarHandle IDENTIFIER_FORM;
+    static final VarHandle NUMBER_FORM;
+    static final VarHandle STRING_FORM;
+    static final VarHandle ARRAY_FORM;
+    static final VarHandle OBJECT_FORM;
 
-  @Override
-  public @Nullable T buildArray(ArrayRepr builder) {
-    return this.fromJsonRepr(builder);
-  }
+    static {
+      // Initialize var handles.
+      final MethodHandles.Lookup lookup = MethodHandles.lookup();
+      try {
+        UNDEFINED_FORM = lookup.findVarHandle(JsonConversions.ValueForm.class, "undefinedForm", JsonUndefinedForm.class);
+        NULL_FORM = lookup.findVarHandle(JsonConversions.ValueForm.class, "nullForm", JsonNullForm.class);
+        IDENTIFIER_FORM = lookup.findVarHandle(JsonConversions.ValueForm.class, "identifierForm", JsonIdentifierForm.class);
+        NUMBER_FORM = lookup.findVarHandle(JsonConversions.ValueForm.class, "numberForm", JsonNumberForm.class);
+        STRING_FORM = lookup.findVarHandle(JsonConversions.ValueForm.class, "stringForm", JsonStringForm.class);
+        ARRAY_FORM = lookup.findVarHandle(JsonConversions.ValueForm.class, "arrayForm", JsonArrayForm.class);
+        OBJECT_FORM = lookup.findVarHandle(JsonConversions.ValueForm.class, "objectForm", JsonObjectForm.class);
+      } catch (ReflectiveOperationException cause) {
+        throw new ExceptionInInitializerError(cause);
+      }
+    }
 
-  @Override
-  public JsonForm<String> keyForm() {
-    return JsonReprs.keyForm();
-  }
-
-  @Override
-  public JsonForm<Repr> valueForm() {
-    return JsonReprs.reprForm();
-  }
-
-  @Override
-  public JsonFieldForm<String, Repr, ObjectRepr> getFieldForm(String key) {
-    return this;
-  }
-
-  @Override
-  public ObjectRepr objectBuilder() {
-    return ObjectRepr.of();
-  }
-
-  @Override
-  public ObjectRepr updateField(ObjectRepr builder, String key, @Nullable Repr value) {
-    Objects.requireNonNull(value, "value");
-    builder.put(key, value);
-    return builder;
-  }
-
-  @Override
-  public @Nullable T buildObject(ObjectRepr builder) {
-    return this.fromJsonRepr(builder);
-  }
-
-  @Override
-  public Parse<T> parse(Input input, JsonParser parser) {
-    return parser.parseExpr(input, this);
-  }
-
-  @Override
-  public Write<?> write(Output<?> output, @Nullable T object, JsonWriter writer) {
-    return JsonReprs.reprForm().write(output, this.toJsonRepr(object), writer);
-  }
-
-  @Override
-  public Term intoTerm(@Nullable T object) {
-    return Term.from(object);
-  }
-
-  @Override
-  public @Nullable T fromTerm(Term term) {
-    return Assume.conformsNullable(term.objectValue(this.fromJsonReprMethod.getDeclaringClass()));
-  }
-
-  @Override
-  public void writeSource(Appendable output) {
-    final Notation notation = Notation.from(output);
-    notation.beginInvoke("JsonConversions", "reprConversionForm")
-            .appendArgument(this.fromJsonReprMethod.getDeclaringClass())
-            .endInvoke();
-  }
-
-  @Override
-  public String toString() {
-    return this.toSource();
   }
 
 }

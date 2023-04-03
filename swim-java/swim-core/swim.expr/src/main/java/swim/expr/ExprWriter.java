@@ -91,7 +91,7 @@ public class ExprWriter extends ExprLexer implements ToSource {
     } else if (term.isValidString()) {
       return this.writeStringTerm(output, term.stringValue());
     } else {
-      return Write.error(new WriteException("Unsupported term: " + term));
+      return Write.error(new WriteException("unsupported term: " + term));
     }
   }
 
@@ -180,7 +180,7 @@ public class ExprWriter extends ExprLexer implements ToSource {
       final DescendantsExpr expr = (DescendantsExpr) selectorExpr;
       return this.writeDescendantsExpr(output, form, expr.scope(), expr.precedence());
     } else {
-      return Write.error(new WriteException("Unsupported selector: " + selectorExpr));
+      return Write.error(new WriteException("unsupported selector: " + selectorExpr));
     }
   }
 
@@ -211,7 +211,7 @@ public class ExprWriter extends ExprLexer implements ToSource {
       final PrefixExpr expr = (PrefixExpr) operatorExpr;
       return this.writePrefixExpr(output, form, expr.operator(), expr.rhs(), expr.precedence());
     } else {
-      return Write.error(new WriteException("Unsupported operator: " + operatorExpr));
+      return Write.error(new WriteException("unsupported operator: " + operatorExpr));
     }
   }
 
@@ -225,7 +225,7 @@ public class ExprWriter extends ExprLexer implements ToSource {
     } else if (expr instanceof GlobalExpr) {
       return this.writeGlobalExpr(output, form, (GlobalExpr) expr);
     } else {
-      return Write.error(new WriteException("Unsupported expression: " + expr));
+      return Write.error(new WriteException("unsupported expression: " + expr));
     }
   }
 

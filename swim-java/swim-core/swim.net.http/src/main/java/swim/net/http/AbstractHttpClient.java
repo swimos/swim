@@ -44,7 +44,7 @@ public abstract class AbstractHttpClient implements HttpClient {
   public HttpOptions options() {
     final HttpClientContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.options();
   }
@@ -52,7 +52,7 @@ public abstract class AbstractHttpClient implements HttpClient {
   public boolean connect(InetSocketAddress remoteAddress) {
     final HttpClientContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.connect(remoteAddress);
   }
@@ -60,7 +60,7 @@ public abstract class AbstractHttpClient implements HttpClient {
   public boolean connect(String address, int port) {
     final HttpClientContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.connect(address, port);
   }
@@ -108,7 +108,7 @@ public abstract class AbstractHttpClient implements HttpClient {
   protected boolean enqueueRequester(HttpRequester requester) {
     final HttpClientContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.enqueueRequester(requester);
   }
@@ -116,7 +116,7 @@ public abstract class AbstractHttpClient implements HttpClient {
   protected void become(NetSocket socket) {
     final HttpClientContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     context.become(socket);
   }
@@ -129,7 +129,7 @@ public abstract class AbstractHttpClient implements HttpClient {
   protected boolean doneReading() {
     final HttpClientContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.doneReading();
   }
@@ -142,7 +142,7 @@ public abstract class AbstractHttpClient implements HttpClient {
   protected boolean doneWriting() {
     final HttpClientContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.doneWriting();
   }

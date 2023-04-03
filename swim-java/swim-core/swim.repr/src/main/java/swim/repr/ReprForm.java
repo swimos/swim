@@ -14,34 +14,55 @@
 
 package swim.repr;
 
-import java.lang.reflect.Type;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.expr.Term;
+import swim.expr.TermException;
+import swim.expr.TermForm;
 
+/**
+ * A conversion between {@code Repr} instances and values of type {@code T}.
+ *
+ * @param <T> the type of values converted by this repr form
+ *
+ * @see ReprRegistry
+ */
 @Public
 @Since("5.0")
-public interface ReprForm<T> {
+public interface ReprForm<T> extends TermForm<T> {
 
-  Repr intoRepr(@Nullable T value);
+  /**
+   * Converts a given {@code value} to a {@code Repr} instance.
+   *
+   * @param value the value of type {@code T} to convert into
+   *        a {@code Repr} instance
+   * @return a {@code Repr} instance representing the given {@code value}
+   * @throws ReprException if the conversion fails
+   */
+  Repr intoRepr(@Nullable T value) throws ReprException;
 
-  @Nullable T fromRepr(Repr term);
+  /**
+   * Converts a given {@code repr} to a value of type {@code T}.
+   *
+   * @param repr the {@code Repr} instance to convert into
+   *        a value of type {@code T}
+   * @return a value of type {@code T} extracted from the given {@code repr}
+   * @throws ReprException if the conversion fails
+   */
+  @Nullable T fromRepr(Repr repr) throws ReprException;
 
-  static <T> ReprForm<T> forType(Type javaType) {
-    final ReprForm<T> reprForm = Repr.registry().forType(javaType);
-    if (reprForm != null) {
-      return reprForm;
-    } else {
-      throw new IllegalArgumentException("No repr form for type: " + javaType);
-    }
+  @Override
+  default Term intoTerm(@Nullable T value) throws TermException {
+    return this.intoRepr(value);
   }
 
-  static <T> ReprForm<T> forValue(@Nullable T value) {
-    final ReprForm<T> reprForm = Repr.registry().forValue(value);
-    if (reprForm != null) {
-      return reprForm;
+  @Override
+  default @Nullable T fromTerm(Term term) throws TermException {
+    if (term instanceof Repr) {
+      return this.fromRepr((Repr) term);
     } else {
-      throw new IllegalArgumentException("No repr form for value: " + value);
+      return null;
     }
   }
 

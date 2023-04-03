@@ -75,7 +75,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
         case KNOT:
           return tree.getKnot(branch).contains(elem);
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
     } while (true);
   }
@@ -107,7 +107,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
           case KNOT:
             return tree.knotAt(0).head();
           default:
-            throw new AssertionError();
+            throw new AssertionError("unreachable");
         }
         nodeMap >>>= 1;
         leafMap >>>= 1;
@@ -153,7 +153,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
           }
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       elem = null;
       hash = 0;
@@ -225,7 +225,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
                      .setKnot(branch, newKnot);
         }
       default:
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
     }
   }
 
@@ -290,7 +290,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
                      .setKnot(branch, newKnot);
         }
       default:
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
     }
   }
 
@@ -453,7 +453,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
           i += 1;
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       nodeMap >>>= 1;
       leafMap >>>= 1;
@@ -469,17 +469,14 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Set<?>) {
-      final Set<?> that = (Set<?>) other;
-      if (this.size == that.size()) {
-        final Iterator<?> those = that.iterator();
-        while (those.hasNext()) {
-          if (!this.contains(those.next())) {
-            return false;
-          }
+    } else if (other instanceof Set<?> that && this.size == that.size()) {
+      final Iterator<?> those = that.iterator();
+      while (those.hasNext()) {
+        if (!this.contains(those.next())) {
+          return false;
         }
-        return true;
       }
+      return true;
     }
     return false;
   }
@@ -530,7 +527,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
             i += 1;
             break;
           default:
-            throw new AssertionError();
+            throw new AssertionError("unreachable");
         }
         nodeMap >>>= 1;
         leafMap >>>= 1;
@@ -566,7 +563,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
           i += 1;
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       nodeMap >>>= 1;
       leafMap >>>= 1;
@@ -606,7 +603,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
           i += 1;
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       nodeMap >>>= 1;
       leafMap >>>= 1;
@@ -758,7 +755,7 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
               this.push(tree.knotAt(this.getSlotIndex()));
               break;
             default:
-              throw new AssertionError();
+              throw new AssertionError("unreachable");
           }
         } else if (this.depth > 0) {
           this.pop();
@@ -773,7 +770,7 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
           this.pop();
         }
       } else {
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
       }
     } while (true);
   }
@@ -807,7 +804,7 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
               this.push(tree.knotAt(this.getSlotIndex()));
               break;
             default:
-              throw new AssertionError();
+              throw new AssertionError("unreachable");
           }
         } else if (this.depth > 0) {
           this.pop();
@@ -825,7 +822,7 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
           this.pop();
         }
       } else {
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
       }
     } while (true);
   }

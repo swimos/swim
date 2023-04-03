@@ -20,7 +20,7 @@ import swim.codec.Base16;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
-import swim.codec.ParseException;
+import swim.json.JsonException;
 import swim.json.JsonStringForm;
 import swim.util.Assume;
 
@@ -51,33 +51,37 @@ public final class ParseJsonString<B, T> extends Parse<T> {
     int c = 0;
     if (step == 1) {
       if (input.isCont() && input.head() == '"') {
+        try {
+          builder = form.stringBuilder();
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
         input.step();
-        builder = form.stringBuilder();
         step = 2;
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("string", input));
       }
     }
-    string: do {
+    do {
       if (step == 2) {
-        builder = Assume.nonNull(builder);
-        while (input.isCont()) {
-          c = input.head();
-          if (c >= 0x20 && c != '"' && c != '\\') {
-            input.step();
-            builder = form.appendCodePoint(builder, c);
-          } else {
-            break;
+        while (input.isCont() && (c = input.head()) >= 0x20 && c != '"' && c != '\\') {
+          try {
+            builder = form.appendCodePoint(Assume.nonNull(builder), c);
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
           }
+          input.step();
         }
         if (input.isCont()) {
           if (c == '"') {
-            input.step();
+            final T value;
             try {
-              return Parse.done(form.buildString(builder));
-            } catch (ParseException cause) {
-              return Parse.error(Diagnostic.message(cause.getMessage(), input), cause);
+              value = form.buildString(Assume.nonNull(builder));
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
             }
+            input.step();
+            return Parse.done(value);
           } else if (c == '\\') {
             input.step();
             step = 3;
@@ -89,37 +93,60 @@ public final class ParseJsonString<B, T> extends Parse<T> {
         }
       }
       if (step == 3) {
-        builder = Assume.nonNull(builder);
         if (input.isCont()) {
           c = input.head();
           if (c == '"' || c == '\'' || c == '/' || c == '\\') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), c);
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, c);
             step = 2;
             continue;
           } else if (c == 'b') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\b');
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\b');
             step = 2;
             continue;
           } else if (c == 'f') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\f');
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\f');
             step = 2;
             continue;
           } else if (c == 'n') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\n');
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\n');
             step = 2;
             continue;
           } else if (c == 'r') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\r');
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\r');
             step = 2;
             continue;
           } else if (c == 't') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\t');
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\t');
             step = 2;
             continue;
           } else if (c == 'u') {
@@ -132,31 +159,48 @@ public final class ParseJsonString<B, T> extends Parse<T> {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
-      if (step >= 4 && step < 8) {
-        builder = Assume.nonNull(builder);
-        do {
-          if (input.isCont()) {
-            c = input.head();
-            if (Base16.isDigit(c)) {
-              input.step();
-              escape = 16 * escape + Base16.decodeDigit(c);
-              if (step <= 6) {
-                step += 1;
-                continue;
-              } else {
-                builder = form.appendCodePoint(builder, escape);
-                escape = 0;
-                step = 2;
-                continue string;
-              }
-            } else {
-              return Parse.error(Diagnostic.expected("hex digit", input));
-            }
-          } else if (input.isDone()) {
-            return Parse.error(Diagnostic.expected("hex digit", input));
+      if (step == 4) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = Base16.decodeDigit(c);
+          input.step();
+          step = 5;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 5) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          input.step();
+          step = 6;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 6) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          input.step();
+          step = 7;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 7) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          try {
+            builder = form.appendCodePoint(Assume.nonNull(builder), escape);
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
           }
-          break;
-        } while (true);
+          escape = 0;
+          input.step();
+          step = 2;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
       }
       break;
     } while (true);

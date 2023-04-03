@@ -104,11 +104,11 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
       if (input.isCont() && Http.isTokenChar(c)) {
         final Parse<WsExtension> parseExtension = WsExtension.parse(input);
         if (parseExtension.isDone()) {
-          extensions = extensions.appended(parseExtension.getNonNull());
+          extensions = extensions.appended(parseExtension.getNonNullUnchecked());
         } else if (parseExtension.isError()) {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Extensions: " + value, parseExtension.getError());
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Extensions: " + value, parseExtension.getError());
         } else {
-          throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Extensions: " + value);
+          throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Extensions: " + value);
         }
       } else {
         break;
@@ -129,9 +129,9 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Extensions: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Extensions: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Extensions: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Extensions: " + value);
     }
     return extensions;
   }
@@ -144,7 +144,7 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
         output.write(',').write(' ');
       }
       extension = extensions.next();
-      extension.write(output).checkDone();
+      extension.write(output).assertDone();
     } while (extensions.hasNext());
     return output.get();
   }

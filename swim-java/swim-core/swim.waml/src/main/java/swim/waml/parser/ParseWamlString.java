@@ -20,8 +20,8 @@ import swim.codec.Base16;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
-import swim.codec.ParseException;
 import swim.util.Assume;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
 import swim.waml.WamlParser;
 import swim.waml.WamlStringForm;
@@ -77,7 +77,7 @@ public final class ParseWamlString<B, T> extends Parse<T> {
           parseAttr = parseAttr.consume(input);
         }
         if (parseAttr.isDone()) {
-          form = Assume.conforms(parseAttr.getNonNull());
+          form = Assume.conforms(parseAttr.getNonNullUnchecked());
           parseAttr = null;
           step = 3;
         } else if (parseAttr.isError()) {
@@ -85,13 +85,8 @@ public final class ParseWamlString<B, T> extends Parse<T> {
         }
       }
       if (step == 3) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '@') {
           step = 2;
@@ -103,17 +98,9 @@ public final class ParseWamlString<B, T> extends Parse<T> {
       break;
     } while (true);
     if (step == 4) {
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isWhitespace(c)) {
-          input.step();
-        } else {
-          break;
-        }
-      }
-      if (input.isCont() && c == '"') {
-        input.step();
+      if (input.isCont() && input.head() == '"') {
         quotes = 1;
+        input.step();
         step = 5;
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("string", input));
@@ -122,11 +109,15 @@ public final class ParseWamlString<B, T> extends Parse<T> {
     if (step == 5) {
       if (input.isCont()) {
         if (input.head() == '"') {
-          input.step();
           quotes = 2;
+          input.step();
           step = 6;
         } else {
-          builder = form.stringBuilder();
+          try {
+            builder = form.stringBuilder();
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
+          }
           step = 7;
         }
       } else if (input.isDone()) {
@@ -135,43 +126,48 @@ public final class ParseWamlString<B, T> extends Parse<T> {
     }
     if (step == 6) {
       if (input.isCont() && input.head() == '"') {
-        input.step();
-        builder = form.stringBuilder();
+        try {
+          builder = form.stringBuilder();
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
         quotes = 3;
+        input.step();
         step = 7;
       } else if (input.isReady()) {
-        if (builder == null) {
-          builder = form.stringBuilder();
-        }
         try {
+          if (builder == null) {
+            builder = form.stringBuilder();
+          }
           return Parse.done(form.buildString(builder));
-        } catch (ParseException cause) {
-          return Parse.error(Diagnostic.message(cause.getMessage(), input), cause);
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
         }
       }
     }
-    string: do {
+    do {
       if (step == 7) {
-        builder = Assume.nonNull(builder);
-        while (input.isCont()) {
-          c = input.head();
-          if (c >= 0x20 && c != '"' && c != '\\') {
-            input.step();
-            builder = form.appendCodePoint(builder, c);
-          } else {
-            break;
+        while (input.isCont() && (c = input.head()) >= 0x20 && c != '"' && c != '\\') {
+          try {
+            builder = form.appendCodePoint(Assume.nonNull(builder), c);
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
           }
+          input.step();
         }
         if (input.isCont()) {
           if (c == '"') {
-            input.step();
             if (quotes == 1) {
+              final T value;
               try {
-                return Parse.done(form.buildString(builder));
-              } catch (ParseException cause) {
-                return Parse.error(Diagnostic.message(cause.getMessage(), input), cause);
+                value = form.buildString(Assume.nonNull(builder));
+              } catch (WamlException cause) {
+                return Parse.diagnostic(input, cause);
               }
+              input.step();
+              return Parse.done(value);
             } else {
+              input.step();
               step = 8;
             }
           } else if (c == '\\') {
@@ -185,13 +181,16 @@ public final class ParseWamlString<B, T> extends Parse<T> {
         }
       }
       if (step == 8) {
-        builder = Assume.nonNull(builder);
         if (input.isCont()) {
           if (input.head() == '"') {
             input.step();
             step = 9;
           } else {
-            builder = form.appendCodePoint(builder, '"');
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '"');
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             step = 7;
             continue;
           }
@@ -200,18 +199,23 @@ public final class ParseWamlString<B, T> extends Parse<T> {
         }
       }
       if (step == 9) {
-        builder = Assume.nonNull(builder);
         if (input.isCont()) {
           if (input.head() == '"') {
-            input.step();
+            final T value;
             try {
-              return Parse.done(form.buildTextBlock(builder));
-            } catch (ParseException cause) {
-              return Parse.error(Diagnostic.message(cause.getMessage(), input), cause);
+              value = form.buildTextBlock(Assume.nonNull(builder));
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
             }
+            input.step();
+            return Parse.done(value);
           } else {
-            builder = form.appendCodePoint(builder, '"');
-            builder = form.appendCodePoint(builder, '"');
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '"');
+              builder = form.appendCodePoint(builder, '"');
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             step = 7;
             continue;
           }
@@ -220,37 +224,61 @@ public final class ParseWamlString<B, T> extends Parse<T> {
         }
       }
       if (step == 10) {
-        builder = Assume.nonNull(builder);
         if (input.isCont()) {
           c = input.head();
-          if (c == '"' || c == '\'' || c == '/' || c == '<' || c == '>' || c == '@' || c == '[' || c == '\\' || c == ']' || c == '{' || c == '}') {
+          if (c == '"' || c == '\'' || c == '/' || c == '<' || c == '>' || c == '@' ||
+              c == '[' || c == '\\' || c == ']' || c == '{' || c == '}') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), c);
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, c);
             step = 7;
             continue;
           } else if (c == 'b') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\b');
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\b');
             step = 7;
             continue;
           } else if (c == 'f') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\f');
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\f');
             step = 7;
             continue;
           } else if (c == 'n') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\n');
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\n');
             step = 7;
             continue;
           } else if (c == 'r') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\r');
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\r');
             step = 7;
             continue;
           } else if (c == 't') {
+            try {
+              builder = form.appendCodePoint(Assume.nonNull(builder), '\t');
+            } catch (WamlException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            builder = form.appendCodePoint(builder, '\t');
             step = 7;
             continue;
           } else if (c == 'u') {
@@ -263,31 +291,48 @@ public final class ParseWamlString<B, T> extends Parse<T> {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
-      if (step >= 11 && step < 15) {
-        builder = Assume.nonNull(builder);
-        do {
-          if (input.isCont()) {
-            c = input.head();
-            if (Base16.isDigit(c)) {
-              input.step();
-              escape = 16 * escape + Base16.decodeDigit(c);
-              if (step <= 10) {
-                step += 1;
-                continue;
-              } else {
-                builder = form.appendCodePoint(builder, escape);
-                escape = 0;
-                step = 7;
-                continue string;
-              }
-            } else {
-              return Parse.error(Diagnostic.expected("hex digit", input));
-            }
-          } else if (input.isDone()) {
-            return Parse.error(Diagnostic.expected("hex digit", input));
+      if (step == 11) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = Base16.decodeDigit(c);
+          input.step();
+          step = 12;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 12) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          input.step();
+          step = 13;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 13) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          input.step();
+          step = 14;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 14) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          try {
+            builder = form.appendCodePoint(Assume.nonNull(builder), escape);
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
           }
-          break;
-        } while (true);
+          escape = 0;
+          input.step();
+          step = 7;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
       }
       break;
     } while (true);

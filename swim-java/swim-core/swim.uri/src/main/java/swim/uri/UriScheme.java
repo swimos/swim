@@ -16,14 +16,16 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
-import swim.codec.ParseException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
-import swim.codec.WriteException;
+import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
@@ -92,27 +94,29 @@ public final class UriScheme extends UriPart implements Comparable<UriScheme>, T
     }
     final int n = name.length();
     if (n == 0) {
-      throw new WriteException(new Notation().append("Invalid scheme: ")
-                                             .appendSource(name).toString());
+      throw new IOException("blank scheme");
     }
     char c = name.charAt(0);
     if (Uri.isAlpha(c)) {
       output.append(c);
     } else {
-      throw new WriteException(new Notation().append("Invalid scheme: ")
-                                             .appendSource(name).toString());
+      throw new IOException(Notation.of("invalid scheme: ")
+                                    .appendSource(name)
+                                    .toString());
     }
     for (int i = 1; i < n; i += 1) {
       c = name.charAt(i);
       if (Uri.isSchemeChar(c)) {
         output.append(c);
       } else {
-        throw new WriteException(new Notation().append("Invalid scheme: ")
-                                               .appendSource(name).toString());
+        throw new IOException(Notation.of("invalid scheme: ")
+                                      .appendSource(name)
+                                      .toString());
       }
     }
   }
 
+  @IntoForm
   @Override
   public String toString() {
     return this.name != null ? this.name : "";
@@ -132,86 +136,90 @@ public final class UriScheme extends UriPart implements Comparable<UriScheme>, T
     }
   }
 
-  public static UriScheme parse(String part) {
+  @FromForm
+  public static @Nullable UriScheme from(String value) {
+    return UriScheme.parse(value).getOr(null);
+  }
+
+  public static Parse<UriScheme> parse(Input input) {
+    return ParseUriScheme.parse(input, null, 1);
+  }
+
+  public static Parse<UriScheme> parse(String part) {
     Objects.requireNonNull(part);
-    final CacheMap<String, UriScheme> cache = UriScheme.cache();
-    UriScheme scheme = cache.get(part);
-    if (scheme == null) {
-      final Input input = new StringInput(part);
-      scheme = UriScheme.parse(input);
-      if (input.isCont()) {
-        throw new ParseException(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        throw new ParseException(input.getError());
-      }
-      scheme = cache.put(part, scheme);
-    }
-    return scheme;
-  }
-
-  public static UriScheme parse(Input input) {
-    final StringBuilder builder = new StringBuilder();
-    int c = 0;
-    if (input.isCont()) {
-      c = input.head();
-      if (Uri.isAlpha(c)) {
-        input.step();
-        builder.append(Character.toLowerCase((char) c));
-      } else {
-        throw new ParseException(Diagnostic.expected("scheme", input));
-      }
-    } else if (input.isDone()) {
-      throw new ParseException(Diagnostic.expected("scheme", input));
-    }
-    while (input.isCont()) {
-      c = input.head();
-      if (Uri.isSchemeChar(c)) {
-        input.step();
-        builder.append(Character.toLowerCase((char) c));
-      } else {
-        break;
+    final CacheMap<String, Parse<UriScheme>> cache = UriScheme.cache();
+    Parse<UriScheme> parseScheme = cache.get(part);
+    if (parseScheme == null) {
+      final StringInput input = new StringInput(part);
+      parseScheme = UriScheme.parse(input).complete(input);
+      if (parseScheme.isDone()) {
+        parseScheme = cache.put(part, parseScheme);
       }
     }
-    if (input.isReady()) {
-      return UriScheme.name(builder.toString());
-    }
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
+    return parseScheme;
   }
 
-  public static UriScheme fromJsonString(String value) {
-    return UriScheme.parse(value);
-  }
+  private static @Nullable CacheMap<String, Parse<UriScheme>> cache;
 
-  public static String toJsonString(UriScheme scheme) {
-    return scheme.toString();
-  }
-
-  public static UriScheme fromWamlString(String value) {
-    return UriScheme.parse(value);
-  }
-
-  public static String toWamlString(UriScheme scheme) {
-    return scheme.toString();
-  }
-
-  private static @Nullable CacheMap<String, UriScheme> cache;
-
-  static CacheMap<String, UriScheme> cache() {
+  static CacheMap<String, Parse<UriScheme>> cache() {
     // Global cache is used in lieu of thread-local cache due to small number
     // of frequently used URI schemes.
     if (UriScheme.cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.uri.scheme.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 16;
       }
-      UriScheme.cache = new LruCacheMap<String, UriScheme>(cacheSize);
+      UriScheme.cache = new LruCacheMap<String, Parse<UriScheme>>(cacheSize);
     }
     return UriScheme.cache;
+  }
+
+}
+
+final class ParseUriScheme extends Parse<UriScheme> {
+
+  final @Nullable StringBuilder builder;
+  final int step;
+
+  ParseUriScheme(@Nullable StringBuilder builder, int step) {
+    this.builder = builder;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<UriScheme> consume(Input input) {
+    return ParseUriScheme.parse(input, this.builder, this.step);
+  }
+
+  static Parse<UriScheme> parse(Input input, @Nullable StringBuilder builder, int step) {
+    int c = 0;
+    if (step == 1) {
+      if (input.isCont() && Uri.isAlpha(c = input.head())) {
+        if (builder == null) {
+          builder = new StringBuilder();
+        }
+        builder.append(Character.toLowerCase((char) c));
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
+        return Parse.error(Diagnostic.expected("scheme", input));
+      }
+    }
+    if (step == 2) {
+      while (input.isCont() && Uri.isSchemeChar(c = input.head())) {
+        Assume.nonNull(builder).append(Character.toLowerCase((char) c));
+        input.step();
+      }
+      if (input.isReady()) {
+        return Parse.done(UriScheme.name(Assume.nonNull(builder).toString()));
+      }
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriScheme(builder, step);
   }
 
 }

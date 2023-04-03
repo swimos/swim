@@ -201,7 +201,7 @@ public class TimerWheelTests {
               scheduler.await(runLatch, 5000);
               shutdownLatch.countDown();
             } catch (BrokenBarrierException | InterruptedException cause) {
-              throw new JUnitException("Timer error", cause);
+              throw new JUnitException("timer error", cause);
             }
           }
         };
@@ -261,7 +261,7 @@ public class TimerWheelTests {
               scheduler.await(cancelLatch, 5000);
               shutdownLatch.countDown();
             } catch (BrokenBarrierException | InterruptedException cause) {
-              throw new JUnitException("Timer error", cause);
+              throw new JUnitException("timer error", cause);
             }
           }
         };
@@ -311,7 +311,7 @@ public class TimerWheelTests {
               }
               shutdownLatch.countDown();
             } catch (BrokenBarrierException | InterruptedException cause) {
-              throw new JUnitException("Timer error", cause);
+              throw new JUnitException("timer error", cause);
             }
           }
         };
@@ -325,87 +325,83 @@ public class TimerWheelTests {
 
   @Test
   @Tag("benchmark")
-  public void benchmarkTimers() {
+  public void benchmarkTimers() throws InterruptedException {
     final int threadCount = Runtime.getRuntime().availableProcessors();
     final int timerCount = 1000000;
     final int iterations = 10;
-    try {
-      long adt1 = 0L;
-      long arate1 = 0L;
-      long adt2 = 0L;
-      long arate2 = 0L;
-      for (int k = 0; k < iterations; k += 1) {
-        final TimerWheel scheduler = new TimerWheel(10, 512);
-        final AtomicInteger scheduleCount = new AtomicInteger(0);
-        final CountDownLatch runLatch = new CountDownLatch(timerCount);
-        final CountDownLatch exitLatch = new CountDownLatch(threadCount);
-        final CyclicBarrier barrier = new CyclicBarrier(threadCount);
-        final AtomicLong t0 = new AtomicLong();
-        final AtomicLong t1 = new AtomicLong();
-        for (int i = 0; i < threadCount; i += 1) {
-          new Thread() {
-            @Override
-            public void run() {
-              boolean interrupted = false;
-              try {
-                barrier.await();
-                scheduler.start();
-                t0.compareAndSet(0L, System.currentTimeMillis());
-                do {
-                  final int count = scheduleCount.getAndIncrement();
-                  if (count < timerCount) {
-                    scheduler.setTimer(0L, new AbstractTimer() {
-                      @Override
-                      public void run() {
-                        runLatch.countDown();
-                      }
-                    });
-                  } else {
-                    if (count == timerCount) {
-                      t1.set(System.currentTimeMillis());
+    long adt1 = 0L;
+    long arate1 = 0L;
+    long adt2 = 0L;
+    long arate2 = 0L;
+    for (int k = 0; k < iterations; k += 1) {
+      final TimerWheel scheduler = new TimerWheel(10, 512);
+      final AtomicInteger scheduleCount = new AtomicInteger(0);
+      final CountDownLatch runLatch = new CountDownLatch(timerCount);
+      final CountDownLatch exitLatch = new CountDownLatch(threadCount);
+      final CyclicBarrier barrier = new CyclicBarrier(threadCount);
+      final AtomicLong t0 = new AtomicLong();
+      final AtomicLong t1 = new AtomicLong();
+      for (int i = 0; i < threadCount; i += 1) {
+        new Thread() {
+          @Override
+          public void run() {
+            boolean interrupted = false;
+            try {
+              barrier.await();
+              scheduler.start();
+              t0.compareAndSet(0L, System.currentTimeMillis());
+              do {
+                final int count = scheduleCount.getAndIncrement();
+                if (count < timerCount) {
+                  scheduler.setTimer(0L, new AbstractTimer() {
+                    @Override
+                    public void run() {
+                      runLatch.countDown();
                     }
-                    runLatch.await();
-                    break;
+                  });
+                } else {
+                  if (count == timerCount) {
+                    t1.set(System.currentTimeMillis());
                   }
-                } while (true);
-                barrier.await();
-              } catch (InterruptedException e) {
-                interrupted = true;
-              } catch (BrokenBarrierException e) {
-                // swallow
-              } finally {
-                scheduler.stop();
-                exitLatch.countDown();
-              }
-              if (interrupted) {
-                this.interrupt();
-              }
+                  runLatch.await();
+                  break;
+                }
+              } while (true);
+              barrier.await();
+            } catch (InterruptedException cause) {
+              interrupted = true;
+            } catch (BrokenBarrierException cause) {
+              throw new AssertionError(cause);
+            } finally {
+              scheduler.stop();
+              exitLatch.countDown();
             }
-          }.start();
-        }
-        exitLatch.await();
-        final long t2 = System.currentTimeMillis();
-        final long dt1 = t1.get() - t0.get();
-        final long rate1 = (1000L * timerCount) / dt1;
-        System.out.println("Scheduled " + timerCount + " timers in " + dt1 + "ms (" + rate1 + "/s)");
-        final long dt2 = t2 - t0.get();
-        final long rate2 = (1000L * timerCount) / dt2;
-        System.out.println("Executed " + timerCount + " timers in " + dt2 + "ms (" + rate2 + "/s)");
-        adt1 += dt1;
-        arate1 += rate1;
-        adt2 += dt2;
-        arate2 += rate2;
+            if (interrupted) {
+              this.interrupt();
+            }
+          }
+        }.start();
       }
-      adt1 /= iterations;
-      arate1 /= iterations;
-      adt2 /= iterations;
-      arate2 /= iterations;
-      System.out.println();
-      System.out.println("Scheduled " + timerCount + " timers every " + adt1 + "ms (" + arate1 + "/s) on average from " + threadCount + " threads over " + iterations + " iterations");
-      System.out.println("Executed " + timerCount + " timers every " + adt2 + "ms (" + arate2 + "/s) on average from " + threadCount + " threads over " + iterations + " iterations");
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
+      exitLatch.await();
+      final long t2 = System.currentTimeMillis();
+      final long dt1 = t1.get() - t0.get();
+      final long rate1 = (1000L * timerCount) / dt1;
+      System.out.println("Scheduled " + timerCount + " timers in " + dt1 + "ms (" + rate1 + "/s)");
+      final long dt2 = t2 - t0.get();
+      final long rate2 = (1000L * timerCount) / dt2;
+      System.out.println("Executed " + timerCount + " timers in " + dt2 + "ms (" + rate2 + "/s)");
+      adt1 += dt1;
+      arate1 += rate1;
+      adt2 += dt2;
+      arate2 += rate2;
     }
+    adt1 /= iterations;
+    arate1 /= iterations;
+    adt2 /= iterations;
+    arate2 /= iterations;
+    System.out.println();
+    System.out.println("Scheduled " + timerCount + " timers every " + adt1 + "ms (" + arate1 + "/s) on average from " + threadCount + " threads over " + iterations + " iterations");
+    System.out.println("Executed " + timerCount + " timers every " + adt2 + "ms (" + arate2 + "/s) on average from " + threadCount + " threads over " + iterations + " iterations");
   }
 
 }

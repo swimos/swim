@@ -30,7 +30,7 @@ public interface Encoder<T> {
     return this.encode(BinaryOutputBuffer.full(), value);
   }
 
-  default long sizeOf(@Nullable T value) {
+  default long sizeOf(@Nullable T value) throws EncodeException {
     final ByteBuffer buffer = ByteBuffer.allocate(1024);
     final BinaryOutputBuffer output = new BinaryOutputBuffer(buffer);
     Encode<?> encode = this.encode(output, value);

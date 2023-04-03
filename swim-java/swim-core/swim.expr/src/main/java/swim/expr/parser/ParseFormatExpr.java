@@ -64,29 +64,23 @@ public final class ParseFormatExpr extends Parse<FormatExpr> {
                                         @Nullable Parse<Term> parsePart,
                                         int escape, int step) {
     int c = 0;
-    expr: do {
+    do {
       if (step == 1) {
-        while (input.isCont()) {
-          c = input.head();
-          if (c != '\\' && c != '{' && c != '}') {
-            input.step();
-            if (stringBuilder == null) {
-              stringBuilder = new StringBuilder();
-            }
-            stringBuilder.appendCodePoint(c);
-          } else {
-            break;
+        while (input.isCont() && (c = input.head()) != '\\' && c != '{' && c != '}') {
+          if (stringBuilder == null) {
+            stringBuilder = new StringBuilder();
           }
+          stringBuilder.appendCodePoint(c);
+          input.step();
         }
         if (input.isCont()) {
           if (c == '\\') {
-            input.step();
             if (stringBuilder == null) {
               stringBuilder = new StringBuilder();
             }
+            input.step();
             step = 2;
           } else if (c == '{') {
-            input.step();
             if (stringBuilder != null) {
               if (partsBuilder == null) {
                 partsBuilder = new ArrayBuilder<Object, Object[]>(Object.class);
@@ -94,6 +88,7 @@ public final class ParseFormatExpr extends Parse<FormatExpr> {
               partsBuilder.add(stringBuilder.toString());
               stringBuilder = null;
             }
+            input.step();
             step = 7;
           } else {
             return Parse.error(Diagnostic.unexpected(input));
@@ -110,37 +105,37 @@ public final class ParseFormatExpr extends Parse<FormatExpr> {
         }
       }
       if (step == 2) {
-        stringBuilder = Assume.nonNull(stringBuilder);
         if (input.isCont()) {
           c = input.head();
-          if (c == '"' || c == '\'' || c == '/' || c == '<' || c == '>' || c == '@' || c == '[' || c == '\\' || c == ']' || c == '{' || c == '}') {
+          if (c == '"' || c == '\'' || c == '/' || c == '<' || c == '>' || c == '@' ||
+              c == '[' || c == '\\' || c == ']' || c == '{' || c == '}') {
+            Assume.nonNull(stringBuilder).appendCodePoint(c);
             input.step();
-            stringBuilder.appendCodePoint(c);
             step = 1;
             continue;
           } else if (c == 'b') {
+            Assume.nonNull(stringBuilder).append('\b');
             input.step();
-            stringBuilder.append('\b');
             step = 1;
             continue;
           } else if (c == 'f') {
+            Assume.nonNull(stringBuilder).append('\f');
             input.step();
-            stringBuilder.append('\f');
             step = 1;
             continue;
           } else if (c == 'n') {
+            Assume.nonNull(stringBuilder).append('\n');
             input.step();
-            stringBuilder.append('\n');
             step = 1;
             continue;
           } else if (c == 'r') {
+            Assume.nonNull(stringBuilder).append('\r');
             input.step();
-            stringBuilder.append('\r');
             step = 1;
             continue;
           } else if (c == 't') {
+            Assume.nonNull(stringBuilder).append('\t');
             input.step();
-            stringBuilder.append('\t');
             step = 1;
             continue;
           } else if (c == 'u') {
@@ -153,31 +148,44 @@ public final class ParseFormatExpr extends Parse<FormatExpr> {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
-      if (step >= 3 && step < 7) {
-        stringBuilder = Assume.nonNull(stringBuilder);
-        do {
-          if (input.isCont()) {
-            c = input.head();
-            if (Base16.isDigit(c)) {
-              input.step();
-              escape = 16 * escape + Base16.decodeDigit(c);
-              if (step <= 5) {
-                step += 1;
-                continue;
-              } else {
-                stringBuilder.appendCodePoint(escape);
-                escape = 0;
-                step = 1;
-                continue expr;
-              }
-            } else {
-              return Parse.error(Diagnostic.expected("hex digit", input));
-            }
-          } else if (input.isDone()) {
-            return Parse.error(Diagnostic.expected("hex digit", input));
-          }
-          break;
-        } while (true);
+      if (step == 3) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = Base16.decodeDigit(c);
+          input.step();
+          step = 4;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 4) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          input.step();
+          step = 5;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 5) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          input.step();
+          step = 6;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 6) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          escape = 16 * escape + Base16.decodeDigit(c);
+          Assume.nonNull(stringBuilder).appendCodePoint(escape);
+          escape = 0;
+          input.step();
+          step = 1;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
       }
       if (step == 7) {
         if (parsePart == null) {
@@ -192,23 +200,16 @@ public final class ParseFormatExpr extends Parse<FormatExpr> {
         }
       }
       if (step == 8) {
-        partsBuilder = Assume.nonNull(partsBuilder);
-        parsePart = Assume.nonNull(parsePart);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '}') {
-          input.step();
           if (partsBuilder == null) {
             partsBuilder = new ArrayBuilder<Object, Object[]>(Object.class);
           }
-          partsBuilder.add(parsePart.getNonNull());
+          partsBuilder.add(Assume.nonNull(parsePart).getNonNullUnchecked());
           parsePart = null;
+          input.step();
           step = 1;
           continue;
         } else if (input.isReady()) {

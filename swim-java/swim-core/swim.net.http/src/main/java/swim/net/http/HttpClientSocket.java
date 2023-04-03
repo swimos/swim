@@ -206,7 +206,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public boolean connect(InetSocketAddress remoteAddress) {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.connect(remoteAddress);
   }
@@ -215,7 +215,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public boolean connect(String address, int port) {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.connect(address, port);
   }
@@ -318,13 +318,13 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     int writeIndex = (int) REQUESTER_WRITE_INDEX.getAcquire(this);
     if (readIndex == writeIndex) {
       // The requester queue is empty.
-      throw new IllegalStateException("Inconsistent request pipeline");
+      throw new IllegalStateException("inconsistent request pipeline");
     }
 
     // Clear the current request handler, if it's the head of the requester queue.
     if (REQUESTER_ARRAY.compareAndExchange(this.requesters, readIndex, handler, null) != handler) {
       // The request handler was not the head of the requester queue.
-      throw new IllegalStateException("Inconsistent request pipeline");
+      throw new IllegalStateException("inconsistent request pipeline");
     }
     // Increment the read index to free up the dequeued request handler's old slot.
     final int newReadIndex = (readIndex + 1) % this.requesters.length;
@@ -343,7 +343,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public boolean requestWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.requestWrite();
   }
@@ -352,7 +352,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public boolean cancelWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.cancelWrite();
   }
@@ -361,7 +361,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public boolean triggerWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.triggerWrite();
   }
@@ -419,7 +419,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   int write(ByteBuffer writeBuffer) throws IOException {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.write(writeBuffer);
   }
@@ -594,13 +594,13 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
     int writeIndex = (int) RESPONDER_WRITE_INDEX.getAcquire(this);
     if (readIndex == writeIndex) {
       // The responder queue is empty.
-      throw new IllegalStateException("Inconsistent response pipeline");
+      throw new IllegalStateException("inconsistent response pipeline");
     }
 
     // Clear the current response handler, if it's the head of the responder queue.
     if (REQUESTER_ARRAY.compareAndExchange(this.responders, readIndex, handler, null) != handler) {
       // The response handler was not the head of the responder queue.
-      throw new IllegalStateException("Inconsistent response pipeline");
+      throw new IllegalStateException("inconsistent response pipeline");
     }
     // Increment the read index to free up the dequeued response handler's old slot.
     final int newReadIndex = (readIndex + 1) % this.responders.length;
@@ -626,7 +626,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public boolean requestRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.requestRead();
   }
@@ -635,7 +635,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public boolean cancelRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.cancelRead();
   }
@@ -644,7 +644,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public boolean triggerRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.triggerRead();
   }
@@ -692,7 +692,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   int read(ByteBuffer readBuffer) throws IOException {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     return context.read(readBuffer);
   }
@@ -809,7 +809,7 @@ public class HttpClientSocket implements NetSocket, FlowContext, HttpClientConte
   public void become(NetSocket socket) {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound client");
+      throw new IllegalStateException("unbound client");
     }
     context.become(socket);
   }

@@ -79,7 +79,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
     if (level != null) {
       try {
         this.level = Severity.parse(level);
-      } catch (IllegalArgumentException e) {
+      } catch (IllegalArgumentException cause) {
         System.err.println("Unknown severity level: " + level);
       }
     }
@@ -136,7 +136,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
     final Class<?> handlerClass;
     try {
       handlerClass = Class.forName(handlerClassName);
-    } catch (ClassNotFoundException e) {
+    } catch (ClassNotFoundException cause) {
       System.err.println("Unknown log handler class " + handlerClassName);
       return;
     }
@@ -149,7 +149,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
     final LogSubscriber handler;
     try {
       handler = (LogSubscriber) handlerClass.getDeclaredConstructor().newInstance();
-    } catch (ReflectiveOperationException e) {
+    } catch (ReflectiveOperationException cause) {
       System.err.println("Failed to instantiate log handler class " + handlerClassName);
       return;
     }
@@ -273,7 +273,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
     Objects.requireNonNull(subtopic);
     final int length = subtopic.length();
     if (length == 0) {
-      throw new IllegalArgumentException("Blank logger subtopic");
+      throw new IllegalArgumentException("blank logger subtopic");
     }
     Logger logger = this;
     int dotIndex = -1;
@@ -282,18 +282,18 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
       final int c = index < length ? subtopic.codePointAt(index) : -1;
       if (c == '.' || c == -1) {
         if (index == dotIndex + 1) {
-          throw new IllegalArgumentException(new Notation().append("Empty identifier in logger subtopic: ")
-                                                           .appendSource(subtopic)
-                                                           .toString());
+          throw new IllegalArgumentException(Notation.of("empty identifier in logger subtopic: ")
+                                                     .appendSource(subtopic)
+                                                     .toString());
         }
         logger = logger.getDirectChild(subtopic.substring(dotIndex + 1, index));
         dotIndex = index;
       } else if (!Logger.isIdentifierChar(c)) {
-        throw new IllegalArgumentException(new Notation().append("Invalid identifier character (")
-                                                         .appendSourceCodePoint(c)
-                                                         .append(") in logger subtopic: ")
-                                                         .appendSource(subtopic)
-                                                         .toString());
+        throw new IllegalArgumentException(Notation.of("invalid identifier character (")
+                                                   .appendSourceCodePoint(c)
+                                                   .append(") in logger subtopic: ")
+                                                   .appendSource(subtopic)
+                                                   .toString());
       }
       if (index < length) {
         index = subtopic.offsetByCodePoints(index, 1);
@@ -415,7 +415,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
         newSubscribers[n] = subscriber;
         newSubscribersRef = newSubscribers;
       } else {
-        throw new AssertionError(); // unreachable
+        throw new AssertionError("unreachable");
       }
       subscribersRef = SUBSCRIBERS.compareAndExchangeRelease(this, oldSubscribersRef, newSubscribersRef);
       if (subscribersRef == oldSubscribersRef) {
@@ -467,7 +467,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
           newSubscribersRef = newSubscribers;
         }
       } else {
-        throw new AssertionError(); // unreachable
+        throw new AssertionError("unreachable");
       }
       subscribersRef = SUBSCRIBERS.compareAndExchangeRelease(this, oldSubscribersRef, newSubscribersRef);
       if (subscribersRef == oldSubscribersRef) {
@@ -549,7 +549,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
         }
       }
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
   }
 

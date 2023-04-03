@@ -20,6 +20,7 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
 import swim.waml.WamlIdentifierForm;
 import swim.waml.WamlParser;
@@ -70,7 +71,7 @@ public final class ParseWamlIdentifier<T> extends Parse<T> {
           parseAttr = parseAttr.consume(input);
         }
         if (parseAttr.isDone()) {
-          form = Assume.conforms(parseAttr.getNonNull());
+          form = Assume.conforms(parseAttr.getNonNullUnchecked());
           parseAttr = null;
           step = 3;
         } else if (parseAttr.isError()) {
@@ -78,13 +79,8 @@ public final class ParseWamlIdentifier<T> extends Parse<T> {
         }
       }
       if (step == 3) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '@') {
           step = 2;
@@ -96,33 +92,26 @@ public final class ParseWamlIdentifier<T> extends Parse<T> {
       break;
     } while (true);
     if (step == 4) {
-      if (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierStartChar(c)) {
-          input.step();
-          builder = new StringBuilder();
-          builder.appendCodePoint(c);
-          step = 5;
-        } else {
-          return Parse.error(Diagnostic.expected("identifier", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && parser.isIdentifierStartChar(c = input.head())) {
+        builder = new StringBuilder();
+        builder.appendCodePoint(c);
+        input.step();
+        step = 5;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("identifier", input));
       }
     }
     if (step == 5) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierChar(c)) {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isIdentifierChar(c = input.head())) {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
-        return Parse.done(form.identifierValue(builder.toString(), parser));
+        try {
+          return Parse.done(form.identifierValue(Assume.nonNull(builder).toString(), parser));
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (input.isError()) {

@@ -148,7 +148,7 @@ final class DecodeHttpUnsized<T> extends Decode<HttpUnsized<T>> {
       decodePayload = decodePayload.consume(input);
     }
     if (decodePayload.isDone()) {
-      return Decode.done(HttpUnsized.of(decodePayload.get(), transcoder));
+      return Decode.done(HttpUnsized.of(decodePayload.getUnchecked(), transcoder));
     } else if (decodePayload.isError()) {
       return decodePayload.asError();
     }
@@ -188,7 +188,7 @@ final class EncodeHttpUnsized<T> extends Encode<HttpUnsized<T>> {
       return encode.asError();
     }
     if (output.isDone()) {
-      return Encode.error(new EncodeException("Truncated encode"));
+      return Encode.error(new EncodeException("truncated encode"));
     } else if (output.isError()) {
       return Encode.error(output.getError());
     }

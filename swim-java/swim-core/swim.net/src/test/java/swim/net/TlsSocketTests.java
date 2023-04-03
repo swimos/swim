@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TlsSocketTests {
 
   @Test
-  public void testConnect() {
+  public void testConnect() throws InterruptedException {
     final CountDownLatch clientOpenLatch = new CountDownLatch(1);
     final CountDownLatch serverOpenLatch = new CountDownLatch(1);
     final CountDownLatch serverBindLatch = new CountDownLatch(1);
@@ -82,8 +82,6 @@ public class TlsSocketTests {
       driver.bindTlsSocket(clientSocket).connect("127.0.0.1", 53556);
       serverOpenLatch.await();
       clientOpenLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -91,7 +89,7 @@ public class TlsSocketTests {
   }
 
   @Test
-  public void testClientConnectError() {
+  public void testClientConnectError() throws InterruptedException {
     final CountDownLatch clientCloseLatch = new CountDownLatch(1);
 
     final TransportDriver driver = new TransportDriver();
@@ -112,8 +110,6 @@ public class TlsSocketTests {
 
       driver.bindTlsSocket(clientSocket).connect("127.0.0.1", 53556);
       clientCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -121,7 +117,7 @@ public class TlsSocketTests {
   }
 
   @Test
-  public void testClientCloseOnConnect() {
+  public void testClientCloseOnConnect() throws InterruptedException {
     final CountDownLatch clientOpenLatch = new CountDownLatch(1);
     final CountDownLatch clientCloseLatch = new CountDownLatch(1);
     final CountDownLatch serverOpenLatch = new CountDownLatch(1);
@@ -192,8 +188,6 @@ public class TlsSocketTests {
       clientCloseLatch.await();
       serverOpenLatch.await();
       serverCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -201,7 +195,7 @@ public class TlsSocketTests {
   }
 
   @Test
-  public void testServerCloseOnConnect() {
+  public void testServerCloseOnConnect() throws InterruptedException {
     final CountDownLatch clientOpenLatch = new CountDownLatch(1);
     final CountDownLatch clientCloseLatch = new CountDownLatch(1);
     final CountDownLatch serverOpenLatch = new CountDownLatch(1);
@@ -272,8 +266,6 @@ public class TlsSocketTests {
       clientCloseLatch.await();
       serverOpenLatch.await();
       serverCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();
@@ -281,7 +273,7 @@ public class TlsSocketTests {
   }
 
   @RepeatedTest(100)
-  public void testEcho() {
+  public void testEcho() throws InterruptedException {
     final CountDownLatch clientWriteLatch = new CountDownLatch(1);
     final CountDownLatch serverReadLatch = new CountDownLatch(1);
     final CountDownLatch serverWriteLatch = new CountDownLatch(1);
@@ -303,7 +295,8 @@ public class TlsSocketTests {
       public void didOpen() {
         try {
           this.writeBuffer = ByteBuffer.wrap(payload.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException cause) {
+          throw new AssertionError(cause);
         }
         this.readBuffer = ByteBuffer.allocate(16 * 1024);
         this.requestRead();
@@ -419,8 +412,6 @@ public class TlsSocketTests {
       clientReadLatch.await();
       clientCloseLatch.await();
       serverCloseLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();

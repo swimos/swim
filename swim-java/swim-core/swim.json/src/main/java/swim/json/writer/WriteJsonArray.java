@@ -21,6 +21,7 @@ import swim.codec.Output;
 import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.json.JsonArrayForm;
+import swim.json.JsonException;
 import swim.json.JsonWriter;
 
 @Internal
@@ -60,7 +61,11 @@ public final class WriteJsonArray<E> extends Write<Object> {
       if (step == 2) {
         if (write == null) {
           if (elements.hasNext()) {
-            write = form.elementForm().write(output, elements.next(), writer);
+            try {
+              write = form.elementForm().write(output, elements.next(), writer);
+            } catch (JsonException cause) {
+              return Write.error(cause);
+            }
           } else {
             step = 5;
             break;
@@ -103,7 +108,7 @@ public final class WriteJsonArray<E> extends Write<Object> {
       return Write.done();
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

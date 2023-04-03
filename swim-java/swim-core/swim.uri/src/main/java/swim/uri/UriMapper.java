@@ -56,22 +56,12 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
 
   public abstract UriMapper<T> getSuffix(Uri uri);
 
-  public UriMapper<T> getSuffix(String uri) {
-    return this.getSuffix(Uri.parse(uri));
-  }
-
   public abstract @Nullable T get(Uri uri);
-
-  public @Nullable T get(String uri) {
-    return this.get(Uri.parse(uri));
-  }
 
   @Override
   public @Nullable T get(Object key) {
     if (key instanceof Uri) {
       return this.get((Uri) key);
-    } else if (key instanceof String) {
-      return this.get((String) key);
     } else {
       return null;
     }
@@ -103,23 +93,7 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
     return this.merged(UriMapper.mapping(pattern, value));
   }
 
-  public UriMapper<T> updated(UriPattern pattern, T value) {
-    return this.updated(pattern.toUri(), value);
-  }
-
-  public UriMapper<T> updated(String pattern, T value) {
-    return this.updated(Uri.parse(pattern), value);
-  }
-
   public abstract UriMapper<T> removed(Uri pattern);
-
-  public UriMapper<T> removed(UriPattern pattern) {
-    return this.removed(pattern.toUri());
-  }
-
-  public UriMapper<T> removed(String pattern) {
-    return this.removed(Uri.parse(pattern));
-  }
 
   public abstract UriMapper<T> unmerged(UriMapper<T> that);
 
@@ -180,14 +154,6 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
     return UriSchemeMapper.compile(pattern, pattern.scheme(), pattern.authority(),
                                    pattern.path(), pattern.query(),
                                    pattern.fragment(), value);
-  }
-
-  public static <T> UriMapper<T> mapping(UriPattern pattern, T value) {
-    return UriMapper.mapping(pattern.toUri(), value);
-  }
-
-  public static <T> UriMapper<T> mapping(String uriString, T value) {
-    return UriMapper.mapping(Uri.parse(uriString), value);
   }
 
 }

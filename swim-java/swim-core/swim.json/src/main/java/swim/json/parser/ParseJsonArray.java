@@ -20,6 +20,7 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.json.JsonArrayForm;
+import swim.json.JsonException;
 import swim.json.JsonParser;
 import swim.util.Assume;
 
@@ -54,29 +55,33 @@ public final class ParseJsonArray<E, B, T> extends Parse<T> {
     int c = 0;
     if (step == 1) {
       if (input.isCont() && input.head() == '[') {
-        input.step();
         if (builder == null) {
-          builder = form.arrayBuilder();
+          try {
+            builder = form.arrayBuilder();
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         }
+        input.step();
         step = 2;
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected('[', input));
       }
     }
     if (step == 2) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isWhitespace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isWhitespace(c = input.head())) {
+        input.step();
       }
       if (input.isCont()) {
         if (c == ']') {
+          final T array;
+          try {
+            array = form.buildArray(Assume.nonNull(builder));
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
+          }
           input.step();
-          return Parse.done(form.buildArray(builder));
+          return Parse.done(array);
         } else {
           step = 3;
         }
@@ -86,14 +91,21 @@ public final class ParseJsonArray<E, B, T> extends Parse<T> {
     }
     do {
       if (step == 3) {
-        builder = Assume.nonNull(builder);
         if (parseElement == null) {
-          parseElement = parser.parseExpr(input, form.elementForm());
+          try {
+            parseElement = parser.parseExpr(input, form.elementForm());
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         } else {
           parseElement = parseElement.consume(input);
         }
         if (parseElement.isDone()) {
-          builder = form.appendElement(builder, parseElement.get());
+          try {
+            builder = form.appendElement(Assume.nonNull(builder), parseElement.getUnchecked());
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
+          }
           parseElement = null;
           step = 4;
         } else if (parseElement.isError()) {
@@ -101,28 +113,36 @@ public final class ParseJsonArray<E, B, T> extends Parse<T> {
         }
       }
       if (step == 4) {
-        builder = Assume.nonNull(builder);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isWhitespace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == ',') {
             input.step();
-            step = 3;
-            continue;
+            step = 5;
           } else if (c == ']') {
+            final T array;
+            try {
+              array = form.buildArray(Assume.nonNull(builder));
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            return Parse.done(form.buildArray(builder));
+            return Parse.done(array);
           } else {
             return Parse.error(Diagnostic.expected("',' or ']'", input));
           }
         } else if (input.isDone()) {
           return Parse.error(Diagnostic.expected(']', input));
+        }
+      }
+      if (step == 5) {
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
+        }
+        if (input.isReady()) {
+          step = 3;
+          continue;
         }
       }
       break;

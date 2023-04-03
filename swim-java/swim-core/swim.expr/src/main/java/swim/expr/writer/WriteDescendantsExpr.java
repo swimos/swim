@@ -113,12 +113,11 @@ public final class WriteDescendantsExpr extends Write<Object> {
       return Write.done();
     }
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }
-    return new WriteDescendantsExpr(writer, form, scope,
-                                    precedence, write, step);
+    return new WriteDescendantsExpr(writer, form, scope, precedence, write, step);
   }
 
 }

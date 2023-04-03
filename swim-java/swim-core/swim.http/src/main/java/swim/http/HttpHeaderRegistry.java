@@ -54,7 +54,7 @@ public class HttpHeaderRegistry implements ToSource {
     do {
       int index = providers.length - 1;
       while (index >= 0) {
-        if (provider.priority() < providers[index].priority()) {
+        if (provider.priority() > providers[index].priority()) {
           index -= 1;
         } else {
           index += 1;
@@ -84,26 +84,29 @@ public class HttpHeaderRegistry implements ToSource {
     final ServiceLoader<HttpHeaderProvider> serviceLoader = ServiceLoader.load(HttpHeaderProvider.class, HttpHeaderRegistry.class.getClassLoader());
     final Iterator<ServiceLoader.Provider<HttpHeaderProvider>> serviceProviders = serviceLoader.stream().iterator();
     while (serviceProviders.hasNext()) {
-      final ServiceLoader.Provider<HttpHeaderProvider> serviceProvider = serviceProviders.next();
-      final Class<? extends HttpHeaderProvider> providerClass = serviceProvider.type();
-      HttpHeaderProvider provider = null;
-
-      // public static HttpHeaderProvider provider();
-      try {
-        final Method method = providerClass.getDeclaredMethod("provider");
-        if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-            && HttpHeaderProvider.class.isAssignableFrom(method.getReturnType())) {
-          provider = (HttpHeaderProvider) method.invoke(null);
-        }
-      } catch (ReflectiveOperationException cause) {
-        // swallow
-      }
-
-      if (provider == null) {
-        provider = serviceProvider.get();
-      }
-      this.addProvider(provider);
+      this.loadExtension(serviceProviders.next());
     }
+  }
+
+  void loadExtension(ServiceLoader.Provider<HttpHeaderProvider> serviceProvider) {
+    final Class<? extends HttpHeaderProvider> providerClass = serviceProvider.type();
+    HttpHeaderProvider provider = null;
+
+    // public static HttpHeaderProvider provider();
+    try {
+      final Method method = providerClass.getDeclaredMethod("provider");
+      if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
+          && HttpHeaderProvider.class.isAssignableFrom(method.getReturnType())) {
+        provider = (HttpHeaderProvider) method.invoke(null);
+      }
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    if (provider == null) {
+      provider = serviceProvider.get();
+    }
+    this.addProvider(provider);
   }
 
   public StringTrieMap<HttpHeaderType<?, ?>> headerTypes() {
@@ -122,10 +125,12 @@ public class HttpHeaderRegistry implements ToSource {
     StringTrieMap<HttpHeaderType<?, ?>> headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.getOpaque(this);
     do {
       final StringTrieMap<HttpHeaderType<?, ?>> oldHeaderTypes = headerTypes;
-      final StringTrieMap<HttpHeaderType<?, ?>> newHeaderTypes = oldHeaderTypes.updated(headerType.name(), headerType);
-      headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.compareAndExchangeRelease(this, oldHeaderTypes, newHeaderTypes);
-      if (headerTypes == oldHeaderTypes) {
-        break;
+      if (!oldHeaderTypes.containsKey(headerType.name())) {
+        final StringTrieMap<HttpHeaderType<?, ?>> newHeaderTypes = oldHeaderTypes.updated(headerType.name(), headerType);
+        headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.compareAndExchangeRelease(this, oldHeaderTypes, newHeaderTypes);
+        if (headerTypes == oldHeaderTypes) {
+          break;
+        }
       }
     } while (true);
   }

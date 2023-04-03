@@ -44,26 +44,26 @@ public final class HttpAssertions {
   }
 
   static String describeParser(String string, int split, int offset) {
-    final Notation notation = new Notation();
+    final Notation notation = Notation.of();
     if (offset < split) {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, offset));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(offset, split));
-      notation.append(" + ");
-      notation.appendSource(string.substring(split));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, offset))
+              .append("; remaining: ")
+              .appendSource(string.substring(offset, split))
+              .append(" + ")
+              .appendSource(string.substring(split));
     } else if (offset > split) {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, split));
-      notation.append(" + ");
-      notation.appendSource(string.substring(split, offset));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(offset));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, split))
+              .append(" + ")
+              .appendSource(string.substring(split, offset))
+              .append("; remaining: ")
+              .appendSource(string.substring(offset));
     } else {
-      notation.append("consumed: ");
-      notation.appendSource(string.substring(0, split));
-      notation.append("; remaining: ");
-      notation.appendSource(string.substring(split));
+      notation.append("consumed: ")
+              .appendSource(string.substring(0, split))
+              .append("; remaining: ")
+              .appendSource(string.substring(split));
     }
     return notation.toString();
   }
@@ -80,7 +80,7 @@ public final class HttpAssertions {
       parse = parse.consume(input);
 
       if (parse.isDone()) {
-        final Object actual = parse.get();
+        final Object actual = parse.getUnchecked();
         if (!Objects.equals(expected, actual)) {
           assertEquals(expected, actual, HttpAssertions.describeParser(string, split, (int) input.offset()));
         }
@@ -108,12 +108,12 @@ public final class HttpAssertions {
       input.limit(n).asLast(true);
       decode = decode.consume(input);
       if (decode.isError()) {
-        throw new JUnitException("Decode failed", decode.getError());
+        throw new JUnitException("decode failed", decode.getError());
       }
       assertFalse(decode.isCont());
       assertTrue(decode.isDone());
       assertFalse(decode.isError());
-      assertEquals(expected, decode.get());
+      assertEquals(expected, decode.getUnchecked());
     }
   }
 
@@ -130,7 +130,7 @@ public final class HttpAssertions {
       output.limit(output.capacity()).asLast(true);
       write = write.produce(output);
       if (write.isError()) {
-        throw new JUnitException("Write failure", write.getError());
+        throw new JUnitException("write failed", write.getError());
       }
       assertFalse(write.isCont());
       assertTrue(write.isDone());
@@ -153,18 +153,19 @@ public final class HttpAssertions {
       encode = encode.produce(output);
     }
     if (encode.isError()) {
-      throw new JUnitException("Encode failure", encode.getError());
+      throw new JUnitException("encode failed", encode.getError());
     }
     assertFalse(encode.isCont());
     assertTrue(encode.isDone());
     actual.flip();
     if (!actual.equals(expected)) {
-      final Notation notation = new Notation();
-      notation.append("expected ");
-      notation.append(new String(expected.array(), expected.arrayOffset(), expected.remaining(), Charset.forName("UTF-8")));
-      notation.append(", but found ");
-      notation.append(new String(actual.array(), actual.arrayOffset(), actual.remaining(), Charset.forName("UTF-8")));
-      fail(notation.toString());
+      fail(Notation.of().append("expected ")
+                        .append(new String(expected.array(), expected.arrayOffset(),
+                                           expected.remaining(), Charset.forName("UTF-8")))
+                        .append(", but found ")
+                        .append(new String(actual.array(), actual.arrayOffset(),
+                                           actual.remaining(), Charset.forName("UTF-8")))
+                        .toString());
     }
   }
 

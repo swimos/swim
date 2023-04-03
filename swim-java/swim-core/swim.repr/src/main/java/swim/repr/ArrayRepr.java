@@ -55,7 +55,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   @Override
   public void setAttrs(Attrs attrs) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.attrs = attrs;
   }
@@ -175,7 +175,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public Repr set(int index, Repr element) {
     Objects.requireNonNull(element);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     if (index < 0 || index >= n) {
@@ -211,7 +211,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public boolean add(Repr element) {
     Objects.requireNonNull(element);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     Repr[] array = this.array;
@@ -231,7 +231,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public boolean addAll(Collection<? extends Repr> elements) {
     Objects.requireNonNull(elements);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     int n = this.size;
     final int k = elements.size();
@@ -268,7 +268,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public void add(int index, Repr element) {
     Objects.requireNonNull(element);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     if (index < 0 || index > n) {
@@ -293,7 +293,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public boolean addAll(int index, Collection<? extends Repr> elements) {
     Objects.requireNonNull(elements);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     if (index < 0 || index > n) {
@@ -325,7 +325,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   @Override
   public Repr remove(int index) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     if (index < 0 || index >= n) {
@@ -351,7 +351,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   @Override
   public boolean remove(@Nullable Object element) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int index = this.indexOf(element);
     if (index >= 0) {
@@ -389,7 +389,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public boolean removeAll(Collection<?> elements) {
     Objects.requireNonNull(elements);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     Repr[] array = this.array;
@@ -431,7 +431,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public boolean retainAll(Collection<?> elements) {
     Objects.requireNonNull(elements);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     final int n = this.size;
     Repr[] array = this.array;
@@ -472,7 +472,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   @Override
   public void clear() {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      throw new UnsupportedOperationException("Immutable");
+      throw new UnsupportedOperationException("immutable");
     }
     this.array = EMPTY_ARRAY;
     this.size = 0;
@@ -660,21 +660,16 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
     return new ArrayRepr(ALIASED_FLAG, 0, Attrs.empty(), EMPTY_ARRAY);
   }
 
-  public static ArrayRepr of(@Nullable Object element) {
-    return new ArrayRepr(0, 1, Attrs.empty(), new Repr[] {Repr.from(element)});
+  public static ArrayRepr of(Repr element) {
+    return new ArrayRepr(0, 1, Attrs.empty(), new Repr[] {element});
   }
 
-  public static ArrayRepr of(@Nullable Object... elements) {
+  public static ArrayRepr of(Repr... elements) {
     Objects.requireNonNull(elements);
-    final int size = elements.length;
-    final Repr[] array = new Repr[size];
-    for (int i = 0; i < size; i += 1) {
-      array[i] = Repr.from(elements[i]);
-    }
-    return new ArrayRepr(0, size, Attrs.empty(), array);
+    return new ArrayRepr(0, elements.length, Attrs.empty(), elements);
   }
 
-  public static ArrayRepr from(@Nullable Collection<?> elements) {
+  public static ArrayRepr from(@Nullable Collection<?> elements) throws ReprException {
     final int size = elements != null ? elements.size() : 0;
     final Repr[] array = new Repr[size];
     if (elements != null) {

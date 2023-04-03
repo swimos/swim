@@ -14,6 +14,7 @@
 
 package swim.repr;
 
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -255,7 +256,7 @@ public interface Repr extends Term {
     }
   }
 
-  static Repr from(@Nullable Object value) {
+  static Repr from(@Nullable Object value) throws ReprException {
     if (value == null) {
       return UnitRepr.unit();
     } else if (value instanceof Repr) {
@@ -265,6 +266,14 @@ public interface Repr extends Term {
     } else {
       return Repr.registry().intoRepr(value);
     }
+  }
+
+  static <T> ReprForm<T> form(Type javaType) throws ReprFormException {
+    return Repr.registry().getReprForm(javaType);
+  }
+
+  static <T> ReprForm<T> form(@Nullable T value) throws ReprFormException {
+    return Repr.registry().getReprForm(value);
   }
 
 }

@@ -23,7 +23,10 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.expr.Evaluator;
+import swim.expr.JavaTerms;
+import swim.expr.SwimTerms;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.expr.TermForm;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -115,7 +118,11 @@ public class LogEvent implements Term, ToSource {
         case "seq":
           return Term.of(this.seq);
         case "time":
-          return INSTANT_FORM.intoTerm(this.time);
+          try {
+            return INSTANT_FORM.intoTerm(this.time);
+          } catch (TermException cause) {
+            return null;
+          }
         case "topic":
           return Term.of(this.topic);
         case "focus":
@@ -123,13 +130,25 @@ public class LogEvent implements Term, ToSource {
         case "scope":
           return this.scope;
         case "level":
-          return SEVERITY_FORM.intoTerm(this.level);
+          try {
+            return SEVERITY_FORM.intoTerm(this.level);
+          } catch (TermException cause) {
+            return null;
+          }
         case "message":
           return Term.of(this.message);
         case "detail":
-          return Term.from(this.detail);
+          try {
+            return Term.from(this.detail);
+          } catch (TermException cause) {
+            return null;
+          }
         case "cause":
-          return THROWABLE_FORM.intoTerm(this.cause);
+          try {
+            return THROWABLE_FORM.intoTerm(this.cause);
+          } catch (TermException cause) {
+            return null;
+          }
         default:
       }
     }
@@ -246,10 +265,10 @@ public class LogEvent implements Term, ToSource {
     }
   }
 
-  static final TermForm<Instant> INSTANT_FORM = TermForm.forType(Instant.class);
+  static final TermForm<Instant> INSTANT_FORM = JavaTerms.instantForm();
 
-  static final TermForm<Severity> SEVERITY_FORM = TermForm.forType(Severity.class);
+  static final TermForm<Severity> SEVERITY_FORM = SwimTerms.severityForm();
 
-  static final TermForm<Throwable> THROWABLE_FORM = TermForm.forType(Throwable.class);
+  static final TermForm<Throwable> THROWABLE_FORM = JavaTerms.throwableForm();
 
 }

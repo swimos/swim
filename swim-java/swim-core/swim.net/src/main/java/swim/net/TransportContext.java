@@ -29,7 +29,7 @@ import swim.annotations.Since;
 public interface TransportContext extends TransportRef {
 
   /**
-   * Requests that the bound I/O dispatcher invoke {@link Transport#doAccept()}
+   * Requests that the bound I/O dispatcher invoke {@link Transport#dispatchAccept()}
    * once the transport channel is ready to perform an accept operation.
    * Returns {@code true} if this call causes the registration of the readiness
    * event; otherwise returns {@code false} if the event is already pending.
@@ -45,7 +45,7 @@ public interface TransportContext extends TransportRef {
   boolean cancelAccept();
 
   /**
-   * Requests that the bound I/O dispatcher invoke {@link Transport#doAccept()}
+   * Requests that the bound I/O dispatcher invoke {@link Transport#dispatchConnect()}
    * once the transport channel is ready to complete a connect operation.
    * Returns {@code true} if this call causes the registration of the readiness
    * event; otherwise returns {@code false} if the event is already pending.
@@ -61,7 +61,7 @@ public interface TransportContext extends TransportRef {
   boolean cancelConnect();
 
   /**
-   * Requests that the bound I/O dispatcher invoke {@link Transport#doRead()}
+   * Requests that the bound I/O dispatcher invoke {@link Transport#dispatchRead()}
    * once the transport channel is ready to perform a read operation.
    * Returns {@code true} if this call causes the registration of the readiness
    * event; otherwise returns {@code false} if the event is already pending.
@@ -77,7 +77,7 @@ public interface TransportContext extends TransportRef {
   boolean cancelRead();
 
   /**
-   * Requests that the bound I/O dispatcher invoke {@link Transport#doWrite()}
+   * Requests that the bound I/O dispatcher invoke {@link Transport#dispatchWrite()}
    * once the transport channel is ready to perform a write operation.
    * Returns {@code true} if this call causes the registration of the readiness
    * event; otherwise returns {@code false} if the event is already pending.

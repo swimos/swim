@@ -18,6 +18,7 @@ import swim.annotations.Internal;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
+import swim.json.JsonException;
 import swim.json.JsonNullForm;
 
 @Internal
@@ -39,17 +40,20 @@ public final class ParseJsonNull<T> extends Parse<T> {
   public static <T> Parse<T> parse(Input input, JsonNullForm<? extends T> form, int index) {
     final String literal = "null";
     while (input.isCont() && index < literal.length()) {
-      final int c = input.head();
       final int expected = literal.codePointAt(index);
-      if (c == expected) {
-        input.step();
+      if (input.head() == expected) {
         index = literal.offsetByCodePoints(index, 1);
+        input.step();
       } else {
         return Parse.error(Diagnostic.expected(expected, input));
       }
     }
     if (index >= literal.length()) {
-      return Parse.done(form.nullValue());
+      try {
+        return Parse.done(form.nullValue());
+      } catch (JsonException cause) {
+        return Parse.diagnostic(input, cause);
+      }
     } else if (input.isError()) {
       return Parse.error(input.getError());
     }

@@ -229,49 +229,49 @@ public class HttpOptions implements ToSource {
       int maxMessageSize;
       try {
         maxMessageSize = Integer.parseInt(System.getProperty("swim.net.http.max.message.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         maxMessageSize = 16 * 1024 * 1024;
       }
 
       int clientRequestBufferSize;
       try {
         clientRequestBufferSize = Integer.parseInt(System.getProperty("swim.net.http.client.request.buffer.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         clientRequestBufferSize = 4 * 1024;
       }
 
       int serverRequestBufferSize;
       try {
         serverRequestBufferSize = Integer.parseInt(System.getProperty("swim.net.http.server.request.buffer.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         serverRequestBufferSize = 4 * 1024;
       }
 
       int clientResponseBufferSize;
       try {
         clientResponseBufferSize = Integer.parseInt(System.getProperty("swim.net.http.client.response.buffer.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         clientResponseBufferSize = 4 * 1024;
       }
 
       int serverResponseBufferSize;
       try {
         serverResponseBufferSize = Integer.parseInt(System.getProperty("swim.net.http.server.response.buffer.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         serverResponseBufferSize = 4 * 1024;
       }
 
       int clientPipelineLength;
       try {
         clientPipelineLength = Integer.parseInt(System.getProperty("swim.net.http.client.pipeline.length"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         clientPipelineLength = 8;
       }
 
       int serverPipelineLength;
       try {
         serverPipelineLength = Integer.parseInt(System.getProperty("swim.net.http.server.pipeline.length"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         serverPipelineLength = 8;
       }
 

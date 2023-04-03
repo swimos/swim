@@ -26,8 +26,8 @@ public interface WamlAttrForm<A, T> {
 
   boolean isNullary(@Nullable A args);
 
-  WamlForm<T> refineForm(WamlForm<T> form, String name, @Nullable A args);
+  WamlForm<T> refineForm(WamlForm<T> form, String name, @Nullable A args) throws WamlException;
 
-  WamlForm<T> refineForm(WamlForm<T> form, String name);
+  WamlForm<T> refineForm(WamlForm<T> form, String name) throws WamlException;
 
 }

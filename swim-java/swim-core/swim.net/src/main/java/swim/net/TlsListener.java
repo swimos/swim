@@ -27,6 +27,7 @@ import swim.annotations.Since;
 import swim.log.Log;
 import swim.repr.ArrayRepr;
 import swim.repr.Repr;
+import swim.repr.ReprException;
 import swim.repr.TupleRepr;
 import swim.util.Severity;
 
@@ -80,20 +81,32 @@ public class TlsListener extends TcpListener {
   public @Nullable Object toLogConfig(Severity level) {
     final ServerSocket socket = this.channel.socket();
     final TupleRepr context = TupleRepr.of();
-    context.put("localAddress", Repr.from(this.localAddress));
+    try {
+      context.put("localAddress", Repr.from(this.localAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
     try {
       context.put("reuseAddress", Repr.of(socket.getReuseAddress()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     context.put("protocol", Repr.of(this.tlsOptions.sslContext().getProtocol()));
     final Collection<String> protocols = this.tlsOptions.protocols();
     if (protocols != null) {
-      context.put("protocols", ArrayRepr.from(protocols));
+      try {
+        context.put("protocols", ArrayRepr.from(protocols));
+      } catch (ReprException cause) {
+        throw new AssertionError(cause);
+      }
     }
     final Collection<String> cipherSuites = this.tlsOptions.cipherSuites();
     if (cipherSuites != null) {
-      context.put("cipherSuites", ArrayRepr.from(cipherSuites));
+      try {
+        context.put("cipherSuites", ArrayRepr.from(cipherSuites));
+      } catch (ReprException cause) {
+        throw new AssertionError(cause);
+      }
     }
     context.put("clientAuth", Repr.of(this.tlsOptions.clientAuth().label()));
     return context;

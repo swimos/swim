@@ -21,26 +21,31 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.NumberTermForm;
 
+/**
+ * A transcoder between WAML number literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlNumberForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlNumberForm<T> extends WamlForm<T>, NumberTermForm<T> {
 
   @Override
-  default WamlNumberForm<T> numberForm() {
+  default WamlNumberForm<? extends T> numberForm() throws WamlException {
     return this;
   }
 
   @Override
-  @Nullable T integerValue(long value);
+  @Nullable T integerValue(long value) throws WamlException;
 
   @Override
-  @Nullable T hexadecimalValue(long value, int digits);
+  @Nullable T hexadecimalValue(long value, int digits) throws WamlException;
 
   @Override
-  @Nullable T bigIntegerValue(String value);
+  @Nullable T bigIntegerValue(String value) throws WamlException;
 
   @Override
-  @Nullable T decimalValue(String value);
+  @Nullable T decimalValue(String value) throws WamlException;
 
   @Override
   default Parse<T> parse(Input input, WamlParser parser) {

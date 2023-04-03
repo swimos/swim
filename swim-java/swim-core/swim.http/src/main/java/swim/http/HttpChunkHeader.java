@@ -124,13 +124,13 @@ public final class HttpChunkHeader implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -160,15 +160,9 @@ public final class HttpChunkHeader implements ToSource, ToString {
     return new ParseHttpChunkHeader(0L, null, null, null, 1);
   }
 
-  public static HttpChunkHeader parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpChunkHeader> parse = HttpChunkHeader.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpChunkHeader> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpChunkHeader.parse(input).complete(input);
   }
 
 }
@@ -204,31 +198,21 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
                                       int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Base16.isDigit(c)) {
-          input.step();
-          size = (long) Base16.decodeDigit(c);
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("chunk size", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && Base16.isDigit(c = input.head())) {
+        size = (long) Base16.decodeDigit(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("chunk size", input));
       }
     }
     if (step == 2) {
-      while (input.isCont()) {
-        c = input.head();
-        if (Base16.isDigit(c)) {
-          input.step();
-          size = (size << 4) | (long) Base16.decodeDigit(c);
-          if (size < 0L) {
-            return Parse.error(Diagnostic.message("chunk size overflow", input));
-          }
-        } else {
-          break;
+      while (input.isCont() && Base16.isDigit(c = input.head())) {
+        size = (size << 4) | (long) Base16.decodeDigit(c);
+        if (size < 0L) {
+          return Parse.error(Diagnostic.message("chunk size overflow", input));
         }
+        input.step();
       }
       if (input.isReady()) {
         step = 3;
@@ -237,10 +221,10 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
     do {
       if (step == 3) {
         if (input.isCont() && input.head() == ';') {
-          input.step();
           if (exts == null) {
             exts = ArrayMap.empty();
           }
+          input.step();
           step = 4;
         } else if (input.isReady()) {
           if (exts == null) {
@@ -250,37 +234,25 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
         }
       }
       if (step == 4) {
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            nameBuilder = new StringBuilder();
-            nameBuilder.appendCodePoint(c);
-            step = 5;
-          } else {
-            return Parse.error(Diagnostic.expected("chunk ext name", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isTokenChar(c = input.head())) {
+          nameBuilder = new StringBuilder();
+          nameBuilder.appendCodePoint(c);
+          input.step();
+          step = 5;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("chunk ext name", input));
         }
       }
       if (step == 5) {
-        exts = Assume.nonNull(exts);
-        nameBuilder = Assume.nonNull(nameBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            nameBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(nameBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont() && c == '=') {
           input.step();
           step = 6;
         } else if (input.isReady()) {
-          exts = exts.updated(nameBuilder.toString(), null);
+          exts = Assume.nonNull(exts).updated(Assume.nonNull(nameBuilder).toString(), null);
           nameBuilder = null;
           step = 3;
           continue;
@@ -300,35 +272,22 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
         }
       }
       if (step == 7) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 8;
-          } else {
-            return Parse.error(Diagnostic.expected("chunk ext value", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 8;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("chunk ext value", input));
         }
       }
       if (step == 8) {
-        exts = Assume.nonNull(exts);
-        nameBuilder = Assume.nonNull(nameBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isReady()) {
-          exts = exts.updated(nameBuilder.toString(), valueBuilder.toString());
+          exts = Assume.nonNull(exts).updated(Assume.nonNull(nameBuilder).toString(),
+                                              Assume.nonNull(valueBuilder).toString());
           nameBuilder = null;
           valueBuilder = null;
           step = 3;
@@ -336,24 +295,17 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
         }
       }
       if (step == 9) {
-        exts = Assume.nonNull(exts);
-        nameBuilder = Assume.nonNull(nameBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isQuotedChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isQuotedChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont()) {
           if (c == '"') {
-            input.step();
-            exts = exts.updated(nameBuilder.toString(), valueBuilder.toString());
+            exts = Assume.nonNull(exts).updated(Assume.nonNull(nameBuilder).toString(),
+                                                Assume.nonNull(valueBuilder).toString());
             nameBuilder = null;
             valueBuilder = null;
+            input.step();
             step = 3;
             continue;
           } else if (c == '\\') {
@@ -367,18 +319,12 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
         }
       }
       if (step == 10) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isEscapeChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 9;
-            continue;
-          } else {
-            return Parse.error(Diagnostic.expected("escape character", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isEscapeChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 9;
+          continue;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
@@ -468,7 +414,7 @@ final class WriteHttpChunkHeader extends Write<Object> {
       if (step == 3) {
         key = Assume.nonNull(key);
         if (key.length() == 0) {
-          return Write.error(new WriteException("Blank chunk ext name"));
+          return Write.error(new WriteException("blank chunk ext name"));
         }
         while (index < key.length() && output.isCont()) {
           c = key.codePointAt(index);
@@ -476,7 +422,7 @@ final class WriteHttpChunkHeader extends Write<Object> {
             output.write(c);
             index = key.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid chunk ext name: " + key));
+            return Write.error(new WriteException("invalid chunk ext name: " + key));
           }
         }
         if (index >= key.length()) {
@@ -491,9 +437,8 @@ final class WriteHttpChunkHeader extends Write<Object> {
         }
       }
       if (step == 4 && output.isCont()) {
-        value = Assume.nonNull(value);
         output.write('=');
-        if (Http.isToken(value)) {
+        if (Http.isToken(Assume.nonNull(value))) {
           step = 5;
         } else {
           step = 6;
@@ -531,7 +476,7 @@ final class WriteHttpChunkHeader extends Write<Object> {
               escape = c;
               step = 8;
             } else {
-              return Write.error(new WriteException("Invalid chunk ext value: " + value));
+              return Write.error(new WriteException("invalid chunk ext value: " + value));
             }
             continue;
           } else {
@@ -558,7 +503,7 @@ final class WriteHttpChunkHeader extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

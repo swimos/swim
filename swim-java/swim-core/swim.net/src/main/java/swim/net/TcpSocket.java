@@ -40,6 +40,7 @@ import swim.log.LogEntity;
 import swim.log.LogScope;
 import swim.log.LogStatus;
 import swim.repr.Repr;
+import swim.repr.ReprException;
 import swim.repr.TupleRepr;
 import swim.util.Result;
 import swim.util.Severity;
@@ -158,7 +159,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public final TransportContext getTransportContext() {
     final TransportContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound transport");
+      throw new IllegalStateException("unbound transport");
     }
     return context;
   }
@@ -253,7 +254,7 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
 
   @Override
   public void setSslParameters(SSLParameters sslParameters) {
-    throw new UnsupportedOperationException("Not a secure transport");
+    throw new UnsupportedOperationException("not a secure transport");
   }
 
   @Override
@@ -1991,8 +1992,16 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public @Nullable Object toLogEntity(Severity level) {
     final Socket socket = this.channel.socket();
     final TupleRepr detail = TupleRepr.of();
-    detail.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
-    detail.put("remoteAddress", Repr.from(this.remoteAddress));
+    try {
+      detail.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
+    } catch (ReprException cause) {
+      // ignore
+    }
+    try {
+      detail.put("remoteAddress", Repr.from(this.remoteAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
     return detail;
   }
 
@@ -2000,26 +2009,34 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public @Nullable Object toLogConfig(Severity level) {
     final Socket socket = this.channel.socket();
     final TupleRepr detail = TupleRepr.of();
-    detail.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
-    detail.put("remoteAddress", Repr.from(this.remoteAddress));
+    try {
+      detail.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
+    } catch (ReprException cause) {
+      // ignore
+    }
+    try {
+      detail.put("remoteAddress", Repr.from(this.remoteAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
     try {
       detail.put("recvBufferSize", Repr.of(socket.getReceiveBufferSize()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     try {
       detail.put("sendBufferSize", Repr.of(socket.getSendBufferSize()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     try {
       detail.put("keepAlive", Repr.of(socket.getKeepAlive()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     try {
       detail.put("noDelay", Repr.of(socket.getTcpNoDelay()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     return detail;
@@ -2029,8 +2046,16 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public @Nullable Object toLogStatus(Severity level) {
     final Socket socket = this.channel.socket();
     final TupleRepr detail = TupleRepr.of();
-    detail.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
-    detail.put("remoteAddress", Repr.from(this.remoteAddress));
+    try {
+      detail.put("localAddress", Repr.from(socket.getLocalSocketAddress()));
+    } catch (ReprException cause) {
+      // ignore
+    }
+    try {
+      detail.put("remoteAddress", Repr.from(this.remoteAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
     if (this.channel.isConnectionPending()) {
       detail.put("connecting", Repr.of(true));
     }

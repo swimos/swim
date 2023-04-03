@@ -14,6 +14,7 @@
 
 package swim.codec;
 
+import java.lang.reflect.Type;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
@@ -22,5 +23,15 @@ import swim.annotations.Since;
 public interface Transcoder<T> extends Decoder<T>, Encoder<T> {
 
   MediaType mediaType();
+
+  static <T> Transcoder<T> get(MediaType mediaType, Type javaType)
+      throws CodecException, TranscoderException {
+    return Codec.registry().getTranscoder(mediaType, javaType);
+  }
+
+  static <T> Transcoder<T> get(String mediaType, Type javaType)
+      throws CodecException, TranscoderException {
+    return Codec.registry().getTranscoder(mediaType, javaType);
+  }
 
 }

@@ -86,23 +86,23 @@ public final class HostHeader extends HttpHeader {
     final StringInput input = new StringInput(value);
     final UriHost host;
     try {
-      host = UriHost.parse(input);
+      host = UriHost.parse(input).getNonNull();
     } catch (ParseException cause) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Host: " + value, cause);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Host: " + value, cause);
     }
     UriPort port = null;
     if (input.isCont() && input.head() == ':') {
       input.step();
       try {
-        port = UriPort.parse(input);
+        port = UriPort.parse(input).getNonNull();
       } catch (ParseException cause) {
-        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Host: " + value, cause);
+        throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Host: " + value, cause);
       }
     }
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Host: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Host: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Host: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Host: " + value);
     }
     return UriAuthority.of(null, host, port);
   }
@@ -117,7 +117,7 @@ public final class HostHeader extends HttpHeader {
       }
       return output.toString();
     } catch (IOException cause) {
-      throw new RuntimeException(cause); // never actually throws
+      throw new AssertionError(cause); // never actually throws
     }
   }
 

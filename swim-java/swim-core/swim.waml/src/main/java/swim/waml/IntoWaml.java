@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.expr;
+package swim.waml;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import swim.annotations.Public;
+import swim.annotations.Since;
 
+@Public
+@Since("5.0")
 @Documented
-@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TermKey {
-
-  String value() default "";
+@Target(ElementType.METHOD)
+public @interface IntoWaml {
 
 }

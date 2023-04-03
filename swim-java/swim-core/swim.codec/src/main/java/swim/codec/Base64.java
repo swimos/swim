@@ -14,9 +14,10 @@
 
 package swim.codec;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.NoSuchElementException;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -73,10 +74,9 @@ public abstract class Base64 {
     } else if (c == '/' || c == '_') {
       return 63;
     } else {
-      final Notation notation = new Notation();
-      notation.append("Invalid base-64 digit: ");
-      notation.appendSourceCodePoint(c);
-      throw new IllegalArgumentException(notation.toString());
+      throw new IllegalArgumentException(Notation.of("invalid base-64 digit: ")
+                                                 .appendSourceCodePoint(c)
+                                                 .toString());
     }
   }
 
@@ -110,7 +110,7 @@ public abstract class Base64 {
     } else if (c4 == '=') {
       output.write((x << 2) | (y >>> 4));
     } else {
-      throw new IllegalArgumentException("Improperly padded base-64");
+      throw new IllegalArgumentException("improperly padded base-64");
     }
   }
 
@@ -151,8 +151,9 @@ public abstract class Base64 {
     return new ParseBase64<byte[]>(this, new ByteArrayOutput());
   }
 
-  public byte[] parseByteArray(String string) {
-    return ParseBase64.parse(new StringInput(string), this, new ByteArrayOutput(), 0, 0, 0, 1).getNonNull();
+  public Parse<byte[]> parseByteArray(String string) {
+    final StringInput input = new StringInput(string);
+    return this.parseByteArray(input).complete(input);
   }
 
   /**
@@ -167,8 +168,9 @@ public abstract class Base64 {
     return new ParseBase64<ByteBuffer>(this, new ByteBufferOutput());
   }
 
-  public ByteBuffer parseByteBuffer(String string) {
-    return ParseBase64.parse(new StringInput(string), this, new ByteBufferOutput(), 0, 0, 0, 1).getNonNull();
+  public Parse<ByteBuffer> parseByteBuffer(String string) {
+    final StringInput input = new StringInput(string);
+    return this.parseByteBuffer(input).complete(input);
   }
 
   /**
@@ -346,11 +348,11 @@ final class Base64DecodedOutput<T> extends Output<T> {
   int q;
   int r;
   int have;
-  @Nullable IOException error;
+  @Nullable OutputException error;
 
   Base64DecodedOutput(Base64 base64, Output<T> output,
                       int p, int q, int r, int have,
-                      @Nullable IOException error) {
+                      @Nullable OutputException error) {
     this.base64 = base64;
     this.output = output;
     this.p = p;
@@ -397,16 +399,20 @@ final class Base64DecodedOutput<T> extends Output<T> {
 
   @Override
   public Base64DecodedOutput<T> write(int c) {
+    if (this.error != null) {
+      throw new IllegalStateException("output error", this.error);
+    }
+
     if (this.have == 0) {
       if (this.base64.isDigit(c)) {
         this.p = c;
         this.have = 1;
       } else if (c < 0) {
         this.have = -1;
-        this.error = new IOException("Incomplete base64 quantum");
+        this.error = new OutputException("incomplete base-64 quantum");
       } else {
         this.have = -1;
-        this.error = new IOException(Base64DecodedOutput.invalidDigit(c));
+        this.error = new OutputException(Base64DecodedOutput.invalidDigit(c));
       }
     } else if (this.have == 1) {
       if (this.base64.isDigit(c)) {
@@ -415,11 +421,11 @@ final class Base64DecodedOutput<T> extends Output<T> {
       } else if (c < 0) {
         this.p = 0;
         this.have = -1;
-        this.error = new IOException("Incomplete base64 quantum");
+        this.error = new OutputException("incomplete base-64 quantum");
       } else {
         this.p = 0;
         this.have = -1;
-        this.error = new IOException(Base64DecodedOutput.invalidDigit(c));
+        this.error = new OutputException(Base64DecodedOutput.invalidDigit(c));
       }
     } else if (this.have == 2) {
       if (this.base64.isDigit(c)) {
@@ -438,13 +444,13 @@ final class Base64DecodedOutput<T> extends Output<T> {
           this.q = 0;
           this.p = 0;
           this.have = -1;
-          this.error = new IOException("Incomplete base64 quantum");
+          this.error = new OutputException("incomplete base-64 quantum");
         }
       } else {
         this.q = 0;
         this.p = 0;
         this.have = -1;
-        this.error = new IOException(Base64DecodedOutput.invalidDigit(c));
+        this.error = new OutputException(Base64DecodedOutput.invalidDigit(c));
       }
     } else if (this.have == 3) {
       if (this.r != '=') {
@@ -472,14 +478,14 @@ final class Base64DecodedOutput<T> extends Output<T> {
             this.q = 0;
             this.p = 0;
             this.have = -1;
-            this.error = new IOException("Incomplete base64 quantum");
+            this.error = new OutputException("incomplete base-64 quantum");
           }
         } else {
           this.r = 0;
           this.q = 0;
           this.p = 0;
           this.have = -1;
-          this.error = new IOException(Base64DecodedOutput.invalidDigit(c));
+          this.error = new OutputException(Base64DecodedOutput.invalidDigit(c));
         }
       } else {
         if (c == '=') {
@@ -493,26 +499,27 @@ final class Base64DecodedOutput<T> extends Output<T> {
           this.q = 0;
           this.p = 0;
           this.have = -1;
-          this.error = new IOException("Incomplete base64 quantum");
+          this.error = new OutputException("incomplete base-64 quantum");
         } else {
           this.r = 0;
           this.q = 0;
           this.p = 0;
           this.have = -1;
-          this.error = new IOException(Base64DecodedOutput.invalidPadding(c));
+          this.error = new OutputException(Base64DecodedOutput.invalidPadding(c));
         }
       }
     } else if (this.have == -1) {
       // done or error
     } else {
-      throw new AssertionError(); // unreachable
+      throw new AssertionError("unreachable");
     }
 
     return this;
   }
 
+  @CheckReturnValue
   @Override
-  public @Nullable T get() {
+  public @Nullable T get() throws OutputException {
     if (this.error == null) {
       if (this.have <= 0) {
         return this.output.get();
@@ -520,7 +527,49 @@ final class Base64DecodedOutput<T> extends Output<T> {
         return this.write(-1).get();
       }
     } else {
-      throw new IllegalStateException("Output error", this.error);
+      throw this.error;
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNull() throws OutputException {
+    if (this.error == null) {
+      if (this.have <= 0) {
+        return this.output.getNonNull();
+      } else {
+        return this.write(-1).getNonNull();
+      }
+    } else {
+      throw this.error;
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getUnchecked() {
+    if (this.error == null) {
+      if (this.have <= 0) {
+        return this.output.getUnchecked();
+      } else {
+        return this.write(-1).getUnchecked();
+      }
+    } else {
+      throw new NoSuchElementException("output error", this.error);
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullUnchecked() {
+    if (this.error == null) {
+      if (this.have <= 0) {
+        return this.output.getNonNullUnchecked();
+      } else {
+        return this.write(-1).getNonNullUnchecked();
+      }
+    } else {
+      throw new NoSuchElementException("output error", this.error);
     }
   }
 
@@ -542,17 +591,15 @@ final class Base64DecodedOutput<T> extends Output<T> {
   }
 
   private static String invalidDigit(int c) {
-    final Notation notation = new Notation();
-    notation.append("Expected base64 digit, but found ");
-    notation.appendSourceCodePoint(c);
-    return notation.toString();
+    return Notation.of("expected base-64 digit, but found ")
+                   .appendSourceCodePoint(c)
+                   .toString();
   }
 
   private static String invalidPadding(int c) {
-    final Notation notation = new Notation();
-    notation.append("Expected '=', but found ");
-    notation.appendSourceCodePoint(c);
-    return notation.toString();
+    return Notation.of("expected '=', but found ")
+                   .appendSourceCodePoint(c)
+                   .toString();
   }
 
 }
@@ -590,99 +637,88 @@ final class ParseBase64<T> extends Parse<T> {
     int c;
     do {
       if (step == 1) {
-        if (input.isCont()) {
-          c = input.head();
-          if (base64.isDigit(c)) {
-            input.step();
-            p = c;
-            step = 2;
-          } else {
+        if (input.isCont() && base64.isDigit(c = input.head())) {
+          p = c;
+          input.step();
+          step = 2;
+        } else if (input.isReady()) {
+          try {
             return Parse.done(output.get());
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
           }
-        } else if (input.isDone()) {
-          return Parse.done(output.get());
         }
       }
       if (step == 2) {
-        if (input.isCont()) {
-          c = input.head();
-          if (base64.isDigit(c)) {
-            input.step();
-            q = c;
-            step = 3;
-          } else {
-            return Parse.error(Diagnostic.expected("base64 digit", input));
-          }
-        } else if (input.isDone()) {
-          return Parse.error(Diagnostic.expected("base64 digit", input));
+        if (input.isCont() && base64.isDigit(c = input.head())) {
+          q = c;
+          input.step();
+          step = 3;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("base-64 digit", input));
         }
       }
       if (step == 3) {
-        if (input.isCont()) {
-          c = input.head();
-          if (base64.isDigit(c)) {
-            input.step();
-            r = c;
-            step = 4;
-          } else if (c == '=') {
-            input.step();
-            r = '=';
+        if (input.isCont() && ((c = input.head()) == '=' || base64.isDigit(c))) {
+          r = c;
+          input.step();
+          if (c == '=') {
             step = 5;
-          } else if (!base64.isPadded()) {
-            base64.writeQuantum(output, p, q, '=', '=');
-            return Parse.done(output.get());
-          } else {
-            return Parse.error(Diagnostic.expected("base64 digit", input));
+          } else { // base64.isDigit(c)
+            step = 4;
           }
-        } else if (input.isDone()) {
+        } else if (input.isReady()) {
           if (!base64.isPadded()) {
             base64.writeQuantum(output, p, q, '=', '=');
-            return Parse.done(output.get());
+            try {
+              return Parse.done(output.get());
+            } catch (OutputException cause) {
+              return Parse.diagnostic(input, cause);
+            }
           } else {
-            return Parse.error(Diagnostic.expected("base64 digit", input));
+            return Parse.error(Diagnostic.expected("base-64 digit", input));
           }
         }
       }
       if (step == 4) {
-        if (input.isCont()) {
-          c = input.head();
-          if (base64.isDigit(c)) {
-            input.step();
-            base64.writeQuantum(output, p, q, r, c);
+        if (input.isCont() && ((c = input.head()) == '=' || base64.isDigit(c))) {
+          base64.writeQuantum(output, p, q, r, c);
+          input.step();
+          if (c == '=') {
+            try {
+              return Parse.done(output.get());
+            } catch (OutputException cause) {
+              return Parse.diagnostic(input, cause);
+            }
+          } else { // base64.isDigit(c)
             r = 0;
             q = 0;
             p = 0;
             step = 1;
             continue;
-          } else if (c == '=') {
-            input.step();
-            base64.writeQuantum(output, p, q, r, '=');
-            return Parse.done(output.get());
-          } else if (!base64.isPadded()) {
-            base64.writeQuantum(output, p, q, r, '=');
-            return Parse.done(output.get());
-          } else {
-            return Parse.error(Diagnostic.expected("base64 digit", input));
           }
-        } else if (input.isDone()) {
+        } else if (input.isReady()) {
           if (!base64.isPadded()) {
             base64.writeQuantum(output, p, q, r, '=');
-            return Parse.done(output.get());
+            try {
+              return Parse.done(output.get());
+            } catch (OutputException cause) {
+              return Parse.diagnostic(input, cause);
+            }
           } else {
-            return Parse.error(Diagnostic.expected("base64 digit", input));
+            return Parse.error(Diagnostic.expected("base-64 digit", input));
           }
         }
       } else if (step == 5) {
-        if (input.isCont()) {
-          c = input.head();
-          if (c == '=') {
-            input.step();
-            base64.writeQuantum(output, p, q, r, c);
+        if (input.isCont() && (c = input.head()) == '=') {
+          base64.writeQuantum(output, p, q, r, c);
+          input.step();
+          try {
             return Parse.done(output.get());
-          } else {
-            return Parse.error(Diagnostic.expected('=', input));
+          } catch (OutputException cause) {
+            return Parse.diagnostic(input, cause);
           }
-        } else if (input.isDone()) {
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected('=', input));
         }
       }
@@ -791,7 +827,7 @@ final class WriteBase64 extends Write<Object> {
     if (index == limit) {
       return Write.done();
     } else if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

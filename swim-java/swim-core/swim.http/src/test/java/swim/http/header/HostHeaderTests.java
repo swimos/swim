@@ -15,6 +15,7 @@
 package swim.http.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.http.HttpAssertions;
 import swim.http.HttpException;
 import swim.http.HttpHeader;
@@ -27,58 +28,58 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class HostHeaderTests {
 
   @Test
-  public void parseHostHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Host: www.example.com\r\n");
+  public void parseHostHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Host: www.example.com\r\n").getNonNull();
     assertInstanceOf(HostHeader.class, headers.getHeader(HostHeader.TYPE));
-    assertEquals(HostHeader.of(UriAuthority.parse("www.example.com")),
+    assertEquals(HostHeader.of(UriAuthority.parse("www.example.com").getNonNull()),
                  headers.getHeader(HostHeader.TYPE));
     assertEquals("www.example.com",
                  headers.get(HostHeader.TYPE));
-    assertEquals(UriAuthority.parse("www.example.com"),
+    assertEquals(UriAuthority.parse("www.example.com").getNonNull(),
                  headers.getValue(HostHeader.TYPE));
   }
 
   @Test
-  public void parseHostHeaders() {
-    assertParses(HostHeader.of(UriAuthority.parse("example.com")),
+  public void parseHostHeaders() throws ParseException {
+    assertParses(HostHeader.of(UriAuthority.parse("example.com").getNonNull()),
                  "Host: example.com");
-    assertParses(HostHeader.of(UriAuthority.parse("example.com:80")),
+    assertParses(HostHeader.of(UriAuthority.parse("example.com:80").getNonNull()),
                  "Host: example.com:80");
-    assertParses(HostHeader.of(UriAuthority.parse("127.0.0.1")),
+    assertParses(HostHeader.of(UriAuthority.parse("127.0.0.1").getNonNull()),
                  "Host: 127.0.0.1");
-    assertParses(HostHeader.of(UriAuthority.parse("127.0.0.1:8080")),
+    assertParses(HostHeader.of(UriAuthority.parse("127.0.0.1:8080").getNonNull()),
                  "Host: 127.0.0.1:8080");
   }
 
   @Test
-  public void writeHostHeaders() {
+  public void writeHostHeaders() throws ParseException {
     assertWrites("Host: example.com",
-                 HostHeader.of(UriAuthority.parse("example.com")));
+                 HostHeader.of(UriAuthority.parse("example.com").getNonNull()));
     assertWrites("Host: example.com:80",
-                 HostHeader.of(UriAuthority.parse("example.com:80")));
+                 HostHeader.of(UriAuthority.parse("example.com:80").getNonNull()));
     assertWrites("Host: 127.0.0.1",
-                 HostHeader.of(UriAuthority.parse("127.0.0.1")));
+                 HostHeader.of(UriAuthority.parse("127.0.0.1").getNonNull()));
     assertWrites("Host: 127.0.0.1:8080",
-                 HostHeader.of(UriAuthority.parse("127.0.0.1:8080")));
+                 HostHeader.of(UriAuthority.parse("127.0.0.1:8080").getNonNull()));
   }
 
   @Test
-  public void writeHostHeadersOmittingUser() {
+  public void writeHostHeadersOmittingUser() throws ParseException {
     assertWrites("Host: www.example.com:8080",
-                 HostHeader.of(UriAuthority.parse("user:pass@www.example.com:8080")));
+                 HostHeader.of(UriAuthority.parse("user:pass@www.example.com:8080").getNonNull()));
   }
 
   @Test
-  public void parseHostHeadersWithSchemesFails() {
-    final HostHeader header = (HostHeader) HttpHeader.parse("Host: http://www.example.com");
+  public void parseHostHeadersWithSchemesFails() throws ParseException {
+    final HostHeader header = (HostHeader) HttpHeader.parse("Host: http://www.example.com").getNonNull();
     assertThrows(HttpException.class, () -> {
       header.authority();
     });
   }
 
   @Test
-  public void parseHostHeadersWithPathsFails() {
-    final HostHeader header = (HostHeader) HttpHeader.parse("Host: www.example.com/");
+  public void parseHostHeadersWithPathsFails() throws ParseException {
+    final HostHeader header = (HostHeader) HttpHeader.parse("Host: www.example.com/").getNonNull();
     assertThrows(HttpException.class, () -> {
       header.authority();
     });

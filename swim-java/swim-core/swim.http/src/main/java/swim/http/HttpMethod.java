@@ -107,13 +107,13 @@ public final class HttpMethod implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -134,15 +134,9 @@ public final class HttpMethod implements ToSource, ToString {
     return new ParseHttpMethod((StringTrieMap<HttpMethod>) NAMES.getOpaque(), null, 1);
   }
 
-  public static HttpMethod parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<HttpMethod> parse = HttpMethod.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<HttpMethod> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return HttpMethod.parse(input).complete(input);
   }
 
   static StringTrieMap<HttpMethod> names = StringTrieMap.caseSensitive();
@@ -195,56 +189,50 @@ final class ParseHttpMethod extends Parse<HttpMethod> {
                                  @Nullable StringBuilder nameBuilder, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          if (nameTrie != null) {
-            final StringTrieMap<HttpMethod> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
-            if (subTrie != null) {
-              nameTrie = subTrie;
-            } else {
-              nameBuilder = new StringBuilder();
-              nameBuilder.appendCodePoint(c);
-              nameTrie = null;
-            }
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        if (nameTrie != null) {
+          final StringTrieMap<HttpMethod> subTrie =
+              nameTrie.getBranch(nameTrie.normalized(c));
+          if (subTrie != null) {
+            nameTrie = subTrie;
           } else {
             nameBuilder = new StringBuilder();
             nameBuilder.appendCodePoint(c);
+            nameTrie = null;
           }
-          step = 2;
         } else {
-          return Parse.error(Diagnostic.expected("method", input));
+          nameBuilder = new StringBuilder();
+          nameBuilder.appendCodePoint(c);
         }
-      } else if (input.isDone()) {
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("method", input));
       }
     }
     if (step == 2) {
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          if (nameTrie != null) {
-            final StringTrieMap<HttpMethod> subTrie = nameTrie.getBranch(nameTrie.normalized(c));
-            if (subTrie != null) {
-              nameTrie = subTrie;
-            } else {
-              nameBuilder = new StringBuilder(nameTrie.prefix());
-              nameBuilder.appendCodePoint(c);
-              nameTrie = null;
-            }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        if (nameTrie != null) {
+          final StringTrieMap<HttpMethod> subTrie =
+              nameTrie.getBranch(nameTrie.normalized(c));
+          if (subTrie != null) {
+            nameTrie = subTrie;
           } else {
-            Assume.nonNull(nameBuilder).appendCodePoint(c);
+            nameBuilder = new StringBuilder(nameTrie.prefix());
+            nameBuilder.appendCodePoint(c);
+            nameTrie = null;
           }
         } else {
-          break;
+          Assume.nonNull(nameBuilder).appendCodePoint(c);
         }
+        input.step();
       }
       if (input.isReady()) {
         HttpMethod method = nameTrie != null ? nameTrie.value() : null;
         if (method == null) {
-          final String name = nameTrie != null ? nameTrie.prefix() : Assume.nonNull(nameBuilder).toString();
+          final String name = nameTrie != null
+                            ? nameTrie.prefix()
+                            : Assume.nonNull(nameBuilder).toString();
           method = new HttpMethod(name);
         }
         return Parse.done(method);
@@ -275,7 +263,7 @@ final class WriteHttpMethod extends Write<Object> {
 
   static Write<Object> write(Output<?> output, String name, int index) {
     if (name.length() == 0) {
-      return Write.error(new WriteException("Blank method name"));
+      return Write.error(new WriteException("blank method name"));
     }
     while (index < name.length() && output.isCont()) {
       final int c = name.codePointAt(index);
@@ -283,13 +271,13 @@ final class WriteHttpMethod extends Write<Object> {
         output.write(c);
         index = name.offsetByCodePoints(index, 1);
       } else {
-        return Write.error(new WriteException("Invalid method name: " + name));
+        return Write.error(new WriteException("invalid method name: " + name));
       }
     }
     if (index >= name.length()) {
       return Write.done();
     } else if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

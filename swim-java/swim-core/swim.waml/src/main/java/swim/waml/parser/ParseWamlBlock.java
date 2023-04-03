@@ -19,6 +19,7 @@ import swim.annotations.Nullable;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
+import swim.waml.WamlException;
 import swim.waml.WamlParser;
 import swim.waml.WamlTupleForm;
 
@@ -57,67 +58,64 @@ public final class ParseWamlBlock<P, B, T> extends Parse<T> {
     int c = 0;
     do {
       if (step == 1) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isWhitespace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
         }
-        if (input.isCont()) {
-          if (c == '@' // attr
-              || c == '(' // tuple
-              || c == '{' // object
-              || c == '<' // markup
-              || c == '[' // array
-              || c == '"' // string
-              || parser.isIdentifierStartChar(c) // identifier
-              || c == '+' || c == '-' || (c >= '0' && c <= '9') // number
-              || c == '%' // context expr
-              || c == '$' // global expr
-              || c == '*' // children or descendants expr
-              || c == '!' // not expr
-              || c == '~') { // bitwise not expr
+        if (input.isCont() && (c == '#' // comment
+                            || c == '@' // attr
+                            || c == '(' // tuple
+                            || c == '{' // object
+                            || c == '<' // markup
+                            || c == '[' // array
+                            || c == '"' // string
+                            || parser.isIdentifierStartChar(c) // identifier
+                            || c == '+' || c == '-' || (c >= '0' && c <= '9') // number
+                            || c == '%' // context expr
+                            || c == '$' // global expr
+                            || c == '*' // children or descendants expr
+                            || c == '!' // not expr
+                            || c == '~')) { // bitwise not expr
+          if (c == '#') {
+            input.step();
+            step = 7;
+          } else { // value
             if (parseParam != null) {
-              if (builder == null) {
-                builder = form.tupleBuilder();
+              try {
+                if (builder == null) {
+                  builder = form.tupleBuilder();
+                }
+                builder = form.appendParam(builder, parseParam.getUnchecked());
+              } catch (WamlException cause) {
+                return Parse.diagnostic(input, cause);
               }
-              builder = form.appendParam(builder, parseParam.get());
               parseParam = null;
             }
             step = 2;
-          } else if (c == '#') {
-            input.step();
-            step = 7;
-          } else {
+          }
+        } else if (input.isReady()) {
+          try {
             if (builder != null) {
               if (parseParam != null) {
-                builder = form.appendParam(builder, parseParam.get());
+                builder = form.appendParam(builder, parseParam.getUnchecked());
               }
               return Parse.done(form.buildTuple(builder));
             } else if (parseParam != null) {
-              return Parse.done(form.unaryTuple(parseParam.get()));
+              return Parse.done(form.unaryTuple(parseParam.getUnchecked()));
             } else {
               return Parse.done(form.emptyTuple());
             }
-          }
-        } else if (input.isDone()) {
-          if (builder != null) {
-            if (parseParam != null) {
-              builder = form.appendParam(builder, parseParam.get());
-            }
-            return Parse.done(form.buildTuple(builder));
-          } else if (parseParam != null) {
-            return Parse.done(form.unaryTuple(parseParam.get()));
-          } else {
-            return Parse.done(form.emptyTuple());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
           }
         }
       }
       if (step == 2) {
         if (parseLabel == null) {
-          parseLabel = parser.parseExpr(input, form.paramForm());
+          try {
+            parseLabel = parser.parseExpr(input, form.paramForm());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         } else {
           parseLabel = parseLabel.consume(input);
         }
@@ -128,13 +126,8 @@ public final class ParseWamlBlock<P, B, T> extends Parse<T> {
         }
       }
       if (step == 3) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == ':') {
           input.step();
@@ -154,17 +147,25 @@ public final class ParseWamlBlock<P, B, T> extends Parse<T> {
         }
       }
       if (step == 5) {
-        parseLabel = Assume.nonNull(parseLabel);
         if (parseParam == null) {
-          parseParam = parser.parseExpr(input, form.paramForm());
+          try {
+            parseParam = parser.parseExpr(input, form.paramForm());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         } else {
           parseParam = parseParam.consume(input);
         }
         if (parseParam.isDone()) {
-          if (builder == null) {
-            builder = form.tupleBuilder();
+          try {
+            if (builder == null) {
+              builder = form.tupleBuilder();
+            }
+            builder = form.appendParam(builder, Assume.nonNull(parseLabel).getUnchecked(),
+                                       parseParam.getUnchecked());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
           }
-          builder = form.appendParam(builder, parseLabel.get(), parseParam.get());
           parseParam = null;
           parseLabel = null;
           step = 6;
@@ -173,44 +174,31 @@ public final class ParseWamlBlock<P, B, T> extends Parse<T> {
         }
       }
       if (step == 6) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
-        if (input.isCont()) {
-          if (c == ',' || parser.isNewline(c)) {
-            input.step();
+        if (input.isCont() && (c == '#' || c == ',' || parser.isNewline(c))) {
+          input.step();
+          if (c == '#') {
+            step = 7;
+          } else { // c == ',' || parser.isNewline(c)
             step = 1;
             continue;
-          } else if (c == '#') {
-            input.step();
-            step = 7;
-          } else {
+          }
+        } else if (input.isReady()) {
+          try {
             if (builder != null) {
               if (parseParam != null) {
-                builder = form.appendParam(builder, parseParam.get());
+                builder = form.appendParam(builder, parseParam.getUnchecked());
               }
               return Parse.done(form.buildTuple(builder));
             } else if (parseParam != null) {
-              return Parse.done(form.unaryTuple(parseParam.get()));
+              return Parse.done(form.unaryTuple(parseParam.getUnchecked()));
             } else {
               return Parse.done(form.emptyTuple());
             }
-          }
-        } else if (input.isDone()) {
-          if (builder != null) {
-            if (parseParam != null) {
-              builder = form.appendParam(builder, parseParam.get());
-            }
-            return Parse.done(form.buildTuple(builder));
-          } else if (parseParam != null) {
-            return Parse.done(form.unaryTuple(parseParam.get()));
-          } else {
-            return Parse.done(form.emptyTuple());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
           }
         }
       }

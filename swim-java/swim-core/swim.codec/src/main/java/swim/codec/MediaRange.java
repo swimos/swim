@@ -14,6 +14,7 @@
 
 package swim.codec;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -183,14 +184,18 @@ public final class MediaRange implements ToSource, ToString {
   }
 
   @Override
-  public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+  public void writeString(Appendable output) throws IOException {
+    try {
+      this.write(StringOutput.from(output)).checkDone();
+    } catch (WriteException cause) {
+      throw new IOException("write failed", cause);
+    }
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output); // swallow write errors to ensure toString never fails
     return output.get();
   }
 
@@ -217,34 +222,31 @@ public final class MediaRange implements ToSource, ToString {
                                ArrayMap.empty(), null, null, 1);
   }
 
-  public static MediaRange parse(String string) {
+  public static Parse<MediaRange> parse(String string) {
     Objects.requireNonNull(string);
-    final CacheMap<String, MediaRange> cache = MediaRange.cache();
-    MediaRange mediaRange = cache.get(string);
-    if (mediaRange == null) {
-      final Input input = new StringInput(string);
-      Parse<MediaRange> parse = MediaRange.parse(input);
-      if (input.isCont() && !parse.isError()) {
-        parse = Parse.error(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        parse = Parse.error(input.getError());
+    final CacheMap<String, Parse<MediaRange>> cache = MediaRange.cache();
+    Parse<MediaRange> parseMediaRange = cache.get(string);
+    if (parseMediaRange == null) {
+      final StringInput input = new StringInput(string);
+      parseMediaRange = MediaRange.parse(input).complete(input);
+      if (parseMediaRange.isDone()) {
+        parseMediaRange = cache.put(string, parseMediaRange);
       }
-      mediaRange = cache.put(string, parse.getNonNull());
     }
-    return mediaRange;
+    return parseMediaRange;
   }
 
-  private static @Nullable CacheMap<String, MediaRange> cache;
+  private static @Nullable CacheMap<String, Parse<MediaRange>> cache;
 
-  static CacheMap<String, MediaRange> cache() {
+  static CacheMap<String, Parse<MediaRange>> cache() {
     if (MediaRange.cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.codec.media.range.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 128;
       }
-      MediaRange.cache = new LruCacheMap<String, MediaRange>(cacheSize);
+      MediaRange.cache = new LruCacheMap<String, Parse<MediaRange>>(cacheSize);
     }
     return MediaRange.cache;
   }
@@ -295,30 +297,19 @@ final class ParseMediaRange extends Parse<MediaRange> {
                                  @Nullable StringBuilder valueBuilder, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (MediaType.isTokenChar(c)) {
-          input.step();
-          typeBuilder = new StringBuilder();
-          typeBuilder.appendCodePoint(c);
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("media type", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+        typeBuilder = new StringBuilder();
+        typeBuilder.appendCodePoint(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("media type", input));
       }
     }
     if (step == 2) {
-      typeBuilder = Assume.nonNull(typeBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (MediaType.isTokenChar(c)) {
-          input.step();
-          typeBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+        Assume.nonNull(typeBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isCont() && c == '/') {
         input.step();
@@ -328,46 +319,28 @@ final class ParseMediaRange extends Parse<MediaRange> {
       }
     }
     if (step == 3) {
-      if (input.isCont()) {
-        c = input.head();
-        if (MediaType.isTokenChar(c)) {
-          input.step();
-          subtypeBuilder = new StringBuilder();
-          subtypeBuilder.appendCodePoint(c);
-          step = 4;
-        } else {
-          return Parse.error(Diagnostic.expected("media subtype", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+        subtypeBuilder = new StringBuilder();
+        subtypeBuilder.appendCodePoint(c);
+        input.step();
+        step = 4;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("media subtype", input));
       }
     }
     if (step == 4) {
-      subtypeBuilder = Assume.nonNull(subtypeBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (MediaType.isTokenChar(c)) {
-          input.step();
-          subtypeBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+        Assume.nonNull(subtypeBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
         step = 5;
       }
     }
     do {
-      typeBuilder = Assume.nonNull(typeBuilder);
-      subtypeBuilder = Assume.nonNull(subtypeBuilder);
       if (step == 5) {
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == ';') {
           input.step();
@@ -376,47 +349,32 @@ final class ParseMediaRange extends Parse<MediaRange> {
           if (weight < 0) {
             weight = 1000;
           }
-          return Parse.done(MediaRange.of(typeBuilder.toString(),
-                                          subtypeBuilder.toString(),
+          return Parse.done(MediaRange.of(Assume.nonNull(typeBuilder).toString(),
+                                          Assume.nonNull(subtypeBuilder).toString(),
                                           params, weight, extParams));
         }
       }
       if (step == 6) {
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isSpace(c = input.head())) {
+          input.step();
         }
-        if (input.isCont()) {
-          if (MediaType.isTokenChar(c)) {
-            keyBuilder = new StringBuilder();
-            input.step();
-            keyBuilder.appendCodePoint(c);
-            step = 7;
-          } else {
-            return Parse.error(Diagnostic.expected("param name", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && MediaType.isTokenChar(c)) {
+          keyBuilder = new StringBuilder();
+          keyBuilder.appendCodePoint(c);
+          input.step();
+          step = 7;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("param name", input));
         }
       }
       if (step == 7) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isTokenChar(c)) {
-            input.step();
-            keyBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+          Assume.nonNull(keyBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont() && c == '=') {
           input.step();
-          if (weight < 0 && "q".equals(keyBuilder.toString())) {
+          if (weight < 0 && "q".equals(Assume.nonNull(keyBuilder).toString())) {
             step = 13;
           } else {
             step = 8;
@@ -439,38 +397,26 @@ final class ParseMediaRange extends Parse<MediaRange> {
         }
       }
       if (step == 9) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (MediaType.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 10;
-          } else {
-            return Parse.error(Diagnostic.expected("param value", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 10;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("param value", input));
         }
       }
       if (step == 10) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isReady()) {
-          keyBuilder = Assume.nonNull(keyBuilder);
-          valueBuilder = Assume.nonNull(valueBuilder);
           if (weight < 0) {
-            params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+            params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                    Assume.nonNull(valueBuilder).toString());
           } else {
-            extParams = extParams.updated(keyBuilder.toString(), valueBuilder.toString());
+            extParams = extParams.updated(Assume.nonNull(keyBuilder).toString(),
+                                          Assume.nonNull(valueBuilder).toString());
           }
           keyBuilder = null;
           valueBuilder = null;
@@ -479,124 +425,87 @@ final class ParseMediaRange extends Parse<MediaRange> {
         }
       }
       if (step == 11) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (MediaType.isQuotedChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && MediaType.isQuotedChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
-        if (input.isCont()) {
+        if (input.isCont() && (c == '"' || c == '\\')) {
           if (c == '"') {
-            input.step();
             if (weight < 0) {
-              params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+              params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                      Assume.nonNull(valueBuilder).toString());
             } else {
-              extParams = extParams.updated(keyBuilder.toString(), valueBuilder.toString());
+              extParams = extParams.updated(Assume.nonNull(keyBuilder).toString(),
+                                            Assume.nonNull(valueBuilder).toString());
             }
             keyBuilder = null;
             valueBuilder = null;
+            input.step();
             step = 5;
             continue;
-          } else if (c == '\\') {
+          } else { // c == '\\'
             input.step();
             step = 12;
-          } else {
-            return Parse.error(Diagnostic.unexpected(input));
           }
-        } else if (input.isDone()) {
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 12) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (MediaType.isEscapeChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 11;
-            continue;
-          } else {
-            return Parse.error(Diagnostic.expected("escape character", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && MediaType.isEscapeChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 11;
+          continue;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
       if (step == 13) {
-        if (input.isCont()) {
-          c = input.head();
+        if (input.isCont() && ((c = input.head()) == '0' || c == '1')) {
           if (c == '0') {
-            input.step();
             weight = 0;
-            step = 14;
-          } else if (c == '1') {
-            input.step();
+          } else { // c == '1'
             weight = 1000;
-            step = 14;
-          } else {
-            return Parse.error(Diagnostic.expected("qvalue", input));
           }
-        } else if (input.isDone()) {
+          input.step();
+          step = 14;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("qvalue", input));
         }
       }
       if (step == 14) {
-        if (input.isCont()) {
-          if (input.head() == '.') {
-            input.step();
-            step = 15;
-          } else {
-            step = 18;
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && input.head() == '.') {
+          input.step();
+          step = 15;
+        } else if (input.isReady()) {
           step = 18;
         }
       }
       if (step == 15) {
-        if (input.isCont()) {
-          c = input.head();
-          if (Base10.isDigit(c)) {
-            input.step();
-            weight += 100 * Base10.decodeDigit(c);
-            step = 16;
-          } else {
-            step = 18;
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Base10.isDigit(c = input.head())) {
+          weight += 100 * Base10.decodeDigit(c);
+          input.step();
+          step = 16;
+        } else if (input.isReady()) {
           step = 18;
         }
       }
       if (step == 16) {
-        if (input.isCont()) {
-          c = input.head();
-          if (Base10.isDigit(c)) {
-            input.step();
-            weight += 10 * Base10.decodeDigit(c);
-            step = 17;
-          } else {
-            step = 18;
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Base10.isDigit(c = input.head())) {
+          weight += 10 * Base10.decodeDigit(c);
+          input.step();
+          step = 17;
+        } else if (input.isReady()) {
           step = 18;
         }
       }
       if (step == 17) {
-        if (input.isCont()) {
-          c = input.head();
-          if (Base10.isDigit(c)) {
-            input.step();
-            weight += Base10.decodeDigit(c);
-            step = 18;
-          } else {
-            step = 18;
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Base10.isDigit(c = input.head())) {
+          weight += Base10.decodeDigit(c);
+          input.step();
+          step = 18;
+        } else if (input.isReady()) {
           step = 18;
         }
       }
@@ -664,7 +573,7 @@ final class WriteMediaRange extends Write<Object> {
     int c = 0;
     if (step == 1) {
       if (type.length() == 0) {
-        return Write.error(new WriteException("Blank media type"));
+        return Write.error(new WriteException("blank media type"));
       }
       while (index < type.length() && output.isCont()) {
         c = type.codePointAt(index);
@@ -672,7 +581,7 @@ final class WriteMediaRange extends Write<Object> {
           output.write(c);
           index = type.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid media type: " + type));
+          return Write.error(new WriteException("invalid media type: " + type));
         }
       }
       if (index >= type.length()) {
@@ -686,7 +595,7 @@ final class WriteMediaRange extends Write<Object> {
     }
     if (step == 3) {
       if (subtype.length() == 0) {
-        return Write.error(new WriteException("Blank media subtype"));
+        return Write.error(new WriteException("blank media subtype"));
       }
       while (index < subtype.length() && output.isCont()) {
         c = subtype.codePointAt(index);
@@ -694,7 +603,7 @@ final class WriteMediaRange extends Write<Object> {
           output.write(c);
           index = subtype.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid media subtype: " + subtype));
+          return Write.error(new WriteException("invalid media subtype: " + subtype));
         }
       }
       if (index >= subtype.length()) {
@@ -736,7 +645,7 @@ final class WriteMediaRange extends Write<Object> {
       if (step == 6) {
         key = Assume.nonNull(key);
         if (key.length() == 0) {
-          return Write.error(new WriteException("Blank param key"));
+          return Write.error(new WriteException("blank param key"));
         }
         while (index < key.length() && output.isCont()) {
           c = key.codePointAt(index);
@@ -744,7 +653,7 @@ final class WriteMediaRange extends Write<Object> {
             output.write(c);
             index = key.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid param key: " + key));
+            return Write.error(new WriteException("invalid param key: " + key));
           }
         }
         if (index >= key.length()) {
@@ -753,9 +662,8 @@ final class WriteMediaRange extends Write<Object> {
         }
       }
       if (step == 7 && output.isCont()) {
-        value = Assume.nonNull(value);
         output.write('=');
-        if (MediaType.isToken(value)) {
+        if (MediaType.isToken(Assume.nonNull(value))) {
           step = 8;
         } else {
           step = 9;
@@ -793,7 +701,7 @@ final class WriteMediaRange extends Write<Object> {
               escape = c;
               step = 11;
             } else {
-              return Write.error(new WriteException("Invalid param value: " + value));
+              return Write.error(new WriteException("invalid param value: " + value));
             }
             continue;
           } else {
@@ -875,7 +783,7 @@ final class WriteMediaRange extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

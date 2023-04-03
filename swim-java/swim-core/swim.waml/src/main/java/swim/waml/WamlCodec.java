@@ -34,11 +34,14 @@ import swim.codec.Input;
 import swim.codec.MediaType;
 import swim.codec.Output;
 import swim.codec.Parse;
+import swim.codec.Translator;
+import swim.codec.TranslatorException;
 import swim.codec.Write;
-import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
 import swim.collections.HashTrieMap;
 import swim.expr.Term;
+import swim.expr.TermException;
+import swim.expr.TermFormException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -69,7 +72,7 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
     do {
       int index = providers.length - 1;
       while (index >= 0) {
-        if (provider.priority() < providers[index].priority()) {
+        if (provider.priority() > providers[index].priority()) {
           index -= 1;
         } else {
           index += 1;
@@ -95,11 +98,10 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
     // Builtin providers
     this.addProvider(WamlJava.provider(this));
     this.addProvider(WamlReprs.provider());
-    this.addProvider(WamlTerms.provider());
 
     // Generic providers
     this.addProvider(WamlDeclarations.provider(this));
-    this.addProvider(WamlConversions.provider());
+    this.addProvider(WamlConversions.provider(this));
     this.addProvider(WamlUnions.provider(this));
     this.addProvider(WamlEnums.provider());
     this.addProvider(WamlThrowables.provider());
@@ -111,39 +113,42 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
     final ServiceLoader<WamlProvider> serviceLoader = ServiceLoader.load(WamlProvider.class, WamlCodec.class.getClassLoader());
     final Iterator<ServiceLoader.Provider<WamlProvider>> serviceProviders = serviceLoader.stream().iterator();
     while (serviceProviders.hasNext()) {
-      final ServiceLoader.Provider<WamlProvider> serviceProvider = serviceProviders.next();
-      final Class<? extends WamlProvider> providerClass = serviceProvider.type();
-      WamlProvider provider = null;
+      this.loadExtension(serviceProviders.next());
+    }
+  }
 
-      // public static WamlProvider provider(WamlCodec codec);
+  void loadExtension(ServiceLoader.Provider<WamlProvider> serviceProvider) {
+    final Class<? extends WamlProvider> providerClass = serviceProvider.type();
+    WamlProvider provider = null;
+
+    // public static WamlProvider provider(WamlCodec codec);
+    try {
+      final Method method = providerClass.getDeclaredMethod("provider", WamlCodec.class);
+      if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
+          && WamlProvider.class.isAssignableFrom(method.getReturnType())) {
+        provider = (WamlProvider) method.invoke(null, this);
+      }
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    if (provider == null) {
+      // public static WamlProvider provider();
       try {
-        final Method method = providerClass.getDeclaredMethod("provider", WamlCodec.class);
+        final Method method = providerClass.getDeclaredMethod("provider");
         if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
             && WamlProvider.class.isAssignableFrom(method.getReturnType())) {
-          provider = (WamlProvider) method.invoke(null, this);
+          provider = (WamlProvider) method.invoke(null);
         }
       } catch (ReflectiveOperationException cause) {
-        // swallow
+        // ignore
       }
-
-      if (provider == null) {
-        // public static WamlProvider provider();
-        try {
-          final Method method = providerClass.getDeclaredMethod("provider");
-          if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-              && WamlProvider.class.isAssignableFrom(method.getReturnType())) {
-            provider = (WamlProvider) method.invoke(null);
-          }
-        } catch (ReflectiveOperationException cause) {
-          // swallow
-        }
-      }
-
-      if (provider == null) {
-        provider = serviceProvider.get();
-      }
-      this.addProvider(provider);
     }
+
+    if (provider == null) {
+      provider = serviceProvider.get();
+    }
+    this.addProvider(provider);
   }
 
   @SuppressWarnings("ReferenceEquality")
@@ -159,25 +164,35 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
     } while (true);
   }
 
-  protected @Nullable WamlForm<?> resolveWamlForm(Type javaType) {
+  protected WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
     if (javaType == Object.class) {
       return this;
     }
 
+    // Keep track of the highest priority resolve error.
+    WamlFormException error = null;
+
     final WamlProvider[] providers = (WamlProvider[]) PROVIDERS.getOpaque(this);
     for (int i = 0; i < providers.length; i += 1) {
       final WamlProvider provider = providers[i];
-      final WamlForm<?> wamlForm = provider.resolveWamlForm(javaType);
-      if (wamlForm != null) {
-        return wamlForm;
+      try {
+        final WamlForm<?> wamlForm = provider.resolveWamlForm(javaType);
+        if (wamlForm != null) {
+          return wamlForm;
+        }
+      } catch (WamlFormException cause) {
+        if (error == null) {
+          error = cause;
+        }
       }
     }
 
-    return null;
+    // Treat the highest priority resolve error as the cause of the exception.
+    throw new WamlFormException("no waml form for " + javaType, error);
   }
 
   @SuppressWarnings("ReferenceEquality")
-  public <T> @Nullable WamlForm<T> forType(Type javaType) {
+  public <T> WamlForm<T> getWamlForm(Type javaType) throws WamlFormException {
     if (javaType instanceof WildcardType) {
       final Type[] upperBounds = ((WildcardType) javaType).getUpperBounds();
       if (upperBounds != null && upperBounds.length != 0) {
@@ -203,10 +218,7 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
         return oldWamlForm;
       } else {
         if (newWamlForm == null) {
-          newWamlForm = Assume.conformsNullable(this.resolveWamlForm(javaType));
-          if (newWamlForm == null) {
-            return null;
-          }
+          newWamlForm = Assume.conforms(this.resolveWamlForm(javaType));
         }
         final HashTrieMap<Type, WamlForm<?>> oldMappings = mappings;
         final HashTrieMap<Type, WamlForm<?>> newMappings = oldMappings.updated(javaType, newWamlForm);
@@ -218,16 +230,16 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
     } while (true);
   }
 
-  public <T> @Nullable WamlForm<T> forValue(@Nullable T value) {
+  public <T> WamlForm<T> getWamlForm(@Nullable T value) throws WamlFormException {
     if (value == null) {
       return Assume.conforms(WamlJava.nullForm());
     } else {
-      return this.forType(value.getClass());
+      return this.getWamlForm(value.getClass());
     }
   }
 
   @Override
-  public @Nullable WamlAttrForm<?, ? extends Object> getAttrForm(String name) {
+  public WamlAttrForm<?, ? extends Object> getAttrForm(String name) throws WamlException {
     if ("blob".equals(name)) {
       return WamlJava.blobAttrForm();
     } else {
@@ -246,13 +258,13 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
   }
 
   @Override
-  public WamlNumberForm<Number> numberForm() {
-    return WamlJava.numberForm();
+  public WamlIdentifierForm<Object> identifierForm() {
+    return WamlJava.identifierForm();
   }
 
   @Override
-  public WamlIdentifierForm<Object> identifierForm() {
-    return WamlJava.identifierForm();
+  public WamlNumberForm<Number> numberForm() {
+    return WamlJava.numberForm();
   }
 
   @Override
@@ -261,13 +273,8 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
   }
 
   @Override
-  public @Nullable WamlArrayForm<?, ?, List<Object>> arrayForm() {
-    final WamlForm<List<Object>> listForm = this.forType(List.class);
-    if (listForm instanceof WamlArrayForm<?, ?, ?>) {
-      return (WamlArrayForm<?, ?, List<Object>>) listForm;
-    } else {
-      return null;
-    }
+  public WamlArrayForm<?, ?, List<Object>> arrayForm() throws WamlException {
+    return Assume.conforms(this.getWamlForm(List.class));
   }
 
   @Override
@@ -276,13 +283,8 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
   }
 
   @Override
-  public @Nullable WamlObjectForm<?, ?, ?, Map<Object, Object>> objectForm() {
-    final WamlForm<Map<Object, Object>> mapForm = this.forType(Map.class);
-    if (mapForm instanceof WamlObjectForm<?, ?, ?, ?>) {
-      return (WamlObjectForm<?, ?, ?, Map<Object, Object>>) mapForm;
-    } else {
-      return null;
-    }
+  public WamlObjectForm<?, ?, ?, Map<Object, Object>> objectForm() throws WamlException {
+    return Assume.conforms(this.getWamlForm(Map.class));
   }
 
   @Override
@@ -296,8 +298,12 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
   }
 
   @Override
-  public <T> @Nullable WamlForm<T> getTranslator(Type javaType) {
-    return this.forType(javaType);
+  public <T> Translator<T> getTranslator(Type javaType) throws TranslatorException {
+    try {
+      return this.getWamlForm(javaType);
+    } catch (WamlFormException cause) {
+      throw new TranslatorException(cause);
+    }
   }
 
   @Override
@@ -307,42 +313,31 @@ public class WamlCodec implements WamlForm<Object>, Format, ToSource {
 
   @Override
   public Write<?> write(Output<?> output, @Nullable Object value, WamlWriter writer) {
-    if (value == null) {
-      return WamlJava.nullForm().write(output, value, writer);
-    } else {
-      final WamlForm<Object> valueForm = this.forValue(value);
-      if (valueForm != null) {
-        return valueForm.write(output, value, writer);
-      } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
-      }
+    try {
+      return this.getWamlForm(value).write(output, value, writer);
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   @Override
   public Write<?> writeBlock(Output<?> output, @Nullable Object value, WamlWriter writer) {
-    if (value == null) {
-      return WamlJava.nullForm().writeBlock(output, value, writer);
-    } else {
-      final WamlForm<Object> valueForm = this.forValue(value);
-      if (valueForm != null) {
-        return valueForm.writeBlock(output, value, writer);
-      } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
-      }
+    try {
+      return this.getWamlForm(value).writeBlock(output, value, writer);
+    } catch (WamlFormException cause) {
+      return Write.error(cause);
     }
   }
 
   @Override
-  public Term intoTerm(@Nullable Object value) {
+  public Term intoTerm(@Nullable Object value) throws TermException {
     if (value instanceof Term) {
       return (Term) value;
     } else {
-      final WamlForm<Object> wamlForm = this.forValue(value);
-      if (wamlForm != null) {
-        return wamlForm.intoTerm(value);
-      } else {
-        return Term.from(value);
+      try {
+        return this.getWamlForm(value).intoTerm(value);
+      } catch (WamlFormException cause) {
+        throw new TermFormException(cause);
       }
     }
   }

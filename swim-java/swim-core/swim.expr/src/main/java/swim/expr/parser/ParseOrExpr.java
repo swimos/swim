@@ -68,20 +68,14 @@ public final class ParseOrExpr extends Parse<Term> {
     }
     do {
       if (step == 2) {
-        parseLhs = Assume.nonNull(parseLhs);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '|') {
           input.step();
           step = 3;
         } else if (input.isReady()) {
-          return parseLhs;
+          return Assume.nonNull(parseLhs);
         }
       }
       if (step == 3) {
@@ -93,14 +87,14 @@ public final class ParseOrExpr extends Parse<Term> {
         }
       }
       if (step == 4) {
-        parseLhs = Assume.nonNull(parseLhs);
         if (parseRhs == null) {
           parseRhs = parser.parseAndExpr(input, form);
         } else {
           parseRhs = parseRhs.consume(input);
         }
         if (parseRhs.isDone()) {
-          parseLhs = Parse.done(new OrExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+          parseLhs = Parse.done(new OrExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                           parseRhs.getNonNullUnchecked()));
           parseRhs = null;
           step = 2;
           continue;

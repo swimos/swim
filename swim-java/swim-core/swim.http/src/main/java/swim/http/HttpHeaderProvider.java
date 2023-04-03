@@ -17,10 +17,24 @@ package swim.http;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A provider of {@code HttpHeaderType} specializations.
+ *
+ * @see HttpHeaderType
+ * @see HttpHeaderRegistry
+ */
 @Public
 @Since("5.0")
 public interface HttpHeaderProvider {
 
+  /**
+   * Returns the precedence of this provider relative to all other providers
+   * registered with an {@link HttpHeaderRegistry} instance. Higher priority
+   * providers register header types before lower priority providers.
+   *
+   * @return the priority of this provider; the greater the numeric value,
+   *         the higher the priority
+   */
   default int priority() {
     return DEFAULT_PRIORITY;
   }

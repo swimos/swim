@@ -18,7 +18,6 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryOutput;
-import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Output;
 import swim.codec.Parse;
@@ -50,24 +49,19 @@ public interface Expr extends Term {
     return Expr.parser().parseExpr(StringInput.empty(), Term.registry());
   }
 
-  static Term parse(String string) {
+  static Parse<? extends Term> parse(String string) {
+    final StringInput input = new StringInput(string);
     final ExprParser parser = Expr.parser();
-    final Input input = new StringInput(string);
     while (input.isCont() && parser.isWhitespace(input.head())) {
       input.step();
     }
-    Parse<Term> parse = parser.parseExpr(input, Term.registry());
-    if (parse.isDone()) {
+    final Parse<Term> parseExcpr = parser.parseExpr(input, Term.registry());
+    if (parseExcpr.isDone()) {
       while (input.isCont() && parser.isWhitespace(input.head())) {
         input.step();
       }
     }
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+    return parseExcpr.complete(input);
   }
 
   static ExprWriter writer(@Nullable ExprWriterOptions options) {
@@ -102,13 +96,13 @@ public interface Expr extends Term {
 
   static String toString(Term term, @Nullable ExprWriterOptions options) {
     final StringOutput output = new StringOutput();
-    Expr.writer(options).writeTerm(output, Term.registry(), term).checkDone();
+    Expr.writer(options).writeTerm(output, Term.registry(), term).assertDone();
     return output.get();
   }
 
   static String toString(Term term) {
     final StringOutput output = new StringOutput();
-    Expr.writer().writeTerm(output, Term.registry(), term).checkDone();
+    Expr.writer().writeTerm(output, Term.registry(), term).assertDone();
     return output.get();
   }
 

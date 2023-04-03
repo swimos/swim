@@ -213,21 +213,21 @@ public class TcpOptions implements ToSource {
       int backlog;
       try {
         backlog = Integer.parseInt(System.getProperty("swim.net.tcp.backlog"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         backlog = 0;
       }
 
       int recvBufferSize;
       try {
         recvBufferSize = Integer.parseInt(System.getProperty("swim.net.tcp.recv.buffer.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         recvBufferSize = 0;
       }
 
       int sendBufferSize;
       try {
         sendBufferSize = Integer.parseInt(System.getProperty("swim.net.tcp.send.buffer.size"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         sendBufferSize = 0;
       }
 

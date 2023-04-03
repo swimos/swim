@@ -39,7 +39,7 @@ public final class BooleanRepr implements Repr, Comparable<BooleanRepr>, ToSourc
 
   @Override
   public void setAttrs(Attrs attrs) {
-    throw new UnsupportedOperationException("Immutable");
+    throw new UnsupportedOperationException("immutable");
   }
 
   @Override

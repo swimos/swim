@@ -57,7 +57,7 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
     do {
       int index = providers.length - 1;
       while (index >= 0) {
-        if (provider.priority() < providers[index].priority()) {
+        if (provider.priority() > providers[index].priority()) {
           index -= 1;
         } else {
           index += 1;
@@ -88,39 +88,42 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
     final ServiceLoader<ReprProvider> serviceLoader = ServiceLoader.load(ReprProvider.class, ReprRegistry.class.getClassLoader());
     final Iterator<ServiceLoader.Provider<ReprProvider>> serviceProviders = serviceLoader.stream().iterator();
     while (serviceProviders.hasNext()) {
-      final ServiceLoader.Provider<ReprProvider> serviceProvider = serviceProviders.next();
-      final Class<? extends ReprProvider> providerClass = serviceProvider.type();
-      ReprProvider provider = null;
+      this.loadExtension(serviceProviders.next());
+    }
+  }
 
-      // public static ReprProvider provider(ReprRegistry registry);
+  void loadExtension(ServiceLoader.Provider<ReprProvider> serviceProvider) {
+    final Class<? extends ReprProvider> providerClass = serviceProvider.type();
+    ReprProvider provider = null;
+
+    // public static ReprProvider provider(ReprRegistry registry);
+    try {
+      final Method method = providerClass.getDeclaredMethod("provider", ReprRegistry.class);
+      if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
+          && ReprProvider.class.isAssignableFrom(method.getReturnType())) {
+        provider = (ReprProvider) method.invoke(null, this);
+      }
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    if (provider == null) {
+      // public static ReprProvider provider();
       try {
-        final Method method = providerClass.getDeclaredMethod("provider", ReprRegistry.class);
+        final Method method = providerClass.getDeclaredMethod("provider");
         if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
             && ReprProvider.class.isAssignableFrom(method.getReturnType())) {
-          provider = (ReprProvider) method.invoke(null, this);
+          provider = (ReprProvider) method.invoke(null);
         }
       } catch (ReflectiveOperationException cause) {
-        // swallow
+        // ignore
       }
-
-      if (provider == null) {
-        // public static ReprProvider provider();
-        try {
-          final Method method = providerClass.getDeclaredMethod("provider");
-          if ((method.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)
-              && ReprProvider.class.isAssignableFrom(method.getReturnType())) {
-            provider = (ReprProvider) method.invoke(null);
-          }
-        } catch (ReflectiveOperationException cause) {
-          // swallow
-        }
-      }
-
-      if (provider == null) {
-        provider = serviceProvider.get();
-      }
-      this.addProvider(provider);
     }
+
+    if (provider == null) {
+      provider = serviceProvider.get();
+    }
+    this.addProvider(provider);
   }
 
   @SuppressWarnings("ReferenceEquality")
@@ -136,25 +139,35 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
     } while (true);
   }
 
-  protected @Nullable ReprForm<?> resolveReprForm(Type javaType) {
+  protected ReprForm<?> resolveReprForm(Type javaType) throws ReprFormException {
     if (javaType == Object.class) {
       return this;
     }
 
+    // Keep track of the highest priority resolve error.
+    ReprFormException error = null;
+
     final ReprProvider[] providers = (ReprProvider[]) PROVIDERS.getOpaque(this);
     for (int i = 0; i < providers.length; i += 1) {
       final ReprProvider provider = providers[i];
-      final ReprForm<?> reprForm = provider.resolveReprForm(javaType);
-      if (reprForm != null) {
-        return reprForm;
+      try {
+        final ReprForm<?> reprForm = provider.resolveReprForm(javaType);
+        if (reprForm != null) {
+          return reprForm;
+        }
+      } catch (ReprFormException cause) {
+        if (error == null) {
+          error = cause;
+        }
       }
     }
 
-    return null;
+    // Treat the highest priority resolve error as the cause of the exception.
+    throw new ReprFormException("no repr form for " + javaType, error);
   }
 
   @SuppressWarnings("ReferenceEquality")
-  public <T> @Nullable ReprForm<T> forType(Type javaType) {
+  public <T> ReprForm<T> getReprForm(Type javaType) throws ReprFormException {
     if (javaType instanceof WildcardType) {
       final Type[] upperBounds = ((WildcardType) javaType).getUpperBounds();
       if (upperBounds != null && upperBounds.length != 0) {
@@ -180,10 +193,7 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
         return oldReprForm;
       } else {
         if (newReprForm == null) {
-          newReprForm = Assume.conformsNullable(this.resolveReprForm(javaType));
-          if (newReprForm == null) {
-            return null;
-          }
+          newReprForm = Assume.conforms(this.resolveReprForm(javaType));
         }
         final HashTrieMap<Type, ReprForm<?>> oldMappings = mappings;
         final HashTrieMap<Type, ReprForm<?>> newMappings = oldMappings.updated(javaType, newReprForm);
@@ -195,22 +205,17 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
     } while (true);
   }
 
-  public <T> @Nullable ReprForm<T> forValue(@Nullable T value) {
+  public <T> ReprForm<T> getReprForm(@Nullable T value) throws ReprFormException {
     if (value == null) {
       return Assume.conforms(JavaReprs.nullForm());
     } else {
-      return this.forType(value.getClass());
+      return this.getReprForm(value.getClass());
     }
   }
 
   @Override
-  public Repr intoRepr(@Nullable Object value) {
-    final ReprForm<Object> reprForm = this.forValue(value);
-    if (reprForm != null) {
-      return reprForm.intoRepr(value);
-    } else {
-      throw new IllegalArgumentException("No repr form for value: " + value);
-    }
+  public Repr intoRepr(@Nullable Object value) throws ReprException {
+    return this.getReprForm(value).intoRepr(value);
   }
 
   @Override

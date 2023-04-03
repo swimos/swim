@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.JUnitException;
 import swim.codec.Text;
 import swim.exec.ThreadScheduler;
 import swim.http.HttpBody;
@@ -33,7 +32,7 @@ public class HttpServerTests {
 
   @Test
   @Tag("manual")
-  public void testServer() {
+  public void testServer() throws InterruptedException {
     final CountDownLatch finishedLatch = new CountDownLatch(1);
 
     final TransportDriver driver = new TransportDriver();
@@ -90,8 +89,6 @@ public class HttpServerTests {
       final TestListener listener = new TestListener();
       driver.bindTcpListener(listener).listen("127.0.0.1", 33556);
       finishedLatch.await();
-    } catch (InterruptedException cause) {
-      throw new JUnitException("Interrupted", cause);
     } finally {
       driver.stop();
       scheduler.stop();

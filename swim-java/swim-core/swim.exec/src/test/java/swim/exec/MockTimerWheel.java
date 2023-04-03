@@ -46,7 +46,7 @@ public class MockTimerWheel extends TimerWheel {
       this.tickBarrier.await();
       this.tickBarrier.await();
     } catch (BrokenBarrierException cause) {
-      throw new JUnitException("Sleep error", cause);
+      throw new JUnitException("sleep error", cause);
     }
   }
 
@@ -59,7 +59,7 @@ public class MockTimerWheel extends TimerWheel {
         this.tickBarrier.await();
       }
     } catch (Throwable cause) {
-      throw new JUnitException("Tick error", cause);
+      throw new JUnitException("tick error", cause);
     }
   }
 
@@ -67,17 +67,17 @@ public class MockTimerWheel extends TimerWheel {
     try {
       this.tickBarrier.await();
     } catch (BrokenBarrierException | InterruptedException cause) {
-      throw new JUnitException("Half-tick error", cause);
+      throw new JUnitException("half-tick error", cause);
     }
   }
 
   void await(CountDownLatch latch, int millis) {
     try {
       if (!latch.await(millis, TimeUnit.MILLISECONDS)) {
-        throw new JUnitException("Await timeout");
+        throw new JUnitException("await timeout");
       }
     } catch (InterruptedException cause) {
-      throw new JUnitException("Await error", cause);
+      throw new JUnitException("await error", cause);
     }
   }
 

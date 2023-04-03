@@ -20,7 +20,7 @@ import swim.annotations.Since;
  */
 @Public
 @Since("5.0")
-module swim.io.ws {
+module swim.net.ws {
 
   requires transitive swim.annotations;
   requires transitive swim.collections;

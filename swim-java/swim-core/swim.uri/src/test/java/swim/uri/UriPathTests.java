@@ -15,60 +15,91 @@
 package swim.uri;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UriPathTests {
 
   @Test
-  public void testPathName() {
-    assertEquals("", UriPath.parse("").name());
-    assertEquals("foo", UriPath.parse("foo").name());
-    assertEquals("foo", UriPath.parse("/foo").name());
-    assertEquals("", UriPath.parse("/foo/").name());
-    assertEquals("bar", UriPath.parse("/foo/bar").name());
-    assertEquals("", UriPath.parse("/foo/bar/").name());
+  public void testPathName() throws ParseException {
+    assertEquals("", UriPath.parse("").getNonNull().name());
+    assertEquals("foo", UriPath.parse("foo").getNonNull().name());
+    assertEquals("foo", UriPath.parse("/foo").getNonNull().name());
+    assertEquals("", UriPath.parse("/foo/").getNonNull().name());
+    assertEquals("bar", UriPath.parse("/foo/bar").getNonNull().name());
+    assertEquals("", UriPath.parse("/foo/bar/").getNonNull().name());
   }
 
   @Test
-  public void testParentPath() {
-    assertEquals(UriPath.parse(""), UriPath.parse("").parent());
-    assertEquals(UriPath.parse(""), UriPath.parse("foo").parent());
-    assertEquals(UriPath.parse(""), UriPath.parse("foo/").parent());
-    assertEquals(UriPath.parse("foo/"), UriPath.parse("foo/bar").parent());
-    assertEquals(UriPath.parse("foo/"), UriPath.parse("foo/bar/").parent());
-    assertEquals(UriPath.parse(""), UriPath.parse("/").parent());
-    assertEquals(UriPath.parse("/"), UriPath.parse("/foo").parent());
-    assertEquals(UriPath.parse("/"), UriPath.parse("/foo/").parent());
-    assertEquals(UriPath.parse("/foo/"), UriPath.parse("/foo/bar").parent());
-    assertEquals(UriPath.parse("/foo/"), UriPath.parse("/foo/bar/").parent());
+  public void testParentPath() throws ParseException {
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("").getNonNull().parent());
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("foo").getNonNull().parent());
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("foo/").getNonNull().parent());
+    assertEquals(UriPath.parse("foo/").getNonNull(),
+                 UriPath.parse("foo/bar").getNonNull().parent());
+    assertEquals(UriPath.parse("foo/").getNonNull(),
+                 UriPath.parse("foo/bar/").getNonNull().parent());
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("/").getNonNull().parent());
+    assertEquals(UriPath.parse("/").getNonNull(),
+                 UriPath.parse("/foo").getNonNull().parent());
+    assertEquals(UriPath.parse("/").getNonNull(),
+                 UriPath.parse("/foo/").getNonNull().parent());
+    assertEquals(UriPath.parse("/foo/").getNonNull(),
+                 UriPath.parse("/foo/bar").getNonNull().parent());
+    assertEquals(UriPath.parse("/foo/").getNonNull(),
+                 UriPath.parse("/foo/bar/").getNonNull().parent());
   }
 
   @Test
-  public void testBasePath() {
-    assertEquals(UriPath.parse(""), UriPath.parse("").base());
-    assertEquals(UriPath.parse(""), UriPath.parse("foo").base());
-    assertEquals(UriPath.parse("foo/"), UriPath.parse("foo/").base());
-    assertEquals(UriPath.parse("foo/"), UriPath.parse("foo/bar").base());
-    assertEquals(UriPath.parse("foo/bar/"), UriPath.parse("foo/bar/").base());
-    assertEquals(UriPath.parse("/"), UriPath.parse("/").base());
-    assertEquals(UriPath.parse("/"), UriPath.parse("/foo").base());
-    assertEquals(UriPath.parse("/foo/"), UriPath.parse("/foo/").base());
-    assertEquals(UriPath.parse("/foo/"), UriPath.parse("/foo/bar").base());
-    assertEquals(UriPath.parse("/foo/bar/"), UriPath.parse("/foo/bar/").base());
+  public void testBasePath() throws ParseException {
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("").getNonNull().base());
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("foo").getNonNull().base());
+    assertEquals(UriPath.parse("foo/").getNonNull(),
+                 UriPath.parse("foo/").getNonNull().base());
+    assertEquals(UriPath.parse("foo/").getNonNull(),
+                 UriPath.parse("foo/bar").getNonNull().base());
+    assertEquals(UriPath.parse("foo/bar/").getNonNull(),
+                 UriPath.parse("foo/bar/").getNonNull().base());
+    assertEquals(UriPath.parse("/").getNonNull(),
+                 UriPath.parse("/").getNonNull().base());
+    assertEquals(UriPath.parse("/").getNonNull(),
+                 UriPath.parse("/foo").getNonNull().base());
+    assertEquals(UriPath.parse("/foo/").getNonNull(),
+                 UriPath.parse("/foo/").getNonNull().base());
+    assertEquals(UriPath.parse("/foo/").getNonNull(),
+                 UriPath.parse("/foo/bar").getNonNull().base());
+    assertEquals(UriPath.parse("/foo/bar/").getNonNull(),
+                 UriPath.parse("/foo/bar/").getNonNull().base());
   }
 
   @Test
-  public void testBodyPath() {
-    assertEquals(UriPath.parse(""), UriPath.parse("").body());
-    assertEquals(UriPath.parse(""), UriPath.parse("foo").body());
-    assertEquals(UriPath.parse("foo"), UriPath.parse("foo/").body());
-    assertEquals(UriPath.parse("foo/"), UriPath.parse("foo/bar").body());
-    assertEquals(UriPath.parse("foo/bar"), UriPath.parse("foo/bar/").body());
-    assertEquals(UriPath.parse(""), UriPath.parse("/").body());
-    assertEquals(UriPath.parse("/"), UriPath.parse("/foo").body());
-    assertEquals(UriPath.parse("/foo"), UriPath.parse("/foo/").body());
-    assertEquals(UriPath.parse("/foo/"), UriPath.parse("/foo/bar").body());
-    assertEquals(UriPath.parse("/foo/bar"), UriPath.parse("/foo/bar/").body());
+  public void testBodyPath() throws ParseException {
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("").getNonNull().body());
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("foo").getNonNull().body());
+    assertEquals(UriPath.parse("foo").getNonNull(),
+                 UriPath.parse("foo/").getNonNull().body());
+    assertEquals(UriPath.parse("foo/").getNonNull(),
+                 UriPath.parse("foo/bar").getNonNull().body());
+    assertEquals(UriPath.parse("foo/bar").getNonNull(),
+                 UriPath.parse("foo/bar/").getNonNull().body());
+    assertEquals(UriPath.parse("").getNonNull(),
+                 UriPath.parse("/").getNonNull().body());
+    assertEquals(UriPath.parse("/").getNonNull(),
+                 UriPath.parse("/foo").getNonNull().body());
+    assertEquals(UriPath.parse("/foo").getNonNull(),
+                 UriPath.parse("/foo/").getNonNull().body());
+    assertEquals(UriPath.parse("/foo/").getNonNull(),
+                 UriPath.parse("/foo/bar").getNonNull().body());
+    assertEquals(UriPath.parse("/foo/bar").getNonNull(),
+                 UriPath.parse("/foo/bar/").getNonNull().body());
   }
 
 }

@@ -21,25 +21,30 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.StringTermForm;
 
+/**
+ * A transcoder between WAML string literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code WamlStringForm}
+ */
 @Public
 @Since("5.0")
 public interface WamlStringForm<B, T> extends WamlForm<T>, StringTermForm<B, T> {
 
   @Override
-  default WamlStringForm<?, T> stringForm() {
+  default WamlStringForm<?, ? extends T> stringForm() throws WamlException {
     return this;
   }
 
   @Override
-  B stringBuilder();
+  B stringBuilder() throws WamlException;
 
   @Override
-  B appendCodePoint(B builder, int c);
+  B appendCodePoint(B builder, int c) throws WamlException;
 
   @Override
-  @Nullable T buildString(B builder);
+  @Nullable T buildString(B builder) throws WamlException;
 
-  default @Nullable T buildTextBlock(B builder) {
+  default @Nullable T buildTextBlock(B builder) throws WamlException {
     return this.buildString(builder);
   }
 

@@ -15,6 +15,8 @@
 package swim.util;
 
 import java.util.Objects;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -175,8 +177,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Severity) {
-      final Severity that = (Severity) other;
+    } else if (other instanceof Severity that) {
       return this.value == that.value && this.label.equals(that.label);
     }
     return false;
@@ -274,6 +275,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
     notation.reset();
   }
 
+  @IntoForm
   @Override
   public String toString() {
     return this.label;
@@ -364,7 +366,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
         }
         break;
       default:
-        throw new IllegalArgumentException("Invalid severity value: " + value);
+        throw new IllegalArgumentException("invalid severity value: " + value);
     }
     return new Severity(value, label);
   }
@@ -396,7 +398,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
       case OFF_VALUE:
         return OFF;
       default:
-        throw new IllegalArgumentException("Invalid severity value: " + value);
+        throw new IllegalArgumentException("invalid severity value: " + value);
     }
   }
 
@@ -406,6 +408,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
    * @throws IllegalArgumentException if {@code label} is not
    *         a standard severity label.
    */
+  @FromForm
   public static Severity parse(String label) {
     Objects.requireNonNull(label);
     if (ALL_LABEL.equalsIgnoreCase(label)) {
@@ -427,24 +430,8 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
     } else if (OFF_LABEL.equalsIgnoreCase(label)) {
       return OFF;
     } else {
-      throw new IllegalArgumentException("Unknown severity label: " + label);
+      throw new IllegalArgumentException("unknown severity label: " + label);
     }
-  }
-
-  public static Severity fromJsonString(String value) {
-    return Severity.parse(value);
-  }
-
-  public static String toJsonString(Severity severity) {
-    return severity.toString();
-  }
-
-  public static Severity fromWamlString(String value) {
-    return Severity.parse(value);
-  }
-
-  public static String toWamlString(Severity severity) {
-    return severity.toString();
   }
 
 }

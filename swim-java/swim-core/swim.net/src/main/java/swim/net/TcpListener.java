@@ -34,6 +34,7 @@ import swim.log.LogEntity;
 import swim.log.LogScope;
 import swim.log.LogStatus;
 import swim.repr.Repr;
+import swim.repr.ReprException;
 import swim.repr.TupleRepr;
 import swim.util.Result;
 import swim.util.Severity;
@@ -141,7 +142,7 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   public final TransportContext getTransportContext() {
     final TransportContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound transport");
+      throw new IllegalStateException("unbound transport");
     }
     return context;
   }
@@ -231,7 +232,7 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
             if ((status & STATE_MASK) == OPENING_STATE) {
               try {
                 this.wait(100L);
-              } catch (InterruptedException e) {
+              } catch (InterruptedException cause) {
                 // Defer thread interrupt.
                 interrupted = true;
               }
@@ -763,7 +764,11 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   @Override
   public @Nullable Object toLogEntity(Severity level) {
     final TupleRepr detail = TupleRepr.of();
-    detail.put("localAddress", Repr.from(this.localAddress));
+    try {
+      detail.put("localAddress", Repr.from(this.localAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
     return detail;
   }
 
@@ -771,10 +776,14 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   public @Nullable Object toLogConfig(Severity level) {
     final ServerSocket socket = this.channel.socket();
     final TupleRepr detail = TupleRepr.of();
-    detail.put("localAddress", Repr.from(this.localAddress));
+    try {
+      detail.put("localAddress", Repr.from(this.localAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
     try {
       detail.put("reuseAddress", Repr.of(socket.getReuseAddress()));
-    } catch (SocketException e) {
+    } catch (SocketException cause) {
       // ignore
     }
     return detail;
@@ -784,7 +793,11 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
   public @Nullable Object toLogStatus(Severity level) {
     final ServerSocket socket = this.channel.socket();
     final TupleRepr detail = TupleRepr.of();
-    detail.put("localAddress", Repr.from(this.localAddress));
+    try {
+      detail.put("localAddress", Repr.from(this.localAddress));
+    } catch (ReprException cause) {
+      // ignore
+    }
     if (!socket.isBound()) {
       detail.put("bound", Repr.of(false));
     }

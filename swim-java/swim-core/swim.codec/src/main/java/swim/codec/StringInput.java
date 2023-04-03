@@ -79,7 +79,7 @@ public final class StringInput extends Input {
   @Override
   public int head() {
     if (this.index >= this.string.length()) {
-      throw new IllegalStateException();
+      throw new IllegalStateException("input " + (this.last ? "done" : "empty"));
     }
     return this.string.codePointAt(this.index);
   }
@@ -104,7 +104,7 @@ public final class StringInput extends Input {
   public StringInput step() {
     final int index = this.index;
     if (index >= this.string.length()) {
-      throw new IllegalStateException("Invalid step");
+      throw new IllegalStateException("input " + (this.last ? "done" : "empty"));
     }
     final int c = this.string.codePointAt(index);
     this.index = this.string.offsetByCodePoints(index, 1);
@@ -123,7 +123,7 @@ public final class StringInput extends Input {
     if (position != null) {
       final long index = (long) this.index + (this.offset - position.offset());
       if (index < 0L || index > this.string.length()) {
-        throw new IllegalArgumentException("Invalid seek to " + position);
+        throw new IllegalArgumentException("invalid seek to " + position);
       }
       this.offset = position.offset();
       this.line = position.line();

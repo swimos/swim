@@ -16,46 +16,50 @@ package swim.json;
 
 import org.junit.jupiter.api.Test;
 import swim.codec.Codec;
+import swim.codec.CodecException;
 import swim.codec.Format;
+import swim.codec.MediaType;
+import swim.codec.Transcoder;
+import swim.codec.Translator;
 import swim.repr.Repr;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JsonCodecTests {
 
   @Test
-  public void loadJsonCodec() {
-    assertEquals(Json.codec(), Codec.getCodec("application/json"));
-    assertEquals(Json.codec(), Codec.getCodec("text/json"));
+  public void loadJsonCodec() throws CodecException {
+    assertEquals(Json.codec(), Codec.get(MediaType.parse("application/json").getNonNull()));
+    assertEquals(Json.codec(), Codec.get(MediaType.parse("text/json").getNonNull()));
   }
 
   @Test
-  public void loadJsonReprTranscoder() {
-    assertEquals(Json.codec().forType(Repr.class),
-                 Codec.getTranscoder("application/json", Repr.class));
+  public void loadJsonReprTranscoder() throws CodecException, JsonException {
+    assertEquals(Json.codec().getJsonForm(Repr.class),
+                 Transcoder.get(MediaType.parse("application/json").getNonNull(), Repr.class));
   }
 
   @Test
-  public void loadJsonJavaTranscoder() {
-    assertEquals(Json.codec().forType(Object.class),
-                 Codec.getTranscoder("application/json", Object.class));
+  public void loadJsonJavaTranscoder() throws CodecException, JsonException {
+    assertEquals(Json.codec().getJsonForm(Object.class),
+                 Transcoder.get(MediaType.parse("application/json").getNonNull(), Object.class));
   }
 
   @Test
-  public void loadJsonFormat() {
-    assertEquals(Json.codec(), Format.getFormat("application/json"));
-    assertEquals(Json.codec(), Format.getFormat("text/json"));
+  public void loadJsonFormat() throws CodecException {
+    assertEquals(Json.codec(), Format.get(MediaType.parse("application/json").getNonNull()));
+    assertEquals(Json.codec(), Format.get(MediaType.parse("text/json").getNonNull()));
   }
 
   @Test
-  public void loadJsonReprTranslator() {
-    assertEquals(Json.codec().forType(Repr.class),
-                 Format.getTranslator("application/json", Repr.class));
+  public void loadJsonReprTranslator() throws CodecException, JsonException {
+    assertEquals(Json.codec().getJsonForm(Repr.class),
+                 Translator.get(MediaType.parse("application/json").getNonNull(), Repr.class));
   }
 
   @Test
-  public void loadJsonJavaTranslator() {
-    assertEquals(Json.codec().forType(Object.class),
-                 Format.getTranslator("application/json", Object.class));
+  public void loadJsonJavaTranslator() throws CodecException, JsonException {
+    assertEquals(Json.codec().getJsonForm(Object.class),
+                 Translator.get(MediaType.parse("application/json").getNonNull(), Object.class));
   }
 
 }

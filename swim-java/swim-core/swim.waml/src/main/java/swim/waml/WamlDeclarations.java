@@ -42,7 +42,7 @@ public final class WamlDeclarations implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) {
+  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
     final Class<?> javaClass;
     final Type[] typeArguments;
     if (javaType instanceof Class<?>) {
@@ -88,7 +88,7 @@ public final class WamlDeclarations implements WamlProvider, ToSource {
     return new WamlDeclarations(codec, GENERIC_PRIORITY);
   }
 
-  public static @Nullable WamlForm<?> declarationForm(WamlCodec codec, Class<?> javaClass, Type @Nullable... typeArguments) {
+  public static @Nullable WamlForm<?> declarationForm(WamlCodec codec, Class<?> javaClass, Type @Nullable... typeArguments) throws WamlFormException {
     if (typeArguments != null && typeArguments.length != 0) {
       // public static WamlForm<?> wamlForm(WamlCodec codec, WamlForm<?> arg0, ..., WamlForm<?> argN);
       try {
@@ -103,7 +103,7 @@ public final class WamlDeclarations implements WamlProvider, ToSource {
           final Object[] arguments = new Object[1 + typeArguments.length];
           arguments[0] = codec;
           for (int i = 0; i < typeArguments.length; i += 1) {
-            arguments[1 + i] = codec.forType(typeArguments[i]);
+            arguments[1 + i] = codec.getWamlForm(typeArguments[i]);
           }
           return (WamlForm<?>) method.invoke(null, arguments);
         }
@@ -122,7 +122,7 @@ public final class WamlDeclarations implements WamlProvider, ToSource {
             && WamlForm.class.isAssignableFrom(method.getReturnType())) {
           final Object[] arguments = new Object[typeArguments.length];
           for (int i = 0; i < typeArguments.length; i += 1) {
-            arguments[i] = codec.forType(typeArguments[i]);
+            arguments[i] = codec.getWamlForm(typeArguments[i]);
           }
           return (WamlForm<?>) method.invoke(null, arguments);
         }

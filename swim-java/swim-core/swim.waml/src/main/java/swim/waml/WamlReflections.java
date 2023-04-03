@@ -31,6 +31,7 @@ import swim.annotations.Since;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.expr.Term;
+import swim.expr.TermException;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -53,7 +54,7 @@ public final class WamlReflections implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) {
+  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
     final Class<?> javaClass;
     if (javaType instanceof Class<?>) {
       javaClass = (Class<?>) javaType;
@@ -95,12 +96,12 @@ public final class WamlReflections implements WamlProvider, ToSource {
     return new WamlReflections(codec, GENERIC_PRIORITY);
   }
 
-  public static <T> @Nullable WamlObjectForm<String, Object, T, T> reflectionForm(WamlCodec codec, Class<?> javaClass) {
+  public static <T> @Nullable WamlObjectForm<String, Object, T, T> reflectionForm(WamlCodec codec, Class<?> javaClass) throws WamlFormException {
     final Constructor<T> constructor;
     try {
       constructor = Assume.conforms(javaClass.getDeclaredConstructor());
     } catch (NoSuchMethodException cause) {
-      return null;
+      throw new WamlFormException("missing default constructor", cause);
     }
     constructor.setAccessible(true);
     final LinkedHashMap<String, WamlReflectionFieldForm<Object, T>> fieldForms = new LinkedHashMap<String, WamlReflectionFieldForm<Object, T>>();
@@ -108,7 +109,7 @@ public final class WamlReflections implements WamlProvider, ToSource {
     return new WamlReflectionForm<T>(codec, constructor, fieldForms, null);
   }
 
-  static <T> void reflectFields(WamlCodec codec, @Nullable Class<?> javaClass, Map<String, WamlReflectionFieldForm<Object, T>> fieldForms) {
+  static <T> void reflectFields(WamlCodec codec, @Nullable Class<?> javaClass, Map<String, WamlReflectionFieldForm<Object, T>> fieldForms) throws WamlFormException {
     if (javaClass != null) {
       WamlReflections.reflectFields(codec, javaClass.getSuperclass(), fieldForms);
       final Field[] fields = javaClass.getDeclaredFields();
@@ -118,20 +119,20 @@ public final class WamlReflections implements WamlProvider, ToSource {
     }
   }
 
-  static <T> void reflectField(WamlCodec codec, Field field, Map<String, WamlReflectionFieldForm<Object, T>> fieldForms) {
+  static <T> void reflectField(WamlCodec codec, Field field, Map<String, WamlReflectionFieldForm<Object, T>> fieldForms) throws WamlFormException {
     final int modifiers = field.getModifiers();
     if ((modifiers & (Modifier.STATIC | Modifier.TRANSIENT)) == 0) {
       if ((modifiers & (Modifier.FINAL | Modifier.PRIVATE | Modifier.PROTECTED)) != 0 || modifiers == 0) {
         field.setAccessible(true);
       }
-      final WamlForm<Object> valueForm = codec.forType(field.getGenericType());
+      final WamlForm<Object> valueForm = codec.getWamlForm(field.getGenericType());
       if (valueForm != null) {
-        final WamlKey keyAnnotation = field.getAnnotation(WamlKey.class);
-        String fieldKey = keyAnnotation != null ? keyAnnotation.value() : null;
-        if (fieldKey == null || fieldKey.length() == 0) {
-          fieldKey = field.getName();
+        final WamlProperty propertyAnnotation = field.getAnnotation(WamlProperty.class);
+        String propertyName = propertyAnnotation != null ? propertyAnnotation.value() : null;
+        if (propertyName == null || propertyName.length() == 0) {
+          propertyName = field.getName();
         }
-        fieldForms.put(fieldKey, new WamlReflectionFieldForm<Object, T>(field, valueForm));
+        fieldForms.put(propertyName, new WamlReflectionFieldForm<Object, T>(field, valueForm));
       }
     }
   }
@@ -175,7 +176,7 @@ final class WamlReflectionForm<T> implements WamlAttrForm<Object, T>, WamlObject
   }
 
   @Override
-  public @Nullable WamlForm<T> taggedForm(String tag) {
+  public WamlForm<T> taggedForm(String tag) {
     if (Objects.equals(this.tag, tag)) {
       return this;
     } else {
@@ -185,11 +186,11 @@ final class WamlReflectionForm<T> implements WamlAttrForm<Object, T>, WamlObject
   }
 
   @Override
-  public @Nullable WamlAttrForm<?, ? extends T> getAttrForm(String name) {
+  public WamlAttrForm<?, ? extends T> getAttrForm(String name) throws WamlException {
     if (this.tag != null && this.tag.equals(name)) {
       return this;
     } else {
-      return null;
+      return WamlObjectForm.super.getAttrForm(name);
     }
   }
 
@@ -199,21 +200,21 @@ final class WamlReflectionForm<T> implements WamlAttrForm<Object, T>, WamlObject
   }
 
   @Override
-  public @Nullable WamlFieldForm<String, Object, T> getFieldForm(String key) {
+  public WamlFieldForm<String, Object, T> getFieldForm(String key) throws WamlException {
     final WamlFieldForm<String, Object, T> fieldForm = this.fieldForms.get(key);
     if (fieldForm != null) {
       return fieldForm;
     } else {
-      return null;
+      return WamlObjectForm.super.getFieldForm(key);
     }
   }
 
   @Override
-  public T objectBuilder() {
+  public T objectBuilder() throws WamlException {
     try {
       return this.constructor.newInstance();
     } catch (ReflectiveOperationException cause) {
-      throw new UnsupportedOperationException(cause);
+      throw new WamlException("unable to construct object builder", cause);
     }
   }
 
@@ -239,7 +240,7 @@ final class WamlReflectionForm<T> implements WamlAttrForm<Object, T>, WamlObject
   }
 
   @Override
-  public Term intoTerm(@Nullable T value) {
+  public Term intoTerm(@Nullable T value) throws TermException {
     return Term.from(value);
   }
 
@@ -316,11 +317,17 @@ final class WamlReflectionFieldForm<V, B> implements WamlFieldForm<String, V, B>
   }
 
   @Override
-  public B updateField(B builder, String key, @Nullable V value) {
+  public B updateField(B builder, String key, @Nullable V value) throws WamlException {
     try {
       this.field.set(builder, value);
     } catch (IllegalAccessException cause) {
-      throw new UnsupportedOperationException(cause);
+      throw new WamlException(Notation.of("unable to set field ")
+                                      .append(this.field.getName())
+                                      .append(" of class ")
+                                      .append(this.field.getDeclaringClass().getName())
+                                      .append(" to value ")
+                                      .appendSource(value)
+                                      .toString(), cause);
     }
     return builder;
   }

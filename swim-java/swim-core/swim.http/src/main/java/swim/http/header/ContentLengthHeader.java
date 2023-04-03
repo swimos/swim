@@ -93,11 +93,11 @@ public final class ContentLengthHeader extends HttpHeader {
         input.step();
         length = (long) Base10.decodeDigit(c);
       } else {
-        throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Content-Length: " + value,
+        throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Content-Length: " + value,
                                 new ParseException(Diagnostic.expected("digit", input)));
       }
     } else if (input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Content-Length: " + value,
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Content-Length: " + value,
                               new ParseException(Diagnostic.expected("digit", input)));
     }
     while (input.isCont()) {
@@ -113,9 +113,9 @@ public final class ContentLengthHeader extends HttpHeader {
       }
     }
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Content-Length: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Content-Length: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Content-Length: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Content-Length: " + value);
     }
     return length;
   }

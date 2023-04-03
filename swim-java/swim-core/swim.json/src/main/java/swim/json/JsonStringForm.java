@@ -21,23 +21,28 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.expr.StringTermForm;
 
+/**
+ * A transcoder between JSON string literals and values of type {@code T}.
+ *
+ * @param <T> the type of values transcoded by this {@code JsonStringForm}
+ */
 @Public
 @Since("5.0")
 public interface JsonStringForm<B, T> extends JsonForm<T>, StringTermForm<B, T> {
 
   @Override
-  default JsonStringForm<?, T> stringForm() {
+  default JsonStringForm<?, ? extends T> stringForm() throws JsonException {
     return this;
   }
 
   @Override
-  B stringBuilder();
+  B stringBuilder() throws JsonException;
 
   @Override
-  B appendCodePoint(B builder, int c);
+  B appendCodePoint(B builder, int c) throws JsonException;
 
   @Override
-  @Nullable T buildString(B builder);
+  @Nullable T buildString(B builder) throws JsonException;
 
   @Override
   default Parse<T> parse(Input input, JsonParser parser) {

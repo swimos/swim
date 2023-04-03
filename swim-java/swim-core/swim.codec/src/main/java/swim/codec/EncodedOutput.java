@@ -14,7 +14,9 @@
 
 package swim.codec;
 
+import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -64,8 +66,50 @@ final class WriteEncodedOutput<T> extends Write<T> {
 
   @CheckReturnValue
   @Override
-  public @Nullable T get() {
+  public @Nullable T get() throws WriteException {
     return this.write.get();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNull() throws WriteException {
+    return this.write.getNonNull();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getUnchecked() {
+    return this.write.getUnchecked();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullUnchecked() {
+    return this.write.getNonNullUnchecked();
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getOr(@Nullable T defaultValue) {
+    return this.write.getOr(defaultValue);
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+    return this.write.getNonNullOr(defaultValue);
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getOrElse(Supplier<? extends T> supplier) {
+    return this.write.getOrElse(supplier);
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
+    return this.write.getNonNullOrElse(supplier);
   }
 
   @Override

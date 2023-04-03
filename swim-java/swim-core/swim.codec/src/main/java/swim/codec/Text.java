@@ -264,14 +264,14 @@ final class TextCodec implements Codec, ToSource {
   }
 
   @Override
-  public <T> @Nullable Transcoder<T> getTranscoder(Type javaType) {
+  public <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException {
     if (javaType instanceof Class<?>) {
       final Class<?> javaClass = (Class<?>) javaType;
       if (javaClass.isAssignableFrom(String.class)) {
         return Assume.conforms(this.transcoder);
       }
     }
-    return null;
+    throw new TranscoderException("no text transcoder for type: " + javaType);
   }
 
   @Override
@@ -343,7 +343,7 @@ final class WriteString<T> extends Write<T> {
     if (index == input.length()) {
       return Write.done();
     } else if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }
@@ -354,20 +354,20 @@ final class WriteString<T> extends Write<T> {
 
 final class ParseLine extends Parse<String> {
 
-  final @Nullable StringBuilder output;
+  final @Nullable StringBuilder builder;
 
-  ParseLine(@Nullable StringBuilder output) {
-    this.output = output;
+  ParseLine(@Nullable StringBuilder builder) {
+    this.builder = builder;
   }
 
   @Override
   public Parse<String> consume(Input input) {
-    return ParseLine.parse(input, this.output);
+    return ParseLine.parse(input, this.builder);
   }
 
-  static Parse<String> parse(Input input, @Nullable StringBuilder output) {
-    if (output == null) {
-      output = new StringBuilder();
+  static Parse<String> parse(Input input, @Nullable StringBuilder builder) {
+    if (builder == null) {
+      builder = new StringBuilder();
     }
     while (input.isCont()) {
       final int c = input.head();
@@ -375,17 +375,17 @@ final class ParseLine extends Parse<String> {
       if (c == '\r') {
         continue;
       } else if (c != '\n') {
-        output.appendCodePoint(c);
+        builder.appendCodePoint(c);
       } else {
-        return Parse.done(output.toString());
+        return Parse.done(builder.toString());
       }
     }
     if (input.isDone()) {
-      return Parse.done(output.toString());
+      return Parse.done(builder.toString());
     } else if (input.isError()) {
       return Parse.error(input.getError());
     }
-    return new ParseLine(output);
+    return new ParseLine(builder);
   }
 
 }

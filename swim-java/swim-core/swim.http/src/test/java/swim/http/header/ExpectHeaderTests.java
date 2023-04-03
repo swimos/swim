@@ -15,6 +15,7 @@
 package swim.http.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.http.HttpAssertions;
 import swim.http.HttpException;
 import swim.http.HttpHeader;
@@ -25,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class ExpectHeaderTests {
 
   @Test
-  public void parseExpectHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Expect: 100-continue\r\n");
+  public void parseExpectHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Expect: 100-continue\r\n").getNonNull();
     assertInstanceOf(ExpectHeader.class, headers.getHeader(ExpectHeader.TYPE));
     assertEquals(ExpectHeader.of("100-continue"),
                  headers.getHeader(ExpectHeader.TYPE));

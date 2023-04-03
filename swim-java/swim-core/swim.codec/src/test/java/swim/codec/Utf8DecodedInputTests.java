@@ -340,7 +340,6 @@ public class Utf8DecodedInputTests {
 
     // Decode all code unit subsequence permutations.
     for (int i = 0; i <= n; i += 1) {
-      //System.out.println("i: " + i + "; n: " + n);
       final byte[] part1 = new byte[i];
       for (int j = 0; j < i; j += 1) {
         part1[j] = codeUnits[j];

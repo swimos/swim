@@ -77,7 +77,7 @@ public abstract class AbstractTask implements Task {
   public boolean schedule() {
     final TaskContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound task");
+      throw new IllegalStateException("unbound task");
     }
     return context.schedule();
   }

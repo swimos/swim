@@ -128,8 +128,8 @@ public class Notation implements Appendable {
         } else {
           this.output.append((char) 0xFFFD); // invalid code point
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -140,8 +140,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(c);
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -152,8 +152,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(csq);
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -164,8 +164,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(csq, start, end);
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -175,8 +175,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(object != null ? object.toString() : "null");
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -189,8 +189,8 @@ public class Notation implements Appendable {
         if (lineSeparator != null) {
           this.output.append(lineSeparator);
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -208,8 +208,8 @@ public class Notation implements Appendable {
             depth -= 1;
           }
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -228,8 +228,8 @@ public class Notation implements Appendable {
             depth -= 1;
           }
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -250,8 +250,8 @@ public class Notation implements Appendable {
         } else if (this.options.whitespace()) {
           this.output.append(' ');
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -262,8 +262,8 @@ public class Notation implements Appendable {
       if (this.options.whitespace()) {
         try {
           this.output.append(' ');
-        } catch (IOException error) {
-          this.error = error;
+        } catch (IOException cause) {
+          this.error = cause;
         }
       }
     }
@@ -282,8 +282,8 @@ public class Notation implements Appendable {
       if (this.error == null) {
         try {
           ((ToSource) object).writeSource(this);
-        } catch (IOException error) {
-          this.error = error;
+        } catch (IOException cause) {
+          this.error = cause;
         }
       }
     } else if (object instanceof Boolean) {
@@ -320,8 +320,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(value ? "true" : "false");
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -335,8 +335,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append('(').append("byte").append(')').append(' ').append(Byte.toString(value));
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -350,8 +350,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append('(').append("short").append(')').append(' ').append(Short.toString(value));
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -365,8 +365,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(Integer.toString(value));
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -380,8 +380,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(Long.toString(value)).append('L');
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -395,8 +395,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(Float.toString(value)).append('f');
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -410,8 +410,8 @@ public class Notation implements Appendable {
     if (this.error == null) {
       try {
         this.output.append(Double.toString(value));
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -451,8 +451,8 @@ public class Notation implements Appendable {
           this.output.append(value);
         }
         this.output.append('\'');
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -508,8 +508,8 @@ public class Notation implements Appendable {
         } else {
           this.output.append("null");
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -558,8 +558,8 @@ public class Notation implements Appendable {
         } else {
           this.output.append('\'').append((char) 0xFFFD).append('\''); // invalid code point
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -578,8 +578,8 @@ public class Notation implements Appendable {
         } else {
           this.output.append("null");
         }
-      } catch (IOException error) {
-        this.error = error;
+      } catch (IOException cause) {
+        this.error = cause;
       }
     }
     return this;
@@ -590,8 +590,8 @@ public class Notation implements Appendable {
       if (this.error == null) {
         try {
           ((ToMarkup) object).writeMarkup(this);
-        } catch (IOException error) {
-          this.error = error;
+        } catch (IOException cause) {
+          this.error = cause;
         }
       }
     } else if (object instanceof Object[]) {
@@ -686,8 +686,8 @@ public class Notation implements Appendable {
       if (this.error == null) {
         try {
           ((ToString) object).writeString(this);
-        } catch (IOException error) {
-          this.error = error;
+        } catch (IOException cause) {
+          this.error = cause;
         }
       }
     } else {
@@ -1327,6 +1327,14 @@ public class Notation implements Appendable {
   static final int INVOKE_ARGUMENT_END = 3 << INVOKE_STATE_SHIFT;
 
   static final int INLINE_FLAG = 1 << 0;
+
+  public static Notation of() {
+    return new Notation();
+  }
+
+  public static Notation of(@Nullable Object object) {
+    return new Notation().append(object);
+  }
 
   public static Notation from(Appendable output) {
     if (output instanceof Notation) {

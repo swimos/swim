@@ -79,7 +79,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
         case KNOT:
           return tree.getKnot(branch).containsKey(key);
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
     }
   }
@@ -114,7 +114,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           i += 1;
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       nodeMap >>>= 1;
       leafMap >>>= 1;
@@ -139,7 +139,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           case KNOT:
             return tree.knotAt(0).head();
           default:
-            throw new AssertionError();
+            throw new AssertionError("unreachable");
         }
         nodeMap >>>= 1;
         leafMap >>>= 1;
@@ -165,7 +165,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           case KNOT:
             return tree.knotAt(0).headKey();
           default:
-            throw new AssertionError();
+            throw new AssertionError("unreachable");
         }
         nodeMap >>>= 1;
         leafMap >>>= 1;
@@ -191,7 +191,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           case KNOT:
             return tree.knotAt(0).headValue();
           default:
-            throw new AssertionError();
+            throw new AssertionError("unreachable");
         }
         nodeMap >>>= 1;
         leafMap >>>= 1;
@@ -237,7 +237,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           }
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       key = null;
       hash = 0;
@@ -285,7 +285,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           }
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       key = null;
       hash = 0;
@@ -333,7 +333,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           }
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       key = null;
       hash = 0;
@@ -367,7 +367,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
         case KNOT:
           return tree.getKnot(branch).get(key);
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
     } while (true);
   }
@@ -439,7 +439,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
                      .setKnot(branch, newKnot);
         }
       default:
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
     }
   }
 
@@ -494,7 +494,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
                      .setKnot(branch, newKnot);
         }
       default:
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
     }
   }
 
@@ -671,7 +671,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           i += 1;
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       nodeMap >>>= 1;
       leafMap >>>= 1;
@@ -702,7 +702,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           i += 1;
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       nodeMap >>>= 1;
       leafMap >>>= 1;
@@ -741,8 +741,8 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map<?, ?>) {
-      return this.entrySet().equals(((Map<?, ?>) other).entrySet());
+    } else if (other instanceof Map<?, ?> that) {
+      return this.entrySet().equals(that.entrySet());
     }
     return false;
   }
@@ -795,7 +795,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
             i += 1;
             break;
           default:
-            throw new AssertionError();
+            throw new AssertionError("unreachable");
         }
         nodeMap >>>= 1;
         leafMap >>>= 1;
@@ -837,7 +837,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           i += 1;
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       nodeMap >>>= 1;
       leafMap >>>= 1;
@@ -877,7 +877,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
           i += 1;
           break;
         default:
-          throw new AssertionError();
+          throw new AssertionError("unreachable");
       }
       nodeMap >>>= 1;
       leafMap >>>= 1;
@@ -1069,7 +1069,7 @@ abstract class HashTrieMapIterator<K, V> {
               this.push(tree.knotAt(this.getSlotIndex()));
               break;
             default:
-              throw new AssertionError();
+              throw new AssertionError("unreachable");
           }
         } else if (this.depth > 0) {
           this.pop();
@@ -1084,7 +1084,7 @@ abstract class HashTrieMapIterator<K, V> {
           this.pop();
         }
       } else {
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
       }
     } while (true);
   }
@@ -1120,7 +1120,7 @@ abstract class HashTrieMapIterator<K, V> {
               this.push(tree.knotAt(this.getSlotIndex()));
               break;
             default:
-              throw new AssertionError();
+              throw new AssertionError("unreachable");
           }
         } else if (this.depth > 0) {
           this.pop();
@@ -1139,7 +1139,7 @@ abstract class HashTrieMapIterator<K, V> {
           this.pop();
         }
       } else {
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
       }
     } while (true);
   }
@@ -1173,7 +1173,7 @@ abstract class HashTrieMapIterator<K, V> {
               this.push(tree.knotAt(this.getSlotIndex()));
               break;
             default:
-              throw new AssertionError();
+              throw new AssertionError("unreachable");
           }
         } else if (this.depth > 0) {
           this.pop();
@@ -1191,7 +1191,7 @@ abstract class HashTrieMapIterator<K, V> {
           this.pop();
         }
       } else {
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
       }
     } while (true);
   }
@@ -1225,7 +1225,7 @@ abstract class HashTrieMapIterator<K, V> {
               this.push(tree.knotAt(this.getSlotIndex()));
               break;
             default:
-              throw new AssertionError();
+              throw new AssertionError("unreachable");
           }
         } else if (this.depth > 0) {
           this.pop();
@@ -1243,7 +1243,7 @@ abstract class HashTrieMapIterator<K, V> {
           this.pop();
         }
       } else {
-        throw new AssertionError();
+        throw new AssertionError("unreachable");
       }
     } while (true);
   }

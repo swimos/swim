@@ -51,7 +51,7 @@ public final class WsCloseFrame<T> extends WsControlFrame<T> implements ToSource
     if (this.payload != null) {
       return this.payload;
     } else {
-      throw new NullPointerException("Null websocket payload");
+      throw new NullPointerException("null websocket payload");
     }
   }
 

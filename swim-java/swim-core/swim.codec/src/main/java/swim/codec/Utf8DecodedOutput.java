@@ -14,8 +14,9 @@
 
 package swim.codec;
 
-import java.io.IOException;
+import java.util.NoSuchElementException;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -35,11 +36,11 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
   int c2;
   int c3;
   int have;
-  @Nullable IOException error;
+  @Nullable OutputException error;
 
   Utf8DecodedOutput(Output<T> output, UtfErrorMode errorMode,
                     int c1, int c2, int c3, int have,
-                    @Nullable IOException error) {
+                    @Nullable OutputException error) {
     this.output = output;
     this.errorMode = errorMode;
     this.c1 = c1;
@@ -90,6 +91,10 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
 
   @Override
   public Utf8DecodedOutput<T> write(int c) {
+    if (this.error != null) {
+      throw new IllegalStateException("output error", this.error);
+    }
+
     int c1 = this.c1;
     int c2 = this.c2;
     int c3 = this.c3;
@@ -120,7 +125,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
     }
 
     if (c1 == 0 && this.errorMode.isNonZero()) { // invalid NUL byte
-      this.error = new UtfException("Unexpected NUL byte");
+      this.error = new OutputException("unexpected NUL byte");
       return this;
     } else if (c1 >= 0 && c1 <= 0x7F) { // U+0000..U+007F
       this.output.write(c1);
@@ -141,7 +146,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
           this.have = 0;
         } else if (c3 >= 0) { // invalid c3
           if (this.errorMode.isFatal()) {
-            this.error = new UtfException(Utf8DecodedOutput.invalid(c1, c2, c3));
+            this.error = new OutputException(Utf8DecodedOutput.invalid(c1, c2, c3));
             return this;
           }
           this.output.write(this.errorMode.replacementChar());
@@ -149,7 +154,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
           this.c2 = -1;
           this.have = 1;
         } else if (c < 0 || this.output.isDone()) { // incomplete c3
-          this.error = new UtfException(Utf8DecodedOutput.invalid(c1, c2));
+          this.error = new OutputException(Utf8DecodedOutput.invalid(c1, c2));
           return this;
         } else { // awaiting c3
           this.c2 = c2;
@@ -168,7 +173,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
             this.have = 0;
           } else if (c4 >= 0) { // invalid c4
             if (this.errorMode.isFatal()) {
-              this.error = new UtfException(Utf8DecodedOutput.invalid(c1, c2, c3, c4));
+              this.error = new OutputException(Utf8DecodedOutput.invalid(c1, c2, c3, c4));
               return this;
             }
             this.output.write(this.errorMode.replacementChar());
@@ -177,7 +182,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
             this.c3 = -1;
             this.have = 1;
           } else if (c < 0 || this.output.isDone()) { // incomplete c4
-            this.error = new UtfException(Utf8DecodedOutput.invalid(c1, c2, c3));
+            this.error = new OutputException(Utf8DecodedOutput.invalid(c1, c2, c3));
             return this;
           } else { // awaiting c4
             this.c3 = c3;
@@ -185,7 +190,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
           }
         } else if (c3 >= 0) { // invalid c3
           if (this.errorMode.isFatal()) {
-            this.error = new UtfException(Utf8DecodedOutput.invalid(c1, c2, c3));
+            this.error = new OutputException(Utf8DecodedOutput.invalid(c1, c2, c3));
             return this;
           }
           this.output.write(this.errorMode.replacementChar());
@@ -193,7 +198,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
           this.c2 = -1;
           this.have = 1;
         } else if (c < 0 || this.output.isDone()) { // incomplete c3
-          this.error = new UtfException(Utf8DecodedOutput.invalid(c1, c2));
+          this.error = new OutputException(Utf8DecodedOutput.invalid(c1, c2));
           return this;
         } else { // awaiting c3
           this.c2 = c2;
@@ -201,14 +206,14 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
         }
       } else if (c2 >= 0) { // invalid c2
         if (this.errorMode.isFatal()) {
-          this.error = new UtfException(Utf8DecodedOutput.invalid(c1, c2));
+          this.error = new OutputException(Utf8DecodedOutput.invalid(c1, c2));
           return this;
         }
         this.output.write(this.errorMode.replacementChar());
         this.c1 = c2;
         this.have = 1;
       } else if (c < 0 || this.output.isDone()) { // incomplete c2
-        this.error = new UtfException(Utf8DecodedOutput.invalid(c1));
+        this.error = new OutputException(Utf8DecodedOutput.invalid(c1));
         return this;
       } else { // awaiting c2
         this.c1 = c1;
@@ -216,7 +221,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
       }
     } else if (c1 >= 0) { // invalid c1
       if (this.errorMode.isFatal()) {
-        this.error = new UtfException(Utf8DecodedOutput.invalid(c1));
+        this.error = new OutputException(Utf8DecodedOutput.invalid(c1));
         return this;
       }
       this.output.write(this.errorMode.replacementChar());
@@ -226,8 +231,9 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
     return this;
   }
 
+  @CheckReturnValue
   @Override
-  public @Nullable T get() {
+  public @Nullable T get() throws OutputException {
     if (this.error == null) {
       if (this.have == 0) {
         return this.output.get();
@@ -235,7 +241,49 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
         return this.write(-1).get();
       }
     } else {
-      throw new IllegalStateException("Output error", this.error);
+      throw this.error;
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNull() throws OutputException {
+    if (this.error == null) {
+      if (this.have == 0) {
+        return this.output.getNonNull();
+      } else {
+        return this.write(-1).getNonNull();
+      }
+    } else {
+      throw this.error;
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @Nullable T getUnchecked() {
+    if (this.error == null) {
+      if (this.have == 0) {
+        return this.output.getUnchecked();
+      } else {
+        return this.write(-1).getUnchecked();
+      }
+    } else {
+      throw new NoSuchElementException("output error", this.error);
+    }
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullUnchecked() {
+    if (this.error == null) {
+      if (this.have == 0) {
+        return this.output.getNonNullUnchecked();
+      } else {
+        return this.write(-1).getNonNullUnchecked();
+      }
+    } else {
+      throw new NoSuchElementException("output error", this.error);
     }
   }
 
@@ -258,41 +306,41 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
 
   private static String invalid(int c1) {
     final StringOutput output = new StringOutput();
-    output.append("Invalid UTF-8 code unit: ");
-    Base16.uppercase().writeIntLiteral(output, c1, 2).checkDone();
+    output.append("invalid UTF-8 code unit: ");
+    Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     return output.get();
   }
 
   private static String invalid(int c1, int c2) {
     final StringOutput output = new StringOutput();
-    output.append("Invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(output, c1, 2).checkDone();
+    output.append("invalid UTF-8 code unit sequence: ");
+    Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c2, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).assertDone();
     return output.get();
   }
 
   private static String invalid(int c1, int c2, int c3) {
     final StringOutput output = new StringOutput();
-    output.append("Invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(output, c1, 2).checkDone();
+    output.append("invalid UTF-8 code unit sequence: ");
+    Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c2, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c3, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c3, 2).assertDone();
     return output.get();
   }
 
   private static String invalid(int c1, int c2, int c3, int c4) {
     final StringOutput output = new StringOutput();
-    output.append("Invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(output, c1, 2).checkDone();
+    output.append("invalid UTF-8 code unit sequence: ");
+    Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c2, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c3, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c3, 2).assertDone();
     output.append(' ');
-    Base16.uppercase().writeIntLiteral(output, c4, 2).checkDone();
+    Base16.uppercase().writeIntLiteral(output, c4, 2).assertDone();
     return output.get();
   }
 

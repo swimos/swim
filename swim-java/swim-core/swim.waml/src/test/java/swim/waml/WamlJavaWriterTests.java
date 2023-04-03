@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.JUnitException;
 import swim.annotations.Nullable;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -183,9 +184,9 @@ public class WamlJavaWriterTests {
 
   public enum TestEnum {
     ONE,
-    @WamlKey("two")
+    @WamlTag("two")
     TWO,
-    @WamlKey("three")
+    @WamlTag("three")
     THREE,
     FOUR;
   }
@@ -237,11 +238,11 @@ public class WamlJavaWriterTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestObject")
-                           .appendArgument(this.a)
-                           .appendArgument(this.b)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestObject")
+                          .appendArgument(this.a)
+                          .appendArgument(this.b)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -289,11 +290,11 @@ public class WamlJavaWriterTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestPoint2")
-                           .appendArgument(this.x)
-                           .appendArgument(this.y)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestPoint2")
+                          .appendArgument(this.x)
+                          .appendArgument(this.y)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -332,12 +333,12 @@ public class WamlJavaWriterTests {
 
     @Override
     public String toString() {
-      return new Notation().beginInvokeNew("TestPoint3")
-                           .appendArgument(this.x)
-                           .appendArgument(this.y)
-                           .appendArgument(this.z)
-                           .endInvoke()
-                           .toString();
+      return Notation.of().beginInvokeNew("TestPoint3")
+                          .appendArgument(this.x)
+                          .appendArgument(this.y)
+                          .appendArgument(this.z)
+                          .endInvoke()
+                          .toString();
     }
 
   }
@@ -367,11 +368,23 @@ public class WamlJavaWriterTests {
   }
 
   public static void assertWrites(Class<?> valueClass, String expected, @Nullable Object value) {
-    WamlAssertions.assertWrites(expected, () -> Waml.forType(valueClass).write(value, Waml.writer(WamlWriterOptions.compact())));
+    final WamlForm<Object> valueForm;
+    try {
+      valueForm = Waml.form(valueClass);
+    } catch (WamlFormException cause) {
+      throw new JUnitException(cause.getMessage(), cause);
+    }
+    WamlAssertions.assertWrites(expected, () -> valueForm.write(value, Waml.writer(WamlWriterOptions.compact())));
   }
 
   public static void assertWrites(String expected, @Nullable Object value) {
-    WamlAssertions.assertWrites(expected, () -> Waml.forValue(value).write(value, Waml.writer(WamlWriterOptions.compact())));
+    final WamlForm<Object> valueForm;
+    try {
+      valueForm = Waml.form(value);
+    } catch (WamlFormException cause) {
+      throw new JUnitException(cause.getMessage(), cause);
+    }
+    WamlAssertions.assertWrites(expected, () -> valueForm.write(value, Waml.writer(WamlWriterOptions.compact())));
   }
 
 }

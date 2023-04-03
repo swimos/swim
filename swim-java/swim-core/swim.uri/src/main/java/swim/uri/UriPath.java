@@ -22,13 +22,16 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
+import swim.annotations.FromForm;
+import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base16;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
-import swim.codec.ParseException;
+import swim.codec.OutputException;
+import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
@@ -511,6 +514,7 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     }
   }
 
+  @IntoForm
   @Override
   public abstract String toString();
 
@@ -580,152 +584,46 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     }
   }
 
-  public static UriPath parse(String part) {
+  @FromForm
+  public static @Nullable UriPath from(String value) {
+    return UriPath.parse(value).getOr(null);
+  }
+
+  public static Parse<UriPath> parse(Input input, UriPathBuilder builder) {
+    return ParseUriPath.parse(input, builder, null, 0, 1);
+  }
+
+  public static Parse<UriPath> parse(Input input) {
+    return ParseUriPath.parse(input, null, null, 0, 1);
+  }
+
+  public static Parse<UriPath> parse(String part) {
     Objects.requireNonNull(part);
-    final CacheMap<String, UriPath> cache = UriPath.cache();
-    UriPath path = cache.get(part);
-    if (path == null) {
-      final Input input = new StringInput(part);
-      path = UriPath.parse(input);
-      if (input.isCont()) {
-        throw new ParseException(Diagnostic.unexpected(input));
-      } else if (input.isError()) {
-        throw new ParseException(input.getError());
+    final CacheMap<String, Parse<UriPath>> cache = UriPath.cache();
+    Parse<UriPath> parsePath = cache.get(part);
+    if (parsePath == null) {
+      final StringInput input = new StringInput(part);
+      parsePath = UriPath.parse(input).complete(input);
+      if (parsePath.isDone()) {
+        parsePath = cache.put(part, parsePath);
       }
-      path = cache.put(part, path);
     }
-    return path;
+    return parsePath;
   }
 
-  public static UriPath parse(Input input) {
-    return UriPath.parse(input, null);
-  }
+  private static final ThreadLocal<CacheMap<String, Parse<UriPath>>> CACHE =
+      new ThreadLocal<CacheMap<String, Parse<UriPath>>>();
 
-  public static UriPath parse(Input input, @Nullable UriPathBuilder builder) {
-    int c = 0;
-    do {
-      if (input.isCont()) {
-        c = input.head();
-        if (Uri.isPathChar(c) || c == '%') {
-          final String segment = UriPath.parseSegment(input);
-          if (builder == null) {
-            builder = new UriPathBuilder();
-          }
-          builder.addSegment(segment);
-          continue;
-        } else if (c == '/' || c == '\\') {
-          input.step();
-          if (builder == null) {
-            builder = new UriPathBuilder();
-          }
-          builder.addSlash();
-          continue;
-        } else {
-          if (builder != null) {
-            return builder.build();
-          } else {
-            return UriPath.empty();
-          }
-        }
-      } else if (input.isReady()) {
-        if (builder != null) {
-          return builder.build();
-        } else {
-          return UriPath.empty();
-        }
-      } else {
-        break;
-      }
-    } while (true);
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  static String parseSegment(Input input) {
-    final Utf8DecodedOutput<String> output = new Utf8DecodedOutput<String>(new StringOutput());
-    int c = 0;
-    do {
-      while (input.isCont()) {
-        c = input.head();
-        if (Uri.isPathChar(c)) {
-          input.step();
-          output.write(c);
-        } else {
-          break;
-        }
-      }
-      if (input.isCont() && c == '%') {
-        input.step();
-      } else if (input.isReady()) {
-        return output.getNonNull();
-      } else {
-        break;
-      }
-      int c1 = 0;
-      if (input.isCont()) {
-        c1 = input.head();
-        if (Base16.isDigit(c1)) {
-          input.step();
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-      int c2 = 0;
-      if (input.isCont()) {
-        c2 = input.head();
-        if (Base16.isDigit(c2)) {
-          input.step();
-          output.write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c2));
-          continue;
-        } else {
-          throw new ParseException(Diagnostic.expected("hex digit", input));
-        }
-      } else if (input.isDone()) {
-        throw new ParseException(Diagnostic.expected("hex digit", input));
-      } else {
-        break;
-      }
-    } while (true);
-    if (input.isError()) {
-      throw new ParseException(input.getError());
-    }
-    throw new ParseException(Diagnostic.unexpected(input));
-  }
-
-  public static UriPath fromJsonString(String value) {
-    return UriPath.parse(value);
-  }
-
-  public static String toJsonString(UriPath path) {
-    return path.toString();
-  }
-
-  public static UriPath fromWamlString(String value) {
-    return UriPath.parse(value);
-  }
-
-  public static String toWamlString(UriPath path) {
-    return path.toString();
-  }
-
-  private static final ThreadLocal<CacheMap<String, UriPath>> CACHE = new ThreadLocal<CacheMap<String, UriPath>>();
-
-  private static CacheMap<String, UriPath> cache() {
-    CacheMap<String, UriPath> cache = CACHE.get();
+  private static CacheMap<String, Parse<UriPath>> cache() {
+    CacheMap<String, Parse<UriPath>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.uri.path.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 512;
       }
-      cache = new LruCacheMap<String, UriPath>(cacheSize);
+      cache = new LruCacheMap<String, Parse<UriPath>>(cacheSize);
       CACHE.set(cache);
     }
     return cache;
@@ -1147,6 +1045,112 @@ final class UriPathIterator implements Iterator<String> {
     final String component = path.head();
     this.path = path.tail();
     return component;
+  }
+
+}
+
+final class ParseUriPath extends Parse<UriPath> {
+
+  final @Nullable UriPathBuilder builder;
+  final @Nullable Utf8DecodedOutput<String> output;
+  final int c1;
+  final int step;
+
+  ParseUriPath(@Nullable UriPathBuilder builder,
+               @Nullable Utf8DecodedOutput<String> output,
+               int c1, int step) {
+    this.builder = builder;
+    this.output = output;
+    this.c1 = c1;
+    this.step = step;
+  }
+
+  @Override
+  public Parse<UriPath> consume(Input input) {
+    return ParseUriPath.parse(input, this.builder, this.output,
+                              this.c1, this.step);
+  }
+
+  static Parse<UriPath> parse(Input input, @Nullable UriPathBuilder builder,
+                              @Nullable Utf8DecodedOutput<String> output,
+                              int c1, int step) {
+    int c = 0;
+    do {
+      if (step == 1) {
+        while (input.isCont() && Uri.isPathChar(c = input.head())) {
+          if (output == null) {
+            output = new Utf8DecodedOutput<String>(new StringOutput());
+          }
+          output.write(c);
+          input.step();
+        }
+        if (input.isCont() && (c == '%' || c == '/' || c == '\\')) {
+          if (c == '%') {
+            input.step();
+            step = 2;
+          } else { // c == '/' || c == '\\'
+            if (builder == null) {
+              builder = new UriPathBuilder();
+            }
+            if (output != null) {
+              try {
+                builder.addSegment(output.getNonNull());
+              } catch (OutputException cause) {
+                return Parse.diagnostic(input, cause);
+              }
+              output = null;
+            }
+            builder.addSlash();
+            input.step();
+            continue;
+          }
+        } else if (input.isReady()) {
+          if (output != null) {
+            if (builder == null) {
+              builder = new UriPathBuilder();
+            }
+            try {
+              builder.addSegment(output.getNonNull());
+            } catch (OutputException cause) {
+              return Parse.diagnostic(input, cause);
+            }
+          }
+          if (builder != null) {
+            return Parse.done(builder.build());
+          } else {
+            return Parse.done(UriPath.empty());
+          }
+        }
+      }
+      if (step == 2) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          c1 = c;
+          input.step();
+          step = 3;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      if (step == 3) {
+        if (input.isCont() && Base16.isDigit(c = input.head())) {
+          if (output == null) {
+            output = new Utf8DecodedOutput<String>(new StringOutput());
+          }
+          output.write((Base16.decodeDigit(c1) << 4) | Base16.decodeDigit(c));
+          c1 = 0;
+          input.step();
+          step = 1;
+          continue;
+        } else if (input.isReady()) {
+          return Parse.error(Diagnostic.expected("hex digit", input));
+        }
+      }
+      break;
+    } while (true);
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseUriPath(builder, output, c1, step);
   }
 
 }

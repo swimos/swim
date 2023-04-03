@@ -15,6 +15,7 @@
 package swim.ws.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.collections.FingerTrieList;
 import swim.http.HttpException;
 import swim.http.HttpHeader;
@@ -26,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class SecWebSocketProtocolHeaderTests {
 
   @Test
-  public void parseSecWebSocketProtocolHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Protocol: chat\r\n");
+  public void parseSecWebSocketProtocolHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Protocol: chat\r\n").getNonNull();
     assertInstanceOf(SecWebSocketProtocolHeader.class, headers.getHeader(SecWebSocketProtocolHeader.TYPE));
     assertEquals(SecWebSocketProtocolHeader.of(FingerTrieList.of("chat")),
                  headers.getHeader(SecWebSocketProtocolHeader.TYPE));

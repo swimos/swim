@@ -15,6 +15,7 @@
 package swim.ws.header;
 
 import org.junit.jupiter.api.Test;
+import swim.codec.ParseException;
 import swim.http.HttpException;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaders;
@@ -26,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 public class SecWebSocketKeyHeaderTests {
 
   @Test
-  public void parseSecWebSocketKeyHeaderType() throws HttpException {
-    final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n");
+  public void parseSecWebSocketKeyHeaderType() throws ParseException, HttpException {
+    final HttpHeaders headers = HttpHeaders.parse("Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n").getNonNull();
     assertInstanceOf(SecWebSocketKeyHeader.class, headers.getHeader(SecWebSocketKeyHeader.TYPE));
     assertEquals(SecWebSocketKeyHeader.of("dGhlIHNhbXBsZSBub25jZQ=="),
                  headers.getHeader(SecWebSocketKeyHeader.TYPE));

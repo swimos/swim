@@ -75,37 +75,30 @@ public final class ParseMultiplicativeExpr extends Parse<Term> {
     }
     do {
       if (step == 2) {
-        parseLhs = Assume.nonNull(parseLhs);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == '*') {
-            input.step();
             operator = "*";
+            input.step();
             step = 3;
           } else if (c == '/') {
-            input.step();
             operator = "/";
+            input.step();
             step = 3;
           } else if (c == '%') {
-            input.step();
             operator = "%";
+            input.step();
             step = 3;
           } else {
-            return parseLhs;
+            return Assume.nonNull(parseLhs);
           }
         } else if (input.isDone()) {
-          return parseLhs;
+          return Assume.nonNull(parseLhs);
         }
       }
       if (step == 3) {
-        parseLhs = Assume.nonNull(parseLhs);
         if (parseRhs == null) {
           parseRhs = parser.parsePrefixExpr(input, form);
         } else {
@@ -113,11 +106,14 @@ public final class ParseMultiplicativeExpr extends Parse<Term> {
         }
         if (parseRhs.isDone()) {
           if ("*".equals(operator)) {
-            parseLhs = Parse.done(new TimesExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+            parseLhs = Parse.done(new TimesExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                                parseRhs.getNonNullUnchecked()));
           } else if ("/".equals(operator)) {
-            parseLhs = Parse.done(new DivideExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+            parseLhs = Parse.done(new DivideExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                                 parseRhs.getNonNullUnchecked()));
           } else if ("%".equals(operator)) {
-            parseLhs = Parse.done(new ModuloExpr(parseLhs.getNonNull(), parseRhs.getNonNull()));
+            parseLhs = Parse.done(new ModuloExpr(Assume.nonNull(parseLhs).getNonNullUnchecked(),
+                                                 parseRhs.getNonNullUnchecked()));
           } else {
             return Parse.error(Diagnostic.message(operator, input));
           }
@@ -134,8 +130,7 @@ public final class ParseMultiplicativeExpr extends Parse<Term> {
     if (input.isError()) {
       return Parse.error(input.getError());
     }
-    return new ParseMultiplicativeExpr(parser, form, parseLhs,
-                                       operator, parseRhs, step);
+    return new ParseMultiplicativeExpr(parser, form, parseLhs, operator, parseRhs, step);
   }
 
 }

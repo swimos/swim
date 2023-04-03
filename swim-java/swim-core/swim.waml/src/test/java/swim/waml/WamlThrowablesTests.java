@@ -15,7 +15,7 @@
 package swim.waml;
 
 import org.junit.jupiter.api.Test;
-import swim.util.Assume;
+import swim.codec.ParseException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,19 +25,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class WamlThrowablesTests {
 
   @Test
-  public void parseStackTraceElements() {
+  public void parseStackTraceElements() throws ParseException {
     assertEquals(new StackTraceElement("com.foo.loader", "foo", "9.0", "com.foo.Main", "run", "Main.java", 101),
-                 Waml.parse(StackTraceElement.class, "{loader:\"com.foo.loader\",module:\"foo\",version:\"9.0\",class:\"com.foo.Main\",method:\"run\",file:\"Main.java\",line:101}"));
+                 Waml.parse(StackTraceElement.class, "{loader:\"com.foo.loader\",module:\"foo\",version:\"9.0\",class:\"com.foo.Main\",method:\"run\",file:\"Main.java\",line:101}").getNonNull());
     assertEquals(new StackTraceElement("com.foo.loader", "foo", "9.0", "com.foo.Main", "run", "Main.java", -1),
-                 Waml.parse(StackTraceElement.class, "{loader:\"com.foo.loader\",module:\"foo\",version:\"9.0\",class:\"com.foo.Main\",method:\"run\",file:\"Main.java\"}"));
+                 Waml.parse(StackTraceElement.class, "{loader:\"com.foo.loader\",module:\"foo\",version:\"9.0\",class:\"com.foo.Main\",method:\"run\",file:\"Main.java\"}").getNonNull());
     assertEquals(new StackTraceElement("com.foo.loader", "foo", "9.0", "com.foo.Main", "run", null, -1),
-                 Waml.parse(StackTraceElement.class, "{loader:\"com.foo.loader\",module:\"foo\",version:\"9.0\",class:\"com.foo.Main\",method:\"run\"}"));
+                 Waml.parse(StackTraceElement.class, "{loader:\"com.foo.loader\",module:\"foo\",version:\"9.0\",class:\"com.foo.Main\",method:\"run\"}").getNonNull());
     assertEquals(new StackTraceElement("com.foo.loader", null, null, "com.foo.bar.App", "run", "App.java", 12),
-                 Waml.parse(StackTraceElement.class, "{loader:\"com.foo.loader\",class:\"com.foo.bar.App\",method:\"run\",file:\"App.java\",line:12}"));
+                 Waml.parse(StackTraceElement.class, "{loader:\"com.foo.loader\",class:\"com.foo.bar.App\",method:\"run\",file:\"App.java\",line:12}").getNonNull());
     assertEquals(new StackTraceElement(null, "acme", "2.1", "org.acme.Lib", "test", "Lib.java", 80),
-                 Waml.parse(StackTraceElement.class, "{module:\"acme\",version:\"2.1\",class:\"org.acme.Lib\",method:\"test\",file:\"Lib.java\",line:80}"));
+                 Waml.parse(StackTraceElement.class, "{module:\"acme\",version:\"2.1\",class:\"org.acme.Lib\",method:\"test\",file:\"Lib.java\",line:80}").getNonNull());
     assertEquals(new StackTraceElement(null, null, null, "MyClass", "mash", "MyClass.java", 9),
-                 Waml.parse(StackTraceElement.class, "{class:\"MyClass\",method:\"mash\",file:\"MyClass.java\",line:9}"));
+                 Waml.parse(StackTraceElement.class, "{class:\"MyClass\",method:\"mash\",file:\"MyClass.java\",line:9}").getNonNull());
   }
 
   @Test
@@ -57,11 +57,11 @@ public class WamlThrowablesTests {
   }
 
   @Test
-  public void transcodeThrowables() {
+  public void transcodeThrowables() throws ParseException {
     final Throwable cause0 = new UnsupportedOperationException();
     final Throwable throwable0 = new RuntimeException("whoops", cause0);
     final String wamlString = Waml.toString(throwable0);
-    final Throwable throwable1 = Assume.nonNull(Waml.parse(Throwable.class, wamlString));
+    final Throwable throwable1 = Waml.<Throwable>parse(Throwable.class, wamlString).getNonNull();
     final Throwable cause1 = throwable1.getCause();
 
     assertInstanceOf(RuntimeException.class, throwable1);

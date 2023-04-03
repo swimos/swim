@@ -19,6 +19,7 @@ import swim.annotations.Nullable;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
+import swim.json.JsonException;
 import swim.json.JsonIdentifierForm;
 import swim.json.JsonParser;
 import swim.util.Assume;
@@ -50,33 +51,26 @@ public final class ParseJsonIdentifier<T> extends Parse<T> {
                                    @Nullable StringBuilder builder, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierStartChar(c)) {
-          input.step();
-          builder = new StringBuilder();
-          builder.appendCodePoint(c);
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("identifier", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && parser.isIdentifierStartChar(c = input.head())) {
+        builder = new StringBuilder();
+        builder.appendCodePoint(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("identifier", input));
       }
     }
     if (step == 2) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isIdentifierChar(c)) {
-          input.step();
-          builder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isIdentifierChar(c = input.head())) {
+        Assume.nonNull(builder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
-        return Parse.done(form.identifierValue(builder.toString(), parser));
+        try {
+          return Parse.done(form.identifierValue(Assume.nonNull(builder).toString(), parser));
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       }
     }
     if (input.isError()) {

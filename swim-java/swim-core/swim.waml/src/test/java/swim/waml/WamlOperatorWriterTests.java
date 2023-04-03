@@ -760,12 +760,12 @@ public class WamlOperatorWriterTests {
   }
 
   public static void assertWrites(String expected, Repr value, WamlWriterOptions options) {
-    WamlAssertions.assertWrites(expected, () -> Waml.forType(Repr.class).write(value, Waml.writer(options)));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(options)));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    WamlAssertions.assertWrites(expected, () -> Waml.forType(Repr.class).write(value, Waml.writer(WamlWriterOptions.readable())));
-    WamlAssertions.assertWrites(expected, () -> Waml.forType(Repr.class).write(value, Waml.writer(WamlWriterOptions.compact())));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.readable())));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.compact())));
   }
 
 }

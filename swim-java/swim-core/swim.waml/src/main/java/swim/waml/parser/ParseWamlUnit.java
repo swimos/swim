@@ -20,6 +20,7 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.util.Assume;
+import swim.waml.WamlException;
 import swim.waml.WamlForm;
 import swim.waml.WamlParser;
 import swim.waml.WamlUnitForm;
@@ -66,7 +67,7 @@ public final class ParseWamlUnit<T> extends Parse<T> {
           parseAttr = parseAttr.consume(input);
         }
         if (parseAttr.isDone()) {
-          form = Assume.conforms(parseAttr.getNonNull());
+          form = Assume.conforms(parseAttr.getNonNullUnchecked());
           parseAttr = null;
           step = 3;
         } else if (parseAttr.isError()) {
@@ -74,19 +75,18 @@ public final class ParseWamlUnit<T> extends Parse<T> {
         }
       }
       if (step == 3) {
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == '@') {
           step = 2;
           continue;
         } else if (input.isReady()) {
-          return Parse.done(form.unitValue());
+          try {
+            return Parse.done(form.unitValue());
+          } catch (WamlException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         }
       }
       break;
@@ -102,7 +102,11 @@ public final class ParseWamlUnit<T> extends Parse<T> {
     if (step == 5) {
       if (input.isCont() && input.head() == ')') {
         input.step();
-        return Parse.done(form.unitValue());
+        try {
+          return Parse.done(form.unitValue());
+        } catch (WamlException cause) {
+          return Parse.diagnostic(input, cause);
+        }
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected(')', input));
       }

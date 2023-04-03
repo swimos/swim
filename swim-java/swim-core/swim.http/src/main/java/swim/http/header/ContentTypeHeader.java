@@ -83,11 +83,11 @@ public final class ContentTypeHeader extends HttpHeader {
     final StringInput input = new StringInput(value);
     final Parse<MediaType> parseMediaType = MediaType.parse(input);
     if (parseMediaType.isDone()) {
-      return parseMediaType.getNonNull();
+      return parseMediaType.getNonNullUnchecked();
     } else if (parseMediaType.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Content-Type: " + value, parseMediaType.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Content-Type: " + value, parseMediaType.getError());
     } else {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Content-Type: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Content-Type: " + value);
     }
   }
 

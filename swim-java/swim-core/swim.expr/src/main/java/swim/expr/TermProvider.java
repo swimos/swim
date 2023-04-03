@@ -19,20 +19,47 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A resolver of {@code TermForm} instances from Java types.
+ *
+ * @see TermForm
+ * @see TermRegistry
+ */
 @Public
 @Since("5.0")
 public interface TermProvider {
 
+  /**
+   * Returns the precedence of this provider relative to all other providers
+   * registered with a {@link TermRegistry} instance. Higher priority providers
+   * are consulted before lower priority providers when resolving Java types
+   * to {@code TermForm} instances.
+   *
+   * @return the priority of this provider; the greater the numeric value,
+   *         the higher the priority
+   */
   default int priority() {
     return DEFAULT_PRIORITY;
   }
 
-  @Nullable TermForm<?> resolveTermForm(Type javaType);
+  /**
+   * Returns a {@code TermForm} that converts between instances of
+   * the given {@code javaType} and {@code Term} instances.
+   *
+   * @param javaType the type of {@code TermForm} to resolve
+   * @return a {@code TermForm<T>} whose type parameter {@code T} conforms
+   *         to the given {@code javaType}, or {@code null} if this provider
+   *         can't resolve the given {@code javaType}
+   * @throws TermFormException if this provider could have resolved the given
+   *         {@code javaType}, but was unable to do so because of a potentially
+   *         inadvertent error
+   */
+  @Nullable TermForm<?> resolveTermForm(Type javaType) throws TermFormException;
 
-  static final int BUILTIN_PRIORITY = -100;
+  static final int BUILTIN_PRIORITY = 100;
 
   static final int DEFAULT_PRIORITY = 0;
 
-  static final int GENERIC_PRIORITY = 100;
+  static final int GENERIC_PRIORITY = -100;
 
 }

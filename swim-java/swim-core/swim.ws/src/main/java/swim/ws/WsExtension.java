@@ -117,13 +117,13 @@ public final class WsExtension implements ToSource, ToString {
 
   @Override
   public void writeString(Appendable output) {
-    this.write(StringOutput.from(output)).checkDone();
+    this.write(StringOutput.from(output)).assertDone();
   }
 
   @Override
   public String toString() {
     final StringOutput output = new StringOutput();
-    this.write(output).checkDone();
+    this.write(output).assertDone();
     return output.get();
   }
 
@@ -189,15 +189,9 @@ public final class WsExtension implements ToSource, ToString {
     return new ParseWsExtension(null, null, null, ArrayMap.empty(), 1);
   }
 
-  public static WsExtension parse(String string) {
-    final Input input = new StringInput(string);
-    Parse<WsExtension> parse = WsExtension.parse(input);
-    if (input.isCont() && !parse.isError()) {
-      parse = Parse.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parse = Parse.error(input.getError());
-    }
-    return parse.getNonNull();
+  public static Parse<WsExtension> parse(String string) {
+    final StringInput input = new StringInput(string);
+    return WsExtension.parse(input).complete(input);
   }
 
 }
@@ -233,30 +227,19 @@ final class ParseWsExtension extends Parse<WsExtension> {
                                   ArrayMap<String, String> params, int step) {
     int c = 0;
     if (step == 1) {
-      if (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          nameBuilder = new StringBuilder();
-          nameBuilder.appendCodePoint(c);
-          step = 2;
-        } else {
-          return Parse.error(Diagnostic.expected("websocket extension", input));
-        }
-      } else if (input.isDone()) {
+      if (input.isCont() && Http.isTokenChar(c = input.head())) {
+        nameBuilder = new StringBuilder();
+        nameBuilder.appendCodePoint(c);
+        input.step();
+        step = 2;
+      } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("websocket extension", input));
       }
     }
     if (step == 2) {
-      nameBuilder = Assume.nonNull(nameBuilder);
-      while (input.isCont()) {
-        c = input.head();
-        if (Http.isTokenChar(c)) {
-          input.step();
-          nameBuilder.appendCodePoint(c);
-        } else {
-          break;
-        }
+      while (input.isCont() && Http.isTokenChar(c = input.head())) {
+        Assume.nonNull(nameBuilder).appendCodePoint(c);
+        input.step();
       }
       if (input.isReady()) {
         step = 3;
@@ -264,60 +247,39 @@ final class ParseWsExtension extends Parse<WsExtension> {
     }
     do {
       if (step == 3) {
-        nameBuilder = Assume.nonNull(nameBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isSpace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == ';') {
           input.step();
           step = 4;
         } else if (input.isReady()) {
-          return Parse.done(new WsExtension(nameBuilder.toString(), params));
+          return Parse.done(new WsExtension(Assume.nonNull(nameBuilder).toString(), params));
         }
       }
       if (step == 4) {
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isSpace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isSpace(c = input.head())) {
+          input.step();
         }
-        if (input.isCont()) {
-          if (Http.isTokenChar(c)) {
-            keyBuilder = new StringBuilder();
-            input.step();
-            keyBuilder.appendCodePoint(c);
-            step = 5;
-          } else {
-            return Parse.error(Diagnostic.expected("param name", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isTokenChar(c)) {
+          keyBuilder = new StringBuilder();
+          keyBuilder.appendCodePoint(c);
+          input.step();
+          step = 5;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("param name", input));
         }
       }
       if (step == 5) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            keyBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(keyBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont() && c == '=') {
           input.step();
           step = 6;
         } else if (input.isReady()) {
-          params = params.updated(keyBuilder.toString(), null);
+          params = params.updated(Assume.nonNull(keyBuilder).toString(), null);
           keyBuilder = null;
           step = 3;
           continue;
@@ -337,34 +299,22 @@ final class ParseWsExtension extends Parse<WsExtension> {
         }
       }
       if (step == 7) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 8;
-          } else {
-            return Parse.error(Diagnostic.expected("param value", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 8;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("param value", input));
         }
       }
       if (step == 8) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isTokenChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isTokenChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isReady()) {
-          params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+          params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                  Assume.nonNull(valueBuilder).toString());
           keyBuilder = null;
           valueBuilder = null;
           step = 3;
@@ -372,23 +322,17 @@ final class ParseWsExtension extends Parse<WsExtension> {
         }
       }
       if (step == 9) {
-        keyBuilder = Assume.nonNull(keyBuilder);
-        valueBuilder = Assume.nonNull(valueBuilder);
-        while (input.isCont()) {
-          c = input.head();
-          if (Http.isQuotedChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-          } else {
-            break;
-          }
+        while (input.isCont() && Http.isQuotedChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
         }
         if (input.isCont()) {
           if (c == '"') {
-            input.step();
-            params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+            params = params.updated(Assume.nonNull(keyBuilder).toString(),
+                                    Assume.nonNull(valueBuilder).toString());
             keyBuilder = null;
             valueBuilder = null;
+            input.step();
             step = 3;
             continue;
           } else if (c == '\\') {
@@ -402,18 +346,12 @@ final class ParseWsExtension extends Parse<WsExtension> {
         }
       }
       if (step == 10) {
-        valueBuilder = Assume.nonNull(valueBuilder);
-        if (input.isCont()) {
-          c = input.head();
-          if (Http.isEscapeChar(c)) {
-            input.step();
-            valueBuilder.appendCodePoint(c);
-            step = 9;
-            continue;
-          } else {
-            return Parse.error(Diagnostic.expected("escape character", input));
-          }
-        } else if (input.isDone()) {
+        if (input.isCont() && Http.isEscapeChar(c = input.head())) {
+          Assume.nonNull(valueBuilder).appendCodePoint(c);
+          input.step();
+          step = 9;
+          continue;
+        } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected("escape character", input));
         }
       }
@@ -463,7 +401,7 @@ final class WriteWsExtension extends Write<Object> {
     int c = 0;
     if (step == 1) {
       if (name.length() == 0) {
-        return Write.error(new WriteException("Blank websocket extension"));
+        return Write.error(new WriteException("blank websocket extension"));
       }
       while (index < name.length() && output.isCont()) {
         c = name.codePointAt(index);
@@ -471,7 +409,7 @@ final class WriteWsExtension extends Write<Object> {
           output.write(c);
           index = name.offsetByCodePoints(index, 1);
         } else {
-          return Write.error(new WriteException("Invalid websocket extension: " + name));
+          return Write.error(new WriteException("invalid websocket extension: " + name));
         }
       }
       if (index >= name.length()) {
@@ -500,7 +438,7 @@ final class WriteWsExtension extends Write<Object> {
       if (step == 4) {
         key = Assume.nonNull(key);
         if (key.length() == 0) {
-          return Write.error(new WriteException("Blank param key"));
+          return Write.error(new WriteException("blank param key"));
         }
         while (index < key.length() && output.isCont()) {
           c = key.codePointAt(index);
@@ -508,7 +446,7 @@ final class WriteWsExtension extends Write<Object> {
             output.write(c);
             index = key.offsetByCodePoints(index, 1);
           } else {
-            return Write.error(new WriteException("Invalid param key: " + key));
+            return Write.error(new WriteException("invalid param key: " + key));
           }
         }
         if (index >= key.length()) {
@@ -523,9 +461,8 @@ final class WriteWsExtension extends Write<Object> {
         }
       }
       if (step == 5 && output.isCont()) {
-        value = Assume.nonNull(value);
         output.write('=');
-        if (Http.isToken(value)) {
+        if (Http.isToken(Assume.nonNull(value))) {
           step = 6;
         } else {
           step = 7;
@@ -563,7 +500,7 @@ final class WriteWsExtension extends Write<Object> {
               escape = c;
               step = 9;
             } else {
-              return Write.error(new WriteException("Invalid param value: " + value));
+              return Write.error(new WriteException("invalid param value: " + value));
             }
             continue;
           } else {
@@ -590,7 +527,7 @@ final class WriteWsExtension extends Write<Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return Write.error(new WriteException("Truncated write"));
+      return Write.error(new WriteException("truncated write"));
     } else if (output.isError()) {
       return Write.error(output.getError());
     }

@@ -19,6 +19,7 @@ import swim.annotations.Nullable;
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
+import swim.json.JsonException;
 import swim.json.JsonFieldForm;
 import swim.json.JsonObjectForm;
 import swim.json.JsonParser;
@@ -64,29 +65,33 @@ public final class ParseJsonObject<K, V, B, T> extends Parse<T> {
     int c = 0;
     if (step == 1) {
       if (input.isCont() && input.head() == '{') {
-        input.step();
         if (builder == null) {
-          builder = form.objectBuilder();
+          try {
+            builder = form.objectBuilder();
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         }
+        input.step();
         step = 2;
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected('{', input));
       }
     }
     if (step == 2) {
-      builder = Assume.nonNull(builder);
-      while (input.isCont()) {
-        c = input.head();
-        if (parser.isWhitespace(c)) {
-          input.step();
-        } else {
-          break;
-        }
+      while (input.isCont() && parser.isWhitespace(c = input.head())) {
+        input.step();
       }
       if (input.isCont()) {
         if (c == '}') {
+          final T object;
+          try {
+            object = form.buildObject(Assume.nonNull(builder));
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
+          }
           input.step();
-          return Parse.done(form.buildObject(builder));
+          return Parse.done(object);
         } else {
           step = 3;
         }
@@ -97,7 +102,11 @@ public final class ParseJsonObject<K, V, B, T> extends Parse<T> {
     do {
       if (step == 3) {
         if (parseKey == null) {
-          parseKey = parser.parseExpr(input, form.keyForm());
+          try {
+            parseKey = parser.parseExpr(input, form.keyForm());
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         } else {
           parseKey = parseKey.consume(input);
         }
@@ -108,22 +117,17 @@ public final class ParseJsonObject<K, V, B, T> extends Parse<T> {
         }
       }
       if (step == 4) {
-        parseKey = Assume.nonNull(parseKey);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isWhitespace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
         }
         if (input.isCont() && c == ':') {
-          input.step();
-          final K key = parseKey.getNonNull();
-          fieldForm = form.getFieldForm(key);
-          if (fieldForm == null) {
-            return Parse.error(Diagnostic.message("unexpected field: " + key, input));
+          final K key = Assume.nonNull(parseKey).getNonNullUnchecked();
+          try {
+            fieldForm = form.getFieldForm(key);
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
           }
+          input.step();
           step = 5;
         } else if (input.isReady()) {
           return Parse.error(Diagnostic.expected(':', input));
@@ -138,24 +142,29 @@ public final class ParseJsonObject<K, V, B, T> extends Parse<T> {
         }
       }
       if (step == 6) {
-        builder = Assume.nonNull(builder);
-        parseKey = Assume.nonNull(parseKey);
-        fieldForm = Assume.nonNull(fieldForm);
-        parseValue = Assume.nonNull(parseValue);
         if (parseValue == null) {
-          parseValue = parser.parseExpr(input, fieldForm.valueForm());
+          try {
+            parseValue = parser.parseExpr(input, Assume.nonNull(fieldForm).valueForm());
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
+          }
         } else {
           parseValue = parseValue.consume(input);
         }
         if (parseValue.isDone()) {
-          final K key = parseKey.getNonNull();
-          final V value = parseValue.get();
-          final JsonObjectForm<K, V, B, ? extends T> refinedForm = fieldForm.refineForm(form, key, value);
-          if (refinedForm != null) {
-            form = refinedForm;
-            builder = form.objectBuilder();
-          } else {
-            builder = fieldForm.updateField(builder, key, value);
+          final K key = Assume.nonNull(parseKey).getNonNullUnchecked();
+          final V value = parseValue.getUnchecked();
+          try {
+            final JsonObjectForm<K, V, B, ? extends T> refinedForm =
+                Assume.nonNull(fieldForm).refineForm(form, key, value);
+            if (refinedForm != null) {
+              form = refinedForm;
+              builder = form.objectBuilder();
+            } else {
+              builder = Assume.nonNull(fieldForm).updateField(Assume.nonNull(builder), key, value);
+            }
+          } catch (JsonException cause) {
+            return Parse.diagnostic(input, cause);
           }
           parseKey = null;
           fieldForm = null;
@@ -166,28 +175,36 @@ public final class ParseJsonObject<K, V, B, T> extends Parse<T> {
         }
       }
       if (step == 7) {
-        builder = Assume.nonNull(builder);
-        while (input.isCont()) {
-          c = input.head();
-          if (parser.isWhitespace(c)) {
-            input.step();
-          } else {
-            break;
-          }
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
         }
         if (input.isCont()) {
           if (c == ',') {
             input.step();
-            step = 3;
-            continue;
+            step = 8;
           } else if (c == '}') {
+            final T object;
+            try {
+              object = form.buildObject(Assume.nonNull(builder));
+            } catch (JsonException cause) {
+              return Parse.diagnostic(input, cause);
+            }
             input.step();
-            return Parse.done(form.buildObject(builder));
+            return Parse.done(object);
           } else {
-            return Parse.error(Diagnostic.expected("'}' or ','", input));
+            return Parse.error(Diagnostic.expected("',' or '}'", input));
           }
         } else if (input.isDone()) {
           return Parse.error(Diagnostic.expected('}', input));
+        }
+      }
+      if (step == 8) {
+        while (input.isCont() && parser.isWhitespace(c = input.head())) {
+          input.step();
+        }
+        if (input.isReady()) {
+          step = 3;
+          continue;
         }
       }
       break;

@@ -20,7 +20,6 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
-import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
 import swim.http.Http;
 import swim.http.HttpException;
@@ -133,9 +132,9 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
       }
     } while (true);
     if (input.isError()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Protocol: " + value, input.getError());
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Protocol: " + value, input.getError());
     } else if (!input.isDone()) {
-      throw new HttpException(HttpStatus.BAD_REQUEST, "Malformed Sec-WebSocket-Protocol: " + value);
+      throw new HttpException(HttpStatus.BAD_REQUEST, "malformed Sec-WebSocket-Protocol: " + value);
     }
     return subprotocols;
   }
@@ -149,14 +148,14 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
       }
       subprotocol = subprotocols.next();
       if (subprotocol.length() == 0) {
-        throw new WriteException("Blank websocket subprotocol");
+        throw new IllegalArgumentException("blank websocket subprotocol");
       }
       for (int i = 0; i < subprotocol.length(); i = subprotocol.offsetByCodePoints(i, 1)) {
         final int c = subprotocol.codePointAt(i);
         if (Http.isTokenChar(c)) {
           output.write(c);
         } else {
-          throw new WriteException("Invalid websocket subprotocol: " + subprotocol);
+          throw new IllegalArgumentException("invalid websocket subprotocol: " + subprotocol);
         }
       }
     } while (subprotocols.hasNext());

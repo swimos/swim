@@ -98,7 +98,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected void become(NetSocket socket) {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     context.become(socket);
   }
@@ -106,7 +106,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected boolean requestRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     return context.requestRead();
   }
@@ -114,7 +114,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected boolean cancelRead() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     return context.cancelRead();
   }
@@ -127,7 +127,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected int read(ByteBuffer readBuffer) throws IOException {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     return context.read(readBuffer);
   }
@@ -135,7 +135,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected boolean requestWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     return context.requestWrite();
   }
@@ -143,7 +143,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected boolean cancelWrite() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     return context.cancelWrite();
   }
@@ -156,7 +156,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected int write(ByteBuffer writeBuffer) throws IOException {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     return context.write(writeBuffer);
   }
@@ -169,7 +169,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected boolean doneReading() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     return context.doneReading();
   }
@@ -182,7 +182,7 @@ public abstract class AbstractNetSocket implements NetSocket {
   protected boolean doneWriting() {
     final NetSocketContext context = this.context;
     if (context == null) {
-      throw new IllegalStateException("Unbound socket");
+      throw new IllegalStateException("unbound socket");
     }
     return context.doneWriting();
   }

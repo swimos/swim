@@ -25,80 +25,63 @@ public interface Codec {
 
   MediaType mediaType();
 
-  <T> @Nullable Transcoder<T> getTranscoder(Type javaType);
+  <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException;
+
+  default <T> Decode<T> decode(Type javaType, InputBuffer input) {
+    final Transcoder<T> transcoder;
+    try {
+      transcoder = this.getTranscoder(javaType);
+    } catch (TranscoderException cause) {
+      return Decode.error(cause);
+    }
+    return transcoder.decode(input);
+  }
+
+  default <T> Decode<T> decode(Type javaType) {
+    final Transcoder<T> transcoder;
+    try {
+      transcoder = this.getTranscoder(javaType);
+    } catch (TranscoderException cause) {
+      return Decode.error(cause);
+    }
+    return transcoder.decode();
+  }
+
+  default <T> Encode<?> encode(Type javaType, OutputBuffer<?> output, @Nullable T value) {
+    final Transcoder<T> transcoder;
+    try {
+      transcoder = this.getTranscoder(javaType);
+    } catch (TranscoderException cause) {
+      return Encode.error(cause);
+    }
+    return transcoder.encode(output, value);
+  }
+
+  default <T> Encode<?> encode(Type javaType, @Nullable T value) {
+    final Transcoder<T> transcoder;
+    try {
+      transcoder = this.getTranscoder(javaType);
+    } catch (TranscoderException cause) {
+      return Encode.error(cause);
+    }
+    return transcoder.encode(value);
+  }
+
+  default <T> long sizeOf(Type javaType, @Nullable T value) throws TranscoderException, EncodeException {
+    final Transcoder<T> transcoder = this.getTranscoder(javaType);
+    return transcoder.sizeOf(value);
+  }
 
   static CodecRegistry registry() {
     return CodecRegistry.REGISTRY;
   }
 
-  static Codec getCodec(MediaType mediaType) {
-    final Codec codec = Codec.registry().getCodec(mediaType);
-    if (codec != null) {
-      return codec;
-    } else {
-      throw new IllegalArgumentException("No codec for media type: " + mediaType);
-    }
+  static Codec get(MediaType mediaType) throws CodecException {
+    return Codec.registry().getCodec(mediaType);
   }
 
-  static Codec getCodec(String mediaType) {
-    final Codec codec = Codec.registry().getCodec(mediaType);
-    if (codec != null) {
-      return codec;
-    } else {
-      throw new IllegalArgumentException("No codec for media type: " + mediaType);
-    }
-  }
-
-  static <T> Transcoder<T> getTranscoder(MediaType mediaType, Type javaType) {
-    final Codec codec = Codec.getCodec(mediaType);
-    final Transcoder<T> transcoder = codec.getTranscoder(javaType);
-    if (transcoder != null) {
-      return transcoder;
-    } else {
-      throw new IllegalArgumentException("No " + mediaType + " transcoder for type: " + javaType);
-    }
-  }
-
-  static <T> Transcoder<T> getTranscoder(String mediaType, Type javaType) {
-    final Codec codec = Codec.getCodec(mediaType);
-    final Transcoder<T> transcoder = codec.getTranscoder(javaType);
-    if (transcoder != null) {
-      return transcoder;
-    } else {
-      throw new IllegalArgumentException("No " + mediaType + " transcoder for type: " + javaType);
-    }
-  }
-
-  static <T> Decode<T> decode(MediaType mediaType, Type javaType, InputBuffer input) {
-    return Codec.<T>getTranscoder(mediaType, javaType).decode(input);
-  }
-
-  static <T> Decode<T> decode(String mediaType, Type javaType, InputBuffer input) {
-    return Codec.<T>getTranscoder(mediaType, javaType).decode(input);
-  }
-
-  static <T> Decode<T> decode(MediaType mediaType, Type javaType) {
-    return Codec.<T>getTranscoder(mediaType, javaType).decode();
-  }
-
-  static <T> Decode<T> decode(String mediaType, Type javaType) {
-    return Codec.<T>getTranscoder(mediaType, javaType).decode();
-  }
-
-  static <T> Encode<?> encode(MediaType mediaType, OutputBuffer<?> output, T value) {
-    return Codec.<T>getTranscoder(mediaType, value.getClass()).encode(output, value);
-  }
-
-  static <T> Encode<?> encode(String mediaType, OutputBuffer<?> output, T value) {
-    return Codec.<T>getTranscoder(mediaType, value.getClass()).encode(output, value);
-  }
-
-  static <T> Encode<?> encode(MediaType mediaType, T value) {
-    return Codec.<T>getTranscoder(mediaType, value.getClass()).encode(value);
-  }
-
-  static <T> Encode<?> encode(String mediaType, T value) {
-    return Codec.<T>getTranscoder(mediaType, value.getClass()).encode(value);
+  static Codec get(String mediaType) throws CodecException {
+    return Codec.registry().getCodec(mediaType);
   }
 
 }

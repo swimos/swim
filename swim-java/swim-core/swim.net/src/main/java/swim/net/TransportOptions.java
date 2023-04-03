@@ -128,14 +128,14 @@ public class TransportOptions implements ToSource {
       long idleInterval;
       try {
         idleInterval = Long.parseLong(System.getProperty("swim.net.transport.idle.interval"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         idleInterval = 30000L; // 30 seconds
       }
 
       long idleTimeout;
       try {
         idleTimeout = Long.parseLong(System.getProperty("swim.net.transport.idle.timeout"));
-      } catch (NumberFormatException error) {
+      } catch (NumberFormatException cause) {
         idleTimeout = 90000L; // 90 seconds
       }
 

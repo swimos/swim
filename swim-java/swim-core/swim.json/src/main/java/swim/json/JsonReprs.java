@@ -27,8 +27,8 @@ import swim.annotations.Since;
 import swim.codec.Base64;
 import swim.codec.Input;
 import swim.codec.Output;
+import swim.codec.OutputException;
 import swim.codec.Parse;
-import swim.codec.ParseException;
 import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.expr.ContextExpr;
@@ -70,31 +70,31 @@ public final class JsonReprs implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) {
+  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
     if (javaType instanceof Class<?>) {
       final Class<?> javaClass = (Class<?>) javaType;
       if (UndefinedRepr.class.isAssignableFrom(javaClass)) {
-        return UNDEFINED_FORM;
+        return JsonReprs.undefinedForm();
       } else if (UnitRepr.class.isAssignableFrom(javaClass)) {
-        return UNIT_FORM;
+        return JsonReprs.unitForm();
       } else if (BooleanRepr.class.isAssignableFrom(javaClass)) {
-        return BOOLEAN_FORM;
+        return JsonReprs.booleanForm();
       } else if (NumberRepr.class.isAssignableFrom(javaClass)) {
-        return NUMBER_FORM;
+        return JsonReprs.numberForm();
       } else if (StringRepr.class.isAssignableFrom(javaClass)) {
-        return STRING_FORM;
+        return JsonReprs.stringForm();
       } else if (BlobRepr.class.isAssignableFrom(javaClass)) {
-        return BLOB_FORM;
+        return JsonReprs.blobForm();
       } else if (TermRepr.class.isAssignableFrom(javaClass)) {
-        return TERM_FORM;
+        return JsonReprs.termForm();
       } else if (ArrayRepr.class.isAssignableFrom(javaClass)) {
-        return ARRAY_FORM;
+        return JsonReprs.arrayForm();
       } else if (ObjectRepr.class.isAssignableFrom(javaClass)) {
-        return OBJECT_FORM;
+        return JsonReprs.objectForm();
       } else if (TupleRepr.class.isAssignableFrom(javaClass)) {
-        return TUPLE_FORM;
+        return JsonReprs.tupleForm();
       } else if (javaClass == Repr.class) {
-        return REPR_FORM;
+        return JsonReprs.reprForm();
       }
     }
     return null;
@@ -129,85 +129,60 @@ public final class JsonReprs implements JsonProvider, ToSource {
     return PROVIDER;
   }
 
-  private static final JsonReprs.UndefinedForm UNDEFINED_FORM = new JsonReprs.UndefinedForm();
-
   public static JsonUndefinedForm<UndefinedRepr> undefinedForm() {
-    return UNDEFINED_FORM;
+    return JsonReprs.UndefinedForm.INSTANCE;
   }
-
-  private static final JsonReprs.UnitForm UNIT_FORM = new JsonReprs.UnitForm();
 
   public static JsonNullForm<UnitRepr> unitForm() {
-    return UNIT_FORM;
+    return JsonReprs.UnitForm.INSTANCE;
   }
-
-  private static final JsonReprs.BooleanForm BOOLEAN_FORM = new JsonReprs.BooleanForm();
-
-  public static JsonForm<BooleanRepr> booleanForm() {
-    return BOOLEAN_FORM;
-  }
-
-  private static final JsonReprs.NumberForm NUMBER_FORM = new JsonReprs.NumberForm();
-
-  public static JsonNumberForm<NumberRepr> numberForm() {
-    return NUMBER_FORM;
-  }
-
-  private static final JsonReprs.IdentifierForm IDENTIFIER_FORM = new JsonReprs.IdentifierForm();
 
   public static JsonIdentifierForm<Repr> identifierForm() {
-    return IDENTIFIER_FORM;
+    return JsonReprs.IdentifierForm.INSTANCE;
   }
 
-  private static final JsonReprs.StringForm STRING_FORM = new JsonReprs.StringForm();
+  public static JsonForm<BooleanRepr> booleanForm() {
+    return JsonReprs.BooleanForm.INSTANCE;
+  }
+
+  public static JsonNumberForm<NumberRepr> numberForm() {
+    return JsonReprs.NumberForm.INSTANCE;
+  }
 
   public static JsonStringForm<StringBuilder, StringRepr> stringForm() {
-    return STRING_FORM;
+    return JsonReprs.StringForm.INSTANCE;
   }
-
-  private static final JsonReprs.BlobForm BLOB_FORM = new JsonReprs.BlobForm();
 
   public static JsonForm<BlobRepr> blobForm() {
-    return BLOB_FORM;
+    return JsonReprs.BlobForm.INSTANCE;
   }
-
-  private static final JsonReprs.TermForm TERM_FORM = new JsonReprs.TermForm();
 
   public static JsonForm<Repr> termForm() {
-    return TERM_FORM;
+    return JsonReprs.TermForm.INSTANCE;
   }
-
-  private static final JsonReprs.ArrayForm ARRAY_FORM = new JsonReprs.ArrayForm();
 
   public static JsonArrayForm<Repr, ArrayRepr, ArrayRepr> arrayForm() {
-    return ARRAY_FORM;
+    return JsonReprs.ArrayForm.INSTANCE;
   }
-
-  private static final JsonReprs.KeyForm KEY_FORM = new JsonReprs.KeyForm();
 
   public static JsonForm<String> keyForm() {
-    return KEY_FORM;
+    return JsonReprs.KeyForm.INSTANCE;
   }
-
-  private static final JsonReprs.ObjectForm OBJECT_FORM = new JsonReprs.ObjectForm();
 
   public static JsonObjectForm<String, Repr, ObjectRepr, ObjectRepr> objectForm() {
-    return OBJECT_FORM;
+    return JsonReprs.ObjectForm.INSTANCE;
   }
-
-  private static final JsonReprs.TupleForm TUPLE_FORM = new JsonReprs.TupleForm();
 
   public static JsonObjectForm<String, Repr, TupleRepr, TupleRepr> tupleForm() {
-    return TUPLE_FORM;
+    return JsonReprs.TupleForm.INSTANCE;
   }
-
-  private static final JsonReprs.ReprForm REPR_FORM = new JsonReprs.ReprForm();
 
   public static JsonForm<Repr> reprForm() {
-    return REPR_FORM;
+    return JsonReprs.ReprForm.INSTANCE;
   }
 
-  private static final ThreadLocal<CacheMap<String, StringRepr>> STRING_CACHE = new ThreadLocal<CacheMap<String, StringRepr>>();
+  private static final ThreadLocal<CacheMap<String, StringRepr>> STRING_CACHE =
+      new ThreadLocal<CacheMap<String, StringRepr>>();
 
   public static CacheMap<String, StringRepr> stringCache() {
     CacheMap<String, StringRepr> stringCache = STRING_CACHE.get();
@@ -215,7 +190,7 @@ public final class JsonReprs implements JsonProvider, ToSource {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.json.string.repr.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 512;
       }
       stringCache = new LruCacheMap<String, StringRepr>(cacheSize);
@@ -224,7 +199,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
     return stringCache;
   }
 
-  private static final ThreadLocal<CacheSet<String>> KEY_CACHE = new ThreadLocal<CacheSet<String>>();
+  private static final ThreadLocal<CacheSet<String>> KEY_CACHE =
+      new ThreadLocal<CacheSet<String>>();
 
   public static CacheSet<String> keyCache() {
     CacheSet<String> keyCache = KEY_CACHE.get();
@@ -232,7 +208,7 @@ public final class JsonReprs implements JsonProvider, ToSource {
       int cacheSize;
       try {
         cacheSize = Integer.parseInt(System.getProperty("swim.json.key.repr.cache.size"));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException cause) {
         cacheSize = 512;
       }
       keyCache = new LruCacheSet<String>(cacheSize);
@@ -278,6 +254,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
+    static final JsonReprs.UndefinedForm INSTANCE = new JsonReprs.UndefinedForm();
+
   }
 
   static final class UnitForm implements JsonNullForm<UnitRepr>, ToSource {
@@ -319,141 +297,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-  }
-
-  static final class BooleanForm implements JsonIdentifierForm<BooleanRepr>, ToSource {
-
-    @Override
-    public BooleanRepr identifierValue(String value, ExprParser parser) {
-      if ("true".equals(value)) {
-        return BooleanRepr.of(true);
-      } else if ("false".equals(value)) {
-        return BooleanRepr.of(false);
-      } else {
-        throw new ParseException("Unexpected identifier: " + value);
-      }
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable BooleanRepr value, JsonWriter writer) {
-      if (value != null) {
-        return writer.writeBoolean(output, value.booleanValue());
-      } else {
-        return writer.writeNull(output);
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable BooleanRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable BooleanRepr fromTerm(Term term) {
-      if (term instanceof BooleanRepr) {
-        return (BooleanRepr) term;
-      } else if (term.isValidBoolean()) {
-        return BooleanRepr.of(term.booleanValue());
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "booleanForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-  }
-
-  static final class NumberForm implements JsonNumberForm<NumberRepr>, ToSource {
-
-    @Override
-    public NumberRepr integerValue(long value) {
-      if (value == (long) (int) value) {
-        return NumberRepr.of((int) value);
-      } else {
-        return NumberRepr.of(value);
-      }
-    }
-
-    @Override
-    public NumberRepr hexadecimalValue(long value, int digits) {
-      if (value == (long) (int) value && digits <= 8) {
-        return NumberRepr.of((int) value);
-      } else {
-        return NumberRepr.of(value);
-      }
-    }
-
-    @Override
-    public NumberRepr bigIntegerValue(String value) {
-      return NumberRepr.of(new BigInteger(value));
-    }
-
-    @Override
-    public NumberRepr decimalValue(String value) {
-      return NumberRepr.parse(value);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable NumberRepr value, JsonWriter writer) {
-      if (value == null) {
-        return writer.writeNull(output);
-      } else if (value.isValidInt()) {
-        return writer.writeNumber(output, value.intValue());
-      } else if (value.isValidLong()) {
-        return writer.writeNumber(output, value.longValue());
-      } else if (value.isValidFloat()) {
-        return writer.writeNumber(output, value.floatValue());
-      } else if (value.isValidDouble()) {
-        return writer.writeNumber(output, value.doubleValue());
-      } else if (value.isValidBigInteger()) {
-        return writer.writeNumber(output, value.bigIntegerValue());
-      } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable NumberRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable NumberRepr fromTerm(Term term) {
-      if (term instanceof NumberRepr) {
-        return (NumberRepr) term;
-      } else if (term.isValidNumber()) {
-        return NumberRepr.of(term.numberValue());
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "numberForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
+    static final JsonReprs.UnitForm INSTANCE = new JsonReprs.UnitForm();
 
   }
 
   static final class IdentifierForm implements JsonIdentifierForm<Repr>, ToSource {
 
     @Override
-    public Repr identifierValue(String value, ExprParser parser) {
+    public Repr identifierValue(String value, ExprParser parser) throws JsonException {
       switch (value) {
         case "undefined":
           return UndefinedRepr.undefined();
@@ -467,7 +318,7 @@ public final class JsonReprs implements JsonProvider, ToSource {
           if (parser instanceof JsonParser && ((JsonParser) parser).options().exprsEnabled()) {
             return TermRepr.of(new ChildExpr(ContextExpr.of(), StringRepr.of(value)));
           } else {
-            throw new ParseException("Unexpected identifier: " + value);
+            throw new JsonException("unsupported identifier: " + value);
           }
       }
     }
@@ -538,6 +389,141 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
+    static final JsonReprs.IdentifierForm INSTANCE = new JsonReprs.IdentifierForm();
+
+  }
+
+  static final class BooleanForm implements JsonIdentifierForm<BooleanRepr>, ToSource {
+
+    @Override
+    public BooleanRepr identifierValue(String value, ExprParser parser) throws JsonException {
+      if ("true".equals(value)) {
+        return BooleanRepr.of(true);
+      } else if ("false".equals(value)) {
+        return BooleanRepr.of(false);
+      } else {
+        throw new JsonException("unsupported identifier: " + value);
+      }
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable BooleanRepr value, JsonWriter writer) {
+      if (value != null) {
+        return writer.writeBoolean(output, value.booleanValue());
+      } else {
+        return writer.writeNull(output);
+      }
+    }
+
+    @Override
+    public Term intoTerm(@Nullable BooleanRepr value) {
+      return value != null ? value : Repr.unit();
+    }
+
+    @Override
+    public @Nullable BooleanRepr fromTerm(Term term) {
+      if (term instanceof BooleanRepr) {
+        return (BooleanRepr) term;
+      } else if (term.isValidBoolean()) {
+        return BooleanRepr.of(term.booleanValue());
+      } else {
+        return null;
+      }
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JsonReprs", "booleanForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JsonReprs.BooleanForm INSTANCE = new JsonReprs.BooleanForm();
+
+  }
+
+  static final class NumberForm implements JsonNumberForm<NumberRepr>, ToSource {
+
+    @Override
+    public NumberRepr integerValue(long value) {
+      if (value == (long) (int) value) {
+        return NumberRepr.of((int) value);
+      } else {
+        return NumberRepr.of(value);
+      }
+    }
+
+    @Override
+    public NumberRepr hexadecimalValue(long value, int digits) {
+      if (value == (long) (int) value && digits <= 8) {
+        return NumberRepr.of((int) value);
+      } else {
+        return NumberRepr.of(value);
+      }
+    }
+
+    @Override
+    public NumberRepr bigIntegerValue(String value) {
+      return NumberRepr.of(new BigInteger(value));
+    }
+
+    @Override
+    public NumberRepr decimalValue(String value) {
+      return NumberRepr.parse(value);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable NumberRepr value, JsonWriter writer) {
+      if (value == null) {
+        return writer.writeNull(output);
+      } else if (value.isValidInt()) {
+        return writer.writeNumber(output, value.intValue());
+      } else if (value.isValidLong()) {
+        return writer.writeNumber(output, value.longValue());
+      } else if (value.isValidFloat()) {
+        return writer.writeNumber(output, value.floatValue());
+      } else if (value.isValidDouble()) {
+        return writer.writeNumber(output, value.doubleValue());
+      } else if (value.isValidBigInteger()) {
+        return writer.writeNumber(output, value.bigIntegerValue());
+      } else {
+        return Write.error(new WriteException("unsupported value: " + value));
+      }
+    }
+
+    @Override
+    public Term intoTerm(@Nullable NumberRepr value) {
+      return value != null ? value : Repr.unit();
+    }
+
+    @Override
+    public @Nullable NumberRepr fromTerm(Term term) {
+      if (term instanceof NumberRepr) {
+        return (NumberRepr) term;
+      } else if (term.isValidNumber()) {
+        return NumberRepr.of(term.numberValue());
+      } else {
+        return null;
+      }
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JsonReprs", "numberForm").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final JsonReprs.NumberForm INSTANCE = new JsonReprs.NumberForm();
+
   }
 
   static final class StringForm implements JsonStringForm<StringBuilder, StringRepr>, ToSource {
@@ -599,6 +585,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
+    static final JsonReprs.StringForm INSTANCE = new JsonReprs.StringForm();
+
   }
 
   static final class BlobForm implements JsonStringForm<Output<BlobRepr>, BlobRepr>, ToSource {
@@ -610,15 +598,18 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public Output<BlobRepr> appendCodePoint(Output<BlobRepr> builder, int c) {
-      return builder.write(c);
+      if (builder.isCont()) {
+        builder.write(c);
+      }
+      return builder;
     }
 
     @Override
-    public @Nullable BlobRepr buildString(Output<BlobRepr> builder) {
+    public @Nullable BlobRepr buildString(Output<BlobRepr> builder) throws JsonException {
       try {
         return builder.get();
-      } catch (IllegalStateException cause) {
-        throw new ParseException(cause.getMessage(), cause);
+      } catch (OutputException cause) {
+        throw new JsonException("malformed base-64 string", cause);
       }
     }
 
@@ -661,6 +652,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonReprs.BlobForm INSTANCE = new JsonReprs.BlobForm();
 
   }
 
@@ -712,6 +705,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonReprs.TermForm INSTANCE = new JsonReprs.TermForm();
 
   }
 
@@ -772,6 +767,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonReprs.ArrayForm INSTANCE = new JsonReprs.ArrayForm();
 
   }
 
@@ -837,6 +834,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonReprs.KeyForm INSTANCE = new JsonReprs.KeyForm();
 
   }
 
@@ -907,6 +906,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonReprs.ObjectForm INSTANCE = new JsonReprs.ObjectForm();
 
   }
 
@@ -1007,6 +1008,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
+    static final JsonReprs.TupleForm INSTANCE = new JsonReprs.TupleForm();
+
     static final class ParamIterator implements Iterator<Map.Entry<String, Repr>> {
 
       final Iterator<Map.Entry<String, Repr>> params;
@@ -1053,13 +1056,13 @@ public final class JsonReprs implements JsonProvider, ToSource {
     }
 
     @Override
-    public JsonNumberForm<NumberRepr> numberForm() {
-      return JsonReprs.numberForm();
+    public JsonIdentifierForm<Repr> identifierForm() {
+      return JsonReprs.identifierForm();
     }
 
     @Override
-    public JsonIdentifierForm<Repr> identifierForm() {
-      return JsonReprs.identifierForm();
+    public JsonNumberForm<NumberRepr> numberForm() {
+      return JsonReprs.numberForm();
     }
 
     @Override
@@ -1107,7 +1110,7 @@ public final class JsonReprs implements JsonProvider, ToSource {
       } else if (value instanceof TupleRepr) {
         return JsonReprs.tupleForm().write(output, (TupleRepr) value, writer);
       } else {
-        return Write.error(new WriteException("Unsupported value: " + value));
+        return Write.error(new WriteException("unsupported value: " + value));
       }
     }
 
@@ -1141,6 +1144,8 @@ public final class JsonReprs implements JsonProvider, ToSource {
     public String toString() {
       return this.toSource();
     }
+
+    static final JsonReprs.ReprForm INSTANCE = new JsonReprs.ReprForm();
 
   }
 

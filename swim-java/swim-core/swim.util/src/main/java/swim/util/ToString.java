@@ -46,7 +46,7 @@ public interface ToString {
     try {
       this.writeString(output);
     } catch (IOException cause) {
-      throw new RuntimeException(cause);
+      throw new RuntimeException(cause); // never actually throws
     }
     return output.toString();
   }

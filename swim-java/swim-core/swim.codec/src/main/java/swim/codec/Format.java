@@ -24,98 +24,78 @@ import swim.annotations.Since;
 public interface Format extends Codec {
 
   @Override
-  default <T> @Nullable Transcoder<T> getTranscoder(Type javaType) {
+  default <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException {
     return this.getTranslator(javaType);
   }
 
-  <T> @Nullable Translator<T> getTranslator(Type javaType);
+  <T> Translator<T> getTranslator(Type javaType) throws TranslatorException;
 
-  static Format getFormat(MediaType mediaType) {
-    final Format format = Codec.registry().getFormat(mediaType);
-    if (format != null) {
-      return format;
-    } else {
-      throw new IllegalArgumentException("No format for media type: " + mediaType);
+  default <T> Parse<T> parse(Type javaType, Input input) {
+    final Translator<T> translator;
+    try {
+      translator = this.getTranslator(javaType);
+    } catch (TranslatorException cause) {
+      return Parse.error(cause);
     }
+    return translator.parse(input);
   }
 
-  static Format getFormat(String mediaType) {
-    final Format format = Codec.registry().getFormat(mediaType);
-    if (format != null) {
-      return format;
-    } else {
-      throw new IllegalArgumentException("No format for media type: " + mediaType);
+  default <T> Parse<T> parse(Type javaType) {
+    final Translator<T> translator;
+    try {
+      translator = this.getTranslator(javaType);
+    } catch (TranslatorException cause) {
+      return Parse.error(cause);
     }
+    return translator.parse();
   }
 
-  static <T> Translator<T> getTranslator(MediaType mediaType, Type javaType) {
-    final Format format = Format.getFormat(mediaType);
-    final Translator<T> translator = format.getTranslator(javaType);
-    if (translator != null) {
-      return translator;
-    } else {
-      throw new IllegalArgumentException("No " + mediaType + " translator for type: " + javaType);
+  default <T> Parse<T> parse(Type javaType, String string) {
+    final Translator<T> translator;
+    try {
+      translator = this.getTranslator(javaType);
+    } catch (TranslatorException cause) {
+      return Parse.error(cause);
     }
+    return translator.parse(string);
   }
 
-  static <T> Translator<T> getTranslator(String mediaType, Type javaType) {
-    final Format format = Format.getFormat(mediaType);
-    final Translator<T> translator = format.getTranslator(javaType);
-    if (translator != null) {
-      return translator;
-    } else {
-      throw new IllegalArgumentException("No " + mediaType + " translator for type: " + javaType);
+  default <T> Write<?> write(Type javaType, Output<?> output, @Nullable T value) {
+    final Translator<T> translator;
+    try {
+      translator = this.getTranslator(javaType);
+    } catch (TranslatorException cause) {
+      return Write.error(cause);
     }
+    return translator.write(output, value);
   }
 
-  static <T> Parse<T> parse(MediaType mediaType, Type javaType, Input input) {
-    return Format.<T>getTranslator(mediaType, javaType).parse(input);
+  default <T> Write<?> write(Type javaType, @Nullable T value) {
+    final Translator<T> translator;
+    try {
+      translator = this.getTranslator(javaType);
+    } catch (TranslatorException cause) {
+      return Write.error(cause);
+    }
+    return translator.write(value);
   }
 
-  static <T> Parse<T> parse(String mediaType, Type javaType, Input input) {
-    return Format.<T>getTranslator(mediaType, javaType).parse(input);
+  default <T> String toString(Type javaType, @Nullable T value) {
+    final Translator<T> translator;
+    try {
+      translator = this.getTranslator(javaType);
+    } catch (TranslatorException cause) {
+      throw new IllegalArgumentException(cause);
+    }
+    return translator.toString(value);
   }
 
-  static <T> Parse<T> parse(MediaType mediaType, Type javaType) {
-    return Format.<T>getTranslator(mediaType, javaType).parse();
+  static Format get(MediaType mediaType) throws FormatException {
+    return Codec.registry().getFormat(mediaType);
   }
 
-  static <T> Parse<T> parse(String mediaType, Type javaType) {
-    return Format.<T>getTranslator(mediaType, javaType).parse();
-  }
-
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  static <T> @Nullable T parse(MediaType mediaType, Type javaType, String string) {
-    return Format.<T>getTranslator(mediaType, javaType).parse(string);
-  }
-
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  static <T> @Nullable T parse(String mediaType, Type javaType, String string) {
-    return Format.<T>getTranslator(mediaType, javaType).parse(string);
-  }
-
-  static <T> Write<?> write(MediaType mediaType, Output<?> output, T value) {
-    return Format.<T>getTranslator(mediaType, value.getClass()).write(output, value);
-  }
-
-  static <T> Write<?> write(String mediaType, Output<?> output, T value) {
-    return Format.<T>getTranslator(mediaType, value.getClass()).write(output, value);
-  }
-
-  static <T> Write<?> write(MediaType mediaType, T value) {
-    return Format.<T>getTranslator(mediaType, value.getClass()).write(value);
-  }
-
-  static <T> Write<?> write(String mediaType, T value) {
-    return Format.<T>getTranslator(mediaType, value.getClass()).write(value);
-  }
-
-  static <T> String toString(MediaType mediaType, T value) {
-    return Format.<T>getTranslator(mediaType, value.getClass()).toString(value);
-  }
-
-  static <T> String toString(String mediaType, T value) {
-    return Format.<T>getTranslator(mediaType, value.getClass()).toString(value);
+  static Format get(String mediaType) throws FormatException {
+    return Codec.registry().getFormat(mediaType);
   }
 
 }
