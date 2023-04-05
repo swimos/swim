@@ -129,9 +129,8 @@ public final class WriteFormatExpr extends Write<Object> {
         }
       }
       if (step == 3 && output.isCont()) {
-        part = Assume.nonNull(part);
         output.write(escape);
-        index = ((String) part).offsetByCodePoints(index, 1);
+        index = ((String) Assume.nonNull(part)).offsetByCodePoints(index, 1);
         escape = 0;
         step = 2;
         continue;
@@ -153,9 +152,8 @@ public final class WriteFormatExpr extends Write<Object> {
         step = 8;
       }
       if (step == 8 && output.isCont()) {
-        part = Assume.nonNull(part);
         output.write(Base16.uppercase().encodeDigit(escape & 0xF));
-        index = ((String) part).offsetByCodePoints(index, 1);
+        index = ((String) Assume.nonNull(part)).offsetByCodePoints(index, 1);
         escape = 0;
         step = 2;
         continue;
@@ -165,9 +163,8 @@ public final class WriteFormatExpr extends Write<Object> {
         step = 10;
       }
       if (step == 10) {
-        part = Assume.nonNull(part);
         if (write == null) {
-          write = writer.writeTerm(output, form, (Term) part);
+          write = writer.writeTerm(output, form, (Term) Assume.nonNull(part));
         } else {
           write = write.produce(output);
         }

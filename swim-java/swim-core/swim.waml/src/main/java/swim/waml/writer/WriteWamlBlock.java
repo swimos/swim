@@ -21,7 +21,6 @@ import swim.annotations.Nullable;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.codec.WriteException;
-import swim.waml.WamlException;
 import swim.waml.WamlTupleForm;
 import swim.waml.WamlWriter;
 
@@ -77,11 +76,7 @@ public final class WriteWamlBlock<L, P> extends Write<Object> {
       }
       if (step == 2) {
         if (write == null) {
-          try {
-            write = form.labelForm().write(output, label, writer);
-          } catch (WamlException cause) {
-            return Write.error(cause);
-          }
+          write = form.labelForm().write(output, label, writer);
         } else {
           write = write.produce(output);
         }
@@ -109,11 +104,7 @@ public final class WriteWamlBlock<L, P> extends Write<Object> {
       }
       if (step == 5) {
         if (write == null) {
-          try {
-            write = form.paramForm().write(output, param, writer);
-          } catch (WamlException cause) {
-            return Write.error(cause);
-          }
+          write = form.paramForm().write(output, param, writer);
         } else {
           write = write.produce(output);
         }

@@ -164,9 +164,8 @@ public final class WriteWamlObject<K, V> extends Write<Object> {
         }
       }
       if (step == 7) {
-        fieldForm = Assume.nonNull(fieldForm);
         if (write == null) {
-          write = fieldForm.valueForm().write(output, value, writer);
+          write = Assume.nonNull(fieldForm).valueForm().write(output, value, writer);
         } else {
           write = write.produce(output);
         }

@@ -34,7 +34,7 @@ public interface JsonArrayForm<E, B, T> extends JsonForm<T> {
     return this;
   }
 
-  JsonForm<E> elementForm() throws JsonException;
+  JsonForm<E> elementForm();
 
   B arrayBuilder() throws JsonException;
 

@@ -228,11 +228,7 @@ public final class WriteWamlMarkup<N> extends Write<Object> {
       }
       if (step == 13) {
         if (write == null) {
-          try {
-            write = form.nodeForm().writeInline(output, node, writer);
-          } catch (WamlException cause) {
-            return Write.error(cause);
-          }
+          write = form.nodeForm().writeInline(output, node, writer);
         } else {
           write = write.produce(output);
         }
@@ -251,11 +247,7 @@ public final class WriteWamlMarkup<N> extends Write<Object> {
       }
       if (step == 15) {
         if (write == null) {
-          try {
-            write = form.nodeForm().write(output, node, writer);
-          } catch (WamlException cause) {
-            return Write.error(cause);
-          }
+          write = form.nodeForm().write(output, node, writer);
         } else {
           write = write.produce(output);
         }

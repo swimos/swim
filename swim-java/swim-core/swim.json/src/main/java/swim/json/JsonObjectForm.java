@@ -35,7 +35,7 @@ public interface JsonObjectForm<K, V, B, T> extends JsonForm<T> {
     return this;
   }
 
-  JsonForm<K> keyForm() throws JsonException;
+  JsonForm<K> keyForm();
 
   default JsonFieldForm<K, V, B> getFieldForm(K key) throws JsonException {
     throw new JsonException(Notation.of("unsupported field: ")

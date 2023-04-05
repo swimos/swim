@@ -135,11 +135,7 @@ public final class ParseWamlArray<E, B, T> extends Parse<T> {
       }
       if (step == 6) {
         if (parseElement == null) {
-          try {
-            parseElement = parser.parseExpr(input, form.elementForm());
-          } catch (WamlException cause) {
-            return Parse.diagnostic(input, cause);
-          }
+          parseElement = parser.parseExpr(input, form.elementForm());
         } else {
           parseElement = parseElement.consume(input);
         }

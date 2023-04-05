@@ -370,11 +370,7 @@ public final class ParseWamlMarkup<N, B, T> extends Parse<T> {
       }
       if (step == 16) {
         if (parseNode == null) {
-          try {
-            parseNode = parser.parseExpr(input, form.nodeForm());
-          } catch (WamlException cause) {
-            return Parse.diagnostic(input, cause);
-          }
+          parseNode = parser.parseExpr(input, form.nodeForm());
         } else {
           parseNode = parseNode.consume(input);
         }

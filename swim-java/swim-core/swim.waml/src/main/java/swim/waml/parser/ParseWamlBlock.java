@@ -111,11 +111,7 @@ public final class ParseWamlBlock<P, B, T> extends Parse<T> {
       }
       if (step == 2) {
         if (parseLabel == null) {
-          try {
-            parseLabel = parser.parseExpr(input, form.paramForm());
-          } catch (WamlException cause) {
-            return Parse.diagnostic(input, cause);
-          }
+          parseLabel = parser.parseExpr(input, form.paramForm());
         } else {
           parseLabel = parseLabel.consume(input);
         }
@@ -148,11 +144,7 @@ public final class ParseWamlBlock<P, B, T> extends Parse<T> {
       }
       if (step == 5) {
         if (parseParam == null) {
-          try {
-            parseParam = parser.parseExpr(input, form.paramForm());
-          } catch (WamlException cause) {
-            return Parse.diagnostic(input, cause);
-          }
+          parseParam = parser.parseExpr(input, form.paramForm());
         } else {
           parseParam = parseParam.consume(input);
         }

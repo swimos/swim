@@ -92,11 +92,7 @@ public final class ParseJsonArray<E, B, T> extends Parse<T> {
     do {
       if (step == 3) {
         if (parseElement == null) {
-          try {
-            parseElement = parser.parseExpr(input, form.elementForm());
-          } catch (JsonException cause) {
-            return Parse.diagnostic(input, cause);
-          }
+          parseElement = parser.parseExpr(input, form.elementForm());
         } else {
           parseElement = parseElement.consume(input);
         }

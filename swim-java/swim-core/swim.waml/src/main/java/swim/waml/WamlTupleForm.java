@@ -34,9 +34,9 @@ public interface WamlTupleForm<L, P, B, T> extends WamlForm<T> {
     return this;
   }
 
-  WamlForm<L> labelForm() throws WamlException;
+  WamlForm<L> labelForm();
 
-  WamlForm<P> paramForm() throws WamlException;
+  WamlForm<P> paramForm();
 
   @Nullable T emptyTuple() throws WamlException;
 

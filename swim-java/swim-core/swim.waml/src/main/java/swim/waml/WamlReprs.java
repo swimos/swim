@@ -340,10 +340,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
     return keyCache;
   }
 
-  static final class UndefinedForm extends WamlReprForm<UndefinedRepr> implements WamlUndefinedForm<UndefinedRepr>, ToSource {
+  static final class UndefinedForm implements WamlReprForm<UndefinedRepr>, WamlUndefinedForm<UndefinedRepr>, ToSource {
+
+    final Attrs attrs;
 
     UndefinedForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -407,10 +414,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class UnitForm extends WamlReprForm<UnitRepr> implements WamlUnitForm<UnitRepr>, ToSource {
+  static final class UnitForm implements WamlReprForm<UnitRepr>, WamlUnitForm<UnitRepr>, ToSource {
+
+    final Attrs attrs;
 
     UnitForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -478,10 +492,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class IdentifierForm extends WamlReprForm<Repr> implements WamlIdentifierForm<Repr>, ToSource {
+  static final class IdentifierForm implements WamlReprForm<Repr>, WamlIdentifierForm<Repr>, ToSource {
+
+    final Attrs attrs;
 
     IdentifierForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -583,10 +604,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class BooleanForm extends WamlReprForm<BooleanRepr> implements WamlIdentifierForm<BooleanRepr>, ToSource {
+  static final class BooleanForm implements WamlReprForm<BooleanRepr>, WamlIdentifierForm<BooleanRepr>, ToSource {
+
+    final Attrs attrs;
 
     BooleanForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -649,10 +677,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class NumberForm extends WamlReprForm<NumberRepr> implements WamlNumberForm<NumberRepr>, ToSource {
+  static final class NumberForm implements WamlReprForm<NumberRepr>, WamlNumberForm<NumberRepr>, ToSource {
+
+    final Attrs attrs;
 
     NumberForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -742,10 +777,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class StringForm extends WamlReprForm<StringRepr> implements WamlStringForm<StringBuilder, StringRepr>, ToSource {
+  static final class StringForm implements WamlReprForm<StringRepr>, WamlStringForm<StringBuilder, StringRepr>, ToSource {
+
+    final Attrs attrs;
 
     StringForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -818,10 +860,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class BlobForm extends WamlReprForm<BlobRepr> implements WamlStringForm<Output<BlobRepr>, BlobRepr>, ToSource {
+  static final class BlobForm implements WamlReprForm<BlobRepr>, WamlStringForm<Output<BlobRepr>, BlobRepr>, ToSource {
+
+    final Attrs attrs;
 
     BlobForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -925,10 +974,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class TermForm extends WamlReprForm<Repr> implements ToSource {
+  static final class TermForm implements WamlReprForm<Repr>, ToSource {
+
+    final Attrs attrs;
 
     TermForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -1002,10 +1058,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class ArrayForm extends WamlReprForm<ArrayRepr> implements WamlArrayForm<Repr, ArrayRepr, ArrayRepr>, WamlMarkupForm<Repr, ArrayRepr, ArrayRepr>, ToSource {
+  static final class ArrayForm implements WamlReprForm<ArrayRepr>, WamlArrayForm<Repr, ArrayRepr, ArrayRepr>, WamlMarkupForm<Repr, ArrayRepr, ArrayRepr>, ToSource {
+
+    final Attrs attrs;
 
     ArrayForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -1132,10 +1195,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class MarkupForm extends WamlReprForm<ArrayRepr> implements WamlMarkupForm<Repr, ArrayRepr, ArrayRepr>, ToSource {
+  static final class MarkupForm implements WamlReprForm<ArrayRepr>, WamlMarkupForm<Repr, ArrayRepr, ArrayRepr>, ToSource {
+
+    final Attrs attrs;
 
     MarkupForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -1300,10 +1370,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class ObjectForm extends WamlReprForm<ObjectRepr> implements WamlFieldForm<String, Repr, ObjectRepr>, WamlObjectForm<String, Repr, ObjectRepr, ObjectRepr>, ToSource {
+  static final class ObjectForm implements WamlReprForm<ObjectRepr>, WamlFieldForm<String, Repr, ObjectRepr>, WamlObjectForm<String, Repr, ObjectRepr, ObjectRepr>, ToSource {
+
+    final Attrs attrs;
 
     ObjectForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -1385,10 +1462,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class TupleForm extends WamlReprForm<Repr> implements WamlTupleForm<String, Repr, TupleRepr, Repr>, ToSource {
+  static final class TupleForm implements WamlReprForm<Repr>, WamlTupleForm<String, Repr, TupleRepr, Repr>, ToSource {
+
+    final Attrs attrs;
 
     TupleForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -1563,10 +1647,17 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   }
 
-  static final class ReprForm extends WamlReprForm<Repr> implements ToSource {
+  static final class ReprForm implements WamlReprForm<Repr>, ToSource {
+
+    final Attrs attrs;
 
     ReprForm(Attrs attrs) {
-      super(attrs);
+      this.attrs = attrs;
+    }
+
+    @Override
+    public Attrs attrs() {
+      return this.attrs;
     }
 
     @Override
@@ -1575,11 +1666,11 @@ public final class WamlReprs implements WamlProvider, ToSource {
     }
 
     @Override
-    public WamlAttrForm<?, ? extends Repr> getAttrForm(String name) {
+    public WamlAttrForm<?, ? extends Repr> getAttrForm(String name) throws WamlException {
       if ("blob".equals(name)) {
         return WamlReprs.blobAttrForm(this.attrs);
       } else {
-        return super.getAttrForm(name);
+        return WamlReprForm.super.getAttrForm(name);
       }
     }
 

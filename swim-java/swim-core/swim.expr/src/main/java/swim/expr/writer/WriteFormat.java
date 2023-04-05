@@ -89,9 +89,8 @@ public final class WriteFormat extends Write<Object> {
         }
       }
       if (step == 3) {
-        part = Assume.nonNull(part);
         if (write == null) {
-          final Term term = ((Term) part).evaluate(evaluator);
+          final Term term = ((Term) Assume.nonNull(part)).evaluate(evaluator);
           write = term.writeFormat(output);
         } else {
           write = write.produce(output);

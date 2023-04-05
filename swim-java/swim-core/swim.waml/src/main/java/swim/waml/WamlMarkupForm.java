@@ -34,7 +34,7 @@ public interface WamlMarkupForm<N, B, T> extends WamlForm<T> {
     return this;
   }
 
-  WamlForm<N> nodeForm() throws WamlException;
+  WamlForm<N> nodeForm();
 
   @Nullable String asText(@Nullable N node) throws WamlException;
 

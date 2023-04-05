@@ -102,11 +102,7 @@ public final class ParseJsonObject<K, V, B, T> extends Parse<T> {
     do {
       if (step == 3) {
         if (parseKey == null) {
-          try {
-            parseKey = parser.parseExpr(input, form.keyForm());
-          } catch (JsonException cause) {
-            return Parse.diagnostic(input, cause);
-          }
+          parseKey = parser.parseExpr(input, form.keyForm());
         } else {
           parseKey = parseKey.consume(input);
         }
@@ -143,11 +139,7 @@ public final class ParseJsonObject<K, V, B, T> extends Parse<T> {
       }
       if (step == 6) {
         if (parseValue == null) {
-          try {
-            parseValue = parser.parseExpr(input, Assume.nonNull(fieldForm).valueForm());
-          } catch (JsonException cause) {
-            return Parse.diagnostic(input, cause);
-          }
+          parseValue = parser.parseExpr(input, Assume.nonNull(fieldForm).valueForm());
         } else {
           parseValue = parseValue.consume(input);
         }

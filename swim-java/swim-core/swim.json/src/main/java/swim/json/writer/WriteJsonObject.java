@@ -110,13 +110,8 @@ public final class WriteJsonObject<K, V> extends Write<Object> {
         }
       }
       if (step == 5) {
-        fieldForm = Assume.nonNull(fieldForm);
         if (write == null) {
-          try {
-            write = fieldForm.valueForm().write(output, value, writer);
-          } catch (JsonException cause) {
-            return Write.error(cause);
-          }
+          write = Assume.nonNull(fieldForm).valueForm().write(output, value, writer);
         } else {
           write = write.produce(output);
         }

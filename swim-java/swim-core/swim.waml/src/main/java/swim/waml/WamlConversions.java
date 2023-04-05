@@ -39,6 +39,7 @@ import swim.codec.Write;
 import swim.expr.ExprParser;
 import swim.expr.Term;
 import swim.expr.TermException;
+import swim.repr.Attrs;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
@@ -446,11 +447,145 @@ public final class WamlConversions implements WamlProvider, ToSource {
         Assume.conforms(fromWaml), Assume.conforms(intoWaml));
   }
 
+  /**
+   * Returns a specialized conversion form that preserves the dominant
+   * {@code WamlForm} subtype of the given {@code interForm}.
+   *
+   * @param <X> the interchange type through which instances of type {@code T}
+   *        should be converted when transcoding to WAML
+   * @param <T> the type be transcoded by the returned {@code WamlForm}
+   * @param interForm the {@code WamlForm} for the interchange type {@code X}
+   * @param fromWaml a function that converts values of the interchange type
+   *        {@code X} to instances of type {@code T}
+   * @param intoWaml a function that converts instances of type {@code T}
+   *        to values of the interchange type {@code X}
+   * @return a specialize {@code WamlForm} that delegates to the given
+   *         {@code interForm}, dynamically converting between values of
+   *         the interchange type {@code X} and instances of type {@code T}
+   */
+  public static <X, T> WamlForm<T> conversionForm(WamlForm<X> interForm,
+                                                  Function<X, T> fromWaml,
+                                                  Function<T, X> intoWaml) {
+    return WamlConversions.conversionForm(null, null, interForm, fromWaml, intoWaml);
+  }
+
+  static <X, T> WamlForm<T> conversionForm(@Nullable WamlCodec codec,
+                                           @Nullable Class<T> javaClass,
+                                           WamlForm<X> interForm,
+                                           Function<X, T> fromWaml,
+                                           Function<T, X> intoWaml) {
+    if (interForm instanceof WamlTupleForm<?, ?, ?, ?>) {
+      return new WamlConversions.TupleForm<X, Object, Object, Object, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else if (interForm instanceof WamlObjectForm<?, ?, ?, ?>) {
+      return new WamlConversions.ObjectForm<X, Object, Object, Object, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else if (interForm instanceof WamlMarkupForm<?, ?, ?>) {
+      return new WamlConversions.MarkupForm<X, Object, Object, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else if (interForm instanceof WamlStringForm<?, ?>) {
+      return new WamlConversions.ArrayForm<X, Object, Object, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else if (interForm instanceof WamlStringForm<?, ?>) {
+      return new WamlConversions.StringForm<X, Object, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else if (interForm instanceof WamlNumberForm<?>) {
+      return new WamlConversions.NumberForm<X, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else if (interForm instanceof WamlIdentifierForm<?>) {
+      return new WamlConversions.IdentifierForm<X, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else if (interForm instanceof WamlUnitForm<?>) {
+      return new WamlConversions.UnitForm<X, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else if (interForm instanceof WamlUndefinedForm<?>) {
+      return new WamlConversions.UndefinedForm<X, T>(
+          codec, javaClass, Assume.conforms(interForm), fromWaml, intoWaml);
+    } else {
+      return new WamlConversions.ValueForm<X, T>(
+          codec, javaClass, interForm, fromWaml, intoWaml);
+    }
+  }
+
+  public static <X, A, T> WamlAttrForm<A, T> attrForm(WamlAttrForm<A, X> attrForm,
+                                                      Function<X, T> fromWaml,
+                                                      Function<T, X> intoWaml) {
+    return new WamlConversions.AttrForm<X, A, T>(null, null, attrForm, fromWaml, intoWaml);
+  }
+
+  static <X, A, T> WamlAttrForm<A, T> attrForm(@Nullable WamlCodec codec,
+                                               @Nullable Class<T> javaClass,
+                                               WamlAttrForm<A, X> attrForm,
+                                               Function<X, T> fromWaml,
+                                               Function<T, X> intoWaml) {
+    return new WamlConversions.AttrForm<X, A, T>(codec, javaClass, attrForm, fromWaml, intoWaml);
+  }
+
   static final String LAMBDA_METHOD_NAME = "apply";
   static final MethodType LAMBDA_FACTORY_TYPE = MethodType.methodType(Function.class);
   static final MethodType LAMBDA_METHOD_TYPE = MethodType.methodType(Object.class, Object.class);
 
-  abstract static class ConversionForm<X, T> implements WamlForm<T> {
+  static final class AttrForm<X, A, T> implements WamlAttrForm<A, T>, ToSource {
+
+    final @Nullable WamlCodec codec;
+    final @Nullable Class<T> javaClass;
+    final WamlAttrForm<A, X> attrForm;
+    final Function<X, T> fromWaml;
+    final Function<T, X> intoWaml;
+
+    AttrForm(@Nullable WamlCodec codec, @Nullable Class<T> javaClass, WamlAttrForm<A, X> attrForm,
+             Function<X, T> fromWaml, Function<T, X> intoWaml) {
+      this.codec = codec;
+      this.javaClass = javaClass;
+      this.attrForm = attrForm;
+      this.fromWaml = fromWaml;
+      this.intoWaml = intoWaml;
+    }
+
+    @Override
+    public WamlForm<A> argsForm() {
+      return this.attrForm.argsForm();
+    }
+
+    @Override
+    public boolean isNullary(@Nullable A args) {
+      return this.attrForm.isNullary(args);
+    }
+
+    @Override
+    public WamlForm<T> refineForm(WamlForm<T> form, String name, @Nullable A args) throws WamlException {
+      final WamlForm<X> interForm = Assume.<WamlConversions.ConversionForm<X, T>>conforms(form).interForm;
+      return WamlConversions.conversionForm(this.codec, this.javaClass,
+                                            this.attrForm.refineForm(interForm, name, args),
+                                            this.fromWaml, this.intoWaml);
+    }
+
+    @Override
+    public WamlForm<T> refineForm(WamlForm<T> form, String name) throws WamlException {
+      final WamlForm<X> interForm = Assume.<WamlConversions.ConversionForm<X, T>>conforms(form).interForm;
+      return WamlConversions.conversionForm(this.codec, this.javaClass,
+                                            this.attrForm.refineForm(interForm, name),
+                                            this.fromWaml, this.intoWaml);
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("WamlConversions", "attrForm")
+              .appendArgument(this.attrForm)
+              .appendArgument(this.fromWaml)
+              .appendArgument(this.intoWaml)
+              .endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+  }
+
+  abstract static class ConversionForm<X, T> implements WamlReprForm<T> {
 
     final @Nullable WamlCodec codec;
     final @Nullable Class<T> javaClass;
@@ -465,6 +600,42 @@ public final class WamlConversions implements WamlProvider, ToSource {
       this.interForm = interForm;
       this.fromWaml = fromWaml;
       this.intoWaml = intoWaml;
+    }
+
+    @Override
+    public Attrs attrs() {
+      if (this.interForm instanceof WamlReprForm<?>) {
+        return ((WamlReprForm<X>) this.interForm).attrs();
+      } else {
+        return Attrs.empty();
+      }
+    }
+
+    @Override
+    public WamlForm<T> withAttrs(Attrs attrs) {
+      if (this.interForm instanceof WamlReprForm<?>) {
+        return WamlConversions.conversionForm(this.codec, this.javaClass,
+                                              ((WamlReprForm<X>) this.interForm).withAttrs(attrs),
+                                              this.fromWaml, this.intoWaml);
+      } else {
+        return this;
+      }
+    }
+
+    @Override
+    public WamlAttrForm<?, ? extends T> getAttrForm(String name) throws WamlException {
+      // Unsound if the returned attrForm is a subtype X' of X,
+      // and intoWaml does not return values of type X'.
+      return WamlConversions.attrForm(this.codec, this.javaClass,
+                                      Assume.conforms(this.interForm.getAttrForm(name)),
+                                      this.fromWaml, this.intoWaml);
+    }
+
+    @Override
+    public WamlForm<T> taggedForm(String tag) throws WamlException {
+      return WamlConversions.conversionForm(this.codec, this.javaClass,
+                                            this.interForm.taggedForm(tag),
+                                            this.fromWaml, this.intoWaml);
     }
 
     @Override
@@ -842,7 +1013,7 @@ public final class WamlConversions implements WamlProvider, ToSource {
     }
 
     @Override
-    public WamlForm<E> elementForm() throws WamlException {
+    public WamlForm<E> elementForm() {
       return Assume.<WamlArrayForm<E, B, X>>conforms(this.interForm).elementForm();
     }
 
@@ -900,7 +1071,7 @@ public final class WamlConversions implements WamlProvider, ToSource {
     }
 
     @Override
-    public WamlForm<N> nodeForm() throws WamlException {
+    public WamlForm<N> nodeForm() {
       return Assume.<WamlMarkupForm<N, B, X>>conforms(this.interForm).nodeForm();
     }
 
@@ -1026,12 +1197,12 @@ public final class WamlConversions implements WamlProvider, ToSource {
     }
 
     @Override
-    public WamlForm<L> labelForm() throws WamlException {
+    public WamlForm<L> labelForm() {
       return Assume.<WamlTupleForm<L, P, B, X>>conforms(this.interForm).labelForm();
     }
 
     @Override
-    public WamlForm<P> paramForm() throws WamlException {
+    public WamlForm<P> paramForm() {
       return Assume.<WamlTupleForm<L, P, B, X>>conforms(this.interForm).paramForm();
     }
 

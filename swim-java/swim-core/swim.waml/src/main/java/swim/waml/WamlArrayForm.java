@@ -34,7 +34,7 @@ public interface WamlArrayForm<E, B, T> extends WamlForm<T> {
     return this;
   }
 
-  WamlForm<E> elementForm() throws WamlException;
+  WamlForm<E> elementForm();
 
   B arrayBuilder() throws WamlException;
 

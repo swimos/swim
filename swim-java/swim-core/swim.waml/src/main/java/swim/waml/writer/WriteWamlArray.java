@@ -117,11 +117,7 @@ public final class WriteWamlArray<E> extends Write<Object> {
       if (step == 4) {
         if (write == null) {
           if (elements.hasNext()) {
-            try {
-              write = form.elementForm().write(output, elements.next(), writer);
-            } catch (WamlException cause) {
-              return Write.error(cause);
-            }
+            write = form.elementForm().write(output, elements.next(), writer);
           } else {
             step = 7;
             break;

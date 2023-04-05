@@ -214,12 +214,11 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
         }
       }
       if (step == 4) {
-        parseHeader = Assume.nonNull(parseHeader);
         final int inputStart = input.position();
         final int inputLimit = input.limit();
         final int inputRemaining = inputLimit - inputStart;
         final boolean inputLast = input.isLast();
-        final long chunkSize = parseHeader.getNonNullUnchecked().size();
+        final long chunkSize = Assume.nonNull(parseHeader).getNonNullUnchecked().size();
         final long chunkRemaining = chunkSize - offset;
         final int decodeSize = (int) Math.min((long) inputRemaining, chunkRemaining);
 
@@ -288,12 +287,10 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
       }
     }
     if (step == 9) {
-      decodePayload = Assume.nonNull(decodePayload);
-      parseTrailers = Assume.nonNull(parseTrailers);
       if (input.isCont() && input.head() == '\n') {
         input.step();
-        return Decode.done(HttpChunked.of(decodePayload.getUnchecked(), transcoder,
-                                          parseTrailers.getNonNullUnchecked()));
+        return Decode.done(HttpChunked.of(Assume.nonNull(decodePayload).getUnchecked(), transcoder,
+                                          Assume.nonNull(parseTrailers).getNonNullUnchecked()));
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("line feed", input));
       }

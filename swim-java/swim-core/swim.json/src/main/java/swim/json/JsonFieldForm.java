@@ -22,9 +22,9 @@ import swim.annotations.Since;
 @Since("5.0")
 public interface JsonFieldForm<K, V, B> {
 
-  JsonForm<K> keyForm() throws JsonException;
+  JsonForm<K> keyForm();
 
-  JsonForm<V> valueForm() throws JsonException;
+  JsonForm<V> valueForm();
 
   B updateField(B builder, K key, @Nullable V value) throws JsonException;
 

@@ -22,18 +22,14 @@ import swim.repr.Repr;
 
 @Public
 @Since("5.0")
-public abstract class WamlReprForm<T> implements WamlForm<T> {
+public interface WamlReprForm<T> extends WamlForm<T> {
 
-  protected final Attrs attrs;
+  Attrs attrs();
 
-  protected WamlReprForm(Attrs attrs) {
-    this.attrs = attrs;
-  }
-
-  public abstract WamlForm<T> withAttrs(Attrs attrs);
+  WamlForm<T> withAttrs(Attrs attrs);
 
   @Override
-  public WamlAttrForm<?, ? extends T> getAttrForm(String name) {
+  default WamlAttrForm<?, ? extends T> getAttrForm(String name) throws WamlException {
     return new WamlReprAttrForm<T>(this);
   }
 
@@ -59,12 +55,12 @@ final class WamlReprAttrForm<T> implements WamlAttrForm<Repr, T> {
 
   @Override
   public WamlForm<T> refineForm(WamlForm<T> form, String name, @Nullable Repr args) {
-    return this.form.withAttrs(this.form.attrs.updated(name, args));
+    return this.form.withAttrs(this.form.attrs().updated(name, args));
   }
 
   @Override
   public WamlForm<T> refineForm(WamlForm<T> form, String name) {
-    return this.form.withAttrs(this.form.attrs.updated(name, Repr.unit()));
+    return this.form.withAttrs(this.form.attrs().updated(name, Repr.unit()));
   }
 
 }

@@ -434,6 +434,60 @@ public final class JsonConversions implements JsonProvider, ToSource {
         Assume.conforms(fromJson), Assume.conforms(intoJson));
   }
 
+  /**
+   * Returns a specialized conversion form that preserves the dominant
+   * {@code JsonForm} subtype of the given {@code interForm}.
+   *
+   * @param <X> the interchange type through which instances of type {@code T}
+   *        should be converted when transcoding to JSON
+   * @param <T> the type be transcoded by the returned {@code JsonForm}
+   * @param interForm the {@code JsonForm} for the interchange type {@code X}
+   * @param fromJson a function that converts values of the interchange type
+   *        {@code X} to instances of type {@code T}
+   * @param intoJson a function that converts instances of type {@code T}
+   *        to values of the interchange type {@code X}
+   * @return a specialize {@code JsonForm} that delegates to the given
+   *         {@code interForm}, dynamically converting between values of
+   *         the interchange type {@code X} and instances of type {@code T}
+   */
+  public static <X, T> JsonForm<T> conversionForm(JsonForm<X> interForm,
+                                                  Function<X, T> fromJson,
+                                                  Function<T, X> intoJson) {
+    return JsonConversions.conversionForm(null, null, interForm, fromJson, intoJson);
+  }
+
+  static <X, T> JsonForm<T> conversionForm(@Nullable JsonCodec codec,
+                                           @Nullable Class<T> javaClass,
+                                           JsonForm<X> interForm,
+                                           Function<X, T> fromJson,
+                                           Function<T, X> intoJson) {
+    if (interForm instanceof JsonObjectForm<?, ?, ?, ?>) {
+      return new JsonConversions.ObjectForm<X, Object, Object, Object, T>(
+          codec, javaClass, Assume.conforms(interForm), fromJson, intoJson);
+    } else if (interForm instanceof JsonArrayForm<?, ?, ?>) {
+      return new JsonConversions.ArrayForm<X, Object, Object, T>(
+          codec, javaClass, Assume.conforms(interForm), fromJson, intoJson);
+    } else if (interForm instanceof JsonStringForm<?, ?>) {
+      return new JsonConversions.StringForm<X, Object, T>(
+          codec, javaClass, Assume.conforms(interForm), fromJson, intoJson);
+    } else if (interForm instanceof JsonNumberForm<?>) {
+      return new JsonConversions.NumberForm<X, T>(
+          codec, javaClass, Assume.conforms(interForm), fromJson, intoJson);
+    } else if (interForm instanceof JsonIdentifierForm<?>) {
+      return new JsonConversions.IdentifierForm<X, T>(
+          codec, javaClass, Assume.conforms(interForm), fromJson, intoJson);
+    } else if (interForm instanceof JsonNullForm<?>) {
+      return new JsonConversions.NullForm<X, T>(
+          codec, javaClass, Assume.conforms(interForm), fromJson, intoJson);
+    } else if (interForm instanceof JsonUndefinedForm<?>) {
+      return new JsonConversions.UndefinedForm<X, T>(
+          codec, javaClass, Assume.conforms(interForm), fromJson, intoJson);
+    } else {
+      return new JsonConversions.ValueForm<X, T>(
+          codec, javaClass, interForm, fromJson, intoJson);
+    }
+  }
+
   static final String LAMBDA_METHOD_NAME = "apply";
   static final MethodType LAMBDA_FACTORY_TYPE = MethodType.methodType(Function.class);
   static final MethodType LAMBDA_METHOD_TYPE = MethodType.methodType(Object.class, Object.class);
@@ -453,6 +507,13 @@ public final class JsonConversions implements JsonProvider, ToSource {
       this.interForm = interForm;
       this.fromJson = fromJson;
       this.intoJson = intoJson;
+    }
+
+    @Override
+    public JsonForm<T> taggedForm(String tag) throws JsonException {
+      return JsonConversions.conversionForm(this.codec, this.javaClass,
+                                            this.interForm.taggedForm(tag),
+                                            this.fromJson, this.intoJson);
     }
 
     @Override
@@ -816,7 +877,7 @@ public final class JsonConversions implements JsonProvider, ToSource {
     }
 
     @Override
-    public JsonForm<E> elementForm() throws JsonException {
+    public JsonForm<E> elementForm() {
       return Assume.<JsonArrayForm<E, B, X>>conforms(this.interForm).elementForm();
     }
 
@@ -874,7 +935,7 @@ public final class JsonConversions implements JsonProvider, ToSource {
     }
 
     @Override
-    public JsonForm<K> keyForm() throws JsonException {
+    public JsonForm<K> keyForm() {
       return Assume.<JsonObjectForm<K, V, B, X>>conforms(this.interForm).keyForm();
     }
 
