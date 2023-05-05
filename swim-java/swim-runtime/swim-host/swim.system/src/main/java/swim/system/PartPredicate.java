@@ -83,6 +83,8 @@ public abstract class PartPredicate {
       return NodePartPredicate.fromValue(value);
     } else if ("hash".equals(tag)) {
       return HashPartPredicate.fromValue(value);
+    } else if ("mod".equals(tag)) {
+      return ModPartPredicate.fromValue(value);
     } else if (value instanceof OrOperator) {
       final PartPredicate lhs = fromValue(((OrOperator) value).lhs().toValue());
       final PartPredicate rhs = fromValue(((OrOperator) value).rhs().toValue());
@@ -401,6 +403,51 @@ final class NodePartPredicate extends PartPredicate {
     return "PartPredicate" + '.' + "node" + '(' + this.nodePattern + ')';
   }
 
+}
+
+final class ModPartPredicate extends PartPredicate {
+  final int slot;
+  final int count;
+
+  ModPartPredicate(int slot, int count) {
+    this.slot = slot;
+    this.count = count;
+  }
+
+  @Override
+  public boolean test(Uri nodeUri, int nodeHash) {
+    return nodeHash % count == slot;
+  }
+
+  @Override
+  public Value toValue() {
+    return Record.create(1).attr("mod", Record.create(2).item(this.slot)
+        .item(this.count));
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof ModPartPredicate) {
+      final ModPartPredicate that = (ModPartPredicate) other;
+      return this.slot == that.slot && this.count == that.count;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "ModPredicate" + '.' + "hash" + '(' + this.slot + ", " + this.count + ')';
+  }
+
+  public static ModPartPredicate fromValue(Value value) {
+    final Value header = value.getAttr("mod");
+    final int slot = header.getItem(0).intValue();
+    final int count = header.getItem(1).intValue();
+    return new ModPartPredicate(slot, count);
+  }
 }
 
 final class HashPartPredicate extends PartPredicate {
