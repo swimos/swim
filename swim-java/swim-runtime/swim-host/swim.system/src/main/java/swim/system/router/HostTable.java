@@ -417,10 +417,12 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
         }
         if (node.isStarted()) {
           nodeBinding = node;
-        } else {
+          break;
+        } else if (node.isClosed()) {
           nodeBinding = null;
+          break;
         }
-        break;
+        // try again
       } else {
         if (nodeBinding == null) {
           final NodeAddress nodeAddress = this.cellAddress().nodeUri(nodeUri);
