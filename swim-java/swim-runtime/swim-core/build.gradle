@@ -40,7 +40,6 @@ dependencies {
   api project(':swim-io-ws')
   api project(':swim-io-warp')
   api project(':swim-web')
-  api project(':swim-web')
 }
 
 javadoc {
