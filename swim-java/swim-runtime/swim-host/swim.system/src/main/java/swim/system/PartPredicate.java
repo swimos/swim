@@ -406,6 +406,7 @@ final class NodePartPredicate extends PartPredicate {
 }
 
 final class ModPartPredicate extends PartPredicate {
+
   final int slot;
   final int count;
 
@@ -416,7 +417,7 @@ final class ModPartPredicate extends PartPredicate {
 
   @Override
   public boolean test(Uri nodeUri, int nodeHash) {
-    return nodeHash % count == slot;
+    return nodeHash % this.count == this.slot;
   }
 
   @Override
@@ -437,6 +438,17 @@ final class ModPartPredicate extends PartPredicate {
     }
   }
 
+  private static int hashSeed;
+
+  @Override
+  public int hashCode() {
+    if (ModPartPredicate.hashSeed == 0) {
+      ModPartPredicate.hashSeed = Murmur3.seed(ModPartPredicate.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(ModPartPredicate.hashSeed,
+        this.slot), this.count));
+  }
+
   @Override
   public String toString() {
     return "ModPredicate" + '.' + "hash" + '(' + this.slot + ", " + this.count + ')';
@@ -448,6 +460,7 @@ final class ModPartPredicate extends PartPredicate {
     final int count = header.getItem(1).intValue();
     return new ModPartPredicate(slot, count);
   }
+
 }
 
 final class HashPartPredicate extends PartPredicate {
