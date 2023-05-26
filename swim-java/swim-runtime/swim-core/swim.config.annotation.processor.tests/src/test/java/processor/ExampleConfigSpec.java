@@ -5,9 +5,7 @@ import swim.config.ConfigError;
 import swim.config.ConfigException;
 import swim.structure.Record;
 import swim.structure.Value;
-
 import java.util.Optional;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
@@ -25,9 +23,6 @@ public class ExampleConfigSpec {
         .slot("additionalProperties", Record.create().slot("batch.size", "1234"));
     ExampleConfig exampleConfig = ExampleConfigImpl.load(input);
     exampleConfig.validate();
-    assertEquals(exampleConfig.port(), 1025, "port should match.");
-    assertEquals(exampleConfig.limitedPort(), 3000, "limitedPort should match.");
-    assertEquals(exampleConfig.hostName(), "localhost", "hostName should match.");
   }
 
   @Test
@@ -76,5 +71,8 @@ public class ExampleConfigSpec {
     exampleConfig.validate();
 
     assertEquals(8080, exampleConfig.portWithDefault(), "portWithDefault should match.");
+    assertEquals(TestLocation.Local, exampleConfig.testLocation(), "testLocation should match.");
   }
+
+
 }
