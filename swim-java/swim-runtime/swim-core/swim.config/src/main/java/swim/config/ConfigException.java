@@ -2,9 +2,6 @@ package swim.config;
 
 import java.util.List;
 
-/**
- * Exception that is thrown when there are configuration issues.
- */
 public class ConfigException extends Exception {
   final List<ConfigError> errors;
 
@@ -12,10 +9,6 @@ public class ConfigException extends Exception {
     this.errors = errors;
   }
 
-  /**
-   * Configuration issues that were found.
-   * @return
-   */
   public List<ConfigError> errors() {
     return this.errors;
   }
