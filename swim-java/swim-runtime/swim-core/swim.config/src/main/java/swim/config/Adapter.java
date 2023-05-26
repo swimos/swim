@@ -1,6 +1,4 @@
-package swim.config.annotation;
-
-import swim.config.Configurable;
+package swim.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

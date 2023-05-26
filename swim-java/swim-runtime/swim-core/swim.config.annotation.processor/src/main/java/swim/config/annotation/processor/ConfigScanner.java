@@ -31,25 +31,26 @@ import com.sun.source.util.DocTrees;
 import swim.codec.Debug;
 import swim.codec.DebugFormatter;
 import swim.codec.Output;
+import swim.config.AbstractConfigurable;
 import swim.config.ConfigError;
 import swim.config.ConfigException;
 import swim.config.Configurable;
-import swim.config.annotation.Ignore;
-import swim.config.annotation.validator.Validators;
-import swim.config.model.AbstractConfigurationElement;
+import swim.config.Ignore;
 import swim.config.model.ConfigurationElement;
 import swim.config.model.ConfigurationItemElement;
+import swim.config.validator.ValidatorImplementation;
 import swim.structure.Form;
 import swim.structure.Tag;
 import swim.structure.Value;
 
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementScanner9;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -60,7 +61,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 class ConfigScanner extends ElementScanner9<Void, Void> {
   final Messager messager;
@@ -135,17 +135,13 @@ class ConfigScanner extends ElementScanner9<Void, Void> {
         .addThrownException(ConfigException.class)
         .addAnnotation("Override");
     this.validateMethod.setJavadocComment("Method is used to validate the supplied configuration.");
-    ClassOrInterfaceType listType = new ClassOrInterfaceType()
-        .setName("List")
-        .setTypeArguments(new ClassOrInterfaceType(ConfigError.class.getSimpleName()));
-    ClassOrInterfaceType arrayListType = new ClassOrInterfaceType()
-        .setName("ArrayList")
-        .setTypeArguments(new ClassOrInterfaceType(ConfigError.class.getSimpleName()));
+//    this.validateMethod.addAndGetParameter("List<ConfigError>", "errors");
+    Type listType = StaticJavaParser.parseType("List");
     VariableDeclarationExpr expr = new VariableDeclarationExpr(
         new VariableDeclarator(
             listType,
             "errors",
-            new ObjectCreationExpr().setType(arrayListType)
+            new ObjectCreationExpr().setType(ArrayList.class)
         )
     );
     this.validateBody.addStatement(expr);
@@ -233,7 +229,6 @@ class ConfigScanner extends ElementScanner9<Void, Void> {
     }
 
     this.configuration = new ConfigurationElement();
-    addDocs(e, this.configuration);
     this.configurations.put(e, this.configuration);
     PackageElement packageElement = this.processingEnv.getElementUtils().getPackageOf(e);
 
@@ -248,6 +243,7 @@ class ConfigScanner extends ElementScanner9<Void, Void> {
         .addImport(ArrayList.class)
         .addImport(ConfigError.class)
         .addImport(Form.class)
+        .addImport(AbstractConfigurable.class)
         .addImport(ConfigException.class)
         .addImport(DebugFormatter.class);
     String className = e.getSimpleName().toString() + "Impl";
@@ -257,6 +253,7 @@ class ConfigScanner extends ElementScanner9<Void, Void> {
     this.configImplementation = this.compilationUnit
         .addClass(className)
         .setPublic(true)
+        .addExtendedType(AbstractConfigurable.class.getSimpleName())
         .addImplementedType(e.getSimpleName().toString());
     this.configImplementationType = new ClassOrInterfaceType(this.configImplementation.getNameAsString());
 
@@ -326,25 +323,6 @@ class ConfigScanner extends ElementScanner9<Void, Void> {
     return result;
   }
 
-  void addDocs(Element element, AbstractConfigurationElement configurationElement) {
-    addDocs(element, configurationElement, null, null);
-  }
-
-  void addDocs(Element element, AbstractConfigurationElement configurationElement, FieldDeclaration field, MethodDeclaration method) {
-    String comments = processingEnv.getElementUtils().getDocComment(element);
-    if (null != comments && !comments.isEmpty()) {
-      Javadoc javadoc = StaticJavaParser.parseJavadoc(comments);
-      if (null != field) {
-        field.setJavadocComment(javadoc.toComment());
-      }
-      if (null != method) {
-        method.setJavadocComment(javadoc.toComment());
-      }
-      configurationElement.documentation(javadoc.getDescription().toText());
-    } else {
-      this.messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "Configuration method has no comments. Documentation will be missing.", element);
-    }
-  }
 
   @Override
   public Void visitExecutable(ExecutableElement e, Void unused) {
@@ -361,27 +339,23 @@ class ConfigScanner extends ElementScanner9<Void, Void> {
     configItem.name(e.getSimpleName().toString());
     FieldDeclaration field = this.configImplementation.addField(type, e.getSimpleName().toString(), Modifier.Keyword.PROTECTED);
     MethodDeclaration method = this.configImplementation.addMethod(e.getSimpleName().toString(), Modifier.Keyword.PUBLIC);
-    FieldAccessExpr fieldAccessExpr = new FieldAccessExpr(new ThisExpr(), e.getSimpleName().toString());
-    StringLiteralExpr methodNameLiteral = new StringLiteralExpr(e.getSimpleName().toString());
-
-    Element returnTypeElement = processingEnv.getTypeUtils().asElement(e.getReturnType());
-    if (null != returnTypeElement && ElementKind.ENUM == returnTypeElement.getKind()) {
-      List<? extends Element> members = processingEnv.getElementUtils().getAllMembers((TypeElement) returnTypeElement);
-      List<String> values = members.stream()
-          .filter(m -> ElementKind.ENUM_CONSTANT == m.getKind())
-          .map(Element::getSimpleName)
-          .map(Object::toString)
-          .collect(Collectors.toList());
-      configItem.recommendations(values);
+    String comments = processingEnv.getElementUtils().getDocComment(e);
+    if (null != comments && !comments.isEmpty()) {
+      Javadoc javadoc = StaticJavaParser.parseJavadoc(comments);
+      field.setJavadocComment(javadoc.toComment());
+      method.setJavadocComment(javadoc.toComment());
+      configItem.documentation(javadoc.getDescription().toText());
+    } else {
+      this.messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "Configuration method has no comments. Documentation will be missing.", e);
     }
 
-
-    addDocs(e, configItem, field, method);
 
     method.setType(field.getElementType());
     BlockStmt blockStmt = new BlockStmt();
     blockStmt.addStatement(
-        new ReturnStmt(fieldAccessExpr)
+        new ReturnStmt(
+            new FieldAccessExpr(new ThisExpr(), e.getSimpleName().toString())
+        )
     );
     method.setBody(blockStmt);
 
@@ -390,79 +364,75 @@ class ConfigScanner extends ElementScanner9<Void, Void> {
             new NameExpr("formatter"),
             "add"
         )
-            .addArgument(methodNameLiteral)
-            .addArgument(fieldAccessExpr)
+            .addArgument(new StringLiteralExpr(e.getSimpleName().toString()))
+            .addArgument(new FieldAccessExpr(new ThisExpr(), e.getSimpleName().toString()))
     );
 
-    Validators.addValidation(validateBody, e, methodNameLiteral, fieldAccessExpr);
-    List<String> docs = Validators.addDocs(e);
-    configItem.validations(docs);
+
+    for (AnnotationMirror annotationMirror : e.getAnnotationMirrors()) {
+      TypeMirror typeMirror = annotationMirror.getAnnotationType().asElement().asType();
+      Class attributeClass;
+      try {
+        attributeClass = Class.forName(typeMirror.toString());
+      } catch (ClassNotFoundException ex) {
+        throw new RuntimeException(ex);
+      }
+
+      NameExpr validatorName = this.validatorAttributeToNameLookup.computeIfAbsent(attributeClass, a -> {
+        ValidatorImplementation validator = (ValidatorImplementation) attributeClass.getAnnotation(ValidatorImplementation.class);
+        Class<?> enclosingClass = validator.value().getEnclosingClass();
+
+        ClassOrInterfaceType validatorType;
+        if (null != enclosingClass) {
+          this.compilationUnit.addImport(enclosingClass);
+          validatorType = new ClassOrInterfaceType(
+              String.format("%s.%s", enclosingClass.getSimpleName(), validator.value().getSimpleName())
+          );
+        } else {
+          this.compilationUnit.addImport(validator.value());
+          validatorType = new ClassOrInterfaceType(validator.value().getSimpleName());
+        }
+
+        String variableName = Character.toLowerCase(attributeClass.getSimpleName().charAt(0)) + attributeClass.getSimpleName().substring(1) + "Validator";
+        VariableDeclarationExpr varValidator = new VariableDeclarationExpr(
+            new VariableDeclarator(
+                validatorType,
+                variableName,
+                new ObjectCreationExpr()
+                    .setType(validatorType)
+            )
+        );
+        this.validateBody.addStatement(varValidator);
+        return new NameExpr(variableName);
+      });
+      ClassOrInterfaceType attributeType = new ClassOrInterfaceType(attributeClass.getSimpleName());
+
+      String attributeVariableName = String.format("%s%s", e.getSimpleName(), attributeClass.getSimpleName());
+
+      VariableDeclarationExpr varAttribute = new VariableDeclarationExpr(
+          new VariableDeclarator(
+              attributeType,
+              attributeVariableName,
+              new MethodCallExpr("attribute")
+                  .addArgument(new ClassExpr(this.interfaceType))
+                  .addArgument(new StringLiteralExpr(e.getSimpleName().toString()))
+                  .addArgument(new ClassExpr(attributeType))
+          )
+      );
+      NameExpr attributeNameExpr = new NameExpr(attributeVariableName);
+      this.validateBody.addStatement(varAttribute);
+      this.validateBody.addStatement(
+          new MethodCallExpr(
+              validatorName,
+              "validate"
+          ).addArgument(new NameExpr("errors"))
+              .addArgument(attributeNameExpr)
+              .addArgument(new StringLiteralExpr(e.getSimpleName().toString()))
+              .addArgument(new FieldAccessExpr(new ThisExpr(), e.getSimpleName().toString()))
+      );
 
 
-//    for (AnnotationMirror annotationMirror : e.getAnnotationMirrors()) {
-//      TypeMirror typeMirror = annotationMirror.getAnnotationType().asElement().asType();
-//      Class attributeClass;
-//      try {
-//        attributeClass = Class.forName(typeMirror.toString());
-//      } catch (ClassNotFoundException ex) {
-//        throw new RuntimeException(ex);
-//      }
-//
-//      NameExpr validatorName = this.validatorAttributeToNameLookup.computeIfAbsent(attributeClass, a -> {
-//        ValidatorImplementation validator = (ValidatorImplementation) attributeClass.getAnnotation(ValidatorImplementation.class);
-//        Class<?> enclosingClass = validator.value().getEnclosingClass();
-//
-//        ClassOrInterfaceType validatorType;
-//        if (null != enclosingClass) {
-//          this.compilationUnit.addImport(enclosingClass);
-//          validatorType = new ClassOrInterfaceType(
-//              String.format("%s.%s", enclosingClass.getSimpleName(), validator.value().getSimpleName())
-//          );
-//        } else {
-//          this.compilationUnit.addImport(validator.value());
-//          validatorType = new ClassOrInterfaceType(validator.value().getSimpleName());
-//        }
-//
-//        String variableName = Character.toLowerCase(attributeClass.getSimpleName().charAt(0)) + attributeClass.getSimpleName().substring(1) + "Validator";
-//        VariableDeclarationExpr varValidator = new VariableDeclarationExpr(
-//            new VariableDeclarator(
-//                validatorType,
-//                variableName,
-//                new ObjectCreationExpr()
-//                    .setType(validatorType)
-//            )
-//        );
-//        this.validateBody.addStatement(varValidator);
-//        return new NameExpr(variableName);
-//      });
-//      ClassOrInterfaceType attributeType = new ClassOrInterfaceType(attributeClass.getSimpleName());
-//
-//      String attributeVariableName = String.format("%s%s", e.getSimpleName(), attributeClass.getSimpleName());
-//
-//      VariableDeclarationExpr varAttribute = new VariableDeclarationExpr(
-//          new VariableDeclarator(
-//              attributeType,
-//              attributeVariableName,
-//              new MethodCallExpr("attribute")
-//                  .addArgument(new ClassExpr(this.interfaceType))
-//                  .addArgument(methodNameLiteral)
-//                  .addArgument(new ClassExpr(attributeType))
-//          )
-//      );
-//      NameExpr attributeNameExpr = new NameExpr(attributeVariableName);
-//      this.validateBody.addStatement(varAttribute);
-//      this.validateBody.addStatement(
-//          new MethodCallExpr(
-//              validatorName,
-//              "validate"
-//          ).addArgument(new NameExpr("errors"))
-//              .addArgument(attributeNameExpr)
-//              .addArgument(methodNameLiteral)
-//              .addArgument(fieldAccessExpr)
-//      );
-//
-//
-//    }
+    }
 
 
     if (e.isDefault()) {

@@ -3,7 +3,7 @@ package swim.config.annotation.processor;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.javadoc.Javadoc;
 import com.sun.source.util.DocTrees;
-import swim.config.annotation.Adapter;
+import swim.config.Adapter;
 import swim.config.model.AdapterElement;
 import swim.config.model.ConfigurationElement;
 import swim.config.model.IconElement;
